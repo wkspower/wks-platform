@@ -18,6 +18,8 @@
 
 		<spring.boot.version>2.5.9</spring.boot.version>
 		<spring.shell.version>2.0.1.RELEASE</spring.shell.version>
+		
+		<camunda.version>7.17.0</camunda.version>
 
 		<lombok.version>1.18.22</lombok.version>
 		<gson.version>2.9.0</gson.version>
@@ -41,5 +43,7 @@
 		<module>mmc-bpm-engine</module>
 		<module>mmc-bpm-rest-client</module>
 		<module>mmc-bpm-camunda-client</module>
+		
+		<module>mmc-bpm-camunda-external-service-client</module>
 	</modules>
 </project>

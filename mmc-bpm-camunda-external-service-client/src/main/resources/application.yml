@@ -1,0 +1,9 @@
+camunda7.rest.url: http://${CAMUNDA7_HOST}:${CAMUNDA7_PORT}/engine-rest
+
+camunda.bpm.client:
+  base-url: ${camunda7.rest.url}
+  subscriptions:
+    creditScoreChecker:
+        process-definition-key: Process_1dxzzhl
+        include-extension-properties: true
+        variable-names: defaultScore
