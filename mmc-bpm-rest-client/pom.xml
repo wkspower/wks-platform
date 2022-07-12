@@ -3,28 +3,32 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.mmc.automation</groupId>
-		<artifactId>mmc-automation-platform</artifactId>
+		<groupId>com.mmc.bpm</groupId>
+		<artifactId>mmc-bpm-platform</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>mmc-automation-camunda-client</artifactId>
-	<name>mmc-automation-camunda-client</name>
-	<description>MMC Automation Camunda Client</description>
+	<artifactId>mmc-bpm-rest-client</artifactId>
+	<name>mmc-bpm-rest-client</name>
+	<description>MMC BPM Rest Client</description>
 
 	<packaging>jar</packaging>
 
 	<dependencies>
+
 		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>compile</scope>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>com.mmc.automation</groupId>
-			<artifactId>mmc-automation-rest-client</artifactId>
-			<version>${project.parent.version}</version>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
