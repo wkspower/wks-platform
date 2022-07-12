@@ -9,7 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.shell.jline.PromptProvider;
 
 @SpringBootApplication
-@ComponentScan(basePackages = { "com.mmc.automation" })
+@ComponentScan(basePackages = { "com.mmc.bpm" })
 public class CaseManagementApplication {
 
 	public static void main(String[] args) throws Exception {

@@ -1,3 +1,7 @@
+spring: 
+  config:
+    import: file:env.properties
+
 camunda7.rest.url: http://${CAMUNDA7_HOST}:${CAMUNDA7_PORT}/engine-rest
 
 camunda.bpm.client:
