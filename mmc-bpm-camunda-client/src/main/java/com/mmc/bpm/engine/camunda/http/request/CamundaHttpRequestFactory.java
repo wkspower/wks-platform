@@ -68,6 +68,11 @@ public class CamundaHttpRequestFactory {
 		return new CamundaHttpPostRequest(processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
 				new HttpEntity<>(payload, httpHeadersFactory.create()));
 	}
+	
+	public MmcHttpRequest getProcessInstanceDeleteRequest(String processInstanceId) {
+		return new CamundaHttpDeleteRequest(processInstanceUrl + "/" + processInstanceId,
+				new HttpEntity<>(httpHeadersFactory.create()));
+	}
 
 	//// Task ////
 

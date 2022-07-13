@@ -19,7 +19,7 @@ import com.mmc.bpm.rest.client.MmcHttpRequest;
  *
  */
 @Component
-public class CamundaEngineDataProvider implements ProcessEngineDataProvider {
+public class CamundaEngineClient implements ProcessEngineClient {
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -72,6 +72,13 @@ public class CamundaEngineDataProvider implements ProcessEngineDataProvider {
 		return restTemplate
 				.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstanceImpl.class)
 				.getBody();
+	}
+
+	@Override
+	public void deleteProcessInstance(String processInstanceId) {
+		MmcHttpRequest request = camundaHttpRequestFactory.getProcessInstanceDeleteRequest(processInstanceId);
+
+		restTemplate.delete(request.getHttpRequestUrl());
 	}
 
 }

@@ -16,7 +16,7 @@ public class CaseInstanceCommand {
 	@Autowired
 	private CaseInstanceRetriever caseInstanceRetriever;
 
-	@ShellMethod(value = "Creates a Case Instance.")
+	@ShellMethod(value = "Create a Case Instance.")
 	public String createCase(final String attributes) {
 		return "Case Instance Created: " + caseInstanceCreator.create(attributes);
 

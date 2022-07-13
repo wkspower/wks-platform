@@ -9,7 +9,7 @@ import com.mmc.bpm.engine.model.spi.Task;
  * @author victor.franca
  *
  */
-public interface ProcessEngineDataProvider {
+public interface ProcessEngineClient {
 
 	public Deployment[] findDeployments();
 
@@ -20,7 +20,9 @@ public interface ProcessEngineDataProvider {
 	public Task[] findTasks();
 
 	public ProcessInstance startProcess(final String processDefinitionKey);
-	
+
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey);
+
+	public void deleteProcessInstance(final String processInstanceId);
 
 }

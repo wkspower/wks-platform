@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonParser;
 import com.mmc.bpm.client.cases.businesskey.GenericBusinessKeyGenerator;
-import com.mmc.bpm.client.process.instance.ProcessInstanceCreator;
+import com.mmc.bpm.client.process.instance.ProcessInstanceService;
 import com.mmc.bpm.client.repository.DataRepository;
 import com.mmc.bpm.engine.model.spi.BusinessKey;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
@@ -21,7 +21,7 @@ public class GenericCaseInstanceCreator implements CaseInstanceCreator {
 	private GenericBusinessKeyGenerator businessKeyCreator;
 
 	@Autowired
-	private ProcessInstanceCreator processInstanceCreator;
+	private ProcessInstanceService processInstanceCreator;
 
 	@Value("${mmc.bpm.case.generic.process-def-key}")
 	private String genericCaseProcessDefKey;
