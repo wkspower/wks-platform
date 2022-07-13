@@ -22,5 +22,5 @@ public class ProcessInstanceCommand {
 		processInstanceCreator.delete(processInstanceId);
 		return "Process Instance Deleted";
 	}
-
+	
 }
