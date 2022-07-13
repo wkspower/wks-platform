@@ -5,14 +5,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.mmc.bpm.engine.camunda.http.request.CamundaHttpRequestFactory;
-import com.mmc.bpm.engine.camunda.model.CamundaDeployment;
-import com.mmc.bpm.engine.camunda.model.CamundaProcessDefinition;
-import com.mmc.bpm.engine.camunda.model.CamundaProcessInstance;
-import com.mmc.bpm.engine.camunda.model.CamundaTask;
-import com.mmc.bpm.engine.camunda.model.Deployment;
-import com.mmc.bpm.engine.camunda.model.ProcessDefinition;
-import com.mmc.bpm.engine.camunda.model.ProcessInstance;
-import com.mmc.bpm.engine.camunda.model.Task;
+import com.mmc.bpm.engine.model.impl.ProcessDefinitionImpl;
+import com.mmc.bpm.engine.model.impl.ProcessInstanceImpl;
+import com.mmc.bpm.engine.model.impl.TaskImpl;
+import com.mmc.bpm.engine.model.spi.Deployment;
+import com.mmc.bpm.engine.model.spi.ProcessDefinition;
+import com.mmc.bpm.engine.model.spi.ProcessInstance;
+import com.mmc.bpm.engine.model.spi.Task;
 import com.mmc.bpm.rest.client.MmcHttpRequest;
 
 /**
@@ -31,36 +30,47 @@ public class CamundaEngineDataProvider implements ProcessEngineDataProvider {
 	@Override
 	public Deployment[] findDeployments() {
 		return restTemplate.getForEntity(camundaHttpRequestFactory.getDeploymentListRequest().getHttpRequestUrl(),
-				CamundaDeployment[].class).getBody();
+				Deployment[].class).getBody();
 	}
 
 	@Override
 	public ProcessDefinition[] findProcessDefinitions() {
 		return restTemplate
 				.getForEntity(camundaHttpRequestFactory.getProcessDefinitionListRequest().getHttpRequestUrl(),
-						CamundaProcessDefinition[].class)
+						ProcessDefinitionImpl[].class)
 				.getBody();
 	}
 
 	@Override
 	public ProcessInstance[] findProcessInstances() {
 		return restTemplate.getForEntity(camundaHttpRequestFactory.getProcessInstanceListRequest().getHttpRequestUrl(),
-				CamundaProcessInstance[].class).getBody();
+				ProcessInstanceImpl[].class).getBody();
 	}
 
 	@Override
 	public Task[] findTasks() {
 		return restTemplate
-				.getForEntity(camundaHttpRequestFactory.getTaskListRequest().getHttpRequestUrl(), CamundaTask[].class)
+				.getForEntity(camundaHttpRequestFactory.getTaskListRequest().getHttpRequestUrl(), TaskImpl[].class)
 				.getBody();
 	}
 
 	@Override
-	public ProcessInstance startProcess(String processDefinitionKey) {
+	public ProcessInstance startProcess(final String processDefinitionKey) {
 
 		MmcHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey);
 
-		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), CamundaProcessInstance.class)
+		return restTemplate
+				.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstanceImpl.class)
+				.getBody();
+	}
+
+	@Override
+	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey) {
+		MmcHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey,
+				businessKey);
+
+		return restTemplate
+				.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstanceImpl.class)
 				.getBody();
 	}
 

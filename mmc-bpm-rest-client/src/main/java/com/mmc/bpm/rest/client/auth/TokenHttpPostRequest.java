@@ -18,7 +18,7 @@ public class TokenHttpPostRequest implements MmcHttpRequest {
 	public HttpMethod httpMethod;
 	public HttpEntity<?> httpEntity;
 
-	public TokenHttpPostRequest(String baseUri, HttpEntity<?> httpEntity) {
+	public TokenHttpPostRequest(final String baseUri, final HttpEntity<?> httpEntity) {
 		this.httpRequestUrl = baseUri;
 		this.httpEntity = httpEntity;
 		this.httpMethod = HttpMethod.POST;

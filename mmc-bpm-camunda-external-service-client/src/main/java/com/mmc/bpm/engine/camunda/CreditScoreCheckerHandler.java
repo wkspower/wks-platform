@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class CreditScoreCheckerHandler implements ExternalTaskHandler {
 
 	@Override
-	public void execute(ExternalTask externalTask, ExternalTaskService externalTaskService) {
+	public void execute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
 		System.out.println("External task executed!");
 		externalTaskService.complete(externalTask);
 	}

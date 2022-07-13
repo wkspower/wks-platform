@@ -1,9 +1,9 @@
 package com.mmc.bpm.engine.camunda.data.provider;
 
-import com.mmc.bpm.engine.camunda.model.Deployment;
-import com.mmc.bpm.engine.camunda.model.ProcessDefinition;
-import com.mmc.bpm.engine.camunda.model.ProcessInstance;
-import com.mmc.bpm.engine.camunda.model.Task;
+import com.mmc.bpm.engine.model.spi.Deployment;
+import com.mmc.bpm.engine.model.spi.ProcessDefinition;
+import com.mmc.bpm.engine.model.spi.ProcessInstance;
+import com.mmc.bpm.engine.model.spi.Task;
 
 /**
  * @author victor.franca
@@ -19,6 +19,8 @@ public interface ProcessEngineDataProvider {
 
 	public Task[] findTasks();
 
-	public ProcessInstance startProcess(String processDefinitionKey);
+	public ProcessInstance startProcess(final String processDefinitionKey);
+	
+	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey);
 
 }

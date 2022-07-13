@@ -40,7 +40,8 @@
     </dependencyManagement>
 
 	<modules>
-		<module>mmc-bpm-engine</module>
+		<module>mmc-bpm-client</module>
+		<module>mmc-bpm-engine-interface</module>
 		<module>mmc-bpm-rest-client</module>
 		<module>mmc-bpm-camunda-client</module>
 		

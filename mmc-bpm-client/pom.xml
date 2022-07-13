@@ -8,35 +8,34 @@
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>mmc-bpm-camunda-client</artifactId>
-	<name>mmc-bpm-camunda-client</name>
-	<description>MMC BPM Camunda Client</description>
+	<artifactId>mmc-bpm-client</artifactId>
+	<name>mmc-bpm-client</name>
+	<description>MMC BPM Client</description>
 
 	<packaging>jar</packaging>
 
 	<dependencies>
+
+		<dependency>
+			<groupId>com.mmc.bpm</groupId>
+			<artifactId>mmc-bpm-camunda-client</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.shell</groupId>
+			<artifactId>spring-shell-starter</artifactId>
+			<version>${spring.shell.version}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.mmc.bpm</groupId>
-			<artifactId>mmc-bpm-engine-interface</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.mmc.bpm</groupId>
-			<artifactId>mmc-bpm-rest-client</artifactId>
-			<version>${project.parent.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
@@ -46,4 +45,19 @@
 		</dependency>
 	</dependencies>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

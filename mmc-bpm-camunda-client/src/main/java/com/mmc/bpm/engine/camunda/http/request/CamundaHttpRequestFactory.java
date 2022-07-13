@@ -5,10 +5,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
 
-import com.mmc.bpm.engine.camunda.model.Deployment;
-import com.mmc.bpm.engine.camunda.model.ProcessDefinition;
-import com.mmc.bpm.engine.camunda.model.ProcessInstance;
-import com.mmc.bpm.engine.camunda.model.Task;
+import com.google.gson.JsonObject;
+import com.mmc.bpm.engine.model.spi.Deployment;
+import com.mmc.bpm.engine.model.spi.ProcessDefinition;
+import com.mmc.bpm.engine.model.spi.ProcessInstance;
+import com.mmc.bpm.engine.model.spi.Task;
 import com.mmc.bpm.rest.client.MmcHttpRequest;
 import com.mmc.bpm.rest.client.header.JSONHttpHeadersFactory;
 
@@ -54,9 +55,18 @@ public class CamundaHttpRequestFactory {
 				new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
-	public MmcHttpRequest getProcessInstanceCreateRequest(String processDefinitionKey) {
+	public MmcHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey) {
 		return new CamundaHttpPostRequest(processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
 				new HttpEntity<>(httpHeadersFactory.create()));
+	}
+
+	public MmcHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey, final String businessKey) {
+		// TODO refactor it - Payload Creator
+		JsonObject payload = new JsonObject();
+		payload.addProperty("businessKey", businessKey);
+
+		return new CamundaHttpPostRequest(processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
+				new HttpEntity<>(payload, httpHeadersFactory.create()));
 	}
 
 	//// Task ////

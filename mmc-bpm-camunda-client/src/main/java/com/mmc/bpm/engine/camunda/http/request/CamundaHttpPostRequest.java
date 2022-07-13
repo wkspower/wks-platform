@@ -18,7 +18,7 @@ public class CamundaHttpPostRequest implements MmcHttpRequest {
 	public HttpMethod httpMethod;
 	public HttpEntity<?> httpEntity;
 
-	public CamundaHttpPostRequest(String url, HttpEntity<?> httpEntity) {
+	public CamundaHttpPostRequest(final String url, final HttpEntity<?> httpEntity) {
 		this.httpRequestUrl = url;
 		this.httpEntity = httpEntity;
 		this.httpMethod = HttpMethod.POST;
