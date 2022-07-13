@@ -7,7 +7,7 @@ import org.springframework.shell.standard.ShellMethod;
 import com.mmc.bpm.client.process.instance.ProcessInstanceService;
 
 @ShellComponent
-public class ProcessInstanceCommand {
+public class ProcessCommand {
 
 	@Autowired
 	private ProcessInstanceService processInstanceCreator;

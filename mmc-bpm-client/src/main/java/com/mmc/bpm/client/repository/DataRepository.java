@@ -10,4 +10,6 @@ public interface DataRepository {
 
 	public List<CaseInstance> findCaseInstances();
 
+	public void delete(final CaseInstance caseInstance);
+
 }

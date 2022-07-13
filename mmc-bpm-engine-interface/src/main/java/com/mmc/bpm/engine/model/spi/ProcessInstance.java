@@ -6,4 +6,8 @@ package com.mmc.bpm.engine.model.spi;
  */
 public interface ProcessInstance {
 
+	public String getId();
+
+	public String getBusinessKey();
+
 }

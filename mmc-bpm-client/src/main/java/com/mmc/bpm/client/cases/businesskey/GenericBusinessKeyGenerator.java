@@ -10,15 +10,13 @@ import com.mmc.bpm.engine.model.spi.BusinessKey;
 public class GenericBusinessKeyGenerator implements BusinessKeyGenerator {
 
 	public BusinessKey generate() {
+		return GenericBusinessKey.builder()
+				.businessKey(calculateBusinessKey())
+				.build();
+	}
 
-		BusinessKey businessKey = new BusinessKey() {
-			@Override
-			public String toString() {
-				return String.valueOf("DUMMY_BUSINESS_KEY-" + ThreadLocalRandom.current().nextInt(0, 1000 + 1));
-			}
-		};
-
-		return businessKey;
+	private String calculateBusinessKey() {
+		return String.valueOf("DUMMY_BUSINESS_KEY-" + ThreadLocalRandom.current().nextInt(0, 1000 + 1));
 	}
 
 }

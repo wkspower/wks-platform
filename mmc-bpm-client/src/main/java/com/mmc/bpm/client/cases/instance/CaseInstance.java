@@ -8,6 +8,7 @@ import com.mmc.bpm.engine.model.spi.BusinessKey;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -16,7 +17,9 @@ import lombok.ToString;
 @ToString
 public class CaseInstance {
 
+	@EqualsAndHashCode.Include
 	private BusinessKey businessKey;
+
 	private JsonObject attributes;
 
 	@Builder.Default

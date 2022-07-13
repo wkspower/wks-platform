@@ -4,22 +4,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
-import com.mmc.bpm.client.cases.instance.CaseInstanceCreator;
-import com.mmc.bpm.client.cases.instance.CaseInstanceRetriever;
+import com.mmc.bpm.client.cases.businesskey.GenericBusinessKey;
+import com.mmc.bpm.client.cases.instance.CaseInstanceService;
 
 @ShellComponent
-public class CaseInstanceCommand {
+public class CaseCommand {
 
 	@Autowired
-	private CaseInstanceCreator caseInstanceCreator;
-
-	@Autowired
-	private CaseInstanceRetriever caseInstanceRetriever;
+	private CaseInstanceService caseInstanceService;
 
 	@ShellMethod(value = "Create a Case Instance.")
 	public String createCase(final String attributes) {
-		return "Case Instance Created: " + caseInstanceCreator.create(attributes);
+		return "Case Instance Created: " + caseInstanceService.create(attributes);
 
+	}
+
+	@ShellMethod(value = "Delete a Case Instance")
+	public void deleteCase(final String businessKey) {
+		caseInstanceService.delete(GenericBusinessKey.builder().businessKey(businessKey).build());
 	}
 
 	@ShellMethod(value = "Search Case Instances.")
@@ -27,7 +29,7 @@ public class CaseInstanceCommand {
 
 		StringBuffer caseInstancesStrings = new StringBuffer();
 
-		caseInstanceRetriever.find()
+		caseInstanceService.find()
 				.forEach(o -> caseInstancesStrings.append(o).append(System.getProperty("line.separator")));
 
 		return caseInstancesStrings.toString();
