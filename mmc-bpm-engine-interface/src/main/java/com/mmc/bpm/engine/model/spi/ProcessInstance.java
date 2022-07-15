@@ -10,4 +10,14 @@ public interface ProcessInstance {
 
 	public String getBusinessKey();
 
+	public String getDefinitionId();
+
+	public String getCaseInstanceId();
+
+	public Boolean getEnded();
+
+	public Boolean getSuspended();
+
+	public String getTenantId();
+
 }

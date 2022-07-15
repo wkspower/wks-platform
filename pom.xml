@@ -13,11 +13,13 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<maven.compiler.target>17</maven.compiler.target>
-		<maven.compiler.source>17</maven.compiler.source>
+		<java.version>11</java.version>
+		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>11</maven.compiler.source>
 
-		<spring.boot.version>2.5.9</spring.boot.version>
+		<spring.boot.version>2.7.0</spring.boot.version>
 		<spring.shell.version>2.0.1.RELEASE</spring.shell.version>
+		<spring.doc.version>1.6.6</spring.doc.version>
 		
 		<camunda.version>7.17.0</camunda.version>
 
@@ -40,11 +42,15 @@
     </dependencyManagement>
 
 	<modules>
-		<module>mmc-bpm-client</module>
-		<module>mmc-bpm-engine-interface</module>
+		<module>mmc-bpm-interface</module>
+
+		<module>mmc-bpm-interface-shell</module>
+		<module>mmc-bpm-interface-rest-api</module>
+
 		<module>mmc-bpm-rest-client</module>
-		<module>mmc-bpm-camunda-client</module>
-		
-		<module>mmc-bpm-camunda-external-service-client</module>
+
+		<module>mmc-bpm-engine-interface</module>
+		<module>mmc-bpm-engine-camunda-client</module>
+		<module>mmc-bpm-engine-camunda-external-service-client</module>
 	</modules>
 </project>

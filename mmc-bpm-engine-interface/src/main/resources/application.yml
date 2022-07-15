@@ -1,8 +1,0 @@
-server: 
-   port: 8080
-   
-logging:
-   level:
-      root: ERROR
-      com:
-         wkspower: INFO

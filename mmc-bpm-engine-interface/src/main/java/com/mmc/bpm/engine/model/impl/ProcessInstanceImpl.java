@@ -24,4 +24,12 @@ public class ProcessInstanceImpl implements ProcessInstance {
 	private String id;
 	private String businessKey;
 
+	private String definitionId;
+	private String caseInstanceId;
+	private Boolean ended;
+	private Boolean suspended;
+	private String tenantId;
+	
+	
+
 }
