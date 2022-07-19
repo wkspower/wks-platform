@@ -7,8 +7,10 @@ import com.mmc.bpm.engine.model.spi.BusinessKey;
 public interface CaseInstanceService {
 
 	public CaseInstance create(final String attributes);
-	
+
 	public List<CaseInstance> find();
-	
-	public void delete(BusinessKey businessKey);
+
+	public void delete(BusinessKey businessKey) throws CaseInstanceNotFoundException;
+
+	public void delete(String businessKey) throws CaseInstanceNotFoundException;
 }

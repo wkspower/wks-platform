@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.mmc.bpm.client.cases.businesskey.GenericBusinessKeyGenerator;
 import com.mmc.bpm.client.process.instance.ProcessInstanceService;
@@ -49,14 +50,38 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 
 	@Override
-	public void delete(BusinessKey businessKey) {
+	public void delete(BusinessKey businessKey) throws CaseInstanceNotFoundException {
 		List<CaseInstance> caseInstanceList = dataRepository.findCaseInstances().stream()
 				.filter(o -> o.getBusinessKey().equals(businessKey)).collect(Collectors.toList());
+
+		if (caseInstanceList.isEmpty()) {
+			throw new CaseInstanceNotFoundException();
+		}
 
 		caseInstanceList.forEach(o -> {
 			processInstanceService.delete(o.getProcessesInstances());
 			dataRepository.delete(o);
 		});
+	}
+
+	@Override
+	public void delete(String businessKey) throws CaseInstanceNotFoundException {
+		List<CaseInstance> caseInstanceList = dataRepository.findCaseInstances().stream()
+				.filter(o -> o.getBusinessKey().getBusinessKey().equals(businessKey)).collect(Collectors.toList());
+
+		if (caseInstanceList.isEmpty()) {
+			throw new CaseInstanceNotFoundException();
+		}
+
+		caseInstanceList.forEach(o -> {
+			processInstanceService.delete(o.getProcessesInstances());
+			dataRepository.delete(o);
+		});
+	}
+
+	@ExceptionHandler({ Exception.class })
+	public void handleException() {
+		//
 	}
 
 }

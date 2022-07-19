@@ -5,6 +5,7 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
 import com.mmc.bpm.client.cases.businesskey.GenericBusinessKey;
+import com.mmc.bpm.client.cases.instance.CaseInstanceNotFoundException;
 import com.mmc.bpm.client.cases.instance.CaseInstanceService;
 
 @ShellComponent
@@ -20,7 +21,7 @@ public class CaseCommand {
 	}
 
 	@ShellMethod(value = "Delete a Case Instance")
-	public String deleteCase(final String businessKey) {
+	public String deleteCase(final String businessKey) throws CaseInstanceNotFoundException {
 		caseInstanceService.delete(GenericBusinessKey.builder().businessKey(businessKey).build());
 		return "Case Deleted";
 	}

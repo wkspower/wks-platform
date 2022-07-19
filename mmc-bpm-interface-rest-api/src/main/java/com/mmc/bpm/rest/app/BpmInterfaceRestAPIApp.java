@@ -6,10 +6,10 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan({"com.mmc.bpm"})
-public class MmcBpmInterfaceRestAPIApp {
+public class BpmInterfaceRestAPIApp {
 
 	public static void main(final String[] args) {
-		SpringApplication.run(MmcBpmInterfaceRestAPIApp.class, args);
+		SpringApplication.run(BpmInterfaceRestAPIApp.class, args);
 	}
 
 }
