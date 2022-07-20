@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.mmc.bpm.cases.instance.CaseAttribute;
-import com.mmc.bpm.cases.instance.CaseInstance;
-import com.mmc.bpm.cases.instance.CaseInstanceNotFoundException;
-import com.mmc.bpm.cases.instance.CaseInstanceService;
+import com.mmc.bpm.client.cases.instance.CaseAttribute;
+import com.mmc.bpm.client.cases.instance.CaseInstance;
+import com.mmc.bpm.client.cases.instance.CaseInstanceNotFoundException;
+import com.mmc.bpm.client.cases.instance.CaseInstanceService;
 
 @RestController
 public class CaseController {

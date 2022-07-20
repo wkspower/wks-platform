@@ -1,4 +1,4 @@
-package com.mmc.bpm.cases.businesskey;
+package com.mmc.bpm.client.cases.businesskey;
 
 import java.util.concurrent.ThreadLocalRandom;
 

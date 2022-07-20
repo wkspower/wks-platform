@@ -1,4 +1,4 @@
-package com.mmc.bpm.process.instance;
+package com.mmc.bpm.client.process.instance;
 
 import java.util.List;
 

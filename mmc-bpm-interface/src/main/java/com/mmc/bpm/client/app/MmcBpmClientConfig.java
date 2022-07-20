@@ -1,4 +1,4 @@
-package com.mmc.bpm.app;
+package com.mmc.bpm.client.app;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

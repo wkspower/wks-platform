@@ -1,4 +1,4 @@
-package com.mmc.bpm.cases.instance;
+package com.mmc.bpm.client.cases.instance;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +22,10 @@ public class CaseInstance {
 
 	private String businessKey;
 
+	// TODO improve this hard code
+	@Builder.Default
+	private String status = "NEW";
+
 	private List<CaseAttribute> attributes;
 
 	@Builder.Default
@@ -37,6 +41,10 @@ public class CaseInstance {
 
 	public void setId(String id) {
 		this.id = businessKey;
+	}
+	
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 }

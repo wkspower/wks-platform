@@ -1,4 +1,4 @@
-package com.mmc.bpm.cases.instance;
+package com.mmc.bpm.client.cases.instance;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

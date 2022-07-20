@@ -7,13 +7,24 @@ import org.camunda.bpm.client.task.ExternalTaskService;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ExternalTaskSubscription("creditScoreChecker")
-public class CreditScoreCheckerHandler implements ExternalTaskHandler {
+@ExternalTaskSubscription("caseStatusUpdate")
+public class CaseUpdateHandler implements ExternalTaskHandler {
+
+//	@Autowired
+//	private CaseInstanceService caseInstanceService;
 
 	@Override
 	public void execute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
-		System.out.println("External task executed!");
-		externalTaskService.complete(externalTask);
+//		log.debug("Starting External Task Handler processing...");
+//
+//		try {
+//			caseInstanceService.updateStatus(externalTask.getBusinessKey(), "REVIEWED");
+//			externalTaskService.complete(externalTask);
+//		} catch (Exception e) {
+//			// error handling
+//			e.printStackTrace();
+//		}
+
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.mmc.bpm.repository;
+package com.mmc.bpm.client.repository;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,14 +13,14 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.mmc.bpm.cases.instance.CaseAttribute;
-import com.mmc.bpm.cases.instance.CaseInstance;
+import com.mmc.bpm.client.cases.instance.CaseAttribute;
+import com.mmc.bpm.client.cases.instance.CaseInstance;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
 
 @Component
 public class JDBCDataRepository implements DataRepository {
 
-	private final String DATABASE_URL = "jdbc:h2:file:./mmc_bpm_interface";
+	private final String DATABASE_URL = "jdbc:h2:file:~/mmc_bpm_interface";
 	private Connection connection;
 
 	public JDBCDataRepository() throws Exception {
@@ -32,7 +32,7 @@ public class JDBCDataRepository implements DataRepository {
 	}
 
 	@PostConstruct
-	private void postConstruct() throws Exception {
+	protected void postConstruct() throws Exception {
 
 		try (var statement = connection.createStatement();) {
 
@@ -41,6 +41,8 @@ public class JDBCDataRepository implements DataRepository {
 			statement.executeUpdate("CREATE TABLE generic_case ("
 
 					+ "business_key varchar(255),"
+
+					+ "status varchar(20),"
 
 					+ "attributes CLOB,"
 
@@ -59,9 +61,10 @@ public class JDBCDataRepository implements DataRepository {
 		try (var statement = connection.createStatement();) {
 
 			ResultSet resultSet = statement
-					.executeQuery("SELECT business_key, attributes, processes FROM generic_case;");
+					.executeQuery("SELECT business_key, status, attributes, processes FROM generic_case;");
 			while (resultSet.next()) {
 				String businessKey = resultSet.getString("business_key");
+				String status = resultSet.getString("status");
 
 				Gson gson = new Gson();
 				List<CaseAttribute> attributes = gson.fromJson(resultSet.getString("attributes"),
@@ -73,7 +76,7 @@ public class JDBCDataRepository implements DataRepository {
 						new TypeToken<List<ProcessInstance>>() {
 						}.getType());
 
-				casesInstances.add(CaseInstance.builder().businessKey(businessKey).attributes(attributes)
+				casesInstances.add(CaseInstance.builder().businessKey(businessKey).attributes(attributes).status(status)
 						.processesInstances(processes).build());
 			}
 
@@ -95,15 +98,37 @@ public class JDBCDataRepository implements DataRepository {
 
 		try (var statement = connection.createStatement();) {
 
-			statement.executeUpdate("INSERT INTO generic_case (business_key, attributes, processes) VALUES ("
+			statement.executeUpdate("INSERT INTO generic_case (business_key, status, attributes, processes) VALUES ("
 
 					+ "\'" + caseInstance.getBusinessKey() + "\'" + ", "
+
+					+ "\'" + caseInstance.getStatus() + "\'" + ", "
 
 					+ "\'" + attributesJSONString + "\'" + ", "
 
 					+ "\'" + processesJSONString + "\'"
 
 					+ ");");
+
+		} catch (SQLException ex) {
+			// TODO error handling
+			throw new Exception(ex);
+		}
+	}
+
+	@Override
+	public void updateCaseStatus(String businessKey, String newStatus) throws Exception {
+		try (var statement = connection.createStatement();) {
+
+			statement.executeUpdate("UPDATE generic_case "
+
+					+ "SET status =" + "'" + newStatus + "'"
+
+					+ " WHERE business_key = "
+
+					+ "'" + businessKey + "'"
+
+					+ ";");
 
 		} catch (SQLException ex) {
 			// TODO error handling

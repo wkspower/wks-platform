@@ -1,4 +1,4 @@
-package com.mmc.bpm.cases.instance;
+package com.mmc.bpm.client.cases.instance;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -6,12 +6,11 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.mmc.bpm.cases.businesskey.GenericBusinessKeyGenerator;
+import com.mmc.bpm.client.cases.businesskey.GenericBusinessKeyGenerator;
+import com.mmc.bpm.client.process.instance.ProcessInstanceService;
+import com.mmc.bpm.client.repository.DataRepository;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
-import com.mmc.bpm.process.instance.ProcessInstanceService;
-import com.mmc.bpm.repository.DataRepository;
 
 @Component
 public class CaseInstanceServiceImpl implements CaseInstanceService {
@@ -28,6 +27,11 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	@Value("${mmc.bpm.case.generic.process-def-key}")
 	private String genericCaseProcessDefKey;
 
+	@Override
+	public List<CaseInstance> find() throws Exception {
+		return dataRepository.findCaseInstances();
+	}
+
 	public CaseInstance create(final List<CaseAttribute> attributes) throws Exception {
 		String businessKey = businessKeyCreator.generate();
 
@@ -39,12 +43,11 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 		dataRepository.saveCaseInstance(caseInstance);
 
 		return caseInstance;
-
 	}
 
 	@Override
-	public List<CaseInstance> find() throws Exception {
-		return dataRepository.findCaseInstances();
+	public void updateStatus(String businessKey, String newStatus) throws Exception {
+		dataRepository.updateCaseStatus(businessKey, newStatus);
 	}
 
 	@Override
@@ -65,11 +68,6 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 				e.printStackTrace();
 			}
 		});
-	}
-
-	@ExceptionHandler({ Exception.class })
-	public void handleException() {
-		//
 	}
 
 }

@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
-import com.mmc.bpm.cases.instance.CaseInstanceService;
+import com.mmc.bpm.client.cases.instance.CaseInstanceService;
 
 @ShellComponent
 public class CaseCommand {
@@ -14,9 +14,15 @@ public class CaseCommand {
 
 	@ShellMethod(value = "Create a Case Instance.")
 	public String createCase(final String attributes) throws Exception {
-		//TODO parse json string to List
+		// TODO parse json string to List
 		return "Case Instance Created: " + caseInstanceService.create(null);
 
+	}
+
+	@ShellMethod(value = "Update Case Instance Status")
+	public String updateCaseStatus(final String businessKey, String status) throws Exception {
+		caseInstanceService.updateStatus(businessKey, status);
+		return "Case Status Updated";
 	}
 
 	@ShellMethod(value = "Delete a Case Instance")

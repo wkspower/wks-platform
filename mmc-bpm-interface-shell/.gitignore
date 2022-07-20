@@ -1,5 +1,6 @@
 # Environment properties
 env.properties
+*.db
 
 *.log
 
