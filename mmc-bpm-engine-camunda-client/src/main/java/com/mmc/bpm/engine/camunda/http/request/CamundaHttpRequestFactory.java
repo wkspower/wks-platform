@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
 
-import com.mmc.bpm.engine.model.impl.ProcessInstanceImpl;
 import com.mmc.bpm.engine.model.spi.Deployment;
 import com.mmc.bpm.engine.model.spi.ProcessDefinition;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
@@ -62,7 +61,7 @@ public class CamundaHttpRequestFactory {
 
 	public MmcHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey, final String businessKey) {
 		// TODO refactor it - Payload Creator
-		ProcessInstance processInstance = ProcessInstanceImpl.builder().businessKey(businessKey).build();
+		ProcessInstance processInstance = ProcessInstance.builder().businessKey(businessKey).build();
 
 		return new CamundaHttpPostRequest(processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
 				new HttpEntity<>(processInstance, httpHeadersFactory.create()));

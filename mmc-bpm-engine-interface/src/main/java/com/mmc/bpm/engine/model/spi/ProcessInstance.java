@@ -1,23 +1,32 @@
 package com.mmc.bpm.engine.model.spi;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
  * @author victor.franca
  *
  */
-public interface ProcessInstance {
 
-	public String getId();
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString
+public class ProcessInstance {
 
-	public String getBusinessKey();
+	private String id;
+	private String businessKey;
 
-	public String getDefinitionId();
-
-	public String getCaseInstanceId();
-
-	public Boolean getEnded();
-
-	public Boolean getSuspended();
-
-	public String getTenantId();
+	private String definitionId;
+	private String caseInstanceId;
+	private Boolean ended;
+	private Boolean suspended;
+	private String tenantId;
 
 }

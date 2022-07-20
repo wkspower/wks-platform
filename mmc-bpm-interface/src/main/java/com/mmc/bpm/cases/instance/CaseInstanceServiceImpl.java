@@ -1,4 +1,4 @@
-package com.mmc.bpm.client.cases.instance;
+package com.mmc.bpm.cases.instance;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,11 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.mmc.bpm.client.cases.businesskey.GenericBusinessKeyGenerator;
-import com.mmc.bpm.client.process.instance.ProcessInstanceService;
-import com.mmc.bpm.client.repository.DataRepository;
-import com.mmc.bpm.engine.model.spi.BusinessKey;
+import com.mmc.bpm.cases.businesskey.GenericBusinessKeyGenerator;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
+import com.mmc.bpm.process.instance.ProcessInstanceService;
+import com.mmc.bpm.repository.DataRepository;
 
 @Component
 public class CaseInstanceServiceImpl implements CaseInstanceService {
@@ -29,11 +28,10 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	@Value("${mmc.bpm.case.generic.process-def-key}")
 	private String genericCaseProcessDefKey;
 
-	public CaseInstance create(final String attributes) {
-		BusinessKey businessKey = businessKeyCreator.generate();
+	public CaseInstance create(final List<CaseAttribute> attributes) throws Exception {
+		String businessKey = businessKeyCreator.generate();
 
-		ProcessInstance processInstance = processInstanceService.create(genericCaseProcessDefKey,
-				businessKey.getBusinessKey());
+		ProcessInstance processInstance = processInstanceService.create(genericCaseProcessDefKey, businessKey);
 
 		CaseInstance caseInstance = CaseInstance.builder().businessKey(businessKey).attributes(attributes).build();
 		caseInstance.addProcessInstance(processInstance);
@@ -45,12 +43,12 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 
 	@Override
-	public List<CaseInstance> find() {
+	public List<CaseInstance> find() throws Exception {
 		return dataRepository.findCaseInstances();
 	}
 
 	@Override
-	public void delete(BusinessKey businessKey) throws CaseInstanceNotFoundException {
+	public void delete(String businessKey) throws Exception {
 		List<CaseInstance> caseInstanceList = dataRepository.findCaseInstances().stream()
 				.filter(o -> o.getBusinessKey().equals(businessKey)).collect(Collectors.toList());
 
@@ -60,22 +58,12 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 		caseInstanceList.forEach(o -> {
 			processInstanceService.delete(o.getProcessesInstances());
-			dataRepository.delete(o);
-		});
-	}
-
-	@Override
-	public void delete(String businessKey) throws CaseInstanceNotFoundException {
-		List<CaseInstance> caseInstanceList = dataRepository.findCaseInstances().stream()
-				.filter(o -> o.getBusinessKey().getBusinessKey().equals(businessKey)).collect(Collectors.toList());
-
-		if (caseInstanceList.isEmpty()) {
-			throw new CaseInstanceNotFoundException();
-		}
-
-		caseInstanceList.forEach(o -> {
-			processInstanceService.delete(o.getProcessesInstances());
-			dataRepository.delete(o);
+			try {
+				dataRepository.delete(o);
+			} catch (Exception e) {
+				// TODO error handling
+				e.printStackTrace();
+			}
 		});
 	}
 

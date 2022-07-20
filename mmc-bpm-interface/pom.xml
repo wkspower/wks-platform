@@ -26,6 +26,10 @@
 			<artifactId>spring-context</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>com.mmc.bpm</groupId>
@@ -36,7 +40,17 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>${h2.version}</version> <!--$NO-MVN-MAN-VER$-->
+			<scope>runtime</scope>
 		</dependency>
 
 		<dependency>

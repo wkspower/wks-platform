@@ -4,9 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
-import com.mmc.bpm.client.cases.businesskey.GenericBusinessKey;
-import com.mmc.bpm.client.cases.instance.CaseInstanceNotFoundException;
-import com.mmc.bpm.client.cases.instance.CaseInstanceService;
+import com.mmc.bpm.cases.instance.CaseInstanceService;
 
 @ShellComponent
 public class CaseCommand {
@@ -15,19 +13,20 @@ public class CaseCommand {
 	private CaseInstanceService caseInstanceService;
 
 	@ShellMethod(value = "Create a Case Instance.")
-	public String createCase(final String attributes) {
-		return "Case Instance Created: " + caseInstanceService.create(attributes);
+	public String createCase(final String attributes) throws Exception {
+		//TODO parse json string to List
+		return "Case Instance Created: " + caseInstanceService.create(null);
 
 	}
 
 	@ShellMethod(value = "Delete a Case Instance")
-	public String deleteCase(final String businessKey) throws CaseInstanceNotFoundException {
-		caseInstanceService.delete(GenericBusinessKey.builder().businessKey(businessKey).build());
+	public String deleteCase(final String businessKey) throws Exception {
+		caseInstanceService.delete(businessKey);
 		return "Case Deleted";
 	}
 
 	@ShellMethod(value = "Search Case Instances.")
-	public String findCase() {
+	public String findCase() throws Exception {
 
 		StringBuffer caseInstancesStrings = new StringBuffer();
 

@@ -7,8 +7,8 @@ import org.springframework.web.client.RestTemplate;
 import com.mmc.bpm.engine.camunda.http.request.CamundaHttpRequestFactory;
 import com.mmc.bpm.engine.model.impl.DeploymentImpl;
 import com.mmc.bpm.engine.model.impl.ProcessDefinitionImpl;
-import com.mmc.bpm.engine.model.impl.ProcessInstanceImpl;
 import com.mmc.bpm.engine.model.impl.TaskImpl;
+import com.mmc.bpm.engine.model.spi.ProcessInstance;
 import com.mmc.bpm.rest.client.MmcHttpRequest;
 
 /**
@@ -39,9 +39,9 @@ public class CamundaEngineClient implements ProcessEngineClient {
 	}
 
 	@Override
-	public ProcessInstanceImpl[] findProcessInstances() {
+	public ProcessInstance[] findProcessInstances() {
 		return restTemplate.getForEntity(camundaHttpRequestFactory.getProcessInstanceListRequest().getHttpRequestUrl(),
-				ProcessInstanceImpl[].class).getBody();
+				ProcessInstance[].class).getBody();
 	}
 
 	@Override
@@ -52,22 +52,20 @@ public class CamundaEngineClient implements ProcessEngineClient {
 	}
 
 	@Override
-	public ProcessInstanceImpl startProcess(final String processDefinitionKey) {
+	public ProcessInstance startProcess(final String processDefinitionKey) {
 
 		MmcHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey);
 
-		return restTemplate
-				.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstanceImpl.class)
+		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
 				.getBody();
 	}
 
 	@Override
-	public ProcessInstanceImpl startProcess(final String processDefinitionKey, final String businessKey) {
+	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey) {
 		MmcHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey,
 				businessKey);
 
-		return restTemplate
-				.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstanceImpl.class)
+		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
 				.getBody();
 	}
 

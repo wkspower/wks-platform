@@ -1,18 +1,14 @@
-package com.mmc.bpm.client.cases.businesskey;
+package com.mmc.bpm.cases.businesskey;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.stereotype.Component;
 
-import com.mmc.bpm.engine.model.spi.BusinessKey;
-
 @Component
 public class GenericBusinessKeyGenerator implements BusinessKeyGenerator {
 
-	public BusinessKey generate() {
-		return GenericBusinessKey.builder()
-				.businessKey(calculateBusinessKey())
-				.build();
+	public String generate() {
+		return calculateBusinessKey();
 	}
 
 	private String calculateBusinessKey() {

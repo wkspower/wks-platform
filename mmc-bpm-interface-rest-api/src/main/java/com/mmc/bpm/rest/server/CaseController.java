@@ -12,9 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.mmc.bpm.client.cases.instance.CaseInstance;
-import com.mmc.bpm.client.cases.instance.CaseInstanceNotFoundException;
-import com.mmc.bpm.client.cases.instance.CaseInstanceService;
+import com.mmc.bpm.cases.instance.CaseAttribute;
+import com.mmc.bpm.cases.instance.CaseInstance;
+import com.mmc.bpm.cases.instance.CaseInstanceNotFoundException;
+import com.mmc.bpm.cases.instance.CaseInstanceService;
 
 @RestController
 public class CaseController {
@@ -23,17 +24,17 @@ public class CaseController {
 	private CaseInstanceService caseInstanceService;
 
 	@GetMapping(value = "/case")
-	public List<CaseInstance> find() {
+	public List<CaseInstance> find() throws Exception {
 		return caseInstanceService.find();
 	}
 
 	@PostMapping(value = "/case")
-	public CaseInstance save(@RequestBody String attributes) {
+	public CaseInstance save(@RequestBody List<CaseAttribute> attributes) throws Exception {
 		return caseInstanceService.create(attributes);
 	}
 
 	@DeleteMapping(value = "/case/{businessKey}")
-	public void delete(@PathVariable String businessKey) {
+	public void delete(@PathVariable String businessKey) throws Exception {
 		try {
 			caseInstanceService.delete(businessKey);
 		} catch (CaseInstanceNotFoundException e) {

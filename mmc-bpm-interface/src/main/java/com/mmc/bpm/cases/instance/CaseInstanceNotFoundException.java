@@ -1,4 +1,4 @@
-package com.mmc.bpm.client.cases.instance;
+package com.mmc.bpm.cases.instance;
 
 public class CaseInstanceNotFoundException extends Exception {
 

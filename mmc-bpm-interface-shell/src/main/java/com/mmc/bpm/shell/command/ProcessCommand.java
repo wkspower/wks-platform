@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
-import com.mmc.bpm.client.process.instance.ProcessInstanceService;
+import com.mmc.bpm.process.instance.ProcessInstanceService;
 
 @ShellComponent
 public class ProcessCommand {
