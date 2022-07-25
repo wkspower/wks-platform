@@ -37,14 +37,14 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/mmctech/cis-innovation-bpm-platform/website',
+            'https://github.com/mmctech/cis-innovation-bpm-platform/tree/main/website',
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/mmctech/cis-innovation-bpm-platform/website',
+            'https://github.com/mmctech/cis-innovation-bpm-platform/tree/main/website',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -57,9 +57,9 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'My Site',
+        title: 'MMC BPM Interface',
         logo: {
-          alt: 'My Site Logo',
+          alt: 'MMC BPM Interface Logo',
           src: 'img/logo.svg',
         },
         items: [
@@ -67,11 +67,11 @@ const config = {
             type: 'doc',
             docId: 'intro',
             position: 'left',
-            label: 'Tutorial',
+            label: 'Docs',
           },
           {to: '/blog', label: 'Blog', position: 'left'},
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://github.com/mmctech/cis-innovation-bpm-platform',
             label: 'GitHub',
             position: 'right',
           },
@@ -87,11 +87,23 @@ const config = {
                 label: 'Tutorial',
                 to: '/docs/intro',
               },
+              {
+                label: 'Solution Architecture',
+                to: '/docs/category/architecture',
+              },
             ],
           },
           {
             title: 'Community',
             items: [
+              {
+                label: 'CI/CD',
+                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+              },
+              {
+                label: 'Sonar',
+                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+              },
               {
                 label: 'Stack Overflow',
                 href: 'https://stackoverflow.com/questions/tagged/docusaurus',
@@ -115,12 +127,12 @@ const config = {
               },
               {
                 label: 'GitHub',
-                href: 'https://github.com/facebook/docusaurus',
+                href: 'https://github.com/mmctech/cis-innovation-bpm-platform',
               },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} MMC BPM Platform.`,
       },
       prism: {
         theme: lightCodeTheme,
