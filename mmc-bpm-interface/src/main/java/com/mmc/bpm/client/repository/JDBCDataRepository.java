@@ -20,12 +20,11 @@ import com.mmc.bpm.engine.model.spi.ProcessInstance;
 @Component
 public class JDBCDataRepository implements DataRepository {
 
-	private final String DATABASE_URL = "jdbc:h2:file:~/mmc_bpm_interface";
 	private Connection connection;
 
-	public JDBCDataRepository() throws Exception {
+	public JDBCDataRepository(final DataBaseConfig databaseConfig) throws Exception {
 		try {
-			this.connection = DriverManager.getConnection(DATABASE_URL);
+			this.connection = DriverManager.getConnection(databaseConfig.getDatabaseURL());
 		} catch (SQLException e) {
 			throw new Exception(e);
 		}
@@ -36,9 +35,7 @@ public class JDBCDataRepository implements DataRepository {
 
 		try (var statement = connection.createStatement();) {
 
-			statement.executeUpdate("DROP TABLE IF EXISTS generic_case;");
-
-			statement.executeUpdate("CREATE TABLE generic_case ("
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS generic_case ("
 
 					+ "business_key varchar(255),"
 

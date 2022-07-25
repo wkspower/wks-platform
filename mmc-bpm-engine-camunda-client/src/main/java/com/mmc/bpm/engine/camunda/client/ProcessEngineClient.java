@@ -3,6 +3,7 @@ package com.mmc.bpm.engine.camunda.client;
 import com.mmc.bpm.engine.model.spi.Deployment;
 import com.mmc.bpm.engine.model.spi.ProcessDefinition;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
+import com.mmc.bpm.engine.model.spi.ProcessMessage;
 import com.mmc.bpm.engine.model.spi.Task;
 
 /**
@@ -24,5 +25,7 @@ public interface ProcessEngineClient {
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey);
 
 	public void deleteProcessInstance(final String processInstanceId);
+
+	public void sendMessage(final ProcessMessage processMesage);
 
 }

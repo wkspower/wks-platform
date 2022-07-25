@@ -7,6 +7,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,19 +15,31 @@ import com.mmc.bpm.client.cases.instance.CaseInstance;
 
 public class JDBCDataRepositoryTest {
 
-	private final String DATABASE_URL = "jdbc:h2:file:~/mmc_bpm_interface";
+	private final String DATABASE_URL = "jdbc:h2:file:~/mmc_bpm_interface_test";
 	private Connection connection;
 
+	private JDBCDataRepository jdbcDataRepository;
+
 	@Before
-	public void init() throws SQLException {
+	public void init() throws Exception {
 		this.connection = DriverManager.getConnection(DATABASE_URL);
+
+		deleteTables();
+
+		DataBaseConfig dataBaseConfig = new DataBaseConfig();
+		dataBaseConfig.setDatabaseURL(DATABASE_URL);
+		jdbcDataRepository = new JDBCDataRepository(dataBaseConfig);
+		jdbcDataRepository.postConstruct();
+
+	}
+
+	@After
+	public void cleanUpTestData() throws Exception {
+		deleteTables();
 	}
 
 	@Test
 	public void updateStatusTest() throws Exception {
-
-		JDBCDataRepository jdbcDataRepository = new JDBCDataRepository();
-		jdbcDataRepository.postConstruct();
 
 		CaseInstance caseInstance = CaseInstance.builder().businessKey("BK-01").build();
 
@@ -48,6 +61,17 @@ public class JDBCDataRepositoryTest {
 
 		assertEquals("REVIEWED", status);
 
+	}
+
+	private void deleteTables() throws Exception {
+		try (var statement = connection.createStatement();) {
+
+			statement.executeUpdate("DROP TABLE IF EXISTS generic_case");
+
+		} catch (SQLException ex) {
+			// TODO error handling
+			throw new Exception(ex);
+		}
 	}
 
 }

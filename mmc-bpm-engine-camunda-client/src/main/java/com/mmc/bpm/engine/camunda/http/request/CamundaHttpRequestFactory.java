@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.mmc.bpm.engine.model.spi.Deployment;
 import com.mmc.bpm.engine.model.spi.ProcessDefinition;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
+import com.mmc.bpm.engine.model.spi.ProcessMessage;
 import com.mmc.bpm.engine.model.spi.Task;
 import com.mmc.bpm.rest.client.MmcHttpRequest;
 import com.mmc.bpm.rest.client.header.JSONHttpHeadersFactory;
@@ -30,6 +31,9 @@ public class CamundaHttpRequestFactory {
 
 	@Value("${camunda7.rest.processinstance.url}")
 	private String processInstanceUrl;
+
+	@Value("${camunda7.rest.correlate.url}")
+	private String correlateUrl;
 
 	@Value("${camunda7.rest.task.url}")
 	private String taskUrl;
@@ -76,6 +80,11 @@ public class CamundaHttpRequestFactory {
 
 	public MmcHttpRequest getTaskListRequest() {
 		return new CamundaHttpGetRequest<Task>(taskUrl, new HttpEntity<>(httpHeadersFactory.create()));
+	}
+
+	/// Message ////
+	public MmcHttpRequest getMessageSendRequest(final ProcessMessage processMessage) {
+		return new CamundaHttpPostRequest(correlateUrl, new HttpEntity<>(processMessage, httpHeadersFactory.create()));
 	}
 
 }

@@ -7,7 +7,7 @@ logging:
       root: INFO
       com:
          mmc: INFO
-         bpm.engine.camunda: DEBUG
+         mmc.bpm.engine.camunda: DEBUG
       org.springframework.web.client.RestTemplate: ERROR
       org.apache.http: ERROR
       httpclient.wire: ERROR    
@@ -22,6 +22,7 @@ camunda7.rest.deployment.url: ${camunda7.rest.url}/deployment
 camunda7.rest.processdefinition.url: ${camunda7.rest.url}/process-definition
 camunda7.rest.processinstance.url: ${camunda7.rest.url}/process-instance
 camunda7.rest.task.url: ${camunda7.rest.url}/task
+camunda7.rest.correlate.url: ${camunda7.rest.url}/message
 
 mmc.bpm.case.generic.process-def-key: ${MMC_BPM_CASE_GENERIC_PROCESS_DEF_KEY}
 

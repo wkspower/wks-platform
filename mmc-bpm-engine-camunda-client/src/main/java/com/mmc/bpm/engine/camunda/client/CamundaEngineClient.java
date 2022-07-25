@@ -9,6 +9,7 @@ import com.mmc.bpm.engine.model.impl.DeploymentImpl;
 import com.mmc.bpm.engine.model.impl.ProcessDefinitionImpl;
 import com.mmc.bpm.engine.model.impl.TaskImpl;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
+import com.mmc.bpm.engine.model.spi.ProcessMessage;
 import com.mmc.bpm.rest.client.MmcHttpRequest;
 
 /**
@@ -74,6 +75,12 @@ public class CamundaEngineClient implements ProcessEngineClient {
 		MmcHttpRequest request = camundaHttpRequestFactory.getProcessInstanceDeleteRequest(processInstanceId);
 
 		restTemplate.delete(request.getHttpRequestUrl());
+	}
+
+	@Override
+	public void sendMessage(ProcessMessage processMesage) {
+		MmcHttpRequest request = camundaHttpRequestFactory.getMessageSendRequest(processMesage);
+		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class);
 	}
 
 }
