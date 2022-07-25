@@ -1,8 +1,8 @@
 ---
-sidebar_position: 0
+sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Third-Party Libraries
 
 Let's discover **Docusaurus in less than 5 minutes**.
 
