@@ -6,8 +6,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'MMC BPM Interface',
-  tagline: 'BPM Platform for Process Automation',
+  title: 'My Site',
+  tagline: 'Dinosaurs are cool',
   url: 'https://your-docusaurus-test-site.com',
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -16,8 +16,8 @@ const config = {
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'MMC', // Usually your GitHub org/user name.
-  projectName: 'bpm-interface', // Usually your repo name.
+  organizationName: 'mmctech', // Usually your GitHub org/user name.
+  projectName: 'cis-innovation-bpm-platform', // Usually your repo name.
 
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
@@ -34,18 +34,20 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
+          breadcrumbs: false,
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/mmctech/cis-innovation-bpm-platform/tree/main/website',
+          'https://github.com/mmctech/cis-innovation-bpm-platform/tree/main/website',
         },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/mmctech/cis-innovation-bpm-platform/tree/main/website',
-        },
+        // blog: {
+        //   showReadingTime: true,
+        //   // Please change this to your repo.
+        //   // Remove this to remove the "edit this page" links.
+        //   editUrl:
+        //     'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+        // },
+        blog: false,
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
@@ -56,6 +58,11 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      docs: {
+        sidebar: {
+          autoCollapseCategories: true,
+        },
+      },
       navbar: {
         title: 'MMC BPM Interface',
         logo: {
@@ -65,7 +72,7 @@ const config = {
         items: [
           {
             type: 'doc',
-            docId: 'introduction/intro',
+            docId: 'intro',
             position: 'left',
             label: 'Docs',
           },
@@ -85,7 +92,7 @@ const config = {
             items: [
               {
                 label: 'Solution Architecture',
-                to: '/docs/category/architecture',
+                to: '/docs/architecture',
               },
             ],
           },
@@ -99,28 +106,12 @@ const config = {
               {
                 label: 'Sonar',
                 href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-              },
-              {
-                label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-              },
-              {
-                label: 'Discord',
-                href: 'https://discordapp.com/invite/docusaurus',
-              },
-              {
-                label: 'Twitter',
-                href: 'https://twitter.com/docusaurus',
-              },
+              }
             ],
           },
           {
             title: 'More',
             items: [
-              {
-                label: 'Blog',
-                to: '/blog',
-              },
               {
                 label: 'GitHub',
                 href: 'https://github.com/mmctech/cis-innovation-bpm-platform',
