@@ -10,7 +10,7 @@
 	<name>mmc-bpm-platform</name>
 
 	<properties>
-		<project.javadoc.outputDirectory>javadoc</project.javadoc.outputDirectory>
+		<project.javadoc.outputDirectory>website/static/javadoc</project.javadoc.outputDirectory>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
