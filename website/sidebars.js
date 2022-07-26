@@ -25,8 +25,9 @@ const sidebars = {
     {
       type: 'link',
       label: 'Javadoc ',
-      href: '/javadoc',
-    },
+      // As docusaurus translate http prexixed url as external
+      href: 'http://localhost:3000/javadoc/index.html',
+    }
   ],
 };
 
