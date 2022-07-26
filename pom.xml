@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.mmc.bpm</groupId>
@@ -11,6 +10,8 @@
 	<name>mmc-bpm-platform</name>
 
 	<properties>
+		<project.javadoc.outputDirectory>javadoc</project.javadoc.outputDirectory>
+
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<java.version>17</java.version>
@@ -20,7 +21,7 @@
 		<spring.boot.version>2.7.0</spring.boot.version>
 		<spring.shell.version>2.0.1.RELEASE</spring.shell.version>
 		<spring.doc.version>1.6.6</spring.doc.version>
-		
+
 		<camunda.version>7.17.0</camunda.version>
 
 		<lombok.version>1.18.22</lombok.version>
@@ -31,16 +32,16 @@
 	</properties>
 
 	<dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring.boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<modules>
 		<module>mmc-bpm-interface</module>
@@ -54,4 +55,28 @@
 		<module>mmc-bpm-engine-camunda-client</module>
 		<module>mmc-bpm-engine-camunda-external-service-client</module>
 	</modules>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.4.0</version>
+				<configuration>
+					<reportOutputDirectory>${project.javadoc.outputDirectory}</reportOutputDirectory>
+					<destDir>.</destDir>
+				</configuration>
+				<executions>
+					<execution>
+						<id>aggregate</id>
+						<goals>
+							<goal>aggregate</goal>
+						</goals>
+						<phase>site</phase>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
 </project>
