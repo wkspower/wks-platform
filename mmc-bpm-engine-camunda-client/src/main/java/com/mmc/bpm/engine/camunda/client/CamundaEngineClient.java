@@ -7,6 +7,7 @@ import org.springframework.web.client.RestTemplate;
 import com.mmc.bpm.engine.camunda.http.request.CamundaHttpRequestFactory;
 import com.mmc.bpm.engine.model.impl.DeploymentImpl;
 import com.mmc.bpm.engine.model.impl.ProcessDefinitionImpl;
+import com.mmc.bpm.engine.model.spi.CamundaForm;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
 import com.mmc.bpm.engine.model.spi.ProcessMessage;
 import com.mmc.bpm.engine.model.spi.Task;
@@ -50,6 +51,12 @@ public class CamundaEngineClient implements ProcessEngineClient {
 		return restTemplate
 				.getForEntity(camundaHttpRequestFactory.getTaskListRequest().getHttpRequestUrl(), Task[].class)
 				.getBody();
+	}
+
+	@Override
+	public CamundaForm getTaskForm(final String taskId) {
+		return restTemplate.getForEntity(camundaHttpRequestFactory.getTaskFormGetRequest(taskId).getHttpRequestUrl(),
+				CamundaForm.class).getBody();
 	}
 
 	@Override

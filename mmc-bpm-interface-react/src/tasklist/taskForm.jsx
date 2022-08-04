@@ -11,6 +11,7 @@ import { TransitionProps } from '@mui/material/transitions';
 import FormControl from '@mui/material/FormControl';
 import Input from '@mui/material/Input';
 import FormHelperText from '@mui/material/FormHelperText';
+import { FormLabel } from "@mui/material";
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -21,7 +22,7 @@ const Transition = React.forwardRef(function Transition(
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const TaskForm = ({ open, handleClickOpen, handleClose }) => {
+export const TaskForm = ({ open, handleClickOpen, handleClose, components }) => {
     return (
         <div>
             <Dialog
@@ -51,14 +52,22 @@ export const TaskForm = ({ open, handleClickOpen, handleClose }) => {
                         </Button>
                     </Toolbar>
                 </AppBar>
-                <FormControl>
-                    <Input id="my-input" aria-describedby="my-helper-text" />
-                    <FormHelperText id="my-helper-text">First Name</FormHelperText>
-                </FormControl>
-                <FormControl>
-                    <Input id="my-input" aria-describedby="my-helper-text" />
-                    <FormHelperText id="my-helper-text">Last Name</FormHelperText>
-                </FormControl>
+                <div>
+                    {components?.map(component => {
+                        if (component.type === 'text') {
+                            return (
+                                <h2 id={component.id}>{component.text}</h2>
+                            );
+                        } else {
+                            return (
+                                <FormControl>
+                                    <Input id={component.id} aria-describedby="my-helper-text" />
+                                    <FormHelperText id="my-helper-text">{component.label}</FormHelperText>
+                                </FormControl>
+                            );
+                        }
+                    })}
+                </div>
             </Dialog>
         </div>
     );

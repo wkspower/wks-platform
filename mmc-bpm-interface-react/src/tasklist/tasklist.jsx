@@ -8,11 +8,11 @@ import './tasklist.css'
 
 export const TaskList = ({ tasks }) => {
     const columns: GridColDef[] = [
-        { field: 'id', headerName: 'Task Id', width: 100 },
-        { field: 'name', headerName: 'Task', width: 200 },
-        { field: 'case', headerName: 'Case', width: 200 },
-        { field: 'processDefinitionId', headerName: 'Process', width: 200 },
-        { field: 'created', headerName: 'Created', type: 'date', width: 100},
+        { field: 'id', headerName: 'Task Id', width: 300 },
+        { field: 'name', headerName: 'Task', width: 150 },
+        { field: 'case', headerName: 'Case', width: 10 },
+        { field: 'processDefinitionId', headerName: 'Process', width: 300 },
+        { field: 'created', headerName: 'Created', type: 'date', width: 150},
         {
             field: "action",
             headerName: "Action",

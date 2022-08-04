@@ -82,6 +82,10 @@ public class CamundaHttpRequestFactory {
 		return new CamundaHttpGetRequest<Task>(taskUrl, new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
+	public MmcHttpRequest getTaskFormGetRequest(final String taskId) {
+		return new CamundaHttpGetRequest<>(taskUrl + "/" + taskId + "/deployed-form", new HttpEntity<>(httpHeadersFactory.create()));
+	}
+
 	/// Message ////
 	public MmcHttpRequest getMessageSendRequest(final ProcessMessage processMessage) {
 		return new CamundaHttpPostRequest(correlateUrl, new HttpEntity<>(processMessage, httpHeadersFactory.create()));
