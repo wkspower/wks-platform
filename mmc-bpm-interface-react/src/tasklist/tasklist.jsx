@@ -12,13 +12,14 @@ export const TaskList = ({ tasks }) => {
         { field: 'name', headerName: 'Task', width: 150 },
         { field: 'case', headerName: 'Case', width: 10 },
         { field: 'processDefinitionId', headerName: 'Process', width: 300 },
-        { field: 'created', headerName: 'Created', type: 'date', width: 150},
+        { field: 'created', headerName: 'Created', type: 'date', width: 150 },
         {
             field: "action",
             headerName: "Action",
             sortable: false,
             renderCell: (params) => {
                 const onClick = (e) => {
+                    setTask(params.row);
                     e.stopPropagation(); // don't select this row after clicking
                     setOpen(true);
                 };
@@ -29,10 +30,7 @@ export const TaskList = ({ tasks }) => {
     ];
 
     const [open, setOpen] = useState(false);
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
+    const [task, setTask] = useState(null);
 
     const handleClose = () => {
         setOpen(false);
@@ -47,7 +45,7 @@ export const TaskList = ({ tasks }) => {
                 rowsPerPageOptions={[10]}
                 checkboxSelection
             />
-            <TaskForm handleClickOpen={handleClickOpen} handleClose={handleClose} open={open} />
+            <TaskForm task={task} handleClose={handleClose} open={open} />
         </div>
     );
 };

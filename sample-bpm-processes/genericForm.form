@@ -1,21 +1,43 @@
 {
   "components": [
     {
-      "text": "# Text",
+      "text": "Person Record",
       "type": "text",
       "id": "Field_0o3o6jw"
     },
     {
-      "label": "Text Field",
+      "label": "First Name",
       "type": "textfield",
       "id": "Field_034vurz",
       "key": "field_1ctm6kb"
     },
     {
-      "label": "Number",
+      "label": "Last Name",
+      "type": "textfield",
+      "id": "Field_137jz56",
+      "key": "field_1tf9cpx"
+    },
+    {
+      "values": [
+        {
+          "label": "Male",
+          "value": "male"
+        },
+        {
+          "label": "Female",
+          "value": "female"
+        }
+      ],
+      "label": "Gender",
+      "type": "radio",
+      "id": "Field_0py4nz4",
+      "key": "field_0ai9mfx"
+    },
+    {
+      "label": "Age",
       "type": "number",
-      "id": "Field_1et5npe",
-      "key": "field_0su9fo3"
+      "id": "Field_0gv625c",
+      "key": "field_0e9ghi3"
     }
   ],
   "type": "default",
