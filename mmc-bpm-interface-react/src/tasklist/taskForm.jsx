@@ -24,6 +24,8 @@ const Transition = React.forwardRef(function Transition(
 export const TaskForm = ({ open, handleClickOpen, handleClose, components, task }) => {
 
     const [formComponents, setFormComponents] = useState([]);
+    const [claimed, setClaimed] = useState(false);
+
     useEffect(() => {
         if (!task) {
             setFormComponents(components);
@@ -32,12 +34,48 @@ export const TaskForm = ({ open, handleClickOpen, handleClose, components, task 
                 .then((response) => response.json())
                 .then((data) => {
                     setFormComponents(data.components);
+                    setClaimed(task.assignee);
                 })
                 .catch((err) => {
                     console.log(err.message);
                 });
         }
     }, [task, components]);
+
+    const handleClaim = function () {
+        fetch(
+            'http://localhost:8081/task/' + task.id + '/claim',
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId: 'demo' })
+            }
+        )
+            .then((response) => setClaimed(true))
+            .catch((err) => {
+                console.log(err.message);
+            });
+    }
+
+    const handleUnclaim = function () {
+        fetch(
+            'http://localhost:8081/task/' + task.id + '/unclaim',
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            }
+        )
+            .then((response) => setClaimed(false))
+            .catch((err) => {
+                console.log(err.message);
+            });
+    }
 
     return (
         <div>
@@ -60,15 +98,21 @@ export const TaskForm = ({ open, handleClickOpen, handleClose, components, task 
                         <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
                             <div>{task?.name}</div>
                         </Typography>
-                        <Button autoFocus color="inherit" onClick={handleClose}>
-                            Claim
-                        </Button>
+                        {!claimed ?
+                            <Button autoFocus color="inherit" onClick={handleClaim}>
+                                Claim
+                            </Button>
+                            :
+                            <Button autoFocus color="inherit" onClick={handleUnclaim}>
+                                Unclaim
+                            </Button>
+                        }
                         <Button autoFocus color="inherit" onClick={handleClose}>
                             Complete
                         </Button>
                     </Toolbar>
                 </AppBar>
-                <div style={{display: 'grid', padding: '10px'}}>
+                <div style={{ display: 'grid', padding: '10px' }}>
                     {formComponents?.map(component => {
                         if (component.type === 'text') {
                             return (
@@ -76,7 +120,7 @@ export const TaskForm = ({ open, handleClickOpen, handleClose, components, task 
                             );
                         } else {
                             return (
-                                <FormControl key={component.id} style={{padding: '5px'}}>
+                                <FormControl key={component.id} style={{ padding: '5px' }} disabled={!claimed}>
                                     <Input id={component.id} aria-describedby="my-helper-text" />
                                     <FormHelperText id="my-helper-text">{component.label}</FormHelperText>
                                 </FormControl>

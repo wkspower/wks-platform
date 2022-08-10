@@ -10,8 +10,8 @@ export const TaskList = ({ tasks }) => {
     const columns: GridColDef[] = [
         { field: 'id', headerName: 'Task Id', width: 300 },
         { field: 'name', headerName: 'Task', width: 150 },
-        { field: 'case', headerName: 'Case', width: 10 },
-        { field: 'processDefinitionId', headerName: 'Process', width: 300 },
+        { field: 'caseInstanceId', headerName: 'Case', width: 200 },
+        { field: 'processDefinitionId', headerName: 'Process', width: 100 },
         { field: 'created', headerName: 'Created', type: 'date', width: 150 },
         {
             field: "action",

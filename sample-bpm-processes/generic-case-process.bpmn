@@ -19,6 +19,11 @@
     </bpmn:intermediateThrowEvent>
     <bpmn:sequenceFlow id="Flow_0lbpw2t" sourceRef="Activity_1c2he35" targetRef="Gateway_1ophmis" />
     <bpmn:userTask id="Activity_1c2he35" name="Update">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField />
+        </camunda:formData>
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_0l4r163</bpmn:incoming>
       <bpmn:outgoing>Flow_0lbpw2t</bpmn:outgoing>
     </bpmn:userTask>

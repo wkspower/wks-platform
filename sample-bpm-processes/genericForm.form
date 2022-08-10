@@ -9,7 +9,13 @@
       "label": "First Name",
       "type": "textfield",
       "id": "Field_034vurz",
-      "key": "field_1ctm6kb"
+      "key": "field_1ctm6kb",
+      "validate": {
+        "required": false
+      },
+      "properties": {
+        "key1": "value"
+      }
     },
     {
       "label": "Last Name",

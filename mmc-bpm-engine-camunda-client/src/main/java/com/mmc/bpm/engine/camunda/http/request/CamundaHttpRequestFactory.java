@@ -10,6 +10,7 @@ import com.mmc.bpm.engine.model.spi.ProcessDefinition;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
 import com.mmc.bpm.engine.model.spi.ProcessMessage;
 import com.mmc.bpm.engine.model.spi.Task;
+import com.mmc.bpm.engine.model.spi.TaskAssignee;
 import com.mmc.bpm.rest.client.MmcHttpRequest;
 import com.mmc.bpm.rest.client.header.JSONHttpHeadersFactory;
 
@@ -65,7 +66,8 @@ public class CamundaHttpRequestFactory {
 
 	public MmcHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey, final String businessKey) {
 		// TODO refactor it - Payload Creator
-		ProcessInstance processInstance = ProcessInstance.builder().businessKey(businessKey).build();
+		ProcessInstance processInstance = ProcessInstance.builder().businessKey(businessKey).caseInstanceId(businessKey)
+				.build();
 
 		return new CamundaHttpPostRequest(processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
 				new HttpEntity<>(processInstance, httpHeadersFactory.create()));
@@ -82,8 +84,19 @@ public class CamundaHttpRequestFactory {
 		return new CamundaHttpGetRequest<Task>(taskUrl, new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
+	public MmcHttpRequest getTaskClaimRequest(final String taskId, final TaskAssignee taskAssignee) {
+		return new CamundaHttpPostRequest(taskUrl + "/" + taskId + "/claim",
+				new HttpEntity<>(taskAssignee, httpHeadersFactory.create()));
+	}
+
+	public MmcHttpRequest getTaskUnclaimRequest(final String taskId) {
+		return new CamundaHttpPostRequest(taskUrl + "/" + taskId + "/unclaim",
+				new HttpEntity<>(httpHeadersFactory.create()));
+	}
+
 	public MmcHttpRequest getTaskFormGetRequest(final String taskId) {
-		return new CamundaHttpGetRequest<>(taskUrl + "/" + taskId + "/deployed-form", new HttpEntity<>(httpHeadersFactory.create()));
+		return new CamundaHttpGetRequest<>(taskUrl + "/" + taskId + "/deployed-form",
+				new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
 	/// Message ////

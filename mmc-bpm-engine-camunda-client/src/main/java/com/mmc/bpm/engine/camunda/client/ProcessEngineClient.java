@@ -6,6 +6,7 @@ import com.mmc.bpm.engine.model.spi.ProcessDefinition;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
 import com.mmc.bpm.engine.model.spi.ProcessMessage;
 import com.mmc.bpm.engine.model.spi.Task;
+import com.mmc.bpm.engine.model.spi.TaskAssignee;
 
 /**
  * @author victor.franca
@@ -20,6 +21,10 @@ public interface ProcessEngineClient {
 	public ProcessInstance[] findProcessInstances();
 
 	public Task[] findTasks();
+
+	public void claimTask(String taskId, TaskAssignee taskAssignee);
+
+	public void unclaimTask(String taskId);
 
 	public CamundaForm getTaskForm(final String taskId);
 

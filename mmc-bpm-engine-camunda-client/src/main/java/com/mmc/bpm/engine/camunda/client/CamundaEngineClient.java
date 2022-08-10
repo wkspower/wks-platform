@@ -11,6 +11,7 @@ import com.mmc.bpm.engine.model.spi.CamundaForm;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
 import com.mmc.bpm.engine.model.spi.ProcessMessage;
 import com.mmc.bpm.engine.model.spi.Task;
+import com.mmc.bpm.engine.model.spi.TaskAssignee;
 import com.mmc.bpm.rest.client.MmcHttpRequest;
 
 /**
@@ -51,6 +52,18 @@ public class CamundaEngineClient implements ProcessEngineClient {
 		return restTemplate
 				.getForEntity(camundaHttpRequestFactory.getTaskListRequest().getHttpRequestUrl(), Task[].class)
 				.getBody();
+	}
+
+	@Override
+	public void claimTask(String taskId, TaskAssignee taskAssignee) {
+		MmcHttpRequest request = camundaHttpRequestFactory.getTaskClaimRequest(taskId, taskAssignee);
+		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class);
+	}
+
+	@Override
+	public void unclaimTask(String taskId) {
+		MmcHttpRequest request = camundaHttpRequestFactory.getTaskUnclaimRequest(taskId);
+		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class);
 	}
 
 	@Override
