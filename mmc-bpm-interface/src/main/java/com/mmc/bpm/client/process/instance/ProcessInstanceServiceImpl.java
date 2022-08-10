@@ -32,7 +32,6 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	@Override
 	public void delete(final List<ProcessInstance> processInstances) {
 		processInstances.forEach(o -> delete(o.getId()));
-
 	}
 
 }

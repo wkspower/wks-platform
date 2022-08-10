@@ -6,9 +6,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonObject;
 import com.mmc.bpm.engine.camunda.client.ProcessEngineClient;
 import com.mmc.bpm.engine.model.spi.Task;
-import com.mmc.bpm.engine.model.spi.TaskAssignee;
 
 @Component
 public class TaskServiceImpl implements TaskService {
@@ -22,7 +22,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
-	public void claim(String taskId, TaskAssignee taskAssignee) {
+	public void claim(String taskId, String taskAssignee) {
 		processEngineClient.claimTask(taskId, taskAssignee);
 
 	}
@@ -30,7 +30,11 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public void unclaim(String taskId) {
 		processEngineClient.unclaimTask(taskId);
+	}
 
+	@Override
+	public void complete(String taskId, JsonObject variables) {
+		processEngineClient.complete(taskId, variables);
 	}
 
 }

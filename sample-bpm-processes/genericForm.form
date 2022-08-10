@@ -9,19 +9,17 @@
       "label": "First Name",
       "type": "textfield",
       "id": "Field_034vurz",
-      "key": "field_1ctm6kb",
+      "key": "firstName",
       "validate": {
         "required": false
       },
-      "properties": {
-        "key1": "value"
-      }
+      "properties": {}
     },
     {
       "label": "Last Name",
       "type": "textfield",
       "id": "Field_137jz56",
-      "key": "field_1tf9cpx"
+      "key": "lastName"
     },
     {
       "values": [
@@ -37,13 +35,13 @@
       "label": "Gender",
       "type": "radio",
       "id": "Field_0py4nz4",
-      "key": "field_0ai9mfx"
+      "key": "gender"
     },
     {
       "label": "Age",
       "type": "number",
       "id": "Field_0gv625c",
-      "key": "field_0e9ghi3"
+      "key": "age"
     }
   ],
   "type": "default",

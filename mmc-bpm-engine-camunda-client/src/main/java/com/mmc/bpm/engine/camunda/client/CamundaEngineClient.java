@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.google.gson.JsonObject;
 import com.mmc.bpm.engine.camunda.http.request.CamundaHttpRequestFactory;
 import com.mmc.bpm.engine.model.impl.DeploymentImpl;
 import com.mmc.bpm.engine.model.impl.ProcessDefinitionImpl;
@@ -11,7 +12,6 @@ import com.mmc.bpm.engine.model.spi.CamundaForm;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
 import com.mmc.bpm.engine.model.spi.ProcessMessage;
 import com.mmc.bpm.engine.model.spi.Task;
-import com.mmc.bpm.engine.model.spi.TaskAssignee;
 import com.mmc.bpm.rest.client.MmcHttpRequest;
 
 /**
@@ -55,7 +55,7 @@ public class CamundaEngineClient implements ProcessEngineClient {
 	}
 
 	@Override
-	public void claimTask(String taskId, TaskAssignee taskAssignee) {
+	public void claimTask(String taskId, String taskAssignee) {
 		MmcHttpRequest request = camundaHttpRequestFactory.getTaskClaimRequest(taskId, taskAssignee);
 		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class);
 	}
@@ -63,6 +63,12 @@ public class CamundaEngineClient implements ProcessEngineClient {
 	@Override
 	public void unclaimTask(String taskId) {
 		MmcHttpRequest request = camundaHttpRequestFactory.getTaskUnclaimRequest(taskId);
+		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class);
+	}
+
+	@Override
+	public void complete(String taskId, JsonObject variables) {
+		MmcHttpRequest request = camundaHttpRequestFactory.getTaskCompleteRequest(taskId, variables);
 		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class);
 	}
 
@@ -95,6 +101,14 @@ public class CamundaEngineClient implements ProcessEngineClient {
 		MmcHttpRequest request = camundaHttpRequestFactory.getProcessInstanceDeleteRequest(processInstanceId);
 
 		restTemplate.delete(request.getHttpRequestUrl());
+	}
+
+	@Override
+	public String findVariables(String processInstanceId) {
+		return restTemplate
+				.getForEntity(camundaHttpRequestFactory.getVariablesListRequest(processInstanceId).getHttpRequestUrl(),
+						String.class)
+				.getBody();
 	}
 
 	@Override

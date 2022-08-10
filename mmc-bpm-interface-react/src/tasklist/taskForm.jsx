@@ -9,7 +9,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
 import FormControl from '@mui/material/FormControl';
-import Input from '@mui/material/Input';
+import TextField from '@mui/material/TextField';
 import FormHelperText from '@mui/material/FormHelperText';
 
 const Transition = React.forwardRef(function Transition(
@@ -25,36 +25,69 @@ export const TaskForm = ({ open, handleClickOpen, handleClose, components, task 
 
     const [formComponents, setFormComponents] = useState([]);
     const [claimed, setClaimed] = useState(false);
+    const [assignee, setAssignee] = useState(null);
+
+    const [variableValues, setVariableValues] = useState({});
 
     useEffect(() => {
+        let formVariables = {};
+        let formComponents = {};
+
         if (!task) {
             setFormComponents(components);
         } else if (task) {
             fetch('http://localhost:8081/form/' + task.id)
-                .then((response) => response.json())
-                .then((data) => {
-                    setFormComponents(data.components);
-                    setClaimed(task.assignee);
+                .then(response => response.json())
+                .then(data => {
+
+                    formComponents = data.components;
+
+                    for (var key in data.components) {
+                        if (data.components[key].type !== 'text') {
+                            formVariables[data.components[key].key] = { value: "" };
+                        }
+                    }
+
+
+                    return fetch('http://localhost:8081/variable/' + task.processInstanceId);
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(formVariables);
+                    console.log(data);
+
+                    for (var key in data) {
+                        if (key in formVariables) {
+                            formVariables[key] = { value: data[key].value };
+                        }
+                    }
+
+                    setFormComponents(formComponents);
+                    setClaimed(task.assignee !== null);
+                    setAssignee(task.assignee);
+                    setVariableValues(formVariables);
                 })
                 .catch((err) => {
                     console.log(err.message);
                 });
         }
-    }, [task, components]);
+    }, [open, task, components]);
 
     const handleClaim = function () {
         fetch(
-            'http://localhost:8081/task/' + task.id + '/claim',
+            'http://localhost:8081/task/' + task.id + '/claim/demo',
             {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userId: 'demo' })
+                }
             }
         )
-            .then((response) => setClaimed(true))
+            .then((response) => {
+                setClaimed(true);
+                setAssignee('demo');
+            })
             .catch((err) => {
                 console.log(err.message);
             });
@@ -71,10 +104,37 @@ export const TaskForm = ({ open, handleClickOpen, handleClose, components, task 
                 }
             }
         )
-            .then((response) => setClaimed(false))
+            .then((response) => {
+                setClaimed(false);
+                setAssignee(null);
+            })
             .catch((err) => {
                 console.log(err.message);
             });
+    }
+
+    const handleComplete = function () {
+        fetch(
+            'http://localhost:8081/task/' + task.id + '/complete',
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    variables: variableValues
+                })
+            }
+        )
+            .then((response) => handleClose())
+            .catch((err) => {
+                console.log(err.message);
+            });
+    }
+
+    const handleInputChange = function (event) {
+        setVariableValues({ ...variableValues, [event.target.id]: { value: event.target.value } });
     }
 
     return (
@@ -97,6 +157,8 @@ export const TaskForm = ({ open, handleClickOpen, handleClose, components, task 
                         </IconButton>
                         <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
                             <div>{task?.name}</div>
+                            <div style={{ 'fontSize': '13px' }}>{task?.caseInstanceId}</div>
+                            <div style={{ 'fontSize': '10px' }}>{task?.id}</div>
                         </Typography>
                         {!claimed ?
                             <Button autoFocus color="inherit" onClick={handleClaim}>
@@ -104,10 +166,10 @@ export const TaskForm = ({ open, handleClickOpen, handleClose, components, task 
                             </Button>
                             :
                             <Button autoFocus color="inherit" onClick={handleUnclaim}>
-                                Unclaim
+                                <div>{assignee} <sup style={{ 'fontSize': '10px' }}>x</sup></div>
                             </Button>
                         }
-                        <Button autoFocus color="inherit" onClick={handleClose}>
+                        <Button autoFocus color="inherit" onClick={handleComplete}>
                             Complete
                         </Button>
                     </Toolbar>
@@ -121,7 +183,7 @@ export const TaskForm = ({ open, handleClickOpen, handleClose, components, task 
                         } else {
                             return (
                                 <FormControl key={component.id} style={{ padding: '5px' }} disabled={!claimed}>
-                                    <Input id={component.id} aria-describedby="my-helper-text" />
+                                    <TextField id={component.key} aria-describedby="my-helper-text" disabled={!claimed} value={variableValues[component.key].value} onChange={handleInputChange} />
                                     <FormHelperText id="my-helper-text">{component.label}</FormHelperText>
                                 </FormControl>
                             );

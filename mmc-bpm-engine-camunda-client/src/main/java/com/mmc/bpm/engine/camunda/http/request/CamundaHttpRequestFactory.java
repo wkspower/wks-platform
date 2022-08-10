@@ -5,12 +5,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mmc.bpm.engine.model.spi.Deployment;
 import com.mmc.bpm.engine.model.spi.ProcessDefinition;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
 import com.mmc.bpm.engine.model.spi.ProcessMessage;
 import com.mmc.bpm.engine.model.spi.Task;
-import com.mmc.bpm.engine.model.spi.TaskAssignee;
 import com.mmc.bpm.rest.client.MmcHttpRequest;
 import com.mmc.bpm.rest.client.header.JSONHttpHeadersFactory;
 
@@ -81,12 +82,21 @@ public class CamundaHttpRequestFactory {
 	//// Task ////
 
 	public MmcHttpRequest getTaskListRequest() {
-		return new CamundaHttpGetRequest<Task>(taskUrl, new HttpEntity<>(httpHeadersFactory.create()));
+		return new CamundaHttpGetRequest<Task>(taskUrl + "?active=true", new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
-	public MmcHttpRequest getTaskClaimRequest(final String taskId, final TaskAssignee taskAssignee) {
+	public MmcHttpRequest getTaskClaimRequest(final String taskId, final String taskAssignee) {
+
+		String assigneeJson = "{ \"userId\": \"" + taskAssignee + "\" }";
+		JsonObject assigneeJsonObject = JsonParser.parseString(assigneeJson).getAsJsonObject();
+
 		return new CamundaHttpPostRequest(taskUrl + "/" + taskId + "/claim",
-				new HttpEntity<>(taskAssignee, httpHeadersFactory.create()));
+				new HttpEntity<String>(assigneeJsonObject.toString(), httpHeadersFactory.create()));
+	}
+
+	public MmcHttpRequest getTaskCompleteRequest(final String taskId, JsonObject variables) {
+		return new CamundaHttpPostRequest(taskUrl + "/" + taskId + "/complete",
+				new HttpEntity<String>(variables.toString(), httpHeadersFactory.create()));
 	}
 
 	public MmcHttpRequest getTaskUnclaimRequest(final String taskId) {
@@ -97,6 +107,12 @@ public class CamundaHttpRequestFactory {
 	public MmcHttpRequest getTaskFormGetRequest(final String taskId) {
 		return new CamundaHttpGetRequest<>(taskUrl + "/" + taskId + "/deployed-form",
 				new HttpEntity<>(httpHeadersFactory.create()));
+	}
+
+	/// Variables ///
+	public MmcHttpRequest getVariablesListRequest(final String processIntanceId) {
+		return new CamundaHttpGetRequest<>(processInstanceUrl + "/" + processIntanceId + "/variables",
+				new HttpEntity<String>(httpHeadersFactory.create()));
 	}
 
 	/// Message ////

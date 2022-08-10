@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from '@mui/material/Button';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { TaskForm } from './taskForm';
@@ -6,7 +6,21 @@ import { TaskForm } from './taskForm';
 
 import './tasklist.css'
 
-export const TaskList = ({ tasks }) => {
+export const TaskList = () => {
+
+    const [tasks, setTasks] = useState([]);
+
+    useEffect(() => {
+      fetch('http://localhost:8081/task')
+        .then((response) => response.json())
+        .then((data) => {
+          setTasks(data);
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+    }, [tasks]);
+
     const columns: GridColDef[] = [
         { field: 'id', headerName: 'Task Id', width: 300 },
         { field: 'name', headerName: 'Task', width: 150 },
