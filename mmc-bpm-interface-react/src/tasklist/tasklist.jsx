@@ -9,6 +9,8 @@ import './tasklist.css'
 export const TaskList = () => {
 
     const [tasks, setTasks] = useState([]);
+    const [open, setOpen] = useState(false);
+    const [task, setTask] = useState(null);
 
     useEffect(() => {
       fetch('http://localhost:8081/task')
@@ -19,13 +21,12 @@ export const TaskList = () => {
         .catch((err) => {
           console.log(err.message);
         });
-    }, [tasks]);
+    }, [open]);
 
     const columns: GridColDef[] = [
-        { field: 'id', headerName: 'Task Id', width: 300 },
-        { field: 'name', headerName: 'Task', width: 150 },
-        { field: 'caseInstanceId', headerName: 'Case', width: 200 },
-        { field: 'processDefinitionId', headerName: 'Process', width: 100 },
+        { field: 'name', headerName: 'Task', width: 200 },
+        { field: 'caseInstanceId', headerName: 'Case', width: 220 },
+        { field: 'processDefinitionId', headerName: 'Process', width: 250 },
         { field: 'created', headerName: 'Created', type: 'date', width: 150 },
         {
             field: "action",
@@ -42,9 +43,6 @@ export const TaskList = () => {
             }
         }
     ];
-
-    const [open, setOpen] = useState(false);
-    const [task, setTask] = useState(null);
 
     const handleClose = () => {
         setOpen(false);

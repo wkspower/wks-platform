@@ -53,9 +53,6 @@ export const TaskForm = ({ open, handleClickOpen, handleClose, components, task 
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(formVariables);
-                    console.log(data);
-
                     for (var key in data) {
                         if (key in formVariables) {
                             formVariables[key] = { value: data[key].value };
@@ -71,7 +68,7 @@ export const TaskForm = ({ open, handleClickOpen, handleClose, components, task 
                     console.log(err.message);
                 });
         }
-    }, [open, task, components]);
+    }, [task]);
 
     const handleClaim = function () {
         fetch(
