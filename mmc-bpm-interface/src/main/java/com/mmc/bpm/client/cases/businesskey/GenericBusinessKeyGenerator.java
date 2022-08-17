@@ -12,7 +12,7 @@ public class GenericBusinessKeyGenerator implements BusinessKeyGenerator {
 	}
 
 	private String calculateBusinessKey() {
-		return String.valueOf("DUMMY_BUSINESS_KEY-" + ThreadLocalRandom.current().nextInt(0, 1000 + 1));
+		return String.valueOf("GENERIC-CASE--" + ThreadLocalRandom.current().nextInt(0, 100000 + 1));
 	}
 
 }
