@@ -1,26 +1,29 @@
 import React, { useState, useEffect } from "react";
 import Button from '@mui/material/Button';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { TaskForm } from './taskForm';
-
+import { TaskForm } from '../taskForm/taskForm';
 
 import './tasklist.css'
 
-export const TaskList = () => {
+export const TaskList = (tasksParam) => {
 
     const [tasks, setTasks] = useState([]);
     const [open, setOpen] = useState(false);
     const [task, setTask] = useState(null);
 
     useEffect(() => {
-      fetch('http://localhost:8081/task')
-        .then((response) => response.json())
-        .then((data) => {
-          setTasks(data);
-        })
-        .catch((err) => {
-          console.log(err.message);
-        });
+        if (!Object.keys(tasksParam).length > 0) {
+            fetch('http://localhost:8081/task')
+                .then((response) => response.json())
+                .then((data) => {
+                    setTasks(data);
+                })
+                .catch((err) => {
+                    console.log(err.message);
+                });
+        } else {
+            setTasks(tasksParam.tasks);
+        }
     }, [open]);
 
     const columns: GridColDef[] = [
@@ -39,7 +42,7 @@ export const TaskList = () => {
                     setOpen(true);
                 };
 
-                return <Button onClick={onClick}>Click</Button>;
+                return <Button onClick={onClick}>Details</Button>;
             }
         }
     ];

@@ -21,48 +21,47 @@ const Transition = React.forwardRef(function Transition(
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const TaskForm = ({ open, handleClickOpen, handleClose, components, task }) => {
+export const TaskForm = ({ open, handleClose, task, componentsParam }) => {
 
     const [formComponents, setFormComponents] = useState([]);
     const [claimed, setClaimed] = useState(false);
     const [assignee, setAssignee] = useState(null);
-
     const [variableValues, setVariableValues] = useState({});
 
     useEffect(() => {
-        let formVariables = {};
-        let formComponents = {};
+        let apiDataVariables = {};
+        let apiDataFormComponents = {};
 
-        if (!task) {
-            setFormComponents(components);
+        if (componentsParam) {
+            setFormComponents(componentsParam.components);
+            setVariableValues(componentsParam.variables);
+            setAssignee("demo");
         } else if (task) {
             fetch('http://localhost:8081/form/' + task.id)
                 .then(response => response.json())
                 .then(data => {
 
-                    formComponents = data.components;
+                    apiDataFormComponents = data.components;
 
                     for (var key in data.components) {
                         if (data.components[key].type !== 'text') {
-                            formVariables[data.components[key].key] = { value: "" };
+                            apiDataVariables[data.components[key].key] = { value: "" };
                         }
                     }
-
-
                     return fetch('http://localhost:8081/variable/' + task.processInstanceId);
                 })
                 .then(response => response.json())
                 .then(data => {
                     for (var key in data) {
-                        if (key in formVariables) {
-                            formVariables[key] = { value: data[key].value };
+                        if (key in apiDataVariables) {
+                            apiDataVariables[key] = { value: data[key].value };
                         }
                     }
 
-                    setFormComponents(formComponents);
+                    setFormComponents(apiDataFormComponents);
                     setClaimed(task.assignee !== null);
                     setAssignee(task.assignee);
-                    setVariableValues(formVariables);
+                    setVariableValues(apiDataVariables);
                 })
                 .catch((err) => {
                     console.log(err.message);
@@ -80,14 +79,12 @@ export const TaskForm = ({ open, handleClickOpen, handleClose, components, task 
                     'Content-Type': 'application/json'
                 }
             }
-        )
-            .then((response) => {
-                setClaimed(true);
-                setAssignee('demo');
-            })
-            .catch((err) => {
-                console.log(err.message);
-            });
+        ).then((response) => {
+            setClaimed(true);
+            setAssignee('demo');
+        }).catch((err) => {
+            console.log(err.message);
+        });
     }
 
     const handleUnclaim = function () {
@@ -100,14 +97,12 @@ export const TaskForm = ({ open, handleClickOpen, handleClose, components, task 
                     'Content-Type': 'application/json'
                 }
             }
-        )
-            .then((response) => {
-                setClaimed(false);
-                setAssignee(null);
-            })
-            .catch((err) => {
-                console.log(err.message);
-            });
+        ).then((response) => {
+            setClaimed(false);
+            setAssignee(null);
+        }).catch((err) => {
+            console.log(err.message);
+        });
     }
 
     const handleComplete = function () {
@@ -172,7 +167,7 @@ export const TaskForm = ({ open, handleClickOpen, handleClose, components, task 
                     </Toolbar>
                 </AppBar>
                 <div style={{ display: 'grid', padding: '10px' }}>
-                    {formComponents?.map(component => {
+                    {(formComponents && formComponents.length) ? formComponents.map(component => {
                         if (component.type === 'text') {
                             return (
                                 <h2 key={component.id} id={component.id}>{component.text}</h2>
@@ -185,7 +180,7 @@ export const TaskForm = ({ open, handleClickOpen, handleClose, components, task 
                                 </FormControl>
                             );
                         }
-                    })}
+                    }) : <div>Empty form components</div>}
                 </div>
             </Dialog>
         </div>
