@@ -2,18 +2,17 @@ package com.mmc.bpm.client.tasks;
 
 import java.util.List;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mmc.bpm.engine.model.spi.Task;
 
 public interface TaskService {
 
-	public List<Task> find();
+	public List<Task> find(final String processInstanceBusinessKey);
 
-	public void claim(String taskId, String taskAssignee);
+	public void claim(final String taskId, final String taskAssignee);
 
-	public void unclaim(String taskId);
+	public void unclaim(final String taskId);
 
-	public void complete(String taskId, JsonObject variables);
+	public void complete(final String taskId, final JsonObject variables);
 
 }

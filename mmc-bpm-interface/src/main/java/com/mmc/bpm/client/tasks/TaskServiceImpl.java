@@ -17,23 +17,23 @@ public class TaskServiceImpl implements TaskService {
 	private ProcessEngineClient processEngineClient;
 
 	@Override
-	public List<Task> find() {
-		return Arrays.asList(processEngineClient.findTasks());
+	public List<Task> find(final String processInstanceBusinessKey) {
+		return Arrays.asList(processEngineClient.findTasks(processInstanceBusinessKey));
 	}
 
 	@Override
-	public void claim(String taskId, String taskAssignee) {
+	public void claim(final String taskId, final String taskAssignee) {
 		processEngineClient.claimTask(taskId, taskAssignee);
 
 	}
 
 	@Override
-	public void unclaim(String taskId) {
+	public void unclaim(final String taskId) {
 		processEngineClient.unclaimTask(taskId);
 	}
 
 	@Override
-	public void complete(String taskId, JsonObject variables) {
+	public void complete(final String taskId, final JsonObject variables) {
 		processEngineClient.complete(taskId, variables);
 	}
 

@@ -1,43 +1,39 @@
 import React, { useState, useEffect } from "react";
 import Button from '@mui/material/Button';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { TaskForm } from '../taskForm/taskForm';
+import { CaseForm } from "../caseForm/caseForm";
 
-import './taskList.css'
-
-export const TaskList = ({tasksParam, businessKey}) => {
-
-    const [tasks, setTasks] = useState([]);
+export const CaseList = (casesParam) => {
+    const [cases, setCases] = useState([]);
+    const [aCase, setACase] = useState([]);
     const [open, setOpen] = useState(false);
-    const [task, setTask] = useState(null);
 
     useEffect(() => {
-        if (!tasksParam) {
-            fetch('http://localhost:8081/task' + (businessKey ? '?processInstanceBusinessKey=' + businessKey : ''))
+
+        if (Object.keys(casesParam).length > 0) {
+            setCases(casesParam.cases);
+        } else {
+            fetch('http://localhost:8081/case')
                 .then((response) => response.json())
                 .then((data) => {
-                    setTasks(data);
+                    setCases(data);
                 })
                 .catch((err) => {
                     console.log(err.message);
                 });
-        } else {
-            setTasks(tasksParam.tasks);
         }
-    }, [open, tasksParam, businessKey]);
+    }, [open, casesParam]);
 
     const columns: GridColDef[] = [
-        { field: 'name', headerName: 'Task', width: 200 },
-        { field: 'caseInstanceId', headerName: 'Case', width: 220 },
-        { field: 'processDefinitionId', headerName: 'Process', width: 250 },
-        { field: 'created', headerName: 'Created', type: 'date', width: 150 },
+        { field: 'id', headerName: 'Id', width: 300 },
+        { field: 'status', headerName: 'Status', width: 220 },
         {
             field: "action",
             headerName: "Action",
             sortable: false,
             renderCell: (params) => {
                 const onClick = (e) => {
-                    setTask(params.row);
+                    setACase(params.row);
                     e.stopPropagation(); // don't select this row after clicking
                     setOpen(true);
                 };
@@ -54,13 +50,13 @@ export const TaskList = ({tasksParam, businessKey}) => {
     return (
         <div style={{ height: 650, width: '100%' }}>
             <DataGrid
-                rows={tasks}
+                rows={cases}
                 columns={columns}
                 pageSize={10}
                 rowsPerPageOptions={[10]}
                 checkboxSelection
             />
-            <TaskForm task={task} handleClose={handleClose} open={open} />
-        </div>
+            <CaseForm aCase={aCase} handleClose={handleClose} open={open} />
+        </div >
     );
-};
+}
