@@ -7,37 +7,46 @@ export default {
     component: TaskForm
 };
 
-const Template = (args) => <TaskForm open={true} {...args} />;
+const Template = (args) => <TaskForm open={true} componentsParam={args} />;
 
 export const Empty = Template.bind({});
 Empty.args = {
     components: [
-    ]
+    ],
+    variablesParam: {}
 };
 
 export const AFewComponents = Template.bind({});
 AFewComponents.args = {
     components: [
         {
-            id: 'Field_0o3o6jw',
-            key: null,
+            id: 'label',
+            key: 'label',
             type: 'text',
             text: 'Person Record',
             label: null
         },
         {
-            id: 'Field_034vurz',
-            key: 'field_1ctm6kb',
+            id: 'firstName',
+            key: 'firstName',
             type: 'textfield',
             text: null,
             label: 'Name'
         },
         {
-            id: 'Field_1et5npe',
-            key: 'field_0su9fo3',
+            id: 'lastName',
+            key: 'lastName',
             type: 'number',
             text: null,
             label: 'Age'
         }
-    ]
+    ],
+    variables: {
+        firstName: {
+            value: 'John',
+        },
+        lastName: {
+            value: 'James',
+        }
+    }
 };
