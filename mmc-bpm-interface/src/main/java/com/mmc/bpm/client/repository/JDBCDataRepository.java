@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mmc.bpm.client.cases.instance.CaseAttribute;
 import com.mmc.bpm.client.cases.instance.CaseInstance;
+import com.mmc.bpm.client.cases.instance.CaseInstanceNotFoundException;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
 
 @Component
@@ -82,6 +83,35 @@ public class JDBCDataRepository implements DataRepository {
 			throw new Exception(ex);
 		}
 		return casesInstances;
+	}
+
+	@Override
+	public CaseInstance getCaseInstance(final String businessKeyParam) throws Exception {
+
+		// TODO ensure single return (throw specific exception otherwise)
+		try (var statement = connection.createStatement();) {
+			ResultSet resultSet = statement.executeQuery(
+					"SELECT business_key, status, attributes, processes FROM generic_case where business_key = '"
+							+ businessKeyParam + "';");
+			while (resultSet.next()) {
+				String businessKey = resultSet.getString("business_key");
+				String status = resultSet.getString("status");
+
+				Gson gson = new Gson();
+				List<CaseAttribute> attributes = gson.fromJson(resultSet.getString("attributes"),
+						new TypeToken<List<CaseAttribute>>() {
+						}.getType());
+
+				gson = new Gson();
+				List<ProcessInstance> processes = gson.fromJson(resultSet.getString("processes"),
+						new TypeToken<List<ProcessInstance>>() {
+						}.getType());
+				return CaseInstance.builder().businessKey(businessKey).attributes(attributes).status(status)
+						.processesInstances(processes).build();
+			}
+		}
+
+		throw new CaseInstanceNotFoundException();
 	}
 
 	@Override

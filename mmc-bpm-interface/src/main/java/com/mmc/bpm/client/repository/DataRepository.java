@@ -8,6 +8,8 @@ public interface DataRepository {
 
 	public List<CaseInstance> findCaseInstances() throws Exception;
 
+	public CaseInstance getCaseInstance(final String businessKey) throws Exception;
+
 	public void saveCaseInstance(final CaseInstance caseInstance) throws Exception;
 
 	public void updateCaseStatus(final String businessKey, final String newStatus) throws Exception;

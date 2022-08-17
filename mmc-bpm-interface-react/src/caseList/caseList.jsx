@@ -25,7 +25,7 @@ export const CaseList = (casesParam) => {
     }, [open, casesParam]);
 
     const columns: GridColDef[] = [
-        { field: 'id', headerName: 'Id', width: 200 },
+        { field: 'id', headerName: 'Id', width: 300 },
         { field: 'status', headerName: 'Status', width: 220 },
         {
             field: "action",

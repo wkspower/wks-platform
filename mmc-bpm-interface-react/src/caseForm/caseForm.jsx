@@ -62,23 +62,26 @@ TabPanel.propTypes = {
 
 export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
     const [formComponents, setFormComponents] = useState([]);
-    const [variableValues, setVariableValues] = useState({});
-
-    const [tasks, setTasks] = useState({});
 
     const [value, setValue] = useState(0);
 
     useEffect(() => {
         if (componentsParam) {
             setFormComponents(componentsParam.components);
-            setVariableValues(componentsParam.variables);
-            setTasks(componentsParam.tasks);
         } else if (aCase) {
+            fetch('http://localhost:8081/case/' + aCase.id)
+                .then(response => response.json())
+                .then(data => {
+                    setFormComponents(data.attributes);
+                })
+                .catch((err) => {
+                    console.log(err.message);
+                });
         }
-    }, [tasks, componentsParam]);
+    }, [aCase, componentsParam]);
 
     const handleInputChange = function (event) {
-        setVariableValues({ ...variableValues, [event.target.id]: { value: event.target.value } });
+        setFormComponents({ ...formComponents, [event.target.id]: { value: event.target.value } });
     }
 
     const handleChange = (event, newValue) => {
@@ -126,9 +129,9 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                         {(formComponents && formComponents.length) ? formComponents.map(component => {
                             if (component.type !== 'text') {
                                 return (
-                                    <FormControl key={component.id} style={{ padding: '5px' }}>
-                                        <TextField id={component.key} aria-describedby="my-helper-text" value={variableValues[component.key].value} onChange={handleInputChange} />
-                                        <FormHelperText id="my-helper-text">{component.label}</FormHelperText>
+                                    <FormControl key={component.name} style={{ padding: '5px' }}>
+                                        <TextField id={component.name} aria-describedby="my-helper-text" value={component.value} onChange={handleInputChange} disabled/>
+                                        <FormHelperText id="my-helper-text">{component.name}</FormHelperText>
                                     </FormControl>
                                 );
                             }
@@ -137,7 +140,7 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                 <TabPanel value={value} index={1}>
                     {/* Task List  */}
                     <div style={{ display: 'grid', padding: '10px' }}>
-                        <TaskList businessKey="DUMMY_BUSINESS_KEY-950" />
+                        <TaskList businessKey={aCase.id} />
                     </div>
                 </TabPanel>
             </Dialog>

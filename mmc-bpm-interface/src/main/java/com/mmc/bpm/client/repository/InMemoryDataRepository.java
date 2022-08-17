@@ -25,7 +25,7 @@ public class InMemoryDataRepository implements DataRepository {
 	}
 
 	@Override
-	//TODO test it
+	// TODO test it
 	public void updateCaseStatus(String businessKey, String newStatus) throws Exception {
 		List<CaseInstance> cases = caseInstancesRepo.stream().filter(o -> businessKey.equals(o.getBusinessKey()))
 				.collect(Collectors.toList());
@@ -35,6 +35,12 @@ public class InMemoryDataRepository implements DataRepository {
 	@Override
 	public void delete(final CaseInstance caseInstance) {
 		caseInstancesRepo.remove(caseInstance);
+	}
+
+	@Override
+	public CaseInstance getCaseInstance(String businessKey) throws Exception {
+		// TODO handle more than 1 result
+		return caseInstancesRepo.stream().filter(o -> businessKey.equals(o.getBusinessKey())).findFirst().get();
 	}
 
 }

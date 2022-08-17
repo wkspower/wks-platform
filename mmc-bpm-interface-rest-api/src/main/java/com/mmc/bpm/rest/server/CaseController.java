@@ -28,6 +28,11 @@ public class CaseController {
 		return caseInstanceService.find();
 	}
 
+	@GetMapping(value = "/case/{businessKey}")
+	public CaseInstance get(@PathVariable String businessKey) throws Exception {
+		return caseInstanceService.get(businessKey);
+	}
+
 	@PostMapping(value = "/case")
 	public CaseInstance save(@RequestBody List<CaseAttribute> attributes) throws Exception {
 		return caseInstanceService.create(attributes);

@@ -31,6 +31,11 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	public List<CaseInstance> find() throws Exception {
 		return dataRepository.findCaseInstances();
 	}
+	
+	@Override
+	public CaseInstance get(String businessKey) throws Exception {
+		return dataRepository.getCaseInstance(businessKey);
+	}
 
 	public CaseInstance create(final List<CaseAttribute> attributes) throws Exception {
 		String businessKey = businessKeyCreator.generate();
@@ -69,5 +74,4 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 			}
 		});
 	}
-
 }
