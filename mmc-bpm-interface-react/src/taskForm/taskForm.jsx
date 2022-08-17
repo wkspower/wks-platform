@@ -67,7 +67,7 @@ export const TaskForm = ({ open, handleClose, task, componentsParam }) => {
                     console.log(err.message);
                 });
         }
-    }, [task]);
+    }, [task, componentsParam]);
 
     const handleClaim = function () {
         fetch(
@@ -168,11 +168,7 @@ export const TaskForm = ({ open, handleClose, task, componentsParam }) => {
                 </AppBar>
                 <div style={{ display: 'grid', padding: '10px' }}>
                     {(formComponents && formComponents.length) ? formComponents.map(component => {
-                        if (component.type === 'text') {
-                            return (
-                                <h2 key={component.id} id={component.id}>{component.text}</h2>
-                            );
-                        } else {
+                        if (component.type !== 'text') {
                             return (
                                 <FormControl key={component.id} style={{ padding: '5px' }} disabled={!claimed}>
                                     <TextField id={component.key} aria-describedby="my-helper-text" disabled={!claimed} value={variableValues[component.key].value} onChange={handleInputChange} />

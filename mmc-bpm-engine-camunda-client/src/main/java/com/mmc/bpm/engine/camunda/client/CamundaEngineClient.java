@@ -48,10 +48,10 @@ public class CamundaEngineClient implements ProcessEngineClient {
 	}
 
 	@Override
-	public Task[] findTasks() {
-		return restTemplate
-				.getForEntity(camundaHttpRequestFactory.getTaskListRequest().getHttpRequestUrl(), Task[].class)
-				.getBody();
+	public Task[] findTasks(final String processInstanceBusinessKey) {
+		return restTemplate.getForEntity(
+				camundaHttpRequestFactory.getTaskListRequest(processInstanceBusinessKey).getHttpRequestUrl(),
+				Task[].class).getBody();
 	}
 
 	@Override

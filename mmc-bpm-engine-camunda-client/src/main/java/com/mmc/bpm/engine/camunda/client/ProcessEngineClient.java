@@ -20,7 +20,7 @@ public interface ProcessEngineClient {
 
 	public ProcessInstance[] findProcessInstances();
 
-	public Task[] findTasks();
+	public Task[] findTasks(final String processInstanceBusinessKey);
 
 	public void claimTask(String taskId, String taskAssignee);
 

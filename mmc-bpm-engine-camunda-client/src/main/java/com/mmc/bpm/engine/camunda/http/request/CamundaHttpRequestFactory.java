@@ -81,8 +81,13 @@ public class CamundaHttpRequestFactory {
 
 	//// Task ////
 
-	public MmcHttpRequest getTaskListRequest() {
-		return new CamundaHttpGetRequest<Task>(taskUrl + "?active=true", new HttpEntity<>(httpHeadersFactory.create()));
+	public MmcHttpRequest getTaskListRequest(String processInstanceBusinessKey) {
+		StringBuilder url = new StringBuilder().append(taskUrl + "?active=true");
+		if(processInstanceBusinessKey != null) {
+			url.append("&processInstanceBusinessKey=" + processInstanceBusinessKey);
+		}
+
+		return new CamundaHttpGetRequest<Task>(url.toString(), new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
 	public MmcHttpRequest getTaskClaimRequest(final String taskId, final String taskAssignee) {

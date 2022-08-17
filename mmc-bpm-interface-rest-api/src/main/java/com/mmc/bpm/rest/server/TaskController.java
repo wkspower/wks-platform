@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.JsonParser;
@@ -20,8 +21,8 @@ public class TaskController {
 	private TaskService taskService;
 
 	@GetMapping(value = "/task")
-	public List<Task> find() {
-		return taskService.find();
+	public List<Task> find(@RequestParam(required = false) String processInstanceBusinessKey) {
+		return taskService.find(processInstanceBusinessKey);
 	}
 
 	@PostMapping(value = "/task/{taskId}/claim/{taskAssignee}")
