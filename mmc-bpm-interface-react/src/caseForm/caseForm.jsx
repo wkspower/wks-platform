@@ -115,8 +115,6 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                     </Toolbar>
                 </AppBar>
 
-
-
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                         <Tab label="Case Details" {...a11yProps(0)} />
