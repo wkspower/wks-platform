@@ -33,7 +33,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 	
 	@Override
-	public CaseInstance get(String businessKey) throws Exception {
+	public CaseInstance get(final String businessKey) throws Exception {
 		return dataRepository.getCaseInstance(businessKey);
 	}
 
@@ -51,12 +51,12 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 
 	@Override
-	public void updateStatus(String businessKey, String newStatus) throws Exception {
+	public void updateStatus(final String businessKey, final String newStatus) throws Exception {
 		dataRepository.updateCaseStatus(businessKey, newStatus);
 	}
 
 	@Override
-	public void delete(String businessKey) throws Exception {
+	public void delete(final String businessKey) throws Exception {
 		List<CaseInstance> caseInstanceList = dataRepository.findCaseInstances().stream()
 				.filter(o -> o.getBusinessKey().equals(businessKey)).collect(Collectors.toList());
 
@@ -67,7 +67,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 		caseInstanceList.forEach(o -> {
 			processInstanceService.delete(o.getProcessesInstances());
 			try {
-				dataRepository.delete(o);
+				dataRepository.deleteCase(o);
 			} catch (Exception e) {
 				// TODO error handling
 				e.printStackTrace();

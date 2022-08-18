@@ -13,7 +13,8 @@ import org.junit.Test;
 
 import com.mmc.bpm.client.cases.instance.CaseInstance;
 
-public class JDBCDataRepositoryTest {
+//TODO create abstract test class for JDBC Repos
+public class JDBCDataRepositoryCaseInstanceTest {
 
 	private final String DATABASE_URL = "jdbc:h2:file:~/mmc_bpm_interface_test";
 	private Connection connection;
@@ -50,7 +51,7 @@ public class JDBCDataRepositoryTest {
 		String status;
 		try (var statement = connection.createStatement();) {
 
-			ResultSet resultSet = statement.executeQuery("SELECT status FROM generic_case;");
+			ResultSet resultSet = statement.executeQuery("SELECT status FROM case_instance;");
 			resultSet.next();
 			status = resultSet.getString("status");
 
@@ -66,7 +67,7 @@ public class JDBCDataRepositoryTest {
 	private void deleteTables() throws Exception {
 		try (var statement = connection.createStatement();) {
 
-			statement.executeUpdate("DROP TABLE IF EXISTS generic_case");
+			statement.executeUpdate("DROP TABLE IF EXISTS case_instance");
 
 		} catch (SQLException ex) {
 			// TODO error handling
