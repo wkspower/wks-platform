@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import AppBar from '@mui/material/AppBar';
@@ -12,6 +12,8 @@ import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
 import FormHelperText from '@mui/material/FormHelperText';
 
+import { TaskList } from '../taskList/taskList';
+
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
         children: React.ReactElement;
@@ -21,9 +23,7 @@ const Transition = React.forwardRef(function Transition(
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const NewCaseForm = ({ open, handleClose }) => {
-    useEffect(() => {
-    }, [open]);
+export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
 
     return (
         <div>
@@ -44,19 +44,27 @@ export const NewCaseForm = ({ open, handleClose }) => {
                             <CloseIcon />
                         </IconButton>
                         <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-                            <div>New Generic Case</div>
+                            <div>Case definition: {aCaseDef?.id}</div>
                         </Typography>
                         <Button autoFocus color="inherit">
-                            Save
+                            Edit
                         </Button>
                     </Toolbar>
                 </AppBar>
 
-                {/* New Case Form */}
+                {/* Case Definition Form */}
                 <div style={{ display: 'grid', padding: '10px' }}>
-                    <FormControl key='key' style={{ padding: '5px' }}>
-                        <TextField id='id' aria-describedby="my-helper-text" value='value' />
-                        <FormHelperText id="my-helper-text">id</FormHelperText>
+                    <FormControl key='ctrlId' style={{ padding: '5px' }}>
+                        <TextField id='txtId' aria-describedby="my-helper-text" value={aCaseDef.id} />
+                        <FormHelperText id="my-helper-text">Case Definition Id</FormHelperText>
+                    </FormControl>
+                    <FormControl key='ctrlName' style={{ padding: '5px' }}>
+                        <TextField id='txtName' aria-describedby="my-helper-text" value={aCaseDef.name} />
+                        <FormHelperText id="my-helper-text">Case Definition Name</FormHelperText>
+                    </FormControl>
+                    <FormControl key='ctrlProcDefKeys' style={{ padding: '5px' }}>
+                        <TextField id='txtProcDefKeys' aria-describedby="my-helper-text" value={aCaseDef.onCreateProcessDefinitions} />
+                        <FormHelperText id="my-helper-text">Process Definition Keys</FormHelperText>
                     </FormControl>
                 </div>
             </Dialog>
