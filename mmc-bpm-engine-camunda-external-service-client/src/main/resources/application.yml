@@ -24,8 +24,6 @@ camunda7.rest.processinstance.url: ${camunda7.rest.url}/process-instance
 camunda7.rest.task.url: ${camunda7.rest.url}/task
 camunda7.rest.correlate.url: ${camunda7.rest.url}/message
 
-mmc.bpm.case.generic.process-def-key: ${MMC_BPM_CASE_GENERIC_PROCESS_DEF_KEY}
-
 camunda.bpm.client:
   base-url: ${camunda7.rest.url}
   subscriptions:

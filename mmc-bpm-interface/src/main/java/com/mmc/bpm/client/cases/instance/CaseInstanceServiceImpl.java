@@ -1,13 +1,15 @@
 package com.mmc.bpm.client.cases.instance;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.mmc.bpm.client.cases.businesskey.GenericBusinessKeyGenerator;
+import com.mmc.bpm.client.cases.definition.CaseDefinition;
+import com.mmc.bpm.client.cases.definition.CaseDefinitionNotFoundException;
 import com.mmc.bpm.client.process.instance.ProcessInstanceService;
 import com.mmc.bpm.client.repository.DataRepository;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
@@ -24,26 +26,32 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	@Autowired
 	private ProcessInstanceService processInstanceService;
 
-	@Value("${mmc.bpm.case.generic.process-def-key}")
-	private String genericCaseProcessDefKey;
-
 	@Override
 	public List<CaseInstance> find() throws Exception {
 		return dataRepository.findCaseInstances();
 	}
-	
+
 	@Override
 	public CaseInstance get(final String businessKey) throws Exception {
 		return dataRepository.getCaseInstance(businessKey);
 	}
 
-	public CaseInstance create(final List<CaseAttribute> attributes) throws Exception {
+	public CaseInstance create(final CaseInstance caseInstanceParam) throws Exception {
+		CaseDefinition caseDefinition = dataRepository.getCaseDefinition(caseInstanceParam.getCaseDefinitionId());
+		if (caseDefinition == null) {
+			throw new CaseDefinitionNotFoundException();
+		}
+
 		String businessKey = businessKeyCreator.generate();
 
-		ProcessInstance processInstance = processInstanceService.create(genericCaseProcessDefKey, businessKey);
+		List<ProcessInstance> processInstances = new ArrayList<>();
+		caseDefinition.getOnCreateProcessDefinitions().forEach(procDefKey -> {
+			processInstances.add(processInstanceService.create(procDefKey, businessKey));
+		});
 
-		CaseInstance caseInstance = CaseInstance.builder().businessKey(businessKey).attributes(attributes).build();
-		caseInstance.addProcessInstance(processInstance);
+		CaseInstance caseInstance = CaseInstance.builder().businessKey(businessKey)
+				.attributes(caseInstanceParam.getAttributes()).caseDefinitionId(caseDefinition.getId()).build();
+		caseInstance.addAllProcessInstances(processInstances);
 
 		dataRepository.saveCaseInstance(caseInstance);
 

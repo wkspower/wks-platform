@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.mmc.bpm.client.cases.instance.CaseAttribute;
 import com.mmc.bpm.client.cases.instance.CaseInstance;
 import com.mmc.bpm.client.cases.instance.CaseInstanceNotFoundException;
 import com.mmc.bpm.client.cases.instance.CaseInstanceService;
@@ -34,8 +33,8 @@ public class CaseController {
 	}
 
 	@PostMapping(value = "/case")
-	public CaseInstance save(@RequestBody List<CaseAttribute> attributes) throws Exception {
-		return caseInstanceService.create(attributes);
+	public CaseInstance save(@RequestBody CaseInstance caseInstance) throws Exception {
+		return caseInstanceService.create(caseInstance);
 	}
 
 	@DeleteMapping(value = "/case/{businessKey}")

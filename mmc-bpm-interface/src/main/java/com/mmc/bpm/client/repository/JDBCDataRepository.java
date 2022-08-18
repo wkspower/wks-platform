@@ -46,6 +46,8 @@ public class JDBCDataRepository implements DataRepository {
 
 					+ "business_key varchar(255),"
 
+					+ "case_definition_id varchar(255),"
+
 					+ "status varchar(20),"
 
 					+ "attributes CLOB,"
@@ -65,6 +67,8 @@ public class JDBCDataRepository implements DataRepository {
 
 					+ "id varchar(255),"
 
+					+ "case_definition_id varchar(255),"
+
 					+ "name varchar(50),"
 
 					+ "on_create_process_definition_keys CLOB);");
@@ -81,11 +85,12 @@ public class JDBCDataRepository implements DataRepository {
 
 		try (var statement = connection.createStatement();) {
 
-			ResultSet resultSet = statement
-					.executeQuery("SELECT business_key, status, attributes, processes FROM case_instance;");
+			ResultSet resultSet = statement.executeQuery(
+					"SELECT business_key, status, attributes, processes, case_definition_id FROM case_instance;");
 			while (resultSet.next()) {
 				String businessKey = resultSet.getString("business_key");
 				String status = resultSet.getString("status");
+				String caseDefId = resultSet.getString("caseDefinitionId");
 
 				Gson gson = new Gson();
 				List<CaseAttribute> attributes = gson.fromJson(resultSet.getString("attributes"),
@@ -98,7 +103,7 @@ public class JDBCDataRepository implements DataRepository {
 						}.getType());
 
 				casesInstances.add(CaseInstance.builder().businessKey(businessKey).attributes(attributes).status(status)
-						.processesInstances(processes).build());
+						.caseDefinitionId(caseDefId).processesInstances(processes).build());
 			}
 
 		} catch (SQLException ex) {
@@ -114,11 +119,12 @@ public class JDBCDataRepository implements DataRepository {
 		// TODO ensure single return (throw specific exception otherwise)
 		try (var statement = connection.createStatement();) {
 			ResultSet resultSet = statement.executeQuery(
-					"SELECT business_key, status, attributes, processes FROM case_instance where business_key = '"
+					"SELECT business_key, status, attributes, processes, case_definition_id FROM case_instance where business_key = '"
 							+ businessKeyParam + "';");
 			while (resultSet.next()) {
 				String businessKey = resultSet.getString("business_key");
 				String status = resultSet.getString("status");
+				String caseDefinitionId = resultSet.getString("caseDefinitionId");
 
 				Gson gson = new Gson();
 				List<CaseAttribute> attributes = gson.fromJson(resultSet.getString("attributes"),
@@ -130,7 +136,7 @@ public class JDBCDataRepository implements DataRepository {
 						new TypeToken<List<ProcessInstance>>() {
 						}.getType());
 				return CaseInstance.builder().businessKey(businessKey).attributes(attributes).status(status)
-						.processesInstances(processes).build();
+						.caseDefinitionId(caseDefinitionId).processesInstances(processes).build();
 			}
 		}
 
@@ -148,17 +154,20 @@ public class JDBCDataRepository implements DataRepository {
 
 		try (var statement = connection.createStatement();) {
 
-			statement.executeUpdate("INSERT INTO case_instance (business_key, status, attributes, processes) VALUES ("
+			statement.executeUpdate(
+					"INSERT INTO case_instance (business_key, status, attributes, processes, case_definition_id) VALUES ("
 
-					+ "\'" + caseInstance.getBusinessKey() + "\'" + ", "
+							+ "\'" + caseInstance.getBusinessKey() + "\'" + ", "
 
-					+ "\'" + caseInstance.getStatus() + "\'" + ", "
+							+ "\'" + caseInstance.getCaseDefinitionId() + "\'" + ", "
 
-					+ "\'" + attributesJSONString + "\'" + ", "
+							+ "\'" + caseInstance.getStatus() + "\'" + ", "
 
-					+ "\'" + processesJSONString + "\'"
+							+ "\'" + attributesJSONString + "\'" + ", "
 
-					+ ");");
+							+ "\'" + processesJSONString + "\'"
+
+							+ ");");
 
 		} catch (SQLException ex) {
 			// TODO error handling
