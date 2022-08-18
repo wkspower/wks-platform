@@ -90,7 +90,7 @@ public class JDBCDataRepository implements DataRepository {
 			while (resultSet.next()) {
 				String businessKey = resultSet.getString("business_key");
 				String status = resultSet.getString("status");
-				String caseDefId = resultSet.getString("caseDefinitionId");
+				String caseDefId = resultSet.getString("case_definition_id");
 
 				Gson gson = new Gson();
 				List<CaseAttribute> attributes = gson.fromJson(resultSet.getString("attributes"),
@@ -124,7 +124,7 @@ public class JDBCDataRepository implements DataRepository {
 			while (resultSet.next()) {
 				String businessKey = resultSet.getString("business_key");
 				String status = resultSet.getString("status");
-				String caseDefinitionId = resultSet.getString("caseDefinitionId");
+				String caseDefinitionId = resultSet.getString("case_definition_id");
 
 				Gson gson = new Gson();
 				List<CaseAttribute> attributes = gson.fromJson(resultSet.getString("attributes"),
@@ -155,7 +155,7 @@ public class JDBCDataRepository implements DataRepository {
 		try (var statement = connection.createStatement();) {
 
 			statement.executeUpdate(
-					"INSERT INTO case_instance (business_key, status, attributes, processes, case_definition_id) VALUES ("
+					"INSERT INTO case_instance (business_key, case_definition_id, status, attributes, processes) VALUES ("
 
 							+ "\'" + caseInstance.getBusinessKey() + "\'" + ", "
 
