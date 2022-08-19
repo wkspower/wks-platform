@@ -11,12 +11,13 @@ import { TransitionProps } from '@mui/material/transitions';
 import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
 import FormHelperText from '@mui/material/FormHelperText';
+
+import { TaskList } from '../../../../taskList/taskList';
+
 import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-
-import { TaskList } from '../taskList/taskList';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -60,32 +61,12 @@ TabPanel.propTypes = {
     value: PropTypes.number.isRequired,
 };
 
-export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
-    const [formComponents, setFormComponents] = useState([]);
+export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
 
-    const [value, setValue] = useState(0);
+    const [tabValue, setTabValue] = useState(0);
 
-    useEffect(() => {
-        if (componentsParam) {
-            setFormComponents(componentsParam.components);
-        } else if (aCase) {
-            fetch('http://localhost:8081/case/' + aCase.id)
-                .then(response => response.json())
-                .then(data => {
-                    setFormComponents(data.attributes);
-                })
-                .catch((err) => {
-                    console.log(err.message);
-                });
-        }
-    }, [aCase, componentsParam]);
-
-    const handleInputChange = function (event) {
-        setFormComponents({ ...formComponents, [event.target.id]: { value: event.target.value } });
-    }
-
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
+    const handleTabChange = (event, newValue) => {
+        setTabValue(newValue);
     };
 
     return (
@@ -107,7 +88,7 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                             <CloseIcon />
                         </IconButton>
                         <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-                            <div>{aCase?.id}</div>
+                            <div>Case definition: {aCaseDef?.name}</div>
                         </Typography>
                         <Button autoFocus color="inherit">
                             Edit
@@ -116,33 +97,41 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                 </AppBar>
 
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                        <Tab label="Case Details" {...a11yProps(0)} />
-                        <Tab label="Tasks" {...a11yProps(1)} />
+                    <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example">
+                        <Tab label="General" {...a11yProps(0)} />
+                        <Tab label="Data Structure" {...a11yProps(1)} />
+                        <Tab label="Validation Rules" {...a11yProps(2)} />
+                        <Tab label="States" {...a11yProps(3)} />
+                        <Tab label="Forms" {...a11yProps(4)} />
+                        <Tab label="Search Layouts" {...a11yProps(5)} />
+                        <Tab label="Events" {...a11yProps(6)} />
+                        <Tab label="Listeners" {...a11yProps(7)} />
+                        <Tab label="Access Control" {...a11yProps(8)} />
+                        <Tab label="Auditing" {...a11yProps(9)} />
+                        <Tab label="API" {...a11yProps(10)} />
+                        <Tab label="Deployment" {...a11yProps(11)} />
+                        <Tab label="Versions" {...a11yProps(12)} />
                     </Tabs>
                 </Box>
-                <TabPanel value={value} index={0}>
-                    {/* Case Form */}
+                <TabPanel value={tabValue} index={0}>
+                    {/* Case Definition Form */}
                     <div style={{ display: 'grid', padding: '10px' }}>
-                        {(formComponents && formComponents.length) ? formComponents.map(component => {
-                            if (component.type !== 'text') {
-                                return (
-                                    <FormControl key={component.name} style={{ padding: '5px' }}>
-                                        <TextField id={component.name} aria-describedby="my-helper-text" value={component.value} onChange={handleInputChange} disabled />
-                                        <FormHelperText id="my-helper-text">{component.name}</FormHelperText>
-                                    </FormControl>
-                                );
-                            }
-                        }) : <div>Empty form components</div>}
+                        <FormControl key='ctrlId' style={{ padding: '5px' }}>
+                            <TextField id='txtId' aria-describedby="my-helper-text" value={aCaseDef.id} />
+                            <FormHelperText id="my-helper-text">Case Definition Id</FormHelperText>
+                        </FormControl>
+                        <FormControl key='ctrlName' style={{ padding: '5px' }}>
+                            <TextField id='txtName' aria-describedby="my-helper-text" value={aCaseDef.name} />
+                            <FormHelperText id="my-helper-text">Case Definition Name</FormHelperText>
+                        </FormControl>
+                        <FormControl key='ctrlProcDefKeys' style={{ padding: '5px' }}>
+                            <TextField id='txtProcDefKeys' aria-describedby="my-helper-text" value={aCaseDef.onCreateProcessDefinitions} />
+                            <FormHelperText id="my-helper-text">Process Definition Keys</FormHelperText>
+                        </FormControl>
                     </div>
                 </TabPanel>
-                <TabPanel value={value} index={1}>
-                    {/* Task List  */}
-                    <div style={{ display: 'grid', padding: '10px' }}>
-                        <TaskList businessKey={aCase.id} />
-                    </div>
-                </TabPanel>
+
             </Dialog>
-        </div>
+        </div >
     );
 }
