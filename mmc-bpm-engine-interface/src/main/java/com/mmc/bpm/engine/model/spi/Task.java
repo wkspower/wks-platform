@@ -33,6 +33,6 @@ public class Task {
 	protected String caseDefinitionId;
 	protected String taskDefinitionKey;
 	protected String formKey;
-	protected CamundaFormRef camundaFormRef;
+	protected FormRef camundaFormRef;
 
 }

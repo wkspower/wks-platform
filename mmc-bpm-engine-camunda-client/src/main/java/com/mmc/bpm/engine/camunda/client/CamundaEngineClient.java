@@ -8,7 +8,7 @@ import com.google.gson.JsonObject;
 import com.mmc.bpm.engine.camunda.http.request.CamundaHttpRequestFactory;
 import com.mmc.bpm.engine.model.impl.DeploymentImpl;
 import com.mmc.bpm.engine.model.impl.ProcessDefinitionImpl;
-import com.mmc.bpm.engine.model.spi.CamundaForm;
+import com.mmc.bpm.engine.model.spi.Form;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
 import com.mmc.bpm.engine.model.spi.ProcessMessage;
 import com.mmc.bpm.engine.model.spi.Task;
@@ -73,9 +73,9 @@ public class CamundaEngineClient implements ProcessEngineClient {
 	}
 
 	@Override
-	public CamundaForm getTaskForm(final String taskId) {
+	public Form getTaskForm(final String taskId) {
 		return restTemplate.getForEntity(camundaHttpRequestFactory.getTaskFormGetRequest(taskId).getHttpRequestUrl(),
-				CamundaForm.class).getBody();
+				Form.class).getBody();
 	}
 
 	@Override

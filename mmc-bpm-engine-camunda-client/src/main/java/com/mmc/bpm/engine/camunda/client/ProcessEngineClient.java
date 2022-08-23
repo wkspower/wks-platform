@@ -1,7 +1,7 @@
 package com.mmc.bpm.engine.camunda.client;
 
 import com.google.gson.JsonObject;
-import com.mmc.bpm.engine.model.spi.CamundaForm;
+import com.mmc.bpm.engine.model.spi.Form;
 import com.mmc.bpm.engine.model.spi.Deployment;
 import com.mmc.bpm.engine.model.spi.ProcessDefinition;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
@@ -28,7 +28,7 @@ public interface ProcessEngineClient {
 
 	public void complete(String taskId, JsonObject variables);
 
-	public CamundaForm getTaskForm(final String taskId);
+	public Form getTaskForm(final String taskId);
 
 	public ProcessInstance startProcess(final String processDefinitionKey);
 
