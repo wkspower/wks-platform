@@ -1,0 +1,483 @@
+{
+	"info": {
+		"_postman_id": "4cedb95e-0db9-4fbc-829b-fdb3a365c448",
+		"name": "mmc-bpm-interface-rest-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5769200"
+	},
+	"item": [
+		{
+			"name": "case",
+			"item": [
+				{
+					"name": "{businessKey}",
+					"item": [
+						{
+							"name": "Get",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/case/:businessKey?=",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"case",
+										":businessKey"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": ""
+										}
+									],
+									"variable": [
+										{
+											"key": "businessKey",
+											"value": null
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "case",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/case/:businessKey?=",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"case",
+										":businessKey"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": ""
+										}
+									],
+									"variable": [
+										{
+											"key": "businessKey",
+											"value": "DUMMY_BUSINESS_KEY-469"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "case",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/case",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"case"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "case",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\r\n{\r\n    \"caseDefinitionId\": \"1\",\r\n    \"attributes\": [\r\n        {\r\n            \"name\": \"dob\",\r\n            \"value\": \"01/01/1990\"\r\n        },\r\n        {\r\n            \"name\": \"city\",\r\n            \"value\": \"Toronto\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/case",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"case"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "case-definition",
+			"item": [
+				{
+					"name": "{id}",
+					"item": [
+						{
+							"name": "Get",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/case-definition/:caseDefId?=",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"case-definition",
+										":caseDefId"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": ""
+										}
+									],
+									"variable": [
+										{
+											"key": "caseDefId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "case-definition",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/case-definition/:caseDefId?=",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"case-definition",
+										":caseDefId"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": ""
+										}
+									],
+									"variable": [
+										{
+											"key": "caseDefId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "case-definition",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\":  \"1\",\r\n    \"name\": \"generic-case\",\r\n    \"onCreateProcessDefinitions\": [\"genericCaseProcess\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/case-definition",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"case-definition"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "case-definition",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/case-definition",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"case-definition"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "form",
+			"item": [
+				{
+					"name": "form",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/form/:taskId",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"form",
+								":taskId"
+							],
+							"variable": [
+								{
+									"key": "taskId",
+									"value": "792e30cf-13fc-11ed-955e-0242ac110002"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "message",
+			"item": [
+				{
+					"name": "message",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"messageName\": \"sampleMessage\",\r\n    \"businessKey\": \"DUMMY_BUSINESS_KEY-517\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/message",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"message"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "task",
+			"item": [
+				{
+					"name": "{id}",
+					"item": [
+						{
+							"name": "claim",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/task/:id/claim/:taskAssignee",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"task",
+										":id",
+										"claim",
+										":taskAssignee"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "e503630f-1883-11ed-933a-0242ac110002"
+										},
+										{
+											"key": "taskAssignee",
+											"value": "demo"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "unclaim",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/task/:id/unclaim",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"task",
+										":id",
+										"unclaim"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": null
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "complete",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"variables\": {\r\n        \"aVariable\": {\r\n            \"value\": \"aStringValue\"\r\n        },\r\n        \"anotherVariable\": {\r\n            \"value\": 42\r\n        },\r\n        \"aThirdVariable\": {\r\n            \"value\": true\r\n        }\r\n    },\r\n    \"withVariablesInReturn\": true\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/task/:id/complete",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"task",
+										":id",
+										"complete"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "e503630f-1883-11ed-933a-0242ac110002"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "task",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/task",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"task"
+							],
+							"query": [
+								{
+									"key": "processInstanceBusinessKey",
+									"value": "DUMMY_BUSINESS_KEY-950",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "variable",
+			"item": [
+				{
+					"name": "variable",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/variable/:processInstanceId",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"variable",
+								":processInstanceId"
+							],
+							"variable": [
+								{
+									"key": "processInstanceId",
+									"value": "e42650af-18a5-11ed-933a-0242ac110002"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "healthCheck",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/healthCheck",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"healthCheck"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

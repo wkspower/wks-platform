@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.mmc.bpm.rest.server.CaseController;
-import com.mmc.bpm.rest.server.ProcessController;
+import com.mmc.bpm.rest.server.CaseDefinitionController;
 
 @SpringBootTest
 public class SmokeTest {
@@ -16,11 +16,11 @@ public class SmokeTest {
 	private CaseController caseController;
 
 	@Autowired
-	private ProcessController processController;
+	private CaseDefinitionController caseDefinitionController;
 
 	@Test
 	public void contextLoads() throws Exception {
 		assertThat(caseController).isNotNull();
-		assertThat(processController).isNotNull();
+		assertThat(caseDefinitionController).isNotNull();
 	}
 }
