@@ -18,7 +18,11 @@ These are the following softwares you will have to be installed on your local de
 * Node <NodeVersion />
 * Camunda 7
 
-You can also optionaly have [Postman](https://www.postman.com/downloads/) to trigger requests to the project API and [Camunda Modeler](https://camunda.com/download/modeler/) to create BPM processes.
+**NOTE 1**: You can also optionaly have [Postman](https://www.postman.com/downloads/) to trigger requests to the project API and [Camunda Modeler](https://camunda.com/download/modeler/) to create BPM processes.
+
+**NOTE 2**: There are a few ways to have a Camunda Instance running in your local environment:
+- [Docker](https://hub.docker.com/r/camunda/camunda-bpm-platform/)
+- [Camunda Springboot](https://victor-franca.com/2022/02/02/bootstrapping-camunda-with-spring-boot-minimal-configuration/)
 
 
 ### Step 1: Clone the repo from [Github](https://github.com/mmctech/cis-innovation-bpm-platform)
