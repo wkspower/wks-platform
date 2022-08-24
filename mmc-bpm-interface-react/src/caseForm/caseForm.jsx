@@ -128,13 +128,14 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                             if (component.type !== 'text') {
                                 return (
                                     <FormControl key={component.name} style={{ padding: '5px' }}>
-                                        <TextField id={component.name} aria-describedby="my-helper-text" value={component.value} onChange={handleInputChange} disabled/>
+                                        <TextField id={component.name} aria-describedby="my-helper-text" value={component.value} onChange={handleInputChange} disabled />
                                         <FormHelperText id="my-helper-text">{component.name}</FormHelperText>
                                     </FormControl>
                                 );
                             }
                         }) : <div>Empty form components</div>}
-                    </div>                </TabPanel>
+                    </div>
+                </TabPanel>
                 <TabPanel value={value} index={1}>
                     {/* Task List  */}
                     <div style={{ display: 'grid', padding: '10px' }}>

@@ -8,7 +8,7 @@ import com.google.gson.JsonObject;
 import com.mmc.bpm.engine.camunda.http.request.CamundaHttpRequestFactory;
 import com.mmc.bpm.engine.model.impl.DeploymentImpl;
 import com.mmc.bpm.engine.model.impl.ProcessDefinitionImpl;
-import com.mmc.bpm.engine.model.spi.CamundaForm;
+import com.mmc.bpm.engine.model.spi.Form;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
 import com.mmc.bpm.engine.model.spi.ProcessMessage;
 import com.mmc.bpm.engine.model.spi.Task;
@@ -42,9 +42,36 @@ public class CamundaEngineClient implements ProcessEngineClient {
 	}
 
 	@Override
-	public ProcessInstance[] findProcessInstances() {
-		return restTemplate.getForEntity(camundaHttpRequestFactory.getProcessInstanceListRequest().getHttpRequestUrl(),
-				ProcessInstance[].class).getBody();
+	public ProcessInstance[] findProcessInstances(final String businessKey) {
+		return restTemplate
+				.getForEntity(camundaHttpRequestFactory.getProcessInstanceListRequest(businessKey).getHttpRequestUrl(),
+						ProcessInstance[].class)
+				.getBody();
+	}
+
+	@Override
+	public ProcessInstance startProcess(final String processDefinitionKey) {
+
+		MmcHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey);
+
+		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
+				.getBody();
+	}
+
+	@Override
+	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey) {
+		MmcHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey,
+				businessKey);
+
+		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
+				.getBody();
+	}
+
+	@Override
+	public void deleteProcessInstance(String processInstanceId) {
+		MmcHttpRequest request = camundaHttpRequestFactory.getProcessInstanceDeleteRequest(processInstanceId);
+
+		restTemplate.delete(request.getHttpRequestUrl());
 	}
 
 	@Override
@@ -73,34 +100,10 @@ public class CamundaEngineClient implements ProcessEngineClient {
 	}
 
 	@Override
-	public CamundaForm getTaskForm(final String taskId) {
-		return restTemplate.getForEntity(camundaHttpRequestFactory.getTaskFormGetRequest(taskId).getHttpRequestUrl(),
-				CamundaForm.class).getBody();
-	}
-
-	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey) {
-
-		MmcHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey);
-
-		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
+	public Form getTaskForm(final String taskId) {
+		return restTemplate
+				.getForEntity(camundaHttpRequestFactory.getTaskFormGetRequest(taskId).getHttpRequestUrl(), Form.class)
 				.getBody();
-	}
-
-	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey) {
-		MmcHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey,
-				businessKey);
-
-		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
-				.getBody();
-	}
-
-	@Override
-	public void deleteProcessInstance(String processInstanceId) {
-		MmcHttpRequest request = camundaHttpRequestFactory.getProcessInstanceDeleteRequest(processInstanceId);
-
-		restTemplate.delete(request.getHttpRequestUrl());
 	}
 
 	@Override

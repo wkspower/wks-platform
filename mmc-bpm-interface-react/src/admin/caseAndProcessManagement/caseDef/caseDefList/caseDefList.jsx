@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Button from '@mui/material/Button';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { CaseDefForm } from '../caseDefForm/caseDefForm'
+import { CaseDefForm } from '../caseDefForm/caseDefForm';
 
 export const CaseDefList = () => {
     const [caseDefs, setCaseDefs] = useState([]);
@@ -50,7 +50,6 @@ export const CaseDefList = () => {
                 columns={columns}
                 pageSize={10}
                 rowsPerPageOptions={[10]}
-                checkboxSelection
             />
             {aCaseDef && <CaseDefForm aCaseDef={aCaseDef} handleClose={handleCloseCaseDefForm} open={openCaseDefForm} />}
         </div >

@@ -1,7 +1,5 @@
 package com.mmc.bpm.engine.model.spi;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +13,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CamundaForm {
+public class FormComponent {
+	
+	private String id;
+	private String key;
+	private String type;
+	
+	private String text;
+	private String label;
 
-	private List<CamundaFormComponent> components;
 }

@@ -13,13 +13,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CamundaFormComponent {
-	
-	private String id;
+public class FormRef {
+
 	private String key;
-	private String type;
-	
-	private String text;
-	private String label;
+	private String binding;
+	private String version;
 
 }

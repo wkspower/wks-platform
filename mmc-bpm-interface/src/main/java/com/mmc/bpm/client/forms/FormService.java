@@ -1,9 +1,9 @@
 package com.mmc.bpm.client.forms;
 
-import com.mmc.bpm.engine.model.spi.CamundaForm;
+import com.mmc.bpm.engine.model.spi.Form;
 
 public interface FormService {
 
-	public CamundaForm getTaskForm(String taskId);
+	public Form getTaskForm(String taskId);
 
 }
