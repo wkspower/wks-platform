@@ -6,16 +6,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.mmc.bpm.client.cases.definition.CaseDefinition;
+import com.mmc.bpm.client.cases.definition.event.CaseEvent;
+import com.mmc.bpm.client.cases.definition.event.ProcessStartEvent;
+import com.mmc.bpm.client.cases.definition.hook.create.PostCaseCreateHook;
 
 //TODO create abstract test class for JDBC Repos
 public class JDBCDataRepositoryCaseDefinitionTest {
@@ -44,26 +43,43 @@ public class JDBCDataRepositoryCaseDefinitionTest {
 	}
 
 	@Test
-	public void createProcessDefinitionTest() throws Exception {
+	public void getProcessDefinitionTest() throws Exception {
+
+		// Given
+		CaseEvent caseEvent = new ProcessStartEvent("1", "proc-def-key");
+
+		PostCaseCreateHook postCaseCreateHook = new PostCaseCreateHook();
+		postCaseCreateHook.attach(caseEvent);
 
 		CaseDefinition caseDefinition = CaseDefinition.builder().id("1").name("generic-case")
-				.onCreateProcessDefinitions(Arrays.asList("1", "2")).build();
+				.postCaseCreateHook(postCaseCreateHook).build();
+		jdbcDataRepository.saveCaseDefinition(caseDefinition);
+
+		// When
+		caseDefinition = jdbcDataRepository.getCaseDefinition("1");
+
+		// Then
+		assertEquals("1", caseDefinition.getId());
+		assertEquals("generic-case", caseDefinition.getName());
+		assertEquals("proc-def-key", ((ProcessStartEvent) caseDefinition.getPostCaseCreateHook().getCaseEvents().get(0))
+				.getProcessDefinitionKey());
+	}
+
+	@Test
+	public void createProcessDefinitionTest() throws Exception {
+
+		CaseDefinition caseDefinition = CaseDefinition.builder().id("1").name("generic-case").build();
 
 		jdbcDataRepository.saveCaseDefinition(caseDefinition);
 
 		String id;
 		String name;
-		List<String> onCreateProcessDefKey;
 		try (var statement = connection.createStatement();) {
 
-			ResultSet resultSet = statement
-					.executeQuery("SELECT id, name, on_create_process_definition_keys FROM case_definition;");
+			ResultSet resultSet = statement.executeQuery("SELECT id, name FROM case_definition;");
 			resultSet.next();
 			id = resultSet.getString("id");
 			name = resultSet.getString("name");
-			onCreateProcessDefKey = new Gson().fromJson(resultSet.getString("on_create_process_definition_keys"),
-					new TypeToken<List<String>>() {
-					}.getType());
 
 		} catch (SQLException ex) {
 			// TODO error handling
@@ -72,8 +88,6 @@ public class JDBCDataRepositoryCaseDefinitionTest {
 
 		assertEquals("1", id);
 		assertEquals("generic-case", name);
-		assertEquals(Arrays.asList("1", "2"), onCreateProcessDefKey);
-
 	}
 
 	private void deleteTables() throws Exception {

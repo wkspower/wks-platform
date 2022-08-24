@@ -16,10 +16,19 @@ public interface ProcessEngineClient {
 
 	public Deployment[] findDeployments();
 
+	
 	public ProcessDefinition[] findProcessDefinitions();
 
-	public ProcessInstance[] findProcessInstances();
 
+	public ProcessInstance[] findProcessInstances(final String businessKey);
+
+	public ProcessInstance startProcess(final String processDefinitionKey);
+
+	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey);
+
+	public void deleteProcessInstance(final String processInstanceId);
+
+	
 	public Task[] findTasks(final String processInstanceBusinessKey);
 
 	public void claimTask(String taskId, String taskAssignee);
@@ -30,14 +39,10 @@ public interface ProcessEngineClient {
 
 	public Form getTaskForm(final String taskId);
 
-	public ProcessInstance startProcess(final String processDefinitionKey);
-
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey);
-
-	public void deleteProcessInstance(final String processInstanceId);
-
+	
 	public String findVariables(final String processInstanceId);
 
+	
 	public void sendMessage(final ProcessMessage processMesage);
 
 }

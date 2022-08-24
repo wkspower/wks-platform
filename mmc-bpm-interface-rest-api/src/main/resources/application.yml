@@ -16,6 +16,8 @@ logging:
       org.springframework.web.client.RestTemplate: ERROR
       org.apache.http: ERROR
       httpclient.wire: ERROR
+      
+spring.mvc.converters.preferred-json-mapper: gson
 
 camunda7.rest.oauth.token.uri:
 camunda7.rest.oauth.token.clientId:

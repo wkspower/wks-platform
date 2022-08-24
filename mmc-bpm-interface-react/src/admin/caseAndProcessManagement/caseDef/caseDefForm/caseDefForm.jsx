@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import AppBar from '@mui/material/AppBar';
@@ -12,12 +12,17 @@ import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
 import FormHelperText from '@mui/material/FormHelperText';
 
-import { TaskList } from '../../../../taskList/taskList';
-
 import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+
+import TreeView from '@mui/lab/TreeView';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import TreeItem from '@mui/lab/TreeItem';
+
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -61,12 +66,24 @@ TabPanel.propTypes = {
     value: PropTypes.number.isRequired,
 };
 
+const eventsColumns: GridColDef[] = [
+    { field: 'processDefinitionKey', headerName: 'processDefinitionKey', width: 200 }
+];
+
 export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
 
     const [tabValue, setTabValue] = useState(0);
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
+    };
+
+    const [hook, setHook] = useState(null);
+    const handleHookChange = (event, nodeId) => {
+
+        if (!nodeId.endsWith('Group')) {
+            setHook(nodeId)
+        }
     };
 
     return (
@@ -113,8 +130,9 @@ export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
                         <Tab label="Versions" {...a11yProps(12)} />
                     </Tabs>
                 </Box>
+
+                {/* General Tab */}
                 <TabPanel value={tabValue} index={0}>
-                    {/* Case Definition Form */}
                     <div style={{ display: 'grid', padding: '10px' }}>
                         <FormControl key='ctrlId' style={{ padding: '5px' }}>
                             <TextField id='txtId' aria-describedby="my-helper-text" value={aCaseDef.id} />
@@ -124,13 +142,59 @@ export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
                             <TextField id='txtName' aria-describedby="my-helper-text" value={aCaseDef.name} />
                             <FormHelperText id="my-helper-text">Case Definition Name</FormHelperText>
                         </FormControl>
-                        <FormControl key='ctrlProcDefKeys' style={{ padding: '5px' }}>
-                            <TextField id='txtProcDefKeys' aria-describedby="my-helper-text" value={aCaseDef.onCreateProcessDefinitions} />
-                            <FormHelperText id="my-helper-text">Process Definition Keys</FormHelperText>
-                        </FormControl>
                     </div>
                 </TabPanel>
 
+                {/* Events tab */}
+                <TabPanel value={tabValue} index={6}>
+                    <div>
+                        <div style={{ float: 'left', padding: '20px', borderStyle: 'solid', borderWidth: 'thin' }}>
+                            <TreeView
+                                aria-label="file system navigator"
+                                defaultCollapseIcon={<ExpandMoreIcon />}
+                                defaultExpandIcon={<ChevronRightIcon />}
+                                onNodeSelect={handleHookChange}
+                                sx={{ flexGrow: 1, maxWidth: 200 }}
+                            >
+                                <div style={{ fontWeight: 'bold', padding: '5px' }}>Case Hooks</div>
+                                <TreeItem nodeId="createGroup" label="Create">
+                                    <TreeItem nodeId="beforeCaseCreateHook" label="Before Create" />
+                                    <TreeItem nodeId="postCaseCreateHook" label="After Create" />
+                                </TreeItem>
+                                <TreeItem nodeId="closeGroup" label="Close">
+                                    <TreeItem nodeId="beforeCaseCloseHook" label="Before Close" />
+                                    <TreeItem nodeId="postCaseCloseHook" label="After Close" />
+                                </TreeItem>
+                                <TreeItem nodeId="stateUpdateGroup" label="State Update">
+                                    <TreeItem nodeId="beforeCaseStateUpdateHook" label="Before State Update" />
+                                    <TreeItem nodeId="postCaseStateUpdateHook" label="After State Update" />
+                                </TreeItem>
+                                <TreeItem nodeId="updateGroup" label="Update">
+                                    <TreeItem nodeId="beforeCaseUpdateHook" label="Before Update" />
+                                    <TreeItem nodeId="postCaseUpdateHook" label="After Update" />
+                                </TreeItem>
+                                <TreeItem nodeId="archiveGroup" label="Archive">
+                                    <TreeItem nodeId="beforeCaseArchiveHook" label="Before Archive" />
+                                    <TreeItem nodeId="postCaseArchiveHook" label="After Archive" />
+                                </TreeItem>
+                                <TreeItem nodeId="assignGroup" label="Assign">
+                                    <TreeItem nodeId="beforeCaseAssignHook" label="Before Assign" />
+                                    <TreeItem nodeId="postCaseAssignHook" label="After Assign" />
+                                </TreeItem>
+                            </TreeView>
+                        </div>
+
+                        <div style={{ float: 'left', padding: '10px', height: 400, width: 400 }}>
+                            {hook && aCaseDef[hook].caseEvents &&
+                                <DataGrid
+                                    rows={aCaseDef[hook].caseEvents}
+                                    columns={eventsColumns}
+                                    pageSize={10}
+                                    rowsPerPageOptions={[10]}
+                                />}
+                        </div>
+                    </div>
+                </TabPanel>
             </Dialog>
         </div >
     );

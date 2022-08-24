@@ -1,5 +1,6 @@
 package com.mmc.bpm.client.process.instance;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,11 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	@Override
 	public void delete(final List<ProcessInstance> processInstances) {
 		processInstances.forEach(o -> delete(o.getId()));
+	}
+
+	@Override
+	public List<ProcessInstance> find(String businessKey) {
+		return Arrays.asList(processEngineClient.findProcessInstances(businessKey));
 	}
 
 }

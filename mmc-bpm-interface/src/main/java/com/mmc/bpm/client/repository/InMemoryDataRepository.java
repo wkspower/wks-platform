@@ -36,7 +36,7 @@ public class InMemoryDataRepository implements DataRepository {
 	}
 
 	@Override
-	public void deleteCase(final CaseInstance caseInstance) {
+	public void deleteCaseInstance(final CaseInstance caseInstance) {
 		caseInstancesRepo.remove(caseInstance);
 	}
 

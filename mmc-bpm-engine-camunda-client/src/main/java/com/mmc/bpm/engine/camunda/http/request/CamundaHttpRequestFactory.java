@@ -55,8 +55,12 @@ public class CamundaHttpRequestFactory {
 
 	//// Process Instance ////
 
-	public MmcHttpRequest getProcessInstanceListRequest() {
-		return new CamundaHttpGetRequest<ProcessInstance>(processInstanceUrl,
+	public MmcHttpRequest getProcessInstanceListRequest(final String businessKey) {
+		StringBuilder url = new StringBuilder().append(processInstanceUrl);
+		if (businessKey != null) {
+			url.append("?businessKey=" + businessKey);
+		}
+		return new CamundaHttpGetRequest<ProcessInstance>(url.toString(),
 				new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
@@ -83,7 +87,7 @@ public class CamundaHttpRequestFactory {
 
 	public MmcHttpRequest getTaskListRequest(String processInstanceBusinessKey) {
 		StringBuilder url = new StringBuilder().append(taskUrl + "?active=true");
-		if(processInstanceBusinessKey != null) {
+		if (processInstanceBusinessKey != null) {
 			url.append("&processInstanceBusinessKey=" + processInstanceBusinessKey);
 		}
 

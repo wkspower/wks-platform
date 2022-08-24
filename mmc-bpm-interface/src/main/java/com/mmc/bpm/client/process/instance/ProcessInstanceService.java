@@ -13,5 +13,7 @@ public interface ProcessInstanceService {
 	public void delete(final List<ProcessInstance> processInstances);
 
 	public void delete(final String processInstanceId);
+	
+	public List<ProcessInstance> find(final String businessKey);
 
 }

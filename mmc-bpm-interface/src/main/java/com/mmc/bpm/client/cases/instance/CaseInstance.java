@@ -1,9 +1,6 @@
 package com.mmc.bpm.client.cases.instance;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import com.mmc.bpm.engine.model.spi.ProcessInstance;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -29,17 +26,6 @@ public class CaseInstance {
 	private String status = "NEW";
 
 	private List<CaseAttribute> attributes;
-
-	@Builder.Default
-	private List<ProcessInstance> processesInstances = new ArrayList<>();
-
-	public void addProcessInstance(final ProcessInstance processInstance) {
-		this.processesInstances.add(processInstance);
-	}
-
-	public void addAllProcessInstances(final List<ProcessInstance> processInstances) {
-		this.processesInstances.addAll(processInstances);
-	}
 
 	public String getId() {
 		return businessKey;

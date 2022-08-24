@@ -25,6 +25,6 @@ public interface DataRepository {
 
 	public void updateCaseStatus(final String businessKey, final String newStatus) throws Exception;
 
-	public void deleteCase(final CaseInstance caseInstance) throws Exception;
+	public void deleteCaseInstance(final CaseInstance caseInstance) throws Exception;
 
 }

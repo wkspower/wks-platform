@@ -35,4 +35,8 @@ public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 		dataRepository.deleteCaseDefinition(caseDefinitionId);
 	}
 
+	public void setDataRepository(DataRepository dataRepository) {
+		this.dataRepository = dataRepository;
+	}
+
 }

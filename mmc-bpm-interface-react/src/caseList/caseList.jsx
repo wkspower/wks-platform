@@ -42,7 +42,7 @@ export const CaseList = (casesParam) => {
 
 
     const columns: GridColDef[] = [
-        { field: 'id', headerName: 'Id', width: 300 },
+        { field: 'businessKey', headerName: 'Business Key', width: 300 },
         { field: 'status', headerName: 'Status', width: 220 },
         { field: 'caseDefinitionId', headerName: 'Case Definition', width: 220 },
         {
@@ -113,7 +113,7 @@ export const CaseList = (casesParam) => {
                 columns={columns}
                 pageSize={10}
                 rowsPerPageOptions={[10]}
-                checkboxSelection
+                getRowId={(row) => row.businessKey}
             />
             {aCase && <CaseForm aCase={aCase} handleClose={handleCloseCaseForm} open={openCaseForm} />}
 

@@ -50,7 +50,6 @@ export const CaseDefList = () => {
                 columns={columns}
                 pageSize={10}
                 rowsPerPageOptions={[10]}
-                checkboxSelection
             />
             {aCaseDef && <CaseDefForm aCaseDef={aCaseDef} handleClose={handleCloseCaseDefForm} open={openCaseDefForm} />}
         </div >

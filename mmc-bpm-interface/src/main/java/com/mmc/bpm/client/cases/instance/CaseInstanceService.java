@@ -3,7 +3,7 @@ package com.mmc.bpm.client.cases.instance;
 import java.util.List;
 
 public interface CaseInstanceService {
-
+	
 	public List<CaseInstance> find() throws Exception;
 
 	public CaseInstance get(final String businessKey) throws Exception;

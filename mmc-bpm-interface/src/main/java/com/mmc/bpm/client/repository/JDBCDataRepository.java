@@ -12,13 +12,16 @@ import javax.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.mmc.bpm.client.cases.definition.CaseDefinition;
 import com.mmc.bpm.client.cases.definition.CaseDefinitionNotFoundException;
+import com.mmc.bpm.client.cases.definition.event.CaseEvent;
+import com.mmc.bpm.client.cases.definition.event.CaseEventDeserializer;
+import com.mmc.bpm.client.cases.definition.hook.create.PostCaseCreateHook;
 import com.mmc.bpm.client.cases.instance.CaseAttribute;
 import com.mmc.bpm.client.cases.instance.CaseInstance;
 import com.mmc.bpm.client.cases.instance.CaseInstanceNotFoundException;
-import com.mmc.bpm.engine.model.spi.ProcessInstance;
 
 @Component
 public class JDBCDataRepository implements DataRepository {
@@ -34,7 +37,7 @@ public class JDBCDataRepository implements DataRepository {
 	}
 
 	@PostConstruct
-	protected void postConstruct() throws Exception {
+	public void postConstruct() throws Exception {
 		createCaseDefinitionTable();
 		createCaseInstanceTable();
 	}
@@ -44,15 +47,13 @@ public class JDBCDataRepository implements DataRepository {
 
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS case_instance ("
 
-					+ "business_key varchar(255),"
+					+ "business_key varchar(255) UNIQUE,"
 
 					+ "case_definition_id varchar(255),"
 
 					+ "status varchar(20),"
 
-					+ "attributes CLOB,"
-
-					+ "processes CLOB);");
+					+ "attributes CLOB);");
 
 		} catch (SQLException ex) {
 			// TODO error handling
@@ -65,13 +66,11 @@ public class JDBCDataRepository implements DataRepository {
 
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS case_definition ("
 
-					+ "id varchar(255),"
+					+ "post_case_create_hook CLOB,"
 
-					+ "case_definition_id varchar(255),"
+					+ "id varchar(255) UNIQUE,"
 
-					+ "name varchar(50),"
-
-					+ "on_create_process_definition_keys CLOB);");
+					+ "name varchar(50));");
 
 		} catch (SQLException ex) {
 			// TODO error handling
@@ -85,8 +84,8 @@ public class JDBCDataRepository implements DataRepository {
 
 		try (var statement = connection.createStatement();) {
 
-			ResultSet resultSet = statement.executeQuery(
-					"SELECT business_key, status, attributes, processes, case_definition_id FROM case_instance;");
+			ResultSet resultSet = statement
+					.executeQuery("SELECT business_key, status, attributes, case_definition_id FROM case_instance;");
 			while (resultSet.next()) {
 				String businessKey = resultSet.getString("business_key");
 				String status = resultSet.getString("status");
@@ -97,13 +96,8 @@ public class JDBCDataRepository implements DataRepository {
 						new TypeToken<List<CaseAttribute>>() {
 						}.getType());
 
-				gson = new Gson();
-				List<ProcessInstance> processes = gson.fromJson(resultSet.getString("processes"),
-						new TypeToken<List<ProcessInstance>>() {
-						}.getType());
-
 				casesInstances.add(CaseInstance.builder().businessKey(businessKey).attributes(attributes).status(status)
-						.caseDefinitionId(caseDefId).processesInstances(processes).build());
+						.caseDefinitionId(caseDefId).build());
 			}
 
 		} catch (SQLException ex) {
@@ -119,7 +113,7 @@ public class JDBCDataRepository implements DataRepository {
 		// TODO ensure single return (throw specific exception otherwise)
 		try (var statement = connection.createStatement();) {
 			ResultSet resultSet = statement.executeQuery(
-					"SELECT business_key, status, attributes, processes, case_definition_id FROM case_instance where business_key = '"
+					"SELECT business_key, status, attributes, case_definition_id FROM case_instance where business_key = '"
 							+ businessKeyParam + "';");
 			while (resultSet.next()) {
 				String businessKey = resultSet.getString("business_key");
@@ -131,12 +125,8 @@ public class JDBCDataRepository implements DataRepository {
 						new TypeToken<List<CaseAttribute>>() {
 						}.getType());
 
-				gson = new Gson();
-				List<ProcessInstance> processes = gson.fromJson(resultSet.getString("processes"),
-						new TypeToken<List<ProcessInstance>>() {
-						}.getType());
 				return CaseInstance.builder().businessKey(businessKey).attributes(attributes).status(status)
-						.caseDefinitionId(caseDefinitionId).processesInstances(processes).build();
+						.caseDefinitionId(caseDefinitionId).build();
 			}
 		}
 
@@ -149,13 +139,10 @@ public class JDBCDataRepository implements DataRepository {
 		Gson gson = new Gson();
 		String attributesJSONString = gson.toJson(caseInstance.getAttributes());
 
-		gson = new Gson();
-		String processesJSONString = gson.toJson(caseInstance.getProcessesInstances());
-
 		try (var statement = connection.createStatement();) {
 
 			statement.executeUpdate(
-					"INSERT INTO case_instance (business_key, case_definition_id, status, attributes, processes) VALUES ("
+					"INSERT INTO case_instance (business_key, case_definition_id, status, attributes) VALUES ("
 
 							+ "\'" + caseInstance.getBusinessKey() + "\'" + ", "
 
@@ -163,9 +150,7 @@ public class JDBCDataRepository implements DataRepository {
 
 							+ "\'" + caseInstance.getStatus() + "\'" + ", "
 
-							+ "\'" + attributesJSONString + "\'" + ", "
-
-							+ "\'" + processesJSONString + "\'"
+							+ "\'" + attributesJSONString + "\'"
 
 							+ ");");
 
@@ -196,7 +181,7 @@ public class JDBCDataRepository implements DataRepository {
 	}
 
 	@Override
-	public void deleteCase(CaseInstance caseInstance) throws Exception {
+	public void deleteCaseInstance(CaseInstance caseInstance) throws Exception {
 		try (var statement = connection.createStatement();) {
 
 			statement.executeUpdate("DELETE case_instance WHERE business_key = "
@@ -216,18 +201,20 @@ public class JDBCDataRepository implements DataRepository {
 		try (var statement = connection.createStatement();) {
 
 			ResultSet resultSet = statement
-					.executeQuery("SELECT id, name, on_create_process_definition_keys FROM case_definition;");
+					.executeQuery("SELECT id, name, post_case_create_hook FROM case_definition;");
 			while (resultSet.next()) {
 				String id = resultSet.getString("id");
 				String name = resultSet.getString("name");
 
-				Gson gson = new Gson();
-				List<String> onCreateProcessDefinitionKeys = gson.fromJson(
-						resultSet.getString("on_create_process_definition_keys"), new TypeToken<List<String>>() {
+				final GsonBuilder builder = new GsonBuilder();
+				builder.registerTypeAdapter(CaseEvent.class, new CaseEventDeserializer<CaseEvent>());
+				Gson gson = builder.create();
+				PostCaseCreateHook postCaseCreateHook = gson.fromJson(resultSet.getString("post_case_create_hook"),
+						new TypeToken<PostCaseCreateHook>() {
 						}.getType());
 
-				casesDefinitions.add(CaseDefinition.builder().id(id).name(name)
-						.onCreateProcessDefinitions(onCreateProcessDefinitionKeys).build());
+				casesDefinitions
+						.add(CaseDefinition.builder().id(id).name(name).postCaseCreateHook(postCaseCreateHook).build());
 			}
 
 		} catch (SQLException ex) {
@@ -242,20 +229,21 @@ public class JDBCDataRepository implements DataRepository {
 
 		// TODO ensure single return (throw specific exception otherwise)
 		try (var statement = connection.createStatement();) {
-			ResultSet resultSet = statement
-					.executeQuery("SELECT id, name, on_create_process_definition_keys FROM case_definition where id = '"
-							+ caseDefId + "';");
+			ResultSet resultSet = statement.executeQuery(
+					"SELECT id, name, post_case_create_hook FROM case_definition where id = '" + caseDefId + "';");
 			while (resultSet.next()) {
 				String id = resultSet.getString("id");
 				String name = resultSet.getString("name");
 
-				Gson gson = new Gson();
-				List<String> onCreateProcessDefinitionKeys = gson.fromJson(
-						resultSet.getString("on_create_process_definition_keys"), new TypeToken<List<String>>() {
+				// Adding custom deserializers
+				final GsonBuilder builder = new GsonBuilder();
+				builder.registerTypeAdapter(CaseEvent.class, new CaseEventDeserializer<CaseEvent>());
+				Gson gson = builder.create();
+				PostCaseCreateHook postCaseCreateHook = gson.fromJson(resultSet.getString("post_case_create_hook"),
+						new TypeToken<PostCaseCreateHook>() {
 						}.getType());
 
-				return CaseDefinition.builder().id(id).name(name)
-						.onCreateProcessDefinitions(onCreateProcessDefinitionKeys).build();
+				return CaseDefinition.builder().id(id).name(name).postCaseCreateHook(postCaseCreateHook).build();
 			}
 		}
 
@@ -264,18 +252,19 @@ public class JDBCDataRepository implements DataRepository {
 
 	@Override
 	public void saveCaseDefinition(CaseDefinition caseDefinition) throws Exception {
+
 		Gson gson = new Gson();
-		String onCreateProcessDefKeysJSONString = gson.toJson(caseDefinition.getOnCreateProcessDefinitions());
+		String postCaseCreateHook = gson.toJson(caseDefinition.getPostCaseCreateHook());
 
 		try (var statement = connection.createStatement();) {
 
-			statement.executeUpdate("INSERT INTO case_definition (id, name, on_create_process_definition_keys) VALUES ("
+			statement.executeUpdate("INSERT INTO case_definition (post_case_create_hook, id, name ) VALUES ("
+
+					+ "\'" + postCaseCreateHook + "\'" + ", "
 
 					+ "\'" + caseDefinition.getId() + "\'" + ", "
 
-					+ "\'" + caseDefinition.getName() + "\'" + ", "
-
-					+ "\'" + onCreateProcessDefKeysJSONString + "\'"
+					+ "\'" + caseDefinition.getName() + "\'"
 
 					+ ");");
 

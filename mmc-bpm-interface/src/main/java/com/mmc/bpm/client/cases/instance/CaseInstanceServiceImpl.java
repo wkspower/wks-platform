@@ -1,18 +1,15 @@
 package com.mmc.bpm.client.cases.instance;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.mmc.bpm.client.cases.businesskey.GenericBusinessKeyGenerator;
 import com.mmc.bpm.client.cases.definition.CaseDefinition;
-import com.mmc.bpm.client.cases.definition.CaseDefinitionNotFoundException;
-import com.mmc.bpm.client.process.instance.ProcessInstanceService;
+import com.mmc.bpm.client.cases.definition.event.ProcessStartEvent;
+import com.mmc.bpm.client.cases.definition.event.ProcessStartEventExecutor;
 import com.mmc.bpm.client.repository.DataRepository;
-import com.mmc.bpm.engine.model.spi.ProcessInstance;
 
 @Component
 public class CaseInstanceServiceImpl implements CaseInstanceService {
@@ -21,10 +18,10 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	private DataRepository dataRepository;
 
 	@Autowired
-	private GenericBusinessKeyGenerator businessKeyCreator;
+	private CaseInstanceCreateService caseInstanceCreateService;
 
 	@Autowired
-	private ProcessInstanceService processInstanceService;
+	private ProcessStartEventExecutor processStartEventExecutor;
 
 	@Override
 	public List<CaseInstance> find() throws Exception {
@@ -36,33 +33,28 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 		return dataRepository.getCaseInstance(businessKey);
 	}
 
-	public CaseInstance create(final CaseInstance caseInstanceParam) throws Exception {
-		CaseDefinition caseDefinition = dataRepository.getCaseDefinition(caseInstanceParam.getCaseDefinitionId());
-		if (caseDefinition == null) {
-			throw new CaseDefinitionNotFoundException();
-		}
+	@Override
+	// TODO how to embrace in a single transation?
+	public CaseInstance create(CaseInstance caseInstance) throws Exception {
 
-		String businessKey = businessKeyCreator.generate();
+		CaseDefinition caseDefinition = dataRepository.getCaseDefinition(caseInstance.getCaseDefinitionId());
 
-		List<ProcessInstance> processInstances = new ArrayList<>();
-		caseDefinition.getOnCreateProcessDefinitions().forEach(procDefKey -> {
-			processInstances.add(processInstanceService.create(procDefKey, businessKey));
-		});
+		CaseInstance newCaseInstance = caseInstanceCreateService.create(caseInstance);
 
-		CaseInstance caseInstance = CaseInstance.builder().businessKey(businessKey)
-				.attributes(caseInstanceParam.getAttributes()).caseDefinitionId(caseDefinition.getId()).build();
-		caseInstance.addAllProcessInstances(processInstances);
+		caseDefinition.getPostCaseCreateHook().getCaseEvents().forEach(event -> processStartEventExecutor
+				.execute((ProcessStartEvent) event, newCaseInstance.getBusinessKey()));
 
-		dataRepository.saveCaseInstance(caseInstance);
-
-		return caseInstance;
+		return newCaseInstance;
 	}
 
+	// TODO Should be a generic update?
 	@Override
 	public void updateStatus(final String businessKey, final String newStatus) throws Exception {
 		dataRepository.updateCaseStatus(businessKey, newStatus);
 	}
 
+	// TODO should not allow to delete. Close or archive instead
+	// Should ensure only one case is deleted - BusinessKey should be UNIQUE
 	@Override
 	public void delete(final String businessKey) throws Exception {
 		List<CaseInstance> caseInstanceList = dataRepository.findCaseInstances().stream()
@@ -72,14 +64,28 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 			throw new CaseInstanceNotFoundException();
 		}
 
+		// TODO close/archive process in PostClose/Archive hook
+
 		caseInstanceList.forEach(o -> {
-			processInstanceService.delete(o.getProcessesInstances());
 			try {
-				dataRepository.deleteCase(o);
+				dataRepository.deleteCaseInstance(o);
 			} catch (Exception e) {
 				// TODO error handling
 				e.printStackTrace();
 			}
 		});
 	}
+
+	public void setDataRepository(DataRepository dataRepository) {
+		this.dataRepository = dataRepository;
+	}
+
+	public void setCaseInstanceCreateService(CaseInstanceCreateService caseInstanceCreateService) {
+		this.caseInstanceCreateService = caseInstanceCreateService;
+	}
+	
+	public void setProcessStartEventExecutor(ProcessStartEventExecutor processStartEventExecutor) {
+		this.processStartEventExecutor = processStartEventExecutor;
+	}
+
 }
