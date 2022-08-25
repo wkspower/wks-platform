@@ -13,7 +13,7 @@ import org.junit.Test;
 import com.mmc.bpm.client.cases.businesskey.GenericBusinessKeyGenerator;
 import com.mmc.bpm.client.cases.definition.CaseDefinition;
 import com.mmc.bpm.client.cases.definition.CaseDefinitionServiceImpl;
-import com.mmc.bpm.client.cases.definition.event.ProcessStartEventExecutor;
+import com.mmc.bpm.client.cases.definition.event.CaseEventExecutor;
 import com.mmc.bpm.client.repository.DataBaseConfig;
 import com.mmc.bpm.client.repository.JDBCDataRepository;
 
@@ -54,9 +54,9 @@ public class CaseInstanceServiceImplTest {
 		caseInstanceCreateServiceImpl.setDataRepository(jdbcDataRepository);
 		caseInstanceCreateServiceImpl.setBusinessKeyCreator(new GenericBusinessKeyGenerator());
 		caseInstanceServiceImpl.setCaseInstanceCreateService(caseInstanceCreateServiceImpl);
-		caseInstanceServiceImpl.setProcessStartEventExecutor(new ProcessStartEventExecutor());
+		caseInstanceServiceImpl.setCaseEventExecutor(new CaseEventExecutor());
 
-		CaseInstance caseInstanceParam = CaseInstance.builder().caseDefinitionId("1").id("1").build();
+		CaseInstance caseInstanceParam = CaseInstance.builder().caseDefinitionId("1").businessKey("1").build();
 		
 		//When
 		CaseInstance caseInstance = caseInstanceServiceImpl.create(caseInstanceParam);

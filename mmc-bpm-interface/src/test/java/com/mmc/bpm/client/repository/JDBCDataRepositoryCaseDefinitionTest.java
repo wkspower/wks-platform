@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.mmc.bpm.client.cases.definition.CaseDefinition;
 import com.mmc.bpm.client.cases.definition.event.CaseEvent;
-import com.mmc.bpm.client.cases.definition.event.ProcessStartEvent;
+import com.mmc.bpm.client.cases.definition.event.CaseEventType;
 import com.mmc.bpm.client.cases.definition.hook.create.PostCaseCreateHook;
 
 //TODO create abstract test class for JDBC Repos
@@ -43,10 +43,10 @@ public class JDBCDataRepositoryCaseDefinitionTest {
 	}
 
 	@Test
-	public void getProcessDefinitionTest() throws Exception {
+	public void shouldGetCaseDefinition() throws Exception {
 
 		// Given
-		CaseEvent caseEvent = new ProcessStartEvent("1", "proc-def-key");
+		CaseEvent caseEvent = new CaseEvent("1", "event1", CaseEventType.PROCESS_DELETE, null);
 
 		PostCaseCreateHook postCaseCreateHook = new PostCaseCreateHook();
 		postCaseCreateHook.attach(caseEvent);
@@ -61,12 +61,11 @@ public class JDBCDataRepositoryCaseDefinitionTest {
 		// Then
 		assertEquals("1", caseDefinition.getId());
 		assertEquals("generic-case", caseDefinition.getName());
-		assertEquals("proc-def-key", ((ProcessStartEvent) caseDefinition.getPostCaseCreateHook().getCaseEvents().get(0))
-				.getProcessDefinitionKey());
+		assertEquals("event1", (caseDefinition.getPostCaseCreateHook().getCaseEvents().get(0)).getName());
 	}
 
 	@Test
-	public void createProcessDefinitionTest() throws Exception {
+	public void shouldCreateCaseDefinition() throws Exception {
 
 		CaseDefinition caseDefinition = CaseDefinition.builder().id("1").name("generic-case").build();
 

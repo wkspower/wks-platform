@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.mmc.bpm.client.cases.definition.CaseDefinition;
-import com.mmc.bpm.client.cases.definition.event.ProcessStartEvent;
-import com.mmc.bpm.client.cases.definition.event.ProcessStartEventExecutor;
+import com.mmc.bpm.client.cases.definition.event.CaseEventExecutor;
 import com.mmc.bpm.client.repository.DataRepository;
 
 @Component
@@ -21,7 +20,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	private CaseInstanceCreateService caseInstanceCreateService;
 
 	@Autowired
-	private ProcessStartEventExecutor processStartEventExecutor;
+	private CaseEventExecutor caseEventExecutor;
 
 	@Override
 	public List<CaseInstance> find() throws Exception {
@@ -41,8 +40,8 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 		CaseInstance newCaseInstance = caseInstanceCreateService.create(caseInstance);
 
-		caseDefinition.getPostCaseCreateHook().getCaseEvents().forEach(event -> processStartEventExecutor
-				.execute((ProcessStartEvent) event, newCaseInstance.getBusinessKey()));
+		caseDefinition.getPostCaseCreateHook().getCaseEvents()
+				.forEach(event -> caseEventExecutor.execute(event, newCaseInstance.getBusinessKey()));
 
 		return newCaseInstance;
 	}
@@ -83,9 +82,8 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	public void setCaseInstanceCreateService(CaseInstanceCreateService caseInstanceCreateService) {
 		this.caseInstanceCreateService = caseInstanceCreateService;
 	}
-	
-	public void setProcessStartEventExecutor(ProcessStartEventExecutor processStartEventExecutor) {
-		this.processStartEventExecutor = processStartEventExecutor;
-	}
 
+	public void setCaseEventExecutor(CaseEventExecutor caseEventExecutor) {
+		this.caseEventExecutor = caseEventExecutor;
+	}
 }

@@ -27,7 +27,7 @@ public class CaseUpdateHandler implements ExternalTaskHandler {
 			caseInstanceService.updateStatus(externalTask.getBusinessKey(), externalTask.getActivityId());
 			externalTaskService.complete(externalTask);
 		} catch (Exception e) {
-			// error handling
+			//TODO error handling
 			e.printStackTrace();
 		}
 

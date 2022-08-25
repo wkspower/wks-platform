@@ -40,7 +40,7 @@ public class SmokeTest {
 	
 
 	@Test
-	public void contextLoads() throws Exception {
+	public void shouldLoadContexts() throws Exception {
 		assertThat(caseController).isNotNull();
 		assertThat(caseDefinitionController).isNotNull();
 		assertThat(formController).isNotNull();

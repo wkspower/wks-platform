@@ -67,7 +67,8 @@ TabPanel.propTypes = {
 };
 
 const eventsColumns: GridColDef[] = [
-    { field: 'processDefinitionKey', headerName: 'processDefinitionKey', width: 200 }
+    { field: 'id', headerName: 'Id', width: 50 },
+    { field: 'type', headerName: 'Type', width: 250 },
 ];
 
 export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
@@ -119,15 +120,19 @@ export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
                         <Tab label="Data Structure" {...a11yProps(1)} />
                         <Tab label="Validation Rules" {...a11yProps(2)} />
                         <Tab label="States" {...a11yProps(3)} />
-                        <Tab label="Forms" {...a11yProps(4)} />
-                        <Tab label="Search Layouts" {...a11yProps(5)} />
-                        <Tab label="Events" {...a11yProps(6)} />
-                        <Tab label="Listeners" {...a11yProps(7)} />
-                        <Tab label="Access Control" {...a11yProps(8)} />
-                        <Tab label="Auditing" {...a11yProps(9)} />
-                        <Tab label="API" {...a11yProps(10)} />
-                        <Tab label="Deployment" {...a11yProps(11)} />
-                        <Tab label="Versions" {...a11yProps(12)} />
+                        <Tab label="Priority & Severity" {...a11yProps(4)} />
+                        <Tab label="Forms" {...a11yProps(5)} />
+                        <Tab label="Search Layouts" {...a11yProps(6)} />
+                        <Tab label="Events" {...a11yProps(7)} />
+                        <Tab label="Listeners" {...a11yProps(8)} />
+                        <Tab label="Access Control" {...a11yProps(9)} />
+                        <Tab label="Auditing" {...a11yProps(10)} />
+                        <Tab label="API" {...a11yProps(11)} />
+                        <Tab label="Deployment" {...a11yProps(12)} />
+                        <Tab label="Versions" {...a11yProps(13)} />
+                        
+                        <Tab label="Source Code" {...a11yProps(14)} />
+
                     </Tabs>
                 </Box>
 
@@ -146,7 +151,7 @@ export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
                 </TabPanel>
 
                 {/* Events tab */}
-                <TabPanel value={tabValue} index={6}>
+                <TabPanel value={tabValue} index={7}>
                     <div>
                         <div style={{ float: 'left', padding: '20px', borderStyle: 'solid', borderWidth: 'thin' }}>
                             <TreeView

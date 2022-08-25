@@ -52,7 +52,7 @@ public class JDBCDataRepositoryCaseInstanceTest {
 		caseAttributes.add(CaseAttribute.builder().name("name").value("aName").build());
 		caseAttributes.add(CaseAttribute.builder().name("value").value("aValue").build());
 
-		CaseInstance caseInstance = CaseInstance.builder().id("1").businessKey("1").attributes(caseAttributes).build();
+		CaseInstance caseInstance = CaseInstance.builder().businessKey("1").attributes(caseAttributes).build();
 
 		// When
 		jdbcDataRepository.saveCaseInstance(caseInstance);
@@ -84,7 +84,7 @@ public class JDBCDataRepositoryCaseInstanceTest {
 	}
 
 	@Test
-	public void updateStatusTest() throws Exception {
+	public void shouldUpdateStatus() throws Exception {
 
 		CaseInstance caseInstance = CaseInstance.builder().businessKey("BK-01").build();
 
