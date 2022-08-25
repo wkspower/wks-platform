@@ -13,10 +13,6 @@ import lombok.ToString;
 @ToString
 public class CaseInstance {
 
-	@Getter(value = AccessLevel.NONE)
-	@Setter(value = AccessLevel.NONE)
-	private String id;
-
 	private String businessKey;
 
 	private String caseDefinitionId;
@@ -29,10 +25,6 @@ public class CaseInstance {
 
 	public String getId() {
 		return businessKey;
-	}
-
-	public void setId(String id) {
-		this.id = businessKey;
 	}
 
 	public void setStatus(String status) {

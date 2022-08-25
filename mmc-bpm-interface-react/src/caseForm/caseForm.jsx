@@ -69,7 +69,7 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
         if (componentsParam) {
             setFormComponents(componentsParam.components);
         } else if (aCase) {
-            fetch('http://localhost:8081/case/' + aCase.id)
+            fetch('http://localhost:8081/case/' + aCase.businessKey)
                 .then(response => response.json())
                 .then(data => {
                     setFormComponents(data.attributes);
@@ -81,7 +81,7 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
     }, [aCase, componentsParam]);
 
     const handleInputChange = function (event) {
-        setFormComponents({ ...formComponents, [event.target.id]: { value: event.target.value } });
+        setFormComponents({ ...formComponents, [event.target.businessKey]: { value: event.target.value } });
     }
 
     const handleChange = (event, newValue) => {
@@ -107,7 +107,7 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                             <CloseIcon />
                         </IconButton>
                         <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-                            <div>{aCase?.id}</div>
+                            <div>{aCase?.businessKey}</div>
                         </Typography>
                         <Button autoFocus color="inherit">
                             Edit
@@ -139,7 +139,7 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                 <TabPanel value={value} index={1}>
                     {/* Task List  */}
                     <div style={{ display: 'grid', padding: '10px' }}>
-                        <TaskList businessKey={aCase.id} />
+                        <TaskList businessKey={aCase.businessKey} />
                     </div>
                 </TabPanel>
             </Dialog>

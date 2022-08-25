@@ -18,7 +18,7 @@ public class GsonConfiguration {
 	public GsonBuilder gsonBuilder(List<GsonBuilderCustomizer> customizers) {
 
 		GsonBuilder builder = new GsonBuilder();
-		builder.registerTypeAdapter(CaseEvent.class, new CaseEventDeserializer<CaseEvent>());
+		builder.registerTypeAdapter(CaseEvent.class, new CaseEventDeserializer());
 		builder.registerTypeAdapter(CaseEvent.class, new CaseEventSerializer<CaseEvent>());
 		return builder;
 	}

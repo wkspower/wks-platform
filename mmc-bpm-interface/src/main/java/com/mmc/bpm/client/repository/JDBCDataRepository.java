@@ -207,7 +207,7 @@ public class JDBCDataRepository implements DataRepository {
 				String name = resultSet.getString("name");
 
 				final GsonBuilder builder = new GsonBuilder();
-				builder.registerTypeAdapter(CaseEvent.class, new CaseEventDeserializer<CaseEvent>());
+				builder.registerTypeAdapter(CaseEvent.class, new CaseEventDeserializer());
 				Gson gson = builder.create();
 				PostCaseCreateHook postCaseCreateHook = gson.fromJson(resultSet.getString("post_case_create_hook"),
 						new TypeToken<PostCaseCreateHook>() {
@@ -237,7 +237,7 @@ public class JDBCDataRepository implements DataRepository {
 
 				// Adding custom deserializers
 				final GsonBuilder builder = new GsonBuilder();
-				builder.registerTypeAdapter(CaseEvent.class, new CaseEventDeserializer<CaseEvent>());
+				builder.registerTypeAdapter(CaseEvent.class, new CaseEventDeserializer());
 				Gson gson = builder.create();
 				PostCaseCreateHook postCaseCreateHook = gson.fromJson(resultSet.getString("post_case_create_hook"),
 						new TypeToken<PostCaseCreateHook>() {

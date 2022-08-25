@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonObject;
 import com.mmc.bpm.engine.camunda.client.ProcessEngineClient;
 import com.mmc.bpm.engine.model.spi.ProcessInstance;
 
@@ -38,6 +39,10 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	@Override
 	public List<ProcessInstance> find(String businessKey) {
 		return Arrays.asList(processEngineClient.findProcessInstances(businessKey));
+	}
+	
+	public void setProcessEngineClient(ProcessEngineClient processEngineClient) {
+		this.processEngineClient = processEngineClient;
 	}
 
 }
