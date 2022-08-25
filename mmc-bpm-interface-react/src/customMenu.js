@@ -32,7 +32,7 @@ export const CustomMenu = () => (
 
         {/* Cases and Processes Management */}
         <Menu.Item to="/dataDomains" primaryText="Data Domains" />
-        <Menu.Item to="/eventType" primaryText="Event Type" />
+        <Menu.Item to="/eventTypeList" primaryText="Event Type" />
         <Menu.Item to="/listenerType" primaryText="Listener Type" />
         <Menu.Item to="/caseDefList" primaryText="Cases Definitions" />
         <Menu.Item to="/processEngines" primaryText="Processes Engines" />

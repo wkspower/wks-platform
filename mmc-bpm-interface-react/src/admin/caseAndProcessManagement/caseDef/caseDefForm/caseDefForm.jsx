@@ -67,7 +67,7 @@ TabPanel.propTypes = {
 };
 
 const eventsColumns: GridColDef[] = [
-    { field: 'id', headerName: 'Id', width: 50 },
+    { field: 'name', headerName: 'Name', width: 200 },
     { field: 'type', headerName: 'Type', width: 250 },
 ];
 
@@ -189,7 +189,7 @@ export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
                             </TreeView>
                         </div>
 
-                        <div style={{ float: 'left', padding: '10px', height: 400, width: 400 }}>
+                        <div style={{ float: 'left', padding: '10px', height: 400, width: 500 }}>
                             {hook && aCaseDef[hook].caseEvents &&
                                 <DataGrid
                                     rows={aCaseDef[hook].caseEvents}
