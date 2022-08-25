@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mmc.bpm.client.process.engine.ProcessEngineService;
 
 @RestController
-public class HealthCheck {
+public class HealthCheckController {
 
 	@Autowired
 	private ProcessEngineService processEngineService;
