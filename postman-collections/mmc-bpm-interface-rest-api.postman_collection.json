@@ -194,7 +194,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"id\":  \"1\",\r\n    \"name\": \"generic-case\",\r\n    \"onCreateProcessDefinitions\": [\"genericCaseProcess\"]\r\n}",
+							"raw": "{\r\n    \"id\":  \"1\",\r\n    \"name\": \"journal creation\",\r\n    \"postCaseCreateHook\": {\r\n        \"caseEvents\" : [\r\n            {\r\n                \"id\": \"1\",\r\n                \"name\": \"startGenericProcessEvent\",\r\n                \"type\": \"PROCESS_START_EVENT_TYPE\",\r\n                \"eventPayload\": {\r\n                    \"processDefinitionKey\": \"genericCaseProcess\"\r\n                }\r\n            }\r\n        ]\r\n    }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -455,6 +455,28 @@
 									"key": "processInstanceId",
 									"value": "e42650af-18a5-11ed-933a-0242ac110002"
 								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "caseEventType",
+			"item": [
+				{
+					"name": "caseEventType",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/case-event-type",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"case-event-type"
 							]
 						}
 					},

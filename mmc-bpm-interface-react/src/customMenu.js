@@ -13,6 +13,7 @@ export const CustomMenu = () => (
             <Menu.Item to="/email" primaryText="Email" />
             <Menu.Item to="/notification" primaryText="Notification" />
             <Menu.Item to="/integrations" primaryText="Integrations" />
+            <Menu.Item to="/webHooks" primaryText="WebHooks" />
             <Menu.Item to="/customCode" primaryText="Custom Code" />
             <Menu.Item to="/environments" primaryText="Environments" />
             <Menu.Item to="/jobs" primaryText="Jobs" />
