@@ -95,7 +95,13 @@ export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
                 </AppBar>
 
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example">
+                    <Tabs
+                        value={tabValue}
+                        onChange={handleTabChange}
+                        variant="scrollable"
+                        scrollButtons="auto"
+                        aria-label="basic tabs example"
+                    >
                         <Tab label="General" {...a11yProps(0)} />
                         <Tab label="Data Structure" {...a11yProps(1)} />
                         <Tab label="Validation Rules" {...a11yProps(2)} />
