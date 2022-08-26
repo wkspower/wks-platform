@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.mmc.bpm</groupId>
-	<artifactId>mmc-bpm-platform</artifactId>
+	<groupId>com.wks</groupId>
+	<artifactId>platform</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>mmc-bpm-platform</name>
+	<name>wks-platform</name>
 
 	<properties>
 		<project.javadoc.outputDirectory>website/static/javadoc</project.javadoc.outputDirectory>
@@ -44,16 +44,16 @@
 	</dependencyManagement>
 
 	<modules>
-		<module>mmc-bpm-interface</module>
+		<module>case-engine</module>
 
-		<module>mmc-bpm-interface-shell</module>
-		<module>mmc-bpm-interface-rest-api</module>
+		<module>case-engine-shell</module>
+		<module>case-engine-rest-api</module>
 
-		<module>mmc-bpm-rest-client</module>
+		<module>wks-rest-client</module>
 
-		<module>mmc-bpm-engine-interface</module>
-		<module>mmc-bpm-engine-camunda-client</module>
-		<module>mmc-bpm-engine-camunda-external-service-client</module>
+		<module>bpm-engine-interface</module>
+		<module>bpm-engine-camunda-client</module>
+		<module>bpm-engine-camunda-external-service-client</module>
 	</modules>
 
 	<build>
