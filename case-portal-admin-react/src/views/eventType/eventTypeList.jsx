@@ -21,8 +21,13 @@ export const EventTypeList = () => {
     }, []);
 
     return (
-        <div style={{ height: 650, width: '100%' }}>
-            <DataGrid rows={eventTypes} columns={columns} pageSize={10} rowsPerPageOptions={[10]} getRowId={(row) => row.code} />
-        </div>
+        <DataGrid
+            sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
+            rows={eventTypes}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[10]}
+            getRowId={(row) => row.code}
+        />
     );
 };

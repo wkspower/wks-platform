@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { TaskForm } from '../taskForm/taskForm';
+import { Box } from '@mui/material';
 
 import './taskList.css';
 
@@ -51,9 +52,15 @@ export const TaskList = ({ tasksParam, businessKey }) => {
     };
 
     return (
-        <div style={{ height: 650, width: '100%' }}>
-            <DataGrid rows={tasks} columns={columns} pageSize={10} rowsPerPageOptions={[10]} />
+        <Box>
+            <DataGrid
+                sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
+                rows={tasks}
+                columns={columns}
+                pageSize={10}
+                rowsPerPageOptions={[10]}
+            />
             <TaskForm task={task} handleClose={handleClose} open={open} />
-        </div>
+        </Box>
     );
 };

@@ -29,6 +29,85 @@ const MainRoutes = {
             path: '/',
             element: <DashboardDefault />
         },
+
+        {
+            path: 'dashboard',
+            children: [
+                {
+                    path: 'default',
+                    element: <DashboardDefault />
+                }
+            ]
+        },
+
+        {
+            path: 'system',
+            children: [
+                {
+                    path: 'look-and-feel',
+                    element: <DashboardDefault />
+                },
+                {
+                    path: 'email',
+                    element: <DashboardDefault />
+                },
+                {
+                    path: 'notification',
+                    element: <DashboardDefault />
+                },
+                {
+                    path: 'webhook',
+                    element: <DashboardDefault />
+                },
+                {
+                    path: 'environment',
+                    element: <DashboardDefault />
+                },
+                {
+                    path: 'job',
+                    element: <DashboardDefault />
+                },
+                {
+                    path: 'log',
+                    element: <DashboardDefault />
+                },
+                {
+                    path: 'monitoring',
+                    element: <DashboardDefault />
+                }
+            ]
+        },
+
+        {
+            path: 'settings',
+            children: [
+                {
+                    path: 'company-settings',
+                    element: <DashboardDefault />
+                },
+                {
+                    path: 'multi-tenancy',
+                    element: <DashboardDefault />
+                },
+                {
+                    path: 'indentity',
+                    element: <DashboardDefault />
+                },
+                {
+                    path: 'security',
+                    element: <DashboardDefault />
+                },
+                {
+                    path: 'privacy-settings',
+                    element: <DashboardDefault />
+                },
+                {
+                    path: 'user-engagement',
+                    element: <DashboardDefault />
+                }
+            ]
+        },
+
         {
             path: 'case-definition',
             element: <CaseDefList />
@@ -38,63 +117,25 @@ const MainRoutes = {
             element: <EventTypeList />
         },
         {
-            path: 'dashboard',
-            children: [
-                {
-                    path: 'default',
-                    element: <DashboardDefault />
-                }
-            ]
+            path: 'listener-type-definition',
+            element: <DashboardDefault />
+        },
+        {
+            path: 'data-domain',
+            element: <DashboardDefault />
+        },
+        {
+            path: 'process-engine',
+            element: <DashboardDefault />
+        },
+        {
+            path: 'task-definition',
+            element: <DashboardDefault />
+        },
+        {
+            path: 'export',
+            element: <DashboardDefault />
         }
-        // {
-        //     path: 'utils',
-        //     children: [
-        //         {
-        //             path: 'util-typography',
-        //             element: <UtilsTypography />
-        //         }
-        //     ]
-        // },
-        // {
-        //     path: 'utils',
-        //     children: [
-        //         {
-        //             path: 'util-color',
-        //             element: <UtilsColor />
-        //         }
-        //     ]
-        // },
-        // {
-        //     path: 'utils',
-        //     children: [
-        //         {
-        //             path: 'util-shadow',
-        //             element: <UtilsShadow />
-        //         }
-        //     ]
-        // },
-        // {
-        //     path: 'icons',
-        //     children: [
-        //         {
-        //             path: 'tabler-icons',
-        //             element: <UtilsTablerIcons />
-        //         }
-        //     ]
-        // },
-        // {
-        //     path: 'icons',
-        //     children: [
-        //         {
-        //             path: 'material-icons',
-        //             element: <UtilsMaterialIcons />
-        //         }
-        //     ]
-        // },
-        // {
-        //     path: 'sample-page',
-        //     element: <SamplePage />
-        // }
     ]
 };
 

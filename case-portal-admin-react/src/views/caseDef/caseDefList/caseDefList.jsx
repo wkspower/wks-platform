@@ -44,7 +44,13 @@ export const CaseDefList = () => {
 
     return (
         <div style={{ height: 650, width: '100%' }}>
-            <DataGrid rows={caseDefs} columns={columns} pageSize={10} rowsPerPageOptions={[10]} />
+            <DataGrid
+                sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
+                rows={caseDefs}
+                columns={columns}
+                pageSize={10}
+                rowsPerPageOptions={[10]}
+            />
             {aCaseDef && <CaseDefForm aCaseDef={aCaseDef} handleClose={handleCloseCaseDefForm} open={openCaseDefForm} />}
         </div>
     );

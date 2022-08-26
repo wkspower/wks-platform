@@ -110,7 +110,14 @@ export const CaseList = (casesParam) => {
                     })}
                 </Menu>
             </div>
-            <DataGrid rows={cases} columns={columns} pageSize={10} rowsPerPageOptions={[10]} getRowId={(row) => row.businessKey} />
+            <DataGrid
+                sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
+                rows={cases}
+                columns={columns}
+                pageSize={10}
+                rowsPerPageOptions={[10]}
+                getRowId={(row) => row.businessKey}
+            />
             {aCase && <CaseForm aCase={aCase} handleClose={handleCloseCaseForm} open={openCaseForm} />}
 
             <NewCaseForm handleClose={handleCloseNewCaseForm} open={openNewCaseForm} />

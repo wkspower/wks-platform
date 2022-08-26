@@ -108,7 +108,7 @@ const utilities = {
                     breadcrumbs: false
                 },
                 {
-                    id: 'Identity',
+                    id: 'indentity',
                     title: 'Identity',
                     type: 'item',
                     url: '/settings/indentity',
