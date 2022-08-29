@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan({ "com.wks.caseengine", "com.wks.bpm.engine", "com.wks.bpm.rest.client" })
+@ComponentScan({ "com.wks.caseengine", "com.wks.bpm.engine", "com.wks.rest.client" })
 public class ExternalServiceClientApplication {
 
 	public static void main(final String[] args) {
