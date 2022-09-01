@@ -1,5 +1,5 @@
 {
-    "name": "case-portal",
+    "name": "case-portal-admin",
     "version": "1.0.0",
     "private": true,
     "homepage": "https://www.wkspower.com",
@@ -10,7 +10,6 @@
         "@mui/icons-material": "^5.8.4",
         "@mui/lab": "^5.0.0-alpha.88",
         "@mui/material": "^5.8.6",
-        "@mui/styles": "^5.8.6",
         "@mui/system": "^5.8.6",
         "@mui/utils": "^5.8.6",
         "@mui/x-data-grid": "^5.16.0",
