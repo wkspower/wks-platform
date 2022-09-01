@@ -5,6 +5,7 @@ import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import { CaseDefList } from 'views/caseDef/caseDefList/caseDefList';
 import { EventTypeList } from 'views/eventType/eventTypeList';
+import { FormList } from 'views/form/formList';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -131,6 +132,10 @@ const MainRoutes = {
         {
             path: 'task-definition',
             element: <DashboardDefault />
+        },
+        {
+            path: 'form',
+            element: <FormList />
         },
         {
             path: 'export',

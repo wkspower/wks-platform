@@ -1,5 +1,7 @@
 package com.wks.bpm.engine.model.spi;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,13 +15,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FormComponent {
-	
-	private String id;
-	private String key;
-	private String type;
-	
-	private String text;
-	private String label;
+public class TaskForm {
 
+	private List<TaskFormComponent> components;
 }

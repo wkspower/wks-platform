@@ -6,17 +6,15 @@ import java.util.stream.Collectors;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.form.Form;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 public class InMemoryDataRepository implements DataRepository {
 
 	private List<CaseInstance> caseInstancesRepo = new ArrayList<>();
 
 	private List<CaseDefinition> caseDefinitionsRepo = new ArrayList<>();
+
+	private List<Form> forms = new ArrayList<>();
 
 	@Override
 	public List<CaseInstance> findCaseInstances() {
@@ -66,6 +64,23 @@ public class InMemoryDataRepository implements DataRepository {
 	public void deleteCaseDefinition(final String caseDefId) {
 		caseDefinitionsRepo
 				.remove(caseDefinitionsRepo.stream().filter(o -> caseDefId.equals(o.getId())).findFirst().get());
+	}
+
+	@Override
+	public Form getForm(final String formKey) {
+		// TODO handle more than 1 result
+		return forms.stream().filter(form -> formKey.equals(form.getKey())).findFirst().get();
+	}
+
+	@Override
+	public void saveForm(final Form form) {
+		forms.add(form);
+	}
+
+	@Override
+	public List<Form> findForms() {
+		// TODO Auto-generated method stub
+		return forms;
 	}
 
 }

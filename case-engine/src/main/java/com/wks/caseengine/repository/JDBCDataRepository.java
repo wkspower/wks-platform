@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
@@ -22,6 +23,8 @@ import com.wks.caseengine.cases.definition.hook.create.PostCaseCreateHook;
 import com.wks.caseengine.cases.instance.CaseAttribute;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
+import com.wks.caseengine.form.Form;
+import com.wks.caseengine.form.FormNotFoundException;
 
 @Component
 public class JDBCDataRepository implements DataRepository {
@@ -40,6 +43,7 @@ public class JDBCDataRepository implements DataRepository {
 	public void postConstruct() throws Exception {
 		createCaseDefinitionTable();
 		createCaseInstanceTable();
+		createFormTable();
 	}
 
 	private void createCaseInstanceTable() throws Exception {
@@ -71,6 +75,23 @@ public class JDBCDataRepository implements DataRepository {
 					+ "id varchar(255) UNIQUE,"
 
 					+ "name varchar(50));");
+
+		} catch (SQLException ex) {
+			// TODO error handling
+			throw new Exception(ex);
+		}
+	}
+
+	private void createFormTable() throws Exception {
+		try (var statement = connection.createStatement();) {
+
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS form ("
+
+					+ "description varchar(255),"
+
+					+ "components CLOB,"
+
+					+ "form_key varchar(255) UNIQUE);");
 
 		} catch (SQLException ex) {
 			// TODO error handling
@@ -288,6 +309,80 @@ public class JDBCDataRepository implements DataRepository {
 			throw new Exception(ex);
 		}
 
+	}
+
+	@Override
+	public Form getForm(String formKey) throws Exception {
+
+		try (var statement = connection.createStatement();) {
+
+			ResultSet resultSet = statement.executeQuery(
+					"SELECT form_key, components, description, FROM form where form_key = '" + formKey + "';");
+
+			while (resultSet.next()) {
+				String key = resultSet.getString("form_key");
+				String description = resultSet.getString("description");
+
+				Gson gson = new Gson();
+				JsonArray components = gson.fromJson(resultSet.getString("components"), new TypeToken<JsonArray>() {
+				}.getType());
+
+				return Form.builder().key(key).description(description).components(components).build();
+			}
+
+		}
+
+		throw new FormNotFoundException();
+	}
+
+	@Override
+	public void saveForm(Form form) throws Exception {
+		Gson gson = new Gson();
+		String componentsJSONString = gson.toJson(form.getComponents());
+
+		try (var statement = connection.createStatement();) {
+
+			statement.executeUpdate("INSERT INTO form (form_key, description, components) VALUES ("
+
+					+ "\'" + form.getKey() + "\'" + ", "
+
+					+ "\'" + form.getDescription() + "\'" + ", "
+
+					+ "\'" + componentsJSONString + "\'"
+
+					+ ");");
+
+		} catch (SQLException ex) {
+			// TODO error handling
+			throw new Exception(ex);
+		}
+	}
+
+	@Override
+	public List<Form> findForms() throws Exception {
+
+		List<Form> forms = new ArrayList<>();
+
+		try (var statement = connection.createStatement();) {
+
+			ResultSet resultSet = statement.executeQuery("SELECT form_key, components, description FROM form;");
+
+			while (resultSet.next()) {
+				String key = resultSet.getString("form_key");
+				String description = resultSet.getString("description");
+
+				Gson gson = new Gson();
+				JsonArray components = gson.fromJson(resultSet.getString("components"), new TypeToken<JsonArray>() {
+				}.getType());
+
+				forms.add(Form.builder().key(key).description(description).components(components).build());
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			throw new Exception(e);
+		}
+
+		return forms;
 	}
 
 }

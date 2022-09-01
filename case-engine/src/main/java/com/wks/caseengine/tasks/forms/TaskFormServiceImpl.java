@@ -1,19 +1,19 @@
-package com.wks.caseengine.client.forms;
+package com.wks.caseengine.tasks.forms;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.bpm.engine.camunda.client.ProcessEngineClient;
-import com.wks.bpm.engine.model.spi.Form;
+import com.wks.bpm.engine.model.spi.TaskForm;
 
 @Component
-public class FormServiceImpl implements FormService {
+public class TaskFormServiceImpl implements FormTaskService {
 
 	@Autowired
 	private ProcessEngineClient processEngineClient;
 
 	@Override
-	public Form getTaskForm(String taskId) {
+	public TaskForm getTaskForm(String taskId) {
 		return processEngineClient.getTaskForm(taskId);
 	}
 
