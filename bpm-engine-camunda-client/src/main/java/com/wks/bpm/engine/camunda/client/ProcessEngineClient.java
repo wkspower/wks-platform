@@ -2,7 +2,7 @@ package com.wks.bpm.engine.camunda.client;
 
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.model.spi.Deployment;
-import com.wks.bpm.engine.model.spi.Form;
+import com.wks.bpm.engine.model.spi.TaskForm;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
@@ -37,7 +37,7 @@ public interface ProcessEngineClient {
 
 	public void complete(String taskId, JsonObject variables);
 
-	public Form getTaskForm(final String taskId);
+	public TaskForm getTaskForm(final String taskId);
 
 	
 	public String findVariables(final String processInstanceId);

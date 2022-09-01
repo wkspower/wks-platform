@@ -13,6 +13,7 @@ import com.wks.caseengine.rest.server.FormController;
 import com.wks.caseengine.rest.server.HealthCheckController;
 import com.wks.caseengine.rest.server.MessageController;
 import com.wks.caseengine.rest.server.TaskController;
+import com.wks.caseengine.rest.server.TaskFormController;
 import com.wks.caseengine.rest.server.VariableController;
 
 @SpringBootTest
@@ -25,7 +26,7 @@ public class SmokeTest {
 	private CaseDefinitionController caseDefinitionController;
 
 	@Autowired
-	private FormController formController;
+	private TaskFormController taskFormController;
 
 	@Autowired
 	private HealthCheckController healthCheckController;
@@ -42,15 +43,19 @@ public class SmokeTest {
 	@Autowired
 	private CaseEventTypeController caseEventTypeController;
 
+	@Autowired
+	private FormController formController;
+
 	@Test
 	public void shouldLoadContexts() throws Exception {
 		assertThat(caseController).isNotNull();
 		assertThat(caseDefinitionController).isNotNull();
-		assertThat(formController).isNotNull();
+		assertThat(taskFormController).isNotNull();
 		assertThat(healthCheckController).isNotNull();
 		assertThat(messageController).isNotNull();
 		assertThat(taskController).isNotNull();
 		assertThat(variableController).isNotNull();
 		assertThat(caseEventTypeController).isNotNull();
+		assertThat(formController).isNotNull();
 	}
 }

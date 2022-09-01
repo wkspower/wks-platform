@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.camunda.client.ProcessEngineClient;
 import com.wks.bpm.engine.model.spi.Deployment;
-import com.wks.bpm.engine.model.spi.Form;
+import com.wks.bpm.engine.model.spi.TaskForm;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
@@ -72,7 +72,7 @@ public class MockProcessEngineClient implements ProcessEngineClient {
 	}
 
 	@Override
-	public Form getTaskForm(String taskId) {
+	public TaskForm getTaskForm(String taskId) {
 		return null;
 	}
 

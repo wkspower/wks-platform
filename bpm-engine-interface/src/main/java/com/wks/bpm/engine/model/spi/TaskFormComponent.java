@@ -13,10 +13,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FormRef {
-
+public class TaskFormComponent {
+	
+	private String id;
 	private String key;
-	private String binding;
-	private String version;
+	private String type;
+	
+	private String text;
+	private String label;
 
 }

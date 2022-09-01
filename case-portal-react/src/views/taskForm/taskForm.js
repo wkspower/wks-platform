@@ -36,7 +36,7 @@ export const TaskForm = ({ open, handleClose, task, componentsParam }) => {
             setVariableValues(componentsParam.variables);
             setAssignee('demo');
         } else if (task) {
-            fetch('http://localhost:8081/form/' + task.id)
+            fetch('http://localhost:8081/task-form/' + task.id)
                 .then((response) => response.json())
                 .then((data) => {
                     apiDataFormComponents = data.components;

@@ -186,6 +186,13 @@ const utilities = {
                     breadcrumbs: false
                 },
                 {
+                    id: 'form',
+                    title: 'Forms',
+                    type: 'item',
+                    url: '/form',
+                    breadcrumbs: false
+                },
+                {
                     id: 'export',
                     title: 'Export',
                     type: 'item',
