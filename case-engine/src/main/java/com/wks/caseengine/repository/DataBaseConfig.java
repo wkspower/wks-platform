@@ -15,5 +15,6 @@ import lombok.Setter;
 public class DataBaseConfig {
 
 	private String databaseURL = "jdbc:h2:~/wks_bpm_interface;AUTO_SERVER=TRUE";
+	private String mongoDatabase = "wks-mongo-database";
 
 }
