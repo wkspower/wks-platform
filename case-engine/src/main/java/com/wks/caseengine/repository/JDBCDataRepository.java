@@ -9,8 +9,6 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.stereotype.Component;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -26,7 +24,6 @@ import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.form.Form;
 import com.wks.caseengine.form.FormNotFoundException;
 
-@Component
 public class JDBCDataRepository implements DataRepository {
 
 	private Connection connection;

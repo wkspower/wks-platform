@@ -35,7 +35,7 @@
 									"variable": [
 										{
 											"key": "businessKey",
-											"value": null
+											"value": "GENERIC-CASE--47746"
 										}
 									]
 								}
@@ -65,7 +65,7 @@
 									"variable": [
 										{
 											"key": "businessKey",
-											"value": "DUMMY_BUSINESS_KEY-469"
+											"value": "GENERIC-CASE--47746"
 										}
 									]
 								}
@@ -233,31 +233,36 @@
 			]
 		},
 		{
-			"name": "form",
+			"name": "task-form",
 			"item": [
 				{
-					"name": "form",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/form/:taskId",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"form",
-								":taskId"
-							],
-							"variable": [
-								{
-									"key": "taskId",
-									"value": "792e30cf-13fc-11ed-955e-0242ac110002"
+					"name": "{id}",
+					"item": [
+						{
+							"name": "form",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/task-form/:taskId",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"task-form",
+										":taskId"
+									],
+									"variable": [
+										{
+											"key": "taskId",
+											"value": "792e30cf-13fc-11ed-955e-0242ac110002"
+										}
+									]
 								}
-							]
+							},
+							"response": []
 						}
-					},
-					"response": []
+					]
 				}
 			]
 		},
@@ -477,6 +482,83 @@
 							],
 							"path": [
 								"case-event-type"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "form",
+			"item": [
+				{
+					"name": "{key}",
+					"item": [
+						{
+							"name": "form",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/form/:formKey",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"form",
+										":formKey"
+									],
+									"variable": [
+										{
+											"key": "formKey",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "form",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"key\": \"journal-case-main-form\",\r\n    \"description\": \"Main Form for Journal Case\",\r\n        \"components\": [\r\n        {\r\n            \"title\": \"Cadastro de Prestacao de Contas\",\r\n            \"collapsible\": false,\r\n            \"key\": \"cadastroDePrestacaoDeContas\",\r\n            \"type\": \"panel\",\r\n            \"label\": \"Panel\",\r\n            \"input\": false,\r\n            \"tableView\": false,\r\n            \"components\": [\r\n                {\r\n                    \"label\": \"Columns\",\r\n                    \"columns\": [\r\n                        {\r\n                            \"components\": [\r\n                                {\r\n                                    \"label\": \"Text Field\",\r\n                                    \"tableView\": true,\r\n                                    \"key\": \"textField\",\r\n                                    \"type\": \"textfield\",\r\n                                    \"input\": true\r\n                                }\r\n                            ],\r\n                            \"width\": 3,\r\n                            \"offset\": 0,\r\n                            \"push\": 0,\r\n                            \"pull\": 0,\r\n                            \"size\": \"md\",\r\n                            \"currentWidth\": 3\r\n                        },\r\n                        {\r\n                            \"components\": [\r\n                                {\r\n                                    \"label\": \"Select Boxes\",\r\n                                    \"optionsLabelPosition\": \"right\",\r\n                                    \"tableView\": false,\r\n                                    \"values\": [\r\n                                        {\r\n                                            \"label\": \"1\",\r\n                                            \"value\": \"1\",\r\n                                            \"shortcut\": \"\"\r\n                                        },\r\n                                        {\r\n                                            \"label\": \"2\",\r\n                                            \"value\": \"2\",\r\n                                            \"shortcut\": \"\"\r\n                                        },\r\n                                        {\r\n                                            \"label\": \"3\",\r\n                                            \"value\": \"3\",\r\n                                            \"shortcut\": \"\"\r\n                                        }\r\n                                    ],\r\n                                    \"key\": \"selectBoxes1\",\r\n                                    \"type\": \"selectboxes\",\r\n                                    \"input\": true,\r\n                                    \"inputType\": \"checkbox\"\r\n                                }\r\n                            ],\r\n                            \"width\": 3,\r\n                            \"offset\": 0,\r\n                            \"push\": 0,\r\n                            \"pull\": 0,\r\n                            \"size\": \"md\",\r\n                            \"currentWidth\": 3\r\n                        },\r\n                        {\r\n                            \"components\": [\r\n                                {\r\n                                    \"label\": \"Radio\",\r\n                                    \"optionsLabelPosition\": \"right\",\r\n                                    \"inline\": false,\r\n                                    \"tableView\": false,\r\n                                    \"values\": [\r\n                                        {\r\n                                            \"label\": \"1\",\r\n                                            \"value\": \"1\",\r\n                                            \"shortcut\": \"\"\r\n                                        },\r\n                                        {\r\n                                            \"label\": \"2\",\r\n                                            \"value\": \"2\",\r\n                                            \"shortcut\": \"\"\r\n                                        },\r\n                                        {\r\n                                            \"label\": \"3\",\r\n                                            \"value\": \"3\",\r\n                                            \"shortcut\": \"\"\r\n                                        }\r\n                                    ],\r\n                                    \"key\": \"radio1\",\r\n                                    \"type\": \"radio\",\r\n                                    \"input\": true\r\n                                }\r\n                            ],\r\n                            \"size\": \"md\",\r\n                            \"width\": 3,\r\n                            \"offset\": 0,\r\n                            \"push\": 0,\r\n                            \"pull\": 0,\r\n                            \"currentWidth\": 3\r\n                        }\r\n                    ],\r\n                    \"key\": \"columns\",\r\n                    \"type\": \"columns\",\r\n                    \"input\": false,\r\n                    \"tableView\": false\r\n                },\r\n                {\r\n                    \"label\": \"Text Area\",\r\n                    \"editor\": \"quill\",\r\n                    \"tableView\": true,\r\n                    \"key\": \"textArea\",\r\n                    \"type\": \"textarea\",\r\n                    \"input\": true,\r\n                    \"isUploadEnabled\": false\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"type\": \"button\",\r\n            \"label\": \"Submit\",\r\n            \"key\": \"submit\",\r\n            \"disableOnInvalid\": true,\r\n            \"input\": true,\r\n            \"tableView\": false\r\n        }\r\n    ]\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/form",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"form"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "form",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/form",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"form"
 							]
 						}
 					},
