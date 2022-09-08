@@ -27,6 +27,8 @@ public class CaseDefinition {
 	private String id;
 
 	private String name;
+	
+	private String formKey;
 
 	@Builder.Default
 	private BeforeCaseCreateHook beforeCaseCreateHook = new BeforeCaseCreateHook();

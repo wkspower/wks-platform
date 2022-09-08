@@ -5,7 +5,6 @@ import java.util.List;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.form.Form;
-import com.wks.caseengine.form.FormNotFoundException;
 
 public interface DataRepository {
 
@@ -35,5 +34,7 @@ public interface DataRepository {
 	public void saveForm(final Form form) throws Exception;
 
 	public List<Form> findForms() throws Exception;
+
+	public void deleteForm(final String formKey) throws Exception;
 
 }

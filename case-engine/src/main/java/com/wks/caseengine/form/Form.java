@@ -1,6 +1,6 @@
 package com.wks.caseengine.form;
 
-import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +13,6 @@ public class Form {
 
 	public String key;
 	public String description;
-	public JsonArray components;
+	public JsonObject structure;
 
 }

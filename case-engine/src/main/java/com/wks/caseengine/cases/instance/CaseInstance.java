@@ -2,10 +2,8 @@ package com.wks.caseengine.cases.instance;
 
 import java.util.List;
 
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 @Getter

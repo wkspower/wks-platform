@@ -10,4 +10,6 @@ public interface FormService {
 
 	public List<Form> find() throws Exception;
 
+	public void delete(final String formKey) throws Exception;
+
 }

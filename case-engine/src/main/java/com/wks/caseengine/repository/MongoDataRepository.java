@@ -127,4 +127,10 @@ public class MongoDataRepository implements DataRepository {
 		return formCollection.find().map(o -> gson.fromJson(o.getJson(), Form.class)).into(new ArrayList<>());
 	}
 
+	@Override
+	public void deleteForm(String formKey) throws Exception {
+		Bson filter = Filters.eq("key", formKey);
+		formCollection.deleteMany(filter);
+	}
+
 }
