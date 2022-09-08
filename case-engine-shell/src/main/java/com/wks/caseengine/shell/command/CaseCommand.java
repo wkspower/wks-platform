@@ -1,9 +1,12 @@
 package com.wks.caseengine.shell.command;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
+import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseInstanceService;
 
 @ShellComponent
@@ -21,7 +24,7 @@ public class CaseCommand {
 
 	@ShellMethod(value = "Update Case Instance Status")
 	public String updateCaseStatus(final String businessKey, String status) throws Exception {
-		caseInstanceService.updateStatus(businessKey, status);
+		caseInstanceService.updateStatus(businessKey, CaseStatus.valueOf(status));
 		return "Case Status Updated";
 	}
 
@@ -36,7 +39,7 @@ public class CaseCommand {
 
 		StringBuffer caseInstancesStrings = new StringBuffer();
 
-		caseInstanceService.find()
+		caseInstanceService.find(Optional.empty())
 				.forEach(o -> caseInstancesStrings.append(o).append(System.getProperty("line.separator")));
 
 		return caseInstancesStrings.toString();

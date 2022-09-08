@@ -1,16 +1,19 @@
 package com.wks.caseengine.cases.instance;
 
 import java.util.List;
+import java.util.Optional;
+
+import com.wks.caseengine.cases.definition.CaseStatus;
 
 public interface CaseInstanceService {
-	
-	public List<CaseInstance> find() throws Exception;
 
-	public CaseInstance get(final String businessKey) throws Exception;
+	List<CaseInstance> find(final Optional<CaseStatus> status) throws Exception;
 
-	public CaseInstance create(final CaseInstance caseInstance) throws Exception;
+	CaseInstance get(final String businessKey) throws Exception;
 
-	public void updateStatus(final String businessKey, final String newStatus) throws Exception;
+	CaseInstance create(final CaseInstance caseInstance) throws Exception;
 
-	public void delete(final String businessKey) throws CaseInstanceNotFoundException, Exception;
+	void updateStatus(final String businessKey, final CaseStatus newStatus) throws Exception;
+
+	void delete(final String businessKey) throws CaseInstanceNotFoundException, Exception;
 }

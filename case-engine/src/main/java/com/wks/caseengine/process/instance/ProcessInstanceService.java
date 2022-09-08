@@ -6,14 +6,14 @@ import com.wks.bpm.engine.model.spi.ProcessInstance;
 
 public interface ProcessInstanceService {
 
-	public ProcessInstance create(final String processDefinitionKey);
+	ProcessInstance create(final String processDefinitionKey);
 
-	public ProcessInstance create(final String processDefinitionKey, String businessKey);
+	ProcessInstance create(final String processDefinitionKey, String businessKey);
 
-	public void delete(final List<ProcessInstance> processInstances);
+	void delete(final List<ProcessInstance> processInstances);
 
-	public void delete(final String processInstanceId);
+	void delete(final String processInstanceId);
 
-	public List<ProcessInstance> find(final String businessKey);
+	List<ProcessInstance> find(final String businessKey);
 
 }

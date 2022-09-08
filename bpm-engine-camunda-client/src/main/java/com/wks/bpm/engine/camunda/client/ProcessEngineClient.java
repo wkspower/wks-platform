@@ -2,11 +2,11 @@ package com.wks.bpm.engine.camunda.client;
 
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.model.spi.Deployment;
-import com.wks.bpm.engine.model.spi.TaskForm;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
 import com.wks.bpm.engine.model.spi.Task;
+import com.wks.bpm.engine.model.spi.TaskForm;
 
 /**
  * @author victor.franca
@@ -14,35 +14,30 @@ import com.wks.bpm.engine.model.spi.Task;
  */
 public interface ProcessEngineClient {
 
-	public Deployment[] findDeployments();
+	Deployment[] findDeployments();
 
-	
-	public ProcessDefinition[] findProcessDefinitions();
+	ProcessDefinition[] findProcessDefinitions();
 
+	ProcessInstance[] findProcessInstances(final String businessKey);
 
-	public ProcessInstance[] findProcessInstances(final String businessKey);
+	ProcessInstance startProcess(final String processDefinitionKey);
 
-	public ProcessInstance startProcess(final String processDefinitionKey);
+	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey);
 
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey);
+	void deleteProcessInstance(final String processInstanceId);
 
-	public void deleteProcessInstance(final String processInstanceId);
+	Task[] findTasks(final String processInstanceBusinessKey);
 
-	
-	public Task[] findTasks(final String processInstanceBusinessKey);
+	void claimTask(String taskId, String taskAssignee);
 
-	public void claimTask(String taskId, String taskAssignee);
+	void unclaimTask(String taskId);
 
-	public void unclaimTask(String taskId);
+	void complete(String taskId, JsonObject variables);
 
-	public void complete(String taskId, JsonObject variables);
+	TaskForm getTaskForm(final String taskId);
 
-	public TaskForm getTaskForm(final String taskId);
+	String findVariables(final String processInstanceId);
 
-	
-	public String findVariables(final String processInstanceId);
-
-	
-	public void sendMessage(final ProcessMessage processMesage);
+	void sendMessage(final ProcessMessage processMesage);
 
 }

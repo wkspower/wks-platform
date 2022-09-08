@@ -2,9 +2,12 @@ package com.wks.caseengine.repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.form.Form;
 
@@ -17,8 +20,13 @@ public class InMemoryDataRepository implements DataRepository {
 	private List<Form> formsRepo = new ArrayList<>();
 
 	@Override
-	public List<CaseInstance> findCaseInstances() {
-		return caseInstancesRepo;
+	public List<CaseInstance> findCaseInstances(final Optional<CaseStatus> caseStatus) {
+		Stream<CaseInstance> caseStream = caseInstancesRepo.stream();
+
+		if (caseStatus.isPresent()) {
+			caseInstancesRepo.stream().filter(o -> caseStatus.get().equals(o.getStatus()));
+		}
+		return caseStream.toList();
 	}
 
 	public void saveCaseInstance(final CaseInstance caseInstance) {
@@ -27,7 +35,7 @@ public class InMemoryDataRepository implements DataRepository {
 
 	@Override
 	// TODO test it
-	public void updateCaseStatus(final String businessKey, final String newStatus) throws Exception {
+	public void updateCaseStatus(final String businessKey, final CaseStatus newStatus) throws Exception {
 		List<CaseInstance> cases = caseInstancesRepo.stream().filter(o -> businessKey.equals(o.getBusinessKey()))
 				.collect(Collectors.toList());
 		cases.forEach(o -> o.setStatus(newStatus));

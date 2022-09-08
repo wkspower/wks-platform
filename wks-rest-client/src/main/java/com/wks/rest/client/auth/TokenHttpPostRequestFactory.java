@@ -8,5 +8,5 @@ import com.wks.rest.client.WksHttpRequest;
  */
 public interface TokenHttpPostRequestFactory {
 
-	public WksHttpRequest create();
+	WksHttpRequest create();
 }

@@ -2,6 +2,7 @@ package com.wks.caseengine.repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -19,6 +20,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.form.Form;
 
@@ -76,9 +78,10 @@ public class MongoDataRepository implements DataRepository {
 	}
 
 	@Override
-	public List<CaseInstance> findCaseInstances() throws Exception {
+	public List<CaseInstance> findCaseInstances(final Optional<CaseStatus> status) throws Exception {
 		Gson gson = new Gson();
-		return caseInstCollection.find().map(o -> gson.fromJson(o.getJson(), CaseInstance.class))
+		Bson filter = status.isPresent() ? Filters.eq("status", status.get()) : Filters.empty();
+		return caseInstCollection.find().filter(filter).map(o -> gson.fromJson(o.getJson(), CaseInstance.class))
 				.into(new ArrayList<>());
 	}
 
@@ -95,7 +98,7 @@ public class MongoDataRepository implements DataRepository {
 	}
 
 	@Override
-	public void updateCaseStatus(String businessKey, String newStatus) throws Exception {
+	public void updateCaseStatus(String businessKey, CaseStatus newStatus) throws Exception {
 		Bson filter = Filters.eq("businessKey", businessKey);
 		Bson update = Updates.set("status", newStatus);
 		caseInstCollection.updateMany(filter, update);

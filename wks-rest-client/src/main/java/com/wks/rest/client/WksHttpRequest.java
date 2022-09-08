@@ -9,10 +9,10 @@ import org.springframework.http.HttpMethod;
  */
 public interface WksHttpRequest {
 
-	public HttpMethod getHttpMethod();
+	HttpMethod getHttpMethod();
 
-	public String getHttpRequestUrl();
+	String getHttpRequestUrl();
 
-	public HttpEntity<?> getHttpEntity();
+	HttpEntity<?> getHttpEntity();
 
 }

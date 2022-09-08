@@ -1,12 +1,14 @@
 package com.wks.caseengine.cases.instance;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.definition.event.CaseEventExecutor;
 import com.wks.caseengine.repository.DataRepository;
 
@@ -23,8 +25,8 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	private CaseEventExecutor caseEventExecutor;
 
 	@Override
-	public List<CaseInstance> find() throws Exception {
-		return dataRepository.findCaseInstances();
+	public List<CaseInstance> find(final Optional<CaseStatus> status) throws Exception {
+		return dataRepository.findCaseInstances(status);
 	}
 
 	@Override
@@ -48,7 +50,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 	// TODO Should be a generic update?
 	@Override
-	public void updateStatus(final String businessKey, final String newStatus) throws Exception {
+	public void updateStatus(final String businessKey, final CaseStatus newStatus) throws Exception {
 		dataRepository.updateCaseStatus(businessKey, newStatus);
 	}
 
@@ -56,7 +58,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	// Should ensure only one case is deleted - BusinessKey should be UNIQUE
 	@Override
 	public void delete(final String businessKey) throws Exception {
-		List<CaseInstance> caseInstanceList = dataRepository.findCaseInstances().stream()
+		List<CaseInstance> caseInstanceList = dataRepository.findCaseInstances(Optional.empty()).stream()
 				.filter(o -> o.getBusinessKey().equals(businessKey)).collect(Collectors.toList());
 
 		if (caseInstanceList.isEmpty()) {

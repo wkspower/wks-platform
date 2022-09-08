@@ -2,13 +2,15 @@ package com.wks.caseengine.cases.instance;
 
 import java.util.List;
 
+import com.wks.caseengine.cases.definition.CaseStatus;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
 @Getter
-@Builder
 @ToString
+@Builder
 public class CaseInstance {
 
 	private String businessKey;
@@ -17,7 +19,7 @@ public class CaseInstance {
 
 	// TODO improve this hard code
 	@Builder.Default
-	private String status = "NEW";
+	private CaseStatus status = CaseStatus.WIP_CASE_STATUS;
 
 	private List<CaseAttribute> attributes;
 
@@ -25,7 +27,7 @@ public class CaseInstance {
 		return businessKey;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(CaseStatus status) {
 		this.status = status;
 	}
 

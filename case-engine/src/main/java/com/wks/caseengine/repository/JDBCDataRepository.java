@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -15,6 +16,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
+import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.definition.event.CaseEvent;
 import com.wks.caseengine.cases.definition.event.CaseEventDeserializer;
 import com.wks.caseengine.cases.definition.hook.create.PostCaseCreateHook;
@@ -97,16 +99,22 @@ public class JDBCDataRepository implements DataRepository {
 	}
 
 	@Override
-	public List<CaseInstance> findCaseInstances() throws Exception {
+	public List<CaseInstance> findCaseInstances(final Optional<CaseStatus> caseStatus) throws Exception {
 		List<CaseInstance> casesInstances = new ArrayList<>();
 
 		try (var statement = connection.createStatement();) {
 
-			ResultSet resultSet = statement
-					.executeQuery("SELECT business_key, status, attributes, case_definition_id FROM case_instance;");
+			StringBuilder where = new StringBuilder();
+			if (caseStatus.isPresent()) {
+				where.append("where status = '" + caseStatus.get().getCode() + "'");
+			}
+
+			ResultSet resultSet = statement.executeQuery(
+					"SELECT business_key, status, attributes, case_definition_id FROM case_instance" + where + ";");
 			while (resultSet.next()) {
 				String businessKey = resultSet.getString("business_key");
-				String status = resultSet.getString("status");
+
+				CaseStatus status = CaseStatus.valueOf(resultSet.getString("status"));
 				String caseDefId = resultSet.getString("case_definition_id");
 
 				Gson gson = new Gson();
@@ -135,7 +143,7 @@ public class JDBCDataRepository implements DataRepository {
 							+ businessKeyParam + "';");
 			while (resultSet.next()) {
 				String businessKey = resultSet.getString("business_key");
-				String status = resultSet.getString("status");
+				CaseStatus status = CaseStatus.valueOf(resultSet.getString("status"));
 				String caseDefinitionId = resultSet.getString("case_definition_id");
 
 				Gson gson = new Gson();
@@ -166,7 +174,7 @@ public class JDBCDataRepository implements DataRepository {
 
 							+ "\'" + caseInstance.getCaseDefinitionId() + "\'" + ", "
 
-							+ "\'" + caseInstance.getStatus() + "\'" + ", "
+							+ "\'" + caseInstance.getStatus().getCode() + "\'" + ", "
 
 							+ "\'" + attributesJSONString + "\'"
 
@@ -179,7 +187,7 @@ public class JDBCDataRepository implements DataRepository {
 	}
 
 	@Override
-	public void updateCaseStatus(String businessKey, String newStatus) throws Exception {
+	public void updateCaseStatus(final String businessKey, final CaseStatus newStatus) throws Exception {
 		try (var statement = connection.createStatement();) {
 
 			statement.executeUpdate("UPDATE case_instance "

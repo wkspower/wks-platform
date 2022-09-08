@@ -9,11 +9,11 @@ import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.repository.DataRepository;
 
 @Component
-public class CaseInstanceCreateServiceImpl implements CaseInstanceCreateService {
+class CaseInstanceCreateServiceImpl implements CaseInstanceCreateService {
 
 	@Autowired
 	private DataRepository dataRepository;
-	
+
 	@Autowired
 	private GenericBusinessKeyGenerator businessKeyCreator;
 
@@ -32,13 +32,13 @@ public class CaseInstanceCreateServiceImpl implements CaseInstanceCreateService 
 
 		return caseInstance;
 	}
-	
+
 	public void setDataRepository(DataRepository dataRepository) {
 		this.dataRepository = dataRepository;
 	}
-	
+
 	public void setBusinessKeyCreator(GenericBusinessKeyGenerator businessKeyCreator) {
 		this.businessKeyCreator = businessKeyCreator;
 	}
-	
+
 }
