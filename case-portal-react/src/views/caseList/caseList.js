@@ -42,7 +42,7 @@ export const CaseList = (casesParam) => {
 
     const columns: GridColDef[] = [
         { field: 'businessKey', headerName: 'Business Key', width: 300 },
-        { field: 'status', headerName: 'Status', width: 220 },
+        { field: 'status', headerName: 'Stage', width: 220 },
         { field: 'caseDefinitionId', headerName: 'Case Definition', width: 220 },
         {
             field: 'action',
