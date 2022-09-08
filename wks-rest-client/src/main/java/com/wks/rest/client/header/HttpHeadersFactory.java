@@ -8,6 +8,6 @@ import org.springframework.http.HttpHeaders;
  */
 public interface HttpHeadersFactory {
 
-	public HttpHeaders create();
+	HttpHeaders create();
 
 }

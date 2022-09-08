@@ -1,40 +1,42 @@
 package com.wks.caseengine.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.form.Form;
 
 public interface DataRepository {
 
 	// Case Definition operations
-	public List<CaseDefinition> findCaseDefintions() throws Exception;
+	List<CaseDefinition> findCaseDefintions() throws Exception;
 
-	public CaseDefinition getCaseDefinition(final String caseDefId) throws Exception;
+	CaseDefinition getCaseDefinition(final String caseDefId) throws Exception;
 
-	public void saveCaseDefinition(final CaseDefinition caseDefinition) throws Exception;
+	void saveCaseDefinition(final CaseDefinition caseDefinition) throws Exception;
 
-	public void deleteCaseDefinition(final String caseDefinitionId) throws Exception;
+	void deleteCaseDefinition(final String caseDefinitionId) throws Exception;
 
 	// Case operations
-	public List<CaseInstance> findCaseInstances() throws Exception;
+	List<CaseInstance> findCaseInstances(final Optional<CaseStatus> status) throws Exception;
 
-	public CaseInstance getCaseInstance(final String businessKey) throws Exception;
+	CaseInstance getCaseInstance(final String businessKey) throws Exception;
 
-	public void saveCaseInstance(final CaseInstance caseInstance) throws Exception;
+	void saveCaseInstance(final CaseInstance caseInstance) throws Exception;
 
-	public void updateCaseStatus(final String businessKey, final String newStatus) throws Exception;
+	void updateCaseStatus(final String businessKey, final CaseStatus newStatus) throws Exception;
 
-	public void deleteCaseInstance(final CaseInstance caseInstance) throws Exception;
+	void deleteCaseInstance(final CaseInstance caseInstance) throws Exception;
 
 	// Form operations
-	public Form getForm(final String formKey) throws Exception;
+	Form getForm(final String formKey) throws Exception;
 
-	public void saveForm(final Form form) throws Exception;
+	void saveForm(final Form form) throws Exception;
 
-	public List<Form> findForms() throws Exception;
+	List<Form> findForms() throws Exception;
 
-	public void deleteForm(final String formKey) throws Exception;
+	void deleteForm(final String formKey) throws Exception;
 
 }

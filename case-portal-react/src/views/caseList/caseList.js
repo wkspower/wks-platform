@@ -6,7 +6,7 @@ import { NewCaseForm } from '../caseForm/newCaseForm';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 
-export const CaseList = (casesParam) => {
+export const CaseList = ({ status }) => {
     const [cases, setCases] = useState([]);
     const [aCase, setACase] = useState(null);
     const [newCaseDefId, setNewCaseDefId] = useState(null);
@@ -14,19 +14,15 @@ export const CaseList = (casesParam) => {
     const [openNewCaseForm, setOpenNewCaseForm] = useState(false);
 
     useEffect(() => {
-        if (Object.keys(casesParam).length > 0) {
-            setCases(casesParam.cases);
-        } else {
-            fetch('http://localhost:8081/case')
-                .then((response) => response.json())
-                .then((data) => {
-                    setCases(data);
-                })
-                .catch((err) => {
-                    console.log(err.message);
-                });
-        }
-    }, [openNewCaseForm, openCaseForm, casesParam]);
+        fetch('http://localhost:8081/case' + (status ? '?status=' + status : ''))
+            .then((response) => response.json())
+            .then((data) => {
+                setCases(data);
+            })
+            .catch((err) => {
+                console.log(err.message);
+            });
+    }, [status, openNewCaseForm, openCaseForm]);
 
     const [caseDefs, setCaseDefs] = useState([]);
     useEffect(() => {
@@ -41,8 +37,9 @@ export const CaseList = (casesParam) => {
     }, []);
 
     const columns: GridColDef[] = [
-        { field: 'businessKey', headerName: 'Business Key', width: 300 },
-        { field: 'status', headerName: 'Stage', width: 220 },
+        { field: 'businessKey', headerName: 'Business Key', width: 150 },
+        { field: 'status', headerName: 'Status', width: 220 },
+        { field: 'stage', headerName: 'Stage', width: 220 },
         { field: 'caseDefinitionId', headerName: 'Case Definition', width: 220 },
         {
             field: 'action',

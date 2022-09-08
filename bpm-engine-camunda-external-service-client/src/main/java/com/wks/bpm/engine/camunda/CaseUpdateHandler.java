@@ -7,6 +7,7 @@ import org.camunda.bpm.client.task.ExternalTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
+import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseInstanceService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +25,11 @@ public class CaseUpdateHandler implements ExternalTaskHandler {
 		log.debug("Starting External Task Handler processing...");
 
 		try {
-			caseInstanceService.updateStatus(externalTask.getBusinessKey(), externalTask.getActivityId());
+			caseInstanceService.updateStatus(externalTask.getBusinessKey(),
+					CaseStatus.valueOf(externalTask.getActivityId()));
 			externalTaskService.complete(externalTask);
 		} catch (Exception e) {
-			//TODO error handling
+			// TODO error handling
 			e.printStackTrace();
 		}
 

@@ -1,7 +1,7 @@
 package com.wks.caseengine.cases.instance;
 
-public interface CaseInstanceCreateService {
+interface CaseInstanceCreateService {
 
-	public CaseInstance create(final CaseInstance caseInstance) throws Exception;
+	CaseInstance create(final CaseInstance caseInstance) throws Exception;
 
 }

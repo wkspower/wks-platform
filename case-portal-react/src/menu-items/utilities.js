@@ -18,10 +18,38 @@ const utilities = {
         {
             id: 'case-list',
             title: 'Cases',
-            type: 'item',
-            url: '/case-list',
-            // icon: icons.IconTypography,
-            breadcrumbs: false
+            type: 'collapse',
+            // icon: icons.IconWindmill,
+            children: [
+                {
+                    id: 'wip-cases',
+                    title: 'Work In Progress',
+                    type: 'item',
+                    url: '/case-list/wip-cases',
+                    breadcrumbs: false
+                },
+                {
+                    id: 'cases',
+                    title: 'All',
+                    type: 'item',
+                    url: '/case-list/cases',
+                    breadcrumbs: false
+                },
+                {
+                    id: 'close-cases',
+                    title: 'Closed',
+                    type: 'item',
+                    url: '/case-list/closed-cases',
+                    breadcrumbs: false
+                },
+                {
+                    id: '   archived-cases',
+                    title: 'Archived',
+                    type: 'item',
+                    url: '/case-list/archived-cases',
+                    breadcrumbs: false
+                }
+            ]
         },
         {
             id: 'task-list',
@@ -31,6 +59,7 @@ const utilities = {
             // icon: icons.IconTypography,
             breadcrumbs: false
         }
+
         // {
         //     id: 'util-typography',
         //     title: 'Typography',

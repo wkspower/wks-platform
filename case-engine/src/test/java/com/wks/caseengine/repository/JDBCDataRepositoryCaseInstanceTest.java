@@ -15,10 +15,9 @@ import org.junit.Test;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseAttribute;
 import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.repository.DataBaseConfig;
-import com.wks.caseengine.repository.JDBCDataRepository;
 
 //TODO create abstract test class for JDBC Repos
 public class JDBCDataRepositoryCaseInstanceTest {
@@ -92,21 +91,21 @@ public class JDBCDataRepositoryCaseInstanceTest {
 
 		jdbcDataRepository.saveCaseInstance(caseInstance);
 
-		jdbcDataRepository.updateCaseStatus("BK-01", "REVIEWED");
+		jdbcDataRepository.updateCaseStatus("BK-01", CaseStatus.WIP_CASE_STATUS);
 
-		String status;
+		CaseStatus status;
 		try (var statement = connection.createStatement();) {
 
 			ResultSet resultSet = statement.executeQuery("SELECT status FROM case_instance;");
 			resultSet.next();
-			status = resultSet.getString("status");
+			status = CaseStatus.valueOf(resultSet.getString("status"));
 
 		} catch (SQLException ex) {
 			// TODO error handling
 			throw new Exception(ex);
 		}
 
-		assertEquals("REVIEWED", status);
+		assertEquals(CaseStatus.WIP_CASE_STATUS, status);
 
 	}
 

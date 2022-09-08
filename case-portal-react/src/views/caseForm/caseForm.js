@@ -16,6 +16,8 @@ import React, { useEffect, useState } from 'react';
 import { Form } from '@formio/react';
 import { TaskList } from '../taskList/taskList';
 
+import { CaseStatus } from 'common/caseStatus';
+
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
         children: React.ReactElement
@@ -113,6 +115,26 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
         setTabIndex(newValue);
     };
 
+    const handleUpdateCaseStatus = (newStatus) => {
+        fetch('http://localhost:8081/case/' + aCase.businessKey, {
+            method: 'PATCH',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                businessKey: caseDef.id,
+                status: newStatus
+            })
+        })
+            .then((response) => {
+                handleClose();
+            })
+            .catch((err) => {
+                console.log(err.message);
+            });
+    };
+
     return (
         <div>
             <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
@@ -123,8 +145,31 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                         </IconButton>
                         <Typography sx={{ ml: 2, flex: 1 }} component="div">
                             <div>Motion Detected: {aCase?.businessKey}</div>
+                            <div style={{ fontSize: '13px' }}>{aCase?.status}</div>
                         </Typography>
-                        <Button color="inherit">Close Case</Button>
+                        {aCase.status === CaseStatus.WipCaseStatus.description && (
+                            <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.ClosedCaseStatus.description)}>
+                                Close Case
+                            </Button>
+                        )}
+                        {aCase.status === CaseStatus.ClosedCaseStatus.description && (
+                            <React.Fragment>
+                                <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.WipCaseStatus.description)}>
+                                    Re-open Case
+                                </Button>
+
+                                <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.ArchivedCaseStatus.description)}>
+                                    Archive Case
+                                </Button>
+                            </React.Fragment>
+                        )}
+                        {aCase.status === CaseStatus.ArchivedCaseStatus.description && (
+                            <React.Fragment>
+                                <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.WipCaseStatus.description)}>
+                                    Re-open Case
+                                </Button>
+                            </React.Fragment>
+                        )}
                     </Toolbar>
                 </AppBar>
 
@@ -134,9 +179,12 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                         <Tab label="Tasks" {...a11yProps(1)} />
                     </Tabs>
                 </Box>
+
                 <TabPanel value={tabIndex} index={0}>
+                    {/* Case Details  */}
                     <Form form={form.structure} submission={formData} options={{ readOnly: true }} />
                 </TabPanel>
+
                 <TabPanel value={tabIndex} index={1}>
                     {/* Task List  */}
                     <div style={{ display: 'grid', padding: '10px' }}>

@@ -6,11 +6,11 @@ import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 
 public interface CaseDefinitionService {
 
-	public List<CaseDefinition> find() throws Exception;
+	List<CaseDefinition> find() throws Exception;
 
-	public CaseDefinition get(final String caseDefId) throws Exception;
+	CaseDefinition get(final String caseDefId) throws Exception;
 
-	public CaseDefinition create(final CaseDefinition caseDefinition) throws Exception;
+	CaseDefinition create(final CaseDefinition caseDefinition) throws Exception;
 
-	public void delete(final String caseDefinitionId) throws CaseInstanceNotFoundException, Exception;
+	void delete(final String caseDefinitionId) throws CaseInstanceNotFoundException, Exception;
 }

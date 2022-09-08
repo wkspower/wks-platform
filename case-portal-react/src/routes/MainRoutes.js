@@ -3,8 +3,10 @@ import { lazy } from 'react';
 // project imports
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
-import { TaskList } from 'views/taskList/taskList';
 import { CaseList } from 'views/caseList/caseList';
+import { TaskList } from 'views/taskList/taskList';
+
+import { CaseStatus } from 'common/caseStatus';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -31,7 +33,24 @@ const MainRoutes = {
         },
         {
             path: 'case-list',
-            element: <CaseList />
+            children: [
+                {
+                    path: 'cases',
+                    element: <CaseList />
+                },
+                {
+                    path: 'wip-cases',
+                    element: <CaseList status={CaseStatus.WipCaseStatus.description} />
+                },
+                {
+                    path: 'closed-cases',
+                    element: <CaseList status={CaseStatus.ClosedCaseStatus.description} />
+                },
+                {
+                    path: 'archived-cases',
+                    element: <CaseList status={CaseStatus.ArchivedCaseStatus.description} />
+                }
+            ]
         },
         {
             path: 'task-list',

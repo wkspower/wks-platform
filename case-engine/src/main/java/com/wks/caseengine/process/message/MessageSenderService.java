@@ -4,6 +4,6 @@ import com.wks.bpm.engine.model.spi.ProcessMessage;
 
 public interface MessageSenderService {
 
-	public void sendMessage(final ProcessMessage processMessage);
+	void sendMessage(final ProcessMessage processMessage);
 
 }

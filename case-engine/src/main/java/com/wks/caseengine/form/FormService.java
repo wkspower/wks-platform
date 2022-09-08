@@ -4,12 +4,12 @@ import java.util.List;
 
 public interface FormService {
 
-	public void save(final Form form) throws Exception;
+	void save(final Form form) throws Exception;
 
-	public Form getForm(final String formKey) throws Exception;
+	Form getForm(final String formKey) throws Exception;
 
-	public List<Form> find() throws Exception;
+	List<Form> find() throws Exception;
 
-	public void delete(final String formKey) throws Exception;
+	void delete(final String formKey) throws Exception;
 
 }
