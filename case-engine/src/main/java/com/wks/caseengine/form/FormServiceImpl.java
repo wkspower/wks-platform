@@ -9,7 +9,7 @@ import com.wks.caseengine.repository.DataRepository;
 
 @Component
 public class FormServiceImpl implements FormService {
-	
+
 	@Autowired
 	private DataRepository dataRepository;
 
@@ -26,6 +26,11 @@ public class FormServiceImpl implements FormService {
 	@Override
 	public List<Form> find() throws Exception {
 		return dataRepository.findForms();
+	}
+
+	@Override
+	public void delete(String formKey) throws Exception {
+		dataRepository.deleteForm(formKey);
 	}
 
 }

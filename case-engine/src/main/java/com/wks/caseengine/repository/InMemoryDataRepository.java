@@ -14,7 +14,7 @@ public class InMemoryDataRepository implements DataRepository {
 
 	private List<CaseDefinition> caseDefinitionsRepo = new ArrayList<>();
 
-	private List<Form> forms = new ArrayList<>();
+	private List<Form> formsRepo = new ArrayList<>();
 
 	@Override
 	public List<CaseInstance> findCaseInstances() {
@@ -69,18 +69,23 @@ public class InMemoryDataRepository implements DataRepository {
 	@Override
 	public Form getForm(final String formKey) {
 		// TODO handle more than 1 result
-		return forms.stream().filter(form -> formKey.equals(form.getKey())).findFirst().get();
+		return formsRepo.stream().filter(form -> formKey.equals(form.getKey())).findFirst().get();
 	}
 
 	@Override
 	public void saveForm(final Form form) {
-		forms.add(form);
+		formsRepo.add(form);
 	}
 
 	@Override
 	public List<Form> findForms() {
 		// TODO Auto-generated method stub
-		return forms;
+		return formsRepo;
+	}
+
+	@Override
+	public void deleteForm(String formKey) throws Exception {
+		formsRepo.remove(formsRepo.stream().filter(form -> formKey.equals(form.getKey())).findFirst().get());
 	}
 
 }

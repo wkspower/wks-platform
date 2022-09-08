@@ -44,7 +44,7 @@ const utilities = {
                     breadcrumbs: false
                 },
                 {
-                    id: 'integrations',
+                    id: 'integration',
                     title: 'Integrations',
                     type: 'item',
                     url: '/system/integration',
@@ -83,6 +83,13 @@ const utilities = {
                     title: 'Monitoring',
                     type: 'item',
                     url: '/system/monitoring',
+                    breadcrumbs: false
+                },
+                {
+                    id: 'languages',
+                    title: 'Languages',
+                    type: 'item',
+                    url: '/system/languages',
                     breadcrumbs: false
                 }
             ]
@@ -196,7 +203,7 @@ const utilities = {
                     id: 'export',
                     title: 'Export',
                     type: 'item',
-                    url: '/event-type-definition',
+                    url: '/export',
                     breadcrumbs: false
                 }
             ]

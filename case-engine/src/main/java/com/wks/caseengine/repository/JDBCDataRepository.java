@@ -11,7 +11,7 @@ import javax.annotation.PostConstruct;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
@@ -321,10 +321,10 @@ public class JDBCDataRepository implements DataRepository {
 				String description = resultSet.getString("description");
 
 				Gson gson = new Gson();
-				JsonArray components = gson.fromJson(resultSet.getString("components"), new TypeToken<JsonArray>() {
+				JsonObject components = gson.fromJson(resultSet.getString("components"), new TypeToken<JsonObject>() {
 				}.getType());
 
-				return Form.builder().key(key).description(description).components(components).build();
+				return Form.builder().key(key).description(description).structure(components).build();
 			}
 
 		}
@@ -335,7 +335,7 @@ public class JDBCDataRepository implements DataRepository {
 	@Override
 	public void saveForm(Form form) throws Exception {
 		Gson gson = new Gson();
-		String componentsJSONString = gson.toJson(form.getComponents());
+		String componentsJSONString = gson.toJson(form.getStructure());
 
 		try (var statement = connection.createStatement();) {
 
@@ -369,10 +369,10 @@ public class JDBCDataRepository implements DataRepository {
 				String description = resultSet.getString("description");
 
 				Gson gson = new Gson();
-				JsonArray components = gson.fromJson(resultSet.getString("components"), new TypeToken<JsonArray>() {
+				JsonObject components = gson.fromJson(resultSet.getString("components"), new TypeToken<JsonObject>() {
 				}.getType());
 
-				forms.add(Form.builder().key(key).description(description).components(components).build());
+				forms.add(Form.builder().key(key).description(description).structure(components).build());
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -380,6 +380,20 @@ public class JDBCDataRepository implements DataRepository {
 		}
 
 		return forms;
+	}
+
+	@Override
+	public void deleteForm(String formKey) throws Exception {
+		try (var statement = connection.createStatement();) {
+
+			statement.executeUpdate("DELETE form WHERE form_key = "
+
+					+ "'" + formKey + "'" + ";");
+
+		} catch (SQLException ex) {
+			// TODO error handling
+			throw new Exception(ex);
+		}
 	}
 
 }

@@ -1,5 +1,4 @@
 // material-ui
-import { useTheme } from '@mui/material/styles';
 import logo from 'assets/images/logo.svg';
 
 /**
@@ -13,7 +12,7 @@ import logo from 'assets/images/logo.svg';
 // ==============================|| LOGO SVG ||============================== //
 
 const Logo = () => {
-    const theme = useTheme();
+    // const theme = useTheme();
 
     return <img src={logo} alt="WKS Power" width="100" />;
 };

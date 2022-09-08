@@ -1,21 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import CloseIcon from '@mui/icons-material/Close';
 import Slide from '@mui/material/Slide';
-import { TransitionProps } from '@mui/material/transitions';
-import FormControl from '@mui/material/FormControl';
-import TextField from '@mui/material/TextField';
-import FormHelperText from '@mui/material/FormHelperText';
-import PropTypes from 'prop-types';
-import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
+import Tabs from '@mui/material/Tabs';
+import Toolbar from '@mui/material/Toolbar';
+import { TransitionProps } from '@mui/material/transitions';
+import Typography from '@mui/material/Typography';
+import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
 
+import { Form } from '@formio/react';
 import { TaskList } from '../taskList/taskList';
 
 const Transition = React.forwardRef(function Transition(
@@ -41,7 +39,7 @@ function TabPanel(props) {
         <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
             {value === index && (
                 <Box sx={{ p: 3 }}>
-                    <Typography>{children}</Typography>
+                    <Typography component={'span'}>{children}</Typography>
                 </Box>
             )}
         </div>
@@ -54,19 +52,33 @@ TabPanel.propTypes = {
     value: PropTypes.number.isRequired
 };
 
-export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
-    const [formComponents, setFormComponents] = useState([]);
+const formDataTemplate = {
+    data: {
+        submit: true
+    },
+    metadata: {},
+    isValid: true
+};
 
-    const [value, setValue] = useState(0);
+export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
+    const [caseInstAttributes, setCaseInstAttributes] = useState([]);
+    const [formData, setFormData] = useState({});
+    const [tabIndex, setTabIndex] = useState(0);
 
     useEffect(() => {
         if (componentsParam) {
-            setFormComponents(componentsParam.components);
+            setCaseInstAttributes(componentsParam.components);
         } else if (aCase) {
             fetch('http://localhost:8081/case/' + aCase.businessKey)
                 .then((response) => response.json())
-                .then((data) => {
-                    setFormComponents(data.attributes);
+                .then((caseData) => {
+                    setCaseInstAttributes(caseData.attributes);
+                    setFormData({
+                        data: caseData.attributes.reduce((obj, item) => Object.assign(obj, { [item.name]: item.value }), {}),
+                        metadata: {},
+                        isValid: true
+                    });
+                    setTabIndex(0);
                 })
                 .catch((err) => {
                     console.log(err.message);
@@ -74,12 +86,31 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
         }
     }, [aCase, componentsParam]);
 
+    const [caseDef, setCaseDef] = useState([]);
+    const [form, setForm] = useState([]);
+
+    useEffect(() => {
+        fetch('http://localhost:8081/case-definition/' + aCase.caseDefinitionId)
+            .then((response) => response.json())
+            .then((data) => {
+                setCaseDef(data);
+                return fetch('http://localhost:8081/form/' + data.formKey);
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                setForm(data);
+            })
+            .catch((err) => {
+                console.log(err.message);
+            });
+    }, [aCase, componentsParam]);
+
     const handleInputChange = function (event) {
-        setFormComponents({ ...formComponents, [event.target.businessKey]: { value: event.target.value } });
+        setCaseInstAttributes({ ...caseInstAttributes, [event.target.businessKey]: { value: event.target.value } });
     };
 
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
+    const handleTabChanged = (event, newValue) => {
+        setTabIndex(newValue);
     };
 
     return (
@@ -91,44 +122,22 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                             <CloseIcon />
                         </IconButton>
                         <Typography sx={{ ml: 2, flex: 1 }} component="div">
-                            <div>{aCase?.businessKey}</div>
+                            <div>Motion Detected: {aCase?.businessKey}</div>
                         </Typography>
-                        <Button color="inherit">Edit</Button>
+                        <Button color="inherit">Close Case</Button>
                     </Toolbar>
                 </AppBar>
 
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+                    <Tabs value={tabIndex} onChange={handleTabChanged} aria-label="basic tabs example">
                         <Tab label="Case Details" {...a11yProps(0)} />
                         <Tab label="Tasks" {...a11yProps(1)} />
                     </Tabs>
                 </Box>
-                <TabPanel value={value} index={0}>
-                    {/* Case Form */}
-                    <div style={{ display: 'grid', padding: '10px' }}>
-                        {formComponents && formComponents.length ? (
-                            formComponents.map((component) => {
-                                if (component.type !== 'text') {
-                                    return (
-                                        <FormControl key={component.name} style={{ padding: '5px' }}>
-                                            <TextField
-                                                id={component.name}
-                                                aria-describedby="my-helper-text"
-                                                value={component.value}
-                                                onChange={handleInputChange}
-                                                disabled
-                                            />
-                                            <FormHelperText id="my-helper-text">{component.name}</FormHelperText>
-                                        </FormControl>
-                                    );
-                                }
-                            })
-                        ) : (
-                            <div>Empty form components</div>
-                        )}
-                    </div>
+                <TabPanel value={tabIndex} index={0}>
+                    <Form form={form.structure} submission={formData} options={{ readOnly: true }} />
                 </TabPanel>
-                <TabPanel value={value} index={1}>
+                <TabPanel value={tabIndex} index={1}>
                     {/* Task List  */}
                     <div style={{ display: 'grid', padding: '10px' }}>
                         <TaskList businessKey={aCase.businessKey} />

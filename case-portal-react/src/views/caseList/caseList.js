@@ -9,6 +9,7 @@ import MenuItem from '@mui/material/MenuItem';
 export const CaseList = (casesParam) => {
     const [cases, setCases] = useState([]);
     const [aCase, setACase] = useState(null);
+    const [newCaseDefId, setNewCaseDefId] = useState(null);
     const [openCaseForm, setOpenCaseForm] = useState(false);
     const [openNewCaseForm, setOpenNewCaseForm] = useState(false);
 
@@ -25,7 +26,7 @@ export const CaseList = (casesParam) => {
                     console.log(err.message);
                 });
         }
-    }, [openCaseForm, casesParam]);
+    }, [openNewCaseForm, openCaseForm, casesParam]);
 
     const [caseDefs, setCaseDefs] = useState([]);
     useEffect(() => {
@@ -41,7 +42,7 @@ export const CaseList = (casesParam) => {
 
     const columns: GridColDef[] = [
         { field: 'businessKey', headerName: 'Business Key', width: 300 },
-        { field: 'status', headerName: 'Status', width: 220 },
+        { field: 'status', headerName: 'Stage', width: 220 },
         { field: 'caseDefinitionId', headerName: 'Case Definition', width: 220 },
         {
             field: 'action',
@@ -67,7 +68,8 @@ export const CaseList = (casesParam) => {
         setOpenNewCaseForm(false);
     };
 
-    const handleNewCaseAction = () => {
+    const handleNewCaseAction = (caseDefId) => {
+        setNewCaseDefId(caseDefId);
         setOpenNewCaseForm(true);
     };
 
@@ -103,7 +105,7 @@ export const CaseList = (casesParam) => {
                 >
                     {caseDefs.map((caseDef) => {
                         return (
-                            <MenuItem key={caseDef.name} onClick={handleNewCaseAction}>
+                            <MenuItem key={caseDef.name} onClick={() => handleNewCaseAction(caseDef.id)}>
                                 {caseDef.name}
                             </MenuItem>
                         );
@@ -120,7 +122,7 @@ export const CaseList = (casesParam) => {
             />
             {aCase && <CaseForm aCase={aCase} handleClose={handleCloseCaseForm} open={openCaseForm} />}
 
-            <NewCaseForm handleClose={handleCloseNewCaseForm} open={openNewCaseForm} />
+            <NewCaseForm handleClose={handleCloseNewCaseForm} open={openNewCaseForm} caseDefId={newCaseDefId} />
         </div>
     );
 };

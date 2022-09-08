@@ -53,7 +53,6 @@ export const FormList = () => {
                 rowsPerPageOptions={[10]}
                 getRowId={(row) => row.key}
             />
-
             {form && <FormDetail form={form} handleClose={handleCloseForm} open={openForm} />}
         </div>
     );

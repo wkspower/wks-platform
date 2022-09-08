@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class GenericBusinessKeyGenerator implements BusinessKeyGenerator {
 
-	public static final String PREFIX = "GENERIC-CASE--";
+	public static final String PREFIX = "";
 
 	public String generate() {
 		return calculateBusinessKey();
