@@ -18,8 +18,9 @@ import { TaskList } from '../taskList/taskList';
 
 import { CaseStatus } from 'common/caseStatus';
 
+import { CaseChat } from 'getStream/caseChat';
 import 'stream-chat-react/dist/css/index.css';
-import { CaseChat } from 'getStream/chat';
+import { height } from '@mui/system';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -180,13 +181,13 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                     <Tabs value={tabIndex} onChange={handleTabChanged} aria-label="basic tabs example">
                         <Tab label="Case Details" {...a11yProps(0)} />
                         <Tab label="Tasks" {...a11yProps(1)} />
+                        <Tab label="Chat" {...a11yProps(2)} />
                     </Tabs>
                 </Box>
 
                 <TabPanel value={tabIndex} index={0}>
                     {/* Case Details  */}
                     <Form form={form.structure} submission={formData} options={{ readOnly: true }} />
-                    <CaseChat />
                 </TabPanel>
 
                 <TabPanel value={tabIndex} index={1}>
@@ -194,6 +195,9 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                     <div style={{ display: 'grid', padding: '10px' }}>
                         <TaskList businessKey={aCase.businessKey} />
                     </div>
+                </TabPanel>
+                <TabPanel value={tabIndex} index={2}>
+                    <CaseChat channelName={aCase.businessKey} />
                 </TabPanel>
             </Dialog>
         </div>

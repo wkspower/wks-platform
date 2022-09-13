@@ -8,6 +8,8 @@ import { TaskList } from 'views/taskList/taskList';
 
 import { CaseStatus } from 'common/caseStatus';
 
+import { AppChat } from 'getStream/appChat';
+
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
@@ -55,6 +57,10 @@ const MainRoutes = {
         {
             path: 'task-list',
             element: <TaskList />
+        },
+        {
+            path: 'app-chat',
+            element: <AppChat />
         },
         {
             path: 'dashboard',
