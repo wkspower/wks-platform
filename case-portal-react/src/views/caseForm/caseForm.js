@@ -18,6 +18,9 @@ import { TaskList } from '../taskList/taskList';
 
 import { CaseStatus } from 'common/caseStatus';
 
+import 'stream-chat-react/dist/css/index.css';
+import { CaseChat } from 'getStream/chat';
+
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
         children: React.ReactElement
@@ -183,6 +186,7 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                 <TabPanel value={tabIndex} index={0}>
                     {/* Case Details  */}
                     <Form form={form.structure} submission={formData} options={{ readOnly: true }} />
+                    <CaseChat />
                 </TabPanel>
 
                 <TabPanel value={tabIndex} index={1}>
