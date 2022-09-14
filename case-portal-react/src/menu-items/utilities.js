@@ -58,14 +58,6 @@ const utilities = {
             url: '/task-list',
             // icon: icons.IconTypography,
             breadcrumbs: false
-        },
-        {
-            id: 'app-chat',
-            title: 'Chat',
-            type: 'item',
-            url: '/app-chat',
-            // icon: icons.IconTypography,
-            breadcrumbs: false
         }
 
         // {
