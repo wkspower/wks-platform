@@ -18,6 +18,9 @@ import { TaskList } from '../taskList/taskList';
 
 import { CaseStatus } from 'common/caseStatus';
 
+import { Comments } from 'views/caseComment/Comments';
+import { Grid } from '@mui/material';
+
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
         children: React.ReactElement
@@ -182,7 +185,14 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
 
                 <TabPanel value={tabIndex} index={0}>
                     {/* Case Details  */}
-                    <Form form={form.structure} submission={formData} options={{ readOnly: true }} />
+                    <Grid container spacing={2}>
+                        <Grid item xs={9}>
+                            <Form form={form.structure} submission={formData} options={{ readOnly: true }} />
+                        </Grid>
+                        <Grid item xs={3}>
+                            <Comments commentsUrl="http://localhost:3004/comments" currentUserId="1" />
+                        </Grid>
+                    </Grid>
                 </TabPanel>
 
                 <TabPanel value={tabIndex} index={1}>
