@@ -6,6 +6,8 @@ import TreeItem from '@mui/lab/TreeItem';
 import TreeView from '@mui/lab/TreeView';
 
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import MainCard from 'components/MainCard';
+import { Grid, Box } from '@mui/material';
 
 const eventsColumns: GridColDef[] = [
     { field: 'name', headerName: 'Name', width: 200 },
@@ -21,8 +23,8 @@ export const CaseDefEventsForm = ({ caseDef }) => {
     };
 
     return (
-        <div>
-            <div style={{ float: 'left', padding: '20px', borderStyle: 'solid', borderWidth: 'thin' }}>
+        <Grid container rowSpacing={4.5} columnSpacing={2.75}>
+            <Grid item xs={12} md={7} lg={2}>
                 <TreeView
                     aria-label="file system navigator"
                     defaultCollapseIcon={<ExpandMoreIcon />}
@@ -56,13 +58,18 @@ export const CaseDefEventsForm = ({ caseDef }) => {
                         <TreeItem nodeId="postCaseAssignHook" label="After Assign" />
                     </TreeItem>
                 </TreeView>
-            </div>
-
-            <div style={{ float: 'left', padding: '10px', height: 400, width: 500 }}>
-                {hook && caseDef[hook].caseEvents && (
-                    <DataGrid rows={caseDef[hook].caseEvents} columns={eventsColumns} pageSize={10} rowsPerPageOptions={[10]} />
-                )}
-            </div>
-        </div>
+            </Grid>
+            <Grid item xs={12} md={7} lg={10}>
+                <MainCard sx={{ mt: 2 }} content={false}>
+                    <Box>
+                        <div style={{ height: 650, width: '100%' }}>
+                            {hook && caseDef[hook].caseEvents && (
+                                <DataGrid rows={caseDef[hook].caseEvents} columns={eventsColumns} pageSize={10} rowsPerPageOptions={[10]} />
+                            )}
+                        </div>
+                    </Box>
+                </MainCard>
+            </Grid>
+        </Grid>
     );
 };

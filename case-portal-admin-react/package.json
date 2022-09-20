@@ -4,33 +4,47 @@
     "private": true,
     "homepage": "https://www.wkspower.com",
     "dependencies": {
-        "@emotion/cache": "^11.9.3",
-        "@emotion/react": "^11.9.3",
-        "@emotion/styled": "^11.9.3",
+        "@ant-design/colors": "^6.0.0",
+        "@ant-design/icons": "^4.0.0-rc.0",
+        "@emotion/cache": "^11.7.1",
+        "@emotion/react": "^11.7.1",
+        "@emotion/styled": "^11.6.0",
         "@formio/react": "^5.2.4-rc.1",
-        "@mui/icons-material": "^5.8.4",
-        "@mui/lab": "^5.0.0-alpha.88",
-        "@mui/material": "^5.8.6",
-        "@mui/system": "^5.8.6",
-        "@mui/utils": "^5.8.6",
-        "@mui/x-data-grid": "^5.16.0",
-        "@tabler/icons": "^1.72.0",
-        "apexcharts": "^3.35.3",
+        "@mui/icons-material": "^5.10.3",
+        "@mui/lab": "^5.0.0-alpha.65",
+        "@mui/material": "^5.3.0",
+        "@mui/styles": "^5.3.0",
+        "@mui/x-data-grid": "^5.17.2",
+        "@reduxjs/toolkit": "^1.7.1",
+        "@tabler/icons": "^1.96.0",
+        "@testing-library/jest-dom": "^5.11.4",
+        "@testing-library/react": "^13.4.0",
+        "@testing-library/user-event": "^14.4.3",
+        "apexcharts": "^3.27.3",
         "formik": "^2.2.9",
         "formiojs": "^4.14.8",
-        "framer-motion": "^6.3.16",
-        "material-ui-popup-state": "^4.0.1",
+        "framer-motion": "^7.3.5",
+        "history": "^5.0.0",
+        "lodash": "^4.17.21",
         "prop-types": "^15.8.1",
         "react": "^18.2.0",
-        "react-apexcharts": "^1.4.0",
-        "react-device-detect": "^2.2.2",
+        "react-apexcharts": "^1.3.9",
+        "react-copy-to-clipboard": "^5.0.4",
+        "react-device-detect": "^2.1.2",
         "react-dom": "^18.2.0",
+        "react-draggable": "^4.4.4",
+        "react-number-format": "^5.0.0-beta.4",
         "react-perfect-scrollbar": "^1.5.8",
         "react-redux": "^8.0.2",
-        "react-router": "6.3.0",
-        "react-router-dom": "6.3.0",
+        "react-router": "^6.2.1",
+        "react-router-dom": "^6.2.1",
         "react-scripts": "^5.0.1",
-        "redux": "^4.2.0",
+        "react-syntax-highlighter": "^15.4.5",
+        "react-window": "^1.8.6",
+        "redux": "^4.1.2",
+        "simplebar": "^5.3.5",
+        "simplebar-react": "^2.3.6",
+        "web-vitals": "^3.0.2",
         "yup": "^0.32.11"
     },
     "scripts": {
@@ -41,18 +55,22 @@
     },
     "eslintConfig": {
         "extends": [
-            "react-app"
+            "react-app",
+            "react-app/jest"
         ]
     },
     "babel": {
         "presets": [
-            "@babel/preset-react"
+            "@babel/preset-env",
+            "@babel/preset-react",
+            "@babel/preset-typescript"
         ]
     },
     "browserslist": {
         "production": [
-            "defaults",
-            "not IE 11"
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
         ],
         "development": [
             "last 1 chrome version",
@@ -61,23 +79,20 @@
         ]
     },
     "devDependencies": {
-        "@babel/core": "^7.18.6",
-        "@babel/eslint-parser": "^7.18.2",
+        "@babel/core": "^7.14.3",
+        "@babel/eslint-parser": "^7.15.8",
         "@babel/preset-react": "^7.18.6",
-        "eslint": "^8.19.0",
-        "eslint-config-airbnb-base": "^15.0.0",
+        "eslint": "^8.23.1",
         "eslint-config-airbnb-typescript": "^17.0.0",
-        "eslint-config-prettier": "^8.5.0",
+        "eslint-config-prettier": "^8.3.0",
         "eslint-config-react-app": "7.0.1",
-        "eslint-import-resolver-typescript": "3.2.1",
+        "eslint-import-resolver-typescript": "3.5.1",
         "eslint-plugin-flowtype": "^8.0.3",
-        "eslint-plugin-import": "^2.26.0",
-        "eslint-plugin-jsx-a11y": "6.6.0",
-        "eslint-plugin-markdown": "^2.2.1",
+        "eslint-plugin-import": "^2.23.3",
+        "eslint-plugin-jsx-a11y": "6.6.1",
         "eslint-plugin-prettier": "^4.2.1",
-        "eslint-plugin-react": "^7.30.1",
+        "eslint-plugin-react": "^7.26.1",
         "eslint-plugin-react-hooks": "4.6.0",
-        "prettier": "^2.7.1",
-        "sass": "^1.53.0"
+        "prettier": "2.7.1"
     }
 }

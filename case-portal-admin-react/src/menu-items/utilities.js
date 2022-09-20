@@ -1,96 +1,157 @@
 // assets
-import { IconTypography, IconPalette, IconShadow, IconWindmill } from '@tabler/icons';
-
-// constant
-const icons = {
-    IconTypography,
+import {
+    IconPackgeExport,
+    IconForms,
+    IconChecklist,
+    IconEngine,
+    IconDatabase,
+    IconEar,
+    IconMessageCode,
+    IconPencil,
+    IconUsers,
+    IconSpy,
+    IconLock,
+    IconIdBadge2,
+    IconBoxMultiple,
+    IconBriefcase,
+    IconWorld,
+    IconHeartRateMonitor,
+    IconFileSearch,
+    IconClockHour9,
+    IconCloudDataConnection,
+    IconMail,
+    IconWebhook,
+    IconBroadcast,
+    IconNotification,
     IconPalette,
-    IconShadow,
-    IconWindmill
+    IconAdjustments,
+    IconBuilding,
+    IconSettingsAutomation
+} from '@tabler/icons';
+
+// icons
+const icons = {
+    IconPackgeExport,
+    IconForms,
+    IconChecklist,
+    IconEngine,
+    IconDatabase,
+    IconEar,
+    IconMessageCode,
+    IconPencil,
+    IconUsers,
+    IconSpy,
+    IconLock,
+    IconIdBadge2,
+    IconBoxMultiple,
+    IconBriefcase,
+    IconWorld,
+    IconHeartRateMonitor,
+    IconFileSearch,
+    IconClockHour9,
+    IconCloudDataConnection,
+    IconMail,
+    IconWebhook,
+    IconBroadcast,
+    IconNotification,
+    IconPalette,
+    IconAdjustments,
+    IconBuilding,
+    IconSettingsAutomation
 };
 
-// ==============================|| UTILITIES MENU ITEMS ||============================== //
+// ==============================|| MENU ITEMS - UTILITIES ||============================== //
 
 const utilities = {
     id: 'utilities',
-    title: 'Case Portal Admin',
+    title: '',
     type: 'group',
     children: [
         {
             id: 'system',
             title: 'System',
             type: 'collapse',
-            icon: icons.IconWindmill,
+            icon: icons.IconBuilding,
             children: [
                 {
                     id: 'look-and-feel',
                     title: 'Look And Feel',
                     type: 'item',
                     url: '/system/look-and-feel',
-                    breadcrumbs: false
+                    icon: icons.IconPalette,
+                    breadcrumbs: true
                 },
                 {
                     id: 'email',
                     title: 'E-mail',
                     type: 'item',
                     url: '/system/email',
-                    breadcrumbs: false
+                    icon: icons.IconMail,
+                    breadcrumbs: true
                 },
                 {
                     id: 'notifications',
                     title: 'Notifications',
                     type: 'item',
                     url: '/system/notification',
-                    breadcrumbs: false
+                    icon: icons.IconNotification,
+                    breadcrumbs: true
                 },
                 {
                     id: 'integration',
                     title: 'Integrations',
                     type: 'item',
                     url: '/system/integration',
-                    breadcrumbs: false
+                    icon: icons.IconBroadcast,
+                    breadcrumbs: true
                 },
                 {
                     id: 'webhook',
                     title: 'Web Hooks',
                     type: 'item',
                     url: '/system/webhook',
-                    breadcrumbs: false
+                    icon: icons.IconWebhook,
+                    breadcrumbs: true
                 },
                 {
                     id: 'environments',
                     title: 'Environments',
                     type: 'item',
                     url: '/system/environment',
-                    breadcrumbs: false
+                    icon: icons.IconCloudDataConnection,
+                    breadcrumbs: true
                 },
                 {
                     id: 'jobs',
                     title: 'Jobs',
                     type: 'item',
                     url: '/system/job',
-                    breadcrumbs: false
+                    icon: icons.IconClockHour9,
+                    breadcrumbs: true
                 },
                 {
                     id: 'logs',
                     title: 'Logs',
                     type: 'item',
                     url: '/system/log',
-                    breadcrumbs: false
+                    icon: icons.IconFileSearch,
+                    breadcrumbs: true
                 },
                 {
                     id: 'monitoring',
                     title: 'Monitoring',
                     type: 'item',
                     url: '/system/monitoring',
-                    breadcrumbs: false
+                    icon: icons.IconHeartRateMonitor,
+                    breadcrumbs: true
                 },
                 {
                     id: 'languages',
                     title: 'Languages',
                     type: 'item',
                     url: '/system/languages',
-                    breadcrumbs: false
+                    icon: icons.IconWorld,
+                    breadcrumbs: true
                 }
             ]
         },
@@ -98,113 +159,127 @@ const utilities = {
             id: 'settings',
             title: 'Settings',
             type: 'collapse',
-            icon: icons.IconShadow,
+            icon: icons.IconAdjustments,
             children: [
                 {
                     id: 'companySettings',
                     title: 'Company Settings',
                     type: 'item',
                     url: '/settings/company-settings',
-                    breadcrumbs: false
+                    icon: icons.IconBriefcase,
+                    breadcrumbs: true
                 },
                 {
                     id: 'multiTenancy',
                     title: 'Multi Tenancy',
                     type: 'item',
                     url: '/settings/multi-tenancy',
-                    breadcrumbs: false
+                    icon: icons.IconBoxMultiple,
+                    breadcrumbs: true
                 },
                 {
-                    id: 'indentity',
+                    id: 'identity',
                     title: 'Identity',
                     type: 'item',
-                    url: '/settings/indentity',
-                    breadcrumbs: false
+                    url: '/settings/identity',
+                    breadcrumbs: true,
+                    icon: icons.IconIdBadge2
                 },
                 {
                     id: 'security',
                     title: 'Security',
                     type: 'item',
                     url: '/settings/security',
-                    breadcrumbs: false
+                    breadcrumbs: true,
+                    icon: icons.IconLock
                 },
                 {
                     id: 'privacySettings',
                     title: 'Privacy Settings',
                     type: 'item',
                     url: '/settings/privacy-settings',
-                    breadcrumbs: false
+                    breadcrumbs: true,
+                    icon: icons.IconSpy
                 },
                 {
                     id: 'userEngagement',
                     title: 'User Engagement',
                     type: 'item',
                     url: '/settings/user-engagement',
-                    breadcrumbs: false
+                    breadcrumbs: true,
+                    icon: icons.IconUsers
                 }
             ]
         },
         {
             id: 'casesAndProcessesManagement',
-            title: 'Cases and Processes Management',
+            title: 'Case Life Cycle',
             type: 'collapse',
-            icon: icons.IconShadow,
+            icon: icons.IconSettingsAutomation,
             children: [
                 {
                     id: 'case-definition',
                     title: 'Cases Definitions',
                     type: 'item',
-                    url: '/case-definition',
-                    breadcrumbs: false
+                    url: '/case-life-cycle/case-definition',
+                    breadcrumbs: true,
+                    icon: icons.IconPencil
                 },
                 {
                     id: 'event-type-definition',
                     title: 'Event Types',
                     type: 'item',
-                    url: '/event-type-definition',
-                    breadcrumbs: false
+                    url: '/case-life-cycle/event-type-definition',
+                    breadcrumbs: true,
+                    icon: icons.IconMessageCode
                 },
                 {
                     id: 'listener-type-definition',
                     title: 'Listener Type',
                     type: 'item',
-                    url: '/listener-type-definition',
-                    breadcrumbs: false
+                    url: '/case-life-cycle/listener-type-definition',
+                    breadcrumbs: true,
+                    icon: icons.IconEar
                 },
                 {
                     id: 'data-domain',
                     title: 'Data Domain',
                     type: 'item',
-                    url: '/data-domain',
-                    breadcrumbs: false
+                    url: '/case-life-cycle/data-domain',
+                    breadcrumbs: true,
+                    icon: icons.IconDatabase
                 },
                 {
                     id: 'process-engine',
-                    title: 'Processes Engines',
+                    title: 'Process Engines',
                     type: 'item',
-                    url: '/process-engine',
-                    breadcrumbs: false
+                    url: '/case-life-cycle/process-engine',
+                    breadcrumbs: true,
+                    icon: icons.IconEngine
                 },
                 {
                     id: 'task-definition',
                     title: 'Task Definition',
                     type: 'item',
-                    url: '/task-definition',
-                    breadcrumbs: false
+                    url: '/case-life-cycle/task-definition',
+                    breadcrumbs: true,
+                    icon: icons.IconChecklist
                 },
                 {
                     id: 'form',
                     title: 'Forms',
                     type: 'item',
-                    url: '/form',
-                    breadcrumbs: false
+                    url: '/case-life-cycle/form',
+                    breadcrumbs: true,
+                    icon: icons.IconForms
                 },
                 {
                     id: 'export',
                     title: 'Export',
                     type: 'item',
-                    url: '/export',
-                    breadcrumbs: false
+                    url: '/case-life-cycle/export',
+                    breadcrumbs: true,
+                    icon: icons.IconPackgeExport
                 }
             ]
         }

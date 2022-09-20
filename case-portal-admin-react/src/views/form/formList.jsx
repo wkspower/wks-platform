@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 
+import { Box } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
+import MainCard from 'components/MainCard';
 
 import Button from '@mui/material/Button';
 import { FormDetail } from './formDetail';
@@ -45,14 +47,18 @@ export const FormList = () => {
 
     return (
         <div style={{ height: 650, width: '100%' }}>
-            <DataGrid
-                sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
-                rows={forms}
-                columns={columns}
-                pageSize={10}
-                rowsPerPageOptions={[10]}
-                getRowId={(row) => row.key}
-            />
+            <MainCard sx={{ mt: 2 }} content={false}>
+                <Box>
+                    <DataGrid
+                        sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
+                        rows={forms}
+                        columns={columns}
+                        pageSize={10}
+                        rowsPerPageOptions={[10]}
+                        getRowId={(row) => row.key}
+                    />
+                </Box>
+            </MainCard>
             {form && <FormDetail form={form} handleClose={handleCloseForm} open={openForm} />}
         </div>
     );
