@@ -1,26 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import CloseIcon from '@mui/icons-material/Close';
-import {
-    AppBar,
-    Box,
-    Button,
-    Dialog,
-    FormControl,
-    Grid,
-    IconButton,
-    InputLabel,
-    MenuItem,
-    Select,
-    Slide,
-    Toolbar,
-    TransitionProps
-} from '@mui/material';
+import { AppBar, Box, Button, Dialog, FormControl, Grid, IconButton, InputLabel, Slide, Toolbar, TransitionProps } from '@mui/material';
 import Typography from '@mui/material/Typography';
 
 import { FormBuilder } from '@formio/react';
 
-import { TextField } from '@mui/material';
+import { MenuItem, Select, TextField } from '@mui/material';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -31,9 +17,36 @@ const Transition = React.forwardRef(function Transition(
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const FormDetail = ({ open, handleClose, form, handleInputChange, handleSelectDisplay }) => {
-    const saveForm = () => {
-        console.log(form);
+export const FormNew = ({ open, handleClose }) => {
+    const [form, setForm] = useState(null);
+
+    useEffect(() => {
+        setForm({ key: '', description: '', structure: { components: [], display: 'form' } });
+    }, [open]);
+
+    const saveNewForm = () => {
+        fetch('http://localhost:8081/form', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(form)
+        })
+            .then((response) => handleClose())
+            .catch((err) => {
+                console.log(err.message);
+            });
+    };
+
+    const handleInputChange = (event) => {
+        setForm({ ...form, [event.target.name]: event.target.value });
+    };
+
+    const handleSelectDisplay = (event) => {
+        let structure = { ...form.structure };
+        structure.display = event.target.value;
+        setForm({ ...form, structure: structure });
     };
 
     return (
@@ -49,7 +62,7 @@ export const FormDetail = ({ open, handleClose, form, handleInputChange, handleS
                         <Typography sx={{ ml: 2, flex: 1 }} component="div">
                             <div>{form?.description}</div>
                         </Typography>
-                        <Button color="inherit" onClick={saveForm}>
+                        <Button color="inherit" onClick={saveNewForm}>
                             Save
                         </Button>
                     </Toolbar>

@@ -6,6 +6,7 @@ import MainCard from 'components/MainCard';
 
 import Button from '@mui/material/Button';
 import { FormDetail } from './formDetail';
+import { FormNew as NewForm } from './formNew';
 
 export const FormList = () => {
     const [forms, setForms] = useState([]);
@@ -27,7 +28,7 @@ export const FormList = () => {
 
     const [form, setForm] = useState(null);
     const columns: GridColDef[] = [
-        { field: 'key', headerName: 'Event', width: 300 },
+        { field: 'key', headerName: 'Form Key', width: 300 },
         { field: 'description', headerName: 'Description', width: 220 },
         {
             field: 'action',
@@ -45,8 +46,31 @@ export const FormList = () => {
         }
     ];
 
+    const [openNewForm, setOpenNewForm] = useState(false);
+
+    const handleNewForm = () => {
+        setOpenNewForm(true);
+    };
+
+    const handleCloseNewForm = () => {
+        setOpenNewForm(false);
+    };
+
+    const handleInputChange = (event) => {
+        setForm({ ...form, [event.target.name]: event.target.value });
+    };
+
+    const handleSelectDisplay = (event) => {
+        let structure = { ...form.structure };
+        structure.display = event.target.value;
+        setForm({ ...form, structure: structure });
+    };
+
     return (
         <div style={{ height: 650, width: '100%' }}>
+            <Button id="basic-button" onClick={handleNewForm} variant="contained">
+                New Form
+            </Button>
             <MainCard sx={{ mt: 2 }} content={false}>
                 <Box>
                     <DataGrid
@@ -59,7 +83,16 @@ export const FormList = () => {
                     />
                 </Box>
             </MainCard>
-            {form && <FormDetail form={form} handleClose={handleCloseForm} open={openForm} />}
+            {form && (
+                <FormDetail
+                    form={form}
+                    handleClose={handleCloseForm}
+                    open={openForm}
+                    handleInputChange={handleInputChange}
+                    handleSelectDisplay={handleSelectDisplay}
+                />
+            )}
+            {<NewForm handleClose={handleCloseNewForm} open={openNewForm} />}
         </div>
     );
 };

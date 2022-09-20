@@ -13,6 +13,7 @@ public class Form {
 
 	public String key;
 	public String description;
+	public String display;
 	public JsonObject structure;
 
 }
