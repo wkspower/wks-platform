@@ -82,13 +82,7 @@ export const CaseList = ({ status }) => {
     return (
         <div style={{ height: 650, width: '100%' }}>
             <div>
-                <Button
-                    id="basic-button"
-                    aria-controls={open ? 'basic-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    onClick={handleClick}
-                >
+                <Button id="basic-button" onClick={handleClick} variant="contained">
                     New Case
                 </Button>
                 <Menu
@@ -110,7 +104,7 @@ export const CaseList = ({ status }) => {
                 </Menu>
             </div>
             <DataGrid
-                sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
+                sx={{ height: 650, width: '100%', backgroundColor: '#ffffff', mt: 1 }}
                 rows={cases}
                 columns={columns}
                 pageSize={10}

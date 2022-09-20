@@ -1,55 +1,64 @@
-import { createTheme } from '@mui/material/styles';
+import PropTypes from 'prop-types';
+import { useMemo } from 'react';
 
-// assets
-import colors from 'assets/scss/_themes-vars.module.scss';
+// material-ui
+import { CssBaseline, StyledEngineProvider } from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-// project imports
-import componentStyleOverrides from './compStyleOverride';
-import themePalette from './palette';
-import themeTypography from './typography';
+// project import
+import Palette from './palette';
+import Typography from './typography';
+import CustomShadows from './shadows';
+import componentsOverride from './overrides';
 
-/**
- * Represent theme style and structure as per Material-UI
- * @param {JsonObject} customization customization parameter object
- */
+// ==============================|| DEFAULT THEME - MAIN  ||============================== //
 
-export const theme = (customization) => {
-    const color = colors;
+export default function ThemeCustomization({ children }) {
+    const theme = Palette('light', 'default');
 
-    const themeOption = {
-        colors: color,
-        heading: color.grey900,
-        paper: color.paper,
-        backgroundDefault: color.paper,
-        background: color.primaryLight,
-        darkTextPrimary: color.grey700,
-        darkTextSecondary: color.grey500,
-        textDark: color.grey900,
-        menuSelected: color.secondaryDark,
-        menuSelectedBack: color.secondaryLight,
-        divider: color.grey200,
-        customization
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const themeTypography = Typography(`'Public Sans', sans-serif`);
+    const themeCustomShadows = useMemo(() => CustomShadows(theme), [theme]);
 
-    const themeOptions = {
-        direction: 'ltr',
-        palette: themePalette(themeOption),
-        mixins: {
-            toolbar: {
-                minHeight: '48px',
-                padding: '16px',
-                '@media (min-width: 600px)': {
-                    minHeight: '48px'
+    const themeOptions = useMemo(
+        () => ({
+            breakpoints: {
+                values: {
+                    xs: 0,
+                    sm: 768,
+                    md: 1024,
+                    lg: 1266,
+                    xl: 1536
                 }
-            }
-        },
-        typography: themeTypography(themeOption)
-    };
+            },
+            direction: 'ltr',
+            mixins: {
+                toolbar: {
+                    minHeight: 60,
+                    paddingTop: 8,
+                    paddingBottom: 8
+                }
+            },
+            palette: theme.palette,
+            customShadows: themeCustomShadows,
+            typography: themeTypography
+        }),
+        [theme, themeTypography, themeCustomShadows]
+    );
 
     const themes = createTheme(themeOptions);
-    themes.components = componentStyleOverrides(themeOption);
+    themes.components = componentsOverride(themes);
 
-    return themes;
+    return (
+        <StyledEngineProvider injectFirst>
+            <ThemeProvider theme={themes}>
+                <CssBaseline />
+                {children}
+            </ThemeProvider>
+        </StyledEngineProvider>
+    );
+}
+
+ThemeCustomization.propTypes = {
+    children: PropTypes.node
 };
-
-export default theme;

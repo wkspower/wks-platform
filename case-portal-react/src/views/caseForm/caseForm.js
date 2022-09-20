@@ -18,8 +18,9 @@ import { TaskList } from '../taskList/taskList';
 
 import { CaseStatus } from 'common/caseStatus';
 
-import { Comments } from 'views/caseComment/Comments';
 import { Grid } from '@mui/material';
+import { Comments } from 'views/caseComment/Comments';
+import MainCard from 'components/MainCard';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -57,27 +58,15 @@ TabPanel.propTypes = {
     value: PropTypes.number.isRequired
 };
 
-const formDataTemplate = {
-    data: {
-        submit: true
-    },
-    metadata: {},
-    isValid: true
-};
-
-export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
-    const [caseInstAttributes, setCaseInstAttributes] = useState([]);
+export const CaseForm = ({ open, handleClose, aCase }) => {
     const [formData, setFormData] = useState({});
     const [tabIndex, setTabIndex] = useState(0);
 
     useEffect(() => {
-        if (componentsParam) {
-            setCaseInstAttributes(componentsParam.components);
-        } else if (aCase) {
+        if (aCase) {
             fetch('http://localhost:8081/case/' + aCase.businessKey)
                 .then((response) => response.json())
                 .then((caseData) => {
-                    setCaseInstAttributes(caseData.attributes);
                     setFormData({
                         data: caseData.attributes.reduce((obj, item) => Object.assign(obj, { [item.name]: item.value }), {}),
                         metadata: {},
@@ -89,7 +78,7 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
                     console.log(err.message);
                 });
         }
-    }, [aCase, componentsParam]);
+    }, [aCase]);
 
     const [caseDef, setCaseDef] = useState([]);
     const [form, setForm] = useState([]);
@@ -108,11 +97,7 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
             .catch((err) => {
                 console.log(err.message);
             });
-    }, [aCase, componentsParam]);
-
-    const handleInputChange = function (event) {
-        setCaseInstAttributes({ ...caseInstAttributes, [event.target.businessKey]: { value: event.target.value } });
-    };
+    }, [aCase]);
 
     const handleTabChanged = (event, newValue) => {
         setTabIndex(newValue);
@@ -185,11 +170,13 @@ export const CaseForm = ({ open, handleClose, aCase, componentsParam }) => {
 
                 <TabPanel value={tabIndex} index={0}>
                     {/* Case Details  */}
-                    <Grid container spacing={2}>
-                        <Grid item xs={9}>
-                            <Form form={form.structure} submission={formData} options={{ readOnly: true }} />
+                    <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
+                        <Grid item xs={12}>
+                            <MainCard sx={{ p: 2 }} content={false}>
+                                <Form form={form.structure} submission={formData} options={{ readOnly: true }} />
+                            </MainCard>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={12}>
                             <Comments commentsUrl="http://localhost:3004/comments" currentUserId="1" />
                         </Grid>
                     </Grid>
