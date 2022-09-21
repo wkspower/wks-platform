@@ -8,6 +8,7 @@ import Slide from '@mui/material/Slide';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Toolbar from '@mui/material/Toolbar';
+import Tooltip from '@mui/material/Tooltip';
 import { TransitionProps } from '@mui/material/transitions';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
@@ -19,8 +20,10 @@ import { TaskList } from '../taskList/taskList';
 import { CaseStatus } from 'common/caseStatus';
 
 import { Grid } from '@mui/material';
-import { Comments } from 'views/caseComment/Comments';
 import MainCard from 'components/MainCard';
+import { Comments } from 'views/caseComment/Comments';
+
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -173,6 +176,14 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
                     <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
                         <Grid item xs={12}>
                             <MainCard sx={{ p: 2 }} content={false}>
+                                <Box sx={{ pb:1, display: 'flex', flexDirection: 'row' }}>
+                                    <Typography variant="h5" color="textSecondary" sx={{ pr:0.5}}>
+                                        {form.title}
+                                    </Typography>
+                                    <Tooltip title={form.toolTip}>
+                                        <QuestionCircleOutlined />
+                                    </Tooltip>
+                                </Box>
                                 <Form form={form.structure} submission={formData} options={{ readOnly: true }} />
                             </MainCard>
                         </Grid>

@@ -33,7 +33,32 @@ const Transition = React.forwardRef(function Transition(
 
 export const FormDetail = ({ open, handleClose, form, handleInputChange, handleSelectDisplay }) => {
     const saveForm = () => {
-        console.log(form);
+        fetch('http://localhost:8081/form/' + form.key, {
+            method: 'PATCH',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(form)
+        })
+            .then((response) => handleClose())
+            .catch((err) => {
+                console.log(err.message);
+            });
+    };
+
+    const deleteForm = () => {
+        fetch('http://localhost:8081/form/' + form.key, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+            .then((response) => handleClose())
+            .catch((err) => {
+                console.log(err.message);
+            });
     };
 
     return (
@@ -47,10 +72,13 @@ export const FormDetail = ({ open, handleClose, form, handleInputChange, handleS
                             <CloseIcon />
                         </IconButton>
                         <Typography sx={{ ml: 2, flex: 1 }} component="div">
-                            <div>{form?.description}</div>
+                            <div>{form?.title}</div>
                         </Typography>
                         <Button color="inherit" onClick={saveForm}>
                             Save
+                        </Button>
+                        <Button color="inherit" onClick={deleteForm}>
+                            Delete
                         </Button>
                     </Toolbar>
                 </AppBar>
@@ -58,16 +86,13 @@ export const FormDetail = ({ open, handleClose, form, handleInputChange, handleS
                 <Box sx={{ p: 2 }}>
                     <Grid container spacing={1} alignItems="center">
                         <Grid item>
-                            <TextField id="txtKey" name="key" value={form.key} label="Form key" onChange={handleInputChange} />
+                            <TextField id="txtKey" name="key" value={form.key} label="Form key" onChange={handleInputChange} disabled />
                         </Grid>
                         <Grid item>
-                            <TextField
-                                id="txtTitle"
-                                name="description"
-                                value={form.description}
-                                label="Description"
-                                onChange={handleInputChange}
-                            />
+                            <TextField id="txtTitle" name="title" value={form.title} label="title" onChange={handleInputChange} />
+                        </Grid>
+                        <Grid item>
+                            <TextField id="txtToolTip" name="toolTip" value={form.toolTip} label="Tool Tip" onChange={handleInputChange} />
                         </Grid>
                         <Grid item>
                             <FormControl fullWidth>

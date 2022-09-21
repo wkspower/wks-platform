@@ -33,4 +33,9 @@ public class FormServiceImpl implements FormService {
 		dataRepository.deleteForm(formKey);
 	}
 
+	@Override
+	public void update(final String formKey, final Form form) throws Exception {
+		dataRepository.updateForm(formKey, form);
+	}
+
 }

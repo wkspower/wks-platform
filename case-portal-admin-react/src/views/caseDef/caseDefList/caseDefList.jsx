@@ -1,8 +1,8 @@
+import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import MainCard from 'components/MainCard';
-import { useEffect, useState } from 'react';
-import { Box } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { CaseDefForm } from '../caseDefForm/caseDefForm';
 
 export const CaseDefList = () => {
@@ -26,7 +26,7 @@ export const CaseDefList = () => {
         { field: 'name', headerName: 'Name', width: 220 },
         {
             field: 'action',
-            headerName: 'Action',
+            headerName: '',
             sortable: false,
             renderCell: (params) => {
                 const onClick = (e) => {
@@ -35,7 +35,11 @@ export const CaseDefList = () => {
                     setOpenCaseDefForm(true);
                 };
 
-                return <Button onClick={onClick}>Details</Button>;
+                return (
+                    <React.Fragment>
+                        <Button onClick={onClick}>Details</Button>
+                    </React.Fragment>
+                );
             }
         }
     ];

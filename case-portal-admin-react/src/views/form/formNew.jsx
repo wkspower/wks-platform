@@ -60,7 +60,7 @@ export const FormNew = ({ open, handleClose }) => {
                             <CloseIcon />
                         </IconButton>
                         <Typography sx={{ ml: 2, flex: 1 }} component="div">
-                            <div>{form?.description}</div>
+                            <div>New Form</div>
                         </Typography>
                         <Button color="inherit" onClick={saveNewForm}>
                             Save
@@ -74,13 +74,10 @@ export const FormNew = ({ open, handleClose }) => {
                             <TextField id="txtKey" name="key" value={form.key} label="Form key" onChange={handleInputChange} />
                         </Grid>
                         <Grid item>
-                            <TextField
-                                id="txtTitle"
-                                name="description"
-                                value={form.description}
-                                label="Description"
-                                onChange={handleInputChange}
-                            />
+                            <TextField id="txtTitle" name="title" value={form.title} label="Title" onChange={handleInputChange} />
+                        </Grid>
+                        <Grid item>
+                            <TextField id="txtToolTip" name="toolTip" value={form.toolTip} label="Tool Tip" onChange={handleInputChange} />
                         </Grid>
                         <Grid item>
                             <FormControl fullWidth>

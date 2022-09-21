@@ -43,7 +43,7 @@ export const CaseList = ({ status }) => {
         { field: 'caseDefinitionId', headerName: 'Case Definition', width: 220 },
         {
             field: 'action',
-            headerName: 'Action',
+            headerName: '',
             sortable: false,
             renderCell: (params) => {
                 const onClick = (e) => {
@@ -113,7 +113,7 @@ export const CaseList = ({ status }) => {
             />
             {aCase && <CaseForm aCase={aCase} handleClose={handleCloseCaseForm} open={openCaseForm} />}
 
-            <NewCaseForm handleClose={handleCloseNewCaseForm} open={openNewCaseForm} caseDefId={newCaseDefId} />
+            {openNewCaseForm && <NewCaseForm handleClose={handleCloseNewCaseForm} open={openNewCaseForm} caseDefId={newCaseDefId} />}
         </div>
     );
 };

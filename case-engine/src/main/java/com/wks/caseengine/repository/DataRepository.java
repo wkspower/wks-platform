@@ -38,5 +38,7 @@ public interface DataRepository {
 	List<Form> findForms() throws Exception;
 
 	void deleteForm(final String formKey) throws Exception;
+	
+	void updateForm(final String formKey, final Form form) throws Exception;
 
 }

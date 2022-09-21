@@ -60,19 +60,19 @@ public class MongoDataRepository implements DataRepository {
 	}
 
 	@Override
-	public CaseDefinition getCaseDefinition(String caseDefId) throws Exception {
+	public CaseDefinition getCaseDefinition(final String caseDefId) throws Exception {
 		Bson filter = Filters.eq("id", caseDefId);
 		Gson gson = new Gson();
 		return gson.fromJson(caseDefCollection.find(filter).first().getJson(), CaseDefinition.class);
 	}
 
 	@Override
-	public void saveCaseDefinition(CaseDefinition caseDefinition) throws Exception {
+	public void saveCaseDefinition(final CaseDefinition caseDefinition) throws Exception {
 		caseDefCollection.insertOne((new JsonObject(new Gson().toJson(caseDefinition))));
 	}
 
 	@Override
-	public void deleteCaseDefinition(String caseDefinitionId) throws Exception {
+	public void deleteCaseDefinition(final String caseDefinitionId) throws Exception {
 		Bson filter = Filters.eq("id", caseDefinitionId);
 		caseDefCollection.deleteMany(filter);
 	}
@@ -86,19 +86,19 @@ public class MongoDataRepository implements DataRepository {
 	}
 
 	@Override
-	public CaseInstance getCaseInstance(String businessKey) throws Exception {
+	public CaseInstance getCaseInstance(final String businessKey) throws Exception {
 		Bson filter = Filters.eq("businessKey", businessKey);
 		Gson gson = new Gson();
 		return gson.fromJson(caseInstCollection.find(filter).first().getJson(), CaseInstance.class);
 	}
 
 	@Override
-	public void saveCaseInstance(CaseInstance caseInstance) throws Exception {
+	public void saveCaseInstance(final CaseInstance caseInstance) throws Exception {
 		caseInstCollection.insertOne((new JsonObject(new Gson().toJson(caseInstance))));
 	}
 
 	@Override
-	public void updateCaseStatus(String businessKey, CaseStatus newStatus) throws Exception {
+	public void updateCaseStatus(final String businessKey, final CaseStatus newStatus) throws Exception {
 		Bson filter = Filters.eq("businessKey", businessKey);
 		Bson update = Updates.set("status", newStatus);
 		caseInstCollection.updateMany(filter, update);
@@ -106,20 +106,20 @@ public class MongoDataRepository implements DataRepository {
 	}
 
 	@Override
-	public void deleteCaseInstance(CaseInstance caseInstance) throws Exception {
+	public void deleteCaseInstance(final CaseInstance caseInstance) throws Exception {
 		Bson filter = Filters.eq("businessKey", caseInstance.getBusinessKey());
 		caseInstCollection.deleteMany(filter);
 	}
 
 	@Override
-	public Form getForm(String formKey) throws Exception {
+	public Form getForm(final String formKey) throws Exception {
 		Bson filter = Filters.eq("key", formKey);
 		Gson gson = new Gson();
 		return gson.fromJson(formCollection.find(filter).first().getJson(), Form.class);
 	}
 
 	@Override
-	public void saveForm(Form form) throws Exception {
+	public void saveForm(final Form form) throws Exception {
 		formCollection.insertOne((new JsonObject(new Gson().toJson(form))));
 
 	}
@@ -131,9 +131,20 @@ public class MongoDataRepository implements DataRepository {
 	}
 
 	@Override
-	public void deleteForm(String formKey) throws Exception {
+	public void deleteForm(final String formKey) throws Exception {
 		Bson filter = Filters.eq("key", formKey);
 		formCollection.deleteMany(filter);
+	}
+
+	@Override
+	public void updateForm(final String formKey, final Form form) throws Exception {
+		Bson filter = Filters.eq("key", formKey);
+
+		Bson update = Updates.combine(Updates.set("title", form.getTitle()),
+				Updates.set("toolTip", form.getToolTip()),
+				Updates.set("structure", (new JsonObject(new Gson().toJson(form.getStructure())))));
+
+		formCollection.updateOne(filter, update);
 	}
 
 }

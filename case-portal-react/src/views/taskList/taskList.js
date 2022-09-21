@@ -33,7 +33,7 @@ export const TaskList = ({ tasksParam, businessKey }) => {
         { field: 'created', headerName: 'Created', type: 'date', width: 150 },
         {
             field: 'action',
-            headerName: 'Action',
+            headerName: '',
             sortable: false,
             renderCell: (params) => {
                 const onClick = (e) => {

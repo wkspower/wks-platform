@@ -10,6 +10,9 @@ import { FormNew as NewForm } from './formNew';
 
 export const FormList = () => {
     const [forms, setForms] = useState([]);
+    const [openForm, setOpenForm] = useState(false);
+    const [openNewForm, setOpenNewForm] = useState(false);
+
     useEffect(() => {
         fetch('http://localhost:8081/form')
             .then((response) => response.json())
@@ -19,9 +22,8 @@ export const FormList = () => {
             .catch((err) => {
                 console.log(err.message);
             });
-    }, []);
+    }, [openForm, openNewForm]);
 
-    const [openForm, setOpenForm] = useState(false);
     const handleCloseForm = () => {
         setOpenForm(false);
     };
@@ -29,24 +31,22 @@ export const FormList = () => {
     const [form, setForm] = useState(null);
     const columns: GridColDef[] = [
         { field: 'key', headerName: 'Form Key', width: 300 },
-        { field: 'description', headerName: 'Description', width: 220 },
+        { field: 'title', headerName: 'Title', width: 300 },
         {
             field: 'action',
-            headerName: 'Action',
+            headerName: '',
             sortable: false,
             renderCell: (params) => {
-                const onClick = (e) => {
+                const onDetailsClick = (e) => {
                     setForm(params.row);
                     e.stopPropagation(); // don't select this row after clicking
                     setOpenForm(true);
                 };
 
-                return <Button onClick={onClick}>Details</Button>;
+                return <Button onClick={onDetailsClick}>Details</Button>;
             }
         }
     ];
-
-    const [openNewForm, setOpenNewForm] = useState(false);
 
     const handleNewForm = () => {
         setOpenNewForm(true);
