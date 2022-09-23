@@ -58,7 +58,8 @@ const MainCard = forwardRef(
                         p: '16px !important',
                         fontFamily: theme.typography.fontFamily,
                         fontSize: '0.75rem'
-                    }
+                    },
+                    overflow: 'visible'
                 }}
             >
                 {/* card header and action */}

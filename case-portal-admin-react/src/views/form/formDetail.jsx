@@ -21,6 +21,7 @@ import Typography from '@mui/material/Typography';
 import { FormBuilder } from '@formio/react';
 
 import { TextField } from '@mui/material';
+import MainCard from 'components/MainCard';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -83,46 +84,56 @@ export const FormDetail = ({ open, handleClose, form, handleInputChange, handleS
                     </Toolbar>
                 </AppBar>
 
-                <Box sx={{ p: 2 }}>
-                    <Grid container spacing={1} alignItems="center">
-                        <Grid item>
-                            <TextField id="txtKey" name="key" value={form.key} label="Form key" onChange={handleInputChange} disabled />
+                <Box sx={{ p: 1 }}>
+                    <MainCard>
+                        <Grid container spacing={1}>
+                            <Grid item>
+                                <TextField id="txtKey" name="key" value={form.key} label="Form key" onChange={handleInputChange} disabled />
+                            </Grid>
+                            <Grid item>
+                                <TextField id="txtTitle" name="title" value={form.title} label="title" onChange={handleInputChange} />
+                            </Grid>
+                            <Grid item>
+                                <TextField
+                                    id="txtToolTip"
+                                    name="toolTip"
+                                    value={form.toolTip}
+                                    label="Tool Tip"
+                                    onChange={handleInputChange}
+                                />
+                            </Grid>
+                            <Grid item>
+                                <FormControl fullWidth>
+                                    <InputLabel id="sltDisplay-label">Display</InputLabel>
+                                    <Select
+                                        id="sltDisplay-label"
+                                        name="display"
+                                        value={form.structure.display}
+                                        label="Display"
+                                        onChange={handleSelectDisplay}
+                                    >
+                                        <MenuItem value="form">Form</MenuItem>
+                                        <MenuItem value="wizard">Wizard</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
                         </Grid>
-                        <Grid item>
-                            <TextField id="txtTitle" name="title" value={form.title} label="title" onChange={handleInputChange} />
-                        </Grid>
-                        <Grid item>
-                            <TextField id="txtToolTip" name="toolTip" value={form.toolTip} label="Tool Tip" onChange={handleInputChange} />
-                        </Grid>
-                        <Grid item>
-                            <FormControl fullWidth>
-                                <InputLabel id="sltDisplay-label">Display</InputLabel>
-                                <Select
-                                    id="sltDisplay-label"
-                                    name="display"
-                                    value={form.structure.display}
-                                    label="Display"
-                                    onChange={handleSelectDisplay}
-                                >
-                                    <MenuItem value="form">Form</MenuItem>
-                                    <MenuItem value="wizard">Wizard</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Grid>
-                    </Grid>
+                    </MainCard>
                 </Box>
 
-                <Box sx={{ p: 2 }}>
-                    <FormBuilder
-                        form={form.structure}
-                        options={{
-                            builder: {
-                                premium: false
-                            },
-                            noNewEdit: true,
-                            noDefaultSubmitButton: true
-                        }}
-                    />
+                <Box sx={{ p: 1 }}>
+                    <MainCard>
+                        <FormBuilder
+                            form={form.structure}
+                            options={{
+                                builder: {
+                                    premium: false
+                                },
+                                noNewEdit: true,
+                                noDefaultSubmitButton: true
+                            }}
+                        />
+                    </MainCard>
                 </Box>
             </Dialog>
         )

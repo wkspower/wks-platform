@@ -37,7 +37,7 @@ export const CaseDefList = () => {
 
                 return (
                     <React.Fragment>
-                        <Button onClick={onClick}>Details</Button>
+                        <Button onClick={onClick}>Edit</Button>
                     </React.Fragment>
                 );
             }

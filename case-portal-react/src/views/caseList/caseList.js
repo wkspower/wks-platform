@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import Button from '@mui/material/Button';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { CaseForm } from '../caseForm/caseForm';
-import { NewCaseForm } from '../caseForm/newCaseForm';
+import { Box, Button } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import MainCard from 'components/MainCard';
+import React, { useEffect, useState } from 'react';
+import { CaseForm } from '../caseForm/caseForm';
+import { NewCaseForm } from '../caseForm/newCaseForm';
 
 export const CaseList = ({ status }) => {
     const [cases, setCases] = useState([]);
@@ -103,14 +104,18 @@ export const CaseList = ({ status }) => {
                     })}
                 </Menu>
             </div>
-            <DataGrid
-                sx={{ height: 650, width: '100%', backgroundColor: '#ffffff', mt: 1 }}
-                rows={cases}
-                columns={columns}
-                pageSize={10}
-                rowsPerPageOptions={[10]}
-                getRowId={(row) => row.businessKey}
-            />
+            <MainCard sx={{ mt: 2 }} content={false}>
+                <Box>
+                    <DataGrid
+                        sx={{ height: 650, width: '100%', backgroundColor: '#ffffff', mt: 1 }}
+                        rows={cases}
+                        columns={columns}
+                        pageSize={10}
+                        rowsPerPageOptions={[10]}
+                        getRowId={(row) => row.businessKey}
+                    />
+                </Box>
+            </MainCard>
             {aCase && <CaseForm aCase={aCase} handleClose={handleCloseCaseForm} open={openCaseForm} />}
 
             {openNewCaseForm && <NewCaseForm handleClose={handleCloseNewCaseForm} open={openNewCaseForm} caseDefId={newCaseDefId} />}

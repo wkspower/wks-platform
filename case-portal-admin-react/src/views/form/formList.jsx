@@ -43,7 +43,7 @@ export const FormList = () => {
                     setOpenForm(true);
                 };
 
-                return <Button onClick={onDetailsClick}>Details</Button>;
+                return <Button onClick={onDetailsClick}>Edit</Button>;
             }
         }
     ];
