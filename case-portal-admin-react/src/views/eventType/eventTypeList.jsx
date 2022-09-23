@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
+import { Box } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
+import MainCard from 'components/MainCard';
 
 const columns: GridColDef[] = [
     { field: 'code', headerName: 'Event', width: 300 },
@@ -21,13 +23,17 @@ export const EventTypeList = () => {
     }, []);
 
     return (
-        <DataGrid
-            sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
-            rows={eventTypes}
-            columns={columns}
-            pageSize={10}
-            rowsPerPageOptions={[10]}
-            getRowId={(row) => row.code}
-        />
+        <MainCard sx={{ mt: 2 }} content={false}>
+            <Box>
+                <DataGrid
+                    sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
+                    rows={eventTypes}
+                    columns={columns}
+                    pageSize={10}
+                    rowsPerPageOptions={[10]}
+                    getRowId={(row) => row.code}
+                />
+            </Box>
+        </MainCard>
     );
 };

@@ -1,6 +1,8 @@
+import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useEffect, useState } from 'react';
+import MainCard from 'components/MainCard';
+import React, { useEffect, useState } from 'react';
 import { CaseDefForm } from '../caseDefForm/caseDefForm';
 
 export const CaseDefList = () => {
@@ -24,7 +26,7 @@ export const CaseDefList = () => {
         { field: 'name', headerName: 'Name', width: 220 },
         {
             field: 'action',
-            headerName: 'Action',
+            headerName: '',
             sortable: false,
             renderCell: (params) => {
                 const onClick = (e) => {
@@ -33,7 +35,11 @@ export const CaseDefList = () => {
                     setOpenCaseDefForm(true);
                 };
 
-                return <Button onClick={onClick}>Details</Button>;
+                return (
+                    <React.Fragment>
+                        <Button onClick={onClick}>Edit</Button>
+                    </React.Fragment>
+                );
             }
         }
     ];
@@ -44,13 +50,17 @@ export const CaseDefList = () => {
 
     return (
         <div style={{ height: 650, width: '100%' }}>
-            <DataGrid
-                sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
-                rows={caseDefs}
-                columns={columns}
-                pageSize={10}
-                rowsPerPageOptions={[10]}
-            />
+            <MainCard sx={{ mt: 2 }} content={false}>
+                <Box>
+                    <DataGrid
+                        sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
+                        rows={caseDefs}
+                        columns={columns}
+                        pageSize={10}
+                        rowsPerPageOptions={[10]}
+                    />
+                </Box>
+            </MainCard>
             {aCaseDef && <CaseDefForm aCaseDef={aCaseDef} handleClose={handleCloseCaseDefForm} open={openCaseDefForm} />}
         </div>
     );

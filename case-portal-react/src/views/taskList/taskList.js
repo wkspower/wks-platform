@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import MainCard from 'components/MainCard';
 import { useEffect, useState } from 'react';
 import { TaskForm } from '../taskForm/taskForm';
 
@@ -33,7 +34,7 @@ export const TaskList = ({ tasksParam, businessKey }) => {
         { field: 'created', headerName: 'Created', type: 'date', width: 150 },
         {
             field: 'action',
-            headerName: 'Action',
+            headerName: '',
             sortable: false,
             renderCell: (params) => {
                 const onClick = (e) => {
@@ -53,13 +54,17 @@ export const TaskList = ({ tasksParam, businessKey }) => {
 
     return (
         <Box>
-            <DataGrid
-                sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
-                rows={tasks}
-                columns={columns}
-                pageSize={10}
-                rowsPerPageOptions={[10]}
-            />
+            <MainCard sx={{ mt: 2 }} content={false}>
+                <Box>
+                    <DataGrid
+                        sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
+                        rows={tasks}
+                        columns={columns}
+                        pageSize={10}
+                        rowsPerPageOptions={[10]}
+                    />
+                </Box>
+            </MainCard>
             <TaskForm task={task} handleClose={handleClose} open={open} />
         </Box>
     );

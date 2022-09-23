@@ -1,9 +1,13 @@
 import { useState } from 'react';
 
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import CloseIcon from '@mui/icons-material/Close';
+import { Box, Tooltip } from '@mui/material';
+
 import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import Slide from '@mui/material/Slide';
 import Toolbar from '@mui/material/Toolbar';
@@ -12,6 +16,7 @@ import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 
 import { Form } from '@formio/react';
+import MainCard from 'components/MainCard';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -22,37 +27,31 @@ const Transition = React.forwardRef(function Transition(
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const emptyFormData = {
-    data: {
-        submit: true
-    },
-    metadata: {},
-    isValid: true
-};
-
 export const NewCaseForm = ({ open, handleClose, caseDefId }) => {
     const [caseDef, setCaseDef] = useState([]);
     const [form, setForm] = useState([]);
-    const [formData, setFormData] = useState(emptyFormData);
+    const [formData, setFormData] = useState(null);
 
     useEffect(() => {
-        if (open) {
-            fetch('http://localhost:8081/case-definition/' + caseDefId)
-                .then((response) => response.json())
-                .then((data) => {
-                    setCaseDef(data);
-                    return fetch('http://localhost:8081/form/' + data.formKey);
-                })
-                .then((response) => response.json())
-                .then((data) => {
-                    setForm(data);
-                    setFormData(emptyFormData);
-                })
-                .catch((err) => {
-                    console.log(err.message);
+        fetch('http://localhost:8081/case-definition/' + caseDefId)
+            .then((response) => response.json())
+            .then((data) => {
+                setCaseDef(data);
+                return fetch('http://localhost:8081/form/' + data.formKey);
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                setForm(data);
+                setFormData({
+                    data: {},
+                    metadata: {},
+                    isValid: true
                 });
-        }
-    }, [open, caseDefId]);
+            })
+            .catch((err) => {
+                console.log(err.message);
+            });
+    }, [open]);
 
     const onSave = () => {
         const caseAttributes = [];
@@ -99,9 +98,23 @@ export const NewCaseForm = ({ open, handleClose, caseDefId }) => {
                 </AppBar>
 
                 {/* New Case Form */}
-                <div style={{ display: 'grid', padding: '10px' }}>
-                    <Form form={form.structure} submission={formData} />
-                </div>
+                <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
+                    <Grid item xs={12}>
+                        <MainCard sx={{ p: 2 }} content={true}>
+                            <Box sx={{ pb: 1, display: 'flex', flexDirection: 'row' }}>
+                                <Typography variant="h5" color="textSecondary" sx={{ pr: 0.5 }}>
+                                    {form.title}
+                                </Typography>
+                                {form.toolTip && (
+                                    <Tooltip title={form.toolTip}>
+                                        <QuestionCircleOutlined />
+                                    </Tooltip>
+                                )}
+                            </Box>
+                            <Form form={form.structure} submission={formData} />
+                        </MainCard>
+                    </Grid>
+                </Grid>
             </Dialog>
         </div>
     );

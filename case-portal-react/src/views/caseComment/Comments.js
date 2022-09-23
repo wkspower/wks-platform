@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
-import CommentForm from './CommentForm';
-import Comment from './Comment';
+import { useEffect, useState } from 'react';
 import {
-    getComments as getCommentsApi,
     createComment as createCommentApi,
-    updateComment as updateCommentApi,
-    deleteComment as deleteCommentApi
+    deleteComment as deleteCommentApi,
+    getComments as getCommentsApi,
+    updateComment as updateCommentApi
 } from './api';
+import Comment from './Comment';
+import CommentForm from './CommentForm';
+
+import { Typography } from '@mui/material';
+import MainCard from 'components/MainCard';
 
 import './comments.css';
 
@@ -38,12 +41,12 @@ export const Comments = ({ commentsUrl, currentUserId }) => {
         });
     };
     const deleteComment = (commentId) => {
-        if (window.confirm('Are you sure you want to remove comment?')) {
-            deleteCommentApi().then(() => {
-                const updatedBackendComments = backendComments.filter((backendComment) => backendComment.id !== commentId);
-                setBackendComments(updatedBackendComments);
-            });
-        }
+        // if (window.confirm('Are you sure you want to remove comment?')) {
+        deleteCommentApi().then(() => {
+            const updatedBackendComments = backendComments.filter((backendComment) => backendComment.id !== commentId);
+            setBackendComments(updatedBackendComments);
+        });
+        // }
     };
 
     useEffect(() => {
@@ -53,24 +56,25 @@ export const Comments = ({ commentsUrl, currentUserId }) => {
     }, []);
 
     return (
-        <div className="comments">
-            <h3 className="comments-form-title">Comments</h3>
+        <MainCard sx={{ p: 2 }} content={false}>
+            <Typography variant="h5" sx={{ textDecoration: 'none' }} color="textSecondary">
+                Comments
+            </Typography>
+
             <CommentForm submitLabel="Send" handleSubmit={addComment} />
-            <div className="comments-container">
-                {rootComments.map((rootComment) => (
-                    <Comment
-                        key={rootComment.id}
-                        comment={rootComment}
-                        replies={getReplies(rootComment.id)}
-                        activeComment={activeComment}
-                        setActiveComment={setActiveComment}
-                        addComment={addComment}
-                        deleteComment={deleteComment}
-                        updateComment={updateComment}
-                        currentUserId={currentUserId}
-                    />
-                ))}
-            </div>
-        </div>
+            {rootComments.map((rootComment) => (
+                <Comment
+                    key={rootComment.id}
+                    comment={rootComment}
+                    replies={getReplies(rootComment.id)}
+                    activeComment={activeComment}
+                    setActiveComment={setActiveComment}
+                    addComment={addComment}
+                    deleteComment={deleteComment}
+                    updateComment={updateComment}
+                    currentUserId={currentUserId}
+                />
+            ))}
+        </MainCard>
     );
 };

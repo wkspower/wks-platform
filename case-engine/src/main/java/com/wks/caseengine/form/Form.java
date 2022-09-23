@@ -11,8 +11,9 @@ import lombok.Setter;
 @Builder
 public class Form {
 
-	public String key;
-	public String description;
-	public JsonObject structure;
+	private String key;
+	private String title;
+	private String toolTip;
+	private JsonObject structure;
 
 }

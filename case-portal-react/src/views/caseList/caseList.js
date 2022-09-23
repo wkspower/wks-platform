@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import Button from '@mui/material/Button';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { CaseForm } from '../caseForm/caseForm';
-import { NewCaseForm } from '../caseForm/newCaseForm';
+import { Box, Button } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import MainCard from 'components/MainCard';
+import React, { useEffect, useState } from 'react';
+import { CaseForm } from '../caseForm/caseForm';
+import { NewCaseForm } from '../caseForm/newCaseForm';
 
 export const CaseList = ({ status }) => {
     const [cases, setCases] = useState([]);
@@ -43,7 +44,7 @@ export const CaseList = ({ status }) => {
         { field: 'caseDefinitionId', headerName: 'Case Definition', width: 220 },
         {
             field: 'action',
-            headerName: 'Action',
+            headerName: '',
             sortable: false,
             renderCell: (params) => {
                 const onClick = (e) => {
@@ -82,13 +83,7 @@ export const CaseList = ({ status }) => {
     return (
         <div style={{ height: 650, width: '100%' }}>
             <div>
-                <Button
-                    id="basic-button"
-                    aria-controls={open ? 'basic-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    onClick={handleClick}
-                >
+                <Button id="basic-button" onClick={handleClick} variant="contained">
                     New Case
                 </Button>
                 <Menu
@@ -109,17 +104,21 @@ export const CaseList = ({ status }) => {
                     })}
                 </Menu>
             </div>
-            <DataGrid
-                sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
-                rows={cases}
-                columns={columns}
-                pageSize={10}
-                rowsPerPageOptions={[10]}
-                getRowId={(row) => row.businessKey}
-            />
+            <MainCard sx={{ mt: 2 }} content={false}>
+                <Box>
+                    <DataGrid
+                        sx={{ height: 650, width: '100%', backgroundColor: '#ffffff', mt: 1 }}
+                        rows={cases}
+                        columns={columns}
+                        pageSize={10}
+                        rowsPerPageOptions={[10]}
+                        getRowId={(row) => row.businessKey}
+                    />
+                </Box>
+            </MainCard>
             {aCase && <CaseForm aCase={aCase} handleClose={handleCloseCaseForm} open={openCaseForm} />}
 
-            <NewCaseForm handleClose={handleCloseNewCaseForm} open={openNewCaseForm} caseDefId={newCaseDefId} />
+            {openNewCaseForm && <NewCaseForm handleClose={handleCloseNewCaseForm} open={openNewCaseForm} caseDefId={newCaseDefId} />}
         </div>
     );
 };

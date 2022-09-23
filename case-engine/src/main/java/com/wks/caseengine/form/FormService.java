@@ -11,5 +11,7 @@ public interface FormService {
 	List<Form> find() throws Exception;
 
 	void delete(final String formKey) throws Exception;
+	
+	void update(final String formKey, final Form form) throws Exception;
 
 }

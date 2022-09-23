@@ -1,53 +1,52 @@
-// assets
+import { FolderOutlined } from '@ant-design/icons';
+import { IconArchive, IconFileCheck, IconFileInvoice, IconList, IconSquareAsterisk } from '@tabler/icons';
 
-// constant
-// const icons = {
-//     IconTypography,
-//     IconPalette,
-//     IconShadow,
-//     IconWindmill
-// };
+const icons = { FolderOutlined, IconFileInvoice, IconFileCheck, IconArchive, IconSquareAsterisk, IconList };
 
 // ==============================|| UTILITIES MENU ITEMS ||============================== //
 
 const utilities = {
     id: 'utilities',
-    title: 'Workspace',
+    title: '',
     type: 'group',
     children: [
         {
             id: 'case-list',
             title: 'Cases',
             type: 'collapse',
-            // icon: icons.IconWindmill,
+            icon: icons.FolderOutlined,
             children: [
                 {
                     id: 'wip-cases',
                     title: 'Work In Progress',
                     type: 'item',
                     url: '/case-list/wip-cases',
-                    breadcrumbs: false
+                    breadcrumbs: true,
+                    icon: icons.IconFileInvoice
                 },
                 {
                     id: 'cases',
                     title: 'All',
                     type: 'item',
                     url: '/case-list/cases',
-                    breadcrumbs: false
+                    breadcrumbs: true,
+                    icon: icons.IconSquareAsterisk
                 },
                 {
                     id: 'close-cases',
                     title: 'Closed',
                     type: 'item',
                     url: '/case-list/closed-cases',
-                    breadcrumbs: false
+                    breadcrumbs: true,
+                    icon: icons.IconFileCheck
                 },
                 {
                     id: '   archived-cases',
                     title: 'Archived',
                     type: 'item',
                     url: '/case-list/archived-cases',
-                    breadcrumbs: false
+                    breadcrumbs: true,
+                    icon: icons.IconArchive
                 }
             ]
         },
@@ -56,56 +55,9 @@ const utilities = {
             title: 'Tasks',
             type: 'item',
             url: '/task-list',
-            // icon: icons.IconTypography,
-            breadcrumbs: false
+            icon: icons.IconList,
+            breadcrumbs: true
         }
-
-        // {
-        //     id: 'util-typography',
-        //     title: 'Typography',
-        //     type: 'item',
-        //     url: '/utils/util-typography',
-        //     icon: icons.IconTypography,
-        //     breadcrumbs: false
-        // },
-        // {
-        //     id: 'util-color',
-        //     title: 'Color',
-        //     type: 'item',
-        //     url: '/utils/util-color',
-        //     icon: icons.IconPalette,
-        //     breadcrumbs: false
-        // },
-        // {
-        //     id: 'util-shadow',
-        //     title: 'Shadow',
-        //     type: 'item',
-        //     url: '/utils/util-shadow',
-        //     icon: icons.IconShadow,
-        //     breadcrumbs: false
-        // },
-        // {
-        //     id: 'icons',
-        //     title: 'Icons',
-        //     type: 'collapse',
-        //     icon: icons.IconWindmill,
-        //     children: [
-        //         {
-        //             id: 'tabler-icons',
-        //             title: 'Tabler Icons',
-        //             type: 'item',
-        //             url: '/icons/tabler-icons',
-        //             breadcrumbs: false
-        //         },
-        //         {
-        //             id: 'material-icons',
-        //             title: 'Material Icons',
-        //             type: 'item',
-        //             url: '/icons/material-icons',
-        //             breadcrumbs: false
-        //         }
-        //     ]
-        // }
     ]
 };
 
