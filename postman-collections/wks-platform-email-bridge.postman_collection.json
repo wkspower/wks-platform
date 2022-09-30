@@ -1,0 +1,44 @@
+{
+	"info": {
+		"_postman_id": "84de2a06-ebe3-472a-a319-610958e32f73",
+		"name": "wks-platform-email-bridge",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5769200"
+	},
+	"item": [
+		{
+			"name": "email-send",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{email-bridge-host}}/email-send",
+					"host": [
+						"{{email-bridge-host}}"
+					],
+					"path": [
+						"email-send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "email-receive",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{email-bridge-host}}/email-receive",
+					"host": [
+						"{{email-bridge-host}}"
+					],
+					"path": [
+						"email-receive"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

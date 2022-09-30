@@ -1,5 +1,7 @@
 package com.wks.bpm.engine.camunda.http.request;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -52,13 +54,18 @@ public class CamundaHttpRequestFactory {
 		return new CamundaHttpGetRequest<ProcessDefinition>(processDefinitionUrl,
 				new HttpEntity<>(httpHeadersFactory.create()));
 	}
+	
+	public WksHttpRequest getProcessDefinitionXmlRequest(final String processDefinitionId) {
+		return new CamundaHttpGetRequest<ProcessDefinition>(processDefinitionUrl + "/" + processDefinitionId + "/xml",
+				new HttpEntity<>(httpHeadersFactory.create()));
+	}
 
 	//// Process Instance ////
 
-	public WksHttpRequest getProcessInstanceListRequest(final String businessKey) {
+	public WksHttpRequest getProcessInstanceListRequest(final Optional<String> businessKey) {
 		StringBuilder url = new StringBuilder().append(processInstanceUrl);
-		if (businessKey != null) {
-			url.append("?businessKey=" + businessKey);
+		if (businessKey.isPresent()) {
+			url.append("?businessKey=" + businessKey.get());
 		}
 		return new CamundaHttpGetRequest<ProcessInstance>(url.toString(),
 				new HttpEntity<>(httpHeadersFactory.create()));
@@ -115,6 +122,12 @@ public class CamundaHttpRequestFactory {
 
 	public WksHttpRequest getTaskFormGetRequest(final String taskId) {
 		return new CamundaHttpGetRequest<>(taskUrl + "/" + taskId + "/deployed-form",
+				new HttpEntity<>(httpHeadersFactory.create()));
+	}
+
+	// Activity Instances
+	public WksHttpRequest getActivityInstancesGetRequest(final String processInstanceId) {
+		return new CamundaHttpGetRequest<>(processInstanceUrl + "/" + processInstanceId + "/activity-instances",
 				new HttpEntity<>(httpHeadersFactory.create()));
 	}
 

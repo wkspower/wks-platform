@@ -2,30 +2,26 @@ import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import MainCard from 'components/MainCard';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TaskForm } from '../taskForm/taskForm';
 
 import './taskList.css';
 
-export const TaskList = ({ tasksParam, businessKey }) => {
-    const [tasks, setTasks] = useState([]);
+export const TaskList = ({ businessKey }) => {
+    const [tasks, setTasks] = useState(null);
     const [open, setOpen] = useState(false);
     const [task, setTask] = useState(null);
 
     useEffect(() => {
-        if (!tasksParam) {
-            fetch('http://localhost:8081/task' + (businessKey ? '?processInstanceBusinessKey=' + businessKey : ''))
-                .then((response) => response.json())
-                .then((data) => {
-                    setTasks(data);
-                })
-                .catch((err) => {
-                    console.log(err.message);
-                });
-        } else {
-            setTasks(tasksParam.tasks);
-        }
-    }, [open, tasksParam, businessKey]);
+        fetch('http://localhost:8081/task' + (businessKey ? '?processInstanceBusinessKey=' + businessKey : ''))
+            .then((response) => response.json())
+            .then((data) => {
+                setTasks(data);
+            })
+            .catch((err) => {
+                console.log(err.message);
+            });
+    }, [open, businessKey]);
 
     const columns: GridColDef[] = [
         { field: 'name', headerName: 'Task', width: 200 },
@@ -53,19 +49,23 @@ export const TaskList = ({ tasksParam, businessKey }) => {
     };
 
     return (
-        <Box>
-            <MainCard sx={{ mt: 2 }} content={false}>
-                <Box>
-                    <DataGrid
-                        sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
-                        rows={tasks}
-                        columns={columns}
-                        pageSize={10}
-                        rowsPerPageOptions={[10]}
-                    />
-                </Box>
-            </MainCard>
-            <TaskForm task={task} handleClose={handleClose} open={open} />
-        </Box>
+        <React.Fragment>
+            <Box>
+                <MainCard sx={{ mt: 2 }} content={false}>
+                    <Box>
+                        {tasks && (
+                            <DataGrid
+                                sx={{ height: 300, width: '100%', backgroundColor: '#ffffff' }}
+                                rows={tasks}
+                                columns={columns}
+                                pageSize={10}
+                                rowsPerPageOptions={[10]}
+                            />
+                        )}
+                    </Box>
+                </MainCard>
+                {task && <TaskForm task={task} handleClose={handleClose} open={open} />}
+            </Box>
+        </React.Fragment>
     );
 };

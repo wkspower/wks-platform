@@ -19,4 +19,6 @@ public class ProcessDefinitionImpl implements ProcessDefinition {
 
 	private String id;
 
+	private String bpmn20Xml;
+
 }

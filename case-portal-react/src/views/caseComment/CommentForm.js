@@ -11,7 +11,7 @@ const CommentForm = ({ handleSubmit, submitLabel, hasCancelButton = false, handl
     };
     return (
         <Box sx={{ flexDirection: 'column', m: 1 }}>
-            <TextField sx={{ display: 'flex' }} multiline rows={2} maxRows={4} value={text} onChange={(e) => setText(e.target.value)} />
+            <TextField sx={{ display: 'flex' }} multiline value={text} onChange={(e) => setText(e.target.value)} />
             <Button sx={{ mt: 1 }} variant="contained" onClick={onSubmit} disabled={isTextareaDisabled}>
                 {submitLabel}
             </Button>

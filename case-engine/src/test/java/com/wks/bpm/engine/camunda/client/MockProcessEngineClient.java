@@ -2,16 +2,17 @@ package com.wks.bpm.engine.camunda.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.google.gson.JsonObject;
-import com.wks.bpm.engine.camunda.client.ProcessEngineClient;
+import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.Deployment;
-import com.wks.bpm.engine.model.spi.TaskForm;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
 import com.wks.bpm.engine.model.spi.Task;
+import com.wks.bpm.engine.model.spi.TaskForm;
 
 public class MockProcessEngineClient implements ProcessEngineClient {
 
@@ -28,8 +29,8 @@ public class MockProcessEngineClient implements ProcessEngineClient {
 	}
 
 	@Override
-	public ProcessInstance[] findProcessInstances(String businessKey) {
-		return processesInstances.stream().filter(o -> businessKey.equals(o.getBusinessKey()))
+	public ProcessInstance[] findProcessInstances(Optional<String> businessKey) {
+		return processesInstances.stream().filter(o -> businessKey.get().equals(o.getBusinessKey()))
 				.collect(Collectors.toList()).toArray(ProcessInstance[]::new);
 
 	}
@@ -85,4 +86,15 @@ public class MockProcessEngineClient implements ProcessEngineClient {
 	public void sendMessage(ProcessMessage processMesage) {
 	}
 
+	@Override
+	public ActivityInstance[] findActivityInstances(String processInstanceId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getProcessDefinitionXML(String processDefinitionId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

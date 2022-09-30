@@ -1,0 +1,32 @@
+spring:
+  config:
+    import: file:env.properties
+  output:
+    ansi:
+      enabled: ALWAYS
+
+server:
+   port: 8081
+
+logging:
+   level:
+      root: INFO
+      com:
+         wks: INFO
+      org.springframework.web.client.RestTemplate: ERROR
+      org.apache.http: ERROR
+      httpclient.wire: ERROR
+      
+spring.mvc.converters.preferred-json-mapper: gson
+
+camunda7.rest.oauth.token.uri:
+camunda7.rest.oauth.token.clientId:
+camunda7.rest.oauth.token.clientSecret:
+camunda7.rest.oauth.token.grantType:
+
+camunda7.rest.url: http://${CAMUNDA7_HOST}:${CAMUNDA7_PORT}/engine-rest
+camunda7.rest.deployment.url: ${camunda7.rest.url}/deployment
+camunda7.rest.processdefinition.url: ${camunda7.rest.url}/process-definition
+camunda7.rest.processinstance.url: ${camunda7.rest.url}/process-instance
+camunda7.rest.task.url: ${camunda7.rest.url}/task
+camunda7.rest.correlate.url: ${camunda7.rest.url}/message

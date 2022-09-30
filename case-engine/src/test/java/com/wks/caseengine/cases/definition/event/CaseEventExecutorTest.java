@@ -2,15 +2,14 @@ package com.wks.caseengine.cases.definition.event;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Optional;
+
 import org.junit.Test;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.camunda.client.MockProcessEngineClient;
 import com.wks.bpm.engine.camunda.client.ProcessEngineClient;
-import com.wks.caseengine.cases.definition.event.CaseEvent;
-import com.wks.caseengine.cases.definition.event.CaseEventExecutor;
-import com.wks.caseengine.cases.definition.event.CaseEventType;
 import com.wks.caseengine.process.instance.ProcessInstanceServiceImpl;
 
 public class CaseEventExecutorTest {
@@ -35,8 +34,8 @@ public class CaseEventExecutorTest {
 		executor.execute(caseEvent, "1");
 
 		// Then
-		assertEquals(1, processEngineClient.findProcessInstances("1").length);
-		assertEquals("1", processEngineClient.findProcessInstances("1")[0].getBusinessKey());
+		assertEquals(1, processEngineClient.findProcessInstances(Optional.of("1")).length);
+		assertEquals("1", processEngineClient.findProcessInstances(Optional.of("1"))[0].getBusinessKey());
 
 	}
 
