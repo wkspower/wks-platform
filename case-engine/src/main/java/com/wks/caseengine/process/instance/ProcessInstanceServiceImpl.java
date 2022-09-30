@@ -2,12 +2,13 @@ package com.wks.caseengine.process.instance;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonObject;
 import com.wks.bpm.engine.camunda.client.ProcessEngineClient;
+import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 
 @Component
@@ -37,10 +38,15 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	}
 
 	@Override
-	public List<ProcessInstance> find(String businessKey) {
+	public List<ProcessInstance> find(Optional<String> businessKey) {
 		return Arrays.asList(processEngineClient.findProcessInstances(businessKey));
 	}
-	
+
+	@Override
+	public List<ActivityInstance> getActivityInstances(String processInstanceId) {
+		return Arrays.asList(processEngineClient.findActivityInstances(processInstanceId));
+	}
+
 	public void setProcessEngineClient(ProcessEngineClient processEngineClient) {
 		this.processEngineClient = processEngineClient;
 	}

@@ -51,7 +51,7 @@ export const NewCaseForm = ({ open, handleClose, caseDefId }) => {
             .catch((err) => {
                 console.log(err.message);
             });
-    }, [open]);
+    }, [open, caseDefId]);
 
     const onSave = () => {
         const caseAttributes = [];

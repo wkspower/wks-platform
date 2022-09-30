@@ -48,17 +48,17 @@
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
     <bpmn:sequenceFlow id="Flow_0pop31s" sourceRef="Gateway_1ophmis" targetRef="Event_0z8wouq" />
-    <bpmn:userTask id="Activity_1wq620g" name="Analyse received message">
+    <bpmn:userTask id="Activity_1wq620g" name="Analyse received message" camunda:formRef="genericForm" camunda:formRefBinding="latest">
       <bpmn:incoming>Flow_04smj4e</bpmn:incoming>
       <bpmn:outgoing>Flow_0htlrd6</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_057cb31" sourceRef="Event_1aadx0b" targetRef="Activity_0h5v6zo" />
-    <bpmn:userTask id="Activity_0h5v6zo" name="Analyse Changed Condition">
+    <bpmn:userTask id="Activity_0h5v6zo" name="Analyse Changed Condition" camunda:formRef="genericForm" camunda:formRefBinding="latest">
       <bpmn:incoming>Flow_057cb31</bpmn:incoming>
       <bpmn:outgoing>Flow_1o1dnqy</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_0ds0lzo" sourceRef="Event_0z8wouq" targetRef="Activity_0g390f6" />
-    <bpmn:userTask id="Activity_0g390f6" name="Analyse timed-out task">
+    <bpmn:userTask id="Activity_0g390f6" name="Analyse timed-out task" camunda:formRef="genericForm" camunda:formRefBinding="latest">
       <bpmn:incoming>Flow_0ds0lzo</bpmn:incoming>
       <bpmn:outgoing>Flow_1xk4ac5</bpmn:outgoing>
     </bpmn:userTask>

@@ -21,6 +21,7 @@
         "@testing-library/react": "^13.4.0",
         "@testing-library/user-event": "^14.4.3",
         "apexcharts": "^3.27.3",
+        "bpmn-js": "^10.0.0",
         "formik": "^2.2.9",
         "formiojs": "^4.14.8",
         "framer-motion": "^7.3.5",

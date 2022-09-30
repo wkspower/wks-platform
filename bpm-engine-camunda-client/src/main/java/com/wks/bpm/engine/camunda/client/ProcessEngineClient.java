@@ -1,6 +1,9 @@
 package com.wks.bpm.engine.camunda.client;
 
+import java.util.Optional;
+
 import com.google.gson.JsonObject;
+import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.Deployment;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
@@ -18,13 +21,17 @@ public interface ProcessEngineClient {
 
 	ProcessDefinition[] findProcessDefinitions();
 
-	ProcessInstance[] findProcessInstances(final String businessKey);
+	ProcessInstance[] findProcessInstances(final Optional<String> businessKey);
+	
+	String getProcessDefinitionXML(final String processInstanceId);
 
 	ProcessInstance startProcess(final String processDefinitionKey);
 
 	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey);
 
 	void deleteProcessInstance(final String processInstanceId);
+
+	ActivityInstance[] findActivityInstances(final String processInstanceId);
 
 	Task[] findTasks(final String processInstanceBusinessKey);
 

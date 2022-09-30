@@ -66,25 +66,23 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
     const [tabIndex, setTabIndex] = useState(0);
 
     useEffect(() => {
-        if (aCase) {
-            fetch('http://localhost:8081/case/' + aCase.businessKey)
-                .then((response) => response.json())
-                .then((caseData) => {
-                    setFormData({
-                        data: caseData.attributes.reduce((obj, item) => Object.assign(obj, { [item.name]: item.value }), {}),
-                        metadata: {},
-                        isValid: true
-                    });
-                    setTabIndex(0);
-                })
-                .catch((err) => {
-                    console.log(err.message);
+        fetch('http://localhost:8081/case/' + aCase.businessKey)
+            .then((response) => response.json())
+            .then((caseData) => {
+                setFormData({
+                    data: caseData.attributes.reduce((obj, item) => Object.assign(obj, { [item.name]: item.value }), {}),
+                    metadata: {},
+                    isValid: true
                 });
-        }
+                setTabIndex(0);
+            })
+            .catch((err) => {
+                console.log(err.message);
+            });
     }, [aCase]);
 
     const [caseDef, setCaseDef] = useState([]);
-    const [form, setForm] = useState([]);
+    const [form, setForm] = useState(null);
 
     useEffect(() => {
         fetch('http://localhost:8081/case-definition/' + aCase.caseDefinitionId)
@@ -174,19 +172,21 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
                 <TabPanel value={tabIndex} index={0}>
                     {/* Case Details  */}
                     <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
-                        <Grid item xs={12}>
-                            <MainCard sx={{ p: 2 }} content={false}>
-                                <Box sx={{ pb:1, display: 'flex', flexDirection: 'row' }}>
-                                    <Typography variant="h5" color="textSecondary" sx={{ pr:0.5}}>
-                                        {form.title}
-                                    </Typography>
-                                    <Tooltip title={form.toolTip}>
-                                        <QuestionCircleOutlined />
-                                    </Tooltip>
-                                </Box>
-                                <Form form={form.structure} submission={formData} options={{ readOnly: true }} />
-                            </MainCard>
-                        </Grid>
+                        {form && (
+                            <Grid item xs={12}>
+                                <MainCard sx={{ p: 2 }} content={false}>
+                                    <Box sx={{ pb: 1, display: 'flex', flexDirection: 'row' }}>
+                                        <Typography variant="h5" color="textSecondary" sx={{ pr: 0.5 }}>
+                                            {form.title}
+                                        </Typography>
+                                        <Tooltip title={form.toolTip}>
+                                            <QuestionCircleOutlined />
+                                        </Tooltip>
+                                    </Box>
+                                    <Form form={form.structure} submission={formData} options={{ readOnly: true }} />
+                                </MainCard>
+                            </Grid>
+                        )}
                         <Grid item xs={12}>
                             <Comments commentsUrl="http://localhost:3004/comments" currentUserId="1" />
                         </Grid>

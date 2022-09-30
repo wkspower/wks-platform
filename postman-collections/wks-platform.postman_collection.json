@@ -13,7 +13,7 @@
 					"name": "{businessKey}",
 					"item": [
 						{
-							"name": "Get",
+							"name": "case",
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -35,7 +35,7 @@
 									"variable": [
 										{
 											"key": "businessKey",
-											"value": "GENERIC-CASE--47746"
+											"value": "78999"
 										}
 									]
 								}
@@ -71,6 +71,39 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "case",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"status\": \"WIP_CASE_STATUS\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/case/:businessKey",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"case",
+										":businessKey"
+									],
+									"variable": [
+										{
+											"key": "businessKey",
+											"value": "4587"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -86,6 +119,13 @@
 							],
 							"path": [
 								"case"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "CLOSED_CASE_STATUS",
+									"disabled": true
+								}
 							]
 						}
 					},
@@ -98,7 +138,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "\r\n{\r\n    \"caseDefinitionId\": \"1\",\r\n    \"attributes\": [\r\n        {\r\n            \"name\": \"dob\",\r\n            \"value\": \"01/01/1990\"\r\n        },\r\n        {\r\n            \"name\": \"city\",\r\n            \"value\": \"Toronto\"\r\n        }\r\n    ]\r\n}",
+							"raw": "\r\n{\r\n    \"caseDefinitionId\": \"1\",\r\n    \"attributes\": [\r\n        {\r\n            \"name\": \"when\",\r\n            \"value\": \"01/01/1990\"\r\n        },\r\n        {\r\n            \"name\": \"where\",\r\n            \"value\": \"Toronto\"\r\n        }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -126,7 +166,7 @@
 					"name": "{id}",
 					"item": [
 						{
-							"name": "Get",
+							"name": "case-definition",
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -194,7 +234,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"id\":  \"1\",\r\n    \"name\": \"journal creation\",\r\n    \"postCaseCreateHook\": {\r\n        \"caseEvents\" : [\r\n            {\r\n                \"id\": \"1\",\r\n                \"name\": \"startGenericProcessEvent\",\r\n                \"type\": \"PROCESS_START_EVENT_TYPE\",\r\n                \"eventPayload\": {\r\n                    \"processDefinitionKey\": \"genericCaseProcess\"\r\n                }\r\n            }\r\n        ]\r\n    }\r\n}",
+							"raw": "{\r\n    \"id\":  \"2\",\r\n    \"name\": \"Journal\",\r\n    \"formKey\": \"motion-detected-form\",\r\n    \"postCaseCreateHook\": {\r\n        \"caseEvents\" : [\r\n            {\r\n                \"id\": \"1\",\r\n                \"name\": \"startGenericProcessEvent\",\r\n                \"type\": \"PROCESS_START_EVENT_TYPE\",\r\n                \"eventPayload\": {\r\n                    \"processDefinitionKey\": \"genericCaseProcess\"\r\n                }\r\n            }\r\n        ]\r\n    }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -276,7 +316,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"messageName\": \"sampleMessage\",\r\n    \"businessKey\": \"DUMMY_BUSINESS_KEY-517\"\r\n}",
+							"raw": "{\r\n    \"messageName\": \"sampleMessage\",\r\n    \"businessKey\": \"71093\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -512,7 +552,76 @@
 									"variable": [
 										{
 											"key": "formKey",
-											"value": "1"
+											"value": "journal-case-main-form"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "form",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/form/:formKey?=",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"form",
+										":formKey"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": ""
+										}
+									],
+									"variable": [
+										{
+											"key": "formKey",
+											"value": "journal-case-main-form"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "form",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"key\": \"motion-detected-form\",\r\n    \"title\": \"Motion Detected Case Main Form\",\r\n    \"toolTip\": \"This is a tool tip!\",\r\n    \"structure\": {\r\n        \"display\": \"form\",\r\n        \"components\": [\r\n            {\r\n                \"label\": \"Where\",\r\n                \"tableView\": true,\r\n                \"key\": \"where\",\r\n                \"type\": \"textfield\",\r\n                \"input\": true,\r\n                \"placeholder\": \"\",\r\n                \"prefix\": \"\",\r\n                \"customClass\": \"\",\r\n                \"suffix\": \"\",\r\n                \"multiple\": false,\r\n                \"protected\": false,\r\n                \"unique\": false,\r\n                \"persistent\": true,\r\n                \"hidden\": false,\r\n                \"clearOnHide\": true,\r\n                \"refreshOn\": \"\",\r\n                \"redrawOn\": \"\",\r\n                \"modalEdit\": false,\r\n                \"dataGridLabel\": false,\r\n                \"labelPosition\": \"top\",\r\n                \"description\": \"\",\r\n                \"errorLabel\": \"\",\r\n                \"tooltip\": \"\",\r\n                \"hideLabel\": false,\r\n                \"tabindex\": \"\",\r\n                \"disabled\": false,\r\n                \"autofocus\": false,\r\n                \"dbIndex\": false,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"attributes\": {},\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false,\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"pattern\": \"\"\r\n                },\r\n                \"conditional\": {\r\n                    \"eq\": \"\"\r\n                },\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"allowCalculateOverride\": false,\r\n                \"encrypted\": false,\r\n                \"showCharCount\": false,\r\n                \"showWordCount\": false,\r\n                \"properties\": {},\r\n                \"allowMultipleMasks\": false,\r\n                \"addons\": [],\r\n                \"mask\": false,\r\n                \"inputType\": \"text\",\r\n                \"inputFormat\": \"plain\",\r\n                \"inputMask\": \"\",\r\n                \"displayMask\": \"\",\r\n                \"spellcheck\": true,\r\n                \"truncateMultipleSpaces\": false,\r\n                \"id\": \"erean3\"\r\n            },\r\n            {\r\n                \"label\": \"When\",\r\n                \"autoExpand\": false,\r\n                \"tableView\": true,\r\n                \"key\": \"when\",\r\n                \"type\": \"textarea\",\r\n                \"input\": true,\r\n                \"placeholder\": \"\",\r\n                \"prefix\": \"\",\r\n                \"customClass\": \"\",\r\n                \"suffix\": \"\",\r\n                \"multiple\": false,\r\n                \"protected\": false,\r\n                \"unique\": false,\r\n                \"persistent\": true,\r\n                \"hidden\": false,\r\n                \"clearOnHide\": true,\r\n                \"refreshOn\": \"\",\r\n                \"redrawOn\": \"\",\r\n                \"modalEdit\": false,\r\n                \"dataGridLabel\": false,\r\n                \"labelPosition\": \"top\",\r\n                \"description\": \"\",\r\n                \"errorLabel\": \"\",\r\n                \"tooltip\": \"\",\r\n                \"hideLabel\": false,\r\n                \"tabindex\": \"\",\r\n                \"disabled\": false,\r\n                \"autofocus\": false,\r\n                \"dbIndex\": false,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"attributes\": {},\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false,\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"pattern\": \"\",\r\n                    \"minWords\": \"\",\r\n                    \"maxWords\": \"\"\r\n                },\r\n                \"conditional\": {\r\n                    \"eq\": \"\"\r\n                },\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"allowCalculateOverride\": false,\r\n                \"encrypted\": false,\r\n                \"showCharCount\": false,\r\n                \"showWordCount\": false,\r\n                \"properties\": {},\r\n                \"allowMultipleMasks\": false,\r\n                \"addons\": [],\r\n                \"mask\": false,\r\n                \"inputType\": \"text\",\r\n                \"inputFormat\": \"html\",\r\n                \"inputMask\": \"\",\r\n                \"displayMask\": \"\",\r\n                \"spellcheck\": true,\r\n                \"truncateMultipleSpaces\": false,\r\n                \"rows\": 3,\r\n                \"wysiwyg\": false,\r\n                \"editor\": \"\",\r\n                \"fixedSize\": true,\r\n                \"id\": \"e7cx9ma\"\r\n            }\r\n        ]\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/form/:formKey?=",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"form",
+										":formKey"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": ""
+										}
+									],
+									"variable": [
+										{
+											"key": "formKey",
+											"value": "motion-detected-form"
 										}
 									]
 								}
@@ -528,7 +637,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"key\": \"journal-case-main-form\",\r\n    \"description\": \"Main Form for Journal Case\",\r\n        \"components\": [\r\n        {\r\n            \"title\": \"Cadastro de Prestacao de Contas\",\r\n            \"collapsible\": false,\r\n            \"key\": \"cadastroDePrestacaoDeContas\",\r\n            \"type\": \"panel\",\r\n            \"label\": \"Panel\",\r\n            \"input\": false,\r\n            \"tableView\": false,\r\n            \"components\": [\r\n                {\r\n                    \"label\": \"Columns\",\r\n                    \"columns\": [\r\n                        {\r\n                            \"components\": [\r\n                                {\r\n                                    \"label\": \"Text Field\",\r\n                                    \"tableView\": true,\r\n                                    \"key\": \"textField\",\r\n                                    \"type\": \"textfield\",\r\n                                    \"input\": true\r\n                                }\r\n                            ],\r\n                            \"width\": 3,\r\n                            \"offset\": 0,\r\n                            \"push\": 0,\r\n                            \"pull\": 0,\r\n                            \"size\": \"md\",\r\n                            \"currentWidth\": 3\r\n                        },\r\n                        {\r\n                            \"components\": [\r\n                                {\r\n                                    \"label\": \"Select Boxes\",\r\n                                    \"optionsLabelPosition\": \"right\",\r\n                                    \"tableView\": false,\r\n                                    \"values\": [\r\n                                        {\r\n                                            \"label\": \"1\",\r\n                                            \"value\": \"1\",\r\n                                            \"shortcut\": \"\"\r\n                                        },\r\n                                        {\r\n                                            \"label\": \"2\",\r\n                                            \"value\": \"2\",\r\n                                            \"shortcut\": \"\"\r\n                                        },\r\n                                        {\r\n                                            \"label\": \"3\",\r\n                                            \"value\": \"3\",\r\n                                            \"shortcut\": \"\"\r\n                                        }\r\n                                    ],\r\n                                    \"key\": \"selectBoxes1\",\r\n                                    \"type\": \"selectboxes\",\r\n                                    \"input\": true,\r\n                                    \"inputType\": \"checkbox\"\r\n                                }\r\n                            ],\r\n                            \"width\": 3,\r\n                            \"offset\": 0,\r\n                            \"push\": 0,\r\n                            \"pull\": 0,\r\n                            \"size\": \"md\",\r\n                            \"currentWidth\": 3\r\n                        },\r\n                        {\r\n                            \"components\": [\r\n                                {\r\n                                    \"label\": \"Radio\",\r\n                                    \"optionsLabelPosition\": \"right\",\r\n                                    \"inline\": false,\r\n                                    \"tableView\": false,\r\n                                    \"values\": [\r\n                                        {\r\n                                            \"label\": \"1\",\r\n                                            \"value\": \"1\",\r\n                                            \"shortcut\": \"\"\r\n                                        },\r\n                                        {\r\n                                            \"label\": \"2\",\r\n                                            \"value\": \"2\",\r\n                                            \"shortcut\": \"\"\r\n                                        },\r\n                                        {\r\n                                            \"label\": \"3\",\r\n                                            \"value\": \"3\",\r\n                                            \"shortcut\": \"\"\r\n                                        }\r\n                                    ],\r\n                                    \"key\": \"radio1\",\r\n                                    \"type\": \"radio\",\r\n                                    \"input\": true\r\n                                }\r\n                            ],\r\n                            \"size\": \"md\",\r\n                            \"width\": 3,\r\n                            \"offset\": 0,\r\n                            \"push\": 0,\r\n                            \"pull\": 0,\r\n                            \"currentWidth\": 3\r\n                        }\r\n                    ],\r\n                    \"key\": \"columns\",\r\n                    \"type\": \"columns\",\r\n                    \"input\": false,\r\n                    \"tableView\": false\r\n                },\r\n                {\r\n                    \"label\": \"Text Area\",\r\n                    \"editor\": \"quill\",\r\n                    \"tableView\": true,\r\n                    \"key\": \"textArea\",\r\n                    \"type\": \"textarea\",\r\n                    \"input\": true,\r\n                    \"isUploadEnabled\": false\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            \"type\": \"button\",\r\n            \"label\": \"Submit\",\r\n            \"key\": \"submit\",\r\n            \"disableOnInvalid\": true,\r\n            \"input\": true,\r\n            \"tableView\": false\r\n        }\r\n    ]\r\n\r\n}",
+							"raw": "{\r\n    \"key\": \"motion-detected-form\",\r\n    \"title\": \"Motion Detected Case Main Form\",\r\n    \"toolTip\": \"This is a tool tip!\",\r\n    \"structure\": {\r\n        \"display\": \"form\",\r\n        \"components\": [\r\n            {\r\n                \"label\": \"Where\",\r\n                \"tableView\": true,\r\n                \"key\": \"where\",\r\n                \"type\": \"textfield\",\r\n                \"input\": true,\r\n                \"placeholder\": \"\",\r\n                \"prefix\": \"\",\r\n                \"customClass\": \"\",\r\n                \"suffix\": \"\",\r\n                \"multiple\": false,\r\n                \"protected\": false,\r\n                \"unique\": false,\r\n                \"persistent\": true,\r\n                \"hidden\": false,\r\n                \"clearOnHide\": true,\r\n                \"refreshOn\": \"\",\r\n                \"redrawOn\": \"\",\r\n                \"modalEdit\": false,\r\n                \"dataGridLabel\": false,\r\n                \"labelPosition\": \"top\",\r\n                \"description\": \"\",\r\n                \"errorLabel\": \"\",\r\n                \"tooltip\": \"\",\r\n                \"hideLabel\": false,\r\n                \"tabindex\": \"\",\r\n                \"disabled\": false,\r\n                \"autofocus\": false,\r\n                \"dbIndex\": false,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"attributes\": {},\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false,\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"pattern\": \"\"\r\n                },\r\n                \"conditional\": {\r\n                    \"eq\": \"\"\r\n                },\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"allowCalculateOverride\": false,\r\n                \"encrypted\": false,\r\n                \"showCharCount\": false,\r\n                \"showWordCount\": false,\r\n                \"properties\": {},\r\n                \"allowMultipleMasks\": false,\r\n                \"addons\": [],\r\n                \"mask\": false,\r\n                \"inputType\": \"text\",\r\n                \"inputFormat\": \"plain\",\r\n                \"inputMask\": \"\",\r\n                \"displayMask\": \"\",\r\n                \"spellcheck\": true,\r\n                \"truncateMultipleSpaces\": false,\r\n                \"id\": \"erean3\"\r\n            },\r\n            {\r\n                \"label\": \"When\",\r\n                \"autoExpand\": false,\r\n                \"tableView\": true,\r\n                \"key\": \"when\",\r\n                \"type\": \"textarea\",\r\n                \"input\": true,\r\n                \"placeholder\": \"\",\r\n                \"prefix\": \"\",\r\n                \"customClass\": \"\",\r\n                \"suffix\": \"\",\r\n                \"multiple\": false,\r\n                \"protected\": false,\r\n                \"unique\": false,\r\n                \"persistent\": true,\r\n                \"hidden\": false,\r\n                \"clearOnHide\": true,\r\n                \"refreshOn\": \"\",\r\n                \"redrawOn\": \"\",\r\n                \"modalEdit\": false,\r\n                \"dataGridLabel\": false,\r\n                \"labelPosition\": \"top\",\r\n                \"description\": \"\",\r\n                \"errorLabel\": \"\",\r\n                \"tooltip\": \"\",\r\n                \"hideLabel\": false,\r\n                \"tabindex\": \"\",\r\n                \"disabled\": false,\r\n                \"autofocus\": false,\r\n                \"dbIndex\": false,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"attributes\": {},\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false,\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"pattern\": \"\",\r\n                    \"minWords\": \"\",\r\n                    \"maxWords\": \"\"\r\n                },\r\n                \"conditional\": {\r\n                    \"eq\": \"\"\r\n                },\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"allowCalculateOverride\": false,\r\n                \"encrypted\": false,\r\n                \"showCharCount\": false,\r\n                \"showWordCount\": false,\r\n                \"properties\": {},\r\n                \"allowMultipleMasks\": false,\r\n                \"addons\": [],\r\n                \"mask\": false,\r\n                \"inputType\": \"text\",\r\n                \"inputFormat\": \"html\",\r\n                \"inputMask\": \"\",\r\n                \"displayMask\": \"\",\r\n                \"spellcheck\": true,\r\n                \"truncateMultipleSpaces\": false,\r\n                \"rows\": 3,\r\n                \"wysiwyg\": false,\r\n                \"editor\": \"\",\r\n                \"fixedSize\": true,\r\n                \"id\": \"e7cx9ma\"\r\n            }\r\n        ]\r\n    }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -563,6 +672,121 @@
 						}
 					},
 					"response": []
+				}
+			]
+		},
+		{
+			"name": "process-diagram",
+			"item": [
+				{
+					"name": "get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/process-diagram",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"process-diagram"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "process-instance",
+			"item": [
+				{
+					"name": "{id}",
+					"item": [
+						{
+							"name": "activity-instances",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/process-instance/:id/activity-instances",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"process-instance",
+										":id",
+										"activity-instances"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "38957f1f-3f48-11ed-8bfd-0242ac110003"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/process-instance?businessKey=21083",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"process-instance"
+							],
+							"query": [
+								{
+									"key": "businessKey",
+									"value": "21083"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "process-definition",
+			"item": [
+				{
+					"name": "{id}",
+					"item": [
+						{
+							"name": "xml",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/process-definition/:key/xml",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"process-definition",
+										":key",
+										"xml"
+									],
+									"variable": [
+										{
+											"key": "key",
+											"value": "genericCaseProcess:15:877c7d63-3e4d-11ed-b767-0242ac110003"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},

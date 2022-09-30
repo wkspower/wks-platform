@@ -1,5 +1,7 @@
 package com.wks.bpm.engine.camunda.client;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -8,10 +10,11 @@ import com.google.gson.JsonObject;
 import com.wks.bpm.engine.camunda.http.request.CamundaHttpRequestFactory;
 import com.wks.bpm.engine.model.impl.DeploymentImpl;
 import com.wks.bpm.engine.model.impl.ProcessDefinitionImpl;
-import com.wks.bpm.engine.model.spi.TaskForm;
+import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
 import com.wks.bpm.engine.model.spi.Task;
+import com.wks.bpm.engine.model.spi.TaskForm;
 import com.wks.rest.client.WksHttpRequest;
 
 /**
@@ -40,9 +43,17 @@ public class CamundaEngineClient implements ProcessEngineClient {
 						ProcessDefinitionImpl[].class)
 				.getBody();
 	}
+	
+	@Override
+	public String getProcessDefinitionXML(final String processDefinitionId) {
+		return restTemplate
+				.getForEntity(camundaHttpRequestFactory.getProcessDefinitionXmlRequest(processDefinitionId).getHttpRequestUrl(),
+						ProcessDefinitionImpl.class)
+				.getBody().getBpmn20Xml();
+	}
 
 	@Override
-	public ProcessInstance[] findProcessInstances(final String businessKey) {
+	public ProcessInstance[] findProcessInstances(final Optional<String> businessKey) {
 		return restTemplate
 				.getForEntity(camundaHttpRequestFactory.getProcessInstanceListRequest(businessKey).getHttpRequestUrl(),
 						ProcessInstance[].class)
@@ -75,6 +86,13 @@ public class CamundaEngineClient implements ProcessEngineClient {
 	}
 
 	@Override
+	public ActivityInstance[] findActivityInstances(String processInstanceId) {
+		return restTemplate.getForEntity(
+				camundaHttpRequestFactory.getActivityInstancesGetRequest(processInstanceId).getHttpRequestUrl(),
+				ActivityInstance.class).getBody().getChildActivityInstances();
+	}
+
+	@Override
 	public Task[] findTasks(final String processInstanceBusinessKey) {
 		return restTemplate.getForEntity(
 				camundaHttpRequestFactory.getTaskListRequest(processInstanceBusinessKey).getHttpRequestUrl(),
@@ -101,9 +119,8 @@ public class CamundaEngineClient implements ProcessEngineClient {
 
 	@Override
 	public TaskForm getTaskForm(final String taskId) {
-		return restTemplate
-				.getForEntity(camundaHttpRequestFactory.getTaskFormGetRequest(taskId).getHttpRequestUrl(), TaskForm.class)
-				.getBody();
+		return restTemplate.getForEntity(camundaHttpRequestFactory.getTaskFormGetRequest(taskId).getHttpRequestUrl(),
+				TaskForm.class).getBody();
 	}
 
 	@Override
