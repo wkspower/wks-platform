@@ -13,6 +13,10 @@ export const CaseDefGeneralForm = ({ caseDef }) => {
                 <TextField id="txtName" aria-describedby="my-helper-text" value={caseDef.name} />
                 <FormHelperText id="my-helper-text">Name</FormHelperText>
             </FormControl>
+            <FormControl key="ctrlStagesLCProcess" style={{ padding: '5px' }}>
+                <TextField id="txtStagesLCProcess" aria-describedby="my-helper-text" value={caseDef.stagesLifecycleProcessKey} />
+                <FormHelperText id="my-helper-text">Stages Lifecycle Process Key</FormHelperText>
+            </FormControl>
         </div>
     );
 };

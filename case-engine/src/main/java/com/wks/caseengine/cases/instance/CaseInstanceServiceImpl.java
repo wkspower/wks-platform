@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseStatus;
-import com.wks.caseengine.cases.definition.event.CaseEventExecutor;
+import com.wks.caseengine.process.instance.ProcessInstanceService;
 import com.wks.caseengine.repository.DataRepository;
 
 @Component
@@ -22,7 +22,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	private CaseInstanceCreateService caseInstanceCreateService;
 
 	@Autowired
-	private CaseEventExecutor caseEventExecutor;
+	private ProcessInstanceService processInstanceService;
 
 	@Override
 	public List<CaseInstance> find(final Optional<CaseStatus> status) throws Exception {
@@ -42,8 +42,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 		CaseInstance newCaseInstance = caseInstanceCreateService.create(caseInstance);
 
-		caseDefinition.getPostCaseCreateHook().getCaseEvents()
-				.forEach(event -> caseEventExecutor.execute(event, newCaseInstance.getBusinessKey()));
+		processInstanceService.create(caseDefinition.getStagesLifecycleProcessKey(), newCaseInstance.getBusinessKey());
 
 		return newCaseInstance;
 	}
@@ -85,7 +84,4 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 		this.caseInstanceCreateService = caseInstanceCreateService;
 	}
 
-	public void setCaseEventExecutor(CaseEventExecutor caseEventExecutor) {
-		this.caseEventExecutor = caseEventExecutor;
-	}
 }

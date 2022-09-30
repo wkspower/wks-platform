@@ -92,15 +92,12 @@ export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
                         <Tab label="Priority & Severity" {...a11yProps(5)} />
                         <Tab label="Forms" {...a11yProps(6)} />
                         <Tab label="Search Layouts" {...a11yProps(7)} />
-                        <Tab label="Events" {...a11yProps(8)} />
-                        <Tab label="Listeners" {...a11yProps(9)} />
-                        <Tab label="Access Control" {...a11yProps(10)} />
-                        <Tab label="Auditing" {...a11yProps(11)} />
-                        <Tab label="API" {...a11yProps(12)} />
-                        <Tab label="Deployment" {...a11yProps(13)} />
-                        <Tab label="Versions" {...a11yProps(14)} />
-
-                        <Tab label="Source Code" {...a11yProps(15)} />
+                        <Tab label="Access Control" {...a11yProps(8)} />
+                        <Tab label="Auditing" {...a11yProps(9)} />
+                        <Tab label="API" {...a11yProps(10)} />
+                        <Tab label="Deployment" {...a11yProps(11)} />
+                        <Tab label="Versions" {...a11yProps(12)} />
+                        <Tab label="Source Code" {...a11yProps(13)} />
                     </Tabs>
                 </Box>
 
@@ -111,11 +108,6 @@ export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
 
                 <TabPanel value={tabValue} index={6}>
                     <CaseDefFormForm formKey={aCaseDef.formKey} />
-                </TabPanel>
-
-                {/* Events tab */}
-                <TabPanel value={tabValue} index={8}>
-                    <CaseDefEventsForm caseDef={aCaseDef} />
                 </TabPanel>
             </Dialog>
         </div>
