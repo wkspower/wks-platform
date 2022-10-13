@@ -9,19 +9,30 @@ export const CaseDefGeneralForm = ({ caseDef, setCaseDef }) => {
 
     return (
         <div style={{ display: 'grid', padding: '10px' }}>
+            <FormControl key="ctrlId" style={{ padding: '5px' }}>
+                <TextField
+                    id="txtId"
+                    aria-describedby="id-helper-text"
+                    value={caseDef.id}
+                    name="id"
+                    onChange={handleInputChange}
+                    disabled={!(caseDef.status && caseDef.status === 'new')}
+                />
+                <FormHelperText id="id-helper-text">Id</FormHelperText>
+            </FormControl>
             <FormControl key="ctrlName" style={{ padding: '5px' }}>
-                <TextField id="txtName" aria-describedby="my-helper-text" value={caseDef.name} name="name" onChange={handleInputChange} />
-                <FormHelperText id="my-helper-text">Name</FormHelperText>
+                <TextField id="txtName" aria-describedby="name-helper-text" value={caseDef.name} name="name" onChange={handleInputChange} />
+                <FormHelperText id="name-helper-text">Name</FormHelperText>
             </FormControl>
             <FormControl key="ctrlStagesLCProcess" style={{ padding: '5px' }}>
                 <TextField
                     id="txtStagesLCProcess"
-                    aria-describedby="my-helper-text"
+                    aria-describedby="stagesLCProcess-helper-text"
                     value={caseDef.stagesLifecycleProcessKey}
                     name="stagesLifecycleProcessKey"
                     onChange={handleInputChange}
                 />
-                <FormHelperText id="my-helper-text">Stages Lifecycle Process Key</FormHelperText>
+                <FormHelperText id="stagesLCProcess-helper-text">Stages Lifecycle Process Key</FormHelperText>
             </FormControl>
         </div>
     );

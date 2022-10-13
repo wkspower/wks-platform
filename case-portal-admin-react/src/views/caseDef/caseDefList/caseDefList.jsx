@@ -49,8 +49,23 @@ export const CaseDefList = () => {
         setOpenCaseDefForm(false);
     };
 
+    const handleNewCaseDef = () => {
+        setACaseDef({
+            status: 'new',
+            id: '',
+            name: '',
+            formKey: '',
+            stagesLifecycleProcessKey: '',
+            stages: [{ id: 0, index: 1, name: 'Stage 1' }]
+        });
+        setOpenCaseDefForm(true);
+    };
+
     return (
         <div style={{ height: 650, width: '100%' }}>
+            <Button id="basic-button" variant="contained" onClick={handleNewCaseDef}>
+                New
+            </Button>
             <MainCard sx={{ mt: 2 }} content={false}>
                 <Box>
                     <DataGrid

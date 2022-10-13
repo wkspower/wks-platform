@@ -68,18 +68,33 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
     };
 
     const handleSave = () => {
-        fetch('http://localhost:8081/case-definition/' + caseDef.id, {
-            method: 'PATCH',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(caseDef)
-        })
-            .then((response) => handleClose())
-            .catch((err) => {
-                console.log(err.message);
-            });
+        if (caseDef.status && caseDef.status === 'new') {
+            fetch('http://localhost:8081/case-definition/', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(caseDef)
+            })
+                .then((response) => handleClose())
+                .catch((err) => {
+                    console.log(err.message);
+                });
+        } else {
+            fetch('http://localhost:8081/case-definition/' + caseDef.id, {
+                method: 'PATCH',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(caseDef)
+            })
+                .then((response) => handleClose())
+                .catch((err) => {
+                    console.log(err.message);
+                });
+        }
     };
 
     return (

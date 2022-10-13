@@ -12,12 +12,12 @@ export const CaseDefFormForm = ({ caseDef, setCaseDef }) => {
             <FormControl key="ctrlId" style={{ padding: '5px' }}>
                 <TextField
                     id="txtId"
-                    aria-describedby="my-helper-text"
+                    aria-describedby="key-helper-text"
                     value={caseDef.formKey}
                     name="formKey"
                     onChange={handleInputChange}
                 />
-                <FormHelperText id="my-helper-text">Form Key</FormHelperText>
+                <FormHelperText id="key-helper-text">Form Key</FormHelperText>
             </FormControl>
         </div>
     );
