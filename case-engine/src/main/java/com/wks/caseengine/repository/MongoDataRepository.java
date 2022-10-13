@@ -120,6 +120,13 @@ public class MongoDataRepository implements DataRepository {
 	}
 
 	@Override
+	public void updateCaseStage(final String businessKey, final String caseStage) {
+		Bson filter = Filters.eq("businessKey", businessKey);
+		Bson update = Updates.set("stage", caseStage);
+		caseInstCollection.updateMany(filter, update);
+	}
+
+	@Override
 	public void deleteCaseInstance(final CaseInstance caseInstance) throws Exception {
 		Bson filter = Filters.eq("businessKey", caseInstance.getBusinessKey());
 		caseInstCollection.deleteMany(filter);

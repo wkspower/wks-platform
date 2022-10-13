@@ -1,11 +1,14 @@
 package com.wks.caseengine.cases.instance;
 
+import java.util.Comparator;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.cases.businesskey.GenericBusinessKeyGenerator;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
+import com.wks.caseengine.cases.definition.CaseStage;
 import com.wks.caseengine.repository.DataRepository;
 
 @Component
@@ -26,6 +29,8 @@ class CaseInstanceCreateServiceImpl implements CaseInstanceCreateService {
 
 		String businessKey = businessKeyCreator.generate();
 		CaseInstance caseInstance = CaseInstance.builder().businessKey(businessKey)
+				.stage(caseDefinition.getStages().stream().sorted(Comparator.comparing(CaseStage::getIndex)).findFirst()
+						.get().getName())
 				.attributes(caseInstanceParam.getAttributes()).caseDefinitionId(caseDefinition.getId()).build();
 
 		dataRepository.saveCaseInstance(caseInstance);

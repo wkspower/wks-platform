@@ -56,7 +56,7 @@ export const CaseDefList = () => {
             name: '',
             formKey: '',
             stagesLifecycleProcessKey: '',
-            stages: [{ id: 0, index: 1, name: 'Stage 1' }]
+            stages: [{ id: 0, index: 0, name: 'Stage 0' }]
         });
         setOpenCaseDefForm(true);
     };

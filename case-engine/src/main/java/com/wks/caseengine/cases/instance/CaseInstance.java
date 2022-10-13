@@ -16,6 +16,8 @@ public class CaseInstance {
 	private String businessKey;
 
 	private String caseDefinitionId;
+	
+	private String stage;
 
 	// TODO improve this hard code
 	@Builder.Default

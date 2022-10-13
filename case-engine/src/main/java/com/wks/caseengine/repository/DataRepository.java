@@ -29,6 +29,8 @@ public interface DataRepository {
 	void saveCaseInstance(final CaseInstance caseInstance) throws Exception;
 
 	void updateCaseStatus(final String businessKey, final CaseStatus newStatus) throws Exception;
+	
+	void updateCaseStage(final String businessKey, final String caseStage);
 
 	void deleteCaseInstance(final CaseInstance caseInstance) throws Exception;
 
@@ -42,5 +44,6 @@ public interface DataRepository {
 	void deleteForm(final String formKey) throws Exception;
 
 	void updateForm(final String formKey, final Form form) throws Exception;
+
 
 }

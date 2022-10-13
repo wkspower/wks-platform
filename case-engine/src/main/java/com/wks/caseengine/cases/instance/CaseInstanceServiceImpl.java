@@ -53,6 +53,12 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 		dataRepository.updateCaseStatus(businessKey, newStatus);
 	}
 
+	// TODO Should replace by 'Stage ID/Key' parameter instead of 'Stage Name'
+	@Override
+	public void updateStage(final String businessKey, String caseStage) throws Exception {
+		dataRepository.updateCaseStage(businessKey, caseStage);
+	}
+
 	// TODO should not allow to delete. Close or archive instead
 	// Should ensure only one case is deleted - BusinessKey should be UNIQUE
 	@Override

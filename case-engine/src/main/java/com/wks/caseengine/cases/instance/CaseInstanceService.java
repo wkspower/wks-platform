@@ -15,5 +15,7 @@ public interface CaseInstanceService {
 
 	void updateStatus(final String businessKey, final CaseStatus newStatus) throws Exception;
 
+	void updateStage(final String businessKey, final String caseStage) throws Exception;
+
 	void delete(final String businessKey) throws CaseInstanceNotFoundException, Exception;
 }
