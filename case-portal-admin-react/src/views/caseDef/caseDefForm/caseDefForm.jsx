@@ -97,6 +97,20 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
         }
     };
 
+    const handleDelete = () => {
+        fetch('http://localhost:8081/case-definition/' + caseDef.id, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+            .then((response) => handleClose())
+            .catch((err) => {
+                console.log(err.message);
+            });
+    };
+
     return (
         <div>
             <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
@@ -111,6 +125,11 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
                         <Button color="inherit" onClick={handleSave}>
                             Save
                         </Button>
+                        {!(caseDef.status && caseDef.status === 'new') && (
+                            <Button color="inherit" onClick={handleDelete}>
+                                Delete
+                            </Button>
+                        )}
                     </Toolbar>
                 </AppBar>
 
