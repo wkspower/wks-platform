@@ -17,6 +17,8 @@ public interface DataRepository {
 
 	void saveCaseDefinition(final CaseDefinition caseDefinition) throws Exception;
 
+	void updateCaseDefinition(final String caseDefId, final CaseDefinition caseDefinition) throws Exception;
+
 	void deleteCaseDefinition(final String caseDefinitionId) throws Exception;
 
 	// Case operations
@@ -38,7 +40,7 @@ public interface DataRepository {
 	List<Form> findForms() throws Exception;
 
 	void deleteForm(final String formKey) throws Exception;
-	
+
 	void updateForm(final String formKey, final Form form) throws Exception;
 
 }

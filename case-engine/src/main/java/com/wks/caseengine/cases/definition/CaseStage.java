@@ -1,28 +1,22 @@
 package com.wks.caseengine.cases.definition;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
-@Getter
-@Builder
-@ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class CaseDefinition {
+@Getter
+@Setter
+@Builder
+@ToString
+public class CaseStage {
 
 	private String id;
-
+	private int index;
 	private String name;
-
-	private String formKey;
-
-	private String stagesLifecycleProcessKey;
-
-	private List<CaseStage> stages;
 
 }

@@ -224,6 +224,45 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "case-definition",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": \"1\",\r\n    \"name\": \"Journal-2\",\r\n    \"formKey\": \"motion-detected-form\",\r\n    \"stagesLifecycleProcessKey\": \"genericCaseProcess\",\r\n    \"stages\": [\r\n        {\r\n            \"id\": 0,\r\n            \"name\": \"Data Collection\",\r\n            \"index\": \"0\"\r\n        },\r\n        {\r\n            \"id\": 1,\r\n            \"name\": \"Review\",\r\n            \"index\": \"1\"\r\n        }\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/case-definition/:caseDefId?=",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"case-definition",
+										":caseDefId"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": ""
+										}
+									],
+									"variable": [
+										{
+											"key": "caseDefId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -234,7 +273,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"id\":  \"2\",\r\n    \"name\": \"Journal\",\r\n    \"formKey\": \"motion-detected-form\",\r\n    \"postCaseCreateHook\": {\r\n        \"caseEvents\" : [\r\n            {\r\n                \"id\": \"1\",\r\n                \"name\": \"startGenericProcessEvent\",\r\n                \"type\": \"PROCESS_START_EVENT_TYPE\",\r\n                \"eventPayload\": {\r\n                    \"processDefinitionKey\": \"genericCaseProcess\"\r\n                }\r\n            }\r\n        ]\r\n    }\r\n}",
+							"raw": "{\r\n    \"id\": \"1\",\r\n    \"name\": \"Journal\",\r\n    \"formKey\": \"motion-detected-form\",\r\n    \"stagesLifecycleProcessKey\": \"genericCaseProcess\",\r\n    \"stages\": [\r\n        {\r\n            \"id\": 0,\r\n            \"name\": \"Data Collection\",\r\n            \"index\": \"0\"\r\n        },\r\n        {\r\n            \"id\": 1,\r\n            \"name\": \"Review\",\r\n            \"index\": \"1\"\r\n        }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -500,28 +539,6 @@
 									"key": "processInstanceId",
 									"value": "e42650af-18a5-11ed-933a-0242ac110002"
 								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "caseEventType",
-			"item": [
-				{
-					"name": "caseEventType",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/case-event-type",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"case-event-type"
 							]
 						}
 					},

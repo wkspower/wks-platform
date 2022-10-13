@@ -226,22 +226,6 @@ const utilities = {
                     icon: icons.IconPencil
                 },
                 {
-                    id: 'event-type-definition',
-                    title: 'Event Types',
-                    type: 'item',
-                    url: '/case-life-cycle/event-type-definition',
-                    breadcrumbs: true,
-                    icon: icons.IconMessageCode
-                },
-                {
-                    id: 'listener-type-definition',
-                    title: 'Listener Type',
-                    type: 'item',
-                    url: '/case-life-cycle/listener-type-definition',
-                    breadcrumbs: true,
-                    icon: icons.IconEar
-                },
-                {
                     id: 'data-domain',
                     title: 'Data Domain',
                     type: 'item',

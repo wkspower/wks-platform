@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import javax.mail.AuthenticationFailedException;
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -15,7 +16,10 @@ import org.springframework.stereotype.Component;
 
 import com.wks.mailbridge.rules.email.receive.CreateCaseRule;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class ReceiveMailService {
 
 	@Autowired
@@ -23,7 +27,6 @@ public class ReceiveMailService {
 
 	public void receive() throws Exception {
 		Message[] messages = checkMailInbox();
-
 		Arrays.stream(messages).forEach(o -> {
 			try {
 				createCaseRule.execute(o, "7");
@@ -45,8 +48,36 @@ public class ReceiveMailService {
 			Folder inbox = (Folder) store.getFolder("INBOX");
 			inbox.open(Folder.READ_WRITE);
 
-			// fetch messages
-			return inbox.getMessages();
+			// TODO: should be replaced by 'search' method as follows when working with
+			// production mail server:
+			// Message[] messages = inbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN),
+			// false));
+			Message[] messages = Arrays.stream(inbox.getMessages()).filter(o -> {
+				try {
+					return !(o.getFlags().contains(Flags.Flag.SEEN));
+				} catch (MessagingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				return false;
+			}).toArray(Message[]::new);
+
+			log.info("New messages received: " + messages.length);
+
+			Arrays.sort(messages, (m1, m2) -> {
+				try {
+					return m2.getSentDate().compareTo(m1.getSentDate());
+				} catch (MessagingException e) {
+					throw new RuntimeException(e);
+				}
+			});
+
+			for (Message message : messages) {
+				message.setFlag(Flags.Flag.SEEN, true);
+			}
+
+			return messages;
+
 		} catch (AuthenticationFailedException e) {
 			throw new Exception(e);
 		} catch (MessagingException e) {

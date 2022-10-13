@@ -29,6 +29,12 @@ public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 		dataRepository.saveCaseDefinition(caseDefinition);
 		return caseDefinition;
 	}
+	
+	@Override
+	public CaseDefinition update(final String caseDefId, final CaseDefinition caseDefinition) throws Exception {
+		dataRepository.updateCaseDefinition(caseDefId, caseDefinition);
+		return caseDefinition;
+	}
 
 	@Override
 	public void delete(final String caseDefinitionId) throws CaseInstanceNotFoundException, Exception {
@@ -36,6 +42,7 @@ public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 	}
 
 	public void setDataRepository(DataRepository dataRepository) {
+
 		this.dataRepository = dataRepository;
 	}
 
