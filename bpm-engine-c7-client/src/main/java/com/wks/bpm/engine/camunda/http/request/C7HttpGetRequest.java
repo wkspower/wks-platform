@@ -12,13 +12,13 @@ import lombok.Getter;
  *
  */
 @Getter
-public class CamundaHttpGetRequest<T> implements WksHttpRequest {
+public class C7HttpGetRequest<T> implements WksHttpRequest {
 
 	public String httpRequestUrl;
 	public HttpMethod httpMethod;
 	public HttpEntity<T> httpEntity;
 
-	public CamundaHttpGetRequest(final String url, final HttpEntity<T> httpEntity) {
+	public C7HttpGetRequest(final String url, final HttpEntity<T> httpEntity) {
 		this.httpRequestUrl = url;
 		this.httpEntity = httpEntity;
 		this.httpMethod = HttpMethod.GET;

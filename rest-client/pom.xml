@@ -8,9 +8,9 @@
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>wks-rest-client</artifactId>
-	<name>wks-rest-client</name>
-	<description>WKS Rest Client</description>
+	<artifactId>rest-client</artifactId>
+	<name>rest-client</name>
+	<description>Rest Client</description>
 
 	<packaging>jar</packaging>
 

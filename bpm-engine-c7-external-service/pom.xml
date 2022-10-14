@@ -26,7 +26,7 @@
 		<dependency>
 			<groupId>org.camunda.bpm.springboot</groupId>
 			<artifactId>camunda-bpm-spring-boot-starter-external-task-client</artifactId>
-			<version>${camunda.version}</version>
+			<version>${camunda7.version}</version>
 		</dependency>
 
 		<dependency>

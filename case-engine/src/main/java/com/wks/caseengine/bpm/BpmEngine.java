@@ -1,5 +1,7 @@
 package com.wks.caseengine.bpm;
 
+import com.google.gson.JsonObject;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +20,6 @@ public class BpmEngine {
 	private String id;
 	private String name;
 	private BpmEngineType type;
-	private String url;
-	private String port;
+	private JsonObject parameters;
 
 }

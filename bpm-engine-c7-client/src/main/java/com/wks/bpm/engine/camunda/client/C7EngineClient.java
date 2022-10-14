@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.JsonObject;
-import com.wks.bpm.engine.camunda.http.request.CamundaHttpRequestFactory;
+import com.wks.bpm.engine.camunda.http.request.C7HttpRequestFactory;
 import com.wks.bpm.engine.client.ProcessEngineClient;
 import com.wks.bpm.engine.model.impl.DeploymentImpl;
 import com.wks.bpm.engine.model.impl.ProcessDefinitionImpl;
@@ -23,13 +23,13 @@ import com.wks.rest.client.WksHttpRequest;
  *
  */
 @Component
-public class CamundaEngineClient implements ProcessEngineClient {
+public class C7EngineClient implements ProcessEngineClient {
 
 	@Autowired
 	private RestTemplate restTemplate;
 
 	@Autowired
-	private CamundaHttpRequestFactory camundaHttpRequestFactory;
+	private C7HttpRequestFactory camundaHttpRequestFactory;
 
 	@Override
 	public DeploymentImpl[] findDeployments() {

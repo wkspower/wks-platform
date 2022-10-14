@@ -1,31 +1,27 @@
 package com.wks.caseengine.bpm;
 
+import java.io.Serializable;
+
 import com.google.gson.annotations.SerializedName;
 
-public enum BpmEngineType {
+public enum BpmEngineType implements Serializable {
 
 	@SerializedName("BPM_ENGINE_CAMUNDA7")
-	BPM_ENGINE_CAMUNDA7("BPM_ENGINE_CAMUNDA7", "Camunda 7"),
+	BPM_ENGINE_CAMUNDA7("BPM_ENGINE_CAMUNDA7", "Camunda 7", "url"),
 
 	@SerializedName("BPM_ENGINE_CAMUNDA8")
-	BPM_ENGINE_CAMUNDA8("BPM_ENGINE_CAMUNDA8", "Camunda 8"),
-
-	@SerializedName("FLOWABLE6")
-	FLOWABLE6("FLOWABLE6", "Flowable 6"),
-
-	@SerializedName("ACTIVITI6")
-	ACTIVITI6("ACTIVITI6", "Activiti 6"),
-
-	@SerializedName("BONITA")
-	BONITA("BONITA", "Bonita");
+	BPM_ENGINE_CAMUNDA8("BPM_ENGINE_CAMUNDA8", "Camunda 8", "cluster");
 
 	private final String code;
 
 	private final String description;
 
-	BpmEngineType(final String code, final String description) {
+	private String parametersNames;
+
+	BpmEngineType(final String code, final String description, final String parametersNames) {
 		this.code = code;
 		this.description = description;
+		this.parametersNames = parametersNames;
 	}
 
 	public String getCode() {
@@ -36,4 +32,7 @@ public enum BpmEngineType {
 		return description;
 	}
 
+	public String getParametersNames() {
+		return parametersNames;
+	}
 }

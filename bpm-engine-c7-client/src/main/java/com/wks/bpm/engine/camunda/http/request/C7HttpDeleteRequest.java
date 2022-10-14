@@ -12,16 +12,16 @@ import lombok.Getter;
  *
  */
 @Getter
-public class CamundaHttpPostRequest implements WksHttpRequest {
+public class C7HttpDeleteRequest implements WksHttpRequest {
 
 	public String httpRequestUrl;
 	public HttpMethod httpMethod;
 	public HttpEntity<?> httpEntity;
 
-	public CamundaHttpPostRequest(final String url, final HttpEntity<?> httpEntity) {
+	public C7HttpDeleteRequest(final String url, final HttpEntity<?> httpEntity) {
 		this.httpRequestUrl = url;
 		this.httpEntity = httpEntity;
-		this.httpMethod = HttpMethod.POST;
+		this.httpMethod = HttpMethod.DELETE;
 	}
 
 }

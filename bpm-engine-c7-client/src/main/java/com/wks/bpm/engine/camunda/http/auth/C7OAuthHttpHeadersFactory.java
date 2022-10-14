@@ -12,10 +12,10 @@ import com.wks.rest.client.header.HttpHeadersFactory;
  *
  */
 @Component
-public class CamundaOAuthHttpHeadersFactory implements HttpHeadersFactory {
+public class C7OAuthHttpHeadersFactory implements HttpHeadersFactory {
 
 	@Autowired
-	private CamundaTokenHttpPostRequestFactory tokenPostRequestFactory;
+	private C7TokenHttpPostRequestFactory tokenPostRequestFactory;
 
 	@Autowired
 	private RestTemplate restTemplate;

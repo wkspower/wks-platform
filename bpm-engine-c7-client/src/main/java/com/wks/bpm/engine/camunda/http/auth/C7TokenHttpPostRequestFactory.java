@@ -17,7 +17,7 @@ import com.wks.rest.client.auth.TokenHttpPostRequestFactory;
  *
  */
 @Component
-public class CamundaTokenHttpPostRequestFactory implements TokenHttpPostRequestFactory {
+public class C7TokenHttpPostRequestFactory implements TokenHttpPostRequestFactory {
 
 	@Value("${camunda7.rest.oauth.token.uri}")
 	private String tokenUri;

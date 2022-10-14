@@ -22,7 +22,7 @@ import com.wks.rest.client.header.JSONHttpHeadersFactory;
  *
  */
 @Component
-public class CamundaHttpRequestFactory {
+public class C7HttpRequestFactory {
 
 	@Autowired
 	private JSONHttpHeadersFactory httpHeadersFactory;
@@ -45,18 +45,18 @@ public class CamundaHttpRequestFactory {
 	//// Deployment ////
 
 	public WksHttpRequest getDeploymentListRequest() {
-		return new CamundaHttpGetRequest<Deployment>(deploymentUrl, new HttpEntity<>(httpHeadersFactory.create()));
+		return new C7HttpGetRequest<Deployment>(deploymentUrl, new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
 	//// Process Definition ////
 
 	public WksHttpRequest getProcessDefinitionListRequest() {
-		return new CamundaHttpGetRequest<ProcessDefinition>(processDefinitionUrl,
+		return new C7HttpGetRequest<ProcessDefinition>(processDefinitionUrl,
 				new HttpEntity<>(httpHeadersFactory.create()));
 	}
 	
 	public WksHttpRequest getProcessDefinitionXmlRequest(final String processDefinitionId) {
-		return new CamundaHttpGetRequest<ProcessDefinition>(processDefinitionUrl + "/" + processDefinitionId + "/xml",
+		return new C7HttpGetRequest<ProcessDefinition>(processDefinitionUrl + "/" + processDefinitionId + "/xml",
 				new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
@@ -67,12 +67,12 @@ public class CamundaHttpRequestFactory {
 		if (businessKey.isPresent()) {
 			url.append("?businessKey=" + businessKey.get());
 		}
-		return new CamundaHttpGetRequest<ProcessInstance>(url.toString(),
+		return new C7HttpGetRequest<ProcessInstance>(url.toString(),
 				new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
 	public WksHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey) {
-		return new CamundaHttpPostRequest(processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
+		return new C7HttpPostRequest(processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
 				new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
@@ -81,12 +81,12 @@ public class CamundaHttpRequestFactory {
 		ProcessInstance processInstance = ProcessInstance.builder().businessKey(businessKey).caseInstanceId(businessKey)
 				.build();
 
-		return new CamundaHttpPostRequest(processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
+		return new C7HttpPostRequest(processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
 				new HttpEntity<>(processInstance, httpHeadersFactory.create()));
 	}
 
 	public WksHttpRequest getProcessInstanceDeleteRequest(String processInstanceId) {
-		return new CamundaHttpDeleteRequest(processInstanceUrl + "/" + processInstanceId,
+		return new C7HttpDeleteRequest(processInstanceUrl + "/" + processInstanceId,
 				new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
@@ -98,7 +98,7 @@ public class CamundaHttpRequestFactory {
 			url.append("&processInstanceBusinessKey=" + processInstanceBusinessKey);
 		}
 
-		return new CamundaHttpGetRequest<Task>(url.toString(), new HttpEntity<>(httpHeadersFactory.create()));
+		return new C7HttpGetRequest<Task>(url.toString(), new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
 	public WksHttpRequest getTaskClaimRequest(final String taskId, final String taskAssignee) {
@@ -106,40 +106,40 @@ public class CamundaHttpRequestFactory {
 		String assigneeJson = "{ \"userId\": \"" + taskAssignee + "\" }";
 		JsonObject assigneeJsonObject = JsonParser.parseString(assigneeJson).getAsJsonObject();
 
-		return new CamundaHttpPostRequest(taskUrl + "/" + taskId + "/claim",
+		return new C7HttpPostRequest(taskUrl + "/" + taskId + "/claim",
 				new HttpEntity<String>(assigneeJsonObject.toString(), httpHeadersFactory.create()));
 	}
 
 	public WksHttpRequest getTaskCompleteRequest(final String taskId, JsonObject variables) {
-		return new CamundaHttpPostRequest(taskUrl + "/" + taskId + "/complete",
+		return new C7HttpPostRequest(taskUrl + "/" + taskId + "/complete",
 				new HttpEntity<String>(variables.toString(), httpHeadersFactory.create()));
 	}
 
 	public WksHttpRequest getTaskUnclaimRequest(final String taskId) {
-		return new CamundaHttpPostRequest(taskUrl + "/" + taskId + "/unclaim",
+		return new C7HttpPostRequest(taskUrl + "/" + taskId + "/unclaim",
 				new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
 	public WksHttpRequest getTaskFormGetRequest(final String taskId) {
-		return new CamundaHttpGetRequest<>(taskUrl + "/" + taskId + "/deployed-form",
+		return new C7HttpGetRequest<>(taskUrl + "/" + taskId + "/deployed-form",
 				new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
 	// Activity Instances
 	public WksHttpRequest getActivityInstancesGetRequest(final String processInstanceId) {
-		return new CamundaHttpGetRequest<>(processInstanceUrl + "/" + processInstanceId + "/activity-instances",
+		return new C7HttpGetRequest<>(processInstanceUrl + "/" + processInstanceId + "/activity-instances",
 				new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
 	/// Variables ///
 	public WksHttpRequest getVariablesListRequest(final String processIntanceId) {
-		return new CamundaHttpGetRequest<>(processInstanceUrl + "/" + processIntanceId + "/variables",
+		return new C7HttpGetRequest<>(processInstanceUrl + "/" + processIntanceId + "/variables",
 				new HttpEntity<String>(httpHeadersFactory.create()));
 	}
 
 	/// Message ////
 	public WksHttpRequest getMessageSendRequest(final ProcessMessage processMessage) {
-		return new CamundaHttpPostRequest(correlateUrl, new HttpEntity<>(processMessage, httpHeadersFactory.create()));
+		return new C7HttpPostRequest(correlateUrl, new HttpEntity<>(processMessage, httpHeadersFactory.create()));
 	}
 
 }

@@ -7,6 +7,103 @@
 	},
 	"item": [
 		{
+			"name": "bpm-engine",
+			"item": [
+				{
+					"name": "{id}",
+					"item": [
+						{
+							"name": "bpm-engine",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/bpm-engine/:bpmEngineId?=",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"bpm-engine",
+										":bpmEngineId"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": ""
+										}
+									],
+									"variable": [
+										{
+											"key": "bpmEngineId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "bpm-engine",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/bpm-engine/",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"bpm-engine",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "bpm-engine",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"1\",\r\n    \"name\": \"Camunda 7 Dev\",\r\n    \"type\": \"BPM_ENGINE_CAMUNDA7\",\r\n    \"url\": \"http://localhost\",\r\n    \"por\": \"8080\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/bpm-engine/:businessKey?=",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"bpm-engine",
+								":businessKey"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": ""
+								}
+							],
+							"variable": [
+								{
+									"key": "businessKey",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "case",
 			"item": [
 				{
@@ -791,29 +888,6 @@
 							"response": []
 						}
 					]
-				}
-			]
-		},
-		{
-			"name": "bpm-engine",
-			"item": [
-				{
-					"name": "bpm-engine",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/bpm-engine/",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"bpm-engine",
-								""
-							]
-						}
-					},
-					"response": []
 				}
 			]
 		},
