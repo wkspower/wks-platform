@@ -1,11 +1,13 @@
 package com.wks.caseengine.repository;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.Conventions;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonObject;
@@ -40,7 +42,9 @@ public class MongoDataRepository implements DataRepository {
 
 	public MongoDataRepository(final DataBaseConfig databaseConfig) throws Exception {
 		CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
-				CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build()));
+				CodecRegistries.fromProviders(PojoCodecProvider.builder()
+						// https://jira.mongodb.org/browse/JAVA-2750
+						.conventions(Arrays.asList(Conventions.ANNOTATION_CONVENTION)).automatic(true).build()));
 
 		MongoClientSettings settings = MongoClientSettings.builder().codecRegistry(pojoCodecRegistry).build();
 		mongoClient = MongoClients.create(settings);
@@ -69,6 +73,17 @@ public class MongoDataRepository implements DataRepository {
 	@Override
 	public void saveCaseDefinition(final CaseDefinition caseDefinition) throws Exception {
 		caseDefCollection.insertOne((new JsonObject(new Gson().toJson(caseDefinition))));
+	}
+
+	@Override
+	public void updateCaseDefinition(final String caseDefId, final CaseDefinition caseDefinition) throws Exception {
+		Bson filter = Filters.eq("id", caseDefId);
+
+		Bson update = Updates.combine(Updates.set("stages", caseDefinition.getStages()),
+				Updates.set("formKey", caseDefinition.getFormKey()), Updates.set("name", caseDefinition.getName()),
+				Updates.set("stagesLifecycleProcessKey", caseDefinition.getStagesLifecycleProcessKey()));
+
+		caseDefCollection.updateOne(filter, update);
 	}
 
 	@Override
@@ -102,7 +117,13 @@ public class MongoDataRepository implements DataRepository {
 		Bson filter = Filters.eq("businessKey", businessKey);
 		Bson update = Updates.set("status", newStatus);
 		caseInstCollection.updateMany(filter, update);
+	}
 
+	@Override
+	public void updateCaseStage(final String businessKey, final String caseStage) {
+		Bson filter = Filters.eq("businessKey", businessKey);
+		Bson update = Updates.set("stage", caseStage);
+		caseInstCollection.updateMany(filter, update);
 	}
 
 	@Override
@@ -140,8 +161,7 @@ public class MongoDataRepository implements DataRepository {
 	public void updateForm(final String formKey, final Form form) throws Exception {
 		Bson filter = Filters.eq("key", formKey);
 
-		Bson update = Updates.combine(Updates.set("title", form.getTitle()),
-				Updates.set("toolTip", form.getToolTip()),
+		Bson update = Updates.combine(Updates.set("title", form.getTitle()), Updates.set("toolTip", form.getToolTip()),
 				Updates.set("structure", (new JsonObject(new Gson().toJson(form.getStructure())))));
 
 		formCollection.updateOne(filter, update);

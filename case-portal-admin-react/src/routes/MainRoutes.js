@@ -5,7 +5,6 @@ import Loadable from 'components/Loadable';
 import MainLayout from 'layout/MainLayout';
 
 import { CaseDefList } from 'views/caseDef/caseDefList/caseDefList';
-import { EventTypeList } from 'views/eventType/eventTypeList';
 import { FormList } from 'views/form/formList';
 
 // render - dashboard
@@ -108,14 +107,6 @@ const MainRoutes = {
                 {
                     path: 'case-definition',
                     element: <CaseDefList />
-                },
-                {
-                    path: 'event-type-definition',
-                    element: <EventTypeList />
-                },
-                {
-                    path: 'listener-type-definition',
-                    element: <DashboardDefault />
                 },
                 {
                     path: 'data-domain',

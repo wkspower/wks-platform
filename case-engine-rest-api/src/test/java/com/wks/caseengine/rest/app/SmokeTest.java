@@ -8,10 +8,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.wks.caseengine.rest.server.CaseController;
 import com.wks.caseengine.rest.server.CaseDefinitionController;
-import com.wks.caseengine.rest.server.CaseEventTypeController;
 import com.wks.caseengine.rest.server.FormController;
 import com.wks.caseengine.rest.server.HealthCheckController;
 import com.wks.caseengine.rest.server.MessageController;
+import com.wks.caseengine.rest.server.ProcessDefinitionController;
+import com.wks.caseengine.rest.server.ProcessInstanceController;
 import com.wks.caseengine.rest.server.TaskController;
 import com.wks.caseengine.rest.server.TaskFormController;
 import com.wks.caseengine.rest.server.VariableController;
@@ -41,10 +42,13 @@ public class SmokeTest {
 	private VariableController variableController;
 
 	@Autowired
-	private CaseEventTypeController caseEventTypeController;
+	private FormController formController;
 
 	@Autowired
-	private FormController formController;
+	private ProcessDefinitionController processDefinitionController;
+
+	@Autowired
+	private ProcessInstanceController processInstanceController;
 
 	@Test
 	public void shouldLoadContexts() throws Exception {
@@ -55,7 +59,8 @@ public class SmokeTest {
 		assertThat(messageController).isNotNull();
 		assertThat(taskController).isNotNull();
 		assertThat(variableController).isNotNull();
-		assertThat(caseEventTypeController).isNotNull();
 		assertThat(formController).isNotNull();
+		assertThat(processDefinitionController).isNotNull();
+		assertThat(processInstanceController).isNotNull();
 	}
 }

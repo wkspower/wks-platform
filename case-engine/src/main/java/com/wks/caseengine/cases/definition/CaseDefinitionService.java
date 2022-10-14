@@ -11,6 +11,9 @@ public interface CaseDefinitionService {
 	CaseDefinition get(final String caseDefId) throws Exception;
 
 	CaseDefinition create(final CaseDefinition caseDefinition) throws Exception;
+	
+	CaseDefinition update(final String caseDefId, CaseDefinition caseDefinition) throws Exception;
 
 	void delete(final String caseDefinitionId) throws CaseInstanceNotFoundException, Exception;
+
 }

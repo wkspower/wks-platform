@@ -26,7 +26,17 @@ public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 
 	@Override
 	public CaseDefinition create(final CaseDefinition caseDefinition) throws Exception {
+		if (caseDefinition.getId().isEmpty()) {
+			// TODO error handling
+			throw new Exception("No Case Definition ID provided");
+		}
 		dataRepository.saveCaseDefinition(caseDefinition);
+		return caseDefinition;
+	}
+
+	@Override
+	public CaseDefinition update(final String caseDefId, final CaseDefinition caseDefinition) throws Exception {
+		dataRepository.updateCaseDefinition(caseDefId, caseDefinition);
 		return caseDefinition;
 	}
 
@@ -36,6 +46,7 @@ public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 	}
 
 	public void setDataRepository(DataRepository dataRepository) {
+
 		this.dataRepository = dataRepository;
 	}
 

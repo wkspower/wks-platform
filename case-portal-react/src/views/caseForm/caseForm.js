@@ -25,6 +25,10 @@ import { Comments } from 'views/caseComment/Comments';
 
 import { QuestionCircleOutlined } from '@ant-design/icons';
 
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import Stepper from '@mui/material/Stepper';
+
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
         children: React.ReactElement
@@ -65,6 +69,9 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
     const [formData, setFormData] = useState({});
     const [tabIndex, setTabIndex] = useState(0);
 
+    const [activeStage, setActiveStage] = React.useState(0);
+    const [stages, setStages] = useState([]);
+
     useEffect(() => {
         fetch('http://localhost:8081/case/' + aCase.businessKey)
             .then((response) => response.json())
@@ -75,6 +82,7 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
                     isValid: true
                 });
                 setTabIndex(0);
+                setActiveStage(caseData.stage);
             })
             .catch((err) => {
                 console.log(err.message);
@@ -89,6 +97,7 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
             .then((response) => response.json())
             .then((data) => {
                 setCaseDef(data);
+                setStages(data.stages.map((o) => o.name));
                 return fetch('http://localhost:8081/form/' + data.formKey);
             })
             .then((response) => response.json())
@@ -161,6 +170,24 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
                         )}
                     </Toolbar>
                 </AppBar>
+
+                <Box sx={{ pl: 10, pr: 10, pt: 2, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
+                    <Stepper
+                        activeStep={stages.findIndex((o) => {
+                            return o === activeStage;
+                        })}
+                    >
+                        {stages.map((label, index) => {
+                            const stagesProps = {};
+                            const labelProps = {};
+                            return (
+                                <Step key={label} {...stagesProps}>
+                                    <StepLabel {...labelProps}>{label}</StepLabel>
+                                </Step>
+                            );
+                        })}
+                    </Stepper>
+                </Box>
 
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={tabIndex} onChange={handleTabChanged} aria-label="basic tabs example">

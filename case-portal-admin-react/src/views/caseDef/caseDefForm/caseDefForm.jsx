@@ -14,7 +14,8 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import PropTypes from 'prop-types';
 
-import { CaseDefEventsForm } from './caseDefEventsForm';
+import { useEffect } from 'react';
+import { CaseDefFormStages } from './caseDefFormStages';
 import { CaseDefGeneralForm } from './caseDefGeneralForm';
 import { CaseDefFormForm } from './caseFormForm';
 
@@ -54,11 +55,60 @@ TabPanel.propTypes = {
     value: PropTypes.number.isRequired
 };
 
-export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
+export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
     const [tabValue, setTabValue] = useState(0);
+    const [caseDef, setCaseDef] = useState(caseDefParam);
+
+    useEffect(() => {
+        setCaseDef(caseDefParam);
+    }, [open, caseDefParam]);
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
+    };
+
+    const handleSave = () => {
+        if (caseDef.status && caseDef.status === 'new') {
+            fetch('http://localhost:8081/case-definition/', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(caseDef)
+            })
+                .then((response) => handleClose())
+                .catch((err) => {
+                    console.log(err.message);
+                });
+        } else {
+            fetch('http://localhost:8081/case-definition/' + caseDef.id, {
+                method: 'PATCH',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(caseDef)
+            })
+                .then((response) => handleClose())
+                .catch((err) => {
+                    console.log(err.message);
+                });
+        }
+    };
+
+    const handleDelete = () => {
+        fetch('http://localhost:8081/case-definition/' + caseDef.id, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+            .then((response) => handleClose())
+            .catch((err) => {
+                console.log(err.message);
+            });
     };
 
     return (
@@ -70,9 +120,16 @@ export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
                             <CloseIcon />
                         </IconButton>
                         <Typography sx={{ ml: 2, flex: 1 }} component="div">
-                            <div>{aCaseDef?.name}</div>
+                            <div>{caseDef?.name}</div>
                         </Typography>
-                        <Button color="inherit">Edit</Button>
+                        <Button color="inherit" onClick={handleSave}>
+                            Save
+                        </Button>
+                        {!(caseDef.status && caseDef.status === 'new') && (
+                            <Button color="inherit" onClick={handleDelete}>
+                                Delete
+                            </Button>
+                        )}
                     </Toolbar>
                 </AppBar>
 
@@ -85,37 +142,22 @@ export const CaseDefForm = ({ open, handleClose, aCaseDef }) => {
                         aria-label="basic tabs example"
                     >
                         <Tab label="General" {...a11yProps(0)} />
-                        <Tab label="Business key" {...a11yProps(1)} />
-                        <Tab label="Data Structure" {...a11yProps(2)} />
-                        <Tab label="Validation Rules" {...a11yProps(3)} />
-                        <Tab label="Stages" {...a11yProps(4)} />
-                        <Tab label="Priority & Severity" {...a11yProps(5)} />
-                        <Tab label="Forms" {...a11yProps(6)} />
-                        <Tab label="Search Layouts" {...a11yProps(7)} />
-                        <Tab label="Events" {...a11yProps(8)} />
-                        <Tab label="Listeners" {...a11yProps(9)} />
-                        <Tab label="Access Control" {...a11yProps(10)} />
-                        <Tab label="Auditing" {...a11yProps(11)} />
-                        <Tab label="API" {...a11yProps(12)} />
-                        <Tab label="Deployment" {...a11yProps(13)} />
-                        <Tab label="Versions" {...a11yProps(14)} />
-
-                        <Tab label="Source Code" {...a11yProps(15)} />
+                        <Tab label="Stages" {...a11yProps(1)} />
+                        <Tab label="Forms" {...a11yProps(2)} />
                     </Tabs>
                 </Box>
 
                 {/* General Tab */}
                 <TabPanel value={tabValue} index={0}>
-                    <CaseDefGeneralForm caseDef={aCaseDef} />
+                    <CaseDefGeneralForm caseDef={caseDef} setCaseDef={setCaseDef} />
                 </TabPanel>
 
-                <TabPanel value={tabValue} index={6}>
-                    <CaseDefFormForm formKey={aCaseDef.formKey} />
+                <TabPanel value={tabValue} index={1}>
+                    <CaseDefFormStages caseDef={caseDef} setCaseDef={setCaseDef} />
                 </TabPanel>
 
-                {/* Events tab */}
-                <TabPanel value={tabValue} index={8}>
-                    <CaseDefEventsForm caseDef={aCaseDef} />
+                <TabPanel value={tabValue} index={2}>
+                    <CaseDefFormForm caseDef={caseDef} setCaseDef={setCaseDef} />
                 </TabPanel>
             </Dialog>
         </div>

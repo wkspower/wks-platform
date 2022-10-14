@@ -1,7 +1,5 @@
 package com.wks.caseengine.cases.definition;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,22 +7,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Builder
-@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class CaseDefinition {
+@Builder
+@ToString
+public class CaseStage {
 
-	public String id;
-
+	private String id;
+	private int index;
 	private String name;
-
-	private String formKey;
-
-	private String stagesLifecycleProcessKey;
-
-	private List<CaseStage> stages;
 
 }

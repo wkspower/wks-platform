@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +36,12 @@ public class CaseDefinitionController {
 	@PostMapping(value = "/case-definition")
 	public CaseDefinition save(@RequestBody CaseDefinition caseDefinition) throws Exception {
 		return caseDefinitionService.create(caseDefinition);
+	}
+
+	@PatchMapping(value = "/case-definition/{caseDefId}")
+	public CaseDefinition update(@PathVariable String caseDefId, @RequestBody CaseDefinition caseDefinition)
+			throws Exception {
+		return caseDefinitionService.update(caseDefId, caseDefinition);
 	}
 
 	@DeleteMapping(value = "/case-definition/{caseDefId}")

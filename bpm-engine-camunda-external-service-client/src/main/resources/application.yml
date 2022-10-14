@@ -27,6 +27,6 @@ camunda7.rest.correlate.url: ${camunda7.rest.url}/message
 camunda.bpm.client:
   base-url: ${camunda7.rest.url}
   subscriptions:
-    caseStatusUpdate:
+    caseStageUpdate:
         process-definition-key: genericCaseProcess
         include-extension-properties: true

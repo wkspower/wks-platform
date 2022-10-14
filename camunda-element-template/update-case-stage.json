@@ -1,0 +1,42 @@
+{
+    "$schema": "https://unpkg.com/@camunda/element-templates-json-schema/resources/schema.json",
+    "name": "WKS - Update Case Stage",
+    "id": "com.wks.camunda.template.case-stage-update",
+    "appliesTo": [
+        "bpmn:ServiceTask"
+    ],
+    "properties": [
+        {
+            "label": "Implementation Type",
+            "type": "String",
+            "value": "external",
+            "editable": false,
+            "binding": {
+                "type": "property",
+                "name": "camunda:type"
+            }
+        },
+        {
+            "label": "Topic",
+            "type": "String",
+            "value": "caseStageUpdate",
+            "editable": false,
+            "binding": {
+                "type": "property",
+                "name": "camunda:topic"
+            }
+        },
+        {
+            "label": "Stage",
+            "type": "String",
+            "editable": true,
+            "binding": {
+                "type": "camunda:inputParameter",
+                "name": "stage"
+            },
+            "constraints": {
+                "notEmpty": true
+            }
+        }
+    ]
+}

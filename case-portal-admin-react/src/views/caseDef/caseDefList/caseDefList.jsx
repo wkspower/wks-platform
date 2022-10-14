@@ -1,8 +1,9 @@
+import React, { useEffect, useState } from 'react';
+
 import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import MainCard from 'components/MainCard';
-import React, { useEffect, useState } from 'react';
 import { CaseDefForm } from '../caseDefForm/caseDefForm';
 
 export const CaseDefList = () => {
@@ -19,7 +20,7 @@ export const CaseDefList = () => {
             .catch((err) => {
                 console.log(err.message);
             });
-    }, []);
+    }, [openCaseDefForm]);
 
     const columns: GridColDef[] = [
         { field: 'id', headerName: 'Id', width: 300 },
@@ -48,8 +49,23 @@ export const CaseDefList = () => {
         setOpenCaseDefForm(false);
     };
 
+    const handleNewCaseDef = () => {
+        setACaseDef({
+            status: 'new',
+            id: '',
+            name: '',
+            formKey: '',
+            stagesLifecycleProcessKey: '',
+            stages: [{ id: 0, index: 0, name: 'Stage 0' }]
+        });
+        setOpenCaseDefForm(true);
+    };
+
     return (
         <div style={{ height: 650, width: '100%' }}>
+            <Button id="basic-button" variant="contained" onClick={handleNewCaseDef}>
+                New
+            </Button>
             <MainCard sx={{ mt: 2 }} content={false}>
                 <Box>
                     <DataGrid
@@ -61,7 +77,7 @@ export const CaseDefList = () => {
                     />
                 </Box>
             </MainCard>
-            {aCaseDef && <CaseDefForm aCaseDef={aCaseDef} handleClose={handleCloseCaseDefForm} open={openCaseDefForm} />}
+            {aCaseDef && <CaseDefForm caseDefParam={aCaseDef} handleClose={handleCloseCaseDefForm} open={openCaseDefForm} />}
         </div>
     );
 };
