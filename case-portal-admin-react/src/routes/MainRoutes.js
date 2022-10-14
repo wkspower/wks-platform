@@ -4,6 +4,7 @@ import { lazy } from 'react';
 import Loadable from 'components/Loadable';
 import MainLayout from 'layout/MainLayout';
 
+import { BpmEngineList } from 'views/bpmEngine/bpmEngineList/bpmEngineList';
 import { CaseDefList } from 'views/caseDef/caseDefList/caseDefList';
 import { FormList } from 'views/form/formList';
 
@@ -114,7 +115,7 @@ const MainRoutes = {
                 },
                 {
                     path: 'process-engine',
-                    element: <DashboardDefault />
+                    element: <BpmEngineList />
                 },
                 {
                     path: 'task-definition',

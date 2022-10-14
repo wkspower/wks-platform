@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface BpmEngineService {
 
-	void save(final BpmEngine bpmEngine) throws Exception;
+	BpmEngine save(final BpmEngine bpmEngine) throws Exception;
 
 	BpmEngine get(final String id) throws Exception;
 

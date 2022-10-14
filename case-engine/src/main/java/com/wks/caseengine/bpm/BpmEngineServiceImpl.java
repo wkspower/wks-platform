@@ -14,8 +14,9 @@ public class BpmEngineServiceImpl implements BpmEngineService {
 	private Repository<BpmEngine> repository;
 
 	@Override
-	public void save(BpmEngine bpmEngine) throws Exception {
+	public BpmEngine save(BpmEngine bpmEngine) throws Exception {
 		repository.save(bpmEngine);
+		return bpmEngine;
 	}
 
 	@Override

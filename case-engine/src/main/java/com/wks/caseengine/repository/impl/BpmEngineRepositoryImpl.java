@@ -46,7 +46,7 @@ public class BpmEngineRepositoryImpl implements BpmEngineRepository {
 	}
 
 	private MongoCollection<JsonObject> getCollection() {
-		return connection.getCaseInstCollection();
+		return connection.getBpmEngineCollection();
 	}
 
 }
