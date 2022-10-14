@@ -81,13 +81,12 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
                     metadata: {},
                     isValid: true
                 });
-                setTabIndex(0);
                 setActiveStage(caseData.stage);
             })
             .catch((err) => {
                 console.log(err.message);
             });
-    }, [aCase]);
+    }, [aCase, tabIndex]);
 
     const [caseDef, setCaseDef] = useState([]);
     const [form, setForm] = useState(null);
@@ -96,6 +95,7 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
         fetch('http://localhost:8081/case-definition/' + aCase.caseDefinitionId)
             .then((response) => response.json())
             .then((data) => {
+                setTabIndex(0);
                 setCaseDef(data);
                 setStages(data.stages.map((o) => o.name));
                 return fetch('http://localhost:8081/form/' + data.formKey);
