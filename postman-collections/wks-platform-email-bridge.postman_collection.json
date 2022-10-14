@@ -7,34 +7,41 @@
 	},
 	"item": [
 		{
-			"name": "email-send",
+			"name": "email",
+			"item": []
+		},
+		{
+			"name": "send",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{email-bridge-host}}/email-send",
+					"raw": "{{email-bridge-host}}/email/send/",
 					"host": [
 						"{{email-bridge-host}}"
 					],
 					"path": [
-						"email-send"
+						"email",
+						"send",
+						""
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "email-receive",
+			"name": "receive",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{email-bridge-host}}/email-receive",
+					"raw": "{{email-bridge-host}}/email/receive",
 					"host": [
 						"{{email-bridge-host}}"
 					],
 					"path": [
-						"email-receive"
+						"email",
+						"receive"
 					]
 				}
 			},

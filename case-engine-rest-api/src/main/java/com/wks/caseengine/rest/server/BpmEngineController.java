@@ -1,22 +1,24 @@
 package com.wks.caseengine.rest.server;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.wks.caseengine.process.engine.ProcessEngineService;
+import com.wks.caseengine.bpm.BpmEngine;
+import com.wks.caseengine.bpm.BpmEngineService;
 
 @RestController
-@RequestMapping("healthCheck")
-public class HealthCheckController {
+@RequestMapping("bpm-engine")
+public class BpmEngineController {
 
 	@Autowired
-	private ProcessEngineService processEngineService;
+	private BpmEngineService bpmEngineService;
 
 	@GetMapping(value = "/")
-	public String check() {
-		return processEngineService.healthCheck();
+	public List<BpmEngine> find() throws Exception {
+		return bpmEngineService.find();
 	}
-
 }

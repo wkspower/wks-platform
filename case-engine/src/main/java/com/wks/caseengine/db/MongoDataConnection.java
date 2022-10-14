@@ -1,4 +1,4 @@
-package com.wks.caseengine.repository.db;
+package com.wks.caseengine.db;
 
 import java.util.Arrays;
 
@@ -29,6 +29,8 @@ public class MongoDataConnection {
 	private MongoCollection<JsonObject> formCollection;
 	private MongoCollection<JsonObject> caseDefCollection;
 
+	private MongoCollection<JsonObject> bpmEngineCollection;
+
 	public MongoDataConnection(final DatabaseConfig databaseConfig) throws Exception {
 		CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
 				CodecRegistries.fromProviders(PojoCodecProvider.builder()
@@ -42,6 +44,7 @@ public class MongoDataConnection {
 		caseDefCollection = database.getCollection("caseDefinitions", JsonObject.class);
 		caseInstCollection = database.getCollection("caseInstances", JsonObject.class);
 		formCollection = database.getCollection("forms", JsonObject.class);
+		bpmEngineCollection = database.getCollection("bpmEngine", JsonObject.class);
 
 	}
 
@@ -55,6 +58,10 @@ public class MongoDataConnection {
 
 	public MongoCollection<JsonObject> getFormCollection() {
 		return formCollection;
+	}
+
+	public MongoCollection<JsonObject> getBpmEngineCollection() {
+		return bpmEngineCollection;
 	}
 
 }

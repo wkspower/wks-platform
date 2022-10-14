@@ -26,7 +26,7 @@ export const FormNew = ({ open, handleClose }) => {
     }, [open]);
 
     const saveNewForm = () => {
-        fetch('http://localhost:8081/form', {
+        fetch('http://localhost:8081/form/', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',

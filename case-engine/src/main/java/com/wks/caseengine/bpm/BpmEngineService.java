@@ -4,12 +4,12 @@ import java.util.List;
 
 public interface BpmEngineService {
 
-	void save(final BpmEngine bpmEngine);
+	void save(final BpmEngine bpmEngine) throws Exception;
 
-	BpmEngine get(final String id);
+	BpmEngine get(final String id) throws Exception;
 
-	List<BpmEngine> find();
+	List<BpmEngine> find() throws Exception;
 
-	void delete(final String id);
+	void delete(final String id) throws Exception;
 
 }

@@ -1,4 +1,4 @@
-package com.wks.caseengine.repository;
+package com.wks.caseengine.repository.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.cases.definition.CaseDefinition;
-import com.wks.caseengine.repository.db.MongoDataConnection;
+import com.wks.caseengine.db.MongoDataConnection;
+import com.wks.caseengine.repository.CaseDefinitionRepository;
 
 @Component
 public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {

@@ -1,4 +1,4 @@
-package com.wks.caseengine.repository.db;
+package com.wks.caseengine.db;
 
 import org.springframework.stereotype.Component;
 

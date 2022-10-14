@@ -14,7 +14,7 @@ export const FormList = () => {
     const [openNewForm, setOpenNewForm] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:8081/form')
+        fetch('http://localhost:8081/form/')
             .then((response) => response.json())
             .then((data) => {
                 setForms(data);

@@ -1,4 +1,4 @@
-package com.wks.caseengine.repository;
+package com.wks.caseengine.repository.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +12,9 @@ import com.google.gson.Gson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
+import com.wks.caseengine.db.MongoDataConnection;
 import com.wks.caseengine.form.Form;
-import com.wks.caseengine.repository.db.MongoDataConnection;
+import com.wks.caseengine.repository.FormRepository;
 
 @Component
 public class FormRepositoryImpl implements FormRepository {

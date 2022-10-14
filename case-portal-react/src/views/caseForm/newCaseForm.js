@@ -61,7 +61,7 @@ export const NewCaseForm = ({ open, handleClose, caseDefId }) => {
                 caseAttributes.push({ name: key, value: formData.data[key] });
             });
 
-        fetch('http://localhost:8081/case', {
+        fetch('http://localhost:8081/case/', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',

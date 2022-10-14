@@ -35,7 +35,7 @@
 									"variable": [
 										{
 											"key": "businessKey",
-											"value": "78999"
+											"value": "47800"
 										}
 									]
 								}
@@ -65,7 +65,7 @@
 									"variable": [
 										{
 											"key": "businessKey",
-											"value": "GENERIC-CASE--47746"
+											"value": "47800"
 										}
 									]
 								}
@@ -98,7 +98,7 @@
 									"variable": [
 										{
 											"key": "businessKey",
-											"value": "4587"
+											"value": "99198"
 										}
 									]
 								}
@@ -113,12 +113,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/case",
+							"raw": "{{host}}/case/",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"case"
+								"case",
+								""
 							],
 							"query": [
 								{
@@ -138,7 +139,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "\r\n{\r\n    \"caseDefinitionId\": \"1\",\r\n    \"attributes\": [\r\n        {\r\n            \"name\": \"when\",\r\n            \"value\": \"01/01/1990\"\r\n        },\r\n        {\r\n            \"name\": \"where\",\r\n            \"value\": \"Toronto\"\r\n        }\r\n    ]\r\n}",
+							"raw": "\r\n{\r\n    \"caseDefinitionId\": \"generic-case-id\",\r\n    \"attributes\": [\r\n        {\r\n            \"name\": \"when\",\r\n            \"value\": \"01/01/1990\"\r\n        },\r\n        {\r\n            \"name\": \"where\",\r\n            \"value\": \"Toronto\"\r\n        }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -146,12 +147,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{host}}/case",
+							"raw": "{{host}}/case/",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"case"
+								"case",
+								""
 							]
 						}
 					},
@@ -281,12 +283,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{host}}/case-definition",
+							"raw": "{{host}}/case-definition/",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"case-definition"
+								"case-definition",
+								""
 							]
 						}
 					},
@@ -298,12 +301,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/case-definition",
+							"raw": "{{host}}/case-definition/",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"case-definition"
+								"case-definition",
+								""
 							]
 						}
 					},
@@ -355,7 +359,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"messageName\": \"sampleMessage\",\r\n    \"businessKey\": \"71093\"\r\n}",
+							"raw": "{\r\n    \"messageName\": \"sampleMessage\",\r\n    \"businessKey\": \"71552\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -363,12 +367,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{host}}/message",
+							"raw": "{{host}}/message/",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"message"
+								"message",
+								""
 							]
 						}
 					},
@@ -497,12 +502,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/task",
+							"raw": "{{host}}/task/",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"task"
+								"task",
+								""
 							],
 							"query": [
 								{
@@ -662,12 +668,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{host}}/form",
+							"raw": "{{host}}/form/",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"form"
+								"form",
+								""
 							]
 						}
 					},
@@ -679,34 +686,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/form",
+							"raw": "{{host}}/form/",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"form"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "process-diagram",
-			"item": [
-				{
-					"name": "get",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/process-diagram",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"process-diagram"
+								"form",
+								""
 							]
 						}
 					},
@@ -753,17 +739,18 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/process-instance?businessKey=21083",
+							"raw": "{{host}}/process-instance/?businessKey=71552",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"process-instance"
+								"process-instance",
+								""
 							],
 							"query": [
 								{
 									"key": "businessKey",
-									"value": "21083"
+									"value": "71552"
 								}
 							]
 						}
@@ -808,17 +795,41 @@
 			]
 		},
 		{
+			"name": "bpm-engine",
+			"item": [
+				{
+					"name": "bpm-engine",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/bpm-engine/",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"bpm-engine",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "healthCheck",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{host}}/healthCheck",
+					"raw": "{{host}}/healthCheck/",
 					"host": [
 						"{{host}}"
 					],
 					"path": [
-						"healthCheck"
+						"healthCheck",
+						""
 					]
 				}
 			},
