@@ -1,4 +1,4 @@
-package com.wks.caseengine.repository;
+package com.wks.caseengine.repository.db;
 
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DataBaseConfig {
+public class DatabaseConfig {
 
 	private String databaseURL = "jdbc:h2:~/wks_bpm_interface;AUTO_SERVER=TRUE";
 	private String mongoDatabase = "wks-mongo-database";

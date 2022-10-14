@@ -8,9 +8,9 @@
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bpm-engine-camunda-external-service-client</artifactId>
-	<name>bpm-engine-camunda-external-service-client</name>
-	<description>Camunda External Service Client</description>
+	<artifactId>bpm-engine-c7-external-service</artifactId>
+	<name>bpm-engine-c7-external-service</name>
+	<description>C7 External Service</description>
 
 	<dependencies>
 		<dependency>

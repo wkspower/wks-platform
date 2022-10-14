@@ -35,7 +35,7 @@
 
 		<dependency>
 			<groupId>com.wks</groupId>
-			<artifactId>bpm-engine-camunda-client</artifactId>
+			<artifactId>bpm-engine-c7-client</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
 

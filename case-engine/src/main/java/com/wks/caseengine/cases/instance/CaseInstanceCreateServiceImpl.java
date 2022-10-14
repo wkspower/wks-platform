@@ -9,20 +9,23 @@ import com.wks.caseengine.cases.businesskey.GenericBusinessKeyGenerator;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.definition.CaseStage;
-import com.wks.caseengine.repository.DataRepository;
+import com.wks.caseengine.repository.Repository;
 
 @Component
 class CaseInstanceCreateServiceImpl implements CaseInstanceCreateService {
 
 	@Autowired
-	private DataRepository dataRepository;
+	private Repository<CaseInstance> repository;
+
+	@Autowired
+	private Repository<CaseDefinition> caseDefRepository;
 
 	@Autowired
 	private GenericBusinessKeyGenerator businessKeyCreator;
 
 	@Override
 	public CaseInstance create(final CaseInstance caseInstanceParam) throws Exception {
-		CaseDefinition caseDefinition = dataRepository.getCaseDefinition(caseInstanceParam.getCaseDefinitionId());
+		CaseDefinition caseDefinition = caseDefRepository.get(caseInstanceParam.getCaseDefinitionId());
 		if (caseDefinition == null) {
 			throw new CaseDefinitionNotFoundException();
 		}
@@ -33,13 +36,13 @@ class CaseInstanceCreateServiceImpl implements CaseInstanceCreateService {
 						.get().getName())
 				.attributes(caseInstanceParam.getAttributes()).caseDefinitionId(caseDefinition.getId()).build();
 
-		dataRepository.saveCaseInstance(caseInstance);
+		repository.save(caseInstance);
 
 		return caseInstance;
 	}
 
-	public void setDataRepository(DataRepository dataRepository) {
-		this.dataRepository = dataRepository;
+	public void setRepository(Repository<CaseInstance> repository) {
+		this.repository = repository;
 	}
 
 	public void setBusinessKeyCreator(GenericBusinessKeyGenerator businessKeyCreator) {

@@ -8,6 +8,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.camunda.http.request.CamundaHttpRequestFactory;
+import com.wks.bpm.engine.client.ProcessEngineClient;
 import com.wks.bpm.engine.model.impl.DeploymentImpl;
 import com.wks.bpm.engine.model.impl.ProcessDefinitionImpl;
 import com.wks.bpm.engine.model.spi.ActivityInstance;

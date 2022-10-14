@@ -3,7 +3,7 @@ package com.wks.caseengine.process.engine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.wks.bpm.engine.camunda.client.ProcessEngineClient;
+import com.wks.bpm.engine.client.ProcessEngineClient;
 
 @Component
 public class ProcessEngineServiceImpl implements ProcessEngineService {

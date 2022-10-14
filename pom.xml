@@ -53,8 +53,8 @@
 		<module>wks-rest-client</module>
 
 		<module>bpm-engine-interface</module>
-		<module>bpm-engine-camunda-client</module>
-		<module>bpm-engine-camunda-external-service-client</module>
+		<module>bpm-engine-c7-client</module>
+		<module>bpm-engine-c7-external-service</module>
 	</modules>
 
 	<build>

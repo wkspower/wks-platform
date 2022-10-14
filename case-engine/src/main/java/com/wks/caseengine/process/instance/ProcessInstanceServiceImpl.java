@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.wks.bpm.engine.camunda.client.ProcessEngineClient;
+import com.wks.bpm.engine.client.ProcessEngineClient;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 
