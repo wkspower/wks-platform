@@ -53,6 +53,7 @@
 		<module>rest-client</module>
 
 		<module>bpm-engine-interface</module>
+		<module>bpm-engine-client</module>
 		<module>bpm-engine-c7-client</module>
 		<module>bpm-engine-c7-external-service</module>
 		

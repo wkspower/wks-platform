@@ -3,7 +3,7 @@ package com.wks.caseengine.tasks.forms;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.wks.bpm.engine.client.ProcessEngineClient;
+import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.bpm.engine.model.spi.TaskForm;
 import com.wks.caseengine.repository.BpmEngineRepository;
 
@@ -11,7 +11,7 @@ import com.wks.caseengine.repository.BpmEngineRepository;
 public class TaskFormServiceImpl implements FormTaskService {
 
 	@Autowired
-	private ProcessEngineClient processEngineClient;
+	private BpmEngineClientFacade processEngineClient;
 
 	@Autowired
 	private BpmEngineRepository bpmEngineRepository;

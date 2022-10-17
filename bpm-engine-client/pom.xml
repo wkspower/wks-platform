@@ -8,9 +8,9 @@
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bpm-engine-c8-client</artifactId>
-	<name>bpm-engine-c8-client</name>
-	<description>C8 Client</description>
+	<artifactId>bpm-engine-client</artifactId>
+	<name>bpm-engine-client</name>
+	<description>BPM Engine Client</description>
 
 	<packaging>jar</packaging>
 
@@ -27,11 +27,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<scope>provided</scope>
@@ -44,9 +39,15 @@
 		</dependency>
 
 		<dependency>
-			<groupId>io.camunda</groupId>
-			<artifactId>zeebe-client-java</artifactId>
-			<version>${camunda8.version}</version>
+			<groupId>com.wks</groupId>
+			<artifactId>bpm-engine-c7-client</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.wks</groupId>
+			<artifactId>bpm-engine-c8-client</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 
 		<dependency>

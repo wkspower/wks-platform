@@ -383,7 +383,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"id\": \"1\",\r\n    \"name\": \"Journal\",\r\n    \"formKey\": \"motion-detected-form\",\r\n    \"bpmEngineId\": \"1\",\r\n    \"stagesLifecycleProcessKey\": \"genericCaseProcess\",\r\n    \"stages\": [\r\n        {\r\n            \"id\": 0,\r\n            \"name\": \"Data Collection\",\r\n            \"index\": \"0\"\r\n        },\r\n        {\r\n            \"id\": 1,\r\n            \"name\": \"Review\",\r\n            \"index\": \"1\"\r\n        }\r\n    ]\r\n}",
+							"raw": "{\r\n    \"id\": \"1\",\r\n    \"name\": \"Journal\",\r\n    \"formKey\": \"motion-detected-form\",\r\n    \"bpmEngine\": {\r\n        \"id\": \"1\",\r\n        \"name\": \"Camunda 7 - Demo\",\r\n        \"type\": \"BPM_ENGINE_CAMUNDA7\",\r\n        \"parameters\": {\r\n            \"url\": \"http://localhost:8080/engine-rest\"\r\n        }\r\n    },\r\n    \"stagesLifecycleProcessKey\": \"genericCaseProcess\",\r\n    \"stages\": [\r\n        {\r\n            \"id\": 0,\r\n            \"name\": \"Data Collection\",\r\n            \"index\": \"0\"\r\n        },\r\n        {\r\n            \"id\": 1,\r\n            \"name\": \"Review\",\r\n            \"index\": \"1\"\r\n        }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"

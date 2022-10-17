@@ -3,13 +3,14 @@ package com.wks.bpm.engine.camunda.client;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.camunda.http.request.C7HttpRequestFactory;
-import com.wks.bpm.engine.client.ProcessEngineClient;
+import com.wks.bpm.engine.client.BpmEngineClient;
 import com.wks.bpm.engine.model.impl.DeploymentImpl;
 import com.wks.bpm.engine.model.impl.ProcessDefinitionImpl;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
@@ -24,7 +25,8 @@ import com.wks.rest.client.WksHttpRequest;
  *
  */
 @Component
-public class C7EngineClient implements ProcessEngineClient {
+@Qualifier("c7EngineClient")
+public class C7EngineClient implements BpmEngineClient {
 
 	@Autowired
 	private RestTemplate restTemplate;

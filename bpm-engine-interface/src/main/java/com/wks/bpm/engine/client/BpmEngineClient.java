@@ -16,7 +16,7 @@ import com.wks.bpm.engine.model.spi.TaskForm;
  * @author victor.franca
  *
  */
-public interface ProcessEngineClient {
+public interface BpmEngineClient {
 
 	Deployment[] findDeployments(final BpmEngine bpmEngine);
 

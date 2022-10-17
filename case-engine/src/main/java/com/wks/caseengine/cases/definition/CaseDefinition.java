@@ -2,6 +2,8 @@ package com.wks.caseengine.cases.definition;
 
 import java.util.List;
 
+import com.wks.bpm.engine.BpmEngine;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,8 +24,8 @@ public class CaseDefinition {
 	private String name;
 
 	private String formKey;
-	
-	private String bpmEngineId;
+
+	private BpmEngine bpmEngine;
 
 	private String stagesLifecycleProcessKey;
 

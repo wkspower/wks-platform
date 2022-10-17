@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.BpmEngine;
-import com.wks.bpm.engine.client.ProcessEngineClient;
+import com.wks.bpm.engine.client.BpmEngineClient;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.Deployment;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
@@ -16,7 +16,7 @@ import com.wks.bpm.engine.model.spi.ProcessMessage;
 import com.wks.bpm.engine.model.spi.Task;
 import com.wks.bpm.engine.model.spi.TaskForm;
 
-public class MockProcessEngineClient implements ProcessEngineClient {
+public class MockProcessEngineClient implements BpmEngineClient {
 
 	private List<ProcessInstance> processesInstances = new ArrayList<>();
 

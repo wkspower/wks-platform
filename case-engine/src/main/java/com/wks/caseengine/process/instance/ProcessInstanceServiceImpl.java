@@ -7,8 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.wks.bpm.engine.BpmEngine;
-import com.wks.bpm.engine.client.ProcessEngineClient;
+import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.caseengine.repository.BpmEngineRepository;
@@ -17,7 +16,7 @@ import com.wks.caseengine.repository.BpmEngineRepository;
 public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 
 	@Autowired
-	private ProcessEngineClient processEngineClient;
+	private BpmEngineClientFacade processEngineClient;
 
 	@Autowired
 	private BpmEngineRepository bpmEngineRepository;
@@ -64,7 +63,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 				processEngineClient.findActivityInstances(processInstanceId, bpmEngineRepository.get(bpmEngineId)));
 	}
 
-	public void setProcessEngineClient(ProcessEngineClient processEngineClient) {
+	public void setProcessEngineClient(BpmEngineClientFacade processEngineClient) {
 		this.processEngineClient = processEngineClient;
 	}
 

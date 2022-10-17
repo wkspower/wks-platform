@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.wks.bpm.engine.client.ProcessEngineClient;
+import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.caseengine.bpm.BpmEngineService;
 
 @RestController
@@ -15,7 +15,7 @@ import com.wks.caseengine.bpm.BpmEngineService;
 public class ProcessDefinitionController {
 
 	@Autowired
-	private ProcessEngineClient processEngineClient;
+	private BpmEngineClientFacade processEngineClient;
 
 	@Autowired
 	private BpmEngineService bpmEngineService;
