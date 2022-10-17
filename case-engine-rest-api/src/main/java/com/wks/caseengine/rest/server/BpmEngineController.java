@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +30,11 @@ public class BpmEngineController {
 	@PostMapping(value = "/")
 	public BpmEngine save(@RequestBody BpmEngine bpmEngine) throws Exception {
 		return bpmEngineService.save(bpmEngine);
+	}
+
+	@PatchMapping(value = "/{bpmEngineId}")
+	public BpmEngine update(@PathVariable String bpmEngineId, @RequestBody BpmEngine bpmEngine) throws Exception {
+		return bpmEngineService.update(bpmEngineId, bpmEngine);
 	}
 
 	@DeleteMapping(value = "/{bpmEngineId}")

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.google.gson.Gson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.caseengine.db.MongoDataConnection;
 import com.wks.caseengine.repository.BpmEngineRepository;
@@ -28,19 +29,31 @@ public class BpmEngineRepositoryImpl implements BpmEngineRepository {
 	}
 
 	@Override
-	public BpmEngine get(String id) throws Exception {
+	public BpmEngine get(final String id) throws Exception {
 		Bson filter = Filters.eq("id", id);
 		Gson gson = new Gson();
 		return gson.fromJson(getCollection().find(filter).first().getJson(), BpmEngine.class);
 	}
 
 	@Override
-	public void save(BpmEngine bpmEngine) throws Exception {
+	public void save(final BpmEngine bpmEngine) throws Exception {
 		getCollection().insertOne((new JsonObject(new Gson().toJson(bpmEngine))));
 	}
 
 	@Override
-	public void delete(String id) throws Exception {
+	public void update(final String bpmEngineId, final BpmEngine bpmEngine) throws Exception {
+		Bson filter = Filters.eq("id", bpmEngineId);
+
+		Bson update = Updates.combine(
+				Updates.set("parameters", (new JsonObject(new Gson().toJson(bpmEngine.getParameters())))),
+				Updates.set("name", bpmEngine.getName()), Updates.set("type", bpmEngine.getType()));
+
+		getCollection().updateOne(filter, update);
+
+	}
+
+	@Override
+	public void delete(final String id) throws Exception {
 		Bson filter = Filters.eq("id", id);
 		getCollection().deleteMany(filter);
 	}
