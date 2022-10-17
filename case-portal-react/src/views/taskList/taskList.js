@@ -13,7 +13,7 @@ export const TaskList = ({ businessKey }) => {
     const [task, setTask] = useState(null);
 
     useEffect(() => {
-        fetch('http://localhost:8081/task' + (businessKey ? '?processInstanceBusinessKey=' + businessKey : ''))
+        fetch('http://localhost:8081/task/' + (businessKey ? '?processInstanceBusinessKey=' + businessKey : ''))
             .then((response) => response.json())
             .then((data) => {
                 setTasks(data);

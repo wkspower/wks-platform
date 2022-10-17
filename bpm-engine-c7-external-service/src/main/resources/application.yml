@@ -1,0 +1,24 @@
+spring: 
+  config:
+    import: file:env.properties
+    
+logging:
+   level:
+      root: INFO
+      com:
+         wks: INFO
+         wks.bpm.engine.camunda: DEBUG
+      org.springframework.web.client.RestTemplate: ERROR
+      org.apache.http: ERROR
+      httpclient.wire: ERROR    
+
+camunda7.rest.oauth.token.uri:
+camunda7.rest.oauth.token.clientId:
+camunda7.rest.oauth.token.clientSecret:
+camunda7.rest.oauth.token.grantType:
+
+camunda7.rest.deployment.url: /deployment
+camunda7.rest.processdefinition.url: /process-definition
+camunda7.rest.processinstance.url: /process-instance
+camunda7.rest.task.url: /task
+camunda7.rest.correlate.url: /message

@@ -5,37 +5,37 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.wks.caseengine.repository.DataRepository;
+import com.wks.caseengine.repository.FormRepository;
 
 @Component
 public class FormServiceImpl implements FormService {
 
 	@Autowired
-	private DataRepository dataRepository;
+	private FormRepository repository;
 
 	@Override
 	public void save(Form form) throws Exception {
-		dataRepository.saveForm(form);
+		repository.save(form);
 	}
 
 	@Override
 	public Form getForm(String formKey) throws Exception {
-		return dataRepository.getForm(formKey);
+		return repository.get(formKey);
 	}
 
 	@Override
 	public List<Form> find() throws Exception {
-		return dataRepository.findForms();
+		return repository.find();
 	}
 
 	@Override
 	public void delete(String formKey) throws Exception {
-		dataRepository.deleteForm(formKey);
+		repository.delete(formKey);
 	}
 
 	@Override
 	public void update(final String formKey, final Form form) throws Exception {
-		dataRepository.updateForm(formKey, form);
+		repository.updateForm(formKey, form);
 	}
 
 }

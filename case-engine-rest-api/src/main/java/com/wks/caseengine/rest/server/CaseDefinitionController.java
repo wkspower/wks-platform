@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -18,33 +19,34 @@ import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.definition.CaseDefinitionService;
 
 @RestController
+@RequestMapping("case-definition")
 public class CaseDefinitionController {
 
 	@Autowired
 	private CaseDefinitionService caseDefinitionService;
 
-	@GetMapping(value = "/case-definition")
+	@GetMapping(value = "/")
 	public List<CaseDefinition> find() throws Exception {
 		return caseDefinitionService.find();
 	}
 
-	@GetMapping(value = "/case-definition/{caseDefId}")
+	@GetMapping(value = "/{caseDefId}")
 	public CaseDefinition get(@PathVariable String caseDefId) throws Exception {
 		return caseDefinitionService.get(caseDefId);
 	}
 
-	@PostMapping(value = "/case-definition")
+	@PostMapping(value = "/")
 	public CaseDefinition save(@RequestBody CaseDefinition caseDefinition) throws Exception {
 		return caseDefinitionService.create(caseDefinition);
 	}
 
-	@PatchMapping(value = "/case-definition/{caseDefId}")
+	@PatchMapping(value = "/{caseDefId}")
 	public CaseDefinition update(@PathVariable String caseDefId, @RequestBody CaseDefinition caseDefinition)
 			throws Exception {
 		return caseDefinitionService.update(caseDefId, caseDefinition);
 	}
 
-	@DeleteMapping(value = "/case-definition/{caseDefId}")
+	@DeleteMapping(value = "/{caseDefId}")
 	public void delete(@PathVariable String caseDefId) throws Exception {
 		try {
 			caseDefinitionService.delete(caseDefId);
@@ -52,5 +54,4 @@ public class CaseDefinitionController {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Case Definition Not Found - " + caseDefId, e);
 		}
 	}
-
 }

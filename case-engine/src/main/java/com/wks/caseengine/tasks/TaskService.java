@@ -7,12 +7,12 @@ import com.wks.bpm.engine.model.spi.Task;
 
 public interface TaskService {
 
-	public List<Task> find(final String processInstanceBusinessKey);
+	public List<Task> find(final String processInstanceBusinessKey, final String bpmEngineId) throws Exception;
 
-	public void claim(final String taskId, final String taskAssignee);
+	public void claim(final String taskId, final String taskAssignee, final String bpmEngineId) throws Exception;
 
-	public void unclaim(final String taskId);
+	public void unclaim(final String taskId, final String bpmEngineId) throws Exception;
 
-	public void complete(final String taskId, final JsonObject variables);
+	public void complete(final String taskId, final JsonObject variables, final String bpmEngineId) throws Exception;
 
 }

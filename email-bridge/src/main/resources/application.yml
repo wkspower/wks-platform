@@ -24,9 +24,8 @@ camunda7.rest.oauth.token.clientId:
 camunda7.rest.oauth.token.clientSecret:
 camunda7.rest.oauth.token.grantType:
 
-camunda7.rest.url: http://${CAMUNDA7_HOST}:${CAMUNDA7_PORT}/engine-rest
-camunda7.rest.deployment.url: ${camunda7.rest.url}/deployment
-camunda7.rest.processdefinition.url: ${camunda7.rest.url}/process-definition
-camunda7.rest.processinstance.url: ${camunda7.rest.url}/process-instance
-camunda7.rest.task.url: ${camunda7.rest.url}/task
-camunda7.rest.correlate.url: ${camunda7.rest.url}/message
+camunda7.rest.deployment.url: /deployment
+camunda7.rest.processdefinition.url: /process-definition
+camunda7.rest.processinstance.url: /process-instance
+camunda7.rest.task.url: /task
+camunda7.rest.correlate.url: /message

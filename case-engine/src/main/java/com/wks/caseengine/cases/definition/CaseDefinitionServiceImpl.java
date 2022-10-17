@@ -6,22 +6,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
-import com.wks.caseengine.repository.DataRepository;
+import com.wks.caseengine.repository.CaseDefinitionRepository;
 
 @Component
 public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 
 	@Autowired
-	private DataRepository dataRepository;
+	private CaseDefinitionRepository repository;
 
 	@Override
 	public List<CaseDefinition> find() throws Exception {
-		return dataRepository.findCaseDefintions();
+		return repository.find();
 	}
 
 	@Override
 	public CaseDefinition get(final String caseDefId) throws Exception {
-		return dataRepository.getCaseDefinition(caseDefId);
+		return repository.get(caseDefId);
 	}
 
 	@Override
@@ -30,24 +30,23 @@ public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 			// TODO error handling
 			throw new Exception("No Case Definition ID provided");
 		}
-		dataRepository.saveCaseDefinition(caseDefinition);
+		repository.save(caseDefinition);
 		return caseDefinition;
 	}
 
 	@Override
 	public CaseDefinition update(final String caseDefId, final CaseDefinition caseDefinition) throws Exception {
-		dataRepository.updateCaseDefinition(caseDefId, caseDefinition);
+		repository.updateCaseDefinition(caseDefId, caseDefinition);
 		return caseDefinition;
 	}
 
 	@Override
 	public void delete(final String caseDefinitionId) throws CaseInstanceNotFoundException, Exception {
-		dataRepository.deleteCaseDefinition(caseDefinitionId);
+		repository.delete(caseDefinitionId);
 	}
 
-	public void setDataRepository(DataRepository dataRepository) {
-
-		this.dataRepository = dataRepository;
+	public void setRepository(CaseDefinitionRepository repository) {
+		this.repository = repository;
 	}
 
 }

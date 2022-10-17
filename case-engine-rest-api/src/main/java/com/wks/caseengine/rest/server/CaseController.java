@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,12 +22,13 @@ import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.cases.instance.CaseInstanceService;
 
 @RestController
+@RequestMapping("case")
 public class CaseController {
 
 	@Autowired
 	private CaseInstanceService caseInstanceService;
 
-	@GetMapping(value = "/case")
+	@GetMapping(value = "/")
 	public List<CaseInstance> find(@RequestParam(required = false) String status) throws Exception {
 		if (status == null) {
 			return caseInstanceService.find(Optional.empty());
@@ -35,22 +37,22 @@ public class CaseController {
 		}
 	}
 
-	@GetMapping(value = "/case/{businessKey}")
+	@GetMapping(value = "/{businessKey}")
 	public CaseInstance get(@PathVariable String businessKey) throws Exception {
 		return caseInstanceService.get(businessKey);
 	}
 
-	@PostMapping(value = "/case")
+	@PostMapping(value = "/")
 	public CaseInstance save(@RequestBody CaseInstance caseInstance) throws Exception {
 		return caseInstanceService.create(caseInstance);
 	}
 
-	@PatchMapping(value = "case/{businessKey}")
+	@PatchMapping(value = "/{businessKey}")
 	public void update(@PathVariable String businessKey, @RequestBody CaseInstance caseInstance) throws Exception {
 		caseInstanceService.updateStatus(businessKey, caseInstance.getStatus());
 	}
 
-	@DeleteMapping(value = "/case/{businessKey}")
+	@DeleteMapping(value = "/{businessKey}")
 	public void delete(@PathVariable String businessKey) throws Exception {
 		try {
 			caseInstanceService.delete(businessKey);
@@ -58,5 +60,4 @@ public class CaseController {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Case Instance Not Found - " + businessKey, e);
 		}
 	}
-
 }

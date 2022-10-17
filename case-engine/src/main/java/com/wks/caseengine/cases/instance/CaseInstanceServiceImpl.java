@@ -10,13 +10,17 @@ import org.springframework.stereotype.Component;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
-import com.wks.caseengine.repository.DataRepository;
+import com.wks.caseengine.repository.CaseInstanceRepository;
+import com.wks.caseengine.repository.Repository;
 
 @Component
 public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 	@Autowired
-	private DataRepository dataRepository;
+	private CaseInstanceRepository repository;
+
+	@Autowired
+	private Repository<CaseDefinition> caseDefRepository;
 
 	@Autowired
 	private CaseInstanceCreateService caseInstanceCreateService;
@@ -26,23 +30,24 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 	@Override
 	public List<CaseInstance> find(final Optional<CaseStatus> status) throws Exception {
-		return dataRepository.findCaseInstances(status);
+		return repository.findCaseInstances(status);
 	}
 
 	@Override
 	public CaseInstance get(final String businessKey) throws Exception {
-		return dataRepository.getCaseInstance(businessKey);
+		return repository.get(businessKey);
 	}
 
 	@Override
 	// TODO how to embrace in a single transation?
 	public CaseInstance create(CaseInstance caseInstance) throws Exception {
 
-		CaseDefinition caseDefinition = dataRepository.getCaseDefinition(caseInstance.getCaseDefinitionId());
+		CaseDefinition caseDefinition = caseDefRepository.get(caseInstance.getCaseDefinitionId());
 
 		CaseInstance newCaseInstance = caseInstanceCreateService.create(caseInstance);
 
-		processInstanceService.create(caseDefinition.getStagesLifecycleProcessKey(), newCaseInstance.getBusinessKey());
+		processInstanceService.create(caseDefinition.getStagesLifecycleProcessKey(), newCaseInstance.getBusinessKey(),
+				caseDefinition.getBpmEngine().getId());
 
 		return newCaseInstance;
 	}
@@ -50,20 +55,20 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	// TODO Should be a generic update?
 	@Override
 	public void updateStatus(final String businessKey, final CaseStatus newStatus) throws Exception {
-		dataRepository.updateCaseStatus(businessKey, newStatus);
+		repository.updateCaseStatus(businessKey, newStatus);
 	}
 
 	// TODO Should replace by 'Stage ID/Key' parameter instead of 'Stage Name'
 	@Override
 	public void updateStage(final String businessKey, String caseStage) throws Exception {
-		dataRepository.updateCaseStage(businessKey, caseStage);
+		repository.updateCaseStage(businessKey, caseStage);
 	}
 
 	// TODO should not allow to delete. Close or archive instead
 	// Should ensure only one case is deleted - BusinessKey should be UNIQUE
 	@Override
 	public void delete(final String businessKey) throws Exception {
-		List<CaseInstance> caseInstanceList = dataRepository.findCaseInstances(Optional.empty()).stream()
+		List<CaseInstance> caseInstanceList = repository.findCaseInstances(Optional.empty()).stream()
 				.filter(o -> o.getBusinessKey().equals(businessKey)).collect(Collectors.toList());
 
 		if (caseInstanceList.isEmpty()) {
@@ -74,7 +79,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 		caseInstanceList.forEach(o -> {
 			try {
-				dataRepository.deleteCaseInstance(o);
+				repository.delete(o.getBusinessKey());
 			} catch (Exception e) {
 				// TODO error handling
 				e.printStackTrace();
@@ -82,8 +87,8 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 		});
 	}
 
-	public void setDataRepository(DataRepository dataRepository) {
-		this.dataRepository = dataRepository;
+	public void setRepository(CaseInstanceRepository repository) {
+		this.repository = repository;
 	}
 
 	public void setCaseInstanceCreateService(CaseInstanceCreateService caseInstanceCreateService) {

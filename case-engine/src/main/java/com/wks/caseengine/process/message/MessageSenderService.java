@@ -4,6 +4,6 @@ import com.wks.bpm.engine.model.spi.ProcessMessage;
 
 public interface MessageSenderService {
 
-	void sendMessage(final ProcessMessage processMessage);
+	void sendMessage(final ProcessMessage processMessage, final String bpmEngineId) throws Exception;
 
 }

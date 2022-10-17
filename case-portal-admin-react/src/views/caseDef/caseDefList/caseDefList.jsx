@@ -12,7 +12,7 @@ export const CaseDefList = () => {
     const [openCaseDefForm, setOpenCaseDefForm] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:8081/case-definition')
+        fetch('http://localhost:8081/case-definition/')
             .then((response) => response.json())
             .then((data) => {
                 setCaseDefs(data);

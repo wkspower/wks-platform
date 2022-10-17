@@ -54,7 +54,7 @@ public class EnumAdapterFactory implements TypeAdapterFactory {
 		}
 
 		public T read(JsonReader in) throws IOException {
-			// Properly deserialize the input (if you use deserialization)
+			// Properly deserialize the input
 			return null;
 		}
 	}
