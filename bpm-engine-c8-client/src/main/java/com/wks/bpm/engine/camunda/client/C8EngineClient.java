@@ -59,19 +59,19 @@ public class C8EngineClient implements BpmEngineClient {
 		throw new UnsupportedOperationException();
 	}
 
-	private static final String zeebeAPI = "1585e068-0f1b-46f4-8f28-56b65150bcc9.bru-2.zeebe.camunda.io";
-	private static final String zeebeAPIPort = "443";
-	private static final String clientId = "Y.J~QwS~ll5Yvx2dwR0m-fQTmqa5xeJi";
-	private static final String clientSecret = "uZHspeQF4S8RU4BskpK2PGZbDkqmwdPA~1x-U_5wXhoVwe_ITc-oKq1GcnZprrtQ";
-
 	@Override
 	public ProcessInstance startProcess(String processDefinitionKey, String businessKey, final BpmEngine bpmEngine) {
-		OAuthCredentialsProvider credentialsProvider = new OAuthCredentialsProviderBuilder().audience(zeebeAPI)
+		final String zeebeEndpoint = bpmEngine.getParameters().get("zeebeEndpoint").getAsString();
+		final String zeebeEndpointPort = bpmEngine.getParameters().get("zeebeEndpointPort").getAsString();
+		final String clientId = bpmEngine.getParameters().get("clientId").getAsString();
+		final String clientSecret = bpmEngine.getParameters().get("clientSecret").getAsString();
+
+		OAuthCredentialsProvider credentialsProvider = new OAuthCredentialsProviderBuilder().audience(zeebeEndpoint)
 				.clientId(clientId).clientSecret(clientSecret).build();
 
 		ProcessInstance processInstance = null;
 
-		try (ZeebeClient client = ZeebeClient.newClientBuilder().gatewayAddress(zeebeAPI + ":" + zeebeAPIPort)
+		try (ZeebeClient client = ZeebeClient.newClientBuilder().gatewayAddress(zeebeEndpoint + ":" + zeebeEndpointPort)
 				.credentialsProvider(credentialsProvider).build()) {
 
 			final ProcessInstanceEvent processInstanceEvent = client.newCreateInstanceCommand()

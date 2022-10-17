@@ -46,6 +46,7 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 		Bson filter = Filters.eq("id", caseDefId);
 
 		Bson update = Updates.combine(Updates.set("stages", caseDefinition.getStages()),
+				Updates.set("bpmEngine", (new JsonObject(new Gson().toJson(caseDefinition.getBpmEngine())))),
 				Updates.set("formKey", caseDefinition.getFormKey()), Updates.set("name", caseDefinition.getName()),
 				Updates.set("stagesLifecycleProcessKey", caseDefinition.getStagesLifecycleProcessKey()));
 
