@@ -1,4 +1,4 @@
-package com.wks.caseengine.bpm;
+package com.wks.bpm.engine;
 
 import com.google.gson.JsonObject;
 

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonObject;
+import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.client.ProcessEngineClient;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.Deployment;
@@ -31,37 +32,37 @@ public class C8EngineClient implements ProcessEngineClient {
 	private ZeebeClientLifecycle client;
 
 	@Override
-	public Deployment[] findDeployments() {
+	public Deployment[] findDeployments(final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ProcessDefinition[] findProcessDefinitions() {
+	public ProcessDefinition[] findProcessDefinitions(final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ProcessInstance[] findProcessInstances(Optional<String> businessKey) {
+	public ProcessInstance[] findProcessInstances(Optional<String> businessKey, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String getProcessDefinitionXML(String processInstanceId) {
+	public String getProcessDefinitionXML(String processInstanceId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ProcessInstance startProcess(String processDefinitionKey) {
+	public ProcessInstance startProcess(String processDefinitionKey, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ProcessInstance startProcess(String processDefinitionKey, String businessKey) {
+	public ProcessInstance startProcess(String processDefinitionKey, String businessKey, final BpmEngine bpmEngine) {
 		final ProcessInstanceEvent event = client.newCreateInstanceCommand().bpmnProcessId(processDefinitionKey)
 				.latestVersion()
 				.variables("{\"a\": \"" + UUID.randomUUID().toString() + "\",\"b\": \"" + new Date().toString() + "\"}")
@@ -70,55 +71,55 @@ public class C8EngineClient implements ProcessEngineClient {
 	}
 
 	@Override
-	public void deleteProcessInstance(String processInstanceId) {
+	public void deleteProcessInstance(String processInstanceId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public ActivityInstance[] findActivityInstances(String processInstanceId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Task[] findTasks(String processInstanceBusinessKey) {
+	public ActivityInstance[] findActivityInstances(String processInstanceId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void claimTask(String taskId, String taskAssignee) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void unclaimTask(String taskId) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void complete(String taskId, JsonObject variables) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public TaskForm getTaskForm(String taskId) {
+	public Task[] findTasks(String processInstanceBusinessKey, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String findVariables(String processInstanceId) {
+	public void claimTask(String taskId, String taskAssignee, final BpmEngine bpmEngine) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void unclaimTask(String taskId, final BpmEngine bpmEngine) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void complete(String taskId, JsonObject variables, final BpmEngine bpmEngine) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public TaskForm getTaskForm(String taskId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void sendMessage(ProcessMessage processMesage) {
+	public String findVariables(String processInstanceId, final BpmEngine bpmEngine) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void sendMessage(ProcessMessage processMesage, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 
 	}

@@ -21,14 +21,16 @@ public class ProcessInstanceController {
 	@Autowired
 	private ProcessInstanceService processInstanceService;
 
-	@GetMapping(value = "/")
-	public List<ProcessInstance> find(@RequestParam(required = false) String businessKey) {
-		return processInstanceService.find(Optional.ofNullable(businessKey));
+	@GetMapping(value = "/{bpmEngineId}")
+	public List<ProcessInstance> find(final @PathVariable String bpmEngineId,
+			@RequestParam(required = false) String businessKey) throws Exception {
+		return processInstanceService.find(Optional.ofNullable(businessKey), bpmEngineId);
 	}
 
-	@GetMapping(value = "/{id}/activity-instances")
-	public List<ActivityInstance> getActivityInstances(@PathVariable String id) {
-		return processInstanceService.getActivityInstances(id);
+	@GetMapping(value = "/{bpmEngineId}/{id}/activity-instances")
+	public List<ActivityInstance> getActivityInstances(final @PathVariable String bpmEngineId,
+			@PathVariable String id) throws Exception {
+		return processInstanceService.getActivityInstances(id, bpmEngineId);
 	}
 
 }

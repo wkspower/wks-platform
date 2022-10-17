@@ -16,9 +16,9 @@ public class TaskFormController {
 	@Autowired
 	private FormTaskService formService;
 
-	@GetMapping(value = "/{taskId}")
-	public TaskForm find(@PathVariable String taskId) {
-		return formService.getTaskForm(taskId);
+	@GetMapping(value = "/{bpmEngineId}/{taskId}")
+	public TaskForm find(final @PathVariable String bpmEngineId, @PathVariable String taskId) throws Exception {
+		return formService.getTaskForm(taskId, bpmEngineId);
 	}
 
 }

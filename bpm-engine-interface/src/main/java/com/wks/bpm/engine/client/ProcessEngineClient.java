@@ -3,6 +3,7 @@ package com.wks.bpm.engine.client;
 import java.util.Optional;
 
 import com.google.gson.JsonObject;
+import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.Deployment;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
@@ -17,34 +18,35 @@ import com.wks.bpm.engine.model.spi.TaskForm;
  */
 public interface ProcessEngineClient {
 
-	Deployment[] findDeployments();
+	Deployment[] findDeployments(final BpmEngine bpmEngine);
 
-	ProcessDefinition[] findProcessDefinitions();
+	ProcessDefinition[] findProcessDefinitions(final BpmEngine bpmEngine);
 
-	ProcessInstance[] findProcessInstances(final Optional<String> businessKey);
-	
-	String getProcessDefinitionXML(final String processInstanceId);
+	ProcessInstance[] findProcessInstances(final Optional<String> businessKey, final BpmEngine bpmEngine);
 
-	ProcessInstance startProcess(final String processDefinitionKey);
+	String getProcessDefinitionXML(final String processInstanceId, final BpmEngine bpmEngine);
 
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey);
+	ProcessInstance startProcess(final String processDefinitionKey, final BpmEngine bpmEngine);
 
-	void deleteProcessInstance(final String processInstanceId);
+	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final BpmEngine bpmEngine);
 
-	ActivityInstance[] findActivityInstances(final String processInstanceId);
+	void deleteProcessInstance(final String processInstanceId, final BpmEngine bpmEngine);
 
-	Task[] findTasks(final String processInstanceBusinessKey);
+	ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine);
 
-	void claimTask(String taskId, String taskAssignee);
+	Task[] findTasks(final String processInstanceBusinessKey, final BpmEngine bpmEngine);
 
-	void unclaimTask(String taskId);
+	void claimTask(String taskId, String taskAssignee, final BpmEngine bpmEngine);
 
-	void complete(String taskId, JsonObject variables);
+	void unclaimTask(String taskId, final BpmEngine bpmEngine);
 
-	TaskForm getTaskForm(final String taskId);
+	void complete(String taskId, JsonObject variables, final BpmEngine bpmEngine);
 
-	String findVariables(final String processInstanceId);
+	TaskForm getTaskForm(final String taskId, final BpmEngine bpmEngine);
 
-	void sendMessage(final ProcessMessage processMesage);
+	String findVariables(final String processInstanceId, final BpmEngine bpmEngine);
+
+	void sendMessage(final ProcessMessage processMesage, final BpmEngine bpmEngine);
 
 }

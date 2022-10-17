@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.JsonObject;
+import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.camunda.http.request.C7HttpRequestFactory;
 import com.wks.bpm.engine.client.ProcessEngineClient;
 import com.wks.bpm.engine.model.impl.DeploymentImpl;
@@ -32,109 +33,115 @@ public class C7EngineClient implements ProcessEngineClient {
 	private C7HttpRequestFactory camundaHttpRequestFactory;
 
 	@Override
-	public DeploymentImpl[] findDeployments() {
-		return restTemplate.getForEntity(camundaHttpRequestFactory.getDeploymentListRequest().getHttpRequestUrl(),
-				DeploymentImpl[].class).getBody();
+	public DeploymentImpl[] findDeployments(final BpmEngine bpmEngine) {
+		return restTemplate
+				.getForEntity(camundaHttpRequestFactory.getDeploymentListRequest(bpmEngine).getHttpRequestUrl(),
+						DeploymentImpl[].class)
+				.getBody();
 	}
 
 	@Override
-	public ProcessDefinitionImpl[] findProcessDefinitions() {
+	public ProcessDefinitionImpl[] findProcessDefinitions(final BpmEngine bpmEngine) {
 		return restTemplate
-				.getForEntity(camundaHttpRequestFactory.getProcessDefinitionListRequest().getHttpRequestUrl(),
+				.getForEntity(camundaHttpRequestFactory.getProcessDefinitionListRequest(bpmEngine).getHttpRequestUrl(),
 						ProcessDefinitionImpl[].class)
 				.getBody();
 	}
-	
+
 	@Override
-	public String getProcessDefinitionXML(final String processDefinitionId) {
+	public String getProcessDefinitionXML(final String processDefinitionId, final BpmEngine bpmEngine) {
 		return restTemplate
-				.getForEntity(camundaHttpRequestFactory.getProcessDefinitionXmlRequest(processDefinitionId).getHttpRequestUrl(),
-						ProcessDefinitionImpl.class)
+				.getForEntity(camundaHttpRequestFactory.getProcessDefinitionXmlRequest(processDefinitionId, bpmEngine)
+						.getHttpRequestUrl(), ProcessDefinitionImpl.class)
 				.getBody().getBpmn20Xml();
 	}
 
 	@Override
-	public ProcessInstance[] findProcessInstances(final Optional<String> businessKey) {
-		return restTemplate
-				.getForEntity(camundaHttpRequestFactory.getProcessInstanceListRequest(businessKey).getHttpRequestUrl(),
-						ProcessInstance[].class)
-				.getBody();
+	public ProcessInstance[] findProcessInstances(final Optional<String> businessKey, final BpmEngine bpmEngine) {
+		return restTemplate.getForEntity(
+				camundaHttpRequestFactory.getProcessInstanceListRequest(businessKey, bpmEngine).getHttpRequestUrl(),
+				ProcessInstance[].class).getBody();
 	}
 
 	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey) {
+	public ProcessInstance startProcess(final String processDefinitionKey, final BpmEngine bpmEngine) {
 
-		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey);
-
-		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
-				.getBody();
-	}
-
-	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey) {
 		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey,
-				businessKey);
+				bpmEngine);
 
 		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
 				.getBody();
 	}
 
 	@Override
-	public void deleteProcessInstance(String processInstanceId) {
-		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceDeleteRequest(processInstanceId);
+	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final BpmEngine bpmEngine) {
+		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey,
+				businessKey, bpmEngine);
+
+		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
+				.getBody();
+	}
+
+	@Override
+	public void deleteProcessInstance(String processInstanceId, final BpmEngine bpmEngine) {
+		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceDeleteRequest(processInstanceId,
+				bpmEngine);
 
 		restTemplate.delete(request.getHttpRequestUrl());
 	}
 
 	@Override
-	public ActivityInstance[] findActivityInstances(String processInstanceId) {
-		return restTemplate.getForEntity(
-				camundaHttpRequestFactory.getActivityInstancesGetRequest(processInstanceId).getHttpRequestUrl(),
-				ActivityInstance.class).getBody().getChildActivityInstances();
+	public ActivityInstance[] findActivityInstances(String processInstanceId, final BpmEngine bpmEngine) {
+		return restTemplate
+				.getForEntity(camundaHttpRequestFactory.getActivityInstancesGetRequest(processInstanceId, bpmEngine)
+						.getHttpRequestUrl(), ActivityInstance.class)
+				.getBody().getChildActivityInstances();
 	}
 
 	@Override
-	public Task[] findTasks(final String processInstanceBusinessKey) {
+	public Task[] findTasks(final String processInstanceBusinessKey, final BpmEngine bpmEngine) {
 		return restTemplate.getForEntity(
-				camundaHttpRequestFactory.getTaskListRequest(processInstanceBusinessKey).getHttpRequestUrl(),
+				camundaHttpRequestFactory.getTaskListRequest(processInstanceBusinessKey, bpmEngine).getHttpRequestUrl(),
 				Task[].class).getBody();
 	}
 
 	@Override
-	public void claimTask(String taskId, String taskAssignee) {
-		WksHttpRequest request = camundaHttpRequestFactory.getTaskClaimRequest(taskId, taskAssignee);
+	public void claimTask(String taskId, String taskAssignee, final BpmEngine bpmEngine) {
+		WksHttpRequest request = camundaHttpRequestFactory.getTaskClaimRequest(taskId, taskAssignee, bpmEngine);
 		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class);
 	}
 
 	@Override
-	public void unclaimTask(String taskId) {
-		WksHttpRequest request = camundaHttpRequestFactory.getTaskUnclaimRequest(taskId);
+	public void unclaimTask(String taskId, final BpmEngine bpmEngine) {
+		WksHttpRequest request = camundaHttpRequestFactory.getTaskUnclaimRequest(taskId, bpmEngine);
 		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class);
 	}
 
 	@Override
-	public void complete(String taskId, JsonObject variables) {
-		WksHttpRequest request = camundaHttpRequestFactory.getTaskCompleteRequest(taskId, variables);
+	public void complete(String taskId, JsonObject variables, final BpmEngine bpmEngine) {
+		WksHttpRequest request = camundaHttpRequestFactory.getTaskCompleteRequest(taskId, variables, bpmEngine);
 		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class);
 	}
 
 	@Override
-	public TaskForm getTaskForm(final String taskId) {
-		return restTemplate.getForEntity(camundaHttpRequestFactory.getTaskFormGetRequest(taskId).getHttpRequestUrl(),
-				TaskForm.class).getBody();
-	}
-
-	@Override
-	public String findVariables(String processInstanceId) {
+	public TaskForm getTaskForm(final String taskId, final BpmEngine bpmEngine) {
 		return restTemplate
-				.getForEntity(camundaHttpRequestFactory.getVariablesListRequest(processInstanceId).getHttpRequestUrl(),
-						String.class)
+				.getForEntity(camundaHttpRequestFactory.getTaskFormGetRequest(taskId, bpmEngine).getHttpRequestUrl(),
+						TaskForm.class)
 				.getBody();
 	}
 
 	@Override
-	public void sendMessage(ProcessMessage processMesage) {
-		WksHttpRequest request = camundaHttpRequestFactory.getMessageSendRequest(processMesage);
+	public String findVariables(String processInstanceId, final BpmEngine bpmEngine) {
+		return restTemplate.getForEntity(
+				camundaHttpRequestFactory.getVariablesListRequest(processInstanceId, bpmEngine).getHttpRequestUrl(),
+				String.class).getBody();
+	}
+
+	@Override
+	public void sendMessage(ProcessMessage processMesage, final BpmEngine bpmEngine) {
+		WksHttpRequest request = camundaHttpRequestFactory.getMessageSendRequest(processMesage, bpmEngine);
 		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class);
 	}
 

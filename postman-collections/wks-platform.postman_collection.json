@@ -35,7 +35,7 @@
 									"variable": [
 										{
 											"key": "bpmEngineId",
-											"value": "1"
+											"value": "2"
 										}
 									]
 								}
@@ -69,7 +69,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"id\": \"1\",\r\n    \"name\": \"Camunda 7 Dev\",\r\n    \"type\": \"BPM_ENGINE_CAMUNDA7\",\r\n    \"url\": \"http://localhost\",\r\n    \"por\": \"8080\"\r\n}",
+							"raw": "{\r\n    \"id\": \"1\",\r\n    \"name\": \"Camunda 7 - Demo\",\r\n    \"type\": \"BPM_ENGINE_CAMUNDA7\",\r\n    \"parameters\": {\r\n        \"url\": \"http://localhost:8080/engine-rest\"\r\n    }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -77,25 +77,36 @@
 							}
 						},
 						"url": {
-							"raw": "{{host}}/bpm-engine/:businessKey?=",
+							"raw": "{{host}}/bpm-engine/",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
 								"bpm-engine",
-								":businessKey"
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "bpm-engine-type",
+			"item": [
+				{
+					"name": "bpm-engine-type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/bpm-engine-type/",
+							"host": [
+								"{{host}}"
 							],
-							"query": [
-								{
-									"key": "",
-									"value": ""
-								}
-							],
-							"variable": [
-								{
-									"key": "businessKey",
-									"value": null
-								}
+							"path": [
+								"bpm-engine-type",
+								""
 							]
 						}
 					},
@@ -132,7 +143,7 @@
 									"variable": [
 										{
 											"key": "businessKey",
-											"value": "47800"
+											"value": "992"
 										}
 									]
 								}
@@ -162,7 +173,7 @@
 									"variable": [
 										{
 											"key": "businessKey",
-											"value": "47800"
+											"value": "25201"
 										}
 									]
 								}
@@ -195,7 +206,7 @@
 									"variable": [
 										{
 											"key": "businessKey",
-											"value": "99198"
+											"value": "25201"
 										}
 									]
 								}
@@ -236,7 +247,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "\r\n{\r\n    \"caseDefinitionId\": \"generic-case-id\",\r\n    \"attributes\": [\r\n        {\r\n            \"name\": \"when\",\r\n            \"value\": \"01/01/1990\"\r\n        },\r\n        {\r\n            \"name\": \"where\",\r\n            \"value\": \"Toronto\"\r\n        }\r\n    ]\r\n}",
+							"raw": "\r\n{\r\n    \"caseDefinitionId\": \"1\",\r\n    \"attributes\": [\r\n        {\r\n            \"name\": \"when\",\r\n            \"value\": \"01/01/1990\"\r\n        },\r\n        {\r\n            \"name\": \"where\",\r\n            \"value\": \"Toronto\"\r\n        }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -331,7 +342,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"id\": \"1\",\r\n    \"name\": \"Journal-2\",\r\n    \"formKey\": \"motion-detected-form\",\r\n    \"stagesLifecycleProcessKey\": \"genericCaseProcess\",\r\n    \"stages\": [\r\n        {\r\n            \"id\": 0,\r\n            \"name\": \"Data Collection\",\r\n            \"index\": \"0\"\r\n        },\r\n        {\r\n            \"id\": 1,\r\n            \"name\": \"Review\",\r\n            \"index\": \"1\"\r\n        }\r\n    ]\r\n}",
+									"raw": "{\r\n    \"id\": \"1\",\r\n    \"name\": \"Journal\",\r\n    \"formKey\": \"motion-detected-form\",\r\n    \"bpmEngineId\": \"1\",\r\n    \"stagesLifecycleProcessKey\": \"genericCaseProcess\",\r\n    \"stages\": [\r\n        {\r\n            \"id\": 0,\r\n            \"name\": \"Data Collection\",\r\n            \"index\": \"0\"\r\n        },\r\n        {\r\n            \"id\": 1,\r\n            \"name\": \"Review\",\r\n            \"index\": \"1\"\r\n        }\r\n    ]\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -372,7 +383,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"id\": \"1\",\r\n    \"name\": \"Journal\",\r\n    \"formKey\": \"motion-detected-form\",\r\n    \"stagesLifecycleProcessKey\": \"genericCaseProcess\",\r\n    \"stages\": [\r\n        {\r\n            \"id\": 0,\r\n            \"name\": \"Data Collection\",\r\n            \"index\": \"0\"\r\n        },\r\n        {\r\n            \"id\": 1,\r\n            \"name\": \"Review\",\r\n            \"index\": \"1\"\r\n        }\r\n    ]\r\n}",
+							"raw": "{\r\n    \"id\": \"1\",\r\n    \"name\": \"Journal\",\r\n    \"formKey\": \"motion-detected-form\",\r\n    \"bpmEngineId\": \"1\",\r\n    \"stagesLifecycleProcessKey\": \"genericCaseProcess\",\r\n    \"stages\": [\r\n        {\r\n            \"id\": 0,\r\n            \"name\": \"Data Collection\",\r\n            \"index\": \"0\"\r\n        },\r\n        {\r\n            \"id\": 1,\r\n            \"name\": \"Review\",\r\n            \"index\": \"1\"\r\n        }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -424,18 +435,23 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{host}}/task-form/:taskId",
+									"raw": "{{host}}/task-form/:bpmEngineId/:taskId",
 									"host": [
 										"{{host}}"
 									],
 									"path": [
 										"task-form",
+										":bpmEngineId",
 										":taskId"
 									],
 									"variable": [
 										{
+											"key": "bpmEngineId",
+											"value": "1"
+										},
+										{
 											"key": "taskId",
-											"value": "792e30cf-13fc-11ed-955e-0242ac110002"
+											"value": "0d8d6c92-4dfd-11ed-a251-0242ac110002"
 										}
 									]
 								}
@@ -464,13 +480,19 @@
 							}
 						},
 						"url": {
-							"raw": "{{host}}/message/",
+							"raw": "{{host}}/message/:bpmEngineId",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
 								"message",
-								""
+								":bpmEngineId"
+							],
+							"variable": [
+								{
+									"key": "bpmEngineId",
+									"value": "1"
+								}
 							]
 						}
 					},
@@ -499,20 +521,25 @@
 									}
 								},
 								"url": {
-									"raw": "{{host}}/task/:id/claim/:taskAssignee",
+									"raw": "{{host}}/task/:bpmEngineId/:id/claim/:taskAssignee",
 									"host": [
 										"{{host}}"
 									],
 									"path": [
 										"task",
+										":bpmEngineId",
 										":id",
 										"claim",
 										":taskAssignee"
 									],
 									"variable": [
 										{
+											"key": "bpmEngineId",
+											"value": null
+										},
+										{
 											"key": "id",
-											"value": "e503630f-1883-11ed-933a-0242ac110002"
+											"value": null
 										},
 										{
 											"key": "taskAssignee",
@@ -538,16 +565,21 @@
 									}
 								},
 								"url": {
-									"raw": "{{host}}/task/:id/unclaim",
+									"raw": "{{host}}/task/:bpmEngineId/:id/unclaim",
 									"host": [
 										"{{host}}"
 									],
 									"path": [
 										"task",
+										":bpmEngineId",
 										":id",
 										"unclaim"
 									],
 									"variable": [
+										{
+											"key": "bpmEngineId",
+											"value": null
+										},
 										{
 											"key": "id",
 											"value": null
@@ -572,19 +604,24 @@
 									}
 								},
 								"url": {
-									"raw": "{{host}}/task/:id/complete",
+									"raw": "{{host}}/task/:bpmEngineId/:id/complete",
 									"host": [
 										"{{host}}"
 									],
 									"path": [
 										"task",
+										":bpmEngineId",
 										":id",
 										"complete"
 									],
 									"variable": [
 										{
+											"key": "bpmEngineId",
+											"value": "1"
+										},
+										{
 											"key": "id",
-											"value": "e503630f-1883-11ed-933a-0242ac110002"
+											"value": null
 										}
 									]
 								}
@@ -599,19 +636,25 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/task/",
+							"raw": "{{host}}/task/:bpmEngineId",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
 								"task",
-								""
+								":bpmEngineId"
 							],
 							"query": [
 								{
 									"key": "processInstanceBusinessKey",
 									"value": "DUMMY_BUSINESS_KEY-950",
 									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "bpmEngineId",
+									"value": "1"
 								}
 							]
 						}
@@ -629,18 +672,23 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/variable/:processInstanceId",
+							"raw": "{{host}}/variable/:bpmEngineId/:processInstanceId",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
 								"variable",
+								":bpmEngineId",
 								":processInstanceId"
 							],
 							"variable": [
 								{
+									"key": "bpmEngineId",
+									"value": "1"
+								},
+								{
 									"key": "processInstanceId",
-									"value": "e42650af-18a5-11ed-933a-0242ac110002"
+									"value": "3f74ff83-4dfd-11ed-a251-0242ac110002"
 								}
 							]
 						}
@@ -809,19 +857,24 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{host}}/process-instance/:id/activity-instances",
+									"raw": "{{host}}/process-instance/:bpmEngineId/:id/activity-instances",
 									"host": [
 										"{{host}}"
 									],
 									"path": [
 										"process-instance",
+										":bpmEngineId",
 										":id",
 										"activity-instances"
 									],
 									"variable": [
 										{
+											"key": "bpmEngineId",
+											"value": null
+										},
+										{
 											"key": "id",
-											"value": "38957f1f-3f48-11ed-8bfd-0242ac110003"
+											"value": "1"
 										}
 									]
 								}
@@ -836,18 +889,24 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/process-instance/?businessKey=71552",
+							"raw": "{{host}}/process-instance/:bpmEngineId?businessKey=71552",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
 								"process-instance",
-								""
+								":bpmEngineId"
 							],
 							"query": [
 								{
 									"key": "businessKey",
 									"value": "71552"
+								}
+							],
+							"variable": [
+								{
+									"key": "bpmEngineId",
+									"value": "1"
 								}
 							]
 						}
@@ -868,19 +927,24 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{host}}/process-definition/:key/xml",
+									"raw": "{{host}}/process-definition/:bpmEngineId/:processDefinitionId/xml",
 									"host": [
 										"{{host}}"
 									],
 									"path": [
 										"process-definition",
-										":key",
+										":bpmEngineId",
+										":processDefinitionId",
 										"xml"
 									],
 									"variable": [
 										{
-											"key": "key",
-											"value": "genericCaseProcess:15:877c7d63-3e4d-11ed-b767-0242ac110003"
+											"key": "bpmEngineId",
+											"value": "1"
+										},
+										{
+											"key": "processDefinitionId",
+											"value": "genericCaseProcess:24:88e17869-4ba8-11ed-834b-0242ac110003"
 										}
 									]
 								}

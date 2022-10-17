@@ -22,6 +22,8 @@ public class CaseDefinition {
 	private String name;
 
 	private String formKey;
+	
+	private String bpmEngineId;
 
 	private String stagesLifecycleProcessKey;
 

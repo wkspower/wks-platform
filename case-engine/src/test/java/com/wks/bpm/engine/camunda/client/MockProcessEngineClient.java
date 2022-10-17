@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.google.gson.JsonObject;
+import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.client.ProcessEngineClient;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.Deployment;
@@ -20,81 +21,81 @@ public class MockProcessEngineClient implements ProcessEngineClient {
 	private List<ProcessInstance> processesInstances = new ArrayList<>();
 
 	@Override
-	public Deployment[] findDeployments() {
+	public Deployment[] findDeployments(final BpmEngine bpmEngine) {
 		return null;
 	}
 
 	@Override
-	public ProcessDefinition[] findProcessDefinitions() {
+	public ProcessDefinition[] findProcessDefinitions(final BpmEngine bpmEngine) {
 		return null;
 	}
 
 	@Override
-	public ProcessInstance[] findProcessInstances(Optional<String> businessKey) {
+	public ProcessInstance[] findProcessInstances(Optional<String> businessKey, final BpmEngine bpmEngine) {
 		return processesInstances.stream().filter(o -> businessKey.get().equals(o.getBusinessKey()))
 				.collect(Collectors.toList()).toArray(ProcessInstance[]::new);
 
 	}
 
 	@Override
-	public ProcessInstance startProcess(String processDefinitionKey) {
+	public ProcessInstance startProcess(String processDefinitionKey, final BpmEngine bpmEngine) {
 		return null;
 	}
 
 	@Override
-	public ProcessInstance startProcess(String processDefinitionKey, String businessKey) {
+	public ProcessInstance startProcess(String processDefinitionKey, String businessKey, final BpmEngine bpmEngine) {
 		ProcessInstance processInstance = ProcessInstance.builder().businessKey(businessKey).build();
 		processesInstances.add(processInstance);
 		return processInstance;
 	}
 
 	@Override
-	public void deleteProcessInstance(String processInstanceId) {
+	public void deleteProcessInstance(String processInstanceId, final BpmEngine bpmEngine) {
 
 	}
 
 	@Override
-	public Task[] findTasks(String processInstanceBusinessKey) {
+	public Task[] findTasks(String processInstanceBusinessKey, final BpmEngine bpmEngine) {
 		return null;
 	}
 
 	@Override
-	public void claimTask(String taskId, String taskAssignee) {
+	public void claimTask(String taskId, String taskAssignee, final BpmEngine bpmEngine) {
 
 	}
 
 	@Override
-	public void unclaimTask(String taskId) {
+	public void unclaimTask(String taskId, final BpmEngine bpmEngine) {
 
 	}
 
 	@Override
-	public void complete(String taskId, JsonObject variables) {
+	public void complete(String taskId, JsonObject variables, final BpmEngine bpmEngine) {
 
 	}
 
 	@Override
-	public TaskForm getTaskForm(String taskId) {
+	public TaskForm getTaskForm(String taskId, final BpmEngine bpmEngine) {
 		return null;
 	}
 
 	@Override
-	public String findVariables(String processInstanceId) {
+	public String findVariables(String processInstanceId, final BpmEngine bpmEngine) {
 		return null;
 	}
 
 	@Override
-	public void sendMessage(ProcessMessage processMesage) {
+	public void sendMessage(ProcessMessage processMesage, final BpmEngine bpmEngine) {
 	}
 
 	@Override
-	public ActivityInstance[] findActivityInstances(String processInstanceId) {
+	public ActivityInstance[] findActivityInstances(String processInstanceId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String getProcessDefinitionXML(String processDefinitionId) {
+	public String getProcessDefinitionXML(String processDefinitionId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return null;
 	}

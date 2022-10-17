@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.google.gson.Gson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.wks.caseengine.bpm.BpmEngine;
+import com.wks.bpm.engine.BpmEngine;
 import com.wks.caseengine.db.MongoDataConnection;
 import com.wks.caseengine.repository.BpmEngineRepository;
 

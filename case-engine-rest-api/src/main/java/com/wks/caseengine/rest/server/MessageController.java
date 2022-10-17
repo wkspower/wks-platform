@@ -1,6 +1,7 @@
 package com.wks.caseengine.rest.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,9 +17,9 @@ public class MessageController {
 	@Autowired
 	private MessageSenderService messageSenderService;
 
-	@PostMapping(value = "/")
-	public void save(@RequestBody ProcessMessage processMessage) throws Exception {
-		messageSenderService.sendMessage(processMessage);
+	@PostMapping(value = "/{bpmEngineId}")
+	public void save(@PathVariable String bpmEngineId, @RequestBody ProcessMessage processMessage) throws Exception {
+		messageSenderService.sendMessage(processMessage, bpmEngineId);
 	}
 
 }

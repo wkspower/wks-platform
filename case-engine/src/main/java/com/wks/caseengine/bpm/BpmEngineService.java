@@ -2,6 +2,8 @@ package com.wks.caseengine.bpm;
 
 import java.util.List;
 
+import com.wks.bpm.engine.BpmEngine;
+
 public interface BpmEngineService {
 
 	BpmEngine save(final BpmEngine bpmEngine) throws Exception;

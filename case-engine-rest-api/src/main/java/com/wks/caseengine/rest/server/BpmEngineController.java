@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.wks.caseengine.bpm.BpmEngine;
+import com.wks.bpm.engine.BpmEngine;
 import com.wks.caseengine.bpm.BpmEngineService;
 
 @RestController

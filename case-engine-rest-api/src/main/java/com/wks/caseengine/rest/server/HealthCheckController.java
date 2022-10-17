@@ -5,18 +5,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.wks.caseengine.process.engine.ProcessEngineService;
+import com.wks.caseengine.cases.definition.CaseDefinitionService;
 
 @RestController
 @RequestMapping("healthCheck")
 public class HealthCheckController {
 
 	@Autowired
-	private ProcessEngineService processEngineService;
+	private CaseDefinitionService caseDefinitionService;
 
 	@GetMapping(value = "/")
-	public String check() {
-		return processEngineService.healthCheck();
+	public String check() throws Exception {
+		caseDefinitionService.find();
+		return "success";
 	}
 
 }

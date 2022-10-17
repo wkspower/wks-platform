@@ -22,24 +22,27 @@ public class TaskController {
 	@Autowired
 	private TaskService taskService;
 
-	@GetMapping(value = "/")
-	public List<Task> find(@RequestParam(required = false) String processInstanceBusinessKey) {
-		return taskService.find(processInstanceBusinessKey);
+	@GetMapping(value = "/{bpmEngineId}")
+	public List<Task> find(final @PathVariable String bpmEngineId,
+			@RequestParam(required = false) String processInstanceBusinessKey) throws Exception {
+		return taskService.find(processInstanceBusinessKey, bpmEngineId);
 	}
 
-	@PostMapping(value = "/{taskId}/claim/{taskAssignee}")
-	public void claim(@PathVariable String taskId, @PathVariable String taskAssignee) {
-		taskService.claim(taskId, taskAssignee);
+	@PostMapping(value = "/{bpmEngineId}/{taskId}/claim/{taskAssignee}")
+	public void claim(final @PathVariable String bpmEngineId, @PathVariable String taskId,
+			@PathVariable String taskAssignee) throws Exception {
+		taskService.claim(taskId, taskAssignee, bpmEngineId);
 	}
 
-	@PostMapping(value = "/{taskId}/unclaim")
-	public void unclaim(@PathVariable String taskId) {
-		taskService.unclaim(taskId);
+	@PostMapping(value = "/{bpmEngineId}/{taskId}/unclaim")
+	public void unclaim(final @PathVariable String bpmEngineId, @PathVariable String taskId) throws Exception {
+		taskService.unclaim(taskId, bpmEngineId);
 	}
 
-	@PostMapping(value = "/{taskId}/complete")
-	public void complete(@PathVariable String taskId, @RequestBody String variables) {
-		taskService.complete(taskId, JsonParser.parseString(variables).getAsJsonObject());
+	@PostMapping(value = "/{bpmEngineId}/{taskId}/complete")
+	public void complete(final @PathVariable String bpmEngineId, @PathVariable String taskId,
+			@RequestBody String variables) throws Exception {
+		taskService.complete(taskId, JsonParser.parseString(variables).getAsJsonObject(), bpmEngineId);
 	}
 
 }

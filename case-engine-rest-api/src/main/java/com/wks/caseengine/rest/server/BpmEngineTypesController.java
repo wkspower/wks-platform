@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.wks.caseengine.bpm.BpmEngineType;
+import com.wks.bpm.engine.BpmEngineType;
 import com.wks.caseengine.json.EnumAdapterFactory;
 
 @RestController

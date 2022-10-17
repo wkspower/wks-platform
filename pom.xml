@@ -48,7 +48,6 @@
 	<modules>
 		<module>case-engine</module>
 
-		<module>case-engine-shell</module>
 		<module>case-engine-rest-api</module>
 
 		<module>rest-client</module>

@@ -7,9 +7,11 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.client.ProcessEngineClient;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
+import com.wks.caseengine.repository.BpmEngineRepository;
 
 @Component
 public class ProcessInstanceServiceImpl implements ProcessInstanceService {
@@ -17,34 +19,49 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	@Autowired
 	private ProcessEngineClient processEngineClient;
 
+	@Autowired
+	private BpmEngineRepository bpmEngineRepository;
+
 	@Override
-	public ProcessInstance create(final String processDefinitionKey) {
-		return processEngineClient.startProcess(processDefinitionKey);
+	public ProcessInstance create(final String processDefinitionKey, final String bpmEngineId) throws Exception {
+		return processEngineClient.startProcess(processDefinitionKey, bpmEngineRepository.get(bpmEngineId));
 	}
 
 	@Override
-	public ProcessInstance create(final String processDefinitionKey, final String businessKey) {
-		return processEngineClient.startProcess(processDefinitionKey, businessKey);
+	public ProcessInstance create(final String processDefinitionKey, final String businessKey, final String bpmEngineId)
+			throws Exception {
+		return processEngineClient.startProcess(processDefinitionKey, businessKey,
+				bpmEngineRepository.get(bpmEngineId));
 	}
 
 	@Override
-	public void delete(final String processInstanceId) {
-		processEngineClient.deleteProcessInstance(processInstanceId);
+	public void delete(final String processInstanceId, final String bpmEngineId) throws Exception {
+		processEngineClient.deleteProcessInstance(processInstanceId, bpmEngineRepository.get(bpmEngineId));
 	}
 
 	@Override
-	public void delete(final List<ProcessInstance> processInstances) {
-		processInstances.forEach(o -> delete(o.getId()));
+	public void delete(final List<ProcessInstance> processInstances, final String bpmEngineId) {
+		processInstances.forEach(o -> {
+			try {
+				delete(o.getId(), bpmEngineId);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
 	}
 
 	@Override
-	public List<ProcessInstance> find(Optional<String> businessKey) {
-		return Arrays.asList(processEngineClient.findProcessInstances(businessKey));
+	public List<ProcessInstance> find(Optional<String> businessKey, final String bpmEngineId) throws Exception {
+		return Arrays
+				.asList(processEngineClient.findProcessInstances(businessKey, bpmEngineRepository.get(bpmEngineId)));
 	}
 
 	@Override
-	public List<ActivityInstance> getActivityInstances(String processInstanceId) {
-		return Arrays.asList(processEngineClient.findActivityInstances(processInstanceId));
+	public List<ActivityInstance> getActivityInstances(String processInstanceId, final String bpmEngineId)
+			throws Exception {
+		return Arrays.asList(
+				processEngineClient.findActivityInstances(processInstanceId, bpmEngineRepository.get(bpmEngineId)));
 	}
 
 	public void setProcessEngineClient(ProcessEngineClient processEngineClient) {
