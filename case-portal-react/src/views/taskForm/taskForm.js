@@ -27,7 +27,7 @@ const Transition = React.forwardRef(function Transition(
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const TaskForm = ({ open, handleClose, task }) => {
+export const TaskForm = ({ open, handleClose, task, bpmEngineId }) => {
     const [formComponents, setFormComponents] = useState([]);
     const [claimed, setClaimed] = useState(false);
     const [assignee, setAssignee] = useState(null);
@@ -38,7 +38,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
         let apiDataVariables = {};
         let apiDataFormComponents = {};
 
-        fetch('http://localhost:8081/task-form/' + task.id)
+        fetch('http://localhost:8081/task-form/' + bpmEngineId + '/' + task.id)
             .then((response) => response.json())
             .then((data) => {
                 apiDataFormComponents = data.components;
@@ -48,7 +48,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
                         apiDataVariables[data.components[key].key] = { value: '' };
                     }
                 }
-                return fetch('http://localhost:8081/variable/' + task.processInstanceId);
+                return fetch('http://localhost:8081/variable/' + bpmEngineId + '/' + task.processInstanceId);
             })
             .then((response) => response.json())
             .then((data) => {
@@ -67,7 +67,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
                 console.log(err.message);
             });
 
-        fetch('http://localhost:8081/process-instance/' + task.processInstanceId + '/activity-instances')
+        fetch('http://localhost:8081/process-instance/' + bpmEngineId + '/' + task.processInstanceId + '/activity-instances')
             .then((response) => response.json())
             .then((data) => {
                 setActivityInstances(data);
@@ -75,7 +75,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
     }, [task]);
 
     const handleClaim = function () {
-        fetch('http://localhost:8081/task/' + task.id + '/claim/demo', {
+        fetch('http://localhost:8081/task/' + bpmEngineId + '/' + task.id + '/claim/demo', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -92,7 +92,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
     };
 
     const handleUnclaim = function () {
-        fetch('http://localhost:8081/task/' + task.id + '/unclaim', {
+        fetch('http://localhost:8081/task/' + bpmEngineId + '/' + task.id + '/unclaim', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -109,7 +109,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
     };
 
     const handleComplete = function () {
-        fetch('http://localhost:8081/task/' + task.id + '/complete', {
+        fetch('http://localhost:8081/task/' + bpmEngineId + '/' + task.id + '/complete', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -186,7 +186,11 @@ export const TaskForm = ({ open, handleClose, task }) => {
                 <Box>
                     <MainCard sx={{ mt: 2 }} content={false}>
                         {task && activityInstances && (
-                            <ProcessDiagram processDefinitionId={task.processDefinitionId} activityInstances={activityInstances} />
+                            <ProcessDiagram
+                                processDefinitionId={task.processDefinitionId}
+                                activityInstances={activityInstances}
+                                bpmEngineId={bpmEngineId}
+                            />
                         )}
                     </MainCard>
                 </Box>

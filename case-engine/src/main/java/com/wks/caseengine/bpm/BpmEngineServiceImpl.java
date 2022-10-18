@@ -6,17 +6,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.bpm.engine.BpmEngine;
-import com.wks.caseengine.repository.Repository;
+import com.wks.caseengine.repository.BpmEngineRepository;
 
 @Component
 public class BpmEngineServiceImpl implements BpmEngineService {
 
 	@Autowired
-	private Repository<BpmEngine> repository;
+	private BpmEngineRepository repository;
 
 	@Override
 	public BpmEngine save(BpmEngine bpmEngine) throws Exception {
 		repository.save(bpmEngine);
+		return bpmEngine;
+	}
+
+	@Override
+	public BpmEngine update(String bpmEngineId, BpmEngine bpmEngine) throws Exception {
+		repository.update(bpmEngineId, bpmEngine);
 		return bpmEngine;
 	}
 

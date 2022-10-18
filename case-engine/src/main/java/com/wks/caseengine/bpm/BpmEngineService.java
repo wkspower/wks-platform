@@ -8,6 +8,8 @@ public interface BpmEngineService {
 
 	BpmEngine save(final BpmEngine bpmEngine) throws Exception;
 
+	BpmEngine update(final String bpmEngineId, final BpmEngine bpmEngine) throws Exception;
+
 	BpmEngine get(final String id) throws Exception;
 
 	List<BpmEngine> find() throws Exception;

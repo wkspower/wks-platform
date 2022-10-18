@@ -22,3 +22,10 @@ camunda7.rest.processdefinition.url: /process-definition
 camunda7.rest.processinstance.url: /process-instance
 camunda7.rest.task.url: /task
 camunda7.rest.correlate.url: /message
+
+camunda.bpm.client:
+  base-url: http://${CAMUNDA7_HOST}:${CAMUNDA7_PORT}/engine-rest
+  subscriptions:
+    caseStageUpdate:
+        process-definition-key: genericCaseProcess
+        include-extension-properties: true

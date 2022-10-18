@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
@@ -7,11 +7,15 @@ import MainCard from 'components/MainCard';
 
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import { BpmEngineC7Form } from '../bpmEngineForm/bpmEngineC7Form';
+import { BpmEngineC8Form } from '../bpmEngineForm/bpmEngineC8Form';
 
 export const BpmEngineList = () => {
     const [list, setList] = useState([]);
     const [bpmEngineTypes, setBpmEngineTypes] = useState([]);
-    const [bpmEngineTypeSelected, setBpmEngineTypeSelected] = useState(null);
+
+    const [bpmEngine, setBpmEngine] = useState(null);
+    const [openForm, setOpenForm] = useState(false);
 
     useEffect(() => {
         fetch('http://localhost:8081/bpm-engine/')
@@ -31,7 +35,7 @@ export const BpmEngineList = () => {
             .catch((err) => {
                 console.log(err.message);
             });
-    }, []);
+    }, [openForm]);
 
     const columns: GridColDef[] = [
         { field: 'id', headerName: 'Id', width: 300 },
@@ -43,7 +47,9 @@ export const BpmEngineList = () => {
             sortable: false,
             renderCell: (params) => {
                 const onClick = (e) => {
+                    setBpmEngine(params.row);
                     e.stopPropagation(); // don't select this row after clicking
+                    setOpenForm(true);
                 };
 
                 return (
@@ -65,7 +71,23 @@ export const BpmEngineList = () => {
     };
 
     const handleNewBpmEngineAction = (bpmEngineTypeCode) => {
-        setBpmEngineTypeSelected(bpmEngineTypeCode);
+        if (bpmEngineTypeCode === 'BPM_ENGINE_CAMUNDA7') {
+            setBpmEngine({ id: '', name: '', type: bpmEngineTypeCode, parameters: { url: '' }, mode: 'new' });
+        } else if (bpmEngineTypeCode === 'BPM_ENGINE_CAMUNDA8') {
+            setBpmEngine({
+                id: '',
+                name: '',
+                type: bpmEngineTypeCode,
+                parameters: { zeebeEndpoint: '', zeebeEndpointPort: '', clientId: '', clientSecret: '' },
+                mode: 'new'
+            });
+        }
+        setOpenForm(true);
+    };
+
+    const handleCloseForm = () => {
+        setBpmEngine(null);
+        setOpenForm(false);
     };
 
     return (
@@ -101,6 +123,12 @@ export const BpmEngineList = () => {
                     />
                 </Box>
             </MainCard>
+            {bpmEngine && bpmEngine.type === 'BPM_ENGINE_CAMUNDA7' && (
+                <BpmEngineC7Form bpmEngine={bpmEngine} setBpmEngine={setBpmEngine} open={openForm} handleClose={handleCloseForm} />
+            )}
+            {bpmEngine && bpmEngine.type === 'BPM_ENGINE_CAMUNDA8' && (
+                <BpmEngineC8Form bpmEngine={bpmEngine} setBpmEngine={setBpmEngine} open={openForm} handleClose={handleCloseForm} />
+            )}
         </div>
     );
 };
