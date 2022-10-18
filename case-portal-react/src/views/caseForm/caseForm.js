@@ -223,7 +223,7 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
                 <TabPanel value={tabIndex} index={1}>
                     {/* Task List  */}
                     <div style={{ display: 'grid', padding: '10px' }}>
-                        <TaskList businessKey={aCase.businessKey} />
+                        <TaskList businessKey={aCase.businessKey} bpmEngineId={caseDef.bpmEngineId} />
                     </div>
                 </TabPanel>
             </Dialog>

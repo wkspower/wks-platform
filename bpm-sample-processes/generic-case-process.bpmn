@@ -93,10 +93,10 @@
       <bpmn:incoming>Flow_0lz9vx0</bpmn:incoming>
       <bpmn:outgoing>Flow_1448kli</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:serviceTask id="Activity_1l4jah8" name="Update Stage 1" camunda:modelerTemplate="com.wks.camunda.template.case-stage-update" camunda:type="external" camunda:topic="caseStageUpdate">
+    <bpmn:serviceTask id="Activity_1l4jah8" name="Update Stage: Data Collection" camunda:modelerTemplate="com.wks.camunda.template.case-stage-update" camunda:type="external" camunda:topic="caseStageUpdate">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="stage">Stage 1</camunda:inputParameter>
+          <camunda:inputParameter name="stage">Data Collection</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1e9mvfd</bpmn:incoming>
@@ -104,29 +104,29 @@
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_1unvzq6" sourceRef="Activity_1l4jah8" targetRef="Gateway_1ophmis" />
     <bpmn:sequenceFlow id="Flow_078wy95" sourceRef="Activity_1ku6wil" targetRef="Activity_1wq620g" />
-    <bpmn:serviceTask id="Activity_1ku6wil" name="Update Stage 2" camunda:modelerTemplate="com.wks.camunda.template.case-stage-update" camunda:type="external" camunda:topic="caseStageUpdate">
+    <bpmn:serviceTask id="Activity_1ku6wil" name="Update Stage: Review" camunda:modelerTemplate="com.wks.camunda.template.case-stage-update" camunda:type="external" camunda:topic="caseStageUpdate">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="stage">Stage 2</camunda:inputParameter>
+          <camunda:inputParameter name="stage">Review</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_04smj4e</bpmn:incoming>
       <bpmn:outgoing>Flow_078wy95</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_0xy92fx" name="Update Stage 2" camunda:modelerTemplate="com.wks.camunda.template.case-stage-update" camunda:type="external" camunda:topic="caseStageUpdate">
+    <bpmn:serviceTask id="Activity_0xy92fx" name="Update Stage: Review" camunda:modelerTemplate="com.wks.camunda.template.case-stage-update" camunda:type="external" camunda:topic="caseStageUpdate">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="stage">Stage 2</camunda:inputParameter>
+          <camunda:inputParameter name="stage">Review</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_057cb31</bpmn:incoming>
       <bpmn:outgoing>Flow_1ifbg0j</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_1ifbg0j" sourceRef="Activity_0xy92fx" targetRef="Activity_0h5v6zo" />
-    <bpmn:serviceTask id="Activity_18ky445" name="Update Stage 2" camunda:modelerTemplate="com.wks.camunda.template.case-stage-update" camunda:type="external" camunda:topic="caseStageUpdate">
+    <bpmn:serviceTask id="Activity_18ky445" name="Update Stage: Review" camunda:modelerTemplate="com.wks.camunda.template.case-stage-update" camunda:type="external" camunda:topic="caseStageUpdate">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="stage">Stage 2</camunda:inputParameter>
+          <camunda:inputParameter name="stage">Review</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0ds0lzo</bpmn:incoming>
@@ -137,6 +137,18 @@
   <bpmn:message id="Message_0tsurqq" name="sampleMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="genericCaseProcess">
+      <bpmndi:BPMNEdge id="Flow_1cnxn18_di" bpmnElement="Flow_1cnxn18">
+        <di:waypoint x="1410" y="530" />
+        <di:waypoint x="1490" y="530" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ifbg0j_di" bpmnElement="Flow_1ifbg0j">
+        <di:waypoint x="1410" y="290" />
+        <di:waypoint x="1490" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_078wy95_di" bpmnElement="Flow_078wy95">
+        <di:waypoint x="1410" y="130" />
+        <di:waypoint x="1490" y="130" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1unvzq6_di" bpmnElement="Flow_1unvzq6">
         <di:waypoint x="950" y="290" />
         <di:waypoint x="1035" y="290" />
@@ -211,18 +223,9 @@
         <di:waypoint x="188" y="290" />
         <di:waypoint x="320" y="290" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_078wy95_di" bpmnElement="Flow_078wy95">
-        <di:waypoint x="1410" y="130" />
-        <di:waypoint x="1490" y="130" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1ifbg0j_di" bpmnElement="Flow_1ifbg0j">
-        <di:waypoint x="1410" y="290" />
-        <di:waypoint x="1490" y="290" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1cnxn18_di" bpmnElement="Flow_1cnxn18">
-        <di:waypoint x="1410" y="530" />
-        <di:waypoint x="1490" y="530" />
-      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="272" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_002z731_di" bpmnElement="Activity_0vgiltt">
         <dc:Bounds x="320" y="250" width="100" height="80" />
       </bpmndi:BPMNShape>
@@ -250,20 +253,6 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1171" y="555" width="79" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_05za3p9_di" bpmnElement="Gateway_0jhq0fk">
-        <dc:Bounds x="485" y="265" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_1rysnv3_di" bpmnElement="Gateway_1gulzjx">
-        <dc:Bounds x="735" y="265" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0pi0p3b_di" bpmnElement="Activity_0thbkjn">
-        <dc:Bounds x="580" y="370" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_16frguv_di" bpmnElement="Activity_1l4jah8">
-        <dc:Bounds x="850" y="250" width="100" height="80" />
-        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1u9x2ki_di" bpmnElement="Activity_1wq620g">
         <dc:Bounds x="1490" y="90" width="100" height="80" />
@@ -293,6 +282,20 @@
           <dc:Bounds x="1678" y="555" width="84" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_05za3p9_di" bpmnElement="Gateway_0jhq0fk">
+        <dc:Bounds x="485" y="265" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1rysnv3_di" bpmnElement="Gateway_1gulzjx">
+        <dc:Bounds x="735" y="265" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0pi0p3b_di" bpmnElement="Activity_0thbkjn">
+        <dc:Bounds x="580" y="370" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_16frguv_di" bpmnElement="Activity_1l4jah8">
+        <dc:Bounds x="850" y="250" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1brw7o4_di" bpmnElement="Activity_1ku6wil">
         <dc:Bounds x="1310" y="90" width="100" height="80" />
         <bpmndi:BPMNLabel />
@@ -304,9 +307,6 @@
       <bpmndi:BPMNShape id="BPMNShape_01vgbxw" bpmnElement="Activity_18ky445">
         <dc:Bounds x="1310" y="490" width="100" height="80" />
         <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="152" y="272" width="36" height="36" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

@@ -34,6 +34,16 @@ export const CaseDefGeneralForm = ({ caseDef, setCaseDef }) => {
                 />
                 <FormHelperText id="stagesLCProcess-helper-text">Stages Lifecycle Process Key</FormHelperText>
             </FormControl>
+            <FormControl key="ctrlBpmEngineId" style={{ padding: '5px' }}>
+                <TextField
+                    id="txtBpmEngineId"
+                    aria-describedby="bpmEngineId-helper-text"
+                    value={caseDef.bpmEngineId}
+                    name="bpmEngineId"
+                    onChange={handleInputChange}
+                />
+                <FormHelperText id="bpmEngineId-helper-text">BPM Engine ID</FormHelperText>
+            </FormControl>
         </div>
     );
 };

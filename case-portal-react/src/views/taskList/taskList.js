@@ -7,13 +7,13 @@ import { TaskForm } from '../taskForm/taskForm';
 
 import './taskList.css';
 
-export const TaskList = ({ businessKey }) => {
+export const TaskList = ({ businessKey, bpmEngineId }) => {
     const [tasks, setTasks] = useState(null);
     const [open, setOpen] = useState(false);
     const [task, setTask] = useState(null);
 
     useEffect(() => {
-        fetch('http://localhost:8081/task/' + (businessKey ? '?processInstanceBusinessKey=' + businessKey : ''))
+        fetch('http://localhost:8081/task/' + bpmEngineId + '/' + (businessKey ? '?processInstanceBusinessKey=' + businessKey : ''))
             .then((response) => response.json())
             .then((data) => {
                 setTasks(data);
@@ -64,7 +64,7 @@ export const TaskList = ({ businessKey }) => {
                         )}
                     </Box>
                 </MainCard>
-                {task && <TaskForm task={task} handleClose={handleClose} open={open} />}
+                {task && <TaskForm task={task} handleClose={handleClose} open={open} bpmEngineId={bpmEngineId} />}
             </Box>
         </React.Fragment>
     );
