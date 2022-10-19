@@ -8,7 +8,7 @@ import com.wks.bpm.engine.model.spi.TaskForm;
 import com.wks.caseengine.repository.BpmEngineRepository;
 
 @Component
-public class TaskFormServiceImpl implements FormTaskService {
+public class TaskFormServiceImpl implements TaskFormService {
 
 	@Autowired
 	private BpmEngineClientFacade processEngineClient;

@@ -13,42 +13,38 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.wks.caseengine.cases.instance.CaseInstanceService;
+import com.wks.caseengine.bpm.BpmEngineService;
 
-@WebMvcTest(controllers = CaseController.class)
-public class CaseControllerTest {
+@WebMvcTest(controllers = BpmEngineController.class)
+public class BpmEngineControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@MockBean
-	private CaseInstanceService caseInstanceService;
+	private BpmEngineService bpmEngineService;
 
 	@Test
 	public void testSave() throws Exception {
-		this.mockMvc.perform(post("/case/").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/bpm-engine/").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void testDelete() throws Exception {
-		this.mockMvc.perform(delete("/case/{caseDefId}", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(delete("/bpm-engine/{bpmEngineId}", "1")).andExpect(status().isOk());
 	}
 
 	@Test
 	public void testUpdate() throws Exception {
-		this.mockMvc.perform(patch("/case/{caseDefId}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc
+				.perform(patch("/bpm-engine/{bpmEngineId}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
 	@Test
-	public void testGet() throws Exception {
-		this.mockMvc.perform(get("/case/{caseDefId}", "1")).andExpect(status().isOk());
-	}
-
-	@Test
 	public void testFind() throws Exception {
-		this.mockMvc.perform(get("/case/")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/bpm-engine/")).andExpect(status().isOk());
 	}
 
 }

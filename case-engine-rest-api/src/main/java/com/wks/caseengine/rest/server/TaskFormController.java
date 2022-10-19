@@ -7,14 +7,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.bpm.engine.model.spi.TaskForm;
-import com.wks.caseengine.tasks.forms.FormTaskService;
+import com.wks.caseengine.tasks.forms.TaskFormService;
 
 @RestController
 @RequestMapping("task-form")
 public class TaskFormController {
 
 	@Autowired
-	private FormTaskService formService;
+	private TaskFormService formService;
 
 	@GetMapping(value = "/{bpmEngineId}/{taskId}")
 	public TaskForm find(final @PathVariable String bpmEngineId, @PathVariable String taskId) throws Exception {
