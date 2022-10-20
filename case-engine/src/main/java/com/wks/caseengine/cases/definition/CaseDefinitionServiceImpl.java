@@ -36,7 +36,7 @@ public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 
 	@Override
 	public CaseDefinition update(final String caseDefId, final CaseDefinition caseDefinition) throws Exception {
-		repository.updateCaseDefinition(caseDefId, caseDefinition);
+		repository.update(caseDefId, caseDefinition);
 		return caseDefinition;
 	}
 

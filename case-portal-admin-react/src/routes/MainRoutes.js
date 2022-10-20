@@ -7,6 +7,7 @@ import MainLayout from 'layout/MainLayout';
 import { BpmEngineList } from 'views/bpmEngine/bpmEngineList/bpmEngineList';
 import { CaseDefList } from 'views/caseDef/caseDefList/caseDefList';
 import { FormList } from 'views/form/formList';
+import { RecordTypeList } from 'views/recordType/recordTypeList';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard')));
@@ -110,8 +111,8 @@ const MainRoutes = {
                     element: <CaseDefList />
                 },
                 {
-                    path: 'data-domain',
-                    element: <DashboardDefault />
+                    path: 'record-type',
+                    element: <RecordTypeList />
                 },
                 {
                     path: 'process-engine',

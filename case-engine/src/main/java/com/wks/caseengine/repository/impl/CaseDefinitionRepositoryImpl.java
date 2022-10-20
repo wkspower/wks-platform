@@ -42,7 +42,7 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	}
 
 	@Override
-	public void updateCaseDefinition(final String caseDefId, final CaseDefinition caseDefinition) throws Exception {
+	public void update(final String caseDefId, final CaseDefinition caseDefinition) throws Exception {
 		Bson filter = Filters.eq("id", caseDefId);
 
 		Bson update = Updates.combine(Updates.set("stages", caseDefinition.getStages()),

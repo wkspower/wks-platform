@@ -6,7 +6,7 @@ public interface FormService {
 
 	void save(final Form form) throws Exception;
 
-	Form getForm(final String formKey) throws Exception;
+	Form get(final String formKey) throws Exception;
 
 	List<Form> find() throws Exception;
 

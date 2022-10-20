@@ -18,7 +18,7 @@ public class TaskFormController {
 
 	@GetMapping(value = "/{bpmEngineId}/{taskId}")
 	public TaskForm find(final @PathVariable String bpmEngineId, @PathVariable String taskId) throws Exception {
-		return formService.getTaskForm(taskId, bpmEngineId);
+		return formService.get(taskId, bpmEngineId);
 	}
 
 }

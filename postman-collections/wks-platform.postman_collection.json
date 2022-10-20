@@ -35,7 +35,46 @@
 									"variable": [
 										{
 											"key": "bpmEngineId",
-											"value": "2"
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "bpm-engine",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": \"1\",\r\n    \"name\": \"Camunda 7 - Demo\",\r\n    \"type\": \"BPM_ENGINE_CAMUNDA7\",\r\n    \"parameters\": {\r\n        \"url\": \"http://localhost:8080/engine-rest\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/bpm-engine/:bpmEngineId?=",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"bpm-engine",
+										":bpmEngineId"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": ""
+										}
+									],
+									"variable": [
+										{
+											"key": "bpmEngineId",
+											"value": "1"
 										}
 									]
 								}
@@ -143,7 +182,7 @@
 									"variable": [
 										{
 											"key": "businessKey",
-											"value": "992"
+											"value": "58513"
 										}
 									]
 								}
@@ -173,7 +212,7 @@
 									"variable": [
 										{
 											"key": "businessKey",
-											"value": "25201"
+											"value": "20656"
 										}
 									]
 								}
@@ -328,7 +367,7 @@
 									"variable": [
 										{
 											"key": "caseDefId",
-											"value": "1"
+											"value": "2"
 										}
 									]
 								}
@@ -342,7 +381,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"id\": \"1\",\r\n    \"name\": \"Journal\",\r\n    \"formKey\": \"motion-detected-form\",\r\n    \"bpmEngineId\": \"1\",\r\n    \"stagesLifecycleProcessKey\": \"genericCaseProcess\",\r\n    \"stages\": [\r\n        {\r\n            \"id\": 0,\r\n            \"name\": \"Data Collection\",\r\n            \"index\": \"0\"\r\n        },\r\n        {\r\n            \"id\": 1,\r\n            \"name\": \"Review\",\r\n            \"index\": \"1\"\r\n        }\r\n    ]\r\n}",
+									"raw": "{\r\n        \"id\": \"1\",\r\n        \"name\": \"Generic Case\",\r\n        \"formKey\": \"motion-detected-form\",\r\n        \"bpmEngineId\": \"1\",\r\n        \"stagesLifecycleProcessKey\": \"genericCaseProcess\",\r\n        \"stages\": [\r\n            {\r\n                \"id\": \"0\",\r\n                \"index\": 0,\r\n                \"name\": \"Data Collection\"\r\n            },\r\n            {\r\n                \"id\": \"1\",\r\n                \"index\": 1,\r\n                \"name\": \"Review\"\r\n            }\r\n        ]\r\n    }",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -383,7 +422,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"id\": \"1\",\r\n    \"name\": \"Journal\",\r\n    \"formKey\": \"motion-detected-form\",\r\n    \"bpmEngine\": {\r\n        \"id\": \"1\",\r\n        \"name\": \"Camunda 7 - Demo\",\r\n        \"type\": \"BPM_ENGINE_CAMUNDA7\",\r\n        \"parameters\": {\r\n            \"url\": \"http://localhost:8080/engine-rest\"\r\n        }\r\n    },\r\n    \"stagesLifecycleProcessKey\": \"genericCaseProcess\",\r\n    \"stages\": [\r\n        {\r\n            \"id\": 0,\r\n            \"name\": \"Data Collection\",\r\n            \"index\": \"0\"\r\n        },\r\n        {\r\n            \"id\": 1,\r\n            \"name\": \"Review\",\r\n            \"index\": \"1\"\r\n        }\r\n    ]\r\n}",
+							"raw": "{\r\n        \"id\": \"2\",\r\n        \"name\": \"genericCase\",\r\n        \"formKey\": \"motion-detected-form\",\r\n\t\"bpmEngineId\": \"2\",\r\n        \"stagesLifecycleProcessKey\": \"genericCaseProcess\",\r\n        \"stages\": [\r\n            {\r\n                \"id\": \"0\",\r\n                \"index\": 0,\r\n                \"name\": \"Data Collection\"\r\n            },\r\n            {\r\n                \"id\": \"1\",\r\n                \"index\": 1,\r\n                \"name\": \"Review\"\r\n            }\r\n        ]\r\n    }",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -472,7 +511,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"messageName\": \"sampleMessage\",\r\n    \"businessKey\": \"71552\"\r\n}",
+							"raw": "{\r\n    \"messageName\": \"sampleMessage\",\r\n    \"businessKey\": \"79449\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -491,7 +530,7 @@
 							"variable": [
 								{
 									"key": "bpmEngineId",
-									"value": "1"
+									"value": "c7-demo"
 								}
 							]
 						}
@@ -636,25 +675,22 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/task/:bpmEngineId",
+							"raw": "{{host}}/task/?processInstanceBusinessKey=95064&bpmEngineId=c7-demo",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
 								"task",
-								":bpmEngineId"
+								""
 							],
 							"query": [
 								{
 									"key": "processInstanceBusinessKey",
-									"value": "DUMMY_BUSINESS_KEY-950",
-									"disabled": true
-								}
-							],
-							"variable": [
+									"value": "95064"
+								},
 								{
 									"key": "bpmEngineId",
-									"value": "1"
+									"value": "c7-demo"
 								}
 							]
 						}
@@ -837,6 +873,154 @@
 							],
 							"path": [
 								"form",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "record-type",
+			"item": [
+				{
+					"name": "{key}",
+					"item": [
+						{
+							"name": "record-type",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/record-type/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"record-type",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "client"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "record-type",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/record-type/:id?=",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"record-type",
+										":id"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": ""
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "motion-detected-form"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "record-type",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fields\": {\r\n        \"display\": \"form\",\r\n        \"components\": [\r\n            {\r\n                \"label\": \"Where\",\r\n                \"tableView\": true,\r\n                \"key\": \"where\",\r\n                \"type\": \"textfield\",\r\n                \"input\": true,\r\n                \"placeholder\": \"\",\r\n                \"prefix\": \"\",\r\n                \"customClass\": \"\",\r\n                \"suffix\": \"\",\r\n                \"multiple\": false,\r\n                \"protected\": false,\r\n                \"unique\": false,\r\n                \"persistent\": true,\r\n                \"hidden\": false,\r\n                \"clearOnHide\": true,\r\n                \"refreshOn\": \"\",\r\n                \"redrawOn\": \"\",\r\n                \"modalEdit\": false,\r\n                \"dataGridLabel\": false,\r\n                \"labelPosition\": \"top\",\r\n                \"description\": \"\",\r\n                \"errorLabel\": \"\",\r\n                \"tooltip\": \"\",\r\n                \"hideLabel\": false,\r\n                \"tabindex\": \"\",\r\n                \"disabled\": false,\r\n                \"autofocus\": false,\r\n                \"dbIndex\": false,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"attributes\": {},\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false,\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"pattern\": \"\"\r\n                },\r\n                \"conditional\": {\r\n                    \"eq\": \"\"\r\n                },\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"allowCalculateOverride\": false,\r\n                \"encrypted\": false,\r\n                \"showCharCount\": false,\r\n                \"showWordCount\": false,\r\n                \"properties\": {},\r\n                \"allowMultipleMasks\": false,\r\n                \"addons\": [],\r\n                \"mask\": false,\r\n                \"inputType\": \"text\",\r\n                \"inputFormat\": \"plain\",\r\n                \"inputMask\": \"\",\r\n                \"displayMask\": \"\",\r\n                \"spellcheck\": true,\r\n                \"truncateMultipleSpaces\": false,\r\n                \"id\": \"erean3\"\r\n            },\r\n            {\r\n                \"label\": \"When\",\r\n                \"autoExpand\": false,\r\n                \"tableView\": true,\r\n                \"key\": \"when\",\r\n                \"type\": \"textarea\",\r\n                \"input\": true,\r\n                \"placeholder\": \"\",\r\n                \"prefix\": \"\",\r\n                \"customClass\": \"\",\r\n                \"suffix\": \"\",\r\n                \"multiple\": false,\r\n                \"protected\": false,\r\n                \"unique\": false,\r\n                \"persistent\": true,\r\n                \"hidden\": false,\r\n                \"clearOnHide\": true,\r\n                \"refreshOn\": \"\",\r\n                \"redrawOn\": \"\",\r\n                \"modalEdit\": false,\r\n                \"dataGridLabel\": false,\r\n                \"labelPosition\": \"top\",\r\n                \"description\": \"\",\r\n                \"errorLabel\": \"\",\r\n                \"tooltip\": \"\",\r\n                \"hideLabel\": false,\r\n                \"tabindex\": \"\",\r\n                \"disabled\": false,\r\n                \"autofocus\": false,\r\n                \"dbIndex\": false,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"attributes\": {},\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false,\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"pattern\": \"\",\r\n                    \"minWords\": \"\",\r\n                    \"maxWords\": \"\"\r\n                },\r\n                \"conditional\": {\r\n                    \"eq\": \"\"\r\n                },\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"allowCalculateOverride\": false,\r\n                \"encrypted\": false,\r\n                \"showCharCount\": false,\r\n                \"showWordCount\": false,\r\n                \"properties\": {},\r\n                \"allowMultipleMasks\": false,\r\n                \"addons\": [],\r\n                \"mask\": false,\r\n                \"inputType\": \"text\",\r\n                \"inputFormat\": \"html\",\r\n                \"inputMask\": \"\",\r\n                \"displayMask\": \"\",\r\n                \"spellcheck\": true,\r\n                \"truncateMultipleSpaces\": false,\r\n                \"rows\": 3,\r\n                \"wysiwyg\": false,\r\n                \"editor\": \"\",\r\n                \"fixedSize\": true,\r\n                \"id\": \"e7cx9ma\"\r\n            }\r\n        ]\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/record-type/:id?=",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"record-type",
+										":id"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": ""
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "client"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "record-type",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"client\",\r\n    \"fields\": {\r\n        \"display\": \"form\",\r\n        \"components\": [\r\n            {\r\n                \"label\": \"Where\",\r\n                \"tableView\": true,\r\n                \"key\": \"where\",\r\n                \"type\": \"textfield\",\r\n                \"input\": true,\r\n                \"placeholder\": \"\",\r\n                \"prefix\": \"\",\r\n                \"customClass\": \"\",\r\n                \"suffix\": \"\",\r\n                \"multiple\": false,\r\n                \"protected\": false,\r\n                \"unique\": false,\r\n                \"persistent\": true,\r\n                \"hidden\": false,\r\n                \"clearOnHide\": true,\r\n                \"refreshOn\": \"\",\r\n                \"redrawOn\": \"\",\r\n                \"modalEdit\": false,\r\n                \"dataGridLabel\": false,\r\n                \"labelPosition\": \"top\",\r\n                \"description\": \"\",\r\n                \"errorLabel\": \"\",\r\n                \"tooltip\": \"\",\r\n                \"hideLabel\": false,\r\n                \"tabindex\": \"\",\r\n                \"disabled\": false,\r\n                \"autofocus\": false,\r\n                \"dbIndex\": false,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"attributes\": {},\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false,\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"pattern\": \"\"\r\n                },\r\n                \"conditional\": {\r\n                    \"eq\": \"\"\r\n                },\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"allowCalculateOverride\": false,\r\n                \"encrypted\": false,\r\n                \"showCharCount\": false,\r\n                \"showWordCount\": false,\r\n                \"properties\": {},\r\n                \"allowMultipleMasks\": false,\r\n                \"addons\": [],\r\n                \"mask\": false,\r\n                \"inputType\": \"text\",\r\n                \"inputFormat\": \"plain\",\r\n                \"inputMask\": \"\",\r\n                \"displayMask\": \"\",\r\n                \"spellcheck\": true,\r\n                \"truncateMultipleSpaces\": false,\r\n                \"id\": \"erean3\"\r\n            },\r\n            {\r\n                \"label\": \"When\",\r\n                \"autoExpand\": false,\r\n                \"tableView\": true,\r\n                \"key\": \"when\",\r\n                \"type\": \"textarea\",\r\n                \"input\": true,\r\n                \"placeholder\": \"\",\r\n                \"prefix\": \"\",\r\n                \"customClass\": \"\",\r\n                \"suffix\": \"\",\r\n                \"multiple\": false,\r\n                \"protected\": false,\r\n                \"unique\": false,\r\n                \"persistent\": true,\r\n                \"hidden\": false,\r\n                \"clearOnHide\": true,\r\n                \"refreshOn\": \"\",\r\n                \"redrawOn\": \"\",\r\n                \"modalEdit\": false,\r\n                \"dataGridLabel\": false,\r\n                \"labelPosition\": \"top\",\r\n                \"description\": \"\",\r\n                \"errorLabel\": \"\",\r\n                \"tooltip\": \"\",\r\n                \"hideLabel\": false,\r\n                \"tabindex\": \"\",\r\n                \"disabled\": false,\r\n                \"autofocus\": false,\r\n                \"dbIndex\": false,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"attributes\": {},\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false,\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"pattern\": \"\",\r\n                    \"minWords\": \"\",\r\n                    \"maxWords\": \"\"\r\n                },\r\n                \"conditional\": {\r\n                    \"eq\": \"\"\r\n                },\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"allowCalculateOverride\": false,\r\n                \"encrypted\": false,\r\n                \"showCharCount\": false,\r\n                \"showWordCount\": false,\r\n                \"properties\": {},\r\n                \"allowMultipleMasks\": false,\r\n                \"addons\": [],\r\n                \"mask\": false,\r\n                \"inputType\": \"text\",\r\n                \"inputFormat\": \"html\",\r\n                \"inputMask\": \"\",\r\n                \"displayMask\": \"\",\r\n                \"spellcheck\": true,\r\n                \"truncateMultipleSpaces\": false,\r\n                \"rows\": 3,\r\n                \"wysiwyg\": false,\r\n                \"editor\": \"\",\r\n                \"fixedSize\": true,\r\n                \"id\": \"e7cx9ma\"\r\n            }\r\n        ]\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/record-type/",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"record-type",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "record-type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/record-type/",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"record-type",
 								""
 							]
 						}

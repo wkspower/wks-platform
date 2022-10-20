@@ -28,6 +28,7 @@ public class MongoDataConnection {
 	private MongoCollection<JsonObject> caseInstCollection;
 	private MongoCollection<JsonObject> formCollection;
 	private MongoCollection<JsonObject> caseDefCollection;
+	private MongoCollection<JsonObject> recordTypeCollection;
 
 	private MongoCollection<JsonObject> bpmEngineCollection;
 
@@ -44,6 +45,8 @@ public class MongoDataConnection {
 		caseDefCollection = database.getCollection("caseDefinitions", JsonObject.class);
 		caseInstCollection = database.getCollection("caseInstances", JsonObject.class);
 		formCollection = database.getCollection("forms", JsonObject.class);
+		recordTypeCollection = database.getCollection("recordType", JsonObject.class);
+
 		bpmEngineCollection = database.getCollection("bpmEngine", JsonObject.class);
 
 	}
@@ -62,6 +65,10 @@ public class MongoDataConnection {
 
 	public MongoCollection<JsonObject> getBpmEngineCollection() {
 		return bpmEngineCollection;
+	}
+
+	public MongoCollection<JsonObject> getRecordTypeCollection() {
+		return recordTypeCollection;
 	}
 
 }

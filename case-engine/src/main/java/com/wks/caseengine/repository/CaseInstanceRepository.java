@@ -10,8 +10,4 @@ public interface CaseInstanceRepository extends Repository<CaseInstance> {
 
 	List<CaseInstance> findCaseInstances(final Optional<CaseStatus> status) throws Exception;
 
-	void updateCaseStatus(final String businessKey, final CaseStatus newStatus) throws Exception;
-
-	void updateCaseStage(final String businessKey, final String caseStage);
-	
 }

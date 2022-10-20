@@ -48,7 +48,7 @@ public class FormRepositoryImpl implements FormRepository {
 	}
 
 	@Override
-	public void updateForm(final String formKey, final Form form) throws Exception {
+	public void update(final String formKey, final Form form) throws Exception {
 		Bson filter = Filters.eq("key", formKey);
 
 		Bson update = Updates.combine(Updates.set("title", form.getTitle()), Updates.set("toolTip", form.getToolTip()),
