@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.wks.caseengine.record.RecordType;
-import com.wks.caseengine.record.RecordTypeService;
+import com.wks.caseengine.record.type.RecordType;
+import com.wks.caseengine.record.type.RecordTypeService;
 
 @RestController
 @RequestMapping("record-type")

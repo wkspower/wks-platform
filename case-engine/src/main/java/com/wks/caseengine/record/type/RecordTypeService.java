@@ -1,4 +1,4 @@
-package com.wks.caseengine.record;
+package com.wks.caseengine.record.type;
 
 import java.util.List;
 
