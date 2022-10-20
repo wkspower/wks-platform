@@ -29,7 +29,7 @@ public class FormController {
 
 	@GetMapping(value = "/{formKey}")
 	public Form get(@PathVariable final String formKey) throws Exception {
-		return formService.getForm(formKey);
+		return formService.get(formKey);
 	}
 
 	@PostMapping(value = "/")

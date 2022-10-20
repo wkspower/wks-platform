@@ -17,7 +17,7 @@ public class TaskFormServiceImpl implements TaskFormService {
 	private BpmEngineRepository bpmEngineRepository;
 
 	@Override
-	public TaskForm getTaskForm(final String taskId, final String bpmEngineId) throws Exception {
+	public TaskForm get(final String taskId, final String bpmEngineId) throws Exception {
 		return processEngineClient.getTaskForm(taskId, bpmEngineRepository.get(bpmEngineId));
 	}
 

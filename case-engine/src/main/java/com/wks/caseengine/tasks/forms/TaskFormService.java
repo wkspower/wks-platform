@@ -4,6 +4,6 @@ import com.wks.bpm.engine.model.spi.TaskForm;
 
 public interface TaskFormService {
 
-	TaskForm getTaskForm(String taskId, final String bpmEngineId) throws Exception;
+	TaskForm get(String taskId, final String bpmEngineId) throws Exception;
 
 }

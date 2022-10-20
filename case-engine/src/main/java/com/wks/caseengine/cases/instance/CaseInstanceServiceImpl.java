@@ -55,13 +55,17 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	// TODO Should be a generic update?
 	@Override
 	public void updateStatus(final String businessKey, final CaseStatus newStatus) throws Exception {
-		repository.updateCaseStatus(businessKey, newStatus);
+		CaseInstance caseInstance = repository.get(businessKey);
+		caseInstance.setStatus(newStatus);
+		repository.update(businessKey, caseInstance);
 	}
 
 	// TODO Should replace by 'Stage ID/Key' parameter instead of 'Stage Name'
 	@Override
 	public void updateStage(final String businessKey, String caseStage) throws Exception {
-		repository.updateCaseStage(businessKey, caseStage);
+		CaseInstance caseInstance = repository.get(businessKey);
+		caseInstance.setStage(caseStage);
+		repository.update(businessKey, caseInstance);
 	}
 
 	// TODO should not allow to delete. Close or archive instead

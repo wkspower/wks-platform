@@ -10,6 +10,8 @@ public interface Repository<T> {
 
 	void save(final T object) throws Exception;
 
+	void update(final String id, final T object) throws Exception;
+
 	void delete(final String id) throws Exception;
 
 }

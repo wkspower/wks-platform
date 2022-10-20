@@ -226,10 +226,10 @@ const utilities = {
                     icon: icons.IconPencil
                 },
                 {
-                    id: 'data-domain',
-                    title: 'Data Domain',
+                    id: 'record-type',
+                    title: 'Records Types',
                     type: 'item',
-                    url: '/case-life-cycle/data-domain',
+                    url: '/case-life-cycle/record-type',
                     breadcrumbs: true,
                     icon: icons.IconDatabase
                 },

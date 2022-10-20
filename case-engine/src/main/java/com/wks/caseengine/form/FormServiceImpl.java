@@ -19,7 +19,7 @@ public class FormServiceImpl implements FormService {
 	}
 
 	@Override
-	public Form getForm(String formKey) throws Exception {
+	public Form get(String formKey) throws Exception {
 		return repository.get(formKey);
 	}
 
@@ -35,7 +35,7 @@ public class FormServiceImpl implements FormService {
 
 	@Override
 	public void update(final String formKey, final Form form) throws Exception {
-		repository.updateForm(formKey, form);
+		repository.update(formKey, form);
 	}
 
 }

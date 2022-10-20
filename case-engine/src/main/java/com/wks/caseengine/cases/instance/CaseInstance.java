@@ -6,9 +6,11 @@ import com.wks.caseengine.cases.definition.CaseStatus;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 @Getter
+@Setter
 @ToString
 @Builder
 public class CaseInstance {
@@ -16,7 +18,7 @@ public class CaseInstance {
 	private String businessKey;
 
 	private String caseDefinitionId;
-	
+
 	private String stage;
 
 	// TODO improve this hard code
