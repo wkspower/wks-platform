@@ -1,4 +1,4 @@
-package com.wks.caseengine.rest.server;
+package com.wks.caseengine.rest.app;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,42 +13,43 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.wks.caseengine.cases.instance.CaseInstanceService;
+import com.wks.caseengine.form.FormService;
+import com.wks.caseengine.rest.server.FormController;
 
-@WebMvcTest(controllers = CaseController.class)
-public class CaseControllerTest {
+@WebMvcTest(controllers = FormController.class)
+public class FormControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@MockBean
-	private CaseInstanceService caseInstanceService;
+	private FormService caseInstanceService;
 
 	@Test
 	public void testSave() throws Exception {
-		this.mockMvc.perform(post("/case/").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/form/").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void testDelete() throws Exception {
-		this.mockMvc.perform(delete("/case/{caseDefId}", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(delete("/form/{formKey}", "1")).andExpect(status().isOk());
 	}
 
 	@Test
 	public void testUpdate() throws Exception {
-		this.mockMvc.perform(patch("/case/{caseDefId}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(patch("/form/{formKey}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void testGet() throws Exception {
-		this.mockMvc.perform(get("/case/{caseDefId}", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/form/{formKey}", "1")).andExpect(status().isOk());
 	}
 
 	@Test
 	public void testFind() throws Exception {
-		this.mockMvc.perform(get("/case/")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/form/")).andExpect(status().isOk());
 	}
 
 }

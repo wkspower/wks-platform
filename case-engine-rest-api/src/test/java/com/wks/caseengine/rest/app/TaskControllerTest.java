@@ -1,4 +1,4 @@
-package com.wks.caseengine.rest.server;
+package com.wks.caseengine.rest.app;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.wks.caseengine.rest.server.TaskController;
 import com.wks.caseengine.tasks.TaskService;
 
 @WebMvcTest(controllers = TaskController.class)

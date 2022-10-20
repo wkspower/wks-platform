@@ -1,4 +1,4 @@
-package com.wks.caseengine.rest.server;
+package com.wks.caseengine.rest.app;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -6,23 +6,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.wks.caseengine.cases.definition.CaseDefinitionService;
+import com.wks.caseengine.rest.server.BpmEngineTypesController;
 
-@WebMvcTest(controllers = HealthCheckController.class)
-public class HealthCheckControllerTest {
+@WebMvcTest(controllers = BpmEngineTypesController.class)
+public class BpmEngineTypesControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
 
-	@MockBean
-	CaseDefinitionService caseDefinitionService;
-
 	@Test
-	public void testCheck() throws Exception {
-		this.mockMvc.perform(get("/healthCheck/")).andExpect(status().isOk());
+	public void testFind() throws Exception {
+		this.mockMvc.perform(get("/bpm-engine-type/")).andExpect(status().isOk());
 	}
 
 }

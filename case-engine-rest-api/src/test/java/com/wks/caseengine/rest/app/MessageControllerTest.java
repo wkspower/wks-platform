@@ -1,4 +1,4 @@
-package com.wks.caseengine.rest.server;
+package com.wks.caseengine.rest.app;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.wks.caseengine.process.message.MessageSenderService;
+import com.wks.caseengine.rest.server.MessageController;
 
 @WebMvcTest(controllers = MessageController.class)
 public class MessageControllerTest {

@@ -1,4 +1,4 @@
-package com.wks.caseengine.rest.server;
+package com.wks.caseengine.rest.app;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.wks.caseengine.cases.definition.CaseDefinitionService;
+import com.wks.caseengine.rest.server.CaseDefinitionController;
 
 @WebMvcTest(controllers = CaseDefinitionController.class)
 public class CaseDefinitionControllerTest {

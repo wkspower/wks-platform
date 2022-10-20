@@ -2,6 +2,7 @@ package com.wks.bpm.engine.camunda.client;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -16,11 +17,6 @@ import com.wks.bpm.engine.model.spi.ProcessMessage;
 import com.wks.bpm.engine.model.spi.Task;
 import com.wks.bpm.engine.model.spi.TaskForm;
 
-import io.camunda.zeebe.client.ZeebeClient;
-import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
-import io.camunda.zeebe.client.impl.oauth.OAuthCredentialsProvider;
-import io.camunda.zeebe.client.impl.oauth.OAuthCredentialsProviderBuilder;
-
 /**
  * @author victor.franca
  *
@@ -28,6 +24,15 @@ import io.camunda.zeebe.client.impl.oauth.OAuthCredentialsProviderBuilder;
 @Component
 @Qualifier("c8EngineClient")
 public class C8EngineClient implements BpmEngineClient {
+
+	@Autowired
+	private C8ZeebeClient zeebeClient;
+
+	@Autowired
+	private C8OperateClient operateClient;
+
+	@Autowired
+	private C8TasklistClient tasklistClient;
 
 	@Override
 	public Deployment[] findDeployments(final BpmEngine bpmEngine) {
@@ -48,38 +53,18 @@ public class C8EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public String getProcessDefinitionXML(String processInstanceId, final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
+	public String getProcessDefinitionXML(String processDefinitionId, final BpmEngine bpmEngine) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public ProcessInstance startProcess(String processDefinitionKey, final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return zeebeClient.startProcess(processDefinitionKey, bpmEngine);
 	}
 
 	@Override
 	public ProcessInstance startProcess(String processDefinitionKey, String businessKey, final BpmEngine bpmEngine) {
-		final String zeebeEndpoint = bpmEngine.getParameters().get("zeebeEndpoint").getAsString();
-		final String zeebeEndpointPort = bpmEngine.getParameters().get("zeebeEndpointPort").getAsString();
-		final String clientId = bpmEngine.getParameters().get("clientId").getAsString();
-		final String clientSecret = bpmEngine.getParameters().get("clientSecret").getAsString();
-
-		OAuthCredentialsProvider credentialsProvider = new OAuthCredentialsProviderBuilder().audience(zeebeEndpoint)
-				.clientId(clientId).clientSecret(clientSecret).build();
-
-		ProcessInstance processInstance = null;
-
-		try (ZeebeClient client = ZeebeClient.newClientBuilder().gatewayAddress(zeebeEndpoint + ":" + zeebeEndpointPort)
-				.credentialsProvider(credentialsProvider).build()) {
-
-			final ProcessInstanceEvent processInstanceEvent = client.newCreateInstanceCommand()
-					.bpmnProcessId(processDefinitionKey).latestVersion().send().join();
-			processInstance = ProcessInstance.builder()
-					.businessKey(String.valueOf(processInstanceEvent.getProcessInstanceKey())).build();
-		}
-		return processInstance;
+		return zeebeClient.startProcess(processDefinitionKey, businessKey, bpmEngine);
 	}
 
 	@Override
