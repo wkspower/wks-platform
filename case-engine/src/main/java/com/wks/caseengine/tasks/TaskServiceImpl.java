@@ -1,12 +1,15 @@
 package com.wks.caseengine.tasks;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonObject;
+import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.bpm.engine.model.spi.Task;
 import com.wks.caseengine.repository.BpmEngineRepository;
@@ -21,9 +24,21 @@ public class TaskServiceImpl implements TaskService {
 	private BpmEngineRepository bpmEngineRepository;
 
 	@Override
-	public List<Task> find(final String processInstanceBusinessKey, final String bpmEngineId) throws Exception {
-		return Arrays.asList(
-				processEngineClient.findTasks(processInstanceBusinessKey, bpmEngineRepository.get(bpmEngineId)));
+	public List<Task> find(final String processInstanceBusinessKey, final Optional<String> bpmEngineId)
+			throws Exception {
+
+		if (bpmEngineId.isEmpty()) {
+			List<BpmEngine> engines = bpmEngineRepository.find();
+
+			List<Task> tasks = new ArrayList<>();
+			engines.forEach(engine -> tasks
+					.addAll(Arrays.asList(processEngineClient.findTasks(processInstanceBusinessKey, engine))));
+
+			return tasks;
+		} else {
+			return Arrays.asList(processEngineClient.findTasks(processInstanceBusinessKey,
+					bpmEngineRepository.get(bpmEngineId.get())));
+		}
 	}
 
 	@Override

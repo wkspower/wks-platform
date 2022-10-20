@@ -17,14 +17,14 @@ import com.wks.rest.client.header.JSONHttpHeadersFactory;
 @Component
 public class C8OperateHttpRequestFactory {
 
-	@Autowired
-	private JSONHttpHeadersFactory httpHeadersFactory;
+//	@Autowired
+//	private JSONHttpHeadersFactory httpHeadersFactory;
 
-	@Value("${camunda8.rest.processdefinition.url}")
-	private String processDefinitionUrl;
-
-	@Value("${camunda8.rest.processinstance.url}")
-	private String processInstanceUrl;
+//	@Value("${camunda8.rest.processdefinition.url}")
+//	private String processDefinitionUrl;
+//
+//	@Value("${camunda8.rest.processinstance.url}")
+//	private String processInstanceUrl;
 
 	public WksHttpRequest getProcessDefinitionListRequest(BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub

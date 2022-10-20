@@ -13,7 +13,11 @@ export const TaskList = ({ businessKey, bpmEngineId }) => {
     const [task, setTask] = useState(null);
 
     useEffect(() => {
-        fetch('http://localhost:8081/task/' + bpmEngineId + '/' + (businessKey ? '?processInstanceBusinessKey=' + businessKey : ''))
+        fetch(
+            'http://localhost:8081/task/?' +
+                (bpmEngineId ? 'bpmEngineId=' + bpmEngineId + '&' : '') +
+                (businessKey ? 'processInstanceBusinessKey=' + businessKey : '')
+        )
             .then((response) => response.json())
             .then((data) => {
                 setTasks(data);
@@ -55,7 +59,7 @@ export const TaskList = ({ businessKey, bpmEngineId }) => {
                     <Box>
                         {tasks && (
                             <DataGrid
-                                sx={{ height: 300, width: '100%', backgroundColor: '#ffffff' }}
+                                sx={{ height: 650, width: '100%', backgroundColor: '#ffffff', mt: 1 }}
                                 rows={tasks}
                                 columns={columns}
                                 pageSize={10}

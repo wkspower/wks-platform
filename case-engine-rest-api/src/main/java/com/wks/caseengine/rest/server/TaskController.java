@@ -1,6 +1,7 @@
 package com.wks.caseengine.rest.server;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,10 +23,10 @@ public class TaskController {
 	@Autowired
 	private TaskService taskService;
 
-	@GetMapping(value = "/{bpmEngineId}")
-	public List<Task> find(final @PathVariable String bpmEngineId,
+	@GetMapping(value = "/")
+	public List<Task> find(final @RequestParam(required = false) String bpmEngineId,
 			@RequestParam(required = false) String processInstanceBusinessKey) throws Exception {
-		return taskService.find(processInstanceBusinessKey, bpmEngineId);
+		return taskService.find(processInstanceBusinessKey, Optional.ofNullable(bpmEngineId));
 	}
 
 	@PostMapping(value = "/{bpmEngineId}/{taskId}/claim/{taskAssignee}")

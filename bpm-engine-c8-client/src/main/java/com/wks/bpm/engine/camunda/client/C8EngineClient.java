@@ -83,7 +83,7 @@ public class C8EngineClient implements BpmEngineClient {
 	@Override
 	public Task[] findTasks(String processInstanceBusinessKey, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return new Task[] {};
 	}
 
 	@Override

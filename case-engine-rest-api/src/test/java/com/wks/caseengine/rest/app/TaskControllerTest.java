@@ -25,7 +25,7 @@ public class TaskControllerTest {
 
 	@Test
 	public void testFind() throws Exception {
-		this.mockMvc.perform(get("/task/{bpmEngineId}", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/task/").param("bpmEngineId", "1")).andExpect(status().isOk());
 	}
 
 	@Test
