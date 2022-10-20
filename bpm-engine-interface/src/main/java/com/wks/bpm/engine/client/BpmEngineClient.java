@@ -24,7 +24,7 @@ public interface BpmEngineClient {
 
 	ProcessInstance[] findProcessInstances(final Optional<String> businessKey, final BpmEngine bpmEngine);
 
-	String getProcessDefinitionXML(final String processInstanceId, final BpmEngine bpmEngine);
+	String getProcessDefinitionXML(final String processDefinitionId, final BpmEngine bpmEngine);
 
 	ProcessInstance startProcess(final String processDefinitionKey, final BpmEngine bpmEngine);
 

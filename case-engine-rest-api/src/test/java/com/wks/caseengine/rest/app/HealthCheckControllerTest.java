@@ -1,4 +1,4 @@
-package com.wks.caseengine.rest.server;
+package com.wks.caseengine.rest.app;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -9,20 +9,21 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.wks.caseengine.variables.VariableService;
+import com.wks.caseengine.cases.definition.CaseDefinitionService;
+import com.wks.caseengine.rest.server.HealthCheckController;
 
-@WebMvcTest(controllers = VariableController.class)
-public class VariableControllerTest {
+@WebMvcTest(controllers = HealthCheckController.class)
+public class HealthCheckControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@MockBean
-	private VariableService variableService;
+	CaseDefinitionService caseDefinitionService;
 
 	@Test
-	public void testFind() throws Exception {
-		this.mockMvc.perform(get("/variable/{bpmEngineId}/{processInstanceId}", "1", "2")).andExpect(status().isOk());
+	public void testCheck() throws Exception {
+		this.mockMvc.perform(get("/healthCheck/")).andExpect(status().isOk());
 	}
 
 }
