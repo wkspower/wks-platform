@@ -66,36 +66,19 @@ TabPanel.propTypes = {
 };
 
 export const CaseForm = ({ open, handleClose, aCase }) => {
-    const [formData, setFormData] = useState({});
+    const [caseDef, setCaseDef] = useState(null);
+    const [form, setForm] = useState(null);
+    const [formData, setFormData] = useState(null);
+
     const [tabIndex, setTabIndex] = useState(0);
 
     const [activeStage, setActiveStage] = React.useState(0);
     const [stages, setStages] = useState([]);
 
     useEffect(() => {
-        fetch('http://localhost:8081/case/' + aCase.businessKey)
-            .then((response) => response.json())
-            .then((caseData) => {
-                setFormData({
-                    data: caseData.attributes.reduce((obj, item) => Object.assign(obj, { [item.name]: item.value }), {}),
-                    metadata: {},
-                    isValid: true
-                });
-                setActiveStage(caseData.stage);
-            })
-            .catch((err) => {
-                console.log(err.message);
-            });
-    }, [aCase, tabIndex]);
-
-    const [caseDef, setCaseDef] = useState([]);
-    const [form, setForm] = useState(null);
-
-    useEffect(() => {
         fetch('http://localhost:8081/case-definition/' + aCase.caseDefinitionId)
             .then((response) => response.json())
             .then((data) => {
-                setTabIndex(0);
                 setCaseDef(data);
                 setStages(data.stages.map((o) => o.name));
                 return fetch('http://localhost:8081/form/' + data.formKey);
@@ -103,11 +86,22 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
             .then((response) => response.json())
             .then((data) => {
                 setForm(data);
+                return fetch('http://localhost:8081/case/' + aCase.businessKey);
+            })
+            .then((response) => response.json())
+            .then((caseData) => {
+                setFormData({
+                    data: caseData.attributes.reduce((obj, item) => Object.assign(obj, { [item.name]: item.value }), {}),
+                    metadata: {},
+                    isValid: true
+                });
+
+                setActiveStage(caseData.stage);
             })
             .catch((err) => {
                 console.log(err.message);
             });
-    }, [aCase]);
+    }, [open, aCase]);
 
     const handleTabChanged = (event, newValue) => {
         setTabIndex(newValue);
@@ -134,72 +128,78 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
     };
 
     return (
-        <div>
-            <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
-                <AppBar sx={{ position: 'relative' }}>
-                    <Toolbar>
-                        <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
-                            <CloseIcon />
-                        </IconButton>
-                        <Typography sx={{ ml: 2, flex: 1 }} component="div">
-                            <div>Motion Detected: {aCase?.businessKey}</div>
-                            <div style={{ fontSize: '13px' }}>{aCase?.status}</div>
-                        </Typography>
-                        {aCase.status === CaseStatus.WipCaseStatus.description && (
-                            <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.ClosedCaseStatus.description)}>
-                                Close Case
-                            </Button>
-                        )}
-                        {aCase.status === CaseStatus.ClosedCaseStatus.description && (
-                            <React.Fragment>
-                                <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.WipCaseStatus.description)}>
-                                    Re-open Case
+        aCase &&
+        caseDef &&
+        form &&
+        formData && (
+            <div>
+                <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
+                    <AppBar sx={{ position: 'relative' }}>
+                        <Toolbar>
+                            <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
+                                <CloseIcon />
+                            </IconButton>
+                            <Typography sx={{ ml: 2, flex: 1 }} component="div">
+                                <div>Motion Detected: {aCase?.businessKey}</div>
+                                <div style={{ fontSize: '13px' }}>{aCase?.status}</div>
+                            </Typography>
+                            {aCase.status === CaseStatus.WipCaseStatus.description && (
+                                <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.ClosedCaseStatus.description)}>
+                                    Close Case
                                 </Button>
+                            )}
+                            {aCase.status === CaseStatus.ClosedCaseStatus.description && (
+                                <React.Fragment>
+                                    <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.WipCaseStatus.description)}>
+                                        Re-open Case
+                                    </Button>
 
-                                <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.ArchivedCaseStatus.description)}>
-                                    Archive Case
-                                </Button>
-                            </React.Fragment>
-                        )}
-                        {aCase.status === CaseStatus.ArchivedCaseStatus.description && (
-                            <React.Fragment>
-                                <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.WipCaseStatus.description)}>
-                                    Re-open Case
-                                </Button>
-                            </React.Fragment>
-                        )}
-                    </Toolbar>
-                </AppBar>
+                                    <Button
+                                        color="inherit"
+                                        onClick={() => handleUpdateCaseStatus(CaseStatus.ArchivedCaseStatus.description)}
+                                    >
+                                        Archive Case
+                                    </Button>
+                                </React.Fragment>
+                            )}
+                            {aCase.status === CaseStatus.ArchivedCaseStatus.description && (
+                                <React.Fragment>
+                                    <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.WipCaseStatus.description)}>
+                                        Re-open Case
+                                    </Button>
+                                </React.Fragment>
+                            )}
+                        </Toolbar>
+                    </AppBar>
 
-                <Box sx={{ pl: 10, pr: 10, pt: 2, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
-                    <Stepper
-                        activeStep={stages.findIndex((o) => {
-                            return o === activeStage;
-                        })}
-                    >
-                        {stages.map((label, index) => {
-                            const stagesProps = {};
-                            const labelProps = {};
-                            return (
-                                <Step key={label} {...stagesProps}>
-                                    <StepLabel {...labelProps}>{label}</StepLabel>
-                                </Step>
-                            );
-                        })}
-                    </Stepper>
-                </Box>
+                    <Box sx={{ pl: 10, pr: 10, pt: 2, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
+                        <Stepper
+                            activeStep={stages.findIndex((o) => {
+                                return o === activeStage;
+                            })}
+                        >
+                            {stages.map((label, index) => {
+                                const stagesProps = {};
+                                const labelProps = {};
+                                return (
+                                    <Step key={label} {...stagesProps}>
+                                        <StepLabel {...labelProps}>{label}</StepLabel>
+                                    </Step>
+                                );
+                            })}
+                        </Stepper>
+                    </Box>
 
-                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Tabs value={tabIndex} onChange={handleTabChanged} aria-label="basic tabs example">
-                        <Tab label="Case Details" {...a11yProps(0)} />
-                        <Tab label="Tasks" {...a11yProps(1)} />
-                    </Tabs>
-                </Box>
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                        <Tabs value={tabIndex} onChange={handleTabChanged} aria-label="basic tabs example">
+                            <Tab label="Case Details" {...a11yProps(0)} />
+                            <Tab label="Tasks" {...a11yProps(1)} />
+                        </Tabs>
+                    </Box>
 
-                <TabPanel value={tabIndex} index={0}>
-                    {/* Case Details  */}
-                    <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
-                        {form && (
+                    <TabPanel value={tabIndex} index={0}>
+                        {/* Case Details  */}
+                        <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
                             <Grid item xs={12}>
                                 <MainCard sx={{ p: 2 }} content={false}>
                                     <Box sx={{ pb: 1, display: 'flex', flexDirection: 'row' }}>
@@ -213,20 +213,23 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
                                     <Form form={form.structure} submission={formData} options={{ readOnly: true }} />
                                 </MainCard>
                             </Grid>
-                        )}
-                        <Grid item xs={12}>
-                            <Comments commentsUrl="http://localhost:3004/comments" currentUserId="1" />
+                            <Grid item xs={12}>
+                                <Comments commentsUrl="http://localhost:3004/comments" currentUserId="1" />
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </TabPanel>
+                    </TabPanel>
 
-                <TabPanel value={tabIndex} index={1}>
-                    {/* Task List  */}
-                    <div style={{ display: 'grid', padding: '10px' }}>
-                        <TaskList businessKey={aCase.businessKey} bpmEngineId={caseDef.bpmEngineId} />
-                    </div>
-                </TabPanel>
-            </Dialog>
-        </div>
+                    <TabPanel value={tabIndex} index={1}>
+                        {/* Task List  */}
+                        <div style={{ display: 'grid', padding: '10px' }}>
+                            <TaskList
+                                businessKey={aCase.businessKey}
+                                bpmEngineId={caseDef.bpmEngineId}
+                            />
+                        </div>
+                    </TabPanel>
+                </Dialog>
+            </div>
+        )
     );
 };

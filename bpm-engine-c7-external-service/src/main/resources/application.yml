@@ -27,5 +27,9 @@ camunda.bpm.client:
   base-url: http://${CAMUNDA7_HOST}:${CAMUNDA7_PORT}/engine-rest
   subscriptions:
     caseStageUpdate:
-        process-definition-key: genericCaseProcess
+        process-definition-key: contractor-onboarding
         include-extension-properties: true
+    recordSave:
+        process-definition-key: contractor-onboarding
+        include-extension-properties: true        
+        

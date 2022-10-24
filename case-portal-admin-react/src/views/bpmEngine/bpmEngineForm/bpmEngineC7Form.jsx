@@ -95,9 +95,11 @@ export const BpmEngineC7Form = ({ bpmEngine, setBpmEngine, open, handleClose }) 
                         <Button color="inherit" onClick={onSave}>
                             Save
                         </Button>
-                        <Button color="inherit" onClick={handleDelete}>
-                            Delete
-                        </Button>
+                        {!(bpmEngine.mode && bpmEngine.mode === 'new') && (
+                            <Button color="inherit" onClick={handleDelete}>
+                                Delete
+                            </Button>
+                        )}
                     </Toolbar>
                 </AppBar>
 

@@ -1,7 +1,7 @@
 import { FolderOutlined } from '@ant-design/icons';
-import { IconArchive, IconFileCheck, IconFileInvoice, IconList, IconSquareAsterisk } from '@tabler/icons';
+import { IconArchive, IconFileCheck, IconFileInvoice, IconList, IconSquareAsterisk, IconDatabase } from '@tabler/icons';
 
-const icons = { FolderOutlined, IconFileInvoice, IconFileCheck, IconArchive, IconSquareAsterisk, IconList };
+const icons = { FolderOutlined, IconFileInvoice, IconFileCheck, IconArchive, IconSquareAsterisk, IconList, IconDatabase };
 
 // ==============================|| UTILITIES MENU ITEMS ||============================== //
 
@@ -57,8 +57,34 @@ const utilities = {
             url: '/task-list',
             icon: icons.IconList,
             breadcrumbs: true
+        },
+        {
+            id: 'record-list',
+            title: 'Records',
+            type: 'collapse',
+            icon: icons.IconDatabase,
+            children: []
         }
     ]
 };
+
+fetch('http://localhost:8081/record-type/')
+    .then((response) => response.json())
+    .then((data) => {
+        data.forEach((element) => {
+            utilities.children
+                .filter((menu) => menu.id === 'record-list')[0]
+                .children.push({
+                    id: element.id,
+                    title: element.id,
+                    type: 'item',
+                    url: '/record-list/' + element.id,
+                    breadcrumbs: true
+                });
+        });
+    })
+    .catch((err) => {
+        console.log(err.message);
+    });
 
 export default utilities;

@@ -3,6 +3,7 @@ import Button from '@mui/material/Button';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import MainCard from 'components/MainCard';
 import React, { useEffect, useState } from 'react';
+import { ProcessDiagram } from 'views/bpmn/ProcessDiagram';
 import { TaskForm } from '../taskForm/taskForm';
 
 import './taskList.css';
@@ -11,6 +12,9 @@ export const TaskList = ({ businessKey, bpmEngineId }) => {
     const [tasks, setTasks] = useState(null);
     const [open, setOpen] = useState(false);
     const [task, setTask] = useState(null);
+
+    const [processDefId, setProcessDefId] = useState(null);
+    const [activityInstances, setActivityInstances] = useState(null);
 
     useEffect(() => {
         fetch(
@@ -25,7 +29,21 @@ export const TaskList = ({ businessKey, bpmEngineId }) => {
             .catch((err) => {
                 console.log(err.message);
             });
-    }, [open, businessKey]);
+
+        fetch('http://localhost:8081/process-instance/' + bpmEngineId + '?businessKey=' + businessKey)
+            .then((response) => response.json())
+            .then((data) => {
+                setProcessDefId(data[0].definitionId);
+                return fetch('http://localhost:8081/process-instance/' + bpmEngineId + '/' + data[0].id + '/activity-instances');
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                setActivityInstances(data);
+            })
+            .catch((err) => {
+                console.log(err.message);
+            });
+    }, [open, businessKey, bpmEngineId]);
 
     const columns: GridColDef[] = [
         { field: 'name', headerName: 'Task', width: 200 },
@@ -55,9 +73,9 @@ export const TaskList = ({ businessKey, bpmEngineId }) => {
     return (
         <React.Fragment>
             <Box>
-                <MainCard sx={{ mt: 2 }} content={false}>
-                    <Box>
-                        {tasks && (
+                {tasks && tasks.length > 0 && (
+                    <MainCard sx={{ mt: 2 }} content={false}>
+                        <Box>
                             <DataGrid
                                 sx={{ height: 650, width: '100%', backgroundColor: '#ffffff', mt: 1 }}
                                 rows={tasks}
@@ -65,10 +83,14 @@ export const TaskList = ({ businessKey, bpmEngineId }) => {
                                 pageSize={10}
                                 rowsPerPageOptions={[10]}
                             />
-                        )}
-                    </Box>
-                </MainCard>
-                {task && <TaskForm task={task} handleClose={handleClose} open={open} bpmEngineId={bpmEngineId} />}
+                        </Box>
+                    </MainCard>
+                )}
+                {(!tasks || tasks.length === 0) && processDefId && activityInstances && (
+                    <ProcessDiagram processDefinitionId={processDefId} activityInstances={activityInstances} bpmEngineId={bpmEngineId} />
+                )}
+
+                {open && task && <TaskForm task={task} handleClose={handleClose} open={open} bpmEngineId={bpmEngineId} />}
             </Box>
         </React.Fragment>
     );

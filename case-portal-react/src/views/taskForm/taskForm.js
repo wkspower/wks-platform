@@ -5,11 +5,8 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
-import FormControl from '@mui/material/FormControl';
-import FormHelperText from '@mui/material/FormHelperText';
 import IconButton from '@mui/material/IconButton';
 import Slide from '@mui/material/Slide';
-import TextField from '@mui/material/TextField';
 import Toolbar from '@mui/material/Toolbar';
 import MainCard from 'components/MainCard';
 
@@ -17,6 +14,8 @@ import { TransitionProps } from '@mui/material/transitions';
 import Typography from '@mui/material/Typography';
 
 import { ProcessDiagram } from 'views/bpmn/ProcessDiagram';
+
+import { Form } from '@formio/react';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -28,40 +27,40 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export const TaskForm = ({ open, handleClose, task, bpmEngineId }) => {
-    const [formComponents, setFormComponents] = useState([]);
     const [claimed, setClaimed] = useState(false);
     const [assignee, setAssignee] = useState(null);
-    const [variableValues, setVariableValues] = useState({});
+
+    const [formComponents, setFormComponents] = useState(null);
+    const [variableValues, setVariableValues] = useState(null);
+
     const [activityInstances, setActivityInstances] = useState(null);
 
     useEffect(() => {
         let apiDataVariables = {};
         let apiDataFormComponents = {};
 
-        fetch('http://localhost:8081/task-form/' + bpmEngineId + '/' + task.id)
+        fetch('http://localhost:8081/form/' + task.formKey)
             .then((response) => response.json())
             .then((data) => {
-                apiDataFormComponents = data.components;
+                apiDataFormComponents = data.structure;
 
-                for (var key in data.components) {
-                    if (data.components[key].type !== 'text') {
-                        apiDataVariables[data.components[key].key] = { value: '' };
-                    }
-                }
+                apiDataVariables = {
+                    data: {},
+                    metadata: {},
+                    isValid: true
+                };
                 return fetch('http://localhost:8081/variable/' + bpmEngineId + '/' + task.processInstanceId);
             })
             .then((response) => response.json())
             .then((data) => {
                 for (var key in data) {
-                    if (key in apiDataVariables) {
-                        apiDataVariables[key] = { value: data[key].value };
-                    }
+                    apiDataVariables.data[key] = data[key].value;
                 }
 
                 setFormComponents(apiDataFormComponents);
-                setClaimed(task.assignee !== null);
-                setAssignee(task.assignee);
                 setVariableValues(apiDataVariables);
+                setClaimed(task.assignee !== null && task.assignee !== undefined);
+                setAssignee(task.assignee);
             })
             .catch((err) => {
                 console.log(err.message);
@@ -72,7 +71,7 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId }) => {
             .then((data) => {
                 setActivityInstances(data);
             });
-    }, [task]);
+    }, [open, task, bpmEngineId]);
 
     const handleClaim = function () {
         fetch('http://localhost:8081/task/' + bpmEngineId + '/' + task.id + '/claim/demo', {
@@ -82,7 +81,7 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId }) => {
                 'Content-Type': 'application/json'
             }
         })
-            .then((response) => {
+            .then(() => {
                 setClaimed(true);
                 setAssignee('demo');
             })
@@ -99,7 +98,7 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId }) => {
                 'Content-Type': 'application/json'
             }
         })
-            .then((response) => {
+            .then(() => {
                 setClaimed(false);
                 setAssignee(null);
             })
@@ -109,6 +108,11 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId }) => {
     };
 
     const handleComplete = function () {
+        let variables = { ...variableValues.data };
+        Object.keys(variables).forEach(function (key, index) {
+            variables[key] = { value: variables[key] };
+        });
+
         fetch('http://localhost:8081/task/' + bpmEngineId + '/' + task.id + '/complete', {
             method: 'POST',
             headers: {
@@ -116,17 +120,13 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId }) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                variables: variableValues
+                variables: variables
             })
         })
             .then((response) => handleClose())
             .catch((err) => {
                 console.log(err.message);
             });
-    };
-
-    const handleInputChange = function (event) {
-        setVariableValues({ ...variableValues, [event.target.id]: { value: event.target.value } });
     };
 
     return (
@@ -153,34 +153,17 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId }) => {
                                 </div>
                             </Button>
                         )}
-                        <Button color="inherit" onClick={handleComplete}>
-                            Complete
-                        </Button>
+                        {claimed && (
+                            <Button color="inherit" onClick={handleComplete}>
+                                Complete
+                            </Button>
+                        )}
                     </Toolbar>
                 </AppBar>
                 <div style={{ display: 'grid', padding: '10px' }}>
-                    {formComponents && formComponents.length ? (
-                        formComponents.map((component) => {
-                            if (component.type !== 'text') {
-                                return (
-                                    <FormControl key={component.id} style={{ padding: '5px' }} disabled={!claimed}>
-                                        <TextField
-                                            id={component.key}
-                                            aria-describedby="my-helper-text"
-                                            disabled={!claimed}
-                                            value={variableValues[component.key].value}
-                                            onChange={handleInputChange}
-                                        />
-                                        <FormHelperText id="my-helper-text">{component.label}</FormHelperText>
-                                    </FormControl>
-                                );
-                            } else {
-                                return null;
-                            }
-                        })
-                    ) : (
-                        <div>Empty form components</div>
-                    )}
+                    <div style={!claimed ? { pointerEvents: 'none', opacity: '0.4' } : {}}>
+                        <Form form={formComponents} submission={variableValues} />
+                    </div>
                 </div>
 
                 <Box>
