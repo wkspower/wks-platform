@@ -4,9 +4,10 @@ import { lazy } from 'react';
 import Loadable from 'components/Loadable';
 import MainLayout from 'layout/MainLayout';
 
-import { CaseList } from 'views/caseList/caseList';
-import { TaskList } from 'views/taskList/taskList';
 import { CaseStatus } from 'common/caseStatus';
+import { CaseList } from 'views/caseList/caseList';
+import { RecordList } from 'views/record/recordList';
+import { TaskList } from 'views/taskList/taskList';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard')));
@@ -51,56 +52,21 @@ const MainRoutes = {
             path: 'task-list',
             element: <TaskList />
         }
-        // {
-        //     path: 'utils',
-        //     children: [
-        //         {
-        //             path: 'util-typography',
-        //             element: <UtilsTypography />
-        //         }
-        //     ]
-        // },
-        // {
-        //     path: 'utils',
-        //     children: [
-        //         {
-        //             path: 'util-color',
-        //             element: <UtilsColor />
-        //         }
-        //     ]
-        // },
-        // {
-        //     path: 'utils',
-        //     children: [
-        //         {
-        //             path: 'util-shadow',
-        //             element: <UtilsShadow />
-        //         }
-        //     ]
-        // },
-        // {
-        //     path: 'icons',
-        //     children: [
-        //         {
-        //             path: 'tabler-icons',
-        //             element: <UtilsTablerIcons />
-        //         }
-        //     ]
-        // },
-        // {
-        //     path: 'icons',
-        //     children: [
-        //         {
-        //             path: 'material-icons',
-        //             element: <UtilsMaterialIcons />
-        //         }
-        //     ]
-        // },
-        // {
-        //     path: 'sample-page',
-        //     element: <SamplePage />
-        // }
     ]
 };
+
+fetch('http://localhost:8081/record-type/')
+    .then((response) => response.json())
+    .then((data) => {
+        data.forEach((element) => {
+            MainRoutes.children.push({
+                path: 'record-list/' + element.id,
+                element: <RecordList recordTypeId={element.id} />
+            });
+        });
+    })
+    .catch((err) => {
+        console.log(err.message);
+    });
 
 export default MainRoutes;

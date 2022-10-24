@@ -13,7 +13,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.db.MongoDataConnection;
-import com.wks.caseengine.record.RecordType;
+import com.wks.caseengine.record.type.RecordType;
 import com.wks.caseengine.repository.RecordTypeRepository;
 
 @Component

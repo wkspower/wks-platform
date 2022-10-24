@@ -70,5 +70,9 @@ public class MongoDataConnection {
 	public MongoCollection<JsonObject> getRecordTypeCollection() {
 		return recordTypeCollection;
 	}
+	
+	public MongoDatabase getDatabase() {
+		return database;
+	}
 
 }

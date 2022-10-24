@@ -1,0 +1,54 @@
+{
+    "$schema": "https://unpkg.com/@camunda/element-templates-json-schema/resources/schema.json",
+    "name": "WKS - Record Save",
+    "id": "com.wks.camunda.template.record-save",
+    "appliesTo": [
+        "bpmn:ServiceTask"
+    ],
+    "properties": [
+        {
+            "label": "Implementation Type",
+            "type": "String",
+            "value": "external",
+            "editable": false,
+            "binding": {
+                "type": "property",
+                "name": "camunda:type"
+            }
+        },
+        {
+            "label": "Topic",
+            "type": "String",
+            "value": "recordSave",
+            "editable": false,
+            "binding": {
+                "type": "property",
+                "name": "camunda:topic"
+            }
+        },
+        {
+            "label": "Record Type Id",
+            "type": "String",
+            "editable": true,
+            "binding": {
+                "type": "camunda:inputParameter",
+                "name": "recordTypeId"
+            },
+            "constraints": {
+                "notEmpty": true
+            }
+        },
+        {
+            "label": "Record",
+            "type": "String",
+            "editable": true,
+            "binding": {
+                "type": "camunda:inputParameter",
+                "name": "record"
+            },
+            "constraints": {
+                "notEmpty": true
+            }
+        }
+    ]
+}
