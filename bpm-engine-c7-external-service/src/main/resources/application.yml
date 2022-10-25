@@ -25,6 +25,7 @@ camunda7.rest.correlate.url: /message
 
 camunda.bpm.client:
   base-url: http://${CAMUNDA7_HOST}:${CAMUNDA7_PORT}/engine-rest
+  disable-backoff-strategy: true
   subscriptions:
     caseStageUpdate:
         process-definition-key: contractor-onboarding
