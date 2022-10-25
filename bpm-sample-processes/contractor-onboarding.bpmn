@@ -55,9 +55,19 @@
       <bpmn:extensionElements>
         <camunda:executionListener event="end">
           <camunda:script scriptFormat="javascript">var contractor = {};
-contractor.name = execution.getVariable('firstName');
-contractor.address= 'Some Address';
-contractor.country= 'brazil';
+
+contractor.firstName = execution.getVariable('firstName');
+contractor.lastName = execution.getVariable('lastName');
+contractor.email = execution.getVariable('email');
+contractor.client = execution.getVariable('client');
+contractor.startDate = execution.getVariable('startDate');
+contractor.companyName= execution.getVariable('companyName');
+contractor.companyAddress = execution.getVariable('companyAddress');
+contractor.addressProof = execution.getVariable('addressProof');
+contractor.companyCertificate = execution.getVariable('companyCertificate');
+contractor.insuranceCertificate = execution.getVariable('insuranceCertificate');
+contractor.dailyRate = execution.getVariable('dailyRate');
+
 execution.setVariable('contractor', JSON.stringify(contractor));</camunda:script>
         </camunda:executionListener>
       </bpmn:extensionElements>

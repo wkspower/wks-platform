@@ -7,9 +7,11 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.Gson;
 import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
+import com.wks.caseengine.cases.instance.CaseAttribute;
 import com.wks.caseengine.repository.BpmEngineRepository;
 
 @Component
@@ -31,6 +33,13 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 			throws Exception {
 		return processEngineClient.startProcess(processDefinitionKey, businessKey,
 				bpmEngineRepository.get(bpmEngineId));
+	}
+
+	@Override
+	public ProcessInstance create(final String processDefinitionKey, final String businessKey,
+			final List<CaseAttribute> caseAttributes, final String bpmEngineId) throws Exception {
+		return processEngineClient.startProcess(processDefinitionKey, businessKey,
+				new Gson().toJsonTree(caseAttributes).getAsJsonArray(), bpmEngineRepository.get(bpmEngineId));
 	}
 
 	@Override
