@@ -13,9 +13,9 @@ logging:
       root: INFO
       com:
          wks: INFO
-      org.springframework.web.client.RestTemplate: ERROR
-      org.apache.http: ERROR
-      httpclient.wire: ERROR
+      org.springframework.web.client.RestTemplate: INFO
+      org.apache.http: INFO
+      httpclient.wire: INFO
       
 spring.mvc.converters.preferred-json-mapper: gson
 

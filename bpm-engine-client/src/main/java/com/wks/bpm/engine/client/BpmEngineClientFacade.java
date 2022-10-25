@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.BpmEngineType;
@@ -56,6 +57,12 @@ public class BpmEngineClientFacade {
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
 			final BpmEngine bpmEngine) {
 		return getEngineClient(bpmEngine).startProcess(processDefinitionKey, businessKey, bpmEngine);
+
+	}
+
+	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final JsonArray caseAttributes, final BpmEngine bpmEngine) {
+		return getEngineClient(bpmEngine).startProcess(processDefinitionKey, businessKey, caseAttributes, bpmEngine);
 
 	}
 

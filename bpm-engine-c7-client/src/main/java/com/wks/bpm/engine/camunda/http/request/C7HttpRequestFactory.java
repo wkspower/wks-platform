@@ -91,6 +91,17 @@ public class C7HttpRequestFactory {
 				new HttpEntity<>(processInstance, httpHeadersFactory.create()));
 	}
 
+	public WksHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey, final String businessKey,
+			final JsonObject variables, final BpmEngine bpmEngine) {
+		// TODO refactor it - Payload Creator
+		ProcessInstance processInstance = ProcessInstance.builder().businessKey(businessKey).caseInstanceId(businessKey)
+				.variables(variables).build();
+
+		return new C7HttpPostRequest(
+				extractUrl(bpmEngine) + processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
+				new HttpEntity<>(processInstance, httpHeadersFactory.create()));
+	}
+
 	public WksHttpRequest getProcessInstanceDeleteRequest(String processInstanceId, final BpmEngine bpmEngine) {
 		return new C7HttpDeleteRequest(extractUrl(bpmEngine) + processInstanceUrl + "/" + processInstanceId,
 				new HttpEntity<>(httpHeadersFactory.create()));

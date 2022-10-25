@@ -2,6 +2,7 @@ package com.wks.bpm.engine.client;
 
 import java.util.Optional;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
@@ -30,6 +31,9 @@ public interface BpmEngineClient {
 
 	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
 			final BpmEngine bpmEngine);
+
+	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final JsonArray caseAttributes, final BpmEngine bpmEngine);
 
 	void deleteProcessInstance(final String processInstanceId, final BpmEngine bpmEngine);
 

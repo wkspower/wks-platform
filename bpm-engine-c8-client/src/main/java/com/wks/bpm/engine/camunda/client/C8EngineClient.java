@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.client.BpmEngineClient;
@@ -120,6 +121,13 @@ public class C8EngineClient implements BpmEngineClient {
 	public void sendMessage(ProcessMessage processMesage, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ProcessInstance startProcess(String processDefinitionKey, String businessKey, JsonArray caseAttributes,
+			BpmEngine bpmEngine) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

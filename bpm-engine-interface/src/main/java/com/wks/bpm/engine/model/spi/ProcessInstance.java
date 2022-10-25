@@ -1,5 +1,7 @@
 package com.wks.bpm.engine.model.spi;
 
+import com.google.gson.JsonObject;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,5 +30,7 @@ public class ProcessInstance {
 	private Boolean ended;
 	private Boolean suspended;
 	private String tenantId;
+
+	private JsonObject variables;
 
 }
