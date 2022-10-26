@@ -29,6 +29,8 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 
+import { tryParseJSONObject } from '../../utils/jsonStringCheck';
+
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
         children: React.ReactElement
@@ -76,7 +78,6 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
     const [stages, setStages] = useState([]);
 
     useEffect(() => {
-        let formResponse;
         fetch('http://localhost:8081/case-definition/' + aCase.caseDefinitionId)
             .then((response) => response.json())
             .then((data) => {
@@ -86,7 +87,6 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
             })
             .then((response) => response.json())
             .then((data) => {
-                formResponse = data;
                 setForm(data);
                 return fetch('http://localhost:8081/case/' + aCase.businessKey);
             })
@@ -96,10 +96,7 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
                     data: caseData.attributes.reduce(
                         (obj, item) =>
                             Object.assign(obj, {
-                                [item.name]:
-                                    formResponse.structure.components.filter((component) => component.key === item.name)[0].type === 'file'
-                                        ? JSON.parse(item.value)
-                                        : item.value
+                                [item.name]: tryParseJSONObject(item.value) ? JSON.parse(item.value) : item.value
                             }),
                         {}
                     ),
