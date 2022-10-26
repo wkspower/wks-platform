@@ -82,7 +82,7 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
             .then((response) => response.json())
             .then((data) => {
                 setCaseDef(data);
-                setStages(data.stages.map((o) => o.name));
+                setStages(data.stages.sort((a, b) => a.index - b.index).map((o) => o.name));
                 return fetch('http://localhost:8081/form/' + data.formKey);
             })
             .then((response) => response.json())
