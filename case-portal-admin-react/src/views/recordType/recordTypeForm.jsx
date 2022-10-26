@@ -107,9 +107,9 @@ export const RecordTypeForm = ({ open, handleClose, recordType, handleInputChang
                         <FormBuilder
                             form={recordType.fields}
                             options={{
-                                builder: {
-                                    premium: false
-                                },
+                                // builder: {
+                                //     premium: false
+                                // },
                                 noNewEdit: true,
                                 noDefaultSubmitButton: true
                             }}
