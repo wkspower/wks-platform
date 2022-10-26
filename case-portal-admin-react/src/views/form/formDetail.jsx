@@ -126,9 +126,9 @@ export const FormDetail = ({ open, handleClose, form, handleInputChange, handleS
                         <FormBuilder
                             form={form.structure}
                             options={{
-                                builder: {
-                                    premium: false
-                                },
+                                // builder: {
+                                //     premium: false
+                                // },
                                 noNewEdit: true,
                                 noDefaultSubmitButton: true
                             }}

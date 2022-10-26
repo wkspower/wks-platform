@@ -76,6 +76,7 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
     const [stages, setStages] = useState([]);
 
     useEffect(() => {
+        let formResponse;
         fetch('http://localhost:8081/case-definition/' + aCase.caseDefinitionId)
             .then((response) => response.json())
             .then((data) => {
@@ -85,17 +86,26 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
             })
             .then((response) => response.json())
             .then((data) => {
+                formResponse = data;
                 setForm(data);
                 return fetch('http://localhost:8081/case/' + aCase.businessKey);
             })
             .then((response) => response.json())
             .then((caseData) => {
                 setFormData({
-                    data: caseData.attributes.reduce((obj, item) => Object.assign(obj, { [item.name]: item.value }), {}),
+                    data: caseData.attributes.reduce(
+                        (obj, item) =>
+                            Object.assign(obj, {
+                                [item.name]:
+                                    formResponse.structure.components.filter((component) => component.key === item.name)[0].type === 'file'
+                                        ? JSON.parse(item.value)
+                                        : item.value
+                            }),
+                        {}
+                    ),
                     metadata: {},
                     isValid: true
                 });
-
                 setActiveStage(caseData.stage);
             })
             .catch((err) => {
@@ -222,10 +232,7 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
                     <TabPanel value={tabIndex} index={1}>
                         {/* Task List  */}
                         <div style={{ display: 'grid', padding: '10px' }}>
-                            <TaskList
-                                businessKey={aCase.businessKey}
-                                bpmEngineId={caseDef.bpmEngineId}
-                            />
+                            <TaskList businessKey={aCase.businessKey} bpmEngineId={caseDef.bpmEngineId} />
                         </div>
                     </TabPanel>
                 </Dialog>

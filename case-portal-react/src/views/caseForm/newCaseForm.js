@@ -17,6 +17,7 @@ import React, { useEffect } from 'react';
 
 import { Form } from '@formio/react';
 import MainCard from 'components/MainCard';
+import { CollectionsBookmarkRounded } from '../../../node_modules/@mui/icons-material/index';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -55,12 +56,15 @@ export const NewCaseForm = ({ open, handleClose, caseDefId }) => {
 
     const onSave = () => {
         const caseAttributes = [];
-        Object.keys(formData.data)
-            .filter((key) => !key.includes('submit'))
-            .forEach((key) => {
-                caseAttributes.push({ name: key, value: formData.data[key] });
-            });
+        Object.keys(formData.data).forEach((key) => {
+            let formComponent = form.structure.components.filter((component) => component.key === key)[0];
 
+            caseAttributes.push({
+                name: key,
+                value: formComponent.type !== 'file' ? formData.data[key] : JSON.stringify(formData.data[key])
+            });
+        });
+        
         fetch('http://localhost:8081/case/', {
             method: 'POST',
             headers: {
