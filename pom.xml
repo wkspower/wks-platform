@@ -29,6 +29,7 @@
 		<gson.version>2.9.0</gson.version>
 		<h2.version>2.1.214</h2.version>
 		<mongo.version>4.7.1</mongo.version>
+		<minio.version>8.4.5</minio.version>
 
 	</properties>
 
@@ -58,6 +59,7 @@
 		
 		<module>bpm-engine-c8-client</module>
 		
+		<module>file-storage</module>
 		<module>email-bridge</module>
 	</modules>
 

@@ -15,7 +15,6 @@ import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
 import com.wks.bpm.engine.model.spi.Task;
-import com.wks.bpm.engine.model.spi.TaskForm;
 
 /**
  * @author victor.franca
@@ -88,10 +87,6 @@ public class BpmEngineClientFacade {
 
 	public void complete(String taskId, JsonObject variables, final BpmEngine bpmEngine) {
 		getEngineClient(bpmEngine).complete(taskId, variables, bpmEngine);
-	}
-
-	public TaskForm getTaskForm(final String taskId, final BpmEngine bpmEngine) {
-		return getEngineClient(bpmEngine).getTaskForm(taskId, bpmEngine);
 	}
 
 	public String findVariables(String processInstanceId, final BpmEngine bpmEngine) {
