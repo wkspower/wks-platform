@@ -23,7 +23,6 @@ import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
 import com.wks.bpm.engine.model.spi.Task;
-import com.wks.bpm.engine.model.spi.TaskForm;
 import com.wks.rest.client.WksHttpRequest;
 
 /**
@@ -154,14 +153,6 @@ public class C7EngineClient implements BpmEngineClient {
 	public void complete(String taskId, JsonObject variables, final BpmEngine bpmEngine) {
 		WksHttpRequest request = camundaHttpRequestFactory.getTaskCompleteRequest(taskId, variables, bpmEngine);
 		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class);
-	}
-
-	@Override
-	public TaskForm getTaskForm(final String taskId, final BpmEngine bpmEngine) {
-		return restTemplate
-				.getForEntity(camundaHttpRequestFactory.getTaskFormGetRequest(taskId, bpmEngine).getHttpRequestUrl(),
-						TaskForm.class)
-				.getBody();
 	}
 
 	@Override

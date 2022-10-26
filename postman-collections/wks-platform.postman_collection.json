@@ -463,45 +463,6 @@
 			]
 		},
 		{
-			"name": "task-form",
-			"item": [
-				{
-					"name": "{id}",
-					"item": [
-						{
-							"name": "form",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{host}}/task-form/:bpmEngineId/:taskId",
-									"host": [
-										"{{host}}"
-									],
-									"path": [
-										"task-form",
-										":bpmEngineId",
-										":taskId"
-									],
-									"variable": [
-										{
-											"key": "bpmEngineId",
-											"value": "1"
-										},
-										{
-											"key": "taskId",
-											"value": "0d8d6c92-4dfd-11ed-a251-0242ac110002"
-										}
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				}
-			]
-		},
-		{
 			"name": "message",
 			"item": [
 				{
@@ -574,11 +535,11 @@
 									"variable": [
 										{
 											"key": "bpmEngineId",
-											"value": null
+											"value": "c7-demo"
 										},
 										{
 											"key": "id",
-											"value": null
+											"value": "c4efe98f-538b-11ed-b5fb-0242ac110003"
 										},
 										{
 											"key": "taskAssignee",
@@ -617,11 +578,11 @@
 									"variable": [
 										{
 											"key": "bpmEngineId",
-											"value": null
+											"value": "c7-demo"
 										},
 										{
 											"key": "id",
-											"value": null
+											"value": "c4efe98f-538b-11ed-b5fb-0242ac110003"
 										}
 									]
 								}
@@ -635,7 +596,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"variables\": {\r\n        \"aVariable\": {\r\n            \"value\": \"aStringValue\"\r\n        },\r\n        \"anotherVariable\": {\r\n            \"value\": 42\r\n        },\r\n        \"aThirdVariable\": {\r\n            \"value\": true\r\n        }\r\n    },\r\n    \"withVariablesInReturn\": true\r\n}",
+									"raw": "{\r\n  \"variables\": {\r\n    \"textField\": {\r\n      \"value\": \"asdasd\"\r\n    },\r\n    \"textField1\": {\r\n      \"value\": \"asdasdasdsda\"\r\n    }\r\n  }\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -656,11 +617,11 @@
 									"variable": [
 										{
 											"key": "bpmEngineId",
-											"value": "1"
+											"value": "c7-demo"
 										},
 										{
 											"key": "id",
-											"value": null
+											"value": "17d470df-5152-11ed-b795-0242ac110002"
 										}
 									]
 								}
@@ -675,7 +636,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/task/?processInstanceBusinessKey=95064&bpmEngineId=c7-demo",
+							"raw": "{{host}}/task/?processInstanceBusinessKey=62056&bpmEngineId=c7-demo",
 							"host": [
 								"{{host}}"
 							],
@@ -686,7 +647,7 @@
 							"query": [
 								{
 									"key": "processInstanceBusinessKey",
-									"value": "95064"
+									"value": "62056"
 								},
 								{
 									"key": "bpmEngineId",
@@ -720,11 +681,11 @@
 							"variable": [
 								{
 									"key": "bpmEngineId",
-									"value": "1"
+									"value": "c7-demo"
 								},
 								{
 									"key": "processInstanceId",
-									"value": "3f74ff83-4dfd-11ed-a251-0242ac110002"
+									"value": "50a8d797-5451-11ed-91b1-0242ac110003"
 								}
 							]
 						}
@@ -756,7 +717,7 @@
 									"variable": [
 										{
 											"key": "formKey",
-											"value": "journal-case-main-form"
+											"value": "contractor-onboarding-provide-info-and-docs"
 										}
 									]
 								}
@@ -841,7 +802,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"key\": \"motion-detected-form\",\r\n    \"title\": \"Motion Detected Case Main Form\",\r\n    \"toolTip\": \"This is a tool tip!\",\r\n    \"structure\": {\r\n        \"display\": \"form\",\r\n        \"components\": [\r\n            {\r\n                \"label\": \"Where\",\r\n                \"tableView\": true,\r\n                \"key\": \"where\",\r\n                \"type\": \"textfield\",\r\n                \"input\": true,\r\n                \"placeholder\": \"\",\r\n                \"prefix\": \"\",\r\n                \"customClass\": \"\",\r\n                \"suffix\": \"\",\r\n                \"multiple\": false,\r\n                \"protected\": false,\r\n                \"unique\": false,\r\n                \"persistent\": true,\r\n                \"hidden\": false,\r\n                \"clearOnHide\": true,\r\n                \"refreshOn\": \"\",\r\n                \"redrawOn\": \"\",\r\n                \"modalEdit\": false,\r\n                \"dataGridLabel\": false,\r\n                \"labelPosition\": \"top\",\r\n                \"description\": \"\",\r\n                \"errorLabel\": \"\",\r\n                \"tooltip\": \"\",\r\n                \"hideLabel\": false,\r\n                \"tabindex\": \"\",\r\n                \"disabled\": false,\r\n                \"autofocus\": false,\r\n                \"dbIndex\": false,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"attributes\": {},\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false,\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"pattern\": \"\"\r\n                },\r\n                \"conditional\": {\r\n                    \"eq\": \"\"\r\n                },\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"allowCalculateOverride\": false,\r\n                \"encrypted\": false,\r\n                \"showCharCount\": false,\r\n                \"showWordCount\": false,\r\n                \"properties\": {},\r\n                \"allowMultipleMasks\": false,\r\n                \"addons\": [],\r\n                \"mask\": false,\r\n                \"inputType\": \"text\",\r\n                \"inputFormat\": \"plain\",\r\n                \"inputMask\": \"\",\r\n                \"displayMask\": \"\",\r\n                \"spellcheck\": true,\r\n                \"truncateMultipleSpaces\": false,\r\n                \"id\": \"erean3\"\r\n            },\r\n            {\r\n                \"label\": \"When\",\r\n                \"autoExpand\": false,\r\n                \"tableView\": true,\r\n                \"key\": \"when\",\r\n                \"type\": \"textarea\",\r\n                \"input\": true,\r\n                \"placeholder\": \"\",\r\n                \"prefix\": \"\",\r\n                \"customClass\": \"\",\r\n                \"suffix\": \"\",\r\n                \"multiple\": false,\r\n                \"protected\": false,\r\n                \"unique\": false,\r\n                \"persistent\": true,\r\n                \"hidden\": false,\r\n                \"clearOnHide\": true,\r\n                \"refreshOn\": \"\",\r\n                \"redrawOn\": \"\",\r\n                \"modalEdit\": false,\r\n                \"dataGridLabel\": false,\r\n                \"labelPosition\": \"top\",\r\n                \"description\": \"\",\r\n                \"errorLabel\": \"\",\r\n                \"tooltip\": \"\",\r\n                \"hideLabel\": false,\r\n                \"tabindex\": \"\",\r\n                \"disabled\": false,\r\n                \"autofocus\": false,\r\n                \"dbIndex\": false,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"attributes\": {},\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false,\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"pattern\": \"\",\r\n                    \"minWords\": \"\",\r\n                    \"maxWords\": \"\"\r\n                },\r\n                \"conditional\": {\r\n                    \"eq\": \"\"\r\n                },\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"allowCalculateOverride\": false,\r\n                \"encrypted\": false,\r\n                \"showCharCount\": false,\r\n                \"showWordCount\": false,\r\n                \"properties\": {},\r\n                \"allowMultipleMasks\": false,\r\n                \"addons\": [],\r\n                \"mask\": false,\r\n                \"inputType\": \"text\",\r\n                \"inputFormat\": \"html\",\r\n                \"inputMask\": \"\",\r\n                \"displayMask\": \"\",\r\n                \"spellcheck\": true,\r\n                \"truncateMultipleSpaces\": false,\r\n                \"rows\": 3,\r\n                \"wysiwyg\": false,\r\n                \"editor\": \"\",\r\n                \"fixedSize\": true,\r\n                \"id\": \"e7cx9ma\"\r\n            }\r\n        ]\r\n    }\r\n}",
+							"raw": "{\r\n    \"key\": \"contractor-onboarding-approve-info-and-docs\",\r\n    \"title\": \"Provide Information & Docs\",\r\n    \"toolTip\": \"Provide Information & Docs\",\r\n    \"structure\": {\r\n        \"components\": [\r\n            {\r\n                \"label\": \"Company Name\",\r\n                \"labelPosition\": \"top\",\r\n                \"placeholder\": \"\",\r\n                \"description\": \"\",\r\n                \"tooltip\": \"\",\r\n                \"prefix\": \"\",\r\n                \"suffix\": \"\",\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"inputMask\": \"\",\r\n                \"displayMask\": \"\",\r\n                \"allowMultipleMasks\": false,\r\n                \"customClass\": \"\",\r\n                \"tabindex\": \"\",\r\n                \"autocomplete\": \"\",\r\n                \"hidden\": false,\r\n                \"hideLabel\": false,\r\n                \"showWordCount\": false,\r\n                \"showCharCount\": false,\r\n                \"mask\": false,\r\n                \"autofocus\": false,\r\n                \"spellcheck\": true,\r\n                \"disabled\": false,\r\n                \"tableView\": true,\r\n                \"modalEdit\": false,\r\n                \"multiple\": false,\r\n                \"persistent\": true,\r\n                \"inputFormat\": \"plain\",\r\n                \"protected\": false,\r\n                \"dbIndex\": false,\r\n                \"case\": \"\",\r\n                \"truncateMultipleSpaces\": false,\r\n                \"encrypted\": false,\r\n                \"redrawOn\": \"\",\r\n                \"clearOnHide\": true,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"allowCalculateOverride\": false,\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"pattern\": \"\",\r\n                    \"customMessage\": \"\",\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"json\": \"\",\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false\r\n                },\r\n                \"unique\": false,\r\n                \"errorLabel\": \"\",\r\n                \"errors\": \"\",\r\n                \"key\": \"companyName\",\r\n                \"tags\": [],\r\n                \"properties\": {},\r\n                \"conditional\": {\r\n                    \"eq\": \"\",\r\n                    \"json\": \"\"\r\n                },\r\n                \"customConditional\": \"\",\r\n                \"logic\": [],\r\n                \"attributes\": {},\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"page\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"type\": \"textfield\",\r\n                \"input\": true,\r\n                \"refreshOn\": \"\",\r\n                \"dataGridLabel\": false,\r\n                \"addons\": [],\r\n                \"inputType\": \"text\",\r\n                \"id\": \"ef61t7g\",\r\n                \"defaultValue\": \"\"\r\n            },\r\n            {\r\n                \"label\": \"Company Address\",\r\n                \"labelPosition\": \"top\",\r\n                \"placeholder\": \"\",\r\n                \"description\": \"\",\r\n                \"tooltip\": \"\",\r\n                \"prefix\": \"\",\r\n                \"suffix\": \"\",\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"inputMask\": \"\",\r\n                \"displayMask\": \"\",\r\n                \"allowMultipleMasks\": false,\r\n                \"customClass\": \"\",\r\n                \"tabindex\": \"\",\r\n                \"autocomplete\": \"\",\r\n                \"hidden\": false,\r\n                \"hideLabel\": false,\r\n                \"showWordCount\": false,\r\n                \"showCharCount\": false,\r\n                \"mask\": false,\r\n                \"autofocus\": false,\r\n                \"spellcheck\": true,\r\n                \"disabled\": false,\r\n                \"tableView\": true,\r\n                \"modalEdit\": false,\r\n                \"multiple\": false,\r\n                \"persistent\": true,\r\n                \"inputFormat\": \"plain\",\r\n                \"protected\": false,\r\n                \"dbIndex\": false,\r\n                \"case\": \"\",\r\n                \"truncateMultipleSpaces\": false,\r\n                \"encrypted\": false,\r\n                \"redrawOn\": \"\",\r\n                \"clearOnHide\": true,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"allowCalculateOverride\": false,\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"pattern\": \"\",\r\n                    \"customMessage\": \"\",\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"json\": \"\",\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false\r\n                },\r\n                \"unique\": false,\r\n                \"errorLabel\": \"\",\r\n                \"errors\": \"\",\r\n                \"key\": \"name\",\r\n                \"tags\": [],\r\n                \"properties\": {},\r\n                \"conditional\": {\r\n                    \"eq\": \"\",\r\n                    \"json\": \"\"\r\n                },\r\n                \"customConditional\": \"\",\r\n                \"logic\": [],\r\n                \"attributes\": {},\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"page\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"type\": \"textfield\",\r\n                \"input\": true,\r\n                \"refreshOn\": \"\",\r\n                \"dataGridLabel\": false,\r\n                \"addons\": [],\r\n                \"inputType\": \"text\",\r\n                \"id\": \"e99jnl\",\r\n                \"defaultValue\": \"\"\r\n            },\r\n            {\r\n                \"label\": \"Address Poof\",\r\n                \"labelPosition\": \"top\",\r\n                \"placeholder\": \"\",\r\n                \"description\": \"\",\r\n                \"tooltip\": \"Recent utility bill\",\r\n                \"prefix\": \"\",\r\n                \"suffix\": \"\",\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"displayMask\": \"\",\r\n                \"customClass\": \"\",\r\n                \"tabindex\": \"\",\r\n                \"autocomplete\": \"\",\r\n                \"hidden\": false,\r\n                \"hideLabel\": false,\r\n                \"mask\": false,\r\n                \"autofocus\": false,\r\n                \"spellcheck\": true,\r\n                \"disabled\": false,\r\n                \"tableView\": true,\r\n                \"modalEdit\": false,\r\n                \"multiple\": false,\r\n                \"persistent\": true,\r\n                \"inputFormat\": \"plain\",\r\n                \"protected\": false,\r\n                \"dbIndex\": false,\r\n                \"truncateMultipleSpaces\": false,\r\n                \"encrypted\": false,\r\n                \"redrawOn\": \"\",\r\n                \"clearOnHide\": true,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"allowCalculateOverride\": false,\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"pattern\": \"\",\r\n                    \"customMessage\": \"\",\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"json\": \"\",\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false\r\n                },\r\n                \"unique\": false,\r\n                \"errorLabel\": \"\",\r\n                \"errors\": \"\",\r\n                \"key\": \"url\",\r\n                \"tags\": [],\r\n                \"properties\": {},\r\n                \"conditional\": {\r\n                    \"eq\": \"\",\r\n                    \"json\": \"\"\r\n                },\r\n                \"customConditional\": \"\",\r\n                \"logic\": [],\r\n                \"attributes\": {},\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"page\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"type\": \"url\",\r\n                \"input\": true,\r\n                \"refreshOn\": \"\",\r\n                \"dataGridLabel\": false,\r\n                \"showCharCount\": false,\r\n                \"showWordCount\": false,\r\n                \"allowMultipleMasks\": false,\r\n                \"addons\": [],\r\n                \"inputType\": \"url\",\r\n                \"inputMask\": \"\",\r\n                \"id\": \"emvygnt\",\r\n                \"defaultValue\": \"\"\r\n            },\r\n            {\r\n                \"label\": \"Certificate of Incorporation\",\r\n                \"labelPosition\": \"top\",\r\n                \"placeholder\": \"\",\r\n                \"description\": \"\",\r\n                \"tooltip\": \"\",\r\n                \"prefix\": \"\",\r\n                \"suffix\": \"\",\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"displayMask\": \"\",\r\n                \"customClass\": \"\",\r\n                \"tabindex\": \"\",\r\n                \"autocomplete\": \"\",\r\n                \"hidden\": false,\r\n                \"hideLabel\": false,\r\n                \"mask\": false,\r\n                \"autofocus\": false,\r\n                \"spellcheck\": true,\r\n                \"disabled\": false,\r\n                \"tableView\": true,\r\n                \"modalEdit\": false,\r\n                \"multiple\": false,\r\n                \"persistent\": true,\r\n                \"inputFormat\": \"plain\",\r\n                \"protected\": false,\r\n                \"dbIndex\": false,\r\n                \"truncateMultipleSpaces\": false,\r\n                \"encrypted\": false,\r\n                \"redrawOn\": \"\",\r\n                \"clearOnHide\": true,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"allowCalculateOverride\": false,\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"pattern\": \"\",\r\n                    \"customMessage\": \"\",\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"json\": \"\",\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false\r\n                },\r\n                \"unique\": false,\r\n                \"errorLabel\": \"\",\r\n                \"errors\": \"\",\r\n                \"key\": \"companyCertificate\",\r\n                \"tags\": [],\r\n                \"properties\": {},\r\n                \"conditional\": {\r\n                    \"eq\": \"\",\r\n                    \"json\": \"\"\r\n                },\r\n                \"customConditional\": \"\",\r\n                \"logic\": [],\r\n                \"attributes\": {},\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"page\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"type\": \"url\",\r\n                \"input\": true,\r\n                \"refreshOn\": \"\",\r\n                \"dataGridLabel\": false,\r\n                \"showCharCount\": false,\r\n                \"showWordCount\": false,\r\n                \"allowMultipleMasks\": false,\r\n                \"addons\": [],\r\n                \"inputType\": \"url\",\r\n                \"inputMask\": \"\",\r\n                \"id\": \"engopdn\",\r\n                \"defaultValue\": \"\"\r\n            },\r\n            {\r\n                \"label\": \"Valid Insurance Certificate\",\r\n                \"labelPosition\": \"top\",\r\n                \"placeholder\": \"\",\r\n                \"description\": \"\",\r\n                \"tooltip\": \"\",\r\n                \"prefix\": \"\",\r\n                \"suffix\": \"\",\r\n                \"widget\": {\r\n                    \"type\": \"input\"\r\n                },\r\n                \"displayMask\": \"\",\r\n                \"customClass\": \"\",\r\n                \"tabindex\": \"\",\r\n                \"autocomplete\": \"\",\r\n                \"hidden\": false,\r\n                \"hideLabel\": false,\r\n                \"mask\": false,\r\n                \"autofocus\": false,\r\n                \"spellcheck\": true,\r\n                \"disabled\": false,\r\n                \"tableView\": true,\r\n                \"modalEdit\": false,\r\n                \"multiple\": false,\r\n                \"persistent\": true,\r\n                \"inputFormat\": \"plain\",\r\n                \"protected\": false,\r\n                \"dbIndex\": false,\r\n                \"truncateMultipleSpaces\": false,\r\n                \"encrypted\": false,\r\n                \"redrawOn\": \"\",\r\n                \"clearOnHide\": true,\r\n                \"customDefaultValue\": \"\",\r\n                \"calculateValue\": \"\",\r\n                \"calculateServer\": false,\r\n                \"allowCalculateOverride\": false,\r\n                \"validateOn\": \"change\",\r\n                \"validate\": {\r\n                    \"required\": false,\r\n                    \"pattern\": \"\",\r\n                    \"customMessage\": \"\",\r\n                    \"custom\": \"\",\r\n                    \"customPrivate\": false,\r\n                    \"json\": \"\",\r\n                    \"minLength\": \"\",\r\n                    \"maxLength\": \"\",\r\n                    \"strictDateValidation\": false,\r\n                    \"multiple\": false,\r\n                    \"unique\": false\r\n                },\r\n                \"unique\": false,\r\n                \"errorLabel\": \"\",\r\n                \"errors\": \"\",\r\n                \"key\": \"insuranceCertificate\",\r\n                \"tags\": [],\r\n                \"properties\": {},\r\n                \"conditional\": {\r\n                    \"eq\": \"\",\r\n                    \"json\": \"\"\r\n                },\r\n                \"customConditional\": \"\",\r\n                \"logic\": [],\r\n                \"attributes\": {},\r\n                \"overlay\": {\r\n                    \"style\": \"\",\r\n                    \"page\": \"\",\r\n                    \"left\": \"\",\r\n                    \"top\": \"\",\r\n                    \"width\": \"\",\r\n                    \"height\": \"\"\r\n                },\r\n                \"type\": \"url\",\r\n                \"input\": true,\r\n                \"refreshOn\": \"\",\r\n                \"dataGridLabel\": false,\r\n                \"showCharCount\": false,\r\n                \"showWordCount\": false,\r\n                \"allowMultipleMasks\": false,\r\n                \"addons\": [],\r\n                \"inputType\": \"url\",\r\n                \"inputMask\": \"\",\r\n                \"id\": \"e6ysd4l\",\r\n                \"defaultValue\": \"\"\r\n            }\r\n        ],\r\n        \"display\": \"form\"\r\n    }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1030,6 +991,181 @@
 			]
 		},
 		{
+			"name": "record",
+			"item": [
+				{
+					"name": "{key}",
+					"item": [
+						{
+							"name": "record",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/record/:recordTypeId/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"record",
+										":recordTypeId",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "recordTypeId",
+											"value": "client"
+										},
+										{
+											"key": "id",
+											"value": "6351668ad28b56adb76a93f6"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "record",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/record/:recordTypeId/:id?=",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"record",
+										":recordTypeId",
+										":id"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": ""
+										}
+									],
+									"variable": [
+										{
+											"key": "recordTypeId",
+											"value": null
+										},
+										{
+											"key": "id",
+											"value": "motion-detected-form"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "record",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"_id\": {\r\n        \"$oid\": \"6351668ad28b56adb76a93f6\"\r\n    },\r\n    \"name\": \"Josho\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/record/:recordTypeId/:id?=",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"record",
+										":recordTypeId",
+										":id"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": ""
+										}
+									],
+									"variable": [
+										{
+											"key": "recordTypeId",
+											"value": "t_client"
+										},
+										{
+											"key": "id",
+											"value": "6351668ad28b56adb76a93f6"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "record",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Ariel\",\r\n    \"address\": \"Adress 2\",\r\n    \"country\": \"Ireland\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/record/:recordTypeId",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"record",
+								":recordTypeId"
+							],
+							"variable": [
+								{
+									"key": "recordTypeId",
+									"value": "client"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "record",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/record/:recordTypeId",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"record",
+								":recordTypeId"
+							],
+							"variable": [
+								{
+									"key": "recordTypeId",
+									"value": "contractor"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "process-instance",
 			"item": [
 				{
@@ -1073,7 +1209,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/process-instance/:bpmEngineId?businessKey=71552",
+							"raw": "{{host}}/process-instance/:bpmEngineId?businessKey=81385",
 							"host": [
 								"{{host}}"
 							],
@@ -1084,13 +1220,13 @@
 							"query": [
 								{
 									"key": "businessKey",
-									"value": "71552"
+									"value": "81385"
 								}
 							],
 							"variable": [
 								{
 									"key": "bpmEngineId",
-									"value": "1"
+									"value": "c7-demo"
 								}
 							]
 						}

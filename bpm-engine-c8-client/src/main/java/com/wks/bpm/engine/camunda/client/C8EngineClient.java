@@ -16,7 +16,6 @@ import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
 import com.wks.bpm.engine.model.spi.Task;
-import com.wks.bpm.engine.model.spi.TaskForm;
 
 /**
  * @author victor.franca
@@ -101,12 +100,6 @@ public class C8EngineClient implements BpmEngineClient {
 
 	@Override
 	public void complete(String taskId, JsonObject variables, final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public TaskForm getTaskForm(String taskId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
