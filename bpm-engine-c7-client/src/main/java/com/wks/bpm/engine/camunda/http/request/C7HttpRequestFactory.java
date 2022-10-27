@@ -153,7 +153,7 @@ public class C7HttpRequestFactory {
 	/// Variables ///
 	public WksHttpRequest getVariablesListRequest(final String processIntanceId, final BpmEngine bpmEngine) {
 		return new C7HttpGetRequest<>(
-				extractUrl(bpmEngine) + processInstanceUrl + "/" + processIntanceId + "/variables",
+				extractUrl(bpmEngine) + processInstanceUrl + "/" + processIntanceId + "/variables?deserializeValues=false",
 				new HttpEntity<String>(httpHeadersFactory.create()));
 	}
 
