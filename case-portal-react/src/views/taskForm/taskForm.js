@@ -53,7 +53,6 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId }) => {
             })
             .then((response) => response.json())
             .then((data) => {
-                console.log(data);
                 for (var key in data) {
                     apiDataVariables.data[key] = data[key].type === 'Json' ? JSON.parse(data[key].value) : data[key].value;
                 }
