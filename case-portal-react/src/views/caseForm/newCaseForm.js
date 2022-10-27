@@ -17,9 +17,6 @@ import React, { useEffect } from 'react';
 
 import { Form } from '@formio/react';
 import MainCard from 'components/MainCard';
-import { CollectionsBookmarkRounded } from '../../../node_modules/@mui/icons-material/index';
-
-import { tryParseJSONObject } from '../../utils/jsonStringCheck';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -61,7 +58,7 @@ export const NewCaseForm = ({ open, handleClose, caseDefId }) => {
         Object.keys(formData.data).forEach((key) => {
             caseAttributes.push({
                 name: key,
-                value: tryParseJSONObject(formData.data[key]) ? formData.data[key] : JSON.stringify(formData.data[key])
+                value: typeof formData.data[key] !== 'object' ? formData.data[key] : JSON.stringify(formData.data[key])
             });
         });
 

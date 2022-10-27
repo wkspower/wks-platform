@@ -60,6 +60,9 @@
 contractor.firstName = execution.getVariable('firstName');
 contractor.lastName = execution.getVariable('lastName');
 contractor.email = execution.getVariable('email');
+contractor.personalAddress = execution.getVariable('personalAddress');
+contractor.phoneNumbers= JSON.parse(execution.getVariable('phoneNumbers'));
+
 contractor.client = execution.getVariable('client');
 contractor.startDate = execution.getVariable('startDate');
 contractor.companyName= execution.getVariable('companyName');
