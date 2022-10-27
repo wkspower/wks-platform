@@ -69,7 +69,14 @@ contractor.companyCertificate = execution.getVariable('companyCertificate');
 contractor.insuranceCertificate = execution.getVariable('insuranceCertificate');
 contractor.dailyRate = execution.getVariable('dailyRate');
 
-execution.setVariable('contractor', JSON.stringify(contractor));</camunda:script>
+contractor.addressProof= JSON.parse(execution.getVariable('addressProof'));
+
+contractor.companyCertificate= JSON.parse(execution.getVariable('companyCertificate'));
+
+contractor.insuranceCertificate= JSON.parse(execution.getVariable('insuranceCertificate'));
+
+
+execution.setVariable('contractor', S(JSON.stringify(contractor)));</camunda:script>
         </camunda:executionListener>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1nll82f</bpmn:incoming>
@@ -177,11 +184,7 @@ execution.setVariable('contractor', JSON.stringify(contractor));</camunda:script
     <bpmn:sequenceFlow id="Flow_1sluqq4" sourceRef="Activity_12neh4g" targetRef="Activity_00usmzm" />
     <bpmn:sequenceFlow id="Flow_11se6yk" sourceRef="Activity_00usmzm" targetRef="Activity_0jfdxc2" />
     <bpmn:userTask id="Activity_00usmzm" name="Contract Writing">
-      <bpmn:extensionElements>
-        <camunda:inputOutput>
-          <camunda:inputParameter name="stage" />
-        </camunda:inputOutput>
-      </bpmn:extensionElements>
+      <bpmn:extensionElements />
       <bpmn:incoming>Flow_1sluqq4</bpmn:incoming>
       <bpmn:outgoing>Flow_11se6yk</bpmn:outgoing>
     </bpmn:userTask>
@@ -203,6 +206,20 @@ execution.setVariable('contractor', JSON.stringify(contractor));</camunda:script
         <dc:Bounds x="159" y="280" width="2591" height="320" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_11se6yk_di" bpmnElement="Flow_11se6yk">
+        <di:waypoint x="1570" y="460" />
+        <di:waypoint x="1635" y="460" />
+        <di:waypoint x="1635" y="180" />
+        <di:waypoint x="1670" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1sluqq4_di" bpmnElement="Flow_1sluqq4">
+        <di:waypoint x="1380" y="460" />
+        <di:waypoint x="1470" y="460" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0tbzfhc_di" bpmnElement="Flow_0tbzfhc">
+        <di:waypoint x="1210" y="460" />
+        <di:waypoint x="1280" y="460" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0llrlgx_di" bpmnElement="Flow_0llrlgx">
         <di:waypoint x="1990" y="485" />
         <di:waypoint x="1990" y="770" />
@@ -301,20 +318,6 @@ execution.setVariable('contractor', JSON.stringify(contractor));</camunda:script
         <di:waypoint x="314" y="460" />
         <di:waypoint x="314" y="790" />
         <di:waypoint x="360" y="790" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0tbzfhc_di" bpmnElement="Flow_0tbzfhc">
-        <di:waypoint x="1210" y="460" />
-        <di:waypoint x="1280" y="460" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1sluqq4_di" bpmnElement="Flow_1sluqq4">
-        <di:waypoint x="1380" y="460" />
-        <di:waypoint x="1470" y="460" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_11se6yk_di" bpmnElement="Flow_11se6yk">
-        <di:waypoint x="1570" y="460" />
-        <di:waypoint x="1635" y="460" />
-        <di:waypoint x="1635" y="180" />
-        <di:waypoint x="1670" y="180" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Activity_0nmmnfg_di" bpmnElement="Activity_0xzk4x3">
         <dc:Bounds x="360" y="750" width="100" height="80" />

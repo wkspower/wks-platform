@@ -53,8 +53,9 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId }) => {
             })
             .then((response) => response.json())
             .then((data) => {
+                console.log(data);
                 for (var key in data) {
-                    apiDataVariables.data[key] = data[key].value;
+                    apiDataVariables.data[key] = data[key].type === 'Json' ? JSON.parse(data[key].value) : data[key].value;
                 }
 
                 setFormComponents(apiDataFormComponents);
@@ -110,7 +111,8 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId }) => {
     const handleComplete = function () {
         let variables = { ...variableValues.data };
         Object.keys(variables).forEach(function (key, index) {
-            variables[key] = { value: variables[key] };
+            variables[key] =
+                typeof variables[key] === 'object' ? { value: JSON.stringify(variables[key]), type: 'Json' } : { value: variables[key] };
         });
 
         fetch('http://localhost:8081/task/' + bpmEngineId + '/' + task.id + '/complete', {
