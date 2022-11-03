@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid';
 import MainCard from 'components/MainCard';
 import React, { useEffect, useState } from 'react';
 import { ProcessDiagram } from 'views/bpmn/ProcessDiagram';
@@ -8,7 +8,7 @@ import { TaskForm } from '../taskForm/taskForm';
 
 import './taskList.css';
 
-export const TaskList = ({ businessKey, bpmEngineId }) => {
+export const TaskList = ({ businessKey, bpmEngineId, keycloak }) => {
     const [tasks, setTasks] = useState(null);
     const [open, setOpen] = useState(false);
     const [task, setTask] = useState(null);
@@ -47,9 +47,12 @@ export const TaskList = ({ businessKey, bpmEngineId }) => {
 
     const columns: GridColDef[] = [
         { field: 'name', headerName: 'Task', width: 200 },
-        { field: 'caseInstanceId', headerName: 'Case', width: 220 },
+        { field: 'caseInstanceId', headerName: 'Case', width: 100 },
         { field: 'processDefinitionId', headerName: 'Process', width: 250 },
+        { field: 'assignee', headerName: 'Assignee', width: 100 },
         { field: 'created', headerName: 'Created', type: 'date', width: 150 },
+        { field: 'due', headerName: 'Due', width: 150 },
+        { field: 'followUp', headerName: 'Follow Up', width: 150 },
         {
             field: 'action',
             headerName: '',
@@ -82,6 +85,7 @@ export const TaskList = ({ businessKey, bpmEngineId }) => {
                                 columns={columns}
                                 pageSize={10}
                                 rowsPerPageOptions={[10]}
+                                components={{ Toolbar: GridToolbar }}
                             />
                         </Box>
                     </MainCard>
@@ -90,7 +94,9 @@ export const TaskList = ({ businessKey, bpmEngineId }) => {
                     <ProcessDiagram processDefinitionId={processDefId} activityInstances={activityInstances} bpmEngineId={bpmEngineId} />
                 )}
 
-                {open && task && <TaskForm task={task} handleClose={handleClose} open={open} bpmEngineId={bpmEngineId} />}
+                {open && task && (
+                    <TaskForm task={task} handleClose={handleClose} open={open} bpmEngineId={bpmEngineId} keycloak={keycloak} />
+                )}
             </Box>
         </React.Fragment>
     );

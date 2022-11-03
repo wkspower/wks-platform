@@ -12,61 +12,54 @@ import { TaskList } from 'views/taskList/taskList';
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard')));
 
-// ==============================|| MAIN ROUTING ||============================== //
+export const MainRoutes = (keycloak, authenticated, recordsTypes) => {
+    let routes = {
+        path: '/',
+        element: <MainLayout keycloak={keycloak} authenticated={authenticated} />,
+        children: [
+            {
+                path: '/',
+                element: <DashboardDefault />
+            },
 
-const MainRoutes = {
-    path: '/',
-    element: <MainLayout />,
-    children: [
-        {
-            path: '/',
-            element: <DashboardDefault />
-        },
+            {
+                path: 'home',
+                element: <DashboardDefault />
+            },
+            {
+                path: 'case-list',
+                children: [
+                    {
+                        path: 'cases',
+                        element: <CaseList keycloak={keycloak} />
+                    },
+                    {
+                        path: 'wip-cases',
+                        element: <CaseList status={CaseStatus.WipCaseStatus.description} keycloak={keycloak} />
+                    },
+                    {
+                        path: 'closed-cases',
+                        element: <CaseList status={CaseStatus.ClosedCaseStatus.description} keycloak={keycloak} />
+                    },
+                    {
+                        path: 'archived-cases',
+                        element: <CaseList status={CaseStatus.ArchivedCaseStatus.description} keycloak={keycloak} />
+                    }
+                ]
+            },
+            {
+                path: 'task-list',
+                element: <TaskList keycloak={keycloak} />
+            }
+        ]
+    };
 
-        {
-            path: 'home',
-            element: <DashboardDefault />
-        },
-        {
-            path: 'case-list',
-            children: [
-                {
-                    path: 'cases',
-                    element: <CaseList />
-                },
-                {
-                    path: 'wip-cases',
-                    element: <CaseList status={CaseStatus.WipCaseStatus.description} />
-                },
-                {
-                    path: 'closed-cases',
-                    element: <CaseList status={CaseStatus.ClosedCaseStatus.description} />
-                },
-                {
-                    path: 'archived-cases',
-                    element: <CaseList status={CaseStatus.ArchivedCaseStatus.description} />
-                }
-            ]
-        },
-        {
-            path: 'task-list',
-            element: <TaskList />
-        }
-    ]
-};
-
-fetch('http://localhost:8081/record-type/')
-    .then((response) => response.json())
-    .then((data) => {
-        data.forEach((element) => {
-            MainRoutes.children.push({
-                path: 'record-list/' + element.id,
-                element: <RecordList recordTypeId={element.id} />
-            });
+    recordsTypes.forEach((element) => {
+        routes.children.push({
+            path: 'record-list/' + element.id,
+            element: <RecordList recordTypeId={element.id} />
         });
-    })
-    .catch((err) => {
-        console.log(err.message);
     });
 
-export default MainRoutes;
+    return routes;
+};

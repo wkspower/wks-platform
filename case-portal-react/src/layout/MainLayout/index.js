@@ -15,22 +15,9 @@ import Header from './Header';
 // types
 import { openDrawer } from 'store/reducers/menu';
 
-import Keycloak from 'keycloak-js';
-
 // ==============================|| MAIN LAYOUT ||============================== //
 
-const MainLayout = () => {
-    const [keycloak, setKeycloak] = useState();
-    const [authenticated, setAuthenticated] = useState(null);
-
-    useEffect(() => {
-        const keycloak = Keycloak('/keycloak.json');
-        keycloak.init({ onLoad: 'login-required' }).then((authenticaded) => {
-            setKeycloak(keycloak);
-            setAuthenticated(authenticaded);
-        });
-    }, []);
-
+const MainLayout = ({ keycloak, authenticated }) => {
     const theme = useTheme();
     const matchDownLG = useMediaQuery(theme.breakpoints.down('xl'));
     const dispatch = useDispatch();
