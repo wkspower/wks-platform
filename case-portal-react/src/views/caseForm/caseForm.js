@@ -67,7 +67,7 @@ TabPanel.propTypes = {
     value: PropTypes.number.isRequired
 };
 
-export const CaseForm = ({ open, handleClose, aCase }) => {
+export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     const [caseDef, setCaseDef] = useState(null);
     const [form, setForm] = useState(null);
     const [formData, setFormData] = useState(null);
@@ -229,7 +229,7 @@ export const CaseForm = ({ open, handleClose, aCase }) => {
                     <TabPanel value={tabIndex} index={1}>
                         {/* Task List  */}
                         <div style={{ display: 'grid', padding: '10px' }}>
-                            <TaskList businessKey={aCase.businessKey} bpmEngineId={caseDef.bpmEngineId} />
+                            <TaskList businessKey={aCase.businessKey} bpmEngineId={caseDef.bpmEngineId} keycloak={keycloak} />
                         </div>
                     </TabPanel>
                 </Dialog>

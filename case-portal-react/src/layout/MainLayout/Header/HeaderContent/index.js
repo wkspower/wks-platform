@@ -1,16 +1,16 @@
 // material-ui
+import { GithubOutlined } from '@ant-design/icons';
 import { Box, IconButton, Link, useMediaQuery } from '@mui/material';
-import { PlusOutlined } from '@ant-design/icons';
 
 // project import
-import Search from './Search';
-import Profile from './Profile';
-import Notification from './Notification';
 import MobileSection from './MobileSection';
+import Notification from './Notification';
+import Profile from './Profile';
+import Search from './Search';
 
 // ==============================|| HEADER - CONTENT ||============================== //
 
-const HeaderContent = () => {
+const HeaderContent = ({ keycloak }) => {
     const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'));
 
     return (
@@ -20,18 +20,18 @@ const HeaderContent = () => {
 
             <IconButton
                 component={Link}
-                href=""
+                href="https://github.com/codedthemes/mantis-free-react-admin-template"
                 target="_blank"
                 disableRipple
                 color="secondary"
-                title="Create New Case"
+                title="Download Free Version"
                 sx={{ color: 'text.primary', bgcolor: 'grey.100' }}
             >
-                <PlusOutlined />
+                <GithubOutlined />
             </IconButton>
 
             <Notification />
-            {!matchesXs && <Profile />}
+            {!matchesXs && <Profile keycloak={keycloak} />}
             {matchesXs && <MobileSection />}
         </>
     );

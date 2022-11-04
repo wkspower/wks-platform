@@ -26,7 +26,7 @@ const Transition = React.forwardRef(function Transition(
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const TaskForm = ({ open, handleClose, task, bpmEngineId }) => {
+export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => {
     const [claimed, setClaimed] = useState(false);
     const [assignee, setAssignee] = useState(null);
 
@@ -74,7 +74,7 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId }) => {
     }, [open, task, bpmEngineId]);
 
     const handleClaim = function () {
-        fetch('http://localhost:8081/task/' + bpmEngineId + '/' + task.id + '/claim/demo', {
+        fetch('http://localhost:8081/task/' + bpmEngineId + '/' + task.id + '/claim/' + keycloak.idTokenParsed.name, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -83,7 +83,7 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId }) => {
         })
             .then(() => {
                 setClaimed(true);
-                setAssignee('demo');
+                setAssignee(keycloak.idTokenParsed.name);
             })
             .catch((err) => {
                 console.log(err.message);

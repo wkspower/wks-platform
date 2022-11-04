@@ -1,16 +1,16 @@
 // material-ui
-import { Box, IconButton, Link, useMediaQuery } from '@mui/material';
 import { GithubOutlined } from '@ant-design/icons';
+import { Box, IconButton, Link, useMediaQuery } from '@mui/material';
 
 // project import
-import Search from './Search';
-import Profile from './Profile';
-import Notification from './Notification';
 import MobileSection from './MobileSection';
+import Notification from './Notification';
+import Profile from './Profile';
+import Search from './Search';
 
 // ==============================|| HEADER - CONTENT ||============================== //
 
-const HeaderContent = () => {
+const HeaderContent = ({ keycloak }) => {
     const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'));
 
     return (
@@ -31,7 +31,7 @@ const HeaderContent = () => {
             </IconButton>
 
             <Notification />
-            {!matchesXs && <Profile />}
+            {!matchesXs && <Profile keycloak={keycloak} />}
             {matchesXs && <MobileSection />}
         </>
     );

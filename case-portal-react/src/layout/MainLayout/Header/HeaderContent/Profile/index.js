@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import { useRef, useState } from 'react';
 
 // material-ui
-import { useTheme } from '@mui/material/styles';
 import {
     Avatar,
     Box,
@@ -18,16 +17,17 @@ import {
     Tabs,
     Typography
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 // project import
-import MainCard from 'components/MainCard';
 import Transitions from 'components/@extended/Transitions';
+import MainCard from 'components/MainCard';
 import ProfileTab from './ProfileTab';
 import SettingTab from './SettingTab';
 
 // assets
-import avatar1 from 'assets/images/users/avatar-1.png';
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import avatar2 from 'assets/images/users/avatar-2.png';
 
 // tab panel wrapper
 function TabPanel({ children, value, index, ...other }) {
@@ -53,11 +53,17 @@ function a11yProps(index) {
 
 // ==============================|| HEADER CONTENT - PROFILE ||============================== //
 
-const Profile = () => {
+const Profile = ({ keycloak }) => {
     const theme = useTheme();
 
     const handleLogout = async () => {
-        // logout
+        keycloak.logout({ redirectUri: window.location.origin });
+        // .then((success) => {
+        //     console.log('--> log: logout success ', success);
+        // })
+        // .catch((error) => {
+        //     console.log('--> log: logout error ', error);
+        // });
     };
 
     const anchorRef = useRef(null);
@@ -97,8 +103,8 @@ const Profile = () => {
                 onClick={handleToggle}
             >
                 <Stack direction="row" spacing={2} alignItems="center" sx={{ p: 0.5 }}>
-                    <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
-                    <Typography variant="subtitle1">John Doe</Typography>
+                    <Avatar alt="profile user" src={avatar2} sx={{ width: 32, height: 32 }} />
+                    <Typography variant="subtitle1">{keycloak.idTokenParsed.name}</Typography>
                 </Stack>
             </ButtonBase>
             <Popper
@@ -139,7 +145,7 @@ const Profile = () => {
                                             <Grid container justifyContent="space-between" alignItems="center">
                                                 <Grid item>
                                                     <Stack direction="row" spacing={1.25} alignItems="center">
-                                                        <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
+                                                        <Avatar alt="profile user" src={avatar2} sx={{ width: 32, height: 32 }} />
                                                         <Stack>
                                                             <Typography variant="h6">John Doe</Typography>
                                                             <Typography variant="body2" color="textSecondary">

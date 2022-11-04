@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 
 // material-ui
-import { useTheme } from '@mui/material/styles';
 import { AppBar, IconButton, Toolbar, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 // project import
 import AppBarStyled from './AppBarStyled';
@@ -13,7 +13,7 @@ import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 
 // ==============================|| MAIN LAYOUT - HEADER ||============================== //
 
-const Header = ({ open, handleDrawerToggle }) => {
+const Header = ({ open, handleDrawerToggle, keycloak }) => {
     const theme = useTheme();
     const matchDownMD = useMediaQuery(theme.breakpoints.down('lg'));
 
@@ -33,7 +33,7 @@ const Header = ({ open, handleDrawerToggle }) => {
             >
                 {!open ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             </IconButton>
-            <HeaderContent />
+            <HeaderContent keycloak={keycloak} />
         </Toolbar>
     );
 

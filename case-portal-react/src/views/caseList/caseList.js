@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { CaseForm } from '../caseForm/caseForm';
 import { NewCaseForm } from '../caseForm/newCaseForm';
 
-export const CaseList = ({ status }) => {
+export const CaseList = ({ status, keycloak }) => {
     const [cases, setCases] = useState([]);
     const [aCase, setACase] = useState(null);
     const [newCaseDefId, setNewCaseDefId] = useState(null);
@@ -116,7 +116,7 @@ export const CaseList = ({ status }) => {
                     />
                 </Box>
             </MainCard>
-            {openCaseForm && <CaseForm aCase={aCase} handleClose={handleCloseCaseForm} open={openCaseForm} />}
+            {openCaseForm && <CaseForm aCase={aCase} handleClose={handleCloseCaseForm} open={openCaseForm} keycloak={keycloak} />}
 
             {openNewCaseForm && <NewCaseForm handleClose={handleCloseNewCaseForm} open={openNewCaseForm} caseDefId={newCaseDefId} />}
         </div>
