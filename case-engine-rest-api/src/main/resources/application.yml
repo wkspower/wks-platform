@@ -1,10 +1,3 @@
-spring:
-  config:
-    import: file:env.properties
-  output:
-    ansi:
-      enabled: ALWAYS
-
 server:
    port: 8081
 
@@ -30,6 +23,5 @@ camunda7.rest.processinstance.url: /process-instance
 camunda7.rest.task.url: /task
 camunda7.rest.correlate.url: /message
 
-minio.url: http://localhost:9090
-minio.accessKey: Rop8zSRf6b3r6uLD
-minio.secret: ianQ2Qdxlr6HkTuEaCenPmrwfhBXFs5N
+mongo.connection-string: mongodb://localhost
+mongo.database: wks-mongo-database

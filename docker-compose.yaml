@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+    case-engine-rest-api:
+        build:
+            context: case-engine-rest-api
+        ports:
+            - 8081:8081
+        links:
+            - mongodb
+
+    mongodb:
+        image: mongo:latest
+        ports:
+            - 27017:27017
