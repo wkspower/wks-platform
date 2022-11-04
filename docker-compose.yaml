@@ -1,5 +1,25 @@
 version: '3.7'
 services:
+    mongodb:
+        image: mongo:latest
+        ports:
+            - 27017:27017
+
+    camunda:
+        image: camunda/camunda-bpm-platform:latest
+        ports:
+            - 8080:8080
+
+    keycloak:
+        image: quay.io/keycloak/keycloak:18.0.0
+        command: start-dev
+        environment:
+            KEYCLOAK_ADMIN: admin
+            KEYCLOAK_ADMIN_PASSWORD: admin 
+
+        ports:
+            - 8580:8080
+
     case-engine-rest-api:
         build:
             context: case-engine-rest-api
@@ -8,7 +28,18 @@ services:
         links:
             - mongodb
 
-    mongodb:
-        image: mongo:latest
+    case-portal-admim:
+        build:
+            context: case-portal-admin-react
         ports:
-            - 27017:27017
+            - 3002:3000
+        links:
+            - keycloak
+
+    case-portal:
+        build:
+            context: case-portal-react
+        ports:
+            - 3001:3000
+        links:
+            - keycloak            
