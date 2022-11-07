@@ -15,7 +15,7 @@ export const CaseList = ({ status, keycloak }) => {
     const [openNewCaseForm, setOpenNewCaseForm] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:8081/case/' + (status ? '?status=' + status : ''))
+        fetch(process.env.REACT_APP_API_URL + '/case/' + (status ? '?status=' + status : ''))
             .then((response) => response.json())
             .then((data) => {
                 setCases(data);
@@ -27,7 +27,7 @@ export const CaseList = ({ status, keycloak }) => {
 
     const [caseDefs, setCaseDefs] = useState([]);
     useEffect(() => {
-        fetch('http://localhost:8081/case-definition/')
+        fetch(process.env.REACT_APP_API_URL + '/case-definition/')
             .then((response) => response.json())
             .then((data) => {
                 setCaseDefs(data);

@@ -14,7 +14,7 @@ export const FormList = () => {
     const [openNewForm, setOpenNewForm] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:8081/form/')
+        fetch(process.env.REACT_APP_API_URL + '/form/')
             .then((response) => response.json())
             .then((data) => {
                 setForms(data);

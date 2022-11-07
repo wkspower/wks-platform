@@ -34,7 +34,7 @@ const Transition = React.forwardRef(function Transition(
 
 export const FormDetail = ({ open, handleClose, form, handleInputChange, handleSelectDisplay }) => {
     const saveForm = () => {
-        fetch('http://localhost:8081/form/' + form.key, {
+        fetch(process.env.REACT_APP_API_URL + '/form/' + form.key, {
             method: 'PATCH',
             headers: {
                 Accept: 'application/json',
@@ -49,7 +49,7 @@ export const FormDetail = ({ open, handleClose, form, handleInputChange, handleS
     };
 
     const deleteForm = () => {
-        fetch('http://localhost:8081/form/' + form.key, {
+        fetch(process.env.REACT_APP_API_URL + '/form/' + form.key, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/json',

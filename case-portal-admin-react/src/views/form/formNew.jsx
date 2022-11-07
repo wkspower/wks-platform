@@ -26,7 +26,7 @@ export const FormNew = ({ open, handleClose }) => {
     }, [open]);
 
     const saveNewForm = () => {
-        fetch('http://localhost:8081/form/', {
+        fetch(process.env.REACT_APP_API_URL + '/form/', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',

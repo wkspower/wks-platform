@@ -78,17 +78,17 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     const [stages, setStages] = useState([]);
 
     useEffect(() => {
-        fetch('http://localhost:8081/case-definition/' + aCase.caseDefinitionId)
+        fetch(process.env.REACT_APP_API_URL + '/case-definition/' + aCase.caseDefinitionId)
             .then((response) => response.json())
             .then((data) => {
                 setCaseDef(data);
                 setStages(data.stages.sort((a, b) => a.index - b.index).map((o) => o.name));
-                return fetch('http://localhost:8081/form/' + data.formKey);
+                return fetch(process.env.REACT_APP_API_URL + '/form/' + data.formKey);
             })
             .then((response) => response.json())
             .then((data) => {
                 setForm(data);
-                return fetch('http://localhost:8081/case/' + aCase.businessKey);
+                return fetch(process.env.REACT_APP_API_URL + '/case/' + aCase.businessKey);
             })
             .then((response) => response.json())
             .then((caseData) => {
@@ -115,7 +115,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     };
 
     const handleUpdateCaseStatus = (newStatus) => {
-        fetch('http://localhost:8081/case/' + aCase.businessKey, {
+        fetch(process.env.REACT_APP_API_URL + '/case/' + aCase.businessKey, {
             method: 'PATCH',
             headers: {
                 Accept: 'application/json',

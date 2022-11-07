@@ -39,7 +39,7 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => 
         let apiDataVariables = {};
         let apiDataFormComponents = {};
 
-        fetch('http://localhost:8081/form/' + task.formKey)
+        fetch(process.env.REACT_APP_API_URL + '/form/' + task.formKey)
             .then((response) => response.json())
             .then((data) => {
                 apiDataFormComponents = data.structure;
@@ -49,7 +49,7 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => 
                     metadata: {},
                     isValid: true
                 };
-                return fetch('http://localhost:8081/variable/' + bpmEngineId + '/' + task.processInstanceId);
+                return fetch(process.env.REACT_APP_API_URL + '/variable/' + bpmEngineId + '/' + task.processInstanceId);
             })
             .then((response) => response.json())
             .then((data) => {
@@ -66,7 +66,7 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => 
                 console.log(err.message);
             });
 
-        fetch('http://localhost:8081/process-instance/' + bpmEngineId + '/' + task.processInstanceId + '/activity-instances')
+        fetch(process.env.REACT_APP_API_URL + '/process-instance/' + bpmEngineId + '/' + task.processInstanceId + '/activity-instances')
             .then((response) => response.json())
             .then((data) => {
                 setActivityInstances(data);
@@ -74,7 +74,7 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => 
     }, [open, task, bpmEngineId]);
 
     const handleClaim = function () {
-        fetch('http://localhost:8081/task/' + bpmEngineId + '/' + task.id + '/claim/' + keycloak.idTokenParsed.name, {
+        fetch(process.env.REACT_APP_API_URL + '/task/' + bpmEngineId + '/' + task.id + '/claim/' + keycloak.idTokenParsed.name, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -91,7 +91,7 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => 
     };
 
     const handleUnclaim = function () {
-        fetch('http://localhost:8081/task/' + bpmEngineId + '/' + task.id + '/unclaim', {
+        fetch(process.env.REACT_APP_API_URL + '/task/' + bpmEngineId + '/' + task.id + '/unclaim', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -114,7 +114,7 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => 
                 typeof variables[key] === 'object' ? { value: JSON.stringify(variables[key]), type: 'Json' } : { value: variables[key] };
         });
 
-        fetch('http://localhost:8081/task/' + bpmEngineId + '/' + task.id + '/complete', {
+        fetch(process.env.REACT_APP_API_URL + '/task/' + bpmEngineId + '/' + task.id + '/complete', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',

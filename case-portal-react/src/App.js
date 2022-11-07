@@ -14,21 +14,24 @@ const App = () => {
     const [recordsTypes, setRecordsTypes] = useState([]);
 
     useEffect(() => {
-        const keycloak = Keycloak('/keycloak.json');
+        const keycloak = Keycloak({
+            url: process.env.REACT_APP_KEYCLOAK_URL,
+            realm: 'wks-platform',
+            clientId: 'wks-portal'
+        });
         keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
             setKeycloak(keycloak);
             setAuthenticated(authenticated);
         });
 
-        fetch('http://localhost:8081/record-type/')
-        .then((response) => response.json())
-        .then((data) => {
-            setRecordsTypes(data);
-        })
-        .catch((err) => {
-            console.log(err.message);
-        });
-
+        fetch(process.env.REACT_APP_API_URL + '/record-type/')
+            .then((response) => response.json())
+            .then((data) => {
+                setRecordsTypes(data);
+            })
+            .catch((err) => {
+                console.log(err.message);
+            });
     }, []);
 
     return (

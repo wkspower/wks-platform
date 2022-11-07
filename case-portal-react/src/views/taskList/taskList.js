@@ -18,7 +18,7 @@ export const TaskList = ({ businessKey, bpmEngineId, keycloak }) => {
 
     useEffect(() => {
         fetch(
-            'http://localhost:8081/task/?' +
+            process.env.REACT_APP_API_URL + '/task/?' +
                 (bpmEngineId ? 'bpmEngineId=' + bpmEngineId + '&' : '') +
                 (businessKey ? 'processInstanceBusinessKey=' + businessKey : '')
         )
@@ -30,11 +30,11 @@ export const TaskList = ({ businessKey, bpmEngineId, keycloak }) => {
                 console.log(err.message);
             });
 
-        fetch('http://localhost:8081/process-instance/' + bpmEngineId + '?businessKey=' + businessKey)
+        fetch(process.env.REACT_APP_API_URL + '/process-instance/' + bpmEngineId + '?businessKey=' + businessKey)
             .then((response) => response.json())
             .then((data) => {
                 setProcessDefId(data[0].definitionId);
-                return fetch('http://localhost:8081/process-instance/' + bpmEngineId + '/' + data[0].id + '/activity-instances');
+                return fetch(process.env.REACT_APP_API_URL + '/process-instance/' + bpmEngineId + '/' + data[0].id + '/activity-instances');
             })
             .then((response) => response.json())
             .then((data) => {
