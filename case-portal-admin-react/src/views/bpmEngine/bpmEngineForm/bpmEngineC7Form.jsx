@@ -39,7 +39,7 @@ export const BpmEngineC7Form = ({ bpmEngine, setBpmEngine, open, handleClose }) 
 
     const onSave = () => {
         if (bpmEngine.mode && bpmEngine.mode === 'new') {
-            fetch('http://localhost:8081/bpm-engine/', {
+            fetch(process.env.REACT_APP_API_URL + '/bpm-engine/', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -52,7 +52,7 @@ export const BpmEngineC7Form = ({ bpmEngine, setBpmEngine, open, handleClose }) 
                     console.log(err.message);
                 });
         } else {
-            fetch('http://localhost:8081/bpm-engine/' + bpmEngine.id, {
+            fetch(process.env.REACT_APP_API_URL + '/bpm-engine/' + bpmEngine.id, {
                 method: 'PATCH',
                 headers: {
                     Accept: 'application/json',
@@ -68,7 +68,7 @@ export const BpmEngineC7Form = ({ bpmEngine, setBpmEngine, open, handleClose }) 
     };
 
     const handleDelete = () => {
-        fetch('http://localhost:8081/bpm-engine/' + bpmEngine.id, {
+        fetch(process.env.REACT_APP_API_URL + '/bpm-engine/' + bpmEngine.id, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/json',

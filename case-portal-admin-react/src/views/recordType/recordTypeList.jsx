@@ -12,7 +12,7 @@ export const RecordTypeList = () => {
     const [openForm, setOpenForm] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:8081/record-type/')
+        fetch(process.env.REACT_APP_API_URL + '/record-type/')
             .then((response) => response.json())
             .then((data) => {
                 setRecordTypes(data);

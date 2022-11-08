@@ -33,11 +33,11 @@ export const NewCaseForm = ({ open, handleClose, caseDefId }) => {
     const [formData, setFormData] = useState(null);
 
     useEffect(() => {
-        fetch('http://localhost:8081/case-definition/' + caseDefId)
+        fetch(process.env.REACT_APP_API_URL + '/case-definition/' + caseDefId)
             .then((response) => response.json())
             .then((data) => {
                 setCaseDef(data);
-                return fetch('http://localhost:8081/form/' + data.formKey);
+                return fetch(process.env.REACT_APP_API_URL + '/form/' + data.formKey);
             })
             .then((response) => response.json())
             .then((data) => {
@@ -62,7 +62,7 @@ export const NewCaseForm = ({ open, handleClose, caseDefId }) => {
             });
         });
 
-        fetch('http://localhost:8081/case/', {
+        fetch(process.env.REACT_APP_API_URL + '/case/', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',

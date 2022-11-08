@@ -24,7 +24,11 @@ const MainLayout = () => {
     const [authenticated, setAuthenticated] = useState(null);
 
     useEffect(() => {
-        const keycloak = Keycloak('/keycloak.json');
+        const keycloak = Keycloak({
+            url: process.env.REACT_APP_KEYCLOAK_URL,
+            realm: 'wks-platform',
+            clientId: 'wks-portal-admin'
+        });
         keycloak.init({ onLoad: 'login-required' }).then((authenticaded) => {
             setKeycloak(keycloak);
             setAuthenticated(authenticaded);

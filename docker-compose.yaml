@@ -1,0 +1,50 @@
+version: '3.7'
+services:
+    mongodb:
+        image: mongo:latest
+        ports:
+            - 27017:27017
+
+    camunda:
+        image: camunda/camunda-bpm-platform:latest
+        ports:
+            - 8080:8080
+
+    keycloak:
+        image: quay.io/keycloak/keycloak:18.0.0
+        command: start-dev --import-realm
+        environment:
+            KEYCLOAK_ADMIN: admin
+            KEYCLOAK_ADMIN_PASSWORD: admin
+        ports:
+            - 8580:8080
+        volumes:
+            - ./keycloak/realms:/opt/keycloak/data/import
+
+    case-engine-rest-api:
+        build:
+            context: case-engine-rest-api
+        ports:
+            - 8081:8081
+        links:
+            - mongodb
+            - camunda
+
+    bpm-engine-c7-external-service:
+        build:
+            context: bpm-engine-c7-external-service
+        links:
+            - mongodb
+            - camunda
+
+    case-portal-admim:
+        build:
+            context: case-portal-admin-react
+        ports:
+            - 3002:3000
+
+    case-portal:
+        build:
+            context: case-portal-react
+        ports:
+            - 3001:3000

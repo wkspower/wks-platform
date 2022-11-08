@@ -21,7 +21,7 @@ const Transition = React.forwardRef(function Transition(
 export const RecordTypeForm = ({ open, handleClose, recordType, handleInputChange }) => {
     const save = () => {
         if (recordType.mode && recordType.mode === 'new') {
-            fetch('http://localhost:8081/record-type/', {
+            fetch(process.env.REACT_APP_API_URL + '/record-type/', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -34,7 +34,7 @@ export const RecordTypeForm = ({ open, handleClose, recordType, handleInputChang
                     console.log(err.message);
                 });
         } else {
-            fetch('http://localhost:8081/record-type/' + recordType.id, {
+            fetch(process.env.REACT_APP_API_URL + '/record-type/' + recordType.id, {
                 method: 'PATCH',
                 headers: {
                     Accept: 'application/json',
@@ -50,7 +50,7 @@ export const RecordTypeForm = ({ open, handleClose, recordType, handleInputChang
     };
 
     const deleteRecordType = () => {
-        fetch('http://localhost:8081/record-type/' + recordType.id, {
+        fetch(process.env.REACT_APP_API_URL + '/record-type/' + recordType.id, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/json',

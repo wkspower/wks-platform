@@ -6,8 +6,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'MMC BPM Interface',
-  tagline: 'Dinosaurs are cool',
+  title: 'WKS Platform',
+  tagline: 'Case Management Platform',
   url: 'https://your-docusaurus-test-site.com',
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -16,8 +16,8 @@ const config = {
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'mmctech', // Usually your GitHub org/user name.
-  projectName: 'cis-innovation-bpm-platform', // Usually your repo name.
+  organizationName: 'wks-power', // Usually your GitHub org/user name.
+  projectName: 'wks-bpm-platform', // Usually your repo name.
 
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
@@ -38,7 +38,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/mmctech/cis-innovation-bpm-platform/tree/main/website',
+            'https://github.com/wkspower/wks-platform/tree/main/website',
         },
         // blog: {
         //   showReadingTime: true,
@@ -64,9 +64,9 @@ const config = {
         },
       },
       navbar: {
-        title: 'MMC BPM Interface',
+        title: 'WKS Platform',
         logo: {
-          alt: 'MMC BPM Interface Logo',
+          alt: 'WKS Platform Logo',
           src: 'img/logo.svg',
         },
         items: [
@@ -78,7 +78,7 @@ const config = {
           },
           // {to: '/blog', label: 'Blog', position: 'left'},
           {
-            href: 'https://github.com/mmctech/cis-innovation-bpm-platform',
+            href: 'https://github.com/wkspower/wks-platform',
             label: 'GitHub',
             position: 'right',
           },
@@ -114,12 +114,12 @@ const config = {
             items: [
               {
                 label: 'GitHub',
-                href: 'https://github.com/mmctech/cis-innovation-bpm-platform',
+                href: 'https://github.com/wkspower/wks-platform',
               },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} MMC BPM Platform.`,
+        copyright: `Copyright © ${new Date().getFullYear()} WKS Power.`,
       },
       prism: {
         theme: lightCodeTheme,

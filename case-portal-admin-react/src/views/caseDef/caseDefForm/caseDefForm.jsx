@@ -69,7 +69,7 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
 
     const handleSave = () => {
         if (caseDef.status && caseDef.status === 'new') {
-            fetch('http://localhost:8081/case-definition/', {
+            fetch(process.env.REACT_APP_API_URL + '/case-definition/', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -82,7 +82,7 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
                     console.log(err.message);
                 });
         } else {
-            fetch('http://localhost:8081/case-definition/' + caseDef.id, {
+            fetch(process.env.REACT_APP_API_URL + '/case-definition/' + caseDef.id, {
                 method: 'PATCH',
                 headers: {
                     Accept: 'application/json',
@@ -98,7 +98,7 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
     };
 
     const handleDelete = () => {
-        fetch('http://localhost:8081/case-definition/' + caseDef.id, {
+        fetch(process.env.REACT_APP_API_URL + '/case-definition/' + caseDef.id, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/json',

@@ -18,7 +18,7 @@ export const BpmEngineList = () => {
     const [openForm, setOpenForm] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:8081/bpm-engine/')
+        fetch(process.env.REACT_APP_API_URL + '/bpm-engine/')
             .then((response) => response.json())
             .then((data) => {
                 setList(data);
@@ -27,7 +27,7 @@ export const BpmEngineList = () => {
                 console.log(err.message);
             });
 
-        fetch('http://localhost:8081/bpm-engine-type/')
+        fetch(process.env.REACT_APP_API_URL + '/bpm-engine-type/')
             .then((response) => response.json())
             .then((data) => {
                 setBpmEngineTypes(data);

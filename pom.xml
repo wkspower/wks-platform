@@ -59,7 +59,6 @@
 		
 		<module>bpm-engine-c8-client</module>
 		
-		<module>file-storage</module>
 		<module>email-bridge</module>
 	</modules>
 

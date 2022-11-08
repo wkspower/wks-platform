@@ -1,8 +1,0 @@
-{
-  "realm": "wks-platform",
-  "auth-server-url": "http://localhost:8580/",
-  "ssl-required": "external",
-  "resource": "wks-portal-admin",
-  "public-client": true,
-  "confidential-port": 0
-}
