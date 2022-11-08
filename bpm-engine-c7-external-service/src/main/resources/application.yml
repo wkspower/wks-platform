@@ -23,12 +23,5 @@ camunda7.rest.correlate.url: /message
 
 camunda.bpm.client:
   disable-backoff-strategy: true
-  subscriptions:
-    caseStageUpdate:
-      process-definition-key: contractor-onboarding
-      include-extension-properties: true
-    recordSave:
-      process-definition-key: contractor-onboarding
-      include-extension-properties: true        
 
 mongo.database: wks-mongo-database

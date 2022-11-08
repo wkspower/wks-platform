@@ -12,7 +12,7 @@ import com.wks.caseengine.cases.instance.CaseInstanceService;
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
-@ExternalTaskSubscription("caseStageUpdate")
+@ExternalTaskSubscription(topicName = "caseStageUpdate", includeExtensionProperties = true)
 @Slf4j
 public class CaseStageUpdateHandler implements ExternalTaskHandler {
 

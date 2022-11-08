@@ -13,7 +13,7 @@ import com.wks.caseengine.record.RecordService;
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
-@ExternalTaskSubscription("recordSave")
+@ExternalTaskSubscription(topicName = "recordSave", includeExtensionProperties = true)
 @Slf4j
 public class RecordSaveUpdateHandler implements ExternalTaskHandler {
 
