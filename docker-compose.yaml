@@ -12,12 +12,14 @@ services:
 
     keycloak:
         image: quay.io/keycloak/keycloak:18.0.0
-        command: start-dev
+        command: start-dev --import-realm
         environment:
             KEYCLOAK_ADMIN: admin
-            KEYCLOAK_ADMIN_PASSWORD: admin 
+            KEYCLOAK_ADMIN_PASSWORD: admin
         ports:
             - 8580:8080
+        volumes:
+            - ./keycloak/realms:/opt/keycloak/data/import
 
     case-engine-rest-api:
         build:
