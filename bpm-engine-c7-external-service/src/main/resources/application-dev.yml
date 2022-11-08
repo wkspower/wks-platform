@@ -1,0 +1,4 @@
+mongo.connection-string: mongodb://localhost
+
+camunda.bpm.client:
+  base-url: http://localhost:8080/engine-rest

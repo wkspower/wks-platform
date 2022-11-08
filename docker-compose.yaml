@@ -16,7 +16,6 @@ services:
         environment:
             KEYCLOAK_ADMIN: admin
             KEYCLOAK_ADMIN_PASSWORD: admin 
-
         ports:
             - 8580:8080
 
@@ -27,19 +26,23 @@ services:
             - 8081:8081
         links:
             - mongodb
+            - camunda
+
+    bpm-engine-c7-external-service:
+        build:
+            context: bpm-engine-c7-external-service
+        links:
+            - mongodb
+            - camunda
 
     case-portal-admim:
         build:
             context: case-portal-admin-react
         ports:
             - 3002:3000
-        links:
-            - keycloak
 
     case-portal:
         build:
             context: case-portal-react
         ports:
             - 3001:3000
-        links:
-            - keycloak            

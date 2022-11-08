@@ -1,3 +1,5 @@
+spring.profiles.active: dev
+
 server:
    port: 8081
 
@@ -23,5 +25,4 @@ camunda7.rest.processinstance.url: /process-instance
 camunda7.rest.task.url: /task
 camunda7.rest.correlate.url: /message
 
-mongo.connection-string: mongodb://localhost
 mongo.database: wks-mongo-database

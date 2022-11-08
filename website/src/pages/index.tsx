@@ -18,7 +18,7 @@ function HomepageHeader() {
           <Link
             className="button button--secondary button--lg"
             to="/docs/intro">
-            MMC BPM Interface Tutorial - 5min ⏱️
+            WKS Platform Tutorial - 5min ⏱️
           </Link>
         </div>
       </div>

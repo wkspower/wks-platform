@@ -1,7 +1,5 @@
-spring: 
-  config:
-    import: file:env.properties
-    
+spring.profiles.active: dev
+
 logging:
    level:
       root: INFO
@@ -19,18 +17,18 @@ camunda7.rest.oauth.token.grantType:
 
 camunda7.rest.deployment.url: /deployment
 camunda7.rest.processdefinition.url: /process-definition
-camunda7.rest.processinstance.url: /process-instance
 camunda7.rest.task.url: /task
+camunda7.rest.processinstance.url: /process-instance
 camunda7.rest.correlate.url: /message
 
 camunda.bpm.client:
-  base-url: http://${CAMUNDA7_HOST}:${CAMUNDA7_PORT}/engine-rest
   disable-backoff-strategy: true
   subscriptions:
     caseStageUpdate:
-        process-definition-key: contractor-onboarding
-        include-extension-properties: true
+      process-definition-key: contractor-onboarding
+      include-extension-properties: true
     recordSave:
-        process-definition-key: contractor-onboarding
-        include-extension-properties: true        
-        
+      process-definition-key: contractor-onboarding
+      include-extension-properties: true        
+
+mongo.database: wks-mongo-database
