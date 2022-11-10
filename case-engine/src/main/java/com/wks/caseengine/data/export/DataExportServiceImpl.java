@@ -78,28 +78,6 @@ public class DataExportServiceImpl implements DataExportService {
 		}
 		exportedData.add("records", recordsArray);
 
-		// BPM processes definitions
-		JsonArray processDefinitionsArray = new JsonArray();
-
-		List<BpmEngine> bpmEngines = bpmEngineRepository.find();
-
-		for (JsonObject caseDefinition : caseDefinitions) {
-			String processDefKey = caseDefinition.get("stagesLifecycleProcessKey").getAsString();
-			String bpmEngineId = caseDefinition.get("bpmEngineId").getAsString();
-
-			Optional<BpmEngine> bpmEngine = bpmEngines.stream().filter(o -> o.getId().equals(bpmEngineId)).findFirst();
-			if (bpmEngine.isPresent()) {
-				String procDefXml = processEngineClientFacade.getProcessDefinitionXMLByKey(processDefKey,
-						bpmEngine.get());
-				JsonObject newRecord = new JsonObject();
-				newRecord.addProperty("processDefinitionKey", processDefKey);
-				newRecord.addProperty("bpmEngine", bpmEngineId);
-				newRecord.addProperty("xml", procDefXml);
-				processDefinitionsArray.add(newRecord);
-			}
-		}
-		exportedData.add("processesDefinitions", processDefinitionsArray);
-
 		return exportedData;
 	}
 

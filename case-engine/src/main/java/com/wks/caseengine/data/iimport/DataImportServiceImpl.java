@@ -1,6 +1,7 @@
 package com.wks.caseengine.data.iimport;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.wks.bpm.engine.BpmEngine;
+import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.caseengine.db.MongoDataConnection;
+import com.wks.caseengine.repository.BpmEngineRepository;
 
 @Component
 public class DataImportServiceImpl implements DataImportService {
@@ -18,8 +22,14 @@ public class DataImportServiceImpl implements DataImportService {
 	@Autowired
 	private MongoDataConnection connection;
 
+	@Autowired
+	private BpmEngineClientFacade bpmEngineClientFacade;
+
+	@Autowired
+	private BpmEngineRepository bpmEngineRepository;
+
 	@Override
-	public void importData(JsonObject data) {
+	public void importData(JsonObject data) throws Exception {
 
 		Gson gson = new Gson();
 
@@ -83,7 +93,6 @@ public class DataImportServiceImpl implements DataImportService {
 							.insertOne(new org.bson.json.JsonObject(gson.toJson(recordJson)));
 				}
 			}
-
 		}
 
 	}

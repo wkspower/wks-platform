@@ -42,7 +42,7 @@ public class DataImportCommandRunner implements CommandLineRunner {
 				try (FileReader fileReader = new FileReader(fileName)) {
 					reader = new JsonReader(fileReader);
 					dataImportService.importData(gson.fromJson(reader, JsonObject.class));
-				} catch (IOException e1) {
+				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}

@@ -24,25 +24,25 @@ public class TaskController {
 	private TaskService taskService;
 
 	@GetMapping(value = "/")
-	public List<Task> find(final @RequestParam(required = false) String bpmEngineId,
+	public List<Task> find(@RequestParam(required = false) final String bpmEngineId,
 			@RequestParam(required = false) String processInstanceBusinessKey) throws Exception {
 		return taskService.find(processInstanceBusinessKey, Optional.ofNullable(bpmEngineId));
 	}
 
 	@PostMapping(value = "/{bpmEngineId}/{taskId}/claim/{taskAssignee}")
-	public void claim(final @PathVariable String bpmEngineId, @PathVariable String taskId,
-			@PathVariable String taskAssignee) throws Exception {
+	public void claim(@PathVariable final String bpmEngineId, @PathVariable final String taskId,
+			@PathVariable final String taskAssignee) throws Exception {
 		taskService.claim(taskId, taskAssignee, bpmEngineId);
 	}
 
 	@PostMapping(value = "/{bpmEngineId}/{taskId}/unclaim")
-	public void unclaim(final @PathVariable String bpmEngineId, @PathVariable String taskId) throws Exception {
+	public void unclaim(@PathVariable final String bpmEngineId, @PathVariable final String taskId) throws Exception {
 		taskService.unclaim(taskId, bpmEngineId);
 	}
 
 	@PostMapping(value = "/{bpmEngineId}/{taskId}/complete")
-	public void complete(final @PathVariable String bpmEngineId, @PathVariable String taskId,
-			@RequestBody String variables) throws Exception {
+	public void complete(@PathVariable final String bpmEngineId, @PathVariable final String taskId,
+			@RequestBody final String variables) throws Exception {
 		taskService.complete(taskId, JsonParser.parseString(variables).getAsJsonObject(), bpmEngineId);
 	}
 

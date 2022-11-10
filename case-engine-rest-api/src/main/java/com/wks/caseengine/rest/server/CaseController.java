@@ -29,7 +29,7 @@ public class CaseController {
 	private CaseInstanceService caseInstanceService;
 
 	@GetMapping(value = "/")
-	public List<CaseInstance> find(@RequestParam(required = false) String status) throws Exception {
+	public List<CaseInstance> find(@RequestParam(required = false) final String status) throws Exception {
 		if (status == null) {
 			return caseInstanceService.find(Optional.empty());
 		} else {
@@ -38,22 +38,23 @@ public class CaseController {
 	}
 
 	@GetMapping(value = "/{businessKey}")
-	public CaseInstance get(@PathVariable String businessKey) throws Exception {
+	public CaseInstance get(@PathVariable final String businessKey) throws Exception {
 		return caseInstanceService.get(businessKey);
 	}
 
 	@PostMapping(value = "/")
-	public CaseInstance save(@RequestBody CaseInstance caseInstance) throws Exception {
+	public CaseInstance save(@RequestBody final CaseInstance caseInstance) throws Exception {
 		return caseInstanceService.create(caseInstance);
 	}
 
 	@PatchMapping(value = "/{businessKey}")
-	public void update(@PathVariable String businessKey, @RequestBody CaseInstance caseInstance) throws Exception {
+	public void update(@PathVariable final String businessKey, @RequestBody final CaseInstance caseInstance)
+			throws Exception {
 		caseInstanceService.updateStatus(businessKey, caseInstance.getStatus());
 	}
 
 	@DeleteMapping(value = "/{businessKey}")
-	public void delete(@PathVariable String businessKey) throws Exception {
+	public void delete(@PathVariable final String businessKey) throws Exception {
 		try {
 			caseInstanceService.delete(businessKey);
 		} catch (CaseInstanceNotFoundException e) {

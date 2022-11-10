@@ -28,17 +28,18 @@ public class BpmEngineController {
 	}
 
 	@PostMapping(value = "/")
-	public BpmEngine save(@RequestBody BpmEngine bpmEngine) throws Exception {
+	public BpmEngine save(@RequestBody final BpmEngine bpmEngine) throws Exception {
 		return bpmEngineService.save(bpmEngine);
 	}
 
 	@PatchMapping(value = "/{bpmEngineId}")
-	public BpmEngine update(@PathVariable String bpmEngineId, @RequestBody BpmEngine bpmEngine) throws Exception {
+	public BpmEngine update(@PathVariable final String bpmEngineId, @RequestBody final BpmEngine bpmEngine)
+			throws Exception {
 		return bpmEngineService.update(bpmEngineId, bpmEngine);
 	}
 
 	@DeleteMapping(value = "/{bpmEngineId}")
-	public void delete(@PathVariable String bpmEngineId) throws Exception {
+	public void delete(@PathVariable final String bpmEngineId) throws Exception {
 		bpmEngineService.delete(bpmEngineId);
 	}
 

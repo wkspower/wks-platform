@@ -17,6 +17,8 @@ import com.wks.bpm.engine.model.spi.Task;
  *
  */
 public interface BpmEngineClient {
+	
+	void deploy(final BpmEngine bpmEngine, final String fileName, final String bpmnXml);
 
 	Deployment[] findDeployments(final BpmEngine bpmEngine);
 

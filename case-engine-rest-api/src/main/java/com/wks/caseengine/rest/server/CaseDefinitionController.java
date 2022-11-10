@@ -31,23 +31,23 @@ public class CaseDefinitionController {
 	}
 
 	@GetMapping(value = "/{caseDefId}")
-	public CaseDefinition get(@PathVariable String caseDefId) throws Exception {
+	public CaseDefinition get(@PathVariable final String caseDefId) throws Exception {
 		return caseDefinitionService.get(caseDefId);
 	}
 
 	@PostMapping(value = "/")
-	public CaseDefinition save(@RequestBody CaseDefinition caseDefinition) throws Exception {
+	public CaseDefinition save(@RequestBody final CaseDefinition caseDefinition) throws Exception {
 		return caseDefinitionService.create(caseDefinition);
 	}
 
 	@PatchMapping(value = "/{caseDefId}")
-	public CaseDefinition update(@PathVariable String caseDefId, @RequestBody CaseDefinition caseDefinition)
+	public CaseDefinition update(@PathVariable final String caseDefId, @RequestBody final CaseDefinition caseDefinition)
 			throws Exception {
 		return caseDefinitionService.update(caseDefId, caseDefinition);
 	}
 
 	@DeleteMapping(value = "/{caseDefId}")
-	public void delete(@PathVariable String caseDefId) throws Exception {
+	public void delete(@PathVariable final String caseDefId) throws Exception {
 		try {
 			caseDefinitionService.delete(caseDefId);
 		} catch (CaseDefinitionNotFoundException e) {

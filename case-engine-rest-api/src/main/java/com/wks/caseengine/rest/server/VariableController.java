@@ -17,7 +17,7 @@ public class VariableController {
 	private VariableService variableService;
 
 	@GetMapping(value = "/{bpmEngineId}/{processInstanceId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String findVariables(final @PathVariable String bpmEngineId, @PathVariable String processInstanceId)
+	public String findVariables(@PathVariable final String bpmEngineId, @PathVariable final String processInstanceId)
 			throws Exception {
 		return variableService.findVariables(processInstanceId, bpmEngineId);
 	}

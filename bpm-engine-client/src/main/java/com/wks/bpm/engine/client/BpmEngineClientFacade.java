@@ -33,6 +33,10 @@ public class BpmEngineClientFacade {
 		return bpmEngine.getType().equals(BpmEngineType.BPM_ENGINE_CAMUNDA7) ? c7EngineClient : c8EngineClient;
 	}
 
+	public void deploy(final BpmEngine bpmEngine, final String fileName, final String bpmnXml) {
+		getEngineClient(bpmEngine).deploy(bpmEngine, fileName, bpmnXml);
+	}
+
 	public Deployment[] findDeployments(final BpmEngine bpmEngine) {
 		return getEngineClient(bpmEngine).findDeployments(bpmEngine);
 	}

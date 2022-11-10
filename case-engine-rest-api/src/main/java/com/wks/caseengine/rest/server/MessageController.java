@@ -18,7 +18,8 @@ public class MessageController {
 	private MessageSenderService messageSenderService;
 
 	@PostMapping(value = "/{bpmEngineId}")
-	public void save(@PathVariable String bpmEngineId, @RequestBody ProcessMessage processMessage) throws Exception {
+	public void save(@PathVariable final String bpmEngineId, @RequestBody final ProcessMessage processMessage)
+			throws Exception {
 		messageSenderService.sendMessage(processMessage, bpmEngineId);
 	}
 
