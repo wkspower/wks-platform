@@ -6,5 +6,4 @@ package com.wks.bpm.engine.model.spi;
  */
 public interface ProcessDefinition {
 
-
 }

@@ -57,9 +57,15 @@ public class C7HttpRequestFactory {
 				new HttpEntity<>(httpHeadersFactory.create()));
 	}
 
-	public WksHttpRequest getProcessDefinitionXmlRequest(final String processDefinitionId, final BpmEngine bpmEngine) {
+	public WksHttpRequest getProcessDefinitionXmlByIdRequest(final String processDefinitionId, final BpmEngine bpmEngine) {
 		return new C7HttpGetRequest<ProcessDefinition>(
 				extractUrl(bpmEngine) + processDefinitionUrl + "/" + processDefinitionId + "/xml",
+				new HttpEntity<>(httpHeadersFactory.create()));
+	}
+
+	public WksHttpRequest getProcessDefinitionXmlByKeyRequest(final String processDefinitionKey, final BpmEngine bpmEngine) {
+		return new C7HttpGetRequest<ProcessDefinition>(
+				extractUrl(bpmEngine) + processDefinitionUrl + "/key/" + processDefinitionKey + "/xml",
 				new HttpEntity<>(httpHeadersFactory.create()));
 	}
 

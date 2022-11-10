@@ -59,9 +59,17 @@ public class C7EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public String getProcessDefinitionXML(final String processDefinitionId, final BpmEngine bpmEngine) {
+	public String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) {
 		return restTemplate
-				.getForEntity(camundaHttpRequestFactory.getProcessDefinitionXmlRequest(processDefinitionId, bpmEngine)
+				.getForEntity(camundaHttpRequestFactory.getProcessDefinitionXmlByIdRequest(processDefinitionId, bpmEngine)
+						.getHttpRequestUrl(), ProcessDefinitionImpl.class)
+				.getBody().getBpmn20Xml();
+	}
+
+	@Override
+	public String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) {
+		return restTemplate
+				.getForEntity(camundaHttpRequestFactory.getProcessDefinitionXmlByKeyRequest(processDefinitionKey, bpmEngine)
 						.getHttpRequestUrl(), ProcessDefinitionImpl.class)
 				.getBody().getBpmn20Xml();
 	}

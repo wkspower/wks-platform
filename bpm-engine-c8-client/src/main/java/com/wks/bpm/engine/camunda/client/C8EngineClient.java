@@ -53,7 +53,12 @@ public class C8EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public String getProcessDefinitionXML(String processDefinitionId, final BpmEngine bpmEngine) {
+	public String getProcessDefinitionXMLById(String processDefinitionId, final BpmEngine bpmEngine) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getProcessDefinitionXMLByKey(String processDefinitionKey, final BpmEngine bpmEngine) {
 		throw new UnsupportedOperationException();
 	}
 

@@ -2,6 +2,7 @@ package com.wks.caseengine.data.export;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -9,19 +10,25 @@ import org.springframework.stereotype.Component;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.wks.bpm.engine.BpmEngine;
+import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.caseengine.db.MongoDataConnection;
-
-import lombok.extern.slf4j.Slf4j;
+import com.wks.caseengine.repository.BpmEngineRepository;
 
 @Component
-@Slf4j
 public class DataExportServiceImpl implements DataExportService {
 
 	@Autowired
 	private MongoDataConnection connection;
 
+	@Autowired
+	private BpmEngineRepository bpmEngineRepository;
+
+	@Autowired
+	private BpmEngineClientFacade processEngineClientFacade;
+
 	@Override
-	public JsonObject export() {
+	public JsonObject export() throws Exception {
 		Gson gson = new Gson();
 
 		JsonObject exportedData = new JsonObject();
@@ -33,16 +40,14 @@ public class DataExportServiceImpl implements DataExportService {
 						.getAsJsonArray());
 
 		// Cases Definitions
-		exportedData.add("casesDefinitions",
-				gson.toJsonTree(connection.getCaseDefCollection().find()
-						.map(o -> gson.fromJson(o.getJson(), JsonObject.class)).into(new ArrayList<JsonObject>()))
-						.getAsJsonArray());
+		List<JsonObject> caseDefinitions = connection.getCaseDefCollection().find()
+				.map(o -> gson.fromJson(o.getJson(), JsonObject.class)).into(new ArrayList<JsonObject>());
+		exportedData.add("casesDefinitions", gson.toJsonTree(caseDefinitions).getAsJsonArray());
 
 		// Cases Instances
-		exportedData.add("casesInstances",
-				gson.toJsonTree(connection.getCaseInstCollection().find()
-						.map(o -> gson.fromJson(o.getJson(), JsonObject.class)).into(new ArrayList<JsonObject>()))
-						.getAsJsonArray());
+		ArrayList<JsonObject> caseInstances = connection.getCaseInstCollection().find()
+				.map(o -> gson.fromJson(o.getJson(), JsonObject.class)).into(new ArrayList<JsonObject>());
+		exportedData.add("casesInstances", gson.toJsonTree(caseInstances).getAsJsonArray());
 
 		// Forms
 		exportedData.add("forms",
@@ -72,6 +77,28 @@ public class DataExportServiceImpl implements DataExportService {
 			}
 		}
 		exportedData.add("records", recordsArray);
+
+		// BPM processes definitions
+		JsonArray processDefinitionsArray = new JsonArray();
+
+		List<BpmEngine> bpmEngines = bpmEngineRepository.find();
+
+		for (JsonObject caseDefinition : caseDefinitions) {
+			String processDefKey = caseDefinition.get("stagesLifecycleProcessKey").getAsString();
+			String bpmEngineId = caseDefinition.get("bpmEngineId").getAsString();
+
+			Optional<BpmEngine> bpmEngine = bpmEngines.stream().filter(o -> o.getId().equals(bpmEngineId)).findFirst();
+			if (bpmEngine.isPresent()) {
+				String procDefXml = processEngineClientFacade.getProcessDefinitionXMLByKey(processDefKey,
+						bpmEngine.get());
+				JsonObject newRecord = new JsonObject();
+				newRecord.addProperty("processDefinitionKey", processDefKey);
+				newRecord.addProperty("bpmEngine", bpmEngineId);
+				newRecord.addProperty("xml", procDefXml);
+				processDefinitionsArray.add(newRecord);
+			}
+		}
+		exportedData.add("processesDefinitions", processDefinitionsArray);
 
 		return exportedData;
 	}

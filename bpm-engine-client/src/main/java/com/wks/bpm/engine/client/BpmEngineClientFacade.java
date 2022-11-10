@@ -41,8 +41,12 @@ public class BpmEngineClientFacade {
 		return getEngineClient(bpmEngine).findProcessDefinitions(bpmEngine);
 	}
 
-	public String getProcessDefinitionXML(final String processDefinitionId, final BpmEngine bpmEngine) {
-		return getEngineClient(bpmEngine).getProcessDefinitionXML(processDefinitionId, bpmEngine);
+	public String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) {
+		return getEngineClient(bpmEngine).getProcessDefinitionXMLById(processDefinitionId, bpmEngine);
+	}
+
+	public String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) {
+		return getEngineClient(bpmEngine).getProcessDefinitionXMLByKey(processDefinitionKey, bpmEngine);
 	}
 
 	public ProcessInstance[] findProcessInstances(final Optional<String> businessKey, final BpmEngine bpmEngine) {
