@@ -16,7 +16,7 @@ public class DataExportController {
 	private DataExportService dataExportService;
 
 	@GetMapping(value = "/")
-	public JsonObject export() {
+	public JsonObject export() throws Exception {
 		return dataExportService.export();
 	}
 

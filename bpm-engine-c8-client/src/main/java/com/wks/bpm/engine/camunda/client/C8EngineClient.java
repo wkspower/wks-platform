@@ -35,6 +35,12 @@ public class C8EngineClient implements BpmEngineClient {
 	private C8TasklistClient tasklistClient;
 
 	@Override
+	public void deploy(final BpmEngine bpmEngine, final String fileName, final String bpmnXml) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public Deployment[] findDeployments(final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -47,78 +53,83 @@ public class C8EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public ProcessInstance[] findProcessInstances(Optional<String> businessKey, final BpmEngine bpmEngine) {
+	public ProcessInstance[] findProcessInstances(final Optional<String> businessKey, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public String getProcessDefinitionXML(String processDefinitionId, final BpmEngine bpmEngine) {
+	public String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public ProcessInstance startProcess(String processDefinitionKey, final BpmEngine bpmEngine) {
+	public String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ProcessInstance startProcess(final String processDefinitionKey, final BpmEngine bpmEngine) {
 		return zeebeClient.startProcess(processDefinitionKey, bpmEngine);
 	}
 
 	@Override
-	public ProcessInstance startProcess(String processDefinitionKey, String businessKey, final BpmEngine bpmEngine) {
+	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final BpmEngine bpmEngine) {
 		return zeebeClient.startProcess(processDefinitionKey, businessKey, bpmEngine);
 	}
 
 	@Override
-	public void deleteProcessInstance(String processInstanceId, final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-
-	}
-
-	@Override
-	public ActivityInstance[] findActivityInstances(String processInstanceId, final BpmEngine bpmEngine) {
+	public void deleteProcessInstance(final String processInstanceId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Task[] findTasks(String processInstanceBusinessKey, final BpmEngine bpmEngine) {
+	public ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Task[] findTasks(final String processInstanceBusinessKey, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return new Task[] {};
 	}
 
 	@Override
-	public void claimTask(String taskId, String taskAssignee, final BpmEngine bpmEngine) {
+	public void claimTask(final String taskId, final String taskAssignee, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void unclaimTask(String taskId, final BpmEngine bpmEngine) {
+	public void unclaimTask(final String taskId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void complete(String taskId, JsonObject variables, final BpmEngine bpmEngine) {
+	public void complete(final String taskId, final JsonObject variables, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public String findVariables(String processInstanceId, final BpmEngine bpmEngine) {
+	public String findVariables(final String processInstanceId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void sendMessage(ProcessMessage processMesage, final BpmEngine bpmEngine) {
+	public void sendMessage(final ProcessMessage processMesage, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public ProcessInstance startProcess(String processDefinitionKey, String businessKey, JsonArray caseAttributes,
-			BpmEngine bpmEngine) {
+	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final JsonArray caseAttributes, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return null;
 	}

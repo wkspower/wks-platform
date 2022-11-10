@@ -2,13 +2,10 @@ package com.wks.bpm.engine.camunda.operate.http.request;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.rest.client.WksHttpRequest;
-import com.wks.rest.client.header.JSONHttpHeadersFactory;
 
 /**
  * @author victor.franca

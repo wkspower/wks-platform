@@ -21,8 +21,9 @@ public class ProcessDefinitionController {
 	private BpmEngineService bpmEngineService;
 
 	@GetMapping(value = "/{bpmEngineId}/{processDefinitionId}/xml", produces = MediaType.APPLICATION_XML_VALUE)
-	public String get(@PathVariable String bpmEngineId, @PathVariable final String processDefinitionId) throws Exception {
-		return processEngineClient.getProcessDefinitionXML(processDefinitionId, bpmEngineService.get(bpmEngineId));
+	public String get(@PathVariable final String bpmEngineId, @PathVariable final String processDefinitionId)
+			throws Exception {
+		return processEngineClient.getProcessDefinitionXMLById(processDefinitionId, bpmEngineService.get(bpmEngineId));
 	}
 
 }

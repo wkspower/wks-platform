@@ -33,6 +33,10 @@ public class BpmEngineClientFacade {
 		return bpmEngine.getType().equals(BpmEngineType.BPM_ENGINE_CAMUNDA7) ? c7EngineClient : c8EngineClient;
 	}
 
+	public void deploy(final BpmEngine bpmEngine, final String fileName, final String bpmnXml) {
+		getEngineClient(bpmEngine).deploy(bpmEngine, fileName, bpmnXml);
+	}
+
 	public Deployment[] findDeployments(final BpmEngine bpmEngine) {
 		return getEngineClient(bpmEngine).findDeployments(bpmEngine);
 	}
@@ -41,8 +45,12 @@ public class BpmEngineClientFacade {
 		return getEngineClient(bpmEngine).findProcessDefinitions(bpmEngine);
 	}
 
-	public String getProcessDefinitionXML(final String processDefinitionId, final BpmEngine bpmEngine) {
-		return getEngineClient(bpmEngine).getProcessDefinitionXML(processDefinitionId, bpmEngine);
+	public String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) {
+		return getEngineClient(bpmEngine).getProcessDefinitionXMLById(processDefinitionId, bpmEngine);
+	}
+
+	public String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) {
+		return getEngineClient(bpmEngine).getProcessDefinitionXMLByKey(processDefinitionKey, bpmEngine);
 	}
 
 	public ProcessInstance[] findProcessInstances(final Optional<String> businessKey, final BpmEngine bpmEngine) {

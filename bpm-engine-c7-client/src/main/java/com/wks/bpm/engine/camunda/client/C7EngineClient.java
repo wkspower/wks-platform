@@ -43,6 +43,13 @@ public class C7EngineClient implements BpmEngineClient {
 	private C7HttpRequestFactory camundaHttpRequestFactory;
 
 	@Override
+	public void deploy(final BpmEngine bpmEngine, final String fileName, final String bpmnXml) {
+		WksHttpRequest request = camundaHttpRequestFactory.getDeploymentCreateRequest(bpmEngine, fileName, bpmnXml);
+
+		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class).getBody();
+	}
+
+	@Override
 	public DeploymentImpl[] findDeployments(final BpmEngine bpmEngine) {
 		return restTemplate
 				.getForEntity(camundaHttpRequestFactory.getDeploymentListRequest(bpmEngine).getHttpRequestUrl(),
@@ -59,11 +66,17 @@ public class C7EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public String getProcessDefinitionXML(final String processDefinitionId, final BpmEngine bpmEngine) {
-		return restTemplate
-				.getForEntity(camundaHttpRequestFactory.getProcessDefinitionXmlRequest(processDefinitionId, bpmEngine)
-						.getHttpRequestUrl(), ProcessDefinitionImpl.class)
-				.getBody().getBpmn20Xml();
+	public String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) {
+		return restTemplate.getForEntity(camundaHttpRequestFactory
+				.getProcessDefinitionXmlByIdRequest(processDefinitionId, bpmEngine).getHttpRequestUrl(),
+				ProcessDefinitionImpl.class).getBody().getBpmn20Xml();
+	}
+
+	@Override
+	public String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) {
+		return restTemplate.getForEntity(camundaHttpRequestFactory
+				.getProcessDefinitionXmlByKeyRequest(processDefinitionKey, bpmEngine).getHttpRequestUrl(),
+				ProcessDefinitionImpl.class).getBody().getBpmn20Xml();
 	}
 
 	@Override

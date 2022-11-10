@@ -12,7 +12,7 @@ import com.wks.rest.client.header.HttpHeadersFactory;
  *
  */
 @Component
-public class C7OAuthHttpHeadersFactory implements HttpHeadersFactory {
+public class C7OAuthHttpHeadersFactory extends HttpHeadersFactory {
 
 	@Autowired
 	private C7TokenHttpPostRequestFactory tokenPostRequestFactory;
@@ -23,7 +23,7 @@ public class C7OAuthHttpHeadersFactory implements HttpHeadersFactory {
 	private String token;
 
 	@Override
-	public HttpHeaders create() {
+	public HttpHeaders json() {
 		HttpHeaders headers = new HttpHeaders();
 
 		headers.set("Authorization", getToken());

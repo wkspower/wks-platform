@@ -4,8 +4,12 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -16,7 +20,7 @@ import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
 import com.wks.bpm.engine.model.spi.Task;
 import com.wks.rest.client.WksHttpRequest;
-import com.wks.rest.client.header.JSONHttpHeadersFactory;
+import com.wks.rest.client.header.HttpHeadersFactory;
 
 /**
  * @author victor.franca
@@ -26,7 +30,7 @@ import com.wks.rest.client.header.JSONHttpHeadersFactory;
 public class C7HttpRequestFactory {
 
 	@Autowired
-	private JSONHttpHeadersFactory httpHeadersFactory;
+	private HttpHeadersFactory httpHeadersFactory;
 
 	@Value("${camunda7.rest.deployment.url}")
 	private String deploymentUrl;
@@ -45,22 +49,47 @@ public class C7HttpRequestFactory {
 
 	//// Deployment ////
 
+	public WksHttpRequest getDeploymentCreateRequest(final BpmEngine bpmEngine, final String fileName, String bpmnXml) {
+
+		// This nested HttpEntiy is important to create the correct
+		// Content-Disposition entry with metadata "name" and "filename"
+		MultiValueMap<String, String> fileMap = new LinkedMultiValueMap<>();
+		ContentDisposition contentDisposition = ContentDisposition.builder("form-data").name("data").filename(fileName)
+				.build();
+		fileMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString());
+		HttpEntity<byte[]> fileEntity = new HttpEntity<>(bpmnXml.getBytes(), fileMap);
+
+		MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+		body.add("data", fileEntity);
+
+		return new C7HttpPostRequest(extractUrl(bpmEngine) + deploymentUrl + "/create",
+				new HttpEntity<MultiValueMap<String, Object>>(body, httpHeadersFactory.multipart()));
+	}
+
 	public WksHttpRequest getDeploymentListRequest(final BpmEngine bpmEngine) {
 		return new C7HttpGetRequest<Deployment>(extractUrl(bpmEngine) + deploymentUrl,
-				new HttpEntity<>(httpHeadersFactory.create()));
+				new HttpEntity<>(httpHeadersFactory.json()));
 	}
 
 	//// Process Definition ////
 
 	public WksHttpRequest getProcessDefinitionListRequest(final BpmEngine bpmEngine) {
 		return new C7HttpGetRequest<ProcessDefinition>(extractUrl(bpmEngine) + processDefinitionUrl,
-				new HttpEntity<>(httpHeadersFactory.create()));
+				new HttpEntity<>(httpHeadersFactory.json()));
 	}
 
-	public WksHttpRequest getProcessDefinitionXmlRequest(final String processDefinitionId, final BpmEngine bpmEngine) {
+	public WksHttpRequest getProcessDefinitionXmlByIdRequest(final String processDefinitionId,
+			final BpmEngine bpmEngine) {
 		return new C7HttpGetRequest<ProcessDefinition>(
 				extractUrl(bpmEngine) + processDefinitionUrl + "/" + processDefinitionId + "/xml",
-				new HttpEntity<>(httpHeadersFactory.create()));
+				new HttpEntity<>(httpHeadersFactory.json()));
+	}
+
+	public WksHttpRequest getProcessDefinitionXmlByKeyRequest(final String processDefinitionKey,
+			final BpmEngine bpmEngine) {
+		return new C7HttpGetRequest<ProcessDefinition>(
+				extractUrl(bpmEngine) + processDefinitionUrl + "/key/" + processDefinitionKey + "/xml",
+				new HttpEntity<>(httpHeadersFactory.json()));
 	}
 
 	//// Process Instance ////
@@ -70,14 +99,14 @@ public class C7HttpRequestFactory {
 		if (businessKey.isPresent()) {
 			url.append("?businessKey=" + businessKey.get());
 		}
-		return new C7HttpGetRequest<ProcessInstance>(url.toString(), new HttpEntity<>(httpHeadersFactory.create()));
+		return new C7HttpGetRequest<ProcessInstance>(url.toString(), new HttpEntity<>(httpHeadersFactory.json()));
 	}
 
 	public WksHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey,
 			final BpmEngine bpmEngine) {
 		return new C7HttpPostRequest(
 				extractUrl(bpmEngine) + processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
-				new HttpEntity<>(httpHeadersFactory.create()));
+				new HttpEntity<>(httpHeadersFactory.json()));
 	}
 
 	public WksHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey, final String businessKey,
@@ -88,7 +117,7 @@ public class C7HttpRequestFactory {
 
 		return new C7HttpPostRequest(
 				extractUrl(bpmEngine) + processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
-				new HttpEntity<>(processInstance, httpHeadersFactory.create()));
+				new HttpEntity<>(processInstance, httpHeadersFactory.json()));
 	}
 
 	public WksHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey, final String businessKey,
@@ -99,12 +128,12 @@ public class C7HttpRequestFactory {
 
 		return new C7HttpPostRequest(
 				extractUrl(bpmEngine) + processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
-				new HttpEntity<>(processInstance, httpHeadersFactory.create()));
+				new HttpEntity<>(processInstance, httpHeadersFactory.json()));
 	}
 
 	public WksHttpRequest getProcessInstanceDeleteRequest(String processInstanceId, final BpmEngine bpmEngine) {
 		return new C7HttpDeleteRequest(extractUrl(bpmEngine) + processInstanceUrl + "/" + processInstanceId,
-				new HttpEntity<>(httpHeadersFactory.create()));
+				new HttpEntity<>(httpHeadersFactory.json()));
 	}
 
 	//// Task ////
@@ -115,7 +144,7 @@ public class C7HttpRequestFactory {
 			url.append("&processInstanceBusinessKey=" + processInstanceBusinessKey);
 		}
 
-		return new C7HttpGetRequest<Task>(url.toString(), new HttpEntity<>(httpHeadersFactory.create()));
+		return new C7HttpGetRequest<Task>(url.toString(), new HttpEntity<>(httpHeadersFactory.json()));
 	}
 
 	public WksHttpRequest getTaskClaimRequest(final String taskId, final String taskAssignee,
@@ -125,42 +154,41 @@ public class C7HttpRequestFactory {
 		JsonObject assigneeJsonObject = JsonParser.parseString(assigneeJson).getAsJsonObject();
 
 		return new C7HttpPostRequest(extractUrl(bpmEngine) + taskUrl + "/" + taskId + "/claim",
-				new HttpEntity<String>(assigneeJsonObject.toString(), httpHeadersFactory.create()));
+				new HttpEntity<String>(assigneeJsonObject.toString(), httpHeadersFactory.json()));
 	}
 
 	public WksHttpRequest getTaskCompleteRequest(final String taskId, JsonObject variables, final BpmEngine bpmEngine) {
 		return new C7HttpPostRequest(extractUrl(bpmEngine) + taskUrl + "/" + taskId + "/complete",
-				new HttpEntity<String>(variables.toString(), httpHeadersFactory.create()));
+				new HttpEntity<String>(variables.toString(), httpHeadersFactory.json()));
 	}
 
 	public WksHttpRequest getTaskUnclaimRequest(final String taskId, final BpmEngine bpmEngine) {
 		return new C7HttpPostRequest(extractUrl(bpmEngine) + taskUrl + "/" + taskId + "/unclaim",
-				new HttpEntity<>(httpHeadersFactory.create()));
+				new HttpEntity<>(httpHeadersFactory.json()));
 	}
 
 	public WksHttpRequest getTaskFormGetRequest(final String taskId, final BpmEngine bpmEngine) {
 		return new C7HttpGetRequest<>(extractUrl(bpmEngine) + taskUrl + "/" + taskId + "/deployed-form",
-				new HttpEntity<>(httpHeadersFactory.create()));
+				new HttpEntity<>(httpHeadersFactory.json()));
 	}
 
 	// Activity Instances
 	public WksHttpRequest getActivityInstancesGetRequest(final String processInstanceId, final BpmEngine bpmEngine) {
 		return new C7HttpGetRequest<>(
 				extractUrl(bpmEngine) + processInstanceUrl + "/" + processInstanceId + "/activity-instances",
-				new HttpEntity<>(httpHeadersFactory.create()));
+				new HttpEntity<>(httpHeadersFactory.json()));
 	}
 
 	/// Variables ///
 	public WksHttpRequest getVariablesListRequest(final String processIntanceId, final BpmEngine bpmEngine) {
-		return new C7HttpGetRequest<>(
-				extractUrl(bpmEngine) + processInstanceUrl + "/" + processIntanceId + "/variables?deserializeValues=false",
-				new HttpEntity<String>(httpHeadersFactory.create()));
+		return new C7HttpGetRequest<>(extractUrl(bpmEngine) + processInstanceUrl + "/" + processIntanceId
+				+ "/variables?deserializeValues=false", new HttpEntity<String>(httpHeadersFactory.json()));
 	}
 
 	/// Message ////
 	public WksHttpRequest getMessageSendRequest(final ProcessMessage processMessage, final BpmEngine bpmEngine) {
 		return new C7HttpPostRequest(extractUrl(bpmEngine) + correlateUrl,
-				new HttpEntity<>(processMessage, httpHeadersFactory.create()));
+				new HttpEntity<>(processMessage, httpHeadersFactory.json()));
 	}
 
 	private String extractUrl(final BpmEngine bpmEngine) {
