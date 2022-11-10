@@ -29,6 +29,10 @@ services:
         links:
             - mongodb
             - camunda
+        volumes:
+            - ./case-engine-sample-data:/opt/case-engine-sample-data
+        environment:
+            - data.import.folder=/opt/case-engine-sample-data
 
     bpm-engine-c7-external-service:
         build:

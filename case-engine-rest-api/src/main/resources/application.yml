@@ -26,3 +26,5 @@ camunda7.rest.task.url: /task
 camunda7.rest.correlate.url: /message
 
 mongo.database: wks-mongo-database
+
+data.import.folder:
