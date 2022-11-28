@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -21,8 +22,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 import com.wks.caseengine.data.iimport.DataImportService;
 
+import lombok.extern.slf4j.Slf4j;
+
 //TODO move this out of the Rest API module - better to be independent
 @Component
+@ConditionalOnProperty("data.import.enabled")
+@Slf4j
 public class DataImportCommandRunner implements CommandLineRunner {
 
 	@Autowired
@@ -33,6 +38,8 @@ public class DataImportCommandRunner implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
+		log.info("Start of data importing");
+
 		if (dataImportFolder != null && !dataImportFolder.isEmpty()) {
 
 			// load and import json files
@@ -51,6 +58,7 @@ public class DataImportCommandRunner implements CommandLineRunner {
 			// delete files
 			Arrays.stream(new File(dataImportFolder).listFiles()).forEach(File::delete);
 		}
+		log.info("End of data importing");
 	}
 
 	public Set<String> listFiles(String dir) throws IOException {

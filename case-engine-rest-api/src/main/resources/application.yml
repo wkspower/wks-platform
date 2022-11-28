@@ -27,4 +27,8 @@ camunda7.rest.correlate.url: /message
 
 mongo.database: wks-mongo-database
 
+# initial data will be imported if true
+data.import.enabled: false
+
+# initial data input folder
 data.import.folder:
