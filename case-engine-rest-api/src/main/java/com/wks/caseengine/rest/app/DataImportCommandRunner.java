@@ -56,7 +56,7 @@ public class DataImportCommandRunner implements CommandLineRunner {
 			});
 
 			// delete files
-			Arrays.stream(new File(dataImportFolder).listFiles()).forEach(File::delete);
+//			Arrays.stream(new File(dataImportFolder).listFiles()).forEach(File::delete);
 		}
 		log.info("End of data importing");
 	}
