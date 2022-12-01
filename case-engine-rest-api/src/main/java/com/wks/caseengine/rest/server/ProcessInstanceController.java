@@ -14,8 +14,11 @@ import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("process-instance")
+@Tag(name = "Process Instance", description = "Access information about processes instances in Camunda")
 public class ProcessInstanceController {
 
 	@Autowired

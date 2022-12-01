@@ -18,11 +18,12 @@
 		<maven.compiler.target>17</maven.compiler.target>
 		<maven.compiler.source>17</maven.compiler.source>
 
-		<spring.boot.version>2.7.0</spring.boot.version>
+		<spring.boot.version>2.7.5</spring.boot.version>
+		<snakeyaml.version>1.33</snakeyaml.version>
 		<spring.shell.version>2.0.1.RELEASE</spring.shell.version>
 		<spring.doc.version>1.6.6</spring.doc.version>
 
-		<camunda7.version>7.17.0</camunda7.version>
+		<camunda7.version>7.18.0</camunda7.version>
 		<camunda8.version>8.1.0</camunda8.version>
 
 		<lombok.version>1.18.22</lombok.version>
@@ -41,6 +42,12 @@
 				<version>${spring.boot.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.yaml</groupId>
+				<artifactId>snakeyaml</artifactId>
+				<version>${snakeyaml.version}</version>
+				<scope>runtime</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

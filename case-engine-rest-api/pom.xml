@@ -27,16 +27,17 @@
 			</exclusions>
 		</dependency>
 
-		<dependency>
-			<groupId>com.wks</groupId>
-			<artifactId>case-engine</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-
+		<!-- Swagger UI -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
 			<version>${spring.doc.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.wks</groupId>
+			<artifactId>case-engine</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 
 		<dependency>

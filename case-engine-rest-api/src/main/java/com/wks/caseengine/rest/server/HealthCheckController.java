@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.cases.definition.CaseDefinitionService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("healthCheck")
+@Tag(name = "Healtcheck", description = "Health check endpoint")
 public class HealthCheckController {
 
 	@Autowired

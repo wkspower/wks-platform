@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.caseengine.bpm.BpmEngineService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("process-definition")
+@Tag(name = "Process Definition", description = "Access information about processes definitions in Camunda")
 public class ProcessDefinitionController {
 
 	@Autowired

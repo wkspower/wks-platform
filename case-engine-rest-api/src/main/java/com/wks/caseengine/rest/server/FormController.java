@@ -15,8 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.form.Form;
 import com.wks.caseengine.form.FormService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("form")
+@Tag(name = "Form", description = "User forms definitions with fields and attributes for cases")
 public class FormController {
 
 	@Autowired
