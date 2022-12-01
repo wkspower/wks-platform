@@ -8,7 +8,7 @@ To start a Docker container of WKS Platform:
 docker-compose up
 ```
 
-## Web Applications and Tools default URLs (default user/password: victor/victor)
+## Web Applications and Tools default URLs
 
 #### WKS Web Applications (default user/password: demo/demo)
 - WKS Platform Admin: http://localhost:3002 
