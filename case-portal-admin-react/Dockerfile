@@ -1,6 +1,10 @@
 # ==== CONFIGURE =====
 # Use a Node 16 base image
 FROM node:16-alpine 
+
+ARG REACT_APP_KEYCLOAK_URL
+ARG REACT_APP_API_URL
+
 # Set the working directory to /app inside the container
 WORKDIR /app
 # Copy app files
@@ -9,7 +13,9 @@ COPY . .
 # Install dependencies (npm ci makes sure the exact versions in the lockfile gets installed)
 RUN npm install
 # Build the app
-RUN npm run build
+RUN REACT_APP_KEYCLOAK_URL=${REACT_APP_KEYCLOAK_URL} \ 
+    REACT_APP_API_URL=${REACT_APP_API_URL} \
+    npm run build
 # ==== RUN =======
 # Set the env to "production"
 ENV NODE_ENV development
