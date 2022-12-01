@@ -16,8 +16,11 @@ import com.google.gson.JsonParser;
 import com.wks.bpm.engine.model.spi.Task;
 import com.wks.caseengine.tasks.TaskService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("task")
+@Tag(name = "Task", description = "A task is a unit of work for a process")
 public class TaskController {
 
 	@Autowired

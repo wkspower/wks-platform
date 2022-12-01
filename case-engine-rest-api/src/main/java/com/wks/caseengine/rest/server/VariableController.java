@@ -9,8 +9,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.variables.VariableService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("variable")
+@Tag(name = "Variables", description = "Access information about variables in Camunda")
 public class VariableController {
 
 	@Autowired

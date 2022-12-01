@@ -10,6 +10,16 @@ services:
         ports:
             - 8080:8080
 
+    camunda-modeler-push:
+        build:
+            context: ./infra/camunda-model-push
+            dockerfile: Dockerfile
+        links:
+            - camunda
+        volumes:
+            - ./infra/camunda-model-push/model:/model
+        entrypoint: /entrypoint.sh /model camunda:8080            
+
     keycloak:
         image: quay.io/keycloak/keycloak:18.0.0
         command: start-dev --import-realm

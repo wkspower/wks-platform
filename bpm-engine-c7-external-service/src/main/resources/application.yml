@@ -23,5 +23,8 @@ camunda7.rest.correlate.url: /message
 
 camunda.bpm.client:
   disable-backoff-strategy: true
+  basic-auth:
+    username: demo
+    password: demo
 
 mongo.database: wks-mongo-database
