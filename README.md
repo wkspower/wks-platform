@@ -29,6 +29,7 @@ docker-compose up
 
 #### Case Management Rest API 
 - Url: http://localhost:8081/
+- Swagger: http://localhost:8081/swagger-ui/index.html
 - Postman Collection: /postman-collections/wks-platform.postman_collection.json
 
 #### Camunda Rest API
