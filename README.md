@@ -5,6 +5,7 @@
 To start a Docker container of WKS Platform:
 
 ```
+mvn install package
 docker-compose up
 ```
 
@@ -22,7 +23,11 @@ docker-compose up
 #### Process Design
 - Camunda Modeler - A [standalone desktop application](https://camunda.com/download/modeler/) that allows business users and developers to design & configure processes.
 
-#### Keycloak: http://localhost:8580 (default used/password: admin/admin)
+## Rest APIs
+
+## Consumer Applications
+
+#### Keycloak: http://localhost:8082 (default used/password: admin/admin)
 
 ## What is WKS Platorm?
 
