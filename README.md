@@ -25,9 +25,13 @@ docker-compose up
 
 ## Rest APIs
 
-## Consumer Applications
+#### Case Management Rest API 
+- Url: http://localhost:8081/
+- Postman Collection: /postman-collections/wks-platform.postman_collection.json
 
-#### Keycloak: http://localhost:8082 (default used/password: admin/admin)
+#### Camunda Rest API
+- Url: http://localhost:8080/engine-rest/
+- Postman Collection: /postman-collections/camunda7.postman_collection.json
 
 ## What is WKS Platorm?
 
