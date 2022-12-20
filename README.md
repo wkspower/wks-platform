@@ -36,6 +36,10 @@ docker-compose up
 - Url: http://localhost:8080/engine-rest/
 - Postman Collection: /postman-collections/camunda7.postman_collection.json
 
+#### Demo Users
+- john/john
+- mary/mary
+
 ## What is WKS Platorm?
 
 ## Main concepts
