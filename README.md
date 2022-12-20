@@ -123,4 +123,5 @@ Camunda External Service client to consume processes events(messages)
 ### Mail Bridge
 Read mail boxes and send out e-mails. This component can be configured with Email Templates and rules for Case events definitions based on e-mails. And can also send Emails out based on Camunda Processes events.
 
-
+### WKS Modeler Templates
+WKS Platform provides customized modeler templates to accelerate the process design work. These templates can be found at /bpm-c7-element-template. Follow the following link for how to install and use templates in Camunda Modeler: https://docs.camunda.io/docs/components/modeler/desktop-modeler/element-templates/configuring-templates/
