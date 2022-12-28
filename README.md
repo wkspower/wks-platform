@@ -43,15 +43,23 @@ docker-compose up
 ## What is WKS Platorm?
 
 ## Main concepts
-1. Case Definition
-2. Case Instance
-3. Case Stage
-4. BPM Process Engine
-5. Process Definition
-6. Process Instance
-7. Tasks
-8. Variables
-9. Messages
+1. Case Management
+2. Case Definition
+3. Case Instance
+4. Case Stage
+5. BPM Process Engine
+6. Process Definition
+7. Process Instance
+8. Tasks
+9. Variables
+10. Messages
+
+### Case Management
+
+A method or practice of coordinating work by organizing all of the relevant information into one place - called a case. The case becomes the focal point for assessing the situation, initiating activities and processes, as well as keeping a historical record of what has transpired.
+
+![image](https://user-images.githubusercontent.com/85225281/209807324-f8a8ab9c-403c-4484-96b5-109bfb999d04.png)
+
 
 ### Case Definition
 A Case Definition is the 'template' for the creation of new Cases Instances. If defines which attributes, stages and processes definitions will be used by Cases Instances created from it
