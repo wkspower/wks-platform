@@ -58,8 +58,7 @@ docker-compose up
 
 A method or practice of coordinating work by organizing all of the relevant information into one place - called a case. The case becomes the focal point for assessing the situation, initiating activities and processes, as well as keeping a historical record of what has transpired.
 
-![image](https://user-images.githubusercontent.com/85225281/209807324-f8a8ab9c-403c-4484-96b5-109bfb999d04.png)
-
+<img src="https://user-images.githubusercontent.com/85225281/209807324-f8a8ab9c-403c-4484-96b5-109bfb999d04.png" width="400">
 
 ### Case Definition
 A Case Definition is the 'template' for the creation of new Cases Instances. If defines which attributes, stages and processes definitions will be used by Cases Instances created from it
