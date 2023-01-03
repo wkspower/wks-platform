@@ -136,3 +136,8 @@ Read mail boxes and send out e-mails. This component can be configured with Emai
 
 ### WKS Modeler Templates
 WKS Platform provides customized modeler templates to accelerate the process design work. These templates can be found at /bpm-c7-element-template. Follow the following link for how to install and use templates in Camunda Modeler: https://docs.camunda.io/docs/components/modeler/desktop-modeler/element-templates/configuring-templates/
+
+On macOS you have to add them to the folder:
+/Users/{user_name}/Library/Application Support/camunda-modeler/resources/element-templates
+
+
