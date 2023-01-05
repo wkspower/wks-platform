@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.27.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: camunda
+  name: camunda
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: camunda
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.27.0 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: camunda
+    spec:
+      containers:
+        - image: camunda/camunda-bpm-platform:latest
+          livenessProbe:
+            exec:
+              command:
+                - curl --fail http://localhost:8080/engine-rest/version || exit 1
+            failureThreshold: 5
+            initialDelaySeconds: 20
+            periodSeconds: 60
+            timeoutSeconds: 10
+          name: camunda
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          resources: {}
+      restartPolicy: Always
+status: {}

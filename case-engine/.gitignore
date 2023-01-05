@@ -34,3 +34,4 @@ build/
 
 *.log
 env*.properties
+/.apt_generated_tests/
