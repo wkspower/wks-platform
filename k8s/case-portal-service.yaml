@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.27.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: case-portal
+  name: case-portal
+spec:
+  ports:
+    - name: "3001"
+      port: 3001
+      targetPort: 3000
+  selector:
+    io.kompose.service: case-portal
+status:
+  loadBalancer: {}
