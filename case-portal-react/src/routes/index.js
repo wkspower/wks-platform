@@ -6,6 +6,6 @@ import { MainRoutes } from './MainRoutes';
 
 // ==============================|| ROUTING RENDER ||============================== //
 
-export const ThemeRoutes = ({ keycloak, authenticated, recordsTypes }) => {
-    return useRoutes([MainRoutes(keycloak, authenticated, recordsTypes), LoginRoutes]);
+export const ThemeRoutes = ({ keycloak, authenticated, recordsTypes, casesDefinitions }) => {
+    return useRoutes([MainRoutes(keycloak, authenticated, recordsTypes, casesDefinitions), LoginRoutes]);
 };
