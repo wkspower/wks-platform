@@ -12,7 +12,7 @@ import { TaskList } from 'views/taskList/taskList';
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard')));
 
-export const MainRoutes = (keycloak, authenticated, recordsTypes) => {
+export const MainRoutes = (keycloak, authenticated, recordsTypes, casesDefinitions) => {
     let routes = {
         path: '/',
         element: <MainLayout keycloak={keycloak} authenticated={authenticated} />,
@@ -27,32 +27,19 @@ export const MainRoutes = (keycloak, authenticated, recordsTypes) => {
                 element: <DashboardDefault />
             },
             {
-                path: 'case-list',
-                children: [
-                    {
-                        path: 'cases',
-                        element: <CaseList keycloak={keycloak} />
-                    },
-                    {
-                        path: 'wip-cases',
-                        element: <CaseList status={CaseStatus.WipCaseStatus.description} keycloak={keycloak} />
-                    },
-                    {
-                        path: 'closed-cases',
-                        element: <CaseList status={CaseStatus.ClosedCaseStatus.description} keycloak={keycloak} />
-                    },
-                    {
-                        path: 'archived-cases',
-                        element: <CaseList status={CaseStatus.ArchivedCaseStatus.description} keycloak={keycloak} />
-                    }
-                ]
-            },
-            {
                 path: 'task-list',
                 element: <TaskList keycloak={keycloak} />
             }
         ]
     };
+
+    casesDefinitions.forEach((element) => {
+        routes.children.push({
+            path: 'case-list/' + element.id,
+            element: <CaseList caseDefId={element.id} keycloak={keycloak} />
+            
+        });
+    });
 
     recordsTypes.forEach((element) => {
         routes.children.push({

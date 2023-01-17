@@ -15,6 +15,7 @@
         "@mui/material": "^5.10.12",
         "@mui/x-data-grid": "^5.17.10",
         "@reduxjs/toolkit": "^1.7.1",
+        "@syncfusion/ej2-react-kanban": "^20.4.42",
         "@tabler/icons": "^1.96.0",
         "@testing-library/jest-dom": "^5.11.4",
         "@testing-library/react": "^13.4.0",

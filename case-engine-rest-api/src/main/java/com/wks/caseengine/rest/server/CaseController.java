@@ -32,12 +32,13 @@ public class CaseController {
 	private CaseInstanceService caseInstanceService;
 
 	@GetMapping(value = "/")
-	public List<CaseInstance> find(@RequestParam(required = false) final String status) throws Exception {
-		if (status == null) {
-			return caseInstanceService.find(Optional.empty());
-		} else {
-			return caseInstanceService.find(Optional.of(CaseStatus.valueOf(status)));
-		}
+	public List<CaseInstance> find(@RequestParam(required = false) final String status,
+			@RequestParam(required = false) final String caseDefinitionId) throws Exception {
+
+		Optional<CaseStatus> statusOption = status == null ? Optional.empty() : Optional.of(CaseStatus.valueOf(status));
+		Optional<String> caseDefIdOption = caseDefinitionId == null ? Optional.empty() : Optional.of(caseDefinitionId);
+
+		return caseInstanceService.find(statusOption, caseDefIdOption);
 	}
 
 	@GetMapping(value = "/{businessKey}")
