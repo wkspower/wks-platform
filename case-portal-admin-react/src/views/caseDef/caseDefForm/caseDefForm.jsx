@@ -143,13 +143,15 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
                     >
                         <Tab label="General" {...a11yProps(0)} />
                         <Tab label="Stages" {...a11yProps(1)} />
-                        <Tab label="Forms" {...a11yProps(2)} />
                     </Tabs>
                 </Box>
 
                 {/* General Tab */}
                 <TabPanel value={tabValue} index={0}>
-                    <CaseDefGeneralForm caseDef={caseDef} setCaseDef={setCaseDef} />
+                    <div style={{ display: 'grid', padding: '10px' }}>
+                        <CaseDefGeneralForm caseDef={caseDef} setCaseDef={setCaseDef} />
+                        <CaseDefFormForm caseDef={caseDef} setCaseDef={setCaseDef} />
+                    </div>
                 </TabPanel>
 
                 <TabPanel value={tabValue} index={1}>
@@ -157,7 +159,6 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
                 </TabPanel>
 
                 <TabPanel value={tabValue} index={2}>
-                    <CaseDefFormForm caseDef={caseDef} setCaseDef={setCaseDef} />
                 </TabPanel>
             </Dialog>
         </div>

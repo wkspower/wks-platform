@@ -18,6 +18,10 @@ import lombok.Setter;
 public class ProcessDefinitionImpl implements ProcessDefinition {
 
 	private String id;
+	
+	private String key;
+	
+	private String name;
 
 	private String bpmn20Xml;
 

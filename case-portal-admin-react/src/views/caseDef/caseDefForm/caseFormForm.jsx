@@ -1,24 +1,45 @@
 import FormControl from '@mui/material/FormControl';
-import FormHelperText from '@mui/material/FormHelperText';
-import TextField from '@mui/material/TextField';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import React from 'react';
+import { useEffect, useState } from 'react';
 
 export const CaseDefFormForm = ({ caseDef, setCaseDef }) => {
-    const handleInputChange = (event) => {
-        setCaseDef({ ...caseDef, [event.target.name]: event.target.value });
-    };
+
+    const [forms, setForms] = useState();
+
+    useEffect(() => {
+        fetch(process.env.REACT_APP_API_URL + '/form/')
+            .then((response) => response.json())
+            .then((data) => {
+                setForms(data);
+            })
+            .catch((err) => {
+                console.log(err.message);
+            });
+    }, [caseDef]);
+
+    const handleFormChange = (event) => {
+        setCaseDef({ ...caseDef, formKey: event.target.value })
+    }
 
     return (
-        <div style={{ display: 'grid', padding: '10px' }}>
-            <FormControl key="ctrlId" style={{ padding: '5px' }}>
-                <TextField
-                    id="txtId"
-                    aria-describedby="key-helper-text"
+        <React.Fragment>
+            {forms && <FormControl key="ctrlForm" variant="outlined" sx={{ mt: 3 }}>
+                <InputLabel id="formLabelId">Form</InputLabel>
+                <Select
+                    labelId="formLabelId"
+                    label="Form"
+                    id="selectForm"
                     value={caseDef.formKey}
-                    name="formKey"
-                    onChange={handleInputChange}
-                />
-                <FormHelperText id="key-helper-text">Form Key</FormHelperText>
-            </FormControl>
-        </div>
+                    onChange={handleFormChange}
+                >
+                    {forms.map((form => {
+                        return <MenuItem key={form.key} value={form.key}>{form.title}</MenuItem>
+                    }))}
+                </Select>
+            </FormControl>}
+        </React.Fragment>
     );
 };

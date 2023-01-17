@@ -74,7 +74,7 @@ public class C7HttpRequestFactory {
 	//// Process Definition ////
 
 	public WksHttpRequest getProcessDefinitionListRequest(final BpmEngine bpmEngine) {
-		return new C7HttpGetRequest<ProcessDefinition>(extractUrl(bpmEngine) + processDefinitionUrl,
+		return new C7HttpGetRequest<ProcessDefinition>(extractUrl(bpmEngine) + processDefinitionUrl + "?latestVersion=true",
 				new HttpEntity<>(httpHeadersFactory.json()));
 	}
 
