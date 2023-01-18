@@ -149,6 +149,7 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
                     })}
                 </Menu>
             </div>
+            
             {caseDefId &&
                 <ToggleButtonGroup
                     orientation="horizontal"
@@ -178,6 +179,7 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
                     {(view === 'kanban') && <Kanban stages={stages} cases={cases} />}
                 </Box>
             </MainCard>
+
             {openCaseForm && <CaseForm aCase={aCase} handleClose={handleCloseCaseForm} open={openCaseForm} keycloak={keycloak} />}
 
             {openNewCaseForm && <NewCaseForm handleClose={handleCloseNewCaseForm} open={openNewCaseForm} caseDefId={newCaseDefId} />}
