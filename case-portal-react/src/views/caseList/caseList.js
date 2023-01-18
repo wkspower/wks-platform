@@ -52,7 +52,7 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
             .catch((err) => {
                 console.log(err.message);
             });
-    }, [caseDefId, openNewCaseForm, openCaseForm]);
+    }, [caseDefId, openNewCaseForm, openCaseForm, status]);
 
     const [caseDefs, setCaseDefs] = useState([]);
     useEffect(() => {
