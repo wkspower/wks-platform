@@ -25,14 +25,18 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
     const [view, setView] = React.useState('list');
 
     useEffect(() => {
-        fetch(process.env.REACT_APP_API_URL + '/case/?'
-            + (status ? 'status=' + status : '')
-            + (caseDefId ? '&caseDefinitionId=' + caseDefId : '')
-        )
+        fetch(process.env.REACT_APP_API_URL + '/case-definition' + (caseDefId ? '/' + caseDefId : ''))
+            .then((response) => response.json())
+            .then((data) => {
+                setStages(data.stages);
+                return fetch(process.env.REACT_APP_API_URL + '/case/?'
+                    + (status ? 'status=' + status : '')
+                    + (caseDefId ? '&caseDefinitionId=' + caseDefId : ''))
+            })
             .then((response) => response.json())
             .then((data) => {
                 let cases = data.map(
-                    function(element){
+                    function (element) {
                         element.date = "11/12/2022"
                         element.statusDescription = getStatus(element.status);
                         return element;
@@ -44,14 +48,6 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
                 console.log(err.message);
             });
 
-        fetch(process.env.REACT_APP_API_URL + '/case-definition' + (caseDefId ? '/' + caseDefId : ''))
-            .then((response) => response.json())
-            .then((data) => {
-                setStages(data.stages);
-            })
-            .catch((err) => {
-                console.log(err.message);
-            });
     }, [caseDefId, openNewCaseForm, openCaseForm, status]);
 
     const [caseDefs, setCaseDefs] = useState([]);
@@ -122,7 +118,7 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
             return "Closed";
         if (status === "ARCHIVED_CASE_STATUS")
             return "Archived";
-        return "";            
+        return "";
     };
 
     return (
@@ -149,7 +145,7 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
                     })}
                 </Menu>
             </div>
-            
+
             {caseDefId &&
                 <ToggleButtonGroup
                     orientation="horizontal"
