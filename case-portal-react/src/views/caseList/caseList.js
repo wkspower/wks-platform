@@ -104,6 +104,7 @@ export const CaseList = ({ status, keycloak }) => {
                     })}
                 </Menu>
             </div>
+            
             <MainCard sx={{ mt: 2 }} content={false}>
                 <Box>
                     <DataGrid
@@ -116,6 +117,7 @@ export const CaseList = ({ status, keycloak }) => {
                     />
                 </Box>
             </MainCard>
+
             {openCaseForm && <CaseForm aCase={aCase} handleClose={handleCloseCaseForm} open={openCaseForm} keycloak={keycloak} />}
 
             {openNewCaseForm && <NewCaseForm handleClose={handleCloseNewCaseForm} open={openNewCaseForm} caseDefId={newCaseDefId} />}
