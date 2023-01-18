@@ -73,7 +73,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	// Should ensure only one case is deleted - BusinessKey should be UNIQUE
 	@Override
 	public void delete(final String businessKey) throws Exception {
-		List<CaseInstance> caseInstanceList = repository.findCaseInstances().stream()
+		List<CaseInstance> caseInstanceList = repository.find().stream()
 				.filter(o -> o.getBusinessKey().equals(businessKey)).collect(Collectors.toList());
 
 		if (caseInstanceList.isEmpty()) {
