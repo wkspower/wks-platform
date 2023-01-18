@@ -31,7 +31,14 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
         )
             .then((response) => response.json())
             .then((data) => {
-                setCases(data);
+                let cases = data.map(
+                    function(element){
+                        element.date = "11/12/2022"
+                        element.statusDescription = getStatus(element.status);
+                        return element;
+                    }
+                )
+                setCases(cases);
             })
             .catch((err) => {
                 console.log(err.message);
@@ -61,9 +68,9 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
 
     const columns: GridColDef[] = [
         { field: 'businessKey', headerName: 'Business Key', width: 150 },
-        { field: 'status', headerName: 'Status', width: 220 },
+        { field: 'statusDescription', headerName: 'Status', width: 220 },
         { field: 'stage', headerName: 'Stage', width: 220 },
-        { field: 'caseDefinitionId', headerName: 'Case Definition', width: 220 },
+        { field: 'date', headerName: 'Created At', width: 220 },
         {
             field: 'action',
             headerName: '',
@@ -106,6 +113,16 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
         if (nextView !== null) {
             setView(nextView);
         }
+    };
+
+    const getStatus = (status) => {
+        if (status === "WIP_CASE_STATUS")
+            return "Work In Progress";
+        if (status === "CLOSED_CASE_STATUS")
+            return "Closed";
+        if (status === "ARCHIVED_CASE_STATUS")
+            return "Archived";
+        return "";            
     };
 
     return (
