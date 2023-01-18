@@ -11,10 +11,12 @@ export default function Grid(theme) {
                     borderColor: theme.palette.divider
                 },
                 columnHeaderTitle: {
-                    fontWeight: 'bold'
+                    fontWeight: '500',
                 },
                 cell: {
-                    borderColor: theme.palette.divider
+                    borderColor: theme.palette.divider,
+                    fontSize: '0.9rem',
+                    color: theme.palette.secondary.main,
                 }
             }
         }
