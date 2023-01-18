@@ -8,8 +8,6 @@ import com.wks.caseengine.cases.instance.CaseInstance;
 
 public interface CaseInstanceRepository extends Repository<CaseInstance> {
 
-	List<CaseInstance> findCaseInstances() throws Exception;
-	
 	List<CaseInstance> findCaseInstances(final Optional<CaseStatus> status, final Optional<String> caseDefinitionId) throws Exception;
 
 }

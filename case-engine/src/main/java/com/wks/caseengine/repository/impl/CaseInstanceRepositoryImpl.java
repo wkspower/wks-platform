@@ -31,14 +31,6 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	}
 
 	@Override
-	public List<CaseInstance> findCaseInstances() throws Exception {
-
-		Gson gson = new Gson();
-
-		return getCollection().find().map(o -> gson.fromJson(o.getJson(), CaseInstance.class)).into(new ArrayList<>());
-	}
-
-	@Override
 	public List<CaseInstance> findCaseInstances(final Optional<CaseStatus> status,
 			final Optional<String> caseDefinitionId) throws Exception {
 
