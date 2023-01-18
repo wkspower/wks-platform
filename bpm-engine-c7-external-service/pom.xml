@@ -22,7 +22,13 @@
 			<artifactId>spring-web</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
+        
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+        </dependency>
+        
 		<dependency>
 			<groupId>org.camunda.bpm.springboot</groupId>
 			<artifactId>camunda-bpm-spring-boot-starter-external-task-client</artifactId>
