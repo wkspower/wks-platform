@@ -121,6 +121,10 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
         return "";
     };
 
+    const fetchKanbanConfig = () => {
+        return caseDefs.find(o => o.id === caseDefId).kanbanConfig;
+    }
+
     return (
         <div style={{ height: 650, width: '100%' }}>
             <div>
@@ -172,7 +176,7 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
                         rowsPerPageOptions={[10]}
                         getRowId={(row) => row.businessKey}
                     />}
-                    {(view === 'kanban') && <Kanban stages={stages} cases={cases} />}
+                    {(view === 'kanban') && <Kanban stages={stages} cases={cases} kanbanConfig={fetchKanbanConfig()} />}
                 </Box>
             </MainCard>
 

@@ -290,7 +290,7 @@ function Attachments() {
                                     <FilePdfOutlined />
                                 </Avatar>
                             </ListItemAvatar>
-                            <ListItemText primary="Anexo-exemplo.pdf" secondary="Jan 9, 2023" />
+                            <ListItemText primary="sample-attachment.pdf" secondary="Jan 9, 2023" />
                         </ListItem>
 
                         <ListItem>
@@ -299,7 +299,7 @@ function Attachments() {
                                     <FileExcelOutlined />
                                 </Avatar>
                             </ListItemAvatar>
-                            <ListItemText primary="Planilha de orçamento.xls" secondary="Jan 9, 2023" />
+                            <ListItemText primary="budget-spreadsheet.xls" secondary="Jan 9, 2023" />
                         </ListItem>
                     </List>
                 </MainCard>
