@@ -15,40 +15,7 @@ const utilities = {
             title: 'Cases',
             type: 'collapse',
             icon: icons.FolderOutlined,
-            children: [
-                {
-                    id: 'wip-cases',
-                    title: 'Work In Progress',
-                    type: 'item',
-                    url: '/case-list/wip-cases',
-                    breadcrumbs: true,
-                    icon: icons.IconFileInvoice
-                },
-                {
-                    id: 'cases',
-                    title: 'All',
-                    type: 'item',
-                    url: '/case-list/cases',
-                    breadcrumbs: true,
-                    icon: icons.IconSquareAsterisk
-                },
-                {
-                    id: 'close-cases',
-                    title: 'Closed',
-                    type: 'item',
-                    url: '/case-list/closed-cases',
-                    breadcrumbs: true,
-                    icon: icons.IconFileCheck
-                },
-                {
-                    id: '   archived-cases',
-                    title: 'Archived',
-                    type: 'item',
-                    url: '/case-list/archived-cases',
-                    breadcrumbs: true,
-                    icon: icons.IconArchive
-                }
-            ]
+            children: []
         },
         {
             id: 'task-list',
@@ -67,6 +34,25 @@ const utilities = {
         }
     ]
 };
+
+fetch(process.env.REACT_APP_API_URL + '/case-definition/')
+    .then((response) => response.json())
+    .then((data) => {
+        data.forEach((element) => {
+            utilities.children
+                .filter((menu) => menu.id === 'case-list')[0]
+                .children.push({
+                    id: element.id,
+                    title: element.name,
+                    type: 'item',
+                    url: '/case-list/' + element.id,
+                    breadcrumbs: true
+                });
+        });
+    })
+    .catch((err) => {
+        console.log(err.message);
+    });
 
 fetch(process.env.REACT_APP_API_URL + '/record-type/')
     .then((response) => response.json())

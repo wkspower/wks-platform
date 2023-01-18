@@ -31,11 +31,25 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	}
 
 	@Override
-	public List<CaseInstance> findCaseInstances(final Optional<CaseStatus> status) throws Exception {
+	public List<CaseInstance> findCaseInstances() throws Exception {
+
 		Gson gson = new Gson();
-		Bson filter = status.isPresent() ? Filters.eq("status", status.get()) : Filters.empty();
-		return getCollection().find().filter(filter).map(o -> gson.fromJson(o.getJson(), CaseInstance.class))
-				.into(new ArrayList<>());
+
+		return getCollection().find().map(o -> gson.fromJson(o.getJson(), CaseInstance.class)).into(new ArrayList<>());
+	}
+
+	@Override
+	public List<CaseInstance> findCaseInstances(final Optional<CaseStatus> status,
+			final Optional<String> caseDefinitionId) throws Exception {
+
+		Gson gson = new Gson();
+
+		Bson statusFilter = status.isPresent() ? Filters.eq("status", status.get()) : Filters.empty();
+		Bson caseDefIdFilter = caseDefinitionId.isPresent() ? Filters.eq("caseDefinitionId", caseDefinitionId.get())
+				: Filters.empty();
+
+		return getCollection().find().filter(Filters.and(statusFilter, caseDefIdFilter))
+				.map(o -> gson.fromJson(o.getJson(), CaseInstance.class)).into(new ArrayList<>());
 	}
 
 	@Override

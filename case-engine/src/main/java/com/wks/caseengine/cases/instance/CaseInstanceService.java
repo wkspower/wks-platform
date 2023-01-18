@@ -7,7 +7,8 @@ import com.wks.caseengine.cases.definition.CaseStatus;
 
 public interface CaseInstanceService {
 
-	List<CaseInstance> find(final Optional<CaseStatus> status) throws Exception;
+	List<CaseInstance> find(final Optional<CaseStatus> status, final Optional<String> caseDefinitionId)
+			throws Exception;
 
 	CaseInstance get(final String businessKey) throws Exception;
 

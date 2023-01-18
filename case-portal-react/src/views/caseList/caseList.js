@@ -1,21 +1,34 @@
 import { Box, Button } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { GridColDef } from '@mui/x-data-grid';
+import { Kanban } from 'components/Kanban/kanban';
 import MainCard from 'components/MainCard';
 import React, { useEffect, useState } from 'react';
 import { CaseForm } from '../caseForm/caseForm';
 import { NewCaseForm } from '../caseForm/newCaseForm';
+import { DataGrid } from '@mui/x-data-grid';
 
-export const CaseList = ({ status, keycloak }) => {
+import ViewListIcon from '@mui/icons-material/ViewList';
+import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+
+export const CaseList = ({ status, caseDefId, keycloak }) => {
+    const [stages, setStages] = useState([]);
+
     const [cases, setCases] = useState([]);
     const [aCase, setACase] = useState(null);
     const [newCaseDefId, setNewCaseDefId] = useState(null);
     const [openCaseForm, setOpenCaseForm] = useState(false);
     const [openNewCaseForm, setOpenNewCaseForm] = useState(false);
+    const [view, setView] = React.useState('list');
 
     useEffect(() => {
-        fetch(process.env.REACT_APP_API_URL + '/case/' + (status ? '?status=' + status : ''))
+        fetch(process.env.REACT_APP_API_URL + '/case/?'
+            + (status ? 'status=' + status : '')
+            + (caseDefId ? '&caseDefinitionId=' + caseDefId : '')
+        )
             .then((response) => response.json())
             .then((data) => {
                 setCases(data);
@@ -23,7 +36,16 @@ export const CaseList = ({ status, keycloak }) => {
             .catch((err) => {
                 console.log(err.message);
             });
-    }, [status, openNewCaseForm, openCaseForm]);
+
+        fetch(process.env.REACT_APP_API_URL + '/case-definition' + (caseDefId ? '/' + caseDefId : ''))
+            .then((response) => response.json())
+            .then((data) => {
+                setStages(data.stages);
+            })
+            .catch((err) => {
+                console.log(err.message);
+            });
+    }, [caseDefId, openNewCaseForm, openCaseForm]);
 
     const [caseDefs, setCaseDefs] = useState([]);
     useEffect(() => {
@@ -80,6 +102,12 @@ export const CaseList = ({ status, keycloak }) => {
         setAnchorEl(null);
     };
 
+    const handleChangeView = (event, nextView) => {
+        if (nextView !== null) {
+            setView(nextView);
+        }
+    };
+
     return (
         <div style={{ height: 650, width: '100%' }}>
             <div>
@@ -105,16 +133,33 @@ export const CaseList = ({ status, keycloak }) => {
                 </Menu>
             </div>
             
+            {caseDefId &&
+                <ToggleButtonGroup
+                    orientation="horizontal"
+                    value={view}
+                    exclusive
+                    onChange={handleChangeView}
+                >
+                    <ToggleButton value="list" aria-label="list">
+                        <ViewListIcon />
+                    </ToggleButton>
+                    <ToggleButton value="kanban" aria-label="kanban">
+                        <ViewKanbanIcon />
+                    </ToggleButton>
+                </ToggleButtonGroup>
+            }
+
             <MainCard sx={{ mt: 2 }} content={false}>
                 <Box>
-                    <DataGrid
+                    {(view === 'list') && <DataGrid
                         sx={{ height: 650, width: '100%', backgroundColor: '#ffffff', mt: 1 }}
                         rows={cases}
                         columns={columns}
                         pageSize={10}
                         rowsPerPageOptions={[10]}
                         getRowId={(row) => row.businessKey}
-                    />
+                    />}
+                    {(view === 'kanban') && <Kanban stages={stages} cases={cases} />}
                 </Box>
             </MainCard>
 

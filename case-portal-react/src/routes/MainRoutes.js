@@ -12,7 +12,7 @@ import { TaskList } from 'views/taskList/taskList';
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard')));
 
-export const MainRoutes = (keycloak, authenticated, recordsTypes) => {
+export const MainRoutes = (keycloak, authenticated, recordsTypes, casesDefinitions) => {
     let routes = {
         path: '/',
         element: <MainLayout keycloak={keycloak} authenticated={authenticated} />,
@@ -53,6 +53,14 @@ export const MainRoutes = (keycloak, authenticated, recordsTypes) => {
             }
         ]
     };
+
+    casesDefinitions.forEach((element) => {
+        routes.children.push({
+            path: 'case-list/' + element.id,
+            element: <CaseList caseDefId={element.id} keycloak={keycloak} />
+            
+        });
+    });
 
     recordsTypes.forEach((element) => {
         routes.children.push({

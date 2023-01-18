@@ -29,8 +29,9 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	private ProcessInstanceService processInstanceService;
 
 	@Override
-	public List<CaseInstance> find(final Optional<CaseStatus> status) throws Exception {
-		return repository.findCaseInstances(status);
+	public List<CaseInstance> find(final Optional<CaseStatus> status, final Optional<String> caseDefinitionId)
+			throws Exception {
+		return repository.findCaseInstances(status, caseDefinitionId);
 	}
 
 	@Override
@@ -72,7 +73,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	// Should ensure only one case is deleted - BusinessKey should be UNIQUE
 	@Override
 	public void delete(final String businessKey) throws Exception {
-		List<CaseInstance> caseInstanceList = repository.findCaseInstances(Optional.empty()).stream()
+		List<CaseInstance> caseInstanceList = repository.findCaseInstances().stream()
 				.filter(o -> o.getBusinessKey().equals(businessKey)).collect(Collectors.toList());
 
 		if (caseInstanceList.isEmpty()) {

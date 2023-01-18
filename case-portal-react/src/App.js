@@ -12,6 +12,7 @@ const App = () => {
     const [keycloak, setKeycloak] = useState();
     const [authenticated, setAuthenticated] = useState(null);
     const [recordsTypes, setRecordsTypes] = useState([]);
+    const [casesDefinitions, setCasesDefinitions] = useState([]);
 
     useEffect(() => {
         const keycloak = Keycloak({
@@ -32,6 +33,15 @@ const App = () => {
             .catch((err) => {
                 console.log(err.message);
             });
+
+            fetch(process.env.REACT_APP_API_URL + '/case-definition/')
+            .then((response) => response.json())
+            .then((data) => {
+                setCasesDefinitions(data);
+            })
+            .catch((err) => {
+                console.log(err.message);
+            });
     }, []);
 
     return (
@@ -39,7 +49,7 @@ const App = () => {
         authenticated && (
             <ThemeCustomization>
                 <ScrollTop>
-                    <ThemeRoutes keycloak={keycloak} authenticated={authenticated} recordsTypes={recordsTypes} />
+                    <ThemeRoutes keycloak={keycloak} authenticated={authenticated} recordsTypes={recordsTypes} casesDefinitions={casesDefinitions} />
                 </ScrollTop>
             </ThemeCustomization>
         )
