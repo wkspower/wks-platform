@@ -14,7 +14,7 @@ import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-export const CaseList = ({ caseDefId, keycloak }) => {
+export const CaseList = ({ status, caseDefId, keycloak }) => {
     const [stages, setStages] = useState([]);
 
     const [cases, setCases] = useState([]);
@@ -25,7 +25,10 @@ export const CaseList = ({ caseDefId, keycloak }) => {
     const [view, setView] = React.useState('list');
 
     useEffect(() => {
-        fetch(process.env.REACT_APP_API_URL + '/case/' + (caseDefId ? '?caseDefinitionId=' + caseDefId : ''))
+        fetch(process.env.REACT_APP_API_URL + '/case/?'
+            + (status ? 'status=' + status : '')
+            + (caseDefId ? '&caseDefinitionId=' + caseDefId : '')
+        )
             .then((response) => response.json())
             .then((data) => {
                 setCases(data);
@@ -129,20 +132,21 @@ export const CaseList = ({ caseDefId, keycloak }) => {
                     })}
                 </Menu>
             </div>
-
-            <ToggleButtonGroup
-                orientation="horizontal"
-                value={view}
-                exclusive
-                onChange={handleChangeView}
-            >
-                <ToggleButton value="list" aria-label="list">
-                    <ViewListIcon />
-                </ToggleButton>
-                <ToggleButton value="kanban" aria-label="kanban">
-                    <ViewKanbanIcon />
-                </ToggleButton>
-            </ToggleButtonGroup>
+            {caseDefId &&
+                <ToggleButtonGroup
+                    orientation="horizontal"
+                    value={view}
+                    exclusive
+                    onChange={handleChangeView}
+                >
+                    <ToggleButton value="list" aria-label="list">
+                        <ViewListIcon />
+                    </ToggleButton>
+                    <ToggleButton value="kanban" aria-label="kanban">
+                        <ViewKanbanIcon />
+                    </ToggleButton>
+                </ToggleButtonGroup>
+            }
 
             <MainCard sx={{ mt: 2 }} content={false}>
                 <Box>

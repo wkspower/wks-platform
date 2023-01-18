@@ -27,6 +27,27 @@ export const MainRoutes = (keycloak, authenticated, recordsTypes, casesDefinitio
                 element: <DashboardDefault />
             },
             {
+                path: 'case-list',
+                children: [
+                    {
+                        path: 'cases',
+                        element: <CaseList keycloak={keycloak} />
+                    },
+                    {
+                        path: 'wip-cases',
+                        element: <CaseList status={CaseStatus.WipCaseStatus.description} keycloak={keycloak} />
+                    },
+                    {
+                        path: 'closed-cases',
+                        element: <CaseList status={CaseStatus.ClosedCaseStatus.description} keycloak={keycloak} />
+                    },
+                    {
+                        path: 'archived-cases',
+                        element: <CaseList status={CaseStatus.ArchivedCaseStatus.description} keycloak={keycloak} />
+                    }
+                ]
+            },
+            {
                 path: 'task-list',
                 element: <TaskList keycloak={keycloak} />
             }
