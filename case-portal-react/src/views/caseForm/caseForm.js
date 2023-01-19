@@ -155,8 +155,8 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                 <CloseIcon />
                             </IconButton>
                             <Typography sx={{ ml: 2, flex: 1 }} component="div">
-                                <div>Motion Detected: {aCase?.businessKey}</div>
-                                <div style={{ fontSize: '13px' }}>{aCase?.status}</div>
+                                <div>{caseDef.name}: {aCase?.businessKey}</div>
+                                <div style={{ fontSize: '13px' }}>{aCase?.statusDescription}</div>
                             </Typography>
                             {aCase.status === CaseStatus.WipCaseStatus.description && (
                                 <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.ClosedCaseStatus.description)}>
@@ -208,9 +208,11 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                         <Tabs value={tabIndex} onChange={handleTabChanged} aria-label="basic tabs example">
                             <Tab label="Case Details" {...a11yProps(0)} />
-                            <Tab label="Comments" {...a11yProps(1)} />
-                            <Tab label="Attachments" {...a11yProps(2)} />
-                            <Tab label="Tasks" {...a11yProps(3)} />
+                            <Tab label="Tasks" {...a11yProps(1)} />
+                            <Tab label="Comments" {...a11yProps(2)} />
+                            <Tab label="Attachments" {...a11yProps(3)} />
+                            <Tab label="E-mails" {...a11yProps(4)} />
+                            
                         </Tabs>
                     </Box>
 
@@ -234,6 +236,12 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={1}>
+                        <div style={{ display: 'grid', padding: '10px' }}>
+                            <TaskList businessKey={aCase.businessKey} bpmEngineId={caseDef.bpmEngineId} keycloak={keycloak} />
+                        </div>
+                    </TabPanel>
+
+                    <TabPanel value={tabIndex} index={2}>
                           <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
                             <Grid item xs={12}>
                                 <Comments commentsUrl="http://localhost:3004/comments" currentUserId="1" />
@@ -241,15 +249,14 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                         </Grid>
                     </TabPanel>
 
-                    <TabPanel value={tabIndex} index={2}>
+                    <TabPanel value={tabIndex} index={3}>
                         <Attachments />
                     </TabPanel>
 
-                    <TabPanel value={tabIndex} index={3}>
-                        <div style={{ display: 'grid', padding: '10px' }}>
-                            <TaskList businessKey={aCase.businessKey} bpmEngineId={caseDef.bpmEngineId} keycloak={keycloak} />
-                        </div>
+                    <TabPanel value={tabIndex} index={4}>
+                        
                     </TabPanel>
+
                 </Dialog>
             </div>
         )
