@@ -3,7 +3,8 @@
     "name": "WKS - Update Case Stage",
     "id": "com.wks.camunda.template.case-stage-update",
     "appliesTo": [
-        "bpmn:ServiceTask"
+        "bpmn:ServiceTask",
+        "bpmn:Event"
     ],
     "properties": [
         {
