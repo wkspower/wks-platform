@@ -38,7 +38,7 @@ export const Kanban = ({ stages, cases }) => {
                 <div className="e-text">{props.Summary}</div>
             </div>
             <div className="e-card-custom-footer">
-                <div className="e-card-tag-field e-tooltip-text">{props.status}</div>
+                <div className="e-card-tag-field e-tooltip-text">{props.statusDescription}</div>
             </div>
         </div>);
     }
