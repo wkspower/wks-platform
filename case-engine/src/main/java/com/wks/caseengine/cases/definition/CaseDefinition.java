@@ -2,6 +2,8 @@ package com.wks.caseengine.cases.definition;
 
 import java.util.List;
 
+import com.google.gson.JsonObject;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,5 +30,7 @@ public class CaseDefinition {
 	private String stagesLifecycleProcessKey;
 
 	private List<CaseStage> stages;
+	
+	private JsonObject kanbanConfig;
 
 }

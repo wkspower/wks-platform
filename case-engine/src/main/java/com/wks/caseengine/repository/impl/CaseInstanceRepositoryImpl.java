@@ -1,6 +1,7 @@
 package com.wks.caseengine.repository.impl;
 
 import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,7 @@ import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.db.MongoDataConnection;
 import com.wks.caseengine.repository.CaseInstanceRepository;
+import static com.mongodb.client.model.Sorts.descending;
 
 @Component
 public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
@@ -27,7 +29,8 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	@Override
 	public List<CaseInstance> find() throws Exception {
 		Gson gson = new Gson();
-		return getCollection().find().map(o -> gson.fromJson(o.getJson(), CaseInstance.class)).into(new ArrayList<>());
+		return getCollection().find().sort(descending("_id")).map(o -> gson.fromJson(o.getJson(), CaseInstance.class))
+				.into(new ArrayList<>());
 	}
 
 	@Override
@@ -40,7 +43,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 		Bson caseDefIdFilter = caseDefinitionId.isPresent() ? Filters.eq("caseDefinitionId", caseDefinitionId.get())
 				: Filters.empty();
 
-		return getCollection().find().filter(Filters.and(statusFilter, caseDefIdFilter))
+		return getCollection().find().sort(descending("_id")).filter(Filters.and(statusFilter, caseDefIdFilter))
 				.map(o -> gson.fromJson(o.getJson(), CaseInstance.class)).into(new ArrayList<>());
 	}
 

@@ -56,7 +56,8 @@ export const CaseDefList = () => {
             name: '',
             formKey: '',
             stagesLifecycleProcessKey: '',
-            stages: [{ id: 0, index: 0, name: 'Stage 0' }]
+            stages: [{ id: 0, index: 0, name: 'Stage 0' }],
+            kanbanConfig: {}
         });
         setOpenCaseDefForm(true);
     };

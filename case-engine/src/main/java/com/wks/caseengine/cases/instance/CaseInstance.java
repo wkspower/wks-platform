@@ -24,7 +24,7 @@ public class CaseInstance {
 	// TODO improve this hard code
 	@Builder.Default
 	private CaseStatus status = CaseStatus.WIP_CASE_STATUS;
-
+	
 	private List<CaseAttribute> attributes;
 
 	public String getId() {

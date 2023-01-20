@@ -18,6 +18,7 @@ import { useEffect } from 'react';
 import { CaseDefFormStages } from './caseDefFormStages';
 import { CaseDefGeneralForm } from './caseDefGeneralForm';
 import { CaseDefFormForm } from './caseFormForm';
+import { CaseKanbanForm } from './caseDefKanban';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -143,6 +144,7 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
                     >
                         <Tab label="General" {...a11yProps(0)} />
                         <Tab label="Stages" {...a11yProps(1)} />
+                        <Tab label="Kanban" {...a11yProps(2)} />
                     </Tabs>
                 </Box>
 
@@ -159,6 +161,7 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
                 </TabPanel>
 
                 <TabPanel value={tabValue} index={2}>
+                    <CaseKanbanForm caseDef={caseDef} setCaseDef={setCaseDef}/>
                 </TabPanel>
             </Dialog>
         </div>
