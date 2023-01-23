@@ -2,15 +2,10 @@ import './kanban.css';
 import * as React from 'react';
 import { extend, addClass } from '@syncfusion/ej2-base';
 import { KanbanComponent, ColumnsDirective, ColumnDirective } from "@syncfusion/ej2-react-kanban";
-import { updateSampleSection } from './sampleBase';
 import { registerLicense } from '@syncfusion/ej2-base';
 
 export const Kanban = ({ stages, cases, kanbanConfig }) => {
     registerLicense('Mgo+DSMBaFt/QHRqVVhkX1pGaV5EQmFJfFBmTGldd1RwcEU3HVdTRHRcQlxiTn5ackxhXnpYdH0=;Mgo+DSMBPh8sVXJ0S0J+XE9AdVRAQmJPYVF2R2BJdlR0fF9GZEwgOX1dQl9gSX9ScUVqXXZcd3FST2k=;ORg4AjUWIQA/Gnt2VVhkQlFaclxJX3xIeEx0RWFab1d6cF1MYFhBNQtUQF1hSn5Sd0JjUHtXcnNQT2NV;OTU1NzMxQDMyMzAyZTM0MmUzMFlmODlLOGFIOWs1N08yZG1UM0tsWXpEZ2tuSlMwWUhHa0hCRWtVY096Q3c9;OTU1NzMyQDMyMzAyZTM0MmUzMGJyVEVuRjVpWGN6dWlqUGpXQmtiNjlNUWpvNENaSlc3YlpITGtObWpyNlk9;NRAiBiAaIQQuGjN/V0Z+WE9EaFtBVmFWf1VpR2NbfE55flFOalxVVAciSV9jS31Td0RkWXZaeXZSQGVeWA==;OTU1NzM0QDMyMzAyZTM0MmUzMFR1bTBxUmxnN29TOWk2T2RKNzgvVVlKS3Y5eEpicENmYVFhZ1lwZERZdE09;OTU1NzM1QDMyMzAyZTM0MmUzMFVDcWpFNjFLWlJabWJ3eXB4d2xDbE5RUHd6N3p6R01KejdmY3RNNHFjc2c9;Mgo+DSMBMAY9C3t2VVhkQlFaclxJX3xIeEx0RWFab1d6cF1MYFhBNQtUQF1hSn5Sd0JjUHtXcnNSR2FV;OTU1NzM3QDMyMzAyZTM0MmUzMFI3OVFhekd0TG41L0pGbUYwTHZyUCtXVWYyRUtmbmQ1dU5BeDZaWjNGblU9;OTU1NzM4QDMyMzAyZTM0MmUzMFJ5V1FLTSthUllSYjUxc0hPQmIzTHpZNFdjaWlMYVZsdXNNbUtYMGorcnM9;OTU1NzM5QDMyMzAyZTM0MmUzMFR1bTBxUmxnN29TOWk2T2RKNzgvVVlKS3Y5eEpicENmYVFhZ1lwZERZdE09');
-
-    React.useEffect(() => {
-        updateSampleSection();
-    }, []);
 
     let data = extend([], cases, null, true);
 
