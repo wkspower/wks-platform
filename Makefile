@@ -12,3 +12,6 @@ case-portal-admim:
 
 case-portal:
 	@cd $(PWD)/case-portal-react && make
+
+user-guide:
+	@cd $(PWD)/website && make	

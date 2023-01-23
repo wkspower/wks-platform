@@ -27,7 +27,7 @@ Cases lifecycles spans over its stages. The case stages are defined in a case de
 - Contract writing
 - Contract signing
 
-#### Kanban
+### Kanban
 Configurations from the Kanban section will define how cards will be displayed in the Case Kanban view in the Users Workspace.
 There are two fields for this configuration:
 - **Title** (comma separated): if provided, these attributes values will be displayed for each Case Card **Tile** in the Kanban View  
