@@ -176,7 +176,7 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
                         rowsPerPageOptions={[10]}
                         getRowId={(row) => row.businessKey}
                     />}
-                    {(view === 'kanban') && <Kanban stages={stages} cases={cases} kanbanConfig={fetchKanbanConfig()} />}
+                    {(view === 'kanban') && <Kanban stages={stages} cases={cases} caseDefId={caseDefId} kanbanConfig={fetchKanbanConfig()} setACase={setACase} setOpenCaseForm={setOpenCaseForm} />}
                 </Box>
             </MainCard>
 
