@@ -1,6 +1,4 @@
 import { Box, Button } from '@mui/material';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import { GridColDef } from '@mui/x-data-grid';
 import { Kanban } from 'components/Kanban/kanban';
 import MainCard from 'components/MainCard';
@@ -14,15 +12,23 @@ import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
+import Snackbar from '@mui/material/Snackbar';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+
 export const CaseList = ({ status, caseDefId, keycloak }) => {
     const [stages, setStages] = useState([]);
 
     const [cases, setCases] = useState([]);
     const [aCase, setACase] = useState(null);
     const [newCaseDefId, setNewCaseDefId] = useState(null);
+    const [lastCreatedCase, setLastCreatedCase] = useState(null);
+
+
     const [openCaseForm, setOpenCaseForm] = useState(false);
     const [openNewCaseForm, setOpenNewCaseForm] = useState(false);
     const [view, setView] = React.useState('list');
+    const [snackOpen, setSnackOpen] = useState(false);
 
     useEffect(() => {
         fetch(process.env.REACT_APP_API_URL + '/case-definition' + (caseDefId ? '/' + caseDefId : ''))
@@ -89,20 +95,13 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
 
     const handleCloseNewCaseForm = () => {
         setOpenNewCaseForm(false);
+        setSnackOpen(true);
     };
 
-    const handleNewCaseAction = (caseDefId) => {
+    const handleNewCaseAction = () => {
+        setLastCreatedCase(null);
         setNewCaseDefId(caseDefId);
         setOpenNewCaseForm(true);
-    };
-
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const open = Boolean(anchorEl);
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const handleClose = () => {
-        setAnchorEl(null);
     };
 
     const handleChangeView = (event, nextView) => {
@@ -125,30 +124,45 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
         return caseDefs.find(o => o.id === caseDefId).kanbanConfig;
     }
 
+    const handleCloseSnack = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setSnackOpen(false);
+    };
+
+    const snackAction = (
+        lastCreatedCase && <React.Fragment>
+            <Button color="primary" size="small" onClick={() => {
+                setACase({
+                    businessKey: lastCreatedCase.businessKey,
+                    caseDefinitionId: caseDefId,
+                });
+                setOpenCaseForm(true);
+            }}
+            >
+                {lastCreatedCase.businessKey}
+            </Button>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleCloseSnack}
+            >
+                <CloseIcon fontSize="small" />
+            </IconButton>
+        </React.Fragment>
+    );
+
     return (
         <div style={{ height: 650, width: '100%' }}>
-            <div>
-                <Button id="basic-button" onClick={handleClick} variant="contained">
+            {caseDefId && <div>
+                <Button id="basic-button" onClick={handleNewCaseAction} variant="contained">
                     New Case
                 </Button>
-                <Menu
-                    id="basic-menu"
-                    anchorEl={anchorEl}
-                    open={open}
-                    onClose={handleClose}
-                    MenuListProps={{
-                        'aria-labelledby': 'basic-button'
-                    }}
-                >
-                    {caseDefs.map((caseDef) => {
-                        return (
-                            <MenuItem key={caseDef.name} onClick={() => handleNewCaseAction(caseDef.id)}>
-                                {caseDef.name}
-                            </MenuItem>
-                        );
-                    })}
-                </Menu>
             </div>
+            }
 
             {caseDefId &&
                 <ToggleButtonGroup
@@ -182,7 +196,15 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
 
             {openCaseForm && <CaseForm aCase={aCase} handleClose={handleCloseCaseForm} open={openCaseForm} keycloak={keycloak} />}
 
-            {openNewCaseForm && <NewCaseForm handleClose={handleCloseNewCaseForm} open={openNewCaseForm} caseDefId={newCaseDefId} />}
+            {openNewCaseForm && <NewCaseForm handleClose={handleCloseNewCaseForm} open={openNewCaseForm} caseDefId={newCaseDefId} setLastCreatedCase={setLastCreatedCase} />}
+
+            {lastCreatedCase && <Snackbar
+                open={snackOpen}
+                autoHideDuration={6000}
+                message="Case created"
+                action={snackAction}
+            />}
+
         </div>
     );
 };

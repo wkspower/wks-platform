@@ -18,6 +18,7 @@ import React, { useEffect } from 'react';
 import { Form } from '@formio/react';
 import MainCard from 'components/MainCard';
 
+
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
         children: React.ReactElement
@@ -27,7 +28,7 @@ const Transition = React.forwardRef(function Transition(
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const NewCaseForm = ({ open, handleClose, caseDefId }) => {
+export const NewCaseForm = ({ open, handleClose, caseDefId, setLastCreatedCase }) => {
     const [caseDef, setCaseDef] = useState([]);
     const [form, setForm] = useState([]);
     const [formData, setFormData] = useState(null);
@@ -73,7 +74,9 @@ export const NewCaseForm = ({ open, handleClose, caseDefId }) => {
                 attributes: caseAttributes
             })
         })
-            .then((response) => {
+            .then((response) => response.json())
+            .then((data) => {
+                setLastCreatedCase(data);
                 handleClose();
             })
             .catch((err) => {

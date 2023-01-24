@@ -211,7 +211,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                             <Tab label="Tasks" {...a11yProps(1)} />
                             <Tab label="Comments" {...a11yProps(2)} />
                             <Tab label="Attachments" {...a11yProps(3)} />
-                            <Tab label="E-mails" {...a11yProps(4)} />
+                            <Tab label="Emails" {...a11yProps(4)} />
                             
                         </Tabs>
                     </Box>
