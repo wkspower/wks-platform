@@ -140,6 +140,7 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
                     caseDefinitionId: caseDefId,
                 });
                 setOpenCaseForm(true);
+                handleCloseSnack();
             }}
             >
                 {lastCreatedCase.businessKey}
@@ -202,6 +203,7 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
                 open={snackOpen}
                 autoHideDuration={6000}
                 message="Case created"
+                onClose={handleCloseSnack}
                 action={snackAction}
             />}
 
