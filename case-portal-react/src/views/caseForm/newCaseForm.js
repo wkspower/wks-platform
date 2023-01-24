@@ -103,20 +103,18 @@ export const NewCaseForm = ({ open, handleClose, caseDefId, setLastCreatedCase }
 
                 {/* New Case Form */}
                 <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Grid item xs={12}>
-                        <MainCard sx={{ p: 2 }} content={true}>
-                            <Box sx={{ pb: 1, display: 'flex', flexDirection: 'row' }}>
-                                <Typography variant="h5" color="textSecondary" sx={{ pr: 0.5 }}>
-                                    {form.title}
-                                </Typography>
-                                {form.toolTip && (
-                                    <Tooltip title={form.toolTip}>
-                                        <QuestionCircleOutlined />
-                                    </Tooltip>
-                                )}
-                            </Box>
-                            <Form form={form.structure} submission={formData} />
-                        </MainCard>
+                    <Grid item xs={12} sx={{ m: 3}}>
+                        <Box sx={{ pb: 1, display: 'flex', flexDirection: 'row' }}>
+                            <Typography variant="h5" color="textSecondary" sx={{ pr: 0.5 }}>
+                                {form.title}
+                            </Typography>
+                            {form.toolTip && (
+                                <Tooltip title={form.toolTip}>
+                                    <QuestionCircleOutlined />
+                                </Tooltip>
+                            )}
+                        </Box>
+                        <Form form={form.structure} submission={formData} />
                     </Grid>
                 </Grid>
             </Dialog>
