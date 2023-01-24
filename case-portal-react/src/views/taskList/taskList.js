@@ -77,7 +77,7 @@ export const TaskList = ({ businessKey, bpmEngineId, keycloak }) => {
         <React.Fragment>
             <Box>
                 {tasks && tasks.length > 0 && (
-                    <MainCard sx={{ mt: 2 }} content={false}>
+                    <MainCard content={false}>
                         <Box>
                             <DataGrid
                                 sx={{ height: 650, width: '100%', backgroundColor: '#ffffff', mt: 1 }}

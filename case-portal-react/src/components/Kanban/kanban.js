@@ -35,11 +35,12 @@ export const Kanban = ({ stages, cases, caseDefId, kanbanConfig, setACase, setOp
                         <Link
                             component="button"
                             variant="body2"
-                            onClick={() => {
+                            onClick={(e) => {
                                 setACase({
                                     businessKey: props.businessKey,
                                     caseDefinitionId: caseDefId,
                                 });
+                                e.stopPropagation();
                                 setOpenCaseForm(true);
                             }}
                         >
