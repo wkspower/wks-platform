@@ -49,19 +49,13 @@ export const Kanban = ({ stages, cases, caseDefId, kanbanConfig, setACase, setOp
                     </div>
 
                     <div className="e-card-header-title">
-                        {title && title.length > 0 ?
-                            title.map(attributeName => { return props.attributes.find(o => o.name === attributeName)?.value }).join(" ")
-                            : props.attributes.slice(0, 2).map(attribute => { return attribute.value; }).join(" ")
-                        }
+                        {title?.map(attributeName => { return props.attributes.find(o => o.name === attributeName)?.value }).join(" ")}
                     </div>
                 </div>
             </div>
             <div className="e-card-content">
                 <div className="e-text">
-                    {content && content.length > 0 ?
-                        content.map(attributeName => { return props.attributes.find(o => o.name === attributeName)?.value }).join(" ")
-                        : props.attributes.slice(2, 3).map(attribute => { return attribute.value; }).join(" ")
-                    }
+                    {content?.map(attributeName => { return props.attributes.find(o => o.name === attributeName)?.value }).join(" ")}
                 </div>
             </div>
             <div className="e-card-custom-footer">
