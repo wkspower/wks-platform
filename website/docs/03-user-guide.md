@@ -32,5 +32,3 @@ Configurations from the Kanban section will define how cards will be displayed i
 There are two fields for this configuration:
 - **Title** (comma separated): if provided, these attributes values will be displayed for each Case Card **Tile** in the Kanban View  
 - **Content** (comma separated): if provided, these attributes values will be displayed for each Case Card **Content** in the Kanban View.
-
-> **_NOTE:_**  If no attributes are provided for these fields, Case Cards will display a few attributes in the Title and Content following their order in the case instance.
