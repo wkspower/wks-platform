@@ -19,7 +19,7 @@ resource "aws_iam_policy" "ci_policy" {
         ],
         Effect = "Allow",
         Resource = [
-          "${aws_s3_bucket.static_react_bucket.arn}/*"
+          "${aws_s3_bucket.wks-userguide-bucket.arn}/*"
         ]
       },
       {
@@ -28,7 +28,7 @@ resource "aws_iam_policy" "ci_policy" {
         ],
         Effect = "Allow",
         Resource = [
-          aws_s3_bucket.static_react_bucket.arn
+          aws_s3_bucket.wks-userguide-bucket.arn
         ]
       },
     ]

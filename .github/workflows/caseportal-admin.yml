@@ -1,0 +1,28 @@
+name: wks-caseportaladmin-deploy
+on:
+  push:
+    branches:
+      - github-actions
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Install dependencies
+      run: yarn --cwd case-portal-admin-react
+    - name: Build the React application
+      run: yarn --cwd case-portal-admin-react build
+    - name: Configure AWS credentials
+      run: echo ${{ secrets.AWS_ACCESS_KEY_ID }}:${{ secrets.AWS_SECRET_ACCESS_KEY }} > aws-credentials
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    - name: Install and configure the AWS CLI
+      run: |
+        apt-get update && apt-get install -y python-pip
+        pip install awscli
+        aws configure set aws_access_key_id $(cat aws-credentials | cut -d: -f1)
+        aws configure set aws_secret_access_key $(cat aws-credentials | cut -d: -f2)
+    - name: Deploy to S3
+      run: aws s3 sync case-portal-admin-react/build/ s3://${{ secrets.WKS_CASEPORTALADMIN_S3_BUCKET }} --delete

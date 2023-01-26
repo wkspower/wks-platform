@@ -1,18 +1,18 @@
 locals {
-  s3_origin_id = "S3-origin-react-app"
+  s3_origin_id_caseportaladmin = "S3-origin-wks-caseportaladmin-app"
 }
 
-resource "aws_cloudfront_origin_access_identity" "oai" {
-  comment = "wks-userguide-app OAI"
+resource "aws_cloudfront_origin_access_identity" "oai_caseportaladmin" {
+  comment = "wks-caseportaladmin-app OAI"
 }
 
-resource "aws_cloudfront_distribution" "cf_distribution" {
+resource "aws_cloudfront_distribution" "cf_distribution_caseportaladmin" {
   origin {
-    domain_name = aws_s3_bucket.static_react_bucket.bucket_regional_domain_name
-    origin_id   = local.s3_origin_id
+    domain_name = aws_s3_bucket.wks-caseportaladmin-bucket.bucket_regional_domain_name
+    origin_id   = local.s3_origin_id_caseportaladmin
 
     s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.oai.cloudfront_access_identity_path
+      origin_access_identity = aws_cloudfront_origin_access_identity.oai_caseportaladmin.cloudfront_access_identity_path
     }
   }
 
@@ -24,7 +24,7 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
-    target_origin_id = local.s3_origin_id
+    target_origin_id = local.s3_origin_id_caseportaladmin
 
     forwarded_values {
       query_string = false
@@ -45,7 +45,7 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     path_pattern     = "/index.html"
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
-    target_origin_id = local.s3_origin_id
+    target_origin_id = local.s3_origin_id_caseportaladmin
 
     forwarded_values {
       query_string = false
