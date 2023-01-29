@@ -16,8 +16,6 @@ import Typography from '@mui/material/Typography';
 import React, { useEffect } from 'react';
 
 import { Form } from '@formio/react';
-import MainCard from 'components/MainCard';
-
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {

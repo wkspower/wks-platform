@@ -12,6 +12,7 @@ export const ReactBpmn = ({ url, activities }) => {
       .then((text) => {
         memoizedCallback(text);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activities]);
 
   const memoizedCallback = useCallback(
@@ -27,6 +28,7 @@ export const ReactBpmn = ({ url, activities }) => {
         canvas.zoom("fit-viewport");
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [activities]
   );
 
@@ -45,6 +47,7 @@ export const ReactBpmn = ({ url, activities }) => {
         ></div>
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [activities]
   );
 

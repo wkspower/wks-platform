@@ -34,7 +34,7 @@ export const RecordForm = ({ open, recordType, record, handleClose, mode }) => {
 
     const save = () => {
         if (mode === 'new') {
-            fetch('http://localhost:8081/record/' + recordType.id, {
+            fetch(process.env.REACT_APP_API_URL + '/record/' + recordType.id, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -49,7 +49,7 @@ export const RecordForm = ({ open, recordType, record, handleClose, mode }) => {
                     console.log(err.message);
                 });
         } else {
-            fetch('http://localhost:8081/record/' + recordType.id + '/' + record._id.$oid, {
+            fetch(process.env.REACT_APP_API_URL + '/record/' + recordType.id + '/' + record._id.$oid, {
                 method: 'PATCH',
                 headers: {
                     Accept: 'application/json',
@@ -67,7 +67,7 @@ export const RecordForm = ({ open, recordType, record, handleClose, mode }) => {
     };
 
     const deleteRecord = () => {
-        fetch('http://localhost:8081/record/' + recordType.id + '/' + record._id.$oid, {
+        fetch(process.env.REACT_APP_API_URL + '/record/' + recordType.id + '/' + record._id.$oid, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/json',

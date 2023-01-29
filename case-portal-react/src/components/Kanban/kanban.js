@@ -1,4 +1,3 @@
-import './kanban.css';
 import * as React from 'react';
 import { extend, addClass } from '@syncfusion/ej2-base';
 import { KanbanComponent, ColumnsDirective, ColumnDirective } from "@syncfusion/ej2-react-kanban";
@@ -17,7 +16,7 @@ export const Kanban = ({ stages, cases, caseDefId, kanbanConfig, setACase, setOp
 
     function columnTemplate(props) {
         return (<div className="header-template-wrap">
-            <div className={"header-icon e-icons " + "Open"}></div>
+            <div className={"header-icon e-icons Open"}></div>
             <div className="header-text">{props.headerText}</div>
         </div>);
     }

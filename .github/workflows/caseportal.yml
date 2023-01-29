@@ -1,4 +1,4 @@
-name: wks-caseportaladmin-deploy
+name: wks-caseportal-deploy
 on:
   push:
     branches:
@@ -10,9 +10,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Install dependencies
-      run: yarn --cwd case-portal-admin-react
+      run: yarn --cwd case-portal-react
     - name: Build the React application
-      run: REACT_APP_KEYCLOAK_URL=${{ secrets.REACT_APP_KEYCLOAK_URL }} REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} yarn --cwd case-portal-admin-react build
+      run: REACT_APP_KEYCLOAK_URL=${{ secrets.REACT_APP_KEYCLOAK_URL }} REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} yarn --cwd case-portal-react build
     - name: Configure AWS credentials
       run: echo ${{ secrets.AWS_ACCESS_KEY_ID }}:${{ secrets.AWS_SECRET_ACCESS_KEY }} > aws-credentials
       env:
@@ -25,4 +25,4 @@ jobs:
         aws configure set aws_access_key_id $(cat aws-credentials | cut -d: -f1)
         aws configure set aws_secret_access_key $(cat aws-credentials | cut -d: -f2)
     - name: Deploy to S3
-      run: aws s3 sync case-portal-admin-react/build/ s3://${{ secrets.WKS_CASEPORTALADMIN_S3_BUCKET }} --delete
+      run: aws s3 sync case-portal-react/build/ s3://${{ secrets.WKS_CASEPORTAL_S3_BUCKET }} --delete
