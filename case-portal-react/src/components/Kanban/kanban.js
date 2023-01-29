@@ -1,3 +1,4 @@
+import './kanban.css';
 import * as React from 'react';
 import { extend, addClass } from '@syncfusion/ej2-base';
 import { KanbanComponent, ColumnsDirective, ColumnDirective } from "@syncfusion/ej2-react-kanban";
