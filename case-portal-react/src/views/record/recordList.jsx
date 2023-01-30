@@ -16,7 +16,7 @@ export const RecordList = ({ recordTypeId }) => {
     const [mode, setMode] = useState('new');
 
     useEffect(() => {
-        fetch('http://localhost:8081/record-type/' + recordTypeId)
+        fetch(process.env.REACT_APP_API_URL + '/record-type/' + recordTypeId)
             .then((response) => response.json())
             .then((data) => {
                 let dynamicColumns: GridColDef[] = [];
@@ -48,7 +48,7 @@ export const RecordList = ({ recordTypeId }) => {
                 console.log(err.message);
             });
 
-        fetch('http://localhost:8081/record/' + recordTypeId)
+        fetch(process.env.REACT_APP_API_URL + '/record/' + recordTypeId)
             .then((response) => response.json())
             .then((data) => {
                 setRecords(data);

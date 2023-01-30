@@ -17,7 +17,7 @@ export const Kanban = ({ stages, cases, caseDefId, kanbanConfig, setACase, setOp
 
     function columnTemplate(props) {
         return (<div className="header-template-wrap">
-            <div className={"header-icon e-icons " + "Open"}></div>
+            <div className={"header-icon e-icons Open"}></div>
             <div className="header-text">{props.headerText}</div>
         </div>);
     }
