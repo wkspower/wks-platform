@@ -7,6 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  REPOSITORY_OWNER: wkspower
   
 jobs:
   build:
@@ -55,7 +56,7 @@ jobs:
       id: bpn_engine_ext_srv_meta
       uses: docker/metadata-action@v4
       with:
-        images: ${{ env.REGISTRY }}/bpm-engine-c7-external-service
+        images: ${{ env.REGISTRY }}/{{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service
         tags: |
           type=ref,event=branch
           type=semver,pattern={{version}}
