@@ -63,7 +63,7 @@ jobs:
     - name: Build and push Docker image for bpm-engine-c7-external-service
       uses: docker/build-push-action@v2
       with:
-        context: .
+        context: ./bpm-engine-c7-external-service
         file: bpm-engine-c7-external-service/Dockerfile
         push: true
         tags: ${{ steps.bpn_engine_ext_srv_meta.outputs.tags }}
