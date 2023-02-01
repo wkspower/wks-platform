@@ -8,6 +8,8 @@ on:
 env:
   REGISTRY: ghcr.io
   REPOSITORY_OWNER: wkspower
+  KEYCLOAK_URL: http://sts.wkspower.local
+  WKS_API_URL: http://api.wkspower.local
   
 jobs:
   build:
@@ -44,13 +46,13 @@ jobs:
       run: yarn --cwd case-portal-react install
 
     - name: Build for case-portal-react
-      run: REACT_APP_KEYCLOAK_URL=${{ secrets.REACT_APP_KEYCLOAK_URL }} REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} yarn --cwd case-portal-react build
+      run: REACT_APP_KEYCLOAK_URL=${{ env.KEYCLOAK_URL }} REACT_APP_API_URL=${{ env.WKS_API_URL }} yarn --cwd case-portal-react build
 
     - name: Install dependencies for case-portal-admin-react
       run: yarn --cwd case-portal-admin-react install
 
     - name: Build for case-portal-admin-react
-      run: REACT_APP_KEYCLOAK_URL=${{ secrets.REACT_APP_KEYCLOAK_URL }} REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} yarn --cwd case-portal-admin-react build
+      run: REACT_APP_KEYCLOAK_URL=${{ env.KEYCLOAK_URL }} REACT_APP_API_URL=${{ env.WKS_API_URL }} yarn --cwd case-portal-admin-react build
 
     - name: Docker meta for bpm-engine-c7-external-service
       id: bpn_engine_ext_srv_meta
