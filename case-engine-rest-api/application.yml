@@ -1,5 +1,3 @@
-spring.profiles.active: dev
-
 server:
    port: 8081
 
@@ -25,7 +23,8 @@ camunda7.rest.processinstance.url: /process-instance
 camunda7.rest.task.url: /task
 camunda7.rest.correlate.url: /message
 
-mongo.database: wks-mongo-database
+mongo.database: ${MONGO_DATABASE:wks-mongo-database}
+mongo.connection-string: ${MONGO_CONN:mongodb://localhost}
 
 # initial data will be imported if true
 data.import.enabled: false

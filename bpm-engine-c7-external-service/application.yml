@@ -1,5 +1,3 @@
-spring.profiles.active: dev
-
 logging:
    level:
       root: INFO
@@ -22,9 +20,11 @@ camunda7.rest.processinstance.url: /process-instance
 camunda7.rest.correlate.url: /message
 
 camunda.bpm.client:
+  base-url: ${CAMUNDA_BASE_URL:http://localhost:8080/engine-rest}
   disable-backoff-strategy: true
   basic-auth:
-    username: demo
-    password: demo
+    username: ${CAMUNDA_USERNAME:demo}
+    password: ${CAMUNDA_PASSWORD:demo}
 
-mongo.database: wks-mongo-database
+mongo.database: ${MONGO_DATABASE:wks-mongo-database}
+mongo.connection-string: ${MONGO_CONN:mongodb://localhost}
