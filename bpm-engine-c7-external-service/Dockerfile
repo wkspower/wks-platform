@@ -1,5 +1,6 @@
-FROM amazoncorretto:17.0.5
+FROM eclipse-temurin:19-jre-alpine
 VOLUME /tmp
 COPY target/*.jar app.jar
+COPY application.yml /application.yml
 EXPOSE 8081
-ENTRYPOINT ["java","-Dspring.profiles.active=prod", "-jar","/app.jar"]
+ENTRYPOINT ["java","-jar","/app.jar"]
