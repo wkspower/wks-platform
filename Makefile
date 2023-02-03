@@ -1,8 +1,8 @@
 servers:
-	@docker-compose up --force-recreate --remove-orphans mongodb camunda camunda-modeler-push keycloak
+	@docker-compose up --build mongodb camunda camunda-modeler-push keycloak
 
 backend:
-	@docker-compose up --build --force-recreate --remove-orphans case-engine-rest-api bpm-engine-c7-external-service
+	@docker-compose up --build case-engine-rest-api bpm-engine-c7-external-service
 
 frontend:
 	make -j 2 case-portal-admim case-portal
