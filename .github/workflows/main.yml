@@ -157,7 +157,7 @@ jobs:
     - name: Update kubernetes resources with new tag
       run: |
         cd wks-gitops/apps
-        
+
         cd case-engine-rest-api/local
         kustomize edit set image caseenginerestapi=ghcr.io/wkspower/case-engine-rest-api:${{ env.case_engine_rest_api_tags }}
         cd ../../
@@ -168,7 +168,8 @@ jobs:
 
     - name: New tag release for continuous delivery
       run: |
-        cd wks-gitops
+        pwd
+        ls -la
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git commit -am "Release docker tag"
