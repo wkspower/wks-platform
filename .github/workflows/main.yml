@@ -168,7 +168,7 @@ jobs:
 
     - name: New tag release for continuous delivery
       run: |
-        pwd
+        cd wks-gitops
         ls -la
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
