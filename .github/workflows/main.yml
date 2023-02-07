@@ -13,6 +13,7 @@ env:
   
 jobs:
   build:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -135,14 +136,17 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [build]
+    # needs: [build]
+    permissions:
+      contents: read
+      packages: write
     
     steps:
     - uses: actions/checkout@v3
       with:
-        repository: wkspower/wks-gitops@main
+        repository: wkspower/wks-gitops
         path: wks-gitops
-        token: ${{ secrets.GITHUB_TOKEN }}
+        ref: main
 
     - name: Update kubernetes resources with new tag
       run: |
