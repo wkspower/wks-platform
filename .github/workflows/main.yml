@@ -156,13 +156,15 @@ jobs:
 
     - name: Update kubernetes resources with new tag
       run: |
-        cd wks-gitops/apps/case-engine-rest-api/local
+        cd wks-gitops/apps
+        
+        cd case-engine-rest-api/local
         kustomize edit set image caseenginerestapi=ghcr.io/wkspower/case-engine-rest-api:${{ env.case_engine_rest_api_tags }}
-        cd --
+        cd ../../
 
-        cd wks-gitops/apps/bpm-engine-c7-external-service/local
+        cd bpm-engine-c7-external-service/local
         kustomize edit set image bpmenginec7extsvc=ghcr.io/wkspower/bpm-engine-c7-external-service:${{ env.bpn_engine_ext_srv_tags }}
-        cd --
+        cd ../../
 
     - name: New tag release for continuous delivery
       run: |
