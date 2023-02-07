@@ -147,21 +147,21 @@ jobs:
       with:
         kustomize-version: "3.6.1"        
 
-      - name: Update kubernetes resources with new tag
-        run: |
-          cd apps/case-engine-rest-api/local
-          kustomize edit set image caseenginerestapi=ghcr.io/wkspower/case-engine-rest-api:${{ case_engine_rest_api_tags }}
+    - name: Update kubernetes resources with new tag
+      run: |
+        cd apps/case-engine-rest-api/local
+        kustomize edit set image caseenginerestapi=ghcr.io/wkspower/case-engine-rest-api:${{ case_engine_rest_api_tags }}
 
-          cd apps/bpm-engine-c7-external-service/local
-          kustomize edit set image bpmenginec7extsvc=ghcr.io/wkspower/bpm-engine-c7-external-service:${{ bpn_engine_ext_srv_tags }}
+        cd apps/bpm-engine-c7-external-service/local
+        kustomize edit set image bpmenginec7extsvc=ghcr.io/wkspower/bpm-engine-c7-external-service:${{ bpn_engine_ext_srv_tags }}
 
-      - name: New tag release for continuous delivery
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git commit -am "Release docker tag"
+    - name: New tag release for continuous delivery
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git commit -am "Release docker tag"
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}          
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}          
