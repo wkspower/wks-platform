@@ -142,6 +142,7 @@ jobs:
       with:
         repository: wkspower/wks-gitops
         path: wks-gitops
+        ref: main
 
     - name: Setup kustomize
       uses: imranismail/setup-kustomize@v1
