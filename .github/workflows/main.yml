@@ -146,6 +146,7 @@ jobs:
       with:
         repository: wkspower/wks-gitops
         path: wks-gitops
+        token: ${{ secrets.GH_PAT }}
 
     - name: Update kubernetes resources with new tag
       run: |
