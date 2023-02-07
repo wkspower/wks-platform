@@ -10,7 +10,6 @@ env:
   REPOSITORY_OWNER: wkspower
   KEYCLOAK_URL: http://sts.wkspower.local
   WKS_API_URL: http://api.wkspower.local
-  $GITHUB_SHA
   
 jobs:
   build:
