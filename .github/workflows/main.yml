@@ -153,10 +153,10 @@ jobs:
         wget -q -O - https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.0.0/kustomize_v5.0.0_linux_amd64.tar.gz | tar -xzf -
         chmod +x ./kustomize
         
-        cd apps/case-engine-rest-api/local
+        cd wks-gitops/apps/case-engine-rest-api/local
         ./kustomize edit set image caseenginerestapi=ghcr.io/wkspower/case-engine-rest-api:${{ env.case_engine_rest_api_tags }}
 
-        cd apps/bpm-engine-c7-external-service/local
+        cd wks-gitops/apps/bpm-engine-c7-external-service/local
         ./kustomize edit set image bpmenginec7extsvc=ghcr.io/wkspower/bpm-engine-c7-external-service:${{ env.bpn_engine_ext_srv_tags }}
 
     - name: New tag release for continuous delivery
