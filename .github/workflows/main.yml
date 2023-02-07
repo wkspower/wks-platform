@@ -140,7 +140,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        repository: wkspower/wks-gitops
+        repository: wkspower/wks-gitops@main
         path: wks-gitops
         token: ${{ secrets.GITHUB_TOKEN }}
 
