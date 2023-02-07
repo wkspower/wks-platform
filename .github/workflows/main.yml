@@ -159,8 +159,12 @@ jobs:
         cd wks-gitops/apps/case-engine-rest-api/local
         kustomize edit set image caseenginerestapi=ghcr.io/wkspower/case-engine-rest-api:${{ env.case_engine_rest_api_tags }}
 
+        cd wks-gitops/apps/bpm-engine-c7-external-service/local
+        kustomize edit set image bpmenginec7extsvc=ghcr.io/wkspower/bpm-engine-c7-external-service:${{ env.bpn_engine_ext_srv_tags }}
+
     - name: New tag release for continuous delivery
       run: |
+        cd wks-gitops
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git commit -am "Release docker tag"
