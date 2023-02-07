@@ -146,7 +146,6 @@ jobs:
       with:
         repository: wkspower/wks-gitops
         path: wks-gitops
-        ref: main
 
     - name: Update kubernetes resources with new tag
       run: |
