@@ -127,5 +127,7 @@ jobs:
     - name: New tag release for continuous delivery
       run: |
         cd wks-gitops
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
         git commit -am "Release docker tag"
         git push
