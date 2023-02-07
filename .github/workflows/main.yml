@@ -10,6 +10,7 @@ env:
   REPOSITORY_OWNER: wkspower
   KEYCLOAK_URL: http://sts.wkspower.local
   WKS_API_URL: http://api.wkspower.local
+  $GITHUB_SHA
   
 jobs:
   build:
@@ -124,4 +125,44 @@ jobs:
         file: case-portal-react/deployments/Dockerfile
         push: true
         tags: ${{ steps.case_portal_react_meta.outputs.tags }}
-        labels: ${{ steps.case_portal_react_meta.outputs.labels }}        
+        labels: ${{ steps.case_portal_react_meta.outputs.labels }}
+
+    - name: Setup environment variables
+      run: |
+        echo "bpn_engine_ext_srv_tags=${{ steps.bpn_engine_ext_srv_meta.outputs.tags }}" >> $GITHUB_ENV
+        echo "case_engine_rest_api_tags=${{ steps.case_engine_rest_api_meta.outputs.tags }}" >> $GITHUB_ENV
+        echo "case_portal_admin_tags=${{ steps.case_portal_admin_meta.outputs.tags }}" >> $GITHUB_ENV
+        echo "case_portal_react_tags=${{ steps.case_portal_react_meta.outputs.tags }}" >> $GITHUB_ENV
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        name: wkspower/wks-gitops
+        ref: refs/heads/main
+
+    - name: Setup kustomize
+      uses: imranismail/setup-kustomize@v1
+      with:
+        kustomize-version: "3.6.1"        
+
+      - name: Update kubernetes resources with new tag
+        run: |
+          cd apps/case-engine-rest-api/local
+          kustomize edit set image caseenginerestapi=ghcr.io/wkspower/case-engine-rest-api:${{ case_engine_rest_api_tags }}
+
+          cd apps/bpm-engine-c7-external-service/local
+          kustomize edit set image bpmenginec7extsvc=ghcr.io/wkspower/bpm-engine-c7-external-service:${{ bpn_engine_ext_srv_tags }}
+
+      - name: New tag release for continuous delivery
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -am "Release docker tag"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}          
