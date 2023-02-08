@@ -63,7 +63,7 @@ jobs:
         context: ./bpm-engine-c7-external-service
         file: bpm-engine-c7-external-service/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ steps.get_version.outputs.version }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ steps.get_version.outputs.build }}"
 
     - name: Build and push Docker image for case-engine-rest-api
       uses: docker/build-push-action@v2
@@ -71,7 +71,7 @@ jobs:
         context: ./case-engine-rest-api
         file: case-engine-rest-api/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ steps.get_version.outputs.version }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ steps.get_version.outputs.build }}"
 
     - name: Build and push Docker image for case-portal-admin-react
       uses: docker/build-push-action@v2
@@ -79,7 +79,7 @@ jobs:
         context: ./case-portal-admin-react
         file: case-portal-admin-react/deployments/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-admin-react:${{ steps.get_version.outputs.version }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-admin-react:${{ steps.get_version.outputs.build }}"
 
     - name: Build and push Docker image for case-portal-react
       uses: docker/build-push-action@v2
@@ -87,7 +87,7 @@ jobs:
         context: ./case-portal-react
         file: case-portal-react/deployments/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react:${{ steps.get_version.outputs.version }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react:${{ steps.get_version.outputs.build }}"
 
   deploy:
     runs-on: ubuntu-latest
@@ -117,11 +117,11 @@ jobs:
         cd wks-gitops/apps
 
         cd case-engine-rest-api/local
-        kustomize edit set image caseenginerestapi=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ steps.get_version.outputs.version }}
+        kustomize edit set image caseenginerestapi=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ steps.get_version.outputs.build }}
         cd ../../
 
         cd bpm-engine-c7-external-service/local
-        kustomize edit set image bpmenginec7extsvc=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ steps.get_version.outputs.version }}
+        kustomize edit set image bpmenginec7extsvc=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ steps.get_version.outputs.build }}
         cd ../../
 
     - name: New tag release for continuous delivery
