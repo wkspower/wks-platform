@@ -67,7 +67,7 @@ jobs:
         context: ./bpm-engine-c7-external-service
         file: bpm-engine-c7-external-service/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:$BUILD_VERSION"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ env.BUILD_VERSION }}"
 
     - name: Build and push Docker image for case-engine-rest-api
       uses: docker/build-push-action@v2
@@ -75,7 +75,7 @@ jobs:
         context: ./case-engine-rest-api
         file: case-engine-rest-api/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:$BUILD_VERSION"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ env.BUILD_VERSION }}"
 
     - name: Build and push Docker image for case-portal-admin-react
       uses: docker/build-push-action@v2
@@ -83,7 +83,7 @@ jobs:
         context: ./case-portal-admin-react
         file: case-portal-admin-react/deployments/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-admin-react:$BUILD_VERSION"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-admin-react:${{ env.BUILD_VERSION }}"
 
     - name: Build and push Docker image for case-portal-react
       uses: docker/build-push-action@v2
@@ -91,7 +91,7 @@ jobs:
         context: ./case-portal-react
         file: case-portal-react/deployments/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react:$BUILD_VERSION"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react:${{ env.BUILD_VERSION }}"
 
   deploy:
     runs-on: ubuntu-latest
@@ -125,11 +125,11 @@ jobs:
         cd wks-gitops/apps
 
         cd case-engine-rest-api/local
-        kustomize edit set image caseenginerestapi=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:$BUILD_VERSION
+        kustomize edit set image caseenginerestapi=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ env.BUILD_VERSION }}
         cd ../../
 
         cd bpm-engine-c7-external-service/local
-        kustomize edit set image bpmenginec7extsvc=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:$BUILD_VERSION
+        kustomize edit set image bpmenginec7extsvc=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ env.BUILD_VERSION }}
         cd ../../
 
     - name: New tag release for continuous delivery
