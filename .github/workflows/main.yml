@@ -20,9 +20,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
-    - id: get_version
-      uses: battila7/get-version-action@v2
+        
+    - name: Setup necessary env vars
+      run: |
+        version=${GITHUB_REF#"refs/tags/"}
+        major_minor=$(echo ${version}  | sed -e 's/^refs\/heads\///')
+        sha_short=$(echo ${GITHUB_SHA} | cut -c 1-8)
+        echo "BUILD_VERSION=$major_minor-$sha_short" >> $GITHUB_ENV
 
     - name: Set up jdk 18
       uses: actions/setup-java@v3
@@ -63,7 +67,7 @@ jobs:
         context: ./bpm-engine-c7-external-service
         file: bpm-engine-c7-external-service/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ steps.get_version.outputs.build }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:$BUILD_VERSION"
 
     - name: Build and push Docker image for case-engine-rest-api
       uses: docker/build-push-action@v2
@@ -71,7 +75,7 @@ jobs:
         context: ./case-engine-rest-api
         file: case-engine-rest-api/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ steps.get_version.outputs.build }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:$BUILD_VERSION"
 
     - name: Build and push Docker image for case-portal-admin-react
       uses: docker/build-push-action@v2
@@ -79,7 +83,7 @@ jobs:
         context: ./case-portal-admin-react
         file: case-portal-admin-react/deployments/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-admin-react:${{ steps.get_version.outputs.build }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-admin-react:$BUILD_VERSION"
 
     - name: Build and push Docker image for case-portal-react
       uses: docker/build-push-action@v2
@@ -87,7 +91,7 @@ jobs:
         context: ./case-portal-react
         file: case-portal-react/deployments/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react:${{ steps.get_version.outputs.build }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react:$BUILD_VERSION"
 
   deploy:
     runs-on: ubuntu-latest
@@ -103,8 +107,12 @@ jobs:
         path: wks-gitops
         token: ${{ secrets.GH_PAT }}
 
-    - id: get_version
-      uses: battila7/get-version-action@v2
+    - name: Setup necessary env vars
+      run: |
+        version=${GITHUB_REF#"refs/tags/"}
+        major_minor=$(echo ${version}  | sed -e 's/^refs\/heads\///')
+        sha_short=$(echo ${GITHUB_SHA} | cut -c 1-8)
+        echo "BUILD_VERSION=$major_minor-$sha_short" >> $GITHUB_ENV
 
     - uses: supplypike/setup-bin@v3
       with:
@@ -117,11 +125,11 @@ jobs:
         cd wks-gitops/apps
 
         cd case-engine-rest-api/local
-        kustomize edit set image caseenginerestapi=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ steps.get_version.outputs.build }}
+        kustomize edit set image caseenginerestapi=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:$BUILD_VERSION
         cd ../../
 
         cd bpm-engine-c7-external-service/local
-        kustomize edit set image bpmenginec7extsvc=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ steps.get_version.outputs.build }}
+        kustomize edit set image bpmenginec7extsvc=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:$BUILD_VERSION
         cd ../../
 
     - name: New tag release for continuous delivery
