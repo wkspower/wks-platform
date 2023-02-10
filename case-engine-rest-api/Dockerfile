@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM eclipse-temurin:19-jre-focal
+FROM --platform=$BUILDPLATFORM amazoncorretto:17.0.5
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 VOLUME /tmp
