@@ -1,6 +1,4 @@
-FROM --platform=$BUILDPLATFORM amazoncorretto:17.0.5
-ARG TARGETPLATFORM
-ARG BUILDPLATFORM
+FROM amazoncorretto:17.0.5
 VOLUME /tmp
 COPY target/*.jar app.jar
 COPY application.yml /application.yml
