@@ -8,8 +8,8 @@ on:
 env:
   REGISTRY: ghcr.io
   REPOSITORY_OWNER: wkspower
-  KEYCLOAK_URL: http://sts.wkspower.local
-  WKS_API_URL: http://api.wkspower.local
+  KEYCLOAK_URL: https://sts.wkspower.co
+  WKS_API_URL: https://api.wkspower.co
   
 jobs:
   build:
@@ -130,17 +130,45 @@ jobs:
         name: 'kustomize'
         version: '5.0.0'
 
-    - name: Update kubernetes resources with new tag
+    - name: Update kubernetes resources with new tag to Local Environment
       run: |
         cd wks-gitops/apps
 
         cd case-engine-rest-api/local
-        kustomize edit set image caseenginerestapi=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ env.BUILD_VERSION }}
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ env.BUILD_VERSION }}
         cd ../../
 
         cd bpm-engine-c7-external-service/local
-        kustomize edit set image bpmenginec7extsvc=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ env.BUILD_VERSION }}
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ env.BUILD_VERSION }}
         cd ../../
+
+        cd case-portal-admin/local
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-admin-react=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-admin-react:${{ env.BUILD_VERSION }}
+        cd ../../
+
+        cd case-portal-client/local
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react:${{ env.BUILD_VERSION }}
+        cd ../../
+
+    - name: Update kubernetes resources with new tag to Staging Environment
+      run: |
+        cd wks-gitops/apps
+
+        cd case-engine-rest-api/staging
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ env.BUILD_VERSION }}
+        cd ../../
+
+        cd bpm-engine-c7-external-service/staging
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ env.BUILD_VERSION }}
+        cd ../../
+
+        cd case-portal-admin/staging
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-admin-react=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-admin-react:${{ env.BUILD_VERSION }}
+        cd ../../
+
+        cd case-portal-client/staging
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react:${{ env.BUILD_VERSION }}
+        cd ../../        
 
     - name: New tag release for continuous delivery
       run: |
