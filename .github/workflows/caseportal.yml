@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - github-actions
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
