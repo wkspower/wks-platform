@@ -139,5 +139,3 @@ WKS Platform provides customized modeler templates to accelerate the process des
 
 On macOS you have to add them to the folder:
 /Users/{user_name}/Library/Application Support/camunda-modeler/resources/element-templates
-
-
