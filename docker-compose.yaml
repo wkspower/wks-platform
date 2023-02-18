@@ -41,7 +41,6 @@ services:
             - CAMUNDA_PASSWORD=demo
             - MONGO_DATABASE=wks-mongo-database
             - MONGO_CONN=mongodb://mongodb
-            - data.import.enabled=true
         depends_on:
             mongodb:
                 condition: service_started
