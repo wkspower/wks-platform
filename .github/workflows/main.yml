@@ -147,6 +147,10 @@ jobs:
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ env.BUILD_VERSION }}
         cd ../../
 
+        cd case-engine-loader/local
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-loader=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-loader:${{ env.BUILD_VERSION }}
+        cd ../../
+
         cd bpm-engine-c7-external-service/local
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ env.BUILD_VERSION }}
         cd ../../
@@ -165,6 +169,10 @@ jobs:
 
         cd case-engine-rest-api/staging
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ env.BUILD_VERSION }}
+        cd ../../
+
+        cd case-engine-loader/staging
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-loader=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-loader:${{ env.BUILD_VERSION }}
         cd ../../
 
         cd bpm-engine-c7-external-service/staging
