@@ -35,15 +35,12 @@ services:
     case-engine-loader:
         build:
             context: case-engine-loader
-        volumes:
-            - ./case-engine-loader/data:/opt/data
         environment:
             - CAMUNDA_BASE_URL=http://camunda:8080/engine-rest
             - CAMUNDA_USERNAME=demo
             - CAMUNDA_PASSWORD=demo
             - MONGO_DATABASE=wks-mongo-database
             - MONGO_CONN=mongodb://mongodb
-            - IMPORT_DIR_PATH=/opt/data
             - data.import.enabled=true
         depends_on:
             mongodb:

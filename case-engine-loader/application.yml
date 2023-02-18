@@ -25,4 +25,4 @@ mongo.database: ${MONGO_DATABASE:wks-mongo-database}
 mongo.connection-string: ${MONGO_CONN:mongodb://localhost}
 
 data.import.enabled: true
-data.import.folder: ${IMPORT_DIR_PATH:./case-engine-sample-data}
+data.import.folder: ${IMPORT_DIR_PATH:/opt/data}
