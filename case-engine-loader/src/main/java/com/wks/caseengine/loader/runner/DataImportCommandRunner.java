@@ -1,4 +1,4 @@
-package com.wks.caseengine.rest.app;
+package com.wks.caseengine.loader.runner;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -22,7 +22,6 @@ import com.wks.caseengine.data.iimport.DataImportService;
 
 import lombok.extern.slf4j.Slf4j;
 
-//TODO move this out of the Rest API module - better to be independent
 @Component
 @ConditionalOnProperty("data.import.enabled")
 @Slf4j
@@ -39,8 +38,6 @@ public class DataImportCommandRunner implements CommandLineRunner {
 		log.info("Start of data importing");
 
 		if (dataImportFolder != null && !dataImportFolder.isEmpty()) {
-
-			// load and import json files
 			Gson gson = new Gson();
 			listFiles(dataImportFolder).forEach(fileName -> {
 				JsonReader reader;
@@ -48,14 +45,11 @@ public class DataImportCommandRunner implements CommandLineRunner {
 					reader = new JsonReader(fileReader);
 					dataImportService.importData(gson.fromJson(reader, JsonObject.class));
 				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					log.error(e1.getMessage());
 				}
 			});
-
-			// delete files
-//			Arrays.stream(new File(dataImportFolder).listFiles()).forEach(File::delete);
 		}
+
 		log.info("End of data importing");
 	}
 

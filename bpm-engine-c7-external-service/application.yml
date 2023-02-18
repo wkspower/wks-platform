@@ -26,5 +26,8 @@ camunda.bpm.client:
     username: ${CAMUNDA_USERNAME:demo}
     password: ${CAMUNDA_PASSWORD:demo}
 
+spring.data.mongodb.uri: ${MONGO_CONN:mongodb://localhost}
+spring.data.mongodb.database: ${MONGO_DATABASE:wks-mongo-database}
+
 mongo.database: ${MONGO_DATABASE:wks-mongo-database}
 mongo.connection-string: ${MONGO_CONN:mongodb://localhost}

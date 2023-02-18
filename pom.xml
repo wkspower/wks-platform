@@ -54,18 +54,14 @@
 
 	<modules>
 		<module>case-engine</module>
-
+		<module>case-engine-loader</module>
 		<module>case-engine-rest-api</module>
-
 		<module>rest-client</module>
-
 		<module>bpm-engine-interface</module>
 		<module>bpm-engine-client</module>
 		<module>bpm-engine-c7-client</module>
 		<module>bpm-engine-c7-external-service</module>
-		
 		<module>bpm-engine-c8-client</module>
-		
 		<module>email-bridge</module>
 	</modules>
 

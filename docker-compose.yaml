@@ -6,14 +6,16 @@ services:
             - 27017:27017
 
     camunda:
-        image: camunda/camunda-bpm-platform:7.19.0-SNAPSHOT
+        image: camunda/camunda-bpm-platform:run-7.19.0-SNAPSHOT
         ports:
             - 8080:8080
+            - 8000:8000
+            - 9404:9404
         healthcheck:
             test: curl --fail http://localhost:8080/engine-rest/version || exit 1
-            interval: 60s
-            retries: 5
-            start_period: 20s
+            interval: 10s
+            retries: 3
+            start_period: 5s
             timeout: 10s
         depends_on:
             mongodb:
@@ -30,17 +32,23 @@ services:
         volumes:
             - ./keycloak/realms:/opt/keycloak/data/import
 
-    camunda-modeler-push:
+    case-engine-loader:
         build:
-            context: ./infra/camunda-model-push
-            dockerfile: Dockerfile
-        links:
-            - camunda
+            context: case-engine-loader
         volumes:
-            - ./infra/camunda-model-push/model:/model
-        entrypoint: /entrypoint.sh /model camunda:8080            
+            - ./case-engine-loader/data:/opt/data
+        environment:
+            - CAMUNDA_BASE_URL=http://camunda:8080/engine-rest
+            - CAMUNDA_USERNAME=demo
+            - CAMUNDA_PASSWORD=demo
+            - MONGO_DATABASE=wks-mongo-database
+            - MONGO_CONN=mongodb://mongodb
+            - IMPORT_DIR_PATH=/opt/data
+            - data.import.enabled=true
         depends_on:
-            camunda: 
+            mongodb:
+                condition: service_started
+            camunda:
                 condition: service_healthy
        
     case-engine-rest-api:
@@ -51,13 +59,9 @@ services:
         links:
             - mongodb
             - camunda
-        volumes:
-            - ./case-engine-sample-data:/opt/case-engine-sample-data
         environment:
             - MONGO_DATABASE=wks-mongo-database
             - MONGO_CONN=mongodb://mongodb
-            - data.import.enabled=true
-            - data.import.folder=/opt/case-engine-sample-data
         depends_on:
             camunda:
                 condition: service_healthy

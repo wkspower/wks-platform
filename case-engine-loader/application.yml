@@ -1,14 +1,9 @@
 server:
-   port: 8081
+   port: 7100
 
 logging:
    level:
-      root: INFO
-      com:
-         wks: INFO
-      org.springframework.web.client.RestTemplate: INFO
-      org.apache.http: INFO
-      httpclient.wire: INFO
+      root: ERROR
       
 spring.mvc.converters.preferred-json-mapper: gson
 
@@ -23,7 +18,11 @@ camunda7.rest.processinstance.url: /process-instance
 camunda7.rest.task.url: /task
 camunda7.rest.correlate.url: /message
 
-spring.data.mongodb.uri: ${MONGO_CONN:mongodb://mongodb}
+spring.data.mongodb.uri: ${MONGO_CONN:mongodb://localhost}
 spring.data.mongodb.database: ${MONGO_DATABASE:wks-mongo-database}
+
 mongo.database: ${MONGO_DATABASE:wks-mongo-database}
-mongo.connection-string: ${MONGO_CONN:mongodb://mongodb}
+mongo.connection-string: ${MONGO_CONN:mongodb://localhost}
+
+data.import.enabled: true
+data.import.folder: ${IMPORT_DIR_PATH:./case-engine-sample-data}
