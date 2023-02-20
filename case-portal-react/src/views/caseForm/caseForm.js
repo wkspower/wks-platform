@@ -35,6 +35,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
+import ListItemButton from '@mui/material/ListItemButton';
 import Avatar from '@mui/material/Avatar';
 import { FilePdfOutlined, FileExcelOutlined } from '@ant-design/icons';
 
@@ -250,7 +251,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={3}>
-                        <Attachments />
+                        <Attachments data={formData.data} />
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={4}>
@@ -263,7 +264,10 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     );
 };
 
-function Attachments() {
+function Attachments({data}) {
+    console.log(data);
+    // data.file.forEach((file) => {console.log("teste")});
+
     return (
         <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
             <Grid item xs={12}>
@@ -290,25 +294,33 @@ function Attachments() {
                         <hr/>
                     </div>
 
-                    <List>
-                        <ListItem>
-                            <ListItemAvatar>
-                                <Avatar style={{ backgroundColor: 'red' }}>
-                                    <FilePdfOutlined />
-                                </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary="sample-attachment.pdf" secondary="Jan 9, 2023" />
-                        </ListItem>
+                    {data.file.length === 0 && 
+                     <Typography variant="h4" color="textSecondary" sx={{ pr: 0.5 }}>
+                        Attach your files and they will be shown here
+                     </Typography>
+                    }
 
-                        <ListItem>
-                            <ListItemAvatar>
-                                <Avatar style={{ backgroundColor: 'green' }}>
-                                    <FileExcelOutlined />
-                                </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary="budget-spreadsheet.xls" secondary="Jan 9, 2023" />
-                        </ListItem>
-                    </List>
+                    {data.file && data.file.map((file, index) => {
+                        return (
+                            <List>
+                                <ListItem>
+                                    <ListItemAvatar>
+                                        <Avatar style={{ backgroundColor: 'red' }}>
+                                            <FilePdfOutlined />
+                                        </Avatar>
+                                    </ListItemAvatar>
+                                    <a key={index} href={file.url} title='Download pdf document'>
+                                        <ListItemText primary={file.originalName} secondary={file.size + "KB"} /> 
+                                    </a>
+                                    {/* <ListItemButton 
+                                        divider component="button"
+                                        onClick={file.url}>
+                                        <ListItemText primary="Download" />
+                                    </ListItemButton> */}
+                                </ListItem>
+                            </List>
+                        )
+                    })}
                 </MainCard>
             </Grid>
         </Grid>
