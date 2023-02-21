@@ -43,7 +43,8 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
             .then((data) => {
                 let cases = data.map(
                     function (element) {
-                        element.date = "11/12/2022"
+                        const createdAt = element.attributes.find(attribute => attribute.name === "createdAt");
+                        element.createdAt = createdAt ? createdAt.value : "11/12/2022";
                         element.statusDescription = getStatus(element.status);
                         return element;
                     }
@@ -72,7 +73,7 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
         { field: 'businessKey', headerName: 'Business Key', width: 150 },
         { field: 'statusDescription', headerName: 'Status', width: 220 },
         { field: 'stage', headerName: 'Stage', width: 220 },
-        { field: 'date', headerName: 'Created At', width: 220 },
+        { field: 'createdAt', headerName: 'Created At', width: 220 },
         {
             field: 'action',
             headerName: '',

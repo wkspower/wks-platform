@@ -1,9 +1,11 @@
 package com.wks.caseengine.cases.instance;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.http.client.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +44,8 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	@Override
 	// TODO how to embrace in a single transation?
 	public CaseInstance create(CaseInstance caseInstance) throws Exception {
+		
+		caseInstance.getAttributes().add(new CaseAttribute("createdAt", DateUtils.formatDate(new Date(), "dd/MM/yyyy")));
 
 		CaseDefinition caseDefinition = caseDefRepository.get(caseInstance.getCaseDefinitionId());
 
