@@ -306,17 +306,23 @@ function Attachments({data}) {
                                 <ListItem>
                                     <ListItemAvatar>
                                         <Avatar style={{ backgroundColor: 'red' }}>
-                                            <FilePdfOutlined />
+                                            {file.type === "application/pdf" && 
+                                                <FilePdfOutlined />
+                                            }
+
+                                            {file.type === "application/xls" && 
+                                                <FileExcelOutlined />
+                                            }
                                         </Avatar>
                                     </ListItemAvatar>
                                     <a key={index} href={file.url} title='Download pdf document'>
                                         <ListItemText primary={file.originalName} secondary={file.size + "KB"} /> 
                                     </a>
-                                    {/* <ListItemButton 
+                                    <ListItemButton 
                                         divider component="button"
                                         onClick={file.url}>
                                         <ListItemText primary="Download" />
-                                    </ListItemButton> */}
+                                    </ListItemButton>
                                 </ListItem>
                             </List>
                         )
