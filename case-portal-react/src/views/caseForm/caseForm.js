@@ -264,6 +264,27 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     );
 };
 
+const downloadFile = async (fileToDownload) => {
+    const file = await createBlob(fileToDownload.url);
+    
+    const element = document.createElement("a");
+    
+    element.href = URL.createObjectURL(file);
+    
+    element.download = fileToDownload.originalName;
+    
+    document.body.appendChild(element); 
+    
+    element.click();
+}
+
+async function createBlob(base64) {
+    let res = await fetch(base64)
+    let myBlob = await res.blob()
+  
+    return myBlob;
+} 
+
 function Attachments({data}) {
     console.log(data);
     // data.file.forEach((file) => {console.log("teste")});
@@ -300,33 +321,34 @@ function Attachments({data}) {
                      </Typography>
                     }
 
-                    {data.file && data.file.map((file, index) => {
-                        return (
-                            <List>
-                                <ListItem>
-                                    <ListItemAvatar>
-                                        <Avatar style={{ backgroundColor: 'red' }}>
-                                            {file.type === "application/pdf" && 
-                                                <FilePdfOutlined />
-                                            }
+                    {data.file.length !== 0 && 
+                        <List>
+                            {data.file && data.file.map((file, index) => {
+                                return (
+                                    <ListItem key={index}>
+                                        <ListItemAvatar>
+                                            <Avatar style={{ backgroundColor: 'red' }}>
+                                                {file.type === "application/pdf" && 
+                                                    <FilePdfOutlined />
+                                                }
 
-                                            {file.type === "application/xls" && 
-                                                <FileExcelOutlined />
-                                            }
-                                        </Avatar>
-                                    </ListItemAvatar>
-                                    <a key={index} href={file.url} title='Download pdf document'>
+                                                {file.type === "application/xls" && 
+                                                    <FileExcelOutlined />
+                                                }
+                                            </Avatar>
+                                        </ListItemAvatar>
                                         <ListItemText primary={file.originalName} secondary={file.size + "KB"} /> 
-                                    </a>
-                                    <ListItemButton 
-                                        divider component="button"
-                                        onClick={file.url}>
-                                        <ListItemText primary="Download" />
-                                    </ListItemButton>
-                                </ListItem>
-                            </List>
-                        )
-                    })}
+                                        <ListItemButton 
+                                            component="button"
+                                            onClick={() => downloadFile(file)}>
+                                            <ListItemText primary="Download" />
+                                        </ListItemButton>
+                                    </ListItem>
+                                )
+                            })}
+                        </List>
+                    }
+
                 </MainCard>
             </Grid>
         </Grid>
