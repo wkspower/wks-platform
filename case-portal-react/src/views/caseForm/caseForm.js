@@ -37,7 +37,7 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemButton from '@mui/material/ListItemButton';
 import Avatar from '@mui/material/Avatar';
-import { FilePdfOutlined, FileExcelOutlined } from '@ant-design/icons';
+import { FilePdfOutlined, FileExcelOutlined, FileOutlined } from '@ant-design/icons';
 
 
 const Transition = React.forwardRef(function Transition(
@@ -334,6 +334,10 @@ function Attachments({data}) {
 
                                                 {file.type === "application/xls" && 
                                                     <FileExcelOutlined />
+                                                }
+
+                                                {file.type !== "application/xls" && file.type !== "application/pdf" && 
+                                                    <FileOutlined />
                                                 }
                                             </Avatar>
                                         </ListItemAvatar>
