@@ -131,7 +131,7 @@ Camunda External Service client to consume processes events(messages)
 > **_NOTE:_**  See more about Camunda External Tasks at https://docs.camunda.org/manual/7.18/user-guide/process-engine/external-tasks/.
 
 
-### Mail Bridge
+### E-mail to Case
 Read mail boxes and send out e-mails. This component can be configured with Email Templates and rules for Case events definitions based on e-mails. And can also send Emails out based on Camunda Processes events.
 
 ### WKS Modeler Templates

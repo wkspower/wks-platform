@@ -39,6 +39,8 @@ import ListItemButton from '@mui/material/ListItemButton';
 import Avatar from '@mui/material/Avatar';
 import { FilePdfOutlined, FileExcelOutlined, FileOutlined } from '@ant-design/icons';
 
+import { CaseEmailsList } from 'views/caseEmail/caseEmailList';
+
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -255,7 +257,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={4}>
-                        
+                        <CaseEmailsList />
                     </TabPanel>
 
                 </Dialog>

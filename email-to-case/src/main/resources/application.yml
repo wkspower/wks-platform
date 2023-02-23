@@ -1,0 +1,29 @@
+server:
+   port: 8083
+
+logging:
+   level:
+      root: INFO
+      com:
+         wks: INFO
+      org.springframework.web.client.RestTemplate: INFO
+      org.apache.http: INFO
+      httpclient.wire: INFO
+      
+spring.mvc.converters.preferred-json-mapper: gson
+
+camunda7.rest.oauth.token.uri:
+camunda7.rest.oauth.token.clientId:
+camunda7.rest.oauth.token.clientSecret:
+camunda7.rest.oauth.token.grantType:
+
+camunda7.rest.deployment.url: /deployment
+camunda7.rest.processdefinition.url: /process-definition
+camunda7.rest.processinstance.url: /process-instance
+camunda7.rest.task.url: /task
+camunda7.rest.correlate.url: /message
+
+spring.data.mongodb.uri: ${MONGO_CONN:mongodb://localhost}
+spring.data.mongodb.database: ${MONGO_DATABASE:wks-mongo-database}
+mongo.database: ${MONGO_DATABASE:wks-mongo-database}
+mongo.connection-string: ${MONGO_CONN:mongodb://localhost}
