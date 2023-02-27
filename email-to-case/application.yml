@@ -27,3 +27,6 @@ spring.data.mongodb.uri: ${MONGO_CONN:mongodb://localhost}
 spring.data.mongodb.database: ${MONGO_DATABASE:wks-mongo-database}
 mongo.database: ${MONGO_DATABASE:wks-mongo-database}
 mongo.connection-string: ${MONGO_CONN:mongodb://localhost}
+
+email-to-case.routing.new-case.pattern: ${EMAIL_CASE_PATTERN_NEW:new-case}
+email-to-case.routing.update-case.pattern: ${EMAIL_CASE_PATTERN_UPDATE:update-case}
