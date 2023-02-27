@@ -39,6 +39,8 @@ import ListItemButton from '@mui/material/ListItemButton';
 import Avatar from '@mui/material/Avatar';
 import { FilePdfOutlined, FileExcelOutlined, FileOutlined } from '@ant-design/icons';
 
+import { CaseEmailsList } from 'views/caseEmail/caseEmailList';
+
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -255,7 +257,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={4}>
-                        
+                        <CaseEmailsList caseInstanceBusinessKey={aCase.businessKey}/>
                     </TabPanel>
 
                 </Dialog>
@@ -286,7 +288,7 @@ async function createBlob(base64) {
 } 
 
 function Attachments({data}) {
-    console.log(data);
+    // console.log(data);
     // data.file.forEach((file) => {console.log("teste")});
 
     return (
@@ -315,13 +317,13 @@ function Attachments({data}) {
                         <hr/>
                     </div>
 
-                    {data.file.length === 0 && 
+                    {data.file?.length === 0 && 
                      <Typography variant="h4" color="textSecondary" sx={{ pr: 0.5 }}>
                         Attach your files and they will be shown here
                      </Typography>
                     }
 
-                    {data.file.length !== 0 && 
+                    {data.file?.length !== 0 && 
                         <List>
                             {data.file && data.file.map((file, index) => {
                                 return (
