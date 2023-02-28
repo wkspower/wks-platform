@@ -44,12 +44,26 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	@Override
 	// TODO how to embrace in a single transation?
 	public CaseInstance create(CaseInstance caseInstance) throws Exception {
-		
-		caseInstance.getAttributes().add(new CaseAttribute("createdAt", DateUtils.formatDate(new Date(), "dd/MM/yyyy")));
+
+		caseInstance.getAttributes()
+				.add(new CaseAttribute("createdAt", DateUtils.formatDate(new Date(), "dd/MM/yyyy")));
 
 		CaseDefinition caseDefinition = caseDefRepository.get(caseInstance.getCaseDefinitionId());
 
 		CaseInstance newCaseInstance = caseInstanceCreateService.create(caseInstance);
+
+		processInstanceService.create(caseDefinition.getStagesLifecycleProcessKey(), newCaseInstance.getBusinessKey(),
+				newCaseInstance.getAttributes(), caseDefinition.getBpmEngineId());
+
+		return newCaseInstance;
+	}
+
+	@Override
+	public CaseInstance create(final String caseDefinitionId) throws Exception {
+
+		CaseDefinition caseDefinition = caseDefRepository.get(caseDefinitionId);
+
+		CaseInstance newCaseInstance = caseInstanceCreateService.create(caseDefinition);
 
 		processInstanceService.create(caseDefinition.getStagesLifecycleProcessKey(), newCaseInstance.getBusinessKey(),
 				newCaseInstance.getAttributes(), caseDefinition.getBpmEngineId());

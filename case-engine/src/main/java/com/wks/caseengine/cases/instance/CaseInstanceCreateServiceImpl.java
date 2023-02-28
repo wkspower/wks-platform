@@ -1,5 +1,6 @@
 package com.wks.caseengine.cases.instance;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,23 @@ class CaseInstanceCreateServiceImpl implements CaseInstanceCreateService {
 				.stage(caseDefinition.getStages().stream().sorted(Comparator.comparing(CaseStage::getIndex)).findFirst()
 						.get().getName())
 				.attributes(caseInstanceParam.getAttributes()).caseDefinitionId(caseDefinition.getId()).build();
+
+		repository.save(caseInstance);
+
+		return caseInstance;
+	}
+
+	@Override
+	public CaseInstance create(final CaseDefinition caseDefinition) throws Exception {
+		if (caseDefinition == null) {
+			throw new CaseDefinitionNotFoundException();
+		}
+
+		String businessKey = businessKeyCreator.generate();
+		CaseInstance caseInstance = CaseInstance
+				.builder().businessKey(businessKey).stage(caseDefinition.getStages().stream()
+						.sorted(Comparator.comparing(CaseStage::getIndex)).findFirst().get().getName())
+				.attributes(new ArrayList<>()).caseDefinitionId(caseDefinition.getId()).build();
 
 		repository.save(caseInstance);
 

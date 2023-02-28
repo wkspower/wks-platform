@@ -14,6 +14,8 @@ public interface CaseInstanceService {
 
 	CaseInstance create(final CaseInstance caseInstance) throws Exception;
 
+	CaseInstance create(final String caseDefinitionId) throws Exception;
+
 	void updateStatus(final String businessKey, final CaseStatus newStatus) throws Exception;
 
 	void updateStage(final String businessKey, final String caseStage) throws Exception;
