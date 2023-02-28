@@ -94,6 +94,15 @@ jobs:
         push: true
         tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-loader:${{ env.BUILD_VERSION }}"
 
+    - name: Build and push Docker image email-to-case
+      uses: docker/build-push-action@v2
+      with:
+        context: ./email-to-case
+        platforms: linux/amd64,linux/arm64
+        file: email-to-case/Dockerfile
+        push: true
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case:${{ env.BUILD_VERSION }}"
+
     - name: Build and push Docker image for case-portal-admin-react
       uses: docker/build-push-action@v2
       with:
@@ -155,6 +164,10 @@ jobs:
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ env.BUILD_VERSION }}
         cd ../../
 
+        cd email-to-case/local
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case:${{ env.BUILD_VERSION }}
+        cd ../../
+
         cd case-portal-admin/local
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-admin-react=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-admin-react:${{ env.BUILD_VERSION }}
         cd ../../
@@ -177,6 +190,10 @@ jobs:
 
         cd bpm-engine-c7-external-service/staging
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ env.BUILD_VERSION }}
+        cd ../../
+
+        cd email-to-case/staging
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case:${{ env.BUILD_VERSION }}
         cd ../../
 
         cd case-portal-admin/staging
