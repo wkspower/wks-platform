@@ -10,7 +10,10 @@ import com.mongodb.MongoClientException;
 import com.mongodb.client.MongoCollection;
 import com.wks.caseengine.db.MongoDataConnection;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class MongoHealthCheck implements HealthIndicator {
 
 	@Autowired
@@ -22,7 +25,8 @@ public class MongoHealthCheck implements HealthIndicator {
 			MongoCollection<Document> collection = connection.getDatabase().getCollection("system");
 			collection.countDocuments();
 		} catch (MongoClientException ex) {
-			return Health.down().withDetail("mongodb", ex.getCause()).build();
+			log.error("error on connect mongo", ex);
+			return Health.down().withDetail("mongodb", ex.getCode()).build();
 		}
 		
 		return Health.up().build();
