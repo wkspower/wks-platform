@@ -1,5 +1,6 @@
 import { FolderOutlined } from '@ant-design/icons';
 import { IconArchive, IconFileCheck, IconFileInvoice, IconList, IconSquareAsterisk, IconDatabase } from '@tabler/icons';
+import i18n from '../i18n';
 
 const icons = { FolderOutlined, IconFileInvoice, IconFileCheck, IconArchive, IconSquareAsterisk, IconList, IconDatabase };
 
@@ -12,14 +13,14 @@ const utilities = {
     children: [
         {
             id: 'case-list',
-            title: 'Cases',
+            title: i18n.t('menu.case'),
             type: 'collapse',
             icon: icons.FolderOutlined,
             children: []
         },
         {
             id: 'task-list',
-            title: 'Tasks',
+            title: i18n.t('menu.task'),
             type: 'item',
             url: '/task-list',
             icon: icons.IconList,
@@ -27,7 +28,7 @@ const utilities = {
         },
         {
             id: 'record-list',
-            title: 'Records',
+            title: i18n.t('menu.record'),
             type: 'collapse',
             icon: icons.IconDatabase,
             children: []
@@ -43,7 +44,7 @@ fetch(process.env.REACT_APP_API_URL + '/case-definition/')
                 .filter((menu) => menu.id === 'case-list')[0]
                 .children.push({
                     id: element.id,
-                    title: element.name,
+                    title: i18n.t(`submenu.case.${element.id}-${element.formKey}`),
                     type: 'item',
                     url: '/case-list/' + element.id,
                     breadcrumbs: true
@@ -62,7 +63,7 @@ fetch(process.env.REACT_APP_API_URL + '/record-type/')
                 .filter((menu) => menu.id === 'record-list')[0]
                 .children.push({
                     id: element.id,
-                    title: element.id,
+                    title: i18n.t(`submenu.record.${element.id}`),
                     type: 'item',
                     url: '/record-list/' + element.id,
                     breadcrumbs: true

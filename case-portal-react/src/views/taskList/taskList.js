@@ -1,24 +1,25 @@
 import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
-import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import MainCard from 'components/MainCard';
 import React, { useEffect, useState } from 'react';
 import { ProcessDiagram } from 'views/bpmn/ProcessDiagram';
 import { TaskForm } from '../taskForm/taskForm';
-
+import { useTranslation } from 'react-i18next';
 import './taskList.css';
 
 export const TaskList = ({ businessKey, bpmEngineId, keycloak }) => {
     const [tasks, setTasks] = useState(null);
     const [open, setOpen] = useState(false);
     const [task, setTask] = useState(null);
-
     const [processDefId, setProcessDefId] = useState(null);
     const [activityInstances, setActivityInstances] = useState(null);
+    const { t } = useTranslation();
 
     useEffect(() => {
         fetch(
-            process.env.REACT_APP_API_URL + '/task/?' +
+            process.env.REACT_APP_API_URL +
+                '/task/?' +
                 (bpmEngineId ? 'bpmEngineId=' + bpmEngineId + '&' : '') +
                 (businessKey ? 'processInstanceBusinessKey=' + businessKey : '')
         )
@@ -45,29 +46,31 @@ export const TaskList = ({ businessKey, bpmEngineId, keycloak }) => {
             });
     }, [open, businessKey, bpmEngineId]);
 
-    const columns: GridColDef[] = [
-        { field: 'name', headerName: 'Task', width: 200 },
-        { field: 'caseInstanceId', headerName: 'Case', width: 100 },
-        { field: 'processDefinitionId', headerName: 'Process', width: 250 },
-        { field: 'assignee', headerName: 'Assignee', width: 100 },
-        { field: 'created', headerName: 'Created', type: 'date', width: 150 },
-        { field: 'due', headerName: 'Due', width: 150 },
-        { field: 'followUp', headerName: 'Follow Up', width: 150 },
-        {
-            field: 'action',
-            headerName: '',
-            sortable: false,
-            renderCell: (params) => {
-                const onClick = (e) => {
-                    setTask(params.row);
-                    e.stopPropagation(); // don't select this row after clicking
-                    setOpen(true);
-                };
+    const makeColumns = () => {
+        return [
+            { field: 'name', headerName: t('pages.tasklist.datagrid.columns.name'), width: 200 },
+            { field: 'caseInstanceId', headerName: t('pages.tasklist.datagrid.columns.caseinstanceid'), width: 100 },
+            { field: 'processDefinitionId', headerName: t('pages.tasklist.datagrid.columns.processdefinitionid'), width: 250 },
+            { field: 'assignee', headerName: t('pages.tasklist.datagrid.columns.assignee'), width: 100 },
+            { field: 'created', headerName: t('pages.tasklist.datagrid.columns.created'), type: 'date', width: 150 },
+            { field: 'due', headerName: t('pages.tasklist.datagrid.columns.due'), width: 150 },
+            { field: 'followUp', headerName: t('pages.tasklist.datagrid.columns.followup'), width: 150 },
+            {
+                field: 'action',
+                headerName: '',
+                sortable: false,
+                renderCell: (params) => {
+                    const onClick = (e) => {
+                        setTask(params.row);
+                        e.stopPropagation();
+                        setOpen(true);
+                    };
 
-                return <Button onClick={onClick}>Details</Button>;
+                    return <Button onClick={onClick}>{t('pages.tasklist.datagrid.action.details')}</Button>;
+                }
             }
-        }
-    ];
+        ];
+    };
 
     const handleClose = () => {
         setOpen(false);
@@ -82,10 +85,16 @@ export const TaskList = ({ businessKey, bpmEngineId, keycloak }) => {
                             <DataGrid
                                 sx={{ height: 650, width: '100%', backgroundColor: '#ffffff', mt: 1 }}
                                 rows={tasks}
-                                columns={columns}
+                                columns={makeColumns()}
                                 pageSize={10}
                                 rowsPerPageOptions={[10]}
                                 components={{ Toolbar: GridToolbar }}
+                                localeText={{
+                                    toolbarColumns: t('pages.tasklist.datagrid.toolbar.columns'),
+                                    toolbarFilters: t('pages.tasklist.datagrid.toolbar.filters'),
+                                    toolbarDensity: t('pages.tasklist.datagrid.toolbar.density'),
+                                    toolbarExport: t('pages.tasklist.datagrid.toolbar.export')
+                                }}
                             />
                         </Box>
                     </MainCard>

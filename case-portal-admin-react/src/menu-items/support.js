@@ -1,5 +1,6 @@
 // assets
 import { ChromeOutlined, QuestionOutlined } from '@ant-design/icons';
+import i18n from '../i18n';
 
 // icons
 const icons = {
@@ -7,23 +8,14 @@ const icons = {
     QuestionOutlined
 };
 
-// ==============================|| MENU ITEMS - SAMPLE PAGE & DOCUMENTATION ||============================== //
-
 const support = {
     id: 'support',
     title: '',
     type: 'group',
     children: [
-        // {
-        //     id: 'sample-page',
-        //     title: 'Sample Page',
-        //     type: 'item',
-        //     url: '/sample-page',
-        //     icon: icons.ChromeOutlined
-        // },
         {
             id: 'documentation',
-            title: 'Documentation',
+            title: i18n.t('menu.documentation'),
             type: 'item',
             url: '#',
             icon: icons.QuestionOutlined,

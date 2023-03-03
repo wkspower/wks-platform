@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Outlet } from 'react-router-dom';
-
-// material-ui
 import { Box, Toolbar, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-
-// project import
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 import navigation from 'menu-items';
 import Drawer from './Drawer';
 import Header from './Header';
-
-// types
 import { openDrawer } from 'store/reducers/menu';
 
 // ==============================|| MAIN LAYOUT ||============================== //
@@ -33,14 +27,13 @@ const MainLayout = ({ keycloak, authenticated }) => {
 
     // set media wise responsive drawer
     useEffect(() => {
-        setOpen(!matchDownLG);
-        dispatch(openDrawer({ drawerOpen: !matchDownLG }));
-
+        // setOpen(!matchDownLG);
+        // dispatch(openDrawer({ drawerOpen: !matchDownLG }));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matchDownLG]);
 
     useEffect(() => {
-        if (open !== drawerOpen) setOpen(drawerOpen);
+        // if (open !== drawerOpen) setOpen(drawerOpen);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [drawerOpen]);
 

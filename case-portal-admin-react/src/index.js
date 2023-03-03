@@ -1,28 +1,22 @@
 import { BrowserRouter } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
-
-// scroll bar
 import 'simplebar/src/simplebar.css';
-
-// third-party
-
-// apex-chart
 import 'assets/third-party/apex-chart.css';
-
-// project import
 import { store } from 'store';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-
-// ==============================|| MAIN - REACT DOM RENDER  ||============================== //
+import i18n from './i18n';
+import { I18nextProvider } from 'react-i18next';
 
 const container = document.getElementById('root');
-const root = createRoot(container); // createRoot(container!) if you use TypeScript
+const root = createRoot(container); 
 root.render(
     <Provider store={store}>
         <BrowserRouter basename="/">
-            <App />
+            <I18nextProvider i18n={i18n}>
+                <App />
+            </I18nextProvider>
         </BrowserRouter>
     </Provider>
 );

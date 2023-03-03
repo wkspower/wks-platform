@@ -6,8 +6,6 @@ import { ThemeRoutes } from 'routes';
 import ThemeCustomization from 'themes';
 import './App.css';
 
-// ==============================|| APP - THEME, ROUTER, LOCAL  ||============================== //
-
 const App = () => {
     const [keycloak, setKeycloak] = useState();
     const [authenticated, setAuthenticated] = useState(null);
@@ -34,7 +32,7 @@ const App = () => {
                 console.log(err.message);
             });
 
-            fetch(process.env.REACT_APP_API_URL + '/case-definition/')
+        fetch(process.env.REACT_APP_API_URL + '/case-definition/')
             .then((response) => response.json())
             .then((data) => {
                 setCasesDefinitions(data);
@@ -49,7 +47,12 @@ const App = () => {
         authenticated && (
             <ThemeCustomization>
                 <ScrollTop>
-                    <ThemeRoutes keycloak={keycloak} authenticated={authenticated} recordsTypes={recordsTypes} casesDefinitions={casesDefinitions} />
+                    <ThemeRoutes
+                        keycloak={keycloak}
+                        authenticated={authenticated}
+                        recordsTypes={recordsTypes}
+                        casesDefinitions={casesDefinitions}
+                    />
                 </ScrollTop>
             </ThemeCustomization>
         )

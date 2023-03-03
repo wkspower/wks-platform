@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-
 import { Box } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import MainCard from 'components/MainCard';
-
 import Button from '@mui/material/Button';
 import { RecordForm } from './recordForm';
+import { useTranslation } from 'react-i18next';
 
 export const RecordList = ({ recordTypeId }) => {
     const [records, setRecords] = useState([]);
@@ -14,18 +13,23 @@ export const RecordList = ({ recordTypeId }) => {
     const [openForm, setOpenForm] = useState(false);
     const [columns, setColumns] = useState([]);
     const [mode, setMode] = useState('new');
+    const { t } = useTranslation();
 
     useEffect(() => {
         fetch(process.env.REACT_APP_API_URL + '/record-type/' + recordTypeId)
             .then((response) => response.json())
             .then((data) => {
-                let dynamicColumns: GridColDef[] = [];
+                let dynamicColumns = [];
 
                 data.fields.components
                     .filter((element) => element.input === true)
                     .forEach((element) => {
-                        dynamicColumns.push({ field: element.key, headerName: element.label, width: 100 });
+                        const key = element.key;
+                        const label = t(`pages.recordlist.datagrid.columns.${key}`);
+
+                        dynamicColumns.push({ field: key, headerName: label, width: 100 });
                     });
+
                 dynamicColumns.push({
                     field: 'action',
                     headerName: '',
@@ -38,7 +42,7 @@ export const RecordList = ({ recordTypeId }) => {
                             setOpenForm(true);
                         };
 
-                        return <Button onClick={onDetailsClick}>View</Button>;
+                        return <Button onClick={onDetailsClick}>{t(`pages.recordlist.datagrid.action.details`)}</Button>;
                     }
                 });
                 setColumns(dynamicColumns);
@@ -71,7 +75,7 @@ export const RecordList = ({ recordTypeId }) => {
     return (
         <div style={{ height: 650, width: '100%' }}>
             <Button id="basic-button" variant="contained" onClick={handleNew}>
-                New
+                {t('pages.recordlist.action.newrecord')}
             </Button>
             <MainCard sx={{ mt: 2 }} content={false}>
                 <Box>
@@ -85,7 +89,9 @@ export const RecordList = ({ recordTypeId }) => {
                     />
                 </Box>
             </MainCard>
-            {record && recordType && <RecordForm record={record} recordType={recordType} open={openForm} handleClose={handleCloseForm} mode={mode} />}
+            {record && recordType && (
+                <RecordForm record={record} recordType={recordType} open={openForm} handleClose={handleCloseForm} mode={mode} />
+            )}
         </div>
     );
 };

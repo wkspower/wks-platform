@@ -1,5 +1,6 @@
 // assets
 import { HomeOutlined } from '@ant-design/icons';
+import i18n from '../i18n';
 
 // icons
 const icons = {
@@ -15,7 +16,7 @@ const dashboard = {
     children: [
         {
             id: 'dashboard',
-            title: 'Home',
+            title: i18n.t('menu.home'),
             type: 'item',
             url: '/home',
             icon: icons.HomeOutlined,

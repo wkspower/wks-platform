@@ -1,3 +1,5 @@
+import i18n from '../i18n';
+
 // assets
 import {
     IconPackgeExport,
@@ -69,7 +71,7 @@ const utilities = {
     children: [
         {
             id: 'system',
-            title: 'System',
+            title: i18n.t('menu.system'),
             type: 'collapse',
             icon: icons.IconBuilding,
             children: [
@@ -157,7 +159,7 @@ const utilities = {
         },
         {
             id: 'settings',
-            title: 'Settings',
+            title: i18n.t('menu.settings'),
             type: 'collapse',
             icon: icons.IconAdjustments,
             children: [
@@ -213,7 +215,7 @@ const utilities = {
         },
         {
             id: 'casesAndProcessesManagement',
-            title: 'Case Life Cycle',
+            title: i18n.t('menu.caselifecicle'),
             type: 'collapse',
             icon: icons.IconSettingsAutomation,
             children: [
