@@ -4,7 +4,7 @@ Describe global configs about this project.
 
 ## Configure i18n
 
-Add new entry on <b>i18n/translations.js</b>
+Add new entry on <b>i18n/pt_br.js</b> and <b>i18n/en_us.js</b>
 
 ## Using i18n
 

@@ -1,5 +1,6 @@
 import i18n from 'i18next';
-import translations from './translations';
+import ptBR from './pt_br';
+import enUS from './en_us';
 
 var lang = 'en';
 var fallbackLng = 'en';
@@ -9,7 +10,14 @@ if (navigator.language === 'pt-BR') {
 }
 
 i18n.init({
-    resources: translations,
+    resources: {
+        en: {
+            translation: enUS
+        },
+        ptBR: {
+            translation: ptBR
+        }
+    },
     lng: lang,
     fallbackLng: fallbackLng,
     interpolation: {
