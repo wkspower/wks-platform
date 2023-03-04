@@ -40,7 +40,6 @@ import Avatar from '@mui/material/Avatar';
 import { FilePdfOutlined, FileExcelOutlined, FileOutlined } from '@ant-design/icons';
 
 import { CaseEmailsList } from 'views/caseEmail/caseEmailList';
-import { file } from '../../../../../../../Library/Caches/typescript/4.9/node_modules/@babel/types/lib/index';
 
 import FileBase64 from 'react-file-base64';
 
