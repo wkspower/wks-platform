@@ -11,8 +11,6 @@ import DrawerContent from './DrawerContent';
 import MiniDrawerStyled from './MiniDrawerStyled';
 import { drawerWidth } from 'config';
 
-// ==============================|| MAIN LAYOUT - DRAWER ||============================== //
-
 const MainDrawer = ({ open, handleDrawerToggle, window }) => {
     const theme = useTheme();
     const matchDownMD = useMediaQuery(theme.breakpoints.down('lg'));
