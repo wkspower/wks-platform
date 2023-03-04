@@ -40,6 +40,9 @@ import Avatar from '@mui/material/Avatar';
 import { FilePdfOutlined, FileExcelOutlined, FileOutlined } from '@ant-design/icons';
 
 import { CaseEmailsList } from 'views/caseEmail/caseEmailList';
+import { file } from '../../../../../../../Library/Caches/typescript/4.9/node_modules/@babel/types/lib/index';
+
+import FileBase64 from 'react-file-base64';
 
 
 const Transition = React.forwardRef(function Transition(
@@ -253,7 +256,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={3}>
-                        <Attachments data={formData.data} />
+                        <Attachments data={formData.data} aCase={aCase} />
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={4}>
@@ -287,10 +290,31 @@ async function createBlob(base64) {
     return myBlob;
 } 
 
-function Attachments({data}) {
-    // console.log(data);
-    // data.file.forEach((file) => {console.log("teste")});
+const handleFileChange = (files, caseId) => {
+    if (!files) {
+      return;
+    }
 
+    const attachments = [];
+
+    files.forEach((file, i) => {
+        attachments.push({...file});
+    });
+
+    fetch(process.env.REACT_APP_API_URL + '/case/upload/' + caseId, {
+      method: 'PUT',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+    },
+      body: JSON.stringify(attachments),
+    })
+      .then((res) => res.json())
+      .then((data) => console.log(data))
+      .catch((err) => console.error(err));
+  };
+
+function Attachments({data, aCase}) {
     return (
         <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
             <Grid item xs={12}>
@@ -304,12 +328,15 @@ function Attachments({data}) {
                             <br/>
 
                             <Typography variant="h4" color="textSecondary" sx={{ pr: 0.5 }}>
-                                Select a file to upload
+                                Select files to upload
                             </Typography>
+                            
+                            <br />
+                            
+                            <FileBase64
+                                multiple={ true }
+                                onDone={ (files) => handleFileChange(files, aCase.businessKey) } />
 
-                            <Typography variant="h6" color="textSecondary" sx={{ pr: 0.2 }}>
-                                or drag and drop it here
-                            </Typography>
                         </Grid>
                     </Box>
 

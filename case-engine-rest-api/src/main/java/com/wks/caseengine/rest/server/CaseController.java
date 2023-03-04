@@ -10,14 +10,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.CaseInstanceFile;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.cases.instance.CaseInstanceService;
 
@@ -55,6 +59,15 @@ public class CaseController {
 	public void update(@PathVariable final String businessKey, @RequestBody final CaseInstance caseInstance)
 			throws Exception {
 		caseInstanceService.updateStatus(businessKey, caseInstance.getStatus());
+	}
+	
+	@PutMapping(value = "/upload/{businessKey}")
+//	@RequestMapping(value = "/upload/{businessKey}", method = RequestMethod.PUT, consumes = {"application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"})
+	public void uploadFile(@PathVariable final String businessKey, @RequestBody CaseInstanceFile[] files)
+			throws Exception {
+		System.out.println(files);
+		
+//		caseInstanceService.uploadFile(businessKey, caseInstance);
 	}
 
 	@DeleteMapping(value = "/{businessKey}")
