@@ -1,5 +1,4 @@
 import { Box, Button } from '@mui/material';
-import { GridColDef } from '@mui/x-data-grid';
 import { Kanban } from 'components/Kanban/kanban';
 import MainCard from 'components/MainCard';
 import React, { useEffect, useState } from 'react';
@@ -28,7 +27,9 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        fetch(process.env.REACT_APP_API_URL + '/case-definition' + (caseDefId ? '/' + caseDefId : ''))
+        fetch(
+            process.env.REACT_APP_API_URL + '/case-definition' + (caseDefId ? '/' + caseDefId : '')
+        )
             .then((response) => response.json())
             .then((data) => {
                 setStages(data.stages);
@@ -41,18 +42,31 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
             })
             .then((response) => response.json())
             .then((data) => {
+                const getStatus = (status) => {
+                    const mapper = {
+                        WIP_CASE_STATUS: t('general.case.status.wip'),
+                        CLOSED_CASE_STATUS: t('general.case.status.closed'),
+                        ARCHIVED_CASE_STATUS: t('general.case.status.archived')
+                    };
+
+                    return mapper[status] || 'Indefinido';
+                };
+
                 let cases = data.map(function (element) {
-                    const createdAt = element.attributes.find((attribute) => attribute.name === 'createdAt');
+                    const createdAt = element.attributes.find(
+                        (attribute) => attribute.name === 'createdAt'
+                    );
                     element.createdAt = createdAt ? createdAt.value : '11/12/2022';
                     element.statusDescription = getStatus(element.status);
                     return element;
                 });
+
                 setCases(cases);
             })
             .catch((err) => {
                 console.log(err.message);
             });
-    }, [caseDefId, openNewCaseForm, openCaseForm, status]);
+    }, [caseDefId, status]);
 
     const [caseDefs, setCaseDefs] = useState([]);
     useEffect(() => {
@@ -68,10 +82,22 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
 
     const makeColumns = () => {
         return [
-            { field: 'businessKey', headerName: t('pages.caselist.datagrid.columns.businesskey'), width: 150 },
-            { field: 'statusDescription', headerName: t('pages.caselist.datagrid.columns.statusdescription'), width: 220 },
+            {
+                field: 'businessKey',
+                headerName: t('pages.caselist.datagrid.columns.businesskey'),
+                width: 150
+            },
+            {
+                field: 'statusDescription',
+                headerName: t('pages.caselist.datagrid.columns.statusdescription'),
+                width: 220
+            },
             { field: 'stage', headerName: t('pages.caselist.datagrid.columns.stage'), width: 220 },
-            { field: 'createdAt', headerName: t('pages.caselist.datagrid.columns.createdat'), width: 220 },
+            {
+                field: 'createdAt',
+                headerName: t('pages.caselist.datagrid.columns.createdat'),
+                width: 220
+            },
             {
                 field: 'action',
                 headerName: '',
@@ -83,7 +109,11 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
                         setOpenCaseForm(true);
                     };
 
-                    return <Button onClick={onClick}>{t('pages.caselist.datagrid.action.details')}</Button>;
+                    return (
+                        <Button onClick={onClick}>
+                            {t('pages.caselist.datagrid.action.details')}
+                        </Button>
+                    );
                 }
             }
         ];
@@ -108,16 +138,6 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
         if (nextView !== null) {
             setView(nextView);
         }
-    };
-
-    const getStatus = (status) => {
-        const mapper = {
-            WIP_CASE_STATUS: t('general.case.status.wip'),
-            CLOSED_CASE_STATUS: t('general.case.status.closed'),
-            ARCHIVED_CASE_STATUS: t('general.case.status.archived')
-        };
-
-        return mapper[status] || 'Indefinido';
     };
 
     const fetchKanbanConfig = () => {
@@ -165,7 +185,12 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
             )}
 
             {caseDefId && (
-                <ToggleButtonGroup orientation="horizontal" value={view} exclusive onChange={handleChangeView}>
+                <ToggleButtonGroup
+                    orientation="horizontal"
+                    value={view}
+                    exclusive
+                    onChange={handleChangeView}
+                >
                     <ToggleButton value="list" aria-label="list">
                         <ViewListIcon />
                     </ToggleButton>
@@ -200,7 +225,14 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
                 </Box>
             </MainCard>
 
-            {openCaseForm && <CaseForm aCase={aCase} handleClose={handleCloseCaseForm} open={openCaseForm} keycloak={keycloak} />}
+            {openCaseForm && (
+                <CaseForm
+                    aCase={aCase}
+                    handleClose={handleCloseCaseForm}
+                    open={openCaseForm}
+                    keycloak={keycloak}
+                />
+            )}
 
             {openNewCaseForm && (
                 <NewCaseForm
@@ -212,7 +244,13 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
             )}
 
             {lastCreatedCase && (
-                <Snackbar open={snackOpen} autoHideDuration={6000} message="Case created" onClose={handleCloseSnack} action={snackAction} />
+                <Snackbar
+                    open={snackOpen}
+                    autoHideDuration={6000}
+                    message="Case created"
+                    onClose={handleCloseSnack}
+                    action={snackAction}
+                />
             )}
         </div>
     );
