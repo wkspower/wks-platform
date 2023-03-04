@@ -1,9 +1,13 @@
 import * as React from 'react';
 import moment from 'moment';
-import CaseService from './CaseService';
+import { CaseService } from './CaseService';
 import { Typography } from '@mui/material';
 
-function getNotifications() {
+export const NotificationService = {
+    getNotifications
+};
+
+function getNotifications(keycloak) {
     function truncIfAboveFiveElements(data) {
         if (!data.length) {
             return Promise.resolve({ data: [], page: {} });
@@ -55,13 +59,7 @@ function getNotifications() {
         );
     }
 
-    return CaseService.getAllByStatus('WIP_CASE_STATUS', 5)
+    return CaseService.getAllByStatus(keycloak, 'WIP_CASE_STATUS', 5)
         .then(truncIfAboveFiveElements)
         .then(toMessage);
 }
-
-const NotificationService = {
-    getNotifications: getNotifications
-};
-
-export default NotificationService;

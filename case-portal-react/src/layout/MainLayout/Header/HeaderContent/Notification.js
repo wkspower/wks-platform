@@ -27,6 +27,7 @@ import {
     SettingOutlined
 } from '@ant-design/icons';
 import { NotificationService } from '../../../../services';
+import { useSession } from 'SessionStoreContext';
 
 // sx styles
 const avatarSX = {
@@ -55,6 +56,7 @@ const Notification = () => {
     const [open, setOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [badge, setBudget] = useState(0);
+    const keycloack = useSession();
 
     const handleToggle = () => {
         setOpen((prevOpen) => !prevOpen);
@@ -72,7 +74,7 @@ const Notification = () => {
         let timeout = null;
 
         const updateNotify = () => {
-            NotificationService.getNotifications()
+            NotificationService.getNotifications(keycloack)
                 .then((data) => {
                     setBudget(data.length ? data[0].total : 0);
                     setMessages(data);

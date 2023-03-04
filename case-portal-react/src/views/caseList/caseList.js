@@ -13,8 +13,10 @@ import Snackbar from '@mui/material/Snackbar';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
+import { CaseService } from '../../services';
+import { useSession } from 'SessionStoreContext';
 
-export const CaseList = ({ status, caseDefId, keycloak }) => {
+export const CaseList = ({ status, caseDefId }) => {
     const [stages, setStages] = useState([]);
     const [cases, setCases] = useState([]);
     const [aCase, setACase] = useState(null);
@@ -25,43 +27,16 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
     const [view, setView] = React.useState('list');
     const [snackOpen, setSnackOpen] = useState(false);
     const { t } = useTranslation();
+    const keycloak = useSession();
 
     useEffect(() => {
-        fetch(
-            process.env.REACT_APP_API_URL + '/case-definition' + (caseDefId ? '/' + caseDefId : '')
-        )
-            .then((response) => response.json())
+        CaseService.getCaseDefinitionsById(keycloak, caseDefId)
             .then((data) => {
                 setStages(data.stages);
-                return fetch(
-                    process.env.REACT_APP_API_URL +
-                        '/case/?' +
-                        (status ? 'status=' + status : '') +
-                        (caseDefId ? '&caseDefinitionId=' + caseDefId : '')
-                );
+                return CaseService.getCaseById(keycloak, caseDefId, status);
             })
-            .then((response) => response.json())
             .then((data) => {
-                const getStatus = (status) => {
-                    const mapper = {
-                        WIP_CASE_STATUS: t('general.case.status.wip'),
-                        CLOSED_CASE_STATUS: t('general.case.status.closed'),
-                        ARCHIVED_CASE_STATUS: t('general.case.status.archived')
-                    };
-
-                    return mapper[status] || 'Indefinido';
-                };
-
-                let cases = data.map(function (element) {
-                    const createdAt = element.attributes.find(
-                        (attribute) => attribute.name === 'createdAt'
-                    );
-                    element.createdAt = createdAt ? createdAt.value : '11/12/2022';
-                    element.statusDescription = getStatus(element.status);
-                    return element;
-                });
-
-                setCases(cases);
+                setCases(data);
             })
             .catch((err) => {
                 console.log(err.message);
@@ -70,8 +45,7 @@ export const CaseList = ({ status, caseDefId, keycloak }) => {
 
     const [caseDefs, setCaseDefs] = useState([]);
     useEffect(() => {
-        fetch(process.env.REACT_APP_API_URL + '/case-definition/')
-            .then((response) => response.json())
+        CaseService.getCaseDefinitions(keycloak)
             .then((data) => {
                 setCaseDefs(data);
             })
