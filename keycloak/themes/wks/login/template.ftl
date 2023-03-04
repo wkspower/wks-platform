@@ -1,36 +1,86 @@
-<#macro registrationLayout bodyClass="" displayInfo=false displayMessage=true>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<#import "document.ftl" as document>
+<#import "components/atoms/alert.ftl" as alert>
+<#import "components/atoms/body.ftl" as body>
+<#import "components/atoms/button.ftl" as button>
+<#import "components/atoms/card.ftl" as card>
+<#import "components/atoms/container.ftl" as container>
+<#import "components/atoms/heading.ftl" as heading>
+<#import "components/atoms/logo.ftl" as logo>
+<#import "components/atoms/nav.ftl" as nav>
+<#import "components/molecules/locale-provider.ftl" as localeProvider>
+<#import "components/molecules/username.ftl" as username>
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="robots" content="noindex, nofollow">
+<#macro
+  registrationLayout
+  displayInfo=false
+  displayMessage=true
+  displayRequiredFields=false
+  script=""
+  showAnotherWayIfPresent=true
+>
+  <#assign cardHeader>
+    <div style="text-align: center; display: flex; align-items: center; flex-direction: column;">
+        <img class="logo" src="${url.resourcesPath}/dist/logo.svg" alt="wks">
+    </div>
 
-    <title><#nested "title"></title>
-    <#if properties.styles?has_content>
-        <#list properties.styles?split(' ') as style>
-            <link href="${url.resourcesPath}/${style}" rel="stylesheet" />
-        </#list>
-    </#if>
-</head>
-
-	<body>
+    <#if !(auth?has_content && auth.showUsername() && !auth.showResetCredentials())>
+      <@heading.kw>
         <#nested "header">
-        <div class="login-content" style="background-image: url(&quot;${url.resourcesPath}/img/background.svg&quot;);">
-            <div class="box">
-        <#if displayMessage && message?has_content>
-        <div class="alert alert-${message.type}">
-             <#if message.type = 'success'><span class="${properties.kcFeedbackSuccessIcon!}"></span></#if>
-             <#if message.type = 'warning'><span class="${properties.kcFeedbackWarningIcon!}"></span></#if>
-             <#if message.type = 'error'><span class="${properties.kcFeedbackErrorIcon!}"></span></#if>
-             <#if message.type = 'info'><span class="${properties.kcFeedbackInfoIcon!}"></span></#if>
-             <span class="message-text">${message.summary?no_esc}</span>
-        </div>
-        </#if>
-        <#nested "form">
-            </div> 
-        </div>
-	</body>
-</html>
+      </@heading.kw>
+    <#else>
+      <#nested "show-username">
+      <@username.kw
+        linkHref=url.loginRestartFlowUrl
+        linkTitle=msg("restartLoginTooltip")
+        name=auth.attemptedUsername
+      />
+    </#if>
+  </#assign>
+
+  <#assign cardContent>
+    <#if displayMessage && message?has_content && (message.type != "warning" || !isAppInitiatedAction??)>
+      <@alert.kw color=message.type>
+        ${kcSanitize(message.summary)?no_esc}
+      </@alert.kw>
+    </#if>
+    <#nested "form">
+    <#if displayRequiredFields>
+      <p class="text-secondary-600 text-sm">
+        * ${msg("requiredFields")}
+      </p>
+    </#if>
+    <#if auth?has_content && auth.showTryAnotherWayLink() && showAnotherWayIfPresent>
+      <form action="${url.loginAction}" method="post">
+        <input name="tryAnotherWay" type="hidden" value="on" />
+        <@button.kw color="primary" type="submit">
+          ${msg("doTryAnotherWay")}
+        </@button.kw>
+      </form>
+    </#if>
+  </#assign>
+
+  <#assign cardFooter>
+    <#if displayInfo>
+      <#nested "info">
+    </#if>
+  </#assign>
+
+  <html>
+    <head>
+      <@document.kw script=script />
+    </head>
+    <@body.kw>
+      
+      <@container.kw>
+        <@card.kw content=cardContent footer=cardFooter header=cardHeader />
+        <@nav.kw>
+          <#nested "nav">
+          <#if realm.internationalizationEnabled && locale.supported?size gt 1>
+            <@localeProvider.kw currentLocale=locale.current locales=locale.supported />
+          </#if>
+        </@nav.kw>
+      </@container.kw>
+      
+    </@body.kw>
+  </html>
 </#macro>
