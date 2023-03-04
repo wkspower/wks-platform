@@ -4,6 +4,7 @@ import Keycloak from 'keycloak-js';
 import { useEffect, useState } from 'react';
 import { ThemeRoutes } from 'routes';
 import ThemeCustomization from 'themes';
+import { SessionStoreProvider } from './SessionStoreContext';
 import './App.css';
 
 const App = () => {
@@ -47,12 +48,14 @@ const App = () => {
         authenticated && (
             <ThemeCustomization>
                 <ScrollTop>
-                    <ThemeRoutes
-                        keycloak={keycloak}
-                        authenticated={authenticated}
-                        recordsTypes={recordsTypes}
-                        casesDefinitions={casesDefinitions}
-                    />
+                    <SessionStoreProvider value={keycloak}>
+                        <ThemeRoutes
+                            keycloak={keycloak}
+                            authenticated={authenticated}
+                            recordsTypes={recordsTypes}
+                            casesDefinitions={casesDefinitions}
+                        />
+                    </SessionStoreProvider>
                 </ScrollTop>
             </ThemeCustomization>
         )
