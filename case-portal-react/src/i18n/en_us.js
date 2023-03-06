@@ -14,17 +14,6 @@ const defs = {
         task: 'Tasks',
         record: 'Records'
     },
-    submenu: {
-        case: {
-            '1-motion-detected-form': 'Generic Case',
-            '2-motion-detected-form': 'Motion Detected',
-            'contractor-onboarding-contractor-on-boarding-form': 'Contractor On Boarding Case'
-        },
-        record: {
-            client: 'Client',
-            contractor: 'Contractor'
-        }
-    },
     pages: {
         dashboard: {
             title: 'My Workspace',
@@ -80,11 +69,6 @@ const defs = {
         },
         recordlist: {
             datagrid: {
-                columns: {
-                    name: 'Name',
-                    address: 'Address',
-                    country: 'Country'
-                },
                 action: {
                     details: 'Details'
                 }

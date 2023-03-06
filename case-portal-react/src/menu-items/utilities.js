@@ -44,7 +44,7 @@ fetch(process.env.REACT_APP_API_URL + '/case-definition/')
                 .filter((menu) => menu.id === 'case-list')[0]
                 .children.push({
                     id: element.id,
-                    title: i18n.t(`submenu.case.${element.id}-${element.formKey}`),
+                    title: element.name,
                     type: 'item',
                     url: '/case-list/' + element.id,
                     breadcrumbs: true
@@ -63,7 +63,7 @@ fetch(process.env.REACT_APP_API_URL + '/record-type/')
                 .filter((menu) => menu.id === 'record-list')[0]
                 .children.push({
                     id: element.id,
-                    title: i18n.t(`submenu.record.${element.id}`),
+                    title: element.id,
                     type: 'item',
                     url: '/record-list/' + element.id,
                     breadcrumbs: true
