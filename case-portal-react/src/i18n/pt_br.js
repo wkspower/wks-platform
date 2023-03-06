@@ -14,17 +14,6 @@ const defs = {
         task: 'Tarefas',
         record: 'Registros'
     },
-    submenu: {
-        case: {
-            '1-motion-detected-form': 'Genérico',
-            '2-motion-detected-form': 'Movimento Detectado',
-            'contractor-onboarding-contractor-on-boarding-form': 'Contrato Embarcado'
-        },
-        record: {
-            client: 'Cliente',
-            contractor: 'Contratante'
-        }
-    },
     pages: {
         dashboard: {
             title: 'Área de trabalho',
@@ -80,11 +69,6 @@ const defs = {
         },
         recordlist: {
             datagrid: {
-                columns: {
-                    name: 'Nome',
-                    address: 'Endereço',
-                    country: 'País'
-                },
                 action: {
                     details: 'Detalhar'
                 }

@@ -10,20 +10,9 @@ const defs = {
     },
     menu: {
         home: 'Dashboard',
-        case: 'Generic Case',
+        case: 'Cases',
         task: 'Tasks',
         record: 'Records'
-    },
-    submenu: {
-        case: {
-            '1-motion-detected-form': 'Generic Case',
-            '2-motion-detected-form': 'Motion Detected',
-            'contractor-onboarding-contractor-on-boarding-form': 'Contractor On Boarding Case'
-        },
-        record: {
-            client: 'Client',
-            contractor: 'Contractor'
-        }
     },
     pages: {
         dashboard: {
@@ -80,11 +69,6 @@ const defs = {
         },
         recordlist: {
             datagrid: {
-                columns: {
-                    name: 'Name',
-                    address: 'Address',
-                    country: 'Country'
-                },
                 action: {
                     details: 'Details'
                 }

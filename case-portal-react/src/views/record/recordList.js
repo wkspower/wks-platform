@@ -25,7 +25,7 @@ export const RecordList = ({ recordTypeId }) => {
                     .filter((element) => element.input === true)
                     .forEach((element) => {
                         const key = element.key;
-                        const label = t(`pages.recordlist.datagrid.columns.${key}`);
+                        const label = element.label;
 
                         dynamicColumns.push({ field: key, headerName: label, width: 100 });
                     });
