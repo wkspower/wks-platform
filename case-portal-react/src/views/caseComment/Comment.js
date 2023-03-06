@@ -5,6 +5,8 @@ import CommentForm from './CommentForm';
 import User1 from 'assets/images/users/avatar-3.png';
 import MainCard from 'components/MainCard';
 
+import { useTranslation } from 'react-i18next';
+
 const Comment = ({
     comment,
     replies,
@@ -25,6 +27,9 @@ const Comment = ({
     const canEdit = currentUserId === comment.userId && !timePassed;
     const replyId = parentId ? parentId : comment.id;
     const createdAt = new Date(comment.createdAt).toLocaleDateString();
+
+    const { t } = useTranslation();
+    
     return (
         <MainCard sx={{ mb: 1 }}>
             <div key={comment.id} className="comment">
@@ -43,7 +48,7 @@ const Comment = ({
                     {!isEditing && <Typography variant="h6">{comment.body}</Typography>}
                     {isEditing && (
                         <CommentForm
-                            submitLabel="Update"
+                            submitLabel={t('pages.comments.actions.edit.update')}
                             hasCancelButton
                             initialText={comment.body}
                             handleSubmit={(text) => updateComment(text, comment.id)}
@@ -55,17 +60,17 @@ const Comment = ({
                     <div className="comment-actions">
                         {canReply && (
                             <Button className="comment-action" onClick={() => setActiveComment({ id: comment.id, type: 'replying' })}>
-                                Reply
+                                {t('pages.comments.actions.reply')}
                             </Button>
                         )}
                         {canEdit && (
                             <Button className="comment-action" onClick={() => setActiveComment({ id: comment.id, type: 'editing' })}>
-                                Edit
+                                {t('pages.comments.actions.edit.action')}
                             </Button>
                         )}
                         {canDelete && (
                             <Button className="comment-action" onClick={() => deleteComment(comment.id)}>
-                                Delete
+                                {t('pages.comments.actions.delete')}
                             </Button>
                         )}
                     </div>
