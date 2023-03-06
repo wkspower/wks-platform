@@ -10,7 +10,7 @@ const defs = {
     },
     menu: {
         home: 'Dashboard',
-        case: 'Generic Case',
+        case: 'Cases',
         task: 'Tasks',
         record: 'Records'
     },
