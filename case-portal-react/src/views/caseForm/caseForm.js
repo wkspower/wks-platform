@@ -43,6 +43,7 @@ import { CaseEmailsList } from 'views/caseEmail/caseEmailList';
 
 import FileBase64 from 'react-file-base64';
 
+import { useTranslation } from 'react-i18next';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -89,6 +90,8 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
 
     const [activeStage, setActiveStage] = React.useState(0);
     const [stages, setStages] = useState([]);
+
+    const { t } = useTranslation();
 
     useEffect(() => {
         fetch(process.env.REACT_APP_API_URL + '/case-definition/' + aCase.caseDefinitionId)
@@ -165,27 +168,27 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                             </Typography>
                             {aCase.status === CaseStatus.WipCaseStatus.description && (
                                 <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.ClosedCaseStatus.description)}>
-                                    Close Case
+                                    {t('pages.caseform.actions.close')}
                                 </Button>
                             )}
                             {aCase.status === CaseStatus.ClosedCaseStatus.description && (
                                 <React.Fragment>
                                     <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.WipCaseStatus.description)}>
-                                        Re-open Case
+                                    {t('pages.caseform.actions.reopen')}
                                     </Button>
 
                                     <Button
                                         color="inherit"
                                         onClick={() => handleUpdateCaseStatus(CaseStatus.ArchivedCaseStatus.description)}
                                     >
-                                        Archive Case
+                                        {t('pages.caseform.actions.archive')}
                                     </Button>
                                 </React.Fragment>
                             )}
                             {aCase.status === CaseStatus.ArchivedCaseStatus.description && (
                                 <React.Fragment>
                                     <Button color="inherit" onClick={() => handleUpdateCaseStatus(CaseStatus.WipCaseStatus.description)}>
-                                        Re-open Case
+                                    {t('pages.caseform.actions.reopen')}
                                     </Button>
                                 </React.Fragment>
                             )}
@@ -212,11 +215,11 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
 
                     <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                         <Tabs value={tabIndex} onChange={handleTabChanged} aria-label="basic tabs example">
-                            <Tab label="Case Details" {...a11yProps(0)} />
-                            <Tab label="Tasks" {...a11yProps(1)} />
-                            <Tab label="Comments" {...a11yProps(2)} />
-                            <Tab label="Attachments" {...a11yProps(3)} />
-                            <Tab label="Emails" {...a11yProps(4)} />
+                            <Tab label={t('pages.caseform.tabs.details')} {...a11yProps(0)} />
+                            <Tab label={t('pages.caseform.tabs.tasks')} {...a11yProps(1)} />
+                            <Tab label={t('pages.caseform.tabs.comments')} {...a11yProps(2)} />
+                            <Tab label={t('pages.caseform.tabs.attachments')} {...a11yProps(3)} />
+                            <Tab label={t('pages.caseform.tabs.emails')} {...a11yProps(4)} />
                             
                         </Tabs>
                     </Box>

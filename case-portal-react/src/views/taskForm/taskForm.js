@@ -17,6 +17,8 @@ import { ProcessDiagram } from 'views/bpmn/ProcessDiagram';
 
 import { Form } from '@formio/react';
 
+import { useTranslation } from 'react-i18next';
+
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
         children: React.ReactElement
@@ -34,6 +36,8 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => 
     const [variableValues, setVariableValues] = useState(null);
 
     const [activityInstances, setActivityInstances] = useState(null);
+
+    const { t } = useTranslation();
 
     useEffect(() => {
         let apiDataVariables = {};
@@ -145,7 +149,7 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => 
                         </Typography>
                         {!claimed ? (
                             <Button color="inherit" onClick={handleClaim}>
-                                Claim
+                                {t('pages.taskform.claim')}
                             </Button>
                         ) : (
                             <Button color="inherit" onClick={handleUnclaim}>
@@ -156,7 +160,7 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => 
                         )}
                         {claimed && (
                             <Button color="inherit" onClick={handleComplete}>
-                                Complete
+                                {t('pages.taskform.complete')}
                             </Button>
                         )}
                     </Toolbar>

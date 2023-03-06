@@ -32,7 +32,7 @@ const defs = {
         caselist: {
             datagrid: {
                 columns: {
-                    businesskey: 'ID',
+                    businesskey: 'Número',
                     statusdescription: 'Situação',
                     stage: 'Estágio',
                     createdat: 'Criado em'
@@ -43,6 +43,20 @@ const defs = {
             },
             action: {
                 newcase: 'Novo Caso'
+            }
+        },
+        caseform: {
+            actions: {
+                close: "Encerrar",
+                reopen: "Reabrir",
+                archive: "Arquivar"
+            },
+            tabs: {
+                details: "Detalhes do Caso",
+                tasks: "Tarefas",
+                comments: "Comentários",
+                attachments: "Anexos",
+                emails: "Emails"
             }
         },
         tasklist: {
@@ -67,6 +81,10 @@ const defs = {
                 }
             }
         },
+        taskform: {
+            claim: "Bloquear",
+            complete: "Finalizar"
+        },
         recordlist: {
             datagrid: {
                 action: {
@@ -75,6 +93,26 @@ const defs = {
             },
             action: {
                 newrecord: 'Novo'
+            }
+        },
+        comments: {
+            title: "Comentários",
+            actions: {
+                send: "Enviar",
+                reply: "Responder",
+                edit: {
+                    action: "Editar",
+                    update: "Alterar",
+                    cancel: "Cancelar",
+                },
+                delete: "Remover"
+            }
+        },
+        emails: {
+            datagrid: {
+                from: "De",
+                to: "Para",
+                text: "Texto",
             }
         }
     }

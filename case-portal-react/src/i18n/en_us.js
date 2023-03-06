@@ -45,6 +45,20 @@ const defs = {
                 newcase: 'New Case'
             }
         },
+        caseform: {
+            actions: {
+                close: "Close",
+                reopen: "Re-open",
+                archive: "Archive"
+            },
+            tabs: {
+                details: "Case Details",
+                tasks: "Tasks",
+                comments: "Comments",
+                attachments: "Attachments",
+                emails: "Emails"
+            }
+        },
         tasklist: {
             datagrid: {
                 columns: {
@@ -67,6 +81,10 @@ const defs = {
                 }
             }
         },
+        taskform: {
+            claim: "Claim",
+            complete: "Complete"
+        },
         recordlist: {
             datagrid: {
                 action: {
@@ -75,6 +93,26 @@ const defs = {
             },
             action: {
                 newrecord: 'New'
+            }
+        },
+        comments: {
+            title: "Comments",
+            actions: {
+                send: "Send",
+                reply: "Reply",
+                edit: {
+                    action: "Edit",
+                    update: "Update",
+                    cancel: "Candel",
+                },
+                delete: "Delete"
+            }
+        },
+        emails: {
+            datagrid: {
+                from: "from",
+                to: "to",
+                text: "text",
             }
         }
     }

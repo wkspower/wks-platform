@@ -3,11 +3,12 @@ import MainCard from "components/MainCard";
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
 
+import { useTranslation } from 'react-i18next';
 
 export const CaseEmailsList = ({caseInstanceBusinessKey}) => {
 
-
     const [emails, setEmails] = useState([]);
+    const { t } = useTranslation();
 
     useEffect(() => {
         fetch(process.env.REACT_APP_EMAIL_URL + '/email/?caseInstanceBusinessKey=' + caseInstanceBusinessKey)
@@ -22,9 +23,9 @@ export const CaseEmailsList = ({caseInstanceBusinessKey}) => {
     }, [caseInstanceBusinessKey]);
 
     const columns: GridColDef[] = [
-        { field: 'from', headerName: 'From', width: 300 },
-        { field: 'to', headerName: 'To', width: 300 },
-        { field: 'text', headerName: 'Text', width: 220 },
+        { field: 'from', headerName: t('pages.emails.datagrid.from'), width: 300 },
+        { field: 'to', headerName: t('pages.emails.datagrid.to'), width: 300 },
+        { field: 'text', headerName: t('pages.emails.datagrid.text'), width: 220 },
     ];
 
     return (
