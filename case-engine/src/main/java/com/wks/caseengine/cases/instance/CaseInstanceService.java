@@ -21,4 +21,7 @@ public interface CaseInstanceService {
 	void updateStage(final String businessKey, final String caseStage) throws Exception;
 
 	void delete(final String businessKey) throws CaseInstanceNotFoundException, Exception;
+
+	void uploadFiles(String businessKey, CaseInstanceFile[] files) throws Exception;
+	
 }

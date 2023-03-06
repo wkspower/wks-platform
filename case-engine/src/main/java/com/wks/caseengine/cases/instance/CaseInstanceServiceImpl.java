@@ -1,22 +1,31 @@
 package com.wks.caseengine.cases.instance;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.http.client.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
 import com.wks.caseengine.repository.CaseInstanceRepository;
 import com.wks.caseengine.repository.Repository;
 
+import io.netty.util.internal.StringUtil;
+
 @Component
 public class CaseInstanceServiceImpl implements CaseInstanceService {
+	
+	Gson gson = new Gson();
 
 	@Autowired
 	private CaseInstanceRepository repository;
@@ -108,6 +117,37 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 				e.printStackTrace();
 			}
 		});
+	}
+	
+	@Override
+	public void uploadFiles(String businessKey, CaseInstanceFile[] files) throws Exception {
+		CaseInstance caseInstance = repository.get(businessKey);
+		
+		List<CaseInstanceFileAttribute> caseInstanceFileAttributeOriginal = new ArrayList<CaseInstanceFileAttribute>();
+		
+		caseInstance.getAttributes().forEach(attribute -> {
+			if (StringUtils.equals(attribute.getName(), "file")) {
+				caseInstanceFileAttributeOriginal.addAll(gson.fromJson(attribute.getValue(), new TypeToken<List<CaseInstanceFileAttribute>>(){}.getType()));
+			}
+		});
+		
+		List<CaseInstanceFileAttribute> caseInstanceFileAttributeToInclude = new ArrayList<CaseInstanceFileAttribute>();
+		
+		List<CaseInstanceFile> fileList = Arrays.asList(files);
+		
+		fileList.forEach(file -> {
+			caseInstanceFileAttributeToInclude.add(new CaseInstanceFileAttribute("base64", file.getName(), file.getBase64(), file.getType(), file.getName()));
+		});
+		
+		caseInstanceFileAttributeToInclude.addAll(caseInstanceFileAttributeOriginal);
+		
+		caseInstance.getAttributes().forEach(attribute -> {
+			if (StringUtils.equals(attribute.getName(), "file")) {
+				attribute.setValue(gson.toJson(caseInstanceFileAttributeToInclude));
+			}
+		});
+		
+		repository.update(businessKey, caseInstance);
 	}
 
 	public void setRepository(CaseInstanceRepository repository) {

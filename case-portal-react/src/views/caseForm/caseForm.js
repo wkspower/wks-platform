@@ -317,6 +317,7 @@ const handleFileChange = (files, caseId) => {
   };
 
 function Attachments({data, aCase}) {
+    console.log(data);
     return (
         <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
             <Grid item xs={12}>
@@ -372,8 +373,8 @@ function Attachments({data, aCase}) {
                                                 }
                                             </Avatar>
                                         </ListItemAvatar>
-                                        <ListItemText primary={file.originalName} secondary={file.size + "KB"} /> 
-                                        <ListItemButton 
+                                        <ListItemText primary={file.originalName} secondary={file.size + "KB"} style={{maxWidth: "80%"}} /> 
+                                        <ListItemButton style={{maxWidth: "10%"}}
                                             component="button"
                                             onClick={() => downloadFile(file)}>
                                             <ListItemText primary="Download" />

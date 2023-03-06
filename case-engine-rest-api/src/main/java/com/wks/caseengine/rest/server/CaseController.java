@@ -62,12 +62,9 @@ public class CaseController {
 	}
 	
 	@PutMapping(value = "/upload/{businessKey}")
-//	@RequestMapping(value = "/upload/{businessKey}", method = RequestMethod.PUT, consumes = {"application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"})
 	public void uploadFile(@PathVariable final String businessKey, @RequestBody CaseInstanceFile[] files)
 			throws Exception {
-		System.out.println(files);
-		
-//		caseInstanceService.uploadFile(businessKey, caseInstance);
+		caseInstanceService.uploadFiles(businessKey, files);
 	}
 
 	@DeleteMapping(value = "/{businessKey}")
