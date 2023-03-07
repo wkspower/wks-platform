@@ -37,7 +37,7 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemButton from '@mui/material/ListItemButton';
 import Avatar from '@mui/material/Avatar';
-import { FilePdfOutlined, FileExcelOutlined, FileOutlined } from '@ant-design/icons';
+import { FilePdfOutlined, FileExcelOutlined, FileOutlined, FileImageOutlined } from '@ant-design/icons';
 
 import { CaseEmailsList } from 'views/caseEmail/caseEmailList';
 
@@ -365,19 +365,29 @@ function Attachments({data, aCase, getCaseInfo}) {
                                 return (
                                     <ListItem key={index}>
                                         <ListItemAvatar>
-                                            <Avatar style={{ backgroundColor: 'red' }}>
                                                 {file.type === "application/pdf" && 
-                                                    <FilePdfOutlined />
+                                                    <Avatar style={{ backgroundColor: 'red' }}>
+                                                        <FilePdfOutlined />
+                                                    </Avatar>
                                                 }
 
                                                 {file.type === "application/xls" && 
-                                                    <FileExcelOutlined />
+                                                    <Avatar style={{ backgroundColor: 'green' }}>
+                                                        <FileExcelOutlined />
+                                                    </Avatar>
                                                 }
 
-                                                {file.type !== "application/xls" && file.type !== "application/pdf" && 
-                                                    <FileOutlined />
+                                                {file.type && file.type.includes("image/") && 
+                                                    <Avatar style={{ backgroundColor: 'lightblue' }}>
+                                                        <FileImageOutlined />
+                                                    </Avatar>
                                                 }
-                                            </Avatar>
+
+                                                {file.type !== "application/xls" && file.type !== "application/pdf" && (file.type && !file.type.includes("image/")) &&
+                                                    <Avatar style={{ backgroundColor: 'grey' }}>
+                                                        <FileOutlined />
+                                                    </Avatar>
+                                                }
                                         </ListItemAvatar>
                                         <ListItemText primary={file.originalName} secondary={file.size + "KB"} style={{maxWidth: "80%"}} /> 
                                         <ListItemButton style={{maxWidth: "10%"}}
