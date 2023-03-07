@@ -94,6 +94,15 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     const { t } = useTranslation();
 
     useEffect(() => {
+        console.log("using effect");
+
+        getCaseInfo(aCase, open)
+
+    }, [open, aCase]);
+
+    const getCaseInfo = (aCase, open) => {
+        console.log("getCaseInfo", aCase);
+
         fetch(process.env.REACT_APP_API_URL + '/case-definition/' + aCase.caseDefinitionId)
             .then((response) => response.json())
             .then((data) => {
@@ -124,7 +133,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
             .catch((err) => {
                 console.log(err.message);
             });
-    }, [open, aCase]);
+    }
 
     const handleTabChanged = (event, newValue) => {
         setTabIndex(newValue);
@@ -258,7 +267,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={3}>
-                        <Attachments data={formData.data} aCase={aCase} />
+                        <Attachments data={formData.data} aCase={aCase} getCaseInfo={getCaseInfo} />
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={4}>
@@ -292,7 +301,7 @@ async function createBlob(base64) {
     return myBlob;
 } 
 
-const handleFileChange = (files, caseId) => {
+const handleFileChange = (files, aCase, getCaseInfo) => {
     if (!files) {
       return;
     }
@@ -303,7 +312,7 @@ const handleFileChange = (files, caseId) => {
         attachments.push({...file});
     });
 
-    fetch(process.env.REACT_APP_API_URL + '/case/upload/' + caseId, {
+    fetch(process.env.REACT_APP_API_URL + '/case/upload/' + aCase.businessKey, {
       method: 'PUT',
       headers: {
         Accept: 'application/json',
@@ -311,12 +320,13 @@ const handleFileChange = (files, caseId) => {
     },
       body: JSON.stringify(attachments),
     })
-      .then((res) => res.json())
-      .then((data) => console.log(data))
+      .then((data) => {
+        getCaseInfo(aCase, true);
+    })
       .catch((err) => console.error(err));
   };
 
-function Attachments({data, aCase}) {
+function Attachments({data, aCase, getCaseInfo}) {
     console.log(data);
     return (
         <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -338,7 +348,9 @@ function Attachments({data, aCase}) {
                             
                             <FileBase64
                                 multiple={ true }
-                                onDone={ (files) => handleFileChange(files, aCase.businessKey) } />
+                                onDone={ async (files) => {
+                                    await handleFileChange(files, aCase, getCaseInfo); 
+                                }} />
 
                         </Grid>
                     </Box>
