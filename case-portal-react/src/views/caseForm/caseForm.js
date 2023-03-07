@@ -94,15 +94,10 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        console.log("using effect");
-
         getCaseInfo(aCase, open)
-
     }, [open, aCase]);
 
     const getCaseInfo = (aCase, open) => {
-        console.log("getCaseInfo", aCase);
-
         fetch(process.env.REACT_APP_API_URL + '/case-definition/' + aCase.caseDefinitionId)
             .then((response) => response.json())
             .then((data) => {
@@ -327,7 +322,6 @@ const handleFileChange = (files, aCase, getCaseInfo) => {
   };
 
 function Attachments({data, aCase, getCaseInfo}) {
-    console.log(data);
     return (
         <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
             <Grid item xs={12}>
