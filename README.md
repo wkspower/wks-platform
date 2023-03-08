@@ -9,7 +9,7 @@ mvn install package
 docker-compose up
 ```
 
-> **_NOTE:_**  If you don't want sample data to be loaded on startup, disable environment variable data.import.enabled inside case-engine-rest-api service at docker-compose.yml file. Sample data files are located at /case-engine-sample-data.
+> **_NOTE:_**  If you don't want sample data to be loaded on startup, disable environment variable data.import.enabled inside case-engine-rest-api service at docker-compose.yml file. Sample data files are located at /case-engine-sample-data
 
 ## Web Applications and Tools default URLs
 
