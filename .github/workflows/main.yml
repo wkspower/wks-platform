@@ -10,6 +10,7 @@ env:
   REPOSITORY_OWNER: wkspower
   KEYCLOAK_URL: https://login.wkspower.co
   WKS_API_URL: https://api.wkspower.co
+  WKS_EMAIL_API_URL: https://api.wkspower.co/inbound
   
 jobs:
   build:
@@ -53,7 +54,7 @@ jobs:
       run: yarn --cwd case-portal-react install
 
     - name: Build for case-portal-react
-      run: REACT_APP_KEYCLOAK_URL=${{ env.KEYCLOAK_URL }} REACT_APP_API_URL=${{ env.WKS_API_URL }} yarn --cwd case-portal-react build
+      run: REACT_APP_KEYCLOAK_URL=${{ env.KEYCLOAK_URL }} REACT_APP_API_URL=${{ env.WKS_API_URL }} REACT_APP_EMAIL_URL=${{ env.WKS_EMAIL_API_URL }} yarn --cwd case-portal-react build
 
     - name: Install dependencies for case-portal-admin-react
       run: yarn --cwd case-portal-admin-react install
