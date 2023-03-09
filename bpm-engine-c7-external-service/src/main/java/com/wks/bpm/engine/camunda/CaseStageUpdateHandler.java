@@ -19,6 +19,9 @@ public class CaseStageUpdateHandler implements ExternalTaskHandler {
 	@Autowired
 	private CaseInstanceService caseInstanceService;
 
+	@Autowired
+	private ExternalServiceErrorHandler errorHandler;
+
 	@Override
 	public void execute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
 		log.debug("Starting External Task Handler processing..." + externalTask.getActivityId());
@@ -27,6 +30,11 @@ public class CaseStageUpdateHandler implements ExternalTaskHandler {
 			caseInstanceService.updateStage(externalTask.getBusinessKey(), externalTask.getVariable("stage"));
 			externalTaskService.complete(externalTask);
 		} catch (Exception e) {
+			log.error("Error updating case stage with business key:" + externalTask.getBusinessKey() + " and new stage: "
+					+ externalTask.getVariable("stage"));
+
+			errorHandler.handle("Error updating case stage", externalTaskService, externalTask, e);
+
 			// TODO error handling
 			e.printStackTrace();
 		}
