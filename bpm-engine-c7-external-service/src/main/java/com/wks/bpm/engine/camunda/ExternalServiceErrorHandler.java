@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExternalServiceErrorHandler {
 
+	private static final int DEFAULT_RETRY = 3;
+
 	public void handle(final String errorMessage, final ExternalTaskService externalTaskService,
 			final ExternalTask externalTask, final Exception e) {
 
@@ -18,7 +20,7 @@ public class ExternalServiceErrorHandler {
 		e.printStackTrace(printWriter);
 
 		externalTaskService.handleFailure(externalTask, errorMessage, stringWriter.toString(),
-				externalTask.getRetries() - 1, 3000L);
+				externalTask.getRetries() == null ? DEFAULT_RETRY : externalTask.getRetries() - 1, 3000L);
 
 	}
 
