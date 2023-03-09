@@ -20,6 +20,9 @@ public class RecordSaveUpdateHandler implements ExternalTaskHandler {
 	@Autowired
 	private RecordService recordService;
 
+	@Autowired
+	private ExternalServiceErrorHandler errorHandler;
+
 	@Override
 	public void execute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
 		log.debug("Starting External Task Handler processing..." + externalTask.getActivityId());
@@ -31,8 +34,13 @@ public class RecordSaveUpdateHandler implements ExternalTaskHandler {
 					new Gson().fromJson(record, com.google.gson.JsonObject.class));
 			externalTaskService.complete(externalTask);
 		} catch (Exception e) {
+			log.error("Error saving new record: " + externalTask.getVariable("record"));
+			
+			errorHandler.handle("Error saving new record", externalTaskService, externalTask, e);
+
 			// TODO error handling
 			e.printStackTrace();
+
 		}
 
 	}
