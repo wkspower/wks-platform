@@ -1,31 +1,30 @@
-import { useState, useEffect } from "react";
-import MainCard from "components/MainCard";
+import { useState, useEffect } from 'react';
+import MainCard from 'components/MainCard';
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
-
 import { useTranslation } from 'react-i18next';
+import { EmailService } from '../../services';
+import { useSession } from 'SessionStoreContext';
 
-export const CaseEmailsList = ({caseInstanceBusinessKey}) => {
-
+export const CaseEmailsList = ({ caseInstanceBusinessKey }) => {
     const [emails, setEmails] = useState([]);
     const { t } = useTranslation();
+    const keycloak = useSession();
 
     useEffect(() => {
-        fetch(process.env.REACT_APP_EMAIL_URL + '/email/?caseInstanceBusinessKey=' + caseInstanceBusinessKey)
-            .then((response) => response.json())
+        EmailService.getAllByBusinessKey(keycloak, caseInstanceBusinessKey)
             .then((data) => {
                 setEmails(data);
             })
             .catch((err) => {
                 console.log(err.message);
             });
-
     }, [caseInstanceBusinessKey]);
 
-    const columns: GridColDef[] = [
+    const columns = [
         { field: 'from', headerName: t('pages.emails.datagrid.from'), width: 300 },
         { field: 'to', headerName: t('pages.emails.datagrid.to'), width: 300 },
-        { field: 'text', headerName: t('pages.emails.datagrid.text'), width: 220 },
+        { field: 'text', headerName: t('pages.emails.datagrid.text'), width: 220 }
     ];
 
     return (
@@ -44,4 +43,4 @@ export const CaseEmailsList = ({caseInstanceBusinessKey}) => {
             </MainCard>
         </div>
     );
-}
+};

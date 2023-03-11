@@ -28,30 +28,29 @@ export const CaseList = ({ status, caseDefId }) => {
     const [snackOpen, setSnackOpen] = useState(false);
     const { t } = useTranslation();
     const keycloak = useSession();
+    const [caseDefs, setCaseDefs] = useState([]);
+    const [fetching, setFetching] = useState(false);
 
     useEffect(() => {
+        setFetching(true);
+
         CaseService.getCaseDefinitionsById(keycloak, caseDefId)
             .then((data) => {
                 setStages(data.stages);
-                return CaseService.getCaseById(keycloak, caseDefId, status);
+                return CaseService.filterCase(keycloak, caseDefId, status);
             })
             .then((data) => {
                 setCases(data);
             })
-            .catch((err) => {
-                console.log(err.message);
+            .finally(() => {
+                setFetching(false);
             });
     }, [caseDefId, status]);
 
-    const [caseDefs, setCaseDefs] = useState([]);
     useEffect(() => {
-        CaseService.getCaseDefinitions(keycloak)
-            .then((data) => {
-                setCaseDefs(data);
-            })
-            .catch((err) => {
-                console.log(err.message);
-            });
+        CaseService.getCaseDefinitions(keycloak).then((data) => {
+            setCaseDefs(data);
+        });
     }, []);
 
     const makeColumns = () => {
@@ -184,6 +183,7 @@ export const CaseList = ({ status, caseDefId }) => {
                             pageSize={10}
                             rowsPerPageOptions={[10]}
                             getRowId={(row) => row.businessKey}
+                            loading={fetching}
                         />
                     )}
                     {view === 'kanban' && (

@@ -5,6 +5,8 @@ import MainCard from 'components/MainCard';
 import Button from '@mui/material/Button';
 import { RecordForm } from './recordForm';
 import { useTranslation } from 'react-i18next';
+import { RecordService } from '../../services';
+import { useSession } from 'SessionStoreContext';
 
 export const RecordList = ({ recordTypeId }) => {
     const [records, setRecords] = useState([]);
@@ -14,10 +16,10 @@ export const RecordList = ({ recordTypeId }) => {
     const [columns, setColumns] = useState([]);
     const [mode, setMode] = useState('new');
     const { t } = useTranslation();
+    const keycloak = useSession();
 
     useEffect(() => {
-        fetch(process.env.REACT_APP_API_URL + '/record-type/' + recordTypeId)
-            .then((response) => response.json())
+        RecordService.getRecordTypeById(keycloak, recordTypeId)
             .then((data) => {
                 let dynamicColumns = [];
 
@@ -42,7 +44,11 @@ export const RecordList = ({ recordTypeId }) => {
                             setOpenForm(true);
                         };
 
-                        return <Button onClick={onDetailsClick}>{t(`pages.recordlist.datagrid.action.details`)}</Button>;
+                        return (
+                            <Button onClick={onDetailsClick}>
+                                {t(`pages.recordlist.datagrid.action.details`)}
+                            </Button>
+                        );
                     }
                 });
                 setColumns(dynamicColumns);
@@ -52,8 +58,7 @@ export const RecordList = ({ recordTypeId }) => {
                 console.log(err.message);
             });
 
-        fetch(process.env.REACT_APP_API_URL + '/record/' + recordTypeId)
-            .then((response) => response.json())
+        RecordService.getRecordById(keycloak, recordTypeId)
             .then((data) => {
                 setRecords(data);
             })
@@ -90,7 +95,13 @@ export const RecordList = ({ recordTypeId }) => {
                 </Box>
             </MainCard>
             {record && recordType && (
-                <RecordForm record={record} recordType={recordType} open={openForm} handleClose={handleCloseForm} mode={mode} />
+                <RecordForm
+                    record={record}
+                    recordType={recordType}
+                    open={openForm}
+                    handleClose={handleCloseForm}
+                    mode={mode}
+                />
             )}
         </div>
     );

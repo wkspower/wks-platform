@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
 import CloseIcon from '@mui/icons-material/Close';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -9,42 +8,29 @@ import IconButton from '@mui/material/IconButton';
 import Slide from '@mui/material/Slide';
 import Toolbar from '@mui/material/Toolbar';
 import MainCard from 'components/MainCard';
-
-import { TransitionProps } from '@mui/material/transitions';
 import Typography from '@mui/material/Typography';
-
 import { ProcessDiagram } from 'views/bpmn/ProcessDiagram';
-
 import { Form } from '@formio/react';
-
 import { useTranslation } from 'react-i18next';
+import { FormService, TaskService } from 'services';
 
-const Transition = React.forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement
-    },
-    ref: React.Ref<unknown>
-) {
+const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
 export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => {
     const [claimed, setClaimed] = useState(false);
     const [assignee, setAssignee] = useState(null);
-
     const [formComponents, setFormComponents] = useState(null);
     const [variableValues, setVariableValues] = useState(null);
-
     const [activityInstances, setActivityInstances] = useState(null);
-
     const { t } = useTranslation();
 
     useEffect(() => {
         let apiDataVariables = {};
         let apiDataFormComponents = {};
 
-        fetch(process.env.REACT_APP_API_URL + '/form/' + task.formKey)
-            .then((response) => response.json())
+        FormService.getByKey(keycloak, task.formKey)
             .then((data) => {
                 apiDataFormComponents = data.structure;
 
@@ -53,12 +39,13 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => 
                     metadata: {},
                     isValid: true
                 };
-                return fetch(process.env.REACT_APP_API_URL + '/variable/' + bpmEngineId + '/' + task.processInstanceId);
+
+                return FormService.getVariableById(keycloak, bpmEngineId, task.processInstanceId);
             })
-            .then((response) => response.json())
             .then((data) => {
                 for (var key in data) {
-                    apiDataVariables.data[key] = data[key].type === 'Json' ? JSON.parse(data[key].value) : data[key].value;
+                    apiDataVariables.data[key] =
+                        data[key].type === 'Json' ? JSON.parse(data[key].value) : data[key].value;
                 }
 
                 setFormComponents(apiDataFormComponents);
@@ -70,21 +57,15 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => 
                 console.log(err.message);
             });
 
-        fetch(process.env.REACT_APP_API_URL + '/process-instance/' + bpmEngineId + '/' + task.processInstanceId + '/activity-instances')
-            .then((response) => response.json())
-            .then((data) => {
+        TaskService.getActivityInstancesById(keycloak, bpmEngineId, task.processInstanceId).then(
+            (data) => {
                 setActivityInstances(data);
-            });
+            }
+        );
     }, [open, task, bpmEngineId]);
 
     const handleClaim = function () {
-        fetch(process.env.REACT_APP_API_URL + '/task/' + bpmEngineId + '/' + task.id + '/claim/' + keycloak.idTokenParsed.name, {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            }
-        })
+        TaskService.createTaskClaim(keycloak, bpmEngineId, task.id)
             .then(() => {
                 setClaimed(true);
                 setAssignee(keycloak.idTokenParsed.name);
@@ -95,13 +76,7 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => 
     };
 
     const handleUnclaim = function () {
-        fetch(process.env.REACT_APP_API_URL + '/task/' + bpmEngineId + '/' + task.id + '/unclaim', {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            }
-        })
+        TaskService.createTaskUnclaim(keycloak, bpmEngineId, task.id)
             .then(() => {
                 setClaimed(false);
                 setAssignee(null);
@@ -113,22 +88,16 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => 
 
     const handleComplete = function () {
         let variables = { ...variableValues.data };
+
         Object.keys(variables).forEach(function (key, index) {
             variables[key] =
-                typeof variables[key] === 'object' ? { value: JSON.stringify(variables[key]), type: 'Json' } : { value: variables[key] };
+                typeof variables[key] === 'object'
+                    ? { value: JSON.stringify(variables[key]), type: 'Json' }
+                    : { value: variables[key] };
         });
 
-        fetch(process.env.REACT_APP_API_URL + '/task/' + bpmEngineId + '/' + task.id + '/complete', {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                variables: variables
-            })
-        })
-            .then((response) => handleClose())
+        TaskService.createTaskComplete(keycloak, bpmEngineId, task.id, variables)
+            .then(() => handleClose())
             .catch((err) => {
                 console.log(err.message);
             });
@@ -139,7 +108,12 @@ export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => 
             <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
                 <AppBar sx={{ position: 'relative' }}>
                     <Toolbar>
-                        <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
+                        <IconButton
+                            edge="start"
+                            color="inherit"
+                            onClick={handleClose}
+                            aria-label="close"
+                        >
                             <CloseIcon />
                         </IconButton>
                         <Typography sx={{ ml: 2, flex: 1 }} component="div">

@@ -27,3 +27,21 @@ spring.data.mongodb.uri: ${MONGO_CONN:mongodb://localhost}
 spring.data.mongodb.database: ${MONGO_DATABASE:wks-mongo-database}
 mongo.database: ${MONGO_DATABASE:wks-mongo-database}
 mongo.connection-string: ${MONGO_CONN:mongodb://localhost}
+
+camunda.bpm.client:
+  base-url: ${CAMUNDA_BASE_URL:http://localhost:8080/engine-rest}
+  disable-backoff-strategy: true
+  basic-auth:
+    username: ${CAMUNDA_USERNAME:demo}
+    password: ${CAMUNDA_PASSWORD:demo}
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWKS_SET_URI:http://localhost:8082/realms/wks-platform/protocol/openid-connect/certs}
+          
+opa.url: ${OPA_URL:http://localhost:8181/v1/data/wks/authz/allow}
+
+security.global.disabled: false

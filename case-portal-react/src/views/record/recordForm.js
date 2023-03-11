@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-
 import CloseIcon from '@mui/icons-material/Close';
 import { AppBar, Button, Dialog, IconButton, Slide, Toolbar } from '@mui/material';
 import Typography from '@mui/material/Typography';
-
 import { Form } from '@formio/react';
 import Grid from '@mui/material/Grid';
 import MainCard from 'components/MainCard';
 import { useEffect } from 'react';
+import { RecordService } from '../../services';
+import { useSession } from 'SessionStoreContext';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -16,6 +16,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export const RecordForm = ({ open, recordType, record, handleClose, mode }) => {
     const [form, setForm] = useState(null);
     const [formData, setFormData] = useState(null);
+    const keycloak = useSession();
 
     useEffect(() => {
         setForm(recordType.fields);
@@ -29,33 +30,16 @@ export const RecordForm = ({ open, recordType, record, handleClose, mode }) => {
 
     const save = () => {
         if (mode === 'new') {
-            fetch(process.env.REACT_APP_API_URL + '/record/' + recordType.id, {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData.data)
-            })
-                .then((response) => {
+            RecordService.createRecord(keycloak, recordType.id, formData.data)
+                .then(() => {
                     handleClose();
                 })
                 .catch((err) => {
                     console.log(err.message);
                 });
         } else {
-            fetch(
-                process.env.REACT_APP_API_URL + '/record/' + recordType.id + '/' + record._id.$oid,
-                {
-                    method: 'PATCH',
-                    headers: {
-                        Accept: 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData.data)
-                }
-            )
-                .then((response) => {
+            RecordService.updateRecord(keycloak, recordType.id, record._id.$oid, formData.data)
+                .then(() => {
                     handleClose();
                 })
                 .catch((err) => {
@@ -65,14 +49,8 @@ export const RecordForm = ({ open, recordType, record, handleClose, mode }) => {
     };
 
     const deleteRecord = () => {
-        fetch(process.env.REACT_APP_API_URL + '/record/' + recordType.id + '/' + record._id.$oid, {
-            method: 'DELETE',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            }
-        })
-            .then((response) => {
+        RecordService.deleteRecord(recordType.id, record._id.$oid)
+            .then(() => {
                 handleClose();
             })
             .catch((err) => {
@@ -90,8 +68,6 @@ export const RecordForm = ({ open, recordType, record, handleClose, mode }) => {
                 TransitionComponent={Transition}
                 disableEnforceFocus={true}
             >
-                {/* disableEnforceFocus: https://mui.com/material-ui/api/modal/#props - if false, formio component forms are unfocusable */}
-
                 <AppBar sx={{ position: 'relative' }}>
                     <Toolbar>
                         <IconButton

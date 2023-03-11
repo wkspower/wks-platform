@@ -1,14 +1,11 @@
-// material-ui
 import { Box, Typography } from '@mui/material';
-
-// project import
 import NavGroup from './NavGroup';
-import menuItem from 'menu-items';
-
-// ==============================|| DRAWER CONTENT - NAVIGATION ||============================== //
+import { useMenu } from 'SessionStoreContext';
 
 const Navigation = () => {
-    const navGroups = menuItem.items.map((item) => {
+    const menu = useMenu();
+
+    const navGroups = menu.items.map((item) => {
         switch (item.type) {
             case 'group':
                 return <NavGroup key={item.id} item={item} />;

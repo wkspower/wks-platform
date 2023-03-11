@@ -1,16 +1,26 @@
 version: '3.7'
 services:
     mongodb:
-        image: mongo:latest
+        image: mongo
         ports:
             - 27017:27017
 
+    opa:
+        image: openpolicyagent/opa:edge-static
+        ports:
+            - 8181:8181        
+        command:
+            - run
+            - --server
+            - /etc/rules/wks_policy_rules.rego
+        volumes:
+            - ./policy-decision-api:/etc/rules:ro
+
     camunda:
         image: camunda/camunda-bpm-platform:run-7.19.0-SNAPSHOT
+        command: ./camunda.sh --rest --webapps
         ports:
             - 8080:8080
-            - 8000:8000
-            - 9404:9404
         healthcheck:
             test: curl --fail http://localhost:8080/engine-rest/version || exit 1
             interval: 10s
@@ -22,7 +32,7 @@ services:
                 condition: service_started
 
     keycloak:
-        image: quay.io/keycloak/keycloak:18.0.0
+        image: quay.io/keycloak/keycloak:20.0.3
         command: start-dev --import-realm
         environment:
             KEYCLOAK_ADMIN: admin
@@ -31,6 +41,7 @@ services:
             - 8082:8080
         volumes:
             - ./keycloak/realms:/opt/keycloak/data/import
+            - ./keycloak/themes:/opt/keycloak/themes
 
     case-engine-loader:
         build:
@@ -58,6 +69,8 @@ services:
         environment:
             - MONGO_DATABASE=wks-mongo-database
             - MONGO_CONN=mongodb://mongodb
+            - KEYCLOAK_JWKS_SET_URI=http://keycloak:8080/realms/wks-platform/protocol/openid-connect/certs
+            - OPA_URL=http://opa:8181/v1/data/wks/authz/allow
         depends_on:
             camunda:
                 condition: service_healthy

@@ -1,14 +1,19 @@
 import i18n from '../i18n';
+import { json, nop } from './request';
 
 export const CaseService = {
     getAllByStatus,
     getCaseDefinitions,
     getCaseDefinitionsById,
     getCaseById,
-    getRecordTypes
+    filterCase,
+    getRecordTypes,
+    updateCaseStatusById,
+    uploadCaseAttachById,
+    createCase
 };
 
-function getAllByStatus(keycloak, status, limit) {
+async function getAllByStatus(keycloak, status, limit) {
     if (!status) {
         return Promise.resolve([]);
     }
@@ -19,32 +24,65 @@ function getAllByStatus(keycloak, status, limit) {
 
     var url = `${process.env.REACT_APP_API_URL}/case/?status=${status}&limit=${limit}`;
 
-    return fetch(url, { headers })
-        .then((response) => response.json())
-        .then(mapperToCase);
+    try {
+        const resp = await fetch(url, { headers });
+        const data = json(keycloak, resp);
+        return mapperToCase(data);
+    } catch (e) {
+        console.log(e);
+        return await Promise.reject(e);
+    }
 }
 
-function getCaseDefinitions(keycloak) {
+async function getCaseDefinitions(keycloak) {
     const url = `${process.env.REACT_APP_API_URL}/case-definition/`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    return fetch(url, { headers }).then((response) => response.json());
+    try {
+        const resp = await fetch(url, { headers });
+        return json(keycloak, resp);
+    } catch (e) {
+        console.log(e);
+        return await Promise.reject(e);
+    }
 }
 
-function getCaseDefinitionsById(keycloak, caseDefId) {
+async function getCaseDefinitionsById(keycloak, caseDefId) {
     const url = `${process.env.REACT_APP_API_URL}/case-definition/${caseDefId || ''}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    return fetch(url, { headers }).then((response) => response.json());
+    try {
+        const resp = await fetch(url, { headers });
+        return json(keycloak, resp);
+    } catch (e) {
+        console.log(e);
+        return await Promise.reject(e);
+    }
 }
 
-function getCaseById(keycloak, caseDefId, status) {
+async function getCaseById(keycloak, id) {
+    let url = `${process.env.REACT_APP_API_URL}/case/${id}`;
+
+    const headers = {
+        Authorization: `Bearer ${keycloak.token}`
+    };
+
+    try {
+        const resp = await fetch(url, { headers });
+        return json(keycloak, resp);
+    } catch (e) {
+        console.log(e);
+        return await Promise.reject(e);
+    }
+}
+
+async function filterCase(keycloak, caseDefId, status) {
     let url = `${process.env.REACT_APP_API_URL}/case/?`;
     url = url + (status ? `status=${status}` : '');
     url = url + (caseDefId ? `&caseDefinitionId=${caseDefId}` : '');
@@ -53,22 +91,97 @@ function getCaseById(keycloak, caseDefId, status) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    return fetch(url, { headers })
-        .then((response) => response.json())
-        .then(mapperToCase);
+    try {
+        const resp = await fetch(url, { headers });
+        const data = json(keycloak, resp);
+        return mapperToCase(data);
+    } catch (e) {
+        console.log(e);
+        return await Promise.reject(e);
+    }
 }
 
-function getRecordTypes(keycloak) {
+async function getRecordTypes(keycloak) {
     const url = `${process.env.REACT_APP_API_URL}/record-type/`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    return fetch(url, { headers }).then((response) => response.json());
+    try {
+        const resp = await fetch(url, { headers });
+        return json(keycloak, resp);
+    } catch (e) {
+        console.log(e);
+        return await Promise.reject(e);
+    }
+}
+
+async function updateCaseStatusById(keycloak, id, body) {
+    const url = `${process.env.REACT_APP_API_URL}/case/${id}`;
+
+    try {
+        const resp = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${keycloak.token}`
+            },
+            body: body
+        });
+        return nop(keycloak, resp);
+    } catch (e) {
+        console.log(e);
+        return await Promise.reject(e);
+    }
+}
+
+async function uploadCaseAttachById(keycloak, id, files) {
+    const url = `${process.env.REACT_APP_API_URL}/case/upload/${id}`;
+
+    try {
+        const resp = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${keycloak.token}`
+            },
+            body: JSON.stringify(files)
+        });
+        return nop(keycloak, resp);
+    } catch (e) {
+        console.log(e);
+        return await Promise.reject(e);
+    }
+}
+
+async function createCase(keycloak, body) {
+    const url = `${process.env.REACT_APP_API_URL}/case/`;
+
+    try {
+        const resp = await fetch(url, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${keycloak.token}`
+            },
+            body: body
+        });
+        return json(keycloak, resp);
+    } catch (err) {
+        console.log(err);
+        return await Promise.reject(err);
+    }
 }
 
 function mapperToCase(data) {
+    if (!data.length) {
+        return Promise.resolve(data);
+    }
+
     const toStatus = (status) => {
         const mapper = {
             WIP_CASE_STATUS: i18n.t('general.case.status.wip'),

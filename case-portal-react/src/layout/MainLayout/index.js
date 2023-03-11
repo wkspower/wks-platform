@@ -1,41 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Outlet } from 'react-router-dom';
-import { Box, Toolbar, useMediaQuery } from '@mui/material';
+import { Box, Toolbar } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
-import navigation from 'menu-items';
 import Drawer from './Drawer';
 import Header from './Header';
 import { openDrawer } from 'store/reducers/menu';
-
-// ==============================|| MAIN LAYOUT ||============================== //
+import { useMenu } from 'SessionStoreContext';
 
 const MainLayout = ({ keycloak, authenticated }) => {
     const theme = useTheme();
-    const matchDownLG = useMediaQuery(theme.breakpoints.down('xl'));
     const dispatch = useDispatch();
-
     const { drawerOpen } = useSelector((state) => state.menu);
-
-    // drawer toggler
     const [open, setOpen] = useState(drawerOpen);
+    const menu = useMenu();
+
     const handleDrawerToggle = () => {
         setOpen(!open);
         dispatch(openDrawer({ drawerOpen: !open }));
     };
-
-    // set media wise responsive drawer
-    useEffect(() => {
-        // setOpen(!matchDownLG);
-        // dispatch(openDrawer({ drawerOpen: !matchDownLG }));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [matchDownLG]);
-
-    useEffect(() => {
-        // if (open !== drawerOpen) setOpen(drawerOpen);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [drawerOpen]);
 
     return (
         keycloak &&
@@ -45,7 +29,7 @@ const MainLayout = ({ keycloak, authenticated }) => {
                 <Drawer open={open} handleDrawerToggle={handleDrawerToggle} />
                 <Box component="main" sx={{ width: '100%', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
                     <Toolbar />
-                    <Breadcrumbs navigation={navigation} divider={false} />
+                    <Breadcrumbs navigation={menu} divider={false} />
                     <Outlet />
                 </Box>
             </Box>

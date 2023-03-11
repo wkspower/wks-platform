@@ -1,27 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Outlet } from 'react-router-dom';
-
-// material-ui
-import { Box, Toolbar, useMediaQuery } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-
-// project import
+import { Box, Toolbar } from '@mui/material';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
-import navigation from 'menu-items';
+import menuItemsDefs from 'menu-items';
 import Drawer from './Drawer';
 import Header from './Header';
-
-// types
 import { openDrawer } from 'store/reducers/menu';
-
 import Keycloak from 'keycloak-js';
-
-// ==============================|| MAIN LAYOUT ||============================== //
+import { SessionStoreProvider } from 'SessionStoreContext';
 
 const MainLayout = () => {
     const [keycloak, setKeycloak] = useState();
     const [authenticated, setAuthenticated] = useState(null);
+    const { drawerOpen } = useSelector((state) => state.menu);
+    const [open, setOpen] = useState(drawerOpen);
+    const [menu, setMenu] = useState({ items: [] });
+    const dispatch = useDispatch();
 
     useEffect(() => {
         const keycloak = Keycloak({
@@ -29,49 +24,73 @@ const MainLayout = () => {
             realm: 'wks-platform',
             clientId: 'wks-portal-admin'
         });
+
         keycloak.init({ onLoad: 'login-required' }).then((authenticaded) => {
             setKeycloak(keycloak);
             setAuthenticated(authenticaded);
+            buildMenuItems(keycloak);
         });
+
+        keycloak.onAuthRefreshError = () => {
+            keycloak.logout({ redirectUri: window.location.origin });
+        };
+
+        keycloak.onTokenExpired = () => {
+            console.log('Token expired');
+
+            keycloak
+                .updateToken(70)
+                .then((refreshed) => {
+                    if (refreshed) {
+                        console.info('Token refreshed: ' + refreshed);
+                    } else {
+                        console.info(
+                            'Token not refreshed, valid for ' +
+                                Math.round(
+                                    keycloak.tokenParsed.exp +
+                                        keycloak.timeSkew -
+                                        new Date().getTime() / 1000
+                                ) +
+                                ' seconds'
+                        );
+                    }
+                })
+                .catch(() => {
+                    console.error('Failed to refresh token');
+                });
+        };
     }, []);
 
-    const theme = useTheme();
-    const matchDownLG = useMediaQuery(theme.breakpoints.down('xl'));
-    const dispatch = useDispatch();
-
-    const { drawerOpen } = useSelector((state) => state.menu);
-
-    // drawer toggler
-    const [open, setOpen] = useState(drawerOpen);
     const handleDrawerToggle = () => {
         setOpen(!open);
         dispatch(openDrawer({ drawerOpen: !open }));
     };
 
-    // set media wise responsive drawer
-    useEffect(() => {
-        // setOpen(!matchDownLG);
-        // dispatch(openDrawer({ drawerOpen: !matchDownLG }));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [matchDownLG]);
-
-    useEffect(() => {
-        // if (open !== drawerOpen) setOpen(drawerOpen);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [drawerOpen]);
+    function buildMenuItems() {
+        const menu = {
+            items: [...menuItemsDefs.items]
+        };
+        return setMenu(menu);
+    }
 
     return (
         keycloak &&
         authenticated && (
-            <Box sx={{ display: 'flex', width: '100%' }}>
-                <Header open={open} handleDrawerToggle={handleDrawerToggle} keycloak={keycloak} />
-                <Drawer open={open} handleDrawerToggle={handleDrawerToggle} />
-                <Box component="main" sx={{ width: '100%', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
-                    <Toolbar />
-                    <Breadcrumbs navigation={navigation} divider={false} />
-                    <Outlet />
+            <SessionStoreProvider value={{ keycloak, menu }}>
+                <Box sx={{ display: 'flex', width: '100%' }}>
+                    <Header
+                        open={open}
+                        handleDrawerToggle={handleDrawerToggle}
+                        keycloak={keycloak}
+                    />
+                    <Drawer open={open} handleDrawerToggle={handleDrawerToggle} />
+                    <Box component="main" sx={{ width: '100%', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
+                        <Toolbar />
+                        <Breadcrumbs navigation={menu} divider={false} />
+                        <Outlet />
+                    </Box>
                 </Box>
-            </Box>
+            </SessionStoreProvider>
         )
     );
 };
