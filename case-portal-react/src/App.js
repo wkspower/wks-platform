@@ -7,6 +7,7 @@ import { SessionStoreProvider } from './SessionStoreContext';
 import { CaseService, RecordService } from 'services';
 import menuItemsDefs from 'menu-items';
 import './App.css';
+import { registerInjectUserSession } from 'plugins/InjectUserSession';
 
 const App = () => {
     const [keycloak, setKeycloak] = useState({});
@@ -26,6 +27,7 @@ const App = () => {
             setKeycloak(keycloak);
             setAuthenticated(authenticated);
             buildMenuItems(keycloak);
+            registerInjectUserSession(keycloak);
         });
 
         keycloak.onAuthRefreshError = () => {
@@ -40,6 +42,7 @@ const App = () => {
                 .then((refreshed) => {
                     if (refreshed) {
                         console.info('Token refreshed: ' + refreshed);
+                        registerInjectUserSession(keycloak);
                     } else {
                         console.info(
                             'Token not refreshed, valid for ' +

@@ -9,6 +9,7 @@ import Header from './Header';
 import { openDrawer } from 'store/reducers/menu';
 import Keycloak from 'keycloak-js';
 import { SessionStoreProvider } from 'SessionStoreContext';
+import { registerInjectUserSession } from 'plugins/InjectUserSession';
 
 const MainLayout = () => {
     const [keycloak, setKeycloak] = useState();
@@ -29,6 +30,7 @@ const MainLayout = () => {
             setKeycloak(keycloak);
             setAuthenticated(authenticaded);
             buildMenuItems(keycloak);
+            registerInjectUserSession(keycloak);
         });
 
         keycloak.onAuthRefreshError = () => {
@@ -43,6 +45,7 @@ const MainLayout = () => {
                 .then((refreshed) => {
                     if (refreshed) {
                         console.info('Token refreshed: ' + refreshed);
+                        registerInjectUserSession(keycloak);
                     } else {
                         console.info(
                             'Token not refreshed, valid for ' +
