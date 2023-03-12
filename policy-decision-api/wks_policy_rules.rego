@@ -82,6 +82,11 @@ allow {
     is_user_profile
 }
 
+allow {
+    input.path = "healthCheck"
+    input.method in ["GET"]
+}
+
 is_user_profile {
     some role in input.realm_access.roles
     role == "user"

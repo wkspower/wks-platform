@@ -34,7 +34,7 @@ public class ApiSecurityConfig {
     	 		.and()
     	 		.csrf().disable()
     	 		.authorizeRequests(authz -> authz
-	    	 			.antMatchers()
+	    	 			.antMatchers("/healthCheck")
 	    	 			.hasAnyRole()
 	    	            .anyRequest()
 	    	            .authenticated()
