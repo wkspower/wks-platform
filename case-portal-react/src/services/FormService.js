@@ -14,7 +14,6 @@ async function getByKey(keycloak, formKey) {
 
     try {
         const resp = await fetch(url, { headers });
-        const json = await resp.json();
         return json(keycloak, resp);
     } catch (err) {
         console.log(err);
