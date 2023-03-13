@@ -1,4 +1,4 @@
-package com.wks.caseengine.rest.security;
+package com.wks.api.security;
 
 import java.util.Collection;
 import java.util.Enumeration;
@@ -46,7 +46,7 @@ public class OpenPolicyAuthzEnforcer implements AccessDecisionVoter<Object> {
 
 		FilterInvocation filter = (FilterInvocation) obj;
 		HttpServletRequest request = filter.getRequest();
-		
+
 		Map<String, String> headers = new HashMap<String, String>();
 		for (Enumeration<String> headerNames = request.getHeaderNames(); headerNames.hasMoreElements();) {
 			String header = headerNames.nextElement();
@@ -57,20 +57,20 @@ public class OpenPolicyAuthzEnforcer implements AccessDecisionVoter<Object> {
 		Map<String, Object> input = new HashMap<String, Object>();
 		input.put("method", request.getMethod().toUpperCase());
 		input.put("path", path[0]);
-		
+
 		if (authentication.getCredentials() instanceof Jwt) {
 			Jwt jwt = (Jwt) authentication.getCredentials();
 			input.put("realm_access", jwt.getClaimAsMap("realm_access"));
 		}
-		
+
 		HttpEntity<?> body = new HttpEntity<>(new OpenPolicyRequest(input));
 		OpenPolicyResponse response = restTemplate.postForObject(this.opaAuthURL, body, OpenPolicyResponse.class);
-		
+
 		if (!response.getResult()) {
 			log.info("Denied: " + response.getResult() + ", Input: " + input);
 			return ACCESS_DENIED;
 		}
-		
+
 		log.info("Allowed: " + response.getResult() + ", Input: " + input);
 		return ACCESS_GRANTED;
 	}
