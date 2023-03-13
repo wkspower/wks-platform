@@ -18,6 +18,8 @@
 		<maven.compiler.target>17</maven.compiler.target>
 		<maven.compiler.source>17</maven.compiler.source>
 
+		<servlet-api.version>2.5</servlet-api.version>
+
 		<spring.boot.version>2.7.5</spring.boot.version>
 		<snakeyaml.version>1.33</snakeyaml.version>
 		<spring.shell.version>2.0.1.RELEASE</spring.shell.version>
@@ -53,15 +55,21 @@
 	</dependencyManagement>
 
 	<modules>
+		<!-- Libraries -->
 		<module>case-engine</module>
-		<module>case-engine-loader</module>
-		<module>case-engine-rest-api</module>
-		<module>rest-client</module>
 		<module>bpm-engine-interface</module>
 		<module>bpm-engine-client</module>
 		<module>bpm-engine-c7-client</module>
-		<module>bpm-engine-c7-external-service</module>
 		<module>bpm-engine-c8-client</module>
+		<module>api-security</module>
+		<module>rest-client</module>
+
+		<!-- Workers -->
+		<module>case-engine-loader</module>
+		<module>bpm-engine-c7-external-service</module>
+
+		<!-- Rest APIs -->
+		<module>case-engine-rest-api</module>
 		<module>email-to-case</module>
 	</modules>
 

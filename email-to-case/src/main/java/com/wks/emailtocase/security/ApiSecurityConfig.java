@@ -1,4 +1,4 @@
-package com.wks.caseengine.rest.security;
+package com.wks.emailtocase.security;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Value;

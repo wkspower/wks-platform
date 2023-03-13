@@ -1,4 +1,4 @@
-package com.wks.caseengine.rest.security;
+package com.wks.api.security;
 
 import java.util.Collection;
 
