@@ -21,7 +21,7 @@ has_manager_role := {
 
 allow {
     input.path = "case"
-    input.method in ["GET", "POST", "OPTION"]
+    input.method in ["GET", "POST", "PUT", "DELETE", "OPTION"]
     is_user_profile
 }
 

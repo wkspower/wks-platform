@@ -666,6 +666,7 @@
       "defaultClientScopes": [
         "web-origins",
         "acr",
+        "org",
         "roles",
         "profile",
         "email"
@@ -1126,6 +1127,7 @@
       "defaultClientScopes": [
         "web-origins",
         "acr",
+        "org",
         "roles",
         "profile",
         "email"
@@ -1203,6 +1205,34 @@
         }
       ]
     },
+    {
+      "id": "7227d26e-6b68-4cdc-aa45-152e21b6ad02",
+      "name": "org",
+      "description": "",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false",
+        "gui.order": ""
+      },
+      "protocolMappers": [
+        {
+          "id": "a98e73bc-83a6-45c7-9616-4e17955c59d3",
+          "name": "realm",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.value": "wks-platform",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "org",
+            "access.tokenResponse.claim": "false"
+          }
+        }
+      ]
+    },    
     {
       "id": "8c2f23d4-8a28-4961-9967-da3806d5c9e9",
       "name": "roles",
@@ -1652,7 +1682,8 @@
     "email",
     "roles",
     "web-origins",
-    "acr"
+    "acr",
+    "org"
   ],
   "defaultOptionalClientScopes": [
     "offline_access",

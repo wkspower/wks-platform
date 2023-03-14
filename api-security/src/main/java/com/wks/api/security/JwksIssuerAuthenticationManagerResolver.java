@@ -95,6 +95,17 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 					}
 				}
 				
+				Object org = claimsSet.getClaim("org");
+				if (org == null) {
+					log.error("could not locate org by token");
+					throw new 	InvalidBearerTokenException("could not locate org by token");
+				}
+				
+				if (!realm.equals(org)) {
+					log.error("invalid org name when compared with dns prefix. it expected '{}' but was '{}'", org, realm);
+					throw new 	InvalidBearerTokenException("invalid org name when compared with dns prefix");
+				}
+				
 				String issueUrl = String.format("%s/realms/%s/protocol/openid-connect/certs", keycloakUrl, realm);
 				log.info("issuer url {}", issueUrl);
 				

@@ -7,7 +7,7 @@ logging:
       com:
          wks: INFO
       org.springframework.web.client.RestTemplate: INFO
-      org.springframework.security: DEBUG
+      org.springframework.security: INFO
       org.apache.http: INFO
       httpclient.wire: INFO
       
