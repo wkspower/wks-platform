@@ -113,15 +113,6 @@ services:
             camunda:
                 condition: service_healthy
 
-    case-portal-admim:
-        build:
-            context: case-portal-admin-react
-            args:
-                REACT_APP_KEYCLOAK_URL: http://localhost:8082
-                REACT_APP_API_URL: http://localhost:8081
-        ports:
-            - 3002:3000
-
     case-portal:
         build:
             context: case-portal-react
