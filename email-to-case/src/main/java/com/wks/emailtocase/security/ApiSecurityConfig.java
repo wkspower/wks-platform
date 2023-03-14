@@ -9,7 +9,7 @@ import org.springframework.security.access.vote.UnanimousBased;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.wks.api.security.NopDecisionVoter;
+import com.wks.api.security.JwksIssuerAuthenticationManagerResolver;
 import com.wks.api.security.OpenPolicyAuthzEnforcer;
 
 @Configuration
@@ -18,42 +18,29 @@ public class ApiSecurityConfig {
 	@Value("${opa.url}")
 	private String opaUrl;
 	
-	@Value("${security.global.disabled}")
-	private boolean isSecurityDisabled;
-
+	@Value("${keycloak.url}")
+	private String keycloakUrl;
+	
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    	if (isSecurityDisabled) {
-    		http.cors()
-    		.and()
-    		.csrf().disable()
-    		.authorizeRequests()
-    		.anyRequest()
-    		.permitAll(); 
-    		return http.build();
-    	}
-    	
     	 http.cors()
     	 		.and()
     	 		.csrf().disable()
     	 		.authorizeRequests(authz -> authz
-	    	 			.antMatchers("/healthCheck")
-	    	 			.hasAnyRole()
-	    	            .anyRequest()
-	    	            .authenticated()
-	    	            .accessDecisionManager(accessDecisionManager())
+    	 			.antMatchers("/healthCheck")
+    	 			.hasAnyRole()
+    	            .anyRequest()
+    	            .authenticated()
+    	            .accessDecisionManager(accessDecisionManager())
     	 		)
-    	        .oauth2ResourceServer(oauth2 -> oauth2.jwt());
-    	 
+    	 		.oauth2ResourceServer(oauth2 -> {
+					oauth2.authenticationManagerResolver(new JwksIssuerAuthenticationManagerResolver(keycloakUrl));
+				});
         return http.build();
     }
     
     @Bean
 	public AccessDecisionManager accessDecisionManager() {
-    	if (isSecurityDisabled) {
-    		return new UnanimousBased(Arrays.asList(new NopDecisionVoter()));
-    	}
-    	
 		return new UnanimousBased(Arrays.asList(new OpenPolicyAuthzEnforcer(opaUrl)));
 	}
     

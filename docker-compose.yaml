@@ -107,6 +107,8 @@ services:
             - MONGO_CONN=mongodb://mongodb
             - EMAIL_CASE_PATTERN_NEW=new-case
             - EMAIL_CASE_PATTERN_UPDATE=update-case
+            - KEYCLOAK_JWKS_SET_URI=http://keycloak:8080
+            - OPA_URL=http://opa:8181/v1/data/wks/authz/allow
         depends_on:
             camunda:
                 condition: service_healthy
