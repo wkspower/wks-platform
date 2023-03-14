@@ -12,7 +12,11 @@ const defs = {
         home: 'Dashboard',
         case: 'Cases',
         task: 'Tasks',
-        record: 'Records'
+        record: 'Records',
+        system: 'System',
+        settings: 'Settings',
+        caselifecicle: 'Case Life Cycle',
+        documentation: 'Documentation'
     },
     pages: {
         dashboard: {
@@ -47,16 +51,16 @@ const defs = {
         },
         caseform: {
             actions: {
-                close: "Close",
-                reopen: "Re-open",
-                archive: "Archive"
+                close: 'Close',
+                reopen: 'Re-open',
+                archive: 'Archive'
             },
             tabs: {
-                details: "Case Details",
-                tasks: "Tasks",
-                comments: "Comments",
-                attachments: "Attachments",
-                emails: "Emails"
+                details: 'Case Details',
+                tasks: 'Tasks',
+                comments: 'Comments',
+                attachments: 'Attachments',
+                emails: 'Emails'
             }
         },
         tasklist: {
@@ -82,8 +86,8 @@ const defs = {
             }
         },
         taskform: {
-            claim: "Claim",
-            complete: "Complete"
+            claim: 'Claim',
+            complete: 'Complete'
         },
         recordlist: {
             datagrid: {
@@ -96,23 +100,23 @@ const defs = {
             }
         },
         comments: {
-            title: "Comments",
+            title: 'Comments',
             actions: {
-                send: "Send",
-                reply: "Reply",
+                send: 'Send',
+                reply: 'Reply',
                 edit: {
-                    action: "Edit",
-                    update: "Update",
-                    cancel: "Candel",
+                    action: 'Edit',
+                    update: 'Update',
+                    cancel: 'Candel'
                 },
-                delete: "Delete"
+                delete: 'Delete'
             }
         },
         emails: {
             datagrid: {
-                from: "from",
-                to: "to",
-                text: "text",
+                from: 'from',
+                to: 'to',
+                text: 'text'
             }
         }
     }

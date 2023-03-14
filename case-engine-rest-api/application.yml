@@ -7,6 +7,7 @@ logging:
       com:
          wks: INFO
       org.springframework.web.client.RestTemplate: INFO
+      org.springframework.security: DEBUG
       org.apache.http: INFO
       httpclient.wire: INFO
       
@@ -28,13 +29,5 @@ spring.data.mongodb.database: ${MONGO_DATABASE:wks-mongo-database}
 mongo.database: ${MONGO_DATABASE:wks-mongo-database}
 mongo.connection-string: ${MONGO_CONN:mongodb://localhost}
 
-spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: ${KEYCLOAK_JWKS_SET_URI:http://localhost:8082/realms/wks-platform/protocol/openid-connect/certs}
-          
 opa.url: ${OPA_URL:http://localhost:8181/v1/data/wks/authz/allow}
-
-security.global.disabled: false
+keycloak.url: ${KEYCLOAK_JWKS_SET_URI:http://localhost:8082}

@@ -1,10 +1,7 @@
-// third-party
 import { configureStore } from '@reduxjs/toolkit';
-
-// project import
 import reducers from './reducers';
-
-// ==============================|| REDUX TOOLKIT - MAIN STORE ||============================== //
+import accountStore from './account';
+import sessionStore from './session';
 
 const store = configureStore({
     reducer: reducers
@@ -12,4 +9,4 @@ const store = configureStore({
 
 const { dispatch } = store;
 
-export { store, dispatch };
+export { store, dispatch, accountStore, sessionStore };

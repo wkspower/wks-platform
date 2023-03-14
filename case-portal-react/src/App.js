@@ -1,13 +1,13 @@
 import ScrollTop from 'components/ScrollTop';
-import Keycloak from 'keycloak-js';
 import { useEffect, useState } from 'react';
 import { ThemeRoutes } from 'routes';
 import ThemeCustomization from 'themes';
 import { SessionStoreProvider } from './SessionStoreContext';
 import { CaseService, RecordService } from 'services';
-import menuItemsDefs from 'menu-items';
-import './App.css';
+import menuItemsDefs from 'menu';
 import { registerInjectUserSession } from 'plugins/InjectUserSession';
+import { accountStore, sessionStore } from './store';
+import './App.css';
 
 const App = () => {
     const [keycloak, setKeycloak] = useState({});
@@ -17,17 +17,14 @@ const App = () => {
     const [menu, setMenu] = useState({ items: [] });
 
     useEffect(() => {
-        const keycloak = Keycloak({
-            url: process.env.REACT_APP_KEYCLOAK_URL,
-            realm: 'wks-platform',
-            clientId: 'wks-portal'
-        });
+        const { keycloak } = sessionStore.bootstrap();
 
         keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
             setKeycloak(keycloak);
             setAuthenticated(authenticated);
             buildMenuItems(keycloak);
             registerInjectUserSession(keycloak);
+            forceLogoutIfUserNoMinimalRoleForSystem(keycloak);
         });
 
         keycloak.onAuthRefreshError = () => {
@@ -60,6 +57,13 @@ const App = () => {
                 });
         };
     }, []);
+
+    async function forceLogoutIfUserNoMinimalRoleForSystem(keycloak) {
+        if (!accountStore.hasAnyRole(keycloak)) {
+            console.log('auto logout because user dont have any permission');
+            return keycloak.logout({ redirectUri: window.location.origin });
+        }
+    }
 
     async function buildMenuItems(keycloak) {
         const menu = {
@@ -97,6 +101,10 @@ const App = () => {
                     });
             });
         });
+
+        if (!accountStore.isManagerUser(keycloak)) {
+            delete menu.items[2];
+        }
 
         return setMenu(menu);
     }

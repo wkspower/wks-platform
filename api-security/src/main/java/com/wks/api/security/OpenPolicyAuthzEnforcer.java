@@ -39,6 +39,7 @@ public class OpenPolicyAuthzEnforcer implements AccessDecisionVoter<Object> {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public int vote(Authentication authentication, Object obj, Collection<ConfigAttribute> attributes) {
 		if (!(obj instanceof FilterInvocation)) {
 			return ACCESS_ABSTAIN;

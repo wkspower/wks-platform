@@ -83,7 +83,88 @@
         "clientRole": false,
         "containerId": "wks-platform",
         "attributes": {}
-      }
+      },
+      {
+        "id": "6a8f42cd-e677-4eb4-8a49-0a9c85741f71",
+        "name": "client_case",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "wks-platform",
+        "attributes": {}
+      },
+      {
+        "id": "5553e493-b1a7-489c-ae75-f14e8419f9f1",
+        "name": "mgmt_bpm_engine",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "wks-platform",
+        "attributes": {}
+      },
+      {
+        "id": "d8b531d3-53c6-4279-bce4-dd4918c5a92e",
+        "name": "mgmt_case_def",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "wks-platform",
+        "attributes": {}
+      },
+      {
+        "id": "bc8e4be6-02f9-47a7-a147-6138d191c331",
+        "name": "client_task",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "wks-platform",
+        "attributes": {}
+      },
+      {
+        "id": "ca4c1c4d-d4c2-4e60-aa5b-692cbd9cdcac",
+        "name": "mgmt_process_engine",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "wks-platform",
+        "attributes": {}
+      },
+      {
+        "id": "c63d7ad0-feb3-416b-b062-c80213f0ff4b",
+        "name": "mgmt_record_type",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "wks-platform",
+        "attributes": {}
+      },
+      {
+        "id": "48263536-f8b9-4eb7-beb5-25363be66959",
+        "name": "client_record",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "wks-platform",
+        "attributes": {}
+      },
+      {
+        "id": "de18a898-af47-4b51-bfc9-fffe49af1951",
+        "name": "mgmt_bpm_engine_type",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "wks-platform",
+        "attributes": {}
+      },
+      {
+        "id": "81806567-c10f-4bf3-806c-48f5b72179dc",
+        "name": "mgmt_form",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "wks-platform",
+        "attributes": {}
+      }      
     ],
     "client": {
       "realm-management": [
@@ -299,7 +380,6 @@
         }
       ],
       "wks-portal": [],
-      "wks-portal-admin": [],
       "security-admin-console": [],
       "wks-platform-francav-postman": [],
       "admin-cli": [],
@@ -399,13 +479,33 @@
   "groups": [
     {
       "id": "91aa1038-f962-4981-b8e8-a7bd2d6808b7",
-      "name": "it",
-      "path": "/it",
+      "name": "user",
+      "path": "/user",
       "attributes": {},
-      "realmRoles": [],
+      "realmRoles": [
+        "client_case",
+        "client_task",
+        "client_record"
+      ],
       "clientRoles": {},
       "subGroups": []
-    }
+    },
+    {
+      "id": "9339f585-e879-475e-b9bf-6e3f7334debc",
+      "name": "manager",
+      "path": "/manager",
+      "attributes": {},
+      "realmRoles": [
+        "mgmt_case_def",
+        "mgmt_ bpm_engine",
+        "mgmt_process_engine",
+        "mgmt_record_type",
+        "mgmt_form",
+        "mgmt_ bpm_engine_type"
+      ],
+      "clientRoles": {},
+      "subGroups": []
+    }    
   ],
   "defaultRole": {
     "id": "01afabd5-56f5-4384-8bf4-ea383d4cd792",
@@ -454,45 +554,6 @@
   "webAuthnPolicyPasswordlessAcceptableAaguids": [],
   "users": [
     {
-      "id": "ee956e5d-90a5-4a83-91ed-d6101dee9bee",
-      "createdTimestamp": 1667317667931,
-      "username": "service-account-wks-platform-francav-postman",
-      "enabled": true,
-      "totp": false,
-      "emailVerified": false,
-      "serviceAccountClientId": "wks-platform-francav-postman",
-      "disableableCredentialTypes": [],
-      "requiredActions": [],
-      "realmRoles": [
-        "default-roles-wks-platform"
-      ],
-      "clientRoles": {
-        "realm-management": [
-          "query-clients",
-          "realm-admin",
-          "manage-events",
-          "view-authorization",
-          "view-clients",
-          "view-identity-providers",
-          "manage-authorization",
-          "query-users",
-          "impersonation",
-          "manage-identity-providers",
-          "manage-realm",
-          "query-realms",
-          "view-events",
-          "manage-clients",
-          "create-client",
-          "view-users",
-          "view-realm",
-          "manage-users",
-          "query-groups"
-        ]
-      },
-      "notBefore": 0,
-      "groups": []
-    },
-    {
       "username": "victor",
       "enabled": true,
       "email": "victor@test.com",
@@ -504,15 +565,14 @@
           "value": "victor"
         }
       ],
-      "realmRoles": [
-        "user"
-      ],
+      "realmRoles": [],
       "clientRoles": {
         "account": [
           "view-profile",
           "manage-account"
         ]
-      }
+      },
+      "groups": [ "user", "manager" ]
     },
     {
       "username": "john",
@@ -526,9 +586,7 @@
           "value": "john"
         }
       ],
-      "realmRoles": [
-        "user"
-      ],
+      "realmRoles": [],
       "clientRoles": {
         "account": [
           "view-profile",
@@ -548,15 +606,14 @@
           "value": "mary"
         }
       ],
-      "realmRoles": [
-        "user"
-      ],
+      "realmRoles": [],
       "clientRoles": {
         "account": [
           "view-profile",
           "manage-account"
         ]
-      }
+      },
+      "groups": [ "user" ]
     }
   ],
   "scopeMappings": [
@@ -1062,122 +1119,6 @@
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "clientHost",
-            "jsonType.label": "String"
-          }
-        }
-      ],
-      "defaultClientScopes": [
-        "web-origins",
-        "acr",
-        "roles",
-        "profile",
-        "email"
-      ],
-      "optionalClientScopes": [
-        "address",
-        "phone",
-        "offline_access",
-        "microprofile-jwt"
-      ]
-    },
-    {
-      "id": "308c885d-530e-41b6-945c-68ff5b1b523e",
-      "clientId": "wks-portal-admin",
-      "adminUrl": "",
-      "baseUrl": "",
-      "surrogateAuthRequired": false,
-      "enabled": true,
-      "alwaysDisplayInConsole": false,
-      "clientAuthenticatorType": "client-secret",
-      "redirectUris": [
-        "http://localhost:3002*"
-      ],
-      "webOrigins": [
-        "http://localhost:3002"
-      ],
-      "notBefore": 0,
-      "bearerOnly": false,
-      "consentRequired": false,
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": true,
-      "serviceAccountsEnabled": false,
-      "publicClient": true,
-      "frontchannelLogout": false,
-      "protocol": "openid-connect",
-      "attributes": {
-        "saml.force.post.binding": "false",
-        "saml.multivalued.roles": "false",
-        "frontchannel.logout.session.required": "false",
-        "oauth2.device.authorization.grant.enabled": "false",
-        "backchannel.logout.revoke.offline.tokens": "false",
-        "saml.server.signature.keyinfo.ext": "false",
-        "use.refresh.tokens": "true",
-        "oidc.ciba.grant.enabled": "false",
-        "backchannel.logout.session.required": "true",
-        "client_credentials.use_refresh_token": "false",
-        "require.pushed.authorization.requests": "false",
-        "saml.client.signature": "false",
-        "saml.allow.ecp.flow": "false",
-        "id.token.as.detached.signature": "false",
-        "saml.assertion.signature": "false",
-        "client.secret.creation.time": "1667309567",
-        "saml.encrypt": "false",
-        "saml.server.signature": "false",
-        "exclude.session.state.from.auth.response": "false",
-        "saml.artifact.binding.identifier": "boPiiYYBi0X1qFNw3M2Q0VYw71k=",
-        "saml.artifact.binding": "false",
-        "saml_force_name_id_format": "false",
-        "acr.loa.map": "{}",
-        "tls.client.certificate.bound.access.tokens": "false",
-        "saml.authnstatement": "false",
-        "display.on.consent.screen": "false",
-        "token.response.type.bearer.lower-case": "false",
-        "saml.onetimeuse.condition": "false"
-      },
-      "authenticationFlowBindingOverrides": {},
-      "fullScopeAllowed": true,
-      "nodeReRegistrationTimeout": -1,
-      "protocolMappers": [
-        {
-          "id": "7e743d27-2d11-4cb4-84a3-b10b71666f6f",
-          "name": "Client Host",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usersessionmodel-note-mapper",
-          "consentRequired": false,
-          "config": {
-            "user.session.note": "clientHost",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "clientHost",
-            "jsonType.label": "String"
-          }
-        },
-        {
-          "id": "29ba7253-a029-4536-872c-8f3ce8f8ae55",
-          "name": "Client ID",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usersessionmodel-note-mapper",
-          "consentRequired": false,
-          "config": {
-            "user.session.note": "clientId",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "clientId",
-            "jsonType.label": "String"
-          }
-        },
-        {
-          "id": "acaac5dc-3a58-4a4d-9c65-d53e392c4ce5",
-          "name": "Client IP Address",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usersessionmodel-note-mapper",
-          "consentRequired": false,
-          "config": {
-            "user.session.note": "clientAddress",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "clientAddress",
             "jsonType.label": "String"
           }
         }

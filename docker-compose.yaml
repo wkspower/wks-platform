@@ -69,7 +69,7 @@ services:
         environment:
             - MONGO_DATABASE=wks-mongo-database
             - MONGO_CONN=mongodb://mongodb
-            - KEYCLOAK_JWKS_SET_URI=http://keycloak:8080/realms/wks-platform/protocol/openid-connect/certs
+            - KEYCLOAK_JWKS_SET_URI=http://keycloak:8080
             - OPA_URL=http://opa:8181/v1/data/wks/authz/allow
         depends_on:
             camunda:

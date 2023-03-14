@@ -1,7 +1,5 @@
 import PropTypes from 'prop-types';
 import { useRef, useState } from 'react';
-
-// material-ui
 import {
     Avatar,
     Box,
@@ -18,21 +16,22 @@ import {
     Typography
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-
-// project import
 import Transitions from 'components/@extended/Transitions';
 import MainCard from 'components/MainCard';
 import ProfileTab from './ProfileTab';
 import SettingTab from './SettingTab';
-
-// assets
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import avatar2 from 'assets/images/users/avatar-2.png';
 
-// tab panel wrapper
 function TabPanel({ children, value, index, ...other }) {
     return (
-        <div role="tabpanel" hidden={value !== index} id={`profile-tabpanel-${index}`} aria-labelledby={`profile-tab-${index}`} {...other}>
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`profile-tabpanel-${index}`}
+            aria-labelledby={`profile-tab-${index}`}
+            {...other}
+        >
             {value === index && children}
         </div>
     );
@@ -51,23 +50,17 @@ function a11yProps(index) {
     };
 }
 
-// ==============================|| HEADER CONTENT - PROFILE ||============================== //
-
 const Profile = ({ keycloak }) => {
     const theme = useTheme();
+    const iconBackColorOpen = 'grey.300';
+    const anchorRef = useRef(null);
+    const [open, setOpen] = useState(false);
+    const [value, setValue] = useState(0);
 
     const handleLogout = async () => {
         keycloak.logout({ redirectUri: window.location.origin });
-        // .then((success) => {
-        //     console.log('--> log: logout success ', success);
-        // })
-        // .catch((error) => {
-        //     console.log('--> log: logout error ', error);
-        // });
     };
 
-    const anchorRef = useRef(null);
-    const [open, setOpen] = useState(false);
     const handleToggle = () => {
         setOpen((prevOpen) => !prevOpen);
     };
@@ -79,13 +72,9 @@ const Profile = ({ keycloak }) => {
         setOpen(false);
     };
 
-    const [value, setValue] = useState(0);
-
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
-
-    const iconBackColorOpen = 'grey.300';
 
     return (
         <Box sx={{ flexShrink: 0, ml: 0.75 }}>
@@ -104,7 +93,7 @@ const Profile = ({ keycloak }) => {
             >
                 <Stack direction="row" spacing={2} alignItems="center" sx={{ p: 0.5 }}>
                     <Avatar alt="profile user" src={avatar2} sx={{ width: 32, height: 32 }} />
-                    <Typography variant="subtitle1">{keycloak.idTokenParsed.name}</Typography>
+                    <Typography variant="subtitle1">{keycloak.idTokenParsed.given_name}</Typography>
                 </Stack>
             </ButtonBase>
             <Popper
@@ -142,20 +131,41 @@ const Profile = ({ keycloak }) => {
                                 <ClickAwayListener onClickAway={handleClose}>
                                     <MainCard elevation={0} border={false} content={false}>
                                         <CardContent sx={{ px: 2.5, pt: 3 }}>
-                                            <Grid container justifyContent="space-between" alignItems="center">
+                                            <Grid
+                                                container
+                                                justifyContent="space-between"
+                                                alignItems="center"
+                                            >
                                                 <Grid item>
-                                                    <Stack direction="row" spacing={1.25} alignItems="center">
-                                                        <Avatar alt="profile user" src={avatar2} sx={{ width: 32, height: 32 }} />
+                                                    <Stack
+                                                        direction="row"
+                                                        spacing={1.25}
+                                                        alignItems="center"
+                                                    >
+                                                        <Avatar
+                                                            alt="profile user"
+                                                            src={avatar2}
+                                                            sx={{ width: 32, height: 32 }}
+                                                        />
                                                         <Stack>
-                                                            <Typography variant="h6">John Doe</Typography>
-                                                            <Typography variant="body2" color="textSecondary">
-                                                                UI/UX Designer
+                                                            <Typography variant="h6">
+                                                                {keycloak.idTokenParsed.name}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant="body2"
+                                                                color="textSecondary"
+                                                            >
+                                                                {keycloak.idTokenParsed.email}
                                                             </Typography>
                                                         </Stack>
                                                     </Stack>
                                                 </Grid>
                                                 <Grid item>
-                                                    <IconButton size="large" color="secondary" onClick={handleLogout}>
+                                                    <IconButton
+                                                        size="large"
+                                                        color="secondary"
+                                                        onClick={handleLogout}
+                                                    >
                                                         <LogoutOutlined />
                                                     </IconButton>
                                                 </Grid>
@@ -163,7 +173,9 @@ const Profile = ({ keycloak }) => {
                                         </CardContent>
                                         {open && (
                                             <>
-                                                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                                                <Box
+                                                    sx={{ borderBottom: 1, borderColor: 'divider' }}
+                                                >
                                                     <Tabs
                                                         variant="fullWidth"
                                                         value={value}
@@ -178,7 +190,14 @@ const Profile = ({ keycloak }) => {
                                                                 alignItems: 'center',
                                                                 textTransform: 'capitalize'
                                                             }}
-                                                            icon={<UserOutlined style={{ marginBottom: 0, marginRight: '10px' }} />}
+                                                            icon={
+                                                                <UserOutlined
+                                                                    style={{
+                                                                        marginBottom: 0,
+                                                                        marginRight: '10px'
+                                                                    }}
+                                                                />
+                                                            }
                                                             label="Profile"
                                                             {...a11yProps(0)}
                                                         />
@@ -190,16 +209,31 @@ const Profile = ({ keycloak }) => {
                                                                 alignItems: 'center',
                                                                 textTransform: 'capitalize'
                                                             }}
-                                                            icon={<SettingOutlined style={{ marginBottom: 0, marginRight: '10px' }} />}
+                                                            icon={
+                                                                <SettingOutlined
+                                                                    style={{
+                                                                        marginBottom: 0,
+                                                                        marginRight: '10px'
+                                                                    }}
+                                                                />
+                                                            }
                                                             label="Setting"
                                                             {...a11yProps(1)}
                                                         />
                                                     </Tabs>
                                                 </Box>
-                                                <TabPanel value={value} index={0} dir={theme.direction}>
+                                                <TabPanel
+                                                    value={value}
+                                                    index={0}
+                                                    dir={theme.direction}
+                                                >
                                                     <ProfileTab handleLogout={handleLogout} />
                                                 </TabPanel>
-                                                <TabPanel value={value} index={1} dir={theme.direction}>
+                                                <TabPanel
+                                                    value={value}
+                                                    index={1}
+                                                    dir={theme.direction}
+                                                >
                                                     <SettingTab />
                                                 </TabPanel>
                                             </>

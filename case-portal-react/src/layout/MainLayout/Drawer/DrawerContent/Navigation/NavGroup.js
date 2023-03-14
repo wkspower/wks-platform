@@ -1,14 +1,8 @@
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-
-// material-ui
 import { Box, List, Typography } from '@mui/material';
-
-// project import
 import NavItem from './NavItem';
 import NavCollapse from './NavCollapse';
-
-// ==============================|| NAVIGATION - LIST GROUP ||============================== //
 
 const NavGroup = ({ item }) => {
     const menu = useSelector((state) => state.menu);
@@ -38,7 +32,6 @@ const NavGroup = ({ item }) => {
                         <Typography variant="subtitle2" color="textSecondary">
                             {item.title}
                         </Typography>
-                        {/* only available in paid version */}
                     </Box>
                 )
             }

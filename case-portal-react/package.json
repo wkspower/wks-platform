@@ -1,5 +1,5 @@
 {
-    "name": "case-portal-admin",
+    "name": "case-portal",
     "version": "1.0.0",
     "private": true,
     "homepage": "https://www.wkspower.com",
@@ -99,6 +99,7 @@
         "eslint-plugin-prettier": "^4.2.1",
         "eslint-plugin-react": "^7.26.1",
         "eslint-plugin-react-hooks": "4.6.0",
-        "prettier": "2.7.1"
+        "prettier": "2.7.1",
+        "jest-location-mock": "^1.0.9"
     }
 }

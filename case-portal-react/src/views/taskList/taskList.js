@@ -31,12 +31,10 @@ export const TaskList = ({ businessKey, bpmEngineId, keycloak }) => {
 
         TaskService.filterProcessInstances(keycloak, bpmEngineId, businessKey)
             .then((data) => {
-                console.log('filter1', data[0].definitionId);
                 setProcessDefId(data[0].definitionId);
                 return TaskService.getActivityInstancesById(keycloak, bpmEngineId, data[0].id);
             })
             .then((data) => {
-                console.log('filter2', data);
                 setActivityInstances(data);
             })
             .catch((err) => {
@@ -80,7 +78,6 @@ export const TaskList = ({ businessKey, bpmEngineId, keycloak }) => {
                 sortable: false,
                 renderCell: (params) => {
                     const onClick = (e) => {
-                        console.log(params.row);
                         setTask(params.row);
                         e.stopPropagation();
                         setOpen(true);

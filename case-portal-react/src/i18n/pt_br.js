@@ -12,7 +12,11 @@ const defs = {
         home: 'Dashboard',
         case: 'Casos',
         task: 'Tarefas',
-        record: 'Registros'
+        record: 'Registros',
+        system: 'Sistema',
+        settings: 'Configurações',
+        caselifecicle: 'Ciclo de vida do caso',
+        documentation: 'Documentação'
     },
     pages: {
         dashboard: {
@@ -47,16 +51,16 @@ const defs = {
         },
         caseform: {
             actions: {
-                close: "Encerrar",
-                reopen: "Reabrir",
-                archive: "Arquivar"
+                close: 'Encerrar',
+                reopen: 'Reabrir',
+                archive: 'Arquivar'
             },
             tabs: {
-                details: "Detalhes do Caso",
-                tasks: "Tarefas",
-                comments: "Comentários",
-                attachments: "Anexos",
-                emails: "Emails"
+                details: 'Detalhes do Caso',
+                tasks: 'Tarefas',
+                comments: 'Comentários',
+                attachments: 'Anexos',
+                emails: 'Emails'
             }
         },
         tasklist: {
@@ -82,8 +86,8 @@ const defs = {
             }
         },
         taskform: {
-            claim: "Bloquear",
-            complete: "Finalizar"
+            claim: 'Bloquear',
+            complete: 'Finalizar'
         },
         recordlist: {
             datagrid: {
@@ -96,23 +100,23 @@ const defs = {
             }
         },
         comments: {
-            title: "Comentários",
+            title: 'Comentários',
             actions: {
-                send: "Enviar",
-                reply: "Responder",
+                send: 'Enviar',
+                reply: 'Responder',
                 edit: {
-                    action: "Editar",
-                    update: "Alterar",
-                    cancel: "Cancelar",
+                    action: 'Editar',
+                    update: 'Alterar',
+                    cancel: 'Cancelar'
                 },
-                delete: "Remover"
+                delete: 'Remover'
             }
         },
         emails: {
             datagrid: {
-                from: "De",
-                to: "Para",
-                text: "Texto",
+                from: 'De',
+                to: 'Para',
+                text: 'Texto'
             }
         }
     }
