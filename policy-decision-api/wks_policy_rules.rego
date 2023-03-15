@@ -103,6 +103,12 @@ allow {
 }
 
 allow {
+    input.path = "case-definition"
+    input.method in ["GET", "POST", "PATCH", "DELETE", "OPTION", "HEAD"]
+    is_manager_profile
+}
+
+allow {
     input.path = "healthCheck"
     input.method in ["GET"]
 }
