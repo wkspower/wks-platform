@@ -141,11 +141,19 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 		
 		caseInstanceFileAttributeToInclude.addAll(caseInstanceFileAttributeOriginal);
 		
-		caseInstance.getAttributes().forEach(attribute -> {
+		Boolean fileAttributeFound = false;
+		
+		for (CaseAttribute attribute : caseInstance.getAttributes()) {
 			if (StringUtils.equals(attribute.getName(), "file")) {
 				attribute.setValue(gson.toJson(caseInstanceFileAttributeToInclude));
+				fileAttributeFound = true;
+				break;
 			}
-		});
+		}
+		
+		if (!fileAttributeFound) {
+			caseInstance.getAttributes().add(new CaseAttribute("file", gson.toJson(caseInstanceFileAttributeToInclude)));
+		}
 		
 		repository.update(businessKey, caseInstance);
 	}
