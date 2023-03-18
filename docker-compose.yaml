@@ -41,7 +41,7 @@ services:
         image: quay.io/keycloak/keycloak:20.0.3
         command: start-dev
         environment:
-            KC_HEALTH_ENABLED: true
+            KC_HEALTH_ENABLED: "true"
             KEYCLOAK_ADMIN: admin
             KEYCLOAK_ADMIN_PASSWORD: admin
         healthcheck:
@@ -52,25 +52,6 @@ services:
             timeout: 10s
         ports:
             - 8082:8080
-
-    case-engine-loader:
-        build:
-            context: case-engine-loader
-        environment:
-            - CAMUNDA_URL=http://camunda:8080/engine-rest
-            - CAMUNDA_USERNAME=demo
-            - CAMUNDA_PASSWORD=demo
-            - MONGO_CONN=mongodb://mongodb
-            - MONGO_SHARED_DATABASE=shared
-            - MONGO_DATABASE=wks
-            - KEYCLOAK_URL=http://keycloak:8080
-        depends_on:
-            mongodb:
-                condition: service_healthy
-            camunda:
-                condition: service_healthy
-            keycloak:
-                condition: service_healthy
        
     case-engine-rest-api:
         build:
