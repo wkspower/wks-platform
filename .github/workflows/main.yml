@@ -147,7 +147,7 @@ jobs:
       run: |
         cd wks-gitops/apps
 
-        cd policy-decision-api
+        cd policy-decision-api/local
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/policy-decision-api=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/policy-decision-api:${{ env.BUILD_VERSION }}
         cd ../../
 
@@ -175,7 +175,7 @@ jobs:
       run: |
         cd wks-gitops/apps
 
-        cd policy-decision-api
+        cd policy-decision-api/staging
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/policy-decision-api=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/policy-decision-api:${{ env.BUILD_VERSION }}
         cd ../../
 
