@@ -122,8 +122,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
             .catch((err) => {
                 console.log(err.message);
             });
-            
-            console.log(formData);
         };
 
     const handleTabChanged = (event, newValue) => {
