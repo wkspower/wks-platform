@@ -43,7 +43,18 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 			return new ResolvingAuthenticationManager(new RequestProps(origin, keycloakUrl, cache));
 	}
 	
-	record RequestProps (String origin, String keycloack, Cache cache) {};
+	static class RequestProps  {
+		String origin;
+		String keycloack;
+		Cache cache;
+		
+		public RequestProps(String origin, String keycloack, Cache cache) {
+			super();
+			this.origin = origin;
+			this.keycloack = keycloack;
+			this.cache = cache;
+		}
+	};
 
 	static class ResolvingAuthenticationManager implements AuthenticationManager {
 
@@ -62,7 +73,7 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 			
 			String issuer = this.issuerConverter.convert(token);
 			
-			JwtAuthenticationManagerResolver authenticationManagerResolver = new JwtAuthenticationManagerResolver(request.cache());
+			JwtAuthenticationManagerResolver authenticationManagerResolver = new JwtAuthenticationManagerResolver(request.cache);
 			
 			AuthenticationManager authenticationManager = authenticationManagerResolver.resolve(issuer);
 			if (authenticationManager == null) {
@@ -84,13 +95,13 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 
 		@Override
 		public String convert(@NonNull BearerTokenAuthenticationToken authentication) {
-			if (request.keycloack() == "") {
+			if (request.keycloack == "") {
 				throw new InvalidBearerTokenException("Missing issuer");
 			}
 			
 			try {
 				String realm = extractTenantIdFromToken(authentication);
-				String issueUrl = String.format("%s/realms/%s/protocol/openid-connect/certs", request.keycloack(), realm);
+				String issueUrl = String.format("%s/realms/%s/protocol/openid-connect/certs", request.keycloack, realm);
 				log.debug("issuer url {}", issueUrl);
 				return issueUrl;
 			} catch (Exception ex) {
