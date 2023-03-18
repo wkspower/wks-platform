@@ -12,14 +12,14 @@ import org.springframework.stereotype.Component;
 import com.google.gson.Gson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.wks.caseengine.db.MongoDataConnection;
+import com.wks.caseengine.db.EngineMongoDataConnection;
 import com.wks.caseengine.repository.RecordRepository;
 
 @Component
 public class RecordRepositoryImpl implements RecordRepository {
 
 	@Autowired
-	private MongoDataConnection connection;
+	private EngineMongoDataConnection connection;
 
 	@Override
 	public com.google.gson.JsonObject get(final String recordTypeId, final String id) throws Exception {

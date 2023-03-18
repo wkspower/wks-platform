@@ -2,6 +2,7 @@ package com.wks.caseengine.repository.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.bson.conversions.Bson;
 import org.bson.json.JsonObject;
@@ -13,14 +14,14 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.cases.definition.CaseDefinition;
-import com.wks.caseengine.db.MongoDataConnection;
+import com.wks.caseengine.db.EngineMongoDataConnection;
 import com.wks.caseengine.repository.CaseDefinitionRepository;
 
 @Component
 public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 
 	@Autowired
-	private MongoDataConnection connection;
+	private EngineMongoDataConnection connection;
 
 	@Override
 	public List<CaseDefinition> find() throws Exception {
@@ -33,7 +34,13 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	public CaseDefinition get(final String caseDefId) throws Exception {
 		Bson filter = Filters.eq("id", caseDefId);
 		Gson gson = new Gson();
-		return gson.fromJson(getCollection().find(filter).first().getJson(), CaseDefinition.class);
+		
+		Optional<JsonObject> first = Optional.ofNullable(getCollection().find(filter).first());
+		if (first.isEmpty()) {
+			return null;
+		}
+		
+		return gson.fromJson(first.get().getJson(), CaseDefinition.class);
 	}
 
 	@Override

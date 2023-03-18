@@ -14,13 +14,12 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.wks.api.security.context.SecurityContextTenantHolder;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
 import com.wks.caseengine.repository.CaseInstanceRepository;
 import com.wks.caseengine.repository.Repository;
-
-import io.netty.util.internal.StringUtil;
 
 @Component
 public class CaseInstanceServiceImpl implements CaseInstanceService {
@@ -38,6 +37,9 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 	@Autowired
 	private ProcessInstanceService processInstanceService;
+	
+    @Autowired
+    private SecurityContextTenantHolder holder;
 
 	@Override
 	public List<CaseInstance> find(final Optional<CaseStatus> status, final Optional<String> caseDefinitionId)
@@ -51,18 +53,19 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 
 	@Override
-	// TODO how to embrace in a single transation?
 	public CaseInstance create(CaseInstance caseInstance) throws Exception {
-
-		caseInstance.getAttributes()
-				.add(new CaseAttribute("createdAt", DateUtils.formatDate(new Date(), "dd/MM/yyyy")));
+		caseInstance.getAttributes().add(new CaseAttribute("createdAt", DateUtils.formatDate(new Date(), "dd/MM/yyyy")));
 
 		CaseDefinition caseDefinition = caseDefRepository.get(caseInstance.getCaseDefinitionId());
 
 		CaseInstance newCaseInstance = caseInstanceCreateService.create(caseInstance);
 
-		processInstanceService.create(caseDefinition.getStagesLifecycleProcessKey(), newCaseInstance.getBusinessKey(),
-				newCaseInstance.getAttributes(), caseDefinition.getBpmEngineId());
+		processInstanceService.create(
+				caseDefinition.getStagesLifecycleProcessKey(), 
+				newCaseInstance.getBusinessKey(),
+				newCaseInstance.getAttributes(), 
+				caseDefinition.getBpmEngineId(),
+				holder.getTenantId().get());
 
 		return newCaseInstance;
 	}
@@ -74,8 +77,11 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 		CaseInstance newCaseInstance = caseInstanceCreateService.create(caseDefinition);
 
-		processInstanceService.create(caseDefinition.getStagesLifecycleProcessKey(), newCaseInstance.getBusinessKey(),
-				newCaseInstance.getAttributes(), caseDefinition.getBpmEngineId());
+		processInstanceService.create(
+				caseDefinition.getStagesLifecycleProcessKey(), 
+				newCaseInstance.getBusinessKey(),
+				newCaseInstance.getAttributes(), 
+				caseDefinition.getBpmEngineId());
 
 		return newCaseInstance;
 	}

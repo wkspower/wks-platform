@@ -1,7 +1,7 @@
 package com.wks.api.security;
 import java.util.Map;
 
-public class OpenPolicyRequest {
+public final class OpenPolicyRequest {
 
     private Map<String, Object> input;
 

@@ -4,12 +4,14 @@ server:
 logging:
    level:
       root: INFO
-      com:
-         wks: INFO
+      com.wks: INFO
+      com.wks.emailtocase: DEBUG
+      com.wks.api.security: DEBUG
+      com.wks.caseengine: DEBUG      
       org.springframework.web.client.RestTemplate: INFO
       org.apache.http: INFO
       httpclient.wire: INFO
-      
+            
 spring.mvc.converters.preferred-json-mapper: gson
 
 camunda7.rest.oauth.token.uri:
@@ -24,12 +26,19 @@ camunda7.rest.task.url: /task
 camunda7.rest.correlate.url: /message
 
 spring.data.mongodb.uri: ${MONGO_CONN:mongodb://localhost}
-spring.data.mongodb.database: ${MONGO_DATABASE:wks-mongo-database}
-mongo.database: ${MONGO_DATABASE:wks-mongo-database}
-mongo.connection-string: ${MONGO_CONN:mongodb://localhost}
+spring.data.mongodb.database: ${MONGO_DATABASE:shared}
+spring.data.mongodb.database.min-pool-size: 0
+spring.data.mongodb.database.max-pool-size: 5
+spring.data.mongodb.database.max-connection-idle-time: 3000
+spring.data.mongodb.database.max-connection-life-time: 3000
 
 email-to-case.routing.new-case.pattern: ${EMAIL_CASE_PATTERN_NEW:new-case}
 email-to-case.routing.update-case.pattern: ${EMAIL_CASE_PATTERN_UPDATE:update-case}
 
 opa.url: ${OPA_URL:http://localhost:8181/v1/data/wks/authz/allow}
 keycloak.url: ${KEYCLOAK_JWKS_SET_URI:http://localhost:8082}
+
+management.health.mongo.enabled: false
+management.health.reds.enabled: false
+management.endpoints.web.exposure.include: health,info 
+management.endpoint.health.show-details: never

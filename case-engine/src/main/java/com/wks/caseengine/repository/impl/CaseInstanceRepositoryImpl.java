@@ -16,7 +16,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.db.MongoDataConnection;
+import com.wks.caseengine.db.EngineMongoDataConnection;
 import com.wks.caseengine.repository.CaseInstanceRepository;
 import static com.mongodb.client.model.Sorts.descending;
 
@@ -24,7 +24,7 @@ import static com.mongodb.client.model.Sorts.descending;
 public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 
 	@Autowired
-	private MongoDataConnection connection;
+	private EngineMongoDataConnection connection;
 
 	@Override
 	public List<CaseInstance> find() throws Exception {

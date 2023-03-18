@@ -120,11 +120,28 @@ public class C7HttpRequestFactory {
 				new HttpEntity<>(processInstance, httpHeadersFactory.json()));
 	}
 
+	public WksHttpRequest getProcessInstanceCreateRequest(String processDefinitionKey, String businessKey,
+			JsonObject variables, BpmEngine bpmEngine, String tenantId) {
+		ProcessInstance processInstance = ProcessInstance.builder()
+				.businessKey(businessKey)
+				.caseInstanceId(businessKey)
+				.variables(variables)
+				.tenantId(tenantId)
+				.build();
+		
+		String root = extractUrl(bpmEngine) + processDefinitionUrl;
+		String url = String.format("%s/key/%s/tenant-id/%s/start",  root, processDefinitionKey, tenantId);
+		System.out.println(url);
+		return new C7HttpPostRequest(url, new HttpEntity<>(processInstance, httpHeadersFactory.json()));
+	}
+	
 	public WksHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey, final String businessKey,
 			final JsonObject variables, final BpmEngine bpmEngine) {
-		// TODO refactor it - Payload Creator
-		ProcessInstance processInstance = ProcessInstance.builder().businessKey(businessKey).caseInstanceId(businessKey)
-				.variables(variables).build();
+		ProcessInstance processInstance = ProcessInstance.builder()
+				.businessKey(businessKey)
+				.caseInstanceId(businessKey)
+				.variables(variables)
+				.build();
 
 		return new C7HttpPostRequest(
 				extractUrl(bpmEngine) + processDefinitionUrl + "/key/" + processDefinitionKey + "/start",

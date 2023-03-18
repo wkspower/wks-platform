@@ -17,7 +17,6 @@ public class CaseEmailServiceImpl implements CaseEmailService {
 	@Override
 	public void save(CaseEmail caseEmail) throws Exception {
 		caseEmailRepository.save(caseEmail);
-
 	}
 
 	@Override

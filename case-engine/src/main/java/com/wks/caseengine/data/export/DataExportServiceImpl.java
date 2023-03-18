@@ -2,7 +2,6 @@ package com.wks.caseengine.data.export;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,22 +9,13 @@ import org.springframework.stereotype.Component;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.wks.bpm.engine.BpmEngine;
-import com.wks.bpm.engine.client.BpmEngineClientFacade;
-import com.wks.caseengine.db.MongoDataConnection;
-import com.wks.caseengine.repository.BpmEngineRepository;
+import com.wks.caseengine.db.EngineMongoDataConnection;
 
 @Component
 public class DataExportServiceImpl implements DataExportService {
 
 	@Autowired
-	private MongoDataConnection connection;
-
-	@Autowired
-	private BpmEngineRepository bpmEngineRepository;
-
-	@Autowired
-	private BpmEngineClientFacade processEngineClientFacade;
+	private EngineMongoDataConnection connection;
 
 	@Override
 	public JsonObject export() throws Exception {

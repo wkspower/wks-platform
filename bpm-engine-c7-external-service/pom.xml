@@ -30,6 +30,11 @@
         </dependency>
         
 		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+        
+		<dependency>
 			<groupId>org.camunda.bpm.springboot</groupId>
 			<artifactId>camunda-bpm-spring-boot-starter-external-task-client</artifactId>
 			<version>${camunda7.version}</version>
@@ -38,6 +43,12 @@
 		<dependency>
 			<groupId>com.wks</groupId>
 			<artifactId>case-engine</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.wks</groupId>
+			<artifactId>api-security</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
 
@@ -51,7 +62,6 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 
 	<build>

@@ -20,15 +20,14 @@ public class ApiSecurityConfig {
 	
 	@Value("${keycloak.url}")
 	private String keycloakUrl;
-	
+		
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     	 http.cors()
     	 		.and()
     	 		.csrf().disable()
     	 		.authorizeRequests(authz -> authz
-    	 			.antMatchers("/healthCheck")
-    	 			.hasAnyRole()
+    	 			.filterSecurityInterceptorOncePerRequest(false)
     	            .anyRequest()
     	            .authenticated()
     	            .accessDecisionManager(accessDecisionManager())

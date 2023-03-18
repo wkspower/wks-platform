@@ -1,14 +1,14 @@
 import Keycloak from 'keycloak-js';
 
 function bootstrap() {
-    let realm = 'wks-platform';
+    let realm = 'wks';
     const clientId = 'wks-portal';
     const hostname = window.location.hostname;
 
-    if (hostname.includes('.wkspower.')) {
-        if (!hostname.startsWith('app.wkspower')) {
-            realm = hostname.substring(0, hostname.indexOf('.'));
-        }
+    console.log(hostname);
+
+    if (hostname !== 'localhost') {
+        realm = hostname.substring(0, hostname.indexOf('.'));
     }
 
     const kc = Keycloak({

@@ -1,12 +1,13 @@
 package com.wks.api.security;
 
-import java.net.URL;
-import java.util.List;
+import java.text.ParseException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.cache.Cache;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,6 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 public final class JwksIssuerAuthenticationManagerResolver implements AuthenticationManagerResolver<HttpServletRequest> {
 
 	private String keycloakUrl;
+	
+	private final Cache cache = new ConcurrentMapCache("jwkSet");
 
 	public JwksIssuerAuthenticationManagerResolver(String keycloakUrl) {
 		super();
@@ -35,16 +38,22 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 	}
 
 	@Override
-	public AuthenticationManager resolve(HttpServletRequest issuer) {
-			return new ResolvingAuthenticationManager(keycloakUrl);
+	public AuthenticationManager resolve(HttpServletRequest request) {
+			String origin = request.getHeader("Origin");
+			return new ResolvingAuthenticationManager(new RequestProps(origin, keycloakUrl, cache));
 	}
+	
+	record RequestProps (String origin, String keycloack, Cache cache) {};
 
 	static class ResolvingAuthenticationManager implements AuthenticationManager {
 
-		private Converter<BearerTokenAuthenticationToken, String> issuerConverter;;
+		private Converter<BearerTokenAuthenticationToken, String> issuerConverter;
 		
-		public ResolvingAuthenticationManager(String keycloakUrl) {
-			this.issuerConverter = new JwtClaimIssuerConverter(keycloakUrl);
+		private RequestProps request;
+		
+		public ResolvingAuthenticationManager(RequestProps request) {
+			this.request = request;
+			this.issuerConverter = new JwtClaimIssuerConverter(request);
 		}
 
 		@Override
@@ -53,7 +62,7 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 			
 			String issuer = this.issuerConverter.convert(token);
 			
-			JwtAuthenticationManagerResolver authenticationManagerResolver = new JwtAuthenticationManagerResolver();
+			JwtAuthenticationManagerResolver authenticationManagerResolver = new JwtAuthenticationManagerResolver(request.cache());
 			
 			AuthenticationManager authenticationManager = authenticationManagerResolver.resolve(issuer);
 			if (authenticationManager == null) {
@@ -66,52 +75,36 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 	}
 
 	static class JwtClaimIssuerConverter implements Converter<BearerTokenAuthenticationToken, String> {
+		
+		private RequestProps request;
 
-		private String keycloakUrl;
-
-		public JwtClaimIssuerConverter(String keycloakUrl) {
-			this.keycloakUrl = keycloakUrl;
+		public JwtClaimIssuerConverter(RequestProps request) {
+			this.request = request;
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public String convert(@NonNull BearerTokenAuthenticationToken authentication) {
-			if (keycloakUrl == "") {
+			if (request.keycloack() == "") {
 				throw new InvalidBearerTokenException("Missing issuer");
 			}
 			
 			try {
-				String token = authentication.getToken();
-				JWTClaimsSet claimsSet  = JWTParser.parse(token).getJWTClaimsSet();
-				
-				String origin = ((List<String>) claimsSet.getClaim("allowed-origins")).get(0);
-				URL url = new URL(origin);
-				String hostname = url.getHost();
-	
-				String realm = "wks-platform";
-				if (hostname.contains(".wkspower.")) {
-					if (!hostname.startsWith("app")) {
-						realm = hostname.substring(0, hostname.indexOf('.'));
-					}
-				}
-				
-				Object org = claimsSet.getClaim("org");
-				if (org == null) {
-					log.error("could not locate org by token");
-					throw new 	InvalidBearerTokenException("could not locate org by token");
-				}
-				
-				if (!realm.equals(org)) {
-					log.error("invalid org name when compared with dns prefix. it expected '{}' but was '{}'", org, realm);
-					throw new 	InvalidBearerTokenException("invalid org name when compared with dns prefix");
-				}
-				
-				String issueUrl = String.format("%s/realms/%s/protocol/openid-connect/certs", keycloakUrl, realm);
-				log.info("issuer url {}", issueUrl);
-				
+				String realm = extractTenantIdFromToken(authentication);
+				String issueUrl = String.format("%s/realms/%s/protocol/openid-connect/certs", request.keycloack(), realm);
+				log.debug("issuer url {}", issueUrl);
 				return issueUrl;
 			} catch (Exception ex) {
 				throw new InvalidBearerTokenException(ex.getMessage(), ex);
+			}
+		}
+
+		private String extractTenantIdFromToken(BearerTokenAuthenticationToken authentication) {
+			try {
+				String token = authentication.getToken();
+				JWTClaimsSet claims = JWTParser.parse(token).getJWTClaimsSet();
+				return (String) claims.getClaim("org");
+			} catch (ParseException e) {
+				throw new RuntimeException(e);
 			}
 		}
 	}
@@ -120,12 +113,22 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 
 		private final Map<String, AuthenticationManager> authenticationManagers = new ConcurrentHashMap<>();
 
+		private Cache cache;
+				
+		public JwtAuthenticationManagerResolver(Cache cache) {
+			this.cache = cache;
+		}
+
 		@Override
 		public AuthenticationManager resolve(String issuer) {
 			AuthenticationManager authenticationManager = this.authenticationManagers.computeIfAbsent(issuer, (k) -> {
-				log.info("Constructing AuthenticationManager");
-				log.info("Resolved AuthenticationManager for issuer '{}'", issuer);
-				JwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(issuer).build();
+				log.debug("Constructing AuthenticationManager");
+				log.debug("Resolved AuthenticationManager for issuer '{}'", issuer);
+				
+				JwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(issuer)
+																							   .cache(cache)
+																							   .build();
+				
 				return new JwtAuthenticationProvider(jwtDecoder)::authenticate;
 			});
 			

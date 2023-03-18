@@ -12,7 +12,7 @@ import com.google.gson.Gson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
-import com.wks.caseengine.db.MongoDataConnection;
+import com.wks.caseengine.db.EngineMongoDataConnection;
 import com.wks.caseengine.form.Form;
 import com.wks.caseengine.repository.FormRepository;
 
@@ -20,7 +20,7 @@ import com.wks.caseengine.repository.FormRepository;
 public class FormRepositoryImpl implements FormRepository {
 
 	@Autowired
-	private MongoDataConnection connection;
+	private EngineMongoDataConnection connection;
 
 	@Override
 	public Form get(final String formKey) throws Exception {

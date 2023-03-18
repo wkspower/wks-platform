@@ -1,9 +1,9 @@
 server:
-   port: 7100
+   port: 7101
 
 logging:
    level:
-      root: ERROR
+      root: INFO
       
 spring.mvc.converters.preferred-json-mapper: gson
 
@@ -19,10 +19,30 @@ camunda7.rest.task.url: /task
 camunda7.rest.correlate.url: /message
 
 spring.data.mongodb.uri: ${MONGO_CONN:mongodb://localhost}
-spring.data.mongodb.database: ${MONGO_DATABASE:wks-mongo-database}
+spring.data.mongodb.database: ${MONGO_SHARED_DATABASE:shared}
+spring.data.mongodb.database.tenant: ${MONGO_DATABASE:app}
 
-mongo.database: ${MONGO_DATABASE:wks-mongo-database}
-mongo.connection-string: ${MONGO_CONN:mongodb://localhost}
+mongo.data.import.enabled: true
+mongo.data.import.folder: ${IMPORT_DIR_PATH:./data}
 
-data.import.enabled: true
-data.import.folder: ${IMPORT_DIR_PATH:/opt/data}
+keycloak.data.import.enabled: true
+keycloak.data.import.url: ${KEYCLOAK_URL:http://localhost:8082}
+keycloak.data.import.admin: ${KEYCLOAK_ADMIN:admin}
+keycloak.data.import.adminpass: ${KEYCLOAK_PASS:admin}
+keycloak.data.import.clientid: wks-portal
+keycloak.data.import.realm: ${spring.data.mongodb.database.tenant}
+keycloak.data.import.dns: app.wkspower.local
+keycloak.data.import.port: :3001
+keycloak.data.import.protocol: http://
+keycloak.data.import.redirecturl: ${keycloak.data.import.protocol}${keycloak.data.import.dns}${keycloak.data.import.port}/*
+keycloak.data.import.weborigins: ${keycloak.data.import.protocol}${keycloak.data.import.dns}${keycloak.data.import.port}
+keycloak.data.import.username: victor
+keycloak.data.import.password: victor
+keycloak.data.import.firstname: Victor
+keycloak.data.import.lastname: Franca
+keycloak.data.import.email: victor@gmail.com
+
+camunda.data.import.enabled: true
+camunda.data.import.url: ${CAMUNDA_URL:http://localhost:8080/engine-rest}
+camunda.data.import.folder: ${IMPORT_DIR_PATH:./data}
+camunda.data.import.tenant: ${spring.data.mongodb.database.tenant}

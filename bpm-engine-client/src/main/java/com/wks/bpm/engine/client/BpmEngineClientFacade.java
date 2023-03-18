@@ -64,13 +64,16 @@ public class BpmEngineClientFacade {
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
 			final BpmEngine bpmEngine) {
 		return getEngineClient(bpmEngine).startProcess(processDefinitionKey, businessKey, bpmEngine);
+	}
 
+	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final JsonArray caseAttributes, final BpmEngine bpmEngine, final String tenantId) {
+		return getEngineClient(bpmEngine).startProcess(processDefinitionKey, businessKey, caseAttributes, bpmEngine, tenantId);
 	}
 
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
 			final JsonArray caseAttributes, final BpmEngine bpmEngine) {
 		return getEngineClient(bpmEngine).startProcess(processDefinitionKey, businessKey, caseAttributes, bpmEngine);
-
 	}
 
 	public void deleteProcessInstance(String processInstanceId, final BpmEngine bpmEngine) {

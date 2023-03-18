@@ -1,6 +1,6 @@
 package com.wks.api.security;
 
-public class OpenPolicyResponse {
+public final class OpenPolicyResponse {
 
 	private boolean result;
 

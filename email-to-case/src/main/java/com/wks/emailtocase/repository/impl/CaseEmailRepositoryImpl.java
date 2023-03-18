@@ -1,7 +1,5 @@
 package com.wks.emailtocase.repository.impl;
 
-import static com.mongodb.client.model.Sorts.descending;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,16 +12,15 @@ import org.springframework.stereotype.Component;
 import com.google.gson.Gson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.db.EngineMongoDataConnection;
 import com.wks.emailtocase.caseemail.CaseEmail;
-import com.wks.emailtocase.db.EmailToCaseMongoDataConnection;
 import com.wks.emailtocase.repository.CaseEmailRepository;
 
 @Component
 public class CaseEmailRepositoryImpl implements CaseEmailRepository {
 
 	@Autowired
-	private EmailToCaseMongoDataConnection connection;
+	private EngineMongoDataConnection connection;
 
 	@Override
 	public List<CaseEmail> find() throws Exception {
@@ -66,7 +63,6 @@ public class CaseEmailRepositoryImpl implements CaseEmailRepository {
 	@Override
 	public void delete(String id) throws Exception {
 		throw new UnsupportedOperationException();
-
 	}
 
 	private MongoCollection<JsonObject> getCollection() {

@@ -78,7 +78,7 @@ const Notification = () => {
                 .then((data) => {
                     setBudget(data.length ? data[0].total : 0);
                     setMessages(data);
-                    delay = 5000;
+                    delay = delay * 30;
                     timeout = setTimeout(updateNotify, delay);
                 })
                 .catch((error) => {

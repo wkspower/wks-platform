@@ -1,0 +1,38 @@
+[
+      {
+        "name": "client_case",
+        "description": ""
+      },
+      {
+        "name": "mgmt_bpm_engine",
+        "description": ""
+      },
+      {
+        "name": "mgmt_case_def",
+        "description": ""
+      },
+      {
+        "name": "client_task",
+        "description": ""
+      },
+      {
+        "name": "mgmt_process_engine",
+        "description": ""
+      },
+      {
+        "name": "mgmt_record_type",
+        "description": ""
+      },
+      {
+        "name": "client_record",
+        "description": ""
+      },
+      {
+        "name": "mgmt_bpm_engine_type",
+        "description": ""
+      },
+      {
+        "name": "mgmt_form",
+        "description": ""
+      }      
+]

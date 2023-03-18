@@ -6,15 +6,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.wks.caseengine.record.type.RecordTypeService;
+import com.wks.caseengine.rest.mocks.MockSecurityContext;
 import com.wks.caseengine.rest.server.RecordTypeController;
 
 @WebMvcTest(controllers = RecordTypeController.class)
@@ -27,6 +31,16 @@ public class RecordTypeControllerTest {
 	@MockBean
 	private RecordTypeService recordTypeService;
 
+	@BeforeEach
+	public void setup() {
+		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
+	}
+	
+	@AfterEach
+	private void teardown() {
+		SecurityContextHolder.clearContext();
+	}
+	
 	@Test
 	public void testSave() throws Exception {
 		this.mockMvc.perform(post("/record-type/").contentType(MediaType.APPLICATION_JSON).content("{}"))

@@ -13,14 +13,14 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.bpm.engine.BpmEngine;
-import com.wks.caseengine.db.MongoDataConnection;
+import com.wks.caseengine.db.EngineMongoDataConnection;
 import com.wks.caseengine.repository.BpmEngineRepository;
 
 @Component
 public class BpmEngineRepositoryImpl implements BpmEngineRepository {
 
 	@Autowired
-	private MongoDataConnection connection;
+	private EngineMongoDataConnection connection;
 
 	@Override
 	public List<BpmEngine> find() throws Exception {

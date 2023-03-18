@@ -28,7 +28,7 @@ const App = () => {
         });
 
         keycloak.onAuthRefreshError = () => {
-            keycloak.logout({ redirectUri: window.location.origin });
+            window.location.reload();
         };
 
         keycloak.onTokenExpired = () => {

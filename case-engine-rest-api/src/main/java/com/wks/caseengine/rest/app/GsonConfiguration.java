@@ -13,9 +13,7 @@ public class GsonConfiguration {
 
 	@Bean
 	public GsonBuilder gsonBuilder(List<GsonBuilderCustomizer> customizers) {
-
 		return new GsonBuilder();
-
 	}
 
 }

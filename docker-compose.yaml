@@ -4,6 +4,12 @@ services:
         image: mongo
         ports:
             - 27017:27017
+        healthcheck:
+            test: mongosh --eval 'db.stats().ok' --quiet
+            interval: 10s
+            retries: 3
+            start_period: 5s
+            timeout: 10s
 
     opa:
         image: openpolicyagent/opa:edge-static
@@ -29,33 +35,41 @@ services:
             timeout: 10s
         depends_on:
             mongodb:
-                condition: service_started
+                condition: service_healthy
 
     keycloak:
         image: quay.io/keycloak/keycloak:20.0.3
-        command: start-dev --import-realm
+        command: start-dev
         environment:
+            KC_HEALTH_ENABLED: true
             KEYCLOAK_ADMIN: admin
             KEYCLOAK_ADMIN_PASSWORD: admin
+        healthcheck:
+            test: curl --fail http://localhost:8080/health/ready || exit 1
+            interval: 10s
+            retries: 3
+            start_period: 5s
+            timeout: 10s
         ports:
             - 8082:8080
-        volumes:
-            - ./keycloak/realms:/opt/keycloak/data/import
-            - ./keycloak/themes:/opt/keycloak/themes
 
     case-engine-loader:
         build:
             context: case-engine-loader
         environment:
-            - CAMUNDA_BASE_URL=http://camunda:8080/engine-rest
+            - CAMUNDA_URL=http://camunda:8080/engine-rest
             - CAMUNDA_USERNAME=demo
             - CAMUNDA_PASSWORD=demo
-            - MONGO_DATABASE=wks-mongo-database
             - MONGO_CONN=mongodb://mongodb
+            - MONGO_SHARED_DATABASE=shared
+            - MONGO_DATABASE=wks
+            - KEYCLOAK_URL=http://keycloak:8080
         depends_on:
             mongodb:
-                condition: service_started
+                condition: service_healthy
             camunda:
+                condition: service_healthy
+            keycloak:
                 condition: service_healthy
        
     case-engine-rest-api:
@@ -67,11 +81,13 @@ services:
             - mongodb
             - camunda
         environment:
-            - MONGO_DATABASE=wks-mongo-database
+            - MONGO_DATABASE=wks
             - MONGO_CONN=mongodb://mongodb
             - KEYCLOAK_JWKS_SET_URI=http://keycloak:8080
             - OPA_URL=http://opa:8181/v1/data/wks/authz/allow
         depends_on:
+            mongodb:
+                condition: service_healthy
             camunda:
                 condition: service_healthy
 
@@ -82,12 +98,14 @@ services:
             - mongodb
             - camunda
         environment:
-            - CAMUNDA_BASE_URL=http://camunda:8080/engine-rest
+            - CAMUNDA_URL=http://camunda:8080/engine-rest
             - CAMUNDA_USERNAME=demo
             - CAMUNDA_PASSWORD=demo
-            - MONGO_DATABASE=wks-mongo-database
+            - MONGO_DATABASE=wks
             - MONGO_CONN=mongodb://mongodb
         depends_on:
+            mongodb:
+                condition: service_healthy
             camunda:
                 condition: service_healthy
 
@@ -100,16 +118,15 @@ services:
             - mongodb
             - camunda
         environment:
-            - CAMUNDA_BASE_URL=http://camunda:8080/engine-rest
-            - CAMUNDA_USERNAME=demo
-            - CAMUNDA_PASSWORD=demo
-            - MONGO_DATABASE=wks-mongo-database
+            - MONGO_DATABASE=wks
             - MONGO_CONN=mongodb://mongodb
             - EMAIL_CASE_PATTERN_NEW=new-case
             - EMAIL_CASE_PATTERN_UPDATE=update-case
             - KEYCLOAK_JWKS_SET_URI=http://keycloak:8080
             - OPA_URL=http://opa:8181/v1/data/wks/authz/allow
         depends_on:
+            mongodb:
+                condition: service_healthy
             camunda:
                 condition: service_healthy
 

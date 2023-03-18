@@ -112,19 +112,39 @@ public class C7EngineClient implements BpmEngineClient {
 
 		JsonObject processVariables = variablesMapper.map(caseAttributes);
 
-		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey,
-				businessKey, processVariables, bpmEngine);
+		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(
+				processDefinitionKey,
+				businessKey, 
+				processVariables, 
+				bpmEngine);
 
-		// TODO Using a particular rest template in order to set the GSON message
-		// converter. Need to improve this to avoid multiple rest template instances and
-		// configurations.
 		RestTemplate restTemplate = new RestTemplate();
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 		messageConverters.add(new GsonHttpMessageConverter());
 		restTemplate.setMessageConverters(messageConverters);
 
-		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
-				.getBody();
+		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class).getBody();
+	}
+	
+	@Override
+	public ProcessInstance startProcess(String processDefinitionKey, String businessKey,
+			JsonArray caseAttributes, BpmEngine bpmEngine, String tenantId) {
+		
+		JsonObject processVariables = variablesMapper.map(caseAttributes);
+		
+		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(
+				processDefinitionKey,
+				businessKey, 
+				processVariables, 
+				bpmEngine,
+				tenantId);
+		
+		RestTemplate restTemplate = new RestTemplate();
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+		messageConverters.add(new GsonHttpMessageConverter());
+		restTemplate.setMessageConverters(messageConverters);
+		
+		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class).getBody();
 	}
 
 	@Override

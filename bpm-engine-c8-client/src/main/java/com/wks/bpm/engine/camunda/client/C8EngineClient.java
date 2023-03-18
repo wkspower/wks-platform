@@ -57,7 +57,7 @@ public class C8EngineClient implements BpmEngineClient {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
-
+	
 	@Override
 	public String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) {
 		throw new UnsupportedOperationException();
@@ -77,6 +77,12 @@ public class C8EngineClient implements BpmEngineClient {
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
 			final BpmEngine bpmEngine) {
 		return zeebeClient.startProcess(processDefinitionKey, businessKey, bpmEngine);
+	}
+	
+	@Override
+	public ProcessInstance startProcess(String processDefinitionKey, String businessKey, JsonArray caseAttributes,
+			BpmEngine bpmEngine, String tenantId) {
+		return startProcess(processDefinitionKey, businessKey, caseAttributes, bpmEngine);
 	}
 
 	@Override

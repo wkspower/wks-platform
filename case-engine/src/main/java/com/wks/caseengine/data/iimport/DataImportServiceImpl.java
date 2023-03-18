@@ -10,15 +10,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import com.wks.bpm.engine.client.BpmEngineClientFacade;
-import com.wks.caseengine.db.MongoDataConnection;
-import com.wks.caseengine.repository.BpmEngineRepository;
+import com.wks.caseengine.db.EngineMongoDataConnection;
 
 @Component
 public class DataImportServiceImpl implements DataImportService {
 
 	@Autowired
-	private MongoDataConnection connection;
+	private EngineMongoDataConnection connection;
 
 	@Override
 	public void importData(JsonObject data) throws Exception {

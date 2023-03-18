@@ -12,7 +12,7 @@ import com.google.gson.Gson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
-import com.wks.caseengine.db.MongoDataConnection;
+import com.wks.caseengine.db.EngineMongoDataConnection;
 import com.wks.caseengine.record.type.RecordType;
 import com.wks.caseengine.repository.RecordTypeRepository;
 
@@ -20,7 +20,7 @@ import com.wks.caseengine.repository.RecordTypeRepository;
 public class RecordTypeRepositoryImpl implements RecordTypeRepository {
 
 	@Autowired
-	private MongoDataConnection connection;
+	private EngineMongoDataConnection connection;
 
 	@Override
 	public RecordType get(final String id) throws Exception {

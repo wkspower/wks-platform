@@ -1,0 +1,23 @@
+[
+  {
+    "name": "user",
+    "path": "/user",
+    "realmRoles": [
+      "client_case",
+      "client_task",
+      "client_record"
+    ]
+  },
+  {
+    "name": "manager",
+    "path": "/manager",
+    "realmRoles": [
+      "mgmt_case_def",
+      "mgmt_ bpm_engine",
+      "mgmt_process_engine",
+      "mgmt_record_type",
+      "mgmt_form",
+      "mgmt_ bpm_engine_type"
+    ]
+  }    
+]

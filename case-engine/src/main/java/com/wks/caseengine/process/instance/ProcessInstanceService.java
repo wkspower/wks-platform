@@ -11,11 +11,11 @@ public interface ProcessInstanceService {
 
 	ProcessInstance create(final String processDefinitionKey, final String bpmEngineId) throws Exception;
 
-	ProcessInstance create(final String processDefinitionKey, String businessKey, final String bpmEngineId)
-			throws Exception;
+	ProcessInstance create(final String processDefinitionKey, String businessKey, final String bpmEngineId) throws Exception;
 
-	ProcessInstance create(String processDefinitionKey, String businessKey, List<CaseAttribute> caseAttributes,
-			String bpmEngineId) throws Exception;
+	ProcessInstance create(String processDefinitionKey, String businessKey, List<CaseAttribute> caseAttributes, String bpmEngineId) throws Exception;
+	
+	ProcessInstance create(String processDefinitionKey, String businessKey, List<CaseAttribute> caseAttributes, String bpmEngineId, String tenantId) throws Exception;
 
 	void delete(final List<ProcessInstance> processInstances, final String bpmEngineId);
 
