@@ -1,8 +1,12 @@
 package com.wks.caseengine.db;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
 
 import org.bson.UuidRepresentation;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.Conventions;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +17,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 
-import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 
 @Configuration
@@ -29,16 +32,22 @@ public class EngineMongoTenateConfig extends AbstractMongoClientConfiguration {
 	
 	@Override
 	protected MongoClientSettings mongoClientSettings() {
-		MongoClientSettings.Builder builder = MongoClientSettings.builder();
+		PojoCodecProvider build = PojoCodecProvider.builder()
+																						.conventions(Arrays.asList(Conventions.ANNOTATION_CONVENTION))
+																						.automatic(true)
+																						.build();
+		
+		CodecRegistry provider = CodecRegistries.fromProviders(build);
+
+		CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), provider); 
+		
+		MongoClientSettings.Builder builder = MongoClientSettings.builder().codecRegistry(pojoCodecRegistry);
+		
 		builder.applyToConnectionPoolSettings(pool -> {
 			pool.minSize(props.getMinPool());
 			pool.maxSize(props.getMaxPool());
-			pool.maxConnectionIdleTime(props.getMaxConnectionIdleTime(), TimeUnit.MILLISECONDS);
-			pool.maxConnectionLifeTime(props.getMaxConnectionLifeTime(), TimeUnit.MILLISECONDS);
 		});
-		builder.applyToClusterSettings(c -> {
-			c.applyConnectionString(new ConnectionString(props.getUri()));
-		});
+		
 		builder.uuidRepresentation(UuidRepresentation.JAVA_LEGACY);
 		return builder.build();
 	}
