@@ -117,11 +117,14 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     isValid: true
                 });
                 setActiveStage(caseData.stage);
+
             })
             .catch((err) => {
                 console.log(err.message);
             });
-    };
+            
+            console.log(formData);
+        };
 
     const handleTabChanged = (event, newValue) => {
         setTabIndex(newValue);
@@ -308,6 +311,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                 businessKey={aCase.businessKey}
                                 bpmEngineId={caseDef.bpmEngineId}
                                 keycloak={keycloak}
+                                getCaseInfo={getCaseInfo}
                             />
                         </div>
                     </TabPanel>
@@ -320,8 +324,9 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                         >
                             <Grid item xs={12}>
                                 <Comments
-                                    commentsUrl="http://localhost:3004/comments"
-                                    currentUserId="1"
+                                    aCase={aCase}
+                                    getCaseInfo={getCaseInfo}
+                                    comments={formData.data.comments ? formData.data.comments : []}
                                 />
                             </Grid>
                         </Grid>

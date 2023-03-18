@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-    createComment as createCommentApi,
     deleteComment as deleteCommentApi,
-    getComments as getCommentsApi,
     updateComment as updateCommentApi
 } from './api';
 import Comment from './Comment';
@@ -13,19 +11,31 @@ import MainCard from 'components/MainCard';
 
 import './comments.css';
 
-export const Comments = ({ commentsUrl, currentUserId }) => {
-    const [backendComments, setBackendComments] = useState([]);
+import { useSession } from 'SessionStoreContext';
+
+import { CaseService } from '../../services';
+
+export const Comments = ({ comments, aCase, getCaseInfo }) => {
+    const [backendComments, setBackendComments] = useState(comments);
+
     const [activeComment, setActiveComment] = useState(null);
-    const rootComments = backendComments.filter((backendComment) => backendComment.parentId === null);
+    
+    const rootComments = backendComments.filter((backendComment) => backendComment.parentId === null || !backendComment.hasOwnProperty("parentId"));
+    
     const getReplies = (commentId) =>
         backendComments
             .filter((backendComment) => backendComment.parentId === commentId)
             .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    const addComment = (text, parentId) => {
-        createCommentApi(text, parentId).then((comment) => {
-            setBackendComments([comment, ...backendComments]);
-            setActiveComment(null);
-        });
+
+    const keycloak = useSession();
+
+    const addComment = async (text, parentId) => {
+        CaseService.addComment(keycloak, text, parentId, aCase.businessKey)
+        .then(() => {
+            getCaseInfo(aCase, true);
+        })
+        .catch((err) => console.error(err));
+
     };
 
     const updateComment = (text, commentId) => {
@@ -50,12 +60,18 @@ export const Comments = ({ commentsUrl, currentUserId }) => {
     };
 
     useEffect(() => {
-        getCommentsApi().then((data) => {
-            setBackendComments(data);
-        });
-    }, []);
+        setBackendComments(comments);
+    });
 
-    return (
+    // useEffect(() => {
+    //     getCommentsApi().then((data) => {
+    //         setBackendComments(data);
+    //     });
+
+    //     console.log(backendComments);
+    // }, []);
+
+    return (       
         <MainCard sx={{ p: 2 }} content={false}>
             <Typography variant="h5" sx={{ textDecoration: 'none' }} color="textSecondary">
                 Comments
@@ -72,7 +88,7 @@ export const Comments = ({ commentsUrl, currentUserId }) => {
                     addComment={addComment}
                     deleteComment={deleteComment}
                     updateComment={updateComment}
-                    currentUserId={currentUserId}
+                    currentUserId={keycloak.tokenParsed.preferred_username}
                 />
             ))}
         </MainCard>

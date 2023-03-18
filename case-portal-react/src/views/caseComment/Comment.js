@@ -40,7 +40,7 @@ const Comment = ({
                     <div className="comment-content">
                         <Box sx={{ display: 'flex', flexDirection: 'row', m: 1 }}>
                             <Typography sx={{ p: 0.5 }} variant="h5">
-                                {comment.username}
+                                {comment.userName}
                             </Typography>
                             <Typography sx={{ p: 0.5 }}>{createdAt}</Typography>
                         </Box>
