@@ -22,6 +22,7 @@ import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceFile;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.cases.instance.CaseInstanceService;
+import com.wks.caseengine.cases.instance.Comment;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -72,5 +73,10 @@ public class CaseController {
 		} catch (CaseInstanceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Case Instance Not Found - " + businessKey, e);
 		}
+	}
+	
+	@PostMapping(value = "/comment")
+	public void addComment(@RequestBody final Comment newComment) throws Exception {
+		caseInstanceService.addComment(newComment);
 	}
 }

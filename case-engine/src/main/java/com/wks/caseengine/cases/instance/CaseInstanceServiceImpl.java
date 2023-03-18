@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.http.client.utils.DateUtils;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -162,6 +163,41 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 		}
 		
 		repository.update(businessKey, caseInstance);
+	}
+	
+	@Override
+	public void addComment(Comment newComment) throws Exception {
+		CaseInstance caseInstance = repository.get(newComment.getCaseId());
+		
+		List<Comment> comments = new ArrayList<Comment>();
+		
+		caseInstance.getAttributes().forEach(attribute -> {
+			if (StringUtils.equals(attribute.getName(), "comments")) {
+				comments.addAll(gson.fromJson(attribute.getValue(), new TypeToken<List<Comment>>(){}.getType()));
+			}
+		});
+		
+		newComment.setCreatedAt(new Date());
+		
+		newComment.setId(ObjectId.get().toString());
+		
+		comments.add(newComment);
+		
+		Boolean commentsAttributeFound = false;
+		
+		for (CaseAttribute attribute : caseInstance.getAttributes()) {
+			if (StringUtils.equals(attribute.getName(), "comments")) {
+				attribute.setValue(gson.toJson(comments));
+				commentsAttributeFound = true;
+				break;
+			}
+		}
+		
+		if (!commentsAttributeFound) {
+			caseInstance.getAttributes().add(new CaseAttribute("comments", gson.toJson(comments)));
+		}
+		
+		repository.update(newComment.getCaseId(), caseInstance);
 	}
 
 	public void setRepository(CaseInstanceRepository repository) {

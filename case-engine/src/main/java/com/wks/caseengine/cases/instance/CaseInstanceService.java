@@ -23,5 +23,7 @@ public interface CaseInstanceService {
 	void delete(final String businessKey) throws CaseInstanceNotFoundException, Exception;
 
 	void uploadFiles(String businessKey, CaseInstanceFile[] files) throws Exception;
+
+	void addComment(Comment newComment) throws Exception;
 	
 }

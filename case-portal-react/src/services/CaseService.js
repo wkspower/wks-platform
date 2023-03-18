@@ -10,7 +10,8 @@ export const CaseService = {
     getRecordTypes,
     updateCaseStatusById,
     uploadCaseAttachById,
-    createCase
+    createCase,
+    addComment
 };
 
 async function getAllByStatus(keycloak, status, limit) {
@@ -200,4 +201,32 @@ function mapperToCase(data) {
     });
 
     return Promise.resolve(toCase);
+}
+
+async function addComment(keycloak, text, parentId, businessKey) {
+    const url = `${process.env.REACT_APP_API_URL}/case/comment`;
+
+        const comment = {
+            body: text,
+            parentId,
+            userId: keycloak.tokenParsed.preferred_username,
+            userName: keycloak.tokenParsed.given_name,
+            caseId: businessKey
+        };
+
+        try {
+            const resp = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${keycloak.token}`
+                },
+                body: JSON.stringify(comment)
+            });
+            return nop(keycloak, resp);
+        } catch (e) {
+            console.log(e);
+            return await Promise.reject(e);
+        }
 }
