@@ -9,6 +9,9 @@ import lombok.Getter;
 @Getter
 public class EngineMongoSettings {
 	
+	@Value("${spring.data.mongodb.uri}")
+	private String uri;
+	
     @Value("${spring.data.mongodb.database}")
     private String dataBaseName;
 

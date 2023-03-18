@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 
+import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 
 @Configuration
@@ -34,6 +35,9 @@ public class EngineMongoTenateConfig extends AbstractMongoClientConfiguration {
 			pool.maxSize(props.getMaxPool());
 			pool.maxConnectionIdleTime(props.getMaxConnectionIdleTime(), TimeUnit.MILLISECONDS);
 			pool.maxConnectionLifeTime(props.getMaxConnectionLifeTime(), TimeUnit.MILLISECONDS);
+		});
+		builder.applyToClusterSettings(c -> {
+			c.applyConnectionString(new ConnectionString(props.getUri()));
 		});
 		builder.uuidRepresentation(UuidRepresentation.JAVA_LEGACY);
 		return builder.build();
