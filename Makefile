@@ -1,5 +1,5 @@
 servers:
-	@docker-compose up --build --remove-orphans mongodb camunda keycloak opa case-engine-loader
+	@docker-compose up --build --remove-orphans mongodb camunda keycloak opa
 
 backend:
 	@docker-compose up --build --remove-orphans case-engine-rest-api bpm-engine-c7-external-service email-to-case
