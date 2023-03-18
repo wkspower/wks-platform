@@ -14,4 +14,4 @@ user-guide:
 	@cd $(PWD)/website && make
 
 sendmail:
-	@curl -i -XPOST http://localhost:8083/email/receive?apiKey=wRSlZt0oNGq6NOzsSu2PdczFsmZXK0Sao4cqCu8mmvdARWTAd3-8QXHROVOnYjOm -H "content-type: multipart/form-data" -F to=contractor-onboarding@new-case.app.sendgrid.wkspower.com -F from=1@new-case -F subject=1@new-case -F text= -F html=
+	@curl -i -XPOST http://localhost:8083/email/receive?apiKey=wRSlZt0oNGq6NOzsSu2PdczFsmZXK0Sao4cqCu8mmvdARWTAd3-8QXHROVOnYjOm -H "content-type: multipart/form-data" -F to=contractor-onboarding@new-case.localhost.sendgrid.wkspower.com -F from=1@new-case -F subject=1@new-case -F text= -F html=

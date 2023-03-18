@@ -1,14 +1,14 @@
 import Keycloak from 'keycloak-js';
 
 function bootstrap() {
-    let realm = 'wks';
+    let realm = '';
     const clientId = 'wks-portal';
     const hostname = window.location.hostname;
 
-    console.log(hostname);
-
     if (hostname !== 'localhost') {
         realm = hostname.substring(0, hostname.indexOf('.'));
+    } else {
+        realm = hostname;
     }
 
     const kc = Keycloak({
