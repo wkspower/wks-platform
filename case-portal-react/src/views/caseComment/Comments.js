@@ -63,14 +63,6 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
         setBackendComments(comments);
     });
 
-    // useEffect(() => {
-    //     getCommentsApi().then((data) => {
-    //         setBackendComments(data);
-    //     });
-
-    //     console.log(backendComments);
-    // }, []);
-
     return (       
         <MainCard sx={{ p: 2 }} content={false}>
             <Typography variant="h5" sx={{ textDecoration: 'none' }} color="textSecondary">

@@ -206,8 +206,6 @@ function mapperToCase(data) {
 async function addComment(keycloak, text, parentId, businessKey) {
     const url = `${process.env.REACT_APP_API_URL}/case/comment`;
 
-        console.log(keycloak);
-
         const comment = {
             body: text,
             parentId,
