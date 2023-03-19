@@ -24,7 +24,8 @@ camunda7.rest.correlate.url: /message
 
 camunda.bpm.client:
   base-url: ${CAMUNDA_URL:http://localhost:8080/engine-rest}
-  disable-backoff-strategy: true
+  disable-backoff-strategy: false
+  backoff-strategy-time: 2000
   basic-auth:
     username: ${CAMUNDA_USERNAME:demo}
     password: ${CAMUNDA_PASSWORD:demo}
