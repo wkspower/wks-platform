@@ -17,6 +17,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 
+import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 
 @Configuration
@@ -41,12 +42,16 @@ public class EngineMongoTenateConfig extends AbstractMongoClientConfiguration {
 
 		CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), provider); 
 		
-		MongoClientSettings.Builder builder = MongoClientSettings.builder().codecRegistry(pojoCodecRegistry);
+		MongoClientSettings.Builder builder = MongoClientSettings.builder()
+																												.applyConnectionString(new ConnectionString(props.getUri()))
+																												.codecRegistry(pojoCodecRegistry);
 		
 		builder.applyToConnectionPoolSettings(pool -> {
 			pool.minSize(props.getMinPool());
 			pool.maxSize(props.getMaxPool());
 		});
+		
+		
 		
 		builder.uuidRepresentation(UuidRepresentation.JAVA_LEGACY);
 		return builder.build();
