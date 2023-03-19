@@ -25,13 +25,13 @@ public class ApiSecurityConfig {
 	
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    	 http.cors()
+    	http.regexMatcher("^(?!(/actuator/)).*$")
+    	 		.cors()
     	 		.and()
     	 		.csrf().disable()
     	 		.authorizeRequests()
     	 		.filterSecurityInterceptorOncePerRequest(false)
-    	 		.anyRequest()
-    	 		.authenticated()
+    	 		.anyRequest().authenticated()
     	 		.accessDecisionManager(accessDecisionManager());
         return http.build();
     }

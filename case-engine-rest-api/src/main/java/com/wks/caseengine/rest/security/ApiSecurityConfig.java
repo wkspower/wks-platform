@@ -23,18 +23,18 @@ public class ApiSecurityConfig {
 		
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    	 http.cors()
+    	 http.regexMatcher("^(?!(/actuator/)).*$")
+    	 		.cors()
     	 		.and()
     	 		.csrf().disable()
     	 		.authorizeRequests(authz -> authz
     	 			.filterSecurityInterceptorOncePerRequest(false)
-    	            .anyRequest()
-    	            .authenticated()
+    	            .anyRequest().authenticated()
     	            .accessDecisionManager(accessDecisionManager())
     	 		)
-    	 		.oauth2ResourceServer(oauth2 -> {
-					oauth2.authenticationManagerResolver(new JwksIssuerAuthenticationManagerResolver(keycloakUrl));
-				});
+    	 		.oauth2ResourceServer(oauth2 -> oauth2 
+					.authenticationManagerResolver(new JwksIssuerAuthenticationManagerResolver(keycloakUrl))
+				);
         return http.build();
     }
     
