@@ -51,10 +51,15 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
 
     const deleteComment = (commentId) => {
         // if (window.confirm('Are you sure you want to remove comment?')) {
-        deleteCommentApi().then(() => {
-            const updatedBackendComments = backendComments.filter((backendComment) => backendComment.id !== commentId);
-            setBackendComments(updatedBackendComments);
-        });
+        CaseService.deleteComment(keycloak, commentId, aCase.businessKey)
+            .then(() => {
+                getCaseInfo(aCase, true);
+                setActiveComment(null);
+            })
+            .catch((err) => {
+                console.error(err);
+                setActiveComment(null);
+            });
         // }
     };
 

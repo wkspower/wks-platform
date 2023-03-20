@@ -27,5 +27,7 @@ public interface CaseInstanceService {
 	void addComment(Comment newComment) throws Exception;
 
 	void editComment(Comment comment) throws Exception;
+
+	void deleteComment(Comment comment) throws Exception;
 	
 }

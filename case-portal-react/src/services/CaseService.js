@@ -12,7 +12,8 @@ export const CaseService = {
     uploadCaseAttachById,
     createCase,
     addComment,
-    editComment
+    editComment,
+    deleteComment
 };
 
 async function getAllByStatus(keycloak, status, limit) {
@@ -245,6 +246,32 @@ async function editComment(keycloak, text, commentId, businessKey) {
         try {
             const resp = await fetch(url, {
                 method: 'PUT',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${keycloak.token}`
+                },
+                body: JSON.stringify(comment)
+            });
+            return nop(keycloak, resp);
+        } catch (e) {
+            console.log(e);
+            return await Promise.reject(e);
+        }
+}
+
+async function deleteComment(keycloak, commentId, businessKey) {
+    const url = `${process.env.REACT_APP_API_URL}/case/comment/delete`;
+
+        const comment = {
+            id: commentId,
+            userId: keycloak.tokenParsed.preferred_username,
+            caseId: businessKey
+        };
+
+        try {
+            const resp = await fetch(url, {
+                method: 'POST',
                 headers: {
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
