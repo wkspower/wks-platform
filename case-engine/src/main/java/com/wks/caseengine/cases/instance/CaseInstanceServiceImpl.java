@@ -217,7 +217,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 		
 		for (Comment commentOnBase : comments) {
 			if (StringUtils.equals(commentOnBase.getId(), comment.getId())) {
-				if (!StringUtils.equals(commentOnBase.getUserId(), comment.getUserId())) {
+				if (StringUtils.equals(commentOnBase.getUserId(), comment.getUserId())) {
 					commentOnBase.setBody(comment.getBody());
 				} else {
 					throw new CaseInstanceCommentNotFoundException("Only the original user can edit a comment");
