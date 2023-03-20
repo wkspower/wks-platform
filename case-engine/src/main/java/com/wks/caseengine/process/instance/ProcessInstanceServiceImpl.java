@@ -46,17 +46,6 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	}
 	
 	@Override
-	public ProcessInstance create(final String processDefinitionKey, final String businessKey,
-			final List<CaseAttribute> caseAttributes, final String bpmEngineId, final String tenantId) throws Exception {
-		return processEngineClient.startProcess(
-				processDefinitionKey, 
-				businessKey,
-				new Gson().toJsonTree(caseAttributes).getAsJsonArray(), 
-				bpmEngineRepository.get(bpmEngineId),
-				tenantId);
-	}
-
-	@Override
 	public void delete(final String processInstanceId, final String bpmEngineId) throws Exception {
 		processEngineClient.deleteProcessInstance(processInstanceId, bpmEngineRepository.get(bpmEngineId));
 	}

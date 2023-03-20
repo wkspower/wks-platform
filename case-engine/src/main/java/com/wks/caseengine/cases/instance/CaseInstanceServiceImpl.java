@@ -65,8 +65,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 				caseDefinition.getStagesLifecycleProcessKey(), 
 				newCaseInstance.getBusinessKey(),
 				newCaseInstance.getAttributes(), 
-				caseDefinition.getBpmEngineId(),
-				holder.getTenantId().get());
+				caseDefinition.getBpmEngineId());
 
 		return newCaseInstance;
 	}
