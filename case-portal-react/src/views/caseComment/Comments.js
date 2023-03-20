@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-    deleteComment as deleteCommentApi,
-    updateComment as updateCommentApi
+    deleteComment as deleteCommentApi
 } from './api';
 import Comment from './Comment';
 import CommentForm from './CommentForm';
@@ -33,23 +32,20 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
         CaseService.addComment(keycloak, text, parentId, aCase.businessKey)
         .then(() => {
             getCaseInfo(aCase, true);
+            setActiveComment(null);
         })
         .catch((err) => console.error(err));
-
     };
 
     const updateComment = (text, commentId) => {
-        updateCommentApi(text).then(() => {
-            const updatedBackendComments = backendComments.map((backendComment) => {
-                if (backendComment.id === commentId) {
-                    return { ...backendComment, body: text };
-                }
-                return backendComment;
-            });
-            setBackendComments(updatedBackendComments);
+        CaseService.editComment(keycloak, text, commentId, aCase.businessKey)
+        .then(() => {
+            getCaseInfo(aCase, true);
             setActiveComment(null);
-        });
+        })
+        .catch((err) => console.error(err));
     };
+
     const deleteComment = (commentId) => {
         // if (window.confirm('Are you sure you want to remove comment?')) {
         deleteCommentApi().then(() => {

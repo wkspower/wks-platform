@@ -25,5 +25,7 @@ public interface CaseInstanceService {
 	void uploadFiles(String businessKey, CaseInstanceFile[] files) throws Exception;
 
 	void addComment(Comment newComment) throws Exception;
+
+	void editComment(Comment comment) throws Exception;
 	
 }
