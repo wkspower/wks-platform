@@ -43,7 +43,10 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
             getCaseInfo(aCase, true);
             setActiveComment(null);
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+            console.error(err);
+            setActiveComment(null);
+        });
     };
 
     const deleteComment = (commentId) => {

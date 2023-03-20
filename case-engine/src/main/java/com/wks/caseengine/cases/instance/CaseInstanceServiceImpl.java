@@ -211,24 +211,25 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 			}
 		});
 		
-		for (Comment commentOnBase : comments) {
-			if (StringUtils.equals(commentOnBase.getId(), comment.getId())) {
-				commentOnBase.setBody(comment.getBody());
-			}
+		if (comments == null || comments.isEmpty() ) {
+			throw new CaseInstanceCommentNotFoundException("Comment not found");
 		}
 		
-		Boolean commentsAttributeFound = false;
+		for (Comment commentOnBase : comments) {
+			if (StringUtils.equals(commentOnBase.getId(), comment.getId())) {
+				if (!StringUtils.equals(commentOnBase.getUserId(), comment.getUserId())) {
+					commentOnBase.setBody(comment.getBody());
+				} else {
+					throw new CaseInstanceCommentNotFoundException("Only the original user can edit a comment");
+				}
+			}
+		}
 		
 		for (CaseAttribute attribute : caseInstance.getAttributes()) {
 			if (StringUtils.equals(attribute.getName(), "comments")) {
 				attribute.setValue(gson.toJson(comments));
-				commentsAttributeFound = true;
 				break;
 			}
-		}
-		
-		if (!commentsAttributeFound) {
-			caseInstance.getAttributes().add(new CaseAttribute("comments", gson.toJson(comments)));
 		}
 		
 		repository.update(comment.getCaseId(), caseInstance);

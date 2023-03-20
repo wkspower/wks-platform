@@ -238,6 +238,7 @@ async function editComment(keycloak, text, commentId, businessKey) {
         const comment = {
             id: commentId,
             body: text,
+            userId: keycloak.tokenParsed.preferred_username,
             caseId: businessKey
         };
 
