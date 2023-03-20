@@ -1,7 +1,4 @@
 import { useEffect, useState } from 'react';
-import {
-    deleteComment as deleteCommentApi
-} from './api';
 import Comment from './Comment';
 import CommentForm from './CommentForm';
 
