@@ -47,8 +47,7 @@ public class InjectorTenantHandlerInterceptor implements HandlerInterceptor {
     	
     	String tenantId = (String) params.get("org");
     	if (tenantId == null || tenantId.isBlank()) {
-    		log.error("Could't find tenantId by subdomain, it was expected to be filled but it is empty {}", tenantId);
-    		throw new IllegalArgumentException("Could't find tenantId by mail server dns ");
+    		log.warn("Could't find tenantId by subdomain, it was expected to be filled but it is empty {}", tenantId);
     	}
     	
         tenantHolder.setTenantId(tenantId);

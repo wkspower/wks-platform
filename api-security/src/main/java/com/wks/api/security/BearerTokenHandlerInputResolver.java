@@ -32,7 +32,7 @@ public final class BearerTokenHandlerInputResolver implements HandlerInputResolv
 		input.put("path", path[0]);
 		input.put("host", HttpUtils.getHost(request.getHeader("origin")));
 
-		if (authentication.getCredentials() instanceof Jwt) {
+		if (authentication != null && authentication.getCredentials() instanceof Jwt) {
 			Jwt jwt = (Jwt) authentication.getCredentials();
 			input.put("org", jwt.getClaim("org"));
 			input.put("allowed_origin", getAllowedOrigin(jwt));

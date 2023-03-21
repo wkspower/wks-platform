@@ -24,6 +24,7 @@ public class ApiSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     	 http.regexMatcher("^(?!(/actuator/)).*$")
+    	 		.regexMatcher("^(?!(/swagger-ui/)).*$")
     	 		.cors()
     	 		.and()
     	 		.csrf().disable()
@@ -38,7 +39,6 @@ public class ApiSecurityConfig {
         return http.build();
     }
     
-    @Bean
 	public AccessDecisionManager accessDecisionManager() {
 		return new UnanimousBased(Arrays.asList(new OpenPolicyAuthzEnforcer(opaUrl)));
 	}
