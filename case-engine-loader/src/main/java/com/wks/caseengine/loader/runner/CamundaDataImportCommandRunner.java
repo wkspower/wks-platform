@@ -48,12 +48,12 @@ public class CamundaDataImportCommandRunner implements CommandLineRunner {
 
 		importData();
 
-		createTenante();
+		createTenant();
 
 		log.info("Finish upload model to camunda");
 	}
 
-	private void createTenante() {
+	private void createTenant() {
 		RestTemplate restTemplate = new RestTemplate();
 
 		HttpHeaders headers = new HttpHeaders();

@@ -198,6 +198,82 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 		
 		repository.update(newComment.getCaseId(), caseInstance);
 	}
+	
+	@Override
+	public void editComment(Comment comment) throws Exception {
+		CaseInstance caseInstance = repository.get(comment.getCaseId());
+		
+		List<Comment> comments = new ArrayList<Comment>();
+		
+		caseInstance.getAttributes().forEach(attribute -> {
+			if (StringUtils.equals(attribute.getName(), "comments")) {
+				comments.addAll(gson.fromJson(attribute.getValue(), new TypeToken<List<Comment>>(){}.getType()));
+			}
+		});
+		
+		if (comments == null || comments.isEmpty() ) {
+			throw new CaseInstanceCommentNotFoundException("Comment not found");
+		}
+		
+		for (Comment commentOnBase : comments) {
+			if (StringUtils.equals(commentOnBase.getId(), comment.getId())) {
+				if (StringUtils.equals(commentOnBase.getUserId(), comment.getUserId())) {
+					commentOnBase.setBody(comment.getBody());
+				} else {
+					throw new CaseInstanceCommentNotFoundException("Only the original user can edit a comment");
+				}
+			}
+		}
+		
+		for (CaseAttribute attribute : caseInstance.getAttributes()) {
+			if (StringUtils.equals(attribute.getName(), "comments")) {
+				attribute.setValue(gson.toJson(comments));
+				break;
+			}
+		}
+		
+		repository.update(comment.getCaseId(), caseInstance);
+	}
+	
+	@Override
+	public void deleteComment(Comment comment) throws Exception {
+		CaseInstance caseInstance = repository.get(comment.getCaseId());
+		
+		List<Comment> comments = new ArrayList<Comment>();
+		
+		caseInstance.getAttributes().forEach(attribute -> {
+			if (StringUtils.equals(attribute.getName(), "comments")) {
+				comments.addAll(gson.fromJson(attribute.getValue(), new TypeToken<List<Comment>>(){}.getType()));
+			}
+		});
+		
+		if (comments == null || comments.isEmpty() ) {
+			throw new CaseInstanceCommentNotFoundException("Comment not found");
+		}
+		
+		Comment commentToDelete = null;
+		
+		for (Comment commentOnBase : comments) {
+			if (StringUtils.equals(commentOnBase.getId(), comment.getId())) {
+				if (StringUtils.equals(commentOnBase.getUserId(), comment.getUserId())) {
+					commentToDelete = commentOnBase;
+				} else {
+					throw new CaseInstanceCommentNotFoundException("Only the original user can delete a comment");
+				}
+			}
+		}
+		
+		comments.remove(commentToDelete);
+		
+		for (CaseAttribute attribute : caseInstance.getAttributes()) {
+			if (StringUtils.equals(attribute.getName(), "comments")) {
+				attribute.setValue(gson.toJson(comments));
+				break;
+			}
+		}
+		
+		repository.update(comment.getCaseId(), caseInstance);
+	}
 
 	public void setRepository(CaseInstanceRepository repository) {
 		this.repository = repository;
@@ -206,5 +282,4 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	public void setCaseInstanceCreateService(CaseInstanceCreateService caseInstanceCreateService) {
 		this.caseInstanceCreateService = caseInstanceCreateService;
 	}
-
 }

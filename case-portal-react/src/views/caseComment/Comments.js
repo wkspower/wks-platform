@@ -31,20 +31,25 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
                 getCaseInfo(aCase, true);
             })
             .catch((err) => console.error(err));
+        .then(() => {
+            getCaseInfo(aCase, true);
+            setActiveComment(null);
+        })
+        .catch((err) => console.error(err));
     };
 
     const updateComment = (text, commentId) => {
-        updateCommentApi(text).then(() => {
-            const updatedBackendComments = backendComments.map((backendComment) => {
-                if (backendComment.id === commentId) {
-                    return { ...backendComment, body: text };
-                }
-                return backendComment;
-            });
-            setBackendComments(updatedBackendComments);
+        CaseService.editComment(keycloak, text, commentId, aCase.businessKey)
+        .then(() => {
+            getCaseInfo(aCase, true);
+            setActiveComment(null);
+        })
+        .catch((err) => {
+            console.error(err);
             setActiveComment(null);
         });
     };
+
     const deleteComment = (commentId) => {
         // if (window.confirm('Are you sure you want to remove comment?')) {
         deleteCommentApi().then(() => {
@@ -53,6 +58,15 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
             );
             setBackendComments(updatedBackendComments);
         });
+        CaseService.deleteComment(keycloak, commentId, aCase.businessKey)
+            .then(() => {
+                getCaseInfo(aCase, true);
+                setActiveComment(null);
+            })
+            .catch((err) => {
+                console.error(err);
+                setActiveComment(null);
+            });
         // }
     };
 

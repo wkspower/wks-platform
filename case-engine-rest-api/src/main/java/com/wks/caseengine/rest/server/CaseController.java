@@ -79,4 +79,14 @@ public class CaseController {
 	public void addComment(@RequestBody final Comment newComment) throws Exception {
 		caseInstanceService.addComment(newComment);
 	}
+
+	@PutMapping(value = "/comment")
+	public void editComment(@RequestBody final Comment comment) throws Exception {
+		caseInstanceService.editComment(comment);
+	}
+	
+	@PostMapping(value = "/comment/delete")
+	public void deleteComment(@RequestBody final Comment comment) throws Exception {
+		caseInstanceService.deleteComment(comment);
+	}
 }

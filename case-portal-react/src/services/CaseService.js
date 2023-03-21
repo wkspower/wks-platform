@@ -11,7 +11,9 @@ export const CaseService = {
     updateCaseStatusById,
     uploadCaseAttachById,
     createCase,
-    addComment
+    addComment,
+    editComment,
+    deleteComment
 };
 
 async function getAllByStatus(keycloak, status, limit) {
@@ -211,6 +213,59 @@ async function addComment(keycloak, text, parentId, businessKey) {
             parentId,
             userId: keycloak.tokenParsed.preferred_username,
             userName: keycloak.tokenParsed.given_name,
+            caseId: businessKey
+        };
+
+        try {
+            const resp = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${keycloak.token}`
+                },
+                body: JSON.stringify(comment)
+            });
+            return nop(keycloak, resp);
+        } catch (e) {
+            console.log(e);
+            return await Promise.reject(e);
+        }
+}
+
+async function editComment(keycloak, text, commentId, businessKey) {
+    const url = `${process.env.REACT_APP_API_URL}/case/comment`;
+
+        const comment = {
+            id: commentId,
+            body: text,
+            userId: keycloak.tokenParsed.preferred_username,
+            caseId: businessKey
+        };
+
+        try {
+            const resp = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${keycloak.token}`
+                },
+                body: JSON.stringify(comment)
+            });
+            return nop(keycloak, resp);
+        } catch (e) {
+            console.log(e);
+            return await Promise.reject(e);
+        }
+}
+
+async function deleteComment(keycloak, commentId, businessKey) {
+    const url = `${process.env.REACT_APP_API_URL}/case/comment/delete`;
+
+        const comment = {
+            id: commentId,
+            userId: keycloak.tokenParsed.preferred_username,
             caseId: businessKey
         };
 
