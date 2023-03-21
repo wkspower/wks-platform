@@ -46,7 +46,7 @@ export const CaseList = ({ status, caseDefId }) => {
             .finally(() => {
                 setFetching(false);
             });
-    }, [caseDefId, status]);
+    }, [caseDefId, status, openNewCaseForm]);
 
     useEffect(() => {
         CaseService.getCaseDefinitions(keycloak).then((data) => {
