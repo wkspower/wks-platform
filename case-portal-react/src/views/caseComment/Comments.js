@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { deleteComment as deleteCommentApi, updateComment as updateCommentApi } from './api';
+import { deleteComment as deleteCommentApi } from './api';
 import Comment from './Comment';
 import CommentForm from './CommentForm';
 import Typography from '@mui/material/Typography';
@@ -30,7 +30,6 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
             .then(() => {
                 getCaseInfo(aCase, true);
             })
-            .catch((err) => console.error(err));
         .then(() => {
             getCaseInfo(aCase, true);
             setActiveComment(null);

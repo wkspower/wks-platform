@@ -45,7 +45,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	@Override
 	public List<CaseInstance> find(final Optional<CaseStatus> status, final Optional<String> caseDefinitionId)
 			throws Exception {
-		return repository.findCaseInstances(status, caseDefinitionId);
+		return repository.find(status, caseDefinitionId);
 	}
 
 	@Override
