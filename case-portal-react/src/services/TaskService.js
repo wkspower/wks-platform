@@ -1,4 +1,4 @@
-import { json } from './request';
+import { json, nop } from './request';
 
 export const TaskService = {
     getActivityInstancesById,
@@ -36,7 +36,7 @@ async function createTaskClaim(keycloak, bpmEngineId, taskId) {
 
     try {
         const resp = await fetch(url, { method: 'POST', headers });
-        return json(keycloak, resp);
+        return nop(keycloak, resp);
     } catch (e) {
         console.log(e);
         return await Promise.reject(e);
@@ -54,7 +54,7 @@ async function createTaskUnclaim(keycloak, bpmEngineId, taskId) {
 
     try {
         const resp = await fetch(url, { method: 'POST', headers });
-        return json(keycloak, resp);
+        return nop(keycloak, resp);
     } catch (e) {
         console.log(e);
         return await Promise.reject(e);
@@ -78,7 +78,7 @@ async function createTaskComplete(keycloak, bpmEngineId, taskId, body) {
                 variables: body
             })
         });
-        return json(keycloak, resp);
+        return nop(keycloak, resp);
     } catch (e) {
         console.log(e);
         return await Promise.reject(e);
