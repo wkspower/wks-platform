@@ -1,18 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-
-// material-ui
 import { useTheme } from '@mui/material/styles';
 import { AppBar, Box, ClickAwayListener, IconButton, Paper, Popper, Toolbar } from '@mui/material';
-
-// project import
 import Search from './Search';
 import Profile from './Profile';
 import Transitions from 'components/@extended/Transitions';
-
-// assets
-import { MoreOutlined } from '@ant-design/icons';
-
-// ==============================|| HEADER CONTENT - MOBILE ||============================== //
+import MoreOutlined from '@ant-design/icons/MoreOutlined';
 
 const MobileSection = () => {
     const theme = useTheme();

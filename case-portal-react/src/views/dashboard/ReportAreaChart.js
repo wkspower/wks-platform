@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react';
-
-// material-ui
 import { useTheme } from '@mui/material/styles';
-
-// third-party
 import ReactApexChart from 'react-apexcharts';
 
 // chart options
@@ -74,7 +70,16 @@ const ReportAreaChart = () => {
             xaxis: {
                 labels: {
                     style: {
-                        colors: [secondary, secondary, secondary, secondary, secondary, secondary, secondary, secondary]
+                        colors: [
+                            secondary,
+                            secondary,
+                            secondary,
+                            secondary,
+                            secondary,
+                            secondary,
+                            secondary,
+                            secondary
+                        ]
                     }
                 }
             },

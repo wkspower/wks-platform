@@ -1,4 +1,4 @@
-import { FolderOutlined } from '@ant-design/icons';
+import FolderOutlined from '@ant-design/icons/FolderOutlined';
 import {
     IconArchive,
     IconFileCheck,
@@ -7,6 +7,7 @@ import {
     IconSquareAsterisk,
     IconDatabase
 } from '@tabler/icons';
+
 import i18n from '../i18n';
 
 const icons = {

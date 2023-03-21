@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
-import { Stack } from '@mui/material';
+import Stack from '@mui/material/Stack';
 import DrawerHeaderStyled from './DrawerHeaderStyled';
 import Logo from 'components/Logo';
 

@@ -19,13 +19,11 @@ import {
 } from '@mui/material';
 import MainCard from 'components/MainCard';
 import Transitions from 'components/@extended/Transitions';
-import {
-    BellOutlined,
-    CloseOutlined,
-    GiftOutlined,
-    MessageOutlined,
-    SettingOutlined
-} from '@ant-design/icons';
+import BellOutlined from '@ant-design/icons/BellOutlined';
+import CloseOutlined from '@ant-design/icons/CloseOutlined';
+import GiftOutlined from '@ant-design/icons/GiftOutlined';
+import MessageOutlined from '@ant-design/icons/MessageOutlined';
+import SettingOutlined from '@ant-design/icons/SettingOutlined';
 import { NotificationService } from '../../../../services';
 import { useSession } from 'SessionStoreContext';
 

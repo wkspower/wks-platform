@@ -11,7 +11,7 @@ import Slide from '@mui/material/Slide';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import CloseIcon from '@mui/icons-material/Close';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 import MainCard from 'components/MainCard';
 import { BpmService } from 'services';
 import { useSession } from 'SessionStoreContext';

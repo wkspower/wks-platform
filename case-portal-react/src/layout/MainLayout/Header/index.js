@@ -3,7 +3,8 @@ import { AppBar, IconButton, Toolbar, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import AppBarStyled from './AppBarStyled';
 import HeaderContent from './HeaderContent';
-import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
+import MenuFoldOutlined from '@ant-design/icons/MenuFoldOutlined';
+import MenuUnfoldOutlined from '@ant-design/icons/MenuUnfoldOutlined';
 
 const Header = ({ open, handleDrawerToggle, keycloak }) => {
     const theme = useTheme();

@@ -1,7 +1,15 @@
-import { Box, Button, TextField } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 import { useState } from 'react';
 
-const CommentForm = ({ handleSubmit, submitLabel, hasCancelButton = false, handleCancel, initialText = '' }) => {
+const CommentForm = ({
+    handleSubmit,
+    submitLabel,
+    hasCancelButton = false,
+    handleCancel,
+    initialText = ''
+}) => {
     const [text, setText] = useState(initialText);
     const isTextareaDisabled = text.length === 0;
     const onSubmit = (event) => {
@@ -11,8 +19,18 @@ const CommentForm = ({ handleSubmit, submitLabel, hasCancelButton = false, handl
     };
     return (
         <Box sx={{ flexDirection: 'column', m: 1 }}>
-            <TextField sx={{ display: 'flex' }} multiline value={text} onChange={(e) => setText(e.target.value)} />
-            <Button sx={{ mt: 1 }} variant="contained" onClick={onSubmit} disabled={isTextareaDisabled}>
+            <TextField
+                sx={{ display: 'flex' }}
+                multiline
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+            />
+            <Button
+                sx={{ mt: 1 }}
+                variant="contained"
+                onClick={onSubmit}
+                disabled={isTextareaDisabled}
+            >
                 {submitLabel}
             </Button>
             {hasCancelButton && (

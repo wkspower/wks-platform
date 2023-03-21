@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
-import { AppBar, Button, Dialog, IconButton, Slide, Toolbar } from '@mui/material';
+import AppBar from '@mui/material/AppBar';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import IconButton from '@mui/material/IconButton';
+import Slide from '@mui/material/Slide';
+import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { Form } from '@formio/react';
 import Grid from '@mui/material/Grid';

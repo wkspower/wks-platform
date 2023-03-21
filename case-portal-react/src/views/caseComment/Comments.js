@@ -1,27 +1,23 @@
 import { useEffect, useState } from 'react';
-import {
-    deleteComment as deleteCommentApi,
-    updateComment as updateCommentApi
-} from './api';
+import { deleteComment as deleteCommentApi, updateComment as updateCommentApi } from './api';
 import Comment from './Comment';
 import CommentForm from './CommentForm';
-
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
 import MainCard from 'components/MainCard';
-
 import './comments.css';
-
 import { useSession } from 'SessionStoreContext';
-
 import { CaseService } from '../../services';
 
 export const Comments = ({ comments, aCase, getCaseInfo }) => {
     const [backendComments, setBackendComments] = useState(comments);
 
     const [activeComment, setActiveComment] = useState(null);
-    
-    const rootComments = backendComments.filter((backendComment) => backendComment.parentId === null || !backendComment.hasOwnProperty("parentId"));
-    
+
+    const rootComments = backendComments.filter(
+        (backendComment) =>
+            backendComment.parentId === null || !backendComment.hasOwnProperty('parentId')
+    );
+
     const getReplies = (commentId) =>
         backendComments
             .filter((backendComment) => backendComment.parentId === commentId)
@@ -31,11 +27,10 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
 
     const addComment = async (text, parentId) => {
         CaseService.addComment(keycloak, text, parentId, aCase.businessKey)
-        .then(() => {
-            getCaseInfo(aCase, true);
-        })
-        .catch((err) => console.error(err));
-
+            .then(() => {
+                getCaseInfo(aCase, true);
+            })
+            .catch((err) => console.error(err));
     };
 
     const updateComment = (text, commentId) => {
@@ -53,7 +48,9 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
     const deleteComment = (commentId) => {
         // if (window.confirm('Are you sure you want to remove comment?')) {
         deleteCommentApi().then(() => {
-            const updatedBackendComments = backendComments.filter((backendComment) => backendComment.id !== commentId);
+            const updatedBackendComments = backendComments.filter(
+                (backendComment) => backendComment.id !== commentId
+            );
             setBackendComments(updatedBackendComments);
         });
         // }
@@ -63,7 +60,7 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
         setBackendComments(comments);
     });
 
-    return (       
+    return (
         <MainCard sx={{ p: 2 }} content={false}>
             <Typography variant="h5" sx={{ textDecoration: 'none' }} color="textSecondary">
                 Comments

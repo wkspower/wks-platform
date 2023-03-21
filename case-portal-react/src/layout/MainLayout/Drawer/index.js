@@ -1,7 +1,9 @@
 import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Box, Drawer, useMediaQuery } from '@mui/material';
+import Box from '@mui/material/Box';
+import Drawer from '@mui/material/Drawer';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import DrawerHeader from './DrawerHeader';
 import DrawerContent from './DrawerContent';
 import MiniDrawerStyled from './MiniDrawerStyled';
@@ -15,7 +17,11 @@ const MainDrawer = ({ open, handleDrawerToggle, window }) => {
     const drawerHeader = useMemo(() => <DrawerHeader open={open} />, [open]);
 
     return (
-        <Box component="nav" sx={{ flexShrink: { md: 0 }, zIndex: 1300 }} aria-label="mailbox folders">
+        <Box
+            component="nav"
+            sx={{ flexShrink: { md: 0 }, zIndex: 1300 }}
+            aria-label="mailbox folders"
+        >
             {!matchDownMD ? (
                 <MiniDrawerStyled variant="permanent" open={open}>
                     {drawerHeader}

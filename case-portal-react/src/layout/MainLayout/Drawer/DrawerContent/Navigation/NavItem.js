@@ -3,14 +3,12 @@ import { forwardRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTheme } from '@mui/material/styles';
-import {
-    Avatar,
-    Chip,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
-    Typography
-} from '@mui/material';
+import Avatar from '@mui/material/Avatar';
+import Chip from '@mui/material/Chip';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Typography from '@mui/material/Typography';
 import { activeItem } from 'store/reducers/menu';
 
 const NavItem = ({ item, level }) => {

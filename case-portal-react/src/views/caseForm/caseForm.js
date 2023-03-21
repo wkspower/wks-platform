@@ -18,7 +18,7 @@ import { CaseStatus } from 'common/caseStatus';
 import { Grid } from '@mui/material';
 import MainCard from 'components/MainCard';
 import { Comments } from 'views/caseComment/Comments';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import QuestionCircleOutlined from '@ant-design/icons/QuestionCircleOutlined';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
@@ -29,12 +29,10 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemButton from '@mui/material/ListItemButton';
 import Avatar from '@mui/material/Avatar';
-import {
-    FilePdfOutlined,
-    FileExcelOutlined,
-    FileOutlined,
-    FileImageOutlined
-} from '@ant-design/icons';
+import FilePdfOutlined from '@ant-design/icons/FilePdfOutlined';
+import FileExcelOutlined from '@ant-design/icons/FileExcelOutlined';
+import FileOutlined from '@ant-design/icons/FileOutlined';
+import FileImageOutlined from '@ant-design/icons/FileImageOutlined';
 import { CaseEmailsList } from 'views/caseEmail/caseEmailList';
 import FileBase64 from 'react-file-base64';
 import { useTranslation } from 'react-i18next';
@@ -117,12 +115,11 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     isValid: true
                 });
                 setActiveStage(caseData.stage);
-
             })
             .catch((err) => {
                 console.log(err.message);
             });
-        };
+    };
 
     const handleTabChanged = (event, newValue) => {
         setTabIndex(newValue);

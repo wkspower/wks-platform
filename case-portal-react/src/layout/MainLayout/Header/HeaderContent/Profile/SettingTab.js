@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
-import { UserOutlined } from '@ant-design/icons';
+import UserOutlined from '@ant-design/icons/UserOutlined';
 
 const SettingTab = () => {
     const theme = useTheme();

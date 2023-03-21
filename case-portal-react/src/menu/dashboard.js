@@ -1,5 +1,6 @@
-import { HomeOutlined } from '@ant-design/icons';
+import HomeOutlined from '@ant-design/icons/HomeOutlined';
 import i18n from '../i18n';
+
 const icons = { HomeOutlined };
 
 const dashboard = {

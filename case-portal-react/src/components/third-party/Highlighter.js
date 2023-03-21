@@ -1,17 +1,13 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
-
-// material-ui
-import { Box, CardActions, Collapse, Divider, IconButton, Tooltip } from '@mui/material';
-
-// third-party
-// import { CopyToClipboard } from 'react-copy-to-clipboard';
-
-// project import
+import Box from '@mui/material/Box';
+import CardActions from '@mui/material/CardActions';
+import Collapse from '@mui/material/Collapse';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import SyntaxHighlight from 'utils/SyntaxHighlight';
-
-// assets
-import { CodeOutlined } from '@ant-design/icons';
+import CodeOutlined from '@ant-design/icons/CodeOutlined';
 
 // ==============================|| CLIPBOARD & HIGHLIGHTER   ||============================== //
 

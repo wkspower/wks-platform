@@ -1,7 +1,8 @@
-// material-ui
-import { useMediaQuery, Container, Link, Typography, Stack } from '@mui/material';
-
-// ==============================|| FOOTER - AUTHENTICATION ||============================== //
+import useMediaQuery from '@mui/material/useMediaQuery';
+import Container from '@mui/material/Container';
+import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
 
 const AuthFooter = () => {
     const matchDownSM = useMediaQuery((theme) => theme.breakpoints.down('sm'));
@@ -16,7 +17,13 @@ const AuthFooter = () => {
             >
                 <Typography variant="subtitle2" color="secondary" component="span">
                     &copy; Mantis React Dashboard Template By&nbsp;
-                    <Typography component={Link} variant="subtitle2" href="https://codedthemes.com" target="_blank" underline="hover">
+                    <Typography
+                        component={Link}
+                        variant="subtitle2"
+                        href="https://codedthemes.com"
+                        target="_blank"
+                        underline="hover"
+                    >
                         CodedThemes
                     </Typography>
                 </Typography>

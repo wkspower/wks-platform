@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
 import MainCard from 'components/MainCard';
 import Button from '@mui/material/Button';

@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import { Box, List, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import List from '@mui/material/List';
+import Typography from '@mui/material/Typography';
 import NavItem from './NavItem';
 import NavCollapse from './NavCollapse';
 

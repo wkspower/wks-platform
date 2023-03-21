@@ -1,5 +1,3 @@
-// ==============================|| THEME CONFIG  ||============================== //
-
 const config = {
     basename: '/',
     defaultPath: '/home',

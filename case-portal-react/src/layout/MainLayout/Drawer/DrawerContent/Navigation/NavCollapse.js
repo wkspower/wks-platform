@@ -1,13 +1,11 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
-import {
-    Collapse,
-    List,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
-    Typography
-} from '@mui/material';
+import Collapse from '@mui/material/Collapse';
+import List from '@mui/material/List';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import NavItem from './NavItem';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';

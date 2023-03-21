@@ -99,7 +99,7 @@
         "eslint-plugin-prettier": "^4.2.1",
         "eslint-plugin-react": "^7.26.1",
         "eslint-plugin-react-hooks": "4.6.0",
-        "prettier": "2.7.1",
-        "jest-location-mock": "^1.0.9"
+        "jest-location-mock": "^1.0.9",
+        "prettier": "2.7.1"
     }
 }

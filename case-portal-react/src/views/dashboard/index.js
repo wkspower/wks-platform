@@ -13,13 +13,25 @@ const DashboardDefault = () => {
                 <Typography variant="h5">{t('pages.dashboard.title')}</Typography>
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={3}>
-                <DashBoardCard title={t('pages.dashboard.cards.wipcases.label')} icon={<IconArchive />} to="/case-list/wip-cases" />
+                <DashBoardCard
+                    title={t('pages.dashboard.cards.wipcases.label')}
+                    icon={<IconArchive />}
+                    to="/case-list/wip-cases"
+                />
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={3}>
-                <DashBoardCard title={t('pages.dashboard.cards.caselist.label')} icon={<IconSquareAsterisk />} to="/case-list/cases" />
+                <DashBoardCard
+                    title={t('pages.dashboard.cards.caselist.label')}
+                    icon={<IconSquareAsterisk />}
+                    to="/case-list/cases"
+                />
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={3}>
-                <DashBoardCard title={t('pages.dashboard.cards.tasklist.label')} icon={<IconList />} to="/task-list" />
+                <DashBoardCard
+                    title={t('pages.dashboard.cards.tasklist.label')}
+                    icon={<IconList />}
+                    to="/task-list"
+                />
             </Grid>
 
             <Grid item md={8} sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} />

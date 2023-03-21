@@ -1,10 +1,6 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-
-// material-ui
-import { ButtonBase } from '@mui/material';
-
-// project import
+import ButtonBase from '@mui/material/ButtonBase';
 import Logo from './Logo';
 import config from 'config';
 

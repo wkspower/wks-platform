@@ -1,26 +1,26 @@
 import PropTypes from 'prop-types';
 import { useRef, useState } from 'react';
-import {
-    Avatar,
-    Box,
-    ButtonBase,
-    CardContent,
-    ClickAwayListener,
-    Grid,
-    IconButton,
-    Paper,
-    Popper,
-    Stack,
-    Tab,
-    Tabs,
-    Typography
-} from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import ButtonBase from '@mui/material/ButtonBase';
+import CardContent from '@mui/material/CardContent';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
+import Popper from '@mui/material/Popper';
+import Stack from '@mui/material/Stack';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import Typography from '@mui/material/Typography';
+import useTheme from '@mui/material/styles/useTheme';
 import Transitions from 'components/@extended/Transitions';
 import MainCard from 'components/MainCard';
 import ProfileTab from './ProfileTab';
 import SettingTab from './SettingTab';
-import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import LogoutOutlined from '@ant-design/icons/LogoutOutlined';
+import SettingOutlined from '@ant-design/icons/SettingOutlined';
+import UserOutlined from '@ant-design/icons/UserOutlined';
 import avatar2 from 'assets/images/users/avatar-2.png';
 
 function TabPanel({ children, value, index, ...other }) {
