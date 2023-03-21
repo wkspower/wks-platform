@@ -8,7 +8,7 @@
       "name": "Camunda 7 - Demo",
       "type": "BPM_ENGINE_CAMUNDA7",
       "parameters": {
-        "url": "http://camunda:8080/engine-rest"
+        "url": "http://localhost:8080/engine-rest"
       }
     }
   ]

@@ -1,14 +1,24 @@
 package com.wks.api.security;
 
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.net.ssl.SSLContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.TrustStrategy;
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
@@ -19,6 +29,8 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
+import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
@@ -137,6 +149,7 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 				log.debug("Resolved AuthenticationManager for issuer '{}'", issuer);
 				
 				JwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(issuer)
+																								.restOperations(createRestOperationWithTlsSupport())
 																							   .cache(cache)
 																							   .build();
 				
@@ -145,7 +158,25 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 			
 			return authenticationManager;
 		}
-		
+
+		private RestOperations createRestOperationWithTlsSupport() {
+			 	try {
+			 	    TrustStrategy acceptingTrustStrategy = (x509Certificates, s) -> true;
+			 	    SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
+			 	    SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new NoopHostnameVerifier());
+			 	    CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
+			 	    HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+			 	    requestFactory.setHttpClient(httpClient);
+			 	    return new RestTemplate(requestFactory);
+				} catch (KeyManagementException e) {
+					throw new RuntimeException(e);
+				} catch (NoSuchAlgorithmException e) {
+					throw new RuntimeException(e);
+				} catch (KeyStoreException e) {
+					throw new RuntimeException(e);
+				}
+		}
+	
 	}
 
 }

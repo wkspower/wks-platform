@@ -14,13 +14,20 @@ services:
     opa:
         image: openpolicyagent/opa:edge-static
         ports:
-            - 8181:8181        
+            - 8181:8181
+        # links:
+        #     - opa-bundles-service
         command:
             - run
             - --server
             - /etc/rules/wks_policy_rules.rego
         volumes:
-            - ./policy-decision-api:/etc/rules:ro
+            - ./policy-decision-api:/etc/rules
+
+    opa-bundles-service:
+        build:
+            context: .
+            dockerfile: ./policy-decision-api/Dockerfile
 
     camunda:
         image: camunda/camunda-bpm-platform:run-7.19.0-SNAPSHOT
@@ -55,7 +62,8 @@ services:
        
     case-engine-rest-api:
         build:
-            context: case-engine-rest-api
+            context: .
+            dockerfile: ./case-engine-rest-api/Dockerfile
         ports:
             - 8081:8081
         links:
@@ -71,10 +79,13 @@ services:
                 condition: service_healthy
             camunda:
                 condition: service_healthy
+        volumes:
+            - cache:/root/.m2
 
     bpm-engine-c7-external-service:
         build:
-            context: bpm-engine-c7-external-service
+            context: .
+            dockerfile: ./bpm-engine-c7-external-service/Dockerfile
         links:
             - mongodb
             - camunda
@@ -89,10 +100,13 @@ services:
                 condition: service_healthy
             camunda:
                 condition: service_healthy
+        volumes:
+            - cache:/root/.m2
 
     email-to-case:
         build:
-            context: email-to-case
+            context: .
+            dockerfile: ./email-to-case/Dockerfile
         ports:
             - 8083:8083
         links:
@@ -110,13 +124,28 @@ services:
                 condition: service_healthy
             camunda:
                 condition: service_healthy
+        volumes:
+            - cache:/root/.m2
 
     case-portal:
         build:
-            context: case-portal-react
+            context: .
+            dockerfile: ./case-portal-react/Dockerfile
             args:
                 REACT_APP_KEYCLOAK_URL: http://localhost:8082
                 REACT_APP_API_URL: http://localhost:8081
                 REACT_APP_EMAIL_URL: http://localhost:8083
+        environment:
+            NODE_OPTIONS: --max_old_space_size=4096
         ports:
             - 3001:3000
+        volumes:
+            - cache:/node_modules
+
+volumes:
+    cache:
+        driver: local
+        driver_opts:
+            type: 'none'
+            o: 'bind'
+            device: '/tmp'            

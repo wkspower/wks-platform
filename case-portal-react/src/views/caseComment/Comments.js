@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { deleteComment as deleteCommentApi, updateComment as updateCommentApi } from './api';
+import { deleteComment as deleteCommentApi } from './api';
 import Comment from './Comment';
 import CommentForm from './CommentForm';
 import Typography from '@mui/material/Typography';
@@ -30,24 +30,23 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
             .then(() => {
                 getCaseInfo(aCase, true);
             })
+            .then(() => {
+                getCaseInfo(aCase, true);
+                setActiveComment(null);
+            })
             .catch((err) => console.error(err));
-        .then(() => {
-            getCaseInfo(aCase, true);
-            setActiveComment(null);
-        })
-        .catch((err) => console.error(err));
     };
 
     const updateComment = (text, commentId) => {
         CaseService.editComment(keycloak, text, commentId, aCase.businessKey)
-        .then(() => {
-            getCaseInfo(aCase, true);
-            setActiveComment(null);
-        })
-        .catch((err) => {
-            console.error(err);
-            setActiveComment(null);
-        });
+            .then(() => {
+                getCaseInfo(aCase, true);
+                setActiveComment(null);
+            })
+            .catch((err) => {
+                console.error(err);
+                setActiveComment(null);
+            });
     };
 
     const deleteComment = (commentId) => {

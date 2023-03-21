@@ -1,0 +1,8 @@
+DROP ROLE IF EXISTS camunda;
+DROP ROLE IF EXISTS keycloak;
+
+CREATE ROLE camunda LOGIN PASSWORD 'camunda00';
+CREATE ROLE keycloak LOGIN PASSWORD 'keycloak00';
+
+CREATE DATABASE camunda WITH OWNER camunda;
+CREATE DATABASE keycloak WITH OWNER keycloak;

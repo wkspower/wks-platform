@@ -3,11 +3,15 @@ package com.wks.caseengine.loader.runner;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.net.ssl.SSLContext;
+
+import org.apache.http.ssl.TrustStrategy;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.ClientScopeRepresentation;
@@ -74,13 +78,20 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		log.info("Start of data importing");
+		
+		 TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
 
+		 SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
+		                    .loadTrustMaterial(null, acceptingTrustStrategy)
+		                    .build();
+		    
 		Keycloak keycloak = Keycloak.getInstance(
 			url, 
 			"master", 
 			admin, 
 			adminPassword, 
-			"admin-cli"
+			"admin-cli",
+			sslContext
 		);
 
 		List<ClientRepresentation> clients = new ArrayList<ClientRepresentation>();
@@ -109,11 +120,13 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 		roleRepresentation.setRealm(createRealmRoles());
 		realm.setRoles(roleRepresentation);
 		realm.setGroups(createGroups());
-
+		
 		try {
 			keycloak.realms().create(realm);
-		} catch (Exception e) {
-			log.error("error to create keycloack",e);
+		} catch (javax.ws.rs.ClientErrorException e) {
+			if (!e.getMessage().contains("409")) {
+				log.error("error to create keycloack",e);
+			}
 		}
 
 		log.info("End of data importing");

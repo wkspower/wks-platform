@@ -1,0 +1,6 @@
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/_wildcard.wkspower.local+1.pem
+        keyFile: /certs/_wildcard.wkspower.local+1-key.pem

@@ -13,7 +13,7 @@ const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(
     <Provider store={store}>
-        <BrowserRouter basename="/">
+        <BrowserRouter basename={`${!!process.env.REACT_APP_CONTEXT_PATH || '/'}`}>
             <I18nextProvider i18n={i18n}>
                 <App />
             </I18nextProvider>
