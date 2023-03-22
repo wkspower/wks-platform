@@ -32,10 +32,13 @@ class CaseInstanceCreateServiceImpl implements CaseInstanceCreateService {
 		}
 
 		String businessKey = businessKeyCreator.generate();
-		CaseInstance caseInstance = CaseInstance.builder().businessKey(businessKey)
+		CaseInstance caseInstance = CaseInstance.builder()
+				.businessKey(businessKey)
 				.stage(caseDefinition.getStages().stream().sorted(Comparator.comparing(CaseStage::getIndex)).findFirst()
 						.get().getName())
-				.attributes(caseInstanceParam.getAttributes()).caseDefinitionId(caseDefinition.getId()).build();
+				.attributes(caseInstanceParam.getAttributes()).caseDefinitionId(caseDefinition.getId())
+				.caseOwner(caseInstanceParam.getCaseOwner())
+				.caseOwnerName(caseInstanceParam.getCaseOwnerName()).build();
 
 		repository.save(caseInstance);
 

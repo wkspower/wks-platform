@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import QuestionCircleOutlined from '@ant-design/icons/QuestionCircleOutlined';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import CloseIcon from '@mui/icons-material/Close';
-import Box from '@mui/material/Box';
-import Tooltip from '@mui/material/Tooltip';
+import { Box, Tooltip } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -56,11 +55,13 @@ export const NewCaseForm = ({ open, handleClose, caseDefId, setLastCreatedCase }
                         : JSON.stringify(formData.data[key])
             });
         });
-
+        
         CaseService.createCase(
             keycloak,
             JSON.stringify({
                 caseDefinitionId: caseDefId,
+                caseOwner: keycloak.subject || '',
+                caseOwnerName: keycloak.idTokenParsed.name || '',
                 attributes: caseAttributes
             })
         )

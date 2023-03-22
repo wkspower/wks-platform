@@ -39,7 +39,8 @@ const defs = {
                     businesskey: 'Número',
                     statusdescription: 'Situação',
                     stage: 'Estágio',
-                    createdat: 'Criado em'
+                    createdat: 'Criado em',
+                    caseOwnerName: 'Criado por' 
                 },
                 action: {
                     details: 'Detalhar'

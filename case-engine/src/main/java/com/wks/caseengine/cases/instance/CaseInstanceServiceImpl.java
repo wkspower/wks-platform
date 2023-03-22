@@ -55,6 +55,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 	@Override
 	public CaseInstance create(CaseInstance caseInstance) throws Exception {
+		
 		caseInstance.getAttributes().add(new CaseAttribute("createdAt", DateUtils.formatDate(new Date(), "dd/MM/yyyy")));
 
 		CaseDefinition caseDefinition = caseDefRepository.get(caseInstance.getCaseDefinitionId());

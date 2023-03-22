@@ -73,6 +73,11 @@ export const CaseList = ({ status, caseDefId }) => {
                 width: 220
             },
             {
+                field: 'caseOwnerName',
+                headerName: t('pages.caselist.datagrid.columns.caseOwnerName'),
+                width: 220
+            },
+            {
                 field: 'action',
                 headerName: '',
                 sortable: false,

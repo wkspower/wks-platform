@@ -20,6 +20,10 @@ public class CaseInstance {
 	private String caseDefinitionId;
 
 	private String stage;
+	
+	private String caseOwner;
+	
+	private String caseOwnerName;
 
 	// TODO improve this hard code
 	@Builder.Default

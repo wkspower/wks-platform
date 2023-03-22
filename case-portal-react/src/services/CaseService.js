@@ -162,7 +162,7 @@ async function uploadCaseAttachById(keycloak, id, files) {
 
 async function createCase(keycloak, body) {
     const url = `${process.env.REACT_APP_API_URL}/case/`;
-
+    
     try {
         const resp = await fetch(url, {
             method: 'POST',
