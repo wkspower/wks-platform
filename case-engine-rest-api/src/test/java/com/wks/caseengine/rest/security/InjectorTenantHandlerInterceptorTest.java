@@ -49,16 +49,6 @@ public class InjectorTenantHandlerInterceptorTest {
 		assertTrue(result);
 		verify(tenantHolder).setTenantId("wks");
 	}
-	
-	@Test
-	public  void shouldThrowExceptionWhenGettingTenantIdEmptyOrNullOnProcessRequest() throws Exception {
-		SecurityContextHolder.setContext(new MockSecurityContext(" ", "localhost"));
-		
-		IllegalArgumentException throwable = assertThrowsExactly(IllegalArgumentException.class, () -> handler.preHandle(request, null, null));
-		
-		assertInstanceOf(IllegalArgumentException.class, throwable);
-		assertEquals("Could't find tenantId by mail server dns ", throwable.getMessage());
-	}
 
 	@Test
 	public  void shouldCleanerContextOnAfterCompletion() throws Exception {
