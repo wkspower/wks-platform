@@ -25,8 +25,7 @@ public class ApiSecurityConfig {
 	
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    	http.regexMatcher("^(?!(/actuator/)).*$")
-    	 		.cors()
+    	http.cors()
     	 		.and()
     	 		.csrf().disable()
     	 		.authorizeRequests()
