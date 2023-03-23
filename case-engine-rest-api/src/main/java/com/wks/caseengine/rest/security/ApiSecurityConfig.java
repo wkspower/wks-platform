@@ -23,9 +23,7 @@ public class ApiSecurityConfig {
 		
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    	 http.regexMatcher("^(?!(/actuator/)).*$")
-    	 		.regexMatcher("^(?!(/swagger-ui/)).*$")
-    	 		.cors()
+    	 http.cors()
     	 		.and()
     	 		.csrf().disable()
     	 		.authorizeRequests(authz -> authz

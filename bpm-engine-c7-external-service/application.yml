@@ -23,7 +23,7 @@ camunda7.rest.processinstance.url: /process-instance
 camunda7.rest.correlate.url: /message
 
 camunda.bpm.client:
-  base-url: ${CAMUNDA_URL:http://camunda:8080/engine-rest}
+  base-url: ${CAMUNDA_URL:https://localhost:8080/engine-rest}
   async-response-timeout: 1000
   disable-backoff-strategy: false
   backoff-strategy-time: 2000

@@ -42,22 +42,28 @@ public class CamundaDataImportCommandRunner implements CommandLineRunner {
 	@Value("${camunda.data.import.tenant}")
 	private String tenantId;
 
+	@Value("${camunda.data.import.username}")
+	private String username;
+	
+	@Value("${camunda.data.import.password}")
+	private String password;
+
 	@Override
 	public void run(String... args) throws Exception {
 		log.info("Starting upload model to camunda....");
 
-		importData();
-
-		createTenant();
+		RestTemplate restTemplate = createRestOperation();
+		importData(restTemplate);
+		createTenant(restTemplate);
 
 		log.info("Finish upload model to camunda");
 	}
 
-	private void createTenant() {
-		RestTemplate restTemplate = new RestTemplate();
+	private void createTenant(RestTemplate restTemplate) {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.setBasicAuth(username, password);
 
 		String body = String.format("{\"id\":\"%s\", \"name\":\"Tenant Platform\"}", tenantId);
 
@@ -77,15 +83,14 @@ public class CamundaDataImportCommandRunner implements CommandLineRunner {
 		}
 	}
 
-	private void importData() throws Exception {
+	private void importData(RestTemplate restTemplate) throws Exception {
 		if (importDir != null && !importDir.isEmpty()) {
 			listFiles(importDir).forEach(fileName -> {
 				File file = new File(fileName);
 
-				RestTemplate restTemplate = new RestTemplate();
-
 				HttpHeaders headers = new HttpHeaders();
 				headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+				headers.setBasicAuth(username, password);
 
 				MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
 				multipartBodyBuilder.part("upload", new FileSystemResource(file));
@@ -110,6 +115,10 @@ public class CamundaDataImportCommandRunner implements CommandLineRunner {
 			return stream.filter(file -> !Files.isDirectory(file)).filter(f -> f.toFile().getName().endsWith(".bpmn"))
 					.map(Path::toAbsolutePath).map(Path::toString).collect(Collectors.toSet());
 		}
+	}
+	
+	private RestTemplate createRestOperation() {
+	 	    return new RestTemplate();
 	}
 
 }

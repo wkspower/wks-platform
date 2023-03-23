@@ -3,15 +3,11 @@ package com.wks.caseengine.loader.runner;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.net.ssl.SSLContext;
-
-import org.apache.http.ssl.TrustStrategy;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.ClientScopeRepresentation;
@@ -79,19 +75,12 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 		log.info("Start of data importing");
 		
-		 TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-
-		 SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
-		                    .loadTrustMaterial(null, acceptingTrustStrategy)
-		                    .build();
-		    
 		Keycloak keycloak = Keycloak.getInstance(
 			url, 
 			"master", 
 			admin, 
 			adminPassword, 
-			"admin-cli",
-			sslContext
+			"admin-cli"
 		);
 
 		List<ClientRepresentation> clients = new ArrayList<ClientRepresentation>();

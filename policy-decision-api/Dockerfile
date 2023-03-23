@@ -10,12 +10,9 @@ RUN apt -y update \
     && chmod +x opa \
     && mv opa /usr/bin
 
-COPY policy-decision-api/wks_policy_rules.rego /app
-RUN opa build /app --optimize=1 --entrypoint "wks/authz"
-RUN ls -la /app
-RUN ls -la
+COPY policy-decision-api/wks_policy_rules.rego /app/wks_policy_rules.rego
+RUN opa build -b /app
 
 FROM nginx:1.20.0-alpine
-# RUN mkdir /usr/share/nginx/html/bundles,
-# COPY --from=build /bundle.tar.gz /usr/share/nginx/html/bundles
-CMD ["nginx"]
+RUN mkdir /usr/share/nginx/html/bundles
+COPY --from=build bundle.tar.gz /usr/share/nginx/html/bundles

@@ -1,0 +1,42 @@
+camunda.bpm:
+  webapp:
+    csrf:
+      enable-same-site-cookie: true
+      same-site-cookie-option: STRICT
+    header-security:
+      hsts-disabled: false
+
+  admin-user:
+    id: demo
+    password: demo
+  
+  authorization.enabled: true
+
+  generic-properties.properties:
+    deserialization-type-validation-enabled: true
+    deserialization-allowed-packages:
+    deserialization-allowed-classes:
+    enable-password-policy: false
+
+  run:
+    auth.enabled: true
+
+server:
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-type: pkcs12
+    key-alias: ${KEY_ALIAS:wks}
+    key-store-password: ${KEY_STORE_PASSWORD:wks}
+    key-password: ${KEY_PASSWORD:wks}
+  port: 8443
+
+  servlet.session.cookie:
+    secure: true
+    http-only: true
+
+logging:
+   level.root: INFO
+   file.name: logs/camunda-bpm-run.log
+
+spring.web.resources:
+  static-locations: NULL

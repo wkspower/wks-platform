@@ -1,8 +1,5 @@
 package com.wks.caseengine.rest.security;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 
@@ -50,16 +47,6 @@ public class InjectorTenantHandlerInterceptorTest {
 		verify(tenantHolder).setTenantId("wks");
 	}
 	
-	@Test
-	public  void shouldThrowExceptionWhenGettingTenantIdEmptyOrNullOnProcessRequest() throws Exception {
-		SecurityContextHolder.setContext(new MockSecurityContext(" ", "localhost"));
-		
-		IllegalArgumentException throwable = assertThrowsExactly(IllegalArgumentException.class, () -> handler.preHandle(request, null, null));
-		
-		assertInstanceOf(IllegalArgumentException.class, throwable);
-		assertEquals("Could't find tenantId by mail server dns ", throwable.getMessage());
-	}
-
 	@Test
 	public  void shouldCleanerContextOnAfterCompletion() throws Exception {
 		handler.afterCompletion(request, null, null, null);

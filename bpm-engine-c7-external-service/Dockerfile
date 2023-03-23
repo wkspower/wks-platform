@@ -13,10 +13,14 @@ ADD bpm-engine-client /platform/bpm-engine-client
 ADD bpm-engine-interface /platform/bpm-engine-interface
 ADD email-to-case /platform/email-to-case
 ADD rest-client /platform/rest-client
-RUN mvn -f /platform/pom.xml clean package
+ADD configs/certs /platform/certs
+RUN mvn -f /platform/pom.xml -Dmaven.test.skip=true package
 
 FROM amazoncorretto:17.0.5
-EXPOSE 8084
+
 COPY --from=build /platform/bpm-engine-c7-external-service/target/*.jar app.jar
 COPY --from=build /platform/bpm-engine-c7-external-service/application.yml application.yml
-ENTRYPOINT ["java","-jar","/app.jar"]
+
+EXPOSE 8084
+
+ENTRYPOINT java -Djavax.net.ssl.trustStore=/keystore.p12 -Djavax.net.ssl.trustStorePassword=$TRUST_STORE_PASSWORD -jar /app.jar

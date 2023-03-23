@@ -1,10 +1,15 @@
-FROM node:19.8 AS build
+FROM node:19.8
 
 ARG REACT_APP_KEYCLOAK_URL
 ARG REACT_APP_API_URL
 ARG REACT_APP_EMAIL_URL
 
 ENV NODE_ENV=development
+ENV HOST=0.0.0.0 
+ENV BROWSER=none 
+ENV PORT=3001
+
+EXPOSE 3001
 
 ADD case-portal-react/src src
 ADD case-portal-react/public public
@@ -19,10 +24,4 @@ RUN yarn install
 RUN REACT_APP_KEYCLOAK_URL=${REACT_APP_KEYCLOAK_URL} \ 
     REACT_APP_API_URL=${REACT_APP_API_URL} \
     REACT_APP_EMAIL_URL=${REACT_APP_EMAIL_URL} \
-    yarn build
-
-FROM node:19.8
-COPY --from=build /build /build
-RUN yarn global add serve
-EXPOSE 3001
-CMD [ "serve", "-s", "build", "-p", "3001" ]
+    yarn start

@@ -32,7 +32,7 @@ spring.data.mongodb.database.max-pool-size: 5
 spring.data.mongodb.database.max-connection-idle-time: 3000
 spring.data.mongodb.database.max-connection-life-time: 3000
 
-opa.url: ${OPA_URL:http://localhost:8181/v1/data/wks/authz/allow}
+opa.url: ${OPA_URL:https://localhost:56659/v1/data/wks/authz/allow}
 keycloak.url: ${KEYCLOAK_URL:http://localhost:8082}
 
 management.health.mongo.enabled: false

@@ -1,151 +1,280 @@
 version: '3.7'
 services:
+    traefik:
+        image: traefik:v2.8
+        command:
+            - --log.level=info
+            - --api.insecure=true
+            - --api.dashboard=true
+            - --serversTransport.insecureSkipVerify=true
+            - --entrypoints.web.address=:80
+            - --entrypoints.websecure.address=:443
+            - --providers.docker=true
+            - --experimental.hub=true
+            - --providers.docker.exposedbydefault=false
+            - --providers.file.watch=true
+            - --providers.file.directory=/traefik
+        ports:
+            - 80:80
+            - 443:443
+            - 8888:8080
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.traefik.rule=PathPrefix(`/`) || PathPrefix(`/dashboard`)
+            - traefik.http.routers.traefik.entrypoints=traefik
+            - traefik.http.routers.traefik.service=dashboard@internal
+            - traefik.http.routers.traefik.service=api@internal
+            - traefik.http.routers.traefik.tls=true
+            - traefik.http.routers.middlewares.cors.headers.accessControlAllowCredentials=true
+            - traefik.http.routers.middlewares.cors.headers.accessControlAllowMethods=*
+            - traefik.http.routers.middlewares.cors.headers.accessControlAllowHeaders=*
+            - traefik.http.routers.middlewares.cors.headers.accessControlAllowOriginList=*
+            - traefik.http.routers.middlewares.cors.headers.addVaryHeader=true
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - ./configs/traefik:/traefik:ro
+            - ./configs/certs:/certs:ro
+
+    postgres:
+        image: postgres:11
+        ports:
+            - 5432
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+        healthcheck:
+            test: pg_isready -U postgres -d postgres
+            interval: 5s
+            timeout: 3s
+            retries: 3
+        volumes: 
+            - postgres:/var/lib/postgresql/data:rw
+            - ./configs/postgres:/docker-entrypoint-initdb.d
+
     mongodb:
         image: mongo
         ports:
-            - 27017:27017
+            - 27017
         healthcheck:
             test: mongosh --eval 'db.stats().ok' --quiet
-            interval: 10s
+            interval: 5s
             retries: 3
             start_period: 5s
             timeout: 10s
+        volumes:
+            - mongo:/data/db:rw
 
     opa:
-        image: openpolicyagent/opa:edge-static
+        image: openpolicyagent/opa:0.50.2-static
         ports:
-            - 8181:8181
-        # links:
-        #     - opa-bundles-service
+            - 8181
         command:
             - run
             - --server
-            - /etc/rules/wks_policy_rules.rego
+            - --log-format=json-pretty
+            - --set=decision_logs.console=true
+            - --set=services.nginx.url=http://opa-bundles-service
+            - --set=bundles.nginx.service=nginx
+            - --set=bundles.nginx.resource=/bundles/bundle.tar.gz
+            - --set=bundles.nginx.polling.min_delay_seconds=10
+            - --set=bundles.nginx.polling.max_delay_seconds=30
+            - --tls-cert-file=/certs/_wildcard.wkspower.local+5.pem
+            - --tls-private-key-file=/certs/_wildcard.wkspower.local+5-key.pem
         volumes:
-            - ./policy-decision-api:/etc/rules
+            - ./configs/certs:/certs:ro
 
     opa-bundles-service:
         build:
             context: .
             dockerfile: ./policy-decision-api/Dockerfile
+        ports:
+            - 80
 
     camunda:
         image: camunda/camunda-bpm-platform:run-7.19.0-SNAPSHOT
-        command: ./camunda.sh --rest --webapps
+        command: ./camunda.sh --rest --webapps --production
         ports:
-            - 8080:8080
-        healthcheck:
-            test: curl --fail http://localhost:8080/engine-rest/version || exit 1
-            interval: 10s
-            retries: 3
-            start_period: 5s
-            timeout: 10s
+            - 8443
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.camunda.rule=Host(`camunda.wkspower.local`)
+            - traefik.http.routers.camunda.entrypoints=websecure
+            - traefik.http.routers.camunda.service=camunda
+            - traefik.http.routers.camunda.tls=true
+            - traefik.http.services.camunda.loadbalancer.server.scheme=https
+            - traefik.http.services.camunda.loadbalancer.server.port=8443
+        environment:
+            DB_DRIVER: org.postgresql.Driver
+            DB_URL: jdbc:postgresql://postgres:5432/camunda
+            DB_USERNAME: camunda
+            DB_PASSWORD: camunda00
+            DB_VALIDATE_ON_BORROW: "false"
+            KEY_ALIAS: wks
+            KEY_STORE_PASSWORD: wks
+            KEY_PASSWORD: wks
         depends_on:
-            mongodb:
+            postgres:
                 condition: service_healthy
+        volumes:
+            - ./configs/certs/keystore.p12:/camunda/configuration/keystore/keystore.p12:ro
+            - ./configs/camunda/production.yml:/camunda/configuration/production.yml:ro
 
     keycloak:
         image: quay.io/keycloak/keycloak:20.0.3
-        command: start-dev
+        command: start -b
+        ports:
+            - 8080
+        labels:
+            - traefik.enable=true
+            # frontend
+            - traefik.http.routers.keycloak.rule=Host(`login.wkspower.local`)
+            - traefik.http.routers.keycloak.entrypoints=websecure
+            - traefik.http.routers.keycloak.service=keycloak
+            - traefik.http.routers.keycloak.tls=true
+            - traefik.http.services.keycloak.loadbalancer.server.scheme=http
+            - traefik.http.services.keycloak.loadbalancer.server.port=8080
+            # admin
+            - traefik.http.routers.keycloakadmin.rule=Host(`iam.wkspower.local`)
+            - traefik.http.routers.keycloakadmin.entrypoints=websecure
+            - traefik.http.routers.keycloakadmin.service=keycloakadmin
+            - traefik.http.routers.keycloakadmin.tls=true
+            - traefik.http.services.keycloakadmin.loadbalancer.server.scheme=http
+            - traefik.http.services.keycloakadmin.loadbalancer.server.port=8080
         environment:
+            KC_LOG_LEVEL: "INFO"
+            KC_PROXY: edge
+            KC_HOSTNAME: login.wkspower.local
+            KC_HOSTNAME_ADMIN: iam.wkspower.local
             KC_HEALTH_ENABLED: "true"
+            KC_METRICS_ENABLED: "true"      
+            KC_HTTPS_CERTIFICATE_FILE: /certs/_wildcard.wkspower.local+5.pem
+            KC_HTTPS_CERTIFICATE_KEY_FILE: /certs/_wildcard.wkspower.local+5-key.pem
+            KC_DB: postgres
+            KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+            KC_DB_USERNAME: keycloak
+            KC_DB_PASSWORD: keycloak00
             KEYCLOAK_ADMIN: admin
             KEYCLOAK_ADMIN_PASSWORD: admin
         healthcheck:
-            test: curl --fail http://localhost:8080/health/ready || exit 1
+            test: curl -k --fail https://localhost:8443/health/ready || exit 1
             interval: 10s
             retries: 3
             start_period: 5s
             timeout: 10s
-        ports:
-            - 8082:8080
-       
+        volumes:
+            - ./configs/certs:/certs
+        depends_on:
+            postgres:
+                condition: service_healthy
+
     case-engine-rest-api:
         build:
             context: .
             dockerfile: ./case-engine-rest-api/Dockerfile
         ports:
-            - 8081:8081
-        links:
-            - mongodb
-            - camunda
+            - 8081
         environment:
-            - MONGO_DATABASE=wks
+            - MONGO_DATABASE=shared
             - MONGO_CONN=mongodb://mongodb
-            - KEYCLOAK_JWKS_SET_URI=http://keycloak:8080
-            - OPA_URL=http://opa:8181/v1/data/wks/authz/allow
+            - KEYCLOAK_URL=https://keycloak:8433
+            - OPA_URL=https://opa:8181/v1/data/wks/authz/allow
+            - TRUST_STORE_PASSWORD=wks
         depends_on:
             mongodb:
                 condition: service_healthy
-            camunda:
+            keycloak:
                 condition: service_healthy
         volumes:
-            - cache:/root/.m2
+            - ./configs/certs/keystore.p12:/keystore.p12:ro
 
     bpm-engine-c7-external-service:
         build:
             context: .
             dockerfile: ./bpm-engine-c7-external-service/Dockerfile
-        links:
-            - mongodb
-            - camunda
+        ports:
+            - 8084
         environment:
-            - CAMUNDA_URL=http://camunda:8080/engine-rest
+            - CAMUNDA_URL=https://camunda:8443/engine-rest
             - CAMUNDA_USERNAME=demo
             - CAMUNDA_PASSWORD=demo
-            - MONGO_DATABASE=wks
+            - MONGO_DATABASE=shared
             - MONGO_CONN=mongodb://mongodb
+            - TRUST_STORE_PASSWORD=wks
         depends_on:
             mongodb:
                 condition: service_healthy
-            camunda:
-                condition: service_healthy
         volumes:
-            - cache:/root/.m2
+            - ./configs/certs/keystore.p12:/keystore.p12:ro
 
     email-to-case:
         build:
             context: .
             dockerfile: ./email-to-case/Dockerfile
         ports:
-            - 8083:8083
-        links:
-            - mongodb
-            - camunda
+            - 8083
         environment:
-            - MONGO_DATABASE=wks
+            - MONGO_DATABASE=shared
             - MONGO_CONN=mongodb://mongodb
             - EMAIL_CASE_PATTERN_NEW=new-case
             - EMAIL_CASE_PATTERN_UPDATE=update-case
-            - KEYCLOAK_JWKS_SET_URI=http://keycloak:8080
-            - OPA_URL=http://opa:8181/v1/data/wks/authz/allow
+            - KEYCLOAK_URL=https://keycloak:8433
+            - OPA_URL=https://opa:8181/v1/data/wks/authz/allow
+            - TRUST_STORE_PASSWORD=wks
         depends_on:
             mongodb:
                 condition: service_healthy
-            camunda:
+            keycloak:
                 condition: service_healthy
         volumes:
-            - cache:/root/.m2
+            - ./configs/certs/keystore.p12:/keystore.p12:ro
 
     case-portal:
         build:
             context: .
             dockerfile: ./case-portal-react/Dockerfile
             args:
-                REACT_APP_KEYCLOAK_URL: http://localhost:8082
-                REACT_APP_API_URL: http://localhost:8081
-                REACT_APP_EMAIL_URL: http://localhost:8083
-        environment:
-            NODE_OPTIONS: --max_old_space_size=4096
+                REACT_APP_KEYCLOAK_URL: https://login.wkspower.local
+                REACT_APP_API_URL: https://api.wkspower.local
+                REACT_APP_EMAIL_URL: https://api.wkspower.local/inbound
         ports:
-            - 3001:3000
+            - 3001
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.case-portal.rule=Host(`app.wkspower.local`)
+            - traefik.http.routers.case-portal.entrypoints=websecure
+            - traefik.http.routers.case-portal.service=case-portal
+            - traefik.http.routers.case-portal.tls=true
+            # - traefik.http.routers.case-portal.middlewares=cors@docker
+            - traefik.http.services.case-portal.loadbalancer.server.scheme=http
+            - traefik.http.services.case-portal.loadbalancer.server.port=3001
+
+    case-engine-loader:
+        profiles:
+            - loader
+        build:
+            context: .
+            dockerfile: ./case-engine-loader/Dockerfile
+        ports:
+            - 8081
+        environment:
+            - IMPORT_DIR_PATH=/data
+            - MONGO_SHARED_DATABASE=shared
+            - MONGO_DATABASE=app
+            - MONGO_CONN=mongodb://mongodb
+            - OPA_URL=https://opa:8181/v1/data/wks/authz/allow
+            - KEYCLOAK_URL=http://keycloak:8080
+            - KEYCLOAK_IMPORT_DNS=app.wkspower.local
+            - KEYCLOAK_IMPORT_PORT=:443
+            - KEYCLOAK_IMPORT_PROTOCOL=https
+            - CAMUNDA_URL=https://camunda:8443/engine-rest
+            - CAMUNDA_USERNAME=demo
+            - CAMUNDA_PASSWORD=demo
+            - TRUST_STORE_PASSWORD=wks
         volumes:
-            - cache:/node_modules
+            - ./configs/certs/keystore.p12:/keystore.p12:ro
 
 volumes:
-    cache:
+    postgres:
         driver: local
-        driver_opts:
-            type: 'none'
-            o: 'bind'
-            device: '/tmp'            
+    mongo:
+        driver: local

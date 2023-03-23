@@ -1,20 +1,11 @@
 package com.wks.api.security;
 
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.net.ssl.SSLContext;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.TrustStrategy;
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.convert.converter.Converter;
@@ -149,7 +140,7 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 				log.debug("Resolved AuthenticationManager for issuer '{}'", issuer);
 				
 				JwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(issuer)
-																								.restOperations(createRestOperationWithTlsSupport())
+																								.restOperations(createRestOperation())
 																							   .cache(cache)
 																							   .build();
 				
@@ -159,22 +150,9 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 			return authenticationManager;
 		}
 
-		private RestOperations createRestOperationWithTlsSupport() {
-			 	try {
-			 	    TrustStrategy acceptingTrustStrategy = (x509Certificates, s) -> true;
-			 	    SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
-			 	    SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new NoopHostnameVerifier());
-			 	    CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
-			 	    HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-			 	    requestFactory.setHttpClient(httpClient);
-			 	    return new RestTemplate(requestFactory);
-				} catch (KeyManagementException e) {
-					throw new RuntimeException(e);
-				} catch (NoSuchAlgorithmException e) {
-					throw new RuntimeException(e);
-				} catch (KeyStoreException e) {
-					throw new RuntimeException(e);
-				}
+		private RestOperations createRestOperation() {
+		 	    HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+		 	    return new RestTemplate(requestFactory);
 		}
 	
 	}

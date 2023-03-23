@@ -122,21 +122,6 @@ allow {
     is_manager_profile
 }
 
-allow {
-    input.path = "actuator"
-    input.method in ["GET"]
-}
-
-allow {
-    input.path = "swagger-ui"
-    input.method in ["GET"]
-}
-
-allow {
-    input.path = "v3"
-    input.method in ["GET"]
-}
-
 check_origin_request if {
 	input.allowed_origin == "localhost"
     input.host = "localhost"

@@ -31,11 +31,11 @@ keycloak.data.import.admin: ${KEYCLOAK_ADMIN:admin}
 keycloak.data.import.adminpass: ${KEYCLOAK_PASS:admin}
 keycloak.data.import.clientid: wks-portal
 keycloak.data.import.realm: ${spring.data.mongodb.database.tenant}
-keycloak.data.import.dns: app.wkspower.local
-keycloak.data.import.port:
-keycloak.data.import.protocol: https://
-keycloak.data.import.redirecturl: ${keycloak.data.import.protocol}${keycloak.data.import.dns}${keycloak.data.import.port}/*
-keycloak.data.import.weborigins: ${keycloak.data.import.protocol}${keycloak.data.import.dns}${keycloak.data.import.port}
+keycloak.data.import.dns: ${KEYCLOAK_IMPORT_DNS:localhost}
+keycloak.data.import.port: ${KEYCLOAK_IMPORT_PORT:3001}
+keycloak.data.import.protocol: ${KEYCLOAK_IMPORT_PROTOCOL:https}
+keycloak.data.import.redirecturl: ${keycloak.data.import.protocol}://${keycloak.data.import.dns}${keycloak.data.import.port}/*
+keycloak.data.import.weborigins: ${keycloak.data.import.protocol}://${keycloak.data.import.dns}${keycloak.data.import.port}
 keycloak.data.import.username: victor
 keycloak.data.import.password: victor
 keycloak.data.import.firstname: Victor
@@ -44,5 +44,7 @@ keycloak.data.import.email: victor@gmail.com
 
 camunda.data.import.enabled: true
 camunda.data.import.url: ${CAMUNDA_URL:http://localhost:8080/engine-rest}
+camunda.data.import.username: ${CAMUNDA_USERNAME:demo}
+camunda.data.import.password: ${CAMUNDA_PASSWORD:demo}
 camunda.data.import.folder: ${IMPORT_DIR_PATH:./data}
 camunda.data.import.tenant: ${spring.data.mongodb.database.tenant}
