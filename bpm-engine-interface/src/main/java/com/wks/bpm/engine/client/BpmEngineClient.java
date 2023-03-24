@@ -17,7 +17,7 @@ import com.wks.bpm.engine.model.spi.Task;
  *
  */
 public interface BpmEngineClient {
-	
+
 	void deploy(final BpmEngine bpmEngine, final String fileName, final String bpmnXml);
 
 	Deployment[] findDeployments(final BpmEngine bpmEngine);
@@ -26,21 +26,25 @@ public interface BpmEngineClient {
 
 	ProcessInstance[] findProcessInstances(final Optional<String> businessKey, final BpmEngine bpmEngine);
 
-	String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine);
-	
-	String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine);
+	String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) throws Exception;
 
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey, final JsonArray caseAttributes, final BpmEngine bpmEngine, String tenantId);
-	
+	String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) throws Exception;
+
+	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final JsonArray caseAttributes, final BpmEngine bpmEngine, String tenantId);
+
 	ProcessInstance startProcess(final String processDefinitionKey, final BpmEngine bpmEngine);
 
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey, final BpmEngine bpmEngine);
+	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final BpmEngine bpmEngine);
 
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey, final JsonArray caseAttributes, final BpmEngine bpmEngine);
+	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final JsonArray caseAttributes, final BpmEngine bpmEngine);
 
 	void deleteProcessInstance(final String processInstanceId, final BpmEngine bpmEngine);
 
-	ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine);
+	ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine)
+			throws Exception;
 
 	Task[] findTasks(final String processInstanceBusinessKey, final BpmEngine bpmEngine);
 

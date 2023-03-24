@@ -23,12 +23,6 @@ public class DataExportServiceImpl implements DataExportService {
 
 		JsonObject exportedData = new JsonObject();
 
-		// BPM Engines
-		exportedData.add("bpmEngines",
-				gson.toJsonTree(connection.getBpmEngineCollection().find()
-						.map(o -> gson.fromJson(o.getJson(), JsonObject.class)).into(new ArrayList<JsonObject>()))
-						.getAsJsonArray());
-
 		// Cases Definitions
 		List<JsonObject> caseDefinitions = connection.getCaseDefCollection().find()
 				.map(o -> gson.fromJson(o.getJson(), JsonObject.class)).into(new ArrayList<JsonObject>());

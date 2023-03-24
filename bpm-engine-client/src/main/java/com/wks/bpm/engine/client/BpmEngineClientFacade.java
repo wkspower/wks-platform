@@ -2,13 +2,8 @@ package com.wks.bpm.engine.client;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.wks.bpm.engine.BpmEngine;
-import com.wks.bpm.engine.BpmEngineType;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.Deployment;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
@@ -20,92 +15,44 @@ import com.wks.bpm.engine.model.spi.Task;
  * @author victor.franca
  *
  */
-@Component
-public class BpmEngineClientFacade {
+public interface BpmEngineClientFacade {
 
-	@Autowired
-	private BpmEngineClient c7EngineClient;
+	void deploy(final String fileName, final String bpmnXml);
 
-	@Autowired
-	private BpmEngineClient c8EngineClient;
+	Deployment[] findDeployments();
 
-	private BpmEngineClient getEngineClient(final BpmEngine bpmEngine) {
-		return bpmEngine.getType().equals(BpmEngineType.BPM_ENGINE_CAMUNDA7) ? c7EngineClient : c8EngineClient;
-	}
+	ProcessDefinition[] findProcessDefinitions();
 
-	public void deploy(final BpmEngine bpmEngine, final String fileName, final String bpmnXml) {
-		getEngineClient(bpmEngine).deploy(bpmEngine, fileName, bpmnXml);
-	}
+	String getProcessDefinitionXMLById(final String processDefinitionId) throws Exception;
 
-	public Deployment[] findDeployments(final BpmEngine bpmEngine) {
-		return getEngineClient(bpmEngine).findDeployments(bpmEngine);
-	}
+	String getProcessDefinitionXMLByKey(final String processDefinitionKey) throws Exception;
 
-	public ProcessDefinition[] findProcessDefinitions(final BpmEngine bpmEngine) {
-		return getEngineClient(bpmEngine).findProcessDefinitions(bpmEngine);
-	}
+	ProcessInstance[] findProcessInstances(final Optional<String> businessKey);
 
-	public String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) {
-		return getEngineClient(bpmEngine).getProcessDefinitionXMLById(processDefinitionId, bpmEngine);
-	}
+	ProcessInstance startProcess(final String processDefinitionKey);
 
-	public String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) {
-		return getEngineClient(bpmEngine).getProcessDefinitionXMLByKey(processDefinitionKey, bpmEngine);
-	}
+	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey);
 
-	public ProcessInstance[] findProcessInstances(final Optional<String> businessKey, final BpmEngine bpmEngine) {
-		return getEngineClient(bpmEngine).findProcessInstances(businessKey, bpmEngine);
-	}
+	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final JsonArray caseAttributes, final String tenantId);
 
-	public ProcessInstance startProcess(final String processDefinitionKey, final BpmEngine bpmEngine) {
-		return getEngineClient(bpmEngine).startProcess(processDefinitionKey, bpmEngine);
-	}
+	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final JsonArray caseAttributes);
 
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final BpmEngine bpmEngine) {
-		return getEngineClient(bpmEngine).startProcess(processDefinitionKey, businessKey, bpmEngine);
-	}
+	void deleteProcessInstance(String processInstanceId);
 
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonArray caseAttributes, final BpmEngine bpmEngine, final String tenantId) {
-		return getEngineClient(bpmEngine).startProcess(processDefinitionKey, businessKey, caseAttributes, bpmEngine, tenantId);
-	}
+	ActivityInstance[] findActivityInstances(String processInstanceId) throws Exception;
 
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonArray caseAttributes, final BpmEngine bpmEngine) {
-		return getEngineClient(bpmEngine).startProcess(processDefinitionKey, businessKey, caseAttributes, bpmEngine);
-	}
+	Task[] findTasks(final String processInstanceBusinessKey);
 
-	public void deleteProcessInstance(String processInstanceId, final BpmEngine bpmEngine) {
-		getEngineClient(bpmEngine).deleteProcessInstance(processInstanceId, bpmEngine);
-	}
+	void claimTask(String taskId, String taskAssignee);
 
-	public ActivityInstance[] findActivityInstances(String processInstanceId, final BpmEngine bpmEngine) {
-		return getEngineClient(bpmEngine).findActivityInstances(processInstanceId, bpmEngine);
-	}
+	void unclaimTask(String taskId);
 
-	public Task[] findTasks(final String processInstanceBusinessKey, final BpmEngine bpmEngine) {
-		return getEngineClient(bpmEngine).findTasks(processInstanceBusinessKey, bpmEngine);
-	}
+	void complete(String taskId, JsonObject variables);
 
-	public void claimTask(String taskId, String taskAssignee, final BpmEngine bpmEngine) {
-		getEngineClient(bpmEngine).claimTask(taskId, taskAssignee, bpmEngine);
-	}
+	String findVariables(String processInstanceId);
 
-	public void unclaimTask(String taskId, final BpmEngine bpmEngine) {
-		getEngineClient(bpmEngine).unclaimTask(taskId, bpmEngine);
-	}
-
-	public void complete(String taskId, JsonObject variables, final BpmEngine bpmEngine) {
-		getEngineClient(bpmEngine).complete(taskId, variables, bpmEngine);
-	}
-
-	public String findVariables(String processInstanceId, final BpmEngine bpmEngine) {
-		return getEngineClient(bpmEngine).findVariables(processInstanceId, bpmEngine);
-	}
-
-	public void sendMessage(ProcessMessage processMesage, final BpmEngine bpmEngine) {
-		getEngineClient(bpmEngine).sendMessage(processMesage, bpmEngine);
-	}
+	void sendMessage(ProcessMessage processMesage);
 
 }

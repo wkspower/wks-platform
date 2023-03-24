@@ -66,17 +66,30 @@ public class C7EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) {
-		return restTemplate.getForEntity(camundaHttpRequestFactory
+	public String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine)
+			throws Exception {
+		ProcessDefinitionImpl processDefinition = restTemplate.getForEntity(camundaHttpRequestFactory
 				.getProcessDefinitionXmlByIdRequest(processDefinitionId, bpmEngine).getHttpRequestUrl(),
-				ProcessDefinitionImpl.class).getBody().getBpmn20Xml();
+				ProcessDefinitionImpl.class).getBody();
+
+		if (processDefinition == null) {
+			throw new Exception("Process Definition not found");
+		}
+
+		return processDefinition.getBpmn20Xml();
 	}
 
 	@Override
-	public String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) {
-		return restTemplate.getForEntity(camundaHttpRequestFactory
+	public String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) throws Exception {
+		ProcessDefinitionImpl processDefinition = restTemplate.getForEntity(camundaHttpRequestFactory
 				.getProcessDefinitionXmlByKeyRequest(processDefinitionKey, bpmEngine).getHttpRequestUrl(),
-				ProcessDefinitionImpl.class).getBody().getBpmn20Xml();
+				ProcessDefinitionImpl.class).getBody();
+
+		if (processDefinition == null) {
+			throw new Exception("Process Definition not found");
+		}
+
+		return processDefinition.getBpmn20Xml();
 	}
 
 	@Override
@@ -112,39 +125,34 @@ public class C7EngineClient implements BpmEngineClient {
 
 		JsonObject processVariables = variablesMapper.map(caseAttributes);
 
-		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(
-				processDefinitionKey,
-				businessKey, 
-				processVariables, 
-				bpmEngine);
+		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey,
+				businessKey, processVariables, bpmEngine);
 
 		RestTemplate restTemplate = new RestTemplate();
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 		messageConverters.add(new GsonHttpMessageConverter());
 		restTemplate.setMessageConverters(messageConverters);
 
-		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class).getBody();
+		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
+				.getBody();
 	}
-	
+
 	@Override
-	public ProcessInstance startProcess(String processDefinitionKey, String businessKey,
-			JsonArray caseAttributes, BpmEngine bpmEngine, String tenantId) {
-		
+	public ProcessInstance startProcess(String processDefinitionKey, String businessKey, JsonArray caseAttributes,
+			BpmEngine bpmEngine, String tenantId) {
+
 		JsonObject processVariables = variablesMapper.map(caseAttributes);
-		
-		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(
-				processDefinitionKey,
-				businessKey, 
-				processVariables, 
-				bpmEngine,
-				tenantId);
-		
+
+		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey,
+				businessKey, processVariables, bpmEngine, tenantId);
+
 		RestTemplate restTemplate = new RestTemplate();
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 		messageConverters.add(new GsonHttpMessageConverter());
 		restTemplate.setMessageConverters(messageConverters);
-		
-		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class).getBody();
+
+		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
+				.getBody();
 	}
 
 	@Override
@@ -156,11 +164,18 @@ public class C7EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public ActivityInstance[] findActivityInstances(String processInstanceId, final BpmEngine bpmEngine) {
-		return restTemplate
+	public ActivityInstance[] findActivityInstances(String processInstanceId, final BpmEngine bpmEngine)
+			throws Exception {
+		ActivityInstance activityInstance = restTemplate
 				.getForEntity(camundaHttpRequestFactory.getActivityInstancesGetRequest(processInstanceId, bpmEngine)
 						.getHttpRequestUrl(), ActivityInstance.class)
-				.getBody().getChildActivityInstances();
+				.getBody();
+
+		if (activityInstance == null) {
+			throw new Exception("Process Instance not found");
+		}
+
+		return activityInstance.getChildActivityInstances();
 	}
 
 	@Override

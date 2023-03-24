@@ -59,12 +59,10 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	@Override
 	public void update(final String businessKey, final CaseInstance caseInstance) throws Exception {
 		Bson filter = Filters.eq("businessKey", businessKey);
-		Bson update = Updates.combine(
-				Updates.set("status", caseInstance.getStatus()),
-				Updates.set("stage", caseInstance.getStage()),
-				Updates.set("comments", caseInstance.getComments()),
-				Updates.set("attributes", caseInstance.getAttributes()),
-				Updates.set("attachments", caseInstance.getAttachments()));
+		Bson update = Updates.combine(Updates.set("status", caseInstance.getStatus()),
+				Updates.set("stage", caseInstance.getStage()), Updates.set("comments", caseInstance.getComments()),
+				Updates.set("documents", caseInstance.getDocuments()),
+				Updates.set("attributes", caseInstance.getAttributes()));
 		getCollection().updateMany(filter, update);
 	}
 

@@ -2,8 +2,10 @@ package com.wks.caseengine.cases.instance;
 
 import java.util.Date;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -11,6 +13,8 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Comment {
 
 	private String id;
@@ -27,19 +31,4 @@ public class Comment {
 	
 	private String caseId;
 	
-	public Comment() {
-		
-	}
-
-	public Comment(String id, String body, String userName, String userId, String parentId, Date createdAt,
-			String caseId) {
-		super();
-		this.id = id;
-		this.body = body;
-		this.userName = userName;
-		this.userId = userId;
-		this.parentId = parentId;
-		this.createdAt = createdAt;
-		this.caseId = caseId;
-	}
 }

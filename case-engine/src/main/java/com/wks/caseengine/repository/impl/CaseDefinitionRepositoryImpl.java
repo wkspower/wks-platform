@@ -34,12 +34,12 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	public CaseDefinition get(final String caseDefId) throws Exception {
 		Bson filter = Filters.eq("id", caseDefId);
 		Gson gson = new Gson();
-		
+
 		Optional<JsonObject> first = Optional.ofNullable(getCollection().find(filter).first());
 		if (first.isEmpty()) {
 			return null;
 		}
-		
+
 		return gson.fromJson(first.get().getJson(), CaseDefinition.class);
 	}
 
@@ -53,7 +53,6 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 		Bson filter = Filters.eq("id", caseDefId);
 
 		Bson update = Updates.combine(Updates.set("stages", caseDefinition.getStages()),
-				Updates.set("bpmEngineId", caseDefinition.getBpmEngineId()),
 				Updates.set("formKey", caseDefinition.getFormKey()), Updates.set("name", caseDefinition.getName()),
 				Updates.set("stagesLifecycleProcessKey", caseDefinition.getStagesLifecycleProcessKey()),
 				Updates.set("kanbanConfig", (new JsonObject(new Gson().toJson(caseDefinition.getKanbanConfig())))));

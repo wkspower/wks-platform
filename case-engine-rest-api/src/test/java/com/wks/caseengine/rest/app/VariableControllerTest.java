@@ -31,15 +31,15 @@ public class VariableControllerTest {
 	public void setup() {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
 	}
-	
+
 	@AfterEach
 	private void teardown() {
 		SecurityContextHolder.clearContext();
 	}
-	
+
 	@Test
 	public void testFind() throws Exception {
-		this.mockMvc.perform(get("/variable/{bpmEngineId}/{processInstanceId}", "1", "2")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/variable/{processInstanceId}", "1")).andExpect(status().isOk());
 	}
 
 }

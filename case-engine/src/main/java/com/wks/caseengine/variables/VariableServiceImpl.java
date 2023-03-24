@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.bpm.engine.client.BpmEngineClientFacade;
-import com.wks.caseengine.repository.BpmEngineRepository;
 
 @Component
 public class VariableServiceImpl implements VariableService {
@@ -12,12 +11,9 @@ public class VariableServiceImpl implements VariableService {
 	@Autowired
 	private BpmEngineClientFacade processEngineClient;
 
-	@Autowired
-	private BpmEngineRepository bpmEngineRepository;
-
 	@Override
-	public String findVariables(final String processInstanceId, final String bpmEngineId) throws Exception {
-		return processEngineClient.findVariables(processInstanceId, bpmEngineRepository.get(bpmEngineId));
+	public String findVariables(final String processInstanceId) throws Exception {
+		return processEngineClient.findVariables(processInstanceId);
 	}
 
 }

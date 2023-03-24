@@ -12,7 +12,6 @@ import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.caseengine.cases.instance.CaseAttribute;
-import com.wks.caseengine.repository.BpmEngineRepository;
 
 @Component
 public class ProcessInstanceServiceImpl implements ProcessInstanceService {
@@ -20,41 +19,33 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	@Autowired
 	private BpmEngineClientFacade processEngineClient;
 
-	@Autowired
-	private BpmEngineRepository bpmEngineRepository;
-
 	@Override
-	public ProcessInstance create(final String processDefinitionKey, final String bpmEngineId) throws Exception {
-		return processEngineClient.startProcess(processDefinitionKey, bpmEngineRepository.get(bpmEngineId));
+	public ProcessInstance create(final String processDefinitionKey) throws Exception {
+		return processEngineClient.startProcess(processDefinitionKey);
 	}
 
 	@Override
-	public ProcessInstance create(final String processDefinitionKey, final String businessKey, final String bpmEngineId)
-			throws Exception {
-		return processEngineClient.startProcess(processDefinitionKey, businessKey,
-				bpmEngineRepository.get(bpmEngineId));
+	public ProcessInstance create(final String processDefinitionKey, final String businessKey) throws Exception {
+		return processEngineClient.startProcess(processDefinitionKey, businessKey);
 	}
 
 	@Override
 	public ProcessInstance create(final String processDefinitionKey, final String businessKey,
-			final List<CaseAttribute> caseAttributes, final String bpmEngineId) throws Exception {
-		return processEngineClient.startProcess(
-				processDefinitionKey, 
-				businessKey,
-				new Gson().toJsonTree(caseAttributes).getAsJsonArray(), 
-				bpmEngineRepository.get(bpmEngineId));
-	}
-	
-	@Override
-	public void delete(final String processInstanceId, final String bpmEngineId) throws Exception {
-		processEngineClient.deleteProcessInstance(processInstanceId, bpmEngineRepository.get(bpmEngineId));
+			final List<CaseAttribute> caseAttributes) throws Exception {
+		return processEngineClient.startProcess(processDefinitionKey, businessKey,
+				new Gson().toJsonTree(caseAttributes).getAsJsonArray());
 	}
 
 	@Override
-	public void delete(final List<ProcessInstance> processInstances, final String bpmEngineId) {
+	public void delete(final String processInstanceId) throws Exception {
+		processEngineClient.deleteProcessInstance(processInstanceId);
+	}
+
+	@Override
+	public void delete(final List<ProcessInstance> processInstances) {
 		processInstances.forEach(o -> {
 			try {
-				delete(o.getId(), bpmEngineId);
+				delete(o.getId());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -63,20 +54,13 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	}
 
 	@Override
-	public List<ProcessInstance> find(Optional<String> businessKey, final String bpmEngineId) throws Exception {
-		return Arrays
-				.asList(processEngineClient.findProcessInstances(businessKey, bpmEngineRepository.get(bpmEngineId)));
+	public List<ProcessInstance> find(Optional<String> businessKey) throws Exception {
+		return Arrays.asList(processEngineClient.findProcessInstances(businessKey));
 	}
 
 	@Override
-	public List<ActivityInstance> getActivityInstances(String processInstanceId, final String bpmEngineId)
-			throws Exception {
-		return Arrays.asList(
-				processEngineClient.findActivityInstances(processInstanceId, bpmEngineRepository.get(bpmEngineId)));
-	}
-
-	public void setProcessEngineClient(BpmEngineClientFacade processEngineClient) {
-		this.processEngineClient = processEngineClient;
+	public List<ActivityInstance> getActivityInstances(String processInstanceId) throws Exception {
+		return Arrays.asList(processEngineClient.findActivityInstances(processInstanceId));
 	}
 
 }

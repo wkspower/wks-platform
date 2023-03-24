@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
-import com.wks.caseengine.repository.BpmEngineRepository;
 
 @Component
 public class MessageSenderServiceImpl implements MessageSenderService {
@@ -13,12 +12,9 @@ public class MessageSenderServiceImpl implements MessageSenderService {
 	@Autowired
 	private BpmEngineClientFacade processEngineClient;
 	
-	@Autowired
-	private BpmEngineRepository bpmEngineRepository;
-
 	@Override
-	public void sendMessage(final ProcessMessage processMessage, final String bpmEngineId) throws Exception {
-		processEngineClient.sendMessage(processMessage, bpmEngineRepository.get(bpmEngineId));
+	public void sendMessage(final ProcessMessage processMessage) throws Exception {
+		processEngineClient.sendMessage(processMessage);
 
 	}
 

@@ -1,9 +1,7 @@
 package com.wks.bpm.engine.camunda.http.auth;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import com.wks.rest.client.header.HttpHeadersFactory;
 
@@ -14,11 +12,11 @@ import com.wks.rest.client.header.HttpHeadersFactory;
 @Component
 public class C7OAuthHttpHeadersFactory extends HttpHeadersFactory {
 
-	@Autowired
-	private C7TokenHttpPostRequestFactory tokenPostRequestFactory;
-
-	@Autowired
-	private RestTemplate restTemplate;
+//	@Autowired
+//	private C7TokenHttpPostRequestFactory tokenPostRequestFactory;
+//
+//	@Autowired
+//	private RestTemplate restTemplate;
 
 	private String token;
 

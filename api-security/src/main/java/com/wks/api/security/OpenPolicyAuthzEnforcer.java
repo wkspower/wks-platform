@@ -67,6 +67,9 @@ public final class OpenPolicyAuthzEnforcer implements AccessDecisionVoter<Object
 
 		HttpEntity<?> body = new HttpEntity<>(new OpenPolicyRequest(input));
 		OpenPolicyResponse response = restTemplate.postForObject(this.opaAuthURL, body, OpenPolicyResponse.class);
+		if (response == null) {
+			throw new RuntimeException("Error connecting to OPA Server");
+		}
 
 		if (!response.getResult()) {
 			log.debug("Denied with Input -> {}", input);
