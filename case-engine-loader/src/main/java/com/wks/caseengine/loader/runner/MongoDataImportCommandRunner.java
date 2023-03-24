@@ -85,21 +85,6 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 			}
 		}
 		
-		JsonElement bpmEnginesJson = data.get("bpmEngines");
-		if (bpmEnginesJson != null) {
-			List<JsonObject> bpmEngines = gson.fromJson(bpmEnginesJson, new TypeToken<List<JsonObject>>() {}.getType());
-			
-			try {
-				getBpmEngineCollection()
-					.insertMany(
-							bpmEngines.stream()
-								.map(o -> new org.bson.json.JsonObject(gson.toJson(o)))
-								.collect(Collectors.toList()));
-			} catch (Exception e) {
-				throwErrorIfNoDuplicateKey(e);
-			}
-		}
-
 		// Cases Definitions
 		JsonElement casesDefinitionsJson = data.get("casesDefinitions");
 		if (casesDefinitionsJson != null) {
@@ -208,11 +193,6 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 		return db.getCollection("organization", org.bson.json.JsonObject.class);
 	}
 
-	private MongoCollection<org.bson.json.JsonObject> getBpmEngineCollection() {
-		MongoDatabase db = config.mongoTemplateShared().getDb();
-		return db.getCollection("bpmEngine", org.bson.json.JsonObject.class);
-	}
-	
 	private  MongoDatabase getDatabase() {
 		return config.mongoTemplateTenant().getDb();
 	}

@@ -33,32 +33,31 @@ public class TaskControllerTest {
 	public void setup() {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
 	}
-	
+
 	@AfterEach
 	private void teardown() {
 		SecurityContextHolder.clearContext();
 	}
-	
+
 	@Test
 	public void testFind() throws Exception {
-		this.mockMvc.perform(get("/task/").param("bpmEngineId", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/task/")).andExpect(status().isOk());
 	}
 
 	@Test
 	public void testClaim() throws Exception {
-		this.mockMvc.perform(post("/task/{bpmEngineId}/{taskId}/claim/{taskAssignee}", "1", "2", "3"))
-				.andExpect(status().isOk());
+		this.mockMvc.perform(post("/task/{taskId}/claim/{taskAssignee}", "1", "mark")).andExpect(status().isOk());
 	}
 
 	@Test
 	public void testUnclaim() throws Exception {
-		this.mockMvc.perform(post("/task/{bpmEngineId}/{taskId}/unclaim", "1", "2")).andExpect(status().isOk());
+		this.mockMvc.perform(post("/task/{taskId}/unclaim", "1")).andExpect(status().isOk());
 	}
 
 	@Test
 	public void testComplete() throws Exception {
-		this.mockMvc.perform(post("/task/{bpmEngineId}/{taskId}/complete", "1", "2")
-				.contentType(MediaType.APPLICATION_JSON).content("{}")).andExpect(status().isOk());
+		this.mockMvc.perform(post("/task/{taskId}/complete", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
+				.andExpect(status().isOk());
 	}
 
 }

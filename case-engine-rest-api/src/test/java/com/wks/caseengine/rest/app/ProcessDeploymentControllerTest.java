@@ -14,7 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.wks.bpm.engine.client.BpmEngineClientFacade;
-import com.wks.caseengine.bpm.BpmEngineService;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
 import com.wks.caseengine.rest.server.ProcessDefinitionController;
 
@@ -28,9 +27,6 @@ public class ProcessDeploymentControllerTest {
 	@MockBean
 	private BpmEngineClientFacade processEngineClient;
 
-	@MockBean
-	private BpmEngineService bpmEngineService;
-
 	@BeforeEach
 	public void setup() {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
@@ -43,7 +39,7 @@ public class ProcessDeploymentControllerTest {
 	
 	@Test
 	public void testGet() throws Exception {
-		this.mockMvc.perform(multipart("/process-deployment/create/{bpmEngineId}", "1").file("file", null))
+		this.mockMvc.perform(multipart("/process-deployment/").file("file", null))
 				.andExpect(status().isOk());
 	}
 

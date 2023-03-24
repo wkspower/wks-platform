@@ -28,11 +28,11 @@ public class C8EngineClient implements BpmEngineClient {
 	@Autowired
 	private C8ZeebeClient zeebeClient;
 
-	@Autowired
-	private C8OperateClient operateClient;
-
-	@Autowired
-	private C8TasklistClient tasklistClient;
+//	@Autowired
+//	private C8OperateClient operateClient;
+//
+//	@Autowired
+//	private C8TasklistClient tasklistClient;
 
 	@Override
 	public void deploy(final BpmEngine bpmEngine, final String fileName, final String bpmnXml) {

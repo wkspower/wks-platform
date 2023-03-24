@@ -9,7 +9,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
-public class CaseInstanceFile {
+public class CaseDocument {
 
 	private String name;
 
