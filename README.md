@@ -173,6 +173,9 @@ make frontend
 ## 3 - Final step, scaling services to high availability (HA)
 
 ```bash
+curl -L https://github.com/FiloSottile/mkcert/releases/download/v1.4.4/mkcert-v1.4.4-darwin-amd64 --output mkcert
+chmod +x mkcert
+./mkcert --install configs/certs
 docker compose --profile servers up -d --scale keycloak=2
 docker compose --profile servers up -d --scale camunda=2
 docker compose ps
