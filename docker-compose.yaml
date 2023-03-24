@@ -1,6 +1,9 @@
 version: '3.7'
+
 services:
     traefik:
+        profiles:
+            - servers
         image: traefik:v2.8
         command:
             - --log.level=info
@@ -25,20 +28,24 @@ services:
             - traefik.http.routers.traefik.service=dashboard@internal
             - traefik.http.routers.traefik.service=api@internal
             - traefik.http.routers.traefik.tls=true
-            - traefik.http.routers.middlewares.cors.headers.accessControlAllowCredentials=true
-            - traefik.http.routers.middlewares.cors.headers.accessControlAllowMethods=*
-            - traefik.http.routers.middlewares.cors.headers.accessControlAllowHeaders=*
-            - traefik.http.routers.middlewares.cors.headers.accessControlAllowOriginList=*
-            - traefik.http.routers.middlewares.cors.headers.addVaryHeader=true
+            - traefik.http.middlewares.cors.headers.accessControlAllowCredentials=true
+            - traefik.http.middlewares.cors.headers.accessControlAllowMethods=*
+            - traefik.http.middlewares.cors.headers.accessControlAllowHeaders=*
+            - traefik.http.middlewares.cors.headers.accessControlAllowOriginList=*
+            - traefik.http.middlewares.cors.headers.addVaryHeader=true
+            - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+            - traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)
+            - traefik.http.routers.http-catchall.entrypoints=web
+            - traefik.http.routers.http-catchall.middlewares=redirect-to-https
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock:ro
             - ./configs/traefik:/traefik:ro
             - ./configs/certs:/certs:ro
 
     postgres:
+        profiles:
+            - servers
         image: postgres:11
-        ports:
-            - 5432
         environment:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
@@ -52,9 +59,9 @@ services:
             - ./configs/postgres:/docker-entrypoint-initdb.d
 
     mongodb:
+        profiles:
+            - servers
         image: mongo
-        ports:
-            - 27017
         healthcheck:
             test: mongosh --eval 'db.stats().ok' --quiet
             interval: 5s
@@ -65,9 +72,9 @@ services:
             - mongo:/data/db:rw
 
     opa:
+        profiles:
+            - servers
         image: openpolicyagent/opa:0.50.2-static
-        ports:
-            - 8181
         command:
             - run
             - --server
@@ -84,23 +91,26 @@ services:
             - ./configs/certs:/certs:ro
 
     opa-bundles-service:
+        profiles:
+            - servers    
         build:
             context: .
             dockerfile: ./policy-decision-api/Dockerfile
-        ports:
-            - 80
 
     camunda:
+        profiles:
+            - servers
         image: camunda/camunda-bpm-platform:run-7.19.0-SNAPSHOT
         command: ./camunda.sh --rest --webapps --production
-        ports:
-            - 8443
         labels:
             - traefik.enable=true
             - traefik.http.routers.camunda.rule=Host(`camunda.wkspower.local`)
-            - traefik.http.routers.camunda.entrypoints=websecure
+            - traefik.http.routers.camunda.entrypoints=web,websecure
             - traefik.http.routers.camunda.service=camunda
             - traefik.http.routers.camunda.tls=true
+            - traefik.http.services.camunda.loadbalancer.sticky.cookie.name=SESSIONID
+            - traefik.http.services.camunda.loadbalancer.sticky.cookie.secure=true
+            - traefik.http.services.camunda.loadbalancer.sticky.cookie.httpOnly=true
             - traefik.http.services.camunda.loadbalancer.server.scheme=https
             - traefik.http.services.camunda.loadbalancer.server.port=8443
         environment:
@@ -120,24 +130,25 @@ services:
             - ./configs/camunda/production.yml:/camunda/configuration/production.yml:ro
 
     keycloak:
+        profiles:
+            - servers
         image: quay.io/keycloak/keycloak:20.0.3
         command: start -b
-        ports:
-            - 8080
         labels:
             - traefik.enable=true
-            # frontend
             - traefik.http.routers.keycloak.rule=Host(`login.wkspower.local`)
             - traefik.http.routers.keycloak.entrypoints=websecure
             - traefik.http.routers.keycloak.service=keycloak
             - traefik.http.routers.keycloak.tls=true
             - traefik.http.services.keycloak.loadbalancer.server.scheme=http
             - traefik.http.services.keycloak.loadbalancer.server.port=8080
-            # admin
             - traefik.http.routers.keycloakadmin.rule=Host(`iam.wkspower.local`)
             - traefik.http.routers.keycloakadmin.entrypoints=websecure
             - traefik.http.routers.keycloakadmin.service=keycloakadmin
             - traefik.http.routers.keycloakadmin.tls=true
+            - traefik.http.services.keycloakadmin.loadbalancer.sticky.cookie.name=SESSIONID
+            - traefik.http.services.keycloakadmin.loadbalancer.sticky.cookie.secure=true
+            - traefik.http.services.keycloakadmin.loadbalancer.sticky.cookie.httpOnly=true
             - traefik.http.services.keycloakadmin.loadbalancer.server.scheme=http
             - traefik.http.services.keycloakadmin.loadbalancer.server.port=8080
         environment:
@@ -168,15 +179,23 @@ services:
                 condition: service_healthy
 
     case-engine-rest-api:
+        profiles:
+            - api
         build:
             context: .
             dockerfile: ./case-engine-rest-api/Dockerfile
-        ports:
-            - 8081
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.case-engine-rest-api.rule=Host(`api.wkspower.local`)
+            - traefik.http.routers.case-engine-rest-api.entrypoints=web,websecure
+            - traefik.http.routers.case-engine-rest-api.service=case-engine-rest-api
+            - traefik.http.routers.case-engine-rest-api.tls=true
+            - traefik.http.services.case-engine-rest-api.loadbalancer.server.scheme=http
+            - traefik.http.services.case-engine-rest-api.loadbalancer.server.port=8081
         environment:
             - MONGO_DATABASE=shared
             - MONGO_CONN=mongodb://mongodb
-            - KEYCLOAK_URL=https://keycloak:8433
+            - KEYCLOAK_URL=http://keycloak:8080
             - OPA_URL=https://opa:8181/v1/data/wks/authz/allow
             - TRUST_STORE_PASSWORD=wks
         depends_on:
@@ -188,11 +207,11 @@ services:
             - ./configs/certs/keystore.p12:/keystore.p12:ro
 
     bpm-engine-c7-external-service:
+        profiles:
+            - api
         build:
             context: .
             dockerfile: ./bpm-engine-c7-external-service/Dockerfile
-        ports:
-            - 8084
         environment:
             - CAMUNDA_URL=https://camunda:8443/engine-rest
             - CAMUNDA_USERNAME=demo
@@ -207,11 +226,19 @@ services:
             - ./configs/certs/keystore.p12:/keystore.p12:ro
 
     email-to-case:
+        profiles:
+            - api
         build:
             context: .
             dockerfile: ./email-to-case/Dockerfile
-        ports:
-            - 8083
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.email-to-case.rule=Host(`api.wkspower.local`) && PathPrefix(`/inbound`)
+            - traefik.http.routers.email-to-case.entrypoints=web,websecure
+            - traefik.http.routers.email-to-case.service=email-to-case
+            - traefik.http.routers.email-to-case.tls=true
+            - traefik.http.services.email-to-case.loadbalancer.server.scheme=http
+            - traefik.http.services.email-to-case.loadbalancer.server.port=8083
         environment:
             - MONGO_DATABASE=shared
             - MONGO_CONN=mongodb://mongodb
@@ -229,6 +256,8 @@ services:
             - ./configs/certs/keystore.p12:/keystore.p12:ro
 
     case-portal:
+        profiles:
+            - frontend
         build:
             context: .
             dockerfile: ./case-portal-react/Dockerfile
@@ -236,26 +265,21 @@ services:
                 REACT_APP_KEYCLOAK_URL: https://login.wkspower.local
                 REACT_APP_API_URL: https://api.wkspower.local
                 REACT_APP_EMAIL_URL: https://api.wkspower.local/inbound
-        ports:
-            - 3001
         labels:
             - traefik.enable=true
             - traefik.http.routers.case-portal.rule=Host(`app.wkspower.local`)
-            - traefik.http.routers.case-portal.entrypoints=websecure
+            - traefik.http.routers.case-portal.entrypoints=web,websecure
             - traefik.http.routers.case-portal.service=case-portal
             - traefik.http.routers.case-portal.tls=true
-            # - traefik.http.routers.case-portal.middlewares=cors@docker
             - traefik.http.services.case-portal.loadbalancer.server.scheme=http
-            - traefik.http.services.case-portal.loadbalancer.server.port=3001
+            - traefik.http.services.case-portal.loadbalancer.server.port=80
 
     case-engine-loader:
         profiles:
-            - loader
+            - init
         build:
             context: .
             dockerfile: ./case-engine-loader/Dockerfile
-        ports:
-            - 8081
         environment:
             - IMPORT_DIR_PATH=/data
             - MONGO_SHARED_DATABASE=shared
