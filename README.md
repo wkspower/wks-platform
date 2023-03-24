@@ -180,3 +180,11 @@ docker compose --profile servers up -d --scale keycloak=2
 docker compose --profile servers up -d --scale camunda=2
 docker compose ps
 ```
+
+## Using apps
+
+```bash
+open https://app.wkspower.local
+open https://iam.wkspower.local
+open https://camunda.wkspower.local
+```
