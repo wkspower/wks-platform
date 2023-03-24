@@ -32,7 +32,7 @@ keycloak.data.import.adminpass: ${KEYCLOAK_PASS:admin}
 keycloak.data.import.clientid: wks-portal
 keycloak.data.import.realm: ${spring.data.mongodb.database.tenant}
 keycloak.data.import.dns: ${KEYCLOAK_IMPORT_DNS:localhost}
-keycloak.data.import.port: ${KEYCLOAK_IMPORT_PORT:3001}
+keycloak.data.import.port: ${KEYCLOAK_IMPORT_PORT}
 keycloak.data.import.protocol: ${KEYCLOAK_IMPORT_PROTOCOL:https}
 keycloak.data.import.redirecturl: ${keycloak.data.import.protocol}://${keycloak.data.import.dns}${keycloak.data.import.port}/*
 keycloak.data.import.weborigins: ${keycloak.data.import.protocol}://${keycloak.data.import.dns}${keycloak.data.import.port}

@@ -1,14 +1,14 @@
 servers:
-	@docker compose up --build mongodb postgres camunda keycloak opa opa-bundles-service traefik
+	@docker compose --profile servers up --build -d
 
 backend:
-	@docker compose up --build bpm-engine-c7-external-service case-engine-rest-api email-to-case
+	@docker compose --profile api up --build -d
 
 frontend:
-	@make -j 1 case-portal
+	@docker compose --profile frontend up --build -d
 
-loader:
-	@docker compose --profile=loader up --build case-engine-loader	
+setup:
+	@docker compose --profile init up --build
 
 case-portal:
 	@cd $(PWD)/case-portal-react && make

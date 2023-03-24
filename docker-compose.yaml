@@ -288,7 +288,7 @@ services:
             - OPA_URL=https://opa:8181/v1/data/wks/authz/allow
             - KEYCLOAK_URL=http://keycloak:8080
             - KEYCLOAK_IMPORT_DNS=app.wkspower.local
-            - KEYCLOAK_IMPORT_PORT=:443
+            - KEYCLOAK_IMPORT_PORT=
             - KEYCLOAK_IMPORT_PROTOCOL=https
             - CAMUNDA_URL=https://camunda:8443/engine-rest
             - CAMUNDA_USERNAME=demo

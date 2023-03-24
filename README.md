@@ -139,3 +139,41 @@ WKS Platform provides customized modeler templates to accelerate the process des
 
 On macOS you have to add them to the folder:
 /Users/{user_name}/Library/Application Support/camunda-modeler/resources/element-templates
+
+## Running platform in mode high availability (HA)
+
+### 1 - First step
+
+```bash
+# edit
+sudo vim /etc/hosts
+
+# copy/past this is entries
+127.0.0.1	api.wkspower.local
+127.0.0.1	app.wkspower.local
+127.0.0.1	login.wspower.local
+127.0.0.1	iam.wkspower.local
+127.0.0.1   camunda.wkspower.local
+::1         api.wkspower.local
+::1         app.wkspower.local
+::1         login.wkspower.local
+::1         iam.wkspower.local
+::1         camunda.wkspower.local
+```
+
+### 2 - Second step
+
+```bash
+make servers
+make setup
+make api
+make frontend
+```
+
+## 3 - Final step, scaling services to high availability (HA)
+
+```bash
+docker compose --profile servers up -d --scale keycloak=2
+docker compose --profile servers up -d --scale camunda=2
+docker compose ps
+```
