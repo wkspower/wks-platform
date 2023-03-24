@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { ThemeRoutes } from 'routes';
 import ThemeCustomization from 'themes';
 import { SessionStoreProvider } from './SessionStoreContext';
-import { CaseService, RecordService } from 'services';
+import { CaseService, RecordService, BpmService } from 'services';
 import menuItemsDefs from 'menu';
 import { registerInjectUserSession } from 'plugins/InjectUserSession';
 import { accountStore, sessionStore } from './store';
@@ -14,6 +14,7 @@ const App = () => {
     const [authenticated, setAuthenticated] = useState(null);
     const [recordsTypes, setRecordsTypes] = useState([]);
     const [casesDefinitions, setCasesDefinitions] = useState([]);
+    const [bpmEngine, setBpmEngine] = useState(null);
     const [menu, setMenu] = useState({ items: [] });
 
     useEffect(() => {
@@ -106,6 +107,12 @@ const App = () => {
             delete menu.items[2];
         }
 
+        BpmService.getAll(keycloak).then((data) => {
+            if (data.length) {
+                setBpmEngine(data[0].id);
+            }
+        });
+
         return setMenu(menu);
     }
 
@@ -114,7 +121,7 @@ const App = () => {
         authenticated && (
             <ThemeCustomization>
                 <ScrollTop>
-                    <SessionStoreProvider value={{ keycloak, menu }}>
+                    <SessionStoreProvider value={{ keycloak, menu, bpmEngine }}>
                         <ThemeRoutes
                             keycloak={keycloak}
                             authenticated={authenticated}

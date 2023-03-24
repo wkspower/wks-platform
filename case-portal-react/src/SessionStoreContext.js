@@ -21,4 +21,9 @@ export const useMenu = () => {
     return attrs['menu'];
 };
 
+export const useBpmEngine = () => {
+    const attrs = useContext(SessionStoreContext);
+    return attrs['bpmEngine'];
+};
+
 export default SessionStoreContext;

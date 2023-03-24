@@ -13,18 +13,21 @@ import { ProcessDiagram } from 'views/bpmn/ProcessDiagram';
 import { Form } from '@formio/react';
 import { useTranslation } from 'react-i18next';
 import { FormService, TaskService } from 'services';
+import { useSession, useBpmEngine } from '../../SessionStoreContext';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const TaskForm = ({ open, handleClose, task, bpmEngineId, keycloak }) => {
+export const TaskForm = ({ open, handleClose, task }) => {
     const [claimed, setClaimed] = useState(false);
     const [assignee, setAssignee] = useState(null);
     const [formComponents, setFormComponents] = useState(null);
     const [variableValues, setVariableValues] = useState(null);
     const [activityInstances, setActivityInstances] = useState(null);
     const { t } = useTranslation();
+    const keycloak = useSession();
+    const bpmEngineId = useBpmEngine();
 
     useEffect(() => {
         let apiDataVariables = {};

@@ -32,40 +32,25 @@ export const MainRoutes = (keycloak, authenticated, recordsTypes, casesDefinitio
                 children: [
                     {
                         path: 'cases',
-                        element: <CaseList keycloak={keycloak} />
+                        element: <CaseList />
                     },
                     {
                         path: 'wip-cases',
-                        element: (
-                            <CaseList
-                                status={CaseStatus.WipCaseStatus.description}
-                                keycloak={keycloak}
-                            />
-                        )
+                        element: <CaseList status={CaseStatus.WipCaseStatus.description} />
                     },
                     {
                         path: 'closed-cases',
-                        element: (
-                            <CaseList
-                                status={CaseStatus.ClosedCaseStatus.description}
-                                keycloak={keycloak}
-                            />
-                        )
+                        element: <CaseList status={CaseStatus.ClosedCaseStatus.description} />
                     },
                     {
                         path: 'archived-cases',
-                        element: (
-                            <CaseList
-                                status={CaseStatus.ArchivedCaseStatus.description}
-                                keycloak={keycloak}
-                            />
-                        )
+                        element: <CaseList status={CaseStatus.ArchivedCaseStatus.description} />
                     }
                 ]
             },
             {
                 path: 'task-list',
-                element: <TaskList keycloak={keycloak} />
+                element: <TaskList />
             },
             {
                 path: 'system',
@@ -103,7 +88,7 @@ export const MainRoutes = (keycloak, authenticated, recordsTypes, casesDefinitio
     casesDefinitions.forEach((element) => {
         routes.children.push({
             path: 'case-list/' + element.id,
-            element: <CaseList caseDefId={element.id} keycloak={keycloak} />
+            element: <CaseList caseDefId={element.id} />
         });
     });
 

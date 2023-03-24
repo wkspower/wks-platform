@@ -8,8 +8,9 @@ import { TaskForm } from '../taskForm/taskForm';
 import { useTranslation } from 'react-i18next';
 import './taskList.css';
 import { TaskService } from 'services';
+import { useBpmEngine, useSession } from '../../SessionStoreContext';
 
-export const TaskList = ({ businessKey, bpmEngineId, keycloak }) => {
+export const TaskList = ({ businessKey }) => {
     const [tasks, setTasks] = useState(null);
     const [open, setOpen] = useState(false);
     const [task, setTask] = useState(null);
@@ -17,6 +18,8 @@ export const TaskList = ({ businessKey, bpmEngineId, keycloak }) => {
     const [activityInstances, setActivityInstances] = useState(null);
     const { t } = useTranslation();
     const [fetching, setFetching] = useState(false);
+    const bpmEngineId = useBpmEngine();
+    const keycloak = useSession();
 
     useEffect(() => {
         setFetching(true);
