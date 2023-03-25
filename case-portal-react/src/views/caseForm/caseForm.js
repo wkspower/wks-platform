@@ -101,7 +101,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                 return CaseService.getCaseById(keycloak, aCase.businessKey);
             })
             .then((caseData) => {
-                console.log("cd", caseData);
                 setFormData({
                     data: caseData.attributes.reduce(
                         (obj, item) =>
@@ -117,7 +116,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     isValid: true
                 });
                 setActiveStage(caseData.stage);
-                console.log("fd2", formData);
             })
             .catch((err) => {
                 console.log(err.message);
@@ -325,7 +323,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                     aCase={aCase}
                                     getCaseInfo={getCaseInfo}
                                     comments={formData.comments ? formData.comments : []}
-                                    fd={formData}
                                 />
                             </Grid>
                         </Grid>

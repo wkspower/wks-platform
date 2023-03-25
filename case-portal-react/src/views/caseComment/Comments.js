@@ -8,7 +8,7 @@ import './comments.css';
 import { useSession } from 'SessionStoreContext';
 import { CaseService } from '../../services';
 
-export const Comments = ({ comments, aCase, getCaseInfo, fd }) => {
+export const Comments = ({ comments, aCase, getCaseInfo }) => {
     const [backendComments, setBackendComments] = useState(comments);
 
     const [activeComment, setActiveComment] = useState(null);
@@ -70,7 +70,6 @@ export const Comments = ({ comments, aCase, getCaseInfo, fd }) => {
     };
 
     useEffect(() => {
-        console.log(fd);
         setBackendComments(comments);
     });
 
