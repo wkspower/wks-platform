@@ -56,13 +56,14 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                 setFormData({
                     data: caseData.attributes.reduce(
                         (obj, item) =>
-                            Object.assign(obj, {
-                                [item.name]: tryParseJSONObject(item.value)
-                                    ? JSON.parse(item.value)
-                                    : item.value
-                            }),
+                        Object.assign(obj, {
+                            [item.name]: tryParseJSONObject(item.value)
+                            ? JSON.parse(item.value)
+                            : item.value
+                        }),
                         {}
                     ),
+                    comments: caseData.comments,
                     metadata: {},
                     isValid: true
                 });
@@ -273,7 +274,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                 <Comments
                                     aCase={aCase}
                                     getCaseInfo={getCaseInfo}
-                                    comments={formData.data.comments ? formData.data.comments : []}
+                                    comments={formData.comments ? formData.comments : []}
                                 />
                             </Grid>
                         </Grid>

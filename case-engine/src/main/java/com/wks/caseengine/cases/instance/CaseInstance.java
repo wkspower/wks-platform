@@ -30,6 +30,25 @@ public class CaseInstance {
 	private CaseStatus status = CaseStatus.WIP_CASE_STATUS;
 	
 	private List<CaseAttribute> attributes;
+	
+	private List<Comment> comments;
+	
+	public CaseInstance() {
+		
+	}
+	
+	public CaseInstance(String businessKey, String caseDefinitionId, String stage, String caseOwner,
+			String caseOwnerName, CaseStatus status, List<CaseAttribute> attributes, List<Comment> comments) {
+		super();
+		this.businessKey = businessKey;
+		this.caseDefinitionId = caseDefinitionId;
+		this.stage = stage;
+		this.caseOwner = caseOwner;
+		this.caseOwnerName = caseOwnerName;
+		this.status = status;
+		this.attributes = attributes;
+		this.comments = comments;
+	}
 
 	public String getId() {
 		return businessKey;
@@ -38,5 +57,4 @@ public class CaseInstance {
 	public void setStatus(CaseStatus status) {
 		this.status = status;
 	}
-
 }
