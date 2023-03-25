@@ -1,4 +1,5 @@
 import Keycloak from 'keycloak-js';
+import Config from '../../consts';
 
 function bootstrap() {
     let realm = '';
@@ -12,7 +13,7 @@ function bootstrap() {
     }
 
     const kc = Keycloak({
-        url: process.env.REACT_APP_KEYCLOAK_URL,
+        url: Config.LoginUrl,
         realm: realm,
         clientId: clientId
     });

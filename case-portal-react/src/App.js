@@ -5,7 +5,7 @@ import ThemeCustomization from 'themes';
 import { SessionStoreProvider } from './SessionStoreContext';
 import { CaseService, RecordService, BpmService } from 'services';
 import menuItemsDefs from 'menu';
-import { registerInjectUserSession } from 'plugins/InjectUserSession';
+import { RegisterInjectUserSession, RegisterStorageModule, RegisteOptions } from './plugins';
 import { accountStore, sessionStore } from './store';
 import './App.css';
 
@@ -24,7 +24,9 @@ const App = () => {
             setKeycloak(keycloak);
             setAuthenticated(authenticated);
             buildMenuItems(keycloak);
-            registerInjectUserSession(keycloak);
+            RegisterInjectUserSession(keycloak);
+            RegisterStorageModule();
+            RegisteOptions(keycloak);
             forceLogoutIfUserNoMinimalRoleForSystem(keycloak);
         });
 
@@ -40,7 +42,8 @@ const App = () => {
                 .then((refreshed) => {
                     if (refreshed) {
                         console.info('Token refreshed: ' + refreshed);
-                        registerInjectUserSession(keycloak);
+                        RegisterInjectUserSession(keycloak);
+                        RegisteOptions(keycloak);
                     } else {
                         console.info(
                             'Token not refreshed, valid for ' +

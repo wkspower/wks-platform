@@ -36,7 +36,7 @@ email-to-case.routing.new-case.pattern: ${EMAIL_CASE_PATTERN_NEW:new-case}
 email-to-case.routing.update-case.pattern: ${EMAIL_CASE_PATTERN_UPDATE:update-case}
 
 opa.url: ${OPA_URL:http://localhost:8181/v1/data/wks/authz/allow}
-keycloak.url: ${KEYCLOAK_JWKS_SET_URI:http://localhost:8082}
+keycloak.url: ${KEYCLOAK_URL:http://localhost:8082}
 
 management.health.mongo.enabled: false
 management.health.reds.enabled: false

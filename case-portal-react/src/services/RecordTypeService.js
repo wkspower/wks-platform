@@ -1,4 +1,5 @@
 import { json, nop } from './request';
+import Config from '../consts';
 
 export const RecordTypeService = {
     create,
@@ -8,7 +9,7 @@ export const RecordTypeService = {
 };
 
 async function getAll(keycloak) {
-    const url = `${process.env.REACT_APP_API_URL}/record-type/`;
+    const url = `${Config.EngineUrl}/record-type/`;
 
     try {
         const resp = await fetch(url, {
@@ -26,7 +27,7 @@ async function getAll(keycloak) {
 }
 
 async function create(keycloak, data) {
-    const url = `${process.env.REACT_APP_API_URL}/record-type/`;
+    const url = `${Config.EngineUrl}/record-type/`;
 
     try {
         const resp = await fetch(url, {
@@ -46,7 +47,7 @@ async function create(keycloak, data) {
 }
 
 async function update(keycloak, id, data) {
-    const url = `${process.env.REACT_APP_API_URL}/record-type/${id}`;
+    const url = `${Config.EngineUrl}/record-type/${id}`;
 
     try {
         const resp = await fetch(url, {
@@ -66,7 +67,7 @@ async function update(keycloak, id, data) {
 }
 
 async function remove(keycloak, id) {
-    const url = `${process.env.REACT_APP_API_URL}/record-type/${id}`;
+    const url = `${Config.EngineUrl}/record-type/${id}`;
 
     try {
         const resp = await fetch(url, {

@@ -1,4 +1,5 @@
 import { json, nop } from './request';
+import Config from '../consts';
 
 export const BpmService = {
     create,
@@ -9,7 +10,7 @@ export const BpmService = {
 };
 
 async function getAllTypes(keycloak) {
-    const url = `${process.env.REACT_APP_API_URL}/bpm-engine-type/`;
+    const url = `${Config.EngineUrl}/bpm-engine-type/`;
 
     const headers = {
         Accept: 'application/json',
@@ -27,7 +28,7 @@ async function getAllTypes(keycloak) {
 }
 
 async function getAll(keycloak) {
-    const url = `${process.env.REACT_APP_API_URL}/bpm-engine/`;
+    const url = `${Config.EngineUrl}/bpm-engine/`;
 
     const headers = {
         Accept: 'application/json',
@@ -45,7 +46,7 @@ async function getAll(keycloak) {
 }
 
 async function create(keycloak, body) {
-    const url = `${process.env.REACT_APP_API_URL}/bpm-engine/`;
+    const url = `${Config.EngineUrl}/bpm-engine/`;
 
     const headers = {
         Accept: 'application/json',
@@ -63,7 +64,7 @@ async function create(keycloak, body) {
 }
 
 async function update(keycloak, id, body) {
-    const url = `${process.env.REACT_APP_API_URL}/bpm-engine/${id}`;
+    const url = `${Config.EngineUrl}/bpm-engine/${id}`;
 
     const headers = {
         Accept: 'application/json',
@@ -85,7 +86,7 @@ async function update(keycloak, id, body) {
 }
 
 async function remove(keycloak, id) {
-    const url = `${process.env.REACT_APP_API_URL}/bpm-engine/${id}`;
+    const url = `${Config.EngineUrl}/bpm-engine/${id}`;
 
     const headers = {
         Accept: 'application/json',

@@ -1,4 +1,5 @@
 import { json } from './request';
+import Config from '../consts';
 
 export const EmailService = {
     getAllByBusinessKey
@@ -9,7 +10,7 @@ async function getAllByBusinessKey(keycloak, caseInstanceBusinessKey) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${process.env.REACT_APP_EMAIL_URL}/email/?caseInstanceBusinessKey=${caseInstanceBusinessKey}`;
+    var url = `${Config.EmailUrl}/email/?caseInstanceBusinessKey=${caseInstanceBusinessKey}`;
 
     try {
         const resp = await fetch(url, { headers });

@@ -10,6 +10,7 @@ import { openDrawer } from 'store/reducers/menu';
 import Keycloak from 'keycloak-js';
 import { SessionStoreProvider } from 'SessionStoreContext';
 import { registerInjectUserSession } from 'plugins/InjectUserSession';
+import Config from '../../config';
 
 const MainLayout = () => {
     const [keycloak, setKeycloak] = useState();
@@ -21,7 +22,7 @@ const MainLayout = () => {
 
     useEffect(() => {
         const keycloak = Keycloak({
-            url: process.env.REACT_APP_KEYCLOAK_URL,
+            url: Config.LoginUrl,
             realm: 'wks-platform',
             clientId: 'wks-portal-admin'
         });

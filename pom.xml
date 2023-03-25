@@ -70,6 +70,7 @@
 		<module>bpm-engine-c8-client</module>
 		<module>api-security</module>
 		<module>rest-client</module>
+		<module>storage-api</module>
 
 		<!-- Workers -->
 		<module>case-engine-loader</module>

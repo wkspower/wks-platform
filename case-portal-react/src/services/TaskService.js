@@ -1,4 +1,5 @@
 import { json, nop } from './request';
+import Config from '../consts';
 
 export const TaskService = {
     getActivityInstancesById,
@@ -10,7 +11,7 @@ export const TaskService = {
 };
 
 async function getActivityInstancesById(keycloak, bpmEngineId, processInstanceId) {
-    const url = `${process.env.REACT_APP_API_URL}/process-instance/${bpmEngineId}/${processInstanceId}/activity-instances`;
+    const url = `${Config.EngineUrl}/process-instance/${bpmEngineId}/${processInstanceId}/activity-instances`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -26,7 +27,7 @@ async function getActivityInstancesById(keycloak, bpmEngineId, processInstanceId
 }
 
 async function createTaskClaim(keycloak, bpmEngineId, taskId) {
-    const url = `${process.env.REACT_APP_API_URL}/task/${bpmEngineId}/${taskId}/claim/${keycloak.idTokenParsed.name}`;
+    const url = `${Config.EngineUrl}/task/${bpmEngineId}/${taskId}/claim/${keycloak.idTokenParsed.name}`;
 
     const headers = {
         Accept: 'application/json',
@@ -44,7 +45,7 @@ async function createTaskClaim(keycloak, bpmEngineId, taskId) {
 }
 
 async function createTaskUnclaim(keycloak, bpmEngineId, taskId) {
-    const url = `${process.env.REACT_APP_API_URL}/task/${bpmEngineId}/${taskId}/unclaim/${keycloak.idTokenParsed.name}`;
+    const url = `${Config.EngineUrl}/task/${bpmEngineId}/${taskId}/unclaim/${keycloak.idTokenParsed.name}`;
 
     const headers = {
         Accept: 'application/json',
@@ -62,7 +63,7 @@ async function createTaskUnclaim(keycloak, bpmEngineId, taskId) {
 }
 
 async function createTaskComplete(keycloak, bpmEngineId, taskId, body) {
-    const url = `${process.env.REACT_APP_API_URL}/task/${bpmEngineId}/${taskId}/complete`;
+    const url = `${Config.EngineUrl}/task/${bpmEngineId}/${taskId}/complete`;
 
     const headers = {
         Accept: 'application/json',
@@ -96,7 +97,7 @@ async function filterTasks(keycloak, bpmEngineId, businessKey) {
         query = query + (businessKey ? 'processInstanceBusinessKey=' + businessKey : '');
     }
 
-    const url = `${process.env.REACT_APP_API_URL}/task/?${query}`;
+    const url = `${Config.EngineUrl}/task/?${query}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -120,7 +121,7 @@ async function filterProcessInstances(keycloak, bpmEngineId, businessKey) {
         businessKey = '';
     }
 
-    const url = `${process.env.REACT_APP_API_URL}/process-instance/${bpmEngineId}?businessKey=${businessKey}`;
+    const url = `${Config.EngineUrl}/process-instance/${bpmEngineId}?businessKey=${businessKey}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`

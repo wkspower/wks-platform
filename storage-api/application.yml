@@ -1,0 +1,27 @@
+server:
+   port: 8085
+
+logging:
+   level:
+      root: INFO
+      com.wks.api.security: DEBUG
+            
+spring.mvc.converters.preferred-json-mapper: gson
+
+management.health.mongo.enabled: false
+management.health.reds.enabled: false
+management.endpoints.web.exposure.include: health,info 
+management.endpoint.health.show-details: never
+
+opa.url: ${OPA_URL:http://localhost:8181/v1/data/wks/authz/allow}
+keycloak.url: ${KEYCLOAK_URL:http://localhost:8082}
+
+minio.endpoint.url: http://localhost
+minio.endpoint.port: 9000
+minio.endpoint.secure: false
+minio.credencials.accesskey: minio
+minio.credencials.secretkey: "#minio00#"
+
+uploads.backend.url: http://localhost/s3
+uploads.file.min.size:  1024		      # 1kb
+uploads.file.max.size:  20000000 # 20mb

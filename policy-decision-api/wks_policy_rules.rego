@@ -122,6 +122,11 @@ allow {
     is_manager_profile
 }
 
+allow {
+    input.path = "storage"
+    input.method in ["GET", "POST", "OPTION", "HEAD"]
+}
+
 check_origin_request if {
 	input.allowed_origin == "localhost"
     input.host = "localhost"

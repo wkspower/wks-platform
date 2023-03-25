@@ -1,0 +1,15 @@
+http:
+  routers:
+    minio:
+      entryPoints:
+        - web
+      middlewares:
+        - delpath
+      service: minio
+      rule: PathPrefix("/s3")
+
+  services:
+    minio:
+      loadBalancer:
+        servers:
+          - url: http://docker.for.mac.localhost:9000

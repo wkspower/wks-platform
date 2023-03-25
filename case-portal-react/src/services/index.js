@@ -8,6 +8,7 @@ import { BpmService } from './BpmService';
 import { CaseDefService } from './CaseDefService';
 import { ProcessDefService } from './ProcessDefService';
 import { RecordTypeService } from './RecordTypeService';
+import { FileService } from './FileService';
 
 export {
     NotificationService,
@@ -19,5 +20,6 @@ export {
     BpmService,
     CaseDefService,
     ProcessDefService,
-    RecordTypeService
+    RecordTypeService,
+    FileService
 };

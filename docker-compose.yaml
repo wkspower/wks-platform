@@ -1,5 +1,41 @@
 version: '3.7'
 services:
+    traefik:
+        profiles:
+            - servers
+        image: traefik:v2.8
+        command:
+            - --log.level=debug
+            - --api.insecure=true
+            - --api.dashboard=true
+            - --entrypoints.web.address=:80
+            - --entrypoints.websecure.address=:443
+            - --providers.docker=true
+            - --experimental.hub=true
+            - --providers.docker.exposedbydefault=false
+            - --serversTransport.insecureSkipVerify=true
+            - --providers.file.watch=true
+            - --providers.file.directory=/traefik            
+        ports:
+            - 80:80
+            - 443:443
+            - 8888:8080
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - ./configs/traefik:/traefik:ro
+            
+    minio:
+        image: quay.io/minio/minio
+        command: server /data --console-address ":9090"
+        ports:
+            - 9000:9000
+            - 9090:9090
+        environment:
+            - MINIO_ROOT_USER=minio
+            - MINIO_ROOT_PASSWORD=#minio00#
+        volumes:
+            - minio:/data:rw
+
     mongodb:
         image: mongo
         ports:
@@ -10,6 +46,8 @@ services:
             retries: 3
             start_period: 5s
             timeout: 10s
+        volumes:
+            - mongo:/data/db:rw
 
     opa:
         image: openpolicyagent/opa:edge-static
@@ -52,7 +90,9 @@ services:
             timeout: 10s
         ports:
             - 8082:8080
-       
+        volumes:
+            - keycloak:/opt/keycloak/data/
+
     case-engine-rest-api:
         build:
             context: case-engine-rest-api
@@ -64,7 +104,7 @@ services:
         environment:
             - MONGO_DATABASE=wks
             - MONGO_CONN=mongodb://mongodb
-            - KEYCLOAK_JWKS_SET_URI=http://keycloak:8080
+            - KEYCLOAK_URL=http://keycloak:8080
             - OPA_URL=http://opa:8181/v1/data/wks/authz/allow
         depends_on:
             mongodb:
@@ -103,7 +143,7 @@ services:
             - MONGO_CONN=mongodb://mongodb
             - EMAIL_CASE_PATTERN_NEW=new-case
             - EMAIL_CASE_PATTERN_UPDATE=update-case
-            - KEYCLOAK_JWKS_SET_URI=http://keycloak:8080
+            - KEYCLOAK_URL=http://keycloak:8080
             - OPA_URL=http://opa:8181/v1/data/wks/authz/allow
         depends_on:
             mongodb:
@@ -120,3 +160,11 @@ services:
                 REACT_APP_EMAIL_URL: http://localhost:8083
         ports:
             - 3001:3000
+
+volumes:
+    mongo:
+        driver: local
+    minio:
+        driver: local
+    keycloak:
+        driver: local

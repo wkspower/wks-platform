@@ -1,4 +1,5 @@
 import { json, nop } from './request';
+import Config from '../consts';
 
 export const RecordService = {
     getRecordTypeById,
@@ -11,7 +12,7 @@ export const RecordService = {
 };
 
 async function getRecordById(keycloak, id) {
-    const url = `${process.env.REACT_APP_API_URL}/record/${id}`;
+    const url = `${Config.EngineUrl}/record/${id}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -27,7 +28,7 @@ async function getRecordById(keycloak, id) {
 }
 
 async function getAllRecordTypes(keycloak) {
-    const url = `${process.env.REACT_APP_API_URL}/record-type/`;
+    const url = `${Config.EngineUrl}/record-type/`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -43,7 +44,7 @@ async function getAllRecordTypes(keycloak) {
 }
 
 async function getRecordTypeById(keycloak, id) {
-    const url = `${process.env.REACT_APP_API_URL}/record-type/${id}`;
+    const url = `${Config.EngineUrl}/record-type/${id}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -59,7 +60,7 @@ async function getRecordTypeById(keycloak, id) {
 }
 
 async function createRecordType(keycloak, id, data) {
-    const url = `${process.env.REACT_APP_API_URL}/record-type/${id}`;
+    const url = `${Config.EngineUrl}/record-type/${id}`;
 
     try {
         const resp = await fetch(url, {
@@ -79,7 +80,7 @@ async function createRecordType(keycloak, id, data) {
 }
 
 async function createRecord(keycloak, id, data) {
-    const url = `${process.env.REACT_APP_API_URL}/record/${id}`;
+    const url = `${Config.EngineUrl}/record/${id}`;
 
     try {
         const resp = await fetch(url, {
@@ -99,7 +100,7 @@ async function createRecord(keycloak, id, data) {
 }
 
 async function updateRecord(keycloak, id, oid, data) {
-    const url = `${process.env.REACT_APP_API_URL}/record/${id}/${oid}`;
+    const url = `${Config.EngineUrl}/record/${id}/${oid}`;
 
     try {
         const resp = await fetch(url, {
@@ -119,7 +120,7 @@ async function updateRecord(keycloak, id, oid, data) {
 }
 
 async function deleteRecord(keycloak, id, oid) {
-    const url = `${process.env.REACT_APP_API_URL}/record/${id}/${oid}`;
+    const url = `${Config.EngineUrl}/record/${id}/${oid}`;
 
     try {
         const resp = await fetch(url, {

@@ -23,58 +23,10 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { tryParseJSONObject } from '../../utils/jsonStringCheck';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemButton from '@mui/material/ListItemButton';
-import Avatar from '@mui/material/Avatar';
-import FilePdfOutlined from '@ant-design/icons/FilePdfOutlined';
-import FileExcelOutlined from '@ant-design/icons/FileExcelOutlined';
-import FileOutlined from '@ant-design/icons/FileOutlined';
-import FileImageOutlined from '@ant-design/icons/FileImageOutlined';
 import { CaseEmailsList } from 'views/caseEmail/caseEmailList';
-import FileBase64 from 'react-file-base64';
 import { useTranslation } from 'react-i18next';
-import { useSession } from 'SessionStoreContext';
 import { CaseService, FormService } from '../../services';
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
-
-function a11yProps(index) {
-    return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `simple-tabpanel-${index}`
-    };
-}
-
-function TabPanel(props) {
-    const { children, value, index, ...other } = props;
-
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
-            {...other}
-        >
-            {value === index && (
-                <Box sx={{ p: 3 }}>
-                    <Typography component={'span'}>{children}</Typography>
-                </Box>
-            )}
-        </div>
-    );
-}
-
-TabPanel.propTypes = {
-    children: PropTypes.node,
-    index: PropTypes.number.isRequired,
-    value: PropTypes.number.isRequired
-};
+import Attachments from './Attachments';
 
 export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     const [caseDef, setCaseDef] = useState(null);
@@ -328,7 +280,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={3}>
-                        <Attachments data={formData.data} aCase={aCase} getCaseInfo={getCaseInfo} />
+                        <Attachments aCase={aCase} getCaseInfo={getCaseInfo} />
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={4}>
@@ -340,153 +292,39 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     );
 };
 
-const downloadFile = async (fileToDownload) => {
-    const file = await createBlob(fileToDownload.url);
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
 
-    const element = document.createElement('a');
-
-    element.href = URL.createObjectURL(file);
-
-    element.download = fileToDownload.originalName;
-
-    document.body.appendChild(element);
-
-    element.click();
-};
-
-async function createBlob(base64) {
-    let res = await fetch(base64);
-    let myBlob = await res.blob();
-
-    return myBlob;
+function a11yProps(index) {
+    return {
+        id: `simple-tab-${index}`,
+        'aria-controls': `simple-tabpanel-${index}`
+    };
 }
 
-const handleFileChange = (keycloak, files, aCase, getCaseInfo) => {
-    if (!files) {
-        return;
-    }
-
-    const attachments = [];
-
-    files.forEach((file, i) => {
-        attachments.push({ ...file });
-    });
-
-    CaseService.uploadCaseAttachById(keycloak, aCase.businessKey, attachments)
-        .then(() => {
-            getCaseInfo(aCase, true);
-        })
-        .catch((err) => console.error(err));
-};
-
-function Attachments({ data, aCase, getCaseInfo }) {
-    const keycloak = useSession();
+function TabPanel(props) {
+    const { children, value, index, ...other } = props;
 
     return (
-        <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Grid item xs={12}>
-                <MainCard sx={{ mb: 1 }}>
-                    <Box sx={{ border: '1px dashed #d9d9d9', padding: 5 }}>
-                        <Grid
-                            container
-                            direction="column"
-                            justifyContent="center"
-                            alignItems="center"
-                        >
-                            <Avatar
-                                style={{
-                                    backgroundColor: '#27CDF2',
-                                    fontSize: 40,
-                                    height: 60,
-                                    width: 60,
-                                    opacity: 0.5
-                                }}
-                            >
-                                <FilePdfOutlined />
-                            </Avatar>
-
-                            <br />
-
-                            <Typography variant="h4" color="textSecondary" sx={{ pr: 0.5 }}>
-                                Select files to upload
-                            </Typography>
-
-                            <br />
-
-                            <FileBase64
-                                multiple={true}
-                                onDone={async (files) => {
-                                    await handleFileChange(keycloak, files, aCase, getCaseInfo);
-                                }}
-                            />
-                        </Grid>
-                    </Box>
-
-                    <div style={{ paddingTop: 15 }}>
-                        <hr />
-                    </div>
-
-                    {data.file?.length === 0 && (
-                        <Typography variant="h4" color="textSecondary" sx={{ pr: 0.5 }}>
-                            Attach your files and they will be shown here
-                        </Typography>
-                    )}
-
-                    {data.file?.length !== 0 && (
-                        <List>
-                            {data.file &&
-                                data.file.map((file, index) => {
-                                    return (
-                                        <ListItem key={index}>
-                                            <ListItemAvatar>
-                                                {file.type === 'application/pdf' && (
-                                                    <Avatar style={{ backgroundColor: 'red' }}>
-                                                        <FilePdfOutlined />
-                                                    </Avatar>
-                                                )}
-
-                                                {file.type === 'application/xls' && (
-                                                    <Avatar style={{ backgroundColor: 'green' }}>
-                                                        <FileExcelOutlined />
-                                                    </Avatar>
-                                                )}
-
-                                                {file.type && file.type.includes('image/') && (
-                                                    <Avatar
-                                                        style={{ backgroundColor: 'lightblue' }}
-                                                    >
-                                                        <FileImageOutlined />
-                                                    </Avatar>
-                                                )}
-
-                                                {file.type !== 'application/xls' &&
-                                                    file.type !== 'application/pdf' &&
-                                                    file.type &&
-                                                    !file.type.includes('image/') && (
-                                                        <Avatar style={{ backgroundColor: 'grey' }}>
-                                                            <FileOutlined />
-                                                        </Avatar>
-                                                    )}
-                                            </ListItemAvatar>
-                                            <ListItemText
-                                                primary={file.originalName}
-                                                secondary={file.size + 'KB'}
-                                                style={{ maxWidth: '80%' }}
-                                            />
-                                            <ListItemButton
-                                                style={{ maxWidth: '10%' }}
-                                                component="button"
-                                                onClick={() => downloadFile(file)}
-                                            >
-                                                <ListItemText primary="Download" />
-                                            </ListItemButton>
-                                        </ListItem>
-                                    );
-                                })}
-                        </List>
-                    )}
-                </MainCard>
-            </Grid>
-        </Grid>
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <Box sx={{ p: 3 }}>
+                    <Typography component={'span'}>{children}</Typography>
+                </Box>
+            )}
+        </div>
     );
 }
+
+TabPanel.propTypes = {
+    children: PropTypes.node,
+    index: PropTypes.number.isRequired,
+    value: PropTypes.number.isRequired
+};

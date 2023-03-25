@@ -55,7 +55,7 @@ export const NewCaseForm = ({ open, handleClose, caseDefId, setLastCreatedCase }
                         : JSON.stringify(formData.data[key])
             });
         });
-        
+
         CaseService.createCase(
             keycloak,
             JSON.stringify({
@@ -96,7 +96,6 @@ export const NewCaseForm = ({ open, handleClose, caseDefId, setLastCreatedCase }
                     </Toolbar>
                 </AppBar>
 
-                {/* New Case Form */}
                 <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Grid item xs={12} sx={{ m: 3 }}>
                         <Box sx={{ pb: 1, display: 'flex', flexDirection: 'row' }}>
