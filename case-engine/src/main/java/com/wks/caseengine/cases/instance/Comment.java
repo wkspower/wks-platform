@@ -27,4 +27,19 @@ public class Comment {
 	
 	private String caseId;
 	
+	public Comment() {
+		
+	}
+
+	public Comment(String id, String body, String userName, String userId, String parentId, Date createdAt,
+			String caseId) {
+		super();
+		this.id = id;
+		this.body = body;
+		this.userName = userName;
+		this.userId = userId;
+		this.parentId = parentId;
+		this.createdAt = createdAt;
+		this.caseId = caseId;
+	}
 }

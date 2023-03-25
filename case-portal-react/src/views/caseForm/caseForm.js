@@ -101,20 +101,23 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                 return CaseService.getCaseById(keycloak, aCase.businessKey);
             })
             .then((caseData) => {
+                console.log("cd", caseData);
                 setFormData({
                     data: caseData.attributes.reduce(
                         (obj, item) =>
-                            Object.assign(obj, {
-                                [item.name]: tryParseJSONObject(item.value)
-                                    ? JSON.parse(item.value)
-                                    : item.value
-                            }),
+                        Object.assign(obj, {
+                            [item.name]: tryParseJSONObject(item.value)
+                            ? JSON.parse(item.value)
+                            : item.value
+                        }),
                         {}
                     ),
+                    comments: caseData.comments,
                     metadata: {},
                     isValid: true
                 });
                 setActiveStage(caseData.stage);
+                console.log("fd2", formData);
             })
             .catch((err) => {
                 console.log(err.message);
@@ -321,7 +324,8 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                 <Comments
                                     aCase={aCase}
                                     getCaseInfo={getCaseInfo}
-                                    comments={formData.data.comments ? formData.data.comments : []}
+                                    comments={formData.comments ? formData.comments : []}
+                                    fd={formData}
                                 />
                             </Grid>
                         </Grid>

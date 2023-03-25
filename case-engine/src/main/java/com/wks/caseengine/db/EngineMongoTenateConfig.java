@@ -34,17 +34,17 @@ public class EngineMongoTenateConfig extends AbstractMongoClientConfiguration {
 	@Override
 	protected MongoClientSettings mongoClientSettings() {
 		PojoCodecProvider build = PojoCodecProvider.builder()
-																						.conventions(Arrays.asList(Conventions.ANNOTATION_CONVENTION))
-																						.automatic(true)
-																						.build();
+													.conventions(Arrays.asList(Conventions.ANNOTATION_CONVENTION))
+													.automatic(true)
+													.build();
 		
 		CodecRegistry provider = CodecRegistries.fromProviders(build);
 
 		CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), provider); 
 		
 		MongoClientSettings.Builder builder = MongoClientSettings.builder()
-																												.applyConnectionString(new ConnectionString(props.getUri()))
-																												.codecRegistry(pojoCodecRegistry);
+																.applyConnectionString(new ConnectionString(props.getUri()))
+																.codecRegistry(pojoCodecRegistry);
 		
 		builder.applyToConnectionPoolSettings(pool -> {
 			pool.minSize(props.getMinPool());

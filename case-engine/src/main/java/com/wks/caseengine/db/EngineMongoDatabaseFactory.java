@@ -1,10 +1,16 @@
 package com.wks.caseengine.db;
 
+import java.util.Arrays;
 import java.util.Optional;
 
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.Conventions;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.wks.api.security.context.SecurityContextTenantHolder;
@@ -23,7 +29,16 @@ public class EngineMongoDatabaseFactory extends SimpleMongoClientDatabaseFactory
 
     @Override
     public MongoDatabase getMongoDatabase() {
-        return getMongoClient().getDatabase(getTenantDatabase());
+    	PojoCodecProvider build = PojoCodecProvider.builder()
+				.conventions(Arrays.asList(Conventions.ANNOTATION_CONVENTION))
+				.automatic(true)
+				.build();
+
+		CodecRegistry provider = CodecRegistries.fromProviders(build);
+		
+		CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), provider); 
+		
+        return getMongoClient().getDatabase(getTenantDatabase()).withCodecRegistry(pojoCodecRegistry);
     }
 
     private String getTenantDatabase() {

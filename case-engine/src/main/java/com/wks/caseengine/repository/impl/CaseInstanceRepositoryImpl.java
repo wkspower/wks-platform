@@ -7,11 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.bson.conversions.Bson;
-import org.bson.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
@@ -32,43 +30,40 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 
 	@Override
 	public List<CaseInstance> find() throws Exception {
-		Gson gson = new Gson();
-		return paginator.apply(getCollection().find()).sort(descending("_id"))
-				.map(o -> gson.fromJson(o.getJson(), CaseInstance.class)).into(new ArrayList<>());
+		return paginator.apply(getCollection().find()).sort(descending("_id")).into(new ArrayList<>());
 	}
 
 	@Override
-	public List<CaseInstance> find(final Optional<CaseStatus> status, final Optional<String> caseDefinitionId)
-			throws Exception {
-
-		Gson gson = new Gson();
-
+	public List<CaseInstance> find(final Optional<CaseStatus> status, final Optional<String> caseDefinitionId) throws Exception {
 		Bson statusFilter = status.isPresent() ? Filters.eq("status", status.get()) : Filters.empty();
-		Bson caseDefIdFilter = caseDefinitionId.isPresent() ? Filters.eq("caseDefinitionId", caseDefinitionId.get())
-				: Filters.empty();
+		Bson caseDefIdFilter = caseDefinitionId.isPresent() ? Filters.eq("caseDefinitionId", caseDefinitionId.get()) : Filters.empty();
+		
+		ArrayList<CaseInstance> caseInstances = paginator.apply(getCollection().find().sort(descending("_id")).filter(Filters.and(statusFilter, caseDefIdFilter)))
+																.into(new ArrayList<>());
 
-		return paginator.apply(getCollection().find()).sort(descending("_id"))
-				.filter(Filters.and(statusFilter, caseDefIdFilter))
-				.map(o -> gson.fromJson(o.getJson(), CaseInstance.class)).into(new ArrayList<>());
+		return caseInstances;
 	}
 
 	@Override
 	public CaseInstance get(final String businessKey) throws Exception {
 		Bson filter = Filters.eq("businessKey", businessKey);
-		Gson gson = new Gson();
-		return gson.fromJson(getCollection().find(filter).first().getJson(), CaseInstance.class);
+		CaseInstance first = getCollection().find(filter).first();
+		return first;
 	}
 
 	@Override
 	public void save(final CaseInstance caseInstance) throws Exception {
-		getCollection().insertOne((new JsonObject(new Gson().toJson(caseInstance))));
+		getCollection().insertOne(caseInstance);
 	}
 
 	@Override
 	public void update(final String businessKey, final CaseInstance caseInstance) throws Exception {
 		Bson filter = Filters.eq("businessKey", businessKey);
-		Bson update = Updates.combine(Updates.set("status", caseInstance.getStatus()),
-				Updates.set("stage", caseInstance.getStage()), Updates.set("attributes", caseInstance.getAttributes()));
+		Bson update = Updates.combine(
+				Updates.set("status", caseInstance.getStatus()),
+				Updates.set("stage", caseInstance.getStage()),
+				Updates.set("comments", caseInstance.getComments()),
+				Updates.set("attributes", caseInstance.getAttributes()));
 		getCollection().updateMany(filter, update);
 	}
 
@@ -78,7 +73,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 		getCollection().deleteMany(filter);
 	}
 
-	private MongoCollection<JsonObject> getCollection() {
-		return connection.getCaseInstCollection();
+	private MongoCollection<CaseInstance> getCollection() {
+		return connection.getCaseInstanceCollection();
 	}
 }

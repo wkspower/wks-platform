@@ -169,32 +169,14 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	public void addComment(Comment newComment) throws Exception {
 		CaseInstance caseInstance = repository.get(newComment.getCaseId());
 		
-		List<Comment> comments = new ArrayList<Comment>();
-		
-		caseInstance.getAttributes().forEach(attribute -> {
-			if (StringUtils.equals(attribute.getName(), "comments")) {
-				comments.addAll(gson.fromJson(attribute.getValue(), new TypeToken<List<Comment>>(){}.getType()));
-			}
-		});
-		
 		newComment.setCreatedAt(new Date());
 		
 		newComment.setId(ObjectId.get().toString());
 		
-		comments.add(newComment);
-		
-		Boolean commentsAttributeFound = false;
-		
-		for (CaseAttribute attribute : caseInstance.getAttributes()) {
-			if (StringUtils.equals(attribute.getName(), "comments")) {
-				attribute.setValue(gson.toJson(comments));
-				commentsAttributeFound = true;
-				break;
-			}
-		}
-		
-		if (!commentsAttributeFound) {
-			caseInstance.getAttributes().add(new CaseAttribute("comments", gson.toJson(comments)));
+		if (caseInstance.getComments() == null) {
+			caseInstance.setComments(Arrays.asList(newComment));
+		} else {
+			caseInstance.getComments().add(newComment);
 		}
 		
 		repository.update(newComment.getCaseId(), caseInstance);

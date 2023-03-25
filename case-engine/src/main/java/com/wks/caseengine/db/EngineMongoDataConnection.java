@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.wks.caseengine.cases.instance.CaseInstance;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,7 +34,7 @@ public class EngineMongoDataConnection {
 		MongoDatabase db = byTenant.getDb();
 		return db.getCollection("caseInstances", JsonObject.class);
 	}
-
+	
 	public MongoCollection<JsonObject> getFormCollection() {
 		MongoDatabase db = byTenant.getDb();
 		return db.getCollection("forms", JsonObject.class);
@@ -61,5 +62,10 @@ public class EngineMongoDataConnection {
 
 	public  MongoDatabase getDatabase() {
 		return byTenant.getDb();
+	}
+	
+	public MongoCollection<CaseInstance> getCaseInstanceCollection() {
+		MongoDatabase db = byTenant.getDb();
+		return db.getCollection("caseInstances", CaseInstance.class);
 	}
 }
