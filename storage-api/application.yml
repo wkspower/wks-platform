@@ -16,12 +16,14 @@ management.endpoint.health.show-details: never
 opa.url: ${OPA_URL:http://localhost:8181/v1/data/wks/authz/allow}
 keycloak.url: ${KEYCLOAK_URL:http://localhost:8082}
 
-minio.endpoint.url: http://localhost
-minio.endpoint.port: 9000
-minio.endpoint.secure: false
-minio.credencials.accesskey: minio
-minio.credencials.secretkey: "#minio00#"
-
-uploads.backend.url: http://localhost:9000
-uploads.file.min.size:  1024		      # 1kb
-uploads.file.max.size:  20000000 # 20mb
+driver.storage.endpoint.url: nyc3.digitaloceanspaces.com
+driver.storage.endpoint.port: 443
+driver.storage.endpoint.secure: true
+driver.storage.endpoint.signing.region: nyc3
+driver.storage.endpoint.bucket.prefix: wks
+driver.storage.accesskey: DO00RLWAK2K7CXMDPXMH
+driver.storage.secretkey: ErA4x+/QBQy2QDwoRzfnEHQBJtUcVl78iuyoZNL7J6I
+driver.storage.factory.type: do
+driver.storage.uploads.backend.url: https://wks.nyc3.digitaloceanspaces.com
+driver.storage.uploads.file.min.size:  1024		      # 1kb
+driver.storage.uploads.file.max.size:  20000000 # 20mb

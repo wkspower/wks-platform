@@ -1,16 +1,17 @@
-package com.wks.storage.service;
+package com.wks.storage.service.minio;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.wks.api.security.context.SecurityContextTenantHolder;
+import com.wks.storage.service.BucketService;
 
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 
-@Component
-public class BucketServiceImpl implements BucketService {
+@Service("MinioBucketService")
+public class MinioBucketService implements BucketService {
 
 	@Autowired
 	private SecurityContextTenantHolder tenantHolder;

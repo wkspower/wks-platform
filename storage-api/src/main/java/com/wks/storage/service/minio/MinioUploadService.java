@@ -1,27 +1,30 @@
-package com.wks.storage.service;
+package com.wks.storage.service.minio;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
-import com.wks.storage.configs.MinioConfiguration;
 import com.wks.storage.model.UploadFileUrl;
+import com.wks.storage.service.BucketService;
+import com.wks.storage.service.UploadService;
 
 import io.minio.MinioClient;
 import io.minio.PostPolicy;
 
-@Component
-public class UploadServiceImpl implements UploadService {
+@Service("MinioUploadService")
+public class MinioUploadService implements UploadService {
 
 	@Autowired
 	private MinioClient client;
 	
 	@Autowired
-	private MinioConfiguration configs;
+	private MinioConfig configs;
 	
 	@Autowired
+	@Qualifier("MinioBucketService")
 	private BucketService bucketService;
 	
 	@Override

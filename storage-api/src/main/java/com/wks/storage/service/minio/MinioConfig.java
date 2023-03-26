@@ -1,38 +1,36 @@
-package com.wks.storage.configs;
+package com.wks.storage.service.minio;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.web.client.RestTemplate;
 
 import io.minio.MinioClient;
 
 @Configuration
-public class MinioConfiguration {
+public class MinioConfig {
 	
-	@Value("${minio.endpoint.url}")
+	@Value("${driver.storage.endpoint.url}")
 	private String endpoint;
 	
-	@Value("${minio.endpoint.port}")
+	@Value("${driver.storage.endpoint.port}")
 	private int port;
 	
-	@Value("${minio.endpoint.secure}")
+	@Value("${driver.storage.endpoint.secure}")
 	private boolean secure;
 	
-	@Value("${minio.credencials.accesskey}")
+	@Value("${driver.storage.accesskey}")
 	private String accessKey;
 	
-	@Value("${minio.credencials.secretkey}")
+	@Value("${driver.storage.secretkey}")
 	private String secretKey;
 	
-	@Value("${uploads.backend.url}")
+	@Value("${driver.storage.uploads.backend.url}")
 	private String uploadsBackendUrl;
 	
-	@Value("${uploads.file.min.size}")
+	@Value("${driver.storage.uploads.file.min.size}")
 	private int uploadsFileMinSize;
 	
-	@Value("${uploads.file.max.size}")
+	@Value("${driver.storage.uploads.file.max.size}")
 	private int uploadsFileMaxSize;
 	
 	@Bean
@@ -41,13 +39,6 @@ public class MinioConfiguration {
 										.endpoint(endpoint, port, secure)
 										.credentials(accessKey, secretKey)
 										.build();
-	}
-	
-	@Bean
-	public RestTemplate getRestTemplate() {
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-		return restTemplate;
 	}
 	
 	public String getUploadsBackendUrl() {

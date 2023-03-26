@@ -1,25 +1,29 @@
-package com.wks.storage.service;
+package com.wks.storage.service.minio;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 import com.wks.storage.model.DownloadFileUrl;
+import com.wks.storage.service.BucketService;
+import com.wks.storage.service.DownloadService;
 
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.http.Method;
 
-@Component
-public class DownloadServiceImpl implements DownloadService {
+@Service("MinioDownloadService")
+public class MinioDownloadService implements DownloadService {
 
 	@Autowired
 	private MinioClient client;
 	
 	@Autowired
+	@Qualifier("MinioBucketService")
 	private BucketService bucketService;
 	
 	@Override
