@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Grid } from '@mui/material';
 import MainCard from 'components/MainCard';
 import List from '@mui/material/List';
@@ -15,53 +15,46 @@ import FileOutlined from '@ant-design/icons/FileOutlined';
 import FileImageOutlined from '@ant-design/icons/FileImageOutlined';
 import Fade from '@mui/material/Fade';
 import CircularProgress from '@mui/material/CircularProgress';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 import { useSession } from 'SessionStoreContext';
 import { FileService } from '../../services';
 import CaseStore from './store';
 import Files from 'react-files';
 
-function Attachments({ aCase, getCaseInfo }) {
+function Attachments({ aCase }) {
     const keycloak = useSession();
     const [fetching, setFetching] = useState(false);
     const [percent, setPercent] = useState(0);
-    const [filesUploaded, setFilesUploaded] = useState([]);
-
-    useEffect(() => {
-        CaseStore.getAttachmentsById(aCase.businessKey)
-            .then((data) => {
-                setFilesUploaded(data);
-            })
-            .catch((e) => console.log(e));
-    });
+    const [messageError, setMessageError] = useState(null);
+    const [filesUploaded, setFilesUploaded] = useState(aCase.attachments || []);
 
     const handleChange = (files) => {
         setFetching(true);
 
-        files.forEach((file) => {
-            FileService.upload({
-                dir: 'cases',
-                file: file,
-                keycloak,
-                progress: (e, percent) => {
-                    setPercent(percent);
-                }
+        CaseStore.saveAttachmentsFromFiles(keycloak, files, aCase, setPercent)
+            .then((data) => {
+                setFilesUploaded([...filesUploaded, ...data]);
             })
-                .then((data) => {
-                    console.log(data);
-                    setFilesUploaded([...filesUploaded, data]);
-                })
-                .finally(() => {
-                    const timeer = setTimeout(() => {
-                        setPercent(0);
-                        setFetching(false);
-                        clearTimeout(timeer);
-                    }, 800);
-                });
-        });
+            .catch((e) => {
+                console.log(e);
+                setMessageError(e);
+            })
+            .finally(() => {
+                const timer = setTimeout(() => {
+                    setPercent(0);
+                    setFetching(false);
+                    clearTimeout(timer);
+                }, 800);
+            });
     };
 
     const handleError = (error, file) => {
         console.log('error code ' + error.code + ': ' + error.message);
+    };
+
+    const handleCloseMesssage = () => {
+        setMessageError(null);
     };
 
     const AnimatedCircularProgress = React.forwardRef((props, ref) => {
@@ -90,6 +83,10 @@ function Attachments({ aCase, getCaseInfo }) {
                 </Box>
             </div>
         );
+    });
+
+    const Alert = React.forwardRef((props, ref) => {
+        return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
     });
 
     return (
@@ -142,94 +139,68 @@ function Attachments({ aCase, getCaseInfo }) {
                         <hr />
                     </div>
 
-                    {filesUploaded.length !== 0 && (
-                        <List>
-                            {filesUploaded.map((file, index) => {
-                                return (
-                                    <ListItem key={index}>
-                                        <ListItemAvatar>
-                                            {file.type === 'application/pdf' && (
-                                                <Avatar style={{ backgroundColor: 'red' }}>
-                                                    <FilePdfOutlined />
+                    <List>
+                        {filesUploaded.map((file, index) => {
+                            return (
+                                <ListItem key={index}>
+                                    <ListItemAvatar>
+                                        {file.type === 'application/pdf' && (
+                                            <Avatar style={{ backgroundColor: 'red' }}>
+                                                <FilePdfOutlined />
+                                            </Avatar>
+                                        )}
+
+                                        {file.type === 'application/xls' && (
+                                            <Avatar style={{ backgroundColor: 'green' }}>
+                                                <FileExcelOutlined />
+                                            </Avatar>
+                                        )}
+
+                                        {file.type && file.type.includes('image/') && (
+                                            <Avatar style={{ backgroundColor: 'lightblue' }}>
+                                                <FileImageOutlined />
+                                            </Avatar>
+                                        )}
+
+                                        {file.type !== 'application/xls' &&
+                                            file.type !== 'application/pdf' &&
+                                            file.type &&
+                                            !file.type.includes('image/') && (
+                                                <Avatar style={{ backgroundColor: 'grey' }}>
+                                                    <FileOutlined />
                                                 </Avatar>
                                             )}
-
-                                            {file.type === 'application/xls' && (
-                                                <Avatar style={{ backgroundColor: 'green' }}>
-                                                    <FileExcelOutlined />
-                                                </Avatar>
-                                            )}
-
-                                            {file.type && file.type.includes('image/') && (
-                                                <Avatar style={{ backgroundColor: 'lightblue' }}>
-                                                    <FileImageOutlined />
-                                                </Avatar>
-                                            )}
-
-                                            {file.type !== 'application/xls' &&
-                                                file.type !== 'application/pdf' &&
-                                                file.type &&
-                                                !file.type.includes('image/') && (
-                                                    <Avatar style={{ backgroundColor: 'grey' }}>
-                                                        <FileOutlined />
-                                                    </Avatar>
-                                                )}
-                                        </ListItemAvatar>
-                                        <ListItemText
-                                            primary={file.name}
-                                            secondary={file.size + 'KB'}
-                                            style={{ maxWidth: '80%' }}
-                                        />
-                                        <ListItemButton
-                                            style={{ maxWidth: '10%' }}
-                                            component="button"
-                                            onClick={() => downloadFile(file)}
-                                        >
-                                            <ListItemText primary="Download" />
-                                        </ListItemButton>
-                                    </ListItem>
-                                );
-                            })}
-                        </List>
-                    )}
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                        primary={file.name}
+                                        secondary={file.size + 'KB'}
+                                        style={{ maxWidth: '80%' }}
+                                    />
+                                    <ListItemButton
+                                        style={{ maxWidth: '10%' }}
+                                        component="button"
+                                        onClick={() => downloadFile(file, keycloak)}
+                                    >
+                                        <ListItemText primary="Download" />
+                                    </ListItemButton>
+                                </ListItem>
+                            );
+                        })}
+                    </List>
                 </MainCard>
             </Grid>
+
+            <Snackbar open={!!messageError} autoHideDuration={6000} onClose={handleCloseMesssage}>
+                <Alert onClose={handleCloseMesssage} severity="error" sx={{ width: '100%' }}>
+                    {messageError}
+                </Alert>
+            </Snackbar>
         </Grid>
     );
 }
 
-const downloadFile = async (fileToDownload) => {
-    const file = await createBlob(fileToDownload.url);
-    const element = document.createElement('a');
-    element.href = URL.createObjectURL(file);
-    element.download = fileToDownload.originalName;
-    document.body.appendChild(element);
-    element.click();
-};
-
-async function createBlob(base64) {
-    let res = await fetch(base64);
-    let myBlob = await res.blob();
-
-    return myBlob;
-}
-
-const handleFileChange = (keycloak, files, aCase, getCaseInfo) => {
-    if (!files) {
-        return;
-    }
-
-    const attachments = [];
-
-    files.forEach((file, i) => {
-        attachments.push({ ...file });
-    });
-
-    CaseService.uploadCaseAttachById(keycloak, aCase.businessKey, attachments)
-        .then(() => {
-            getCaseInfo(aCase, true);
-        })
-        .catch((err) => console.error(err));
+const downloadFile = (file, keycloak) => {
+    return FileService.download(file, keycloak);
 };
 
 export default Attachments;

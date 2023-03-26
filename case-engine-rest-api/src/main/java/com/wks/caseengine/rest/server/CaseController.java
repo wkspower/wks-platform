@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.wks.caseengine.cases.definition.CaseStatus;
+import com.wks.caseengine.cases.instance.Attachment;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceFile;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
@@ -89,4 +90,10 @@ public class CaseController {
 	public void deleteComment(@RequestBody final Comment comment) throws Exception {
 		caseInstanceService.deleteComment(comment);
 	}
+	
+	@PutMapping(value = "/{businessKey}/attachments")
+	public void addAttachment(@PathVariable String businessKey, @RequestBody Attachment newAttachment) throws Exception {
+		caseInstanceService.addAttachment(businessKey, newAttachment);
+	}
+
 }

@@ -29,5 +29,7 @@ public interface CaseInstanceService {
 	void editComment(Comment comment) throws Exception;
 
 	void deleteComment(Comment comment) throws Exception;
+
+	void addAttachment(String businessKey, Attachment newAttachment) throws Exception;
 	
 }

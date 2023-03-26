@@ -11,11 +11,11 @@ import org.apache.commons.codec.binary.StringUtils;
 import org.apache.http.client.utils.DateUtils;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.wks.api.security.context.SecurityContextTenantHolder;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
@@ -38,9 +38,6 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 	@Autowired
 	private ProcessInstanceService processInstanceService;
-	
-    @Autowired
-    private SecurityContextTenantHolder holder;
 
 	@Override
 	public List<CaseInstance> find(final Optional<CaseStatus> status, final Optional<String> caseDefinitionId)
@@ -226,6 +223,18 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 		caseInstance.getComments().remove(commentToDelete);
 		
 		repository.update(comment.getCaseId(), caseInstance);
+	}
+	
+@Override
+	public void addAttachment(String businessKey, Attachment newAttachment) throws Exception {
+		CaseInstance caseInstance = repository.get(businessKey);
+		if (caseInstance == null) {
+			throw new RecordNotFoundException("Attachment not found");
+		}
+		
+		caseInstance.addAttachment(newAttachment);
+		
+		repository.update(businessKey, caseInstance);
 	}
 
 	public void setRepository(CaseInstanceRepository repository) {

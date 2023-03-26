@@ -2,7 +2,7 @@ package wks.authz
 
 import future.keywords
 
-test_storage if {
+test_storage_allowed if {
     allow with input as {
         "path": "storage",
         "method": "GET",

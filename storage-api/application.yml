@@ -22,6 +22,6 @@ minio.endpoint.secure: false
 minio.credencials.accesskey: minio
 minio.credencials.secretkey: "#minio00#"
 
-uploads.backend.url: http://localhost/s3
+uploads.backend.url: http://localhost:9000
 uploads.file.min.size:  1024		      # 1kb
 uploads.file.max.size:  20000000 # 20mb

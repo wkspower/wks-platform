@@ -1,5 +1,5 @@
 servers:
-	@docker-compose up --build -d --remove-orphans mongodb camunda keycloak opa minio traefik
+	@docker-compose up --build -d --remove-orphans mongodb camunda keycloak opa minio
 
 backend:
 	@docker-compose up --build -d --remove-orphans case-engine-rest-api bpm-engine-c7-external-service email-to-case

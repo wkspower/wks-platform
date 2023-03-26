@@ -14,7 +14,8 @@ export const CaseService = {
     createCase,
     addComment,
     editComment,
-    deleteComment
+    deleteComment,
+    addAttachment
 };
 
 async function getAllByStatus(keycloak, status, limit) {
@@ -226,6 +227,34 @@ async function addComment(keycloak, text, parentId, businessKey) {
                 Authorization: `Bearer ${keycloak.token}`
             },
             body: JSON.stringify(comment)
+        });
+        return nop(keycloak, resp);
+    } catch (e) {
+        console.log(e);
+        return await Promise.reject(e);
+    }
+}
+
+async function addAttachment(keycloak, aCase, attachment) {
+    const url = `${Config.EngineUrl}/case/${aCase.businessKey}/attachments`;
+
+    const { preferred_username, given_name } = keycloak.tokenParsed;
+
+    const data = {
+        ...attachment,
+        userId: preferred_username,
+        userName: given_name
+    };
+
+    try {
+        const resp = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${keycloak.token}`
+            },
+            body: JSON.stringify(data)
         });
         return nop(keycloak, resp);
     } catch (e) {

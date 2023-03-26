@@ -56,14 +56,15 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                 setFormData({
                     data: caseData.attributes.reduce(
                         (obj, item) =>
-                        Object.assign(obj, {
-                            [item.name]: tryParseJSONObject(item.value)
-                            ? JSON.parse(item.value)
-                            : item.value
-                        }),
+                            Object.assign(obj, {
+                                [item.name]: tryParseJSONObject(item.value)
+                                    ? JSON.parse(item.value)
+                                    : item.value
+                            }),
                         {}
                     ),
                     comments: caseData.comments,
+                    attachments: caseData.attachments,
                     metadata: {},
                     isValid: true
                 });
@@ -281,7 +282,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={3}>
-                        <Attachments aCase={aCase} getCaseInfo={getCaseInfo} />
+                        <Attachments aCase={aCase} />
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={4}>

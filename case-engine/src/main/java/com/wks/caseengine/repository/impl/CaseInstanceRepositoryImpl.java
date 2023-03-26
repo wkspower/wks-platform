@@ -63,7 +63,8 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 				Updates.set("status", caseInstance.getStatus()),
 				Updates.set("stage", caseInstance.getStage()),
 				Updates.set("comments", caseInstance.getComments()),
-				Updates.set("attributes", caseInstance.getAttributes()));
+				Updates.set("attributes", caseInstance.getAttributes()),
+				Updates.set("attachments", caseInstance.getAttachments()));
 		getCollection().updateMany(filter, update);
 	}
 
