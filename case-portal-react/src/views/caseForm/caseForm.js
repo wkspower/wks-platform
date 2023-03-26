@@ -282,7 +282,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={3}>
-                        <Attachments aCase={aCase} />
+                        <Attachments aCase={aCase} initialValue={formData.attachments || []} />
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={4}>

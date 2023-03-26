@@ -22,12 +22,12 @@ import { FileService } from '../../services';
 import CaseStore from './store';
 import Files from 'react-files';
 
-function Attachments({ aCase }) {
+function Attachments({ aCase, initialValue }) {
     const keycloak = useSession();
     const [fetching, setFetching] = useState(false);
     const [percent, setPercent] = useState(0);
     const [messageError, setMessageError] = useState(null);
-    const [filesUploaded, setFilesUploaded] = useState(aCase.attachments || []);
+    const [filesUploaded, setFilesUploaded] = useState(initialValue);
 
     const handleChange = (files) => {
         setFetching(true);
