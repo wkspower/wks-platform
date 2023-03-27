@@ -1,29 +1,27 @@
 package com.wks.storage.service.digitalocean;
 
-import java.net.URL;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.HttpMethod;
-import com.amazonaws.services.s3.AmazonS3;
+import com.wks.storage.driver.MinioClientDelegate;
 import com.wks.storage.model.DownloadFileUrl;
 import com.wks.storage.service.BucketService;
 import com.wks.storage.service.DownloadService;
+
+import io.minio.GetPresignedObjectUrlArgs;
+import io.minio.http.Method;
 
 @Service("DigitalOceanDownloadService")
 public class DigitalOceanDownloadService implements DownloadService {
 
 	@Autowired
-	private AmazonS3 client;
+	@Qualifier("DigitalOceanClient")
+	private MinioClientDelegate client;
 	
 	@Autowired
 	@Qualifier("DigitalOceanBucketService")
@@ -40,6 +38,9 @@ public class DigitalOceanDownloadService implements DownloadService {
 	}
 
 	private DownloadFileUrl createPresigned(String dir, String fileName, String contentType) throws Exception  {
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("response-content-type", contentType);
+		
 		String bucketName = bucketService.createAssignedTenant();
 		
 		String objectName = fileName;
@@ -47,13 +48,18 @@ public class DigitalOceanDownloadService implements DownloadService {
 			objectName = bucketService.createObjectWithPath(dir, fileName);
 		}
 		
-		LocalDateTime dateTime = LocalDateTime.now().plus(Duration.of(10, ChronoUnit.MINUTES));
-		
-		Date tmfn = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
-		
-		URL url = client.generatePresignedUrl(bucketName, objectName, tmfn, HttpMethod.GET);
+		GetPresignedObjectUrlArgs signed =
+				GetPresignedObjectUrlArgs.builder()
+																.method(Method.GET)
+																.bucket(bucketName)
+																.object(objectName)
+																.expiry(1, TimeUnit.MINUTES)
+																.extraQueryParams(params)
+																.build();
 
-		return new DownloadFileUrl(url.toString());
+		String url = client.getPresignedObjectUrl(signed);
+
+		return new DownloadFileUrl(url);
 	}
 
 }

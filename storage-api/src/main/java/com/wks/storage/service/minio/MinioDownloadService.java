@@ -8,20 +8,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.wks.storage.driver.MinioClientDelegate;
 import com.wks.storage.model.DownloadFileUrl;
 import com.wks.storage.service.BucketService;
 import com.wks.storage.service.DownloadService;
 
 import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.MinioClient;
 import io.minio.http.Method;
 
 @Service("MinioDownloadService")
 public class MinioDownloadService implements DownloadService {
-
-	@Autowired
-	private MinioClient client;
 	
+	@Autowired
+	@Qualifier("MinioClient")
+	private MinioClientDelegate client;
+
 	@Autowired
 	@Qualifier("MinioBucketService")
 	private BucketService bucketService;

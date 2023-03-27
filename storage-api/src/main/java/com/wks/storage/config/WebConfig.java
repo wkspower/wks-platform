@@ -1,4 +1,4 @@
-package com.wks.storage.configs;
+package com.wks.storage.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

@@ -5,6 +5,7 @@ logging:
    level:
       root: INFO
       com.wks.api.security: DEBUG
+      org.apache.http: DEBUG
             
 spring.mvc.converters.preferred-json-mapper: gson
 
@@ -16,14 +17,32 @@ management.endpoint.health.show-details: never
 opa.url: ${OPA_URL:http://localhost:8181/v1/data/wks/authz/allow}
 keycloak.url: ${KEYCLOAK_URL:http://localhost:8082}
 
-driver.storage.endpoint.url: nyc3.digitaloceanspaces.com
-driver.storage.endpoint.port: 443
-driver.storage.endpoint.secure: true
+# minio
+driver.storage.factoryclass: minio
+driver.storage.endpoint.url: localhost
+driver.storage.endpoint.port: 9000
+driver.storage.endpoint.secure: false
 driver.storage.endpoint.signing.region: nyc3
-driver.storage.endpoint.bucket.prefix: wks
-driver.storage.accesskey: DO00RLWAK2K7CXMDPXMH
-driver.storage.secretkey: ErA4x+/QBQy2QDwoRzfnEHQBJtUcVl78iuyoZNL7J6I
-driver.storage.factory.type: do
-driver.storage.uploads.backend.url: https://wks.nyc3.digitaloceanspaces.com
-driver.storage.uploads.file.min.size:  1024		      # 1kb
-driver.storage.uploads.file.max.size:  20000000 # 20mb
+driver.storage.endpoint.bucket.prefix: 
+driver.storage.accesskey: minio
+driver.storage.secretkey: "#minio00#"
+driver.storage.uploads.backend.protocol: http
+driver.storage.uploads.backend.port: 9000
+driver.storage.uploads.backend.url: localhost
+driver.storage.uploads.file.min.size:  1024
+driver.storage.uploads.file.max.size:  20000000
+
+# digital ocean
+# driver.storage.factoryclass: do
+# driver.storage.endpoint.url: nyc3.digitaloceanspaces.com
+# driver.storage.endpoint.port: 443
+# driver.storage.endpoint.secure: true
+# driver.storage.endpoint.signing.region: nyc3
+# driver.storage.endpoint.bucket.prefix: wks 
+# driver.storage.accesskey: <accesskey>
+# driver.storage.secretkey: <secretkey>
+# driver.storage.uploads.backend.protocol: https
+# driver.storage.uploads.backend.port: -1
+# driver.storage.uploads.backend.url: nyc3.digitaloceanspaces.com
+# driver.storage.uploads.file.min.size:  1024
+# driver.storage.uploads.file.max.size:  20000000

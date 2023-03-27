@@ -1,14 +1,15 @@
 package com.wks.storage.service.minio;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.wks.api.security.context.SecurityContextTenantHolder;
+import com.wks.storage.driver.MinioClientDelegate;
 import com.wks.storage.service.BucketService;
 
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
 
 @Service("MinioBucketService")
 public class MinioBucketService implements BucketService {
@@ -17,12 +18,12 @@ public class MinioBucketService implements BucketService {
 	private SecurityContextTenantHolder tenantHolder;
 
 	@Autowired
-	private MinioClient client;
+	@Qualifier("MinioClient")
+	private MinioClientDelegate client;
 
 	@Override
 	public String createAssignedTenant() throws Exception {
 		String bucketByTenant = tenantHolder.getTenantId().get();
-		
 
 		boolean found = client.bucketExists(BucketExistsArgs.builder()
 																									.bucket(bucketByTenant)
@@ -40,5 +41,5 @@ public class MinioBucketService implements BucketService {
 	public String createObjectWithPath(String dir, String fileName) throws Exception {
 		return String.format("%s/%s", dir, fileName);
 	}
-
+	
 }

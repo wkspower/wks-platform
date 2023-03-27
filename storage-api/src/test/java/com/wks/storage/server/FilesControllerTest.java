@@ -3,12 +3,14 @@ package com.wks.storage.server;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.wks.storage.mocks.MockStorageServiceFactory;
 import com.wks.storage.model.DownloadFileUrl;
 import com.wks.storage.model.UploadFileUrl;
 import com.wks.storage.service.DownloadService;
@@ -20,11 +22,21 @@ public class FilesControllerTest {
 	@InjectMocks
 	private FilesController controller;
 	
+	private MockStorageServiceFactory factory;
+	
 	@Mock
 	private DownloadService downloadService;
 
 	@Mock
 	private UploadService uploadService;
+	
+	@BeforeEach
+	public void setup() {
+		factory = new MockStorageServiceFactory();
+		factory.setDownloadService(downloadService);
+		factory.setUploadService(uploadService);
+		controller.setFactory(factory);
+	}
 
 	@Test
 	public void shouldCreateDownloadUrlWithoutDirPath() throws Exception {

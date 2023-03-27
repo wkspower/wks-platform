@@ -22,22 +22,22 @@ public class FilesController {
 	private StorageServiceFactory factory;
 
 	@GetMapping(value = "/storage/files/{dir}/downloads/{fileName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public DownloadFileUrl downloadFileWithDir(@PathVariable String dir, @PathVariable String fileName, @RequestParam(name="content-type", required=true) String contentType) throws Exception {
+	public DownloadFileUrl downloadFileWithDir(@PathVariable(required=true) String dir, @PathVariable(required=true) String fileName, @RequestParam(name="content-type", required=true) String contentType) throws Exception {
 		return downloadService().createPresignedObjectUrl(dir, fileName, contentType);
 	}
 	
 	@GetMapping(value = "/storage/files/downloads/{fileName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public DownloadFileUrl downloadFile(@PathVariable String fileName, @RequestParam(name="content-type", required=true) String contentType) throws Exception {
+	public DownloadFileUrl downloadFile(@PathVariable(required=true) String fileName, @RequestParam(name="content-type", required=true) String contentType) throws Exception {
 		return downloadService().createPresignedObjectUrl(fileName, contentType);
 	}
 
 	@GetMapping(value = "/storage/files/{dir}/uploads/{fileName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public UploadFileUrl uploadWithDir(@PathVariable String dir, @PathVariable String fileName, @RequestParam(name="content-type", required=true) String contentType) throws Exception {
+	public UploadFileUrl uploadWithDir(@PathVariable(required=true) String dir, @PathVariable(required=true) String fileName, @RequestParam(name="content-type", required=true) String contentType) throws Exception {
 		return uploadService().createPresignedPostFormData(dir, fileName, contentType);
 	}
 
 	@GetMapping(value = "/storage/files/uploads/{fileName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public UploadFileUrl upload(@PathVariable String fileName, @RequestParam(name="content-type",required=true) String contentType) throws Exception {
+	public UploadFileUrl upload(@PathVariable(required=true) String fileName, @RequestParam(name="content-type",required=true) String contentType) throws Exception {
 		return uploadService().createPresignedPostFormData( fileName, contentType);
 	}
 	
@@ -47,6 +47,10 @@ public class FilesController {
 
 	private UploadService uploadService() {
 		return factory.getFactory().getUploadService();
+	}
+	
+	public void setFactory(StorageServiceFactory factory) {
+		this.factory = factory;
 	}
 	
 }

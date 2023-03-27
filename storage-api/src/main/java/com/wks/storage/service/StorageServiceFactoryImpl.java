@@ -16,20 +16,25 @@ public class StorageServiceFactoryImpl implements StorageServiceFactory {
 	@Qualifier("DigitalOceanServiceFactory")
 	private ServiceFactory digitalOcean;
 	
-	@Value("${driver.storage.factory.type}")
-	private String factoryType;
+	@Value("${driver.storage.factoryclass}")
+	private String factoryClass;
 	
 	@Override
 	public ServiceFactory getFactory() {
-		if ("minio".equals(factoryType)) {
+		return getFactory(factoryClass);
+	}
+
+	@Override
+	public ServiceFactory getFactory(String driver) {
+		if ("minio".equals(driver)) {
 			return minio;
 		}
 		
-		if ("do".equals(factoryType)) {
+		if ("do".equals(driver)) {
 			return digitalOcean;
 		}
 		
-		throw new IllegalArgumentException(String.format("Factory name '%s' not found", factoryType));
+		throw new IllegalArgumentException(String.format("Factory name '%s' not found", driver));
 	}
-
+	
 }
