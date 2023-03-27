@@ -11,7 +11,7 @@ env:
   KEYCLOAK_URL: https://login.wkspower.co
   WKS_API_URL: https://api.wkspower.co
   WKS_EMAIL_API_URL: https://api.wkspower.co/inbound
-  WKS_STORAGE_API_URL: https://api.wkspower.co/storage
+  WKS_STORAGE_API_URL: https://api.wkspower.co
   
 jobs:
   build:
