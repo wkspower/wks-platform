@@ -4,7 +4,6 @@ import { EmailService } from './EmailService';
 import { FormService } from './FormService';
 import { RecordService } from './RecordService';
 import { TaskService } from './TaskService';
-import { BpmService } from './BpmService';
 import { CaseDefService } from './CaseDefService';
 import { ProcessDefService } from './ProcessDefService';
 import { RecordTypeService } from './RecordTypeService';
@@ -17,7 +16,6 @@ export {
     FormService,
     RecordService,
     TaskService,
-    BpmService,
     CaseDefService,
     ProcessDefService,
     RecordTypeService,

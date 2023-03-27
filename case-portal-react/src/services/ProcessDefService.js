@@ -1,26 +1,42 @@
 import { json } from './request';
-import Config from '../consts';
 
 export const ProcessDefService = {
-    getById
+    find,
+    getBPMNXml
 };
 
-async function getById(keycloak, id) {
-    if (!id) {
-        return Promise.reject('empty id');
+async function find(keycloak) {
+    if (keycloak.isTokenExpired()) {
+        keycloak.logout({ redirectUri: window.location.origin });
     }
-
-    const url = `${Config.EngineUrl}/process-definition/${id}/`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
     };
 
+    var url = `${process.env.REACT_APP_API_URL}/process-definition/`;
+
     try {
         const resp = await fetch(url, { headers });
         return json(keycloak, resp);
-    } catch (e) {
-        console.log(e);
-        return await Promise.reject(e);
+    } catch (err) {
+        console.log(err);
+        return await Promise.reject(err);
+    }
+}
+
+async function getBPMNXml(keycloak, bpmEngineId, processDefId) {
+    const headers = {
+        Authorization: `Bearer ${keycloak.token}`
+    };
+
+    var url = `${process.env.REACT_APP_API_URL}/process-definition/${bpmEngineId}/${processDefId}/xml`;
+
+    try {
+        const resp = await fetch(url, { headers });
+        return json(keycloak, resp.text());
+    } catch (err) {
+        console.log(err);
+        return await Promise.reject(err);
     }
 }

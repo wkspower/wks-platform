@@ -24,10 +24,10 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 export const FormDetail = ({ open, handleClose, form, handleInputChange, handleSelectDisplay }) => {
-    const keycloack = useSession();
+    const keycloak = useSession();
 
     const saveForm = () => {
-        FormService.update(keycloack, form.key, form)
+        FormService.update(keycloak, form.key, form)
             .then(() => handleClose())
             .catch((err) => {
                 console.log(err.message);
@@ -35,7 +35,7 @@ export const FormDetail = ({ open, handleClose, form, handleInputChange, handleS
     };
 
     const deleteForm = () => {
-        FormService.remove(keycloack, form.key)
+        FormService.remove(keycloak, form.key)
             .then(() => handleClose())
             .catch((err) => {
                 console.log(err.message);

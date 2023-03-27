@@ -12,16 +12,13 @@ has_client_role := {
 
 has_manager_role := {
     "mgmt_form", 
-    "mgmt_process_engine", 
-    "mgmt_bpm_engine",
-    "mgmt_bpm_engine_type",
     "mgmt_case_def", 
     "mgmt_record_type"
 }
 
 allow {
     input.path == "case"
-    input.method in ["GET", "POST", "PUT", "DELETE", "OPTION"]
+    input.method in ["GET", "POST", "PATCH", "DELETE", "OPTION"]
 	check_origin_request
     is_user_profile
 }
@@ -89,20 +86,6 @@ allow {
 
 allow {
     input.path = "form"
-    input.method in ["GET", "POST", "PATCH", "DELETE", "OPTION", "HEAD"]
-	check_origin_request    
-    is_manager_profile
-}
-
-allow {
-    input.path = "bpm-engine"
-    input.method in ["GET", "POST", "PATCH", "DELETE", "OPTION", "HEAD"]
-	check_origin_request    
-    is_manager_profile
-}
-
-allow {
-    input.path = "bpm-engine-type"
     input.method in ["GET", "POST", "PATCH", "DELETE", "OPTION", "HEAD"]
 	check_origin_request    
     is_manager_profile

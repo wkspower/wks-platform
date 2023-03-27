@@ -26,8 +26,8 @@ public class TaskController {
 	private TaskService taskService;
 
 	@GetMapping(value = "/")
-	public List<Task> find(@RequestParam(required = false) String processInstanceBusinessKey) throws Exception {
-		return taskService.find(processInstanceBusinessKey);
+	public List<Task> find(@RequestParam(required = false) String businessKey) throws Exception {
+		return taskService.find(businessKey);
 	}
 
 	@PostMapping(value = "/{taskId}/claim/{taskAssignee}")

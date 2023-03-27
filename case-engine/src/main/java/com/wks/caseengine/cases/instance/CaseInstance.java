@@ -49,12 +49,12 @@ public class CaseInstance {
 		this.status = status;
 	}
 
-	public void addDocuments(final CaseDocument[] documents) {
+	public void addDocument(final CaseDocument document) {
 		if (documents == null) {
 			this.documents = new ArrayList<>();
 		}
 
-		this.documents.addAll(Arrays.asList(documents));
+		this.documents.add(document);
 	}
 
 	public void addComment(final Comment comment) {

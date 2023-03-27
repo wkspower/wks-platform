@@ -69,9 +69,9 @@ public class CaseController {
 	}
 
 	@PostMapping(value = "/{businessKey}/document")
-	public void saveDocument(@PathVariable final String businessKey, @RequestBody CaseDocument[] files)
+	public void saveDocument(@PathVariable final String businessKey, @RequestBody CaseDocument document)
 			throws Exception {
-		caseInstanceService.saveFiles(businessKey, files);
+		caseInstanceService.saveDocument(businessKey, document);
 	}
 
 	@PostMapping(value = "/{businessKey}/comment")
@@ -83,7 +83,7 @@ public class CaseController {
 	@PatchMapping(value = "/{businessKey}/comment/{commentId}")
 	public void udpateComment(@PathVariable final String businessKey, @PathVariable final String commentId,
 			@RequestBody final Comment comment) throws Exception {
-		caseInstanceService.updateComment(businessKey, commentId, comment);
+		caseInstanceService.updateComment(businessKey, commentId, comment.getBody());
 	}
 
 	@DeleteMapping(value = "/{businessKey}/comment/{commentId}")

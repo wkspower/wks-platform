@@ -13,7 +13,7 @@ import { ProcessDiagram } from 'views/bpmn/ProcessDiagram';
 import { Form } from '@formio/react';
 import { useTranslation } from 'react-i18next';
 import { FormService, TaskService } from 'services';
-import { useSession, useBpmEngine } from '../../SessionStoreContext';
+import { useSession } from '../../SessionStoreContext';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -27,7 +27,6 @@ export const TaskForm = ({ open, handleClose, task }) => {
     const [activityInstances, setActivityInstances] = useState(null);
     const { t } = useTranslation();
     const keycloak = useSession();
-    const bpmEngineId = useBpmEngine();
 
     useEffect(() => {
         let apiDataVariables = {};
@@ -43,7 +42,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
                     isValid: true
                 };
 
-                return FormService.getVariableById(keycloak, bpmEngineId, task.processInstanceId);
+                return FormService.getVariableById(keycloak, task.processInstanceId);
             })
             .then((data) => {
                 for (var key in data) {
@@ -60,15 +59,15 @@ export const TaskForm = ({ open, handleClose, task }) => {
                 console.log(err.message);
             });
 
-        TaskService.getActivityInstancesById(keycloak, bpmEngineId, task.processInstanceId).then(
+        TaskService.getActivityInstancesById(keycloak, task.processInstanceId).then(
             (data) => {
                 setActivityInstances(data);
             }
         );
-    }, [open, task, bpmEngineId]);
+    }, [open, task]);
 
     const handleClaim = function () {
-        TaskService.createTaskClaim(keycloak, bpmEngineId, task.id)
+        TaskService.createTaskClaim(keycloak, task.id)
             .then(() => {
                 setClaimed(true);
                 setAssignee(keycloak.idTokenParsed.name);
@@ -79,7 +78,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
     };
 
     const handleUnclaim = function () {
-        TaskService.createTaskUnclaim(keycloak, bpmEngineId, task.id)
+        TaskService.createTaskUnclaim(keycloak, task.id)
             .then(() => {
                 setClaimed(false);
                 setAssignee(null);
@@ -99,7 +98,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
                     : { value: variables[key] };
         });
 
-        TaskService.createTaskComplete(keycloak, bpmEngineId, task.id, variables)
+        TaskService.createTaskComplete(keycloak, task.id, variables)
             .then(() => handleClose())
             .catch((err) => {
                 console.log(err.message);
@@ -154,7 +153,6 @@ export const TaskForm = ({ open, handleClose, task }) => {
                             <ProcessDiagram
                                 processDefinitionId={task.processDefinitionId}
                                 activityInstances={activityInstances}
-                                bpmEngineId={bpmEngineId}
                             />
                         )}
                     </MainCard>

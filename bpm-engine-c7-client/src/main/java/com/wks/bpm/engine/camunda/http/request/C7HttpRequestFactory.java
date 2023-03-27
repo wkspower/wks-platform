@@ -32,6 +32,9 @@ public class C7HttpRequestFactory {
 	@Autowired
 	private HttpHeadersFactory httpHeadersFactory;
 
+	@Value("${camunda7.rest.base-url}")
+	private String baseUrl;
+
 	@Value("${camunda7.rest.deployment.url}")
 	private String deploymentUrl;
 
@@ -209,7 +212,7 @@ public class C7HttpRequestFactory {
 	}
 
 	private String extractUrl(final BpmEngine bpmEngine) {
-		return bpmEngine.getParameters().get("url").getAsString();
+		return baseUrl;
 	}
 
 }

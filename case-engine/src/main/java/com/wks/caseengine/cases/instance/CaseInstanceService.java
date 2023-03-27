@@ -22,11 +22,11 @@ public interface CaseInstanceService {
 
 	void delete(final String businessKey) throws CaseInstanceNotFoundException, Exception;
 
-	void saveFiles(final String businessKey, final CaseDocument[] files) throws Exception;
+	void saveDocument(final String businessKey, final CaseDocument document) throws Exception;
 
 	void saveComment(final String businessKey, final Comment comment) throws Exception;
 
-	void updateComment(final String businessKey, final String commentId, final Comment comment) throws Exception;
+	void updateComment(final String businessKey, final String commentId, final String body) throws Exception;
 
 	void deleteComment(final String businessKey, final String commentId) throws Exception;
 	

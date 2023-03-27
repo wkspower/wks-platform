@@ -1,6 +1,9 @@
 package com.wks.caseengine.repository.impl;
 
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Sorts.descending;
+import static com.mongodb.client.model.Updates.set;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +16,10 @@ import org.springframework.stereotype.Component;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
+import com.mongodb.client.result.UpdateResult;
 import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.Comment;
 import com.wks.caseengine.db.EngineMongoDataConnection;
 import com.wks.caseengine.repository.CaseInstanceRepository;
 import com.wks.caseengine.repository.Paginator;
@@ -60,9 +65,9 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	public void update(final String businessKey, final CaseInstance caseInstance) throws Exception {
 		Bson filter = Filters.eq("businessKey", businessKey);
 		Bson update = Updates.combine(Updates.set("status", caseInstance.getStatus()),
-				Updates.set("stage", caseInstance.getStage()), Updates.set("comments", caseInstance.getComments()),
+				Updates.set("stage", caseInstance.getStage()), Updates.set("attributes", caseInstance.getAttributes()),
 				Updates.set("documents", caseInstance.getDocuments()),
-				Updates.set("attributes", caseInstance.getAttributes()));
+				Updates.set("comments", caseInstance.getComments()));
 		getCollection().updateMany(filter, update);
 	}
 
@@ -75,4 +80,20 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	private MongoCollection<CaseInstance> getCollection() {
 		return connection.getCaseInstanceCollection();
 	}
+
+	@Override
+	public void deleteComment(final String businessKey, final Comment comment) {
+		
+		Bson filter = Filters.eq("businessKey", businessKey);
+		Bson update = Updates.pull("comments", comment);
+		getCollection().updateOne(filter, update);
+	}
+
+	@Override
+	public void updateComment(final String businessKey, final String commentId, final String body) {
+		Bson filter = and(eq("businessKey", businessKey), eq("comments.id", commentId));
+		Bson update = set("comments.$.body", body);
+		getCollection().updateOne(filter, update);
+	}
+
 }

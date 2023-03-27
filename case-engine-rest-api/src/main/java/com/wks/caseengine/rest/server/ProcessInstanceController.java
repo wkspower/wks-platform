@@ -29,7 +29,7 @@ public class ProcessInstanceController {
 		return processInstanceService.find(Optional.ofNullable(businessKey));
 	}
 
-	@GetMapping(value = "/activity-instances")
+	@GetMapping(value = "/{id}/activity-instances")
 	public List<ActivityInstance> getActivityInstances(@PathVariable final String id) throws Exception {
 		return processInstanceService.getActivityInstances(id);
 	}

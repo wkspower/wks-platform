@@ -20,17 +20,17 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 export const RecordTypeForm = ({ open, handleClose, recordType, handleInputChange }) => {
-    const keycloack = useSession();
+    const keycloak = useSession();
 
     const save = () => {
         if (recordType.mode && recordType.mode === 'new') {
-            RecordTypeService.create(keycloack, recordType)
+            RecordTypeService.create(keycloak, recordType)
                 .then(() => handleClose())
                 .catch((err) => {
                     console.log(err.message);
                 });
         } else {
-            RecordTypeService.update(keycloack, recordType.id, recordType)
+            RecordTypeService.update(keycloak, recordType.id, recordType)
                 .then(() => handleClose())
                 .catch((err) => {
                     console.log(err.message);
@@ -39,7 +39,7 @@ export const RecordTypeForm = ({ open, handleClose, recordType, handleInputChang
     };
 
     const deleteRecordType = () => {
-        RecordTypeService.remove(keycloack, recordType.id)
+        RecordTypeService.remove(keycloak, recordType.id)
             .then(() => handleClose())
             .catch((err) => {
                 console.log(err.message);

@@ -115,10 +115,10 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 
 	@Override
-	public void saveFiles(final String businessKey, final CaseDocument[] documents) throws Exception {
+	public void saveDocument(final String businessKey, final CaseDocument document) throws Exception {
 		CaseInstance caseInstance = repository.get(businessKey);
 
-		caseInstance.addDocuments(documents);
+		caseInstance.addDocument(document);
 
 		repository.update(businessKey, caseInstance);
 	}
@@ -126,7 +126,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	@Override
 	public void saveComment(final String businessKey, final Comment comment) throws Exception {
 		CaseInstance caseInstance = repository.get(comment.getCaseId());
-		if(caseInstance == null) {
+		if (caseInstance == null) {
 			throw new CaseNotFoundException("Case not found");
 		}
 
@@ -144,49 +144,33 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 
 	@Override
-	public void updateComment(final String businessKey, final String commentId, final Comment comment)
+	public void updateComment(final String businessKey, final String commentId, final String body)
 			throws Exception {
-//		CaseInstance caseInstance = repository.get(comment.getCaseId());
-//		
-//		if (caseInstance.getComments() == null || caseInstance.getComments().isEmpty() ) {
-//			throw new CaseInstanceCommentNotFoundException("Comment not found");
-//		}
-//		
-//		for (Comment commentOnBase : caseInstance.getComments()) {
-//			if (StringUtils.equals(commentOnBase.getId(), comment.getId())) {
-//				if (StringUtils.equals(commentOnBase.getUserId(), comment.getUserId())) {
-//					commentOnBase.setBody(comment.getBody());
-//				} else {
-//					throw new CaseInstanceCommentNotFoundException("Only the original user can edit a comment");
-//				}
-//			}
-//		}
-//		
-//		repository.update(comment.getCaseId(), caseInstance);
+		CaseInstance caseInstance = repository.get(businessKey);
+
+		if (caseInstance == null) {
+			throw new CaseInstanceCommentNotFoundException("Case not found");
+		}
+
+		repository.updateComment(businessKey, commentId, body);
 	}
 
 	public void deleteComment(final String businessKey, final String commentId) throws Exception {
-//		CaseInstance caseInstance = repository.get(comment.getCaseId());
-//		
-//		if (caseInstance.getComments() == null || caseInstance.getComments().isEmpty() ) {
-//			throw new CaseInstanceCommentNotFoundException("Comment not found");
-//		}
-//		
-//		Comment commentToDelete = null;
-//		
-//		for (Comment commentOnBase : caseInstance.getComments()) {
-//			if (StringUtils.equals(commentOnBase.getId(), comment.getId())) {
-//				if (StringUtils.equals(commentOnBase.getUserId(), comment.getUserId())) {
-//					commentToDelete = commentOnBase;
-//				} else {
-//					throw new CaseInstanceCommentNotFoundException("Only the original user can edit a comment");
-//				}
-//			}
-//		}
-//		
-//		caseInstance.getComments().remove(commentToDelete);
-//		
-//		repository.update(comment.getCaseId(), caseInstance);
+		CaseInstance caseInstance = repository.get(businessKey);
+
+		if (caseInstance == null) {
+			throw new CaseInstanceCommentNotFoundException("Case not found");
+		}
+
+		Comment comment = caseInstance.getComments().stream().filter(o -> commentId.equals(o.getId()))
+				.reduce((a, b) -> {
+					throw new IllegalStateException("Multiple elements: " + a + ", " + b);
+				}).get();
+		if (comment == null) {
+			throw new CaseInstanceCommentNotFoundException("Comment not found");
+		}
+
+		repository.deleteComment(businessKey, comment);
 	}
 
 	public void setRepository(CaseInstanceRepository repository) {

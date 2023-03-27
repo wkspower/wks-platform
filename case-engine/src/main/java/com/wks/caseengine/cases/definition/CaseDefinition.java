@@ -28,7 +28,7 @@ public class CaseDefinition {
 	private String stagesLifecycleProcessKey;
 
 	private List<CaseStage> stages;
-	
+
 	private JsonObject kanbanConfig;
 
 }

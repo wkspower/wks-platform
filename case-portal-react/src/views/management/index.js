@@ -1,6 +1,6 @@
 import { Grid, Typography } from '@mui/material';
 import DashBoardCard from 'components/cards/DashboardCard';
-import { IconEngine, IconForms, IconPalette, IconPencil } from '@tabler/icons';
+import { IconForms, IconPalette, IconPencil } from '@tabler/icons';
 
 const DashboardDefault = () => {
     return (
@@ -23,14 +23,6 @@ const DashboardDefault = () => {
                     subtitle={'Create and edit Record types'}
                     icon={<IconForms />}
                     to="/case-life-cycle/record-type"
-                />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4} lg={3}>
-                <DashBoardCard
-                    title="Process Engines"
-                    subtitle={'Configure Process Engines'}
-                    icon={<IconEngine />}
-                    to="/case-life-cycle/process-engine"
                 />
             </Grid>
 

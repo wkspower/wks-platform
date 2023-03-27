@@ -1,7 +1,9 @@
 package com.wks.caseengine.cases.instance;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -9,6 +11,8 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class CaseDocument {
 
 	private String name;

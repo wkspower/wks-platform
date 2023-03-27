@@ -60,7 +60,7 @@ const defs = {
                 details: 'Case Details',
                 tasks: 'Tasks',
                 comments: 'Comments',
-                attachments: 'Attachments',
+                documents: 'Documents',
                 emails: 'Emails'
             }
         },
@@ -118,6 +118,13 @@ const defs = {
                 from: 'from',
                 to: 'to',
                 text: 'text'
+            }
+        },
+        message: {
+            fileUpload:{
+                error :{
+                    couldNotUpload: 'Could not upload this file.'
+                }
             }
         }
     }
