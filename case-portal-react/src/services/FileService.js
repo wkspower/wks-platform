@@ -87,13 +87,21 @@ function download(file, keycloak) {
 
     return fetch(getObjectForUrl, createHeaders(keycloak))
         .then((resp) => resp.json())
-        .then((data) => {
+        .then(async (data) => {
+            const resp = await fetch(data.url);
+            const blob = await resp.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+
             const anchor = document.createElement('a');
-            anchor.href = data.url;
-            anchor.download = data.url;
-            anchor.target = '_blank';
             document.body.appendChild(anchor);
+            anchor.href = downloadUrl;
+            anchor.download = downloadUrl;
             anchor.click();
+
+            setTimeout(() => {
+                window.URL.revokeObjectURL(downloadUrl);
+                document.body.removeChild(anchor);
+            }, 0);
             return;
         });
 }
