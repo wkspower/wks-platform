@@ -55,7 +55,7 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 		Bson update = Updates.combine(Updates.set("stages", caseDefinition.getStages()),
 				Updates.set("formKey", caseDefinition.getFormKey()), Updates.set("name", caseDefinition.getName()),
 				Updates.set("stagesLifecycleProcessKey", caseDefinition.getStagesLifecycleProcessKey()),
-				Updates.set("kanbanConfig", (new JsonObject(new Gson().toJson(caseDefinition.getKanbanConfig())))));
+				Updates.set("kanbanConfig", (new JsonObject(new Gson().toJson(caseDefinition.getKanbanConfig() )))));
 
 		getCollection().updateOne(filter, update);
 	}

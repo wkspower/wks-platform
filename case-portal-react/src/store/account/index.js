@@ -1,10 +1,7 @@
 const MGMT_ROLES = [
     'mgmt_case_def',
-    'mgmt_bpm_engine',
-    'mgmt_process_engine',
     'mgmt_record_type',
-    'mgmt_form',
-    'mgmt_bpm_engine_type'
+    'mgmt_form'
 ];
 
 const CLT_ROLES = ['client_case', 'client_task', 'client_record'];

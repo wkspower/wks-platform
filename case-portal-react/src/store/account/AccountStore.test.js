@@ -12,11 +12,8 @@ class Keycloak {
 
 test('should be true when user has managament role', () => {
     expect(store.isManagerUser(new Keycloak('mgmt_case_def'))).toEqual(true);
-    expect(store.isManagerUser(new Keycloak('mgmt_bpm_engine'))).toEqual(true);
-    expect(store.isManagerUser(new Keycloak('mgmt_process_engine'))).toEqual(true);
     expect(store.isManagerUser(new Keycloak('mgmt_record_type'))).toEqual(true);
     expect(store.isManagerUser(new Keycloak('mgmt_form'))).toEqual(true);
-    expect(store.isManagerUser(new Keycloak('mgmt_bpm_engine_type'))).toEqual(true);
 });
 
 test('should be false when user dont has managament role', () => {

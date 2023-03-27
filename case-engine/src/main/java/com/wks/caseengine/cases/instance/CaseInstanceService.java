@@ -26,7 +26,7 @@ public interface CaseInstanceService {
 
 	void saveComment(final String businessKey, final Comment comment) throws Exception;
 
-	void updateComment(final String businessKey, final String commentId, final Comment comment) throws Exception;
+	void updateComment(final String businessKey, final String commentId, final String body) throws Exception;
 
 	void deleteComment(final String businessKey, final String commentId) throws Exception;
 	

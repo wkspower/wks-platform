@@ -60,7 +60,7 @@ const defs = {
                 details: 'Case Details',
                 tasks: 'Tasks',
                 comments: 'Comments',
-                attachments: 'Attachments',
+                documents: 'Documents',
                 emails: 'Emails'
             }
         },

@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 import CloseIcon from '@mui/icons-material/Close';
 import Box from '@mui/material/Box';
 import MainCard from 'components/MainCard';
-import { BpmService } from 'services';
+import { BpmEngineService } from 'services';
 import { useSession } from 'SessionStoreContext';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -36,13 +36,13 @@ export const BpmEngineC7Form = ({ bpmEngine, setBpmEngine, open, handleClose }) 
 
     const onSave = () => {
         if (bpmEngine.mode && bpmEngine.mode === 'new') {
-            BpmService.create(keycloak, bpmEngine)
+            BpmEngineService.create(keycloak, bpmEngine)
                 .then(() => handleClose())
                 .catch((err) => {
                     console.log(err.message);
                 });
         } else {
-            BpmService.update(keycloak, bpmEngine.id, bpmEngine)
+            BpmEngineService.update(keycloak, bpmEngine.id, bpmEngine)
                 .then(() => handleClose())
                 .catch((err) => {
                     console.log(err.message);
@@ -51,7 +51,7 @@ export const BpmEngineC7Form = ({ bpmEngine, setBpmEngine, open, handleClose }) 
     };
 
     const handleDelete = () => {
-        BpmService.remove(keycloak, bpmEngine.id)
+        BpmEngineService.remove(keycloak, bpmEngine.id)
             .then(() => handleClose())
             .catch((err) => {
                 console.log(err.message);

@@ -54,7 +54,7 @@ const Notification = () => {
     const [open, setOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [badge, setBudget] = useState(0);
-    const keycloack = useSession();
+    const keycloak = useSession();
 
     const handleToggle = () => {
         setOpen((prevOpen) => !prevOpen);
@@ -72,7 +72,7 @@ const Notification = () => {
         let timeout = null;
 
         const updateNotify = () => {
-            NotificationService.getNotifications(keycloack)
+            NotificationService.getNotifications(keycloak)
                 .then((data) => {
                     setBudget(data.length ? data[0].total : 0);
                     setMessages(data);

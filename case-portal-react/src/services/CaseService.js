@@ -1,6 +1,6 @@
+import Config from '../consts';
 import i18n from '../i18n';
 import { json, nop } from './request';
-import Config from '../consts';
 
 export const CaseService = {
     getAllByStatus,
@@ -8,14 +8,12 @@ export const CaseService = {
     getCaseDefinitionsById,
     getCaseById,
     filterCase,
-    getRecordTypes,
-    updateCaseStatusById,
-    uploadCaseAttachById,
     createCase,
+    updateCaseStatusById,
+    addDocuments,
     addComment,
-    editComment,
-    deleteComment,
-    addAttachment
+    updateComment,
+    deleteComment
 };
 
 async function getAllByStatus(keycloak, status, limit) {
@@ -106,22 +104,6 @@ async function filterCase(keycloak, caseDefId, status) {
     }
 }
 
-async function getRecordTypes(keycloak) {
-    const url = `${Config.EngineUrl}/record-type/`;
-
-    const headers = {
-        Authorization: `Bearer ${keycloak.token}`
-    };
-
-    try {
-        const resp = await fetch(url, { headers });
-        return json(keycloak, resp);
-    } catch (e) {
-        console.log(e);
-        return await Promise.reject(e);
-    }
-}
-
 async function updateCaseStatusById(keycloak, id, body) {
     const url = `${Config.EngineUrl}/case/${id}`;
 
@@ -134,26 +116,6 @@ async function updateCaseStatusById(keycloak, id, body) {
                 Authorization: `Bearer ${keycloak.token}`
             },
             body: body
-        });
-        return nop(keycloak, resp);
-    } catch (e) {
-        console.log(e);
-        return await Promise.reject(e);
-    }
-}
-
-async function uploadCaseAttachById(keycloak, id, files) {
-    const url = `${Config.EngineUrl}/case/upload/${id}`;
-
-    try {
-        const resp = await fetch(url, {
-            method: 'PUT',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${keycloak.token}`
-            },
-            body: JSON.stringify(files)
         });
         return nop(keycloak, resp);
     } catch (e) {
@@ -207,8 +169,28 @@ function mapperToCase(data) {
     return Promise.resolve(toCase);
 }
 
+async function addDocuments(keycloak, id, files) {
+    const url = `${process.env.REACT_APP_API_URL}/case/upload/${id}`;
+
+    try {
+        const resp = await fetch(url, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${keycloak.token}`
+            },
+            body: JSON.stringify(files)
+        });
+        return nop(keycloak, resp);
+    } catch (e) {
+        console.log(e);
+        return await Promise.reject(e);
+    }
+}
+
 async function addComment(keycloak, text, parentId, businessKey) {
-    const url = `${Config.EngineUrl}/case/comment`;
+    const url = `${process.env.REACT_APP_API_URL}/case/${businessKey}/comment`;
 
     const comment = {
         body: text,
@@ -235,36 +217,8 @@ async function addComment(keycloak, text, parentId, businessKey) {
     }
 }
 
-async function addAttachment(keycloak, aCase, attachment) {
-    const url = `${Config.EngineUrl}/case/${aCase.businessKey}/attachments`;
-
-    const { preferred_username, given_name } = keycloak.tokenParsed;
-
-    const data = {
-        ...attachment,
-        userId: preferred_username,
-        userName: given_name
-    };
-
-    try {
-        const resp = await fetch(url, {
-            method: 'PUT',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${keycloak.token}`
-            },
-            body: JSON.stringify(data)
-        });
-        return nop(keycloak, resp);
-    } catch (e) {
-        console.log(e);
-        return await Promise.reject(e);
-    }
-}
-
-async function editComment(keycloak, text, commentId, businessKey) {
-    const url = `${Config.EngineUrl}/case/comment`;
+async function updateComment(keycloak, text, commentId, businessKey) {
+    const url = `${process.env.REACT_APP_API_URL}/case/${businessKey}/comment/${commentId}`;
 
     const comment = {
         id: commentId,
@@ -275,7 +229,7 @@ async function editComment(keycloak, text, commentId, businessKey) {
 
     try {
         const resp = await fetch(url, {
-            method: 'PUT',
+            method: 'PATCH',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
@@ -291,23 +245,16 @@ async function editComment(keycloak, text, commentId, businessKey) {
 }
 
 async function deleteComment(keycloak, commentId, businessKey) {
-    const url = `${Config.EngineUrl}/case/comment/delete`;
-
-    const comment = {
-        id: commentId,
-        userId: keycloak.tokenParsed.preferred_username,
-        caseId: businessKey
-    };
+    const url = `${process.env.REACT_APP_API_URL}/case/${businessKey}/comment/${commentId}`;
 
     try {
         const resp = await fetch(url, {
-            method: 'POST',
+            method: 'DELETE',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${keycloak.token}`
-            },
-            body: JSON.stringify(comment)
+            }
         });
         return nop(keycloak, resp);
     } catch (e) {

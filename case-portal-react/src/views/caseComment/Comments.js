@@ -28,19 +28,19 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
     const addComment = async (text, parentId) => {
         CaseService.addComment(keycloak, text, parentId, aCase.businessKey)
             .then(() => {
-                getCaseInfo(aCase, true);
+                getCaseInfo(aCase);
             })
         .then(() => {
-            getCaseInfo(aCase, true);
+            getCaseInfo(aCase);
             setActiveComment(null);
         })
         .catch((err) => console.error(err));
     };
 
     const updateComment = (text, commentId) => {
-        CaseService.editComment(keycloak, text, commentId, aCase.businessKey)
+        CaseService.updateComment(keycloak, text, commentId, aCase.businessKey)
         .then(() => {
-            getCaseInfo(aCase, true);
+            getCaseInfo(aCase);
             setActiveComment(null);
         })
         .catch((err) => {

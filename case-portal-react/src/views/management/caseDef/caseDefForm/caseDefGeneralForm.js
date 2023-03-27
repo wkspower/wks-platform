@@ -5,16 +5,22 @@ import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { BpmService, ProcessDefService } from 'services';
+<<<<<<< Updated upstream
+import { ProcessDefService } from 'services';
+=======
+import { BpmEngineService, ProcessDefService } from 'services';
+>>>>>>> Stashed changes
 import { useSession } from 'SessionStoreContext';
 
 export const CaseDefGeneralForm = ({ caseDef, setCaseDef }) => {
-    const [bpmEngines, setBpmEngines] = useState();
     const [processesDefinitions, setProcessesDefinitions] = useState();
-    const keycloack = useSession();
+    const keycloak = useSession();
 
     useEffect(() => {
-        BpmService.getAll(keycloack)
+<<<<<<< Updated upstream
+        ProcessDefService.find(keycloack)
+=======
+        BpmEngineService.getAll(keycloak)
             .then((data) => {
                 setBpmEngines(data);
             })
@@ -22,7 +28,8 @@ export const CaseDefGeneralForm = ({ caseDef, setCaseDef }) => {
                 console.log(err.message);
             });
 
-        ProcessDefService.getById(keycloack, caseDef.bpmEngineId)
+        ProcessDefService.findByEngineId(keycloak, caseDef.bpmEngineId)
+>>>>>>> Stashed changes
             .then((data) => {
                 setProcessesDefinitions(data);
             })
@@ -34,11 +41,6 @@ export const CaseDefGeneralForm = ({ caseDef, setCaseDef }) => {
 
     const handleInputChange = (event) => {
         setCaseDef({ ...caseDef, [event.target.name]: event.target.value });
-    };
-
-    const handleBpmEngineChange = (event) => {
-        setCaseDef({ ...caseDef, stagesLifecycleProcessKey: 'null' });
-        setCaseDef({ ...caseDef, bpmEngineId: event.target.value });
     };
 
     const handleProcessDefinitionChange = (event) => {
@@ -68,28 +70,7 @@ export const CaseDefGeneralForm = ({ caseDef, setCaseDef }) => {
                 />
             </FormControl>
 
-            {bpmEngines && (
-                <FormControl key="ctrlBpmEngine" variant="outlined" sx={{ mt: 3 }}>
-                    <InputLabel id="bpmEngineLabelId">BPM Engine</InputLabel>
-                    <Select
-                        labelId="bpmEngineLabelId"
-                        label="BPM Engine"
-                        id="selectBpmEngine"
-                        value={caseDef.bpmEngineId}
-                        onChange={handleBpmEngineChange}
-                    >
-                        {bpmEngines.map((bpmEngine) => {
-                            return (
-                                <MenuItem key={bpmEngine.id} value={bpmEngine.id}>
-                                    {bpmEngine.name}
-                                </MenuItem>
-                            );
-                        })}
-                    </Select>
-                </FormControl>
-            )}
-
-            {bpmEngines && processesDefinitions && (
+            {processesDefinitions && (
                 <FormControl key="ctrlStagesLCProcess" variant="outlined" sx={{ mt: 3 }}>
                     <InputLabel id="processDefinitionlId">Process Definition</InputLabel>
                     <Select

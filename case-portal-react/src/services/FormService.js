@@ -101,12 +101,12 @@ async function getByKey(keycloak, formKey) {
     }
 }
 
-async function getVariableById(keycloak, bpmEngineId, processInstanceId) {
+async function getVariableById(keycloak, processInstanceId) {
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${Config.EngineUrl}/variable/${bpmEngineId}/${processInstanceId}`;
+    var url = `${process.env.REACT_APP_API_URL}/variable/${processInstanceId}`;
 
     try {
         const resp = await fetch(url, { headers });

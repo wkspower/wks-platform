@@ -22,7 +22,7 @@ import { FileService } from '../../services';
 import CaseStore from './store';
 import Files from 'react-files';
 
-function Attachments({ aCase, initialValue }) {
+function Documents({ aCase, initialValue }) {
     const keycloak = useSession();
     const [fetching, setFetching] = useState(false);
     const [percent, setPercent] = useState(0);
@@ -30,9 +30,11 @@ function Attachments({ aCase, initialValue }) {
     const [filesUploaded, setFilesUploaded] = useState(initialValue);
 
     const handleChange = (files) => {
+        console.log(files);
+        
         setFetching(true);
 
-        CaseStore.saveAttachmentsFromFiles(keycloak, files, aCase, setPercent)
+        CaseStore.saveDocumentsFromFiles(keycloak, files, aCase, setPercent)
             .then((data) => {
                 setFilesUploaded([...filesUploaded, ...data]);
             })
@@ -203,4 +205,4 @@ const downloadFile = (file, keycloak) => {
     return FileService.download(file, keycloak);
 };
 
-export default Attachments;
+export default Documents;

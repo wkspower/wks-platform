@@ -1,15 +1,2 @@
 {
-  "bpmEngines": [
-    {
-      "_id": {
-        "$oid": "636bb856cf1d3002f5d8d3b6"
-      },
-      "id": "c7-demo",
-      "name": "Camunda 7 - Demo",
-      "type": "BPM_ENGINE_CAMUNDA7",
-      "parameters": {
-        "url": "http://camunda:8080/engine-rest"
-      }
-    }
-  ]
 }

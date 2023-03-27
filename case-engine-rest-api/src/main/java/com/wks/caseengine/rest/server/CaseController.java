@@ -83,7 +83,7 @@ public class CaseController {
 	@PatchMapping(value = "/{businessKey}/comment/{commentId}")
 	public void udpateComment(@PathVariable final String businessKey, @PathVariable final String commentId,
 			@RequestBody final Comment comment) throws Exception {
-		caseInstanceService.updateComment(businessKey, commentId, comment);
+		caseInstanceService.updateComment(businessKey, commentId, comment.getBody());
 	}
 
 	@DeleteMapping(value = "/{businessKey}/comment/{commentId}")

@@ -5,7 +5,6 @@ import {
     IconPackgeExport,
     IconForms,
     IconChecklist,
-    IconEngine,
     IconDatabase,
     IconEar,
     IconMessageCode,
@@ -36,7 +35,6 @@ const icons = {
     IconPackgeExport,
     IconForms,
     IconChecklist,
-    IconEngine,
     IconDatabase,
     IconEar,
     IconMessageCode,
@@ -105,14 +103,6 @@ const management = {
                     url: '/case-life-cycle/record-type',
                     breadcrumbs: true,
                     icon: icons.IconDatabase
-                },
-                {
-                    id: 'process-engine',
-                    title: 'Process Engines',
-                    type: 'item',
-                    url: '/case-life-cycle/process-engine',
-                    breadcrumbs: true,
-                    icon: icons.IconEngine
                 },
                 {
                     id: 'form',

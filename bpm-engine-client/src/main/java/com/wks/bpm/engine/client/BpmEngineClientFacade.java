@@ -1,6 +1,8 @@
 package com.wks.bpm.engine.client;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -27,7 +29,16 @@ public interface BpmEngineClientFacade {
 
 	String getProcessDefinitionXMLByKey(final String processDefinitionKey) throws Exception;
 
+<<<<<<< Updated upstream
 	ProcessInstance[] findProcessInstances(final Optional<String> businessKey);
+=======
+	public ProcessDefinition[] findProcessDefinitions(final BpmEngine bpmEngine) {
+		return Arrays.stream(getEngineClient(bpmEngine).findProcessDefinitions(bpmEngine)).map(o -> {
+			o.setBpmEngineId(bpmEngine.getId());
+			return o;
+		}).collect(Collectors.toList()).toArray(ProcessDefinition[]::new);
+	}
+>>>>>>> Stashed changes
 
 	ProcessInstance startProcess(final String processDefinitionKey);
 

@@ -7,7 +7,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { BpmEngineC7Form } from '../bpmEngineForm/bpmEngineC7Form';
 import { BpmEngineC8Form } from '../bpmEngineForm/bpmEngineC8Form';
-import { BpmService } from 'services';
+import { BpmEngineService } from 'services';
 import { useSession } from 'SessionStoreContext';
 
 export const BpmEngineList = () => {
@@ -18,7 +18,7 @@ export const BpmEngineList = () => {
     const keycloak = useSession();
 
     useEffect(() => {
-        BpmService.getAll(keycloak)
+        BpmEngineService.getAll(keycloak)
             .then((data) => {
                 setList(data);
             })
@@ -26,7 +26,7 @@ export const BpmEngineList = () => {
                 console.log(err.message);
             });
 
-        BpmService.getAllTypes(keycloak)
+        BpmEngineService.getAllTypes(keycloak)
             .then((data) => {
                 setBpmEngineTypes(data);
             })
