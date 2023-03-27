@@ -1,11 +1,12 @@
 import { Formio } from 'formiojs';
 import Config from '../../consts';
+import MemoryTokenManager from '../MemoryTokenManager';
 
 export function minio(formio) {
     function createHeaders() {
         return {
             headers: {
-                Authorization: `Bearer ${Formio.getToken()}`
+                Authorization: `Bearer ${MemoryTokenManager.getToken()}`
             }
         };
     }
@@ -115,7 +116,16 @@ export function minio(formio) {
                     const anchor = document.createElement('a');
                     document.body.appendChild(anchor);
                     anchor.href = downloadUrl;
-                    anchor.download = downloadUrl;
+
+                    const url = new URL(data.url);
+                    if (url.pathname) {
+                        anchor.download = url.pathname
+                            .slice(url.pathname.lastIndexOf('/') + 1)
+                            .replaceAll("'");
+                    } else {
+                        anchor.download = downloadUrl;
+                    }
+
                     anchor.click();
 
                     setTimeout(() => {

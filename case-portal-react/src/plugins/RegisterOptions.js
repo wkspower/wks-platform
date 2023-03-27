@@ -1,5 +1,9 @@
-import { Formio } from 'formiojs';
+import MemoryTokenManager from './MemoryTokenManager';
 
 export function RegisteOptions(keycloak) {
-    Formio.setToken(keycloak.token);
+    if (keycloak == null) {
+        MemoryTokenManager.setToken(null);
+    } else {
+        MemoryTokenManager.setToken(keycloak.token);
+    }
 }

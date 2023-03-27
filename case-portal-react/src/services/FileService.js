@@ -95,7 +95,16 @@ function download(file, keycloak) {
             const anchor = document.createElement('a');
             document.body.appendChild(anchor);
             anchor.href = downloadUrl;
-            anchor.download = downloadUrl;
+
+            const url = new URL(data.url);
+            if (url.pathname) {
+                anchor.download = url.pathname
+                    .slice(url.pathname.lastIndexOf('/') + 1)
+                    .replaceAll("'");
+            } else {
+                anchor.download = downloadUrl;
+            }
+
             anchor.click();
 
             setTimeout(() => {
