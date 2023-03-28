@@ -25,7 +25,7 @@ async function getAllByStatus(keycloak, status, limit) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${Config.EngineUrl}/case/?status=${status}&limit=${limit}`;
+    var url = `${process.env.REACT_APP_API_URL}/case/?status=${status}&limit=${limit}`;
 
     try {
         const resp = await fetch(url, { headers });
@@ -38,7 +38,7 @@ async function getAllByStatus(keycloak, status, limit) {
 }
 
 async function getCaseDefinitions(keycloak) {
-    const url = `${Config.EngineUrl}/case-definition/`;
+    const url = `${process.env.REACT_APP_API_URL}/case-definition/`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -54,7 +54,7 @@ async function getCaseDefinitions(keycloak) {
 }
 
 async function getCaseDefinitionsById(keycloak, caseDefId) {
-    const url = `${Config.EngineUrl}/case-definition/${caseDefId || ''}`;
+    const url = `${process.env.REACT_APP_API_URL}/case-definition/${caseDefId || ''}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -70,7 +70,7 @@ async function getCaseDefinitionsById(keycloak, caseDefId) {
 }
 
 async function getCaseById(keycloak, id) {
-    let url = `${Config.EngineUrl}/case/${id}`;
+    let url = `${process.env.REACT_APP_API_URL}/case/${id}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -86,7 +86,7 @@ async function getCaseById(keycloak, id) {
 }
 
 async function filterCase(keycloak, caseDefId, status) {
-    let url = `${Config.EngineUrl}/case/?`;
+    let url = `${process.env.REACT_APP_API_URL}/case/?`;
     url = url + (status ? `status=${status}` : '');
     url = url + (caseDefId ? `&caseDefinitionId=${caseDefId}` : '');
 
@@ -105,7 +105,7 @@ async function filterCase(keycloak, caseDefId, status) {
 }
 
 async function updateCaseStatusById(keycloak, id, body) {
-    const url = `${Config.EngineUrl}/case/${id}`;
+    const url = `${process.env.REACT_APP_API_URL}/case/${id}`;
 
     try {
         const resp = await fetch(url, {
@@ -125,7 +125,7 @@ async function updateCaseStatusById(keycloak, id, body) {
 }
 
 async function createCase(keycloak, body) {
-    const url = `${Config.EngineUrl}/case/`;
+    const url = `${process.env.REACT_APP_API_URL}/case/`;
 
     try {
         const resp = await fetch(url, {

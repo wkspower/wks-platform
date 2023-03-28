@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import './taskList.css';
 import { TaskService } from 'services';
 import { useSession } from '../../SessionStoreContext';
+import { format } from 'date-fns';
 
 export const TaskList = ({ businessKey }) => {
     const [tasks, setTasks] = useState(null);
@@ -25,7 +26,7 @@ export const TaskList = ({ businessKey }) => {
 
         TaskService.filterTasks(keycloak, businessKey)
             .then((data) => {
-                setTasks(data);
+                setTasks(data.map(o => o = { ...o, created: format(new Date(o.created), 'P'), due: o.due && format(new Date(o.due), 'P'), followUp: o.followUp && format(new Date(o.followUp), 'P') }));
             })
             .finally(() => {
                 setFetching(false);
@@ -51,11 +52,6 @@ export const TaskList = ({ businessKey }) => {
                 field: 'caseInstanceId',
                 headerName: t('pages.tasklist.datagrid.columns.caseinstanceid'),
                 width: 100
-            },
-            {
-                field: 'processDefinitionId',
-                headerName: t('pages.tasklist.datagrid.columns.processdefinitionid'),
-                width: 250
             },
             {
                 field: 'assignee',

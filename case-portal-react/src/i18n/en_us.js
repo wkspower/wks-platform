@@ -16,7 +16,13 @@ const defs = {
         system: 'System',
         settings: 'Settings',
         caselifecicle: 'Case Life Cycle',
-        documentation: 'Documentation'
+        documentation: 'Documentation',
+
+        processes: 'Processes',
+        caseDefinitions: 'Case Definitions',
+        recordTypes: 'Record Types',
+        processEngines: 'Process Engines',
+        forms: 'Forms'
     },
     pages: {
         dashboard: {
