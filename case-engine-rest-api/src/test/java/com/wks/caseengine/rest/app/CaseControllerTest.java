@@ -72,7 +72,7 @@ public class CaseControllerTest {
 	public void testSaveDocument() throws Exception {
 		this.mockMvc
 				.perform(
-						post("/case/{businessKey}/document", "1").contentType(MediaType.APPLICATION_JSON).content("[]"))
+						post("/case/{businessKey}/document", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
