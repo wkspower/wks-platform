@@ -25,14 +25,14 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 export const FormNew = ({ open, handleClose }) => {
     const [form, setForm] = useState(null);
-    const keycloack = useSession();
+    const keycloak = useSession();
 
     useEffect(() => {
         setForm({ key: '', description: '', structure: { components: [], display: 'form' } });
     }, [open]);
 
     const saveNewForm = () => {
-        FormService.create(keycloack, form)
+        FormService.create(keycloak, form)
             .then(() => handleClose())
             .catch((err) => {
                 console.log(err.message);

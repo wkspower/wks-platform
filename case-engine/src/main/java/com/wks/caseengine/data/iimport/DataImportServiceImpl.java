@@ -23,15 +23,6 @@ public class DataImportServiceImpl implements DataImportService {
 
 		Gson gson = new Gson();
 
-		// BPM Engines
-		JsonElement bpmEnginesJson = data.get("bpmEngines");
-		if (bpmEnginesJson != null) {
-			List<JsonObject> bpmEngines = gson.fromJson(bpmEnginesJson, new TypeToken<List<JsonObject>>() {
-			}.getType());
-			connection.getBpmEngineCollection().insertMany(bpmEngines.stream()
-					.map(o -> new org.bson.json.JsonObject(gson.toJson(o))).collect(Collectors.toList()));
-		}
-
 		// Cases Definitions
 		JsonElement casesDefinitionsJson = data.get("casesDefinitions");
 		if (casesDefinitionsJson != null) {

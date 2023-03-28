@@ -11,10 +11,10 @@ export const RecordTypeList = () => {
     const [recordTypes, setRecordTypes] = useState([]);
     const [openForm, setOpenForm] = useState(false);
     const [recordType, setRecordType] = useState(null);
-    const keycloack = useSession();
+    const keycloak = useSession();
 
     useEffect(() => {
-        RecordTypeService.getAll(keycloack)
+        RecordTypeService.getAll(keycloak)
             .then((data) => {
                 setRecordTypes(data);
             })

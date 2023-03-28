@@ -13,10 +13,10 @@ export const FormList = () => {
     const [openForm, setOpenForm] = useState(false);
     const [openNewForm, setOpenNewForm] = useState(false);
     const [form, setForm] = useState(null);
-    const keycloack = useSession();
+    const keycloak = useSession();
 
     useEffect(() => {
-        FormService.getAll(keycloack)
+        FormService.getAll(keycloak)
             .then((data) => {
                 setForms(data);
             })

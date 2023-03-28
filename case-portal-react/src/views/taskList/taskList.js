@@ -8,7 +8,7 @@ import { TaskForm } from '../taskForm/taskForm';
 import { useTranslation } from 'react-i18next';
 import './taskList.css';
 import { TaskService } from 'services';
-import { useBpmEngine, useSession } from '../../SessionStoreContext';
+import { useSession } from '../../SessionStoreContext';
 
 export const TaskList = ({ businessKey }) => {
     const [tasks, setTasks] = useState(null);
@@ -18,13 +18,12 @@ export const TaskList = ({ businessKey }) => {
     const [activityInstances, setActivityInstances] = useState(null);
     const { t } = useTranslation();
     const [fetching, setFetching] = useState(false);
-    const bpmEngineId = useBpmEngine();
     const keycloak = useSession();
 
     useEffect(() => {
         setFetching(true);
 
-        TaskService.filterTasks(keycloak, bpmEngineId, businessKey)
+        TaskService.filterTasks(keycloak, businessKey)
             .then((data) => {
                 setTasks(data);
             })
@@ -32,10 +31,10 @@ export const TaskList = ({ businessKey }) => {
                 setFetching(false);
             });
 
-        TaskService.filterProcessInstances(keycloak, bpmEngineId, businessKey)
+        TaskService.filterProcessInstances(keycloak, businessKey)
             .then((data) => {
                 setProcessDefId(data[0].definitionId);
-                return TaskService.getActivityInstancesById(keycloak, bpmEngineId, data[0].id);
+                return TaskService.getActivityInstancesById(keycloak, data[0].id);
             })
             .then((data) => {
                 setActivityInstances(data);
@@ -43,7 +42,7 @@ export const TaskList = ({ businessKey }) => {
             .catch((err) => {
                 console.log(err.message);
             });
-    }, [open, businessKey, bpmEngineId]);
+    }, [open, businessKey]);
 
     const makeColumns = () => {
         return [
@@ -134,7 +133,6 @@ export const TaskList = ({ businessKey }) => {
                     <ProcessDiagram
                         processDefinitionId={processDefId}
                         activityInstances={activityInstances}
-                        bpmEngineId={bpmEngineId}
                     />
                 )}
 
@@ -143,7 +141,6 @@ export const TaskList = ({ businessKey }) => {
                         task={task}
                         handleClose={handleClose}
                         open={open}
-                        bpmEngineId={bpmEngineId}
                         keycloak={keycloak}
                     />
                 )}

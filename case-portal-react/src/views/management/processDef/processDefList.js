@@ -3,31 +3,34 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { DataGrid } from '@mui/x-data-grid';
 import MainCard from 'components/MainCard';
-import { CaseDefForm } from '../caseDefForm/caseDefForm';
-import { CaseDefService } from 'services';
 import { useSession } from 'SessionStoreContext';
+import { ProcessDefService } from 'services/ProcessDefService';
+import { BPMNModeler } from './bpmnModeler';
 
-export const CaseDefList = () => {
-    const [caseDefs, setCaseDefs] = useState([]);
-    const [aCaseDef, setACaseDef] = useState(null);
-    const [openCaseDefForm, setOpenCaseDefForm] = useState(false);
+import sampleProcess from './sample-process.js';
+
+export const ProcessDefList = () => {
+    const [processDefs, setProcessDefs] = useState([]);
+    const [processDef, setProcessDef] = useState(null);
+    const [openBPMNModeler, setOpenBPMNModeler] = useState(false);
     const [fetching, setFetching] = useState(false);
     const keycloak = useSession();
 
     useEffect(() => {
         setFetching(true);
 
-        CaseDefService.getAll(keycloak)
+        ProcessDefService.find(keycloak, 'c7-demo')
             .then((data) => {
-                setCaseDefs(data);
+                setProcessDefs(data);
             })
             .finally(() => {
                 setFetching(false);
             });
-    }, [openCaseDefForm]);
+    }, [openBPMNModeler]);
 
     const columns = [
         { field: 'id', headerName: 'Id', width: 300 },
+        { field: 'key', headerName: 'Key', width: 300 },
         { field: 'name', headerName: 'Name', width: 220 },
         {
             field: 'action',
@@ -35,9 +38,9 @@ export const CaseDefList = () => {
             sortable: false,
             renderCell: (params) => {
                 const onClick = (e) => {
-                    setACaseDef(params.row);
+                    setProcessDef(params.row);
                     e.stopPropagation(); // don't select this row after clicking
-                    setOpenCaseDefForm(true);
+                    setOpenBPMNModeler(true);
                 };
 
                 return (
@@ -49,33 +52,29 @@ export const CaseDefList = () => {
         }
     ];
 
-    const handleCloseCaseDefForm = () => {
-        setOpenCaseDefForm(false);
+    const handleCloseBPMNModeler = () => {
+        setOpenBPMNModeler(false);
     };
 
-    const handleNewCaseDef = () => {
-        setACaseDef({
-            status: 'new',
+    const handleNewProcessDef = () => {
+        setProcessDef({
             id: '',
             name: '',
-            formKey: '',
-            stagesLifecycleProcessKey: '',
-            stages: [{ id: 0, index: 0, name: 'Stage 0' }],
-            kanbanConfig: {}
+            key: ''
         });
-        setOpenCaseDefForm(true);
+        setOpenBPMNModeler(true);
     };
 
     return (
         <div style={{ height: 650, width: '100%' }}>
-            <Button id="basic-button" variant="contained" onClick={handleNewCaseDef}>
+            <Button id="basic-button" variant="contained" onClick={handleNewProcessDef}>
                 New
             </Button>
             <MainCard sx={{ mt: 2 }} content={false}>
                 <Box>
                     <DataGrid
                         sx={{ height: 650, width: '100%', backgroundColor: '#ffffff' }}
-                        rows={caseDefs}
+                        rows={processDefs}
                         columns={columns}
                         pageSize={10}
                         loading={fetching}
@@ -83,12 +82,8 @@ export const CaseDefList = () => {
                     />
                 </Box>
             </MainCard>
-            {aCaseDef && (
-                <CaseDefForm
-                    caseDefParam={aCaseDef}
-                    handleClose={handleCloseCaseDefForm}
-                    open={openCaseDefForm}
-                />
+            {processDef && (
+                <BPMNModeler open={openBPMNModeler} keycloak={keycloak} processDef={processDef} handleClose={handleCloseBPMNModeler}/>
             )}
         </div>
     );

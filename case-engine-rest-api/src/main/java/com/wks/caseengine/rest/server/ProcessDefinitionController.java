@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
-import com.wks.caseengine.bpm.BpmEngineService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -21,19 +20,20 @@ public class ProcessDefinitionController {
 	@Autowired
 	private BpmEngineClientFacade processEngineClientFacade;
 
-	@Autowired
-	private BpmEngineService bpmEngineService;
+	@GetMapping(value = "/{processDefinitionId}/xml", produces = MediaType.APPLICATION_XML_VALUE)
+	public String get(@PathVariable final String processDefinitionId) throws Exception {
+		return processEngineClientFacade.getProcessDefinitionXMLById(processDefinitionId);
+	}
+
+	@GetMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ProcessDefinition[] find() throws Exception {
+		return processEngineClientFacade.findProcessDefinitions();
+	}
 
 	@GetMapping(value = "/{bpmEngineId}/{processDefinitionId}/xml", produces = MediaType.APPLICATION_XML_VALUE)
 	public String get(@PathVariable final String bpmEngineId, @PathVariable final String processDefinitionId)
 			throws Exception {
-		return processEngineClientFacade.getProcessDefinitionXMLById(processDefinitionId, bpmEngineService.get(bpmEngineId));
-	}
-
-	@GetMapping(value = "/{bpmEngineId}/", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ProcessDefinition[] find(@PathVariable final String bpmEngineId)
-			throws Exception {
-		return processEngineClientFacade.findProcessDefinitions(bpmEngineService.get(bpmEngineId));
+		return processEngineClientFacade.getProcessDefinitionXMLById(processDefinitionId);
 	}
 
 }

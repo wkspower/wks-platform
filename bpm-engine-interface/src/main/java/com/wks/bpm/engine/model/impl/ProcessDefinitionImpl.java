@@ -17,6 +17,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ProcessDefinitionImpl implements ProcessDefinition {
 
+	private String bpmEngineId;
+	
 	private String id;
 	
 	private String key;

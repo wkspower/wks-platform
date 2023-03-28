@@ -5,7 +5,6 @@ import { CaseStatus } from 'common/caseStatus';
 import { CaseList } from 'views/caseList/caseList';
 import { RecordList } from 'views/record/recordList';
 import { TaskList } from 'views/taskList/taskList';
-import { BpmEngineList } from 'views/management/bpmEngine/bpmEngineList/bpmEngineList';
 import { CaseDefList } from 'views/management/caseDef/caseDefList/caseDefList';
 import { FormList } from 'views/management/form/formList';
 import { RecordTypeList } from 'views/management/recordType/recordTypeList';
@@ -71,10 +70,6 @@ export const MainRoutes = (keycloak, authenticated, recordsTypes, casesDefinitio
                     {
                         path: 'record-type',
                         element: <RecordTypeList />
-                    },
-                    {
-                        path: 'process-engine',
-                        element: <BpmEngineList />
                     },
                     {
                         path: 'form',

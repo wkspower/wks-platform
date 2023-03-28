@@ -30,12 +30,12 @@ public class CaseControllerTest {
 
 	@MockBean
 	private CaseInstanceService caseInstanceService;
-	
+
 	@BeforeEach
 	public void setup() {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
 	}
-	
+
 	@AfterEach
 	private void teardown() {
 		SecurityContextHolder.clearContext();
@@ -49,23 +49,49 @@ public class CaseControllerTest {
 
 	@Test
 	public void testDelete() throws Exception {
-		this.mockMvc.perform(delete("/case/{caseDefId}", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(delete("/case/{businessKey}", "1")).andExpect(status().isOk());
 	}
 
 	@Test
 	public void testUpdate() throws Exception {
-		this.mockMvc.perform(patch("/case/{caseDefId}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(patch("/case/{businessKey}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void testGet() throws Exception {
-		this.mockMvc.perform(get("/case/{caseDefId}", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/case/{businessKey}", "1")).andExpect(status().isOk());
 	}
 
 	@Test
 	public void testFind() throws Exception {
 		this.mockMvc.perform(get("/case/")).andExpect(status().isOk());
+	}
+
+	@Test
+	public void testSaveDocument() throws Exception {
+		this.mockMvc
+				.perform(
+						post("/case/{businessKey}/document", "1").contentType(MediaType.APPLICATION_JSON).content("[]"))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void testSaveComment() throws Exception {
+		this.mockMvc
+				.perform(post("/case/{businessKey}/comment", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void testUdpateComment() throws Exception {
+		this.mockMvc.perform(patch("/case/{businessKey}/comment/{commentId}", "1", "1")
+				.contentType(MediaType.APPLICATION_JSON).content("{}")).andExpect(status().isOk());
+	}
+
+	@Test
+	public void testDeleteComment() throws Exception {
+		this.mockMvc.perform(delete("/case/{businessKey}/comment/{commentId}", "1", "1")).andExpect(status().isOk());
 	}
 
 }

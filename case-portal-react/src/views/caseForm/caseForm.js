@@ -26,22 +26,24 @@ import { tryParseJSONObject } from '../../utils/jsonStringCheck';
 import { CaseEmailsList } from 'views/caseEmail/caseEmailList';
 import { useTranslation } from 'react-i18next';
 import { CaseService, FormService } from '../../services';
-import Attachments from './Attachments';
+import Documents from './Documents';
 
 export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     const [caseDef, setCaseDef] = useState(null);
     const [form, setForm] = useState(null);
     const [formData, setFormData] = useState(null);
+    const [comments, setComments] = useState(null);
+    const [documents, setDocuments] = useState(null);
     const [tabIndex, setTabIndex] = useState(0);
     const [activeStage, setActiveStage] = React.useState(0);
     const [stages, setStages] = useState([]);
     const { t } = useTranslation();
 
     useEffect(() => {
-        getCaseInfo(aCase, open);
+        getCaseInfo(aCase);
     }, [open, aCase]);
 
-    const getCaseInfo = (aCase, open) => {
+    const getCaseInfo = (aCase) => {
         CaseService.getCaseDefinitionsById(keycloak, aCase.caseDefinitionId)
             .then((data) => {
                 setCaseDef(data);
@@ -53,6 +55,8 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                 return CaseService.getCaseById(keycloak, aCase.businessKey);
             })
             .then((caseData) => {
+                setComments(caseData?.comments?.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+                setDocuments(caseData?.documents);
                 setFormData({
                     data: caseData.attributes.reduce(
                         (obj, item) =>
@@ -63,8 +67,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                             }),
                         {}
                     ),
-                    comments: caseData.comments,
-                    attachments: caseData.attachments,
                     metadata: {},
                     isValid: true
                 });
@@ -218,7 +220,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                             <Tab label={t('pages.caseform.tabs.details')} {...a11yProps(0)} />
                             <Tab label={t('pages.caseform.tabs.tasks')} {...a11yProps(1)} />
                             <Tab label={t('pages.caseform.tabs.comments')} {...a11yProps(2)} />
-                            <Tab label={t('pages.caseform.tabs.attachments')} {...a11yProps(3)} />
+                            <Tab label={t('pages.caseform.tabs.documents')} {...a11yProps(3)} />
                             <Tab label={t('pages.caseform.tabs.emails')} {...a11yProps(4)} />
                         </Tabs>
                     </Box>
@@ -258,7 +260,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                         <div style={{ display: 'grid', padding: '10px' }}>
                             <TaskList
                                 businessKey={aCase.businessKey}
-                                bpmEngineId={caseDef.bpmEngineId}
                                 keycloak={keycloak}
                                 getCaseInfo={getCaseInfo}
                             />
@@ -275,14 +276,14 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                 <Comments
                                     aCase={aCase}
                                     getCaseInfo={getCaseInfo}
-                                    comments={formData.comments ? formData.comments : []}
+                                    comments={comments ? comments : []}
                                 />
                             </Grid>
                         </Grid>
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={3}>
-                        <Attachments aCase={aCase} initialValue={formData.attachments || []} />
+                        <Documents aCase={aCase} initialValue={documents || []} />
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={4}>

@@ -25,12 +25,10 @@ public class CaseDefinition {
 
 	private String formKey;
 
-	private String bpmEngineId;
-
 	private String stagesLifecycleProcessKey;
 
 	private List<CaseStage> stages;
-	
+
 	private JsonObject kanbanConfig;
 
 }

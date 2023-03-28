@@ -55,11 +55,6 @@ public class EngineMongoDataConnection {
 		return db.getCollection("organization", JsonObject.class);
 	}
 
-	public MongoCollection<JsonObject> getBpmEngineCollection() {
-		MongoDatabase db = byShared.getDb();
-		return db.getCollection("bpmEngine", JsonObject.class);
-	}
-
 	public  MongoDatabase getDatabase() {
 		return byTenant.getDb();
 	}

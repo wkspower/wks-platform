@@ -1,12 +1,15 @@
 package com.wks.caseengine.cases.instance;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.wks.caseengine.cases.definition.CaseStatus;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -14,6 +17,8 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CaseInstance {
 
 	private String businessKey;
@@ -21,38 +26,20 @@ public class CaseInstance {
 	private String caseDefinitionId;
 
 	private String stage;
-	
+
 	private String caseOwner;
-	
+
 	private String caseOwnerName;
 
+	private List<Comment> comments;
+
+	private List<CaseDocument> documents;
+
+	// TODO improve this hard code
 	@Builder.Default
 	private CaseStatus status = CaseStatus.WIP_CASE_STATUS;
-	
+
 	private List<CaseAttribute> attributes;
-	
-	private List<Comment> comments;
-	
-	private List<Attachment> attachments;
-	
-	public CaseInstance() {
-		super();
-	}
-	
-	public CaseInstance(String businessKey, String caseDefinitionId, String stage, String caseOwner,
-			String caseOwnerName, CaseStatus status, List<CaseAttribute> attributes, 
-			List<Comment> comments, List<Attachment> attachments) {
-		super();
-		this.businessKey = businessKey;
-		this.caseDefinitionId = caseDefinitionId;
-		this.stage = stage;
-		this.caseOwner = caseOwner;
-		this.caseOwnerName = caseOwnerName;
-		this.status = status;
-		this.attributes = attributes;
-		this.comments = comments;
-		this.attachments = attachments;
-	}
 
 	public String getId() {
 		return businessKey;
@@ -62,12 +49,20 @@ public class CaseInstance {
 		this.status = status;
 	}
 
-	public void addAttachment(Attachment newAttachment) {
-		if (this.attachments == null) {
-			this.attachments = new ArrayList<Attachment>();
+	public void addDocument(final CaseDocument document) {
+		if (documents == null) {
+			this.documents = new ArrayList<>();
 		}
-		
-		this.attachments.add(newAttachment);
+
+		this.documents.add(document);
 	}
-	
+
+	public void addComment(final Comment comment) {
+		if (comments == null) {
+			this.comments = new ArrayList<>();
+		}
+
+		this.comments.add(comment);
+	}
+
 }

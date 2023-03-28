@@ -1,7 +1,6 @@
 package com.wks.caseengine.rest.server;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,26 +26,23 @@ public class TaskController {
 	private TaskService taskService;
 
 	@GetMapping(value = "/")
-	public List<Task> find(@RequestParam(required = false) final String bpmEngineId,
-			@RequestParam(required = false) String processInstanceBusinessKey) throws Exception {
-		return taskService.find(processInstanceBusinessKey, Optional.ofNullable(bpmEngineId));
+	public List<Task> find(@RequestParam(required = false) String businessKey) throws Exception {
+		return taskService.find(businessKey);
 	}
 
-	@PostMapping(value = "/{bpmEngineId}/{taskId}/claim/{taskAssignee}")
-	public void claim(@PathVariable final String bpmEngineId, @PathVariable final String taskId,
-			@PathVariable final String taskAssignee) throws Exception {
-		taskService.claim(taskId, taskAssignee, bpmEngineId);
+	@PostMapping(value = "/{taskId}/claim/{taskAssignee}")
+	public void claim(@PathVariable final String taskId, @PathVariable final String taskAssignee) throws Exception {
+		taskService.claim(taskId, taskAssignee);
 	}
 
-	@PostMapping(value = "/{bpmEngineId}/{taskId}/unclaim")
-	public void unclaim(@PathVariable final String bpmEngineId, @PathVariable final String taskId) throws Exception {
-		taskService.unclaim(taskId, bpmEngineId);
+	@PostMapping(value = "/{taskId}/unclaim")
+	public void unclaim(@PathVariable final String taskId) throws Exception {
+		taskService.unclaim(taskId);
 	}
 
-	@PostMapping(value = "/{bpmEngineId}/{taskId}/complete")
-	public void complete(@PathVariable final String bpmEngineId, @PathVariable final String taskId,
-			@RequestBody final String variables) throws Exception {
-		taskService.complete(taskId, JsonParser.parseString(variables).getAsJsonObject(), bpmEngineId);
+	@PostMapping(value = "/{taskId}/complete")
+	public void complete(@PathVariable final String taskId, @RequestBody final String variables) throws Exception {
+		taskService.complete(taskId, JsonParser.parseString(variables).getAsJsonObject());
 	}
 
 }

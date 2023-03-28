@@ -9,10 +9,10 @@ import { useSession } from 'SessionStoreContext';
 
 export const CaseDefFormForm = ({ caseDef, setCaseDef }) => {
     const [forms, setForms] = useState();
-    const keycloack = useSession();
+    const keycloak = useSession();
 
     useEffect(() => {
-        FormService.getAll(keycloack)
+        FormService.getAll(keycloak)
             .then((data) => {
                 setForms(data);
             })

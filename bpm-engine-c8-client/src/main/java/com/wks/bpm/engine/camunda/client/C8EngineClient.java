@@ -28,44 +28,43 @@ public class C8EngineClient implements BpmEngineClient {
 	@Autowired
 	private C8ZeebeClient zeebeClient;
 
-	@Autowired
-	private C8OperateClient operateClient;
-
-	@Autowired
-	private C8TasklistClient tasklistClient;
+//	@Autowired
+//	private C8OperateClient operateClient;
+//
+//	@Autowired
+//	private C8TasklistClient tasklistClient;
 
 	@Override
 	public void deploy(final BpmEngine bpmEngine, final String fileName, final String bpmnXml) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Deployment[] findDeployments(final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return new Deployment[] {};
 	}
 
 	@Override
 	public ProcessDefinition[] findProcessDefinitions(final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return new ProcessDefinition[] {};
 	}
 
 	@Override
 	public ProcessInstance[] findProcessInstances(final Optional<String> businessKey, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return new ProcessInstance[] {};
 	}
-	
+
 	@Override
 	public String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) {
-		throw new UnsupportedOperationException();
+		return String.valueOf("");
 	}
 
 	@Override
 	public String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) {
-		throw new UnsupportedOperationException();
+		return String.valueOf("");
 	}
 
 	@Override
@@ -78,7 +77,7 @@ public class C8EngineClient implements BpmEngineClient {
 			final BpmEngine bpmEngine) {
 		return zeebeClient.startProcess(processDefinitionKey, businessKey, bpmEngine);
 	}
-	
+
 	@Override
 	public ProcessInstance startProcess(String processDefinitionKey, String businessKey, JsonArray caseAttributes,
 			BpmEngine bpmEngine, String tenantId) {
@@ -88,13 +87,12 @@ public class C8EngineClient implements BpmEngineClient {
 	@Override
 	public void deleteProcessInstance(final String processInstanceId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return new ActivityInstance[] {};
 	}
 
 	@Override
@@ -106,31 +104,27 @@ public class C8EngineClient implements BpmEngineClient {
 	@Override
 	public void claimTask(final String taskId, final String taskAssignee, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void unclaimTask(final String taskId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void complete(final String taskId, final JsonObject variables, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public String findVariables(final String processInstanceId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return String.valueOf("");
 	}
 
 	@Override
 	public void sendMessage(final ProcessMessage processMesage, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	@Override

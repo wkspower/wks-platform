@@ -21,7 +21,7 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 
 @Configuration
-public class EngineMongoTenateConfig extends AbstractMongoClientConfiguration {
+public class EngineMongoTenantConfig extends AbstractMongoClientConfiguration {
 
 	@Autowired
 	private EngineMongoSettings props;

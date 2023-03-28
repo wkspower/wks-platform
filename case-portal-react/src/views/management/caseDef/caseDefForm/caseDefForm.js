@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
 import { useEffect } from 'react';
 import { CaseDefFormStages } from './caseDefFormStages';
 import { CaseDefGeneralForm } from './caseDefGeneralForm';
-import { CaseDefFormForm } from './caseFormForm';
+import { CaseDefFormForm } from './caseDefFormForm';
 import { CaseKanbanForm } from './caseDefKanban';
 import { CaseDefService } from 'services';
 import { useSession } from 'SessionStoreContext';

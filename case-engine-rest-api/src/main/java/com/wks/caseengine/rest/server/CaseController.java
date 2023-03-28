@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,9 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.wks.caseengine.cases.definition.CaseStatus;
-import com.wks.caseengine.cases.instance.Attachment;
+import com.wks.caseengine.cases.instance.CaseDocument;
 import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.cases.instance.CaseInstanceFile;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.cases.instance.CaseInstanceService;
 import com.wks.caseengine.cases.instance.Comment;
@@ -60,12 +58,6 @@ public class CaseController {
 			throws Exception {
 		caseInstanceService.updateStatus(businessKey, caseInstance.getStatus());
 	}
-	
-	@PutMapping(value = "/upload/{businessKey}")
-	public void uploadFile(@PathVariable final String businessKey, @RequestBody CaseInstanceFile[] files)
-			throws Exception {
-		caseInstanceService.uploadFiles(businessKey, files);
-	}
 
 	@DeleteMapping(value = "/{businessKey}")
 	public void delete(@PathVariable final String businessKey) throws Exception {
@@ -75,25 +67,29 @@ public class CaseController {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Case Instance Not Found - " + businessKey, e);
 		}
 	}
-	
-	@PostMapping(value = "/comment")
-	public void addComment(@RequestBody final Comment newComment) throws Exception {
-		caseInstanceService.addComment(newComment);
+
+	@PostMapping(value = "/{businessKey}/document")
+	public void saveDocument(@PathVariable final String businessKey, @RequestBody CaseDocument document)
+			throws Exception {
+		caseInstanceService.saveDocument(businessKey, document);
 	}
 
-	@PutMapping(value = "/comment")
-	public void editComment(@RequestBody final Comment comment) throws Exception {
-		caseInstanceService.editComment(comment);
-	}
-	
-	@PostMapping(value = "/comment/delete")
-	public void deleteComment(@RequestBody final Comment comment) throws Exception {
-		caseInstanceService.deleteComment(comment);
-	}
-	
-	@PutMapping(value = "/{businessKey}/attachments")
-	public void addAttachment(@PathVariable String businessKey, @RequestBody Attachment newAttachment) throws Exception {
-		caseInstanceService.addAttachment(businessKey, newAttachment);
+	@PostMapping(value = "/{businessKey}/comment")
+	public void saveComment(@PathVariable final String businessKey, @RequestBody final Comment newComment)
+			throws Exception {
+		caseInstanceService.saveComment(businessKey, newComment);
 	}
 
+	@PatchMapping(value = "/{businessKey}/comment/{commentId}")
+	public void udpateComment(@PathVariable final String businessKey, @PathVariable final String commentId,
+			@RequestBody final Comment comment) throws Exception {
+		caseInstanceService.updateComment(businessKey, commentId, comment.getBody());
+	}
+
+	@DeleteMapping(value = "/{businessKey}/comment/{commentId}")
+	public void deleteComment(@PathVariable final String businessKey, @PathVariable final String commentId)
+			throws Exception {
+		caseInstanceService.deleteComment(businessKey, commentId);
+	}
+	
 }

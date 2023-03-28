@@ -19,7 +19,6 @@ camunda7.rest.oauth.token.clientId:
 camunda7.rest.oauth.token.clientSecret:
 camunda7.rest.oauth.token.grantType:
 
-camunda7.rest.base-url: ${CAMUNDA_URL:http://localhost:8080/engine-rest}
 camunda7.rest.deployment.url: /deployment
 camunda7.rest.processdefinition.url: /process-definition
 camunda7.rest.processinstance.url: /process-instance
@@ -34,7 +33,7 @@ spring.data.mongodb.database.max-connection-idle-time: 3000
 spring.data.mongodb.database.max-connection-life-time: 3000
 
 opa.url: ${OPA_URL:http://localhost:8181/v1/data/wks/authz/allow}
-keycloak.url: ${KEYCLOAK_URL:http://localhost:8082}
+keycloak.url: ${KEYCLOAK_JWKS_SET_URI:http://localhost:8082}
 
 management.health.mongo.enabled: false
 management.health.reds.enabled: false
