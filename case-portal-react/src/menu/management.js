@@ -2,62 +2,18 @@ import i18n from '../i18n';
 
 // assets
 import {
-    IconPackgeExport,
     IconForms,
-    IconChecklist,
     IconDatabase,
-    IconEar,
-    IconMessageCode,
     IconPencil,
-    IconUsers,
-    IconSpy,
-    IconLock,
-    IconIdBadge2,
-    IconBoxMultiple,
-    IconBriefcase,
-    IconWorld,
-    IconHeartRateMonitor,
-    IconFileSearch,
-    IconClockHour9,
-    IconCloudDataConnection,
-    IconMail,
-    IconWebhook,
-    IconBroadcast,
-    IconNotification,
-    IconPalette,
-    IconAdjustments,
-    IconBuilding,
-    IconSettingsAutomation
+    IconSchema
 } from '@tabler/icons';
 
 // icons
 const icons = {
-    IconPackgeExport,
     IconForms,
-    IconChecklist,
     IconDatabase,
-    IconEar,
-    IconMessageCode,
     IconPencil,
-    IconUsers,
-    IconSpy,
-    IconLock,
-    IconIdBadge2,
-    IconBoxMultiple,
-    IconBriefcase,
-    IconWorld,
-    IconHeartRateMonitor,
-    IconFileSearch,
-    IconClockHour9,
-    IconCloudDataConnection,
-    IconMail,
-    IconWebhook,
-    IconBroadcast,
-    IconNotification,
-    IconPalette,
-    IconAdjustments,
-    IconBuilding,
-    IconSettingsAutomation
+    IconSchema
 };
 
 const management = {
@@ -89,8 +45,16 @@ const management = {
             icon: icons.IconSettingsAutomation,
             children: [
                 {
+                    id: 'process-definition',
+                    title: i18n.t('menu.processes'),
+                    type: 'item',
+                    url: '/case-life-cycle/process-definition',
+                    breadcrumbs: true,
+                    icon: icons.IconSchema
+                },
+                {
                     id: 'case-definition',
-                    title: 'Cases Definitions',
+                    title: i18n.t('menu.caseDefinitions'),
                     type: 'item',
                     url: '/case-life-cycle/case-definition',
                     breadcrumbs: true,
@@ -98,7 +62,7 @@ const management = {
                 },
                 {
                     id: 'record-type',
-                    title: 'Records Types',
+                    title: i18n.t('menu.recordTypes'),
                     type: 'item',
                     url: '/case-life-cycle/record-type',
                     breadcrumbs: true,
@@ -106,7 +70,7 @@ const management = {
                 },
                 {
                     id: 'form',
-                    title: 'Forms',
+                    title: i18n.t('menu.forms'),
                     type: 'item',
                     url: '/case-life-cycle/form',
                     breadcrumbs: true,

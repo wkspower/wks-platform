@@ -99,6 +99,13 @@ allow {
 }
 
 allow {
+    input.path = "deployment"
+    input.method in ["GET", "POST", "PATCH", "DELETE", "OPTION", "HEAD"]
+	check_origin_request    
+    is_manager_profile
+}
+
+allow {
     input.path = "case-definition"
     input.method in ["GET", "POST", "PATCH", "DELETE", "OPTION", "HEAD"]
 	check_origin_request    

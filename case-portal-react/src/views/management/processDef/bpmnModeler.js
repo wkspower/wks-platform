@@ -7,14 +7,11 @@ import Slide from '@mui/material/Slide';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { Box, Grid } from '@mui/material';
 import { ProcessDefService } from 'services/ProcessDefService';
+import { DeploymentService } from 'services/DeploymentService';
 
 import {
     BpmnModeler as CamundaWebModeler,
-    ContentSavedReason,
-    CustomBpmnJsModeler,
-    Event,
     isBpmnIoEvent,
     isContentSavedEvent,
     isNotificationEvent,
@@ -31,7 +28,7 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
     const [bpmnXml, setBpmnXml] = useState();
 
     useEffect(() => {
-        ProcessDefService.getBPMNXml(keycloak, processDef.bpmEngineId, processDef.id)
+        ProcessDefService.getBPMNXml(keycloak, processDef.id)
             .then((data) => {
                 setBpmnXml(data);
             })
@@ -48,7 +45,7 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
         newSvg,
         reason
     ) => {
-        console.log(`Model has been changed because of ${reason}`);
+        // console.log(`Model has been changed because of ${reason}`);
         // Do whatever you want here, save the XML and SVG in the backend etc.
         setBpmnXml(newXml);
     }, []);
@@ -59,9 +56,14 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
             return;
         }
 
-        console.log("Saving model...");
+        // console.log("Saving model...");
+
         const result = await modelerRef.current.save();
-        console.log("Saved model!", result.xml, result.svg);
+        DeploymentService.deploy(keycloak, result.xml).then(() => {
+            handleClose();
+        });
+
+        // console.log("Saved model!", result.xml, result.svg);
     }, []);
 
     const onEvent = useCallback(async (event) => {
@@ -87,7 +89,7 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
         if (isPropertiesPanelResizedEvent(event)) {
             // The user has resized the properties panel. You can save this value e.g. in local
             // storage to restore it on next load and pass it as initializing option.
-            console.log(`Properties panel has been resized to ${event.data.width}`);
+            // console.log(`Properties panel has been resized to ${event.data.width}`);
             return;
         }
 
@@ -97,7 +99,7 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
         }
 
         // eslint-disable-next-line no-console
-        console.log("Unhandled event received", event);
+        // console.log("Unhandled event received", event);
     }, [onXmlChanged]);
 
     /**
@@ -163,11 +165,8 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
                         </IconButton>
                         <Typography sx={{ ml: 2, flex: 1 }} component="div">
                         </Typography>
-                        <Button color="inherit">
+                        <Button color="inherit" onClick={onSaveClicked}>
                             Save
-                        </Button>
-                        <Button color="inherit">
-                            Delete
                         </Button>
                     </Toolbar>
                 </AppBar>

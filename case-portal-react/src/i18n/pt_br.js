@@ -16,7 +16,13 @@ const defs = {
         system: 'Sistema',
         settings: 'Configurações',
         caselifecicle: 'Ciclo de vida do caso',
-        documentation: 'Documentação'
+        documentation: 'Documentação',
+
+        processes: 'Processos',
+        caseDefinitions: 'Definições de Casos',
+        recordTypes: 'Tipos de Registros',
+        processEngines: 'Motores de Processos',
+        forms: 'Formulários'
     },
     pages: {
         dashboard: {

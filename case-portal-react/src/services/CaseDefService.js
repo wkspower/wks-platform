@@ -9,7 +9,7 @@ export const CaseDefService = {
 };
 
 async function create(keycloak, body) {
-    const url = `${Config.EngineUrl}/case-definition/`;
+    const url = `${process.env.REACT_APP_API_URL}/case-definition/`;
 
     try {
         const resp = await fetch(url, {
@@ -29,7 +29,7 @@ async function create(keycloak, body) {
 }
 
 async function update(keycloak, id, body) {
-    const url = `${Config.EngineUrl}/case-definition/${id}`;
+    const url = `${process.env.REACT_APP_API_URL}/case-definition/${id}`;
 
     try {
         const resp = await fetch(url, {
@@ -49,7 +49,7 @@ async function update(keycloak, id, body) {
 }
 
 async function remove(keycloak, id) {
-    const url = `${Config.EngineUrl}/case-definition/${id}`;
+    const url = `${process.env.REACT_APP_API_URL}/case-definition/${id}`;
 
     try {
         const resp = await fetch(url, {
@@ -76,7 +76,7 @@ async function getAll(keycloak) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${Config.EngineUrl}/case-definition/`;
+    var url = `${process.env.REACT_APP_API_URL}/case-definition/`;
 
     try {
         const resp = await fetch(url, { headers });

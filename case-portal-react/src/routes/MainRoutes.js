@@ -6,6 +6,7 @@ import { CaseList } from 'views/caseList/caseList';
 import { RecordList } from 'views/record/recordList';
 import { TaskList } from 'views/taskList/taskList';
 import { CaseDefList } from 'views/management/caseDef/caseDefList/caseDefList';
+import { ProcessDefList } from 'views/management/processDef/processDefList';
 import { FormList } from 'views/management/form/formList';
 import { RecordTypeList } from 'views/management/recordType/recordTypeList';
 
@@ -63,6 +64,10 @@ export const MainRoutes = (keycloak, authenticated, recordsTypes, casesDefinitio
             {
                 path: 'case-life-cycle',
                 children: [
+                    {
+                        path: 'process-definition',
+                        element: <ProcessDefList />
+                    },
                     {
                         path: 'case-definition',
                         element: <CaseDefList />

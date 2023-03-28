@@ -7,8 +7,6 @@ import { useSession } from 'SessionStoreContext';
 import { ProcessDefService } from 'services/ProcessDefService';
 import { BPMNModeler } from './bpmnModeler';
 
-import sampleProcess from './sample-process.js';
-
 export const ProcessDefList = () => {
     const [processDefs, setProcessDefs] = useState([]);
     const [processDef, setProcessDef] = useState(null);
@@ -32,6 +30,7 @@ export const ProcessDefList = () => {
         { field: 'id', headerName: 'Id', width: 300 },
         { field: 'key', headerName: 'Key', width: 300 },
         { field: 'name', headerName: 'Name', width: 220 },
+        { field: 'version', headerName: 'Version', width: 220 },
         {
             field: 'action',
             headerName: '',

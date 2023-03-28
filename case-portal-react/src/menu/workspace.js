@@ -20,7 +20,7 @@ const icons = {
     IconDatabase
 };
 
-const utilities = {
+const workspace = {
     id: 'utilities',
     title: '',
     type: 'group',
@@ -50,4 +50,4 @@ const utilities = {
     ]
 };
 
-export default utilities;
+export default workspace;

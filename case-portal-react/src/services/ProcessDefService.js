@@ -25,12 +25,12 @@ async function find(keycloak) {
     }
 }
 
-async function getBPMNXml(keycloak, bpmEngineId, processDefId) {
+async function getBPMNXml(keycloak, processDefId) {
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${process.env.REACT_APP_API_URL}/process-definition/${bpmEngineId}/${processDefId}/xml`;
+    var url = `${process.env.REACT_APP_API_URL}/process-definition/${processDefId}/xml`;
 
     try {
         const resp = await fetch(url, { headers });

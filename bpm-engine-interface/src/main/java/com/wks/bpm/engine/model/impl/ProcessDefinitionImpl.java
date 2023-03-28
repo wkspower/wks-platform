@@ -24,6 +24,10 @@ public class ProcessDefinitionImpl implements ProcessDefinition {
 	private String key;
 	
 	private String name;
+	
+	private String version;
+	
+	private String tenantId;
 
 	private String bpmn20Xml;
 
