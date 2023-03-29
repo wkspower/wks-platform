@@ -1,8 +1,5 @@
 FROM node:19.8 AS build
 
-# Needed since Miragon BPMN modeler makes dist buildle too big
-ENV GENERATE_SOURCEMAP=false
-
 ARG REACT_APP_KEYCLOAK_URL
 ARG REACT_APP_API_URL
 ARG REACT_APP_EMAIL_URL
