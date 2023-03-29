@@ -102,7 +102,7 @@ services:
             - mongodb
             - camunda
         environment:
-            - CAMUNDA_URL=http://camunda:8080/engine-rest
+            - CAMUNDA_BASE_URL=http://camunda:8080/engine-rest
             - MONGO_DATABASE=wks
             - MONGO_CONN=mongodb://mongodb
             - KEYCLOAK_URL=http://keycloak:8080
