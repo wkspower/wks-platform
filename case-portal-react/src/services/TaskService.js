@@ -1,4 +1,5 @@
 import { json, nop } from './request';
+import Config from 'consts/index';
 
 export const TaskService = {
     getActivityInstancesById,
@@ -10,7 +11,7 @@ export const TaskService = {
 };
 
 async function getActivityInstancesById(keycloak, processInstanceId) {
-    const url = `${process.env.REACT_APP_API_URL}/process-instance/${processInstanceId}/activity-instances`;
+    const url = `${Config.CaseEngineUrl}/process-instance/${processInstanceId}/activity-instances`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -26,7 +27,7 @@ async function getActivityInstancesById(keycloak, processInstanceId) {
 }
 
 async function createTaskClaim(keycloak, taskId) {
-    const url = `${process.env.REACT_APP_API_URL}/task/${taskId}/claim/${keycloak.idTokenParsed.name}`;
+    const url = `${Config.CaseEngineUrl}/task/${taskId}/claim/${keycloak.idTokenParsed.name}`;
 
     const headers = {
         Accept: 'application/json',
@@ -44,7 +45,7 @@ async function createTaskClaim(keycloak, taskId) {
 }
 
 async function createTaskUnclaim(keycloak, taskId) {
-    const url = `${process.env.REACT_APP_API_URL}/task/${taskId}/unclaim/${keycloak.idTokenParsed.name}`;
+    const url = `${Config.CaseEngineUrl}/task/${taskId}/unclaim/${keycloak.idTokenParsed.name}`;
 
     const headers = {
         Accept: 'application/json',
@@ -62,7 +63,7 @@ async function createTaskUnclaim(keycloak, taskId) {
 }
 
 async function createTaskComplete(keycloak, taskId, body) {
-    const url = `${process.env.REACT_APP_API_URL}/task/${taskId}/complete`;
+    const url = `${Config.CaseEngineUrl}/task/${taskId}/complete`;
 
     const headers = {
         Accept: 'application/json',
@@ -92,7 +93,7 @@ async function filterTasks(keycloak, businessKey) {
         query = query + (businessKey ? 'businessKey=' + businessKey : '');
     }
 
-    const url = `${process.env.REACT_APP_API_URL}/task/?${query}`;
+    const url = `${Config.CaseEngineUrl}/task/?${query}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -112,7 +113,7 @@ async function filterProcessInstances(keycloak, businessKey) {
         businessKey = '';
     }
 
-    const url = `${process.env.REACT_APP_API_URL}/process-instance/?businessKey=${businessKey}`;
+    const url = `${Config.CaseEngineUrl}/process-instance/?businessKey=${businessKey}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`

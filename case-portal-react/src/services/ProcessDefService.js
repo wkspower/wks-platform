@@ -1,4 +1,5 @@
 import { json } from './request';
+import Config from 'consts/index';
 
 export const ProcessDefService = {
     find,
@@ -14,7 +15,7 @@ async function find(keycloak) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${process.env.REACT_APP_API_URL}/process-definition/`;
+    var url = `${Config.CaseEngineUrl}/process-definition/`;
 
     try {
         const resp = await fetch(url, { headers });
@@ -30,7 +31,7 @@ async function getBPMNXml(keycloak, processDefId) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${process.env.REACT_APP_API_URL}/process-definition/${processDefId}/xml`;
+    var url = `${Config.CaseEngineUrl}/process-definition/${processDefId}/xml`;
 
     try {
         const resp = await fetch(url, { headers });

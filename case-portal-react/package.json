@@ -10,7 +10,6 @@
         "@emotion/react": "^11.7.1",
         "@emotion/styled": "^11.6.0",
         "@formio/react": "^5.2.4-rc.1",
-        "@miragon/camunda-web-modeler": "^0.0.4",
         "@mui/icons-material": "^5.10.9",
         "@mui/lab": "^5.0.0-alpha.106",
         "@mui/material": "^5.10.12",

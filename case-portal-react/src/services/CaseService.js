@@ -25,7 +25,7 @@ async function getAllByStatus(keycloak, status, limit) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${process.env.REACT_APP_API_URL}/case/?status=${status}&limit=${limit}`;
+    var url = `${Config.CaseEngineUrl}/case/?status=${status}&limit=${limit}`;
 
     try {
         const resp = await fetch(url, { headers });
@@ -38,7 +38,7 @@ async function getAllByStatus(keycloak, status, limit) {
 }
 
 async function getCaseDefinitions(keycloak) {
-    const url = `${process.env.REACT_APP_API_URL}/case-definition/`;
+    const url = `${Config.CaseEngineUrl}/case-definition/`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -54,7 +54,7 @@ async function getCaseDefinitions(keycloak) {
 }
 
 async function getCaseDefinitionsById(keycloak, caseDefId) {
-    const url = `${process.env.REACT_APP_API_URL}/case-definition/${caseDefId || ''}`;
+    const url = `${Config.CaseEngineUrl}/case-definition/${caseDefId || ''}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -70,7 +70,7 @@ async function getCaseDefinitionsById(keycloak, caseDefId) {
 }
 
 async function getCaseById(keycloak, id) {
-    let url = `${process.env.REACT_APP_API_URL}/case/${id}`;
+    let url = `${Config.CaseEngineUrl}/case/${id}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -86,7 +86,7 @@ async function getCaseById(keycloak, id) {
 }
 
 async function filterCase(keycloak, caseDefId, status) {
-    let url = `${process.env.REACT_APP_API_URL}/case/?`;
+    let url = `${Config.CaseEngineUrl}/case/?`;
     url = url + (status ? `status=${status}` : '');
     url = url + (caseDefId ? `&caseDefinitionId=${caseDefId}` : '');
 
@@ -105,7 +105,7 @@ async function filterCase(keycloak, caseDefId, status) {
 }
 
 async function updateCaseStatusById(keycloak, id, body) {
-    const url = `${process.env.REACT_APP_API_URL}/case/${id}`;
+    const url = `${Config.CaseEngineUrl}/case/${id}`;
 
     try {
         const resp = await fetch(url, {
@@ -125,7 +125,7 @@ async function updateCaseStatusById(keycloak, id, body) {
 }
 
 async function createCase(keycloak, body) {
-    const url = `${process.env.REACT_APP_API_URL}/case/`;
+    const url = `${Config.CaseEngineUrl}/case/`;
 
     try {
         const resp = await fetch(url, {
@@ -171,7 +171,7 @@ function mapperToCase(data) {
 
 async function addDocuments(keycloak, businessKey, document) {
     console.log(businessKey);
-    const url = `${process.env.REACT_APP_API_URL}/case/${businessKey}/document`;
+    const url = `${Config.CaseEngineUrl}/case/${businessKey}/document`;
 
     try {
         const resp = await fetch(url, {
@@ -191,7 +191,7 @@ async function addDocuments(keycloak, businessKey, document) {
 }
 
 async function addComment(keycloak, text, parentId, businessKey) {
-    const url = `${process.env.REACT_APP_API_URL}/case/${businessKey}/comment`;
+    const url = `${Config.CaseEngineUrl}/case/${businessKey}/comment`;
 
     const comment = {
         body: text,
@@ -219,7 +219,7 @@ async function addComment(keycloak, text, parentId, businessKey) {
 }
 
 async function updateComment(keycloak, text, commentId, businessKey) {
-    const url = `${process.env.REACT_APP_API_URL}/case/${businessKey}/comment/${commentId}`;
+    const url = `${Config.CaseEngineUrl}/case/${businessKey}/comment/${commentId}`;
 
     const comment = {
         id: commentId,
@@ -246,7 +246,7 @@ async function updateComment(keycloak, text, commentId, businessKey) {
 }
 
 async function deleteComment(keycloak, commentId, businessKey) {
-    const url = `${process.env.REACT_APP_API_URL}/case/${businessKey}/comment/${commentId}`;
+    const url = `${Config.CaseEngineUrl}/case/${businessKey}/comment/${commentId}`;
 
     try {
         const resp = await fetch(url, {

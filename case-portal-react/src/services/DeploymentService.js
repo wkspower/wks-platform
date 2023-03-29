@@ -1,11 +1,12 @@
 import { nop } from './request';
+import Config from 'consts/index';
 
 export const DeploymentService = {
     deploy
 };
 
 async function deploy(keycloak, file) {
-    const url = `${process.env.REACT_APP_API_URL}/deployment/`;
+    const url = `${Config.CaseEngineUrl}/deployment/`;
 
     try {
         const resp = await fetch(url, {

@@ -11,7 +11,7 @@ export const FormService = {
 };
 
 async function create(keycloak, body) {
-    const url = `${process.env.REACT_APP_API_URL}/form/`;
+    const url = `${Config.CaseEngineUrl}/form/`;
 
     try {
         const resp = await fetch(url, {
@@ -31,7 +31,7 @@ async function create(keycloak, body) {
 }
 
 async function update(keycloak, id, body) {
-    const url = `${process.env.REACT_APP_API_URL}/form/${id}`;
+    const url = `${Config.CaseEngineUrl}/form/${id}`;
 
     try {
         const resp = await fetch(url, {
@@ -51,7 +51,7 @@ async function update(keycloak, id, body) {
 }
 
 async function remove(keycloak, id) {
-    const url = `${process.env.REACT_APP_API_URL}/form/${id}`;
+    const url = `${Config.CaseEngineUrl}/form/${id}`;
 
     try {
         const resp = await fetch(url, {
@@ -74,7 +74,7 @@ async function getAll(keycloak) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${process.env.REACT_APP_API_URL}/form/`;
+    var url = `${Config.CaseEngineUrl}/form/`;
 
     try {
         const resp = await fetch(url, { headers });
@@ -90,7 +90,7 @@ async function getByKey(keycloak, formKey) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${process.env.REACT_APP_API_URL}/form/${formKey}`;
+    var url = `${Config.CaseEngineUrl}/form/${formKey}`;
 
     try {
         const resp = await fetch(url, { headers });
@@ -106,7 +106,7 @@ async function getVariableById(keycloak, processInstanceId) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${process.env.REACT_APP_API_URL}/variable/${processInstanceId}`;
+    var url = `${Config.CaseEngineUrl}/variable/${processInstanceId}`;
 
     try {
         const resp = await fetch(url, { headers });

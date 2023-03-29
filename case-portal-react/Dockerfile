@@ -6,14 +6,14 @@ ARG REACT_APP_EMAIL_URL
 
 ENV NODE_ENV=development
 
-ADD case-portal-react/src src
-ADD case-portal-react/public public
-ADD case-portal-react/package.json package.json
-ADD case-portal-react/yarn.lock yarn.lock
-ADD case-portal-react/jsconfig.json jsconfig.json
-ADD case-portal-react/.eslintrc .eslintrc
-ADD case-portal-react/.prettierrc .prettierrc
-ADD case-portal-react/.eslintrc .eslintrc
+ADD src src
+ADD public public
+ADD package.json package.json
+ADD yarn.lock yarn.lock
+ADD jsconfig.json jsconfig.json
+ADD .eslintrc .eslintrc
+ADD .prettierrc .prettierrc
+ADD .eslintrc .eslintrc
 
 RUN yarn install
 RUN REACT_APP_KEYCLOAK_URL=${REACT_APP_KEYCLOAK_URL} \ 
