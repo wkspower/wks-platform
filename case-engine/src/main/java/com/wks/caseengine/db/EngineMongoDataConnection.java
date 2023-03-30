@@ -24,6 +24,10 @@ public class EngineMongoDataConnection {
 	@Qualifier("mongoTemplateShared")
 	private MongoTemplate byShared;
 	
+	public MongoTemplate getOperations() {
+		return byTenant;
+	}
+	
 	public MongoCollection<JsonObject> getCaseDefCollection() {
 		MongoDatabase db = byTenant.getDb();
 		log.info("using database MongoDataConnection: {}", db.getName());
@@ -59,13 +63,14 @@ public class EngineMongoDataConnection {
 		MongoDatabase db = byShared.getDb();
 		return db.getCollection("bpmEngine", JsonObject.class);
 	}
-
-	public  MongoDatabase getDatabase() {
-		return byTenant.getDb();
-	}
 	
 	public MongoCollection<CaseInstance> getCaseInstanceCollection() {
 		MongoDatabase db = byTenant.getDb();
 		return db.getCollection("caseInstances", CaseInstance.class);
 	}
+
+	public  MongoDatabase getDatabase() {
+		return byTenant.getDb();
+	}
+
 }

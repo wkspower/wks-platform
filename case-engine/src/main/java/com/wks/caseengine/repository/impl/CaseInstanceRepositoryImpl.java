@@ -1,21 +1,25 @@
 package com.wks.caseengine.repository.impl;
 
 import static com.mongodb.client.model.Sorts.descending;
+import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
-import com.wks.caseengine.cases.definition.CaseStatus;
+import com.wks.caseengine.cases.instance.CaseFilter;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.db.EngineMongoDataConnection;
+import com.wks.caseengine.pagination.Cursor;
+import com.wks.caseengine.pagination.CursorPage;
+import com.wks.caseengine.pagination.MongoQueryPaginator;
 import com.wks.caseengine.repository.CaseInstanceRepository;
 import com.wks.caseengine.repository.Paginator;
 
@@ -32,17 +36,24 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	public List<CaseInstance> find() throws Exception {
 		return paginator.apply(getCollection().find()).sort(descending("_id")).into(new ArrayList<>());
 	}
-
+	
 	@Override
-	public List<CaseInstance> find(final Optional<CaseStatus> status, final Optional<String> caseDefinitionId) throws Exception {
-		Bson statusFilter = status.isPresent() ? Filters.eq("status", status.get()) : Filters.empty();
-		Bson caseDefIdFilter = caseDefinitionId.isPresent() ? Filters.eq("caseDefinitionId", caseDefinitionId.get()) : Filters.empty();
+	public CursorPage<CaseInstance> find(CaseFilter filters) throws Exception {
+		Cursor cursor = filters.getCursor();
 		
-		ArrayList<CaseInstance> caseInstances = paginator.apply(getCollection().find().sort(descending("_id")).filter(Filters.and(statusFilter, caseDefIdFilter)))
-																.into(new ArrayList<>());
-
-		return caseInstances;
+		CursorPage<CaseInstance> data = MongoQueryPaginator
+																				 .with(connection.getOperations(), asList("businessKey"))
+																				 .cursor(cursor)
+																				 .criteria(c -> {
+																					 filters.getCaseDefsId().ifPresent(a -> c.add(Criteria.where("caseDefinitionId").is(filters.getCaseDefsId().get())));
+																					 filters.getStatus().ifPresent(a -> c.add(Criteria.where("status").is(filters.getStatus().get())));
+																				 })
+																				 .executeQuery(CaseInstance.class);
+		
+		return data;
 	}
+	
+
 
 	@Override
 	public CaseInstance get(final String businessKey) throws Exception {

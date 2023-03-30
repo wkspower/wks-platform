@@ -16,8 +16,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import { CaseService } from '../../services';
 import { useSession } from 'SessionStoreContext';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 export const CaseList = ({ status, caseDefId }) => {
+    const { t } = useTranslation();
     const [stages, setStages] = useState([]);
     const [cases, setCases] = useState([]);
     const [aCase, setACase] = useState(null);
@@ -27,21 +30,29 @@ export const CaseList = ({ status, caseDefId }) => {
     const [openNewCaseForm, setOpenNewCaseForm] = useState(false);
     const [view, setView] = React.useState('list');
     const [snackOpen, setSnackOpen] = useState(false);
-    const { t } = useTranslation();
     const keycloak = useSession();
     const [caseDefs, setCaseDefs] = useState([]);
     const [fetching, setFetching] = useState(false);
+    const [cursor, setCursor] = useState({
+        token: '',
+        sort: '',
+        dir: '',
+        limit: 10,
+        hasPrevious: false,
+        hasNext: true
+    });
 
     useEffect(() => {
         setFetching(true);
 
         CaseService.getCaseDefinitionsById(keycloak, caseDefId)
-            .then((data) => {
-                setStages(data.stages);
-                return CaseService.filterCase(keycloak, caseDefId, status);
+            .then((resp) => {
+                setStages(resp.stages);
+                return CaseService.filterCase(keycloak, caseDefId, status, cursor);
             })
-            .then((data) => {
-                setCases(data);
+            .then((resp) => {
+                setCases(resp.data);
+                setCursor({ ...resp.paging });
             })
             .finally(() => {
                 setFetching(false);
@@ -49,8 +60,8 @@ export const CaseList = ({ status, caseDefId }) => {
     }, [caseDefId, status, openNewCaseForm]);
 
     useEffect(() => {
-        CaseService.getCaseDefinitions(keycloak).then((data) => {
-            setCaseDefs(data);
+        CaseService.getCaseDefinitions(keycloak).then((resp) => {
+            setCaseDefs(resp);
         });
     }, []);
 
@@ -153,6 +164,19 @@ export const CaseList = ({ status, caseDefId }) => {
         </React.Fragment>
     );
 
+    const handlePage = (order) => {
+        setFetching(true);
+
+        CaseService.filterCase(keycloak, caseDefId, status, { ...cursor, order })
+            .then((resp) => {
+                setCases(resp.data);
+                setCursor(resp.paging);
+            })
+            .finally(() => {
+                setFetching(false);
+            });
+    };
+
     return (
         <div style={{ height: 650, width: '100%' }}>
             {caseDefId && (
@@ -182,15 +206,31 @@ export const CaseList = ({ status, caseDefId }) => {
             <MainCard sx={{ mt: 2 }} content={false}>
                 <Box>
                     {view === 'list' && (
-                        <DataGrid
-                            sx={{ height: 650, width: '100%', backgroundColor: '#ffffff', mt: 1 }}
-                            rows={cases}
-                            columns={makeColumns()}
-                            pageSize={10}
-                            rowsPerPageOptions={[10]}
-                            getRowId={(row) => row.businessKey}
-                            loading={fetching}
-                        />
+                        <div>
+                            <DataGrid
+                                sx={{
+                                    height: 650,
+                                    width: '100%',
+                                    backgroundColor: '#ffffff',
+                                    mt: 1
+                                }}
+                                rows={cases}
+                                columns={makeColumns()}
+                                getRowId={(row) => row.businessKey}
+                                loading={fetching}
+                                hideFooterPagination={true}
+                            />
+                            <IconButton
+                                onClick={() => handlePage(2)}
+                                disabled={!cursor.hasPrevious}
+                            >
+                                <KeyboardArrowLeftIcon />
+                            </IconButton>
+
+                            <IconButton onClick={() => handlePage(1)} disabled={!cursor.hasNext}>
+                                <KeyboardArrowRightIcon />
+                            </IconButton>
+                        </div>
                     )}
                     {view === 'kanban' && (
                         <Kanban
@@ -204,6 +244,8 @@ export const CaseList = ({ status, caseDefId }) => {
                     )}
                 </Box>
             </MainCard>
+
+            <br />
 
             {openCaseForm && (
                 <CaseForm

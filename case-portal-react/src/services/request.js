@@ -8,7 +8,7 @@ export function json(keycloak, resp) {
         return resp.json();
     }
 
-    return resp;
+    return Promise.resolve(resp);
 }
 
 export function nop(keycloak, resp) {

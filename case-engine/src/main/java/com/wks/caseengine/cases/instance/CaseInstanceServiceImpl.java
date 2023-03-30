@@ -4,20 +4,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.http.client.utils.DateUtils;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseStatus;
+import com.wks.caseengine.pagination.CursorPage;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
 import com.wks.caseengine.repository.CaseInstanceRepository;
 import com.wks.caseengine.repository.Repository;
@@ -40,9 +39,8 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	private ProcessInstanceService processInstanceService;
 
 	@Override
-	public List<CaseInstance> find(final Optional<CaseStatus> status, final Optional<String> caseDefinitionId)
-			throws Exception {
-		return repository.find(status, caseDefinitionId);
+	public CursorPage<CaseInstance> find(CaseFilter filters) throws Exception {
+		return repository.find(filters);
 	}
 
 	@Override

@@ -31,7 +31,7 @@ async function getAllByStatus(keycloak, status, limit) {
 
     try {
         const resp = await fetch(url, { headers });
-        const data = json(keycloak, resp);
+        const data = await json(keycloak, resp);
         return mapperToCase(data);
     } catch (e) {
         console.log(e);
@@ -87,10 +87,14 @@ async function getCaseById(keycloak, id) {
     }
 }
 
-async function filterCase(keycloak, caseDefId, status) {
+async function filterCase(keycloak, caseDefId, status, cursor) {
     let url = `${Config.EngineUrl}/case/?`;
     url = url + (status ? `status=${status}` : '');
     url = url + (caseDefId ? `&caseDefinitionId=${caseDefId}` : '');
+    url = url + (cursor?.token ? '&token=' + cursor?.token : '');
+    url = url + (cursor?.sort ? '&sort=' + cursor?.sort : '');
+    url = url + (cursor?.dir ? '&dir=' + cursor?.dir : '');
+    url = url + (cursor?.limit ? '&limit=' + cursor?.limit : '');
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -98,7 +102,7 @@ async function filterCase(keycloak, caseDefId, status) {
 
     try {
         const resp = await fetch(url, { headers });
-        const data = json(keycloak, resp);
+        const data = await json(keycloak, resp);
         return mapperToCase(data);
     } catch (e) {
         console.log(e);
@@ -180,31 +184,6 @@ async function createCase(keycloak, body) {
         console.log(err);
         return await Promise.reject(err);
     }
-}
-
-function mapperToCase(data) {
-    if (!data.length) {
-        return Promise.resolve(data);
-    }
-
-    const toStatus = (status) => {
-        const mapper = {
-            WIP_CASE_STATUS: i18n.t('general.case.status.wip'),
-            CLOSED_CASE_STATUS: i18n.t('general.case.status.closed'),
-            ARCHIVED_CASE_STATUS: i18n.t('general.case.status.archived')
-        };
-
-        return mapper[status] || 'Indefinido';
-    };
-
-    const toCase = data.map((element) => {
-        const createdAt = element.attributes.find((attribute) => attribute.name === 'createdAt');
-        element.createdAt = createdAt ? createdAt.value : '11/12/2022';
-        element.statusDescription = toStatus(element.status);
-        return element;
-    });
-
-    return Promise.resolve(toCase);
 }
 
 async function addComment(keycloak, text, parentId, businessKey) {
@@ -314,4 +293,31 @@ async function deleteComment(keycloak, commentId, businessKey) {
         console.log(e);
         return await Promise.reject(e);
     }
+}
+
+function mapperToCase(resp) {
+    const { data, paging } = resp;
+
+    if (!data.length) {
+        return Promise.resolve(data);
+    }
+
+    const toStatus = (status) => {
+        const mapper = {
+            WIP_CASE_STATUS: i18n.t('general.case.status.wip'),
+            CLOSED_CASE_STATUS: i18n.t('general.case.status.closed'),
+            ARCHIVED_CASE_STATUS: i18n.t('general.case.status.archived')
+        };
+
+        return mapper[status] || 'Indefinido';
+    };
+
+    const toCase = data.map((element) => {
+        const createdAt = element?.attributes?.find((attribute) => attribute.name === 'createdAt');
+        element.createdAt = createdAt ? createdAt.value : '11/12/2022';
+        element.statusDescription = toStatus(element.status);
+        return element;
+    });
+
+    return Promise.resolve({ data: toCase, paging });
 }
