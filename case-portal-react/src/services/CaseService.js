@@ -85,7 +85,7 @@ async function getCaseById(keycloak, id) {
     }
 }
 
-async function filterCase(keycloak, caseDefId, status) {
+async function filterCase(keycloak, caseDefId, status, cursor) {
     let url = `${Config.CaseEngineUrl}/case/?`;
     url = url + (status ? `status=${status}` : '');
     url = url + (caseDefId ? `&caseDefinitionId=${caseDefId}` : '');
@@ -149,35 +149,8 @@ async function createCase(keycloak, body) {
 }
 
 async function addDocuments(keycloak, businessKey, document) {
+    console.log(businessKey);
     const url = `${Config.CaseEngineUrl}/case/${businessKey}/document`;
-
-    try {
-        const resp = await fetch(url, {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${keycloak.token}`
-            },
-            body: JSON.stringify(document)
-        });
-        return nop(keycloak, resp);
-    } catch (e) {
-        console.log(e);
-        return await Promise.reject(e);
-    }
-}
-
-async function addComment(keycloak, text, parentId, businessKey) {
-    const url = `${Config.EngineUrl}/case/comment`;
-
-    const comment = {
-        body: text,
-        parentId,
-        userId: keycloak.tokenParsed.preferred_username,
-        userName: keycloak.tokenParsed.given_name,
-        caseId: businessKey
-    };
 
     try {
         const resp = await fetch(url, {
