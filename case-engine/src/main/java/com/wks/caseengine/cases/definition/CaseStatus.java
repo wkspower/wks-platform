@@ -1,6 +1,7 @@
 package com.wks.caseengine.cases.definition;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -32,4 +33,18 @@ public enum CaseStatus implements Serializable {
 		return description;
 	}
 
+	public static Optional<CaseStatus> fromValue(String status) {
+		for (CaseStatus c : values()) {
+			if (c.code.equals(status)) {
+				return Optional.ofNullable(c);
+			}
+		}
+		
+		return Optional.ofNullable(null);
+	}
+	
+	public String toValue() {
+		return code;
+	}
+	
 }

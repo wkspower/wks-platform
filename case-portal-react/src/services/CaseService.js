@@ -29,7 +29,7 @@ async function getAllByStatus(keycloak, status, limit) {
 
     try {
         const resp = await fetch(url, { headers });
-        const data = json(keycloak, resp);
+        const data = await json(keycloak, resp);
         return mapperToCase(data);
     } catch (e) {
         console.log(e);
@@ -89,6 +89,10 @@ async function filterCase(keycloak, caseDefId, status) {
     let url = `${Config.CaseEngineUrl}/case/?`;
     url = url + (status ? `status=${status}` : '');
     url = url + (caseDefId ? `&caseDefinitionId=${caseDefId}` : '');
+    url = url + `&before=${cursor.before || ''}`;
+    url = url + `&after=${cursor.after || ''}`;
+    url = url + `&sort=${cursor.sort || 'asc'}`;
+    url = url + `&limit=${cursor.limit || 10}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -96,7 +100,7 @@ async function filterCase(keycloak, caseDefId, status) {
 
     try {
         const resp = await fetch(url, { headers });
-        const data = json(keycloak, resp);
+        const data = await json(keycloak, resp);
         return mapperToCase(data);
     } catch (e) {
         console.log(e);
@@ -144,34 +148,36 @@ async function createCase(keycloak, body) {
     }
 }
 
-function mapperToCase(data) {
-    if (!data.length) {
-        return Promise.resolve(data);
+async function addDocuments(keycloak, businessKey, document) {
+    const url = `${Config.CaseEngineUrl}/case/${businessKey}/document`;
+
+    try {
+        const resp = await fetch(url, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${keycloak.token}`
+            },
+            body: JSON.stringify(document)
+        });
+        return nop(keycloak, resp);
+    } catch (e) {
+        console.log(e);
+        return await Promise.reject(e);
     }
-
-    const toStatus = (status) => {
-        const mapper = {
-            WIP_CASE_STATUS: i18n.t('general.case.status.wip'),
-            CLOSED_CASE_STATUS: i18n.t('general.case.status.closed'),
-            ARCHIVED_CASE_STATUS: i18n.t('general.case.status.archived')
-        };
-
-        return mapper[status] || 'Indefinido';
-    };
-
-    const toCase = data.map((element) => {
-        const createdAt = element.attributes.find((attribute) => attribute.name === 'createdAt');
-        element.createdAt = createdAt ? createdAt.value : '11/12/2022';
-        element.statusDescription = toStatus(element.status);
-        return element;
-    });
-
-    return Promise.resolve(toCase);
 }
 
-async function addDocuments(keycloak, businessKey, document) {
-    console.log(businessKey);
-    const url = `${Config.CaseEngineUrl}/case/${businessKey}/document`;
+async function addComment(keycloak, text, parentId, businessKey) {
+    const url = `${Config.EngineUrl}/case/comment`;
+
+    const comment = {
+        body: text,
+        parentId,
+        userId: keycloak.tokenParsed.preferred_username,
+        userName: keycloak.tokenParsed.given_name,
+        caseId: businessKey
+    };
 
     try {
         const resp = await fetch(url, {
@@ -262,4 +268,37 @@ async function deleteComment(keycloak, commentId, businessKey) {
         console.log(e);
         return await Promise.reject(e);
     }
+}
+
+function mapperToCase(resp) {
+    const { data, paging } = resp;
+
+    if (!data.length) {
+        return Promise.resolve({ data: [], paging: {} });
+    }
+
+    const toStatus = (status) => {
+        const mapper = {
+            WIP_CASE_STATUS: i18n.t('general.case.status.wip'),
+            CLOSED_CASE_STATUS: i18n.t('general.case.status.closed'),
+            ARCHIVED_CASE_STATUS: i18n.t('general.case.status.archived')
+        };
+
+        return mapper[status] || 'Indefinido';
+    };
+
+    const toCase = data.map((element) => {
+        const createdAt = element?.attributes?.find((attribute) => attribute.name === 'createdAt');
+        element.createdAt = createdAt ? createdAt.value : '';
+        element.statusDescription = toStatus(element.status);
+        return element;
+    });
+
+    const toPaging = {
+        cursors: paging.cursors,
+        hasPrevious: paging.hasPrevious,
+        hasNext: paging.hasNext
+    };
+
+    return Promise.resolve({ data: toCase, paging: toPaging });
 }

@@ -1,14 +1,11 @@
 package com.wks.caseengine.cases.instance;
 
-import java.util.List;
-import java.util.Optional;
-
 import com.wks.caseengine.cases.definition.CaseStatus;
+import com.wks.caseengine.pagination.PageResult;
 
 public interface CaseInstanceService {
 
-	List<CaseInstance> find(final Optional<CaseStatus> status, final Optional<String> caseDefinitionId)
-			throws Exception;
+	PageResult<CaseInstance> find(CaseFilter filters) throws Exception;
 
 	CaseInstance get(final String businessKey) throws Exception;
 

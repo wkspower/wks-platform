@@ -3,7 +3,6 @@ package com.wks.caseengine.cases.instance;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.http.client.utils.DateUtils;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.google.gson.Gson;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseStatus;
+import com.wks.caseengine.pagination.PageResult;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
 import com.wks.caseengine.repository.CaseInstanceRepository;
 import com.wks.caseengine.repository.Repository;
@@ -36,9 +36,8 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	private ProcessInstanceService processInstanceService;
 
 	@Override
-	public List<CaseInstance> find(final Optional<CaseStatus> status, final Optional<String> caseDefinitionId)
-			throws Exception {
-		return repository.find(status, caseDefinitionId);
+	public PageResult<CaseInstance> find(CaseFilter filters) throws Exception {
+		return repository.find(filters);
 	}
 
 	@Override

@@ -1,8 +1,9 @@
 package com.wks.caseengine.cases.instance;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.wks.caseengine.cases.definition.CaseStatus;
 
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+@Document("caseInstances")
 @Getter
 @Setter
 @ToString
@@ -21,6 +23,8 @@ import lombok.ToString;
 @AllArgsConstructor
 public class CaseInstance {
 
+	private String _id;
+	
 	private String businessKey;
 
 	private String caseDefinitionId;
@@ -35,18 +39,25 @@ public class CaseInstance {
 
 	private List<CaseDocument> documents;
 
-	// TODO improve this hard code
-	@Builder.Default
-	private CaseStatus status = CaseStatus.WIP_CASE_STATUS;
-
 	private List<CaseAttribute> attributes;
 
+	private String status;
+		
+	public CaseInstance(String _id, String businessKey, String caseDefinitionId, String stage, String status) {
+		super();
+		this._id = _id;
+		this.businessKey = businessKey;
+		this.caseDefinitionId = caseDefinitionId;
+		this.stage = stage;
+		this.status = status;
+	}
+	
 	public String getId() {
 		return businessKey;
 	}
 
 	public void setStatus(CaseStatus status) {
-		this.status = status;
+		this.status = status != null ? status.getCode() : null;
 	}
 
 	public void addDocument(final CaseDocument document) {
@@ -63,6 +74,10 @@ public class CaseInstance {
 		}
 
 		this.comments.add(comment);
+	}
+
+	public CaseStatus getStatus() {
+		return CaseStatus.fromValue(status).orElse(null);
 	}
 
 }

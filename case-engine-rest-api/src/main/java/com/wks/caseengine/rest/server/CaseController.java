@@ -1,10 +1,8 @@
 package com.wks.caseengine.rest.server;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -15,13 +13,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
 import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseDocument;
+import com.wks.caseengine.cases.instance.Attachment;
+import com.wks.caseengine.cases.instance.CaseFilter;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.cases.instance.CaseInstanceService;
 import com.wks.caseengine.cases.instance.Comment;
+import com.wks.caseengine.pagination.Cursor;
+import com.wks.caseengine.pagination.PageResult;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -34,13 +35,19 @@ public class CaseController {
 	private CaseInstanceService caseInstanceService;
 
 	@GetMapping(value = "/")
-	public List<CaseInstance> find(@RequestParam(required = false) final String status,
-			@RequestParam(required = false) final String caseDefinitionId) throws Exception {
-
-		Optional<CaseStatus> statusOption = status == null ? Optional.empty() : Optional.of(CaseStatus.valueOf(status));
-		Optional<String> caseDefIdOption = caseDefinitionId == null ? Optional.empty() : Optional.of(caseDefinitionId);
-
-		return caseInstanceService.find(statusOption, caseDefIdOption);
+	public ResponseEntity<Object> find(@RequestParam(required=false) String status,
+																	@RequestParam(required=false) String caseDefinitionId, 
+																	@RequestParam(required=false, name="before") String before,
+																	@RequestParam(required=false, name="after") String after,
+																	@RequestParam(required=false, name="sort") String sort,
+																	@RequestParam(required=false, name="limit") String limit) throws Exception {
+		Cursor cursor = Cursor.of(before, after);
+		
+		CaseFilter filter = new CaseFilter(status, caseDefinitionId, cursor, sort, limit);
+		
+		PageResult<CaseInstance> data = caseInstanceService.find(filter);
+		
+		return new ResponseEntity<>(data.toJson(), HttpStatus.OK);
 	}
 
 	@GetMapping(value = "/{businessKey}")

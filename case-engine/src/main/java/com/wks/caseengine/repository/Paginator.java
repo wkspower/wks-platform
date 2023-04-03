@@ -1,6 +1,5 @@
 package com.wks.caseengine.repository;
 
-import org.bson.json.JsonObject;
 import org.springframework.stereotype.Component;
 
 import com.mongodb.client.FindIterable;
