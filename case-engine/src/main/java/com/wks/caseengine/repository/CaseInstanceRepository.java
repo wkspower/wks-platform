@@ -2,10 +2,10 @@ package com.wks.caseengine.repository;
 
 import com.wks.caseengine.cases.instance.CaseFilter;
 import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.pagination.CursorPage;
+import com.wks.caseengine.pagination.PageResult;
 
 public interface CaseInstanceRepository extends Repository<CaseInstance> {
 
-	CursorPage<CaseInstance> find(CaseFilter filters) throws Exception;
+	PageResult<CaseInstance> find(CaseFilter filters) throws Exception;
 
 }

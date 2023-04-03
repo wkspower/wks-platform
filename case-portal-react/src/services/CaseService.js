@@ -91,10 +91,10 @@ async function filterCase(keycloak, caseDefId, status, cursor) {
     let url = `${Config.EngineUrl}/case/?`;
     url = url + (status ? `status=${status}` : '');
     url = url + (caseDefId ? `&caseDefinitionId=${caseDefId}` : '');
-    url = url + (cursor?.token ? '&token=' + cursor?.token : '');
-    url = url + (cursor?.sort ? '&sort=' + cursor?.sort : '');
-    url = url + (cursor?.dir ? '&dir=' + cursor?.dir : '');
-    url = url + (cursor?.limit ? '&limit=' + cursor?.limit : '');
+    url = url + `&before=${cursor.before || ''}`;
+    url = url + `&after=${cursor.after || ''}`;
+    url = url + `&sort=${cursor.sort || 'asc'}`;
+    url = url + `&limit=${cursor.limit || 10}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -299,7 +299,7 @@ function mapperToCase(resp) {
     const { data, paging } = resp;
 
     if (!data.length) {
-        return Promise.resolve(data);
+        return Promise.resolve({ data: [], paging: {} });
     }
 
     const toStatus = (status) => {
@@ -314,10 +314,16 @@ function mapperToCase(resp) {
 
     const toCase = data.map((element) => {
         const createdAt = element?.attributes?.find((attribute) => attribute.name === 'createdAt');
-        element.createdAt = createdAt ? createdAt.value : '11/12/2022';
+        element.createdAt = createdAt ? createdAt.value : '';
         element.statusDescription = toStatus(element.status);
         return element;
     });
 
-    return Promise.resolve({ data: toCase, paging });
+    const toPaging = {
+        cursors: paging.cursors,
+        hasPrevious: paging.hasPrevious,
+        hasNext: paging.hasNext
+    };
+
+    return Promise.resolve({ data: toCase, paging: toPaging });
 }

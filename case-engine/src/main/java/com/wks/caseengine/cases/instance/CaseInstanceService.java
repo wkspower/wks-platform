@@ -1,11 +1,11 @@
 package com.wks.caseengine.cases.instance;
 
 import com.wks.caseengine.cases.definition.CaseStatus;
-import com.wks.caseengine.pagination.CursorPage;
+import com.wks.caseengine.pagination.PageResult;
 
 public interface CaseInstanceService {
 
-	CursorPage<CaseInstance> find(CaseFilter filters) throws Exception;
+	PageResult<CaseInstance> find(CaseFilter filters) throws Exception;
 
 	CaseInstance get(final String businessKey) throws Exception;
 

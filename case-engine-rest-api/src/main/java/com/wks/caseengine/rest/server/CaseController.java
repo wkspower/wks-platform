@@ -22,7 +22,8 @@ import com.wks.caseengine.cases.instance.CaseInstanceFile;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.cases.instance.CaseInstanceService;
 import com.wks.caseengine.cases.instance.Comment;
-import com.wks.caseengine.pagination.CursorPage;
+import com.wks.caseengine.pagination.Cursor;
+import com.wks.caseengine.pagination.PageResult;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -36,14 +37,16 @@ public class CaseController {
 
 	@GetMapping(value = "/")
 	public ResponseEntity<Object> find(@RequestParam(required=false) String status,
-																	@RequestParam(required=false) String caseDefId, 
-																	@RequestParam(required=false, name="token") String token,
+																	@RequestParam(required=false) String caseDefinitionId, 
+																	@RequestParam(required=false, name="before") String before,
+																	@RequestParam(required=false, name="after") String after,
 																	@RequestParam(required=false, name="sort") String sort,
-																	@RequestParam(required=false, name="dir") String dir,
 																	@RequestParam(required=false, name="limit") String limit) throws Exception {
-		CaseFilter filter = new CaseFilter(status, caseDefId, token, sort, dir, limit);
+		Cursor cursor = Cursor.of(before, after);
 		
-		CursorPage<CaseInstance> data = caseInstanceService.find(filter);
+		CaseFilter filter = new CaseFilter(status, caseDefinitionId, cursor, sort, limit);
+		
+		PageResult<CaseInstance> data = caseInstanceService.find(filter);
 		
 		return new ResponseEntity<>(data.toJson(), HttpStatus.OK);
 	}

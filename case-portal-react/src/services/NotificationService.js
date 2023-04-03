@@ -8,7 +8,9 @@ export const NotificationService = {
 };
 
 async function getNotifications(keycloak) {
-    function truncIfAboveFiveElements(data) {
+    function truncIfAboveFiveElements(resp) {
+        const { data } = resp;
+
         if (!data || !data.length) {
             return Promise.resolve({ data: [], page: {} });
         }
@@ -60,8 +62,8 @@ async function getNotifications(keycloak) {
     }
 
     try {
-        let data = await CaseService.getAllByStatus(keycloak, 'WIP_CASE_STATUS', 5);
-        data = await truncIfAboveFiveElements(data);
+        const resp = await CaseService.getAllByStatus(keycloak, 'WIP_CASE_STATUS', 5);
+        const data = await truncIfAboveFiveElements(resp);
         return toMessage(data);
     } catch (e) {
         console.log(e);

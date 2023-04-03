@@ -16,7 +16,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseStatus;
-import com.wks.caseengine.pagination.CursorPage;
+import com.wks.caseengine.pagination.PageResult;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
 import com.wks.caseengine.repository.CaseInstanceRepository;
 import com.wks.caseengine.repository.Repository;
@@ -39,7 +39,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	private ProcessInstanceService processInstanceService;
 
 	@Override
-	public CursorPage<CaseInstance> find(CaseFilter filters) throws Exception {
+	public PageResult<CaseInstance> find(CaseFilter filters) throws Exception {
 		return repository.find(filters);
 	}
 

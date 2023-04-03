@@ -35,8 +35,8 @@ public enum CaseStatus implements Serializable {
 
 	public static Optional<CaseStatus> fromValue(String status) {
 		for (CaseStatus c : values()) {
-			if (c.code == status) {
-				return Optional.of(c);
+			if (c.code.equals(status)) {
+				return Optional.ofNullable(c);
 			}
 		}
 		

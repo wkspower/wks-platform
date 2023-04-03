@@ -1,76 +1,32 @@
 package com.wks.caseengine.db;
 
 import org.bson.json.JsonObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.stereotype.Component;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.wks.caseengine.cases.instance.CaseInstance;
 
-import lombok.extern.slf4j.Slf4j;
+public interface EngineMongoDataConnection {
 
-@Component
-@Slf4j
-public class EngineMongoDataConnection {
+	MongoTemplate getOperations();
 
-	@Autowired
-	@Qualifier("mongoTemplate")
-	private MongoTemplate byTenant;
-	
-	@Autowired
-	@Qualifier("mongoTemplateShared")
-	private MongoTemplate byShared;
-	
-	public MongoTemplate getOperations() {
-		return byTenant;
-	}
-	
-	public MongoCollection<JsonObject> getCaseDefCollection() {
-		MongoDatabase db = byTenant.getDb();
-		log.info("using database MongoDataConnection: {}", db.getName());
-		return db.getCollection("caseDefinitions", JsonObject.class);
-	}
+	MongoCollection<JsonObject> getCaseDefCollection();
 
-	public MongoCollection<JsonObject> getCaseInstCollection() {
-		MongoDatabase db = byTenant.getDb();
-		return db.getCollection("caseInstances", JsonObject.class);
-	}
-	
-	public MongoCollection<JsonObject> getFormCollection() {
-		MongoDatabase db = byTenant.getDb();
-		return db.getCollection("forms", JsonObject.class);
-	}
-	
-	public MongoCollection<JsonObject> getRecordTypeCollection() {
-		MongoDatabase db = byTenant.getDb();
-		return db.getCollection("recordType", JsonObject.class);
-	}
+	MongoCollection<JsonObject> getCaseInstCollection();
 
-	public MongoCollection<JsonObject> getCaseEmailCollection() {
-		MongoDatabase db = byTenant.getDb();
-		return db.getCollection("caseEmail", JsonObject.class);
-	}
+	MongoCollection<JsonObject> getFormCollection();
 
-	public MongoCollection<JsonObject> getOrganizationCollection() {
-		MongoDatabase db = byTenant.getDb();
-		return db.getCollection("organization", JsonObject.class);
-	}
+	MongoCollection<JsonObject> getRecordTypeCollection();
 
-	public MongoCollection<JsonObject> getBpmEngineCollection() {
-		MongoDatabase db = byShared.getDb();
-		return db.getCollection("bpmEngine", JsonObject.class);
-	}
-	
-	public MongoCollection<CaseInstance> getCaseInstanceCollection() {
-		MongoDatabase db = byTenant.getDb();
-		return db.getCollection("caseInstances", CaseInstance.class);
-	}
+	MongoCollection<JsonObject> getCaseEmailCollection();
 
-	public  MongoDatabase getDatabase() {
-		return byTenant.getDb();
-	}
+	MongoCollection<JsonObject> getOrganizationCollection();
+
+	MongoCollection<JsonObject> getBpmEngineCollection();
+
+	MongoCollection<CaseInstance> getCaseInstanceCollection();
+
+	MongoDatabase getDatabase();
 
 }

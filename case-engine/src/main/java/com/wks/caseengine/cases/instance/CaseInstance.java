@@ -58,6 +58,15 @@ public class CaseInstance {
 		this.comments = comments;
 		this.attachments = attachments;
 	}
+
+	public CaseInstance(String _id, String businessKey, String caseDefinitionId, String stage, String status) {
+		super();
+		this._id = _id;
+		this.businessKey = businessKey;
+		this.caseDefinitionId = caseDefinitionId;
+		this.stage = stage;
+		this.status = status;
+	}
 	
 	public String getId() {
 		return businessKey;
@@ -68,7 +77,7 @@ public class CaseInstance {
 	}
 	
 	public CaseStatus getStatus() {
-		return CaseStatus.fromValue(status).get();
+		return CaseStatus.fromValue(status).orElse(null);
 	}
 	
 	public void addAttachment(Attachment newAttachment) {

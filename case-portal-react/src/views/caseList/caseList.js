@@ -1,8 +1,9 @@
+import { useTheme } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { Kanban } from 'components/Kanban/kanban';
 import MainCard from 'components/MainCard';
-import React, { useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState, useContext } from 'react';
 import { CaseForm } from '../caseForm/caseForm';
 import { NewCaseForm } from '../caseForm/newCaseForm';
 import { DataGrid } from '@mui/x-data-grid';
@@ -16,10 +17,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import { CaseService } from '../../services';
 import { useSession } from 'SessionStoreContext';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import { KeyboardArrowLeft } from '@mui/icons-material';
+import { KeyboardArrowRight } from '@mui/icons-material';
+import TablePagination from '@mui/material/TablePagination';
 
 export const CaseList = ({ status, caseDefId }) => {
+    const PaginationContext = createContext();
     const { t } = useTranslation();
     const [stages, setStages] = useState([]);
     const [cases, setCases] = useState([]);
@@ -33,13 +36,14 @@ export const CaseList = ({ status, caseDefId }) => {
     const keycloak = useSession();
     const [caseDefs, setCaseDefs] = useState([]);
     const [fetching, setFetching] = useState(false);
-    const [cursor, setCursor] = useState({
-        token: '',
+    const [filter, setFilter] = useState({
         sort: '',
-        dir: '',
         limit: 10,
+        after: '',
+        before: '',
+        cursors: {},
         hasPrevious: false,
-        hasNext: true
+        hasNext: false
     });
 
     useEffect(() => {
@@ -48,11 +52,17 @@ export const CaseList = ({ status, caseDefId }) => {
         CaseService.getCaseDefinitionsById(keycloak, caseDefId)
             .then((resp) => {
                 setStages(resp.stages);
-                return CaseService.filterCase(keycloak, caseDefId, status, cursor);
+                return CaseService.filterCase(keycloak, caseDefId, status, filter);
             })
             .then((resp) => {
-                setCases(resp.data);
-                setCursor({ ...resp.paging });
+                const { data, paging } = resp;
+                setCases(data);
+                setFilter({
+                    ...filter,
+                    cursors: paging.cursors,
+                    hasPrevious: paging.hasPrevious,
+                    hasNext: paging.hasNext
+                });
             })
             .finally(() => {
                 setFetching(false);
@@ -164,17 +174,144 @@ export const CaseList = ({ status, caseDefId }) => {
         </React.Fragment>
     );
 
-    const handlePage = (order) => {
+    const handlerNextPage = () => {
         setFetching(true);
 
-        CaseService.filterCase(keycloak, caseDefId, status, { ...cursor, order })
+        const next = {
+            sort: filter.sort,
+            limit: filter.limit,
+            after: filter.cursors.after
+        };
+
+        CaseService.filterCase(keycloak, caseDefId, status, next)
             .then((resp) => {
-                setCases(resp.data);
-                setCursor(resp.paging);
+                const { data, paging } = resp;
+
+                setCases(data);
+                setFilter({
+                    ...filter,
+                    cursors: paging.cursors,
+                    hasPrevious: paging.hasPrevious,
+                    hasNext: paging.hasNext
+                });
             })
             .finally(() => {
                 setFetching(false);
             });
+    };
+
+    const handlerPriorPage = () => {
+        setFetching(true);
+
+        const prior = {
+            sort: filter.sort,
+            limit: filter.limit,
+            before: filter.cursors.before
+        };
+
+        CaseService.filterCase(keycloak, caseDefId, status, prior)
+            .then((resp) => {
+                const { data, paging } = resp;
+
+                setCases(data);
+                setFilter({
+                    ...filter,
+                    cursors: paging.cursors,
+                    hasPrevious: paging.hasPrevious,
+                    hasNext: paging.hasNext
+                });
+            })
+            .finally(() => {
+                setFetching(false);
+            });
+    };
+
+    function TablePaginationActions(props) {
+        const theme = useTheme();
+        const filter = useContext(PaginationContext);
+        const { onPageChange } = props;
+
+        const handleBackButtonClick = (event) => {
+            onPageChange(event, 'back');
+        };
+
+        const handleNextButtonClick = (event) => {
+            onPageChange(event, 'next');
+        };
+
+        const { hasPrevious, hasNext } = filter;
+
+        return (
+            <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+                <IconButton
+                    onClick={handleBackButtonClick}
+                    disabled={!hasPrevious}
+                    aria-label="previous page"
+                >
+                    {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+                </IconButton>
+                <IconButton
+                    onClick={handleNextButtonClick}
+                    disabled={!hasNext}
+                    aria-label="next page"
+                >
+                    {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+                </IconButton>
+            </Box>
+        );
+    }
+
+    const CustomPagination = () => {
+        return (
+            <PaginationContext.Provider value={filter}>
+                <TablePagination
+                    component="div"
+                    count={-1}
+                    page={0}
+                    labelRowsPerPage={<div style={{ paddingTop: 15 }}>Rows per page:</div>}
+                    rowsPerPage={filter.limit}
+                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    getItemAriaLabel={(type) => ''}
+                    labelDisplayedRows={() => ''}
+                    onPageChange={(e, type) => {
+                        const action = {
+                            next: handlerNextPage,
+                            back: handlerPriorPage
+                        };
+                        action[type]();
+                    }}
+                    onRowsPerPageChange={(e) => {
+                        setFetching(true);
+
+                        CaseService.filterCase(keycloak, caseDefId, status, {
+                            limit: e.target.value
+                        })
+                            .then((resp) => {
+                                const { data, paging } = resp;
+
+                                setCases(data);
+                                setFilter({
+                                    ...filter,
+                                    limit: e.target.value,
+                                    cursors: paging.cursors,
+                                    hasPrevious: paging.hasPrevious,
+                                    hasNext: paging.hasNext
+                                });
+                            })
+                            .finally(() => {
+                                setFetching(false);
+                            });
+                    }}
+                    SelectProps={{
+                        inputProps: {
+                            'aria-label': 'rows per page'
+                        },
+                        native: true
+                    }}
+                    ActionsComponent={TablePaginationActions}
+                />
+            </PaginationContext.Provider>
+        );
     };
 
     return (
@@ -209,7 +346,7 @@ export const CaseList = ({ status, caseDefId }) => {
                         <div>
                             <DataGrid
                                 sx={{
-                                    height: 650,
+                                    height: 500,
                                     width: '100%',
                                     backgroundColor: '#ffffff',
                                     mt: 1
@@ -218,18 +355,8 @@ export const CaseList = ({ status, caseDefId }) => {
                                 columns={makeColumns()}
                                 getRowId={(row) => row.businessKey}
                                 loading={fetching}
-                                hideFooterPagination={true}
+                                components={{ Pagination: CustomPagination }}
                             />
-                            <IconButton
-                                onClick={() => handlePage(2)}
-                                disabled={!cursor.hasPrevious}
-                            >
-                                <KeyboardArrowLeftIcon />
-                            </IconButton>
-
-                            <IconButton onClick={() => handlePage(1)} disabled={!cursor.hasNext}>
-                                <KeyboardArrowRightIcon />
-                            </IconButton>
                         </div>
                     )}
                     {view === 'kanban' && (
