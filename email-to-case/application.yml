@@ -19,6 +19,7 @@ camunda7.rest.oauth.token.clientId:
 camunda7.rest.oauth.token.clientSecret:
 camunda7.rest.oauth.token.grantType:
 
+camunda7.rest.base-url: ${CAMUNDA_BASE_URL:http://localhost:8080/engine-rest}
 camunda7.rest.deployment.url: /deployment
 camunda7.rest.processdefinition.url: /process-definition
 camunda7.rest.processinstance.url: /process-instance

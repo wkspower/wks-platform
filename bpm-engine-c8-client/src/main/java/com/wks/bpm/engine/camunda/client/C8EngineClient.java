@@ -79,12 +79,6 @@ public class C8EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public ProcessInstance startProcess(String processDefinitionKey, String businessKey, JsonArray caseAttributes,
-			BpmEngine bpmEngine, String tenantId) {
-		return startProcess(processDefinitionKey, businessKey, caseAttributes, bpmEngine);
-	}
-
-	@Override
 	public void deleteProcessInstance(final String processInstanceId, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 	}
