@@ -45,7 +45,7 @@ public class CaseStageUpdateHandler implements ExternalTaskHandler {
 			log.error("Error updating case stage with business key: {} and new stage: {}", externalTask.getBusinessKey(),  externalTask.getVariable("stage"));
 			errorHandler.handle("Error updating case stage", externalTaskService, externalTask, e);
 		} finally {
-			log.info("Finishing External Task Handler activity '{}' for tenant '{}'", externalTask.getTenantId(), externalTask.getActivityId());
+			log.info("Finishing External Task Handler activity '{}' for tenant '{}'", externalTask.getActivityId(), externalTask.getTenantId());
 			holder.clear();
 		}
 	}

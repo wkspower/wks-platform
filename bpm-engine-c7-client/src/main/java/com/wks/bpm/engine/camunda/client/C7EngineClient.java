@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.wks.api.security.context.SecurityContextTenantHolder;
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.camunda.http.request.C7HttpRequestFactory;
 import com.wks.bpm.engine.client.BpmEngineClient;
@@ -41,6 +42,9 @@ public class C7EngineClient implements BpmEngineClient {
 
 	@Autowired
 	private C7HttpRequestFactory camundaHttpRequestFactory;
+	
+	@Autowired
+	private SecurityContextTenantHolder tenantHolder;
 
 	@Override
 	public void deploy(final BpmEngine bpmEngine, final String fileName, final String bpmnXml) {
@@ -120,31 +124,13 @@ public class C7EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonArray caseAttributes, final BpmEngine bpmEngine) {
-
-		JsonObject processVariables = variablesMapper.map(caseAttributes);
-
-		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey,
-				businessKey, processVariables, bpmEngine);
-
-		RestTemplate restTemplate = new RestTemplate();
-		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-		messageConverters.add(new GsonHttpMessageConverter());
-		restTemplate.setMessageConverters(messageConverters);
-
-		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
-				.getBody();
-	}
-
-	@Override
 	public ProcessInstance startProcess(String processDefinitionKey, String businessKey, JsonArray caseAttributes,
-			BpmEngine bpmEngine, String tenantId) {
+			BpmEngine bpmEngine) {
 
 		JsonObject processVariables = variablesMapper.map(caseAttributes);
 
 		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey,
-				businessKey, processVariables, bpmEngine, tenantId);
+				businessKey, processVariables, bpmEngine, tenantHolder.getTenantId().get());
 
 		RestTemplate restTemplate = new RestTemplate();
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();

@@ -30,9 +30,6 @@ public interface BpmEngineClient {
 
 	String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) throws Exception;
 
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonArray caseAttributes, final BpmEngine bpmEngine, String tenantId);
-
 	ProcessInstance startProcess(final String processDefinitionKey, final BpmEngine bpmEngine);
 
 	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,

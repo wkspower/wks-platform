@@ -36,6 +36,12 @@
 			<artifactId>gson</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.wks</groupId>
+			<artifactId>api-security</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.wks</groupId>

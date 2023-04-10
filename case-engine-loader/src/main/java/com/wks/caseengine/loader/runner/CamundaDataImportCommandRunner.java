@@ -46,9 +46,9 @@ public class CamundaDataImportCommandRunner implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 		log.info("Starting upload model to camunda....");
 
-		importData();
-
 		createTenant();
+
+		importData();
 
 		log.info("Finish upload model to camunda");
 	}
@@ -89,6 +89,7 @@ public class CamundaDataImportCommandRunner implements CommandLineRunner {
 
 				MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
 				multipartBodyBuilder.part("upload", new FileSystemResource(file));
+				multipartBodyBuilder.part("tenant-id", tenantId);
 
 				MultiValueMap<String, HttpEntity<?>> multipartBody = multipartBodyBuilder.build();
 
