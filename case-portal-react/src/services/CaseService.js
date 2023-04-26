@@ -257,7 +257,7 @@ function mapperToCase(resp) {
             ARCHIVED_CASE_STATUS: i18n.t('general.case.status.archived')
         };
 
-        return mapper[status] || 'Indefinido';
+        return mapper[status] || '-';
     };
 
     const toCase = data.map((element) => {
