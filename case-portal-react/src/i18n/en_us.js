@@ -53,7 +53,7 @@ const defs = {
                 }
             },
             action: {
-                newcase: 'New Case'
+                newcase: 'Create'
             }
         },
         caseform: {
