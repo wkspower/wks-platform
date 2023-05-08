@@ -1,6 +1,7 @@
 package com.wks.caseengine.cases.definition;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,11 @@ public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 	@Override
 	public List<CaseDefinition> find() throws Exception {
 		return repository.find();
+	}
+
+	@Override
+	public List<CaseDefinition> find(final Optional<Boolean> deployed) throws Exception {
+		return repository.find(deployed);
 	}
 
 	@Override

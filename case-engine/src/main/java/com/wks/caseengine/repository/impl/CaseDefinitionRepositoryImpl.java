@@ -31,6 +31,19 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	}
 
 	@Override
+	public List<CaseDefinition> find(final Optional<Boolean> deployed) throws Exception {
+
+		if(deployed.isEmpty()){
+			return find();
+		}
+
+		Gson gson = new Gson();
+		Bson filter = Filters.eq("deployed", true);
+		return getCollection().find(filter).map(o -> gson.fromJson(o.getJson(), CaseDefinition.class))
+				.into(new ArrayList<>());
+	}
+
+	@Override
 	public CaseDefinition get(final String caseDefId) throws Exception {
 		Bson filter = Filters.eq("id", caseDefId);
 		Gson gson = new Gson();
@@ -55,6 +68,7 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 		Bson update = Updates.combine(Updates.set("stages", caseDefinition.getStages()),
 				Updates.set("formKey", caseDefinition.getFormKey()), Updates.set("name", caseDefinition.getName()),
 				Updates.set("stagesLifecycleProcessKey", caseDefinition.getStagesLifecycleProcessKey()),
+				Updates.set("deployed", caseDefinition.getDeployed()),
 				Updates.set("kanbanConfig", (new JsonObject(new Gson().toJson(caseDefinition.getKanbanConfig() )))));
 
 		getCollection().updateOne(filter, update);

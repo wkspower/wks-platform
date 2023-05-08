@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,6 +30,9 @@ public class CaseDefinition {
 
 	private List<CaseStage> stages;
 
-	private JsonObject kanbanConfig;
+	@Default
+	private JsonObject kanbanConfig = new JsonObject();
+
+	private Boolean deployed;
 
 }

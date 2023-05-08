@@ -38,7 +38,7 @@ async function getAllByStatus(keycloak, status, limit) {
 }
 
 async function getCaseDefinitions(keycloak) {
-    const url = `${Config.CaseEngineUrl}/case-definition/`;
+    const url = `${Config.CaseEngineUrl}/case-definition/?deployed=true`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
