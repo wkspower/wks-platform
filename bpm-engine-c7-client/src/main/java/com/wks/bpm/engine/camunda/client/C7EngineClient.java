@@ -107,7 +107,7 @@ public class C7EngineClient implements BpmEngineClient {
 	public ProcessInstance startProcess(final String processDefinitionKey, final BpmEngine bpmEngine) {
 
 		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey,
-				bpmEngine);
+				bpmEngine, tenantHolder.getTenantId().get());
 
 		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
 				.getBody();
@@ -117,7 +117,7 @@ public class C7EngineClient implements BpmEngineClient {
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
 			final BpmEngine bpmEngine) {
 		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey,
-				businessKey, bpmEngine);
+				businessKey, bpmEngine, tenantHolder.getTenantId().get());
 
 		return restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), ProcessInstance.class)
 				.getBody();
