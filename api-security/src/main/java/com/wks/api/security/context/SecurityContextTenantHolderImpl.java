@@ -2,26 +2,23 @@ package com.wks.api.security.context;
 
 import java.util.Optional;
 
-import org.springframework.stereotype.Component;
-
-@Component
 public final class SecurityContextTenantHolderImpl implements SecurityContextTenantHolder {
 
-	private ThreadLocal<String> tenantId = new ThreadLocal<>();
+	private Optional<String> tenantId = Optional.empty();
 
-    @Override
+	@Override
 	public Optional<String> getTenantId() {
-        return Optional.of(tenantId.get());
-    }
+		return Optional.of(tenantId.get());
+	}
 
-    @Override
+	@Override
 	public void setTenantId(final String tenantId) {
-        this.tenantId.set(tenantId);
-    }
+		this.tenantId = Optional.of(tenantId);
+	}
 
-    @Override
+	@Override
 	public void clear() {
-        tenantId.remove();
-    }
+		tenantId = null;
+	}
 
 }

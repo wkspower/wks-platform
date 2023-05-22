@@ -106,25 +106,32 @@ public class C7HttpRequestFactory {
 	}
 
 	public WksHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey,
-			final BpmEngine bpmEngine) {
-		return new C7HttpPostRequest(
-				extractUrl(bpmEngine) + processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
-				new HttpEntity<>(httpHeadersFactory.json()));
+			final BpmEngine bpmEngine, final String tenantId) {
+		// TODO refactor it - Payload Creator
+		ProcessInstance processInstance = ProcessInstance.builder().tenantId(tenantId).build();
+
+		String root = extractUrl(bpmEngine) + processDefinitionUrl;
+		String url = String.format("%s/key/%s/tenant-id/%s/start", root, processDefinitionKey, tenantId);
+
+		return new C7HttpPostRequest(url,
+				new HttpEntity<>(processInstance, httpHeadersFactory.json()));
 	}
 
 	public WksHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey, final String businessKey,
-			final BpmEngine bpmEngine) {
+			final BpmEngine bpmEngine, String tenantId) {
 		// TODO refactor it - Payload Creator
 		ProcessInstance processInstance = ProcessInstance.builder().businessKey(businessKey).caseInstanceId(businessKey)
+				.tenantId(tenantId)
 				.build();
 
-		return new C7HttpPostRequest(
-				extractUrl(bpmEngine) + processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
+		String root = extractUrl(bpmEngine) + processDefinitionUrl;
+		String url = String.format("%s/key/%s/tenant-id/%s/start", root, processDefinitionKey, tenantId);
+		return new C7HttpPostRequest(url,
 				new HttpEntity<>(processInstance, httpHeadersFactory.json()));
 	}
 
 	public WksHttpRequest getProcessInstanceCreateRequest(String processDefinitionKey, String businessKey,
-			JsonObject variables, BpmEngine bpmEngine, String tenantId) {
+			JsonObject variables, BpmEngine bpmEngine, final String tenantId) {
 		ProcessInstance processInstance = ProcessInstance.builder()
 				.businessKey(businessKey)
 				.caseInstanceId(businessKey)
@@ -134,23 +141,9 @@ public class C7HttpRequestFactory {
 		
 		String root = extractUrl(bpmEngine) + processDefinitionUrl;
 		String url = String.format("%s/key/%s/tenant-id/%s/start",  root, processDefinitionKey, tenantId);
-		System.out.println(url);
 		return new C7HttpPostRequest(url, new HttpEntity<>(processInstance, httpHeadersFactory.json()));
 	}
 	
-	public WksHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey, final String businessKey,
-			final JsonObject variables, final BpmEngine bpmEngine) {
-		ProcessInstance processInstance = ProcessInstance.builder()
-				.businessKey(businessKey)
-				.caseInstanceId(businessKey)
-				.variables(variables)
-				.build();
-
-		return new C7HttpPostRequest(
-				extractUrl(bpmEngine) + processDefinitionUrl + "/key/" + processDefinitionKey + "/start",
-				new HttpEntity<>(processInstance, httpHeadersFactory.json()));
-	}
-
 	public WksHttpRequest getProcessInstanceDeleteRequest(String processInstanceId, final BpmEngine bpmEngine) {
 		return new C7HttpDeleteRequest(extractUrl(bpmEngine) + processInstanceUrl + "/" + processInstanceId,
 				new HttpEntity<>(httpHeadersFactory.json()));
