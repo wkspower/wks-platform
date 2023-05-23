@@ -52,7 +52,8 @@ public class C8EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public ProcessInstance[] findProcessInstances(final Optional<String> businessKey, final BpmEngine bpmEngine) {
+	public ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
+			final Optional<String> businessKey, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return new ProcessInstance[] {};
 	}
@@ -117,7 +118,8 @@ public class C8EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public void sendMessage(final ProcessMessage processMesage, final BpmEngine bpmEngine) {
+	public void sendMessage(final ProcessMessage processMesage, final Optional<JsonArray> variables,
+			final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 	}
 

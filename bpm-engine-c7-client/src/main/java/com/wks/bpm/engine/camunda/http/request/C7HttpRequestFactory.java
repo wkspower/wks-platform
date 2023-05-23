@@ -77,7 +77,8 @@ public class C7HttpRequestFactory {
 	//// Process Definition ////
 
 	public WksHttpRequest getProcessDefinitionListRequest(final BpmEngine bpmEngine) {
-		return new C7HttpGetRequest<ProcessDefinition>(extractUrl(bpmEngine) + processDefinitionUrl + "?latestVersion=true",
+		return new C7HttpGetRequest<ProcessDefinition>(
+				extractUrl(bpmEngine) + processDefinitionUrl + "?latestVersion=true",
 				new HttpEntity<>(httpHeadersFactory.json()));
 	}
 
@@ -97,53 +98,53 @@ public class C7HttpRequestFactory {
 
 	//// Process Instance ////
 
-	public WksHttpRequest getProcessInstanceListRequest(final Optional<String> businessKey, final BpmEngine bpmEngine) {
+	public WksHttpRequest getProcessInstanceListRequest(final Optional<String> processDefinitionKey,
+			final Optional<String> businessKey, final BpmEngine bpmEngine) {
+
 		StringBuilder url = new StringBuilder().append(extractUrl(bpmEngine) + processInstanceUrl);
-		if (businessKey.isPresent()) {
-			url.append("?businessKey=" + businessKey.get());
+		url.append("?");
+		if (processDefinitionKey.isPresent()) {
+			url.append("&processDefinitionKey=" + processDefinitionKey.get());
 		}
+		if (businessKey.isPresent()) {
+			url.append("&businessKey=" + businessKey.get());
+		}
+
 		return new C7HttpGetRequest<ProcessInstance>(url.toString(), new HttpEntity<>(httpHeadersFactory.json()));
 	}
 
-	public WksHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey,
-			final BpmEngine bpmEngine, final String tenantId) {
+	public WksHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey, final BpmEngine bpmEngine,
+			final String tenantId) {
 		// TODO refactor it - Payload Creator
 		ProcessInstance processInstance = ProcessInstance.builder().tenantId(tenantId).build();
 
 		String root = extractUrl(bpmEngine) + processDefinitionUrl;
 		String url = String.format("%s/key/%s/tenant-id/%s/start", root, processDefinitionKey, tenantId);
 
-		return new C7HttpPostRequest(url,
-				new HttpEntity<>(processInstance, httpHeadersFactory.json()));
+		return new C7HttpPostRequest(url, new HttpEntity<>(processInstance, httpHeadersFactory.json()));
 	}
 
 	public WksHttpRequest getProcessInstanceCreateRequest(final String processDefinitionKey, final String businessKey,
 			final BpmEngine bpmEngine, String tenantId) {
 		// TODO refactor it - Payload Creator
 		ProcessInstance processInstance = ProcessInstance.builder().businessKey(businessKey).caseInstanceId(businessKey)
-				.tenantId(tenantId)
-				.build();
+				.tenantId(tenantId).build();
 
 		String root = extractUrl(bpmEngine) + processDefinitionUrl;
 		String url = String.format("%s/key/%s/tenant-id/%s/start", root, processDefinitionKey, tenantId);
-		return new C7HttpPostRequest(url,
-				new HttpEntity<>(processInstance, httpHeadersFactory.json()));
+		return new C7HttpPostRequest(url, new HttpEntity<>(processInstance, httpHeadersFactory.json()));
 	}
 
 	public WksHttpRequest getProcessInstanceCreateRequest(String processDefinitionKey, String businessKey,
 			JsonObject variables, BpmEngine bpmEngine, final String tenantId) {
-		ProcessInstance processInstance = ProcessInstance.builder()
-				.businessKey(businessKey)
-				.caseInstanceId(businessKey)
-				.variables(variables)
-				.tenantId(tenantId)
-				.build();
-		
+		ProcessInstance processInstance = ProcessInstance.builder().businessKey(businessKey).caseInstanceId(businessKey)
+				.variables(variables).tenantId(tenantId).build();
+
 		String root = extractUrl(bpmEngine) + processDefinitionUrl;
-		String url = String.format("%s/key/%s/tenant-id/%s/start",  root, processDefinitionKey, tenantId);
+		String url = String.format("%s/key/%s/tenant-id/%s/start", root, processDefinitionKey, tenantId);
 		return new C7HttpPostRequest(url, new HttpEntity<>(processInstance, httpHeadersFactory.json()));
 	}
-	
+
 	public WksHttpRequest getProcessInstanceDeleteRequest(String processInstanceId, final BpmEngine bpmEngine) {
 		return new C7HttpDeleteRequest(extractUrl(bpmEngine) + processInstanceUrl + "/" + processInstanceId,
 				new HttpEntity<>(httpHeadersFactory.json()));
@@ -199,7 +200,13 @@ public class C7HttpRequestFactory {
 	}
 
 	/// Message ////
-	public WksHttpRequest getMessageSendRequest(final ProcessMessage processMessage, final BpmEngine bpmEngine) {
+	public WksHttpRequest getMessageSendRequest(final ProcessMessage processMessage,
+			final Optional<JsonObject> variables, final BpmEngine bpmEngine) {
+		
+		if(variables.isPresent()){
+			processMessage.setProcessVariables(variables.get());	
+		}
+
 		return new C7HttpPostRequest(extractUrl(bpmEngine) + correlateUrl,
 				new HttpEntity<>(processMessage, httpHeadersFactory.json()));
 	}

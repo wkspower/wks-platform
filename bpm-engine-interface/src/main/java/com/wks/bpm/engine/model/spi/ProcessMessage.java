@@ -1,5 +1,7 @@
 package com.wks.bpm.engine.model.spi;
 
+import com.google.gson.JsonObject;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,7 +22,12 @@ import lombok.ToString;
 @ToString
 public class ProcessMessage {
 
+	private String tenantId;
+	
 	private String messageName;
 	private String businessKey;
+	
+	private JsonObject processVariables;
+
 
 }

@@ -27,7 +27,8 @@ public interface BpmEngineClientFacade {
 
 	String getProcessDefinitionXMLByKey(final String processDefinitionKey) throws Exception;
 
-	ProcessInstance[] findProcessInstances(final Optional<String> businessKey);
+	ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
+			final Optional<String> businessKey);
 
 	ProcessInstance startProcess(final String processDefinitionKey);
 
@@ -50,6 +51,6 @@ public interface BpmEngineClientFacade {
 
 	String findVariables(String processInstanceId);
 
-	void sendMessage(ProcessMessage processMesage);
+	void sendMessage(ProcessMessage processMesage, Optional<JsonArray> variables);
 
 }

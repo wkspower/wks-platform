@@ -24,7 +24,8 @@ public interface BpmEngineClient {
 
 	ProcessDefinition[] findProcessDefinitions(final BpmEngine bpmEngine);
 
-	ProcessInstance[] findProcessInstances(final Optional<String> businessKey, final BpmEngine bpmEngine);
+	ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
+			final Optional<String> businessKey, final BpmEngine bpmEngine);
 
 	String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) throws Exception;
 
@@ -53,6 +54,7 @@ public interface BpmEngineClient {
 
 	String findVariables(final String processInstanceId, final BpmEngine bpmEngine);
 
-	void sendMessage(final ProcessMessage processMesage, final BpmEngine bpmEngine);
+	void sendMessage(final ProcessMessage processMesage, final Optional<JsonArray> variables,
+			final BpmEngine bpmEngine);
 
 }
