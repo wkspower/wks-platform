@@ -1,5 +1,7 @@
 package com.wks.caseengine.rest.server;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +23,7 @@ public class MessageController {
 
 	@PostMapping(value = "/")
 	public void save(@RequestBody final ProcessMessage processMessage) throws Exception {
-		messageSenderService.sendMessage(processMessage);
+		messageSenderService.sendMessage(processMessage, Optional.empty());
 	}
 
 }

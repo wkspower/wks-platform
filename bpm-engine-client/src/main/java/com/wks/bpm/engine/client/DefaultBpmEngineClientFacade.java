@@ -55,8 +55,9 @@ public class DefaultBpmEngineClientFacade implements BpmEngineClientFacade {
 		return getEngineClient().getProcessDefinitionXMLByKey(processDefinitionKey, getBpmEngine());
 	}
 
-	public ProcessInstance[] findProcessInstances(final Optional<String> businessKey) {
-		return getEngineClient().findProcessInstances(businessKey, getBpmEngine());
+	public ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
+			final Optional<String> businessKey) {
+		return getEngineClient().findProcessInstances(processDefinitionKey, businessKey, getBpmEngine());
 	}
 
 	public ProcessInstance startProcess(final String processDefinitionKey) {
@@ -100,8 +101,8 @@ public class DefaultBpmEngineClientFacade implements BpmEngineClientFacade {
 		return getEngineClient().findVariables(processInstanceId, getBpmEngine());
 	}
 
-	public void sendMessage(ProcessMessage processMesage) {
-		getEngineClient().sendMessage(processMesage, getBpmEngine());
+	public void sendMessage(ProcessMessage processMesage, Optional<JsonArray> variables) {
+		getEngineClient().sendMessage(processMesage, variables, getBpmEngine());
 	}
 
 }

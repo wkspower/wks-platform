@@ -54,8 +54,8 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	}
 
 	@Override
-	public List<ProcessInstance> find(Optional<String> businessKey) throws Exception {
-		return Arrays.asList(processEngineClient.findProcessInstances(businessKey));
+	public List<ProcessInstance> find(Optional<String> processDefinitionKey, Optional<String> businessKey) throws Exception {
+		return Arrays.asList(processEngineClient.findProcessInstances(processDefinitionKey, businessKey));
 	}
 
 	@Override
