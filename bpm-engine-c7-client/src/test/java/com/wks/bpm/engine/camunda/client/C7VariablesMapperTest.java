@@ -16,14 +16,13 @@ public class C7VariablesMapperTest {
 	public void testMap() {
 
 		// given
-		String caseAttributes = "[" + "{\"name\": \"when\",\"value\": \"01/01/1990\"},"
-				+ "{\"name\": \"where\",\"value\": \"Toronto\"}]";
+		String caseAttributes = "[{\"name\": \"when\",\"value\": \"01/01/1990\",\"type\": \"String\"},{\"name\": \"where\",\"value\": \"Toronto\",\"type\": \"String\"}]";
 
 		// when
 		JsonObject processVariables = c7VariablesMapper.map(new Gson().fromJson(caseAttributes, JsonArray.class));
 
-		assertEquals("{\"value\":\"01/01/1990\",\"type\":\"String\"}", String.valueOf(processVariables.get("when")));
-		assertEquals("{\"value\":\"Toronto\",\"type\":\"String\"}", String.valueOf(processVariables.get("where")));
+		assertEquals("{\"value\":\"\\\"01/01/1990\\\"\",\"type\":\"String\"}", String.valueOf(processVariables.get("when")));
+		assertEquals("{\"value\":\"\\\"Toronto\\\"\",\"type\":\"String\"}", String.valueOf(processVariables.get("where")));
 	}
 
 }
