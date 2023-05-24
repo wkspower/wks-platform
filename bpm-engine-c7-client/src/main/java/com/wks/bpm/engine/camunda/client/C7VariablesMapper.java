@@ -16,8 +16,8 @@ public class C7VariablesMapper implements VariablesMapper {
 
 		caseAttributes.forEach(caseAttribute -> {
 			JsonObject valueObject = new JsonObject();
-			valueObject.add("value", caseAttribute.getAsJsonObject().get("value"));
-			valueObject.addProperty("type", "String");
+			valueObject.addProperty("value", caseAttribute.getAsJsonObject().get("value").toString());
+			valueObject.addProperty("type", caseAttribute.getAsJsonObject().get("type").getAsString());
 			processVariables.add(caseAttribute.getAsJsonObject().get("name").getAsString(), valueObject);
 
 		});

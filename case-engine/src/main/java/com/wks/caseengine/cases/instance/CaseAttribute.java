@@ -15,5 +15,6 @@ public class CaseAttribute {
 
 	private String name;
 	private String value;
+	private String type;
 
 }

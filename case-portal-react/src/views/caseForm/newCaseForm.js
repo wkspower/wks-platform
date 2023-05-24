@@ -52,7 +52,8 @@ export const NewCaseForm = ({ open, handleClose, caseDefId, setLastCreatedCase }
                 value:
                     typeof formData.data[key] !== 'object'
                         ? formData.data[key]
-                        : JSON.stringify(formData.data[key])
+                        : JSON.stringify(formData.data[key]),
+                type: 'String'
             });
         });
 
