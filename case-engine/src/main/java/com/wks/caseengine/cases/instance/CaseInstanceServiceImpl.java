@@ -49,7 +49,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	public CaseInstance create(CaseInstance caseInstance) throws Exception {
 
 		caseInstance.getAttributes()
-				.add(new CaseAttribute("createdAt", DateUtils.formatDate(new Date(), "dd/MM/yyyy")));
+				.add(new CaseAttribute("createdAt", DateUtils.formatDate(new Date(), "dd/MM/yyyy"), CaseAttributeType.STRING.getValue()));
 
 		CaseDefinition caseDefinition = caseDefRepository.get(caseInstance.getCaseDefinitionId());
 
