@@ -1,0 +1,2666 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- description: Generated server url
+  url: http://127.0.0.1:8081
+tags:
+- description: Health check endpoint
+  name: Healtcheck
+- description: Access information about variables in Camunda
+  name: Variables
+- description: Send messages to processes
+  name: Message
+- description: Access information about processes instances in Camunda
+  name: Process Instance
+- description: Access information about processes definitions in Camunda
+  name: Process Definition
+- description: A task is a unit of work for a process
+  name: Task
+- description: User forms definitions with fields and attributes for cases
+  name: Form
+- description: "A Case Definition is the 'template' for the creation of new Cases\
+    \ Instances. If defines which attributes, stages and processes definitions will\
+    \ be used by Cases Instances created from it"
+  name: Case Definition
+- description: "A Case Instance is created based in a Case Definition and is the 'Digital\
+    \ Folder' for related information, documents, communication and processes for\
+    \ case"
+  name: Case Instance
+paths:
+  /task/{taskId}/unclaim:
+    post:
+      operationId: unclaim
+      parameters:
+      - explode: false
+        in: path
+        name: taskId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Task
+      x-accepts: application/json
+  /task/{taskId}/complete:
+    post:
+      operationId: complete
+      parameters:
+      - explode: false
+        in: path
+        name: taskId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Task
+      x-content-type: application/json
+      x-accepts: application/json
+  /task/{taskId}/claim/{taskAssignee}:
+    post:
+      operationId: claim
+      parameters:
+      - explode: false
+        in: path
+        name: taskId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: taskAssignee
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Task
+      x-accepts: application/json
+  /record/{recordTypeId}:
+    get:
+      operationId: find_1
+      parameters:
+      - explode: false
+        in: path
+        name: recordTypeId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                items:
+                  $ref: '#/components/schemas/JsonObject'
+                type: array
+          description: OK
+      tags:
+      - record-controller
+      x-accepts: '*/*'
+    post:
+      operationId: save
+      parameters:
+      - explode: false
+        in: path
+        name: recordTypeId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonObject'
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - record-controller
+      x-content-type: application/json
+      x-accepts: application/json
+  /record-type/:
+    get:
+      operationId: find_2
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                items:
+                  $ref: '#/components/schemas/RecordType'
+                type: array
+          description: OK
+      tags:
+      - record-type-controller
+      x-accepts: '*/*'
+    post:
+      operationId: save_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordType'
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - record-type-controller
+      x-content-type: application/json
+      x-accepts: application/json
+  /message/:
+    post:
+      operationId: save_2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessMessage'
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Message
+      x-content-type: application/json
+      x-accepts: application/json
+  /import/:
+    post:
+      operationId: importData
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonObject'
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - data-import-controller
+      x-content-type: application/json
+      x-accepts: application/json
+  /form/:
+    get:
+      operationId: find_5
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                items:
+                  $ref: '#/components/schemas/Form'
+                type: array
+          description: OK
+      tags:
+      - Form
+      x-accepts: '*/*'
+    post:
+      operationId: save_3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Form'
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Form
+      x-content-type: application/json
+      x-accepts: application/json
+  /deployment/:
+    post:
+      operationId: deploy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - deployment-controller
+      x-content-type: application/json
+      x-accepts: application/json
+  /case/{businessKey}/document:
+    post:
+      operationId: saveDocument
+      parameters:
+      - explode: false
+        in: path
+        name: businessKey
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseDocument'
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Case Instance
+      x-content-type: application/json
+      x-accepts: application/json
+  /case/{businessKey}/comment:
+    post:
+      operationId: saveComment
+      parameters:
+      - explode: false
+        in: path
+        name: businessKey
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Case Instance
+      x-content-type: application/json
+      x-accepts: application/json
+  /case/:
+    get:
+      operationId: find_6
+      parameters:
+      - explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: caseDefinitionId
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: before
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: after
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: object
+          description: OK
+      tags:
+      - Case Instance
+      x-accepts: '*/*'
+    post:
+      operationId: save_4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseInstance'
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CaseInstance'
+          description: OK
+      tags:
+      - Case Instance
+      x-content-type: application/json
+      x-accepts: '*/*'
+  /case-definition/:
+    get:
+      operationId: find_7
+      parameters:
+      - explode: true
+        in: query
+        name: deployed
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                items:
+                  $ref: '#/components/schemas/CaseDefinition'
+                type: array
+          description: OK
+      tags:
+      - Case Definition
+      x-accepts: '*/*'
+    post:
+      operationId: save_5
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseDefinition'
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CaseDefinition'
+          description: OK
+      tags:
+      - Case Definition
+      x-content-type: application/json
+      x-accepts: '*/*'
+  /record/{recordTypeId}/{id}:
+    delete:
+      operationId: delete
+      parameters:
+      - explode: false
+        in: path
+        name: recordTypeId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: OK
+      tags:
+      - record-controller
+      x-accepts: application/json
+    get:
+      operationId: get
+      parameters:
+      - explode: false
+        in: path
+        name: recordTypeId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/JsonObject'
+          description: OK
+      tags:
+      - record-controller
+      x-accepts: '*/*'
+    patch:
+      operationId: update
+      parameters:
+      - explode: false
+        in: path
+        name: recordTypeId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonObject'
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - record-controller
+      x-content-type: application/json
+      x-accepts: application/json
+  /record-type/{id}:
+    delete:
+      operationId: delete_1
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: OK
+      tags:
+      - record-type-controller
+      x-accepts: application/json
+    get:
+      operationId: get_1
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RecordType'
+          description: OK
+      tags:
+      - record-type-controller
+      x-accepts: '*/*'
+    patch:
+      operationId: update_1
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordType'
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - record-type-controller
+      x-content-type: application/json
+      x-accepts: application/json
+  /form/{formKey}:
+    delete:
+      operationId: delete_2
+      parameters:
+      - explode: false
+        in: path
+        name: formKey
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Form
+      x-accepts: application/json
+    get:
+      operationId: get_4
+      parameters:
+      - explode: false
+        in: path
+        name: formKey
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Form'
+          description: OK
+      tags:
+      - Form
+      x-accepts: '*/*'
+    patch:
+      operationId: update_2
+      parameters:
+      - explode: false
+        in: path
+        name: formKey
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Form'
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Form
+      x-content-type: application/json
+      x-accepts: application/json
+  /case/{businessKey}:
+    delete:
+      operationId: delete_3
+      parameters:
+      - explode: false
+        in: path
+        name: businessKey
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Case Instance
+      x-accepts: application/json
+    get:
+      operationId: get_5
+      parameters:
+      - explode: false
+        in: path
+        name: businessKey
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CaseInstance'
+          description: OK
+      tags:
+      - Case Instance
+      x-accepts: '*/*'
+    patch:
+      operationId: update_3
+      parameters:
+      - explode: false
+        in: path
+        name: businessKey
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseInstance'
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Case Instance
+      x-content-type: application/json
+      x-accepts: application/json
+  /case/{businessKey}/comment/{commentId}:
+    delete:
+      operationId: deleteComment
+      parameters:
+      - explode: false
+        in: path
+        name: businessKey
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: commentId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Case Instance
+      x-accepts: application/json
+    patch:
+      operationId: udpateComment
+      parameters:
+      - explode: false
+        in: path
+        name: businessKey
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: commentId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Case Instance
+      x-content-type: application/json
+      x-accepts: application/json
+  /case-definition/{caseDefId}:
+    delete:
+      operationId: delete_4
+      parameters:
+      - explode: false
+        in: path
+        name: caseDefId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Case Definition
+      x-accepts: application/json
+    get:
+      operationId: get_6
+      parameters:
+      - explode: false
+        in: path
+        name: caseDefId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CaseDefinition'
+          description: OK
+      tags:
+      - Case Definition
+      x-accepts: '*/*'
+    patch:
+      operationId: update_4
+      parameters:
+      - explode: false
+        in: path
+        name: caseDefId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseDefinition'
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CaseDefinition'
+          description: OK
+      tags:
+      - Case Definition
+      x-content-type: application/json
+      x-accepts: '*/*'
+  /variable/{processInstanceId}:
+    get:
+      operationId: findVariables
+      parameters:
+      - explode: false
+        in: path
+        name: processInstanceId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: OK
+      tags:
+      - Variables
+      x-accepts: application/json
+  /task/:
+    get:
+      operationId: find
+      parameters:
+      - explode: true
+        in: query
+        name: businessKey
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                items:
+                  $ref: '#/components/schemas/Task'
+                type: array
+          description: OK
+      tags:
+      - Task
+      x-accepts: '*/*'
+  /process-instance/{id}/activity-instances:
+    get:
+      operationId: getActivityInstances
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                items:
+                  $ref: '#/components/schemas/ActivityInstance'
+                type: array
+          description: OK
+      tags:
+      - Process Instance
+      x-accepts: '*/*'
+  /process-instance/:
+    get:
+      operationId: find_3
+      parameters:
+      - explode: true
+        in: query
+        name: businessKey
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                items:
+                  $ref: '#/components/schemas/ProcessInstance'
+                type: array
+          description: OK
+      tags:
+      - Process Instance
+      x-accepts: '*/*'
+  /process-definition/{processDefinitionId}/xml:
+    get:
+      operationId: get_2
+      parameters:
+      - explode: false
+        in: path
+        name: processDefinitionId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/xml:
+              schema:
+                type: string
+          description: OK
+      tags:
+      - Process Definition
+      x-accepts: application/xml
+  /process-definition/{bpmEngineId}/{processDefinitionId}/xml:
+    get:
+      operationId: get_3
+      parameters:
+      - explode: false
+        in: path
+        name: bpmEngineId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: processDefinitionId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/xml:
+              schema:
+                type: string
+          description: OK
+      tags:
+      - Process Definition
+      x-accepts: application/xml
+  /process-definition/:
+    get:
+      operationId: find_4
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ProcessDefinition'
+                type: array
+          description: OK
+      tags:
+      - Process Definition
+      x-accepts: application/json
+  /healthCheck/:
+    get:
+      operationId: check
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: string
+          description: OK
+      tags:
+      - Healtcheck
+      x-accepts: '*/*'
+  /export/:
+    get:
+      operationId: export
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/JsonObject'
+          description: OK
+      tags:
+      - data-export-controller
+      x-accepts: '*/*'
+components:
+  schemas:
+    JsonArray:
+      example:
+        asByte: asByte
+        asBigInteger: 2
+        asJsonObject: null
+        asCharacter: asCharacter
+        jsonPrimitive: true
+        asNumber: 7.061401241503109
+        asBigDecimal: 3.616076749251911
+        jsonNull: true
+        asFloat: 9.301444
+        empty: true
+        asLong: 2
+        asInt: 5
+        asJsonPrimitive:
+          asByte: asByte
+          asBigInteger: 1
+          asJsonObject: null
+          string: true
+          asCharacter: asCharacter
+          jsonPrimitive: true
+          asNumber: 1.4894159098541704
+          asBigDecimal: 7.457744773683766
+          jsonNull: true
+          asFloat: 6.846853
+          asLong: 1
+          asInt: 1
+          number: true
+          asJsonPrimitive: null
+          boolean: true
+          asJsonNull:
+            asByte: asByte
+            asJsonObject: null
+            asBigInteger: 6
+            jsonPrimitive: true
+            asCharacter: asCharacter
+            asNumber: 6.683562403749608
+            asBigDecimal: 9.018348186070783
+            jsonNull: true
+            asFloat: 8.762042
+            asLong: 9
+            asInt: 9
+            asJsonPrimitive: null
+            asJsonNull: null
+            asShort: 3
+            asDouble: 5.025004791520295
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asShort: 4
+          asDouble: 7.386281948385884
+          asJsonArray: null
+          asString: asString
+          jsonObject: true
+          jsonArray: true
+          asBoolean: true
+        asJsonNull:
+          asByte: asByte
+          asJsonObject: null
+          asBigInteger: 6
+          jsonPrimitive: true
+          asCharacter: asCharacter
+          asNumber: 6.683562403749608
+          asBigDecimal: 9.018348186070783
+          jsonNull: true
+          asFloat: 8.762042
+          asLong: 9
+          asInt: 9
+          asJsonPrimitive: null
+          asJsonNull: null
+          asShort: 3
+          asDouble: 5.025004791520295
+          asJsonArray: null
+          asString: asString
+          jsonObject: true
+          jsonArray: true
+          asBoolean: true
+        asShort: 4
+        asDouble: 5.962133916683182
+        asJsonArray: null
+        asString: asString
+        jsonObject: true
+        jsonArray: true
+        asBoolean: true
+      properties:
+        empty:
+          type: boolean
+        asBoolean:
+          type: boolean
+        asDouble:
+          format: double
+          type: number
+        asInt:
+          format: int32
+          type: integer
+        asLong:
+          format: int64
+          type: integer
+        asString:
+          type: string
+        asNumber:
+          type: number
+        asFloat:
+          format: float
+          type: number
+        asByte:
+          format: byte
+          type: string
+        asCharacter:
+          deprecated: true
+          type: string
+        asBigDecimal:
+          type: number
+        asBigInteger:
+          type: integer
+        asShort:
+          format: int32
+          type: integer
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
+        asJsonObject:
+          $ref: '#/components/schemas/JsonObject'
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
+        jsonArray:
+          type: boolean
+        jsonObject:
+          type: boolean
+        jsonPrimitive:
+          type: boolean
+        jsonNull:
+          type: boolean
+        asJsonNull:
+          $ref: '#/components/schemas/JsonNull'
+      type: object
+    JsonNull:
+      example:
+        asByte: asByte
+        asJsonObject: null
+        asBigInteger: 6
+        jsonPrimitive: true
+        asCharacter: asCharacter
+        asNumber: 6.683562403749608
+        asBigDecimal: 9.018348186070783
+        jsonNull: true
+        asFloat: 8.762042
+        asLong: 9
+        asInt: 9
+        asJsonPrimitive: null
+        asJsonNull: null
+        asShort: 3
+        asDouble: 5.025004791520295
+        asJsonArray: null
+        asString: asString
+        jsonObject: true
+        jsonArray: true
+        asBoolean: true
+      properties:
+        asBoolean:
+          type: boolean
+        asDouble:
+          format: double
+          type: number
+        asInt:
+          format: int32
+          type: integer
+        asLong:
+          format: int64
+          type: integer
+        asString:
+          type: string
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
+        asJsonObject:
+          $ref: '#/components/schemas/JsonObject'
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
+        jsonArray:
+          type: boolean
+        jsonObject:
+          type: boolean
+        jsonPrimitive:
+          type: boolean
+        jsonNull:
+          type: boolean
+        asJsonNull:
+          $ref: '#/components/schemas/JsonNull'
+        asNumber:
+          type: number
+        asFloat:
+          format: float
+          type: number
+        asByte:
+          format: byte
+          type: string
+        asCharacter:
+          deprecated: true
+          type: string
+        asBigDecimal:
+          type: number
+        asBigInteger:
+          type: integer
+        asShort:
+          format: int32
+          type: integer
+      type: object
+    JsonObject:
+      example:
+        asByte: asByte
+        asJsonObject: null
+        asBigInteger: 6
+        jsonPrimitive: true
+        asCharacter: asCharacter
+        asNumber: 6.965117697638846
+        asBigDecimal: 2.8841621266687802
+        jsonNull: true
+        asFloat: 1.284659
+        asLong: 1
+        asInt: 6
+        asJsonPrimitive:
+          asByte: asByte
+          asBigInteger: 1
+          asJsonObject: null
+          string: true
+          asCharacter: asCharacter
+          jsonPrimitive: true
+          asNumber: 1.4894159098541704
+          asBigDecimal: 7.457744773683766
+          jsonNull: true
+          asFloat: 6.846853
+          asLong: 1
+          asInt: 1
+          number: true
+          asJsonPrimitive: null
+          boolean: true
+          asJsonNull:
+            asByte: asByte
+            asJsonObject: null
+            asBigInteger: 6
+            jsonPrimitive: true
+            asCharacter: asCharacter
+            asNumber: 6.683562403749608
+            asBigDecimal: 9.018348186070783
+            jsonNull: true
+            asFloat: 8.762042
+            asLong: 9
+            asInt: 9
+            asJsonPrimitive: null
+            asJsonNull: null
+            asShort: 3
+            asDouble: 5.025004791520295
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asShort: 4
+          asDouble: 7.386281948385884
+          asJsonArray: null
+          asString: asString
+          jsonObject: true
+          jsonArray: true
+          asBoolean: true
+        asJsonNull:
+          asByte: asByte
+          asJsonObject: null
+          asBigInteger: 6
+          jsonPrimitive: true
+          asCharacter: asCharacter
+          asNumber: 6.683562403749608
+          asBigDecimal: 9.018348186070783
+          jsonNull: true
+          asFloat: 8.762042
+          asLong: 9
+          asInt: 9
+          asJsonPrimitive: null
+          asJsonNull: null
+          asShort: 3
+          asDouble: 5.025004791520295
+          asJsonArray: null
+          asString: asString
+          jsonObject: true
+          jsonArray: true
+          asBoolean: true
+        asShort: 6
+        asDouble: 0.8008281904610115
+        asJsonArray:
+          asByte: asByte
+          asBigInteger: 2
+          asJsonObject: null
+          asCharacter: asCharacter
+          jsonPrimitive: true
+          asNumber: 7.061401241503109
+          asBigDecimal: 3.616076749251911
+          jsonNull: true
+          asFloat: 9.301444
+          empty: true
+          asLong: 2
+          asInt: 5
+          asJsonPrimitive:
+            asByte: asByte
+            asBigInteger: 1
+            asJsonObject: null
+            string: true
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 1.4894159098541704
+            asBigDecimal: 7.457744773683766
+            jsonNull: true
+            asFloat: 6.846853
+            asLong: 1
+            asInt: 1
+            number: true
+            asJsonPrimitive: null
+            boolean: true
+            asJsonNull:
+              asByte: asByte
+              asJsonObject: null
+              asBigInteger: 6
+              jsonPrimitive: true
+              asCharacter: asCharacter
+              asNumber: 6.683562403749608
+              asBigDecimal: 9.018348186070783
+              jsonNull: true
+              asFloat: 8.762042
+              asLong: 9
+              asInt: 9
+              asJsonPrimitive: null
+              asJsonNull: null
+              asShort: 3
+              asDouble: 5.025004791520295
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asShort: 4
+            asDouble: 7.386281948385884
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asJsonNull:
+            asByte: asByte
+            asJsonObject: null
+            asBigInteger: 6
+            jsonPrimitive: true
+            asCharacter: asCharacter
+            asNumber: 6.683562403749608
+            asBigDecimal: 9.018348186070783
+            jsonNull: true
+            asFloat: 8.762042
+            asLong: 9
+            asInt: 9
+            asJsonPrimitive: null
+            asJsonNull: null
+            asShort: 3
+            asDouble: 5.025004791520295
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asShort: 4
+          asDouble: 5.962133916683182
+          asJsonArray: null
+          asString: asString
+          jsonObject: true
+          jsonArray: true
+          asBoolean: true
+        asString: asString
+        jsonObject: true
+        jsonArray: true
+        asBoolean: true
+      properties:
+        asBoolean:
+          type: boolean
+        asDouble:
+          format: double
+          type: number
+        asInt:
+          format: int32
+          type: integer
+        asLong:
+          format: int64
+          type: integer
+        asString:
+          type: string
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
+        asJsonObject:
+          $ref: '#/components/schemas/JsonObject'
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
+        jsonArray:
+          type: boolean
+        jsonObject:
+          type: boolean
+        jsonPrimitive:
+          type: boolean
+        jsonNull:
+          type: boolean
+        asJsonNull:
+          $ref: '#/components/schemas/JsonNull'
+        asNumber:
+          type: number
+        asFloat:
+          format: float
+          type: number
+        asByte:
+          format: byte
+          type: string
+        asCharacter:
+          deprecated: true
+          type: string
+        asBigDecimal:
+          type: number
+        asBigInteger:
+          type: integer
+        asShort:
+          format: int32
+          type: integer
+      type: object
+    JsonPrimitive:
+      example:
+        asByte: asByte
+        asBigInteger: 1
+        asJsonObject: null
+        string: true
+        asCharacter: asCharacter
+        jsonPrimitive: true
+        asNumber: 1.4894159098541704
+        asBigDecimal: 7.457744773683766
+        jsonNull: true
+        asFloat: 6.846853
+        asLong: 1
+        asInt: 1
+        number: true
+        asJsonPrimitive: null
+        boolean: true
+        asJsonNull:
+          asByte: asByte
+          asJsonObject: null
+          asBigInteger: 6
+          jsonPrimitive: true
+          asCharacter: asCharacter
+          asNumber: 6.683562403749608
+          asBigDecimal: 9.018348186070783
+          jsonNull: true
+          asFloat: 8.762042
+          asLong: 9
+          asInt: 9
+          asJsonPrimitive: null
+          asJsonNull: null
+          asShort: 3
+          asDouble: 5.025004791520295
+          asJsonArray: null
+          asString: asString
+          jsonObject: true
+          jsonArray: true
+          asBoolean: true
+        asShort: 4
+        asDouble: 7.386281948385884
+        asJsonArray: null
+        asString: asString
+        jsonObject: true
+        jsonArray: true
+        asBoolean: true
+      properties:
+        asBoolean:
+          type: boolean
+        asDouble:
+          format: double
+          type: number
+        asInt:
+          format: int32
+          type: integer
+        asLong:
+          format: int64
+          type: integer
+        boolean:
+          type: boolean
+        asString:
+          type: string
+        number:
+          type: boolean
+        string:
+          type: boolean
+        asNumber:
+          type: number
+        asFloat:
+          format: float
+          type: number
+        asByte:
+          format: byte
+          type: string
+        asCharacter:
+          deprecated: true
+          type: string
+        asBigDecimal:
+          type: number
+        asBigInteger:
+          type: integer
+        asShort:
+          format: int32
+          type: integer
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
+        asJsonObject:
+          $ref: '#/components/schemas/JsonObject'
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
+        jsonArray:
+          type: boolean
+        jsonObject:
+          type: boolean
+        jsonPrimitive:
+          type: boolean
+        jsonNull:
+          type: boolean
+        asJsonNull:
+          $ref: '#/components/schemas/JsonNull'
+      type: object
+    RecordType:
+      example:
+        id: id
+        fields:
+          asByte: asByte
+          asJsonObject: null
+          asBigInteger: 6
+          jsonPrimitive: true
+          asCharacter: asCharacter
+          asNumber: 6.965117697638846
+          asBigDecimal: 2.8841621266687802
+          jsonNull: true
+          asFloat: 1.284659
+          asLong: 1
+          asInt: 6
+          asJsonPrimitive:
+            asByte: asByte
+            asBigInteger: 1
+            asJsonObject: null
+            string: true
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 1.4894159098541704
+            asBigDecimal: 7.457744773683766
+            jsonNull: true
+            asFloat: 6.846853
+            asLong: 1
+            asInt: 1
+            number: true
+            asJsonPrimitive: null
+            boolean: true
+            asJsonNull:
+              asByte: asByte
+              asJsonObject: null
+              asBigInteger: 6
+              jsonPrimitive: true
+              asCharacter: asCharacter
+              asNumber: 6.683562403749608
+              asBigDecimal: 9.018348186070783
+              jsonNull: true
+              asFloat: 8.762042
+              asLong: 9
+              asInt: 9
+              asJsonPrimitive: null
+              asJsonNull: null
+              asShort: 3
+              asDouble: 5.025004791520295
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asShort: 4
+            asDouble: 7.386281948385884
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asJsonNull:
+            asByte: asByte
+            asJsonObject: null
+            asBigInteger: 6
+            jsonPrimitive: true
+            asCharacter: asCharacter
+            asNumber: 6.683562403749608
+            asBigDecimal: 9.018348186070783
+            jsonNull: true
+            asFloat: 8.762042
+            asLong: 9
+            asInt: 9
+            asJsonPrimitive: null
+            asJsonNull: null
+            asShort: 3
+            asDouble: 5.025004791520295
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asShort: 6
+          asDouble: 0.8008281904610115
+          asJsonArray:
+            asByte: asByte
+            asBigInteger: 2
+            asJsonObject: null
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 7.061401241503109
+            asBigDecimal: 3.616076749251911
+            jsonNull: true
+            asFloat: 9.301444
+            empty: true
+            asLong: 2
+            asInt: 5
+            asJsonPrimitive:
+              asByte: asByte
+              asBigInteger: 1
+              asJsonObject: null
+              string: true
+              asCharacter: asCharacter
+              jsonPrimitive: true
+              asNumber: 1.4894159098541704
+              asBigDecimal: 7.457744773683766
+              jsonNull: true
+              asFloat: 6.846853
+              asLong: 1
+              asInt: 1
+              number: true
+              asJsonPrimitive: null
+              boolean: true
+              asJsonNull:
+                asByte: asByte
+                asJsonObject: null
+                asBigInteger: 6
+                jsonPrimitive: true
+                asCharacter: asCharacter
+                asNumber: 6.683562403749608
+                asBigDecimal: 9.018348186070783
+                jsonNull: true
+                asFloat: 8.762042
+                asLong: 9
+                asInt: 9
+                asJsonPrimitive: null
+                asJsonNull: null
+                asShort: 3
+                asDouble: 5.025004791520295
+                asJsonArray: null
+                asString: asString
+                jsonObject: true
+                jsonArray: true
+                asBoolean: true
+              asShort: 4
+              asDouble: 7.386281948385884
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asJsonNull:
+              asByte: asByte
+              asJsonObject: null
+              asBigInteger: 6
+              jsonPrimitive: true
+              asCharacter: asCharacter
+              asNumber: 6.683562403749608
+              asBigDecimal: 9.018348186070783
+              jsonNull: true
+              asFloat: 8.762042
+              asLong: 9
+              asInt: 9
+              asJsonPrimitive: null
+              asJsonNull: null
+              asShort: 3
+              asDouble: 5.025004791520295
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asShort: 4
+            asDouble: 5.962133916683182
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asString: asString
+          jsonObject: true
+          jsonArray: true
+          asBoolean: true
+      properties:
+        id:
+          type: string
+        fields:
+          $ref: '#/components/schemas/JsonObject'
+      type: object
+    ProcessMessage:
+      example:
+        messageName: messageName
+        tenantId: tenantId
+        businessKey: businessKey
+        processVariables:
+          asByte: asByte
+          asJsonObject: null
+          asBigInteger: 6
+          jsonPrimitive: true
+          asCharacter: asCharacter
+          asNumber: 6.965117697638846
+          asBigDecimal: 2.8841621266687802
+          jsonNull: true
+          asFloat: 1.284659
+          asLong: 1
+          asInt: 6
+          asJsonPrimitive:
+            asByte: asByte
+            asBigInteger: 1
+            asJsonObject: null
+            string: true
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 1.4894159098541704
+            asBigDecimal: 7.457744773683766
+            jsonNull: true
+            asFloat: 6.846853
+            asLong: 1
+            asInt: 1
+            number: true
+            asJsonPrimitive: null
+            boolean: true
+            asJsonNull:
+              asByte: asByte
+              asJsonObject: null
+              asBigInteger: 6
+              jsonPrimitive: true
+              asCharacter: asCharacter
+              asNumber: 6.683562403749608
+              asBigDecimal: 9.018348186070783
+              jsonNull: true
+              asFloat: 8.762042
+              asLong: 9
+              asInt: 9
+              asJsonPrimitive: null
+              asJsonNull: null
+              asShort: 3
+              asDouble: 5.025004791520295
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asShort: 4
+            asDouble: 7.386281948385884
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asJsonNull:
+            asByte: asByte
+            asJsonObject: null
+            asBigInteger: 6
+            jsonPrimitive: true
+            asCharacter: asCharacter
+            asNumber: 6.683562403749608
+            asBigDecimal: 9.018348186070783
+            jsonNull: true
+            asFloat: 8.762042
+            asLong: 9
+            asInt: 9
+            asJsonPrimitive: null
+            asJsonNull: null
+            asShort: 3
+            asDouble: 5.025004791520295
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asShort: 6
+          asDouble: 0.8008281904610115
+          asJsonArray:
+            asByte: asByte
+            asBigInteger: 2
+            asJsonObject: null
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 7.061401241503109
+            asBigDecimal: 3.616076749251911
+            jsonNull: true
+            asFloat: 9.301444
+            empty: true
+            asLong: 2
+            asInt: 5
+            asJsonPrimitive:
+              asByte: asByte
+              asBigInteger: 1
+              asJsonObject: null
+              string: true
+              asCharacter: asCharacter
+              jsonPrimitive: true
+              asNumber: 1.4894159098541704
+              asBigDecimal: 7.457744773683766
+              jsonNull: true
+              asFloat: 6.846853
+              asLong: 1
+              asInt: 1
+              number: true
+              asJsonPrimitive: null
+              boolean: true
+              asJsonNull:
+                asByte: asByte
+                asJsonObject: null
+                asBigInteger: 6
+                jsonPrimitive: true
+                asCharacter: asCharacter
+                asNumber: 6.683562403749608
+                asBigDecimal: 9.018348186070783
+                jsonNull: true
+                asFloat: 8.762042
+                asLong: 9
+                asInt: 9
+                asJsonPrimitive: null
+                asJsonNull: null
+                asShort: 3
+                asDouble: 5.025004791520295
+                asJsonArray: null
+                asString: asString
+                jsonObject: true
+                jsonArray: true
+                asBoolean: true
+              asShort: 4
+              asDouble: 7.386281948385884
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asJsonNull:
+              asByte: asByte
+              asJsonObject: null
+              asBigInteger: 6
+              jsonPrimitive: true
+              asCharacter: asCharacter
+              asNumber: 6.683562403749608
+              asBigDecimal: 9.018348186070783
+              jsonNull: true
+              asFloat: 8.762042
+              asLong: 9
+              asInt: 9
+              asJsonPrimitive: null
+              asJsonNull: null
+              asShort: 3
+              asDouble: 5.025004791520295
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asShort: 4
+            asDouble: 5.962133916683182
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asString: asString
+          jsonObject: true
+          jsonArray: true
+          asBoolean: true
+      properties:
+        tenantId:
+          type: string
+        messageName:
+          type: string
+        businessKey:
+          type: string
+        processVariables:
+          $ref: '#/components/schemas/JsonObject'
+      type: object
+    Form:
+      example:
+        toolTip: toolTip
+        title: title
+        key: key
+        structure:
+          asByte: asByte
+          asJsonObject: null
+          asBigInteger: 6
+          jsonPrimitive: true
+          asCharacter: asCharacter
+          asNumber: 6.965117697638846
+          asBigDecimal: 2.8841621266687802
+          jsonNull: true
+          asFloat: 1.284659
+          asLong: 1
+          asInt: 6
+          asJsonPrimitive:
+            asByte: asByte
+            asBigInteger: 1
+            asJsonObject: null
+            string: true
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 1.4894159098541704
+            asBigDecimal: 7.457744773683766
+            jsonNull: true
+            asFloat: 6.846853
+            asLong: 1
+            asInt: 1
+            number: true
+            asJsonPrimitive: null
+            boolean: true
+            asJsonNull:
+              asByte: asByte
+              asJsonObject: null
+              asBigInteger: 6
+              jsonPrimitive: true
+              asCharacter: asCharacter
+              asNumber: 6.683562403749608
+              asBigDecimal: 9.018348186070783
+              jsonNull: true
+              asFloat: 8.762042
+              asLong: 9
+              asInt: 9
+              asJsonPrimitive: null
+              asJsonNull: null
+              asShort: 3
+              asDouble: 5.025004791520295
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asShort: 4
+            asDouble: 7.386281948385884
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asJsonNull:
+            asByte: asByte
+            asJsonObject: null
+            asBigInteger: 6
+            jsonPrimitive: true
+            asCharacter: asCharacter
+            asNumber: 6.683562403749608
+            asBigDecimal: 9.018348186070783
+            jsonNull: true
+            asFloat: 8.762042
+            asLong: 9
+            asInt: 9
+            asJsonPrimitive: null
+            asJsonNull: null
+            asShort: 3
+            asDouble: 5.025004791520295
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asShort: 6
+          asDouble: 0.8008281904610115
+          asJsonArray:
+            asByte: asByte
+            asBigInteger: 2
+            asJsonObject: null
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 7.061401241503109
+            asBigDecimal: 3.616076749251911
+            jsonNull: true
+            asFloat: 9.301444
+            empty: true
+            asLong: 2
+            asInt: 5
+            asJsonPrimitive:
+              asByte: asByte
+              asBigInteger: 1
+              asJsonObject: null
+              string: true
+              asCharacter: asCharacter
+              jsonPrimitive: true
+              asNumber: 1.4894159098541704
+              asBigDecimal: 7.457744773683766
+              jsonNull: true
+              asFloat: 6.846853
+              asLong: 1
+              asInt: 1
+              number: true
+              asJsonPrimitive: null
+              boolean: true
+              asJsonNull:
+                asByte: asByte
+                asJsonObject: null
+                asBigInteger: 6
+                jsonPrimitive: true
+                asCharacter: asCharacter
+                asNumber: 6.683562403749608
+                asBigDecimal: 9.018348186070783
+                jsonNull: true
+                asFloat: 8.762042
+                asLong: 9
+                asInt: 9
+                asJsonPrimitive: null
+                asJsonNull: null
+                asShort: 3
+                asDouble: 5.025004791520295
+                asJsonArray: null
+                asString: asString
+                jsonObject: true
+                jsonArray: true
+                asBoolean: true
+              asShort: 4
+              asDouble: 7.386281948385884
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asJsonNull:
+              asByte: asByte
+              asJsonObject: null
+              asBigInteger: 6
+              jsonPrimitive: true
+              asCharacter: asCharacter
+              asNumber: 6.683562403749608
+              asBigDecimal: 9.018348186070783
+              jsonNull: true
+              asFloat: 8.762042
+              asLong: 9
+              asInt: 9
+              asJsonPrimitive: null
+              asJsonNull: null
+              asShort: 3
+              asDouble: 5.025004791520295
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asShort: 4
+            asDouble: 5.962133916683182
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asString: asString
+          jsonObject: true
+          jsonArray: true
+          asBoolean: true
+      properties:
+        key:
+          type: string
+        title:
+          type: string
+        toolTip:
+          type: string
+        structure:
+          $ref: '#/components/schemas/JsonObject'
+      type: object
+    CaseDocument:
+      example:
+        size: size
+        name: name
+        base64: base64
+        type: type
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        size:
+          type: string
+        base64:
+          type: string
+      type: object
+    Comment:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        caseId: caseId
+        id: id
+        body: body
+        userName: userName
+        userId: userId
+        parentId: parentId
+      properties:
+        id:
+          type: string
+        body:
+          type: string
+        userName:
+          type: string
+        userId:
+          type: string
+        parentId:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        caseId:
+          type: string
+      type: object
+    CaseAttribute:
+      example:
+        name: name
+        value: value
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+      type: object
+    CaseInstance:
+      example:
+        caseOwner: caseOwner
+        caseOwnerName: caseOwnerName
+        comments:
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          caseId: caseId
+          id: id
+          body: body
+          userName: userName
+          userId: userId
+          parentId: parentId
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          caseId: caseId
+          id: id
+          body: body
+          userName: userName
+          userId: userId
+          parentId: parentId
+        stage: stage
+        caseDefinitionId: caseDefinitionId
+        documents:
+        - size: size
+          name: name
+          base64: base64
+          type: type
+        - size: size
+          name: name
+          base64: base64
+          type: type
+        businessKey: businessKey
+        attributes:
+        - name: name
+          value: value
+        - name: name
+          value: value
+        id: id
+        get_id: get_id
+        status: WIP_CASE_STATUS
+      properties:
+        get_id:
+          type: string
+        businessKey:
+          type: string
+        caseDefinitionId:
+          type: string
+        stage:
+          type: string
+        caseOwner:
+          type: string
+        caseOwnerName:
+          type: string
+        comments:
+          items:
+            $ref: '#/components/schemas/Comment'
+          type: array
+        documents:
+          items:
+            $ref: '#/components/schemas/CaseDocument'
+          type: array
+        attributes:
+          items:
+            $ref: '#/components/schemas/CaseAttribute'
+          type: array
+        status:
+          enum:
+          - WIP_CASE_STATUS
+          - CLOSED_CASE_STATUS
+          - ARCHIVED_CASE_STATUS
+          type: string
+        id:
+          type: string
+      type: object
+    CaseDefinition:
+      example:
+        stagesLifecycleProcessKey: stagesLifecycleProcessKey
+        formKey: formKey
+        kanbanConfig:
+          asByte: asByte
+          asJsonObject: null
+          asBigInteger: 6
+          jsonPrimitive: true
+          asCharacter: asCharacter
+          asNumber: 6.965117697638846
+          asBigDecimal: 2.8841621266687802
+          jsonNull: true
+          asFloat: 1.284659
+          asLong: 1
+          asInt: 6
+          asJsonPrimitive:
+            asByte: asByte
+            asBigInteger: 1
+            asJsonObject: null
+            string: true
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 1.4894159098541704
+            asBigDecimal: 7.457744773683766
+            jsonNull: true
+            asFloat: 6.846853
+            asLong: 1
+            asInt: 1
+            number: true
+            asJsonPrimitive: null
+            boolean: true
+            asJsonNull:
+              asByte: asByte
+              asJsonObject: null
+              asBigInteger: 6
+              jsonPrimitive: true
+              asCharacter: asCharacter
+              asNumber: 6.683562403749608
+              asBigDecimal: 9.018348186070783
+              jsonNull: true
+              asFloat: 8.762042
+              asLong: 9
+              asInt: 9
+              asJsonPrimitive: null
+              asJsonNull: null
+              asShort: 3
+              asDouble: 5.025004791520295
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asShort: 4
+            asDouble: 7.386281948385884
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asJsonNull:
+            asByte: asByte
+            asJsonObject: null
+            asBigInteger: 6
+            jsonPrimitive: true
+            asCharacter: asCharacter
+            asNumber: 6.683562403749608
+            asBigDecimal: 9.018348186070783
+            jsonNull: true
+            asFloat: 8.762042
+            asLong: 9
+            asInt: 9
+            asJsonPrimitive: null
+            asJsonNull: null
+            asShort: 3
+            asDouble: 5.025004791520295
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asShort: 6
+          asDouble: 0.8008281904610115
+          asJsonArray:
+            asByte: asByte
+            asBigInteger: 2
+            asJsonObject: null
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 7.061401241503109
+            asBigDecimal: 3.616076749251911
+            jsonNull: true
+            asFloat: 9.301444
+            empty: true
+            asLong: 2
+            asInt: 5
+            asJsonPrimitive:
+              asByte: asByte
+              asBigInteger: 1
+              asJsonObject: null
+              string: true
+              asCharacter: asCharacter
+              jsonPrimitive: true
+              asNumber: 1.4894159098541704
+              asBigDecimal: 7.457744773683766
+              jsonNull: true
+              asFloat: 6.846853
+              asLong: 1
+              asInt: 1
+              number: true
+              asJsonPrimitive: null
+              boolean: true
+              asJsonNull:
+                asByte: asByte
+                asJsonObject: null
+                asBigInteger: 6
+                jsonPrimitive: true
+                asCharacter: asCharacter
+                asNumber: 6.683562403749608
+                asBigDecimal: 9.018348186070783
+                jsonNull: true
+                asFloat: 8.762042
+                asLong: 9
+                asInt: 9
+                asJsonPrimitive: null
+                asJsonNull: null
+                asShort: 3
+                asDouble: 5.025004791520295
+                asJsonArray: null
+                asString: asString
+                jsonObject: true
+                jsonArray: true
+                asBoolean: true
+              asShort: 4
+              asDouble: 7.386281948385884
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asJsonNull:
+              asByte: asByte
+              asJsonObject: null
+              asBigInteger: 6
+              jsonPrimitive: true
+              asCharacter: asCharacter
+              asNumber: 6.683562403749608
+              asBigDecimal: 9.018348186070783
+              jsonNull: true
+              asFloat: 8.762042
+              asLong: 9
+              asInt: 9
+              asJsonPrimitive: null
+              asJsonNull: null
+              asShort: 3
+              asDouble: 5.025004791520295
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asShort: 4
+            asDouble: 5.962133916683182
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asString: asString
+          jsonObject: true
+          jsonArray: true
+          asBoolean: true
+        name: name
+        stages:
+        - name: name
+          index: 0
+          id: id
+        - name: name
+          index: 0
+          id: id
+        deployed: true
+        id: id
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        formKey:
+          type: string
+        stagesLifecycleProcessKey:
+          type: string
+        stages:
+          items:
+            $ref: '#/components/schemas/CaseStage'
+          type: array
+        kanbanConfig:
+          $ref: '#/components/schemas/JsonObject'
+        deployed:
+          type: boolean
+      type: object
+    CaseStage:
+      example:
+        name: name
+        index: 0
+        id: id
+      properties:
+        id:
+          type: string
+        index:
+          format: int32
+          type: integer
+        name:
+          type: string
+      type: object
+    Task:
+      example:
+        owner: owner
+        processInstanceId: processInstanceId
+        processDefinitionId: processDefinitionId
+        caseExecutionId: caseExecutionId
+        caseDefinitionId: caseDefinitionId
+        formKey: formKey
+        created: created
+        caseInstanceId: caseInstanceId
+        description: description
+        priority: priority
+        followUp: followUp
+        executionId: executionId
+        taskDefinitionKey: taskDefinitionKey
+        due: due
+        name: name
+        tenantId: tenantId
+        id: id
+        assignee: assignee
+      properties:
+        id:
+          type: string
+        owner:
+          type: string
+        assignee:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        priority:
+          type: string
+        created:
+          type: string
+        due:
+          type: string
+        followUp:
+          type: string
+        tenantId:
+          type: string
+        executionId:
+          type: string
+        processInstanceId:
+          type: string
+        processDefinitionId:
+          type: string
+        caseExecutionId:
+          type: string
+        caseInstanceId:
+          type: string
+        caseDefinitionId:
+          type: string
+        taskDefinitionKey:
+          type: string
+        formKey:
+          type: string
+      type: object
+    ActivityInstance:
+      example:
+        activityId: activityId
+        id: id
+        activityType: activityType
+        childActivityInstances:
+        - null
+        - null
+      properties:
+        id:
+          type: string
+        activityId:
+          type: string
+        activityType:
+          type: string
+        childActivityInstances:
+          items:
+            $ref: '#/components/schemas/ActivityInstance'
+          type: array
+      type: object
+    ProcessInstance:
+      example:
+        variables:
+          asByte: asByte
+          asJsonObject: null
+          asBigInteger: 6
+          jsonPrimitive: true
+          asCharacter: asCharacter
+          asNumber: 6.965117697638846
+          asBigDecimal: 2.8841621266687802
+          jsonNull: true
+          asFloat: 1.284659
+          asLong: 1
+          asInt: 6
+          asJsonPrimitive:
+            asByte: asByte
+            asBigInteger: 1
+            asJsonObject: null
+            string: true
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 1.4894159098541704
+            asBigDecimal: 7.457744773683766
+            jsonNull: true
+            asFloat: 6.846853
+            asLong: 1
+            asInt: 1
+            number: true
+            asJsonPrimitive: null
+            boolean: true
+            asJsonNull:
+              asByte: asByte
+              asJsonObject: null
+              asBigInteger: 6
+              jsonPrimitive: true
+              asCharacter: asCharacter
+              asNumber: 6.683562403749608
+              asBigDecimal: 9.018348186070783
+              jsonNull: true
+              asFloat: 8.762042
+              asLong: 9
+              asInt: 9
+              asJsonPrimitive: null
+              asJsonNull: null
+              asShort: 3
+              asDouble: 5.025004791520295
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asShort: 4
+            asDouble: 7.386281948385884
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asJsonNull:
+            asByte: asByte
+            asJsonObject: null
+            asBigInteger: 6
+            jsonPrimitive: true
+            asCharacter: asCharacter
+            asNumber: 6.683562403749608
+            asBigDecimal: 9.018348186070783
+            jsonNull: true
+            asFloat: 8.762042
+            asLong: 9
+            asInt: 9
+            asJsonPrimitive: null
+            asJsonNull: null
+            asShort: 3
+            asDouble: 5.025004791520295
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asShort: 6
+          asDouble: 0.8008281904610115
+          asJsonArray:
+            asByte: asByte
+            asBigInteger: 2
+            asJsonObject: null
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 7.061401241503109
+            asBigDecimal: 3.616076749251911
+            jsonNull: true
+            asFloat: 9.301444
+            empty: true
+            asLong: 2
+            asInt: 5
+            asJsonPrimitive:
+              asByte: asByte
+              asBigInteger: 1
+              asJsonObject: null
+              string: true
+              asCharacter: asCharacter
+              jsonPrimitive: true
+              asNumber: 1.4894159098541704
+              asBigDecimal: 7.457744773683766
+              jsonNull: true
+              asFloat: 6.846853
+              asLong: 1
+              asInt: 1
+              number: true
+              asJsonPrimitive: null
+              boolean: true
+              asJsonNull:
+                asByte: asByte
+                asJsonObject: null
+                asBigInteger: 6
+                jsonPrimitive: true
+                asCharacter: asCharacter
+                asNumber: 6.683562403749608
+                asBigDecimal: 9.018348186070783
+                jsonNull: true
+                asFloat: 8.762042
+                asLong: 9
+                asInt: 9
+                asJsonPrimitive: null
+                asJsonNull: null
+                asShort: 3
+                asDouble: 5.025004791520295
+                asJsonArray: null
+                asString: asString
+                jsonObject: true
+                jsonArray: true
+                asBoolean: true
+              asShort: 4
+              asDouble: 7.386281948385884
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asJsonNull:
+              asByte: asByte
+              asJsonObject: null
+              asBigInteger: 6
+              jsonPrimitive: true
+              asCharacter: asCharacter
+              asNumber: 6.683562403749608
+              asBigDecimal: 9.018348186070783
+              jsonNull: true
+              asFloat: 8.762042
+              asLong: 9
+              asInt: 9
+              asJsonPrimitive: null
+              asJsonNull: null
+              asShort: 3
+              asDouble: 5.025004791520295
+              asJsonArray: null
+              asString: asString
+              jsonObject: true
+              jsonArray: true
+              asBoolean: true
+            asShort: 4
+            asDouble: 5.962133916683182
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asString: asString
+          jsonObject: true
+          jsonArray: true
+          asBoolean: true
+        caseInstanceId: caseInstanceId
+        businessKey: businessKey
+        ended: true
+        tenantId: tenantId
+        id: id
+        suspended: true
+        definitionId: definitionId
+      properties:
+        id:
+          type: string
+        businessKey:
+          type: string
+        definitionId:
+          type: string
+        caseInstanceId:
+          type: string
+        ended:
+          type: boolean
+        suspended:
+          type: boolean
+        tenantId:
+          type: string
+        variables:
+          $ref: '#/components/schemas/JsonObject'
+      type: object
+    ProcessDefinition:
+      example:
+        bpmEngineId: bpmEngineId
+      properties:
+        bpmEngineId:
+          type: string
+          writeOnly: true
+      type: object
+

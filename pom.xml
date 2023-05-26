@@ -78,6 +78,7 @@
 
 		<!-- Rest APIs -->
 		<module>case-engine-rest-api</module>
+		<module>case-engine-rest-client</module>
 		<module>email-to-case</module>
 	</modules>
 
