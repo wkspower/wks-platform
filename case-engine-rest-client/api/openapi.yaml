@@ -977,84 +977,21 @@ components:
     JsonArray:
       example:
         asByte: asByte
-        asBigInteger: 2
+        asBigInteger: 6
         asJsonObject: null
         asCharacter: asCharacter
         jsonPrimitive: true
-        asNumber: 7.061401241503109
-        asBigDecimal: 3.616076749251911
+        asNumber: 9.965781217890562
+        asBigDecimal: 9.369310271410669
         jsonNull: true
-        asFloat: 9.301444
+        asFloat: 8.762042
         empty: true
-        asLong: 2
-        asInt: 5
-        asJsonPrimitive:
-          asByte: asByte
-          asBigInteger: 1
-          asJsonObject: null
-          string: true
-          asCharacter: asCharacter
-          jsonPrimitive: true
-          asNumber: 1.4894159098541704
-          asBigDecimal: 7.457744773683766
-          jsonNull: true
-          asFloat: 6.846853
-          asLong: 1
-          asInt: 1
-          number: true
-          asJsonPrimitive: null
-          boolean: true
-          asJsonNull:
-            asByte: asByte
-            asJsonObject: null
-            asBigInteger: 6
-            jsonPrimitive: true
-            asCharacter: asCharacter
-            asNumber: 6.683562403749608
-            asBigDecimal: 9.018348186070783
-            jsonNull: true
-            asFloat: 8.762042
-            asLong: 9
-            asInt: 9
-            asJsonPrimitive: null
-            asJsonNull: null
-            asShort: 3
-            asDouble: 5.025004791520295
-            asJsonArray: null
-            asString: asString
-            jsonObject: true
-            jsonArray: true
-            asBoolean: true
-          asShort: 4
-          asDouble: 7.386281948385884
-          asJsonArray: null
-          asString: asString
-          jsonObject: true
-          jsonArray: true
-          asBoolean: true
-        asJsonNull:
-          asByte: asByte
-          asJsonObject: null
-          asBigInteger: 6
-          jsonPrimitive: true
-          asCharacter: asCharacter
-          asNumber: 6.683562403749608
-          asBigDecimal: 9.018348186070783
-          jsonNull: true
-          asFloat: 8.762042
-          asLong: 9
-          asInt: 9
-          asJsonPrimitive: null
-          asJsonNull: null
-          asShort: 3
-          asDouble: 5.025004791520295
-          asJsonArray: null
-          asString: asString
-          jsonObject: true
-          jsonArray: true
-          asBoolean: true
-        asShort: 4
-        asDouble: 5.962133916683182
+        asLong: 5
+        asInt: 4
+        asJsonPrimitive: null
+        asJsonNull: null
+        asShort: 9
+        asDouble: 1.1730742509559433
         asJsonArray: null
         asString: asString
         jsonObject: true
@@ -1074,16 +1011,8 @@ components:
         asLong:
           format: int64
           type: integer
-        asString:
-          type: string
         asNumber:
           type: number
-        asFloat:
-          format: float
-          type: number
-        asByte:
-          format: byte
-          type: string
         asCharacter:
           deprecated: true
           type: string
@@ -1091,46 +1020,119 @@ components:
           type: number
         asBigInteger:
           type: integer
+        asString:
+          type: string
+        asFloat:
+          format: float
+          type: number
+        asByte:
+          format: byte
+          type: string
         asShort:
           format: int32
           type: integer
-        asJsonArray:
-          $ref: '#/components/schemas/JsonArray'
-        asJsonObject:
-          $ref: '#/components/schemas/JsonObject'
-        asJsonPrimitive:
-          $ref: '#/components/schemas/JsonPrimitive'
         jsonArray:
           type: boolean
         jsonObject:
           type: boolean
         jsonPrimitive:
           type: boolean
-        jsonNull:
-          type: boolean
         asJsonNull:
           $ref: '#/components/schemas/JsonNull'
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
+        asJsonObject:
+          $ref: '#/components/schemas/JsonObject'
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
+        jsonNull:
+          type: boolean
       type: object
     JsonNull:
       example:
         asByte: asByte
+        asBigInteger: 3
         asJsonObject: null
-        asBigInteger: 6
         jsonPrimitive: true
         asCharacter: asCharacter
-        asNumber: 6.683562403749608
-        asBigDecimal: 9.018348186070783
+        asNumber: 7.061401241503109
+        asBigDecimal: 9.301444243932576
         jsonNull: true
-        asFloat: 8.762042
-        asLong: 9
-        asInt: 9
-        asJsonPrimitive: null
+        asFloat: 6.4384236
+        asLong: 2
+        asInt: 5
+        asJsonPrimitive:
+          asByte: asByte
+          asBigInteger: 1
+          asJsonObject: null
+          asCharacter: asCharacter
+          string: true
+          jsonPrimitive: true
+          asNumber: 1.2315135367772556
+          asBigDecimal: 1.0246457001441578
+          jsonNull: true
+          asFloat: 6.846853
+          asLong: 7
+          asInt: 4
+          number: true
+          asJsonPrimitive: null
+          boolean: true
+          asJsonNull: null
+          asShort: 7
+          asDouble: 2.027123023002322
+          asJsonArray:
+            asByte: asByte
+            asBigInteger: 6
+            asJsonObject: null
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 9.965781217890562
+            asBigDecimal: 9.369310271410669
+            jsonNull: true
+            asFloat: 8.762042
+            empty: true
+            asLong: 5
+            asInt: 4
+            asJsonPrimitive: null
+            asJsonNull: null
+            asShort: 9
+            asDouble: 1.1730742509559433
+            asJsonArray: null
+            asString: asString
+            jsonObject: true
+            jsonArray: true
+            asBoolean: true
+          asString: asString
+          jsonObject: true
+          jsonArray: true
+          asBoolean: true
         asJsonNull: null
         asShort: 3
-        asDouble: 5.025004791520295
-        asJsonArray: null
-        asString: asString
+        asDouble: 5.962133916683182
+        asJsonArray:
+          asByte: asByte
+          asBigInteger: 6
+          asJsonObject: null
+          asCharacter: asCharacter
+          jsonPrimitive: true
+          asNumber: 9.965781217890562
+          asBigDecimal: 9.369310271410669
+          jsonNull: true
+          asFloat: 8.762042
+          empty: true
+          asLong: 5
+          asInt: 4
+          asJsonPrimitive: null
+          asJsonNull: null
+          asShort: 9
+          asDouble: 1.1730742509559433
+          asJsonArray: null
+          asString: asString
+          jsonObject: true
+          jsonArray: true
+          asBoolean: true
         jsonObject: true
+        asString: asString
         jsonArray: true
         asBoolean: true
       properties:
@@ -1145,32 +1147,16 @@ components:
         asLong:
           format: int64
           type: integer
-        asString:
-          type: string
-        asJsonArray:
-          $ref: '#/components/schemas/JsonArray'
-        asJsonObject:
-          $ref: '#/components/schemas/JsonObject'
-        asJsonPrimitive:
-          $ref: '#/components/schemas/JsonPrimitive'
         jsonArray:
           type: boolean
         jsonObject:
           type: boolean
         jsonPrimitive:
           type: boolean
-        jsonNull:
-          type: boolean
         asJsonNull:
           $ref: '#/components/schemas/JsonNull'
         asNumber:
           type: number
-        asFloat:
-          format: float
-          type: number
-        asByte:
-          format: byte
-          type: string
         asCharacter:
           deprecated: true
           type: string
@@ -1178,6 +1164,22 @@ components:
           type: number
         asBigInteger:
           type: integer
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
+        asJsonObject:
+          $ref: '#/components/schemas/JsonObject'
+        asString:
+          type: string
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
+        jsonNull:
+          type: boolean
+        asFloat:
+          format: float
+          type: number
+        asByte:
+          format: byte
+          type: string
         asShort:
           format: int32
           type: integer
@@ -1185,170 +1187,173 @@ components:
     JsonObject:
       example:
         asByte: asByte
+        asBigInteger: 2
         asJsonObject: null
-        asBigInteger: 6
         jsonPrimitive: true
         asCharacter: asCharacter
         asNumber: 6.965117697638846
-        asBigDecimal: 2.8841621266687802
+        asBigDecimal: 1.284659006116532
         jsonNull: true
-        asFloat: 1.284659
+        asFloat: 6.778325
         asLong: 1
         asInt: 6
         asJsonPrimitive:
           asByte: asByte
           asBigInteger: 1
           asJsonObject: null
-          string: true
           asCharacter: asCharacter
+          string: true
           jsonPrimitive: true
-          asNumber: 1.4894159098541704
-          asBigDecimal: 7.457744773683766
+          asNumber: 1.2315135367772556
+          asBigDecimal: 1.0246457001441578
           jsonNull: true
           asFloat: 6.846853
-          asLong: 1
-          asInt: 1
+          asLong: 7
+          asInt: 4
           number: true
           asJsonPrimitive: null
           boolean: true
-          asJsonNull:
+          asJsonNull: null
+          asShort: 7
+          asDouble: 2.027123023002322
+          asJsonArray:
             asByte: asByte
-            asJsonObject: null
             asBigInteger: 6
-            jsonPrimitive: true
+            asJsonObject: null
             asCharacter: asCharacter
-            asNumber: 6.683562403749608
-            asBigDecimal: 9.018348186070783
+            jsonPrimitive: true
+            asNumber: 9.965781217890562
+            asBigDecimal: 9.369310271410669
             jsonNull: true
             asFloat: 8.762042
-            asLong: 9
-            asInt: 9
+            empty: true
+            asLong: 5
+            asInt: 4
             asJsonPrimitive: null
             asJsonNull: null
-            asShort: 3
-            asDouble: 5.025004791520295
+            asShort: 9
+            asDouble: 1.1730742509559433
             asJsonArray: null
             asString: asString
             jsonObject: true
             jsonArray: true
             asBoolean: true
-          asShort: 4
-          asDouble: 7.386281948385884
-          asJsonArray: null
           asString: asString
           jsonObject: true
           jsonArray: true
           asBoolean: true
         asJsonNull:
           asByte: asByte
+          asBigInteger: 3
           asJsonObject: null
-          asBigInteger: 6
           jsonPrimitive: true
           asCharacter: asCharacter
-          asNumber: 6.683562403749608
-          asBigDecimal: 9.018348186070783
-          jsonNull: true
-          asFloat: 8.762042
-          asLong: 9
-          asInt: 9
-          asJsonPrimitive: null
-          asJsonNull: null
-          asShort: 3
-          asDouble: 5.025004791520295
-          asJsonArray: null
-          asString: asString
-          jsonObject: true
-          jsonArray: true
-          asBoolean: true
-        asShort: 6
-        asDouble: 0.8008281904610115
-        asJsonArray:
-          asByte: asByte
-          asBigInteger: 2
-          asJsonObject: null
-          asCharacter: asCharacter
-          jsonPrimitive: true
           asNumber: 7.061401241503109
-          asBigDecimal: 3.616076749251911
+          asBigDecimal: 9.301444243932576
           jsonNull: true
-          asFloat: 9.301444
-          empty: true
+          asFloat: 6.4384236
           asLong: 2
           asInt: 5
           asJsonPrimitive:
             asByte: asByte
             asBigInteger: 1
             asJsonObject: null
-            string: true
             asCharacter: asCharacter
+            string: true
             jsonPrimitive: true
-            asNumber: 1.4894159098541704
-            asBigDecimal: 7.457744773683766
+            asNumber: 1.2315135367772556
+            asBigDecimal: 1.0246457001441578
             jsonNull: true
             asFloat: 6.846853
-            asLong: 1
-            asInt: 1
+            asLong: 7
+            asInt: 4
             number: true
             asJsonPrimitive: null
             boolean: true
-            asJsonNull:
+            asJsonNull: null
+            asShort: 7
+            asDouble: 2.027123023002322
+            asJsonArray:
               asByte: asByte
-              asJsonObject: null
               asBigInteger: 6
-              jsonPrimitive: true
+              asJsonObject: null
               asCharacter: asCharacter
-              asNumber: 6.683562403749608
-              asBigDecimal: 9.018348186070783
+              jsonPrimitive: true
+              asNumber: 9.965781217890562
+              asBigDecimal: 9.369310271410669
               jsonNull: true
               asFloat: 8.762042
-              asLong: 9
-              asInt: 9
+              empty: true
+              asLong: 5
+              asInt: 4
               asJsonPrimitive: null
               asJsonNull: null
-              asShort: 3
-              asDouble: 5.025004791520295
+              asShort: 9
+              asDouble: 1.1730742509559433
               asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asShort: 4
-            asDouble: 7.386281948385884
-            asJsonArray: null
             asString: asString
             jsonObject: true
             jsonArray: true
             asBoolean: true
-          asJsonNull:
+          asJsonNull: null
+          asShort: 3
+          asDouble: 5.962133916683182
+          asJsonArray:
             asByte: asByte
-            asJsonObject: null
             asBigInteger: 6
-            jsonPrimitive: true
+            asJsonObject: null
             asCharacter: asCharacter
-            asNumber: 6.683562403749608
-            asBigDecimal: 9.018348186070783
+            jsonPrimitive: true
+            asNumber: 9.965781217890562
+            asBigDecimal: 9.369310271410669
             jsonNull: true
             asFloat: 8.762042
-            asLong: 9
-            asInt: 9
+            empty: true
+            asLong: 5
+            asInt: 4
             asJsonPrimitive: null
             asJsonNull: null
-            asShort: 3
-            asDouble: 5.025004791520295
+            asShort: 9
+            asDouble: 1.1730742509559433
             asJsonArray: null
             asString: asString
             jsonObject: true
             jsonArray: true
             asBoolean: true
-          asShort: 4
-          asDouble: 5.962133916683182
+          jsonObject: true
+          asString: asString
+          jsonArray: true
+          asBoolean: true
+        asShort: 6
+        asDouble: 0.8008281904610115
+        asJsonArray:
+          asByte: asByte
+          asBigInteger: 6
+          asJsonObject: null
+          asCharacter: asCharacter
+          jsonPrimitive: true
+          asNumber: 9.965781217890562
+          asBigDecimal: 9.369310271410669
+          jsonNull: true
+          asFloat: 8.762042
+          empty: true
+          asLong: 5
+          asInt: 4
+          asJsonPrimitive: null
+          asJsonNull: null
+          asShort: 9
+          asDouble: 1.1730742509559433
           asJsonArray: null
           asString: asString
           jsonObject: true
           jsonArray: true
           asBoolean: true
-        asString: asString
         jsonObject: true
+        asString: asString
         jsonArray: true
         asBoolean: true
       properties:
@@ -1363,32 +1368,16 @@ components:
         asLong:
           format: int64
           type: integer
-        asString:
-          type: string
-        asJsonArray:
-          $ref: '#/components/schemas/JsonArray'
-        asJsonObject:
-          $ref: '#/components/schemas/JsonObject'
-        asJsonPrimitive:
-          $ref: '#/components/schemas/JsonPrimitive'
         jsonArray:
           type: boolean
         jsonObject:
           type: boolean
         jsonPrimitive:
           type: boolean
-        jsonNull:
-          type: boolean
         asJsonNull:
           $ref: '#/components/schemas/JsonNull'
         asNumber:
           type: number
-        asFloat:
-          format: float
-          type: number
-        asByte:
-          format: byte
-          type: string
         asCharacter:
           deprecated: true
           type: string
@@ -1396,6 +1385,22 @@ components:
           type: number
         asBigInteger:
           type: integer
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
+        asJsonObject:
+          $ref: '#/components/schemas/JsonObject'
+        asString:
+          type: string
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
+        jsonNull:
+          type: boolean
+        asFloat:
+          format: float
+          type: number
+        asByte:
+          format: byte
+          type: string
         asShort:
           format: int32
           type: integer
@@ -1405,42 +1410,43 @@ components:
         asByte: asByte
         asBigInteger: 1
         asJsonObject: null
-        string: true
         asCharacter: asCharacter
+        string: true
         jsonPrimitive: true
-        asNumber: 1.4894159098541704
-        asBigDecimal: 7.457744773683766
+        asNumber: 1.2315135367772556
+        asBigDecimal: 1.0246457001441578
         jsonNull: true
         asFloat: 6.846853
-        asLong: 1
-        asInt: 1
+        asLong: 7
+        asInt: 4
         number: true
         asJsonPrimitive: null
         boolean: true
-        asJsonNull:
+        asJsonNull: null
+        asShort: 7
+        asDouble: 2.027123023002322
+        asJsonArray:
           asByte: asByte
-          asJsonObject: null
           asBigInteger: 6
-          jsonPrimitive: true
+          asJsonObject: null
           asCharacter: asCharacter
-          asNumber: 6.683562403749608
-          asBigDecimal: 9.018348186070783
+          jsonPrimitive: true
+          asNumber: 9.965781217890562
+          asBigDecimal: 9.369310271410669
           jsonNull: true
           asFloat: 8.762042
-          asLong: 9
-          asInt: 9
+          empty: true
+          asLong: 5
+          asInt: 4
           asJsonPrimitive: null
           asJsonNull: null
-          asShort: 3
-          asDouble: 5.025004791520295
+          asShort: 9
+          asDouble: 1.1730742509559433
           asJsonArray: null
           asString: asString
           jsonObject: true
           jsonArray: true
           asBoolean: true
-        asShort: 4
-        asDouble: 7.386281948385884
-        asJsonArray: null
         asString: asString
         jsonObject: true
         jsonArray: true
@@ -1457,22 +1463,8 @@ components:
         asLong:
           format: int64
           type: integer
-        boolean:
-          type: boolean
-        asString:
-          type: string
-        number:
-          type: boolean
-        string:
-          type: boolean
         asNumber:
           type: number
-        asFloat:
-          format: float
-          type: number
-        asByte:
-          format: byte
-          type: string
         asCharacter:
           deprecated: true
           type: string
@@ -1480,195 +1472,212 @@ components:
           type: number
         asBigInteger:
           type: integer
+        asString:
+          type: string
+        asFloat:
+          format: float
+          type: number
+        asByte:
+          format: byte
+          type: string
         asShort:
           format: int32
           type: integer
-        asJsonArray:
-          $ref: '#/components/schemas/JsonArray'
-        asJsonObject:
-          $ref: '#/components/schemas/JsonObject'
-        asJsonPrimitive:
-          $ref: '#/components/schemas/JsonPrimitive'
+        boolean:
+          type: boolean
+        number:
+          type: boolean
+        string:
+          type: boolean
         jsonArray:
           type: boolean
         jsonObject:
           type: boolean
         jsonPrimitive:
           type: boolean
-        jsonNull:
-          type: boolean
         asJsonNull:
           $ref: '#/components/schemas/JsonNull'
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
+        asJsonObject:
+          $ref: '#/components/schemas/JsonObject'
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
+        jsonNull:
+          type: boolean
       type: object
     RecordType:
       example:
         id: id
         fields:
           asByte: asByte
+          asBigInteger: 2
           asJsonObject: null
-          asBigInteger: 6
           jsonPrimitive: true
           asCharacter: asCharacter
           asNumber: 6.965117697638846
-          asBigDecimal: 2.8841621266687802
+          asBigDecimal: 1.284659006116532
           jsonNull: true
-          asFloat: 1.284659
+          asFloat: 6.778325
           asLong: 1
           asInt: 6
           asJsonPrimitive:
             asByte: asByte
             asBigInteger: 1
             asJsonObject: null
-            string: true
             asCharacter: asCharacter
+            string: true
             jsonPrimitive: true
-            asNumber: 1.4894159098541704
-            asBigDecimal: 7.457744773683766
+            asNumber: 1.2315135367772556
+            asBigDecimal: 1.0246457001441578
             jsonNull: true
             asFloat: 6.846853
-            asLong: 1
-            asInt: 1
+            asLong: 7
+            asInt: 4
             number: true
             asJsonPrimitive: null
             boolean: true
-            asJsonNull:
+            asJsonNull: null
+            asShort: 7
+            asDouble: 2.027123023002322
+            asJsonArray:
               asByte: asByte
-              asJsonObject: null
               asBigInteger: 6
-              jsonPrimitive: true
+              asJsonObject: null
               asCharacter: asCharacter
-              asNumber: 6.683562403749608
-              asBigDecimal: 9.018348186070783
+              jsonPrimitive: true
+              asNumber: 9.965781217890562
+              asBigDecimal: 9.369310271410669
               jsonNull: true
               asFloat: 8.762042
-              asLong: 9
-              asInt: 9
+              empty: true
+              asLong: 5
+              asInt: 4
               asJsonPrimitive: null
               asJsonNull: null
-              asShort: 3
-              asDouble: 5.025004791520295
+              asShort: 9
+              asDouble: 1.1730742509559433
               asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asShort: 4
-            asDouble: 7.386281948385884
-            asJsonArray: null
             asString: asString
             jsonObject: true
             jsonArray: true
             asBoolean: true
           asJsonNull:
             asByte: asByte
+            asBigInteger: 3
             asJsonObject: null
-            asBigInteger: 6
             jsonPrimitive: true
             asCharacter: asCharacter
-            asNumber: 6.683562403749608
-            asBigDecimal: 9.018348186070783
-            jsonNull: true
-            asFloat: 8.762042
-            asLong: 9
-            asInt: 9
-            asJsonPrimitive: null
-            asJsonNull: null
-            asShort: 3
-            asDouble: 5.025004791520295
-            asJsonArray: null
-            asString: asString
-            jsonObject: true
-            jsonArray: true
-            asBoolean: true
-          asShort: 6
-          asDouble: 0.8008281904610115
-          asJsonArray:
-            asByte: asByte
-            asBigInteger: 2
-            asJsonObject: null
-            asCharacter: asCharacter
-            jsonPrimitive: true
             asNumber: 7.061401241503109
-            asBigDecimal: 3.616076749251911
+            asBigDecimal: 9.301444243932576
             jsonNull: true
-            asFloat: 9.301444
-            empty: true
+            asFloat: 6.4384236
             asLong: 2
             asInt: 5
             asJsonPrimitive:
               asByte: asByte
               asBigInteger: 1
               asJsonObject: null
-              string: true
               asCharacter: asCharacter
+              string: true
               jsonPrimitive: true
-              asNumber: 1.4894159098541704
-              asBigDecimal: 7.457744773683766
+              asNumber: 1.2315135367772556
+              asBigDecimal: 1.0246457001441578
               jsonNull: true
               asFloat: 6.846853
-              asLong: 1
-              asInt: 1
+              asLong: 7
+              asInt: 4
               number: true
               asJsonPrimitive: null
               boolean: true
-              asJsonNull:
+              asJsonNull: null
+              asShort: 7
+              asDouble: 2.027123023002322
+              asJsonArray:
                 asByte: asByte
-                asJsonObject: null
                 asBigInteger: 6
-                jsonPrimitive: true
+                asJsonObject: null
                 asCharacter: asCharacter
-                asNumber: 6.683562403749608
-                asBigDecimal: 9.018348186070783
+                jsonPrimitive: true
+                asNumber: 9.965781217890562
+                asBigDecimal: 9.369310271410669
                 jsonNull: true
                 asFloat: 8.762042
-                asLong: 9
-                asInt: 9
+                empty: true
+                asLong: 5
+                asInt: 4
                 asJsonPrimitive: null
                 asJsonNull: null
-                asShort: 3
-                asDouble: 5.025004791520295
+                asShort: 9
+                asDouble: 1.1730742509559433
                 asJsonArray: null
                 asString: asString
                 jsonObject: true
                 jsonArray: true
                 asBoolean: true
-              asShort: 4
-              asDouble: 7.386281948385884
-              asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asJsonNull:
+            asJsonNull: null
+            asShort: 3
+            asDouble: 5.962133916683182
+            asJsonArray:
               asByte: asByte
-              asJsonObject: null
               asBigInteger: 6
-              jsonPrimitive: true
+              asJsonObject: null
               asCharacter: asCharacter
-              asNumber: 6.683562403749608
-              asBigDecimal: 9.018348186070783
+              jsonPrimitive: true
+              asNumber: 9.965781217890562
+              asBigDecimal: 9.369310271410669
               jsonNull: true
               asFloat: 8.762042
-              asLong: 9
-              asInt: 9
+              empty: true
+              asLong: 5
+              asInt: 4
               asJsonPrimitive: null
               asJsonNull: null
-              asShort: 3
-              asDouble: 5.025004791520295
+              asShort: 9
+              asDouble: 1.1730742509559433
               asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asShort: 4
-            asDouble: 5.962133916683182
+            jsonObject: true
+            asString: asString
+            jsonArray: true
+            asBoolean: true
+          asShort: 6
+          asDouble: 0.8008281904610115
+          asJsonArray:
+            asByte: asByte
+            asBigInteger: 6
+            asJsonObject: null
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 9.965781217890562
+            asBigDecimal: 9.369310271410669
+            jsonNull: true
+            asFloat: 8.762042
+            empty: true
+            asLong: 5
+            asInt: 4
+            asJsonPrimitive: null
+            asJsonNull: null
+            asShort: 9
+            asDouble: 1.1730742509559433
             asJsonArray: null
             asString: asString
             jsonObject: true
             jsonArray: true
             asBoolean: true
-          asString: asString
           jsonObject: true
+          asString: asString
           jsonArray: true
           asBoolean: true
       properties:
@@ -1684,170 +1693,173 @@ components:
         businessKey: businessKey
         processVariables:
           asByte: asByte
+          asBigInteger: 2
           asJsonObject: null
-          asBigInteger: 6
           jsonPrimitive: true
           asCharacter: asCharacter
           asNumber: 6.965117697638846
-          asBigDecimal: 2.8841621266687802
+          asBigDecimal: 1.284659006116532
           jsonNull: true
-          asFloat: 1.284659
+          asFloat: 6.778325
           asLong: 1
           asInt: 6
           asJsonPrimitive:
             asByte: asByte
             asBigInteger: 1
             asJsonObject: null
-            string: true
             asCharacter: asCharacter
+            string: true
             jsonPrimitive: true
-            asNumber: 1.4894159098541704
-            asBigDecimal: 7.457744773683766
+            asNumber: 1.2315135367772556
+            asBigDecimal: 1.0246457001441578
             jsonNull: true
             asFloat: 6.846853
-            asLong: 1
-            asInt: 1
+            asLong: 7
+            asInt: 4
             number: true
             asJsonPrimitive: null
             boolean: true
-            asJsonNull:
+            asJsonNull: null
+            asShort: 7
+            asDouble: 2.027123023002322
+            asJsonArray:
               asByte: asByte
-              asJsonObject: null
               asBigInteger: 6
-              jsonPrimitive: true
+              asJsonObject: null
               asCharacter: asCharacter
-              asNumber: 6.683562403749608
-              asBigDecimal: 9.018348186070783
+              jsonPrimitive: true
+              asNumber: 9.965781217890562
+              asBigDecimal: 9.369310271410669
               jsonNull: true
               asFloat: 8.762042
-              asLong: 9
-              asInt: 9
+              empty: true
+              asLong: 5
+              asInt: 4
               asJsonPrimitive: null
               asJsonNull: null
-              asShort: 3
-              asDouble: 5.025004791520295
+              asShort: 9
+              asDouble: 1.1730742509559433
               asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asShort: 4
-            asDouble: 7.386281948385884
-            asJsonArray: null
             asString: asString
             jsonObject: true
             jsonArray: true
             asBoolean: true
           asJsonNull:
             asByte: asByte
+            asBigInteger: 3
             asJsonObject: null
-            asBigInteger: 6
             jsonPrimitive: true
             asCharacter: asCharacter
-            asNumber: 6.683562403749608
-            asBigDecimal: 9.018348186070783
-            jsonNull: true
-            asFloat: 8.762042
-            asLong: 9
-            asInt: 9
-            asJsonPrimitive: null
-            asJsonNull: null
-            asShort: 3
-            asDouble: 5.025004791520295
-            asJsonArray: null
-            asString: asString
-            jsonObject: true
-            jsonArray: true
-            asBoolean: true
-          asShort: 6
-          asDouble: 0.8008281904610115
-          asJsonArray:
-            asByte: asByte
-            asBigInteger: 2
-            asJsonObject: null
-            asCharacter: asCharacter
-            jsonPrimitive: true
             asNumber: 7.061401241503109
-            asBigDecimal: 3.616076749251911
+            asBigDecimal: 9.301444243932576
             jsonNull: true
-            asFloat: 9.301444
-            empty: true
+            asFloat: 6.4384236
             asLong: 2
             asInt: 5
             asJsonPrimitive:
               asByte: asByte
               asBigInteger: 1
               asJsonObject: null
-              string: true
               asCharacter: asCharacter
+              string: true
               jsonPrimitive: true
-              asNumber: 1.4894159098541704
-              asBigDecimal: 7.457744773683766
+              asNumber: 1.2315135367772556
+              asBigDecimal: 1.0246457001441578
               jsonNull: true
               asFloat: 6.846853
-              asLong: 1
-              asInt: 1
+              asLong: 7
+              asInt: 4
               number: true
               asJsonPrimitive: null
               boolean: true
-              asJsonNull:
+              asJsonNull: null
+              asShort: 7
+              asDouble: 2.027123023002322
+              asJsonArray:
                 asByte: asByte
-                asJsonObject: null
                 asBigInteger: 6
-                jsonPrimitive: true
+                asJsonObject: null
                 asCharacter: asCharacter
-                asNumber: 6.683562403749608
-                asBigDecimal: 9.018348186070783
+                jsonPrimitive: true
+                asNumber: 9.965781217890562
+                asBigDecimal: 9.369310271410669
                 jsonNull: true
                 asFloat: 8.762042
-                asLong: 9
-                asInt: 9
+                empty: true
+                asLong: 5
+                asInt: 4
                 asJsonPrimitive: null
                 asJsonNull: null
-                asShort: 3
-                asDouble: 5.025004791520295
+                asShort: 9
+                asDouble: 1.1730742509559433
                 asJsonArray: null
                 asString: asString
                 jsonObject: true
                 jsonArray: true
                 asBoolean: true
-              asShort: 4
-              asDouble: 7.386281948385884
-              asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asJsonNull:
+            asJsonNull: null
+            asShort: 3
+            asDouble: 5.962133916683182
+            asJsonArray:
               asByte: asByte
-              asJsonObject: null
               asBigInteger: 6
-              jsonPrimitive: true
+              asJsonObject: null
               asCharacter: asCharacter
-              asNumber: 6.683562403749608
-              asBigDecimal: 9.018348186070783
+              jsonPrimitive: true
+              asNumber: 9.965781217890562
+              asBigDecimal: 9.369310271410669
               jsonNull: true
               asFloat: 8.762042
-              asLong: 9
-              asInt: 9
+              empty: true
+              asLong: 5
+              asInt: 4
               asJsonPrimitive: null
               asJsonNull: null
-              asShort: 3
-              asDouble: 5.025004791520295
+              asShort: 9
+              asDouble: 1.1730742509559433
               asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asShort: 4
-            asDouble: 5.962133916683182
+            jsonObject: true
+            asString: asString
+            jsonArray: true
+            asBoolean: true
+          asShort: 6
+          asDouble: 0.8008281904610115
+          asJsonArray:
+            asByte: asByte
+            asBigInteger: 6
+            asJsonObject: null
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 9.965781217890562
+            asBigDecimal: 9.369310271410669
+            jsonNull: true
+            asFloat: 8.762042
+            empty: true
+            asLong: 5
+            asInt: 4
+            asJsonPrimitive: null
+            asJsonNull: null
+            asShort: 9
+            asDouble: 1.1730742509559433
             asJsonArray: null
             asString: asString
             jsonObject: true
             jsonArray: true
             asBoolean: true
-          asString: asString
           jsonObject: true
+          asString: asString
           jsonArray: true
           asBoolean: true
       properties:
@@ -1867,170 +1879,173 @@ components:
         key: key
         structure:
           asByte: asByte
+          asBigInteger: 2
           asJsonObject: null
-          asBigInteger: 6
           jsonPrimitive: true
           asCharacter: asCharacter
           asNumber: 6.965117697638846
-          asBigDecimal: 2.8841621266687802
+          asBigDecimal: 1.284659006116532
           jsonNull: true
-          asFloat: 1.284659
+          asFloat: 6.778325
           asLong: 1
           asInt: 6
           asJsonPrimitive:
             asByte: asByte
             asBigInteger: 1
             asJsonObject: null
-            string: true
             asCharacter: asCharacter
+            string: true
             jsonPrimitive: true
-            asNumber: 1.4894159098541704
-            asBigDecimal: 7.457744773683766
+            asNumber: 1.2315135367772556
+            asBigDecimal: 1.0246457001441578
             jsonNull: true
             asFloat: 6.846853
-            asLong: 1
-            asInt: 1
+            asLong: 7
+            asInt: 4
             number: true
             asJsonPrimitive: null
             boolean: true
-            asJsonNull:
+            asJsonNull: null
+            asShort: 7
+            asDouble: 2.027123023002322
+            asJsonArray:
               asByte: asByte
-              asJsonObject: null
               asBigInteger: 6
-              jsonPrimitive: true
+              asJsonObject: null
               asCharacter: asCharacter
-              asNumber: 6.683562403749608
-              asBigDecimal: 9.018348186070783
+              jsonPrimitive: true
+              asNumber: 9.965781217890562
+              asBigDecimal: 9.369310271410669
               jsonNull: true
               asFloat: 8.762042
-              asLong: 9
-              asInt: 9
+              empty: true
+              asLong: 5
+              asInt: 4
               asJsonPrimitive: null
               asJsonNull: null
-              asShort: 3
-              asDouble: 5.025004791520295
+              asShort: 9
+              asDouble: 1.1730742509559433
               asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asShort: 4
-            asDouble: 7.386281948385884
-            asJsonArray: null
             asString: asString
             jsonObject: true
             jsonArray: true
             asBoolean: true
           asJsonNull:
             asByte: asByte
+            asBigInteger: 3
             asJsonObject: null
-            asBigInteger: 6
             jsonPrimitive: true
             asCharacter: asCharacter
-            asNumber: 6.683562403749608
-            asBigDecimal: 9.018348186070783
-            jsonNull: true
-            asFloat: 8.762042
-            asLong: 9
-            asInt: 9
-            asJsonPrimitive: null
-            asJsonNull: null
-            asShort: 3
-            asDouble: 5.025004791520295
-            asJsonArray: null
-            asString: asString
-            jsonObject: true
-            jsonArray: true
-            asBoolean: true
-          asShort: 6
-          asDouble: 0.8008281904610115
-          asJsonArray:
-            asByte: asByte
-            asBigInteger: 2
-            asJsonObject: null
-            asCharacter: asCharacter
-            jsonPrimitive: true
             asNumber: 7.061401241503109
-            asBigDecimal: 3.616076749251911
+            asBigDecimal: 9.301444243932576
             jsonNull: true
-            asFloat: 9.301444
-            empty: true
+            asFloat: 6.4384236
             asLong: 2
             asInt: 5
             asJsonPrimitive:
               asByte: asByte
               asBigInteger: 1
               asJsonObject: null
-              string: true
               asCharacter: asCharacter
+              string: true
               jsonPrimitive: true
-              asNumber: 1.4894159098541704
-              asBigDecimal: 7.457744773683766
+              asNumber: 1.2315135367772556
+              asBigDecimal: 1.0246457001441578
               jsonNull: true
               asFloat: 6.846853
-              asLong: 1
-              asInt: 1
+              asLong: 7
+              asInt: 4
               number: true
               asJsonPrimitive: null
               boolean: true
-              asJsonNull:
+              asJsonNull: null
+              asShort: 7
+              asDouble: 2.027123023002322
+              asJsonArray:
                 asByte: asByte
-                asJsonObject: null
                 asBigInteger: 6
-                jsonPrimitive: true
+                asJsonObject: null
                 asCharacter: asCharacter
-                asNumber: 6.683562403749608
-                asBigDecimal: 9.018348186070783
+                jsonPrimitive: true
+                asNumber: 9.965781217890562
+                asBigDecimal: 9.369310271410669
                 jsonNull: true
                 asFloat: 8.762042
-                asLong: 9
-                asInt: 9
+                empty: true
+                asLong: 5
+                asInt: 4
                 asJsonPrimitive: null
                 asJsonNull: null
-                asShort: 3
-                asDouble: 5.025004791520295
+                asShort: 9
+                asDouble: 1.1730742509559433
                 asJsonArray: null
                 asString: asString
                 jsonObject: true
                 jsonArray: true
                 asBoolean: true
-              asShort: 4
-              asDouble: 7.386281948385884
-              asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asJsonNull:
+            asJsonNull: null
+            asShort: 3
+            asDouble: 5.962133916683182
+            asJsonArray:
               asByte: asByte
-              asJsonObject: null
               asBigInteger: 6
-              jsonPrimitive: true
+              asJsonObject: null
               asCharacter: asCharacter
-              asNumber: 6.683562403749608
-              asBigDecimal: 9.018348186070783
+              jsonPrimitive: true
+              asNumber: 9.965781217890562
+              asBigDecimal: 9.369310271410669
               jsonNull: true
               asFloat: 8.762042
-              asLong: 9
-              asInt: 9
+              empty: true
+              asLong: 5
+              asInt: 4
               asJsonPrimitive: null
               asJsonNull: null
-              asShort: 3
-              asDouble: 5.025004791520295
+              asShort: 9
+              asDouble: 1.1730742509559433
               asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asShort: 4
-            asDouble: 5.962133916683182
+            jsonObject: true
+            asString: asString
+            jsonArray: true
+            asBoolean: true
+          asShort: 6
+          asDouble: 0.8008281904610115
+          asJsonArray:
+            asByte: asByte
+            asBigInteger: 6
+            asJsonObject: null
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 9.965781217890562
+            asBigDecimal: 9.369310271410669
+            jsonNull: true
+            asFloat: 8.762042
+            empty: true
+            asLong: 5
+            asInt: 4
+            asJsonPrimitive: null
+            asJsonNull: null
+            asShort: 9
+            asDouble: 1.1730742509559433
             asJsonArray: null
             asString: asString
             jsonObject: true
             jsonArray: true
             asBoolean: true
-          asString: asString
           jsonObject: true
+          asString: asString
           jsonArray: true
           asBoolean: true
       properties:
@@ -2088,11 +2103,14 @@ components:
     CaseAttribute:
       example:
         name: name
+        type: type
         value: value
       properties:
         name:
           type: string
         value:
+          type: string
+        type:
           type: string
       type: object
     CaseInstance:
@@ -2128,8 +2146,10 @@ components:
         businessKey: businessKey
         attributes:
         - name: name
+          type: type
           value: value
         - name: name
+          type: type
           value: value
         id: id
         get_id: get_id
@@ -2174,170 +2194,173 @@ components:
         formKey: formKey
         kanbanConfig:
           asByte: asByte
+          asBigInteger: 2
           asJsonObject: null
-          asBigInteger: 6
           jsonPrimitive: true
           asCharacter: asCharacter
           asNumber: 6.965117697638846
-          asBigDecimal: 2.8841621266687802
+          asBigDecimal: 1.284659006116532
           jsonNull: true
-          asFloat: 1.284659
+          asFloat: 6.778325
           asLong: 1
           asInt: 6
           asJsonPrimitive:
             asByte: asByte
             asBigInteger: 1
             asJsonObject: null
-            string: true
             asCharacter: asCharacter
+            string: true
             jsonPrimitive: true
-            asNumber: 1.4894159098541704
-            asBigDecimal: 7.457744773683766
+            asNumber: 1.2315135367772556
+            asBigDecimal: 1.0246457001441578
             jsonNull: true
             asFloat: 6.846853
-            asLong: 1
-            asInt: 1
+            asLong: 7
+            asInt: 4
             number: true
             asJsonPrimitive: null
             boolean: true
-            asJsonNull:
+            asJsonNull: null
+            asShort: 7
+            asDouble: 2.027123023002322
+            asJsonArray:
               asByte: asByte
-              asJsonObject: null
               asBigInteger: 6
-              jsonPrimitive: true
+              asJsonObject: null
               asCharacter: asCharacter
-              asNumber: 6.683562403749608
-              asBigDecimal: 9.018348186070783
+              jsonPrimitive: true
+              asNumber: 9.965781217890562
+              asBigDecimal: 9.369310271410669
               jsonNull: true
               asFloat: 8.762042
-              asLong: 9
-              asInt: 9
+              empty: true
+              asLong: 5
+              asInt: 4
               asJsonPrimitive: null
               asJsonNull: null
-              asShort: 3
-              asDouble: 5.025004791520295
+              asShort: 9
+              asDouble: 1.1730742509559433
               asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asShort: 4
-            asDouble: 7.386281948385884
-            asJsonArray: null
             asString: asString
             jsonObject: true
             jsonArray: true
             asBoolean: true
           asJsonNull:
             asByte: asByte
+            asBigInteger: 3
             asJsonObject: null
-            asBigInteger: 6
             jsonPrimitive: true
             asCharacter: asCharacter
-            asNumber: 6.683562403749608
-            asBigDecimal: 9.018348186070783
-            jsonNull: true
-            asFloat: 8.762042
-            asLong: 9
-            asInt: 9
-            asJsonPrimitive: null
-            asJsonNull: null
-            asShort: 3
-            asDouble: 5.025004791520295
-            asJsonArray: null
-            asString: asString
-            jsonObject: true
-            jsonArray: true
-            asBoolean: true
-          asShort: 6
-          asDouble: 0.8008281904610115
-          asJsonArray:
-            asByte: asByte
-            asBigInteger: 2
-            asJsonObject: null
-            asCharacter: asCharacter
-            jsonPrimitive: true
             asNumber: 7.061401241503109
-            asBigDecimal: 3.616076749251911
+            asBigDecimal: 9.301444243932576
             jsonNull: true
-            asFloat: 9.301444
-            empty: true
+            asFloat: 6.4384236
             asLong: 2
             asInt: 5
             asJsonPrimitive:
               asByte: asByte
               asBigInteger: 1
               asJsonObject: null
-              string: true
               asCharacter: asCharacter
+              string: true
               jsonPrimitive: true
-              asNumber: 1.4894159098541704
-              asBigDecimal: 7.457744773683766
+              asNumber: 1.2315135367772556
+              asBigDecimal: 1.0246457001441578
               jsonNull: true
               asFloat: 6.846853
-              asLong: 1
-              asInt: 1
+              asLong: 7
+              asInt: 4
               number: true
               asJsonPrimitive: null
               boolean: true
-              asJsonNull:
+              asJsonNull: null
+              asShort: 7
+              asDouble: 2.027123023002322
+              asJsonArray:
                 asByte: asByte
-                asJsonObject: null
                 asBigInteger: 6
-                jsonPrimitive: true
+                asJsonObject: null
                 asCharacter: asCharacter
-                asNumber: 6.683562403749608
-                asBigDecimal: 9.018348186070783
+                jsonPrimitive: true
+                asNumber: 9.965781217890562
+                asBigDecimal: 9.369310271410669
                 jsonNull: true
                 asFloat: 8.762042
-                asLong: 9
-                asInt: 9
+                empty: true
+                asLong: 5
+                asInt: 4
                 asJsonPrimitive: null
                 asJsonNull: null
-                asShort: 3
-                asDouble: 5.025004791520295
+                asShort: 9
+                asDouble: 1.1730742509559433
                 asJsonArray: null
                 asString: asString
                 jsonObject: true
                 jsonArray: true
                 asBoolean: true
-              asShort: 4
-              asDouble: 7.386281948385884
-              asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asJsonNull:
+            asJsonNull: null
+            asShort: 3
+            asDouble: 5.962133916683182
+            asJsonArray:
               asByte: asByte
-              asJsonObject: null
               asBigInteger: 6
-              jsonPrimitive: true
+              asJsonObject: null
               asCharacter: asCharacter
-              asNumber: 6.683562403749608
-              asBigDecimal: 9.018348186070783
+              jsonPrimitive: true
+              asNumber: 9.965781217890562
+              asBigDecimal: 9.369310271410669
               jsonNull: true
               asFloat: 8.762042
-              asLong: 9
-              asInt: 9
+              empty: true
+              asLong: 5
+              asInt: 4
               asJsonPrimitive: null
               asJsonNull: null
-              asShort: 3
-              asDouble: 5.025004791520295
+              asShort: 9
+              asDouble: 1.1730742509559433
               asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asShort: 4
-            asDouble: 5.962133916683182
+            jsonObject: true
+            asString: asString
+            jsonArray: true
+            asBoolean: true
+          asShort: 6
+          asDouble: 0.8008281904610115
+          asJsonArray:
+            asByte: asByte
+            asBigInteger: 6
+            asJsonObject: null
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 9.965781217890562
+            asBigDecimal: 9.369310271410669
+            jsonNull: true
+            asFloat: 8.762042
+            empty: true
+            asLong: 5
+            asInt: 4
+            asJsonPrimitive: null
+            asJsonNull: null
+            asShort: 9
+            asDouble: 1.1730742509559433
             asJsonArray: null
             asString: asString
             jsonObject: true
             jsonArray: true
             asBoolean: true
-          asString: asString
           jsonObject: true
+          asString: asString
           jsonArray: true
           asBoolean: true
         name: name
@@ -2464,170 +2487,173 @@ components:
       example:
         variables:
           asByte: asByte
+          asBigInteger: 2
           asJsonObject: null
-          asBigInteger: 6
           jsonPrimitive: true
           asCharacter: asCharacter
           asNumber: 6.965117697638846
-          asBigDecimal: 2.8841621266687802
+          asBigDecimal: 1.284659006116532
           jsonNull: true
-          asFloat: 1.284659
+          asFloat: 6.778325
           asLong: 1
           asInt: 6
           asJsonPrimitive:
             asByte: asByte
             asBigInteger: 1
             asJsonObject: null
-            string: true
             asCharacter: asCharacter
+            string: true
             jsonPrimitive: true
-            asNumber: 1.4894159098541704
-            asBigDecimal: 7.457744773683766
+            asNumber: 1.2315135367772556
+            asBigDecimal: 1.0246457001441578
             jsonNull: true
             asFloat: 6.846853
-            asLong: 1
-            asInt: 1
+            asLong: 7
+            asInt: 4
             number: true
             asJsonPrimitive: null
             boolean: true
-            asJsonNull:
+            asJsonNull: null
+            asShort: 7
+            asDouble: 2.027123023002322
+            asJsonArray:
               asByte: asByte
-              asJsonObject: null
               asBigInteger: 6
-              jsonPrimitive: true
+              asJsonObject: null
               asCharacter: asCharacter
-              asNumber: 6.683562403749608
-              asBigDecimal: 9.018348186070783
+              jsonPrimitive: true
+              asNumber: 9.965781217890562
+              asBigDecimal: 9.369310271410669
               jsonNull: true
               asFloat: 8.762042
-              asLong: 9
-              asInt: 9
+              empty: true
+              asLong: 5
+              asInt: 4
               asJsonPrimitive: null
               asJsonNull: null
-              asShort: 3
-              asDouble: 5.025004791520295
+              asShort: 9
+              asDouble: 1.1730742509559433
               asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asShort: 4
-            asDouble: 7.386281948385884
-            asJsonArray: null
             asString: asString
             jsonObject: true
             jsonArray: true
             asBoolean: true
           asJsonNull:
             asByte: asByte
+            asBigInteger: 3
             asJsonObject: null
-            asBigInteger: 6
             jsonPrimitive: true
             asCharacter: asCharacter
-            asNumber: 6.683562403749608
-            asBigDecimal: 9.018348186070783
-            jsonNull: true
-            asFloat: 8.762042
-            asLong: 9
-            asInt: 9
-            asJsonPrimitive: null
-            asJsonNull: null
-            asShort: 3
-            asDouble: 5.025004791520295
-            asJsonArray: null
-            asString: asString
-            jsonObject: true
-            jsonArray: true
-            asBoolean: true
-          asShort: 6
-          asDouble: 0.8008281904610115
-          asJsonArray:
-            asByte: asByte
-            asBigInteger: 2
-            asJsonObject: null
-            asCharacter: asCharacter
-            jsonPrimitive: true
             asNumber: 7.061401241503109
-            asBigDecimal: 3.616076749251911
+            asBigDecimal: 9.301444243932576
             jsonNull: true
-            asFloat: 9.301444
-            empty: true
+            asFloat: 6.4384236
             asLong: 2
             asInt: 5
             asJsonPrimitive:
               asByte: asByte
               asBigInteger: 1
               asJsonObject: null
-              string: true
               asCharacter: asCharacter
+              string: true
               jsonPrimitive: true
-              asNumber: 1.4894159098541704
-              asBigDecimal: 7.457744773683766
+              asNumber: 1.2315135367772556
+              asBigDecimal: 1.0246457001441578
               jsonNull: true
               asFloat: 6.846853
-              asLong: 1
-              asInt: 1
+              asLong: 7
+              asInt: 4
               number: true
               asJsonPrimitive: null
               boolean: true
-              asJsonNull:
+              asJsonNull: null
+              asShort: 7
+              asDouble: 2.027123023002322
+              asJsonArray:
                 asByte: asByte
-                asJsonObject: null
                 asBigInteger: 6
-                jsonPrimitive: true
+                asJsonObject: null
                 asCharacter: asCharacter
-                asNumber: 6.683562403749608
-                asBigDecimal: 9.018348186070783
+                jsonPrimitive: true
+                asNumber: 9.965781217890562
+                asBigDecimal: 9.369310271410669
                 jsonNull: true
                 asFloat: 8.762042
-                asLong: 9
-                asInt: 9
+                empty: true
+                asLong: 5
+                asInt: 4
                 asJsonPrimitive: null
                 asJsonNull: null
-                asShort: 3
-                asDouble: 5.025004791520295
+                asShort: 9
+                asDouble: 1.1730742509559433
                 asJsonArray: null
                 asString: asString
                 jsonObject: true
                 jsonArray: true
                 asBoolean: true
-              asShort: 4
-              asDouble: 7.386281948385884
-              asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asJsonNull:
+            asJsonNull: null
+            asShort: 3
+            asDouble: 5.962133916683182
+            asJsonArray:
               asByte: asByte
-              asJsonObject: null
               asBigInteger: 6
-              jsonPrimitive: true
+              asJsonObject: null
               asCharacter: asCharacter
-              asNumber: 6.683562403749608
-              asBigDecimal: 9.018348186070783
+              jsonPrimitive: true
+              asNumber: 9.965781217890562
+              asBigDecimal: 9.369310271410669
               jsonNull: true
               asFloat: 8.762042
-              asLong: 9
-              asInt: 9
+              empty: true
+              asLong: 5
+              asInt: 4
               asJsonPrimitive: null
               asJsonNull: null
-              asShort: 3
-              asDouble: 5.025004791520295
+              asShort: 9
+              asDouble: 1.1730742509559433
               asJsonArray: null
               asString: asString
               jsonObject: true
               jsonArray: true
               asBoolean: true
-            asShort: 4
-            asDouble: 5.962133916683182
+            jsonObject: true
+            asString: asString
+            jsonArray: true
+            asBoolean: true
+          asShort: 6
+          asDouble: 0.8008281904610115
+          asJsonArray:
+            asByte: asByte
+            asBigInteger: 6
+            asJsonObject: null
+            asCharacter: asCharacter
+            jsonPrimitive: true
+            asNumber: 9.965781217890562
+            asBigDecimal: 9.369310271410669
+            jsonNull: true
+            asFloat: 8.762042
+            empty: true
+            asLong: 5
+            asInt: 4
+            asJsonPrimitive: null
+            asJsonNull: null
+            asShort: 9
+            asDouble: 1.1730742509559433
             asJsonArray: null
             asString: asString
             jsonObject: true
             jsonArray: true
             asBoolean: true
-          asString: asString
           jsonObject: true
+          asString: asString
           jsonArray: true
           asBoolean: true
         caseInstanceId: caseInstanceId

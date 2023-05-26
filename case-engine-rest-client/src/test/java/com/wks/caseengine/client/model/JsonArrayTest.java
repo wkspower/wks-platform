@@ -82,35 +82,11 @@ public class JsonArrayTest {
     }
 
     /**
-     * Test the property 'asString'
-     */
-    @Test
-    public void asStringTest() {
-        // TODO: test asString
-    }
-
-    /**
      * Test the property 'asNumber'
      */
     @Test
     public void asNumberTest() {
         // TODO: test asNumber
-    }
-
-    /**
-     * Test the property 'asFloat'
-     */
-    @Test
-    public void asFloatTest() {
-        // TODO: test asFloat
-    }
-
-    /**
-     * Test the property 'asByte'
-     */
-    @Test
-    public void asByteTest() {
-        // TODO: test asByte
     }
 
     /**
@@ -138,35 +114,35 @@ public class JsonArrayTest {
     }
 
     /**
+     * Test the property 'asString'
+     */
+    @Test
+    public void asStringTest() {
+        // TODO: test asString
+    }
+
+    /**
+     * Test the property 'asFloat'
+     */
+    @Test
+    public void asFloatTest() {
+        // TODO: test asFloat
+    }
+
+    /**
+     * Test the property 'asByte'
+     */
+    @Test
+    public void asByteTest() {
+        // TODO: test asByte
+    }
+
+    /**
      * Test the property 'asShort'
      */
     @Test
     public void asShortTest() {
         // TODO: test asShort
-    }
-
-    /**
-     * Test the property 'asJsonArray'
-     */
-    @Test
-    public void asJsonArrayTest() {
-        // TODO: test asJsonArray
-    }
-
-    /**
-     * Test the property 'asJsonObject'
-     */
-    @Test
-    public void asJsonObjectTest() {
-        // TODO: test asJsonObject
-    }
-
-    /**
-     * Test the property 'asJsonPrimitive'
-     */
-    @Test
-    public void asJsonPrimitiveTest() {
-        // TODO: test asJsonPrimitive
     }
 
     /**
@@ -194,19 +170,43 @@ public class JsonArrayTest {
     }
 
     /**
-     * Test the property 'jsonNull'
-     */
-    @Test
-    public void jsonNullTest() {
-        // TODO: test jsonNull
-    }
-
-    /**
      * Test the property 'asJsonNull'
      */
     @Test
     public void asJsonNullTest() {
         // TODO: test asJsonNull
+    }
+
+    /**
+     * Test the property 'asJsonPrimitive'
+     */
+    @Test
+    public void asJsonPrimitiveTest() {
+        // TODO: test asJsonPrimitive
+    }
+
+    /**
+     * Test the property 'asJsonObject'
+     */
+    @Test
+    public void asJsonObjectTest() {
+        // TODO: test asJsonObject
+    }
+
+    /**
+     * Test the property 'asJsonArray'
+     */
+    @Test
+    public void asJsonArrayTest() {
+        // TODO: test asJsonArray
+    }
+
+    /**
+     * Test the property 'jsonNull'
+     */
+    @Test
+    public void jsonNullTest() {
+        // TODO: test jsonNull
     }
 
 }

@@ -31,14 +31,19 @@ class CaseInstanceCreateServiceImpl implements CaseInstanceCreateService {
 			throw new CaseDefinitionNotFoundException();
 		}
 
-		String businessKey = businessKeyCreator.generate();
-		CaseInstance caseInstance = CaseInstance.builder()
-				.businessKey(businessKey)
+		String businessKey = null;
+		if (caseInstanceParam.getBusinessKey() == null) {
+			businessKey = businessKeyCreator.generate();
+		} else {
+			businessKey = caseInstanceParam.getBusinessKey();
+		}
+
+		CaseInstance caseInstance = CaseInstance.builder().businessKey(businessKey)
 				.stage(caseDefinition.getStages().stream().sorted(Comparator.comparing(CaseStage::getIndex)).findFirst()
 						.get().getName())
 				.attributes(caseInstanceParam.getAttributes()).caseDefinitionId(caseDefinition.getId())
-				.caseOwner(caseInstanceParam.getCaseOwner())
-				.caseOwnerName(caseInstanceParam.getCaseOwnerName()).build();
+				.caseOwner(caseInstanceParam.getCaseOwner()).caseOwnerName(caseInstanceParam.getCaseOwnerName())
+				.build();
 
 		repository.save(caseInstance);
 
@@ -52,9 +57,9 @@ class CaseInstanceCreateServiceImpl implements CaseInstanceCreateService {
 		}
 
 		String businessKey = businessKeyCreator.generate();
-		CaseInstance caseInstance = CaseInstance
-				.builder().businessKey(businessKey).stage(caseDefinition.getStages().stream()
-						.sorted(Comparator.comparing(CaseStage::getIndex)).findFirst().get().getName())
+		CaseInstance caseInstance = CaseInstance.builder().businessKey(businessKey)
+				.stage(caseDefinition.getStages().stream().sorted(Comparator.comparing(CaseStage::getIndex)).findFirst()
+						.get().getName())
 				.attributes(new ArrayList<>()).caseDefinitionId(caseDefinition.getId()).build();
 
 		repository.save(caseInstance);

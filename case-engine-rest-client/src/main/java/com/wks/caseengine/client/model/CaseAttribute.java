@@ -28,15 +28,19 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  */
 @JsonPropertyOrder({
   CaseAttribute.JSON_PROPERTY_NAME,
-  CaseAttribute.JSON_PROPERTY_VALUE
+  CaseAttribute.JSON_PROPERTY_VALUE,
+  CaseAttribute.JSON_PROPERTY_TYPE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2023-05-25T11:02:43.660489+01:00[Europe/Dublin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2023-05-26T12:12:09.236578+01:00[Europe/Dublin]")
 public class CaseAttribute {
   public static final String JSON_PROPERTY_NAME = "name";
   private String name;
 
   public static final String JSON_PROPERTY_VALUE = "value";
   private String value;
+
+  public static final String JSON_PROPERTY_TYPE = "type";
+  private String type;
 
   public CaseAttribute() {
   }
@@ -92,6 +96,32 @@ public class CaseAttribute {
     this.value = value;
   }
 
+
+  public CaseAttribute type(String type) {
+    
+    this.type = type;
+    return this;
+  }
+
+   /**
+   * Get type
+   * @return type
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_TYPE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getType() {
+    return type;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_TYPE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setType(String type) {
+    this.type = type;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -102,12 +132,13 @@ public class CaseAttribute {
     }
     CaseAttribute caseAttribute = (CaseAttribute) o;
     return Objects.equals(this.name, caseAttribute.name) &&
-        Objects.equals(this.value, caseAttribute.value);
+        Objects.equals(this.value, caseAttribute.value) &&
+        Objects.equals(this.type, caseAttribute.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, value);
+    return Objects.hash(name, value, type);
   }
 
   @Override
@@ -116,6 +147,7 @@ public class CaseAttribute {
     sb.append("class CaseAttribute {\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    value: ").append(toIndentedString(value)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("}");
     return sb.toString();
   }

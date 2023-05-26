@@ -33,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ProcessMessage.JSON_PROPERTY_BUSINESS_KEY,
   ProcessMessage.JSON_PROPERTY_PROCESS_VARIABLES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2023-05-25T11:02:43.660489+01:00[Europe/Dublin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2023-05-26T12:12:09.236578+01:00[Europe/Dublin]")
 public class ProcessMessage {
   public static final String JSON_PROPERTY_TENANT_ID = "tenantId";
   private String tenantId;

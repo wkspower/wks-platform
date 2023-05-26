@@ -39,7 +39,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   CaseDefinition.JSON_PROPERTY_KANBAN_CONFIG,
   CaseDefinition.JSON_PROPERTY_DEPLOYED
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2023-05-25T11:02:43.660489+01:00[Europe/Dublin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2023-05-26T12:12:09.236578+01:00[Europe/Dublin]")
 public class CaseDefinition {
   public static final String JSON_PROPERTY_ID = "id";
   private String id;

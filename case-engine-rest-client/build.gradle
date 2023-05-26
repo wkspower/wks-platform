@@ -2,7 +2,7 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 
 group = 'com.wks'
-version = '0.0.1-SNAPSHOT'
+version = '1.0-SNAPSHOT'
 
 buildscript {
     repositories {
@@ -84,7 +84,7 @@ if(hasProperty('target') && target == 'android') {
     publishing {
         publications {
             maven(MavenPublication) {
-               artifactId = 'wks-case-engine-api-client'
+               artifactId = 'case-engine-rest-client'
                from components.java
             }
         }

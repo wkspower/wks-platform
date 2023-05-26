@@ -35,24 +35,24 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   JsonNull.JSON_PROPERTY_AS_DOUBLE,
   JsonNull.JSON_PROPERTY_AS_INT,
   JsonNull.JSON_PROPERTY_AS_LONG,
-  JsonNull.JSON_PROPERTY_AS_STRING,
-  JsonNull.JSON_PROPERTY_AS_JSON_ARRAY,
-  JsonNull.JSON_PROPERTY_AS_JSON_OBJECT,
-  JsonNull.JSON_PROPERTY_AS_JSON_PRIMITIVE,
   JsonNull.JSON_PROPERTY_JSON_ARRAY,
   JsonNull.JSON_PROPERTY_JSON_OBJECT,
   JsonNull.JSON_PROPERTY_JSON_PRIMITIVE,
-  JsonNull.JSON_PROPERTY_JSON_NULL,
   JsonNull.JSON_PROPERTY_AS_JSON_NULL,
   JsonNull.JSON_PROPERTY_AS_NUMBER,
-  JsonNull.JSON_PROPERTY_AS_FLOAT,
-  JsonNull.JSON_PROPERTY_AS_BYTE,
   JsonNull.JSON_PROPERTY_AS_CHARACTER,
   JsonNull.JSON_PROPERTY_AS_BIG_DECIMAL,
   JsonNull.JSON_PROPERTY_AS_BIG_INTEGER,
+  JsonNull.JSON_PROPERTY_AS_JSON_PRIMITIVE,
+  JsonNull.JSON_PROPERTY_AS_JSON_OBJECT,
+  JsonNull.JSON_PROPERTY_AS_STRING,
+  JsonNull.JSON_PROPERTY_AS_JSON_ARRAY,
+  JsonNull.JSON_PROPERTY_JSON_NULL,
+  JsonNull.JSON_PROPERTY_AS_FLOAT,
+  JsonNull.JSON_PROPERTY_AS_BYTE,
   JsonNull.JSON_PROPERTY_AS_SHORT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2023-05-25T11:02:43.660489+01:00[Europe/Dublin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2023-05-26T12:12:09.236578+01:00[Europe/Dublin]")
 public class JsonNull {
   public static final String JSON_PROPERTY_AS_BOOLEAN = "asBoolean";
   private Boolean asBoolean;
@@ -66,18 +66,6 @@ public class JsonNull {
   public static final String JSON_PROPERTY_AS_LONG = "asLong";
   private Long asLong;
 
-  public static final String JSON_PROPERTY_AS_STRING = "asString";
-  private String asString;
-
-  public static final String JSON_PROPERTY_AS_JSON_ARRAY = "asJsonArray";
-  private JsonArray asJsonArray;
-
-  public static final String JSON_PROPERTY_AS_JSON_OBJECT = "asJsonObject";
-  private JsonObject asJsonObject;
-
-  public static final String JSON_PROPERTY_AS_JSON_PRIMITIVE = "asJsonPrimitive";
-  private JsonPrimitive asJsonPrimitive;
-
   public static final String JSON_PROPERTY_JSON_ARRAY = "jsonArray";
   private Boolean jsonArray;
 
@@ -87,20 +75,11 @@ public class JsonNull {
   public static final String JSON_PROPERTY_JSON_PRIMITIVE = "jsonPrimitive";
   private Boolean jsonPrimitive;
 
-  public static final String JSON_PROPERTY_JSON_NULL = "jsonNull";
-  private Boolean jsonNull;
-
   public static final String JSON_PROPERTY_AS_JSON_NULL = "asJsonNull";
   private JsonNull asJsonNull;
 
   public static final String JSON_PROPERTY_AS_NUMBER = "asNumber";
   private BigDecimal asNumber;
-
-  public static final String JSON_PROPERTY_AS_FLOAT = "asFloat";
-  private Float asFloat;
-
-  public static final String JSON_PROPERTY_AS_BYTE = "asByte";
-  private byte[] asByte;
 
   public static final String JSON_PROPERTY_AS_CHARACTER = "asCharacter";
   private String asCharacter;
@@ -110,6 +89,27 @@ public class JsonNull {
 
   public static final String JSON_PROPERTY_AS_BIG_INTEGER = "asBigInteger";
   private Integer asBigInteger;
+
+  public static final String JSON_PROPERTY_AS_JSON_PRIMITIVE = "asJsonPrimitive";
+  private JsonPrimitive asJsonPrimitive;
+
+  public static final String JSON_PROPERTY_AS_JSON_OBJECT = "asJsonObject";
+  private JsonObject asJsonObject;
+
+  public static final String JSON_PROPERTY_AS_STRING = "asString";
+  private String asString;
+
+  public static final String JSON_PROPERTY_AS_JSON_ARRAY = "asJsonArray";
+  private JsonArray asJsonArray;
+
+  public static final String JSON_PROPERTY_JSON_NULL = "jsonNull";
+  private Boolean jsonNull;
+
+  public static final String JSON_PROPERTY_AS_FLOAT = "asFloat";
+  private Float asFloat;
+
+  public static final String JSON_PROPERTY_AS_BYTE = "asByte";
+  private byte[] asByte;
 
   public static final String JSON_PROPERTY_AS_SHORT = "asShort";
   private Integer asShort;
@@ -221,110 +221,6 @@ public class JsonNull {
   }
 
 
-  public JsonNull asString(String asString) {
-    
-    this.asString = asString;
-    return this;
-  }
-
-   /**
-   * Get asString
-   * @return asString
-  **/
-  @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_AS_STRING)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public String getAsString() {
-    return asString;
-  }
-
-
-  @JsonProperty(JSON_PROPERTY_AS_STRING)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAsString(String asString) {
-    this.asString = asString;
-  }
-
-
-  public JsonNull asJsonArray(JsonArray asJsonArray) {
-    
-    this.asJsonArray = asJsonArray;
-    return this;
-  }
-
-   /**
-   * Get asJsonArray
-   * @return asJsonArray
-  **/
-  @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_AS_JSON_ARRAY)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public JsonArray getAsJsonArray() {
-    return asJsonArray;
-  }
-
-
-  @JsonProperty(JSON_PROPERTY_AS_JSON_ARRAY)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAsJsonArray(JsonArray asJsonArray) {
-    this.asJsonArray = asJsonArray;
-  }
-
-
-  public JsonNull asJsonObject(JsonObject asJsonObject) {
-    
-    this.asJsonObject = asJsonObject;
-    return this;
-  }
-
-   /**
-   * Get asJsonObject
-   * @return asJsonObject
-  **/
-  @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_AS_JSON_OBJECT)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public JsonObject getAsJsonObject() {
-    return asJsonObject;
-  }
-
-
-  @JsonProperty(JSON_PROPERTY_AS_JSON_OBJECT)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAsJsonObject(JsonObject asJsonObject) {
-    this.asJsonObject = asJsonObject;
-  }
-
-
-  public JsonNull asJsonPrimitive(JsonPrimitive asJsonPrimitive) {
-    
-    this.asJsonPrimitive = asJsonPrimitive;
-    return this;
-  }
-
-   /**
-   * Get asJsonPrimitive
-   * @return asJsonPrimitive
-  **/
-  @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_AS_JSON_PRIMITIVE)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public JsonPrimitive getAsJsonPrimitive() {
-    return asJsonPrimitive;
-  }
-
-
-  @JsonProperty(JSON_PROPERTY_AS_JSON_PRIMITIVE)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAsJsonPrimitive(JsonPrimitive asJsonPrimitive) {
-    this.asJsonPrimitive = asJsonPrimitive;
-  }
-
-
   public JsonNull jsonArray(Boolean jsonArray) {
     
     this.jsonArray = jsonArray;
@@ -403,32 +299,6 @@ public class JsonNull {
   }
 
 
-  public JsonNull jsonNull(Boolean jsonNull) {
-    
-    this.jsonNull = jsonNull;
-    return this;
-  }
-
-   /**
-   * Get jsonNull
-   * @return jsonNull
-  **/
-  @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_JSON_NULL)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public Boolean getJsonNull() {
-    return jsonNull;
-  }
-
-
-  @JsonProperty(JSON_PROPERTY_JSON_NULL)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setJsonNull(Boolean jsonNull) {
-    this.jsonNull = jsonNull;
-  }
-
-
   public JsonNull asJsonNull(JsonNull asJsonNull) {
     
     this.asJsonNull = asJsonNull;
@@ -478,58 +348,6 @@ public class JsonNull {
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
   public void setAsNumber(BigDecimal asNumber) {
     this.asNumber = asNumber;
-  }
-
-
-  public JsonNull asFloat(Float asFloat) {
-    
-    this.asFloat = asFloat;
-    return this;
-  }
-
-   /**
-   * Get asFloat
-   * @return asFloat
-  **/
-  @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_AS_FLOAT)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public Float getAsFloat() {
-    return asFloat;
-  }
-
-
-  @JsonProperty(JSON_PROPERTY_AS_FLOAT)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAsFloat(Float asFloat) {
-    this.asFloat = asFloat;
-  }
-
-
-  public JsonNull asByte(byte[] asByte) {
-    
-    this.asByte = asByte;
-    return this;
-  }
-
-   /**
-   * Get asByte
-   * @return asByte
-  **/
-  @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_AS_BYTE)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public byte[] getAsByte() {
-    return asByte;
-  }
-
-
-  @JsonProperty(JSON_PROPERTY_AS_BYTE)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAsByte(byte[] asByte) {
-    this.asByte = asByte;
   }
 
 
@@ -613,6 +431,188 @@ public class JsonNull {
   }
 
 
+  public JsonNull asJsonPrimitive(JsonPrimitive asJsonPrimitive) {
+    
+    this.asJsonPrimitive = asJsonPrimitive;
+    return this;
+  }
+
+   /**
+   * Get asJsonPrimitive
+   * @return asJsonPrimitive
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_AS_JSON_PRIMITIVE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public JsonPrimitive getAsJsonPrimitive() {
+    return asJsonPrimitive;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_AS_JSON_PRIMITIVE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setAsJsonPrimitive(JsonPrimitive asJsonPrimitive) {
+    this.asJsonPrimitive = asJsonPrimitive;
+  }
+
+
+  public JsonNull asJsonObject(JsonObject asJsonObject) {
+    
+    this.asJsonObject = asJsonObject;
+    return this;
+  }
+
+   /**
+   * Get asJsonObject
+   * @return asJsonObject
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_AS_JSON_OBJECT)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public JsonObject getAsJsonObject() {
+    return asJsonObject;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_AS_JSON_OBJECT)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setAsJsonObject(JsonObject asJsonObject) {
+    this.asJsonObject = asJsonObject;
+  }
+
+
+  public JsonNull asString(String asString) {
+    
+    this.asString = asString;
+    return this;
+  }
+
+   /**
+   * Get asString
+   * @return asString
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_AS_STRING)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getAsString() {
+    return asString;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_AS_STRING)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setAsString(String asString) {
+    this.asString = asString;
+  }
+
+
+  public JsonNull asJsonArray(JsonArray asJsonArray) {
+    
+    this.asJsonArray = asJsonArray;
+    return this;
+  }
+
+   /**
+   * Get asJsonArray
+   * @return asJsonArray
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_AS_JSON_ARRAY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public JsonArray getAsJsonArray() {
+    return asJsonArray;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_AS_JSON_ARRAY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setAsJsonArray(JsonArray asJsonArray) {
+    this.asJsonArray = asJsonArray;
+  }
+
+
+  public JsonNull jsonNull(Boolean jsonNull) {
+    
+    this.jsonNull = jsonNull;
+    return this;
+  }
+
+   /**
+   * Get jsonNull
+   * @return jsonNull
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_JSON_NULL)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Boolean getJsonNull() {
+    return jsonNull;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_JSON_NULL)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setJsonNull(Boolean jsonNull) {
+    this.jsonNull = jsonNull;
+  }
+
+
+  public JsonNull asFloat(Float asFloat) {
+    
+    this.asFloat = asFloat;
+    return this;
+  }
+
+   /**
+   * Get asFloat
+   * @return asFloat
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_AS_FLOAT)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Float getAsFloat() {
+    return asFloat;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_AS_FLOAT)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setAsFloat(Float asFloat) {
+    this.asFloat = asFloat;
+  }
+
+
+  public JsonNull asByte(byte[] asByte) {
+    
+    this.asByte = asByte;
+    return this;
+  }
+
+   /**
+   * Get asByte
+   * @return asByte
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_AS_BYTE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public byte[] getAsByte() {
+    return asByte;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_AS_BYTE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setAsByte(byte[] asByte) {
+    this.asByte = asByte;
+  }
+
+
   public JsonNull asShort(Integer asShort) {
     
     this.asShort = asShort;
@@ -651,27 +651,27 @@ public class JsonNull {
         Objects.equals(this.asDouble, jsonNull.asDouble) &&
         Objects.equals(this.asInt, jsonNull.asInt) &&
         Objects.equals(this.asLong, jsonNull.asLong) &&
-        Objects.equals(this.asString, jsonNull.asString) &&
-        Objects.equals(this.asJsonArray, jsonNull.asJsonArray) &&
-        Objects.equals(this.asJsonObject, jsonNull.asJsonObject) &&
-        Objects.equals(this.asJsonPrimitive, jsonNull.asJsonPrimitive) &&
         Objects.equals(this.jsonArray, jsonNull.jsonArray) &&
         Objects.equals(this.jsonObject, jsonNull.jsonObject) &&
         Objects.equals(this.jsonPrimitive, jsonNull.jsonPrimitive) &&
-        Objects.equals(this.jsonNull, jsonNull.jsonNull) &&
         Objects.equals(this.asJsonNull, jsonNull.asJsonNull) &&
         Objects.equals(this.asNumber, jsonNull.asNumber) &&
-        Objects.equals(this.asFloat, jsonNull.asFloat) &&
-        Arrays.equals(this.asByte, jsonNull.asByte) &&
         Objects.equals(this.asCharacter, jsonNull.asCharacter) &&
         Objects.equals(this.asBigDecimal, jsonNull.asBigDecimal) &&
         Objects.equals(this.asBigInteger, jsonNull.asBigInteger) &&
+        Objects.equals(this.asJsonPrimitive, jsonNull.asJsonPrimitive) &&
+        Objects.equals(this.asJsonObject, jsonNull.asJsonObject) &&
+        Objects.equals(this.asString, jsonNull.asString) &&
+        Objects.equals(this.asJsonArray, jsonNull.asJsonArray) &&
+        Objects.equals(this.jsonNull, jsonNull.jsonNull) &&
+        Objects.equals(this.asFloat, jsonNull.asFloat) &&
+        Arrays.equals(this.asByte, jsonNull.asByte) &&
         Objects.equals(this.asShort, jsonNull.asShort);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(asBoolean, asDouble, asInt, asLong, asString, asJsonArray, asJsonObject, asJsonPrimitive, jsonArray, jsonObject, jsonPrimitive, jsonNull, asJsonNull, asNumber, asFloat, Arrays.hashCode(asByte), asCharacter, asBigDecimal, asBigInteger, asShort);
+    return Objects.hash(asBoolean, asDouble, asInt, asLong, jsonArray, jsonObject, jsonPrimitive, asJsonNull, asNumber, asCharacter, asBigDecimal, asBigInteger, asJsonPrimitive, asJsonObject, asString, asJsonArray, jsonNull, asFloat, Arrays.hashCode(asByte), asShort);
   }
 
   @Override
@@ -682,21 +682,21 @@ public class JsonNull {
     sb.append("    asDouble: ").append(toIndentedString(asDouble)).append("\n");
     sb.append("    asInt: ").append(toIndentedString(asInt)).append("\n");
     sb.append("    asLong: ").append(toIndentedString(asLong)).append("\n");
-    sb.append("    asString: ").append(toIndentedString(asString)).append("\n");
-    sb.append("    asJsonArray: ").append(toIndentedString(asJsonArray)).append("\n");
-    sb.append("    asJsonObject: ").append(toIndentedString(asJsonObject)).append("\n");
-    sb.append("    asJsonPrimitive: ").append(toIndentedString(asJsonPrimitive)).append("\n");
     sb.append("    jsonArray: ").append(toIndentedString(jsonArray)).append("\n");
     sb.append("    jsonObject: ").append(toIndentedString(jsonObject)).append("\n");
     sb.append("    jsonPrimitive: ").append(toIndentedString(jsonPrimitive)).append("\n");
-    sb.append("    jsonNull: ").append(toIndentedString(jsonNull)).append("\n");
     sb.append("    asJsonNull: ").append(toIndentedString(asJsonNull)).append("\n");
     sb.append("    asNumber: ").append(toIndentedString(asNumber)).append("\n");
-    sb.append("    asFloat: ").append(toIndentedString(asFloat)).append("\n");
-    sb.append("    asByte: ").append(toIndentedString(asByte)).append("\n");
     sb.append("    asCharacter: ").append(toIndentedString(asCharacter)).append("\n");
     sb.append("    asBigDecimal: ").append(toIndentedString(asBigDecimal)).append("\n");
     sb.append("    asBigInteger: ").append(toIndentedString(asBigInteger)).append("\n");
+    sb.append("    asJsonPrimitive: ").append(toIndentedString(asJsonPrimitive)).append("\n");
+    sb.append("    asJsonObject: ").append(toIndentedString(asJsonObject)).append("\n");
+    sb.append("    asString: ").append(toIndentedString(asString)).append("\n");
+    sb.append("    asJsonArray: ").append(toIndentedString(asJsonArray)).append("\n");
+    sb.append("    jsonNull: ").append(toIndentedString(jsonNull)).append("\n");
+    sb.append("    asFloat: ").append(toIndentedString(asFloat)).append("\n");
+    sb.append("    asByte: ").append(toIndentedString(asByte)).append("\n");
     sb.append("    asShort: ").append(toIndentedString(asShort)).append("\n");
     sb.append("}");
     return sb.toString();

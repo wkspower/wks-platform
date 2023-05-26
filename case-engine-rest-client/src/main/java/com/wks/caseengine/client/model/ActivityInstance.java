@@ -34,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
   ActivityInstance.JSON_PROPERTY_ACTIVITY_TYPE,
   ActivityInstance.JSON_PROPERTY_CHILD_ACTIVITY_INSTANCES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2023-05-25T11:02:43.660489+01:00[Europe/Dublin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2023-05-26T12:12:09.236578+01:00[Europe/Dublin]")
 public class ActivityInstance {
   public static final String JSON_PROPERTY_ID = "id";
   private String id;
