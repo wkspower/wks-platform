@@ -17,13 +17,14 @@ import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.RolesRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.wks.caseengine.loader.utils.SecretGenerator;
 
@@ -70,6 +71,9 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 	
 	@Value("${keycloak.data.import.password}")
 	private String userPassword;
+	
+	@Autowired
+	private GsonBuilder gsonBuilder;
 	
 	@Override
 	public void run(String... args) throws Exception {
@@ -171,13 +175,15 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 	private List<GroupRepresentation> createGroups() {
 		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 		InputStream stream = contextClassLoader.getResourceAsStream("realmGroups.json");
-		return new Gson().fromJson(new InputStreamReader(stream), new TypeToken<List<GroupRepresentation>>() {}.getType());
+		return gsonBuilder.create().fromJson(new InputStreamReader(stream), new TypeToken<List<GroupRepresentation>>() {}.getType());
 	}
 
 	private List<ClientScopeRepresentation> createScopes() throws IOException {
 		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 		InputStream stream = contextClassLoader.getResourceAsStream("clientScopes.json");
-		List<ClientScopeRepresentation> clients = new Gson().fromJson(new InputStreamReader(stream), new TypeToken<List<ClientScopeRepresentation>>() {}.getType());
+		List<ClientScopeRepresentation> clients = gsonBuilder.create().fromJson(new InputStreamReader(stream),
+				new TypeToken<List<ClientScopeRepresentation>>() {
+				}.getType());
 		clients.forEach(f -> {
 			if (f.getName().equals("org")) {
 				f.getProtocolMappers().get(0).getConfig().put("claim.value", realmName);
@@ -190,7 +196,9 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 	private List<RoleRepresentation> createRealmRoles() throws IOException {
 		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 		InputStream stream = contextClassLoader.getResourceAsStream("realmRoles.json");
-		List<HashMap<String, String>> out = new Gson().fromJson(new InputStreamReader(stream), new TypeToken<List<HashMap>>() {}.getType());
+		List<HashMap<String, String>> out = gsonBuilder.create().fromJson(new InputStreamReader(stream),
+				new TypeToken<List<HashMap>>() {
+				}.getType());
 		List<RoleRepresentation> roles = new ArrayList<RoleRepresentation>();
 		out.forEach(r -> {
 			roles.add(new RoleRepresentation(r.get("name"), r.get("description"), false));

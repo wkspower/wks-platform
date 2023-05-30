@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.wks.caseengine.db.EngineMongoDataConnection;
@@ -22,9 +23,12 @@ public class CaseEmailRepositoryImpl implements CaseEmailRepository {
 	@Autowired
 	private EngineMongoDataConnection connection;
 
+	@Autowired
+	private GsonBuilder gsonBuilder;
+
 	@Override
 	public List<CaseEmail> find() throws Exception {
-		Gson gson = new Gson();
+		Gson gson = gsonBuilder.create();
 		return getCollection().find().map(o -> gson.fromJson(o.getJson(), CaseEmail.class)).into(new ArrayList<>());
 	}
 
@@ -38,7 +42,7 @@ public class CaseEmailRepositoryImpl implements CaseEmailRepository {
 		Bson caseDefIdFilter = caseDefinitionId.isPresent() ? Filters.eq("caseDefinitionId", caseDefinitionId.get())
 				: Filters.empty();
 
-		Gson gson = new Gson();
+		Gson gson = gsonBuilder.create();
 		return getCollection().find().filter(Filters.and(caseInstanceBKFilter, caseDefIdFilter))
 				.map(o -> gson.fromJson(o.getJson(), CaseEmail.class)).into(new ArrayList<>());
 	}
@@ -46,13 +50,13 @@ public class CaseEmailRepositoryImpl implements CaseEmailRepository {
 	@Override
 	public CaseEmail get(String caseEmailId) throws Exception {
 		Bson filter = Filters.eq("id", caseEmailId);
-		Gson gson = new Gson();
+		Gson gson = gsonBuilder.create();
 		return gson.fromJson(getCollection().find(filter).first().getJson(), CaseEmail.class);
 	}
 
 	@Override
 	public void save(CaseEmail caseEmail) throws Exception {
-		getCollection().insertOne((new JsonObject(new Gson().toJson(caseEmail))));
+		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(caseEmail))));
 	}
 
 	@Override

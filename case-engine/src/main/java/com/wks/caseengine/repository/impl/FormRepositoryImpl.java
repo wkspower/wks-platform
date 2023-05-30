@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
@@ -21,23 +22,26 @@ public class FormRepositoryImpl implements FormRepository {
 
 	@Autowired
 	private EngineMongoDataConnection connection;
+	
+	@Autowired
+	private GsonBuilder gsonBuilder;
 
 	@Override
 	public Form get(final String formKey) throws Exception {
 		Bson filter = Filters.eq("key", formKey);
-		Gson gson = new Gson();
+		Gson gson = gsonBuilder.create();
 		return gson.fromJson(getCollection().find(filter).first().getJson(), Form.class);
 	}
 
 	@Override
 	public void save(final Form form) throws Exception {
-		getCollection().insertOne((new JsonObject(new Gson().toJson(form))));
+		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(form))));
 
 	}
 
 	@Override
 	public List<Form> find() throws Exception {
-		Gson gson = new Gson();
+		Gson gson = gsonBuilder.create();
 		return getCollection().find().map(o -> gson.fromJson(o.getJson(), Form.class)).into(new ArrayList<>());
 	}
 
@@ -52,7 +56,7 @@ public class FormRepositoryImpl implements FormRepository {
 		Bson filter = Filters.eq("key", formKey);
 
 		Bson update = Updates.combine(Updates.set("title", form.getTitle()), Updates.set("toolTip", form.getToolTip()),
-				Updates.set("structure", (new JsonObject(new Gson().toJson(form.getStructure())))));
+				Updates.set("structure", (new JsonObject(gsonBuilder.create().toJson(form.getStructure())))));
 
 		getCollection().updateOne(filter, update);
 	}

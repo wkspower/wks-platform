@@ -47,26 +47,7 @@ export const CaseList = ({ status, caseDefId }) => {
     });
 
     useEffect(() => {
-        setFetching(true);
-
-        CaseService.getCaseDefinitionsById(keycloak, caseDefId)
-            .then((resp) => {
-                setStages(resp.stages);
-                return CaseService.filterCase(keycloak, caseDefId, status, filter);
-            })
-            .then((resp) => {
-                const { data, paging } = resp;
-                setCases(data);
-                setFilter({
-                    ...filter,
-                    cursors: paging.cursors,
-                    hasPrevious: paging.hasPrevious,
-                    hasNext: paging.hasNext
-                });
-            })
-            .finally(() => {
-                setFetching(false);
-            });
+        fetchCases(setFetching, keycloak, caseDefId, setStages, status, filter, setCases, setFilter);
     }, [caseDefId, status, openNewCaseForm]);
 
     useEffect(() => {
@@ -121,6 +102,7 @@ export const CaseList = ({ status, caseDefId }) => {
 
     const handleCloseCaseForm = () => {
         setOpenCaseForm(false);
+        fetchCases(setFetching, keycloak, caseDefId, setStages, status, filter, setCases, setFilter);
     };
 
     const handleCloseNewCaseForm = () => {
@@ -404,3 +386,26 @@ export const CaseList = ({ status, caseDefId }) => {
         </div>
     );
 };
+function fetchCases(setFetching, keycloak, caseDefId, setStages, status, filter, setCases, setFilter) {
+    setFetching(true);
+
+    CaseService.getCaseDefinitionsById(keycloak, caseDefId)
+        .then((resp) => {
+            setStages(resp.stages);
+            return CaseService.filterCase(keycloak, caseDefId, status, filter);
+        })
+        .then((resp) => {
+            const { data, paging } = resp;
+            setCases(data);
+            setFilter({
+                ...filter,
+                cursors: paging.cursors,
+                hasPrevious: paging.hasPrevious,
+                hasNext: paging.hasNext
+            });
+        })
+        .finally(() => {
+            setFetching(false);
+        });
+}
+
