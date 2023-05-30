@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
@@ -23,9 +24,12 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	@Autowired
 	private EngineMongoDataConnection connection;
 
+	@Autowired
+	private GsonBuilder gsonBuilder;
+
 	@Override
 	public List<CaseDefinition> find() throws Exception {
-		Gson gson = new Gson();
+		Gson gson = gsonBuilder.create();
 		return getCollection().find().map(o -> gson.fromJson(o.getJson(), CaseDefinition.class))
 				.into(new ArrayList<>());
 	}
@@ -33,11 +37,11 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	@Override
 	public List<CaseDefinition> find(final Optional<Boolean> deployed) throws Exception {
 
-		if(deployed.isEmpty()){
+		if (deployed.isEmpty()) {
 			return find();
 		}
 
-		Gson gson = new Gson();
+		Gson gson = gsonBuilder.create();
 		Bson filter = Filters.eq("deployed", true);
 		return getCollection().find(filter).map(o -> gson.fromJson(o.getJson(), CaseDefinition.class))
 				.into(new ArrayList<>());
@@ -46,7 +50,7 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	@Override
 	public CaseDefinition get(final String caseDefId) throws Exception {
 		Bson filter = Filters.eq("id", caseDefId);
-		Gson gson = new Gson();
+		Gson gson = gsonBuilder.create();
 
 		Optional<JsonObject> first = Optional.ofNullable(getCollection().find(filter).first());
 		if (first.isEmpty()) {
@@ -58,7 +62,7 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 
 	@Override
 	public void save(final CaseDefinition caseDefinition) throws Exception {
-		getCollection().insertOne((new JsonObject(new Gson().toJson(caseDefinition))));
+		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(caseDefinition))));
 	}
 
 	@Override
@@ -69,7 +73,9 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 				Updates.set("formKey", caseDefinition.getFormKey()), Updates.set("name", caseDefinition.getName()),
 				Updates.set("stagesLifecycleProcessKey", caseDefinition.getStagesLifecycleProcessKey()),
 				Updates.set("deployed", caseDefinition.getDeployed()),
-				Updates.set("kanbanConfig", (new JsonObject(new Gson().toJson(caseDefinition.getKanbanConfig() )))));
+				Updates.set("kanbanConfig",
+						(new JsonObject(gsonBuilder.create().toJson(caseDefinition.getKanbanConfig())))),
+				Updates.set("taskCompleteHooks", caseDefinition.getTaskCompleteHooks()));
 
 		getCollection().updateOne(filter, update);
 	}

@@ -4,17 +4,23 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.bpm.engine.model.spi.Task;
+import com.wks.caseengine.tasks.event.complete.TaskCompleteEvent;
+import com.wks.caseengine.tasks.event.complete.TaskCompleteEventObject;
 
 @Component
 public class TaskServiceImpl implements TaskService {
 
 	@Autowired
 	private BpmEngineClientFacade processEngineClient;
+
+	@Autowired
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	@Override
 	public List<Task> find(final String processInstanceBusinessKey) throws Exception {
@@ -34,7 +40,12 @@ public class TaskServiceImpl implements TaskService {
 
 	@Override
 	public void complete(final String taskId, final JsonObject variables) throws Exception {
+		Task task = processEngineClient.getTask(taskId);
 		processEngineClient.complete(taskId, variables);
+
+		applicationEventPublisher
+				.publishEvent(new TaskCompleteEvent(new TaskCompleteEventObject(task.getProcessDefinitionId(),
+						task.getTaskDefinitionKey(), task.getCaseInstanceId())));
 	}
 
 }

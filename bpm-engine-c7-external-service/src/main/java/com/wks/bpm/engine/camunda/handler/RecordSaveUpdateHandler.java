@@ -7,7 +7,7 @@ import org.camunda.bpm.client.task.ExternalTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.wks.api.security.context.SecurityContextTenantHolder;
 import com.wks.caseengine.record.RecordService;
 
@@ -26,6 +26,9 @@ public class RecordSaveUpdateHandler implements ExternalTaskHandler {
 
 	@Autowired
 	private ExternalServiceErrorHandler errorHandler;
+	
+	@Autowired
+	private GsonBuilder gsonBuilder;
 
 	@Override
 	public void execute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
@@ -41,7 +44,7 @@ public class RecordSaveUpdateHandler implements ExternalTaskHandler {
 			
 			String record = externalTask.getVariable("record");
 			
-			recordService.save(externalTask.getVariable("recordTypeId"), new Gson().fromJson(record, com.google.gson.JsonObject.class));
+			recordService.save(externalTask.getVariable("recordTypeId"), gsonBuilder.create().fromJson(record, com.google.gson.JsonObject.class));
 			
 			externalTaskService.complete(externalTask);
 		} catch (Exception e) {

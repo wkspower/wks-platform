@@ -18,6 +18,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -34,22 +35,25 @@ import lombok.extern.slf4j.Slf4j;
 @Order(1)
 @Slf4j
 public class MongoDataImportCommandRunner implements CommandLineRunner {
-	
+
 	@Autowired
 	private MongoLocalConfigFactory config;
 
+	@Autowired
+	private GsonBuilder gsonBuilder;
+
 	@Value("${mongo.data.import.folder}")
 	private String importDir;
-	
+
 	@Override
 	public void run(String... args) throws Exception {
 		log.info("Start of mongo data importing {}", importDir);
-		
+
 		if (importDir != null && !importDir.isEmpty()) {
-			Gson gson = new Gson();
+			Gson gson = gsonBuilder.create();
 			listFiles(importDir).forEach(fileName -> {
 				log.info(importDir + " -> " + fileName);
-				
+
 				JsonReader reader;
 				try (FileReader fileReader = new FileReader(fileName)) {
 					reader = new JsonReader(fileReader);
@@ -59,43 +63,38 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 				}
 			});
 		}
-		
+
 		log.info("End mongo data importing", importDir);
 	}
 
-	public void importData(JsonObject data) throws Exception {	
-		Gson gson = new Gson();
+	public void importData(JsonObject data) throws Exception {
+		Gson gson = gsonBuilder.create();
 
 		JsonElement organizationJson = data.get("organization");
 		if (organizationJson != null) {
-			List<JsonObject> organization = gson.fromJson(organizationJson, new TypeToken<List<JsonObject>>() {}.getType());
-			
+			List<JsonObject> organization = gson.fromJson(organizationJson, new TypeToken<List<JsonObject>>() {
+			}.getType());
+
 			try {
-				getOrganizationCollection()
-				.insertMany(
-						organization.stream()
-						.map(o -> {
-							o.remove("mailReceiveApiKey");
-							o.addProperty("mailReceiveApiKey", new SecretGenerator(64).generate());
-							return new org.bson.json.JsonObject(gson.toJson(o));
-						})
-						.collect(Collectors.toList()));
+				getOrganizationCollection().insertMany(organization.stream().map(o -> {
+					o.remove("mailReceiveApiKey");
+					o.addProperty("mailReceiveApiKey", new SecretGenerator(64).generate());
+					return new org.bson.json.JsonObject(gson.toJson(o));
+				}).collect(Collectors.toList()));
 			} catch (Exception e) {
 				throwErrorIfNoDuplicateKey(e);
 			}
 		}
-		
+
 		// Cases Definitions
 		JsonElement casesDefinitionsJson = data.get("casesDefinitions");
 		if (casesDefinitionsJson != null) {
-			List<JsonObject> caseDefinitions = gson.fromJson(casesDefinitionsJson, new TypeToken<List<JsonObject>>() {}.getType());
-			
+			List<JsonObject> caseDefinitions = gson.fromJson(casesDefinitionsJson, new TypeToken<List<JsonObject>>() {
+			}.getType());
+
 			try {
-				getCaseDefCollection().insertMany(
-						caseDefinitions
-						.stream()
-						.map(o -> new org.bson.json.JsonObject(gson.toJson(o)))
-						.collect(Collectors.toList()));
+				getCaseDefCollection().insertMany(caseDefinitions.stream()
+						.map(o -> new org.bson.json.JsonObject(gson.toJson(o))).collect(Collectors.toList()));
 			} catch (Exception e) {
 				throwErrorIfNoDuplicateKey(e);
 			}
@@ -104,24 +103,26 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 		// Cases Instances
 		JsonElement casesInstancesJson = data.get("casesInstances");
 		if (casesInstancesJson != null) {
-			List<JsonObject> caseInstances = gson.fromJson(casesInstancesJson, new TypeToken<List<JsonObject>>() {}.getType());
-			
+			List<JsonObject> caseInstances = gson.fromJson(casesInstancesJson, new TypeToken<List<JsonObject>>() {
+			}.getType());
+
 			try {
 				getCaseInstCollection().insertMany(caseInstances.stream()
-					.map(o -> new org.bson.json.JsonObject(gson.toJson(o))).collect(Collectors.toList()));
+						.map(o -> new org.bson.json.JsonObject(gson.toJson(o))).collect(Collectors.toList()));
 			} catch (Exception e) {
 				throwErrorIfNoDuplicateKey(e);
-			}			
+			}
 		}
 
 		// Forms
 		JsonElement formsJson = data.get("forms");
 		if (formsJson != null) {
-			List<JsonObject> forms = gson.fromJson(formsJson, new TypeToken<List<JsonObject>>() {}.getType());
-			
+			List<JsonObject> forms = gson.fromJson(formsJson, new TypeToken<List<JsonObject>>() {
+			}.getType());
+
 			try {
-				getFormCollection().insertMany(
-					forms.stream().map(o -> new org.bson.json.JsonObject(gson.toJson(o))).collect(Collectors.toList()));
+				getFormCollection().insertMany(forms.stream().map(o -> new org.bson.json.JsonObject(gson.toJson(o)))
+						.collect(Collectors.toList()));
 			} catch (Exception e) {
 				throwErrorIfNoDuplicateKey(e);
 			}
@@ -130,11 +131,12 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 		// Records Types
 		JsonElement recordTypesJson = data.get("recordsTypes");
 		if (recordTypesJson != null) {
-			List<JsonObject> recordTypes = gson.fromJson(recordTypesJson, new TypeToken<List<JsonObject>>() {}.getType());
-			
+			List<JsonObject> recordTypes = gson.fromJson(recordTypesJson, new TypeToken<List<JsonObject>>() {
+			}.getType());
+
 			try {
 				getRecordTypeCollection().insertMany(recordTypes.stream()
-					.map(o -> new org.bson.json.JsonObject(gson.toJson(o))).collect(Collectors.toList()));
+						.map(o -> new org.bson.json.JsonObject(gson.toJson(o))).collect(Collectors.toList()));
 			} catch (Exception e) {
 				throwErrorIfNoDuplicateKey(e);
 			}
@@ -143,7 +145,8 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 		// Records
 		JsonElement recordsJson = data.get("records");
 		if (recordsJson != null) {
-			List<JsonObject> records = gson.fromJson(recordsJson, new TypeToken<List<JsonObject>>() {}.getType());
+			List<JsonObject> records = gson.fromJson(recordsJson, new TypeToken<List<JsonObject>>() {
+			}.getType());
 
 			for (JsonObject recordObject : records) {
 				String recordTypeId = recordObject.get("type").getAsString();
@@ -151,7 +154,7 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 				if (recordJson != null) {
 					try {
 						getDatabase().getCollection("rec_" + recordTypeId, org.bson.json.JsonObject.class)
-							.insertOne(new org.bson.json.JsonObject(gson.toJson(recordJson)));
+								.insertOne(new org.bson.json.JsonObject(gson.toJson(recordJson)));
 					} catch (Exception e) {
 						throwErrorIfNoDuplicateKey(e);
 					}
@@ -182,29 +185,26 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 		MongoDatabase db = config.mongoTemplateTenant().getDb();
 		return db.getCollection("forms", org.bson.json.JsonObject.class);
 	}
-	
+
 	private MongoCollection<org.bson.json.JsonObject> getRecordTypeCollection() {
 		MongoDatabase db = config.mongoTemplateTenant().getDb();
 		return db.getCollection("recordType", org.bson.json.JsonObject.class);
 	}
-	
+
 	private MongoCollection<org.bson.json.JsonObject> getOrganizationCollection() {
 		MongoDatabase db = config.mongoTemplateTenant().getDb();
 		return db.getCollection("organization", org.bson.json.JsonObject.class);
 	}
 
-	private  MongoDatabase getDatabase() {
+	private MongoDatabase getDatabase() {
 		return config.mongoTemplateTenant().getDb();
 	}
-	
+
 	private Set<String> listFiles(String dir) throws IOException {
 		try (Stream<Path> stream = Files.list(Paths.get(dir))) {
-			return stream.filter(file -> !Files.isDirectory(file))
-					.filter(f -> f.toFile().getName().endsWith(".json"))
-					.map(Path::toAbsolutePath)
-					.map(Path::toString)
-					.collect(Collectors.toSet());
+			return stream.filter(file -> !Files.isDirectory(file)).filter(f -> f.toFile().getName().endsWith(".json"))
+					.map(Path::toAbsolutePath).map(Path::toString).collect(Collectors.toSet());
 		}
 	}
-	
+
 }

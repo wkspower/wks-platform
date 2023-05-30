@@ -10,7 +10,6 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.pagination.PageResult;
@@ -20,8 +19,6 @@ import com.wks.caseengine.repository.Repository;
 
 @Component
 public class CaseInstanceServiceImpl implements CaseInstanceService {
-
-	Gson gson = new Gson();
 
 	@Autowired
 	private CaseInstanceRepository repository;
@@ -46,7 +43,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 
 	@Override
-	public CaseInstance create(CaseInstance caseInstance) throws Exception {
+	public CaseInstance create(final CaseInstance caseInstance) throws Exception {
 
 		caseInstance.getAttributes()
 				.add(new CaseAttribute("createdAt", DateUtils.formatDate(new Date(), "dd/MM/yyyy"), CaseAttributeType.STRING.getValue()));
@@ -72,6 +69,12 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 				newCaseInstance.getAttributes());
 
 		return newCaseInstance;
+	}
+	
+	public CaseInstance update(CaseInstance caseInstance) throws Exception {
+		repository.update(caseInstance.getBusinessKey(), caseInstance);
+		// TODO return the updated case instance from DB
+		return caseInstance;
 	}
 
 	// TODO Should be a generic update?

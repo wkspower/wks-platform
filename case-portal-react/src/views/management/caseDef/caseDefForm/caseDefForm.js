@@ -12,12 +12,14 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import PropTypes from 'prop-types';
 import { useEffect } from 'react';
+import { CaseDefFormEvents } from './caseDefFormEvents';
 import { CaseDefFormStages } from './caseDefFormStages';
 import { CaseDefGeneralForm } from './caseDefGeneralForm';
 import { CaseDefFormForm } from './caseDefFormForm';
 import { CaseKanbanForm } from './caseDefKanban';
 import { CaseDefService } from 'services';
 import { useSession } from 'SessionStoreContext';
+
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -130,7 +132,8 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
                     >
                         <Tab label="General" {...a11yProps(0)} />
                         <Tab label="Stages" {...a11yProps(1)} />
-                        <Tab label="Kanban" {...a11yProps(2)} />
+                        <Tab label="Events" {...a11yProps(2)} />
+                        <Tab label="Kanban" {...a11yProps(3)} />
                     </Tabs>
                 </Box>
 
@@ -147,6 +150,10 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
                 </TabPanel>
 
                 <TabPanel value={tabValue} index={2}>
+                    <CaseDefFormEvents caseDef={caseDef} setCaseDef={setCaseDef} />
+                </TabPanel>
+
+                <TabPanel value={tabValue} index={3}>
                     <CaseKanbanForm caseDef={caseDef} setCaseDef={setCaseDef} />
                 </TabPanel>
             </Dialog>

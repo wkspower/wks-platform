@@ -168,6 +168,13 @@ public class C7EngineClient implements BpmEngineClient {
 	}
 
 	@Override
+	public Task getTask(final String taskId, final BpmEngine bpmEngine) {
+		return restTemplate.getForEntity(
+				camundaHttpRequestFactory.getTaskGetRequest(taskId, bpmEngine).getHttpRequestUrl(),
+				Task.class).getBody();
+	}
+
+	@Override
 	public Task[] findTasks(final String processInstanceBusinessKey, final BpmEngine bpmEngine) {
 		return restTemplate.getForEntity(
 				camundaHttpRequestFactory.getTaskListRequest(processInstanceBusinessKey, bpmEngine).getHttpRequestUrl(),
@@ -210,7 +217,7 @@ public class C7EngineClient implements BpmEngineClient {
 
 		WksHttpRequest request = camundaHttpRequestFactory.getMessageSendRequest(processMessage, variablesCamundaJson,
 				bpmEngine);
-		
+
 		RestTemplate restTemplate = new RestTemplate();
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 		messageConverters.add(new GsonHttpMessageConverter());

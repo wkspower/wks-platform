@@ -98,6 +98,10 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
             });
     };
 
+    const updateActiveState = () => {
+        CaseService.getCaseById(keycloak, aCase.businessKey).then((data) => setActiveStage(data.stage));
+    }
+
     return (
         aCase &&
         caseDef &&
@@ -262,6 +266,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                 businessKey={aCase.businessKey}
                                 keycloak={keycloak}
                                 getCaseInfo={getCaseInfo}
+                                callback={updateActiveState}
                             />
                         </div>
                     </TabPanel>

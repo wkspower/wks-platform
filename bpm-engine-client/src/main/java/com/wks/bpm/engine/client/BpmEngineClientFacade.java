@@ -40,6 +40,8 @@ public interface BpmEngineClientFacade {
 	void deleteProcessInstance(String processInstanceId);
 
 	ActivityInstance[] findActivityInstances(String processInstanceId) throws Exception;
+	
+	Task getTask(final String taskId);
 
 	Task[] findTasks(final String processInstanceBusinessKey);
 

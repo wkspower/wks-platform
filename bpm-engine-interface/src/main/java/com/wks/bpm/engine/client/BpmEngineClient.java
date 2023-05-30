@@ -44,6 +44,8 @@ public interface BpmEngineClient {
 	ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine)
 			throws Exception;
 
+	public Task getTask(final String taskId, final BpmEngine bpmEngine);
+
 	Task[] findTasks(final String processInstanceBusinessKey, final BpmEngine bpmEngine);
 
 	void claimTask(String taskId, String taskAssignee, final BpmEngine bpmEngine);

@@ -1,8 +1,10 @@
 package com.wks.caseengine.cases.definition;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.JsonObject;
+import com.wks.caseengine.cases.definition.hook.TaskCompleteHook;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,11 +30,14 @@ public class CaseDefinition {
 
 	private String stagesLifecycleProcessKey;
 
+	private Boolean deployed;
+	
 	private List<CaseStage> stages;
-
+	
+	@Default
+	private List<TaskCompleteHook> taskCompleteHooks = new ArrayList<>();
+	
 	@Default
 	private JsonObject kanbanConfig = new JsonObject();
-
-	private Boolean deployed;
 
 }

@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import com.wks.caseengine.cases.definition.CaseStatus;
+
 import com.wks.caseengine.cases.instance.CaseDocument;
-import com.wks.caseengine.cases.instance.Attachment;
 import com.wks.caseengine.cases.instance.CaseFilter;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;

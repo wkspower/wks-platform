@@ -11,7 +11,7 @@ import { TaskService } from 'services';
 import { useSession } from '../../SessionStoreContext';
 import { format } from 'date-fns';
 
-export const TaskList = ({ businessKey }) => {
+export const TaskList = ({ businessKey, callback }) => {
     const [tasks, setTasks] = useState(null);
     const [open, setOpen] = useState(false);
     const [task, setTask] = useState(null);
@@ -47,7 +47,7 @@ export const TaskList = ({ businessKey }) => {
 
     const makeColumns = () => {
         return [
-            { field: 'name', headerName: t('pages.tasklist.datagrid.columns.name'), width: 200 },
+            { field: 'name', headerName: t('pages.tasklist.datagrid.columns.name'), width: 300 },
             {
                 field: 'caseInstanceId',
                 headerName: t('pages.tasklist.datagrid.columns.caseinstanceid'),
@@ -93,6 +93,7 @@ export const TaskList = ({ businessKey }) => {
 
     const handleClose = () => {
         setOpen(false);
+        callback();
     };
 
     return (

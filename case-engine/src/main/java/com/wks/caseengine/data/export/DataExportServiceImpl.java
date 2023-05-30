@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.wks.caseengine.db.EngineMongoDataConnection;
@@ -16,10 +17,13 @@ public class DataExportServiceImpl implements DataExportService {
 
 	@Autowired
 	private EngineMongoDataConnection connection;
+	
+	@Autowired
+	private GsonBuilder gsonBuilder;
 
 	@Override
 	public JsonObject export() throws Exception {
-		Gson gson = new Gson();
+		Gson gson = gsonBuilder.create();
 
 		JsonObject exportedData = new JsonObject();
 
