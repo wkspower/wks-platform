@@ -161,7 +161,7 @@ public class C7HttpRequestFactory {
 	public WksHttpRequest getTaskListRequest(String processInstanceBusinessKey, final BpmEngine bpmEngine) {
 		StringBuilder url = new StringBuilder().append(extractUrl(bpmEngine) + taskUrl + "?active=true");
 		if (processInstanceBusinessKey != null) {
-			url.append("&processInstanceBusinessKey=" + processInstanceBusinessKey);
+			url.append("&caseInstanceId=" + processInstanceBusinessKey);
 		}
 
 		return new C7HttpGetRequest<Task>(url.toString(), new HttpEntity<>(httpHeadersFactory.json()));

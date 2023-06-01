@@ -6,6 +6,7 @@ export const TaskService = {
     createTaskClaim,
     createTaskUnclaim,
     createTaskComplete,
+    createNewTask,
     filterTasks,
     filterProcessInstances
 };
@@ -64,6 +65,30 @@ async function createTaskUnclaim(keycloak, taskId) {
 
 async function createTaskComplete(keycloak, taskId, body) {
     const url = `${Config.CaseEngineUrl}/task/${taskId}/complete`;
+
+    const headers = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${keycloak.token}`
+    };
+
+    try {
+        const resp = await fetch(url, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+                variables: body
+            })
+        });
+        return nop(keycloak, resp);
+    } catch (e) {
+        console.log(e);
+        return await Promise.reject(e);
+    }
+}
+
+async function createNewTask(keycloak, taskId, body) {
+    const url = `${Config.CaseEngineUrl}/task/create`;
 
     const headers = {
         Accept: 'application/json',

@@ -21,8 +21,8 @@ public class C7VariablesMapperTest {
 		// when
 		JsonObject processVariables = c7VariablesMapper.map(new Gson().fromJson(caseAttributes, JsonArray.class));
 
-		assertEquals("{\"value\":\"\\\"01/01/1990\\\"\",\"type\":\"String\"}", String.valueOf(processVariables.get("when")));
-		assertEquals("{\"value\":\"\\\"Toronto\\\"\",\"type\":\"String\"}", String.valueOf(processVariables.get("where")));
+		assertEquals("{\"value\":\"01/01/1990\",\"type\":\"String\"}", String.valueOf(processVariables.get("when")));
+		assertEquals("{\"value\":\"Toronto\",\"type\":\"String\"}", String.valueOf(processVariables.get("where")));
 	}
 
 }

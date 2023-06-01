@@ -60,7 +60,8 @@ const defs = {
             actions: {
                 close: 'Encerrar',
                 reopen: 'Reabrir',
-                archive: 'Arquivar'
+                archive: 'Arquivar',
+                newTask: 'Nova Tarefa'
             },
             tabs: {
                 details: 'Detalhes do Caso',

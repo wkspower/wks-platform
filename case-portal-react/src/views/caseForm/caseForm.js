@@ -1,32 +1,38 @@
+import QuestionCircleOutlined from '@ant-design/icons/QuestionCircleOutlined';
+import { Form } from '@formio/react';
+import { AddCircleOutline } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
+import DatePicker from '@mui/lab/DatePicker';
+import { Grid } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
+import Modal from '@mui/material/Modal';
 import Slide from '@mui/material/Slide';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
-import Toolbar from '@mui/material/Toolbar';
-import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
-import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
-import { Form } from '@formio/react';
-import { TaskList } from '../taskList/taskList';
-import { CaseStatus } from 'common/caseStatus';
-import { Grid } from '@mui/material';
-import MainCard from 'components/MainCard';
-import { Comments } from 'views/caseComment/Comments';
-import QuestionCircleOutlined from '@ant-design/icons/QuestionCircleOutlined';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
-import { tryParseJSONObject } from '../../utils/jsonStringCheck';
-import { CaseEmailsList } from 'views/caseEmail/caseEmailList';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import TextField from '@mui/material/TextField';
+import Toolbar from '@mui/material/Toolbar';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import { CaseStatus } from 'common/caseStatus';
+import MainCard from 'components/MainCard';
+import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Comments } from 'views/caseComment/Comments';
+import { CaseEmailsList } from 'views/caseEmail/caseEmailList';
 import { CaseService, FormService } from '../../services';
+import { tryParseJSONObject } from '../../utils/jsonStringCheck';
+import { TaskList } from '../taskList/taskList';
 import Documents from './Documents';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+
 
 export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     const [caseDef, setCaseDef] = useState(null);
@@ -38,6 +44,32 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     const [activeStage, setActiveStage] = React.useState(0);
     const [stages, setStages] = useState([]);
     const { t } = useTranslation();
+
+    const [isFollowing, setIsFollowing] = useState(false);
+    const handleFollowClick = () => {
+        setIsFollowing(!isFollowing);
+    };
+
+    const [isModalOpen, setModalOpen] = useState(false);
+    const [newTaskData, setNewTaskData] = useState({
+        description: '',
+        dueDate: null,
+        assignee: ''
+    });
+    const handleNewTaskSubmit = () => {
+        // Perform any necessary validation on the new task data
+        // ...
+
+        // Reset the new task form
+        setNewTaskData({
+            description: '',
+            dueDate: null,
+            assignee: ''
+        });
+
+        // Close the modal
+        setModalOpen(false);
+    };
 
     useEffect(() => {
         getCaseInfo(aCase);
@@ -185,6 +217,13 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                     </Button>
                                 </React.Fragment>
                             )}
+                            <Button
+                                color="inherit"
+                                onClick={handleFollowClick}
+                                startIcon={<NotificationsActiveIcon />}
+                            >
+                                {isFollowing ? 'Unfollow' : 'Follow'}
+                            </Button>
                         </Toolbar>
                     </AppBar>
 
@@ -261,6 +300,15 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={1}>
+                        <Box sx={{ marginTop: '10px' }}>
+                            <Button
+                                variant="contained"
+                                startIcon={<AddCircleOutline />}
+                                onClick={() => setModalOpen(true)}
+                            >
+                                {t('pages.caseform.actions.newTask')}
+                            </Button>
+                        </Box>
                         <div style={{ display: 'grid', padding: '10px' }}>
                             <TaskList
                                 businessKey={aCase.businessKey}
@@ -269,6 +317,57 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                 callback={updateActiveState}
                             />
                         </div>
+                        <Modal open={isModalOpen} onClose={() => setModalOpen(false)}>
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                    bgcolor: 'background.paper',
+                                    boxShadow: 24,
+                                    p: 4,
+                                    minWidth: 400,
+                                    maxWidth: 600
+                                }}
+                            >
+                                <Typography variant="h6" component="h2" gutterBottom>
+                                    {t('pages.caseform.actions.newTask')}
+                                </Typography>
+                                <form onSubmit={handleNewTaskSubmit}>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <TextField
+                                            label={t('pages.caseform.task.description')}
+                                            value={newTaskData.description}
+                                            onChange={(e) =>
+                                                setNewTaskData({ ...newTaskData, description: e.target.value })
+                                            }
+                                            required
+                                        />
+                                        <DatePicker
+                                            label={t('pages.caseform.task.dueDate')}
+                                            value={newTaskData.dueDate}
+                                            onChange={(date) =>
+                                                setNewTaskData({ ...newTaskData, dueDate: date })
+                                            }
+                                            renderInput={(params) => <TextField {...params} />}
+                                            required
+                                        />
+                                        <TextField
+                                            label={t('pages.caseform.task.assignee')}
+                                            value={newTaskData.assignee}
+                                            onChange={(e) =>
+                                                setNewTaskData({ ...newTaskData, assignee: e.target.value })
+                                            }
+                                            required
+                                        />
+                                        <Button type="submit" variant="contained">
+                                            Submit
+                                        </Button>
+                                    </Box>
+                                </form>
+                            </Box>
+                        </Modal>
                     </TabPanel>
 
                     <TabPanel value={tabIndex} index={2}>
