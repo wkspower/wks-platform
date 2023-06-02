@@ -177,6 +177,11 @@ public class C7HttpRequestFactory {
 				new HttpEntity<String>(assigneeJsonObject.toString(), httpHeadersFactory.json()));
 	}
 
+	public WksHttpRequest getTaskCreateRequest(final Task task, final BpmEngine bpmEngine) {
+		return new C7HttpPostRequest(extractUrl(bpmEngine) + taskUrl + "/create",
+				new HttpEntity<>(task, httpHeadersFactory.json()));
+	}
+
 	public WksHttpRequest getTaskCompleteRequest(final String taskId, JsonObject variables, final BpmEngine bpmEngine) {
 		return new C7HttpPostRequest(extractUrl(bpmEngine) + taskUrl + "/" + taskId + "/complete",
 				new HttpEntity<String>(variables.toString(), httpHeadersFactory.json()));

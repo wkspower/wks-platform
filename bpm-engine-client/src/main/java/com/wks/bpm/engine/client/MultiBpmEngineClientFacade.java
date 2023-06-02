@@ -92,6 +92,11 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 		return getEngineClient().getTask(taskId, getBpmEngine());
 	}
 	
+	@Override
+	public void createTask(Task task) {
+		getEngineClient().createTask(task, getBpmEngine());
+	}
+	
 	public Task[] findTasks(final String processInstanceBusinessKey) {
 		return getEngineClient().findTasks(processInstanceBusinessKey, getBpmEngine());
 	}

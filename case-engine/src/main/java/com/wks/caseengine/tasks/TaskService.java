@@ -7,6 +7,8 @@ import com.wks.bpm.engine.model.spi.Task;
 
 public interface TaskService {
 
+	void create(final Task task) throws Exception;
+
 	List<Task> find(final String processInstanceBusinessKey) throws Exception;
 
 	void claim(final String taskId, final String taskAssignee) throws Exception;

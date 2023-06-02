@@ -41,6 +41,8 @@ public interface BpmEngineClientFacade {
 
 	ActivityInstance[] findActivityInstances(String processInstanceId) throws Exception;
 	
+	void createTask(final Task task);
+	
 	Task getTask(final String taskId);
 
 	Task[] findTasks(final String processInstanceBusinessKey);

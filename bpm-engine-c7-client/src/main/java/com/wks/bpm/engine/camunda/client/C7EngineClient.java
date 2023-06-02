@@ -1,8 +1,10 @@
 package com.wks.bpm.engine.camunda.client;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -165,6 +167,17 @@ public class C7EngineClient implements BpmEngineClient {
 		}
 
 		return activityInstance.getChildActivityInstances();
+	}
+	
+	@Override
+	public void createTask(Task task, BpmEngine bpmEngine) {
+		
+		UUID taskId = UUID.nameUUIDFromBytes((task.getDescription() + new Date()).getBytes());
+		task.setId(taskId.toString());
+		task.setTenantId(tenantHolder.getTenantId().get());
+		
+		WksHttpRequest request = camundaHttpRequestFactory.getTaskCreateRequest(task, bpmEngine);
+		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class);
 	}
 
 	@Override

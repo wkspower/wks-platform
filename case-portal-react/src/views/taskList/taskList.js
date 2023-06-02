@@ -1,15 +1,19 @@
+import { AddCircleOutline } from '@mui/icons-material';
 import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
+import Modal from '@mui/material/Modal';
+import TextField from '@mui/material/TextField';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import MainCard from 'components/MainCard';
-import React, { useEffect, useState } from 'react';
-import { ProcessDiagram } from 'views/bpmn/ProcessDiagram';
-import { TaskForm } from '../taskForm/taskForm';
-import { useTranslation } from 'react-i18next';
-import './taskList.css';
-import { TaskService } from 'services';
-import { useSession } from '../../SessionStoreContext';
 import { format } from 'date-fns';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { TaskService } from 'services';
+import { ProcessDiagram } from 'views/bpmn/ProcessDiagram';
+import { useSession } from '../../SessionStoreContext';
+import { TaskForm } from '../taskForm/taskForm';
+import Typography from '@mui/material/Typography';
+import './taskList.css';
 
 export const TaskList = ({ businessKey, callback }) => {
     const [tasks, setTasks] = useState(null);
@@ -21,28 +25,37 @@ export const TaskList = ({ businessKey, callback }) => {
     const [fetching, setFetching] = useState(false);
     const keycloak = useSession();
 
+    const [isModalOpen, setModalOpen] = useState(false);
+    const [newTaskData, setNewTaskData] = useState({
+        name: '',
+        description: '',
+        due: null,
+        assignee: '',
+        caseInstanceId: businessKey
+    });
+    const handleNewTaskSubmit = () => {
+        // Perform any necessary validation on the new task data
+        // ...
+        TaskService.createNewTask(keycloak, newTaskData).then(() => {
+            fetchTasks(setFetching, keycloak, businessKey, setTasks, setProcessDefId, setActivityInstances);
+        });
+
+        // Reset the new task form
+        setNewTaskData({
+            name: '',
+            description: '',
+            due: null,
+            assignee: '',
+            caseInstanceId: businessKey
+        });
+
+        // Close the modal
+        setModalOpen(false);
+    };
+
+
     useEffect(() => {
-        setFetching(true);
-
-        TaskService.filterTasks(keycloak, businessKey)
-            .then((data) => {
-                setTasks(data.map(o => o = { ...o, created: format(new Date(o.created), 'P'), due: o.due && format(new Date(o.due), 'P'), followUp: o.followUp && format(new Date(o.followUp), 'P') }));
-            })
-            .finally(() => {
-                setFetching(false);
-            });
-
-        TaskService.filterProcessInstances(keycloak, businessKey)
-            .then((data) => {
-                setProcessDefId(data[0].definitionId);
-                return TaskService.getActivityInstancesById(keycloak, data[0].id);
-            })
-            .then((data) => {
-                setActivityInstances(data);
-            })
-            .catch((err) => {
-                console.log(err.message);
-            });
+        fetchTasks(setFetching, keycloak, businessKey, setTasks, setProcessDefId, setActivityInstances);
     }, [open, businessKey]);
 
     const makeColumns = () => {
@@ -98,6 +111,16 @@ export const TaskList = ({ businessKey, callback }) => {
 
     return (
         <React.Fragment>
+            <Box sx={{ marginTop: '10px' }}>
+                <Button
+                    variant="contained"
+                    startIcon={<AddCircleOutline />}
+                    onClick={() => setModalOpen(true)}
+                >
+                    {t('pages.caseform.actions.newTask')}
+                </Button>
+            </Box>
+
             <Box>
                 {tasks && tasks.length > 0 && (
                     <MainCard content={false}>
@@ -123,6 +146,58 @@ export const TaskList = ({ businessKey, callback }) => {
                                 }}
                             />
                         </Box>
+                        <Modal open={isModalOpen} onClose={() => setModalOpen(false)}>
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                    bgcolor: 'background.paper',
+                                    boxShadow: 24,
+                                    p: 4,
+                                    minWidth: 400,
+                                    maxWidth: 600
+                                }}
+                            >
+                                <Typography variant="h6" component="h2" gutterBottom>
+                                    {t('pages.caseform.actions.newTask')}
+                                </Typography>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <TextField
+                                        label={t('pages.tasklist.newTask.name')}
+                                        value={newTaskData.name}
+                                        onChange={(e) =>
+                                            setNewTaskData({ ...newTaskData, name: e.target.value })
+                                        }
+                                    />
+                                    <TextField
+                                        label={t('pages.tasklist.newTask.description')}
+                                        value={newTaskData.description}
+                                        onChange={(e) =>
+                                            setNewTaskData({ ...newTaskData, description: e.target.value })
+                                        }
+                                    />
+                                    <TextField
+                                        label={t('pages.tasklist.newTask.dueDate')}
+                                        value={newTaskData.due}
+                                        onChange={(e) =>
+                                            setNewTaskData({ ...newTaskData, due: e.target.value })
+                                        }
+                                    />
+                                    <TextField
+                                        label={t('pages.tasklist.newTask.assignee')}
+                                        value={newTaskData.assignee}
+                                        onChange={(e) =>
+                                            setNewTaskData({ ...newTaskData, assignee: e.target.value })
+                                        }
+                                    />
+                                    <Button type="submit" variant="contained" onClick={handleNewTaskSubmit}>
+                                        Submit
+                                    </Button>
+                                </Box>
+                            </Box>
+                        </Modal>
                     </MainCard>
                 )}
 
@@ -145,3 +220,28 @@ export const TaskList = ({ businessKey, callback }) => {
         </React.Fragment>
     );
 };
+
+function fetchTasks(setFetching, keycloak, businessKey, setTasks, setProcessDefId, setActivityInstances) {
+    setFetching(true);
+
+    TaskService.filterTasks(keycloak, businessKey)
+        .then((data) => {
+            setTasks(data.map(o => o = { ...o, created: format(new Date(o.created), 'P'), due: o.due && format(new Date(o.due), 'P'), followUp: o.followUp && format(new Date(o.followUp), 'P') }));
+        })
+        .finally(() => {
+            setFetching(false);
+        });
+
+    TaskService.filterProcessInstances(keycloak, businessKey)
+        .then((data) => {
+            setProcessDefId(data[0].definitionId);
+            return TaskService.getActivityInstancesById(keycloak, data[0].id);
+        })
+        .then((data) => {
+            setActivityInstances(data);
+        })
+        .catch((err) => {
+            console.log(err.message);
+        });
+}
+

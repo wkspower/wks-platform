@@ -91,6 +91,12 @@ const defs = {
                 action: {
                     details: 'Details'
                 }
+            },
+            newTask: {
+                name: 'Task',
+                description: 'Description',
+                dueDate: 'Due Date',
+                assignee: 'Assignee'
             }
         },
         taskform: {
@@ -128,8 +134,8 @@ const defs = {
             }
         },
         message: {
-            fileUpload:{
-                error :{
+            fileUpload: {
+                error: {
                     couldNotUpload: 'Could not upload this file.'
                 }
             }

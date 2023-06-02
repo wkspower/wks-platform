@@ -91,6 +91,12 @@ public class C8EngineClient implements BpmEngineClient {
 	}
 	
 	@Override
+	public void createTask(Task task, BpmEngine bpmEngine) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
 	public Task getTask(String taskId, BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return null;

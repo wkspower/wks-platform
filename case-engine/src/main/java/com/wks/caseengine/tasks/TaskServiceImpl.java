@@ -21,6 +21,11 @@ public class TaskServiceImpl implements TaskService {
 
 	@Autowired
 	private ApplicationEventPublisher applicationEventPublisher;
+	
+	@Override
+	public void create(Task task) throws Exception {
+		processEngineClient.createTask(task);
+	}
 
 	@Override
 	public List<Task> find(final String processInstanceBusinessKey) throws Exception {

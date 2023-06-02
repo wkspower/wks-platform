@@ -91,7 +91,14 @@ const defs = {
                 action: {
                     details: 'Detalhar'
                 }
+            },
+            newTask:{
+                name: 'Tarefa',
+                description: 'Descrição',
+                dueDate: 'Prazo',
+                assignee: 'Responsável'
             }
+
         },
         taskform: {
             claim: 'Bloquear',

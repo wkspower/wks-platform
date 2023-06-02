@@ -87,7 +87,7 @@ async function createTaskComplete(keycloak, taskId, body) {
     }
 }
 
-async function createNewTask(keycloak, taskId, body) {
+async function createNewTask(keycloak, body) {
     const url = `${Config.CaseEngineUrl}/task/create`;
 
     const headers = {
@@ -100,9 +100,7 @@ async function createNewTask(keycloak, taskId, body) {
         const resp = await fetch(url, {
             method: 'POST',
             headers,
-            body: JSON.stringify({
-                variables: body
-            })
+            body: JSON.stringify(body)
         });
         return nop(keycloak, resp);
     } catch (e) {

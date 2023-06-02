@@ -80,6 +80,11 @@ public class DefaultBpmEngineClientFacade implements BpmEngineClientFacade {
 	public ActivityInstance[] findActivityInstances(String processInstanceId) throws Exception {
 		return getEngineClient().findActivityInstances(processInstanceId, getBpmEngine());
 	}
+	
+	@Override
+	public void createTask(Task task) {
+		getEngineClient().createTask(task, getBpmEngine());
+	}
 
 	public Task getTask(final String taskId) {
 		return getEngineClient().getTask(taskId, getBpmEngine());
