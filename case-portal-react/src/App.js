@@ -59,6 +59,8 @@ const App = () => {
                     console.error('Failed to refresh token');
                 });
         };
+
+        RegisterStorageModule();
     }, []);
 
     async function forceLogoutIfUserNoMinimalRoleForSystem(keycloak) {
