@@ -2,7 +2,21 @@ import { Formio } from 'formiojs';
 import Config from '../../consts';
 import MemoryTokenManager from '../MemoryTokenManager';
 
-export function minio(formio) {
+export class StorageService {
+    async uploadFile(storage, file, fileName, dir, evt, url, options) {
+        return minio().uploadFile(file, fileName, dir, evt, null, null, null, null, () => null);
+    }
+
+    async deleteFile(fileInfo) {
+        //do something
+    }
+
+    async downloadFile(fileInfo, options) {
+        return minio().downloadFile(fileInfo);
+    }
+}
+
+export function minio() {
     function createHeaders() {
         return {
             headers: {
@@ -138,4 +152,4 @@ export function minio(formio) {
     };
 }
 
-minio.title = 'Minio';
+minio.title = 's3';

@@ -18,6 +18,7 @@ import { TextField } from '@mui/material';
 import MainCard from 'components/MainCard';
 import { FormService } from 'services';
 import { useSession } from 'SessionStoreContext';
+import { StorageService } from 'plugins/storage';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -129,7 +130,8 @@ export const FormDetail = ({ open, handleClose, form, handleInputChange, handleS
                             form={form.structure}
                             options={{
                                 noNewEdit: true,
-                                noDefaultSubmitButton: true
+                                noDefaultSubmitButton: true,
+                                fileService: new StorageService()
                             }}
                         />
                     </MainCard>

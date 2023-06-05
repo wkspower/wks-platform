@@ -5,7 +5,7 @@ import ThemeCustomization from 'themes';
 import { SessionStoreProvider } from './SessionStoreContext';
 import { CaseService, RecordService } from 'services';
 import menuItemsDefs from 'menu';
-import { RegisterInjectUserSession, RegisterStorageModule, RegisteOptions } from './plugins';
+import { RegisterInjectUserSession, RegisteOptions } from './plugins';
 import { accountStore, sessionStore } from './store';
 import './App.css';
 
@@ -24,7 +24,6 @@ const App = () => {
             setAuthenticated(authenticated);
             buildMenuItems(keycloak);
             RegisterInjectUserSession(keycloak);
-            RegisterStorageModule();
             RegisteOptions(keycloak);
             forceLogoutIfUserNoMinimalRoleForSystem(keycloak);
         });
@@ -59,8 +58,6 @@ const App = () => {
                     console.error('Failed to refresh token');
                 });
         };
-
-        RegisterStorageModule();
     }, []);
 
     async function forceLogoutIfUserNoMinimalRoleForSystem(keycloak) {
