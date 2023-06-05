@@ -28,6 +28,7 @@ import { CaseService, FormService } from '../../services';
 import { tryParseJSONObject } from '../../utils/jsonStringCheck';
 import { TaskList } from '../taskList/taskList';
 import Documents from './Documents';
+import { StorageService } from 'plugins/storage';
 
 export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     const [caseDef, setCaseDef] = useState(null);
@@ -61,7 +62,11 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                 return CaseService.getCaseById(keycloak, aCase.businessKey);
             })
             .then((caseData) => {
-                setComments(caseData?.comments?.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+                setComments(
+                    caseData?.comments?.sort(
+                        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                    )
+                );
                 setDocuments(caseData?.documents);
                 setFormData({
                     data: caseData.attributes.reduce(
@@ -105,8 +110,10 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     };
 
     const updateActiveState = () => {
-        CaseService.getCaseById(keycloak, aCase.businessKey).then((data) => setActiveStage(data.stage));
-    }
+        CaseService.getCaseById(keycloak, aCase.businessKey).then((data) =>
+            setActiveStage(data.stage)
+        );
+    };
 
     return (
         aCase &&
@@ -229,10 +236,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     </Box>
 
                     <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                        <Tabs
-                            value={tabIndex}
-                            onChange={handleTabChanged}
-                        >
+                        <Tabs value={tabIndex} onChange={handleTabChanged}>
                             <Tab label={t('pages.caseform.tabs.details')} {...a11yProps(0)} />
                             <Tab label={t('pages.caseform.tabs.tasks')} {...a11yProps(1)} />
                             <Tab label={t('pages.caseform.tabs.comments')} {...a11yProps(2)} />
@@ -265,7 +269,10 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                     <Form
                                         form={form.structure}
                                         submission={formData}
-                                        options={{ readOnly: true }}
+                                        options={{
+                                            readOnly: true,
+                                            fileService: new StorageService()
+                                        }}
                                     />
                                 </MainCard>
                             </Grid>

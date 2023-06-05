@@ -13,6 +13,7 @@ import MainCard from 'components/MainCard';
 import { useEffect } from 'react';
 import { RecordService } from '../../services';
 import { useSession } from 'SessionStoreContext';
+import { StorageService } from 'plugins/storage';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -100,7 +101,13 @@ export const RecordForm = ({ open, recordType, record, handleClose, mode }) => {
                 <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Grid item xs={12}>
                         <MainCard sx={{ p: 2 }} content={true}>
-                            <Form form={form} submission={formData} />
+                            <Form
+                                form={form}
+                                submission={formData}
+                                options={{
+                                    fileService: new StorageService()
+                                }}
+                            />
                         </MainCard>
                     </Grid>
                 </Grid>

@@ -14,6 +14,7 @@ import { Form } from '@formio/react';
 import { useTranslation } from 'react-i18next';
 import { FormService, TaskService } from 'services';
 import { useSession } from '../../SessionStoreContext';
+import { StorageService } from 'plugins/storage';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -59,11 +60,9 @@ export const TaskForm = ({ open, handleClose, task }) => {
                 console.log(err.message);
             });
 
-        TaskService.getActivityInstancesById(keycloak, task.processInstanceId).then(
-            (data) => {
-                setActivityInstances(data);
-            }
-        );
+        TaskService.getActivityInstancesById(keycloak, task.processInstanceId).then((data) => {
+            setActivityInstances(data);
+        });
     }, [open, task]);
 
     const handleClaim = function () {
@@ -143,7 +142,13 @@ export const TaskForm = ({ open, handleClose, task }) => {
                 </AppBar>
                 <div style={{ display: 'grid', padding: '10px' }}>
                     <div style={!claimed ? { pointerEvents: 'none', opacity: '0.4' } : {}}>
-                        <Form form={formComponents} submission={variableValues} />
+                        <Form
+                            form={formComponents}
+                            submission={variableValues}
+                            options={{
+                                fileService: new StorageService()
+                            }}
+                        />
                     </div>
                 </div>
 

@@ -14,6 +14,7 @@ import React, { useEffect } from 'react';
 import { Form } from '@formio/react';
 import { useSession } from 'SessionStoreContext';
 import { CaseService, FormService } from '../../services';
+import { StorageService } from 'plugins/storage';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -53,9 +54,7 @@ export const NewCaseForm = ({ open, handleClose, caseDefId, setLastCreatedCase }
                     typeof formData.data[key] !== 'object'
                         ? formData.data[key]
                         : JSON.stringify(formData.data[key]),
-                type: typeof formData.data[key] !== 'object'
-                    ? 'String'
-                    : 'Json',
+                type: typeof formData.data[key] !== 'object' ? 'String' : 'Json'
             });
         });
 
@@ -111,7 +110,13 @@ export const NewCaseForm = ({ open, handleClose, caseDefId, setLastCreatedCase }
                                 </Tooltip>
                             )}
                         </Box>
-                        <Form form={form.structure} submission={formData} />
+                        <Form
+                            form={form.structure}
+                            submission={formData}
+                            options={{
+                                fileService: new StorageService()
+                            }}
+                        />
                     </Grid>
                 </Grid>
             </Dialog>

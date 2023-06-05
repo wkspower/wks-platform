@@ -14,6 +14,7 @@ import { TextField } from '@mui/material';
 import MainCard from 'components/MainCard';
 import { RecordTypeService } from 'services';
 import { useSession } from 'SessionStoreContext';
+import { StorageService } from 'plugins/storage';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -100,7 +101,8 @@ export const RecordTypeForm = ({ open, handleClose, recordType, handleInputChang
                             form={recordType.fields}
                             options={{
                                 noNewEdit: true,
-                                noDefaultSubmitButton: true
+                                noDefaultSubmitButton: true,
+                                fileService: new StorageService()
                             }}
                         />
                     </MainCard>
