@@ -25,7 +25,7 @@ public interface BpmEngineClient {
 	ProcessDefinition[] findProcessDefinitions(final BpmEngine bpmEngine);
 
 	ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
-			final Optional<String> businessKey, final BpmEngine bpmEngine);
+			final Optional<String> businessKey, final Optional<String> activityIdIn, final BpmEngine bpmEngine);
 
 	String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) throws Exception;
 

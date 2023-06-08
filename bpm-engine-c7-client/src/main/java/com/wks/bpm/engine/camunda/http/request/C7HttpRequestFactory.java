@@ -99,7 +99,7 @@ public class C7HttpRequestFactory {
 	//// Process Instance ////
 
 	public WksHttpRequest getProcessInstanceListRequest(final Optional<String> processDefinitionKey,
-			final Optional<String> businessKey, final BpmEngine bpmEngine) {
+			final Optional<String> businessKey, final Optional<String> activityIdIn, final BpmEngine bpmEngine) {
 
 		StringBuilder url = new StringBuilder().append(extractUrl(bpmEngine) + processInstanceUrl);
 		url.append("?");
@@ -108,6 +108,9 @@ public class C7HttpRequestFactory {
 		}
 		if (businessKey.isPresent()) {
 			url.append("&businessKey=" + businessKey.get());
+		}
+		if (activityIdIn.isPresent()) {
+			url.append("&activityIdIn=" + activityIdIn);
 		}
 
 		return new C7HttpGetRequest<ProcessInstance>(url.toString(), new HttpEntity<>(httpHeadersFactory.json()));

@@ -28,7 +28,7 @@ public interface BpmEngineClientFacade {
 	String getProcessDefinitionXMLByKey(final String processDefinitionKey) throws Exception;
 
 	ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
-			final Optional<String> businessKey);
+			final Optional<String> businessKey, final Optional<String> activityIdIn);
 
 	ProcessInstance startProcess(final String processDefinitionKey);
 
@@ -40,9 +40,9 @@ public interface BpmEngineClientFacade {
 	void deleteProcessInstance(String processInstanceId);
 
 	ActivityInstance[] findActivityInstances(String processInstanceId) throws Exception;
-	
+
 	void createTask(final Task task);
-	
+
 	Task getTask(final String taskId);
 
 	Task[] findTasks(final String processInstanceBusinessKey);

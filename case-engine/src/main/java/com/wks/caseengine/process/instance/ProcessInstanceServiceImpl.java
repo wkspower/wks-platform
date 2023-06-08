@@ -18,7 +18,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 
 	@Autowired
 	private BpmEngineClientFacade processEngineClient;
-	
+
 	@Autowired
 	private GsonBuilder gsonBuilder;
 
@@ -57,8 +57,9 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	}
 
 	@Override
-	public List<ProcessInstance> find(Optional<String> processDefinitionKey, Optional<String> businessKey) throws Exception {
-		return Arrays.asList(processEngineClient.findProcessInstances(processDefinitionKey, businessKey));
+	public List<ProcessInstance> find(final Optional<String> processDefinitionKey, final Optional<String> businessKey,
+			final Optional<String> activityIdIn) throws Exception {
+		return Arrays.asList(processEngineClient.findProcessInstances(processDefinitionKey, businessKey, activityIdIn));
 	}
 
 	@Override

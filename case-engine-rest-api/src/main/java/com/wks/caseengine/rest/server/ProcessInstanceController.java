@@ -26,7 +26,7 @@ public class ProcessInstanceController {
 
 	@GetMapping(value = "/")
 	public List<ProcessInstance> find(@RequestParam(required = false) String businessKey) throws Exception {
-		return processInstanceService.find(Optional.empty(), Optional.ofNullable(businessKey));
+		return processInstanceService.find(Optional.empty(), Optional.ofNullable(businessKey), Optional.empty());
 	}
 
 	@GetMapping(value = "/{id}/activity-instances")

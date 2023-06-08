@@ -53,7 +53,7 @@ public class C8EngineClient implements BpmEngineClient {
 
 	@Override
 	public ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
-			final Optional<String> businessKey, final BpmEngine bpmEngine) {
+			final Optional<String> businessKey, final Optional<String> activityIdIn, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return new ProcessInstance[] {};
 	}
@@ -89,13 +89,13 @@ public class C8EngineClient implements BpmEngineClient {
 		// TODO Auto-generated method stub
 		return new ActivityInstance[] {};
 	}
-	
+
 	@Override
 	public void createTask(Task task, BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public Task getTask(String taskId, BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub

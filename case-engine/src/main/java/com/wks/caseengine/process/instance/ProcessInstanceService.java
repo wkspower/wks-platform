@@ -20,8 +20,8 @@ public interface ProcessInstanceService {
 
 	void delete(final String processInstanceId) throws Exception;
 
-	List<ProcessInstance> find(final Optional<String> processDefinitionKey, final Optional<String> businessKey)
-			throws Exception;
+	List<ProcessInstance> find(final Optional<String> processDefinitionKey, final Optional<String> businessKey,
+			final Optional<String> activityIdIn) throws Exception;
 
 	List<ActivityInstance> getActivityInstances(final String processInstanceId) throws Exception;
 

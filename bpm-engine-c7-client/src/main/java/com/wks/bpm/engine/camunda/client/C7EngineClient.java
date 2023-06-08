@@ -101,10 +101,10 @@ public class C7EngineClient implements BpmEngineClient {
 
 	@Override
 	public ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
-			final Optional<String> businessKey, final BpmEngine bpmEngine) {
+			final Optional<String> businessKey, final Optional<String> activityIdIn, final BpmEngine bpmEngine) {
 
 		return restTemplate.getForEntity(camundaHttpRequestFactory
-				.getProcessInstanceListRequest(processDefinitionKey, businessKey, bpmEngine).getHttpRequestUrl(),
+				.getProcessInstanceListRequest(processDefinitionKey, activityIdIn, businessKey, bpmEngine).getHttpRequestUrl(),
 				ProcessInstance[].class).getBody();
 	}
 

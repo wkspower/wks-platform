@@ -58,8 +58,8 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	public ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
-			final Optional<String> businessKey) {
-		return getEngineClient().findProcessInstances(processDefinitionKey, businessKey, getBpmEngine());
+			final Optional<String> businessKey, final Optional<String> activityIdIn) {
+		return getEngineClient().findProcessInstances(processDefinitionKey, businessKey, activityIdIn, getBpmEngine());
 	}
 
 	public ProcessInstance startProcess(final String processDefinitionKey) {
@@ -91,12 +91,12 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	public Task getTask(final String taskId) {
 		return getEngineClient().getTask(taskId, getBpmEngine());
 	}
-	
+
 	@Override
 	public void createTask(Task task) {
 		getEngineClient().createTask(task, getBpmEngine());
 	}
-	
+
 	public Task[] findTasks(final String processInstanceBusinessKey) {
 		return getEngineClient().findTasks(processInstanceBusinessKey, getBpmEngine());
 	}
