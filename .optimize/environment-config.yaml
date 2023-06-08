@@ -1,0 +1,34 @@
+# security:
+#   auth:
+#     token:
+#       # given a SSO environment Optimize's own sessions can be short lived
+#       lifeMin: 1
+
+# plugin:
+#   authenticationExtractor:
+#     basePackages: ['org.camunda.optimize.examples']
+
+ui:
+  header:
+    # determines the color theme of the text in the header. Currently 'dark' and 'light' are supported.
+    textColor: 'dark'
+    # Path to the logo that is displayed in the header of Optimize.
+    # Path can be:
+    # * relative: starting from the environment folder you can provide a relative path.
+    # * absolute: full path in the file system.
+    #
+    # Supported image formats can be found here:
+    # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Supported_image_formats
+    pathToLogoIcon: 'logo/wks_icon.svg'
+    # a hex encoded color that should be used as background color for the header. Default color is white.
+    backgroundColor: '#FFFFFF'
+  # If you have SSO enabled, you can set the property below to hide the logout option if it is not needed
+  logoutHidden: false
+
+es:
+  settings:
+    index:
+      number_of_replicas: 0
+
+telemetry:
+  initializeTelemetry: false      
