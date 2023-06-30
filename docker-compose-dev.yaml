@@ -15,7 +15,7 @@ services:
             - --providers.docker.exposedbydefault=false
             - --serversTransport.insecureSkipVerify=true
             - --providers.file.watch=true
-            - --providers.file.directory=/traefik
+            - --providers.file.directory=/traefik            
         ports:
             - 80:80
             - 443:443
@@ -23,7 +23,7 @@ services:
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock:ro
             - ./configs/traefik:/traefik:ro
-
+            
     minio:
         image: quay.io/minio/minio
         command: server /data --console-address ":9090"
@@ -52,7 +52,7 @@ services:
     opa:
         image: openpolicyagent/opa:edge-static
         ports:
-            - 8181:8181
+            - 8181:8181        
         command:
             - run
             - --server
@@ -61,7 +61,7 @@ services:
             - ./policy-decision-api:/etc/rules:ro
 
     camunda:
-        image: registry.camunda.cloud/cambpm-ee/camunda-bpm-platform-ee:run-7.19.1
+        image: camunda/camunda-bpm-platform:run-7.19.0-SNAPSHOT
         command: ./camunda.sh --rest --webapps
         ports:
             - 8080:8080
@@ -92,37 +92,6 @@ services:
             - 8082:8080
         volumes:
             - keycloak:/opt/keycloak/data/
-
-    elasticsearch:
-        # https://hub.docker.com/_/elasticsearch
-        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
-        container_name: elasticsearch
-        ports:
-            - "9200:9200"
-            - "9300:9300"
-        environment:
-            - bootstrap.memory_lock=true
-            - discovery.type=single-node
-            - xpack.security.enabled=false
-            # allow running with low disk space
-            - cluster.routing.allocation.disk.threshold_enabled=false
-            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-        ulimits:
-            memlock:
-                soft: -1
-                hard: -1
-        restart: always
-        healthcheck:
-            test:
-                [
-                    "CMD-SHELL",
-                    "curl -f http://localhost:9200/_cat/health | grep -q green"
-                ]
-            interval: 30s
-            timeout: 5s
-            retries: 3
-        volumes:
-            - elastic:/usr/share/elasticsearch/data
 
     case-engine-rest-api:
         build:
@@ -183,46 +152,11 @@ services:
                 condition: service_healthy
             camunda:
                 condition: service_healthy
-
-    case-portal:
-        build:
-            context: case-portal-react
-            args:
-                REACT_APP_KEYCLOAK_URL: http://localhost:8082
-                REACT_APP_API_URL: http://localhost:8081
-                REACT_APP_EMAIL_URL: http://localhost:8083
-                REACT_APP_STORAGE_URL: http://localhost:8085
-        ports:
-            - 3001:3000
-
-    optimize:
-        image: camunda/optimize:3.9.4
-        container_name: optimize
-        ports:
-            - "8090:8090"
-        environment:
-            - JAVA_OPTS=-Xms1g -Xmx1g -XX:MaxMetaspaceSize=256m
-            - OPTIMIZE_CAMUNDABPM_REST_URL=http://camunda:8080/engine-rest
-            - OPTIMIZE_ELASTICSEARCH_HOST=elasticsearch
-            - OPTIMIZE_ELASTICSEARCH_HTTP_PORT=9200
-            - OPTIMIZE_EVENT_INGESTION_ACCESS_TOKEN=secret        
-        volumes:
-            - "./.optimize/environment-config.yaml:/optimize/config/environment-config.yaml"
-            - "./.optimize/OptimizeLicense.txt:/optimize/config/OptimizeLicense.txt"
-            - "./.optimize/logo/wks_icon.svg:/optimize/config/logo/wks_icon.svg"
-        restart: on-failure
-        links:
-            - elasticsearch
-            - camunda
-        depends_on:
-            - elasticsearch
-
+                
 volumes:
     mongo:
         driver: local
     minio:
         driver: local
     keycloak:
-        driver: local
-    elastic:
         driver: local
