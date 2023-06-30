@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-WKS Platform is an open-source Case Management and Process Automation solution that leverages a powerful stack of technologies, including Camunda, MongoDB, Keycloak, OPA (Open Policy Agent), Form.io, Spring Boot, and React. It provides a comprehensive framework for managing and automating business processes, enabling organizations to streamline their operations, enhance efficiency, and improve decision-making.
+WKS Platform is an open-source Case Management and Process Automation solution that leverages a powerful stack of technologies, including Camunda, MongoDB, Keycloak, Traefik, MinIO, OPA (Open Policy Agent), Form.io, Spring Boot, and React. It provides a comprehensive framework for managing and automating business processes, enabling organizations to streamline their operations, enhance efficiency, and improve decision-making.
 
 ## Features
 
@@ -15,6 +15,10 @@ WKS Platform is an open-source Case Management and Process Automation solution t
 - **Identity and Access Management**: Integration with Keycloak offers robust identity and access management capabilities, including user authentication, authorization, and role-based access control. This ensures secure access to the platform and its features, protecting sensitive information.
 
 - **Policy Enforcement**: WKS Platform integrates with OPA (Open Policy Agent) to enforce fine-grained policies across the system. Policies can be defined to control access, validate data, enforce business rules, and ensure compliance with organizational regulations.
+
+- **Traefik Integration**: WKS Platform seamlessly integrates with Traefik, a modern reverse proxy and load balancer, to provide scalable and secure routing of HTTP traffic to the platform's components.
+
+- **MinIO Integration**: WKS Platform integrates with MinIO, an object storage server, for efficient and scalable storage of files and attachments associated with cases and processes.
 
 - **Dynamic Form Creation**: By leveraging Form.io, WKS Platform allows users to design and create dynamic forms that adapt to specific case requirements. This empowers organizations to collect structured data efficiently, ensuring data consistency and enabling streamlined processes.
 
