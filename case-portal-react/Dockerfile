@@ -16,13 +16,10 @@ ADD .prettierrc .prettierrc
 ADD .eslintrc .eslintrc
 
 RUN yarn install
-RUN REACT_APP_KEYCLOAK_URL=${REACT_APP_KEYCLOAK_URL} \ 
-    REACT_APP_API_URL=${REACT_APP_API_URL} \
-    REACT_APP_EMAIL_URL=${REACT_APP_EMAIL_URL} \
-    yarn build
+COPY . .
+ENV REACT_APP_KEYCLOAK_URL=${REACT_APP_KEYCLOAK_URL} 
+ENV REACT_APP_API_URL=${REACT_APP_API_URL}
+ENV REACT_APP_EMAIL_URL=${REACT_APP_EMAIL_URL}
 
-FROM node:19.8
-COPY --from=build /build /build
-RUN yarn global add serve
-EXPOSE 3001
-CMD [ "serve", "-s", "build", "-p", "3001" ]
+EXPOSE 3000
+CMD ["yarn", "start"]
