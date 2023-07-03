@@ -65,9 +65,9 @@ After successfully running `docker-compose up` to start the Docker Compose confi
 
 Please note that it may take some time for the web applications to become fully operational, especially if this is the first time you are running them. If you encounter any issues, wait a few moments and try accessing the applications again.
 
-Additionally, the MongoDB database used by these applications is running on port 27017. However, direct access to the MongoDB instance might not be necessary for using the web applications mentioned above.
+Additionally, the MongoDB database used by these applications is running on port 27017.
 
-Remember to ensure that you have Docker and Docker Compose installed on your system before running the `docker-compose up` command.
+Remember to ensure that you have Docker installed on your system before running the `docker-compose up` command.
 
 
 ## License
