@@ -34,18 +34,18 @@ public class CaseController {
 	private CaseInstanceService caseInstanceService;
 
 	@GetMapping(value = "/")
-	public ResponseEntity<Object> find(@RequestParam(required=false) String status,
-																	@RequestParam(required=false) String caseDefinitionId, 
-																	@RequestParam(required=false, name="before") String before,
-																	@RequestParam(required=false, name="after") String after,
-																	@RequestParam(required=false, name="sort") String sort,
-																	@RequestParam(required=false, name="limit") String limit) throws Exception {
+	public ResponseEntity<Object> find(@RequestParam(required = false) String status,
+			@RequestParam(required = false) String caseDefinitionId,
+			@RequestParam(required = false, name = "before") String before,
+			@RequestParam(required = false, name = "after") String after,
+			@RequestParam(required = false, name = "sort") String sort,
+			@RequestParam(required = false, name = "limit") String limit) throws Exception {
 		Cursor cursor = Cursor.of(before, after);
-		
+
 		CaseFilter filter = new CaseFilter(status, caseDefinitionId, cursor, sort, limit);
-		
+
 		PageResult<CaseInstance> data = caseInstanceService.find(filter);
-		
+
 		return new ResponseEntity<>(data.toJson(), HttpStatus.OK);
 	}
 
@@ -97,5 +97,5 @@ public class CaseController {
 			throws Exception {
 		caseInstanceService.deleteComment(businessKey, commentId);
 	}
-	
+
 }

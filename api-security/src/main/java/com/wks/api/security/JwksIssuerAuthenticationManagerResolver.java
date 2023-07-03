@@ -26,10 +26,11 @@ import com.nimbusds.jwt.JWTParser;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public final class JwksIssuerAuthenticationManagerResolver implements AuthenticationManagerResolver<HttpServletRequest> {
+public final class JwksIssuerAuthenticationManagerResolver
+		implements AuthenticationManagerResolver<HttpServletRequest> {
 
 	private String keycloakUrl;
-	
+
 	private final Cache cache = new ConcurrentMapCache("jwkSet");
 
 	public JwksIssuerAuthenticationManagerResolver(String keycloakUrl) {
@@ -39,29 +40,29 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 
 	@Override
 	public AuthenticationManager resolve(HttpServletRequest request) {
-			String origin = request.getHeader("Origin");
-			return new ResolvingAuthenticationManager(new RequestProps(origin, keycloakUrl, cache));
+		String origin = request.getHeader("Origin");
+		return new ResolvingAuthenticationManager(new RequestProps(origin, keycloakUrl, cache));
 	}
-	
-	static class RequestProps  {
+
+	static class RequestProps {
 		String origin;
 		String keycloack;
 		Cache cache;
-		
+
 		public RequestProps(String origin, String keycloack, Cache cache) {
 			super();
 			this.origin = origin;
 			this.keycloack = keycloack;
 			this.cache = cache;
 		}
-	};
+	}
 
 	static class ResolvingAuthenticationManager implements AuthenticationManager {
 
 		private Converter<BearerTokenAuthenticationToken, String> issuerConverter;
-		
+
 		private RequestProps request;
-		
+
 		public ResolvingAuthenticationManager(RequestProps request) {
 			this.request = request;
 			this.issuerConverter = new JwtClaimIssuerConverter(request);
@@ -70,23 +71,24 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 		@Override
 		public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 			BearerTokenAuthenticationToken token = (BearerTokenAuthenticationToken) authentication;
-			
+
 			String issuer = this.issuerConverter.convert(token);
-			
-			JwtAuthenticationManagerResolver authenticationManagerResolver = new JwtAuthenticationManagerResolver(request.cache);
-			
+
+			JwtAuthenticationManagerResolver authenticationManagerResolver = new JwtAuthenticationManagerResolver(
+					request.cache);
+
 			AuthenticationManager authenticationManager = authenticationManagerResolver.resolve(issuer);
 			if (authenticationManager == null) {
 				throw new InvalidBearerTokenException("Invalid issuer");
 			}
-			
+
 			return authenticationManager.authenticate(authentication);
 		}
 
 	}
 
 	static class JwtClaimIssuerConverter implements Converter<BearerTokenAuthenticationToken, String> {
-		
+
 		private RequestProps request;
 
 		public JwtClaimIssuerConverter(RequestProps request) {
@@ -98,7 +100,7 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 			if (request.keycloack == "") {
 				throw new InvalidBearerTokenException("Missing issuer");
 			}
-			
+
 			try {
 				String realm = extractTenantIdFromToken(authentication);
 				String issueUrl = String.format("%s/realms/%s/protocol/openid-connect/certs", request.keycloack, realm);
@@ -125,7 +127,7 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 		private final Map<String, AuthenticationManager> authenticationManagers = new ConcurrentHashMap<>();
 
 		private Cache cache;
-				
+
 		public JwtAuthenticationManagerResolver(Cache cache) {
 			this.cache = cache;
 		}
@@ -135,17 +137,15 @@ public final class JwksIssuerAuthenticationManagerResolver implements Authentica
 			AuthenticationManager authenticationManager = this.authenticationManagers.computeIfAbsent(issuer, (k) -> {
 				log.debug("Constructing AuthenticationManager");
 				log.debug("Resolved AuthenticationManager for issuer '{}'", issuer);
-				
-				JwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(issuer)
-																							   .cache(cache)
-																							   .build();
-				
+
+				JwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(issuer).cache(cache).build();
+
 				return new JwtAuthenticationProvider(jwtDecoder)::authenticate;
 			});
-			
+
 			return authenticationManager;
 		}
-		
+
 	}
 
 }

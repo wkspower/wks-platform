@@ -28,7 +28,7 @@ public class CaseEmailFactory {
 			log.debug("new case pattern identified");
 
 			String caseDefinitionId = to.split("@")[0];
-			
+
 			log.debug("Case definition: " + caseDefinitionId);
 
 			caseEmailBuilder
@@ -41,7 +41,7 @@ public class CaseEmailFactory {
 			log.debug("update case pattern identified");
 
 			String caseInstanceBusinessKey = to.split("@")[0];
-			
+
 			log.debug("Case Business Key: " + caseInstanceBusinessKey);
 
 			caseEmailBuilder

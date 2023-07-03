@@ -18,40 +18,40 @@ import com.wks.caseengine.rest.mocks.MockSecurityContext;
 
 @ExtendWith(MockitoExtension.class)
 public class InjectorTenantHandlerInterceptorTest {
-	
+
 	@InjectMocks
 	private InjectorTenantHandlerInterceptor handler;
-	
+
 	@Mock
 	private SecurityContextTenantHolder tenantHolder;
-	
+
 	private MockHttpServletRequest request;
 
 	@BeforeEach
 	public void setup() {
 		request = new MockHttpServletRequest();
 	}
-	
+
 	@AfterEach
 	private void teardown() {
 		SecurityContextHolder.clearContext();
 	}
-	
+
 	@Test
-	public  void shouldInjectTenantIdToContextOnProcessRequest() throws Exception {
+	public void shouldInjectTenantIdToContextOnProcessRequest() throws Exception {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
-		
+
 		boolean result = handler.preHandle(request, null, null);
-		
+
 		assertTrue(result);
 		verify(tenantHolder).setTenantId("wks");
 	}
 
 	@Test
-	public  void shouldCleanerContextOnAfterCompletion() throws Exception {
+	public void shouldCleanerContextOnAfterCompletion() throws Exception {
 		handler.afterCompletion(request, null, null, null);
-		
+
 		verify(tenantHolder).clear();
 	}
-	
+
 }

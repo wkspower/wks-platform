@@ -8,13 +8,13 @@ import org.springframework.data.annotation.Id;
 import lombok.ToString;
 
 @ToString
-public class Post  {
+public class Post {
 
 	@Id
 	private String id;
 
 	private String title;
-	
+
 	public Post() {
 		super();
 	}
@@ -23,17 +23,17 @@ public class Post  {
 		this.id = id;
 		this.title = title;
 	}
-	
+
 	public String getId() {
 		return id;
 	}
-	
+
 	public String getTitle() {
 		return title;
 	}
 
 	public static List<Post> fixtures() {
-		List<Post> items = new ArrayList<Post>();
+		List<Post> items = new ArrayList<>();
 		items.add(new Post("236UV30CwhgaMiGKYbC4xm4KkUg", "a"));
 		items.add(new Post("236UVhAGEKHSHAt3HekgSuW7zNw", "b"));
 		items.add(new Post("236UWIrPdkjY2FQ1pluzGm6amXs", "c"));

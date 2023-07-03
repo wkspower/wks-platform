@@ -26,17 +26,17 @@ public class HealthCheckControllerTest {
 
 	@MockBean
 	private CaseDefinitionService caseDefinitionService;
-	
+
 	@BeforeEach
 	public void setup() {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
 	}
-	
+
 	@AfterEach
 	private void teardown() {
 		SecurityContextHolder.clearContext();
 	}
-	
+
 	@Test
 	public void testCheck() throws Exception {
 		this.mockMvc.perform(get("/healthCheck/")).andExpect(status().isOk());

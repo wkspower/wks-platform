@@ -27,20 +27,19 @@ public class DataExportControllerTest {
 	@MockBean
 	private DataExportService dataExportService;
 
-	
 	@BeforeEach
 	public void setup() {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
 	}
-	
+
 	@AfterEach
 	private void teardown() {
 		SecurityContextHolder.clearContext();
 	}
-	
+
 	@Test
 	public void testExport() throws Exception {
 		this.mockMvc.perform(get("/export/")).andExpect(status().isOk());
 	}
-	
+
 }

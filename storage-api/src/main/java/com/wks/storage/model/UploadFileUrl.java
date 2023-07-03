@@ -12,9 +12,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UploadFileUrl {
-	
+
 	private String url;
-	
+
 	private Map<String, String> formData;
 
 }

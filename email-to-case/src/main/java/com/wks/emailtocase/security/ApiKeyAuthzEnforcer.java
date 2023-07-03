@@ -26,7 +26,7 @@ public class ApiKeyAuthzEnforcer implements AccessDecisionVoter<Object> {
 
 	@Autowired
 	private OrganizationRepository repository;
-	
+
 	@Autowired
 	private SecurityContextTenantHolder tenantHolder;
 
@@ -45,10 +45,10 @@ public class ApiKeyAuthzEnforcer implements AccessDecisionVoter<Object> {
 		if (!(obj instanceof FilterInvocation)) {
 			return ACCESS_ABSTAIN;
 		}
-		
+
 		FilterInvocation filter = (FilterInvocation) obj;
 		HttpServletRequest request = filter.getRequest();
-		
+
 		AntPathRequestMatcher antMatcher = new AntPathRequestMatcher("/actuator/*");
 		if (antMatcher.matches(request)) {
 			return ACCESS_ABSTAIN;
@@ -56,24 +56,25 @@ public class ApiKeyAuthzEnforcer implements AccessDecisionVoter<Object> {
 
 		try {
 			MailServerInputRequestResolver handler = new MailServerInputRequestResolver();
-			
+
 			Map<String, Object> params = handler.resolver(request, null);
-			
+
 			String tenantId = (String) params.get("org");
 			if (tenantId == null || tenantId.isBlank()) {
-				log.error("Could't find tenantId by subdomain, it was expected to be filled but it is empty {}", tenantId);
+				log.error("Could't find tenantId by subdomain, it was expected to be filled but it is empty {}",
+						tenantId);
 				return ACCESS_DENIED;
 			}
-			
+
 			tenantHolder.setTenantId(tenantId);
-			
+
 			Organization organization = repository.get();
-			
+
 			if (!Objects.equals(organization.getMailReceiveApiKey(), request.getParameter("apiKey"))) {
 				log.error("The API key was not found or not the expected value.");
 				return ACCESS_DENIED;
 			}
-			
+
 			return ACCESS_GRANTED;
 		} finally {
 			tenantHolder.clear();

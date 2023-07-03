@@ -23,34 +23,36 @@ public class InjectorTenantHandlerInterceptor implements HandlerInterceptor {
 
 	@Autowired
 	private SecurityContextTenantHolder tenantHolder;
-	
+
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        setTenantId(request, tenantHolder);
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+			throws Exception {
+		setTenantId(request, tenantHolder);
 		return true;
 	}
 
 	@Override
-	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
-        tenantHolder.clear();
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+			@Nullable Exception ex) throws Exception {
+		tenantHolder.clear();
 	}
 
-    private void setTenantId(HttpServletRequest request, SecurityContextTenantHolder tenantHolder) {
-    	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    	
-    	BearerTokenHandlerInputResolver handler = new BearerTokenHandlerInputResolver();
+	private void setTenantId(HttpServletRequest request, SecurityContextTenantHolder tenantHolder) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    	Map<String, Object> params = handler.resolver(request, authentication);
-    	if (params.isEmpty()) {
-    		return;
-    	}
-    	
-    	String tenantId = (String) params.get("org");
-    	if (tenantId == null || tenantId.isBlank()) {
-    		log.warn("Could't find tenantId by subdomain, it was expected to be filled but it is empty {}", tenantId);
-    	}
-    	
-        tenantHolder.setTenantId(tenantId);
-    }
+		BearerTokenHandlerInputResolver handler = new BearerTokenHandlerInputResolver();
+
+		Map<String, Object> params = handler.resolver(request, authentication);
+		if (params.isEmpty()) {
+			return;
+		}
+
+		String tenantId = (String) params.get("org");
+		if (tenantId == null || tenantId.isBlank()) {
+			log.warn("Could't find tenantId by subdomain, it was expected to be filled but it is empty {}", tenantId);
+		}
+
+		tenantHolder.setTenantId(tenantId);
+	}
 
 }

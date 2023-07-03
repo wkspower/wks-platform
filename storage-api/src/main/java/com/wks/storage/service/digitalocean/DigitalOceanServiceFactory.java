@@ -11,15 +11,15 @@ import com.wks.storage.service.UploadService;
 
 @Service("DigitalOceanServiceFactory")
 public class DigitalOceanServiceFactory implements ServiceFactory {
-	
+
 	@Autowired
 	@Qualifier("DigitalOceanBucketService")
 	private BucketService bucketService;
-	
+
 	@Autowired
 	@Qualifier("DigitalOceanDownloadService")
 	private DownloadService downloadService;
-	
+
 	@Autowired
 	@Qualifier("DigitalOceanUploadService")
 	private UploadService uploadService;

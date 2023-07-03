@@ -20,34 +20,34 @@ public class MinioDownloadServiceTest {
 
 	@InjectMocks
 	private MinioDownloadService service;
-	
+
 	@Mock
 	private BucketService bucketService;
-	
+
 	@Mock
 	private MinioClientDelegate client;
-	
+
 	@Test
 	public void shouldCreateSignedUrlWithoutDir() throws Exception {
 		when(bucketService.createAssignedTenant()).thenReturn("app");
 		when(client.getPresignedObjectUrl(isNotNull())).thenReturn("http://localhost");
-		
+
 		DownloadFileUrl download = service.createPresignedObjectUrl("file.csv", "application/csv");
-		
+
 		assertNotNull(download);
 		assertEquals("http://localhost", download.getUrl());
 	}
-	
+
 	@Test
 	public void shouldCreateSignedUrlWithtDir() throws Exception {
 		when(bucketService.createAssignedTenant()).thenReturn("app");
 		when(bucketService.createObjectWithPath("dirpath", "file.csv")).thenReturn("dirpath/file.csv");
 		when(client.getPresignedObjectUrl(isNotNull())).thenReturn("http://localhost/dirpath/file.csv");
-		
+
 		DownloadFileUrl download = service.createPresignedObjectUrl("dirpath", "file.csv", "application/csv");
-		
+
 		assertNotNull(download);
 		assertEquals("http://localhost/dirpath/file.csv", download.getUrl());
 	}
-	
+
 }

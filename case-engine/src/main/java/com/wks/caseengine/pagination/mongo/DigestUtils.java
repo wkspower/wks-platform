@@ -8,12 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public final class DigestUtils {
-	
+
 	public static String decode(Object token) {
 		if (token == null) {
 			return null;
 		}
-		
+
 		try {
 			byte[] decrypted = Base64Utils.decodeFromUrlSafeString(token.toString());
 			return new String(decrypted);
@@ -27,7 +27,7 @@ public final class DigestUtils {
 		if (token == null) {
 			return null;
 		}
-		
+
 		try {
 			return Base64Utils.encodeToUrlSafeString(token.toString().getBytes());
 		} catch (Exception e) {

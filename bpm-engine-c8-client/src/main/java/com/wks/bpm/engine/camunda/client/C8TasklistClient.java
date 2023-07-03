@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class C8TasklistClient {
-	
+
 	public HttpResponse callGraphQLService(String url, String query) throws URISyntaxException, IOException {
 		HttpClient client = HttpClientBuilder.create().build();
 		HttpGet request = new HttpGet(url);

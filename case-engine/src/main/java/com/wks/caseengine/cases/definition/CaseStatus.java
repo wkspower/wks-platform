@@ -39,12 +39,12 @@ public enum CaseStatus implements Serializable {
 				return Optional.ofNullable(c);
 			}
 		}
-		
+
 		return Optional.ofNullable(null);
 	}
-	
+
 	public String toValue() {
 		return code;
 	}
-	
+
 }

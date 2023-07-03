@@ -19,16 +19,16 @@ public class EngineMongoDataConnectionImpl implements EngineMongoDataConnection 
 	@Autowired
 	@Qualifier("mongoTemplate")
 	private MongoTemplate byTenant;
-	
+
 	@Autowired
 	@Qualifier("mongoTemplateShared")
 	private MongoTemplate byShared;
-	
+
 	@Override
 	public MongoTemplate getOperations() {
 		return byTenant;
 	}
-	
+
 	@Override
 	public MongoCollection<JsonObject> getCaseDefCollection() {
 		MongoDatabase db = byTenant.getDb();
@@ -41,13 +41,13 @@ public class EngineMongoDataConnectionImpl implements EngineMongoDataConnection 
 		MongoDatabase db = byTenant.getDb();
 		return db.getCollection("caseInstances", JsonObject.class);
 	}
-	
+
 	@Override
 	public MongoCollection<JsonObject> getFormCollection() {
 		MongoDatabase db = byTenant.getDb();
 		return db.getCollection("forms", JsonObject.class);
 	}
-	
+
 	@Override
 	public MongoCollection<JsonObject> getRecordTypeCollection() {
 		MongoDatabase db = byTenant.getDb();
@@ -71,7 +71,7 @@ public class EngineMongoDataConnectionImpl implements EngineMongoDataConnection 
 		MongoDatabase db = byShared.getDb();
 		return db.getCollection("bpmEngine", JsonObject.class);
 	}
-	
+
 	@Override
 	public MongoCollection<CaseInstance> getCaseInstanceCollection() {
 		MongoDatabase db = byTenant.getDb();
@@ -79,7 +79,7 @@ public class EngineMongoDataConnectionImpl implements EngineMongoDataConnection 
 	}
 
 	@Override
-	public  MongoDatabase getDatabase() {
+	public MongoDatabase getDatabase() {
 		return byTenant.getDb();
 	}
 

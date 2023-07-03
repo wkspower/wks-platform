@@ -61,7 +61,7 @@ public class CamundaDataImportCommandRunner implements CommandLineRunner {
 
 		String body = String.format("{\"id\":\"%s\", \"name\":\"Tenant Platform\"}", tenantId);
 
-		HttpEntity<String> entity = new HttpEntity<String>(body, headers);
+		HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
 		try {
 			restTemplate.getForEntity(String.format("%s/tenant/%s", baseUrl, tenantId), String.class);

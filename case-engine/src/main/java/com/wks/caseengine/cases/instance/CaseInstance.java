@@ -24,7 +24,7 @@ import lombok.ToString;
 public class CaseInstance {
 
 	private String _id;
-	
+
 	private String businessKey;
 
 	private String caseDefinitionId;
@@ -42,7 +42,7 @@ public class CaseInstance {
 	private List<CaseAttribute> attributes;
 
 	private String status;
-		
+
 	public CaseInstance(String _id, String businessKey, String caseDefinitionId, String stage, String status) {
 		super();
 		this._id = _id;
@@ -51,7 +51,7 @@ public class CaseInstance {
 		this.stage = stage;
 		this.status = status;
 	}
-	
+
 	public String getId() {
 		return businessKey;
 	}

@@ -18,18 +18,18 @@ import com.wks.storage.service.UploadService;
 
 @ExtendWith(MockitoExtension.class)
 public class FilesControllerTest {
-	
+
 	@InjectMocks
 	private FilesController controller;
-	
+
 	private MockStorageServiceFactory factory;
-	
+
 	@Mock
 	private DownloadService downloadService;
 
 	@Mock
 	private UploadService uploadService;
-	
+
 	@BeforeEach
 	public void setup() {
 		factory = new MockStorageServiceFactory();
@@ -41,36 +41,36 @@ public class FilesControllerTest {
 	@Test
 	public void shouldCreateDownloadUrlWithoutDirPath() throws Exception {
 		when(downloadService.createPresignedObjectUrl("file", "application/json")).thenReturn(new DownloadFileUrl());
-		
+
 		DownloadFileUrl description = controller.downloadFile("file", "application/json");
-		
+
 		assertNotNull(description);
 	}
-	
+
 	@Test
 	public void shouldCreateDownloadUrlWithtDirPath() throws Exception {
 		when(downloadService.createPresignedObjectUrl("dir", "file", "application/json")).thenReturn(new DownloadFileUrl());
-		
+
 		DownloadFileUrl description = controller.downloadFileWithDir("dir", "file", "application/json");
-		
+
 		assertNotNull(description);
 	}
-	
+
 	@Test
 	public void shouldCreateUploadUrl() throws Exception {
 		when(uploadService.createPresignedPostFormData("file", "application/json")).thenReturn(new UploadFileUrl());
-		
+
 		UploadFileUrl description = controller.upload("file", "application/json");
-		
+
 		assertNotNull(description);
 	}
-	
+
 	@Test
 	public void shouldCreateUploadUrlWithDirPath() throws Exception {
 		when(uploadService.createPresignedPostFormData("dir", "file", "application/json")).thenReturn(new UploadFileUrl());
-		
+
 		UploadFileUrl description = controller.uploadWithDir("dir", "file", "application/json");
-		
+
 		assertNotNull(description);
 	}
 

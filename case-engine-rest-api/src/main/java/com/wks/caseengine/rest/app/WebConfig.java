@@ -10,7 +10,7 @@ import com.wks.caseengine.rest.security.InjectorTenantHandlerInterceptor;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-	
+
 	@Autowired
 	private InjectorTenantHandlerInterceptor tenantHandler;
 
@@ -23,5 +23,5 @@ public class WebConfig implements WebMvcConfigurer {
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(tenantHandler);
 	}
-	
+
 }

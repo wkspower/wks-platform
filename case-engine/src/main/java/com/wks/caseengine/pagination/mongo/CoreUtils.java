@@ -25,9 +25,9 @@ public final class CoreUtils {
 			return decoded;
 		}
 	}
-	
+
 	public static String encode(Object value) {
 		return DigestUtils.encode(value);
 	}
-	
+
 }

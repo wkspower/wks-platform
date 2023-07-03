@@ -9,5 +9,5 @@ public interface SecurityContextTenantHolder {
 	void setTenantId(String tenantId);
 
 	void clear();
-	
+
 }

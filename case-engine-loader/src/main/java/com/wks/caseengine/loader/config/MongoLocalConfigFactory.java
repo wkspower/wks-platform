@@ -18,7 +18,7 @@ public class MongoLocalConfigFactory {
 
 	@Value("${spring.data.mongodb.uri}")
 	private String dbUrl;
-	
+
 	@Value("${spring.data.mongodb.database}")
 	private String dbShared;
 

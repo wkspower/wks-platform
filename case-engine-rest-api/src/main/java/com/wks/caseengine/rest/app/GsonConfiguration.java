@@ -19,7 +19,7 @@ public class GsonConfiguration {
 
 		GsonBuilder builder = new GsonBuilder();
 		builder.registerTypeAdapter(CaseAction.class, new CaseActionDeserializer());
-		builder.registerTypeAdapter(CaseAction.class, new CaseActionSerializer<CaseAction>());
+		builder.registerTypeAdapter(CaseAction.class, new CaseActionSerializer<>());
 
 		return builder;
 	}

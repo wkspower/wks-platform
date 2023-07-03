@@ -24,13 +24,13 @@ public class DigitalOceanUploadServiceTest {
 
 	@InjectMocks
 	private DigitalOceanUploadService service;
-	
+
 	@Mock
 	private BucketService bucketService;
-	
+
 	@Mock
 	private MinioClientDelegate client;
-	
+
 	private StorageConfig configs;
 
 	@BeforeEach
@@ -42,28 +42,28 @@ public class DigitalOceanUploadServiceTest {
 		configs.setUploadsBackendUrl("localhost");
 		service.setConfig(configs);
 	}
-	
+
 	@Test
 	public void shouldCreateSignedUrlWithoutDir() throws Exception {
 		when(bucketService.createAssignedTenant()).thenReturn("wks-app");
 		when(client.getPresignedPostFormData(isNotNull())).thenReturn(new HashMap<String, String>());
-		
+
 		UploadFileUrl upload = service.createPresignedPostFormData("file.csv", "application/csv");
-		
+
 		assertNotNull(upload);
 		assertEquals("https://wks-app.localhost", upload.getUrl());
 	}
-	
+
 	@Test
 	public void shouldCreateSignedUrlWithtDir() throws Exception {
 		when(bucketService.createAssignedTenant()).thenReturn("wks-app");
 		when(bucketService.createObjectWithPath("dirpath", "file.csv")).thenReturn("dirpath/file.csv");
 		when(client.getPresignedPostFormData(isNotNull())).thenReturn(new HashMap<String, String>());
-		
+
 		UploadFileUrl upload = service.createPresignedPostFormData("dirpath", "file.csv", "application/csv");
-		
+
 		assertNotNull(upload);
 		assertEquals("https://wks-app.localhost", upload.getUrl());
 	}
-	
+
 }

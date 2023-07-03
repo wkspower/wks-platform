@@ -11,15 +11,15 @@ import com.wks.storage.service.UploadService;
 
 @Service("MinioServiceFactory")
 public class MinioServiceFactory implements ServiceFactory {
-	
+
 	@Autowired
 	@Qualifier("MinioBucketService")
 	private BucketService bucketService;
-	
+
 	@Autowired
 	@Qualifier("MinioDownloadService")
 	private DownloadService downloadService;
-	
+
 	@Autowired
 	@Qualifier("MinioUploadService")
 	private UploadService uploadService;

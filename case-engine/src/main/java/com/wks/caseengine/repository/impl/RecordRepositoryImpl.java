@@ -21,7 +21,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 
 	@Autowired
 	private EngineMongoDataConnection connection;
-	
+
 	@Autowired
 	private GsonBuilder gsonBuilder;
 

@@ -1,15 +1,16 @@
 package com.wks.api.security;
+
 import java.util.Map;
 
 public final class OpenPolicyRequest {
 
-    private Map<String, Object> input;
+	private Map<String, Object> input;
 
-    public OpenPolicyRequest(Map<String, Object> input) {
-        this.input = input;
-    }
-    
-    public Map<String, Object> getInput() {
-        return input;
-    }
+	public OpenPolicyRequest(Map<String, Object> input) {
+		this.input = input;
+	}
+
+	public Map<String, Object> getInput() {
+		return input;
+	}
 }

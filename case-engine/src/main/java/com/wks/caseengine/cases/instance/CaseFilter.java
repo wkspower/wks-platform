@@ -26,7 +26,7 @@ public class CaseFilter {
 		this.status = CaseStatus.fromValue(status);
 		this.caseDefsId = Optional.ofNullable(caseDefsId);
 	}
-	
+
 	private Integer parseInt(String limit) {
 		try {
 			return Integer.valueOf(limit);
@@ -34,5 +34,5 @@ public class CaseFilter {
 			return 5;
 		}
 	}
-		
+
 }

@@ -30,29 +30,25 @@ public class EngineMongoTenantConfig extends AbstractMongoClientConfiguration {
 	protected String getDatabaseName() {
 		return props.getDataBaseName();
 	}
-	
+
 	@Override
 	protected MongoClientSettings mongoClientSettings() {
 		PojoCodecProvider build = PojoCodecProvider.builder()
-													.conventions(Arrays.asList(Conventions.ANNOTATION_CONVENTION))
-													.automatic(true)
-													.build();
-		
+				.conventions(Arrays.asList(Conventions.ANNOTATION_CONVENTION)).automatic(true).build();
+
 		CodecRegistry provider = CodecRegistries.fromProviders(build);
 
-		CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), provider); 
-		
+		CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
+				provider);
+
 		MongoClientSettings.Builder builder = MongoClientSettings.builder()
-																.applyConnectionString(new ConnectionString(props.getUri()))
-																.codecRegistry(pojoCodecRegistry);
-		
+				.applyConnectionString(new ConnectionString(props.getUri())).codecRegistry(pojoCodecRegistry);
+
 		builder.applyToConnectionPoolSettings(pool -> {
 			pool.minSize(props.getMinPool());
 			pool.maxSize(props.getMaxPool());
 		});
-		
-		
-		
+
 		builder.uuidRepresentation(UuidRepresentation.JAVA_LEGACY);
 		return builder.build();
 	}
@@ -77,5 +73,5 @@ public class EngineMongoTenantConfig extends AbstractMongoClientConfiguration {
 		MongoDatabaseFactory mongoDbFactory = new SimpleMongoClientDatabaseFactory(mongoClient(), db);
 		return new MongoTemplate(mongoDbFactory);
 	}
-	
+
 }

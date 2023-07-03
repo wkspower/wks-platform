@@ -12,7 +12,7 @@ import lombok.Setter;
 public class Organization {
 
 	private Object _id;
-	
+
 	private String mailReceiveApiKey;
 
 }

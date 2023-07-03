@@ -66,7 +66,7 @@ public class C7HttpRequestFactory {
 		body.add("data", fileEntity);
 
 		return new C7HttpPostRequest(extractUrl(bpmEngine) + deploymentUrl + "/create",
-				new HttpEntity<MultiValueMap<String, Object>>(body, httpHeadersFactory.multipart()));
+				new HttpEntity<>(body, httpHeadersFactory.multipart()));
 	}
 
 	public WksHttpRequest getDeploymentListRequest(final BpmEngine bpmEngine) {
@@ -177,7 +177,7 @@ public class C7HttpRequestFactory {
 		JsonObject assigneeJsonObject = JsonParser.parseString(assigneeJson).getAsJsonObject();
 
 		return new C7HttpPostRequest(extractUrl(bpmEngine) + taskUrl + "/" + taskId + "/claim",
-				new HttpEntity<String>(assigneeJsonObject.toString(), httpHeadersFactory.json()));
+				new HttpEntity<>(assigneeJsonObject.toString(), httpHeadersFactory.json()));
 	}
 
 	public WksHttpRequest getTaskCreateRequest(final Task task, final BpmEngine bpmEngine) {
@@ -187,7 +187,7 @@ public class C7HttpRequestFactory {
 
 	public WksHttpRequest getTaskCompleteRequest(final String taskId, JsonObject variables, final BpmEngine bpmEngine) {
 		return new C7HttpPostRequest(extractUrl(bpmEngine) + taskUrl + "/" + taskId + "/complete",
-				new HttpEntity<String>(variables.toString(), httpHeadersFactory.json()));
+				new HttpEntity<>(variables.toString(), httpHeadersFactory.json()));
 	}
 
 	public WksHttpRequest getTaskUnclaimRequest(final String taskId, final BpmEngine bpmEngine) {
@@ -216,9 +216,9 @@ public class C7HttpRequestFactory {
 	/// Message ////
 	public WksHttpRequest getMessageSendRequest(final ProcessMessage processMessage,
 			final Optional<JsonObject> variables, final BpmEngine bpmEngine) {
-		
-		if(variables.isPresent()){
-			processMessage.setProcessVariables(variables.get());	
+
+		if (variables.isPresent()) {
+			processMessage.setProcessVariables(variables.get());
 		}
 
 		return new C7HttpPostRequest(extractUrl(bpmEngine) + correlateUrl,

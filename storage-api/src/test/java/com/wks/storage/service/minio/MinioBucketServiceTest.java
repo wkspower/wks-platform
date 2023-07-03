@@ -18,22 +18,22 @@ import com.wks.storage.driver.MinioClientDelegate;
 
 @ExtendWith(MockitoExtension.class)
 public class MinioBucketServiceTest {
-	
+
 	@InjectMocks
 	private MinioBucketService service;
-	
+
 	@Mock
 	private MinioClientDelegate client;
-	
+
 	@Mock
 	private SecurityContextTenantHolder holder;
 
 	@Test
 	public void shouldCreateBucketNameWithTentant() throws Exception {
 		when(holder.getTenantId()).thenReturn(Optional.of("app"));
-		
+
 		String bucket = service.createAssignedTenant();
-		
+
 		assertEquals("app", bucket);
 		verify(client).makeBucket(notNull());
 	}

@@ -20,6 +20,6 @@ public class CaseDocument {
 	private String type;
 
 	private String size;
-	
+
 	private String base64;
 }

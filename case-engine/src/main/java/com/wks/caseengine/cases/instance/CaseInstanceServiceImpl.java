@@ -45,8 +45,8 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	@Override
 	public CaseInstance create(final CaseInstance caseInstance) throws Exception {
 
-		caseInstance.getAttributes()
-				.add(new CaseAttribute("createdAt", DateUtils.formatDate(new Date(), "dd/MM/yyyy"), CaseAttributeType.STRING.getValue()));
+		caseInstance.getAttributes().add(new CaseAttribute("createdAt", DateUtils.formatDate(new Date(), "dd/MM/yyyy"),
+				CaseAttributeType.STRING.getValue()));
 
 		CaseDefinition caseDefinition = caseDefRepository.get(caseInstance.getCaseDefinitionId());
 
@@ -70,7 +70,8 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 		return newCaseInstance;
 	}
-	
+
+	@Override
 	public CaseInstance update(CaseInstance caseInstance) throws Exception {
 		repository.update(caseInstance.getBusinessKey(), caseInstance);
 		// TODO return the updated case instance from DB
@@ -146,8 +147,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 
 	@Override
-	public void updateComment(final String businessKey, final String commentId, final String body)
-			throws Exception {
+	public void updateComment(final String businessKey, final String commentId, final String body) throws Exception {
 		CaseInstance caseInstance = repository.get(businessKey);
 
 		if (caseInstance == null) {
@@ -157,6 +157,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 		repository.updateComment(businessKey, commentId, body);
 	}
 
+	@Override
 	public void deleteComment(final String businessKey, final String commentId) throws Exception {
 		CaseInstance caseInstance = repository.get(businessKey);
 

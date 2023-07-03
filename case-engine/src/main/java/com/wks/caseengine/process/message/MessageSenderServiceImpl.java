@@ -14,7 +14,7 @@ public class MessageSenderServiceImpl implements MessageSenderService {
 
 	@Autowired
 	private BpmEngineClientFacade processEngineClient;
-	
+
 	@Override
 	public void sendMessage(final ProcessMessage processMessage, final Optional<JsonArray> variables) throws Exception {
 		processEngineClient.sendMessage(processMessage, variables);

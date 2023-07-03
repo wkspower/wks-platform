@@ -17,7 +17,7 @@ public class DataImportServiceImpl implements DataImportService {
 
 	@Autowired
 	private EngineMongoDataConnection connection;
-	
+
 	@Autowired
 	private GsonBuilder gsonBuilder;
 
@@ -27,19 +27,25 @@ public class DataImportServiceImpl implements DataImportService {
 		// Cases Definitions
 		JsonElement casesDefinitionsJson = data.get("casesDefinitions");
 		if (casesDefinitionsJson != null) {
-			List<JsonObject> caseDefinitions = gsonBuilder.create().fromJson(casesDefinitionsJson, new TypeToken<List<JsonObject>>() {
-			}.getType());
-			connection.getCaseDefCollection().insertMany(caseDefinitions.stream()
-					.map(o -> new org.bson.json.JsonObject(gsonBuilder.create().toJson(o))).collect(Collectors.toList()));
+			List<JsonObject> caseDefinitions = gsonBuilder.create().fromJson(casesDefinitionsJson,
+					new TypeToken<List<JsonObject>>() {
+					}.getType());
+			connection.getCaseDefCollection()
+					.insertMany(caseDefinitions.stream()
+							.map(o -> new org.bson.json.JsonObject(gsonBuilder.create().toJson(o)))
+							.collect(Collectors.toList()));
 		}
 
 		// Cases Instances
 		JsonElement casesInstancesJson = data.get("casesInstances");
 		if (casesInstancesJson != null) {
-			List<JsonObject> caseInstances = gsonBuilder.create().fromJson(casesInstancesJson, new TypeToken<List<JsonObject>>() {
-			}.getType());
-			connection.getCaseInstCollection().insertMany(caseInstances.stream()
-					.map(o -> new org.bson.json.JsonObject(gsonBuilder.create().toJson(o))).collect(Collectors.toList()));
+			List<JsonObject> caseInstances = gsonBuilder.create().fromJson(casesInstancesJson,
+					new TypeToken<List<JsonObject>>() {
+					}.getType());
+			connection.getCaseInstCollection()
+					.insertMany(caseInstances.stream()
+							.map(o -> new org.bson.json.JsonObject(gsonBuilder.create().toJson(o)))
+							.collect(Collectors.toList()));
 		}
 
 		// Forms
@@ -47,17 +53,20 @@ public class DataImportServiceImpl implements DataImportService {
 		if (formsJson != null) {
 			List<JsonObject> forms = gsonBuilder.create().fromJson(formsJson, new TypeToken<List<JsonObject>>() {
 			}.getType());
-			connection.getFormCollection().insertMany(
-					forms.stream().map(o -> new org.bson.json.JsonObject(gsonBuilder.create().toJson(o))).collect(Collectors.toList()));
+			connection.getFormCollection()
+					.insertMany(forms.stream().map(o -> new org.bson.json.JsonObject(gsonBuilder.create().toJson(o)))
+							.collect(Collectors.toList()));
 		}
 
 		// Records Types
 		JsonElement recordTypesJson = data.get("recordsTypes");
 		if (recordTypesJson != null) {
-			List<JsonObject> recordTypes = gsonBuilder.create().fromJson(recordTypesJson, new TypeToken<List<JsonObject>>() {
-			}.getType());
-			connection.getRecordTypeCollection().insertMany(recordTypes.stream()
-					.map(o -> new org.bson.json.JsonObject(gsonBuilder.create().toJson(o))).collect(Collectors.toList()));
+			List<JsonObject> recordTypes = gsonBuilder.create().fromJson(recordTypesJson,
+					new TypeToken<List<JsonObject>>() {
+					}.getType());
+			connection.getRecordTypeCollection().insertMany(
+					recordTypes.stream().map(o -> new org.bson.json.JsonObject(gsonBuilder.create().toJson(o)))
+							.collect(Collectors.toList()));
 
 		}
 

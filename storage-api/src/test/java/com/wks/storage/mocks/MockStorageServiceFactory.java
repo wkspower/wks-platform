@@ -14,9 +14,9 @@ public class MockStorageServiceFactory implements StorageServiceFactory {
 	private DownloadService downloadService;
 
 	private UploadService uploadService;
-	
+
 	private BucketService bucketService;
-	
+
 	@Override
 	public ServiceFactory getFactory() {
 		return new ServiceFactory() {
@@ -35,10 +35,10 @@ public class MockStorageServiceFactory implements StorageServiceFactory {
 			public UploadService getUploadService() {
 				return uploadService;
 			}
-			
+
 		};
 	}
-	
+
 	@Override
 	public ServiceFactory getFactory(String driver) {
 		return getFactory();

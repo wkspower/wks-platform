@@ -1,4 +1,5 @@
 package com.wks.storage.security;
+
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -14,31 +15,25 @@ import com.wks.api.security.OpenPolicyAuthzEnforcer;
 
 @Configuration
 public class ApiSecurityConfig {
-	
+
 	@Value("${opa.url}")
 	private String opaUrl;
-	
+
 	@Value("${keycloak.url}")
 	private String keycloakUrl;
-		
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    	 http.cors()
-    	 		.and()
-    	 		.csrf().disable()
-    	 		.authorizeRequests(authz -> authz
-    	 			.filterSecurityInterceptorOncePerRequest(false)
-    	            .anyRequest().authenticated()
-    	            .accessDecisionManager(accessDecisionManager())
-    	 		)
-    	 		.oauth2ResourceServer(oauth2 -> oauth2 
-					.authenticationManagerResolver(new JwksIssuerAuthenticationManagerResolver(keycloakUrl))
-				);
-        return http.build();
-    }
-    
+
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http.cors().and().csrf().disable()
+				.authorizeRequests(authz -> authz.filterSecurityInterceptorOncePerRequest(false).anyRequest()
+						.authenticated().accessDecisionManager(accessDecisionManager()))
+				.oauth2ResourceServer(oauth2 -> oauth2
+						.authenticationManagerResolver(new JwksIssuerAuthenticationManagerResolver(keycloakUrl)));
+		return http.build();
+	}
+
 	public AccessDecisionManager accessDecisionManager() {
 		return new UnanimousBased(Arrays.asList(new OpenPolicyAuthzEnforcer(opaUrl)));
 	}
-    
+
 }

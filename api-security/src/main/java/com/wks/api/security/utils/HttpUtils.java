@@ -11,36 +11,36 @@ public final class HttpUtils {
 		if (base == null || base.isBlank()) {
 			return "";
 		}
-		
+
 		try {
 			String url = base;
-			
+
 			if (!url.contains("://")) {
 				url = String.format("https://%s", base);
 			}
-			
+
 			URL allowedOrigin = new URL(url);
 			return allowedOrigin.getHost();
 		} catch (MalformedURLException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
-	
+
 	public static String getSubdomain(String url, int pos, String defaultIfEmpty) {
 		if (url == null || url.isBlank()) {
 			return defaultIfEmpty;
 		}
-		
+
 		String host = getHost(url);
 		if (host.isBlank()) {
 			return defaultIfEmpty;
 		}
-		
+
 		String[] names = host.split("\\.");
-		if (pos < 0 ||  pos >= names.length) {
+		if (pos < 0 || pos >= names.length) {
 			return defaultIfEmpty;
 		}
-		
+
 		return names[pos];
 	}
 
@@ -50,7 +50,7 @@ public final class HttpUtils {
 			if (method == null) {
 				return "";
 			}
-			
+
 			return method.toUpperCase();
 		} catch (java.lang.NoSuchMethodError e) {
 			return "";

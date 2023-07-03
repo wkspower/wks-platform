@@ -9,6 +9,7 @@ public class GenericBusinessKeyGenerator implements BusinessKeyGenerator {
 
 	public static final String PREFIX = "";
 
+	@Override
 	public String generate() {
 		return calculateBusinessKey();
 	}

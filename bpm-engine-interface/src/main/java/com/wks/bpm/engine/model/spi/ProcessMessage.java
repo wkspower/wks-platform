@@ -23,11 +23,10 @@ import lombok.ToString;
 public class ProcessMessage {
 
 	private String tenantId;
-	
+
 	private String messageName;
 	private String businessKey;
-	
-	private JsonObject processVariables;
 
+	private JsonObject processVariables;
 
 }

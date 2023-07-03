@@ -17,17 +17,17 @@ import com.wks.api.security.mocks.MockAuthentication;
 
 @ExtendWith(MockitoExtension.class)
 public class BearerTokenHandlerInputResolverTest {
-	
+
 	@InjectMocks
 	private BearerTokenHandlerInputResolver resolver;
-	
+
 	private MockHttpServletRequest request;
 
 	@BeforeEach
 	public void setup() {
 		request = new MockHttpServletRequest();
 	}
-	
+
 	@Test
 	@SuppressWarnings("serial")
 	public void shouldGetInputParsedFromBearerToken() {
@@ -35,18 +35,20 @@ public class BearerTokenHandlerInputResolverTest {
 		request.setRequestURI("/files/1?id=1");
 		request.setMethod("get");
 		request.addHeader("origin", "http://localhost:3000");
-		
+
 		Map<String, Object> input = resolver.resolver(request, authz);
-		
+
 		assertFalse(input.isEmpty());
-		assertEquals(new HashMap<String, Object>(){{
-			put("path", "files");
-			put("method", "GET");
-			put("realm_access", null);
-			put("org", "wks");
-			put("host", "localhost");
-			put("allowed_origin", "localhost");
-		}}, input);
+		assertEquals(new HashMap<String, Object>() {
+			{
+				put("path", "files");
+				put("method", "GET");
+				put("realm_access", null);
+				put("org", "wks");
+				put("host", "localhost");
+				put("allowed_origin", "localhost");
+			}
+		}, input);
 	}
 
 }

@@ -19,7 +19,7 @@ public class EnumAdapterFactory implements TypeAdapterFactory {
 	public <T> TypeAdapter<T> create(final Gson gson, final TypeToken<T> type) {
 		Class<? super T> rawType = type.getRawType();
 		if (rawType.isEnum()) {
-			return new EnumTypeAdapter<T>();
+			return new EnumTypeAdapter<>();
 		}
 		return null;
 	}
@@ -53,6 +53,7 @@ public class EnumAdapterFactory implements TypeAdapterFactory {
 			}
 		}
 
+		@Override
 		public T read(JsonReader in) throws IOException {
 			// Properly deserialize the input
 			return null;

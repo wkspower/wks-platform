@@ -13,34 +13,35 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class StorageServiceFactoryImplTest {
-	
+
 	@InjectMocks
 	private StorageServiceFactoryImpl storageServiceFactory;
 
 	@Mock
 	private ServiceFactory minio;
-	
+
 	@Mock
 	private ServiceFactory digitalOcean;
 
 	@Test
 	public void shouldCreateFactoryForMinioDriver() {
 		ServiceFactory factory = storageServiceFactory.getFactory("minio");
-		
+
 		assertSame(factory, minio);
 	}
-	
+
 	@Test
 	public void shouldCreateFactoryForDigitalOceanDriver() {
 		ServiceFactory factory = storageServiceFactory.getFactory("do");
-		
+
 		assertSame(factory, digitalOcean);
 	}
-	
+
 	@Test
 	public void shouldThrowExceptionWhenInvalidDriver() {
-		IllegalArgumentException exception = assertThrowsExactly(IllegalArgumentException.class, () -> storageServiceFactory.getFactory("unknow"));
-		
+		IllegalArgumentException exception = assertThrowsExactly(IllegalArgumentException.class,
+				() -> storageServiceFactory.getFactory("unknow"));
+
 		assertNotNull(exception);
 		assertEquals("Factory name 'unknow' not found", exception.getMessage());
 	}

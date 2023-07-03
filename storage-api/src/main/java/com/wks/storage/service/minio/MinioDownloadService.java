@@ -18,7 +18,7 @@ import io.minio.http.Method;
 
 @Service("MinioDownloadService")
 public class MinioDownloadService implements DownloadService {
-	
+
 	@Autowired
 	@Qualifier("MinioClient")
 	private MinioClientDelegate client;
@@ -26,36 +26,30 @@ public class MinioDownloadService implements DownloadService {
 	@Autowired
 	@Qualifier("MinioBucketService")
 	private BucketService bucketService;
-	
+
 	@Override
 	public DownloadFileUrl createPresignedObjectUrl(String fileName, String contentType) throws Exception {
 		return createPresigned(null, fileName, contentType);
 	}
-	
+
 	@Override
 	public DownloadFileUrl createPresignedObjectUrl(String dir, String fileName, String contentType) throws Exception {
 		return createPresigned(dir, fileName, contentType);
 	}
 
-	private DownloadFileUrl createPresigned(String dir, String fileName, String contentType) throws Exception  {
-		Map<String, String> params = new HashMap<String, String>();
+	private DownloadFileUrl createPresigned(String dir, String fileName, String contentType) throws Exception {
+		Map<String, String> params = new HashMap<>();
 		params.put("response-content-type", contentType);
-		
+
 		String bucketName = bucketService.createAssignedTenant();
-		
+
 		String objectName = fileName;
-		if (dir != null  && !dir.isBlank()) {
+		if (dir != null && !dir.isBlank()) {
 			objectName = bucketService.createObjectWithPath(dir, fileName);
 		}
-		
-		GetPresignedObjectUrlArgs signed =
-				GetPresignedObjectUrlArgs.builder()
-																.method(Method.GET)
-																.bucket(bucketName)
-																.object(objectName)
-																.expiry(1, TimeUnit.MINUTES)
-																.extraQueryParams(params)
-																.build();
+
+		GetPresignedObjectUrlArgs signed = GetPresignedObjectUrlArgs.builder().method(Method.GET).bucket(bucketName)
+				.object(objectName).expiry(1, TimeUnit.MINUTES).extraQueryParams(params).build();
 
 		String url = client.getPresignedObjectUrl(signed);
 

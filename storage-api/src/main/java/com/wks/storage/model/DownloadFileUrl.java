@@ -10,7 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DownloadFileUrl {
-	
+
 	private String url;
 
 }

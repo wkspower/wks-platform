@@ -30,17 +30,17 @@ public class FormControllerTest {
 
 	@MockBean
 	private FormService caseInstanceService;
-	
+
 	@BeforeEach
 	public void setup() {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
 	}
-	
+
 	@AfterEach
 	private void teardown() {
 		SecurityContextHolder.clearContext();
 	}
-	
+
 	@Test
 	public void testSave() throws Exception {
 		this.mockMvc.perform(post("/form/").contentType(MediaType.APPLICATION_JSON).content("{}"))

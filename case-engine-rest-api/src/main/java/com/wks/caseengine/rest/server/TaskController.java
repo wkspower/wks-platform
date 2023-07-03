@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("task")
 @Tag(name = "Task", description = "A task is a unit of work for a process")
 public class TaskController {
-	
+
 	@Autowired
 	private TaskService taskService;
 

@@ -7,10 +7,10 @@ public final class OpenPolicyResponse {
 	public boolean getResult() {
 		return this.result;
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.format("result: %s", result);
 	}
-	
+
 }

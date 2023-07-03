@@ -5,12 +5,13 @@ import java.util.Random;
 
 public class SecretGenerator {
 
-	private static final char[] DEFAULT_CODEC = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_".toCharArray();
+	private static final char[] DEFAULT_CODEC = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
+			.toCharArray();
 
 	private Random random = new SecureRandom();
 
 	private int length;
-	
+
 	public static String create(int size) {
 		return new SecretGenerator(size).generate();
 	}

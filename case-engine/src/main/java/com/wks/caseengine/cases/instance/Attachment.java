@@ -29,6 +29,5 @@ public class Attachment {
 	private String userId;
 	private String userName;
 	private Date createdAt;
-	
-	
+
 }

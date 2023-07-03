@@ -23,56 +23,57 @@ import com.wks.emailtocase.mocks.MockSecurityContext;
 
 @ExtendWith(MockitoExtension.class)
 public class InjectorTenantHandlerInterceptorTest {
-	
+
 	@InjectMocks
 	private InjectorTenantHandlerInterceptor handler;
-	
+
 	@Mock
 	private SecurityContextTenantHolder tenantHolder;
-	
+
 	private MockHttpServletRequest request;
 
 	@BeforeEach
 	public void setup() {
 		request = new MockHttpServletRequest();
 	}
-	
+
 	@AfterEach
 	private void teardown() {
 		SecurityContextHolder.clearContext();
 	}
-	
+
 	@Test
-	public  void shouldInjectTenantIdToContextOnProcessRequest() throws Exception {
+	public void shouldInjectTenantIdToContextOnProcessRequest() throws Exception {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
 		request.setContentType(MediaType.MULTIPART_FORM_DATA_VALUE);
 		request.setParameter("to", "client@new-case.myorg.sendgrid.com");
 		request.addPart(new MockPart("to", "client@new-case.myorg.sendgrid.com".getBytes()));
-		
+
 		boolean result = handler.preHandle(request, null, null);
-		
+
 		assertTrue(result);
 		verify(tenantHolder).setTenantId("myorg");
 	}
-	
+
 	@Test
-	public  void shouldInjectDefaultTenantIdIfPrefixDnsNotFoundOnProcessRequest() throws Exception {
+	public void shouldInjectDefaultTenantIdIfPrefixDnsNotFoundOnProcessRequest() throws Exception {
 		SecurityContextHolder.setContext(new MockSecurityContext(" ", "localhost"));
 		request.setContentType(MediaType.MULTIPART_FORM_DATA_VALUE);
 		request.setParameter("to", "client@new-case.sendgrid.com");
 		request.addPart(new MockPart("to", "client@new-case.sendgrid.com".getBytes()));
-		
-		IllegalArgumentException assertThrows = assertThrows(IllegalArgumentException.class, () -> handler.preHandle(request, null, null));
-		
+
+		IllegalArgumentException assertThrows = assertThrows(IllegalArgumentException.class,
+				() -> handler.preHandle(request, null, null));
+
 		assertEquals("Invalid origin declared on 'to', tenantId could not to be 'sendgrid'", assertThrows.getMessage());
 		verifyNoInteractions(tenantHolder);
 	}
 
 	@Test
-	public  void shouldCleanerContextOnAfterCompletion() throws Exception {
+	public void shouldCleanerContextOnAfterCompletion() throws Exception {
 		handler.afterCompletion(request, null, null, null);
-		
+
 		verify(tenantHolder).clear();
 	}
-	
+
 }

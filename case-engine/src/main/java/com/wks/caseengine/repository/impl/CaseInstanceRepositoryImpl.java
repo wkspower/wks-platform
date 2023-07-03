@@ -41,24 +41,22 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	public List<CaseInstance> find() throws Exception {
 		return paginator.apply(getCollection().find()).sort(descending("_id")).into(new ArrayList<>());
 	}
-	
+
 	@Override
 	public PageResult<CaseInstance> find(CaseFilter filters) throws Exception {
 		CursorPagination pagination = new MongoCursorPagination(getOperations());
-		
-		Args args = Args.of(filters.getLimit())
-									.key("_id")
-									.cursor(filters.getCursor(), filters.getDir())
-									.criteria(c -> {
-										 filters.getCaseDefsId().ifPresent(a -> c.add(Criteria.where("caseDefinitionId").is(filters.getCaseDefsId().get())));
-										 filters.getStatus().ifPresent(a -> c.add(Criteria.where("status").is(filters.getStatus().get())));
-									});
-		
+
+		Args args = Args.of(filters.getLimit()).key("_id").cursor(filters.getCursor(), filters.getDir()).criteria(c -> {
+			filters.getCaseDefsId()
+					.ifPresent(a -> c.add(Criteria.where("caseDefinitionId").is(filters.getCaseDefsId().get())));
+			filters.getStatus().ifPresent(a -> c.add(Criteria.where("status").is(filters.getStatus().get())));
+		});
+
 		PageResult<CaseInstance> results = pagination.executeQuery(args, CaseInstance.class);
-		
+
 		return results;
 	}
-	
+
 	@Override
 	public CaseInstance get(final String businessKey) throws Exception {
 		Bson filter = Filters.eq("businessKey", businessKey);
@@ -93,7 +91,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 
 	@Override
 	public void deleteComment(final String businessKey, final Comment comment) {
-		
+
 		Bson filter = Filters.eq("businessKey", businessKey);
 		Bson update = Updates.pull("comments", comment);
 		getCollection().updateOne(filter, update);
@@ -109,5 +107,5 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	protected MongoOperations getOperations() {
 		return connection.getOperations();
 	}
-	
+
 }

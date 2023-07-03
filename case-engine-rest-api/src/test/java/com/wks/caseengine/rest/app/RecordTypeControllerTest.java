@@ -35,12 +35,12 @@ public class RecordTypeControllerTest {
 	public void setup() {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
 	}
-	
+
 	@AfterEach
 	private void teardown() {
 		SecurityContextHolder.clearContext();
 	}
-	
+
 	@Test
 	public void testSave() throws Exception {
 		this.mockMvc.perform(post("/record-type/").contentType(MediaType.APPLICATION_JSON).content("{}"))

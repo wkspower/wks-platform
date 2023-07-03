@@ -9,19 +9,19 @@ public final class SecurityContextTenantHolderThreadLocallImpl implements Securi
 
 	private ThreadLocal<String> tenantId = new ThreadLocal<>();
 
-    @Override
+	@Override
 	public Optional<String> getTenantId() {
-        return Optional.of(tenantId.get());
-    }
+		return Optional.of(tenantId.get());
+	}
 
-    @Override
+	@Override
 	public void setTenantId(final String tenantId) {
-        this.tenantId.set(tenantId);
-    }
+		this.tenantId.set(tenantId);
+	}
 
-    @Override
+	@Override
 	public void clear() {
-        tenantId.remove();
-    }
+		tenantId.remove();
+	}
 
 }

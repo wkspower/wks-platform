@@ -104,8 +104,8 @@ public class C7EngineClient implements BpmEngineClient {
 			final Optional<String> businessKey, final Optional<String> activityIdIn, final BpmEngine bpmEngine) {
 
 		return restTemplate.getForEntity(camundaHttpRequestFactory
-				.getProcessInstanceListRequest(processDefinitionKey, activityIdIn, businessKey, bpmEngine).getHttpRequestUrl(),
-				ProcessInstance[].class).getBody();
+				.getProcessInstanceListRequest(processDefinitionKey, activityIdIn, businessKey, bpmEngine)
+				.getHttpRequestUrl(), ProcessInstance[].class).getBody();
 	}
 
 	@Override
@@ -168,23 +168,24 @@ public class C7EngineClient implements BpmEngineClient {
 
 		return activityInstance.getChildActivityInstances();
 	}
-	
+
 	@Override
 	public void createTask(Task task, BpmEngine bpmEngine) {
-		
+
 		UUID taskId = UUID.nameUUIDFromBytes((task.getDescription() + new Date()).getBytes());
 		task.setId(taskId.toString());
 		task.setTenantId(tenantHolder.getTenantId().get());
-		
+
 		WksHttpRequest request = camundaHttpRequestFactory.getTaskCreateRequest(task, bpmEngine);
 		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class);
 	}
 
 	@Override
 	public Task getTask(final String taskId, final BpmEngine bpmEngine) {
-		return restTemplate.getForEntity(
-				camundaHttpRequestFactory.getTaskGetRequest(taskId, bpmEngine).getHttpRequestUrl(),
-				Task.class).getBody();
+		return restTemplate
+				.getForEntity(camundaHttpRequestFactory.getTaskGetRequest(taskId, bpmEngine).getHttpRequestUrl(),
+						Task.class)
+				.getBody();
 	}
 
 	@Override

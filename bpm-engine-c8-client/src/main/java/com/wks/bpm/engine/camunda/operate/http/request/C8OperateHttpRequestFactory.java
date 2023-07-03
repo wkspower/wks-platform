@@ -48,5 +48,4 @@ public class C8OperateHttpRequestFactory {
 		return null;
 	}
 
-
 }

@@ -5,7 +5,7 @@ package com.wks.bpm.engine.model.spi;
  *
  */
 public interface ProcessDefinition {
-	
+
 	void setBpmEngineId(final String bpmnEngineId);
 
 }

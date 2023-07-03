@@ -18,16 +18,16 @@ public final class BearerTokenHandlerInputResolver implements HandlerInputResolv
 	public Map<String, Object> resolver(HttpServletRequest request, Authentication authentication) {
 		return inputResolver(request, authentication);
 	}
-	
+
 	private Map<String, Object> inputResolver(HttpServletRequest request, Authentication authentication) {
-		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		for (Enumeration<String> headerNames = request.getHeaderNames(); headerNames.hasMoreElements();) {
 			String header = headerNames.nextElement();
 			headers.put(header, request.getHeader(header));
 		}
-		
+
 		String[] path = request.getRequestURI().replaceAll("^/|/$", "").split("/");
-		Map<String, Object> input = new HashMap<String, Object>();
+		Map<String, Object> input = new HashMap<>();
 		input.put("method", HttpUtils.getMethod(request));
 		input.put("path", path[0]);
 		input.put("host", HttpUtils.getHost(request.getHeader("origin")));
@@ -38,7 +38,7 @@ public final class BearerTokenHandlerInputResolver implements HandlerInputResolv
 			input.put("allowed_origin", getAllowedOrigin(jwt));
 			input.put("realm_access", jwt.getClaimAsMap("realm_access"));
 		}
-		
+
 		return input;
 	}
 
@@ -46,5 +46,5 @@ public final class BearerTokenHandlerInputResolver implements HandlerInputResolv
 	private String getAllowedOrigin(Jwt jwt) {
 		return HttpUtils.getHost(((List<String>) jwt.getClaim("allowed-origins")).get(0));
 	}
-	
+
 }

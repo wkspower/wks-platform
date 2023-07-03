@@ -14,17 +14,17 @@ public class CaseInstanceFileAttribute {
 	private String name;
 
 	private String url;
-	
+
 	private String type;
-	
+
 	private String originalName;
-	
+
 	private String hash;
-	
+
 	public CaseInstanceFileAttribute() {
-		
+
 	}
-	
+
 	public CaseInstanceFileAttribute(String storage, String name, String url, String type, String originalName) {
 		this.storage = storage;
 		this.name = name;

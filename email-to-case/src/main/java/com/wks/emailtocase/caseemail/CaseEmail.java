@@ -22,9 +22,9 @@ public class CaseEmail {
 	private String html;
 
 	private String caseInstanceBusinessKey;
-	
+
 	private String caseDefinitionId;
-	
+
 	private CaseEmailType caseEmailType;
 
 }

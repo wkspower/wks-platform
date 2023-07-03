@@ -32,16 +32,16 @@ public class DeploymentControllerTest {
 	public void setup() {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
 	}
-	
+
 	@AfterEach
 	private void teardown() {
 		SecurityContextHolder.clearContext();
 	}
-	
+
 	@Test
 	public void testGet() throws Exception {
 		this.mockMvc.perform(post("/deployment/").contentType(MediaType.APPLICATION_JSON).content("{}"))
-		.andExpect(status().isOk());
+				.andExpect(status().isOk());
 	}
 
 }

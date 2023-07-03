@@ -25,21 +25,17 @@ public class MinioBucketService implements BucketService {
 	public String createAssignedTenant() throws Exception {
 		String bucketByTenant = tenantHolder.getTenantId().get();
 
-		boolean found = client.bucketExists(BucketExistsArgs.builder()
-																									.bucket(bucketByTenant)
-																									.build());
+		boolean found = client.bucketExists(BucketExistsArgs.builder().bucket(bucketByTenant).build());
 		if (!found) {
-			client.makeBucket(MakeBucketArgs.builder()
-																		 .bucket(bucketByTenant)
-																		 .build());
+			client.makeBucket(MakeBucketArgs.builder().bucket(bucketByTenant).build());
 		}
 
 		return bucketByTenant;
 	}
-	
+
 	@Override
 	public String createObjectWithPath(String dir, String fileName) throws Exception {
 		return String.format("%s/%s", dir, fileName);
 	}
-	
+
 }

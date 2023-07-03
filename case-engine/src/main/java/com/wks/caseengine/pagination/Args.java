@@ -30,43 +30,43 @@ public final class Args {
 	public static Args of(int limit) {
 		return new Args(limit, Direction.ASC);
 	}
-	
+
 	public static Args of(Direction dir) {
 		return new Args(5, dir);
 	}
-	
+
 	public static Args of(Args copy, Cursor.Order order, String value) {
 		return Args.of(copy.limit).cursor(order, value, copy.dir);
 	}
 
-	public Args fields(String field, String ...fields) {
+	public Args fields(String field, String... fields) {
 		if (fields != null && !field.isBlank()) {
 			this.fields.add(field);
 		}
-		
+
 		if (fields != null) {
 			this.fields.addAll(Arrays.asList(fields));
 		}
-		
+
 		return this;
 	}
-	
+
 	public Args key(String key) {
 		this.key = key;
 		return this;
 	}
-	
+
 	public Args sort(String sort) {
 		this.sort = sort;
 		return this;
 	}
-	
+
 	public Args cursor(Cursor cursor, Direction dir) {
 		this.cursor = cursor == null ? Cursor.empty() : cursor;
 		this.dir = dir;
 		return this;
 	}
-	
+
 	public Args cursor(Cursor.Order order, String value, Direction dir) {
 		this.cursor = order.isAfter() ? cursor.next(value) : cursor.previous(value);
 		this.dir = dir;
@@ -82,23 +82,23 @@ public final class Args {
 		});
 		return this;
 	}
-	
+
 	public String key() {
 		return Optional.ofNullable(key).orElse("_id");
 	}
-	
+
 	public int limit() {
 		return limit;
 	}
-	
+
 	public Direction dir() {
 		return dir;
 	}
-	
+
 	public List<Criteria> criterias() {
 		return criterias;
 	}
-	
+
 	public String sort() {
 		return sort;
 	}
@@ -110,7 +110,7 @@ public final class Args {
 	public Cursor cursors() {
 		return cursor;
 	}
-	
+
 	public interface Expr {
 		void add(Criteria c);
 	}
@@ -118,13 +118,13 @@ public final class Args {
 	public void validate() {
 		if (!fields.isEmpty()) {
 			if (key != null && !fields.contains(key)) {
-				throw new PaginationException("PersistentProperty '"+key+"' wasn't declared in fields");
+				throw new PaginationException("PersistentProperty '" + key + "' wasn't declared in fields");
 			}
-			
+
 			if (sort != null && !fields.contains(sort)) {
-				throw new PaginationException("PersistentProperty '"+sort+"' wasn't declared in fields");
+				throw new PaginationException("PersistentProperty '" + sort + "' wasn't declared in fields");
 			}
 		}
 	}
-	
+
 }

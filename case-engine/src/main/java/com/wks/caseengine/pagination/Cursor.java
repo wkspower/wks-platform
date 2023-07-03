@@ -13,28 +13,28 @@ public final class Cursor {
 
 	public static Cursor of(String before, String after) {
 		Cursor c = Cursor.empty();
-		
+
 		if (before != null && !before.isBlank()) {
-			return c.previous(before) ;
-		} 
+			return c.previous(before);
+		}
 
 		if (after != null && !after.isBlank()) {
-			return c.next(after) ;
-		} 
-		
+			return c.next(after);
+		}
+
 		return null;
 	}
-	
+
 	public static Cursor empty() {
 		return new Cursor(null, null);
 	}
-		
+
 	public Cursor previous(String value) {
 		this.order = Cursor.Order.BEFORE;
 		this.previous = value;
-		 return this;
+		return this;
 	}
-	
+
 	public Cursor next(String value) {
 		this.order = Cursor.Order.AFTER;
 		this.next = value;
@@ -42,15 +42,11 @@ public final class Cursor {
 	}
 
 	public boolean hasPrevious() {
-		return previous != null 
-					&& !previous.toString().isBlank() 
-					&& order.isBefore();
+		return previous != null && !previous.toString().isBlank() && order.isBefore();
 	}
-	
+
 	public boolean hasNext() {
-		return next != null 
-					&& !next.toString().isBlank()
-					&& order.isAfter();
+		return next != null && !next.toString().isBlank() && order.isAfter();
 	}
 
 	public String previous() {
@@ -60,21 +56,19 @@ public final class Cursor {
 	public String next() {
 		return next != null ? next.toString() : null;
 	}
-	
+
 	public enum Order {
-		
-		AFTER,
-		BEFORE, 
-		EMPTY;
+
+		AFTER, BEFORE, EMPTY;
 
 		public boolean isAfter() {
 			return this.equals(AFTER);
 		}
-		
-		public  boolean isBefore() {
+
+		public boolean isBefore() {
 			return this.equals(BEFORE);
 		}
 
 	}
-	
+
 }

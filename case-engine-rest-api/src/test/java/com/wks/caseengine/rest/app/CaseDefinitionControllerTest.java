@@ -31,17 +31,16 @@ public class CaseDefinitionControllerTest {
 	@MockBean
 	private CaseDefinitionService caseDefinitionService;
 
-	
 	@BeforeEach
 	public void setup() {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
 	}
-	
+
 	@AfterEach
 	private void teardown() {
 		SecurityContextHolder.clearContext();
 	}
-	
+
 	@Test
 	public void testSave() throws Exception {
 		this.mockMvc.perform(post("/case-definition/").contentType(MediaType.APPLICATION_JSON).content("{}"))

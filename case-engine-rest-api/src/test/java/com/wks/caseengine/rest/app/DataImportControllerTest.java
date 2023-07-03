@@ -28,22 +28,21 @@ public class DataImportControllerTest {
 	@MockBean
 	private DataImportController dataImportController;
 
-	
 	@BeforeEach
 	public void setup() {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
 	}
-	
+
 	@AfterEach
 	private void teardown() {
 		SecurityContextHolder.clearContext();
 	}
-	
+
 	@Test
 	public void testImport() throws Exception {
 		this.mockMvc.perform(post("/import/").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 
 	}
-	
+
 }

@@ -31,12 +31,12 @@ public class CaseDefinition {
 	private String stagesLifecycleProcessKey;
 
 	private Boolean deployed;
-	
+
 	private List<CaseStage> stages;
-	
+
 	@Default
 	private List<TaskCompleteHook> taskCompleteHooks = new ArrayList<>();
-	
+
 	@Default
 	private JsonObject kanbanConfig = new JsonObject();
 

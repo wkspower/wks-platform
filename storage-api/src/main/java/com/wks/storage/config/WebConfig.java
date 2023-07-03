@@ -10,7 +10,7 @@ import com.wks.storage.security.InjectorTenantHandlerInterceptor;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-	
+
 	@Autowired
 	private InjectorTenantHandlerInterceptor tenantHandler;
 

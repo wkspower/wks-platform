@@ -32,12 +32,12 @@ public class MessageControllerTest {
 	public void setup() {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));
 	}
-	
+
 	@AfterEach
 	private void teardown() {
 		SecurityContextHolder.clearContext();
 	}
-	
+
 	@Test
 	public void testSave() throws Exception {
 		this.mockMvc.perform(post("/message/", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))

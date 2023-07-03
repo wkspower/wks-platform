@@ -31,7 +31,7 @@ public class CaseDefinitionController {
 	private CaseDefinitionService caseDefinitionService;
 
 	@GetMapping(value = "/")
-	public List<CaseDefinition> find(@RequestParam(required=false) Boolean deployed) throws Exception {
+	public List<CaseDefinition> find(@RequestParam(required = false) Boolean deployed) throws Exception {
 		return caseDefinitionService.find(Optional.ofNullable(deployed));
 	}
 

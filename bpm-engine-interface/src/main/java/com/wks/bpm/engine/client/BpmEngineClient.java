@@ -43,7 +43,7 @@ public interface BpmEngineClient {
 
 	ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine)
 			throws Exception;
-	
+
 	public void createTask(final Task task, final BpmEngine bpmEngine);
 
 	public Task getTask(final String taskId, final BpmEngine bpmEngine);

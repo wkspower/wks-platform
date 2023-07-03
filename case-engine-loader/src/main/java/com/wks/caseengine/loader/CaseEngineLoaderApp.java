@@ -6,15 +6,13 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
-@SpringBootApplication(
-		exclude =  UserDetailsServiceAutoConfiguration.class
-)
+@SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 @ComponentScan
-public class CaseEngineLoaderApp  {
+public class CaseEngineLoaderApp {
 
 	public static void main(final String[] args) {
 		ConfigurableApplicationContext applicationContext = SpringApplication.run(CaseEngineLoaderApp.class, args);
 		applicationContext.close();
 	}
-	
+
 }

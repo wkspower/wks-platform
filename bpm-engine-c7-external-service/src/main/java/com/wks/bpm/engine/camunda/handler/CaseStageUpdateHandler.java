@@ -30,22 +30,25 @@ public class CaseStageUpdateHandler implements ExternalTaskHandler {
 	public void execute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
 		try {
 			log.info("Starting External Task Handler processing '{}' for tenant '{}'", externalTask.getActivityId());
-			
+
 			if (externalTask.getTenantId() == null) {
-				log.warn("Could not start External Task Handler processing '{}' without tenant id", externalTask.getActivityId());
+				log.warn("Could not start External Task Handler processing '{}' without tenant id",
+						externalTask.getActivityId());
 				return;
 			}
-			
+
 			holder.setTenantId(externalTask.getTenantId());
-			
+
 			caseInstanceService.updateStage(externalTask.getBusinessKey(), externalTask.getVariable("stage"));
-			
+
 			externalTaskService.complete(externalTask);
 		} catch (Exception e) {
-			log.error("Error updating case stage with business key: {} and new stage: {}", externalTask.getBusinessKey(),  externalTask.getVariable("stage"));
+			log.error("Error updating case stage with business key: {} and new stage: {}",
+					externalTask.getBusinessKey(), externalTask.getVariable("stage"));
 			errorHandler.handle("Error updating case stage", externalTaskService, externalTask, e);
 		} finally {
-			log.info("Finishing External Task Handler activity '{}' for tenant '{}'", externalTask.getActivityId(), externalTask.getTenantId());
+			log.info("Finishing External Task Handler activity '{}' for tenant '{}'", externalTask.getActivityId(),
+					externalTask.getTenantId());
 			holder.clear();
 		}
 	}

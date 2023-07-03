@@ -8,7 +8,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import com.wks.api.security.utils.HttpUtils;
 
 public class HttpUtilsTest {
-	 
+
 	@Test
 	public void shouldGetSubdomainByPosition() {
 		assertEquals("localhost", HttpUtils.getSubdomain("http://localhost:9000", 0, "localhost"));
@@ -19,13 +19,13 @@ public class HttpUtilsTest {
 	public void shouldGetHost() {
 		assertEquals("new-case.sendgrid.wkspower.com", HttpUtils.getHost("http://new-case.sendgrid.wkspower.com"));
 	}
-	
+
 	@Test
 	public void shouldGetEmptyStringWhenNullHost() {
 		assertEquals("", HttpUtils.getHost(null));
 		assertEquals("", HttpUtils.getHost(""));
 	}
-	
+
 	@Test
 	public void shouldGetMethodByRequest() {
 		assertEquals("", HttpUtils.getMethod(new MockHttpServletRequest("", "http://localhost")));
@@ -33,4 +33,3 @@ public class HttpUtilsTest {
 	}
 
 }
-

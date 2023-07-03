@@ -48,5 +48,4 @@ public class C8TasklistHttpRequestFactory {
 		return null;
 	}
 
-
 }
