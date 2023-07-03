@@ -23,10 +23,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
         
-    - name: Setup necessary env vars
-      run: |
-        version=${GITHUB_REF}
-        echo "BUILD_VERSION=$version" >> $GITHUB_ENV
+    - name: Extract tag name
+      id: extract_tag
+      run: echo "::set-output name=tag::$(echo ${GITHUB_REF#refs/tags/})"
 
     - name: Set up jdk 18
       uses: actions/setup-java@v3
@@ -68,7 +67,7 @@ jobs:
         platforms: linux/amd64,linux/arm64
         file: storage-api/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/storage-api:${{ env.BUILD_VERSION }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/storage-api:${{ steps.extract_tag.outputs.tag }}"
 
     - name: Build and push Docker image for policy-decision-api
       uses: docker/build-push-action@v2
@@ -77,7 +76,7 @@ jobs:
         platforms: linux/amd64,linux/arm64
         file: policy-decision-api/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/policy-decision-api:${{ env.BUILD_VERSION }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/policy-decision-api:${{ steps.extract_tag.outputs.tag }}"
 
     - name: Build and push Docker image for bpm-engine-c7-external-service
       uses: docker/build-push-action@v2
@@ -86,7 +85,7 @@ jobs:
         platforms: linux/amd64,linux/arm64
         file: bpm-engine-c7-external-service/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ env.BUILD_VERSION }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ steps.extract_tag.outputs.tag }}"
 
     - name: Build and push Docker image for case-engine-rest-api
       uses: docker/build-push-action@v2
@@ -95,7 +94,7 @@ jobs:
         platforms: linux/amd64,linux/arm64
         file: case-engine-rest-api/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ env.BUILD_VERSION }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ steps.extract_tag.outputs.tag }}"
 
     - name: Build and push Docker image for case-engine-loader
       uses: docker/build-push-action@v2
@@ -104,7 +103,7 @@ jobs:
         platforms: linux/amd64,linux/arm64
         file: case-engine-loader/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-loader:${{ env.BUILD_VERSION }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-loader:${{ steps.extract_tag.outputs.tag }}"
 
     - name: Build and push Docker image email-to-case
       uses: docker/build-push-action@v2
@@ -113,7 +112,7 @@ jobs:
         platforms: linux/amd64,linux/arm64
         file: email-to-case/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case:${{ env.BUILD_VERSION }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case:${{ steps.extract_tag.outputs.tag }}"
 
     - name: Build and push Docker image for case-portal-react
       uses: docker/build-push-action@v2
@@ -122,4 +121,4 @@ jobs:
         platforms: linux/amd64,linux/arm64
         file: case-portal-react/deployments/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react:${{ env.BUILD_VERSION }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react:${{ steps.extract_tag.outputs.tag }}"
