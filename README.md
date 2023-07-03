@@ -49,6 +49,27 @@ cd wks-platform-docker
 docker-compose up -d
 ```
 
+After successfully running `docker-compose up` to start the Docker Compose configuration, it may take a while for all the web applications to finish their startup process. Once the startup is complete, you can access the following web applications:
+
+- **WKS Platform Portal**: You can access the WKS Platform Portal by opening your web browser and navigating to [http://localhost:3001](http://localhost:3001). Use the following credentials to log in: 
+    - Username: demo
+    - Password: demo
+
+- **Camunda**: To access the Camunda web application, open your web browser and visit [http://localhost:8080](http://localhost:8080). Use the following credentials to log in: 
+    - Username: demo
+    - Password: demo
+
+- **Keycloak**: Access the Keycloak web application by opening your web browser and visiting [http://localhost:8082](http://localhost:8082). Use the following credentials to log in as an administrator: 
+    - Username: admin
+    - Password: admin
+
+Please note that it may take some time for the web applications to become fully operational, especially if this is the first time you are running them. If you encounter any issues, wait a few moments and try accessing the applications again.
+
+Additionally, the MongoDB database used by these applications is running on port 27017. However, direct access to the MongoDB instance might not be necessary for using the web applications mentioned above.
+
+Remember to ensure that you have Docker and Docker Compose installed on your system before running the `docker-compose up` command.
+
+
 ## License
 
 WKS Platform is released under the [MIT License](LICENSE), allowing users to freely use, modify, and distribute the solution as per the terms of the license.
