@@ -6,6 +6,7 @@ Table of Contents
 -----------------
 - [Features](#features)
 - [Instalation](#instalation)
+- [Screenshots](#screenshots)
 - [License](#license)
 - [Contact](#contact)
 
@@ -69,6 +70,25 @@ Additionally, the MongoDB database used by these applications is running on port
 
 Remember to ensure that you have Docker installed on your system before running the `docker-compose up` command.
 
+## Screenshots
+
+Form Designer
+<img width="1487" alt="image" src="https://github.com/wkspower/wks-platform/assets/85225281/9e28708b-0547-4e5f-bee1-5721f63186e7">
+
+Case kanban
+<img width="1507" alt="image" src="https://github.com/wkspower/wks-platform/assets/85225281/19ac1611-4328-466b-8574-72a33486edac">
+
+Task List in a Case
+<img width="1511" alt="image" src="https://github.com/wkspower/wks-platform/assets/85225281/0c437058-f63e-4d9a-b207-6758aa6a2486">
+
+Task Form
+<img width="1501" alt="image" src="https://github.com/wkspower/wks-platform/assets/85225281/55db2e63-64a9-45b8-8d3b-b231f4ac2c31">
+
+Process diagram in Task Form
+<img width="1488" alt="image" src="https://github.com/wkspower/wks-platform/assets/85225281/40342c86-451f-40cc-b820-3ae9ee9fc24e">
+
+Create ad-hoc tasks in cases
+<img width="1512" alt="image" src="https://github.com/wkspower/wks-platform/assets/85225281/cb98d635-66bd-4877-bcbc-06bac437eb45">
 
 ## License
 
