@@ -98,6 +98,4 @@ WKS Platform is released under the [MIT License](LICENSE), allowing users to fre
 
 For any questions, feedback, or contributions, please reach out to the project team:
 
-- Project Website: [https://wksplatform.com](https://wksplatform.com)
-- GitHub Repository: [https://github.com/wkspower/wks-platform](https://github.com/wkspower/wks-platform)
 - Email: victor@wkspower.com
