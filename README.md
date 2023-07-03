@@ -5,6 +5,7 @@
 Table of Contents
 -----------------
 - [Features](#features)
+- [Instalation](#instalation)
 - [License](#license)
 - [Contact](#contact)
 
@@ -35,6 +36,18 @@ WKS Platform is designed as a multi-tenant solution, allowing multiple organizat
 - **Traefik Integration**: WKS Platform seamlessly integrates with Traefik, a modern reverse proxy and load balancer, to provide scalable and secure routing of HTTP traffic to the platform's components.
 
 - **Multi-Language Support**: WKS Platform is designed to be a multi-language project, utilizing internationalization (i18n) techniques. This allows for the localization of the platform's interface, making it accessible and usable in different languages. Currently, it supports English and Brazilian Portuguese, with the potential to expand support for additional languages. 
+
+## Instalation
+
+To run the project locally in a development environment, we recommend using Docker Compose. This ensures that all the necessary dependencies and services are set up correctly and provides a consistent and reproducible environment.
+
+```bash
+git clone https://github.com/wkspower/wks-platform-docker.git
+cd wks-platform-docker
+git clone https://github.com/wkspower/wks-platform-docker.git
+cd wks-platform-docker
+docker-compose up -d
+```
 
 ## License
 
