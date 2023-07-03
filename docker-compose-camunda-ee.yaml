@@ -124,6 +124,28 @@ services:
         volumes:
             - elastic:/usr/share/elasticsearch/data
 
+    optimize:
+        image: camunda/optimize:3.9.4
+        container_name: optimize
+        ports:
+            - "8090:8090"
+        environment:
+            - JAVA_OPTS=-Xms1g -Xmx1g -XX:MaxMetaspaceSize=256m
+            - OPTIMIZE_CAMUNDABPM_REST_URL=http://camunda:8080/engine-rest
+            - OPTIMIZE_ELASTICSEARCH_HOST=elasticsearch
+            - OPTIMIZE_ELASTICSEARCH_HTTP_PORT=9200
+            - OPTIMIZE_EVENT_INGESTION_ACCESS_TOKEN=secret        
+        volumes:
+            - "./.optimize/environment-config.yaml:/optimize/config/environment-config.yaml"
+            - "./.optimize/OptimizeLicense.txt:/optimize/config/OptimizeLicense.txt"
+            - "./.optimize/logo/wks_icon.svg:/optimize/config/logo/wks_icon.svg"
+        restart: on-failure
+        links:
+            - elasticsearch
+            - camunda
+        depends_on:
+            - elasticsearch
+
     case-engine-rest-api:
         build:
             context: case-engine-rest-api
@@ -195,27 +217,25 @@ services:
         ports:
             - 3001:3000
 
-    optimize:
-        image: camunda/optimize:3.9.4
-        container_name: optimize
-        ports:
-            - "8090:8090"
-        environment:
-            - JAVA_OPTS=-Xms1g -Xmx1g -XX:MaxMetaspaceSize=256m
-            - OPTIMIZE_CAMUNDABPM_REST_URL=http://camunda:8080/engine-rest
-            - OPTIMIZE_ELASTICSEARCH_HOST=elasticsearch
-            - OPTIMIZE_ELASTICSEARCH_HTTP_PORT=9200
-            - OPTIMIZE_EVENT_INGESTION_ACCESS_TOKEN=secret        
-        volumes:
-            - "./.optimize/environment-config.yaml:/optimize/config/environment-config.yaml"
-            - "./.optimize/OptimizeLicense.txt:/optimize/config/OptimizeLicense.txt"
-            - "./.optimize/logo/wks_icon.svg:/optimize/config/logo/wks_icon.svg"
-        restart: on-failure
+    case-engine-loader:
+        build:
+            context: case-engine-loader
+            args:
+            - CAMUNDA_URL=http://camunda:8080/engine-rest
+            - MONGO_DATABASE=localhost
+            - MONGO_CONN=mongodb://mongodb
+            - KEYCLOAK_URL=http://keycloak:8080
         links:
-            - elasticsearch
+            - mongodb
             - camunda
+            - keycloak
         depends_on:
-            - elasticsearch
+            mongodb:
+                condition: service_healthy
+            camunda:
+                condition: service_healthy
+            keycloak:
+                condition: service_healthy              
 
 volumes:
     mongo:

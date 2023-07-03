@@ -94,7 +94,8 @@ services:
             - keycloak:/opt/keycloak/data/
 
     case-engine-rest-api:
-        image: ghcr.io/wkspower/case-engine-rest-api:main-39d7ba5f
+        build:
+            context: case-engine-rest-api
         ports:
             - 8081:8081
         links:
@@ -113,7 +114,8 @@ services:
                 condition: service_healthy
 
     bpm-engine-c7-external-service:
-        image: ghcr.io/wkspower/bpm-engine-c7-external-service:main-39d7ba5f
+        build:
+            context: bpm-engine-c7-external-service
         links:
             - mongodb
             - camunda
@@ -130,7 +132,8 @@ services:
                 condition: service_healthy
 
     email-to-case:
-        image: ghcr.io/wkspower/email-to-case:main-39d7ba5f
+        build:
+            context: email-to-case
         ports:
             - 8083:8083
         links:
@@ -162,8 +165,9 @@ services:
             - 3001:3000
 
     case-engine-loader:
-        image: ghcr.io/wkspower/case-engine-loader:main-39d7ba5f
-        environment:
+        build:
+            context: case-engine-loader
+            args:
             - CAMUNDA_URL=http://camunda:8080/engine-rest
             - MONGO_DATABASE=localhost
             - MONGO_CONN=mongodb://mongodb
@@ -178,8 +182,8 @@ services:
             camunda:
                 condition: service_healthy
             keycloak:
-                condition: service_healthy
-
+                condition: service_healthy            
+                
 volumes:
     mongo:
         driver: local
