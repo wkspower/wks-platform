@@ -19,7 +19,7 @@ keycloak.url: ${KEYCLOAK_URL:http://localhost:8082}
 
 # minio
 driver.storage.factoryclass: minio
-driver.storage.endpoint.url: localhost
+driver.storage.endpoint.url: ${MINIO_HOST:localhost}
 driver.storage.endpoint.port: 9000
 driver.storage.endpoint.secure: false
 driver.storage.endpoint.signing.region: nyc3
