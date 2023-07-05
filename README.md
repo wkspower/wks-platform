@@ -42,7 +42,11 @@ WKS Platform is designed as a multi-tenant solution, allowing multiple organizat
 
 - **MinIO Integration**: WKS Platform integrates with MinIO, an object storage server, for efficient and scalable storage of files and attachments associated with cases and processes.
 
+- **E-mail to Case**: WKS Platform includes a comprehensive E-mail to Case feature that enables seamless integration between email communication and case management. Users can not only create cases from incoming emails but also receive case-related updates and notifications via email, ensuring efficient and effective communication throughout the case lifecycle. 
+
 - **Robust Backend**: Built on the Spring Boot framework, WKS Platform provides a scalable and high-performance backend infrastructure. It offers reliable API endpoints, data integration capabilities, and supports extensibility through modular design principles.
+  
+- **Robust API Security with Trust-based Architecture**: WKS Platform prioritizes security and follows the principles of Zero Trust architecture. It ensures safe API communications by implementing secure protocols, encryption, and authentication mechanisms.
 
 - **Traefik Integration**: WKS Platform seamlessly integrates with Traefik, a modern reverse proxy and load balancer, to provide scalable and secure routing of HTTP traffic to the platform's components.
 
