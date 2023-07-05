@@ -3,3 +3,49 @@ id: platform-architecture
 title: Platform Architecture
 ---
 
+Platform architecture
+This documentation provides an overview of the architecture of the platform.
+Components
+The platform consists of the following components:
+1.	Traefik: A reverse proxy and load balancer used for routing and securing HTTP traffic to different services.
+2.	Minio: An object storage server used for storing and accessing files and data.
+3.	MongoDB: A document-oriented NoSQL database used for persistent data storage.
+4.	OPA: Open Policy Agent, used for policy-based authorization and access control.
+5.	Camunda: A BPM (Business Process Management) platform used for workflow automation and process execution.
+6.	Keycloak: An open-source identity and access management solution used for authentication and authorization.
+7.	case-engine-rest-api: A custom REST API service for the case engine, providing case-related functionality.
+8.	bpm-engine-c7-external-service: An external service interacting with the BPM engine.
+9.	email-to-case: A service responsible for converting emails into cases in the platform.
+10.	storage-api: An API service for interacting with the Minio storage.
+11.	case-portal: A web application built with React, serving as the user interface for interacting with the platform.
+12.	case-engine-loader: A service responsible for loading case-related data into the platform.
+Architecture Overview
+The platform architecture is composed of multiple microservices, each fulfilling specific functions and communicating with each other to provide a cohesive system. Docker Compose is used to orchestrate the deployment and management of these services.
+The main architectural components are as follows:
+Reverse Proxy and Load Balancer
+Traefik is utilized as the reverse proxy and load balancer. It provides routing capabilities, SSL termination, and load balancing for the services deployed in the platform. Traefik enables secure access to services through HTTP and HTTPS protocols.
+Storage
+Minio is employed as the object storage server, providing durable and scalable storage for files and data within the platform. It offers an S3-compatible API and allows services to store and retrieve data from the storage backend.
+Database
+MongoDB is the chosen NoSQL database for persistent data storage. It provides high performance, scalability, and flexibility for storing structured and unstructured data. Services within the platform interact with MongoDB for data persistence and retrieval.
+Authorization and Access Control
+OPA (Open Policy Agent) is integrated into the platform for policy-based authorization and access control. It enables fine-grained control over access to platform resources based on defined policies.
+Business Process Management
+Camunda is used as the BPM platform, providing workflow automation and process execution capabilities. It allows the definition and execution of complex business processes, managing process instances, tasks, and user interactions.
+Identity and Access Management
+Keycloak is utilized as the identity and access management solution. It enables user authentication, authorization, and user management functionalities within the platform. Keycloak ensures secure access to platform resources and APIs.
+Custom API Services
+Several custom API services are developed to provide specific functionalities within the platform:
+•	case-engine-rest-api: This API service exposes functionality related to the case engine, allowing the creation, modification, and retrieval of cases.
+•	bpm-engine-c7-external-service: This external service interacts with the BPM engine and performs specific tasks related to business process management.
+•	email-to-case: This service converts incoming emails into cases within the platform, automating the process of creating cases from email communication.
+•	storage-api: This API service enables interaction with the Minio storage, allowing other services to store and retrieve files and data.
+User Interface
+The case-portal web application serves as the user interface for the platform. It is built with React and provides a user-friendly interface for interacting with cases, processes, and platform functionalities.
+Data Loading
+The case-engine-loader service is responsible for loading case-related data into the platform. It interacts with MongoDB, the BPM engine, and Keycloak to populate the necessary data for the platform's operation.
+Communication and Dependencies
+The services within the platform communicate with each other through well-defined APIs and network connections. Dependencies between services are managed using the Docker Compose orchestration tool, ensuring proper startup order and availability of dependent services.
+Services such as case-engine-rest-api, bpm-engine-c7-external-service, email-to-case, and storage-api depend on MongoDB, Camunda, and Keycloak. They rely on the availability and proper functioning of these services to perform their specific tasks.
+The architecture is designed to be scalable and resilient, allowing the addition and removal of services as per the platform's requirements.
+That concludes the Platform Architecture documentation based on the provided Docker Compose file. Please note that this documentation serves as an example and should be further customized and expanded based on the specific needs and details of your platform.

@@ -3,3 +3,39 @@ id: system-requirements
 title: System Requirements
 ---
 
+System requirements
+System Requirements for the WKS Platform
+The WKS Platform is a robust case management and process automation solution that requires specific system requirements to ensure optimal performance and functionality. The following are the system requirements for deploying and running the WKS Platform:
+1.	Operating System:
+o	Linux (e.g., Ubuntu, CentOS) or Windows Server (e.g., Windows Server 2016/2019)
+2.	Processor:
+o	Minimum: Dual-core 2.0 GHz processor
+o	Recommended: Quad-core 2.5 GHz or higher processor
+3.	Memory (RAM):
+o	Minimum: 4 GB RAM
+o	Recommended: 8 GB RAM or higher for better performance
+4.	Disk Space:
+o	Minimum: 10 GB free disk space
+o	Recommended: 20 GB or more, depending on the volume of data and document storage requirements
+5.	Java Development Kit (JDK):
+o	Oracle JDK or OpenJDK 11 or higher (with JavaFX support)
+6.	Database:
+o	MongoDB 4.2 or higher (used for storing case data and metadata)
+7.	Web Server and Reverse Proxy:
+o	Nginx, Apache, or Traefik (used for serving frontend components and routing requests)
+8.	Identity and Access Management:
+o	Keycloak 10.0 or higher (used for authentication and authorization)
+9.	Workflow and Decision Automation:
+o	Camunda Platform 7.15 or higher (integrated for process automation and workflow management)
+10.	Object Storage:
+o	MinIO 2020 or higher (used for document storage and retrieval)
+11.	Policy Enforcement:
+o	Open Policy Agent (OPA) 0.27 or higher (used for fine-grained access control)
+12.	Containerization and Orchestration (Optional):
+o	Docker and Docker Compose or Kubernetes (for containerized deployment and orchestration)
+13.	Network Ports:
+o	The required network ports should be open to allow communication between components, such as HTTP/HTTPS ports, database ports, and proxy ports.
+14.	Web Browsers:
+o	Latest versions of modern web browsers, such as Google Chrome, Mozilla Firefox, or Microsoft Edge, for accessing the WKS Platform's user interface.
+It is important to note that the above system requirements are general guidelines and may vary based on factors like the scale of deployment, the number of concurrent users, and specific customization requirements. It is recommended to refer to the official documentation or deployment guides provided by the WKS Platform for detailed and up-to-date system requirements specific to the version you are installing.
+Additionally, regular backups, system monitoring, and maintenance practices should be implemented to ensure the stability, security, and availability of the WKS Platform in production environments.
