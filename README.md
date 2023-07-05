@@ -78,6 +78,10 @@ After successfully running `docker-compose up` to start the Docker Compose confi
     - Username: admin
     - Password: admin
 
+- **MinIO**: Access the MinIO web application by opening your web browser and visiting [http://localhost:9000](http://localhost:9000). Use the following credentials to log in as an administrator: 
+    - Username: minio
+    - Password: #minio00#
+
 Please note that it may take some time for the web applications to become fully operational, especially if this is the first time you are running them. If you encounter any issues, wait a few moments and try accessing the applications again.
 
 Additionally, the MongoDB database used by these applications is running on port 27017.
