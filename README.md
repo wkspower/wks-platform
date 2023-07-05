@@ -13,12 +13,12 @@ Table of Contents
 WKS Platform is an open-source Case Management and Process Automation solution that leverages a powerful stack of technologies, including Camunda, MongoDB, Keycloak, Traefik, MinIO, OPA (Open Policy Agent), Form.io, Spring Boot, and React. It provides a comprehensive framework for managing and automating business processes, enabling organizations to streamline their operations, enhance efficiency, and improve decision-making.
 
 WKS Platform is ideal for organizations in various industries, including but not limited to:
-- Financial Services: Streamline and automate complex financial processes, such as loan approvals, claims management, and risk assessment.
-- Healthcare: Efficiently manage patient cases, automate healthcare processes, and ensure compliance with regulatory requirements.
-- Insurance: Automate insurance claims processing, underwriting, policy management, and enhance customer service.
-- Manufacturing: Streamline production workflows, manage quality control processes, and improve supply chain management.
-- Government: Automate administrative processes, citizen service requests, and regulatory compliance procedures.
-- Education: Simplify student enrollment, course registration, and academic workflows.
+- **Financial Services**: Streamline and automate complex financial processes, such as loan approvals, claims management, and risk assessment.
+- **Healthcare**: Efficiently manage patient cases, automate healthcare processes, and ensure compliance with regulatory requirements.
+- **Insurance**: Automate insurance claims processing, underwriting, policy management, and enhance customer service.
+- **Manufacturing**: Streamline production workflows, manage quality control processes, and improve supply chain management.
+- **Government**: Automate administrative processes, citizen service requests, and regulatory compliance procedures.
+- **Education**: Simplify student enrollment, course registration, and academic workflows.
 
 These are just a few examples of the industry-specific scenarios where WKS Platform can be effectively utilized. Its flexibility and extensibility make it suitable for a wide range of use cases.
 
