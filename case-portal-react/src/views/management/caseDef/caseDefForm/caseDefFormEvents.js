@@ -62,7 +62,7 @@ export const CaseDefFormEvents = ({ caseDef, setCaseDef }) => {
         <Container maxWidth="md">
             <form onSubmit={handleSubmit}>
                 <Grid container spacing={2}>
-                    <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={3}>
                         <TextField
                             fullWidth
                             label="Process Definition Key"
@@ -71,7 +71,7 @@ export const CaseDefFormEvents = ({ caseDef, setCaseDef }) => {
                             placeholder="Enter process definition key"
                         />
                     </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={3}>
                         <TextField
                             fullWidth
                             label="Task Definition Key"
@@ -79,7 +79,7 @@ export const CaseDefFormEvents = ({ caseDef, setCaseDef }) => {
                             onChange={handleTaskDefKeyChange}
                             placeholder="Enter task definition key" />
                     </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={3}>
                         <TextField
                             fullWidth
                             label="New Stage"
@@ -88,10 +88,12 @@ export const CaseDefFormEvents = ({ caseDef, setCaseDef }) => {
                             placeholder="Enter new stage"
                         />
                     </Grid>
+                    <Grid item xs={12} sm={3}>
+                        <Button type="submit" variant="contained" color="primary">
+                            Add Record
+                        </Button>
+                    </Grid>
                 </Grid>
-                <Button type="submit" variant="contained" color="primary">
-                    Add Record
-                </Button>
             </form>
             <List>
                 {caseDef.taskCompleteHooks.map((record, index) => (

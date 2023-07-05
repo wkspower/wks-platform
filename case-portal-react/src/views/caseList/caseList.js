@@ -391,6 +391,7 @@ function fetchCases(setFetching, keycloak, caseDefId, setStages, status, filter,
 
     CaseService.getCaseDefinitionsById(keycloak, caseDefId)
         .then((resp) => {
+            resp.stages.sort((a, b) => a.index - b.index).map((o) => o.name)
             setStages(resp.stages);
             return CaseService.filterCase(keycloak, caseDefId, status, filter);
         })
