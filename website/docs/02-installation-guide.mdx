@@ -1,0 +1,92 @@
+---
+id: instalation-guide
+title: Instalation Guide
+---
+
+# WKS Platform Installation Guide
+
+## Prerequisites
+- Docker and Docker Compose are installed on your system.
+- Java 17 and Maven 3.8.x or higher are installed for building the Spring Boot microservices.
+- Node.js, npm, and Yarn are installed for building and running the React application.
+
+## Step-by-Step Guide
+
+1. Clone the WKS Platform repository:
+```
+git clone https://github.com/wkspower/wks-platform.git
+```
+
+2. Navigate to the root directory of the cloned repository:
+```
+cd wks-platform
+```
+
+3. Ensure that you have the necessary Docker Compose configuration file (`docker-compose.yml`) in the root directory.
+
+4. Open a terminal or command prompt and run the following command to start the required dependencies in detached mode:
+```
+docker-compose up minio mongodb opa camunda keycloak -d
+```
+The command instructs Docker Compose to pull the necessary Docker images for MinIO, MongoDB, OPA, Camunda, and Keycloak from the Docker registry if they are not already available locally. It then starts the containers for each of these middlewares.
+
+Starting these middlewares is crucial for the proper functioning of the WKS Platform. They provide essential functionalities such as storage (MinIO), database (MongoDB), policy enforcement (OPA), workflow management (Camunda), and authentication (Keycloak).
+
+5. Wait for the dependencies to start up successfully. You can monitor the logs by running:
+```
+docker-compose logs -f
+```
+
+6. Once all the dependencies are up and running without any errors, you can proceed to start the microservices of the WKS Platform.
+
+For the Spring Boot microservices:
+
+a. Ensure you are in the root directory of the WKS Platform repository.
+
+b. Build all the microservices at once using Maven:
+   ```
+   mvn clean install package
+   ```
+
+c. To start each microservice individually using Maven, run the following command in the root directory:
+   ```
+   mvn spring-boot:run -pl case-engine-rest-api
+   ```
+
+   Replace `case-engine-rest-api` with the appropriate submodule directory name for each microservice.
+
+   Repeat this command for each microservice in the following order: `case-engine-rest-api`, `bpm-engine-c7-external-service`, `email-to-case`, `storage-api`, `case-engine-loader`.
+
+   Each microservice serves a specific purpose within the WKS Platform:
+
+- **case-engine-rest-api**: This microservice provides a RESTful API for managing case-related operations, such as creating, updating, and retrieving cases.
+
+- **bpm-engine-c7-external-service**: This microservice handles external service integrations with the Camunda BPM engine, enabling communication and coordination with external systems or services.
+
+- **email-to-case**: This microservice is responsible for converting incoming emails into cases, allowing users to create cases by sending emails to a specified email address.
+
+- **storage-api**: This microservice provides an API for managing storage-related operations, such as storing and retrieving files associated with cases or processes.
+
+- **case-engine-loader**: This microservice serves as a default data loader component. It is responsible for loading the Keycloak realm configuration and default case definitions into the system. The Keycloak realm configuration includes authentication and authorization settings, while the default case definitions define the initial set of case management processes available in the WKS Platform.
+
+For the case-portal (React application):
+
+a. Navigate to the case-portal directory:
+   ```
+   cd case-portal
+   ```
+
+b. Install the necessary dependencies using Yarn:
+   ```
+   yarn install
+   ```
+
+c. Start the case-portal using Yarn:
+   ```
+   yarn start
+   ```
+
+7. Once all the microservices are up and running, you should be able to access access the WKS Platform Portal by opening your web browser and navigating to [http://localhost:3001](http://localhost:3001). Use the following credentials to log in: 
+    - Username: demo
+    - Password: demo
+
