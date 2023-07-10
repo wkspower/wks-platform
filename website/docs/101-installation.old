@@ -1,6 +1,6 @@
 ---
 id: installation
-title: Installation [deprecated]
+title: Installation and Setup
 ---
 
 import {AppName, JdkVersion, MavenVersion, NodeVersion} from '@site/src/components/Config';

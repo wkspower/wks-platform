@@ -64,7 +64,7 @@ const config = {
         },
       },
       navbar: {
-        title: 'WKS Platform',
+        title: '',
         logo: {
           alt: 'WKS Platform Logo',
           src: 'img/logo.svg',
@@ -87,37 +87,37 @@ const config = {
       footer: {
         style: 'dark',
         links: [
-          {
-            title: 'Docs',
-            items: [
-              {
-                label: 'Solution Architecture',
-                to: '/docs/architecture',
-              },
-            ],
-          },
-          {
-            title: 'Community',
-            items: [
-              {
-                label: 'CI/CD',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-              },
-              {
-                label: 'Sonar',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-              }
-            ],
-          },
-          {
-            title: 'More',
-            items: [
-              {
-                label: 'GitHub',
-                href: 'https://github.com/wkspower/wks-platform',
-              },
-            ],
-          },
+          // {
+          //   title: 'Docs',
+          //   items: [
+          //     {
+          //       label: 'Solution Architecture',
+          //       to: '/docs/architecture',
+          //     },
+          //   ],
+          // },
+          // {
+          //   title: 'Community',
+          //   items: [
+          //     {
+          //       label: 'CI/CD',
+          //       href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+          //     },
+          //     {
+          //       label: 'Sonar',
+          //       href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+          //     }
+          //   ],
+          // },
+          // {
+          //   title: 'More',
+          //   items: [
+          //     {
+          //       label: 'GitHub',
+          //       href: 'https://github.com/wkspower/wks-platform',
+          //     },
+          //   ],
+          // },
         ],
         copyright: `Copyright © ${new Date().getFullYear()} WKS Power.`,
       },

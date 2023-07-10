@@ -1,0 +1,32 @@
+---
+id: system-requirements
+title: System Requirements
+---
+
+1.	Hardware Requirements:
+•	CPU: Dual-core processor (recommended: quad-core or higher)
+•	RAM: Minimum 4 GB (recommended: 8 GB or higher)
+•	Storage: Sufficient disk space for Docker containers, application data, and any additional requirements (recommended: 20 GB or higher)
+•	Network: Stable internet connection for downloading dependencies and accessing external services (e.g., Docker Hub)
+2.	Software Requirements:
+•	Operating System: Linux (Ubuntu, CentOS, or similar distributions) or Windows 10 Pro/Enterprise (64-bit)
+•	Web Browser: Latest versions of Google Chrome, Mozilla Firefox, or Microsoft Edge for accessing the WKS Platform user interface
+3.	Technology Stack: The WKS Platform leverages the following technologies:
+•	Camunda: A workflow and decision automation platform
+•	MongoDB: A NoSQL database for storing application data
+•	Keycloak: An open-source identity and access management solution
+•	Traefik: A reverse proxy and load balancer for routing requests to the appropriate services
+•	MinIO: An open-source object storage server for managing files and attachments
+•	OPA (Open Policy Agent): A policy-based decision-making framework
+•	http://Form.io: A form management platform for creating dynamic forms
+•	Spring Boot: A Java-based framework for building microservices
+•	React: A JavaScript library for building user interfaces
+4.	Network Ports: Ensure that the following ports are available and not blocked by firewalls or other services:
+•	8080: Main application port for accessing the WKS Platform UI
+•	27017: MongoDB port
+•	8081: Keycloak port
+•	9000: MinIO port
+
+Note: The WKS Platform may have additional requirements or dependencies based on your specific configuration or customization. Please refer to the official documentation or project repository for any additional instructions or updates.
+By meeting the above system requirements, you will be able to successfully install and run the WKS Platform, enabling your organization to streamline operations, enhance efficiency, and improve decision-making through comprehensive case management and process automation.
+

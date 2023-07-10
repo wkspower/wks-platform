@@ -4,29 +4,29 @@ import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'Easy to Extend',
+    title: 'Adaptive Case Management',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Automate processes and managage integrations with external systems
+        WKS Platform provides a powerful Adaptive Case Management (ACM) solution built on top of Camunda BPM.
       </>
     ),
   },
   {
-    title: 'Focus on BPM Process Automation',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
-    description: (
-      <>
-        Optimize enterprise processes and workflows to be more efficient and adaptable.
-      </>
-    ),
-  },
-  {
-    title: 'Powered by Camunda',
+    title: 'Flexible Workflow Automation',
     Svg: require('@site/static/img/camunda-logo-dark.svg').default,
     description: (
       <>
-        Built on top of Camunda BPM.
+        Automate complex workflows and adapt them on-the-fly with WKS Platform's flexible automation capabilities.
+      </>
+    ),
+  },
+  {
+    title: 'Extensible and Customizable',
+    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    description: (
+      <>
+        Extend and customize WKS Platform to meet your specific case management requirements.
       </>
     ),
   },
