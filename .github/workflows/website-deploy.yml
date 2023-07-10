@@ -1,10 +1,6 @@
 name: website-deploy
 
 on:
-  push:
-    branches:
-      - main
-      
   workflow_dispatch:    
 
 jobs:
@@ -33,5 +29,5 @@ jobs:
       uses: osiegmar/s3-publisher-action@v1
       with:
         bucket: ${{ secrets.S3_BUCKET }}
-        dir: build
+        dir: website/build
         delete-orphaned: true
