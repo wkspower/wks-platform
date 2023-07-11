@@ -2,6 +2,8 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+See our on-line documentation at https://docs.wkspower.com
+
 Table of Contents
 -----------------
 - [Features](#features)
