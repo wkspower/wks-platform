@@ -11,11 +11,8 @@
  */
 package com.wks.caseengine.cases.definition.action;
 
-import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.event.Action;
+public class CaseActionTypeNotIdentifiedException extends Exception{
 
-public interface CaseAction extends Action {
-
-	void visit(CaseInstance caseInstance);
+	private static final long serialVersionUID = 1L;
 
 }

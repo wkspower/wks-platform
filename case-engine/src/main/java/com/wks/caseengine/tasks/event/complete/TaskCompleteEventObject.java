@@ -11,6 +11,8 @@
  */
 package com.wks.caseengine.tasks.event.complete;
 
+import com.wks.caseengine.event.EventObject;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +20,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @AllArgsConstructor
-public class TaskCompleteEventObject {
+public class TaskCompleteEventObject implements EventObject{
 
 	private String processDefinitionKey;
 	private String taskDefKey;

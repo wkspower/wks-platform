@@ -9,8 +9,8 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.tasks.event;
+package com.wks.caseengine.event;
 
-public class TaskClaimEvent {
+public interface Action {
 
 }

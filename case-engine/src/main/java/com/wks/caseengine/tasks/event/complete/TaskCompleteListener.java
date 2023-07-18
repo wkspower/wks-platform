@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.instance.event;
+package com.wks.caseengine.tasks.event.complete;
 
 import java.util.List;
 
@@ -18,18 +18,15 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
-import com.wks.caseengine.cases.definition.hook.TaskCompleteHook;
 import com.wks.caseengine.cases.definition.service.CaseDefinitionService;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.service.CaseInstanceService;
-import com.wks.caseengine.tasks.event.complete.TaskCompleteEvent;
-import com.wks.caseengine.tasks.event.complete.TaskCompleteEventObject;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class CaseEventListener implements ApplicationListener<TaskCompleteEvent> {
+public class TaskCompleteListener implements ApplicationListener<TaskCompleteEvent> {
 
 	@Autowired
 	private CaseInstanceService caseInstanceService;
@@ -51,10 +48,12 @@ public class CaseEventListener implements ApplicationListener<TaskCompleteEvent>
 
 			final String caseDefId = caseInstance.getCaseDefinitionId();
 			CaseDefinition caseDefinition = caseDefinitionService.get(caseDefId);
+
 			List<TaskCompleteHook> taskCompleteHooks = caseDefinition.getTaskCompleteHooks();
+
 			taskCompleteHooks.stream().filter(hook -> processDefKey.startsWith(hook.getProcessDefKey()))
 					.filter(hook -> hook.getTaskDefKey().equals(tskDefKey)).forEach(hook -> {
-						hook.getActions().forEach(action -> action.apply(caseInstance));
+						hook.getActions().forEach(action -> action.visit(caseInstance));
 					});
 
 			caseInstanceService.update(caseInstance);

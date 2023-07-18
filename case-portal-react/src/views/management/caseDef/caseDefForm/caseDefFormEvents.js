@@ -40,7 +40,7 @@ export const CaseDefFormEvents = ({ caseDef, setCaseDef }) => {
         const newRecord = {
             processDefKey: inputProcessDefKey,
             taskDefKey: inputTaskDefKey,
-            actions: [{ newStage: inputNewStage }]
+            actions: [{ newStage: inputNewStage, actionType: 'CASE_STAGE_UPDATE_ACTION' }]
         };
         setCaseDef({ ...caseDef, taskCompleteHooks: [...caseDef.taskCompleteHooks, newRecord] });
         setInputProcessDefKey('');

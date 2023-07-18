@@ -12,10 +12,27 @@
 package com.wks.caseengine.cases.definition.action;
 
 import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.event.Action;
 
-public interface CaseAction extends Action {
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-	void visit(CaseInstance caseInstance);
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
+@ToString
+public class CaseQueueAssignAction implements CaseAction{
+	
+	private String queueId; 
+
+	@Override
+	public void visit(CaseInstance caseInstance) {
+		caseInstance.setQueueId(queueId);
+	}
 
 }
