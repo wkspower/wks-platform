@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.JsonObject;
-import com.wks.caseengine.cases.definition.hook.TaskCompleteHook;
+import com.wks.caseengine.tasks.event.complete.TaskCompleteHook;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

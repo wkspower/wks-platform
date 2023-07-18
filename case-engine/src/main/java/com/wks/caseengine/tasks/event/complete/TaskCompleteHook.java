@@ -9,11 +9,12 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.definition.hook;
+package com.wks.caseengine.tasks.event.complete;
 
 import java.util.List;
 
 import com.wks.caseengine.cases.definition.action.CaseAction;
+import com.wks.caseengine.event.ActionHook;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,7 +29,7 @@ import lombok.ToString;
 @Setter
 @Builder
 @ToString
-public class TaskCompleteHook {
+public class TaskCompleteHook implements ActionHook{
 
 	private String processDefKey;
 	private String taskDefKey;

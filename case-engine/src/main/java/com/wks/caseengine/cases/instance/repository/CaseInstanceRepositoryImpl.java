@@ -85,6 +85,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 		Bson update = Updates.combine(Updates.set("status", caseInstance.getStatus()),
 				Updates.set("stage", caseInstance.getStage()), Updates.set("attributes", caseInstance.getAttributes()),
 				Updates.set("documents", caseInstance.getDocuments()),
+				Updates.set("queueId", caseInstance.getQueueId()),
 				Updates.set("comments", caseInstance.getComments()));
 		getCollection().updateMany(filter, update);
 	}

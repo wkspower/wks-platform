@@ -9,13 +9,8 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.definition.action;
+package com.wks.caseengine.event;
 
-import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.event.Action;
-
-public interface CaseAction extends Action {
-
-	void visit(CaseInstance caseInstance);
+public interface ActionHook {
 
 }

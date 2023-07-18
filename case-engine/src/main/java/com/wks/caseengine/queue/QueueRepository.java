@@ -9,8 +9,10 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.tasks.event;
+package com.wks.caseengine.queue;
 
-public class TaskClaimEvent {
+import com.wks.caseengine.repository.Repository;
+
+public interface QueueRepository extends Repository<Queue> {
 
 }

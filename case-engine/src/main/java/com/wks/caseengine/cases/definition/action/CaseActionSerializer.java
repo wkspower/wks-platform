@@ -22,8 +22,19 @@ public class CaseActionSerializer<T extends CaseAction> implements JsonSerialize
 
 	@Override
 	public JsonElement serialize(T src, Type typeOfSrc, JsonSerializationContext context) {
-		// TODO Auto-generated method stub
-		return new Gson().toJsonTree(src);
+		
+		JsonElement jsonElement = new Gson().toJsonTree(src);
+		
+		
+		if(src instanceof CaseStageUpdateAction) {
+			jsonElement.getAsJsonObject().addProperty("actionType", CaseActionType.CASE_STAGE_UPDATE_ACTION.getCode());
+			
+		}else if(src instanceof CaseQueueAssignAction) {
+			jsonElement.getAsJsonObject().addProperty("actionType", CaseActionType.CASE_QUEUE_UPDATE_ACTION.getCode());
+		}
+		
+		
+		return jsonElement;
 	}
 
 }

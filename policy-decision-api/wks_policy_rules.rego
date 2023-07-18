@@ -113,6 +113,13 @@ allow {
 }
 
 allow {
+    input.path = "queue"
+    input.method in ["GET", "POST", "PATCH", "DELETE", "OPTION", "HEAD"]
+	check_origin_request    
+    is_manager_profile
+}
+
+allow {
     input.path = "storage"
     input.method in ["GET", "POST", "OPTION", "HEAD"]
 }

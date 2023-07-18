@@ -31,7 +31,7 @@ public class CaseStageUpdateAction implements CaseAction {
 	private String newStage;
 
 	@Override
-	public void apply(CaseInstance caseInstance) {
+	public void visit(CaseInstance caseInstance) {
 		caseInstance.setStage(newStage);
 	}
 

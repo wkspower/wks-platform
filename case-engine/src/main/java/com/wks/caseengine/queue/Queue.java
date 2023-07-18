@@ -9,13 +9,23 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.definition.action;
+package com.wks.caseengine.queue;
 
-import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.event.Action;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public interface CaseAction extends Action {
-
-	void visit(CaseInstance caseInstance);
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Queue {
+	
+	private String id;
+	private String name;
+	private String description;
 
 }

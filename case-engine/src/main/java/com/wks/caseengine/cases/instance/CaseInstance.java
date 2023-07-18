@@ -53,6 +53,8 @@ public class CaseInstance {
 	private List<CaseAttribute> attributes;
 
 	private String status;
+	
+	private String queueId;
 
 	public CaseInstance(String _id, String businessKey, String caseDefinitionId, String stage, String status) {
 		super();

@@ -41,7 +41,8 @@
         {
           "actions": [
             {
-              "newStage": "Issue Investigation"
+              "newStage": "Issue Investigation",
+              "actionType": "CASE_STAGE_UPDATE_ACTION"
             }
           ],
           "processDefKey": "customer-support",
@@ -50,7 +51,8 @@
         {
           "actions": [
             {
-              "newStage": "Resolution"
+              "newStage": "Resolution",
+              "actionType": "CASE_STAGE_UPDATE_ACTION"
             }
           ],
           "processDefKey": "customer-support",
@@ -95,7 +97,8 @@
         {
           "actions": [
             {
-              "newStage": "Approval"
+              "newStage": "Approval",
+              "actionType": "CASE_STAGE_UPDATE_ACTION"
             }
           ],
           "processDefKey": "employee-onboarding",
@@ -104,7 +107,8 @@
         {
           "actions": [
             {
-              "newStage": "Assigning Equipment"
+              "newStage": "Assigning Equipment",
+              "actionType": "CASE_STAGE_UPDATE_ACTION"
             }
           ],
           "processDefKey": "employee-onboarding",
@@ -113,7 +117,8 @@
         {
           "actions": [
             {
-              "newStage": "Orientation"
+              "newStage": "Orientation",
+              "actionType": "CASE_STAGE_UPDATE_ACTION"
             }
           ],
           "processDefKey": "employee-onboarding",

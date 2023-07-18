@@ -28,7 +28,16 @@ public class CaseActionDeserializer implements JsonDeserializer<CaseAction> {
 
 		final JsonObject jsonObject = jsonElement.getAsJsonObject();
 
-		return new Gson().fromJson(jsonObject, CaseStageUpdateAction.class);
+		String actionType = jsonObject.get("actionType").getAsString();
+
+		if (CaseActionType.CASE_STAGE_UPDATE_ACTION.getCode().equals(actionType)) {
+			return new Gson().fromJson(jsonObject, CaseStageUpdateAction.class);
+
+		} else if (CaseActionType.CASE_QUEUE_UPDATE_ACTION.getCode().equals(actionType)) {
+			return new Gson().fromJson(jsonObject, CaseQueueAssignAction.class);
+		}
+
+		throw new JsonParseException("Case Action Type Not Identified", new CaseActionTypeNotIdentifiedException());
 	}
 
 }
