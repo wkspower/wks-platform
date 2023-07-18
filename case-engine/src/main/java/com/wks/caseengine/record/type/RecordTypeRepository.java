@@ -9,9 +9,9 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.repository;
+package com.wks.caseengine.record.type;
 
-import com.wks.caseengine.record.type.RecordType;
+import com.wks.caseengine.repository.Repository;
 
 public interface RecordTypeRepository extends Repository<RecordType> {
 

@@ -30,7 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.wks.caseengine.cases.instance.CaseInstanceService;
+import com.wks.caseengine.cases.instance.service.CaseInstanceService;
 import com.wks.caseengine.pagination.PageResult;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
 import com.wks.caseengine.rest.server.CaseController;

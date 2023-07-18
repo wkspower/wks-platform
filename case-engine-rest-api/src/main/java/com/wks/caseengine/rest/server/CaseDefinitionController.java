@@ -29,7 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
-import com.wks.caseengine.cases.definition.CaseDefinitionService;
+import com.wks.caseengine.cases.definition.service.CaseDefinitionService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 

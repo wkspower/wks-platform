@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.repository.impl;
+package com.wks.caseengine.record;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,6 @@ import com.google.gson.GsonBuilder;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.wks.caseengine.db.EngineMongoDataConnection;
-import com.wks.caseengine.repository.RecordRepository;
 
 @Component
 public class RecordRepositoryImpl implements RecordRepository {

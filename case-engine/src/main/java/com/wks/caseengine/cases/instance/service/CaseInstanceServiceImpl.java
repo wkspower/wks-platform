@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.instance;
+package com.wks.caseengine.cases.instance.service;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -23,9 +23,18 @@ import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseStatus;
+import com.wks.caseengine.cases.instance.CaseAttribute;
+import com.wks.caseengine.cases.instance.CaseAttributeType;
+import com.wks.caseengine.cases.instance.CaseDocument;
+import com.wks.caseengine.cases.instance.CaseFilter;
+import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.CaseInstanceCommentNotFoundException;
+import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
+import com.wks.caseengine.cases.instance.CaseNotFoundException;
+import com.wks.caseengine.cases.instance.Comment;
+import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
 import com.wks.caseengine.pagination.PageResult;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
-import com.wks.caseengine.repository.CaseInstanceRepository;
 import com.wks.caseengine.repository.Repository;
 
 @Component

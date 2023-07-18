@@ -32,6 +32,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseFilter;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.repository.CaseInstanceRepositoryImpl;
 import com.wks.caseengine.pagination.Cursor;
 import com.wks.caseengine.pagination.PageResult;
 

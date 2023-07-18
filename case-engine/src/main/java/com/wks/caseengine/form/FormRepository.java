@@ -9,9 +9,9 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.repository;
+package com.wks.caseengine.form;
 
-import com.wks.caseengine.form.Form;
+import com.wks.caseengine.repository.Repository;
 
 public interface FormRepository extends Repository<Form> {
 

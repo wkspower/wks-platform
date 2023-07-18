@@ -9,12 +9,13 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.repository;
+package com.wks.caseengine.cases.definition.repository;
 
 import java.util.List;
 import java.util.Optional;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.repository.Repository;
 
 public interface CaseDefinitionRepository extends Repository<CaseDefinition> {
 

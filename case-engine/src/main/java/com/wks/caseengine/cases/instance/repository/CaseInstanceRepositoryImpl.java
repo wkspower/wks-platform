@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.repository.impl;
+package com.wks.caseengine.cases.instance.repository;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
@@ -36,7 +36,6 @@ import com.wks.caseengine.pagination.Args;
 import com.wks.caseengine.pagination.CursorPagination;
 import com.wks.caseengine.pagination.PageResult;
 import com.wks.caseengine.pagination.mongo.MongoCursorPagination;
-import com.wks.caseengine.repository.CaseInstanceRepository;
 import com.wks.caseengine.repository.Paginator;
 
 @Component

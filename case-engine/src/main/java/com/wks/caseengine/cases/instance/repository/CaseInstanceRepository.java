@@ -9,12 +9,13 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.repository;
+package com.wks.caseengine.cases.instance.repository;
 
 import com.wks.caseengine.cases.instance.CaseFilter;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.Comment;
 import com.wks.caseengine.pagination.PageResult;
+import com.wks.caseengine.repository.Repository;
 
 public interface CaseInstanceRepository extends Repository<CaseInstance> {
 

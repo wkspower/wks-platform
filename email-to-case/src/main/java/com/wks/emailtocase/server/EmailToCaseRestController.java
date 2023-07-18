@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.cases.instance.CaseInstanceService;
+import com.wks.caseengine.cases.instance.service.CaseInstanceService;
 import com.wks.emailtocase.caseemail.CaseEmail;
 import com.wks.emailtocase.caseemail.CaseEmailService;
 import com.wks.emailtocase.caseemail.CaseEmailType;
