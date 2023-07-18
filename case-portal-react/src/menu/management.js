@@ -75,6 +75,14 @@ const management = {
                     url: '/case-life-cycle/form',
                     breadcrumbs: true,
                     icon: icons.IconForms
+                },
+                {
+                    id: 'queue',
+                    title: i18n.t('menu.queues'),
+                    type: 'item',
+                    url: '/case-life-cycle/queue',
+                    breadcrumbs: true,
+                    icon: icons.IconForms
                 }
             ]
         }

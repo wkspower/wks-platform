@@ -22,7 +22,8 @@ const defs = {
         caseDefinitions: 'Definições de Casos',
         recordTypes: 'Tipos de Registros',
         processEngines: 'Motores de Processos',
-        forms: 'Formulários'
+        forms: 'Formulários',
+        queues: 'Filas'
     },
     pages: {
         dashboard: {

@@ -37,6 +37,8 @@ public interface EngineMongoDataConnection {
 	MongoCollection<JsonObject> getBpmEngineCollection();
 
 	MongoCollection<CaseInstance> getCaseInstanceCollection();
+	
+	MongoCollection<JsonObject> getQueueCollection();
 
 	MongoDatabase getDatabase();
 

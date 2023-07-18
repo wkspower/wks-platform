@@ -9,6 +9,7 @@ import { CaseDefList } from 'views/management/caseDef/caseDefList/caseDefList';
 import { ProcessDefList } from 'views/management/processDef/processDefList';
 import { FormList } from 'views/management/form/formList';
 import { RecordTypeList } from 'views/management/recordType/recordTypeList';
+import { QueueList } from 'views/management/queue/queueList';
 
 const ManagamentDefault = Loadable(lazy(() => import('views/management')));
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard')));
@@ -79,6 +80,10 @@ export const MainRoutes = (keycloak, authenticated, recordsTypes, casesDefinitio
                     {
                         path: 'form',
                         element: <FormList />
+                    },
+                    {
+                        path: 'queue',
+                        element: <QueueList />
                     }
                 ]
             }
