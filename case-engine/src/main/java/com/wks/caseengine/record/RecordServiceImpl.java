@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonObject;
-import com.wks.caseengine.repository.RecordRepository;
 
 @Component
 public class RecordServiceImpl implements RecordService {

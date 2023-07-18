@@ -18,10 +18,10 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
-import com.wks.caseengine.cases.definition.CaseDefinitionService;
 import com.wks.caseengine.cases.definition.hook.TaskCompleteHook;
+import com.wks.caseengine.cases.definition.service.CaseDefinitionService;
 import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.cases.instance.CaseInstanceService;
+import com.wks.caseengine.cases.instance.service.CaseInstanceService;
 import com.wks.caseengine.tasks.event.complete.TaskCompleteEvent;
 import com.wks.caseengine.tasks.event.complete.TaskCompleteEventObject;
 

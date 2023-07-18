@@ -16,8 +16,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.wks.caseengine.repository.RecordTypeRepository;
-
 @Component
 public class RecordTypeServiceImpl implements RecordTypeService {
 

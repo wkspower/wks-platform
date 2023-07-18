@@ -9,9 +9,10 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.instance;
+package com.wks.caseengine.cases.instance.service;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.instance.CaseInstance;
 
 interface CaseInstanceCreateService {
 

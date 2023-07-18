@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.repository.impl;
+package com.wks.caseengine.form;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,11 +25,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.db.EngineMongoDataConnection;
-import com.wks.caseengine.record.type.RecordType;
-import com.wks.caseengine.repository.RecordTypeRepository;
 
 @Component
-public class RecordTypeRepositoryImpl implements RecordTypeRepository {
+public class FormRepositoryImpl implements FormRepository {
 
 	@Autowired
 	private EngineMongoDataConnection connection;
@@ -38,41 +36,42 @@ public class RecordTypeRepositoryImpl implements RecordTypeRepository {
 	private GsonBuilder gsonBuilder;
 
 	@Override
-	public RecordType get(final String id) throws Exception {
-		Bson filter = Filters.eq("id", id);
+	public Form get(final String formKey) throws Exception {
+		Bson filter = Filters.eq("key", formKey);
 		Gson gson = gsonBuilder.create();
-		return gson.fromJson(getCollection().find(filter).first().getJson(), RecordType.class);
+		return gson.fromJson(getCollection().find(filter).first().getJson(), Form.class);
 	}
 
 	@Override
-	public void save(final RecordType recordType) throws Exception {
-		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(recordType))));
+	public void save(final Form form) throws Exception {
+		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(form))));
 
 	}
 
 	@Override
-	public List<RecordType> find() throws Exception {
+	public List<Form> find() throws Exception {
 		Gson gson = gsonBuilder.create();
-		return getCollection().find().map(o -> gson.fromJson(o.getJson(), RecordType.class)).into(new ArrayList<>());
+		return getCollection().find().map(o -> gson.fromJson(o.getJson(), Form.class)).into(new ArrayList<>());
 	}
 
 	@Override
-	public void delete(final String id) throws Exception {
-		Bson filter = Filters.eq("id", id);
+	public void delete(final String formKey) throws Exception {
+		Bson filter = Filters.eq("key", formKey);
 		getCollection().deleteMany(filter);
 	}
 
 	@Override
-	public void update(final String id, final RecordType recordType) throws Exception {
-		Bson filter = Filters.eq("id", id);
+	public void update(final String formKey, final Form form) throws Exception {
+		Bson filter = Filters.eq("key", formKey);
 
-		Bson update = Updates.set("fields", (new JsonObject(gsonBuilder.create().toJson(recordType.getFields()))));
+		Bson update = Updates.combine(Updates.set("title", form.getTitle()), Updates.set("toolTip", form.getToolTip()),
+				Updates.set("structure", (new JsonObject(gsonBuilder.create().toJson(form.getStructure())))));
 
 		getCollection().updateOne(filter, update);
 	}
 
 	private MongoCollection<JsonObject> getCollection() {
-		return connection.getRecordTypeCollection();
+		return connection.getFormCollection();
 	}
 
 }

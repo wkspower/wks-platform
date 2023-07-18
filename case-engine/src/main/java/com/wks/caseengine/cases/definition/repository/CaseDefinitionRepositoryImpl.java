@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.repository.impl;
+package com.wks.caseengine.cases.definition.repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,6 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.db.EngineMongoDataConnection;
-import com.wks.caseengine.repository.CaseDefinitionRepository;
 
 @Component
 public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {

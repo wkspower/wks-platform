@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import com.wks.api.security.context.SecurityContextTenantHolder;
-import com.wks.caseengine.cases.instance.CaseInstanceService;
+import com.wks.caseengine.cases.instance.service.CaseInstanceService;
 
 import lombok.extern.slf4j.Slf4j;
 
