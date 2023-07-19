@@ -61,8 +61,6 @@ To run the project locally in a development environment, we recommend using Dock
 ```bash
 git clone https://github.com/wkspower/wks-platform-docker.git
 cd wks-platform-docker
-git clone https://github.com/wkspower/wks-platform-docker.git
-cd wks-platform-docker
 docker-compose up -d
 ```
 
