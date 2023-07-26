@@ -1,0 +1,43 @@
+{
+    "$schema": "https://unpkg.com/@camunda/element-templates-json-schema/resources/schema.json",
+    "name": "WKS - Update Case Queue",
+    "id": "com.wks.camunda.template.case-queue-update",
+    "appliesTo": [
+        "bpmn:ServiceTask",
+        "bpmn:Event"
+    ],
+    "properties": [
+        {
+            "label": "Implementation Type",
+            "type": "String",
+            "value": "external",
+            "editable": false,
+            "binding": {
+                "type": "property",
+                "name": "camunda:type"
+            }
+        },
+        {
+            "label": "Topic",
+            "type": "String",
+            "value": "caseQueueUpdate",
+            "editable": false,
+            "binding": {
+                "type": "property",
+                "name": "camunda:topic"
+            }
+        },
+        {
+            "label": "Queue",
+            "type": "String",
+            "editable": true,
+            "binding": {
+                "type": "camunda:inputParameter",
+                "name": "queue"
+            },
+            "constraints": {
+                "notEmpty": true
+            }
+        }
+    ]
+}

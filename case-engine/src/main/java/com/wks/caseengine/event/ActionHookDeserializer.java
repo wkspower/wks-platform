@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.definition.action;
+package com.wks.caseengine.event;
 
 import java.lang.reflect.Type;
 
@@ -20,27 +20,26 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.wks.caseengine.json.GsonBuilderFactory;
+import com.wks.caseengine.tasks.event.complete.CaseEventType;
+import com.wks.caseengine.tasks.event.complete.TaskCompleteHook;
 
-public class CaseActionDeserializer implements JsonDeserializer<CaseAction> {
+public class ActionHookDeserializer implements JsonDeserializer<ActionHook> {
 
 	@Override
-	public CaseAction deserialize(JsonElement jsonElement, Type typeOfT, JsonDeserializationContext context)
+	public ActionHook deserialize(JsonElement jsonElement, Type typeOfT, JsonDeserializationContext context)
 			throws JsonParseException {
 
 		final JsonObject jsonObject = jsonElement.getAsJsonObject();
 
-		String actionType = jsonObject.get("actionType").getAsString();
+		String eventType = jsonObject.get("eventType").getAsString();
 		
 		Gson gson = new GsonBuilderFactory().getGsonBuilder().create();
 
-		if (CaseActionType.CASE_STAGE_UPDATE_ACTION.getCode().equals(actionType)) {
-			return gson.fromJson(jsonObject, CaseStageUpdateAction.class);
-
-		} else if (CaseActionType.CASE_QUEUE_UPDATE_ACTION.getCode().equals(actionType)) {
-			return gson.fromJson(jsonObject, CaseQueueUpdateAction.class);
+		if (CaseEventType.TASK_COMPLETE_EVENT_TYPE.getCode().equals(eventType)) {
+			return gson.fromJson(jsonObject, TaskCompleteHook.class);
 		}
 
-		throw new JsonParseException("Case Action Type Not Identified", new CaseActionTypeNotIdentifiedException());
+		throw new JsonParseException("Action Hook Type Not Identified", new ActionHookTypeNotIdentified());
 	}
 
 }

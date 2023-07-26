@@ -173,6 +173,20 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 			}
 		}
 
+		// Queues
+		JsonElement queuesJson = data.get("queues");
+		if (queuesJson != null) {
+			List<JsonObject> queues = gson.fromJson(queuesJson, new TypeToken<List<JsonObject>>() {
+			}.getType());
+
+			try {
+				getQueueCollection().insertMany(queues.stream().map(o -> new org.bson.json.JsonObject(gson.toJson(o)))
+						.collect(Collectors.toList()));
+			} catch (Exception e) {
+				throwErrorIfNoDuplicateKey(e);
+			}
+		}
+
 	}
 
 	private void throwErrorIfNoDuplicateKey(Exception e) {
@@ -195,6 +209,11 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 	private MongoCollection<org.bson.json.JsonObject> getFormCollection() {
 		MongoDatabase db = config.mongoTemplateTenant().getDb();
 		return db.getCollection("forms", org.bson.json.JsonObject.class);
+	}
+
+	private MongoCollection<org.bson.json.JsonObject> getQueueCollection() {
+		MongoDatabase db = config.mongoTemplateTenant().getDb();
+		return db.getCollection("queues", org.bson.json.JsonObject.class);
 	}
 
 	private MongoCollection<org.bson.json.JsonObject> getRecordTypeCollection() {

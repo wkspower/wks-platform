@@ -11,6 +11,15 @@
  */
 package com.wks.caseengine.event;
 
+import java.util.List;
+
+import com.wks.caseengine.cases.definition.action.CaseAction;
+import com.wks.caseengine.tasks.event.complete.CaseEventType;
+
 public interface ActionHook {
+	
+	CaseEventType getEventType();
+	
+	List<CaseAction> getActions();
 
 }

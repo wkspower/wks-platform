@@ -11,15 +11,23 @@
  */
 package com.wks.caseengine.tasks.event.complete;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import java.io.Serializable;
 
-@Getter
-@Setter
-@AllArgsConstructor
-public class TaskCompleteEvent {
+import com.google.gson.annotations.SerializedName;
 
-	private TaskCompleteEventObject source;
+public enum CaseEventType implements Serializable {
+
+	@SerializedName("TASK_COMPLETE_EVENT_TYPE")
+	TASK_COMPLETE_EVENT_TYPE("TASK_COMPLETE_EVENT_TYPE");
+	
+	private final String code;
+
+	CaseEventType(final String code) {
+		this.code = code;
+	}
+
+	public String getCode() {
+		return code;
+	}
 
 }

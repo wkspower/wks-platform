@@ -66,7 +66,7 @@ export const CaseList = ({ status, caseDefId }) => {
             {
                 field: 'statusDescription',
                 headerName: t('pages.caselist.datagrid.columns.statusdescription'),
-                width: 220
+                width: 150
             },
             { field: 'stage', headerName: t('pages.caselist.datagrid.columns.stage'), width: 220 },
             {
@@ -77,7 +77,12 @@ export const CaseList = ({ status, caseDefId }) => {
             {
                 field: 'caseOwnerName',
                 headerName: t('pages.caselist.datagrid.columns.caseOwnerName'),
-                width: 220
+                width: 150
+            },
+            {
+                field: 'queueId',
+                headerName: t('pages.caselist.datagrid.columns.queue'),
+                width: 200
             },
             {
                 field: 'action',

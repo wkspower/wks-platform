@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.JsonObject;
-import com.wks.caseengine.tasks.event.complete.TaskCompleteHook;
+import com.wks.caseengine.event.ActionHook;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,7 +46,7 @@ public class CaseDefinition {
 	private List<CaseStage> stages;
 
 	@Default
-	private List<TaskCompleteHook> taskCompleteHooks = new ArrayList<>();
+	private List<ActionHook> caseHooks = new ArrayList<>();
 
 	@Default
 	private JsonObject kanbanConfig = new JsonObject();

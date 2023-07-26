@@ -15,6 +15,7 @@ import com.wks.caseengine.cases.instance.CaseInstance;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,10 +27,15 @@ import lombok.ToString;
 @Setter
 @Builder
 @ToString
-public class CaseQueueAssignAction implements CaseAction{
+public class CaseQueueUpdateAction implements CaseAction{
 	
-	private String queueId; 
+	private String id;
+	
+	@Default
+	private CaseActionType actionType = CaseActionType.CASE_QUEUE_UPDATE_ACTION;
 
+	private String queueId; 
+	
 	@Override
 	public void visit(CaseInstance caseInstance) {
 		caseInstance.setQueueId(queueId);

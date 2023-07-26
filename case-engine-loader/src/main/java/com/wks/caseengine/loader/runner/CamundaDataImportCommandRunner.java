@@ -81,7 +81,7 @@ public class CamundaDataImportCommandRunner implements CommandLineRunner {
 					HttpMethod.POST, entity, String.class);
 
 			if (responseEntity.getStatusCode().is2xxSuccessful()) {
-				log.info("Camunda created tenant {}", tenantId);
+				log.error("Camunda created tenant {}", tenantId);
 			} else if (responseEntity.getStatusCode().is5xxServerError()) {
 				log.error("Error to create tenant {}. Error: {}", tenantId, responseEntity.toString());
 			}

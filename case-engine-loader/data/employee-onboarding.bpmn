@@ -9,6 +9,12 @@
       <bpmn:outgoing>SequenceFlow_2</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:userTask id="department-assignment" name="Department Assignment" camunda:formKey="employee-onboarding-department-assignment">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="end">
+          <camunda:script scriptFormat="javascript">var businessKey = execution.getBusinessKey(); 
+execution.getProcessEngineServices().getRuntimeService().createMessageCorrelation("taskCompleted").processInstanceBusinessKey(businessKey).correlate();</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_2</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_3</bpmn:outgoing>
     </bpmn:userTask>
@@ -33,53 +39,119 @@
     <bpmn:sequenceFlow id="SequenceFlow_4" sourceRef="manager-approval" targetRef="it-setup" />
     <bpmn:sequenceFlow id="SequenceFlow_5" sourceRef="it-setup" targetRef="orientation-trainning" />
     <bpmn:sequenceFlow id="SequenceFlow_6" sourceRef="orientation-trainning" targetRef="EndEvent_1" />
+    <bpmn:subProcess id="Activity_137gwwr" name="Update Case Stage and Queue" triggeredByEvent="true">
+      <bpmn:serviceTask id="Activity_0dw5ogu" name="Progress Stage: Approval" camunda:modelerTemplate="com.wks.camunda.template.case-stage-update" camunda:type="external" camunda:topic="caseStageUpdate">
+        <bpmn:extensionElements>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="stage">Approval</camunda:inputParameter>
+          </camunda:inputOutput>
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_09ajcay</bpmn:incoming>
+        <bpmn:outgoing>Flow_0hpfj9y</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="Flow_0hpfj9y" sourceRef="Activity_0dw5ogu" targetRef="Event_1ifoz9y" />
+      <bpmn:endEvent id="Event_1ifoz9y" name="Stage and Queue updated">
+        <bpmn:incoming>Flow_0hpfj9y</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flow_0kwovlc" sourceRef="Event_14450i3" targetRef="Activity_0wa8jtu" />
+      <bpmn:sequenceFlow id="Flow_09ajcay" sourceRef="Activity_0wa8jtu" targetRef="Activity_0dw5ogu" />
+      <bpmn:serviceTask id="Activity_0wa8jtu" name="Update queue: Regular Customer" camunda:modelerTemplate="com.wks.camunda.template.case-queue-update" camunda:type="external" camunda:topic="caseQueueUpdate">
+        <bpmn:extensionElements>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="queue">regular-customer</camunda:inputParameter>
+          </camunda:inputOutput>
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_0kwovlc</bpmn:incoming>
+        <bpmn:outgoing>Flow_09ajcay</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:startEvent id="Event_14450i3" isInterrupting="false">
+        <bpmn:outgoing>Flow_0kwovlc</bpmn:outgoing>
+        <bpmn:messageEventDefinition id="MessageEventDefinition_161abna" messageRef="Message_13155ci" />
+      </bpmn:startEvent>
+    </bpmn:subProcess>
   </bpmn:process>
+  <bpmn:message id="Message_13155ci" name="taskCompleted" />
+  <bpmn:message id="Message_27of7v4" name="stageProgressed" />
+  <bpmn:signal id="Signal_04qq07q" name="taskCompletedSignal" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="employee-onboarding">
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_1" bpmnElement="StartEvent_1">
-        <dc:Bounds x="173" y="102" width="36" height="36" />
+        <dc:Bounds x="173" y="362" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_1_di" bpmnElement="registration">
-        <dc:Bounds x="270" y="80" width="100" height="80" />
+        <dc:Bounds x="270" y="340" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_2_di" bpmnElement="department-assignment">
-        <dc:Bounds x="425" y="80" width="100" height="80" />
+        <dc:Bounds x="425" y="340" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_3_di" bpmnElement="manager-approval">
-        <dc:Bounds x="590" y="80" width="100" height="80" />
+        <dc:Bounds x="590" y="340" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_4_di" bpmnElement="it-setup">
-        <dc:Bounds x="755" y="80" width="100" height="80" />
+        <dc:Bounds x="755" y="340" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_5_di" bpmnElement="orientation-trainning">
-        <dc:Bounds x="920" y="80" width="100" height="80" />
+        <dc:Bounds x="920" y="340" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="_BPMNShape_EndEvent_1" bpmnElement="EndEvent_1">
-        <dc:Bounds x="1085" y="102" width="36" height="36" />
+        <dc:Bounds x="1085" y="362" width="36" height="36" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_04aeyws_di" bpmnElement="Activity_137gwwr" isExpanded="true">
+        <dc:Bounds x="260" y="80" width="745" height="180" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1476mm7_di" bpmnElement="Activity_0dw5ogu">
+        <dc:Bounds x="735" y="130" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1f3pvi5_di" bpmnElement="Event_1ifoz9y">
+        <dc:Bounds x="917" y="152" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="892" y="195" width="87" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0uwvm4d_di" bpmnElement="Activity_0wa8jtu">
+        <dc:Bounds x="490" y="130" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0x8lzgm_di" bpmnElement="Event_14450i3">
+        <dc:Bounds x="312" y="152" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0hpfj9y_di" bpmnElement="Flow_0hpfj9y">
+        <di:waypoint x="835" y="170" />
+        <di:waypoint x="917" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0kwovlc_di" bpmnElement="Flow_0kwovlc">
+        <di:waypoint x="348" y="170" />
+        <di:waypoint x="490" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09ajcay_di" bpmnElement="Flow_09ajcay">
+        <di:waypoint x="590" y="170" />
+        <di:waypoint x="735" y="170" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1_di" bpmnElement="SequenceFlow_1">
-        <di:waypoint x="209" y="120" />
-        <di:waypoint x="270" y="120" />
+        <di:waypoint x="209" y="380" />
+        <di:waypoint x="270" y="380" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_2_di" bpmnElement="SequenceFlow_2">
-        <di:waypoint x="370" y="120" />
-        <di:waypoint x="425" y="120" />
+        <di:waypoint x="370" y="380" />
+        <di:waypoint x="425" y="380" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_3_di" bpmnElement="SequenceFlow_3">
-        <di:waypoint x="525" y="120" />
-        <di:waypoint x="590" y="120" />
+        <di:waypoint x="525" y="380" />
+        <di:waypoint x="590" y="380" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_4_di" bpmnElement="SequenceFlow_4">
-        <di:waypoint x="690" y="120" />
-        <di:waypoint x="755" y="120" />
+        <di:waypoint x="690" y="380" />
+        <di:waypoint x="755" y="380" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_5_di" bpmnElement="SequenceFlow_5">
-        <di:waypoint x="855" y="120" />
-        <di:waypoint x="920" y="120" />
+        <di:waypoint x="855" y="380" />
+        <di:waypoint x="920" y="380" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_6_di" bpmnElement="SequenceFlow_6">
-        <di:waypoint x="1020" y="120" />
-        <di:waypoint x="1085" y="120" />
+        <di:waypoint x="1020" y="380" />
+        <di:waypoint x="1085" y="380" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

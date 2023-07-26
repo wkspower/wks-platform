@@ -113,6 +113,13 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 		caseInstance.setStage(caseStage);
 		repository.update(businessKey, caseInstance);
 	}
+	
+	@Override
+	public void updateQueue(String businessKey, String queueId) throws Exception {
+		CaseInstance caseInstance = repository.get(businessKey);
+		caseInstance.setQueueId(queueId);
+		repository.update(businessKey, caseInstance);
+	}
 
 	// TODO should not allow to delete. Close or archive instead
 	// Should ensure only one case is deleted - BusinessKey should be UNIQUE
@@ -203,4 +210,5 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	public void setCaseInstanceCreateService(CaseInstanceCreateService caseInstanceCreateService) {
 		this.caseInstanceCreateService = caseInstanceCreateService;
 	}
+
 }

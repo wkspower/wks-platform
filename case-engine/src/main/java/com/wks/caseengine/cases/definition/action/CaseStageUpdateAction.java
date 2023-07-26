@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.Builder.Default;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,12 +28,19 @@ import lombok.ToString;
 @Builder
 @ToString
 public class CaseStageUpdateAction implements CaseAction {
+	
+	private String id;
+
+	@Default
+	private CaseActionType actionType = CaseActionType.CASE_STAGE_UPDATE_ACTION;
 
 	private String newStage;
+	
 
 	@Override
 	public void visit(CaseInstance caseInstance) {
 		caseInstance.setStage(newStage);
 	}
+
 
 }

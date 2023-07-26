@@ -11,7 +11,6 @@
  */
 package com.wks.caseengine.rest.app;
 
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -21,7 +20,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -30,20 +28,19 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.wks.caseengine.cases.instance.service.CaseInstanceService;
-import com.wks.caseengine.pagination.PageResult;
+import com.wks.caseengine.queue.QueueService;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
-import com.wks.caseengine.rest.server.CaseController;
+import com.wks.caseengine.rest.server.QueueController;
 
-@WebMvcTest(controllers = CaseController.class)
+@WebMvcTest(controllers = QueueController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class CaseControllerTest {
+public class QueueControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@MockBean
-	private CaseInstanceService caseInstanceService;
+	private QueueService queueService;
 
 	@BeforeEach
 	public void setup() {
@@ -57,57 +54,29 @@ public class CaseControllerTest {
 
 	@Test
 	public void testSave() throws Exception {
-		this.mockMvc.perform(post("/case/").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/queue/").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void testDelete() throws Exception {
-		this.mockMvc.perform(delete("/case/{businessKey}", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(delete("/queue/{queueId}", "1")).andExpect(status().isOk());
 	}
 
 	@Test
 	public void testUpdate() throws Exception {
-		this.mockMvc.perform(patch("/case/{businessKey}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(patch("/queue/{queueIdKey}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void testGet() throws Exception {
-		this.mockMvc.perform(get("/case/{businessKey}", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/queue/{queueId}", "1")).andExpect(status().isOk());
 	}
 
 	@Test
 	public void testFind() throws Exception {
-		when(caseInstanceService.find(ArgumentMatchers.any())).thenReturn(PageResult.EMPTY);
-
-		this.mockMvc.perform(get("/case/")).andExpect(status().isOk());
-	}
-
-	@Test
-	public void testSaveDocument() throws Exception {
-		this.mockMvc
-				.perform(
-						post("/case/{businessKey}/document", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isOk());
-	}
-
-	@Test
-	public void testSaveComment() throws Exception {
-		this.mockMvc
-				.perform(post("/case/{businessKey}/comment", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isOk());
-	}
-
-	@Test
-	public void testUdpateComment() throws Exception {
-		this.mockMvc.perform(patch("/case/{businessKey}/comment/{commentId}", "1", "1")
-				.contentType(MediaType.APPLICATION_JSON).content("{}")).andExpect(status().isOk());
-	}
-
-	@Test
-	public void testDeleteComment() throws Exception {
-		this.mockMvc.perform(delete("/case/{businessKey}/comment/{commentId}", "1", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/queue/")).andExpect(status().isOk());
 	}
 
 }

@@ -85,7 +85,7 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 				Updates.set("deployed", caseDefinition.getDeployed()),
 				Updates.set("kanbanConfig",
 						(new JsonObject(gsonBuilder.create().toJson(caseDefinition.getKanbanConfig())))),
-				Updates.set("taskCompleteHooks", caseDefinition.getTaskCompleteHooks()));
+				Updates.set("caseHooks", caseDefinition.getCaseHooks()));
 
 		getCollection().updateOne(filter, update);
 	}

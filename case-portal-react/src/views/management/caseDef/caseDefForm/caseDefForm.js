@@ -12,7 +12,7 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import PropTypes from 'prop-types';
 import { useEffect } from 'react';
-import { CaseDefFormEvents } from './caseDefFormEvents';
+import { CaseDefFormEvents } from './listeners/caseDefFormListenerList';
 import { CaseDefFormStages } from './caseDefFormStages';
 import { CaseDefGeneralForm } from './caseDefGeneralForm';
 import { CaseDefFormForm } from './caseDefFormForm';
@@ -132,7 +132,7 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
                     >
                         <Tab label="General" {...a11yProps(0)} />
                         <Tab label="Stages" {...a11yProps(1)} />
-                        <Tab label="Events" {...a11yProps(2)} />
+                        <Tab label="Event Listeners" {...a11yProps(2)} />
                         <Tab label="Kanban" {...a11yProps(3)} />
                     </Tabs>
                 </Box>
