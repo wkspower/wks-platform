@@ -15,7 +15,11 @@ import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.event.Action;
 
 public interface CaseAction extends Action {
+	
+	String getId();
+
+	CaseActionType getActionType();
 
 	void visit(CaseInstance caseInstance);
-
+	
 }

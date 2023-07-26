@@ -44,7 +44,7 @@ public class EngineMongoDataConnectionImpl implements EngineMongoDataConnection 
 	@Override
 	public MongoCollection<JsonObject> getCaseDefCollection() {
 		MongoDatabase db = byTenant.getDb();
-		log.info("using database MongoDataConnection: {}", db.getName());
+		log.debug("using database MongoDataConnection: {}", db.getName());
 		return db.getCollection("caseDefinitions", JsonObject.class);
 	}
 

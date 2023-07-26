@@ -15,7 +15,7 @@ const defs = {
         record: 'Registros',
         system: 'Sistema',
         settings: 'Configurações',
-        caselifecicle: 'Ciclo de vida do caso',
+        casebuilder: 'Case Builder',
         documentation: 'Documentação',
 
         processes: 'Processos',
@@ -47,7 +47,8 @@ const defs = {
                     statusdescription: 'Situação',
                     stage: 'Estágio',
                     createdat: 'Criado em',
-                    caseOwnerName: 'Criado por' 
+                    queue: 'Fila',
+                    caseOwnerName: 'Criado por'
                 },
                 action: {
                     details: 'Detalhar'

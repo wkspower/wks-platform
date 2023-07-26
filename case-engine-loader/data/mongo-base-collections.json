@@ -37,26 +37,39 @@
         }
       ],
       "kanbanConfig": {},
-      "taskCompleteHooks": [
+      "caseHooks": [
         {
           "actions": [
             {
-              "newStage": "Issue Investigation",
-              "actionType": "CASE_STAGE_UPDATE_ACTION"
+              "actionType": "CASE_STAGE_UPDATE_ACTION",
+              "newStage": "Issue Investigation"
             }
           ],
+          "eventType": "TASK_COMPLETE_EVENT_TYPE",
           "processDefKey": "customer-support",
           "taskDefKey": "create-ticket"
         },
         {
           "actions": [
             {
-              "newStage": "Resolution",
-              "actionType": "CASE_STAGE_UPDATE_ACTION"
+              "actionType": "CASE_STAGE_UPDATE_ACTION",
+              "newStage": "Resolution"
             }
           ],
+          "eventType": "TASK_COMPLETE_EVENT_TYPE",
           "processDefKey": "customer-support",
           "taskDefKey": "resolve-issue"
+        },
+        {
+          "actions": [
+            {
+              "actionType": "CASE_QUEUE_UPDATE_ACTION",
+              "queueId": "Regular Customers"
+            }
+          ],
+          "eventType": "TASK_COMPLETE_EVENT_TYPE",
+          "processDefKey": "customer-support",
+          "taskDefKey": "create-ticket"
         }
       ]
     },
@@ -92,39 +105,7 @@
           "name": "Orientation"
         }
       ],
-      "kanbanConfig": {},
-      "taskCompleteHooks": [
-        {
-          "actions": [
-            {
-              "newStage": "Approval",
-              "actionType": "CASE_STAGE_UPDATE_ACTION"
-            }
-          ],
-          "processDefKey": "employee-onboarding",
-          "taskDefKey": "department-assignment"
-        },
-        {
-          "actions": [
-            {
-              "newStage": "Assigning Equipment",
-              "actionType": "CASE_STAGE_UPDATE_ACTION"
-            }
-          ],
-          "processDefKey": "employee-onboarding",
-          "taskDefKey": "manager-approval"
-        },
-        {
-          "actions": [
-            {
-              "newStage": "Orientation",
-              "actionType": "CASE_STAGE_UPDATE_ACTION"
-            }
-          ],
-          "processDefKey": "employee-onboarding",
-          "taskDefKey": "it-setup"
-        }
-      ]
+      "kanbanConfig": {}
     },
     {
       "_id": {
@@ -7096,6 +7077,24 @@
       },
       "title": "Orientation Training",
       "toolTip": "Orientation Training"
+    }
+  ],
+  "queues": [
+    {
+      "_id": {
+        "$oid": "64bfcea90f4949f8dd971ac8"
+      },
+      "id": "regular-customer",
+      "name": "Regular Customers",
+      "description": "Regular Customers"
+    },
+    {
+      "_id": {
+        "$oid": "64bfceb50f4949f8dd971af4"
+      },
+      "id": "special-customer",
+      "name": "Special Customer",
+      "description": "Special Customer"
     }
   ]
 }

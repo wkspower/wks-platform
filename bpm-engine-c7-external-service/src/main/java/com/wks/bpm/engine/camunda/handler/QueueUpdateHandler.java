@@ -18,28 +18,24 @@ import org.camunda.bpm.client.task.ExternalTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.gson.GsonBuilder;
 import com.wks.api.security.context.SecurityContextTenantHolder;
-import com.wks.caseengine.record.RecordService;
+import com.wks.caseengine.cases.instance.service.CaseInstanceService;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
-@ExternalTaskSubscription(topicName = "recordSave", includeExtensionProperties = true)
+@ExternalTaskSubscription(topicName = "caseQueueUpdate", includeExtensionProperties = true)
 @Slf4j
-public class RecordSaveUpdateHandler implements ExternalTaskHandler {
+public class QueueUpdateHandler implements ExternalTaskHandler {
 
 	@Autowired
 	private SecurityContextTenantHolder holder;
 
 	@Autowired
-	private RecordService recordService;
+	private CaseInstanceService caseInstanceService;
 
 	@Autowired
 	private ExternalServiceErrorHandler errorHandler;
-
-	@Autowired
-	private GsonBuilder gsonBuilder;
 
 	@Override
 	public void execute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
@@ -54,16 +50,16 @@ public class RecordSaveUpdateHandler implements ExternalTaskHandler {
 
 			holder.setTenantId(externalTask.getTenantId());
 
-			String record = externalTask.getVariable("record");
-
-			recordService.save(externalTask.getVariable("recordTypeId"),
-					gsonBuilder.create().fromJson(record, com.google.gson.JsonObject.class));
+			caseInstanceService.updateQueue(externalTask.getBusinessKey(), externalTask.getVariable("queue"));
 
 			externalTaskService.complete(externalTask);
 		} catch (Exception e) {
-			log.error("Error saving new record: {}", externalTask.getActivityId(), externalTask.getVariable("record"));
-			errorHandler.handle("Error saving new record", externalTaskService, externalTask, e);
+			log.error("Error updating case stage with business key: {} and new stage: {}",
+					externalTask.getBusinessKey(), externalTask.getVariable("stage"));
+			errorHandler.handle("Error updating case stage", externalTaskService, externalTask, e);
 		} finally {
+			log.debug("Finishing External Task Handler activity '{}' for tenant '{}'", externalTask.getActivityId(),
+					externalTask.getTenantId());
 			holder.clear();
 		}
 	}

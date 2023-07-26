@@ -40,7 +40,7 @@ const management = {
         },
         {
             id: 'casesAndProcessesManagement',
-            title: i18n.t('menu.caselifecicle'),
+            title: i18n.t('menu.casebuilder'),
             type: 'collapse',
             icon: icons.IconSettingsAutomation,
             children: [

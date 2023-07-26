@@ -18,6 +18,7 @@ import com.wks.caseengine.event.ActionHook;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,7 +30,10 @@ import lombok.ToString;
 @Setter
 @Builder
 @ToString
-public class TaskCompleteHook implements ActionHook{
+public class TaskCompleteHook implements ActionHook {
+
+	@Default
+	private CaseEventType eventType = CaseEventType.TASK_COMPLETE_EVENT_TYPE;
 
 	private String processDefKey;
 	private String taskDefKey;

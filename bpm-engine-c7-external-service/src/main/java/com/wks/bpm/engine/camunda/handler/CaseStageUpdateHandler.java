@@ -40,7 +40,7 @@ public class CaseStageUpdateHandler implements ExternalTaskHandler {
 	@Override
 	public void execute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
 		try {
-			log.info("Starting External Task Handler processing '{}' for tenant '{}'", externalTask.getActivityId());
+			log.debug("Starting External Task Handler processing '{}'", externalTask.getActivityId());
 
 			if (externalTask.getTenantId() == null) {
 				log.warn("Could not start External Task Handler processing '{}' without tenant id",
@@ -58,7 +58,7 @@ public class CaseStageUpdateHandler implements ExternalTaskHandler {
 					externalTask.getBusinessKey(), externalTask.getVariable("stage"));
 			errorHandler.handle("Error updating case stage", externalTaskService, externalTask, e);
 		} finally {
-			log.info("Finishing External Task Handler activity '{}' for tenant '{}'", externalTask.getActivityId(),
+			log.debug("Finishing External Task Handler activity '{}' for tenant '{}'", externalTask.getActivityId(),
 					externalTask.getTenantId());
 			holder.clear();
 		}

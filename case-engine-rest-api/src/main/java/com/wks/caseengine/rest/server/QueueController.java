@@ -42,8 +42,8 @@ public class QueueController {
 	}
 
 	@GetMapping(value = "/{queueId}")
-	public Queue get(@PathVariable final String caseDefId) throws Exception {
-		return queueService.get(caseDefId);
+	public Queue get(@PathVariable final String queueId) throws Exception {
+		return queueService.get(queueId);
 	}
 
 	@PostMapping(value = "/")
