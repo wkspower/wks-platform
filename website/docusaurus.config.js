@@ -7,7 +7,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'WKS Platform',
-  tagline: 'Case Management Platform',
+  tagline: 'Adaptive Case Management Platform',
   url: 'https://your-docusaurus-test-site.com',
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -27,6 +27,17 @@ const config = {
     locales: ['en'],
   },
 
+  scripts: [
+    {
+      src: 'https://www.googletagmanager.com/gtag/js?id=G-DD0FWZXED7',
+      async: true,
+    },
+    {
+      src: '/js/gtag.js',
+      async: false,
+    },
+  ],
+
   presets: [
     [
       'classic',
@@ -35,21 +46,18 @@ const config = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           breadcrumbs: false,
+          editUrl:
+            'https://github.com/wkspower/wks-platform/tree/main/website',
+        },
+        blog: {
+          showReadingTime: false,
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
             'https://github.com/wkspower/wks-platform/tree/main/website',
         },
-        // blog: {
-        //   showReadingTime: true,
-        //   // Please change this to your repo.
-        //   // Remove this to remove the "edit this page" links.
-        //   editUrl:
-        //     'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-        // },
-        blog: false,
         theme: {
-          customCss: require.resolve('./src/css/custom.css'),
+          customCss: [require.resolve('./src/css/custom.css')],
         },
       }),
     ],
@@ -58,6 +66,11 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      colorMode: {
+        defaultMode: 'light',
+        disableSwitch: true,
+        respectPrefersColorScheme: false,
+      },
       docs: {
         sidebar: {
           autoCollapseCategories: true,
@@ -70,22 +83,22 @@ const config = {
           src: 'img/logo.svg',
         },
         items: [
+          { to: '/blog', label: 'Blog', position: 'left' },
           {
             type: 'doc',
             docId: 'intro',
             position: 'left',
             label: 'Docs',
           },
-          // {to: '/blog', label: 'Blog', position: 'left'},
           {
             href: 'https://github.com/wkspower/wks-platform',
             label: 'GitHub',
             position: 'right',
-          },
+          }
         ],
       },
       footer: {
-        style: 'dark',
+        // style: 'dark',
         links: [
           // {
           //   title: 'Docs',

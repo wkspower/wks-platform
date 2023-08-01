@@ -1,0 +1,70 @@
+---
+slug: jBPM-to-case-management
+title: A Baptism by Fire. From jBPM to Camunda-powered Case Management
+authors: [francav]
+tags: [case management, bpm automation]
+---
+
+In 2011, I set foot into what would turn out to be one of the most transformative phases of my professional journey. At that time, I was a software engineer eager to dive into the world of BPM automation and BPMSs. Over the past decade, I have had the privilege of observing and contributing to the continual innovation in this field. This first post will provide a glimpse into my initial forays into BPM, setting the stage for the subsequent series on Case Management and my vision of creating [WKS Platform](https://github.com/wkspower/wks-platform), an open-source Case Management Platform with Camunda BPM.
+
+<br />
+<div style={{textAlign: 'center'}}>
+  <img src="/img/blog_2023_07_31/pje.jpg" />
+</div>
+<div style={{textAlign: 'center'}}>
+    Lost in BPM thoughts - 2012
+</div>
+<br />
+
+
+## Diving Deeper into the PJ-e: A Revolution in the Brazilian Judicial System
+
+It all commenced with the Brazilian PJ-e, a pioneering project for which I served as a Java specialist. Our responsibility? To build it using [jBPM](https://www.jbpm.org/). The significance of the PJ-e was not just about its scale or its impact; it became my initiation into the challenges and intricacies of BPM learning.
+
+The PJ-e represented a significant shift for the Brazilian government and the legal sector. Conceived as a digital platform to modernize the Brazilian judicial system, the PJ-e was envisioned to bring speed, transparency, and efficiency to a domain that had, for long, been mired in paperwork and slow bureaucratic processes.
+
+Its implementation aimed to make justice more accessible to the Brazilian populace by reducing the time and costs associated with legal proceedings. The promise of the PJ-e was that of a future where court proceedings could be initiated, tracked, and concluded electronically, eliminating the need for physical presence and mountains of paper. For the Brazilian government, it was a step towards modern governance. For the legal community, it marked the beginning of a new era, where technology would play an indispensable role in ensuring that justice is swift and streamlined.
+
+However, the ambitious vision for the PJ-e came with its own set of challenges. The legal field, with its myriad intricacies, demanded an aggressive set of requirements for the PJ-e platform. Each court, each legal procedure, and each administrative process had its own set of nuances that needed to be perfectly encapsulated within the system.
+
+This is where we faced our biggest challenge. The nebulous terrain of case management emerged as the most significant roadblock. Even with an exceptionally talented engineering team at our disposal, the complexities of merging case management with process automation proved daunting. The inherent ambiguities associated with legal proceedings, combined with a myriad of requirements that often lacked clarity, meant that we had to constantly pivot, iterate, and refine our approach.
+
+The PJ-e, with all its complexities, wasn't just a project for me. It was a baptism by fire into the world of BPM, an introduction to the delicate balance between technological innovation and real-world constraints. It was a learning experience like no other, setting the stage for my future endeavors in the realm of BPM and case management.
+
+## The Learning Curve
+
+Navigating through these challenges, I spent countless hours trying to demystify the connection between case management requirements and process automation. The PJ-e, with its distinct demands, vividly highlighted the nuances of integrating the two paradigms.
+
+Some exemplifying challenges we faced were:
+
+**Dynamic Workflow Paths**: Legal proceedings, by their very nature, don't follow a set template. Depending on the specifics of a case, evidence presented, or the actions of parties involved, the procedural steps could vary significantly. The BPM component required linear processes, while case management inherently needed a more flexible, adaptive approach. Balancing the two was a daily challenge.
+
+**Varied Access Levels & Case Visibility**: Legal cases involve various stakeholders, each needing different data at different stages. A judge might require a comprehensive case view, while an attorney might only need specific files pertinent to an argument. Building a system that's both restrictive and liberating, where necessary, was a constant tussle between BPM's structured environments and case management's adaptive nature.
+
+**Bespoke Document Management**: While PJ-e was self-contained and had its unique web document editor, digital signing component for PKI, and custom document storage, aligning these components with the process automation aspect was intricate. For instance, determining at which stage a document can be edited or signed without disrupting the process flow added layers of complexity.
+
+**Dynamic Task Management & Notifications**: Legal scenarios aren't just about predefined tasks. They're about responding to dynamic situations. While BPM operates best with preset tasks, case management often requires creating, assigning, or modifying tasks on-the-fly. Integrating the dynamic nature of task management in legal cases with a BPM framework, ensuring tasks are escalated or notified correctly without causing process breakdowns, was a hurdle.
+
+**Handling Exception Scenarios**: Legal cases come with their unique set of exceptions – an unexpected turn of events, a sudden change in case dynamics, or even an unplanned intervention. While BPM thrives on predictability, case management often lives in the realm of unpredictability. Designing a system that marries these two opposite ends of the spectrum, ensuring seamless flow despite interruptions, was a challenge.
+
+With each of these challenges, I learned more about the fragile equilibrium between the structured world of BPM and the flexible realm of case management. Each project phase, each hurdle, honed my understanding, preparing me for a future where I would dream of bridging these domains seamlessly.
+## Beyond jBPM: A Broader Perspective
+
+The PJ-e project was just the beginning. As the BPM landscape evolved, I found myself at the intersection of different open-source BPM engines and commercial BPMSs, understanding their intricacies, strengths, and areas of improvement. A recurring theme was companies wrestling with case management, especially when using tools primarily designed for BPM.
+
+Even today, I often encounter clients who are keen on understanding how to replace platforms like Pega Systems by Camunda. It's evident that the desire for a comprehensive open-source solution is more significant than ever.
+
+## Towards an Open-Source Vision
+
+With the collective insights from these experiences, I am now steering towards a mission: the creation of an open-source [Case Management Platform](https://github.com/wkspower/wks-platform) atop [Camunda BPM](https://www.camunda.com). It's an ambitious goal, but one that is close to my heart.
+
+In the subsequent posts, I'll dive deeper into my experiences with different BPMSs and open-source BPM engines. I'll also shed light on the shared challenges companies face when wrestling with case management, especially when equipped with BPM-centric tools.
+
+To everyone embarking on this storytelling journey with me rediscovering the past, appreciating the present, and envisioning a future where BPM and Case Management coexist seamlessly.
+
+## Learn more about WKS Platform
+
+Stay tuned on my [LinkedIn](https://www.linkedin.com/in/victorpfranca/) for updates about the upcoming blog posts and project news.
+
+To learn more about WKS Platform, I invite you to follow us on github at [github.com/wkspower/wks-platform](https://github.com/wkspower/wks-platform) and read the platform documentation at [docs.wkspower.com](https://docs.wkspower.com). 
+
