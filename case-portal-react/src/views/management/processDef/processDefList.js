@@ -17,7 +17,7 @@ export const ProcessDefList = () => {
     useEffect(() => {
         setFetching(true);
 
-        ProcessDefService.find(keycloak, 'c7-demo')
+        ProcessDefService.find(keycloak)
             .then((data) => {
                 setProcessDefs(data);
             })
@@ -82,7 +82,8 @@ export const ProcessDefList = () => {
                 </Box>
             </MainCard>
             {processDef && (
-                <BPMNModeler open={openBPMNModeler} keycloak={keycloak} processDef={processDef} handleClose={handleCloseBPMNModeler}/>
+                <BPMNModeler open={openBPMNModeler} keycloak={keycloak} processDef={processDef}
+                    handleClose={handleCloseBPMNModeler} />
             )}
         </div>
     );
