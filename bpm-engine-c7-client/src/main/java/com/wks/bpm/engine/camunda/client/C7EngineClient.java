@@ -61,7 +61,8 @@ public class C7EngineClient implements BpmEngineClient {
 
 	@Override
 	public void deploy(final BpmEngine bpmEngine, final String fileName, final String bpmnXml) {
-		WksHttpRequest request = camundaHttpRequestFactory.getDeploymentCreateRequest(bpmEngine, fileName, bpmnXml);
+		WksHttpRequest request = camundaHttpRequestFactory.getDeploymentCreateRequest(bpmEngine, fileName, bpmnXml,
+				tenantHolder.getTenantId().get());
 
 		restTemplate.postForEntity(request.getHttpRequestUrl(), request.getHttpEntity(), String.class).getBody();
 	}

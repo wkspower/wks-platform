@@ -18,6 +18,7 @@ import {
     isPropertiesPanelResizedEvent,
     isUIUpdateRequiredEvent
 } from "@miragon/camunda-web-modeler";
+import newProcessXml from './new-process';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -28,14 +29,18 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
     const [bpmnXml, setBpmnXml] = useState();
 
     useEffect(() => {
-        ProcessDefService.getBPMNXml(keycloak, processDef.id)
-            .then((data) => {
-                setBpmnXml(data);
-            })
-            .catch((err) => {
-                setBpmnXml(null);
-                console.log(err.message);
-            });
+        if (!processDef.id) {
+            setBpmnXml(newProcessXml);
+        } else {
+            ProcessDefService.getBPMNXml(keycloak, processDef.id)
+                .then((data) => {
+                    setBpmnXml(data);
+                })
+                .catch((err) => {
+                    setBpmnXml(null);
+                    console.log(err.message);
+                });
+        }
     }, [open]);
 
     const modelerRef = useRef();
@@ -110,7 +115,7 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
 
     const xmlTabOptions = useMemo(() => ({
         className: undefined,
-        disabled: undefined,
+        disabled: true,
         monacoOptions: undefined
     }), []);
 
@@ -164,6 +169,7 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
                             <CloseIcon />
                         </IconButton>
                         <Typography sx={{ ml: 2, flex: 1 }} component="div">
+                            <div>{processDef.name}</div>
                         </Typography>
                         <Button color="inherit" onClick={onSaveClicked}>
                             Save

@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TaskService } from 'services';
-import { ProcessDiagram } from 'views/bpmn/ProcessDiagram';
+import { ProcessDiagram } from 'views/bpmnViewer/ProcessDiagram';
 import { useSession } from '../../SessionStoreContext';
 import { TaskForm } from '../taskForm/taskForm';
 import Typography from '@mui/material/Typography';

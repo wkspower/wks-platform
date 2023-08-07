@@ -9,7 +9,7 @@ import Slide from '@mui/material/Slide';
 import Toolbar from '@mui/material/Toolbar';
 import MainCard from 'components/MainCard';
 import Typography from '@mui/material/Typography';
-import { ProcessDiagram } from 'views/bpmn/ProcessDiagram';
+import { ProcessDiagram } from 'views/bpmnViewer/ProcessDiagram';
 import { Form } from '@formio/react';
 import { useTranslation } from 'react-i18next';
 import { FormService, TaskService } from 'services';

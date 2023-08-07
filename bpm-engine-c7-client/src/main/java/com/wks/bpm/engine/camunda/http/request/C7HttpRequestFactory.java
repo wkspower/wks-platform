@@ -62,8 +62,8 @@ public class C7HttpRequestFactory {
 	private String taskUrl;
 
 	//// Deployment ////
-
-	public WksHttpRequest getDeploymentCreateRequest(final BpmEngine bpmEngine, final String fileName, String bpmnXml) {
+	public WksHttpRequest getDeploymentCreateRequest(final BpmEngine bpmEngine, final String fileName,
+			final String bpmnXml, final String tenantId) {
 
 		// This nested HttpEntiy is important to create the correct
 		// Content-Disposition entry with metadata "name" and "filename"
@@ -75,6 +75,7 @@ public class C7HttpRequestFactory {
 
 		MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 		body.add("data", fileEntity);
+		body.add("tenant-id", tenantId);
 
 		return new C7HttpPostRequest(extractUrl(bpmEngine) + deploymentUrl + "/create",
 				new HttpEntity<>(body, httpHeadersFactory.multipart()));
