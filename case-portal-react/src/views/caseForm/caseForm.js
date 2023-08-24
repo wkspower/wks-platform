@@ -93,11 +93,10 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     };
 
     const handleUpdateCaseStatus = (keycloak, newStatus) => {
-        CaseService.updateCaseStatusById(
+        CaseService.patch(
             keycloak,
             aCase.businessKey,
             JSON.stringify({
-                businessKey: caseDef.id,
                 status: newStatus
             })
         )

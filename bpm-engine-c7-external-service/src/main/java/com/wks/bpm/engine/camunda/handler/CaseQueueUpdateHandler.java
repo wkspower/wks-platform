@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import com.wks.api.security.context.SecurityContextTenantHolder;
+import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.service.CaseInstanceService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 @ExternalTaskSubscription(topicName = "caseQueueUpdate", includeExtensionProperties = true)
 @Slf4j
-public class QueueUpdateHandler implements ExternalTaskHandler {
+public class CaseQueueUpdateHandler implements ExternalTaskHandler {
 
 	@Autowired
 	private SecurityContextTenantHolder holder;
@@ -49,8 +50,10 @@ public class QueueUpdateHandler implements ExternalTaskHandler {
 			}
 
 			holder.setTenantId(externalTask.getTenantId());
+			
+			CaseInstance mergePatch = CaseInstance.builder().stage(externalTask.getVariable("queue")).build();
 
-			caseInstanceService.updateQueue(externalTask.getBusinessKey(), externalTask.getVariable("queue"));
+			caseInstanceService.patch(externalTask.getBusinessKey(), mergePatch);
 
 			externalTaskService.complete(externalTask);
 		} catch (Exception e) {

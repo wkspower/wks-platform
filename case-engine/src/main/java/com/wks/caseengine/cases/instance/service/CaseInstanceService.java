@@ -11,7 +11,6 @@
  */
 package com.wks.caseengine.cases.instance.service;
 
-import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseDocument;
 import com.wks.caseengine.cases.instance.CaseFilter;
 import com.wks.caseengine.cases.instance.CaseInstance;
@@ -29,13 +28,7 @@ public interface CaseInstanceService {
 
 	CaseInstance create(final String caseDefinitionId) throws Exception;
 
-	CaseInstance update(final CaseInstance caseInstance) throws Exception;
-
-	void updateStatus(final String businessKey, final CaseStatus newStatus) throws Exception;
-
-	void updateStage(final String businessKey, final String caseStage) throws Exception;
-	
-	void updateQueue(final String businessKey, final String queueId) throws Exception;
+	CaseInstance patch(final String businessKey, final CaseInstance caseInstance) throws Exception;
 
 	void delete(final String businessKey) throws CaseInstanceNotFoundException, Exception;
 

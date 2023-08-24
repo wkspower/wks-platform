@@ -9,7 +9,7 @@ export const CaseService = {
     getCaseById,
     filterCase,
     createCase,
-    updateCaseStatusById,
+    patch,
     addDocuments,
     addComment,
     updateComment,
@@ -108,7 +108,7 @@ async function filterCase(keycloak, caseDefId, status, cursor) {
     }
 }
 
-async function updateCaseStatusById(keycloak, id, body) {
+async function patch(keycloak, id, body) {
     const url = `${Config.CaseEngineUrl}/case/${id}`;
 
     try {
@@ -116,7 +116,7 @@ async function updateCaseStatusById(keycloak, id, body) {
             method: 'PATCH',
             headers: {
                 Accept: 'application/json',
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/merge-patch+json',
                 Authorization: `Bearer ${keycloak.token}`
             },
             body: body

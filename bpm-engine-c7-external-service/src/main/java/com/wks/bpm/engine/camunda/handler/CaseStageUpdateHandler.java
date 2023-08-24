@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import com.wks.api.security.context.SecurityContextTenantHolder;
+import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.service.CaseInstanceService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CaseStageUpdateHandler implements ExternalTaskHandler {
 
 	@Autowired
-	private SecurityContextTenantHolder holder;
+	private SecurityContextTenantHolder securityContext;
 
 	@Autowired
 	private CaseInstanceService caseInstanceService;
@@ -48,9 +49,11 @@ public class CaseStageUpdateHandler implements ExternalTaskHandler {
 				return;
 			}
 
-			holder.setTenantId(externalTask.getTenantId());
+			securityContext.setTenantId(externalTask.getTenantId());
+			
+			CaseInstance mergePatch = CaseInstance.builder().stage(externalTask.getVariable("stage")).build();
 
-			caseInstanceService.updateStage(externalTask.getBusinessKey(), externalTask.getVariable("stage"));
+			caseInstanceService.patch(externalTask.getBusinessKey(), mergePatch);
 
 			externalTaskService.complete(externalTask);
 		} catch (Exception e) {
@@ -60,7 +63,7 @@ public class CaseStageUpdateHandler implements ExternalTaskHandler {
 		} finally {
 			log.debug("Finishing External Task Handler activity '{}' for tenant '{}'", externalTask.getActivityId(),
 					externalTask.getTenantId());
-			holder.clear();
+			securityContext.clear();
 		}
 	}
 
