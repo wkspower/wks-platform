@@ -28,7 +28,7 @@ public class HealthCheckController {
 	@Autowired
 	private CaseDefinitionService caseDefinitionService;
 
-	@GetMapping(value = "/")
+	@GetMapping
 	public String check() throws Exception {
 		caseDefinitionService.find();
 		return "success";

@@ -26,7 +26,7 @@ public class DataExportController {
 	@Autowired
 	private DataExportService dataExportService;
 
-	@GetMapping(value = "/")
+	@GetMapping
 	public JsonObject export() throws Exception {
 		return dataExportService.export();
 	}

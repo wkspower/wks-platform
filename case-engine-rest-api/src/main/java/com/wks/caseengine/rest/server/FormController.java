@@ -36,7 +36,7 @@ public class FormController {
 	@Autowired
 	private FormService formService;
 
-	@GetMapping(value = "/")
+	@GetMapping
 	public List<Form> find() throws Exception {
 		return formService.find();
 	}
@@ -46,7 +46,7 @@ public class FormController {
 		return formService.get(formKey);
 	}
 
-	@PostMapping(value = "/")
+	@PostMapping
 	public void save(@RequestBody final Form form) throws Exception {
 		formService.save(form);
 	}

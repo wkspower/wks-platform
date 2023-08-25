@@ -41,7 +41,7 @@ public class TaskController {
 		taskService.create(task);
 	}
 
-	@GetMapping(value = "/")
+	@GetMapping
 	public List<Task> find(@RequestParam(required = false) String businessKey) throws Exception {
 		return taskService.find(businessKey);
 	}

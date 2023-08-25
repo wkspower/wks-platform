@@ -48,7 +48,7 @@ public class CaseController {
 	@Autowired
 	private GsonBuilder gsonBuilder;
 
-	@GetMapping(value = "/")
+	@GetMapping
 	public ResponseEntity<Object> find(@RequestParam(required = false) String status,
 			@RequestParam(required = false) String caseDefinitionId,
 			@RequestParam(required = false, name = "before") String before,
@@ -69,7 +69,7 @@ public class CaseController {
 		return caseInstanceService.get(businessKey);
 	}
 
-	@PostMapping(value = "/")
+	@PostMapping
 	public CaseInstance save(@RequestBody final CaseInstance caseInstance) throws Exception {
 		return caseInstanceService.create(caseInstance);
 	}
