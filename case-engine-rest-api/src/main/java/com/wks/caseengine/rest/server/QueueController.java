@@ -36,7 +36,7 @@ public class QueueController {
 	@Autowired
 	private QueueService queueService;
 
-	@GetMapping(value = "/")
+	@GetMapping
 	public List<Queue> find() throws Exception {
 		return queueService.find();
 	}
@@ -46,7 +46,7 @@ public class QueueController {
 		return queueService.get(queueId);
 	}
 
-	@PostMapping(value = "/")
+	@PostMapping
 	public void save(@RequestBody final Queue queue) throws Exception {
 		queueService.save(queue);
 	}

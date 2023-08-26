@@ -27,7 +27,7 @@ public class DataImportController {
 	@Autowired
 	private DataImportService dataImportService;
 
-	@PostMapping(value = "/")
+	@PostMapping
 	public void importData(@RequestBody final JsonObject data) throws Exception {
 		dataImportService.importData(data);
 	}

@@ -63,13 +63,13 @@ public class CaseControllerTest {
 
 	@Test
 	public void testDelete() throws Exception {
-		this.mockMvc.perform(delete("/case/{businessKey}", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(delete("/case/{businessKey}", "1")).andExpect(status().isNoContent());
 	}
 
 	@Test
-	public void testUpdate() throws Exception {
-		this.mockMvc.perform(patch("/case/{businessKey}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isOk());
+	public void testMergePatch() throws Exception {
+		this.mockMvc.perform(patch("/case/{businessKey}", "1").contentType("application/merge-patch+json").content("{}"))
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
@@ -89,25 +89,25 @@ public class CaseControllerTest {
 		this.mockMvc
 				.perform(
 						post("/case/{businessKey}/document", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void testSaveComment() throws Exception {
 		this.mockMvc
 				.perform(post("/case/{businessKey}/comment", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void testUdpateComment() throws Exception {
 		this.mockMvc.perform(patch("/case/{businessKey}/comment/{commentId}", "1", "1")
-				.contentType(MediaType.APPLICATION_JSON).content("{}")).andExpect(status().isOk());
+				.contentType(MediaType.APPLICATION_JSON).content("{}")).andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void testDeleteComment() throws Exception {
-		this.mockMvc.perform(delete("/case/{businessKey}/comment/{commentId}", "1", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(delete("/case/{businessKey}/comment/{commentId}", "1", "1")).andExpect(status().isNoContent());
 	}
 
 }

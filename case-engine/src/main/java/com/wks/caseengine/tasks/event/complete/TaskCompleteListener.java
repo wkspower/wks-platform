@@ -63,7 +63,7 @@ public class TaskCompleteListener {
 						hook.getActions().forEach(action -> action.visit(caseInstance));
 					});
 
-			caseInstanceService.update(caseInstance);
+			caseInstanceService.patch(businessKey, caseInstance);
 		} catch (Exception e) {
 			log.error("CaseEventListener.onApplicationEvent: Case Instance {} not found when completing task {}",
 					businessKey, tskDefKey);

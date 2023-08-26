@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
-import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseAttribute;
 import com.wks.caseengine.cases.instance.CaseAttributeType;
 import com.wks.caseengine.cases.instance.CaseDocument;
@@ -92,33 +91,24 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 
 	@Override
-	public CaseInstance update(CaseInstance caseInstance) throws Exception {
-		repository.update(caseInstance.getBusinessKey(), caseInstance);
+	public CaseInstance patch(final String businessKey, final CaseInstance mergePatch) throws Exception {
+
+		CaseInstance target = repository.get(businessKey);
+
+		if (mergePatch.getStatus() != null) {
+			target.setStatus(mergePatch.getStatus());
+		}
+		if (mergePatch.getStage() != null) {
+			target.setStage(mergePatch.getStage());
+		}
+		if (mergePatch.getQueueId() != null) {
+			target.setQueueId(mergePatch.getQueueId());
+		}
+
+		repository.update(businessKey, target);
+
 		// TODO return the updated case instance from DB
-		return caseInstance;
-	}
-
-	// TODO Should be a generic update?
-	@Override
-	public void updateStatus(final String businessKey, final CaseStatus newStatus) throws Exception {
-		CaseInstance caseInstance = repository.get(businessKey);
-		caseInstance.setStatus(newStatus);
-		repository.update(businessKey, caseInstance);
-	}
-
-	// TODO Should replace by 'Stage ID/Key' parameter instead of 'Stage Name'
-	@Override
-	public void updateStage(final String businessKey, final String caseStage) throws Exception {
-		CaseInstance caseInstance = repository.get(businessKey);
-		caseInstance.setStage(caseStage);
-		repository.update(businessKey, caseInstance);
-	}
-	
-	@Override
-	public void updateQueue(String businessKey, String queueId) throws Exception {
-		CaseInstance caseInstance = repository.get(businessKey);
-		caseInstance.setQueueId(queueId);
-		repository.update(businessKey, caseInstance);
+		return target;
 	}
 
 	// TODO should not allow to delete. Close or archive instead

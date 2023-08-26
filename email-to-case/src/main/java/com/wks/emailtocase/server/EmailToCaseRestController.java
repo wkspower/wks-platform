@@ -73,7 +73,7 @@ public class EmailToCaseRestController {
 
 	}
 
-	@GetMapping(value = "/")
+	@GetMapping
 	public List<CaseEmail> find(@RequestParam(required = false) String caseInstanceBusinessKey,
 			@RequestParam(required = false) String caseDefinitionId) throws Exception {
 

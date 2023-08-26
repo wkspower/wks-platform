@@ -32,7 +32,7 @@ public class MessageController {
 	@Autowired
 	private MessageSenderService messageSenderService;
 
-	@PostMapping(value = "/")
+	@PostMapping
 	public void save(@RequestBody final ProcessMessage processMessage) throws Exception {
 		messageSenderService.sendMessage(processMessage, Optional.empty());
 	}

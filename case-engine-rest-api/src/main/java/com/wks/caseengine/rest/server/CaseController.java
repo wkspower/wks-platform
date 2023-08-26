@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.google.gson.GsonBuilder;
 import com.wks.caseengine.cases.instance.CaseDocument;
 import com.wks.caseengine.cases.instance.CaseFilter;
 import com.wks.caseengine.cases.instance.CaseInstance;
@@ -44,7 +45,10 @@ public class CaseController {
 	@Autowired
 	private CaseInstanceService caseInstanceService;
 
-	@GetMapping(value = "/")
+	@Autowired
+	private GsonBuilder gsonBuilder;
+
+	@GetMapping
 	public ResponseEntity<Object> find(@RequestParam(required = false) String status,
 			@RequestParam(required = false) String caseDefinitionId,
 			@RequestParam(required = false, name = "before") String before,
@@ -65,48 +69,58 @@ public class CaseController {
 		return caseInstanceService.get(businessKey);
 	}
 
-	@PostMapping(value = "/")
+	@PostMapping
 	public CaseInstance save(@RequestBody final CaseInstance caseInstance) throws Exception {
 		return caseInstanceService.create(caseInstance);
 	}
 
-	@PatchMapping(value = "/{businessKey}")
-	public void update(@PathVariable final String businessKey, @RequestBody final CaseInstance caseInstance)
+	@PatchMapping(value = "/{businessKey}", consumes = "application/merge-patch+json")
+	public ResponseEntity<Void> mergePatch(@PathVariable final String businessKey, @RequestBody String mergePatchJson)
 			throws Exception {
-		caseInstanceService.updateStatus(businessKey, caseInstance.getStatus());
+
+		CaseInstance mergePatch = gsonBuilder.create().fromJson(mergePatchJson, CaseInstance.class);
+
+		caseInstanceService.patch(businessKey, mergePatch);
+		
+		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping(value = "/{businessKey}")
-	public void delete(@PathVariable final String businessKey) throws Exception {
+	public ResponseEntity<Void> delete(@PathVariable final String businessKey) throws Exception {
 		try {
 			caseInstanceService.delete(businessKey);
+			return ResponseEntity.noContent().build();
 		} catch (CaseInstanceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Case Instance Not Found - " + businessKey, e);
 		}
 	}
 
 	@PostMapping(value = "/{businessKey}/document")
-	public void saveDocument(@PathVariable final String businessKey, @RequestBody CaseDocument document)
+	public ResponseEntity<Void> saveDocument(@PathVariable final String businessKey, @RequestBody CaseDocument document)
 			throws Exception {
 		caseInstanceService.saveDocument(businessKey, document);
+		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping(value = "/{businessKey}/comment")
-	public void saveComment(@PathVariable final String businessKey, @RequestBody final Comment newComment)
+	public ResponseEntity<Void> saveComment(@PathVariable final String businessKey, @RequestBody final Comment newComment)
 			throws Exception {
 		caseInstanceService.saveComment(businessKey, newComment);
+		return ResponseEntity.noContent().build();
 	}
 
 	@PatchMapping(value = "/{businessKey}/comment/{commentId}")
-	public void udpateComment(@PathVariable final String businessKey, @PathVariable final String commentId,
+	public ResponseEntity<Void> udpateComment(@PathVariable final String businessKey, @PathVariable final String commentId,
 			@RequestBody final Comment comment) throws Exception {
 		caseInstanceService.updateComment(businessKey, commentId, comment.getBody());
+		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping(value = "/{businessKey}/comment/{commentId}")
-	public void deleteComment(@PathVariable final String businessKey, @PathVariable final String commentId)
+	public ResponseEntity<Void> deleteComment(@PathVariable final String businessKey, @PathVariable final String commentId)
 			throws Exception {
 		caseInstanceService.deleteComment(businessKey, commentId);
+		return ResponseEntity.noContent().build();
 	}
 
 }

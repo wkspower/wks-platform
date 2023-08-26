@@ -7,7 +7,7 @@ See our on-line documentation at https://docs.wkspower.com
 Table of Contents
 -----------------
 - [Features](#features)
-- [Instalation](#instalation)
+- [Installation](#installation)
 - [Screenshots](#screenshots)
 - [License](#license)
 - [Contact](#contact)
@@ -54,7 +54,7 @@ WKS Platform is designed as a multi-tenant solution, allowing multiple organizat
 
 - **Multi-Language Support**: WKS Platform is designed to be a multi-language project, utilizing internationalization (i18n) techniques. This allows for the localization of the platform's interface, making it accessible and usable in different languages. Currently, it supports English and Brazilian Portuguese, with the potential to expand support for additional languages. 
 
-## Instalation
+## Installation
 
 To run the project locally in a development environment, we recommend using Docker Compose. This ensures that all the necessary dependencies and services are set up correctly and provides a consistent and reproducible environment.
 

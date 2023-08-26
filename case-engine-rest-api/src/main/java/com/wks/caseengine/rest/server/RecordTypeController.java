@@ -33,7 +33,7 @@ public class RecordTypeController {
 	@Autowired
 	private RecordTypeService recordTypeService;
 
-	@GetMapping(value = "/")
+	@GetMapping
 	public List<RecordType> find() throws Exception {
 		return recordTypeService.find();
 	}
@@ -43,7 +43,7 @@ public class RecordTypeController {
 		return recordTypeService.get(id);
 	}
 
-	@PostMapping(value = "/")
+	@PostMapping
 	public void save(@RequestBody final RecordType recordType) throws Exception {
 		recordTypeService.save(recordType);
 	}

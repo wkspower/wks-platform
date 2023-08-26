@@ -41,7 +41,7 @@ public class CaseDefinitionController {
 	@Autowired
 	private CaseDefinitionService caseDefinitionService;
 
-	@GetMapping(value = "/")
+	@GetMapping
 	public List<CaseDefinition> find(@RequestParam(required = false) Boolean deployed) throws Exception {
 		return caseDefinitionService.find(Optional.ofNullable(deployed));
 	}
@@ -51,7 +51,7 @@ public class CaseDefinitionController {
 		return caseDefinitionService.get(caseDefId);
 	}
 
-	@PostMapping(value = "/")
+	@PostMapping
 	public CaseDefinition save(@RequestBody final CaseDefinition caseDefinition) throws Exception {
 		return caseDefinitionService.create(caseDefinition);
 	}
