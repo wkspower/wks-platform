@@ -141,9 +141,9 @@ services:
             - OPTIMIZE_ELASTICSEARCH_HTTP_PORT=9200
             - OPTIMIZE_EVENT_INGESTION_ACCESS_TOKEN=secret        
         volumes:
-            - "./.optimize/environment-config.yaml:/optimize/config/environment-config.yaml"
-            - "./.optimize/OptimizeLicense.txt:/optimize/config/OptimizeLicense.txt"
-            - "./.optimize/logo/wks_icon.svg:/optimize/config/logo/wks_icon.svg"
+            - ".configs/optimize/environment-config.yaml:/optimize/config/environment-config.yaml"
+            - ".configs/optimize/OptimizeLicense.txt:/optimize/config/OptimizeLicense.txt"
+            - ".configs/optimize/logo/wks_icon.svg:/optimize/config/logo/wks_icon.svg"
         restart: on-failure
         links:
             - elasticsearch
