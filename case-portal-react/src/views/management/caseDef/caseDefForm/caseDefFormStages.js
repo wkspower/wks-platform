@@ -3,8 +3,12 @@ import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
 import MainCard from 'components/MainCard';
 import Button from '@mui/material/Button';
+import { CaseDefStageProcesses } from './caseDefStageProcesses';
 
 export const CaseDefFormStages = ({ caseDef, setCaseDef }) => {
+    const [openProcessesList, setOpenProcessesList] = React.useState(false);
+    const [currentStage, setCurrentStage] = React.useState(null);
+
     const [sortModel] = React.useState([
         {
             field: 'index',
@@ -22,6 +26,18 @@ export const CaseDefFormStages = ({ caseDef, setCaseDef }) => {
             type: 'number'
         },
         { field: 'name', headerName: 'Name', width: 220, sortable: false, editable: true },
+        {
+            field: 'processes',
+            headerName: '',
+            sortable: false,
+            renderCell: (params) => {
+                return (
+                    <React.Fragment>
+                        <Button onClick={() => openProcessesDialog(params.row)}>Processes</Button>
+                    </React.Fragment>
+                );
+            }
+        },
         {
             field: 'action',
             headerName: '',
@@ -41,7 +57,7 @@ export const CaseDefFormStages = ({ caseDef, setCaseDef }) => {
                     </React.Fragment>
                 );
             }
-        }
+        },
     ];
 
     const handleNewStage = () => {
@@ -67,6 +83,23 @@ export const CaseDefFormStages = ({ caseDef, setCaseDef }) => {
         return newRow;
     };
 
+    const openProcessesDialog = (stage) => {
+        setCurrentStage(stage);
+        setOpenProcessesList(true);
+    };
+
+    const closeProcessesDialog = () => {
+        setOpenProcessesList(false);
+        setCurrentStage(null);
+    };
+
+    const updateProcesses = (stageId, processes) => {
+        let newStages = [...caseDef.stages];
+        let stage = newStages.find(s => s.id === stageId);
+        stage.processesDefinitions = processes;
+        setCaseDef({ ...caseDef, stages: newStages });
+    };
+
     return (
         <div style={{ height: 650, width: '100%' }}>
             <Button id="basic-button" variant="contained" onClick={handleNewStage}>
@@ -87,6 +120,7 @@ export const CaseDefFormStages = ({ caseDef, setCaseDef }) => {
                             processRowUpdate={processRowUpdate}
                         />
                     </Box>
+                    {currentStage && <CaseDefStageProcesses open={openProcessesList} handleClose={closeProcessesDialog} stage={currentStage} updateProcesses={updateProcesses} />}
                 </MainCard>
             )}
         </div>

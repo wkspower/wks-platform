@@ -73,6 +73,13 @@ allow {
 }
 
 allow {
+    input.path = "process-definition"
+    input.method in ["POST", "OPTION", "HEAD"]
+	check_origin_request    
+    is_user_profile
+}
+
+allow {
     input.path = "queue"
     input.method in ["GET", "OPTION"]
 	check_origin_request    
