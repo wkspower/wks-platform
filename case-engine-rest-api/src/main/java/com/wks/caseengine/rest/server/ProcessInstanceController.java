@@ -34,7 +34,7 @@ public class ProcessInstanceController {
 
 	@Autowired
 	private ProcessInstanceService processInstanceService;
-
+	
 	@GetMapping
 	public List<ProcessInstance> find(@RequestParam(required = false) String businessKey) throws Exception {
 		return processInstanceService.find(Optional.empty(), Optional.ofNullable(businessKey), Optional.empty());

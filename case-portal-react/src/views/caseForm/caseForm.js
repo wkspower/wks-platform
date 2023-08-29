@@ -1,13 +1,21 @@
 import QuestionCircleOutlined from '@ant-design/icons/QuestionCircleOutlined';
 import { Form } from '@formio/react';
 import CloseIcon from '@mui/icons-material/Close';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import { Grid } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import Slide from '@mui/material/Slide';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
@@ -19,16 +27,17 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { CaseStatus } from 'common/caseStatus';
 import MainCard from 'components/MainCard';
+import { StorageService } from 'plugins/storage';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ProcessDefService } from 'services/ProcessDefService';
 import { Comments } from 'views/caseComment/Comments';
 import { CaseEmailsList } from 'views/caseEmail/caseEmailList';
 import { CaseService, FormService } from '../../services';
 import { tryParseJSONObject } from '../../utils/jsonStringCheck';
 import { TaskList } from '../taskList/taskList';
 import Documents from './Documents';
-import { StorageService } from 'plugins/storage';
 
 export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     const [caseDef, setCaseDef] = useState(null);
@@ -41,6 +50,12 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     const [stages, setStages] = useState([]);
     const { t } = useTranslation();
 
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const isMenuOpen = Boolean(anchorEl);
+
+    const [openProcessesDialog, setOpenProcessesDialog] = useState(false);
+    const [manualInitProcessDefs, setManualInitProcessDefs] = useState([]);
+
     const [isFollowing, setIsFollowing] = useState(false);
     const handleFollowClick = () => {
         setIsFollowing(!isFollowing);
@@ -49,6 +64,23 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     useEffect(() => {
         getCaseInfo(aCase);
     }, [open, aCase]);
+
+    useEffect(() => {
+        if (activeStage) {
+            const stage = caseDef.stages.find(o => o.name === activeStage);
+            const stageProcesses = stage ? stage.processesDefinitions : [];
+            const autoStartProcesses = stageProcesses ? stageProcesses.filter(o => o.autoStart === false) : undefined;
+            setManualInitProcessDefs(autoStartProcesses);
+        }
+    }, [activeStage])
+
+    const handleMenuOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
 
     const getCaseInfo = (aCase) => {
         CaseService.getCaseDefinitionsById(keycloak, aCase.caseDefinitionId)
@@ -112,6 +144,22 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
         CaseService.getCaseById(keycloak, aCase.businessKey).then((data) =>
             setActiveStage(data.stage)
         );
+    };
+
+    const handleOpenProcessesDialog = () => {
+        setOpenProcessesDialog(true);
+        handleMenuClose();
+    };
+
+    const handleCloseProcessesDialog = () => {
+        setOpenProcessesDialog(false);
+    };
+
+    const startProcess = (key) => {
+        ProcessDefService.start(keycloak, key, aCase.businessKey)
+
+        // Close the dialog
+        handleCloseProcessesDialog();
     };
 
     return (
@@ -204,6 +252,31 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                             >
                                 {isFollowing ? 'Unfollow' : 'Follow'}
                             </Button>
+
+                            {/* Case Actions Menu */}
+                            <IconButton
+                                edge="end"
+                                color="inherit"
+                                onClick={handleMenuOpen}
+                                aria-label="manual-actions"
+                            >
+                                <MoreVertIcon />
+                            </IconButton>
+                            <Menu
+                                anchorEl={anchorEl}
+                                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                                id="manual-actions-menu"
+                                keepMounted
+                                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                                open={isMenuOpen}
+                                onClose={handleMenuClose}
+                            >
+                                {manualInitProcessDefs && <MenuItem onClick={handleOpenProcessesDialog}>
+                                    {t('pages.caseform.actions.startProcess')}
+                                </MenuItem>
+                                }
+                            </Menu>
+
                         </Toolbar>
                     </AppBar>
 
@@ -312,6 +385,30 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                         <CaseEmailsList caseInstanceBusinessKey={aCase.businessKey} />
                     </TabPanel>
                 </Dialog>
+
+                {manualInitProcessDefs &&
+                    <Dialog onClose={handleCloseProcessesDialog} open={openProcessesDialog}>
+                        <DialogTitle sx={{ paddingBottom: 2 }}>{t('pages.caseform.manualProcesses.title')}</DialogTitle>
+                        <List>
+                            {manualInitProcessDefs.map((process, index) => (
+                                <React.Fragment key={process.definitionKey}>
+                                    <ListItem
+                                        button
+                                        onClick={() => startProcess(process.definitionKey)}
+                                        sx={{
+                                            '&:hover': {
+                                                backgroundColor: 'action.hover'
+                                            }
+                                        }}
+                                    >
+                                        <ListItemText primary={process.name || process.definitionKey} />
+                                    </ListItem>
+                                    {index !== manualInitProcessDefs.length - 1 && <Divider />}
+                                </React.Fragment>
+                            ))}
+                        </List>
+                    </Dialog>
+                }
             </div>
         )
     );

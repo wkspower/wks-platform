@@ -63,7 +63,8 @@ const defs = {
                 close: 'Close',
                 reopen: 'Re-open',
                 archive: 'Archive',
-                newTask: 'New Task'
+                newTask: 'New Task',
+                startProcess: 'Start Process'
             },
             tabs: {
                 details: 'Case Details',
@@ -71,6 +72,9 @@ const defs = {
                 comments: 'Comments',
                 documents: 'Documents',
                 emails: 'Emails'
+            },
+            manualProcesses: {
+                title: 'Choose a process to start'
             }
         },
         tasklist: {

@@ -11,6 +11,8 @@
  */
 package com.wks.caseengine.cases.definition;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,5 +31,7 @@ public class CaseStage {
 	private String id;
 	private int index;
 	private String name;
+
+	private List<CaseStageProcessDefinition> processesDefinitions;
 
 }
