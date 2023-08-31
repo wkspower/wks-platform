@@ -70,23 +70,21 @@
 
 	<modules>
 		<!-- Libraries -->
-		<module>case-engine</module>
-		<module>bpm-engine-interface</module>
-		<module>bpm-engine-client</module>
-		<module>bpm-engine-c7-client</module>
-		<module>bpm-engine-c8-client</module>
-		<module>api-security</module>
-		<module>rest-client</module>
-		<module>storage-api</module>
+		<module>libraries/case-engine</module>
+		<module>libraries/bpm-engine-interface</module>
+		<module>libraries/bpm-engine-client</module>
+		<module>libraries/bpm-engine-c7-client</module>
+		<module>libraries/bpm-engine-c8-client</module>
+		<module>libraries/api-security</module>
+		<module>libraries/rest-client</module>
+		<module>libraries/case-engine-rest-client</module>		
 
-		<!-- Workers -->
-		<module>demo-data-loader</module>
-		<module>bpm-engine-c7-external-service</module>
-
-		<!-- Rest APIs -->
-		<module>case-engine-rest-api</module>
-		<module>case-engine-rest-client</module>
-		<module>email-to-case</module>
+		<!-- Services -->
+		<module>services/case-engine-rest-api</module>
+		<module>services/bpm-engine-c7-external-service</module>
+		<module>services/storage-api</module>
+		<module>services/email-to-case</module>
+		<module>services/demo-data-loader</module>
 	</modules>
 
 	<build>

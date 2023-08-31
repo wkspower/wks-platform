@@ -100,7 +100,7 @@ services:
 
     case-engine-rest-api:
         build:
-            context: apps/java/case-engine-rest-api
+            context: apps/java/services/case-engine-rest-api
         ports:
             - 8081:8081
         links:
@@ -120,7 +120,7 @@ services:
 
     bpm-engine-c7-external-service:
         build:
-            context: apps/java/bpm-engine-c7-external-service
+            context: apps/java/services/bpm-engine-c7-external-service
         links:
             - mongodb
             - camunda
@@ -138,7 +138,7 @@ services:
 
     email-to-case:
         build:
-            context: apps/java/email-to-case
+            context: apps/java/services/email-to-case
         ports:
             - 8083:8083
         links:
@@ -160,7 +160,7 @@ services:
 
     storage-api:
         build:
-            context: apps/java/storage-api
+            context: apps/java/services/storage-api
         ports:
             - 8085:8085
         links:
@@ -186,7 +186,7 @@ services:
 
     demo-data-loader:
         build:
-            context: apps/java/demo-data-loader
+            context: apps/java/services/demo-data-loader
         environment:
             - CAMUNDA_URL=http://camunda:8080/engine-rest
             - MONGO_DATABASE=localhost
