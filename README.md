@@ -89,7 +89,7 @@ Additionally, the MongoDB database used by these applications is running on port
 Remember to ensure that you have Docker installed on your system before running the `docker-compose up` command.
 
 Find an architecture overview of WKS Platform below: 
-<img width="1507" alt="architecture-overview" src="https://github.com/wkspower/wks-platform/assets/30292227/3e24d9a2-88b3-4e08-8184-3bb0a4c58acb">
+<img width="1507" alt="architecture-overview" src="https://github.com/wkspower/wks-platform/assets/85225281/fcd0718d-ea2a-4d05-91fa-8bcbbbb1a88b">
 
 ## Screenshots
 
