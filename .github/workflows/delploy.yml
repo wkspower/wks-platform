@@ -49,11 +49,11 @@ jobs:
     - name: Build all for backend api
       run: mvn -B package --file pom.xml
 
-    - name: Install dependencies for case-portal-react
-      run: yarn --cwd case-portal-react install
+    - name: Install dependencies for case-portal
+      run: yarn --cwd case-portal install
 
-    - name: Build for case-portal-react
-      run: REACT_APP_KEYCLOAK_URL=${{ env.KEYCLOAK_URL }} REACT_APP_API_URL=${{ env.WKS_API_URL }} REACT_APP_EMAIL_URL=${{ env.WKS_EMAIL_API_URL }} REACT_APP_STORAGE_URL=${{ env.WKS_STORAGE_API_URL }} yarn --cwd case-portal-react build
+    - name: Build for case-portal
+      run: REACT_APP_KEYCLOAK_URL=${{ env.KEYCLOAK_URL }} REACT_APP_API_URL=${{ env.WKS_API_URL }} REACT_APP_EMAIL_URL=${{ env.WKS_EMAIL_API_URL }} REACT_APP_STORAGE_URL=${{ env.WKS_STORAGE_API_URL }} yarn --cwd case-portal build
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
@@ -70,14 +70,14 @@ jobs:
         push: true
         tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/storage-api:${{ env.BUILD_VERSION }}"
 
-    - name: Build and push Docker image for policy-decision-api
+    - name: Build and push Docker image for opa
       uses: docker/build-push-action@v2
       with:
-        context: ./policy-decision-api
+        context: ./opa
         platforms: linux/amd64,linux/arm64
-        file: policy-decision-api/Dockerfile
+        file: opa/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/policy-decision-api:${{ env.BUILD_VERSION }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/opa:${{ env.BUILD_VERSION }}"
 
     - name: Build and push Docker image for bpm-engine-c7-external-service
       uses: docker/build-push-action@v2
@@ -97,14 +97,14 @@ jobs:
         push: true
         tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ env.BUILD_VERSION }}"
 
-    - name: Build and push Docker image for case-engine-loader
+    - name: Build and push Docker image for demo-data-loader
       uses: docker/build-push-action@v2
       with:
-        context: ./case-engine-loader
+        context: ./demo-data-loader
         platforms: linux/amd64,linux/arm64
-        file: case-engine-loader/Dockerfile
+        file: demo-data-loader/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-loader:${{ env.BUILD_VERSION }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader:${{ env.BUILD_VERSION }}"
 
     - name: Build and push Docker image email-to-case
       uses: docker/build-push-action@v2
@@ -115,14 +115,14 @@ jobs:
         push: true
         tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case:${{ env.BUILD_VERSION }}"
 
-    - name: Build and push Docker image for case-portal-react
+    - name: Build and push Docker image for case-portal
       uses: docker/build-push-action@v2
       with:
-        context: ./case-portal-react
+        context: ./case-portal
         platforms: linux/amd64,linux/arm64
-        file: case-portal-react/deployments/Dockerfile
+        file: case-portal/deployments/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react:${{ env.BUILD_VERSION }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal:${{ env.BUILD_VERSION }}"
 
   deploy:
     runs-on: ubuntu-latest
@@ -155,16 +155,16 @@ jobs:
       run: |
         cd wks-gitops/apps
 
-        cd policy-decision-api/local
-        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/policy-decision-api=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/policy-decision-api:${{ env.BUILD_VERSION }}
+        cd opa/local
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/opa=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/opa:${{ env.BUILD_VERSION }}
         cd ../../
 
         cd case-engine-rest-api/local
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ env.BUILD_VERSION }}
         cd ../../
 
-        cd case-engine-loader/local
-        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-loader=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-loader:${{ env.BUILD_VERSION }}
+        cd demo-data-loader/local
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader:${{ env.BUILD_VERSION }}
         cd ../../
 
         cd bpm-engine-c7-external-service/local
@@ -176,7 +176,7 @@ jobs:
         cd ../../
 
         cd case-portal-client/local
-        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react:${{ env.BUILD_VERSION }}
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal:${{ env.BUILD_VERSION }}
         cd ../../
 
     - name: Update kubernetes resources with new tag to Staging Environment
@@ -187,16 +187,16 @@ jobs:
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/storage-api=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/storage-api:${{ env.BUILD_VERSION }}
         cd ../../
 
-        cd policy-decision-api/staging
-        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/policy-decision-api=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/policy-decision-api:${{ env.BUILD_VERSION }}
+        cd opa/staging
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/opa=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/opa:${{ env.BUILD_VERSION }}
         cd ../../
 
         cd case-engine-rest-api/staging
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ env.BUILD_VERSION }}
         cd ../../
 
-        cd case-engine-loader/staging
-        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-loader=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-loader:${{ env.BUILD_VERSION }}
+        cd demo-data-loader/staging
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader:${{ env.BUILD_VERSION }}
         cd ../../
 
         cd bpm-engine-c7-external-service/staging
@@ -208,7 +208,7 @@ jobs:
         cd ../../
 
         cd case-portal-client/staging
-        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-react:${{ env.BUILD_VERSION }}
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal:${{ env.BUILD_VERSION }}
         cd ../../        
 
     - name: New tag release for continuous delivery

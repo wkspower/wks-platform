@@ -8,9 +8,9 @@
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>case-engine-loader</artifactId>
-	<name>case-engine-loader</name>
-	<description>Data loader for case engine</description>
+	<artifactId>demo-data-loader</artifactId>
+	<name>demo-data-loader</name>
+	<description>Demo Data Loader</description>
 
 	<packaging>jar</packaging>
 

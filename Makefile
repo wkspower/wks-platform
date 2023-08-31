@@ -8,7 +8,7 @@ frontend:
 	make -j 1 case-portal
 
 case-portal:
-	@cd $(PWD)/case-portal-react && make
+	@cd $(PWD)/case-portal && make
 
 user-guide:
 	@cd $(PWD)/website && make

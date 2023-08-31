@@ -80,7 +80,7 @@
 		<module>storage-api</module>
 
 		<!-- Workers -->
-		<module>case-engine-loader</module>
+		<module>demo-data-loader</module>
 		<module>bpm-engine-c7-external-service</module>
 
 		<!-- Rest APIs -->
