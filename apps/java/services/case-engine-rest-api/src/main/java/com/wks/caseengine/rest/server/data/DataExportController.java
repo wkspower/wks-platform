@@ -11,6 +11,7 @@
  */
 package com.wks.caseengine.rest.server.data;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ import com.wks.caseengine.data.export.DataExportService;
 
 @RestController
 @RequestMapping("export")
+@Tag(name = "Export")
 public class DataExportController {
 
 	@Autowired

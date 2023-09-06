@@ -14,6 +14,7 @@ package com.wks.caseengine.rest.app;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -100,8 +101,8 @@ public class CaseControllerTest {
 	}
 
 	@Test
-	public void testUdpateComment() throws Exception {
-		this.mockMvc.perform(patch("/case/{businessKey}/comment/{commentId}", "1", "1")
+	public void testUpdateComment() throws Exception {
+		this.mockMvc.perform(put("/case/{businessKey}/comment/{commentId}", "1", "1")
 				.contentType(MediaType.APPLICATION_JSON).content("{}")).andExpect(status().isNoContent());
 	}
 
