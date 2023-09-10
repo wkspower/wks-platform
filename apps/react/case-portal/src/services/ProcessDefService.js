@@ -47,3 +47,19 @@ async function find(keycloak) {
     }
 }
 
+async function getBPMNXml(keycloak, processDefId) {
+    const headers = {
+        Authorization: `Bearer ${keycloak.token}`
+    };
+
+    var url = `${Config.CaseEngineUrl}/process-definition/${processDefId}/xml`;
+
+    try {
+        const resp = await fetch(url, { headers });
+        return json(keycloak, resp.text());
+    } catch (err) {
+        console.log(err);
+        return await Promise.reject(err);
+    }
+}
+
