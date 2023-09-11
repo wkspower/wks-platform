@@ -13,6 +13,7 @@ package com.wks.caseengine.rest.server;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +29,7 @@ import com.wks.caseengine.record.type.RecordTypeService;
 
 @RestController
 @RequestMapping("record-type")
+@Tag(name = "Record Type")
 public class RecordTypeController {
 
 	@Autowired

@@ -209,7 +209,7 @@ async function updateComment(keycloak, text, commentId, businessKey) {
 
     try {
         const resp = await fetch(url, {
-            method: 'PATCH',
+            method: 'PUT',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',

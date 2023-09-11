@@ -14,6 +14,7 @@ package com.wks.caseengine.rest.app;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -65,7 +66,7 @@ public class QueueControllerTest {
 
 	@Test
 	public void testUpdate() throws Exception {
-		this.mockMvc.perform(patch("/queue/{queueIdKey}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(put("/queue/{queueIdKey}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 

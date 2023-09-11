@@ -11,6 +11,7 @@
  */
 package com.wks.caseengine.rest.server;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,7 @@ import com.wks.bpm.engine.client.BpmEngineClientFacade;
 
 @RestController
 @RequestMapping("deployment")
+@Tag(name = "Deployment")
 public class DeploymentController {
 
 	// TODO replace this hard code

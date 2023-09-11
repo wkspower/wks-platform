@@ -106,10 +106,12 @@ async function getVariableById(keycloak, processInstanceId) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${Config.CaseEngineUrl}/variable/${processInstanceId}`;
+    const body = JSON.stringify({ processInstanceId });
+
+    var url = `${Config.CaseEngineUrl}/variable`;
 
     try {
-        const resp = await fetch(url, { headers });
+        const resp = await fetch(url, { headers, body });
         return json(keycloak, resp);
     } catch (err) {
         console.log(err);

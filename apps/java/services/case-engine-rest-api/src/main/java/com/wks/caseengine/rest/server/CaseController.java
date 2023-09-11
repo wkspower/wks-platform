@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.google.gson.GsonBuilder;
@@ -109,7 +110,7 @@ public class CaseController {
 		return ResponseEntity.noContent().build();
 	}
 
-	@PatchMapping(value = "/{businessKey}/comment/{commentId}")
+	@PutMapping(value = "/{businessKey}/comment/{commentId}")
 	public ResponseEntity<Void> udpateComment(@PathVariable final String businessKey, @PathVariable final String commentId,
 			@RequestBody final Comment comment) throws Exception {
 		caseInstanceService.updateComment(businessKey, commentId, comment.getBody());
