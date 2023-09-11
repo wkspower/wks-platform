@@ -9,6 +9,7 @@ import { ProcessDefService } from './ProcessDefService';
 import { RecordTypeService } from './RecordTypeService';
 import { FileService } from './FileService';
 import { DeploymentService } from './DeploymentService';
+import { VariableService } from './VariableService';
 
 export {
     NotificationService,
@@ -21,5 +22,6 @@ export {
     ProcessDefService,
     RecordTypeService,
     FileService,
-    DeploymentService
+    DeploymentService,
+    VariableService,
 };
