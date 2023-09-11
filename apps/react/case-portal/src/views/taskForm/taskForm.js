@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography';
 import { ProcessDiagram } from 'views/bpmnViewer/ProcessDiagram';
 import { Form } from '@formio/react';
 import { useTranslation } from 'react-i18next';
-import { FormService, TaskService } from 'services';
+import { FormService, TaskService, VariableService } from 'services';
 import { useSession } from '../../SessionStoreContext';
 import { StorageService } from 'plugins/storage';
 
@@ -43,7 +43,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
                     isValid: true
                 };
 
-                return FormService.getVariableById(keycloak, task.processInstanceId);
+                return VariableService.getByProcessInstanceId(keycloak, task.processInstanceId);
             })
             .then((data) => {
                 for (var key in data) {
