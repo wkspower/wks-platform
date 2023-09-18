@@ -6,6 +6,7 @@
 		<groupId>com.wks</groupId>
 		<artifactId>platform</artifactId>
 		<version>1.0-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>bpm-engine-interface</artifactId>
