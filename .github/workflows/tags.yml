@@ -53,9 +53,9 @@ jobs:
       run: yarn --cwd apps/react/case-portal install
 
     - name: Build for case-portal
-      run: |
-      export NODE_OPTIONS=--max_old_space_size=4096
-      REACT_APP_KEYCLOAK_URL=${{ env.KEYCLOAK_URL }} REACT_APP_API_URL=${{ env.WKS_API_URL }} REACT_APP_EMAIL_URL=${{ env.WKS_EMAIL_API_URL }} REACT_APP_STORAGE_URL=${{ env.WKS_STORAGE_API_URL }} yarn --cwd apps/react/case-portal build
+      env:
+          NODE_OPTIONS: "--max_old_space_size=4096"
+      run: REACT_APP_KEYCLOAK_URL=${{ env.KEYCLOAK_URL }} REACT_APP_API_URL=${{ env.WKS_API_URL }} REACT_APP_EMAIL_URL=${{ env.WKS_EMAIL_API_URL }} REACT_APP_STORAGE_URL=${{ env.WKS_STORAGE_API_URL }} yarn --cwd apps/react/case-portal build
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
@@ -66,9 +66,9 @@ jobs:
     - name: Build and push Docker image for storage-api
       uses: docker/build-push-action@v2
       with:
-        context: ./storage-api
+        context: ./apps/java/services/storage-api
         platforms: linux/amd64,linux/arm64
-        file: storage-api/Dockerfile
+        file: apps/java/services/storage-api/Dockerfile
         push: true
         tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/storage-api:${{ steps.extract_tag.outputs.tag }}"
 
@@ -84,44 +84,44 @@ jobs:
     - name: Build and push Docker image for bpm-engine-c7-external-service
       uses: docker/build-push-action@v2
       with:
-        context: ./bpm-engine-c7-external-service
+        context: ./apps/java/services/bpm-engine-c7-external-service
         platforms: linux/amd64,linux/arm64
-        file: bpm-engine-c7-external-service/Dockerfile
+        file: apps/java/services/bpm-engine-c7-external-service/Dockerfile
         push: true
         tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ steps.extract_tag.outputs.tag }}"
 
     - name: Build and push Docker image for case-engine-rest-api
       uses: docker/build-push-action@v2
       with:
-        context: ./case-engine-rest-api
+        context: ./apps/java/services/case-engine-rest-api
         platforms: linux/amd64,linux/arm64
-        file: case-engine-rest-api/Dockerfile
+        file: apps/java/services/case-engine-rest-api/Dockerfile
         push: true
         tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ steps.extract_tag.outputs.tag }}"
 
     - name: Build and push Docker image for demo-data-loader
       uses: docker/build-push-action@v2
       with:
-        context: ./demo-data-loader
+        context: ./apps/java/services/demo-data-loader
         platforms: linux/amd64,linux/arm64
-        file: demo-data-loader/Dockerfile
+        file: apps/java/services/demo-data-loader/Dockerfile
         push: true
         tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader:${{ steps.extract_tag.outputs.tag }}"
 
     - name: Build and push Docker image email-to-case
       uses: docker/build-push-action@v2
       with:
-        context: ./email-to-case
+        context: ./apps/java/services/email-to-case
         platforms: linux/amd64,linux/arm64
-        file: email-to-case/Dockerfile
+        file: apps/java/services/email-to-case/Dockerfile
         push: true
         tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case:${{ steps.extract_tag.outputs.tag }}"
 
     - name: Build and push Docker image for case-portal
       uses: docker/build-push-action@v2
       with:
-        context: ./case-portal
+        context: ./apps/react/case-portal
         platforms: linux/amd64,linux/arm64
-        file: case-portal/deployments/Dockerfile
+        file: apps/react/case-portal/deployments/Dockerfile
         push: true
         tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal:${{ steps.extract_tag.outputs.tag }}"
