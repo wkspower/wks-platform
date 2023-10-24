@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - '**'
+  workflow_dispatch:      
 
 env:
   REGISTRY: ghcr.io
@@ -51,11 +52,10 @@ jobs:
     - name: Install dependencies for case-portal
       run: yarn --cwd apps/react/case-portal install
 
-    - name: Set Node.js Heap Size
-      run: export NODE_OPTIONS="--max-old-space-size=4096"      
-
     - name: Build for case-portal
-      run: REACT_APP_KEYCLOAK_URL=${{ env.KEYCLOAK_URL }} REACT_APP_API_URL=${{ env.WKS_API_URL }} REACT_APP_EMAIL_URL=${{ env.WKS_EMAIL_API_URL }} REACT_APP_STORAGE_URL=${{ env.WKS_STORAGE_API_URL }} yarn --cwd apps/react/case-portal build
+      run: |
+      export NODE_OPTIONS=--max_old_space_size=4096
+      REACT_APP_KEYCLOAK_URL=${{ env.KEYCLOAK_URL }} REACT_APP_API_URL=${{ env.WKS_API_URL }} REACT_APP_EMAIL_URL=${{ env.WKS_EMAIL_API_URL }} REACT_APP_STORAGE_URL=${{ env.WKS_STORAGE_API_URL }} yarn --cwd apps/react/case-portal build
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
