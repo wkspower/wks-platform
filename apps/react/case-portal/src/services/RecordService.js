@@ -28,7 +28,7 @@ async function getRecordById(keycloak, id) {
 }
 
 async function getAllRecordTypes(keycloak) {
-    const url = `${Config.CaseEngineUrl}/record-type/`;
+    const url = `${Config.CaseEngineUrl}/record-type`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`

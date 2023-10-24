@@ -6,7 +6,7 @@ export const DeploymentService = {
 };
 
 async function deploy(keycloak, file) {
-    const url = `${Config.CaseEngineUrl}/deployment/`;
+    const url = `${Config.CaseEngineUrl}/deployment`;
 
     try {
         const resp = await fetch(url, {

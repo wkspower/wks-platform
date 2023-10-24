@@ -36,7 +36,7 @@ async function find(keycloak) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${Config.CaseEngineUrl}/process-definition/`;
+    var url = `${Config.CaseEngineUrl}/process-definition`;
 
     try {
         const resp = await fetch(url, { headers });

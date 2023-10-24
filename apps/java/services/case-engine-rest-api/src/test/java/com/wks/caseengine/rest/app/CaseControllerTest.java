@@ -58,7 +58,7 @@ public class CaseControllerTest {
 
 	@Test
 	public void testSave() throws Exception {
-		this.mockMvc.perform(post("/case/").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/case").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
@@ -82,7 +82,7 @@ public class CaseControllerTest {
 	public void testFind() throws Exception {
 		when(caseInstanceService.find(ArgumentMatchers.any())).thenReturn(PageResult.EMPTY);
 
-		this.mockMvc.perform(get("/case/")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/case")).andExpect(status().isOk());
 	}
 
 	@Test

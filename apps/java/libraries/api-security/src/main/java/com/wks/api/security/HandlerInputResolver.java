@@ -13,9 +13,9 @@ package com.wks.api.security;
 
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.security.core.Authentication;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface HandlerInputResolver {
 

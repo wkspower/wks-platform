@@ -50,7 +50,7 @@ public class DataExportControllerTest {
 
 	@Test
 	public void testExport() throws Exception {
-		this.mockMvc.perform(get("/export/")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/export")).andExpect(status().isOk());
 	}
 
 }

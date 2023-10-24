@@ -116,7 +116,7 @@ async function filterTasks(keycloak, businessKey) {
         query = query + (businessKey ? 'businessKey=' + businessKey : '');
     }
 
-    const url = `${Config.CaseEngineUrl}/task/?${query}`;
+    const url = `${Config.CaseEngineUrl}/task?${query}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -136,7 +136,7 @@ async function filterProcessInstances(keycloak, businessKey) {
         businessKey = '';
     }
 
-    const url = `${Config.CaseEngineUrl}/process-instance/?businessKey=${businessKey}`;
+    const url = `${Config.CaseEngineUrl}/process-instance?businessKey=${businessKey}`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`

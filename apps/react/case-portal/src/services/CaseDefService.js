@@ -9,7 +9,7 @@ export const CaseDefService = {
 };
 
 async function create(keycloak, body) {
-    const url = `${Config.CaseEngineUrl}/case-definition/`;
+    const url = `${Config.CaseEngineUrl}/case-definition`;
 
     try {
         const resp = await fetch(url, {
@@ -76,7 +76,7 @@ async function getAll(keycloak) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${Config.CaseEngineUrl}/case-definition/`;
+    var url = `${Config.CaseEngineUrl}/case-definition`;
 
     try {
         const resp = await fetch(url, { headers });

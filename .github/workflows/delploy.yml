@@ -47,7 +47,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build all for backend api
-      run: mvn -B package --file pom.xml
+      run: mvn -B package --file apps/java/pom.xml
 
     - name: Install dependencies for case-portal
       run: yarn --cwd case-portal install

@@ -11,12 +11,13 @@
  */
 package com.wks.caseengine.cases.instance.service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.http.client.utils.DateUtils;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -64,8 +65,9 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	@Override
 	public CaseInstance create(final CaseInstance caseInstance) throws Exception {
 
-		caseInstance.getAttributes().add(new CaseAttribute("createdAt", DateUtils.formatDate(new Date(), "dd/MM/yyyy"),
-				CaseAttributeType.STRING.getValue()));
+		caseInstance.getAttributes()
+				.add(new CaseAttribute("createdAt", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+						CaseAttributeType.STRING.getValue()));
 
 		CaseDefinition caseDefinition = caseDefRepository.get(caseInstance.getCaseDefinitionId());
 

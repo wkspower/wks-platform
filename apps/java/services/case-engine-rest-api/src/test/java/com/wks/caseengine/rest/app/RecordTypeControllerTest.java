@@ -54,7 +54,7 @@ public class RecordTypeControllerTest {
 
 	@Test
 	public void testSave() throws Exception {
-		this.mockMvc.perform(post("/record-type/").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/record-type").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
@@ -76,7 +76,7 @@ public class RecordTypeControllerTest {
 
 	@Test
 	public void testFind() throws Exception {
-		this.mockMvc.perform(get("/record-type/")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/record-type")).andExpect(status().isOk());
 	}
 
 }

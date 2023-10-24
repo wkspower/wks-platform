@@ -50,7 +50,7 @@ public class HealthCheckControllerTest {
 
 	@Test
 	public void testCheck() throws Exception {
-		this.mockMvc.perform(get("/healthCheck/")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/healthCheck")).andExpect(status().isOk());
 	}
 
 }

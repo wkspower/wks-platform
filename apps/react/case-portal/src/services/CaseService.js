@@ -25,7 +25,7 @@ async function getAllByStatus(keycloak, status, limit) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${Config.CaseEngineUrl}/case/?status=${status}&limit=${limit}`;
+    var url = `${Config.CaseEngineUrl}/case?status=${status}&limit=${limit}`;
 
     try {
         const resp = await fetch(url, { headers });
@@ -38,7 +38,7 @@ async function getAllByStatus(keycloak, status, limit) {
 }
 
 async function getCaseDefinitions(keycloak) {
-    const url = `${Config.CaseEngineUrl}/case-definition/?deployed=true`;
+    const url = `${Config.CaseEngineUrl}/case-definition?deployed=true`;
 
     const headers = {
         Authorization: `Bearer ${keycloak.token}`
@@ -86,7 +86,7 @@ async function getCaseById(keycloak, id) {
 }
 
 async function filterCase(keycloak, caseDefId, status, cursor) {
-    let url = `${Config.CaseEngineUrl}/case/?`;
+    let url = `${Config.CaseEngineUrl}/case?`;
     url = url + (status ? `status=${status}` : '');
     url = url + (caseDefId ? `&caseDefinitionId=${caseDefId}` : '');
     url = url + `&before=${cursor.before || ''}`;
@@ -129,7 +129,7 @@ async function patch(keycloak, id, body) {
 }
 
 async function createCase(keycloak, body) {
-    const url = `${Config.CaseEngineUrl}/case/`;
+    const url = `${Config.CaseEngineUrl}/case`;
 
     try {
         const resp = await fetch(url, {

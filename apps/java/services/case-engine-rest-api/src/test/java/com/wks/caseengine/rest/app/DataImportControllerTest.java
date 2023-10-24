@@ -51,7 +51,7 @@ public class DataImportControllerTest {
 
 	@Test
 	public void testImport() throws Exception {
-		this.mockMvc.perform(post("/import/").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/import").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 
 	}

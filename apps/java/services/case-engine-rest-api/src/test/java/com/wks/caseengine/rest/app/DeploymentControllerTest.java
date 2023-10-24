@@ -51,7 +51,7 @@ public class DeploymentControllerTest {
 
 	@Test
 	public void testGet() throws Exception {
-		this.mockMvc.perform(post("/deployment/").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/deployment").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
