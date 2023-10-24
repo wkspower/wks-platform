@@ -54,7 +54,7 @@ public class FormControllerTest {
 
 	@Test
 	public void testSave() throws Exception {
-		this.mockMvc.perform(post("/form/").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/form").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
@@ -76,7 +76,7 @@ public class FormControllerTest {
 
 	@Test
 	public void testFind() throws Exception {
-		this.mockMvc.perform(get("/form/")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/form")).andExpect(status().isOk());
 	}
 
 }

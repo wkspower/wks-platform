@@ -17,15 +17,15 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.support.MultipartResolutionDelegate;
 
 import com.wks.api.security.HandlerInputResolver;
 import com.wks.api.security.utils.HttpUtils;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 
 public final class MailServerInputRequestResolver implements HandlerInputResolver {
 
@@ -71,7 +71,7 @@ public final class MailServerInputRequestResolver implements HandlerInputResolve
 			Map<String, String> parameters = new HashMap<>();
 
 			if (MultipartResolutionDelegate.isMultipartRequest(request)) {
-				Collection<javax.servlet.http.Part> parts = request.getParts();
+				Collection<Part> parts = request.getParts();
 				for (Part part : parts) {
 					String value = request.getParameter(part.getName());
 					parameters.put(part.getName(), value);

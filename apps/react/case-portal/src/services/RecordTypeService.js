@@ -9,7 +9,7 @@ export const RecordTypeService = {
 };
 
 async function getAll(keycloak) {
-    const url = `${Config.CaseEngineUrl}/record-type/`;
+    const url = `${Config.CaseEngineUrl}/record-type`;
 
     try {
         const resp = await fetch(url, {
@@ -27,7 +27,7 @@ async function getAll(keycloak) {
 }
 
 async function create(keycloak, data) {
-    const url = `${Config.CaseEngineUrl}/record-type/`;
+    const url = `${Config.CaseEngineUrl}/record-type`;
 
     try {
         const resp = await fetch(url, {

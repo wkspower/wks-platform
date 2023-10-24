@@ -11,7 +11,6 @@
  */
 package com.wks.caseengine.rest.server;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.bpm.engine.client.BpmEngineClientFacade;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("deployment")
@@ -31,7 +32,7 @@ public class DeploymentController {
 	@Autowired
 	private BpmEngineClientFacade processEngineClient;
 
-	@PostMapping("/")
+	@PostMapping
 	public void deploy(@RequestBody String file) throws Exception {
 		processEngineClient.deploy(FILE_NAME_BPMN, new String(file.getBytes()));
 	}

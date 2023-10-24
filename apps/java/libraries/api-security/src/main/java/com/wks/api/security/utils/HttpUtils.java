@@ -14,7 +14,7 @@ package com.wks.api.security.utils;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public final class HttpUtils {
 

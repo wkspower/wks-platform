@@ -11,7 +11,7 @@ export const FormService = {
 };
 
 async function create(keycloak, body) {
-    const url = `${Config.CaseEngineUrl}/form/`;
+    const url = `${Config.CaseEngineUrl}/form`;
 
     try {
         const resp = await fetch(url, {
@@ -74,7 +74,7 @@ async function getAll(keycloak) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${Config.CaseEngineUrl}/form/`;
+    var url = `${Config.CaseEngineUrl}/form`;
 
     try {
         const resp = await fetch(url, { headers });

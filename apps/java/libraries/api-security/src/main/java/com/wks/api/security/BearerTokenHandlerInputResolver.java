@@ -16,12 +16,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import com.wks.api.security.utils.HttpUtils;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public final class BearerTokenHandlerInputResolver implements HandlerInputResolver {
 

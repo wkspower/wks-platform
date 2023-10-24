@@ -10,7 +10,7 @@ export const QueueService = {
 };
 
 async function save(keycloak, body) {
-    const url = `${Config.CaseEngineUrl}/queue/`;
+    const url = `${Config.CaseEngineUrl}/queue`;
 
     try {
         const resp = await fetch(url, {
@@ -73,7 +73,7 @@ async function find(keycloak) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${Config.CaseEngineUrl}/queue/`;
+    var url = `${Config.CaseEngineUrl}/queue`;
 
     try {
         const resp = await fetch(url, { headers });

@@ -51,7 +51,7 @@ public class MessageControllerTest {
 
 	@Test
 	public void testSave() throws Exception {
-		this.mockMvc.perform(post("/message/", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/message", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 

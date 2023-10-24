@@ -54,7 +54,7 @@ public class CaseDefinitionControllerTest {
 
 	@Test
 	public void testSave() throws Exception {
-		this.mockMvc.perform(post("/case-definition/").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/case-definition").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
@@ -77,7 +77,7 @@ public class CaseDefinitionControllerTest {
 
 	@Test
 	public void testFind() throws Exception {
-		this.mockMvc.perform(get("/case-definition/")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/case-definition")).andExpect(status().isOk());
 	}
 
 }

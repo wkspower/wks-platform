@@ -55,7 +55,7 @@ public class QueueControllerTest {
 
 	@Test
 	public void testSave() throws Exception {
-		this.mockMvc.perform(post("/queue/").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/queue").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
@@ -77,7 +77,7 @@ public class QueueControllerTest {
 
 	@Test
 	public void testFind() throws Exception {
-		this.mockMvc.perform(get("/queue/")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/queue")).andExpect(status().isOk());
 	}
 
 }

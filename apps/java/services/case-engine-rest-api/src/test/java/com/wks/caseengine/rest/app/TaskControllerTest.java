@@ -52,7 +52,7 @@ public class TaskControllerTest {
 
 	@Test
 	public void testFind() throws Exception {
-		this.mockMvc.perform(get("/task/")).andExpect(status().isOk());
+		this.mockMvc.perform(get("/task")).andExpect(status().isOk());
 	}
 
 	@Test
