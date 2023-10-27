@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 public final class SecurityContextTenantHolderThreadLocallImpl implements SecurityContextTenantHolder {
 
 	private ThreadLocal<String> tenantId = new ThreadLocal<>();
+	private ThreadLocal<String> userId = new ThreadLocal<>();
 
 	@Override
 	public Optional<String> getTenantId() {
@@ -31,8 +32,19 @@ public final class SecurityContextTenantHolderThreadLocallImpl implements Securi
 	}
 
 	@Override
+	public Optional<String> getUserId() {
+		return Optional.of(userId.get());
+	}
+
+	@Override
+	public void setUserId(String userId) {
+		this.userId.set(userId);
+	}
+
+	@Override
 	public void clear() {
 		tenantId.remove();
+		userId.remove();
 	}
 
 }

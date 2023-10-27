@@ -15,7 +15,8 @@ public class CommandExecutorImpl implements CommandExecutor {
 	public <T> T execute(final Command<T> command) {
 		T t = command.execute(commandContext);
 		
-		log.debug("Command {} executed", command.getClass().getSimpleName());
+		log.debug("Command {} executed by user {}", command.getClass().getSimpleName(),
+				commandContext.getSecurityContextTenantHolder().getUserId().get());
 		
 		return t;
 	}

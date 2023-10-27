@@ -61,8 +61,16 @@ public class InjectorTenantHandlerInterceptor implements HandlerInterceptor {
 		if (tenantId == null || tenantId.isBlank()) {
 			log.warn("Could't find tenantId by subdomain, it was expected to be filled but it is empty {}", tenantId);
 		}
+		
+		String userId = (String) params.get("sub");
+		if (userId == null || userId.isBlank()) {
+			log.error("Could't find userId by subdomain, it was expected to be filled but it is empty {}",
+					userId);
+		}
+
 
 		tenantHolder.setTenantId(tenantId);
+		tenantHolder.setUserId(userId);
 	}
 
 }
