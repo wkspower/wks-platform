@@ -9,14 +9,23 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.command;
+package com.wks.caseengine.cases.definition.command;
+
+import java.util.Optional;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author victor.franca
  *
  */
-public interface CommandExecutor {
-
-	<T> T execute(final Command<T> command);
+@Getter
+@Setter
+@Builder
+public class FindCaseDefinitionFilter {
+	
+	private Optional<Boolean> deployed;
 
 }

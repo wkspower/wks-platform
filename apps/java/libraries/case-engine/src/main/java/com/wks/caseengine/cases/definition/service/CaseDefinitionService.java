@@ -19,8 +19,6 @@ import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 
 public interface CaseDefinitionService {
 
-	List<CaseDefinition> find() throws Exception;
-
 	List<CaseDefinition> find(final Optional<Boolean> deployed) throws Exception;
 
 	CaseDefinition get(final String caseDefId) throws Exception;

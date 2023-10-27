@@ -45,7 +45,7 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	}
 
 	@Override
-	public List<CaseDefinition> find(final Optional<Boolean> deployed) throws Exception {
+	public List<CaseDefinition> find(final Optional<Boolean> deployed) {
 
 		if (deployed.isEmpty()) {
 			return find();

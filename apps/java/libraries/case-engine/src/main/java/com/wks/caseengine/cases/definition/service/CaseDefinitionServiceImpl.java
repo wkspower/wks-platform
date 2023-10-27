@@ -18,10 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.command.CreateCaseDefinitionCmd;
+import com.wks.caseengine.cases.definition.command.FindCaseDefinitionCmd;
+import com.wks.caseengine.cases.definition.command.FindCaseDefinitionFilter;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.command.CommandExecutor;
-import com.wks.caseengine.command.CreateCaseDefinitionCmd;
 
 @Component
 public class CaseDefinitionServiceImpl implements CaseDefinitionService {
@@ -33,13 +35,10 @@ public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 	private CaseDefinitionRepository repository;
 
 	@Override
-	public List<CaseDefinition> find() throws Exception {
-		return repository.find();
-	}
-
-	@Override
 	public List<CaseDefinition> find(final Optional<Boolean> deployed) throws Exception {
-		return repository.find(deployed);
+		return commandExecutor
+				.execute(new FindCaseDefinitionCmd(
+						Optional.of(FindCaseDefinitionFilter.builder().deployed(deployed).build())));
 	}
 
 	@Override

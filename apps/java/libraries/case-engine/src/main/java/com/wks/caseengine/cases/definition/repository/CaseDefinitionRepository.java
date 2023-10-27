@@ -19,6 +19,6 @@ import com.wks.caseengine.repository.Repository;
 
 public interface CaseDefinitionRepository extends Repository<CaseDefinition> {
 
-	List<CaseDefinition> find(final Optional<Boolean> deployed) throws Exception;
+	List<CaseDefinition> find(final Optional<Boolean> deployed);
 
 }
