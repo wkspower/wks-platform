@@ -13,7 +13,9 @@ package com.wks.caseengine.cases.instance.service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +24,10 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.wks.caseengine.cases.businesskey.GenericBusinessKeyGenerator;
 import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
+import com.wks.caseengine.cases.definition.CaseStage;
 import com.wks.caseengine.cases.instance.CaseAttribute;
 import com.wks.caseengine.cases.instance.CaseAttributeType;
 import com.wks.caseengine.cases.instance.CaseDocument;
@@ -39,15 +44,15 @@ import com.wks.caseengine.repository.Repository;
 
 @Component
 public class CaseInstanceServiceImpl implements CaseInstanceService {
+	
+	@Autowired
+	private GenericBusinessKeyGenerator businessKeyCreator;
 
 	@Autowired
 	private CaseInstanceRepository repository;
 
 	@Autowired
 	private Repository<CaseDefinition> caseDefRepository;
-
-	@Autowired
-	private CaseInstanceCreateService caseInstanceCreateService;
 
 	@Autowired
 	private ProcessInstanceService processInstanceService;
@@ -71,7 +76,25 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 		CaseDefinition caseDefinition = caseDefRepository.get(caseInstance.getCaseDefinitionId());
 
-		CaseInstance newCaseInstance = caseInstanceCreateService.create(caseInstance);
+		if (caseDefinition == null) {
+			throw new CaseDefinitionNotFoundException();
+		}
+
+		String businessKey = null;
+		if (caseInstance.getBusinessKey() == null) {
+			businessKey = businessKeyCreator.generate();
+		} else {
+			businessKey = caseInstance.getBusinessKey();
+		}
+
+		CaseInstance newCaseInstance = CaseInstance.builder().businessKey(businessKey)
+				.stage(caseDefinition.getStages().stream().sorted(Comparator.comparing(CaseStage::getIndex)).findFirst()
+						.get().getName())
+				.attributes(caseInstance.getAttributes()).caseDefinitionId(caseDefinition.getId())
+				.caseOwner(caseInstance.getCaseOwner()).caseOwnerName(caseInstance.getCaseOwnerName())
+				.build();
+
+		repository.save(newCaseInstance);
 
 		processInstanceService.create(caseDefinition.getStagesLifecycleProcessKey(), newCaseInstance.getBusinessKey(),
 				newCaseInstance.getAttributes());
@@ -84,7 +107,17 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 		CaseDefinition caseDefinition = caseDefRepository.get(caseDefinitionId);
 
-		CaseInstance newCaseInstance = caseInstanceCreateService.create(caseDefinition);
+		if (caseDefinition == null) {
+			throw new CaseDefinitionNotFoundException();
+		}
+
+		String businessKey = businessKeyCreator.generate();
+		CaseInstance newCaseInstance = CaseInstance.builder().businessKey(businessKey)
+				.stage(caseDefinition.getStages().stream().sorted(Comparator.comparing(CaseStage::getIndex)).findFirst()
+						.get().getName())
+				.attributes(new ArrayList<>()).caseDefinitionId(caseDefinition.getId()).build();
+
+		repository.save(newCaseInstance);
 
 		processInstanceService.create(caseDefinition.getStagesLifecycleProcessKey(), newCaseInstance.getBusinessKey(),
 				newCaseInstance.getAttributes());
@@ -114,7 +147,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 
 	// TODO should not allow to delete. Close or archive instead
-	// Should ensure only one case is deleted - BusinessKey should be UNIQUE
+	// TODO Should ensure only one case is deleted - BusinessKey should be UNIQUE
 	@Override
 	public void delete(final String businessKey) throws Exception {
 		List<CaseInstance> caseInstanceList = repository.find().stream()
@@ -197,10 +230,6 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 	public void setRepository(CaseInstanceRepository repository) {
 		this.repository = repository;
-	}
-
-	public void setCaseInstanceCreateService(CaseInstanceCreateService caseInstanceCreateService) {
-		this.caseInstanceCreateService = caseInstanceCreateService;
 	}
 
 }
