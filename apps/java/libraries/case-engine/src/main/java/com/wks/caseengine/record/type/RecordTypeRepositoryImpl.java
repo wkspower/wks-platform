@@ -36,32 +36,32 @@ public class RecordTypeRepositoryImpl implements RecordTypeRepository {
 	private GsonBuilder gsonBuilder;
 
 	@Override
-	public RecordType get(final String id) throws Exception {
+	public RecordType get(final String id) {
 		Bson filter = Filters.eq("id", id);
 		Gson gson = gsonBuilder.create();
 		return gson.fromJson(getCollection().find(filter).first().getJson(), RecordType.class);
 	}
 
 	@Override
-	public void save(final RecordType recordType) throws Exception {
+	public void save(final RecordType recordType) {
 		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(recordType))));
 
 	}
 
 	@Override
-	public List<RecordType> find() throws Exception {
+	public List<RecordType> find() {
 		Gson gson = gsonBuilder.create();
 		return getCollection().find().map(o -> gson.fromJson(o.getJson(), RecordType.class)).into(new ArrayList<>());
 	}
 
 	@Override
-	public void delete(final String id) throws Exception {
+	public void delete(final String id) {
 		Bson filter = Filters.eq("id", id);
 		getCollection().deleteMany(filter);
 	}
 
 	@Override
-	public void update(final String id, final RecordType recordType) throws Exception {
+	public void update(final String id, final RecordType recordType) {
 		Bson filter = Filters.eq("id", id);
 
 		Bson update = Updates.set("fields", (new JsonObject(gsonBuilder.create().toJson(recordType.getFields()))));

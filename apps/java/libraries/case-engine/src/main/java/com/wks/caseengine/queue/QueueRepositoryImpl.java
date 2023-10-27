@@ -36,25 +36,25 @@ public class QueueRepositoryImpl implements QueueRepository {
 	private GsonBuilder gsonBuilder;
 
 	@Override
-	public List<Queue> find() throws Exception {
+	public List<Queue> find() {
 		Gson gson = gsonBuilder.create();
 		return getCollection().find().map(o -> gson.fromJson(o.getJson(), Queue.class)).into(new ArrayList<>());
 	}
 
 	@Override
-	public Queue get(String id) throws Exception {
+	public Queue get(String id) {
 		Bson filter = Filters.eq("id", id);
 		Gson gson = gsonBuilder.create();
 		return gson.fromJson(getCollection().find(filter).first().getJson(), Queue.class);
 	}
 
 	@Override
-	public void save(Queue queue) throws Exception {
+	public void save(Queue queue) {
 		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(queue))));
 	}
 
 	@Override
-	public void update(String id, Queue queue) throws Exception {
+	public void update(String id, Queue queue) {
 		Bson filter = Filters.eq("id", id);
 
 		Bson update = Updates.combine(Updates.set("name", queue.getName()),
@@ -64,7 +64,7 @@ public class QueueRepositoryImpl implements QueueRepository {
 	}
 
 	@Override
-	public void delete(String id) throws Exception {
+	public void delete(String id) {
 		Bson filter = Filters.eq("id", id);
 		getCollection().deleteMany(filter);
 	}
