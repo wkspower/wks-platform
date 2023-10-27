@@ -11,7 +11,9 @@
  */
 package com.wks.caseengine.cases.definition.service;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +29,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
+import com.wks.caseengine.cases.definition.command.CreateCaseDefinitionCmd;
 import com.wks.caseengine.cases.definition.command.FindCaseDefinitionCmd;
+import com.wks.caseengine.cases.definition.command.GetCaseDefinitionCmd;
+import com.wks.caseengine.cases.definition.command.UpdateCaseDefinitionCmd;
 import com.wks.caseengine.command.CommandExecutor;
 
 /**
@@ -58,66 +64,80 @@ public class CaseDefinitionServiceImplTest {
 	}
 
 	@Test
-	void shouldReturnCaseDefinitionWhenFind() throws Exception {
-
-		// Given
-		CaseDefinition existingCaseDefinition = new CaseDefinition();
-
-		when(commandExecutor.execute(new FindCaseDefinitionCmd(Mockito.any()))).thenReturn(Arrays.<CaseDefinition>asList(existingCaseDefinition));
-
-		// When
-		List<CaseDefinition> result = service.find(Optional.empty());
-
-		// Then
-		assertEquals(Arrays.<CaseDefinition>asList(existingCaseDefinition), result);
-		verify(commandExecutor).execute(Mockito.any());
-	}
-
-	void shouldReturnCaseDefinitionWhenFindDeployed() throws Exception {
-
-		// Given
-		CaseDefinition existingCaseDefinition = new CaseDefinition();
-
-		when(commandExecutor.execute(new FindCaseDefinitionCmd(Mockito.any()))).thenReturn(Arrays.<CaseDefinition>asList(existingCaseDefinition));
-
-		// When
-		List<CaseDefinition> result = service.find(Optional.of(true));
-
-		// Then
-		assertEquals(Arrays.<CaseDefinition>asList(existingCaseDefinition), result);
-		verify(commandExecutor).execute(Mockito.any());
-	}
-	
-	@Test
-	void shouldReturnCaseDefinitionWhenFindNotDeployed() throws Exception {
-
-		// Given
-		CaseDefinition existingCaseDefinition = new CaseDefinition();
-
-		when(commandExecutor.execute(new FindCaseDefinitionCmd(Mockito.any()))).thenReturn(Arrays.<CaseDefinition>asList(existingCaseDefinition));
-
-		// When
-		List<CaseDefinition> result = service.find(Optional.of(false));
-
-		// Then
-		assertEquals(Arrays.<CaseDefinition>asList(existingCaseDefinition), result);
-		verify(commandExecutor).execute(Mockito.any());
-	}
-	
-	@Test
 	void shouldReturnCaseDefinitionWhenGet() throws Exception {
 
-//		// Given
-//		CaseDefinition existingCaseDefinition = new CaseDefinition();
-//		existingCaseDefinition.setId("someID");
-//
-//		when(commandExecutor.execute(new GetCaseDefinitionCmd(Mockito.any()))).thenReturn(Arrays.<CaseDefinition>asList(existingCaseDefinition));
-//
-//		// When
-//		List<CaseDefinition> result = service.get(Optional.of(false));
-//
-//		// Then
-//		assertEquals(Arrays.<CaseDefinition>asList(existingCaseDefinition), result);
-//		verify(commandExecutor).execute(Mockito.any());
+		// Given
+		CaseDefinition existingCaseDefinition = new CaseDefinition();
+		existingCaseDefinition.setId("someID");
+
+		when(commandExecutor.execute(new GetCaseDefinitionCmd(Mockito.any()))).thenReturn(existingCaseDefinition);
+
+		// When
+		CaseDefinition result = service.get("someId");
+
+		// Then
+		assertEquals(existingCaseDefinition, result);
+		verify(commandExecutor).execute(Mockito.any());
 	}
+
+	@Test
+	void shouldCreateCaseDefinition() {
+		// Given
+		CaseDefinition caseDefinition = new CaseDefinition();
+		caseDefinition.setId("someID");
+
+		when(commandExecutor.execute(new CreateCaseDefinitionCmd(Mockito.any()))).thenReturn(caseDefinition);
+
+		// When
+		CaseDefinition result = service.create(caseDefinition);
+
+		// Then
+		assertEquals(caseDefinition, result);
+		verify(commandExecutor).execute(Mockito.any());
+
+	}
+
+	@Test
+	void shouldThrowExceptionWhenCreatingCaseDefinitionWithNullOrEmptyId() {
+		// Given
+		CaseDefinition caseDefinition = new CaseDefinition();
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			service.create(caseDefinition);
+		});
+	}
+
+	@Test
+	void shouldUpdateCaseDefinition() {
+		// Given
+		CaseDefinition caseDefinition = new CaseDefinition();
+		caseDefinition.setId("someID");
+		caseDefinition.setName("someCaseName");
+
+		when(commandExecutor.execute(new UpdateCaseDefinitionCmd("someID", Mockito.any()))).thenReturn(caseDefinition);
+
+		// When
+		CaseDefinition result = service.update("someID", caseDefinition);
+
+		// Then
+		assertEquals(caseDefinition, result);
+	}
+
+	@Test
+	void shouldDeleteCaseDefinition() {
+		// Given
+		CaseDefinition caseDefinition = new CaseDefinition();
+		caseDefinition.setId("someID");
+
+		// When
+		try {
+			service.delete("someID");
+		} catch (CaseDefinitionNotFoundException e) {
+			fail("Unexpected CaseDefinitionNotFoundException.");
+		}
+
+		// Then
+		verify(commandExecutor).execute(Mockito.any());
+	}
+
 }

@@ -26,12 +26,12 @@ public class FindCaseDefinitionCmd implements Command<List<CaseDefinition>> {
 
 	private Optional<FindCaseDefinitionFilter> caseDefinintionFilter;
 
-	public FindCaseDefinitionCmd(Optional<FindCaseDefinitionFilter> filter) {
+	public FindCaseDefinitionCmd(final Optional<FindCaseDefinitionFilter> filter) {
 		this.caseDefinintionFilter = filter;
 	}
 
 	@Override
-	public List<CaseDefinition> execute(CommandContext commandContext) {
+	public List<CaseDefinition> execute(final CommandContext commandContext) {
 		if (caseDefinintionFilter.isEmpty()) {
 			return commandContext.getCaseDefRepository().find();
 		} else {
