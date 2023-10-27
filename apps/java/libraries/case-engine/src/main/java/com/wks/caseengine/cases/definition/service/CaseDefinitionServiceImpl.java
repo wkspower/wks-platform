@@ -20,9 +20,14 @@ import org.springframework.stereotype.Component;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
+import com.wks.caseengine.command.CommandExecutor;
+import com.wks.caseengine.command.CreateCaseDefinitionCmd;
 
 @Component
 public class CaseDefinitionServiceImpl implements CaseDefinitionService {
+
+	@Autowired
+	private CommandExecutor commandExecutor;
 
 	@Autowired
 	private CaseDefinitionRepository repository;
@@ -48,8 +53,8 @@ public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 			// TODO error handling
 			throw new Exception("No Case Definition ID provided");
 		}
-		repository.save(caseDefinition);
-		return caseDefinition;
+
+		return commandExecutor.execute(new CreateCaseDefinitionCmd(caseDefinition));
 	}
 
 	@Override

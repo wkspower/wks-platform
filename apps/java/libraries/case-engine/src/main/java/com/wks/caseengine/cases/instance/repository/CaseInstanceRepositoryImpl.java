@@ -48,7 +48,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	private Paginator paginator;
 
 	@Override
-	public List<CaseInstance> find() throws Exception {
+	public List<CaseInstance> find() {
 		return paginator.apply(getCollection().find()).sort(descending("_id")).into(new ArrayList<>());
 	}
 
@@ -68,19 +68,19 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	}
 
 	@Override
-	public CaseInstance get(final String businessKey) throws Exception {
+	public CaseInstance get(final String businessKey) {
 		Bson filter = Filters.eq("businessKey", businessKey);
 		CaseInstance first = getCollection().find(filter).first();
 		return first;
 	}
 
 	@Override
-	public void save(final CaseInstance caseInstance) throws Exception {
+	public void save(final CaseInstance caseInstance) {
 		getCollection().insertOne(caseInstance);
 	}
 
 	@Override
-	public void update(final String businessKey, final CaseInstance caseInstance) throws Exception {
+	public void update(final String businessKey, final CaseInstance caseInstance) {
 		Bson filter = Filters.eq("businessKey", businessKey);
 		Bson update = Updates.combine(Updates.set("status", caseInstance.getStatus()),
 				Updates.set("stage", caseInstance.getStage()), Updates.set("attributes", caseInstance.getAttributes()),
@@ -91,7 +91,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	}
 
 	@Override
-	public void delete(final String businessKey) throws Exception {
+	public void delete(final String businessKey) {
 		Bson filter = Filters.eq("businessKey", businessKey);
 		getCollection().deleteMany(filter);
 	}

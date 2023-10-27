@@ -7,7 +7,8 @@ logging:
       com.wks: INFO
       com.wks.api.security: INFO
       com.wks.caseengine: INFO
-      com.wks.caseengine.pagination: DEBUG
+      com.wks.caseengine.command: INFO
+      com.wks.caseengine.pagination: INFO
       org.springframework.web.client.RestTemplate: INFO
       org.springframework.security: INFO
       org.apache.http: INFO
