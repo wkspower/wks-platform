@@ -19,6 +19,10 @@ import com.wks.caseengine.command.CommandContext;
 
 import lombok.AllArgsConstructor;
 
+/**
+ * @author victor.franca
+ *
+ */
 @AllArgsConstructor
 public class DeleteCaseInstanceCommentCmd implements Command<Void> {
 

@@ -21,6 +21,13 @@ import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
 import com.wks.caseengine.db.EngineMongoDataConnection;
 
+import lombok.AllArgsConstructor;
+
+/**
+ * @author victor.franca
+ *
+ */
+@AllArgsConstructor
 public class ExportDataCmd implements Command<JsonObject> {
 
 	@Override
@@ -28,7 +35,7 @@ public class ExportDataCmd implements Command<JsonObject> {
 		Gson gson = commandContext.getGsonBuilder().create();
 
 		JsonObject exportedData = new JsonObject();
-		
+
 		EngineMongoDataConnection connection = commandContext.getConnection();
 
 		// Cases Definitions

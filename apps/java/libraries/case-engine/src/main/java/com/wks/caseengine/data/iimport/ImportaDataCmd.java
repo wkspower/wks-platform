@@ -24,6 +24,10 @@ import com.wks.caseengine.db.EngineMongoDataConnection;
 
 import lombok.AllArgsConstructor;
 
+/**
+ * @author victor.franca
+ *
+ */
 @AllArgsConstructor
 public class ImportaDataCmd implements Command<Void> {
 

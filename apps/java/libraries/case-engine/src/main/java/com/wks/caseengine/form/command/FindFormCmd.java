@@ -8,6 +8,10 @@ import com.wks.caseengine.form.Form;
 
 import lombok.AllArgsConstructor;
 
+/**
+ * @author victor.franca
+ *
+ */
 @AllArgsConstructor
 public class FindFormCmd implements Command<List<Form>> {
 

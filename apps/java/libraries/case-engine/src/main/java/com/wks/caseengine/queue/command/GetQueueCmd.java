@@ -6,6 +6,10 @@ import com.wks.caseengine.queue.Queue;
 
 import lombok.AllArgsConstructor;
 
+/**
+ * @author victor.franca
+ *
+ */
 @AllArgsConstructor
 public class GetQueueCmd implements Command<Queue> {
 

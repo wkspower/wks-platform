@@ -24,6 +24,7 @@ import com.wks.caseengine.form.FormRepository;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
 import com.wks.caseengine.queue.QueueRepository;
 import com.wks.caseengine.record.RecordRepository;
+import com.wks.caseengine.record.type.RecordTypeRepository;
 
 import lombok.Getter;
 
@@ -52,6 +53,9 @@ public class CommandContext {
 
 	@Autowired
 	private RecordRepository recordRepository;
+
+	@Autowired
+	private RecordTypeRepository recordTypeRepository;
 
 	@Autowired
 	private ProcessInstanceService processInstanceService;

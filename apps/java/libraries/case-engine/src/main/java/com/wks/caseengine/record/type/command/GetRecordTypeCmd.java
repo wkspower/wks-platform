@@ -9,13 +9,11 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.instance.command;
+package com.wks.caseengine.record.type.command;
 
-import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.cases.instance.CaseInstanceFilter;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
-import com.wks.caseengine.pagination.PageResult;
+import com.wks.caseengine.record.type.RecordType;
 
 import lombok.AllArgsConstructor;
 
@@ -24,13 +22,13 @@ import lombok.AllArgsConstructor;
  *
  */
 @AllArgsConstructor
-public class FindCaseInstanceCmd implements Command<PageResult<CaseInstance>> {
+public class GetRecordTypeCmd implements Command<RecordType> {
 
-	private CaseInstanceFilter caseFilter;
+	private String recordTypeId;
 
 	@Override
-	public PageResult<CaseInstance> execute(CommandContext commandContext) {
-		return commandContext.getCaseInstanceRepository().find(caseFilter);
+	public RecordType execute(CommandContext commandContext) {
+		return commandContext.getRecordTypeRepository().get(recordTypeId);
 	}
 
 }
