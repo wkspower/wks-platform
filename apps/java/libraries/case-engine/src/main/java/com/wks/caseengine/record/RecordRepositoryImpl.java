@@ -36,7 +36,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 	private GsonBuilder gsonBuilder;
 
 	@Override
-	public com.google.gson.JsonObject get(final String recordTypeId, final String id) throws Exception {
+	public com.google.gson.JsonObject get(final String recordTypeId, final String id) {
 		Bson filter = Filters.eq("_id", new ObjectId(id));
 		Gson gson = gsonBuilder.create();
 		return gson.fromJson(getCollection(recordTypeId).find(filter).first().getJson(),
@@ -44,27 +44,26 @@ public class RecordRepositoryImpl implements RecordRepository {
 	}
 
 	@Override
-	public void save(final String recordTypeId, final com.google.gson.JsonObject record) throws Exception {
+	public void save(final String recordTypeId, final com.google.gson.JsonObject record) {
 		getCollection(recordTypeId).insertOne((new JsonObject(gsonBuilder.create().toJson(record))));
 
 	}
 
 	@Override
-	public List<com.google.gson.JsonObject> find(final String recordTypeId) throws Exception {
+	public List<com.google.gson.JsonObject> find(final String recordTypeId) {
 		Gson gson = gsonBuilder.create();
 		return getCollection(recordTypeId).find().map(o -> gson.fromJson(o.getJson(), com.google.gson.JsonObject.class))
 				.into(new ArrayList<>());
 	}
 
 	@Override
-	public void delete(final String recordTypeId, final String id) throws Exception {
+	public void delete(final String recordTypeId, final String id) {
 		Bson filter = Filters.eq("_id", new ObjectId(id));
 		getCollection(recordTypeId).deleteMany(filter);
 	}
 
 	@Override
-	public void update(final String recordTypeId, final String id, final com.google.gson.JsonObject record)
-			throws Exception {
+	public void update(final String recordTypeId, final String id, final com.google.gson.JsonObject record) {
 		Bson filter = Filters.eq("_id", new ObjectId(id));
 
 		getCollection(recordTypeId).replaceOne(filter, (new JsonObject(gsonBuilder.create().toJson(record))));

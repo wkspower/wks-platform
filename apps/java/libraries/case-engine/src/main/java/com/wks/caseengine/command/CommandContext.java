@@ -23,6 +23,7 @@ import com.wks.caseengine.db.EngineMongoDataConnection;
 import com.wks.caseengine.form.FormRepository;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
 import com.wks.caseengine.queue.QueueRepository;
+import com.wks.caseengine.record.RecordRepository;
 
 import lombok.Getter;
 
@@ -48,6 +49,9 @@ public class CommandContext {
 
 	@Autowired
 	private QueueRepository queueRepository;
+
+	@Autowired
+	private RecordRepository recordRepository;
 
 	@Autowired
 	private ProcessInstanceService processInstanceService;
