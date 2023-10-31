@@ -16,35 +16,42 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.wks.caseengine.command.CommandExecutor;
+import com.wks.caseengine.queue.command.DeleteQueueCmd;
+import com.wks.caseengine.queue.command.FindQueueCmd;
+import com.wks.caseengine.queue.command.GetQueueCmd;
+import com.wks.caseengine.queue.command.SaveQueueCmd;
+import com.wks.caseengine.queue.command.UpdateQueueCmd;
+
 @Component
 public class QueueServiceImpl implements QueueService {
 
 	@Autowired
-	private QueueRepository queueRepository;
+	private CommandExecutor commandExecutor;
 
 	@Override
 	public void save(Queue queue) throws Exception {
-		queueRepository.save(queue);
+		commandExecutor.execute(new SaveQueueCmd(queue));
 	}
 
 	@Override
 	public Queue get(String id) throws Exception {
-		return queueRepository.get(id);
+		return commandExecutor.execute(new GetQueueCmd(id));
 	}
 
 	@Override
 	public List<Queue> find() throws Exception {
-		return queueRepository.find();
+		return commandExecutor.execute(new FindQueueCmd());
 	}
 
 	@Override
 	public void delete(String id) throws Exception {
-		queueRepository.delete(id);
+		commandExecutor.execute(new DeleteQueueCmd(id));
 	}
 
 	@Override
 	public void update(String id, Queue queue) throws Exception {
-		queueRepository.update(id, queue);
+		commandExecutor.execute(new UpdateQueueCmd(id, queue));
 	}
 
 }
