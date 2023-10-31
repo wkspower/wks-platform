@@ -12,10 +12,12 @@
 package com.wks.caseengine.command;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.GsonBuilder;
 import com.wks.api.security.context.SecurityContextTenantHolder;
+import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.caseengine.cases.businesskey.GenericBusinessKeyGenerator;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
@@ -38,6 +40,9 @@ public class CommandContext {
 
 	@Autowired
 	private SecurityContextTenantHolder securityContextTenantHolder;
+	
+	@Autowired
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	@Autowired
 	private CaseDefinitionRepository caseDefRepository;
@@ -59,6 +64,9 @@ public class CommandContext {
 
 	@Autowired
 	private ProcessInstanceService processInstanceService;
+	
+	@Autowired
+	private BpmEngineClientFacade bpmEngineClientFacade;
 
 	@Autowired
 	private GenericBusinessKeyGenerator businessKeyCreator;
