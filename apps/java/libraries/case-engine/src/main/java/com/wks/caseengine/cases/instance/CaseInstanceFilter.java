@@ -18,10 +18,14 @@ import org.springframework.data.domain.Sort.Direction;
 import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.pagination.Cursor;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class CaseFilter {
+@Builder
+@AllArgsConstructor
+public class CaseInstanceFilter {
 
 	private Optional<CaseStatus> status;
 	private Optional<String> caseDefsId;
@@ -29,7 +33,7 @@ public class CaseFilter {
 	private Integer limit;
 	private Cursor cursor;
 
-	public CaseFilter(String status, String caseDefsId, Cursor cursor, String dir, String limit) {
+	public CaseInstanceFilter(String status, String caseDefsId, Cursor cursor, String dir, String limit) {
 		super();
 		this.cursor = cursor;
 		this.dir = dir == null || dir.isBlank() ? Direction.ASC : Direction.fromString(dir);

@@ -18,11 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.CaseDefinitionFilter;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.definition.command.CreateCaseDefinitionCmd;
 import com.wks.caseengine.cases.definition.command.DeleteCaseDefinitionCmd;
 import com.wks.caseengine.cases.definition.command.FindCaseDefinitionCmd;
-import com.wks.caseengine.cases.definition.command.FindCaseDefinitionFilter;
 import com.wks.caseengine.cases.definition.command.GetCaseDefinitionCmd;
 import com.wks.caseengine.cases.definition.command.UpdateCaseDefinitionCmd;
 import com.wks.caseengine.command.CommandExecutor;
@@ -36,7 +36,7 @@ public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 	@Override
 	public List<CaseDefinition> find(final Optional<Boolean> deployed) {
 		return commandExecutor.execute(
-				new FindCaseDefinitionCmd(Optional.of(FindCaseDefinitionFilter.builder().deployed(deployed).build())));
+				new FindCaseDefinitionCmd(Optional.of(CaseDefinitionFilter.builder().deployed(deployed).build())));
 	}
 
 	@Override

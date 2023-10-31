@@ -19,19 +19,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.google.gson.GsonBuilder;
+import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseDocument;
-import com.wks.caseengine.cases.instance.CaseFilter;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.CaseInstanceFilter;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
-import com.wks.caseengine.cases.instance.Comment;
 import com.wks.caseengine.cases.instance.service.CaseInstanceService;
 import com.wks.caseengine.pagination.Cursor;
 import com.wks.caseengine.pagination.PageResult;
@@ -58,7 +58,7 @@ public class CaseController {
 			@RequestParam(required = false, name = "limit") String limit) throws Exception {
 		Cursor cursor = Cursor.of(before, after);
 
-		CaseFilter filter = new CaseFilter(status, caseDefinitionId, cursor, sort, limit);
+		CaseInstanceFilter filter = new CaseInstanceFilter(status, caseDefinitionId, cursor, sort, limit);
 
 		PageResult<CaseInstance> data = caseInstanceService.find(filter);
 
@@ -72,7 +72,7 @@ public class CaseController {
 
 	@PostMapping
 	public CaseInstance save(@RequestBody final CaseInstance caseInstance) throws Exception {
-		return caseInstanceService.create(caseInstance);
+		return caseInstanceService.createWithValues(caseInstance);
 	}
 
 	@PatchMapping(value = "/{businessKey}", consumes = "application/merge-patch+json")
@@ -104,7 +104,7 @@ public class CaseController {
 	}
 
 	@PostMapping(value = "/{businessKey}/comment")
-	public ResponseEntity<Void> saveComment(@PathVariable final String businessKey, @RequestBody final Comment newComment)
+	public ResponseEntity<Void> saveComment(@PathVariable final String businessKey, @RequestBody final CaseComment newComment)
 			throws Exception {
 		caseInstanceService.saveComment(businessKey, newComment);
 		return ResponseEntity.noContent().build();
@@ -112,7 +112,7 @@ public class CaseController {
 
 	@PutMapping(value = "/{businessKey}/comment/{commentId}")
 	public ResponseEntity<Void> udpateComment(@PathVariable final String businessKey, @PathVariable final String commentId,
-			@RequestBody final Comment comment) throws Exception {
+			@RequestBody final CaseComment comment) throws Exception {
 		caseInstanceService.updateComment(businessKey, commentId, comment.getBody());
 		return ResponseEntity.noContent().build();
 	}

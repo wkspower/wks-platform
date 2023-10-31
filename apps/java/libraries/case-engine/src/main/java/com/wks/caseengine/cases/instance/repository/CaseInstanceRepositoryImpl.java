@@ -28,9 +28,9 @@ import org.springframework.stereotype.Component;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
-import com.wks.caseengine.cases.instance.CaseFilter;
+import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.cases.instance.Comment;
+import com.wks.caseengine.cases.instance.CaseInstanceFilter;
 import com.wks.caseengine.db.EngineMongoDataConnection;
 import com.wks.caseengine.pagination.Args;
 import com.wks.caseengine.pagination.CursorPagination;
@@ -53,7 +53,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	}
 
 	@Override
-	public PageResult<CaseInstance> find(CaseFilter filters) throws Exception {
+	public PageResult<CaseInstance> find(CaseInstanceFilter filters) {
 		CursorPagination pagination = new MongoCursorPagination(getOperations());
 
 		Args args = Args.of(filters.getLimit()).key("_id").cursor(filters.getCursor(), filters.getDir()).criteria(c -> {
@@ -101,7 +101,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	}
 
 	@Override
-	public void deleteComment(final String businessKey, final Comment comment) {
+	public void deleteComment(final String businessKey, final CaseComment comment) {
 
 		Bson filter = Filters.eq("businessKey", businessKey);
 		Bson update = Updates.pull("comments", comment);

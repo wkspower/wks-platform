@@ -30,8 +30,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.wks.caseengine.cases.definition.CaseStatus;
-import com.wks.caseengine.cases.instance.CaseFilter;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.CaseInstanceFilter;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepositoryImpl;
 import com.wks.caseengine.pagination.Cursor;
 import com.wks.caseengine.pagination.PageResult;
@@ -63,7 +63,7 @@ public class CaseInstanceRepositoryImplIT {
 
 	@Test
 	public void shouldGetResultsByFindUsingPaginationFilter() throws Exception {
-		CaseFilter filter = new CaseFilter("ARCHIVED_CASE_STATUS", "1", Cursor.empty(), "asc", "1");
+		CaseInstanceFilter filter = new CaseInstanceFilter("ARCHIVED_CASE_STATUS", "1", Cursor.empty(), "asc", "1");
 
 		PageResult<CaseInstance> results = repository.find(filter);
 
@@ -78,7 +78,7 @@ public class CaseInstanceRepositoryImplIT {
 
 	@Test
 	public void shouldGetEmptyResultsByFindUsingPaginationFilter() throws Exception {
-		CaseFilter filter = new CaseFilter("ARCHIVED_CASE_STATUS", "-1", Cursor.empty(), "asc", "0");
+		CaseInstanceFilter filter = new CaseInstanceFilter("ARCHIVED_CASE_STATUS", "-1", Cursor.empty(), "asc", "0");
 
 		PageResult<CaseInstance> results = repository.find(filter);
 
@@ -89,11 +89,11 @@ public class CaseInstanceRepositoryImplIT {
 	@Test
 	public void shouldGetResultsByFindUsingPaginationFilterWithNextAndBeforeCursor() throws Exception {
 		PageResult<CaseInstance> results1 = repository
-				.find(new CaseFilter("CLOSED_CASE_STATUS", "1", Cursor.empty(), "asc", "2"));
+				.find(new CaseInstanceFilter("CLOSED_CASE_STATUS", "1", Cursor.empty(), "asc", "2"));
 		PageResult<CaseInstance> results2 = repository
-				.find(new CaseFilter("CLOSED_CASE_STATUS", "1", Cursor.of(null, results1.next()), "asc", "2"));
+				.find(new CaseInstanceFilter("CLOSED_CASE_STATUS", "1", Cursor.of(null, results1.next()), "asc", "2"));
 		PageResult<CaseInstance> results3 = repository
-				.find(new CaseFilter("CLOSED_CASE_STATUS", "1", Cursor.of(null, results2.next()), "asc", "2"));
+				.find(new CaseInstanceFilter("CLOSED_CASE_STATUS", "1", Cursor.of(null, results2.next()), "asc", "2"));
 
 		assertNotNull(results1);
 		assertTrue(results1.hasNext());

@@ -9,17 +9,16 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.instance;
+package com.wks.bpm.engine.exception;
 
-public class CaseInstanceCommentNotFoundException extends Exception {
+public class ProcessInstanceNotFoundException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
-	public CaseInstanceCommentNotFoundException() {
-		super();
+	private static final String DETAULT_MESSAGE = "Process Instance Not Found";
+
+	public ProcessInstanceNotFoundException() {
+		super(DETAULT_MESSAGE);
 	}
 
-	public CaseInstanceCommentNotFoundException(String message) {
-		super(message);
-	}
 }

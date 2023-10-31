@@ -15,20 +15,20 @@ import java.util.List;
 import java.util.Optional;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.CaseDefinitionFilter;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+
+import lombok.AllArgsConstructor;
 
 /**
  * @author victor.franca
  *
  */
+@AllArgsConstructor
 public class FindCaseDefinitionCmd implements Command<List<CaseDefinition>> {
 
-	private Optional<FindCaseDefinitionFilter> caseDefinintionFilter;
-
-	public FindCaseDefinitionCmd(final Optional<FindCaseDefinitionFilter> filter) {
-		this.caseDefinintionFilter = filter;
-	}
+	private Optional<CaseDefinitionFilter> caseDefinintionFilter;
 
 	@Override
 	public List<CaseDefinition> execute(final CommandContext commandContext) {

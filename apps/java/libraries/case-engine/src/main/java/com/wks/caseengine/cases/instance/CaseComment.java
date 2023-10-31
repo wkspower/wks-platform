@@ -9,23 +9,37 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.definition.command;
+package com.wks.caseengine.cases.instance;
 
-import java.util.Optional;
+import java.util.Date;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
-/**
- * @author victor.franca
- *
- */
 @Getter
 @Setter
+@ToString
 @Builder
-public class FindCaseDefinitionFilter {
-	
-	private Optional<Boolean> deployed;
+@NoArgsConstructor
+@AllArgsConstructor
+public class CaseComment {
+
+	private String id;
+
+	private String body;
+
+	private String userName;
+
+	private String userId;
+
+	private String parentId;
+
+	private Date createdAt;
+
+	private String caseId;
 
 }

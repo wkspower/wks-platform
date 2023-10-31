@@ -15,15 +15,13 @@ import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public class UpdateCaseDefinitionCmd implements Command<CaseDefinition> {
 
 	private String caseDefId;
 	private CaseDefinition caseDefinition;
-
-	public UpdateCaseDefinitionCmd(final String caseDefId, final CaseDefinition caseDefinition) {
-		this.caseDefId = caseDefId;
-		this.caseDefinition = caseDefinition;
-	}
 
 	@Override
 	public CaseDefinition execute(final CommandContext commandContext) {

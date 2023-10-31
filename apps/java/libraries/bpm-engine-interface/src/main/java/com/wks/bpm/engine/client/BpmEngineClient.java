@@ -16,6 +16,8 @@ import java.util.Optional;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.BpmEngine;
+import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
+import com.wks.bpm.engine.exception.ProcessInstanceNotFoundException;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.Deployment;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
@@ -38,9 +40,9 @@ public interface BpmEngineClient {
 	ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
 			final Optional<String> businessKey, final Optional<String> activityIdIn, final BpmEngine bpmEngine);
 
-	String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) throws Exception;
+	String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) throws ProcessDefinitionNotFoundException;
 
-	String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) throws Exception;
+	String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) throws ProcessDefinitionNotFoundException;
 
 	ProcessInstance startProcess(final String processDefinitionKey, final BpmEngine bpmEngine);
 
@@ -52,8 +54,7 @@ public interface BpmEngineClient {
 
 	void deleteProcessInstance(final String processInstanceId, final BpmEngine bpmEngine);
 
-	ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine)
-			throws Exception;
+	ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine) throws ProcessInstanceNotFoundException;
 
 	public void createTask(final Task task, final BpmEngine bpmEngine);
 

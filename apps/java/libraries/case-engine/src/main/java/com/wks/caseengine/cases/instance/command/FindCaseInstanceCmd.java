@@ -9,22 +9,24 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.definition.command;
+package com.wks.caseengine.cases.instance.command;
 
+import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.CaseInstanceFilter;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.pagination.PageResult;
 
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class DeleteCaseDefinitionCmd implements Command<Void> {
+public class FindCaseInstanceCmd implements Command<PageResult<CaseInstance>> {
 
-	private String caseDefinitionId;
+	private CaseInstanceFilter caseFilter;
 
 	@Override
-	public Void execute(final CommandContext commandContext) {
-		commandContext.getCaseDefRepository().delete(caseDefinitionId);
-		return null;
+	public PageResult<CaseInstance> execute(CommandContext commandContext) {
+		return commandContext.getCaseInstanceRepository().find(caseFilter);
 	}
 
 }

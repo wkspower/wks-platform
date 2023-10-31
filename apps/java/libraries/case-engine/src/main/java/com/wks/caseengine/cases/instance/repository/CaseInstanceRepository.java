@@ -11,17 +11,17 @@
  */
 package com.wks.caseengine.cases.instance.repository;
 
-import com.wks.caseengine.cases.instance.CaseFilter;
+import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.cases.instance.Comment;
+import com.wks.caseengine.cases.instance.CaseInstanceFilter;
 import com.wks.caseengine.pagination.PageResult;
 import com.wks.caseengine.repository.Repository;
 
 public interface CaseInstanceRepository extends Repository<CaseInstance> {
 
-	PageResult<CaseInstance> find(CaseFilter filters) throws Exception;
+	PageResult<CaseInstance> find(CaseInstanceFilter filters);
 
-	void deleteComment(final String businessKey, final Comment comment);
+	void deleteComment(final String businessKey, final CaseComment comment);
 
 	void updateComment(final String businessKey, final String commentId, final String body);
 

@@ -11,33 +11,34 @@
  */
 package com.wks.caseengine.cases.instance.service;
 
+import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseDocument;
-import com.wks.caseengine.cases.instance.CaseFilter;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.CaseInstanceFilter;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
-import com.wks.caseengine.cases.instance.Comment;
 import com.wks.caseengine.pagination.PageResult;
 
 public interface CaseInstanceService {
 
-	PageResult<CaseInstance> find(CaseFilter filters) throws Exception;
+	PageResult<CaseInstance> find(CaseInstanceFilter filters);
 
-	CaseInstance get(final String businessKey) throws Exception;
+	CaseInstance get(final String businessKey) throws CaseInstanceNotFoundException;
 
-	CaseInstance create(final CaseInstance caseInstance) throws Exception;
+	CaseInstance createWithValues(final CaseInstance caseInstance);
 
-	CaseInstance create(final String caseDefinitionId) throws Exception;
+	CaseInstance createEmpty(final String caseDefinitionId);
 
-	CaseInstance patch(final String businessKey, final CaseInstance caseInstance) throws Exception;
+	CaseInstance patch(final String businessKey, final CaseInstance caseInstance);
 
-	void delete(final String businessKey) throws CaseInstanceNotFoundException, Exception;
+	void delete(final String businessKey) throws CaseInstanceNotFoundException;
 
-	void saveDocument(final String businessKey, final CaseDocument document) throws Exception;
+	void saveDocument(final String businessKey, final CaseDocument document) throws CaseInstanceNotFoundException;
 
-	void saveComment(final String businessKey, final Comment comment) throws Exception;
+	void saveComment(final String businessKey, final CaseComment comment) throws CaseInstanceNotFoundException;
 
-	void updateComment(final String businessKey, final String commentId, final String body) throws Exception;
+	void updateComment(final String businessKey, final String commentId, final String body)
+			throws CaseInstanceNotFoundException;
 
-	void deleteComment(final String businessKey, final String commentId) throws Exception;
+	void deleteComment(final String businessKey, final String commentId) throws CaseInstanceNotFoundException;
 
 }

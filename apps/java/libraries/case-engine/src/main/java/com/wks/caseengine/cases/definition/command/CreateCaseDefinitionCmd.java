@@ -15,17 +15,16 @@ import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
 
+import lombok.AllArgsConstructor;
+
 /**
  * @author victor.franca
  *
  */
+@AllArgsConstructor
 public class CreateCaseDefinitionCmd implements Command<CaseDefinition> {
 
 	private CaseDefinition caseDefinition;
-
-	public CreateCaseDefinitionCmd(final CaseDefinition caseDefinition) {
-		this.caseDefinition = caseDefinition;
-	}
 
 	@Override
 	public CaseDefinition execute(final CommandContext commandContext) {

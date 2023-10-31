@@ -15,6 +15,8 @@ import java.util.Optional;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
+import com.wks.bpm.engine.exception.ProcessInstanceNotFoundException;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.Deployment;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
@@ -34,9 +36,9 @@ public interface BpmEngineClientFacade {
 
 	ProcessDefinition[] findProcessDefinitions();
 
-	String getProcessDefinitionXMLById(final String processDefinitionId) throws Exception;
+	String getProcessDefinitionXMLById(final String processDefinitionId) throws ProcessDefinitionNotFoundException;
 
-	String getProcessDefinitionXMLByKey(final String processDefinitionKey) throws Exception;
+	String getProcessDefinitionXMLByKey(final String processDefinitionKey) throws ProcessDefinitionNotFoundException;
 
 	ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
 			final Optional<String> businessKey, final Optional<String> activityIdIn);
@@ -50,7 +52,7 @@ public interface BpmEngineClientFacade {
 
 	void deleteProcessInstance(String processInstanceId);
 
-	ActivityInstance[] findActivityInstances(String processInstanceId) throws Exception;
+	ActivityInstance[] findActivityInstances(String processInstanceId) throws ProcessInstanceNotFoundException;
 
 	void createTask(final Task task);
 

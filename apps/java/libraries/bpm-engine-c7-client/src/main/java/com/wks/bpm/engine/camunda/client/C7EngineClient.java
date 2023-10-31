@@ -31,6 +31,8 @@ import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.camunda.http.request.C7HttpRequestFactory;
 import com.wks.bpm.engine.client.BpmEngineClient;
 import com.wks.bpm.engine.client.VariablesMapper;
+import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
+import com.wks.bpm.engine.exception.ProcessInstanceNotFoundException;
 import com.wks.bpm.engine.model.impl.DeploymentImpl;
 import com.wks.bpm.engine.model.impl.ProcessDefinitionImpl;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
@@ -84,28 +86,26 @@ public class C7EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine)
-			throws Exception {
+	public String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) throws ProcessDefinitionNotFoundException {
 		ProcessDefinitionImpl processDefinition = restTemplate.getForEntity(camundaHttpRequestFactory
 				.getProcessDefinitionXmlByIdRequest(processDefinitionId, bpmEngine).getHttpRequestUrl(),
 				ProcessDefinitionImpl.class).getBody();
 
 		if (processDefinition == null) {
-			throw new Exception("Process Definition not found");
+			throw new ProcessDefinitionNotFoundException();
 		}
 
 		return processDefinition.getBpmn20Xml();
 	}
 
 	@Override
-	public String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine)
-			throws Exception {
+	public String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) throws ProcessDefinitionNotFoundException {
 		ProcessDefinitionImpl processDefinition = restTemplate.getForEntity(camundaHttpRequestFactory
 				.getProcessDefinitionXmlByKeyRequest(processDefinitionKey, bpmEngine).getHttpRequestUrl(),
 				ProcessDefinitionImpl.class).getBody();
 
 		if (processDefinition == null) {
-			throw new Exception("Process Definition not found");
+			throw new ProcessDefinitionNotFoundException();
 		}
 
 		return processDefinition.getBpmn20Xml();
@@ -167,15 +167,14 @@ public class C7EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine)
-			throws Exception {
+	public ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine) throws ProcessInstanceNotFoundException {
 		ActivityInstance activityInstance = restTemplate
 				.getForEntity(camundaHttpRequestFactory.getActivityInstancesGetRequest(processInstanceId, bpmEngine)
 						.getHttpRequestUrl(), ActivityInstance.class)
 				.getBody();
 
 		if (activityInstance == null) {
-			throw new Exception("Process Instance not found");
+			throw new ProcessInstanceNotFoundException();
 		}
 
 		return activityInstance.getChildActivityInstances();

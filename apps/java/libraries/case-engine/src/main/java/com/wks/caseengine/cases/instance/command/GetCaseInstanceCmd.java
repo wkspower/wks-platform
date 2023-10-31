@@ -9,22 +9,23 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.definition.command;
+package com.wks.caseengine.cases.instance.command;
 
+import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
 
 import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
-public class DeleteCaseDefinitionCmd implements Command<Void> {
 
-	private String caseDefinitionId;
+@AllArgsConstructor
+public class GetCaseInstanceCmd implements Command<CaseInstance> {
+
+	private String businessKey;
 
 	@Override
-	public Void execute(final CommandContext commandContext) {
-		commandContext.getCaseDefRepository().delete(caseDefinitionId);
-		return null;
+	public CaseInstance execute(CommandContext commandContext) {
+		return commandContext.getCaseInstanceRepository().get(businessKey);
 	}
 
 }

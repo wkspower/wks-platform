@@ -11,8 +11,14 @@
  */
 package com.wks.caseengine.cases.definition;
 
-public class CaseDefinitionNotFoundException extends Exception {
+public class CaseDefinitionNotFoundException extends RuntimeException {
+
+	private static final String DEFAULT_MESSAGE = "Case Definition not found";
 
 	private static final long serialVersionUID = 1L;
+
+	public CaseDefinitionNotFoundException() {
+		super(DEFAULT_MESSAGE);
+	}
 
 }

@@ -9,17 +9,16 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.instance;
+package com.wks.bpm.engine.exception;
 
-public class CaseNotFoundException extends Exception {
+public class ProcessDefinitionNotFoundException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
-	public CaseNotFoundException() {
-		super();
+	private static final String DEFAULT_MESSAGE = "Process Definition Not Found Exception";
+
+	public ProcessDefinitionNotFoundException() {
+		super(DEFAULT_MESSAGE);
 	}
 
-	public CaseNotFoundException(String message) {
-		super(message);
-	}
 }
