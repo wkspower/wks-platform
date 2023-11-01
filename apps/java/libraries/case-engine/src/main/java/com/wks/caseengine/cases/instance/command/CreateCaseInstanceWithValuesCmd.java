@@ -25,20 +25,22 @@ import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
 
 import lombok.AllArgsConstructor;
+import lombok.Setter;
 
 /**
  * @author victor.franca
  *
  */
 @AllArgsConstructor
+@Setter
 public class CreateCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 
 	private CaseInstance caseInstance;
 
 	@Override
 	public CaseInstance execute(CommandContext commandContext) {
-		caseInstance.getAttributes()
-				.add(new CaseAttribute("createdAt", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+		caseInstance.addAttribute(
+				new CaseAttribute("createdAt", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
 						CaseAttributeType.STRING.getValue()));
 
 		CaseDefinition caseDefinition = commandContext.getCaseDefRepository().get(caseInstance.getCaseDefinitionId());
@@ -57,7 +59,7 @@ public class CreateCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 		CaseInstance newCaseInstance = CaseInstance.builder().businessKey(businessKey)
 				.stage(caseDefinition.getStages().stream().sorted(Comparator.comparing(CaseStage::getIndex)).findFirst()
 						.get().getName())
-				.attributes(caseInstance.getAttributes()).caseDefinitionId(caseDefinition.getId())
+				.attributes(caseInstance.getAttributes()).caseDefinitionId(caseInstance.getCaseDefinitionId())
 				.caseOwner(caseInstance.getCaseOwner()).caseOwnerName(caseInstance.getCaseOwnerName()).build();
 
 		commandContext.getCaseInstanceRepository().save(newCaseInstance);

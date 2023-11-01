@@ -16,12 +16,14 @@ import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
 
 import lombok.AllArgsConstructor;
+import lombok.Setter;
 
 /**
  * @author victor.franca
  *
  */
 @AllArgsConstructor
+@Setter
 public class CreateCaseDefinitionCmd implements Command<CaseDefinition> {
 
 	private CaseDefinition caseDefinition;

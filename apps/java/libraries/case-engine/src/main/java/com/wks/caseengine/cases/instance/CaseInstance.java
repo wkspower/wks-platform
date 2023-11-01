@@ -88,6 +88,14 @@ public class CaseInstance {
 
 		this.comments.add(comment);
 	}
+	
+	public void addAttribute(final CaseAttribute attribute) {
+		if (attributes == null) {
+			this.attributes = new ArrayList<>();
+		}
+		
+		this.attributes.add(attribute);
+	}
 
 	public CaseStatus getStatus() {
 		return CaseStatus.fromValue(status).orElse(null);
