@@ -29,10 +29,14 @@ public class CommandExecutorImpl implements CommandExecutor {
 
 	public <T> T execute(final Command<T> command) {
 		T t = command.execute(commandContext);
-		
-		log.debug("Command {} executed by user {}", command.getClass().getSimpleName(),
-				commandContext.getSecurityContextTenantHolder().getUserId().get());
-		
+
+		if (commandContext.getSecurityContextTenantHolder().getUserId().isPresent()) {
+			log.debug("Command {} executed by user {}", command.getClass().getSimpleName(),
+					commandContext.getSecurityContextTenantHolder().getUserId().get());
+		} else {
+			log.debug("Command {} executed", command.getClass().getSimpleName());
+		}
+
 		return t;
 	}
 }

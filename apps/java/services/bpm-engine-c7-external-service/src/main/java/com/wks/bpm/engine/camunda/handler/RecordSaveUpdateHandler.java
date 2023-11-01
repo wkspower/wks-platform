@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RecordSaveUpdateHandler implements ExternalTaskHandler {
 
 	@Autowired
-	private SecurityContextTenantHolder holder;
+	private SecurityContextTenantHolder securityContext;
 
 	@Autowired
 	private RecordService recordService;
@@ -52,7 +52,7 @@ public class RecordSaveUpdateHandler implements ExternalTaskHandler {
 				return;
 			}
 
-			holder.setTenantId(externalTask.getTenantId());
+			securityContext.setTenantId(externalTask.getTenantId());
 
 			String record = externalTask.getVariable("record");
 
@@ -64,7 +64,7 @@ public class RecordSaveUpdateHandler implements ExternalTaskHandler {
 			log.error("Error saving new record: {}", externalTask.getActivityId(), externalTask.getVariable("record"));
 			errorHandler.handle("Error saving new record", externalTaskService, externalTask, e);
 		} finally {
-			holder.clear();
+			securityContext.clear();
 		}
 	}
 

@@ -23,6 +23,9 @@ public final class SecurityContextTenantHolderThreadLocallImpl implements Securi
 
 	@Override
 	public Optional<String> getTenantId() {
+		if (tenantId.get() == null) {
+			return Optional.empty();
+		}
 		return Optional.of(tenantId.get());
 	}
 
@@ -33,6 +36,9 @@ public final class SecurityContextTenantHolderThreadLocallImpl implements Securi
 
 	@Override
 	public Optional<String> getUserId() {
+		if (userId.get() == null) {
+			return Optional.empty();
+		}
 		return Optional.of(userId.get());
 	}
 

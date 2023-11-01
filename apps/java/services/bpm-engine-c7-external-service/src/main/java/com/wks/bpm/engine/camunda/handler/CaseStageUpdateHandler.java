@@ -16,6 +16,7 @@ import org.camunda.bpm.client.task.ExternalTask;
 import org.camunda.bpm.client.task.ExternalTaskHandler;
 import org.camunda.bpm.client.task.ExternalTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import com.wks.api.security.context.SecurityContextTenantHolder;
@@ -37,7 +38,7 @@ public class CaseStageUpdateHandler implements ExternalTaskHandler {
 
 	@Autowired
 	private ExternalServiceErrorHandler errorHandler;
-
+	
 	@Override
 	public void execute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
 		try {
@@ -50,7 +51,7 @@ public class CaseStageUpdateHandler implements ExternalTaskHandler {
 			}
 
 			securityContext.setTenantId(externalTask.getTenantId());
-			
+
 			CaseInstance mergePatch = CaseInstance.builder().stage(externalTask.getVariable("stage")).build();
 
 			caseInstanceService.patch(externalTask.getBusinessKey(), mergePatch);
