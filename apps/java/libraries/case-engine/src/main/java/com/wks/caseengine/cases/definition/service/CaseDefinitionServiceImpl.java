@@ -18,53 +18,50 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
-import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
-import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
+import com.wks.caseengine.cases.definition.CaseDefinitionFilter;
+import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
+import com.wks.caseengine.cases.definition.command.CreateCaseDefinitionCmd;
+import com.wks.caseengine.cases.definition.command.DeleteCaseDefinitionCmd;
+import com.wks.caseengine.cases.definition.command.FindCaseDefinitionCmd;
+import com.wks.caseengine.cases.definition.command.GetCaseDefinitionCmd;
+import com.wks.caseengine.cases.definition.command.UpdateCaseDefinitionCmd;
+import com.wks.caseengine.command.CommandExecutor;
 
 @Component
 public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 
 	@Autowired
-	private CaseDefinitionRepository repository;
+	private CommandExecutor commandExecutor;
 
 	@Override
-	public List<CaseDefinition> find() throws Exception {
-		return repository.find();
+	public List<CaseDefinition> find(final Optional<Boolean> deployed) {
+		return commandExecutor.execute(
+				new FindCaseDefinitionCmd(Optional.of(CaseDefinitionFilter.builder().deployed(deployed).build())));
 	}
 
 	@Override
-	public List<CaseDefinition> find(final Optional<Boolean> deployed) throws Exception {
-		return repository.find(deployed);
+	public CaseDefinition get(final String caseDefId) {
+		return commandExecutor.execute(new GetCaseDefinitionCmd(caseDefId));
 	}
 
 	@Override
-	public CaseDefinition get(final String caseDefId) throws Exception {
-		return repository.get(caseDefId);
-	}
-
-	@Override
-	public CaseDefinition create(final CaseDefinition caseDefinition) throws Exception {
-		if (caseDefinition.getId().isEmpty()) {
+	public CaseDefinition create(final CaseDefinition caseDefinition) {
+		if (caseDefinition.getId() == null || caseDefinition.getId().isEmpty()) {
 			// TODO error handling
-			throw new Exception("No Case Definition ID provided");
+			throw new IllegalArgumentException("No Case Definition ID provided");
 		}
-		repository.save(caseDefinition);
-		return caseDefinition;
+
+		return commandExecutor.execute(new CreateCaseDefinitionCmd(caseDefinition));
 	}
 
 	@Override
-	public CaseDefinition update(final String caseDefId, final CaseDefinition caseDefinition) throws Exception {
-		repository.update(caseDefId, caseDefinition);
-		return caseDefinition;
+	public CaseDefinition update(final String caseDefId, final CaseDefinition caseDefinition) {
+		return commandExecutor.execute(new UpdateCaseDefinitionCmd(caseDefId, caseDefinition));
 	}
 
 	@Override
-	public void delete(final String caseDefinitionId) throws CaseInstanceNotFoundException, Exception {
-		repository.delete(caseDefinitionId);
-	}
-
-	public void setRepository(CaseDefinitionRepository repository) {
-		this.repository = repository;
+	public void delete(final String caseDefinitionId) throws CaseDefinitionNotFoundException {
+		commandExecutor.execute(new DeleteCaseDefinitionCmd(caseDefinitionId));
 	}
 
 }

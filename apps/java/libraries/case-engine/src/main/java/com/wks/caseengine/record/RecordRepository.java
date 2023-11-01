@@ -17,14 +17,14 @@ import com.google.gson.JsonObject;
 
 public interface RecordRepository {
 
-	List<JsonObject> find(final String recordTypeId) throws Exception;
+	List<JsonObject> find(final String recordTypeId);
 
-	JsonObject get(final String recordTypeId, final String id) throws Exception;
+	JsonObject get(final String recordTypeId, final String id);
 
-	void save(final String recordTypeId, final JsonObject object) throws Exception;
+	void save(final String recordTypeId, final JsonObject object);
 
-	void update(final String recordTypeId, final String id, final JsonObject object) throws Exception;
+	void update(final String recordTypeId, final String id, final JsonObject object);
 
-	void delete(final String recordTypeId, final String id) throws Exception;
+	void delete(final String recordTypeId, final String id);
 
 }

@@ -9,17 +9,14 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.instance;
+package com.wks.caseengine.command;
 
-public class CaseNotFoundException extends Exception {
+/**
+ * @author victor.franca
+ *
+ */
+public interface Command<T> {
 
-	private static final long serialVersionUID = 1L;
+	T execute(final CommandContext commandContext);
 
-	public CaseNotFoundException() {
-		super();
-	}
-
-	public CaseNotFoundException(String message) {
-		super(message);
-	}
 }

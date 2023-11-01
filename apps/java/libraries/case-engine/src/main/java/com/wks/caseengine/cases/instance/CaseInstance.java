@@ -46,7 +46,7 @@ public class CaseInstance {
 
 	private String caseOwnerName;
 
-	private List<Comment> comments;
+	private List<CaseComment> comments;
 
 	private List<CaseDocument> documents;
 
@@ -81,12 +81,20 @@ public class CaseInstance {
 		this.documents.add(document);
 	}
 
-	public void addComment(final Comment comment) {
+	public void addComment(final CaseComment comment) {
 		if (comments == null) {
 			this.comments = new ArrayList<>();
 		}
 
 		this.comments.add(comment);
+	}
+	
+	public void addAttribute(final CaseAttribute attribute) {
+		if (attributes == null) {
+			this.attributes = new ArrayList<>();
+		}
+		
+		this.attributes.add(attribute);
 	}
 
 	public CaseStatus getStatus() {

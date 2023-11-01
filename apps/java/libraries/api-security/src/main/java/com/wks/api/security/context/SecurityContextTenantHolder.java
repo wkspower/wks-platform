@@ -18,6 +18,11 @@ public interface SecurityContextTenantHolder {
 	Optional<String> getTenantId();
 
 	void setTenantId(String tenantId);
+	
+	Optional<String> getUserId();
+
+	void setUserId(String userId);
+
 
 	void clear();
 

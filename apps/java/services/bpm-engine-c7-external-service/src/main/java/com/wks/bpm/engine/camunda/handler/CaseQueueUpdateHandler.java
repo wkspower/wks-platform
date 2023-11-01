@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CaseQueueUpdateHandler implements ExternalTaskHandler {
 
 	@Autowired
-	private SecurityContextTenantHolder holder;
+	private SecurityContextTenantHolder securityContext;
 
 	@Autowired
 	private CaseInstanceService caseInstanceService;
@@ -49,21 +49,21 @@ public class CaseQueueUpdateHandler implements ExternalTaskHandler {
 				return;
 			}
 
-			holder.setTenantId(externalTask.getTenantId());
-			
-			CaseInstance mergePatch = CaseInstance.builder().stage(externalTask.getVariable("queue")).build();
+			securityContext.setTenantId(externalTask.getTenantId());
+
+			CaseInstance mergePatch = CaseInstance.builder().queueId(externalTask.getVariable("queue")).build();
 
 			caseInstanceService.patch(externalTask.getBusinessKey(), mergePatch);
 
 			externalTaskService.complete(externalTask);
 		} catch (Exception e) {
-			log.error("Error updating case stage with business key: {} and new stage: {}",
+			log.error("Error updating case queue with business key: {} and new queue: {}",
 					externalTask.getBusinessKey(), externalTask.getVariable("stage"));
 			errorHandler.handle("Error updating case stage", externalTaskService, externalTask, e);
 		} finally {
 			log.debug("Finishing External Task Handler activity '{}' for tenant '{}'", externalTask.getActivityId(),
 					externalTask.getTenantId());
-			holder.clear();
+			securityContext.clear();
 		}
 	}
 

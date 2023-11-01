@@ -15,14 +15,14 @@ import java.util.List;
 
 public interface Repository<T> {
 
-	List<T> find() throws Exception;
+	List<T> find();
 
-	T get(final String id) throws Exception;
+	T get(final String id);
 
-	void save(final T object) throws Exception;
+	void save(final T object);
 
-	void update(final String id, final T object) throws Exception;
+	void update(final String id, final T object);
 
-	void delete(final String id) throws Exception;
+	void delete(final String id);
 
 }

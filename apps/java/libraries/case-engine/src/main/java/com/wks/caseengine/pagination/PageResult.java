@@ -19,6 +19,12 @@ import org.springframework.data.domain.Sort.Direction;
 
 import com.google.gson.JsonObject;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
+
+@Builder
+@AllArgsConstructor
 public final class PageResult<T> {
 
 	@SuppressWarnings("rawtypes")

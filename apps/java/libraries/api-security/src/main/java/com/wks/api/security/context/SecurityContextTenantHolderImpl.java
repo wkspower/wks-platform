@@ -16,6 +16,7 @@ import java.util.Optional;
 public final class SecurityContextTenantHolderImpl implements SecurityContextTenantHolder {
 
 	private Optional<String> tenantId = Optional.empty();
+	private Optional<String> userId = Optional.empty();
 
 	@Override
 	public Optional<String> getTenantId() {
@@ -26,10 +27,23 @@ public final class SecurityContextTenantHolderImpl implements SecurityContextTen
 	public void setTenantId(final String tenantId) {
 		this.tenantId = Optional.of(tenantId);
 	}
+	
+	@Override
+	public Optional<String> getUserId() {
+		return Optional.of(userId.get());
+	}
+
+	@Override
+	public void setUserId(String userId) {
+		this.userId = Optional.of(userId);
+	}
+
 
 	@Override
 	public void clear() {
-		tenantId = null;
+		this.tenantId = null;
+		this.userId = null;
+		
 	}
 
 }

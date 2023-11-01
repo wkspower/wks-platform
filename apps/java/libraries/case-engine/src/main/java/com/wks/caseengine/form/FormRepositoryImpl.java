@@ -36,32 +36,32 @@ public class FormRepositoryImpl implements FormRepository {
 	private GsonBuilder gsonBuilder;
 
 	@Override
-	public Form get(final String formKey) throws Exception {
+	public Form get(final String formKey) {
 		Bson filter = Filters.eq("key", formKey);
 		Gson gson = gsonBuilder.create();
 		return gson.fromJson(getCollection().find(filter).first().getJson(), Form.class);
 	}
 
 	@Override
-	public void save(final Form form) throws Exception {
+	public void save(final Form form) {
 		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(form))));
 
 	}
 
 	@Override
-	public List<Form> find() throws Exception {
+	public List<Form> find() {
 		Gson gson = gsonBuilder.create();
 		return getCollection().find().map(o -> gson.fromJson(o.getJson(), Form.class)).into(new ArrayList<>());
 	}
 
 	@Override
-	public void delete(final String formKey) throws Exception {
+	public void delete(final String formKey) {
 		Bson filter = Filters.eq("key", formKey);
 		getCollection().deleteMany(filter);
 	}
 
 	@Override
-	public void update(final String formKey, final Form form) throws Exception {
+	public void update(final String formKey, final Form form) {
 		Bson filter = Filters.eq("key", formKey);
 
 		Bson update = Updates.combine(Updates.set("title", form.getTitle()), Updates.set("toolTip", form.getToolTip()),

@@ -19,14 +19,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.CaseInstanceFilter;
+import com.wks.caseengine.cases.instance.command.FindCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
+import com.wks.caseengine.command.CommandExecutor;
+import com.wks.caseengine.pagination.PageResult;
 
 @ExtendWith(MockitoExtension.class)
 public class CaseInstanceServiceImplTest {
+
+	@Mock
+	private CommandExecutor commandExecutor;
 
 	@Mock
 	private CaseInstanceRepository repository;
@@ -35,31 +42,33 @@ public class CaseInstanceServiceImplTest {
 	private CaseInstanceServiceImpl service;
 
 	@Test
-	void testPatchUpdatesStatusAndStage() throws Exception {
-		
+	void shouldReturnEmptyListWhenFind() throws Exception {
+
 		// Given
-		String businessKey = "sampleKey";
-
-		CaseInstance existingInstance = new CaseInstance();
-		existingInstance.setStatus(CaseStatus.WIP_CASE_STATUS);
-		existingInstance.setStage("oldStage");
-		existingInstance.setQueueId("oldQueue");
-
-		CaseInstance mergePatch = new CaseInstance();
-		mergePatch.setStatus(CaseStatus.CLOSED_CASE_STATUS);
-		mergePatch.setStage("newStage");
-		mergePatch.setQueueId("newQueue");
-
-		when(repository.get(businessKey)).thenReturn(existingInstance);
+		PageResult<CaseInstance> pageResult = PageResult.<CaseInstance>builder().build();
+		when(commandExecutor.execute(new FindCaseInstanceCmd(Mockito.any()))).thenReturn(pageResult);
 
 		// When
-		CaseInstance result = service.patch(businessKey, mergePatch);
+		var result = service.find(CaseInstanceFilter.builder().build());
 
 		// Then
-		assertEquals(CaseStatus.CLOSED_CASE_STATUS, result.getStatus());
-		assertEquals("newStage", result.getStage());
-		assertEquals("newQueue", result.getQueueId());
-		verify(repository).update(businessKey, result);
+		assertEquals(pageResult, result);
+		verify(commandExecutor).execute(Mockito.any());
+	}
+	
+	@Test
+	void shouldReturnNullListWhenGet() throws Exception {
+
+		// Given
+		PageResult<CaseInstance> pageResult = PageResult.<CaseInstance>builder().build();
+		when(commandExecutor.execute(new FindCaseInstanceCmd(Mockito.any()))).thenReturn(pageResult);
+
+		// When
+		var result = service.find(CaseInstanceFilter.builder().build());
+
+		// Then
+		assertEquals(pageResult, result);
+		verify(commandExecutor).execute(Mockito.any());
 	}
 
 }

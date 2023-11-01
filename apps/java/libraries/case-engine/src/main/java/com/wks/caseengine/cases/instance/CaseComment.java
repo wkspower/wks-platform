@@ -26,7 +26,7 @@ import lombok.ToString;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Comment {
+public class CaseComment {
 
 	private String id;
 

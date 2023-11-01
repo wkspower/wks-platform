@@ -38,14 +38,14 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	private GsonBuilder gsonBuilder;
 
 	@Override
-	public List<CaseDefinition> find() throws Exception {
+	public List<CaseDefinition> find() {
 		Gson gson = gsonBuilder.create();
 		return getCollection().find().map(o -> gson.fromJson(o.getJson(), CaseDefinition.class))
 				.into(new ArrayList<>());
 	}
 
 	@Override
-	public List<CaseDefinition> find(final Optional<Boolean> deployed) throws Exception {
+	public List<CaseDefinition> find(final Optional<Boolean> deployed) {
 
 		if (deployed.isEmpty()) {
 			return find();
@@ -58,7 +58,7 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	}
 
 	@Override
-	public CaseDefinition get(final String caseDefId) throws Exception {
+	public CaseDefinition get(final String caseDefId) {
 		Bson filter = Filters.eq("id", caseDefId);
 		Gson gson = gsonBuilder.create();
 
@@ -71,12 +71,12 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	}
 
 	@Override
-	public void save(final CaseDefinition caseDefinition) throws Exception {
+	public void save(final CaseDefinition caseDefinition) {
 		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(caseDefinition))));
 	}
 
 	@Override
-	public void update(final String caseDefId, final CaseDefinition caseDefinition) throws Exception {
+	public void update(final String caseDefId, final CaseDefinition caseDefinition) {
 		Bson filter = Filters.eq("id", caseDefId);
 
 		Bson update = Updates.combine(Updates.set("stages", caseDefinition.getStages()),
@@ -91,7 +91,7 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	}
 
 	@Override
-	public void delete(final String caseDefinitionId) throws Exception {
+	public void delete(final String caseDefinitionId) {
 		Bson filter = Filters.eq("id", caseDefinitionId);
 		getCollection().deleteMany(filter);
 	}

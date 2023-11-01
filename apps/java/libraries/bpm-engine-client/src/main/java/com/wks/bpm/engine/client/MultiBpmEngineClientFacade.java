@@ -19,6 +19,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.BpmEngineType;
+import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
+import com.wks.bpm.engine.exception.ProcessInstanceNotFoundException;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.Deployment;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
@@ -64,12 +66,12 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public String getProcessDefinitionXMLById(final String processDefinitionId) throws Exception {
+	public String getProcessDefinitionXMLById(final String processDefinitionId) throws ProcessDefinitionNotFoundException {
 		return getEngineClient().getProcessDefinitionXMLById(processDefinitionId, getBpmEngine());
 	}
 
 	@Override
-	public String getProcessDefinitionXMLByKey(final String processDefinitionKey) throws Exception {
+	public String getProcessDefinitionXMLByKey(final String processDefinitionKey) throws ProcessDefinitionNotFoundException {
 		return getEngineClient().getProcessDefinitionXMLByKey(processDefinitionKey, getBpmEngine());
 	}
 
@@ -106,7 +108,7 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public ActivityInstance[] findActivityInstances(String processInstanceId) throws Exception {
+	public ActivityInstance[] findActivityInstances(String processInstanceId) throws ProcessInstanceNotFoundException {
 		return getEngineClient().findActivityInstances(processInstanceId, getBpmEngine());
 	}
 
