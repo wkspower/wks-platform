@@ -1,8 +1,8 @@
-package com.wks.caseengine.form.command;
+package com.wks.caseengine.queue.command;
 
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
-import com.wks.caseengine.form.Form;
+import com.wks.caseengine.queue.Queue;
 
 import lombok.AllArgsConstructor;
 
@@ -11,13 +11,13 @@ import lombok.AllArgsConstructor;
  *
  */
 @AllArgsConstructor
-public class SaveFormCmd implements Command<Void> {
+public class CreateQueueCmd implements Command<Void> {
 
-	private Form form;
+	private Queue queue;
 
 	@Override
 	public Void execute(CommandContext commandContext) {
-		commandContext.getFormRepository().save(form);
+		commandContext.getQueueRepository().save(queue);
 		return null;
 	}
 

@@ -26,8 +26,8 @@ import com.wks.caseengine.cases.instance.command.DeleteCaseInstanceCommentCmd;
 import com.wks.caseengine.cases.instance.command.FindCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.command.GetCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.command.PatchCaseInstanceCmd;
-import com.wks.caseengine.cases.instance.command.SaveCaseInstanceCommentCmd;
-import com.wks.caseengine.cases.instance.command.SaveCaseInstanceDocumentCmd;
+import com.wks.caseengine.cases.instance.command.CreateCaseInstanceCommentCmd;
+import com.wks.caseengine.cases.instance.command.CreateCaseInstanceDocumentCmd;
 import com.wks.caseengine.cases.instance.command.UpdateCaseInstanceCommentCmd;
 import com.wks.caseengine.command.CommandExecutor;
 import com.wks.caseengine.pagination.PageResult;
@@ -71,12 +71,12 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 
 	@Override
 	public void saveDocument(final String businessKey, final CaseDocument document) {
-		commandExecutor.execute(new SaveCaseInstanceDocumentCmd(businessKey, document));
+		commandExecutor.execute(new CreateCaseInstanceDocumentCmd(businessKey, document));
 	}
 
 	@Override
 	public void saveComment(final String businessKey, final CaseComment comment) throws CaseInstanceNotFoundException {
-		commandExecutor.execute(new SaveCaseInstanceCommentCmd(businessKey, comment));
+		commandExecutor.execute(new CreateCaseInstanceCommentCmd(businessKey, comment));
 	}
 
 	@Override

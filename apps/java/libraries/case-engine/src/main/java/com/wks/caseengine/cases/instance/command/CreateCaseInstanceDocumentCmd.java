@@ -23,7 +23,7 @@ import lombok.AllArgsConstructor;
  *
  */
 @AllArgsConstructor
-public class SaveCaseInstanceDocumentCmd implements Command<CaseDocument> {
+public class CreateCaseInstanceDocumentCmd implements Command<CaseDocument> {
 
 	private String businessKey;
 	private CaseDocument document;

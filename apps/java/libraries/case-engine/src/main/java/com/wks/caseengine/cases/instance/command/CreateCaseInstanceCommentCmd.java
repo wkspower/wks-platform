@@ -29,7 +29,7 @@ import lombok.AllArgsConstructor;
  *
  */
 @AllArgsConstructor
-public class SaveCaseInstanceCommentCmd implements Command<CaseComment> {
+public class CreateCaseInstanceCommentCmd implements Command<CaseComment> {
 
 	private String businessKey;
 	private CaseComment comment;

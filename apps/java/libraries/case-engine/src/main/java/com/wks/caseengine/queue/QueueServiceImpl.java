@@ -20,7 +20,7 @@ import com.wks.caseengine.command.CommandExecutor;
 import com.wks.caseengine.queue.command.DeleteQueueCmd;
 import com.wks.caseengine.queue.command.FindQueueCmd;
 import com.wks.caseengine.queue.command.GetQueueCmd;
-import com.wks.caseengine.queue.command.SaveQueueCmd;
+import com.wks.caseengine.queue.command.CreateQueueCmd;
 import com.wks.caseengine.queue.command.UpdateQueueCmd;
 
 @Component
@@ -31,7 +31,7 @@ public class QueueServiceImpl implements QueueService {
 
 	@Override
 	public void save(Queue queue) throws Exception {
-		commandExecutor.execute(new SaveQueueCmd(queue));
+		commandExecutor.execute(new CreateQueueCmd(queue));
 	}
 
 	@Override

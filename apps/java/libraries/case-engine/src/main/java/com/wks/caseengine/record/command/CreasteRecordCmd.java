@@ -9,11 +9,11 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.record.type.command;
+package com.wks.caseengine.record.command;
 
+import com.google.gson.JsonObject;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
-import com.wks.caseengine.record.type.RecordType;
 
 import lombok.AllArgsConstructor;
 
@@ -22,13 +22,14 @@ import lombok.AllArgsConstructor;
  *
  */
 @AllArgsConstructor
-public class SaveRecordTypeCmd implements Command<Void> {
+public class CreasteRecordCmd implements Command<Void> {
 
-	private RecordType recordType;
+	private String recordTypeId;
+	private JsonObject record;
 
 	@Override
 	public Void execute(CommandContext commandContext) {
-		commandContext.getRecordTypeRepository().save(recordType);
+		commandContext.getRecordRepository().save(recordTypeId, record);
 		return null;
 	}
 

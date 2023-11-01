@@ -22,12 +22,14 @@ import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
 
 import lombok.AllArgsConstructor;
+import lombok.Setter;
 
 /**
  * @author victor.franca
  *
  */
 @AllArgsConstructor
+@Setter
 public class CreateEmptyCaseInstanceCmd implements Command<CaseInstance> {
 
 	private String caseDefinitionId;
@@ -42,10 +44,13 @@ public class CreateEmptyCaseInstanceCmd implements Command<CaseInstance> {
 		}
 
 		String businessKey = commandContext.getBusinessKeyCreator().generate();
-		CaseInstance newCaseInstance = CaseInstance.builder().businessKey(businessKey)
+		CaseInstance newCaseInstance = CaseInstance.builder()
+				.businessKey(businessKey)
 				.stage(caseDefinition.getStages().stream().sorted(Comparator.comparing(CaseStage::getIndex)).findFirst()
 						.get().getName())
-				.attributes(new ArrayList<>()).caseDefinitionId(caseDefinition.getId()).build();
+				.attributes(new ArrayList<>()).caseDefinitionId(caseDefinition.getId())
+				.caseDefinitionId(caseDefinitionId)
+				.build();
 
 		commandContext.getCaseInstanceRepository().save(newCaseInstance);
 

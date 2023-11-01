@@ -20,7 +20,7 @@ import com.wks.caseengine.command.CommandExecutor;
 import com.wks.caseengine.form.command.DeleteFormCmd;
 import com.wks.caseengine.form.command.FindFormCmd;
 import com.wks.caseengine.form.command.GetFormCmd;
-import com.wks.caseengine.form.command.SaveFormCmd;
+import com.wks.caseengine.form.command.CreateFormCmd;
 import com.wks.caseengine.form.command.UpdateFormCmd;
 
 @Component
@@ -31,7 +31,7 @@ public class FormServiceImpl implements FormService {
 
 	@Override
 	public void save(Form form) throws Exception {
-		commandExecutor.execute(new SaveFormCmd(form));
+		commandExecutor.execute(new CreateFormCmd(form));
 	}
 
 	@Override
