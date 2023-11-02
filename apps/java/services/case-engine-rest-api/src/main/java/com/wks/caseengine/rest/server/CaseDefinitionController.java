@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,11 +25,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.definition.service.CaseDefinitionService;
+import com.wks.caseengine.rest.exception.ResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -42,31 +42,41 @@ public class CaseDefinitionController {
 	private CaseDefinitionService caseDefinitionService;
 
 	@GetMapping
-	public List<CaseDefinition> find(@RequestParam(required = false) Boolean deployed) {
-		return caseDefinitionService.find(Optional.ofNullable(deployed));
+	public ResponseEntity<List<CaseDefinition>> find(@RequestParam(required = false) Boolean deployed) {
+		return ResponseEntity.ok(caseDefinitionService.find(Optional.ofNullable(deployed)));
 	}
 
 	@GetMapping(value = "/{caseDefId}")
-	public CaseDefinition get(@PathVariable final String caseDefId) {
-		return caseDefinitionService.get(caseDefId);
+	public ResponseEntity<CaseDefinition> get(@PathVariable final String caseDefId) {
+		try {
+			return ResponseEntity.ok(caseDefinitionService.get(caseDefId));
+		} catch (CaseDefinitionNotFoundException e) {
+			throw new ResourceNotFoundException(e.getMessage());
+		}
 	}
 
 	@PostMapping
-	public CaseDefinition save(@RequestBody final CaseDefinition caseDefinition) {
-		return caseDefinitionService.create(caseDefinition);
+	public ResponseEntity<CaseDefinition> save(@RequestBody final CaseDefinition caseDefinition) {
+		return ResponseEntity.ok(caseDefinitionService.create(caseDefinition));
 	}
 
 	@PutMapping(value = "/{caseDefId}")
-	public CaseDefinition update(@PathVariable final String caseDefId, @RequestBody final CaseDefinition caseDefinition) {
-		return caseDefinitionService.update(caseDefId, caseDefinition);
+	public ResponseEntity<CaseDefinition> update(@PathVariable final String caseDefId,
+			@RequestBody final CaseDefinition caseDefinition) {
+		try {
+			return ResponseEntity.ok(caseDefinitionService.update(caseDefId, caseDefinition));
+		} catch (CaseDefinitionNotFoundException e) {
+			throw new ResourceNotFoundException(e.getMessage());
+		}
 	}
 
 	@DeleteMapping(value = "/{caseDefId}")
-	public void delete(@PathVariable final String caseDefId) {
+	public ResponseEntity<Void> delete(@PathVariable final String caseDefId) {
 		try {
 			caseDefinitionService.delete(caseDefId);
+			return ResponseEntity.noContent().build();
 		} catch (CaseDefinitionNotFoundException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Case Definition Not Found - " + caseDefId, e);
+			throw new ResourceNotFoundException(e.getMessage());
 		}
 	}
 }

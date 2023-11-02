@@ -14,6 +14,7 @@ package com.wks.caseengine.rest.server;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,28 +38,31 @@ public class QueueController {
 	private QueueService queueService;
 
 	@GetMapping
-	public List<Queue> find() {
-		return queueService.find();
+	public ResponseEntity<List<Queue>> find() {
+		return ResponseEntity.ok(queueService.find());
 	}
 
 	@GetMapping(value = "/{queueId}")
-	public Queue get(@PathVariable final String queueId) {
-		return queueService.get(queueId);
+	public ResponseEntity<Queue> get(@PathVariable final String queueId) {
+		return ResponseEntity.ok(queueService.get(queueId));
 	}
 
 	@PostMapping
-	public void save(@RequestBody final Queue queue) {
+	public ResponseEntity<Void> save(@RequestBody final Queue queue) {
 		queueService.save(queue);
+		return ResponseEntity.noContent().build();
 	}
 
 	@PutMapping(value = "/{queueId}")
-	public void update(@PathVariable final String queueId, @RequestBody final Queue queue) {
+	public ResponseEntity<Void> update(@PathVariable final String queueId, @RequestBody final Queue queue) {
 		queueService.update(queueId, queue);
+		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping(value = "/{queueId}")
-	public void delete(@PathVariable final String queueId) {
+	public ResponseEntity<Void> delete(@PathVariable final String queueId) {
 		queueService.delete(queueId);
+		return ResponseEntity.noContent().build();
 	}
 
 }

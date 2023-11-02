@@ -11,6 +11,7 @@
  */
 package com.wks.caseengine.rest.server;
 
+import org.springframework.boot.actuate.health.Health;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,8 +24,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class HealthCheckController {
 
 	@GetMapping
-	public String check() {
-		return "success";
+	public Health check() {
+		return Health.up().build();
 	}
 
 }

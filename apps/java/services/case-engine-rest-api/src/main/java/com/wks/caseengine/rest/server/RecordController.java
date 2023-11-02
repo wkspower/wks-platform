@@ -14,6 +14,7 @@ package com.wks.caseengine.rest.server;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -37,29 +38,32 @@ public class RecordController {
 	private RecordService recordService;
 
 	@GetMapping(value = "/{recordTypeId}")
-	public List<JsonObject> find(@PathVariable final String recordTypeId) {
-		return recordService.find(recordTypeId);
+	public ResponseEntity<List<JsonObject>> find(@PathVariable final String recordTypeId) {
+		return ResponseEntity.ok(recordService.find(recordTypeId));
 	}
 
 	@GetMapping(value = "/{recordTypeId}/{id}")
-	public JsonObject get(@PathVariable final String recordTypeId, @PathVariable final String id) {
-		return recordService.get(recordTypeId, id);
+	public ResponseEntity<JsonObject> get(@PathVariable final String recordTypeId, @PathVariable final String id) {
+		return ResponseEntity.ok(recordService.get(recordTypeId, id));
 	}
 
 	@PostMapping(value = "/{recordTypeId}")
-	public void save(@PathVariable final String recordTypeId, @RequestBody final JsonObject record) {
+	public ResponseEntity<Void> save(@PathVariable final String recordTypeId, @RequestBody final JsonObject record) {
 		recordService.save(recordTypeId, record);
+		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping(value = "/{recordTypeId}/{id}")
-	public void delete(@PathVariable final String recordTypeId, @PathVariable final String id) {
+	public ResponseEntity<Void> delete(@PathVariable final String recordTypeId, @PathVariable final String id) {
 		recordService.delete(recordTypeId, id);
+		return ResponseEntity.noContent().build();
 	}
 
 	@PatchMapping(value = "/{recordTypeId}/{id}")
-	public void update(@PathVariable final String recordTypeId, @PathVariable final String id,
+	public ResponseEntity<Void> update(@PathVariable final String recordTypeId, @PathVariable final String id,
 			@RequestBody final JsonObject record) {
 		recordService.update(recordTypeId, id, record);
+		return ResponseEntity.noContent().build();
 	}
 
 }

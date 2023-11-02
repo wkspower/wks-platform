@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,13 +37,14 @@ public class ProcessInstanceController {
 	private ProcessInstanceService processInstanceService;
 	
 	@GetMapping
-	public List<ProcessInstance> find(@RequestParam(required = false) String businessKey) {
-		return processInstanceService.find(Optional.empty(), Optional.ofNullable(businessKey), Optional.empty());
+	public ResponseEntity<List<ProcessInstance>> find(@RequestParam(required = false) String businessKey) {
+		return ResponseEntity
+				.ok(processInstanceService.find(Optional.empty(), Optional.ofNullable(businessKey), Optional.empty()));
 	}
 
 	@GetMapping(value = "/{id}/activity-instances")
-	public List<ActivityInstance> getActivityInstances(@PathVariable final String id) {
-		return processInstanceService.getActivityInstances(id);
+	public ResponseEntity<List<ActivityInstance>> getActivityInstances(@PathVariable final String id) {
+		return ResponseEntity.ok(processInstanceService.getActivityInstances(id));
 	}
 
 }

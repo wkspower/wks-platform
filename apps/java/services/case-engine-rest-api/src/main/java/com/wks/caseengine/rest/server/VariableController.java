@@ -13,6 +13,7 @@ package com.wks.caseengine.rest.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,8 +32,9 @@ public class VariableController {
 	private VariableService variableService;
 
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	public String findVariables(@RequestParam(name = "processInstanceId") final String processInstanceId) {
-		return variableService.findVariables(processInstanceId);
+	public ResponseEntity<String> findVariables(
+			@RequestParam(name = "processInstanceId") final String processInstanceId) {
+		return ResponseEntity.ok(variableService.findVariables(processInstanceId));
 	}
 
 }

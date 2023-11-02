@@ -14,6 +14,7 @@ package com.wks.caseengine.rest.server;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -37,28 +38,31 @@ public class RecordTypeController {
 	private RecordTypeService recordTypeService;
 
 	@GetMapping
-	public List<RecordType> find() {
-		return recordTypeService.find();
+	public ResponseEntity<List<RecordType>> find() {
+		return ResponseEntity.ok(recordTypeService.find());
 	}
 
 	@GetMapping(value = "/{id}")
-	public RecordType get(@PathVariable final String id) {
-		return recordTypeService.get(id);
+	public ResponseEntity<RecordType> get(@PathVariable final String id) {
+		return ResponseEntity.ok(recordTypeService.get(id));
 	}
 
 	@PostMapping
-	public void save(@RequestBody final RecordType recordType) {
+	public ResponseEntity<Void> save(@RequestBody final RecordType recordType) {
 		recordTypeService.save(recordType);
+		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping(value = "/{id}")
-	public void delete(@PathVariable final String id) {
+	public ResponseEntity<Void> delete(@PathVariable final String id) {
 		recordTypeService.delete(id);
+		return ResponseEntity.noContent().build();
 	}
 
 	@PatchMapping(value = "/{id}")
-	public void update(@PathVariable final String id, @RequestBody final RecordType recordType) {
+	public ResponseEntity<Void> update(@PathVariable final String id, @RequestBody final RecordType recordType) {
 		recordTypeService.update(id, recordType);
+		return ResponseEntity.noContent().build();
 	}
 
 }

@@ -14,6 +14,7 @@ package com.wks.caseengine.rest.server;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,28 +38,32 @@ public class TaskController {
 	private TaskService taskService;
 
 	@PostMapping(value = "/create")
-	public void create(@RequestBody final Task task) {
+	public ResponseEntity<Void> create(@RequestBody final Task task) {
 		taskService.create(task);
+		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping
-	public List<Task> find(@RequestParam(required = false) String businessKey) {
-		return taskService.find(businessKey);
+	public ResponseEntity<List<Task>> find(@RequestParam(required = false) String businessKey) {
+		return ResponseEntity.ok(taskService.find(businessKey));
 	}
 
 	@PostMapping(value = "/{taskId}/claim/{taskAssignee}")
-	public void claim(@PathVariable final String taskId, @PathVariable final String taskAssignee) {
+	public ResponseEntity<Void> claim(@PathVariable final String taskId, @PathVariable final String taskAssignee) {
 		taskService.claim(taskId, taskAssignee);
+		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping(value = "/{taskId}/unclaim")
-	public void unclaim(@PathVariable final String taskId) {
+	public ResponseEntity<Void> unclaim(@PathVariable final String taskId) {
 		taskService.unclaim(taskId);
+		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping(value = "/{taskId}/complete")
-	public void complete(@PathVariable final String taskId, @RequestBody final String variables) {
+	public ResponseEntity<Void> complete(@PathVariable final String taskId, @RequestBody final String variables) {
 		taskService.complete(taskId, JsonParser.parseString(variables).getAsJsonObject());
+		return ResponseEntity.noContent().build();
 	}
 
 }

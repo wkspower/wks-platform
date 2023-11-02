@@ -14,6 +14,7 @@ package com.wks.caseengine.rest.server;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,8 +34,9 @@ public class MessageController {
 	private MessageSenderService messageSenderService;
 
 	@PostMapping
-	public void save(@RequestBody final ProcessMessage processMessage) {
+	public ResponseEntity<Void> save(@RequestBody final ProcessMessage processMessage) {
 		messageSenderService.sendMessage(processMessage, Optional.empty());
+		return ResponseEntity.noContent().build();
 	}
 
 }
