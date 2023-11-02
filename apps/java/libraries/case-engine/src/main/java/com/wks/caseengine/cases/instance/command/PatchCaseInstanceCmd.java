@@ -48,7 +48,11 @@ public class PatchCaseInstanceCmd implements Command<CaseInstance> {
 			target.setQueueId(mergePatch.getQueueId());
 		}
 
-		commandContext.getCaseInstanceRepository().update(businessKey, target);
+		try {
+			commandContext.getCaseInstanceRepository().update(businessKey, target);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseInstanceNotFoundException(e);
+		}
 
 		// TODO return the updated case instance from DB
 		return target;

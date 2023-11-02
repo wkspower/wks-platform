@@ -60,7 +60,7 @@ public class CaseDefinitionControllerTest {
 
 	@Test
 	public void testDelete() throws Exception {
-		this.mockMvc.perform(delete("/case-definition/{caseDefId}", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(delete("/case-definition/{caseDefId}", "1")).andExpect(status().isNoContent());
 	}
 
 	@Test

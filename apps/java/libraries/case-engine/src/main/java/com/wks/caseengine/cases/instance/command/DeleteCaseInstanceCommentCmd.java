@@ -47,7 +47,11 @@ public class DeleteCaseInstanceCommentCmd implements Command<Void> {
 			throw new CaseInstanceNotFoundException();
 		}
 
-		commandContext.getCaseInstanceRepository().deleteComment(businessKey, comment);
+		try {
+			commandContext.getCaseInstanceRepository().deleteComment(businessKey, comment);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseInstanceNotFoundException(e);
+		}
 
 		return null;
 	}

@@ -55,18 +55,18 @@ public class QueueControllerTest {
 	@Test
 	public void testSave() throws Exception {
 		this.mockMvc.perform(post("/queue").contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void testDelete() throws Exception {
-		this.mockMvc.perform(delete("/queue/{queueId}", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(delete("/queue/{queueId}", "1")).andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void testUpdate() throws Exception {
 		this.mockMvc.perform(put("/queue/{queueIdKey}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 	@Test

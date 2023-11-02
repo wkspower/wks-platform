@@ -52,7 +52,7 @@ public class DeploymentControllerTest {
 	@Test
 	public void testGet() throws Exception {
 		this.mockMvc.perform(post("/deployment").contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 }

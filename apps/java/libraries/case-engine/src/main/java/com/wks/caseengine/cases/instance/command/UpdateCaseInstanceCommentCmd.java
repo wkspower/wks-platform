@@ -11,7 +11,6 @@
  */
 package com.wks.caseengine.cases.instance.command;
 
-import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
@@ -38,7 +37,11 @@ public class UpdateCaseInstanceCommentCmd implements Command<Void> {
 			throw new CaseInstanceNotFoundException(e);
 		}
 
-		commandContext.getCaseInstanceRepository().updateComment(businessKey, commentId, body);
+		try {
+			commandContext.getCaseInstanceRepository().updateComment(businessKey, commentId, body);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseInstanceNotFoundException(e);
+		}
 		return null;
 
 	}

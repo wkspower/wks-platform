@@ -11,7 +11,6 @@
  */
 package com.wks.caseengine.form.command;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;

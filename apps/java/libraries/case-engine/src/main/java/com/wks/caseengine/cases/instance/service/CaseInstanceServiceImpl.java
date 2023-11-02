@@ -18,7 +18,6 @@ import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseDocument;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceFilter;
-import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.cases.instance.command.CreateCaseInstanceCommentCmd;
 import com.wks.caseengine.cases.instance.command.CreateCaseInstanceDocumentCmd;
 import com.wks.caseengine.cases.instance.command.CreateCaseInstanceWithValuesCmd;

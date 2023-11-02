@@ -9,20 +9,19 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.repository;
+package com.wks.caseengine.record;
 
 /**
  * @author victor.franca
  *
  */
-public class DatabaseRecordNotFoundException extends Exception {
-
-	private static final String DEFAULT_MESSAGE = "Database record not found";
+public class RecordNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
+	private static final String DEFAULT_MESSAGE = "Record not found";
 
-	public DatabaseRecordNotFoundException() {
-		super(DEFAULT_MESSAGE);
+	public RecordNotFoundException(final Throwable e) {
+		super(DEFAULT_MESSAGE, e);
 	}
 
 }

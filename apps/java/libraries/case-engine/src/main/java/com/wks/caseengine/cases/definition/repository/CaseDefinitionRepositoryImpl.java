@@ -77,7 +77,8 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	}
 
 	@Override
-	public void update(final String caseDefId, final CaseDefinition caseDefinition) {
+	public void update(final String caseDefId, final CaseDefinition caseDefinition)
+			throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", caseDefId);
 
 		Bson update = Updates.combine(Updates.set("stages", caseDefinition.getStages()),
@@ -88,13 +89,19 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 						(new JsonObject(gsonBuilder.create().toJson(caseDefinition.getKanbanConfig())))),
 				Updates.set("caseHooks", caseDefinition.getCaseHooks()));
 
-		getCollection().updateOne(filter, update);
+		JsonObject jsonObject = getCollection().findOneAndUpdate(filter, update);
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException();
+		}
 	}
 
 	@Override
-	public void delete(final String caseDefinitionId) {
+	public void delete(final String caseDefinitionId) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", caseDefinitionId);
-		getCollection().deleteMany(filter);
+		JsonObject jsonObject = getCollection().findOneAndDelete(filter);
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException();
+		}
 	}
 
 	private MongoCollection<JsonObject> getCollection() {

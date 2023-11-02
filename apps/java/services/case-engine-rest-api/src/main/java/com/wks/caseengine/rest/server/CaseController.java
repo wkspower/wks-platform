@@ -86,20 +86,20 @@ public class CaseController {
 
 		try {
 			caseInstanceService.patch(businessKey, mergePatch);
-			return ResponseEntity.noContent().build();
 		} catch (CaseInstanceNotFoundException e) {
 			throw new ResourceNotFoundException(e.getMessage());
 		}
+		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping(value = "/{businessKey}")
 	public ResponseEntity<Void> delete(@PathVariable final String businessKey) {
 		try {
 			caseInstanceService.delete(businessKey);
-			return ResponseEntity.noContent().build();
 		} catch (CaseInstanceNotFoundException e) {
 			throw new ResourceNotFoundException(e.getMessage());
 		}
+		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping(value = "/{businessKey}/document")
@@ -108,10 +108,10 @@ public class CaseController {
 
 		try {
 			caseInstanceService.saveDocument(businessKey, document);
-			return ResponseEntity.noContent().build();
 		} catch (CaseInstanceNotFoundException e) {
 			throw new ResourceNotFoundException(e.getMessage());
 		}
+		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping(value = "/{businessKey}/comment")
@@ -120,10 +120,10 @@ public class CaseController {
 
 		try {
 			caseInstanceService.saveComment(businessKey, newComment);
-			return ResponseEntity.noContent().build();
 		} catch (CaseInstanceNotFoundException e) {
 			throw new ResourceNotFoundException(e.getMessage());
 		}
+		return ResponseEntity.noContent().build();
 	}
 
 	@PutMapping(value = "/{businessKey}/comment/{commentId}")
@@ -132,10 +132,10 @@ public class CaseController {
 
 		try {
 			caseInstanceService.updateComment(businessKey, commentId, comment.getBody());
-			return ResponseEntity.noContent().build();
 		} catch (CaseInstanceNotFoundException e) {
 			throw new ResourceNotFoundException(e.getMessage());
 		}
+		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping(value = "/{businessKey}/comment/{commentId}")
@@ -144,10 +144,10 @@ public class CaseController {
 
 		try {
 			caseInstanceService.deleteComment(businessKey, commentId);
-			return ResponseEntity.noContent().build();
 		} catch (CaseInstanceNotFoundException e) {
 			throw new ResourceNotFoundException(e.getMessage());
 		}
+		return ResponseEntity.noContent().build();
 	}
 
 }

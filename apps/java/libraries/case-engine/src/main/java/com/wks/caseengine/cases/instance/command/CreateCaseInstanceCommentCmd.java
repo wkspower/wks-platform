@@ -54,7 +54,11 @@ public class CreateCaseInstanceCommentCmd implements Command<CaseComment> {
 			caseInstance.getComments().add(comment);
 		}
 
-		commandContext.getCaseInstanceRepository().update(comment.getCaseId(), caseInstance);
+		try {
+			commandContext.getCaseInstanceRepository().update(comment.getCaseId(), caseInstance);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseInstanceNotFoundException(e);
+		}
 
 		return comment;
 	}

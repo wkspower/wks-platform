@@ -25,7 +25,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.record.type.RecordType;
+import com.wks.caseengine.record.type.RecordTypeNotFoundException;
 import com.wks.caseengine.record.type.RecordTypeService;
+import com.wks.caseengine.rest.exception.ResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -44,7 +46,11 @@ public class RecordTypeController {
 
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<RecordType> get(@PathVariable final String id) {
-		return ResponseEntity.ok(recordTypeService.get(id));
+		try {
+			return ResponseEntity.ok(recordTypeService.get(id));
+		} catch (RecordTypeNotFoundException e) {
+			throw new ResourceNotFoundException(e.getMessage());
+		}
 	}
 
 	@PostMapping
@@ -55,13 +61,22 @@ public class RecordTypeController {
 
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<Void> delete(@PathVariable final String id) {
-		recordTypeService.delete(id);
+		try {
+			recordTypeService.delete(id);
+		} catch (RecordTypeNotFoundException e) {
+			throw new ResourceNotFoundException(e.getMessage());
+		}
 		return ResponseEntity.noContent().build();
 	}
 
 	@PatchMapping(value = "/{id}")
 	public ResponseEntity<Void> update(@PathVariable final String id, @RequestBody final RecordType recordType) {
-		recordTypeService.update(id, recordType);
+		try {
+			recordTypeService.update(id, recordType);
+		} catch (RecordTypeNotFoundException e) {
+			throw new ResourceNotFoundException(e.getMessage());
+		}
+
 		return ResponseEntity.noContent().build();
 	}
 

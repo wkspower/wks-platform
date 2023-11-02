@@ -23,9 +23,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.ResourceAccessException;
 
 import com.google.gson.JsonObject;
+import com.wks.caseengine.record.RecordNotFoundException;
 import com.wks.caseengine.record.RecordService;
+import com.wks.caseengine.rest.exception.ResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -44,7 +47,11 @@ public class RecordController {
 
 	@GetMapping(value = "/{recordTypeId}/{id}")
 	public ResponseEntity<JsonObject> get(@PathVariable final String recordTypeId, @PathVariable final String id) {
-		return ResponseEntity.ok(recordService.get(recordTypeId, id));
+		try {
+			return ResponseEntity.ok(recordService.get(recordTypeId, id));
+		} catch (RecordNotFoundException e) {
+			throw new ResourceAccessException(e.getMessage());
+		}
 	}
 
 	@PostMapping(value = "/{recordTypeId}")
@@ -55,14 +62,22 @@ public class RecordController {
 
 	@DeleteMapping(value = "/{recordTypeId}/{id}")
 	public ResponseEntity<Void> delete(@PathVariable final String recordTypeId, @PathVariable final String id) {
-		recordService.delete(recordTypeId, id);
+		try {
+			recordService.delete(recordTypeId, id);
+		} catch (RecordNotFoundException e) {
+			throw new ResourceNotFoundException(e.getMessage());
+		}
 		return ResponseEntity.noContent().build();
 	}
 
 	@PatchMapping(value = "/{recordTypeId}/{id}")
 	public ResponseEntity<Void> update(@PathVariable final String recordTypeId, @PathVariable final String id,
 			@RequestBody final JsonObject record) {
-		recordService.update(recordTypeId, id, record);
+		try {
+			recordService.update(recordTypeId, id, record);
+		} catch (ResourceNotFoundException e) {
+			throw new ResourceNotFoundException(e.getMessage());
+		}
 		return ResponseEntity.noContent().build();
 	}
 

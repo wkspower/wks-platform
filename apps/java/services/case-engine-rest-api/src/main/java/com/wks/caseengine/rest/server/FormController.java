@@ -63,20 +63,21 @@ public class FormController {
 	public ResponseEntity<Void> delete(@PathVariable final String formKey) {
 		try {
 			formService.delete(formKey);
-			return ResponseEntity.noContent().build();
 		} catch (FormNotFoundException e) {
 			throw new ResourceNotFoundException(e.getMessage());
 		}
+		return ResponseEntity.noContent().build();
 	}
 
 	@PatchMapping(value = "/{formKey}")
 	public ResponseEntity<Void> update(@PathVariable final String formKey, @RequestBody final Form form) {
 		try {
 			formService.update(formKey, form);
-			return ResponseEntity.noContent().build();
+			
 		} catch (FormNotFoundException e) {
 			throw new ResourceNotFoundException(e.getMessage());
 		}
+		return ResponseEntity.noContent().build();
 	}
 
 }

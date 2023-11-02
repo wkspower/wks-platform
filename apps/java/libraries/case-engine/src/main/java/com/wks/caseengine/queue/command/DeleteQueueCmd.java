@@ -2,6 +2,8 @@ package com.wks.caseengine.queue.command;
 
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.queue.QueueNotFoundException;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 
@@ -16,7 +18,11 @@ public class DeleteQueueCmd implements Command<Void> {
 
 	@Override
 	public Void execute(CommandContext commandContext) {
-		commandContext.getQueueRepository().delete(queueId);
+		try {
+			commandContext.getQueueRepository().delete(queueId);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new QueueNotFoundException(e);
+		}
 		return null;
 	}
 

@@ -25,7 +25,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.queue.Queue;
+import com.wks.caseengine.queue.QueueNotFoundException;
 import com.wks.caseengine.queue.QueueService;
+import com.wks.caseengine.rest.exception.ResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -44,7 +46,11 @@ public class QueueController {
 
 	@GetMapping(value = "/{queueId}")
 	public ResponseEntity<Queue> get(@PathVariable final String queueId) {
-		return ResponseEntity.ok(queueService.get(queueId));
+		try {
+			return ResponseEntity.ok(queueService.get(queueId));
+		} catch (QueueNotFoundException e) {
+			throw new ResourceNotFoundException(e.getMessage());
+		}
 	}
 
 	@PostMapping
@@ -55,13 +61,21 @@ public class QueueController {
 
 	@PutMapping(value = "/{queueId}")
 	public ResponseEntity<Void> update(@PathVariable final String queueId, @RequestBody final Queue queue) {
-		queueService.update(queueId, queue);
+		try {
+			queueService.update(queueId, queue);
+		} catch (QueueNotFoundException e) {
+			throw new ResourceNotFoundException(e.getMessage());
+		}
 		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping(value = "/{queueId}")
 	public ResponseEntity<Void> delete(@PathVariable final String queueId) {
-		queueService.delete(queueId);
+		try {
+			queueService.delete(queueId);
+		} catch (QueueNotFoundException e) {
+			throw new ResourceNotFoundException(e.getMessage());
+		}
 		return ResponseEntity.noContent().build();
 	}
 

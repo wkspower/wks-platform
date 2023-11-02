@@ -18,6 +18,7 @@ import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 
@@ -45,7 +46,12 @@ public class DeleteCaseInstanceCmd implements Command<Void> {
 		// TODO close/archive process in PostClose/Archive hook
 
 		caseInstanceList.forEach(o -> {
-			commandContext.getCaseInstanceRepository().delete(o.getBusinessKey());
+			try {
+				commandContext.getCaseInstanceRepository().delete(o.getBusinessKey());
+			} catch (DatabaseRecordNotFoundException e) {
+				throw new CaseInstanceNotFoundException(e);
+			}
+
 		});
 
 		return null;

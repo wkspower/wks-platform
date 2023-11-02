@@ -55,19 +55,19 @@ public class RecordControllerTest {
 	@Test
 	public void testSave() throws Exception {
 		this.mockMvc.perform(post("/record/{recordTypeId}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void testDelete() throws Exception {
-		this.mockMvc.perform(delete("/record/{recordTypeId}/{id}", "1", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(delete("/record/{recordTypeId}/{id}", "1", "1")).andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void testUpdate() throws Exception {
 		this.mockMvc.perform(
 				patch("/record/{recordTypeId}/{id}", "1", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 	@Test

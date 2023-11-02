@@ -14,6 +14,8 @@ package com.wks.caseengine.record.command;
 import com.google.gson.JsonObject;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.record.RecordNotFoundException;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 
@@ -30,7 +32,11 @@ public class UpdateRecordCmd implements Command<Void> {
 
 	@Override
 	public Void execute(CommandContext commandContext) {
-		commandContext.getRecordRepository().update(recordTypeId, recordId, record);
+		try {
+			commandContext.getRecordRepository().update(recordTypeId, recordId, record);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new RecordNotFoundException(e);
+		}
 		return null;
 	}
 

@@ -57,18 +57,18 @@ public class TaskControllerTest {
 
 	@Test
 	public void testClaim() throws Exception {
-		this.mockMvc.perform(post("/task/{taskId}/claim/{taskAssignee}", "1", "mark")).andExpect(status().isOk());
+		this.mockMvc.perform(post("/task/{taskId}/claim/{taskAssignee}", "1", "mark")).andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void testUnclaim() throws Exception {
-		this.mockMvc.perform(post("/task/{taskId}/unclaim", "1")).andExpect(status().isOk());
+		this.mockMvc.perform(post("/task/{taskId}/unclaim", "1")).andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void testComplete() throws Exception {
 		this.mockMvc.perform(post("/task/{taskId}/complete", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 }

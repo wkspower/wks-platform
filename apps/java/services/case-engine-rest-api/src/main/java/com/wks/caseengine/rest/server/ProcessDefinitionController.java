@@ -22,8 +22,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.bpm.engine.client.BpmEngineClientFacade;
+import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
+import com.wks.caseengine.rest.exception.ResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -34,16 +36,21 @@ public class ProcessDefinitionController {
 
 	@Autowired
 	private BpmEngineClientFacade processEngineClientFacade;
-
+	
 	@PostMapping(value = "/key/{key}/start")
-	public ResponseEntity<ProcessInstance> start(@PathVariable final String key, @RequestBody final ProcessInstance processInstance) {
+	public ResponseEntity<ProcessInstance> start(@PathVariable final String key,
+			@RequestBody final ProcessInstance processInstance) {
 		return ResponseEntity.ok(processEngineClientFacade.startProcess(key, processInstance.getBusinessKey()));
-		
+
 	}
 
 	@GetMapping(value = "/{processDefinitionId}/xml", produces = MediaType.APPLICATION_XML_VALUE)
 	public ResponseEntity<String> get(@PathVariable final String processDefinitionId) {
-		return ResponseEntity.ok(processEngineClientFacade.getProcessDefinitionXMLById(processDefinitionId));
+		try {
+			return ResponseEntity.ok(processEngineClientFacade.getProcessDefinitionXMLById(processDefinitionId));
+		} catch (ProcessDefinitionNotFoundException e) {
+			throw new ResourceNotFoundException(e.getMessage());
+		}
 	}
 
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)

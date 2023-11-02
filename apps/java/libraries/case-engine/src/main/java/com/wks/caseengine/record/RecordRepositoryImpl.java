@@ -25,6 +25,7 @@ import com.google.gson.GsonBuilder;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.wks.caseengine.db.EngineMongoDataConnection;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 @Component
 public class RecordRepositoryImpl implements RecordRepository {
@@ -36,11 +37,17 @@ public class RecordRepositoryImpl implements RecordRepository {
 	private GsonBuilder gsonBuilder;
 
 	@Override
-	public com.google.gson.JsonObject get(final String recordTypeId, final String id) {
+	public com.google.gson.JsonObject get(final String recordTypeId, final String id)
+			throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("_id", new ObjectId(id));
 		Gson gson = gsonBuilder.create();
-		return gson.fromJson(getCollection(recordTypeId).find(filter).first().getJson(),
-				com.google.gson.JsonObject.class);
+
+		JsonObject jsonObject = getCollection(recordTypeId).find(filter).first();
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException();
+		}
+
+		return gson.fromJson(jsonObject.getJson(), com.google.gson.JsonObject.class);
 	}
 
 	@Override
@@ -57,16 +64,24 @@ public class RecordRepositoryImpl implements RecordRepository {
 	}
 
 	@Override
-	public void delete(final String recordTypeId, final String id) {
+	public void delete(final String recordTypeId, final String id) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("_id", new ObjectId(id));
-		getCollection(recordTypeId).deleteMany(filter);
+		JsonObject jsonObject = getCollection(recordTypeId).findOneAndDelete(filter);
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException();
+		}
 	}
 
 	@Override
-	public void update(final String recordTypeId, final String id, final com.google.gson.JsonObject record) {
+	public void update(final String recordTypeId, final String id, final com.google.gson.JsonObject record)
+			throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("_id", new ObjectId(id));
 
-		getCollection(recordTypeId).replaceOne(filter, (new JsonObject(gsonBuilder.create().toJson(record))));
+		JsonObject jsonObject = getCollection(recordTypeId).findOneAndReplace(filter,
+				(new JsonObject(gsonBuilder.create().toJson(record))));
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException();
+		}
 	}
 
 	private MongoCollection<JsonObject> getCollection(final String collectionName) {

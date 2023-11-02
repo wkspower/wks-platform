@@ -74,9 +74,9 @@ public class CaseDefinitionController {
 	public ResponseEntity<Void> delete(@PathVariable final String caseDefId) {
 		try {
 			caseDefinitionService.delete(caseDefId);
-			return ResponseEntity.noContent().build();
 		} catch (CaseDefinitionNotFoundException e) {
 			throw new ResourceNotFoundException(e.getMessage());
 		}
+		return ResponseEntity.noContent().build();
 	}
 }

@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionFilter;
-import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.definition.command.CreateCaseDefinitionCmd;
 import com.wks.caseengine.cases.definition.command.DeleteCaseDefinitionCmd;
 import com.wks.caseengine.cases.definition.command.FindCaseDefinitionCmd;

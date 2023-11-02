@@ -62,19 +62,27 @@ public class FormRepositoryImpl implements FormRepository {
 	}
 
 	@Override
-	public void delete(final String formKey) {
+	public void delete(final String formKey) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("key", formKey);
-		getCollection().deleteMany(filter);
+		
+		JsonObject form = getCollection().findOneAndDelete(filter);
+		if(form == null) {
+			throw new DatabaseRecordNotFoundException();
+		}
 	}
 
 	@Override
-	public void update(final String formKey, final Form form) {
+	public void update(final String formKey, final Form form) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("key", formKey);
 
 		Bson update = Updates.combine(Updates.set("title", form.getTitle()), Updates.set("toolTip", form.getToolTip()),
 				Updates.set("structure", (new JsonObject(gsonBuilder.create().toJson(form.getStructure())))));
+		
+		JsonObject updatedForm = getCollection().findOneAndUpdate(filter, update);
+		if(updatedForm == null) {
+			throw new DatabaseRecordNotFoundException();
+		}
 
-		getCollection().updateOne(filter, update);
 	}
 
 	private MongoCollection<JsonObject> getCollection() {

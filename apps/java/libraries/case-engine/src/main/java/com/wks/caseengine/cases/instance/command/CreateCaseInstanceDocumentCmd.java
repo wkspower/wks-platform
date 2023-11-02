@@ -42,7 +42,11 @@ public class CreateCaseInstanceDocumentCmd implements Command<CaseDocument> {
 
 		caseInstance.addDocument(document);
 
-		commandContext.getCaseInstanceRepository().update(businessKey, caseInstance);
+		try {
+			commandContext.getCaseInstanceRepository().update(businessKey, caseInstance);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseInstanceNotFoundException(e);
+		}
 
 		return document;
 	}

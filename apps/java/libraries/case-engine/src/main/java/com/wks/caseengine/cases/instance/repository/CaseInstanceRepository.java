@@ -15,14 +15,16 @@ import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceFilter;
 import com.wks.caseengine.pagination.PageResult;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 import com.wks.caseengine.repository.Repository;
 
 public interface CaseInstanceRepository extends Repository<CaseInstance> {
 
 	PageResult<CaseInstance> find(CaseInstanceFilter filters);
 
-	void deleteComment(final String businessKey, final CaseComment comment);
+	void deleteComment(final String businessKey, final CaseComment comment) throws DatabaseRecordNotFoundException;
 
-	void updateComment(final String businessKey, final String commentId, final String body);
+	void updateComment(final String businessKey, final String commentId, final String body)
+			throws DatabaseRecordNotFoundException;
 
 }

@@ -14,17 +14,18 @@ package com.wks.caseengine.record;
 import java.util.List;
 
 import com.google.gson.JsonObject;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 public interface RecordRepository {
 
 	List<JsonObject> find(final String recordTypeId);
 
-	JsonObject get(final String recordTypeId, final String id);
+	JsonObject get(final String recordTypeId, final String id) throws DatabaseRecordNotFoundException;
 
 	void save(final String recordTypeId, final JsonObject object);
 
-	void update(final String recordTypeId, final String id, final JsonObject object);
+	void update(final String recordTypeId, final String id, final JsonObject object) throws DatabaseRecordNotFoundException;
 
-	void delete(final String recordTypeId, final String id);
+	void delete(final String recordTypeId, final String id) throws DatabaseRecordNotFoundException;
 
 }

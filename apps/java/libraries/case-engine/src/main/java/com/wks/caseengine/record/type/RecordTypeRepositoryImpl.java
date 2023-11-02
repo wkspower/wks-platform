@@ -41,11 +41,11 @@ public class RecordTypeRepositoryImpl implements RecordTypeRepository {
 		Bson filter = Filters.eq("id", id);
 		Gson gson = gsonBuilder.create();
 		JsonObject jsonObject = getCollection().find(filter).first();
-		
+
 		if (jsonObject == null) {
 			throw new DatabaseRecordNotFoundException();
 		}
-		
+
 		return gson.fromJson(jsonObject.getJson(), RecordType.class);
 	}
 
@@ -62,18 +62,27 @@ public class RecordTypeRepositoryImpl implements RecordTypeRepository {
 	}
 
 	@Override
-	public void delete(final String id) {
+	public void delete(final String id) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", id);
-		getCollection().deleteMany(filter);
+		
+		JsonObject jsonObject = getCollection().findOneAndDelete(filter);
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException();
+		}
+
 	}
 
 	@Override
-	public void update(final String id, final RecordType recordType) {
+	public void update(final String id, final RecordType recordType) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", id);
 
 		Bson update = Updates.set("fields", (new JsonObject(gsonBuilder.create().toJson(recordType.getFields()))));
 
-		getCollection().updateOne(filter, update);
+		JsonObject jsonObject = getCollection().findOneAndUpdate(filter, update);
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException();
+		}
+
 	}
 
 	private MongoCollection<JsonObject> getCollection() {
