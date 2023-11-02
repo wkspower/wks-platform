@@ -44,7 +44,7 @@ public final class OpenPolicyAuthzEnforcer implements AccessDecisionVoter<Object
 		this.opaAuthURL = opaAuthURL;
 		this.handler = handler;
 		this.restTemplate = createRestTemplate();
-		this.matchers = Arrays.asList(new AntPathRequestMatcher("/actuator/**"),
+		this.matchers = Arrays.asList(new AntPathRequestMatcher("/healthCheck"), new AntPathRequestMatcher("/actuator/**"),
 				new AntPathRequestMatcher("/swagger-ui/**"), new AntPathRequestMatcher("/v3/api-docs/**"));
 	}
 
