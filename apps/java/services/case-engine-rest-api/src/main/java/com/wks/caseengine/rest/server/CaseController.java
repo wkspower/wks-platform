@@ -55,7 +55,7 @@ public class CaseController {
 			@RequestParam(required = false, name = "before") String before,
 			@RequestParam(required = false, name = "after") String after,
 			@RequestParam(required = false, name = "sort") String sort,
-			@RequestParam(required = false, name = "limit") String limit) throws Exception {
+			@RequestParam(required = false, name = "limit") String limit) {
 		Cursor cursor = Cursor.of(before, after);
 
 		CaseInstanceFilter filter = new CaseInstanceFilter(status, caseDefinitionId, cursor, sort, limit);
@@ -66,18 +66,17 @@ public class CaseController {
 	}
 
 	@GetMapping(value = "/{businessKey}")
-	public CaseInstance get(@PathVariable final String businessKey) throws Exception {
+	public CaseInstance get(@PathVariable final String businessKey) {
 		return caseInstanceService.get(businessKey);
 	}
 
 	@PostMapping
-	public CaseInstance save(@RequestBody final CaseInstance caseInstance) throws Exception {
+	public CaseInstance save(@RequestBody final CaseInstance caseInstance) {
 		return caseInstanceService.createWithValues(caseInstance);
 	}
 
 	@PatchMapping(value = "/{businessKey}", consumes = "application/merge-patch+json")
-	public ResponseEntity<Void> mergePatch(@PathVariable final String businessKey, @RequestBody String mergePatchJson)
-			throws Exception {
+	public ResponseEntity<Void> mergePatch(@PathVariable final String businessKey, @RequestBody String mergePatchJson) {
 
 		CaseInstance mergePatch = gsonBuilder.create().fromJson(mergePatchJson, CaseInstance.class);
 
@@ -87,7 +86,7 @@ public class CaseController {
 	}
 
 	@DeleteMapping(value = "/{businessKey}")
-	public ResponseEntity<Void> delete(@PathVariable final String businessKey) throws Exception {
+	public ResponseEntity<Void> delete(@PathVariable final String businessKey) {
 		try {
 			caseInstanceService.delete(businessKey);
 			return ResponseEntity.noContent().build();
@@ -97,29 +96,26 @@ public class CaseController {
 	}
 
 	@PostMapping(value = "/{businessKey}/document")
-	public ResponseEntity<Void> saveDocument(@PathVariable final String businessKey, @RequestBody CaseDocument document)
-			throws Exception {
+	public ResponseEntity<Void> saveDocument(@PathVariable final String businessKey, @RequestBody CaseDocument document) {
 		caseInstanceService.saveDocument(businessKey, document);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping(value = "/{businessKey}/comment")
-	public ResponseEntity<Void> saveComment(@PathVariable final String businessKey, @RequestBody final CaseComment newComment)
-			throws Exception {
+	public ResponseEntity<Void> saveComment(@PathVariable final String businessKey, @RequestBody final CaseComment newComment) {
 		caseInstanceService.saveComment(businessKey, newComment);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PutMapping(value = "/{businessKey}/comment/{commentId}")
 	public ResponseEntity<Void> udpateComment(@PathVariable final String businessKey, @PathVariable final String commentId,
-			@RequestBody final CaseComment comment) throws Exception {
+			@RequestBody final CaseComment comment) {
 		caseInstanceService.updateComment(businessKey, commentId, comment.getBody());
 		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping(value = "/{businessKey}/comment/{commentId}")
-	public ResponseEntity<Void> deleteComment(@PathVariable final String businessKey, @PathVariable final String commentId)
-			throws Exception {
+	public ResponseEntity<Void> deleteComment(@PathVariable final String businessKey, @PathVariable final String commentId) {
 		caseInstanceService.deleteComment(businessKey, commentId);
 		return ResponseEntity.noContent().build();
 	}

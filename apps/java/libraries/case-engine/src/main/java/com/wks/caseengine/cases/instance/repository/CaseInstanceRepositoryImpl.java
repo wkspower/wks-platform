@@ -36,6 +36,7 @@ import com.wks.caseengine.pagination.Args;
 import com.wks.caseengine.pagination.CursorPagination;
 import com.wks.caseengine.pagination.PageResult;
 import com.wks.caseengine.pagination.mongo.MongoCursorPagination;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 import com.wks.caseengine.repository.Paginator;
 
 @Component
@@ -68,9 +69,12 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	}
 
 	@Override
-	public CaseInstance get(final String businessKey) {
+	public CaseInstance get(final String businessKey) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("businessKey", businessKey);
 		CaseInstance first = getCollection().find(filter).first();
+		if (first == null) {
+			throw new DatabaseRecordNotFoundException();
+		}
 		return first;
 	}
 

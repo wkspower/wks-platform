@@ -34,6 +34,7 @@ import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
 import com.wks.caseengine.command.CommandContext;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 
 /**
@@ -62,7 +63,7 @@ public class CreateEmptyCaseInstanceCmdTest {
 	private ProcessInstanceService processInstanceService;
 
 	@Test
-	public void shouldCreateCaseInstance() {
+	public void shouldCreateCaseInstance() throws DatabaseRecordNotFoundException {
 
 		// Given
 		createCaseInstanceCmd.setCaseDefinitionId("CD_1");

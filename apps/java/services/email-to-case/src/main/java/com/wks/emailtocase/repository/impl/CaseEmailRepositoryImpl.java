@@ -25,6 +25,7 @@ import com.google.gson.GsonBuilder;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.wks.caseengine.db.EngineMongoDataConnection;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 import com.wks.emailtocase.caseemail.CaseEmail;
 import com.wks.emailtocase.repository.CaseEmailRepository;
 
@@ -38,14 +39,13 @@ public class CaseEmailRepositoryImpl implements CaseEmailRepository {
 	private GsonBuilder gsonBuilder;
 
 	@Override
-	public List<CaseEmail> find() throws Exception {
+	public List<CaseEmail> find() {
 		Gson gson = gsonBuilder.create();
 		return getCollection().find().map(o -> gson.fromJson(o.getJson(), CaseEmail.class)).into(new ArrayList<>());
 	}
 
 	@Override
-	public List<CaseEmail> find(final Optional<String> caseInstanceBusinessKey, final Optional<String> caseDefinitionId)
-			throws Exception {
+	public List<CaseEmail> find(final Optional<String> caseInstanceBusinessKey, final Optional<String> caseDefinitionId) {
 
 		Bson caseInstanceBKFilter = caseInstanceBusinessKey.isPresent()
 				? Filters.eq("caseInstanceBusinessKey", caseInstanceBusinessKey.get())
@@ -59,24 +59,24 @@ public class CaseEmailRepositoryImpl implements CaseEmailRepository {
 	}
 
 	@Override
-	public CaseEmail get(String caseEmailId) throws Exception {
+	public CaseEmail get(String caseEmailId) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", caseEmailId);
 		Gson gson = gsonBuilder.create();
 		return gson.fromJson(getCollection().find(filter).first().getJson(), CaseEmail.class);
 	}
 
 	@Override
-	public void save(CaseEmail caseEmail) throws Exception {
+	public void save(CaseEmail caseEmail) {
 		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(caseEmail))));
 	}
 
 	@Override
-	public void update(String id, CaseEmail object) throws Exception {
+	public void update(String id, CaseEmail object) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void delete(String id) throws Exception {
+	public void delete(String id) {
 		throw new UnsupportedOperationException();
 	}
 

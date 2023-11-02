@@ -9,12 +9,20 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.data.iimport;
+package com.wks.caseengine.repository;
 
-import com.google.gson.JsonObject;
+/**
+ * @author victor.franca
+ *
+ */
+public class DatabaseRecordNotFoundException extends Exception {
 
-public interface DataImportService {
+	private static final String DEFAULT_MESSAGE = "Record not found";
 
-	void importData(final JsonObject data);
+	private static final long serialVersionUID = 1L;
+
+	public DatabaseRecordNotFoundException() {
+		super(DEFAULT_MESSAGE);
+	}
 
 }

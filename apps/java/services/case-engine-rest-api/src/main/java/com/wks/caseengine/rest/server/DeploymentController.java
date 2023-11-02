@@ -33,7 +33,7 @@ public class DeploymentController {
 	private BpmEngineClientFacade processEngineClient;
 
 	@PostMapping
-	public void deploy(@RequestBody String file) throws Exception {
+	public void deploy(@RequestBody String file) {
 		processEngineClient.deploy(FILE_NAME_BPMN, new String(file.getBytes()));
 	}
 

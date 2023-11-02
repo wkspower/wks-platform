@@ -27,7 +27,7 @@ public class MessageSenderServiceImpl implements MessageSenderService {
 	private BpmEngineClientFacade processEngineClient;
 
 	@Override
-	public void sendMessage(final ProcessMessage processMessage, final Optional<JsonArray> variables) throws Exception {
+	public void sendMessage(final ProcessMessage processMessage, final Optional<JsonArray> variables) {
 		processEngineClient.sendMessage(processMessage, variables);
 
 	}

@@ -33,7 +33,7 @@ public class MessageController {
 	private MessageSenderService messageSenderService;
 
 	@PostMapping
-	public void save(@RequestBody final ProcessMessage processMessage) throws Exception {
+	public void save(@RequestBody final ProcessMessage processMessage) {
 		messageSenderService.sendMessage(processMessage, Optional.empty());
 	}
 

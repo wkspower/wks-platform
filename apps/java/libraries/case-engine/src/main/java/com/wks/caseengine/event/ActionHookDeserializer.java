@@ -26,8 +26,7 @@ import com.wks.caseengine.tasks.event.complete.TaskCompleteHook;
 public class ActionHookDeserializer implements JsonDeserializer<ActionHook> {
 
 	@Override
-	public ActionHook deserialize(JsonElement jsonElement, Type typeOfT, JsonDeserializationContext context)
-			throws JsonParseException {
+	public ActionHook deserialize(JsonElement jsonElement, Type typeOfT, JsonDeserializationContext context) {
 
 		final JsonObject jsonObject = jsonElement.getAsJsonObject();
 

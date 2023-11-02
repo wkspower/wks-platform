@@ -13,8 +13,10 @@ package com.wks.caseengine.cases.instance.command;
 
 import com.wks.caseengine.cases.instance.CaseDocument;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 
@@ -31,7 +33,12 @@ public class CreateCaseInstanceDocumentCmd implements Command<CaseDocument> {
 	@Override
 	public CaseDocument execute(final CommandContext commandContext) {
 
-		CaseInstance caseInstance = commandContext.getCaseInstanceRepository().get(businessKey);
+		CaseInstance caseInstance;
+		try {
+			caseInstance = commandContext.getCaseInstanceRepository().get(businessKey);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseInstanceNotFoundException(e);
+		}
 
 		caseInstance.addDocument(document);
 

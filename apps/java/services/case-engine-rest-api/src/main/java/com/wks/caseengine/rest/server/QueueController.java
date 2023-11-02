@@ -37,27 +37,27 @@ public class QueueController {
 	private QueueService queueService;
 
 	@GetMapping
-	public List<Queue> find() throws Exception {
+	public List<Queue> find() {
 		return queueService.find();
 	}
 
 	@GetMapping(value = "/{queueId}")
-	public Queue get(@PathVariable final String queueId) throws Exception {
+	public Queue get(@PathVariable final String queueId) {
 		return queueService.get(queueId);
 	}
 
 	@PostMapping
-	public void save(@RequestBody final Queue queue) throws Exception {
+	public void save(@RequestBody final Queue queue) {
 		queueService.save(queue);
 	}
 
 	@PutMapping(value = "/{queueId}")
-	public void update(@PathVariable final String queueId, @RequestBody final Queue queue) throws Exception {
+	public void update(@PathVariable final String queueId, @RequestBody final Queue queue) {
 		queueService.update(queueId, queue);
 	}
 
 	@DeleteMapping(value = "/{queueId}")
-	public void delete(@PathVariable final String queueId) throws Exception {
+	public void delete(@PathVariable final String queueId) {
 		queueService.delete(queueId);
 	}
 

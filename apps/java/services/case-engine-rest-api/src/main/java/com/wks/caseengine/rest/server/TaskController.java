@@ -37,27 +37,27 @@ public class TaskController {
 	private TaskService taskService;
 
 	@PostMapping(value = "/create")
-	public void create(@RequestBody final Task task) throws Exception {
+	public void create(@RequestBody final Task task) {
 		taskService.create(task);
 	}
 
 	@GetMapping
-	public List<Task> find(@RequestParam(required = false) String businessKey) throws Exception {
+	public List<Task> find(@RequestParam(required = false) String businessKey) {
 		return taskService.find(businessKey);
 	}
 
 	@PostMapping(value = "/{taskId}/claim/{taskAssignee}")
-	public void claim(@PathVariable final String taskId, @PathVariable final String taskAssignee) throws Exception {
+	public void claim(@PathVariable final String taskId, @PathVariable final String taskAssignee) {
 		taskService.claim(taskId, taskAssignee);
 	}
 
 	@PostMapping(value = "/{taskId}/unclaim")
-	public void unclaim(@PathVariable final String taskId) throws Exception {
+	public void unclaim(@PathVariable final String taskId) {
 		taskService.unclaim(taskId);
 	}
 
 	@PostMapping(value = "/{taskId}/complete")
-	public void complete(@PathVariable final String taskId, @RequestBody final String variables) throws Exception {
+	public void complete(@PathVariable final String taskId, @RequestBody final String variables) {
 		taskService.complete(taskId, JsonParser.parseString(variables).getAsJsonObject());
 	}
 

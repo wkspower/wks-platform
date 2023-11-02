@@ -33,7 +33,7 @@ public class MinioBucketService implements BucketService {
 	private MinioClientDelegate client;
 
 	@Override
-	public String createAssignedTenant() throws Exception {
+	public String createAssignedTenant() {
 		String bucketByTenant = tenantHolder.getTenantId().get();
 
 		boolean found = client.bucketExists(BucketExistsArgs.builder().bucket(bucketByTenant).build());
@@ -45,7 +45,7 @@ public class MinioBucketService implements BucketService {
 	}
 
 	@Override
-	public String createObjectWithPath(String dir, String fileName) throws Exception {
+	public String createObjectWithPath(String dir, String fileName) {
 		return String.format("%s/%s", dir, fileName);
 	}
 

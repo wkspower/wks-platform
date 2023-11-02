@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
-import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 
 public interface CaseDefinitionService {
 
@@ -27,6 +26,6 @@ public interface CaseDefinitionService {
 
 	CaseDefinition update(final String caseDefId, CaseDefinition caseDefinition);
 
-	void delete(final String caseDefinitionId) throws CaseDefinitionNotFoundException;
+	void delete(final String caseDefinitionId);
 
 }

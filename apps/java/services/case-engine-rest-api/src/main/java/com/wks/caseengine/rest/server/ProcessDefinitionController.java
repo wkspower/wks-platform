@@ -35,18 +35,17 @@ public class ProcessDefinitionController {
 	private BpmEngineClientFacade processEngineClientFacade;
 
 	@PostMapping(value = "/key/{key}/start")
-	public ProcessInstance start(@PathVariable final String key, @RequestBody final ProcessInstance processInstance)
-			throws Exception {
+	public ProcessInstance start(@PathVariable final String key, @RequestBody final ProcessInstance processInstance) {
 		return processEngineClientFacade.startProcess(key, processInstance.getBusinessKey());
 	}
 
 	@GetMapping(value = "/{processDefinitionId}/xml", produces = MediaType.APPLICATION_XML_VALUE)
-	public String get(@PathVariable final String processDefinitionId) throws Exception {
+	public String get(@PathVariable final String processDefinitionId) {
 		return processEngineClientFacade.getProcessDefinitionXMLById(processDefinitionId);
 	}
 
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	public ProcessDefinition[] find() throws Exception {
+	public ProcessDefinition[] find() {
 		return processEngineClientFacade.findProcessDefinitions();
 	}
 

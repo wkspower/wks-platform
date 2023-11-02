@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class HealthCheckController {
 
 	@GetMapping
-	public String check() throws Exception {
+	public String check() {
 		return "success";
 	}
 

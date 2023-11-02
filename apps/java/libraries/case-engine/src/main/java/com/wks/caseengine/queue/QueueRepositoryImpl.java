@@ -21,10 +21,12 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.db.EngineMongoDataConnection;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 @Component
 public class QueueRepositoryImpl implements QueueRepository {
@@ -42,10 +44,14 @@ public class QueueRepositoryImpl implements QueueRepository {
 	}
 
 	@Override
-	public Queue get(String id) {
+	public Queue get(String id) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", id);
 		Gson gson = gsonBuilder.create();
-		return gson.fromJson(getCollection().find(filter).first().getJson(), Queue.class);
+		JsonObject jsonObject = getCollection().find(filter).first();
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException();
+		}
+		return gson.fromJson(jsonObject.getJson(), Queue.class);
 	}
 
 	@Override

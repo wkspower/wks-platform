@@ -57,7 +57,7 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 	private String importDir;
 
 	@Override
-	public void run(String... args) throws Exception {
+	public void run(String... args) throws IOException {
 		log.info("Start of mongo data importing {}", importDir);
 
 		if (importDir != null && !importDir.isEmpty()) {
@@ -78,7 +78,7 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 		log.info("End mongo data importing", importDir);
 	}
 
-	public void importData(JsonObject data) throws Exception {
+	public void importData(JsonObject data) {
 		Gson gson = gsonBuilder.create();
 
 		JsonElement organizationJson = data.get("organization");

@@ -17,7 +17,7 @@ public interface Repository<T> {
 
 	List<T> find();
 
-	T get(final String id);
+	T get(final String id) throws DatabaseRecordNotFoundException;
 
 	void save(final T object);
 

@@ -30,7 +30,7 @@ public class CaseEmailFactory {
 	private String emailToCaseRoutingUpdateCasePattern;
 
 	public CaseEmail create(final String to, final String from, final String subject, final String text,
-			final String html) throws CaseEmailBuilderException {
+			final String html) {
 
 		CaseEmail.CaseEmailBuilder caseEmailBuilder = CaseEmail.builder();
 

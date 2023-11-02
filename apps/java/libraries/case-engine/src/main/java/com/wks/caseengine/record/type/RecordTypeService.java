@@ -15,14 +15,14 @@ import java.util.List;
 
 public interface RecordTypeService {
 
-	void save(final RecordType recordType) throws Exception;
+	void save(final RecordType recordType);
 
-	RecordType get(final String id) throws Exception;
+	RecordType get(final String id);
 
-	List<RecordType> find() throws Exception;
+	List<RecordType> find();
 
-	void delete(final String id) throws Exception;
+	void delete(final String id);
 
-	void update(final String id, final RecordType recordType) throws Exception;
+	void update(final String id, final RecordType recordType);
 
 }

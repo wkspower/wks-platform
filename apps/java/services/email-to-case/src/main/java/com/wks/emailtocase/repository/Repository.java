@@ -13,16 +13,18 @@ package com.wks.emailtocase.repository;
 
 import java.util.List;
 
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
+
 public interface Repository<T> {
 
-	List<T> find() throws Exception;
+	List<T> find();
 
-	T get(final String id) throws Exception;
+	T get(final String id) throws DatabaseRecordNotFoundException;
 
-	void save(final T object) throws Exception;
+	void save(final T object);
 
-	void update(final String id, final T object) throws Exception;
+	void update(final String id, final T object);
 
-	void delete(final String id) throws Exception;
+	void delete(final String id);
 
 }

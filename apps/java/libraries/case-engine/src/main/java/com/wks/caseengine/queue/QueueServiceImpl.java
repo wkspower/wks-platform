@@ -30,27 +30,27 @@ public class QueueServiceImpl implements QueueService {
 	private CommandExecutor commandExecutor;
 
 	@Override
-	public void save(Queue queue) throws Exception {
+	public void save(Queue queue){
 		commandExecutor.execute(new CreateQueueCmd(queue));
 	}
 
 	@Override
-	public Queue get(String id) throws Exception {
+	public Queue get(String id){
 		return commandExecutor.execute(new GetQueueCmd(id));
 	}
 
 	@Override
-	public List<Queue> find() throws Exception {
+	public List<Queue> find(){
 		return commandExecutor.execute(new FindQueueCmd());
 	}
 
 	@Override
-	public void delete(String id) throws Exception {
+	public void delete(String id){
 		commandExecutor.execute(new DeleteQueueCmd(id));
 	}
 
 	@Override
-	public void update(String id, Queue queue) throws Exception {
+	public void update(String id, Queue queue){
 		commandExecutor.execute(new UpdateQueueCmd(id, queue));
 	}
 

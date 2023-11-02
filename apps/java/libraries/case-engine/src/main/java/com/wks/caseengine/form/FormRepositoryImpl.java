@@ -25,6 +25,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.db.EngineMongoDataConnection;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 @Component
 public class FormRepositoryImpl implements FormRepository {
@@ -36,10 +37,16 @@ public class FormRepositoryImpl implements FormRepository {
 	private GsonBuilder gsonBuilder;
 
 	@Override
-	public Form get(final String formKey) {
+	public Form get(final String formKey) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("key", formKey);
 		Gson gson = gsonBuilder.create();
-		return gson.fromJson(getCollection().find(filter).first().getJson(), Form.class);
+
+		JsonObject jsonObject = getCollection().find(filter).first();
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException();
+		}
+
+		return gson.fromJson(jsonObject.getJson(), Form.class);
 	}
 
 	@Override

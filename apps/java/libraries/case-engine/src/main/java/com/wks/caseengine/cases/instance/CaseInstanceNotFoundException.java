@@ -11,8 +11,22 @@
  */
 package com.wks.caseengine.cases.instance;
 
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
+
 public class CaseInstanceNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final String DEFAULT_MESSAGE = "Case Instance not found";
+
+
+	public CaseInstanceNotFoundException() {
+		super(DEFAULT_MESSAGE);
+	}
+
+	public CaseInstanceNotFoundException(DatabaseRecordNotFoundException e) {
+		super(DEFAULT_MESSAGE, e);
+	}
+
 
 }

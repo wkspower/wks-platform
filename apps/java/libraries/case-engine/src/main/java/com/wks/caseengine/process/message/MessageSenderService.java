@@ -18,6 +18,6 @@ import com.wks.bpm.engine.model.spi.ProcessMessage;
 
 public interface MessageSenderService {
 
-	void sendMessage(final ProcessMessage processMessage, final Optional<JsonArray> variables) throws Exception;
+	void sendMessage(final ProcessMessage processMessage, final Optional<JsonArray> variables);
 
 }

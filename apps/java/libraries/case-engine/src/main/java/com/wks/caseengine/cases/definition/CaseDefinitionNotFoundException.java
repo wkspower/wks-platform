@@ -11,6 +11,8 @@
  */
 package com.wks.caseengine.cases.definition;
 
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
+
 public class CaseDefinitionNotFoundException extends RuntimeException {
 
 	private static final String DEFAULT_MESSAGE = "Case Definition not found";
@@ -19,6 +21,10 @@ public class CaseDefinitionNotFoundException extends RuntimeException {
 
 	public CaseDefinitionNotFoundException() {
 		super(DEFAULT_MESSAGE);
+	}
+
+	public CaseDefinitionNotFoundException(DatabaseRecordNotFoundException e) {
+		super(DEFAULT_MESSAGE, e);
 	}
 
 }

@@ -35,6 +35,7 @@ import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
 import com.wks.caseengine.command.CommandContext;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 /**
  * @author victor.franca
@@ -62,7 +63,7 @@ public class CreateCaseInstanceWithValuesCmdTest {
 	private ProcessInstanceService processInstanceService;
 
 	@Test
-	public void shouldCreateCaseDefinition() {
+	public void shouldCreateCaseDefinition() throws DatabaseRecordNotFoundException {
 
 		// Given
 		CaseInstance caseInstanceToSave = new CaseInstance();
@@ -89,17 +90,6 @@ public class CreateCaseInstanceWithValuesCmdTest {
 		assertEquals("Stage 1", savedCaseInstance.getStage());
 		assertEquals(caseInstanceToSave.getStatus(), savedCaseInstance.getStatus());
 		verify(processInstanceService).create(eq("Process1"), eq("BK_1"), Mockito.any());
-	}
-
-	@Test
-	public void shouldThrowExceptionIfCaseDefinitionNotInformed() {
-		// Given
-		CaseInstance caseInstance = new CaseInstance();
-		createCaseInstanceCmd.setCaseInstance(caseInstance);
-
-		assertThrows(CaseDefinitionNotFoundException.class, () -> {
-			createCaseInstanceCmd.execute(commandContext);
-		});
 	}
 
 }

@@ -37,28 +37,28 @@ public class RecordController {
 	private RecordService recordService;
 
 	@GetMapping(value = "/{recordTypeId}")
-	public List<JsonObject> find(@PathVariable final String recordTypeId) throws Exception {
+	public List<JsonObject> find(@PathVariable final String recordTypeId) {
 		return recordService.find(recordTypeId);
 	}
 
 	@GetMapping(value = "/{recordTypeId}/{id}")
-	public JsonObject get(@PathVariable final String recordTypeId, @PathVariable final String id) throws Exception {
+	public JsonObject get(@PathVariable final String recordTypeId, @PathVariable final String id) {
 		return recordService.get(recordTypeId, id);
 	}
 
 	@PostMapping(value = "/{recordTypeId}")
-	public void save(@PathVariable final String recordTypeId, @RequestBody final JsonObject record) throws Exception {
+	public void save(@PathVariable final String recordTypeId, @RequestBody final JsonObject record) {
 		recordService.save(recordTypeId, record);
 	}
 
 	@DeleteMapping(value = "/{recordTypeId}/{id}")
-	public void delete(@PathVariable final String recordTypeId, @PathVariable final String id) throws Exception {
+	public void delete(@PathVariable final String recordTypeId, @PathVariable final String id) {
 		recordService.delete(recordTypeId, id);
 	}
 
 	@PatchMapping(value = "/{recordTypeId}/{id}")
 	public void update(@PathVariable final String recordTypeId, @PathVariable final String id,
-			@RequestBody final JsonObject record) throws Exception {
+			@RequestBody final JsonObject record) {
 		recordService.update(recordTypeId, id, record);
 	}
 

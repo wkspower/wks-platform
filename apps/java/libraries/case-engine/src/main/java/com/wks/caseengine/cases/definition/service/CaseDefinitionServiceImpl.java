@@ -60,7 +60,7 @@ public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 	}
 
 	@Override
-	public void delete(final String caseDefinitionId) throws CaseDefinitionNotFoundException {
+	public void delete(final String caseDefinitionId) {
 		commandExecutor.execute(new DeleteCaseDefinitionCmd(caseDefinitionId));
 	}
 

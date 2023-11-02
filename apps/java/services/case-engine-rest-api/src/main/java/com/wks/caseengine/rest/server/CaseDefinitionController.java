@@ -42,28 +42,27 @@ public class CaseDefinitionController {
 	private CaseDefinitionService caseDefinitionService;
 
 	@GetMapping
-	public List<CaseDefinition> find(@RequestParam(required = false) Boolean deployed) throws Exception {
+	public List<CaseDefinition> find(@RequestParam(required = false) Boolean deployed) {
 		return caseDefinitionService.find(Optional.ofNullable(deployed));
 	}
 
 	@GetMapping(value = "/{caseDefId}")
-	public CaseDefinition get(@PathVariable final String caseDefId) throws Exception {
+	public CaseDefinition get(@PathVariable final String caseDefId) {
 		return caseDefinitionService.get(caseDefId);
 	}
 
 	@PostMapping
-	public CaseDefinition save(@RequestBody final CaseDefinition caseDefinition) throws Exception {
+	public CaseDefinition save(@RequestBody final CaseDefinition caseDefinition) {
 		return caseDefinitionService.create(caseDefinition);
 	}
 
 	@PutMapping(value = "/{caseDefId}")
-	public CaseDefinition update(@PathVariable final String caseDefId, @RequestBody final CaseDefinition caseDefinition)
-			throws Exception {
+	public CaseDefinition update(@PathVariable final String caseDefId, @RequestBody final CaseDefinition caseDefinition) {
 		return caseDefinitionService.update(caseDefId, caseDefinition);
 	}
 
 	@DeleteMapping(value = "/{caseDefId}")
-	public void delete(@PathVariable final String caseDefId) throws Exception {
+	public void delete(@PathVariable final String caseDefId) {
 		try {
 			caseDefinitionService.delete(caseDefId);
 		} catch (CaseDefinitionNotFoundException e) {

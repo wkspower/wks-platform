@@ -36,12 +36,12 @@ public class ProcessInstanceController {
 	private ProcessInstanceService processInstanceService;
 	
 	@GetMapping
-	public List<ProcessInstance> find(@RequestParam(required = false) String businessKey) throws Exception {
+	public List<ProcessInstance> find(@RequestParam(required = false) String businessKey) {
 		return processInstanceService.find(Optional.empty(), Optional.ofNullable(businessKey), Optional.empty());
 	}
 
 	@GetMapping(value = "/{id}/activity-instances")
-	public List<ActivityInstance> getActivityInstances(@PathVariable final String id) throws Exception {
+	public List<ActivityInstance> getActivityInstances(@PathVariable final String id) {
 		return processInstanceService.getActivityInstances(id);
 	}
 

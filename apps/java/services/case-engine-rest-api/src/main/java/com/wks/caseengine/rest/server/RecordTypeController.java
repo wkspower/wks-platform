@@ -37,27 +37,27 @@ public class RecordTypeController {
 	private RecordTypeService recordTypeService;
 
 	@GetMapping
-	public List<RecordType> find() throws Exception {
+	public List<RecordType> find() {
 		return recordTypeService.find();
 	}
 
 	@GetMapping(value = "/{id}")
-	public RecordType get(@PathVariable final String id) throws Exception {
+	public RecordType get(@PathVariable final String id) {
 		return recordTypeService.get(id);
 	}
 
 	@PostMapping
-	public void save(@RequestBody final RecordType recordType) throws Exception {
+	public void save(@RequestBody final RecordType recordType) {
 		recordTypeService.save(recordType);
 	}
 
 	@DeleteMapping(value = "/{id}")
-	public void delete(@PathVariable final String id) throws Exception {
+	public void delete(@PathVariable final String id) {
 		recordTypeService.delete(id);
 	}
 
 	@PatchMapping(value = "/{id}")
-	public void update(@PathVariable final String id, @RequestBody final RecordType recordType) throws Exception {
+	public void update(@PathVariable final String id, @RequestBody final RecordType recordType) {
 		recordTypeService.update(id, recordType);
 	}
 

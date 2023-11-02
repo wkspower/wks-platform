@@ -31,7 +31,7 @@ public class VariableController {
 	private VariableService variableService;
 
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	public String findVariables(@RequestParam(name = "processInstanceId") final String processInstanceId) throws Exception {
+	public String findVariables(@RequestParam(name = "processInstanceId") final String processInstanceId) {
 		return variableService.findVariables(processInstanceId);
 	}
 

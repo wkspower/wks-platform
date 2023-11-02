@@ -9,14 +9,20 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.emailtocase.server;
+package com.wks.emailtocase.caseemail;
 
-public class CaseEmailBuilderException extends RuntimeException {
+/**
+ * @author victor.franca
+ *
+ */
+public class CaseEmailNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public CaseEmailBuilderException(String message) {
-		super(message);
+	private static final String DEFAULT_MESSAGE = "Email not found";
+
+	public CaseEmailNotFoundException(final Throwable e) {
+		super(DEFAULT_MESSAGE, e);
 	}
 
 }

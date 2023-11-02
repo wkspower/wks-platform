@@ -20,6 +20,7 @@ import com.wks.caseengine.cases.definition.CaseStage;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 import lombok.Setter;
@@ -37,10 +38,11 @@ public class CreateEmptyCaseInstanceCmd implements Command<CaseInstance> {
 	@Override
 	public CaseInstance execute(CommandContext commandContext) {
 
-		CaseDefinition caseDefinition = commandContext.getCaseDefRepository().get(caseDefinitionId);
-
-		if (caseDefinition == null) {
-			throw new CaseDefinitionNotFoundException();
+		CaseDefinition caseDefinition;
+		try {
+			caseDefinition = commandContext.getCaseDefRepository().get(caseDefinitionId);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseDefinitionNotFoundException(e);
 		}
 
 		String businessKey = commandContext.getBusinessKeyCreator().generate();

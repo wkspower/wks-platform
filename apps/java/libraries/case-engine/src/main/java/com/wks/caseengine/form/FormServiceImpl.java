@@ -30,27 +30,27 @@ public class FormServiceImpl implements FormService {
 	private CommandExecutor commandExecutor;
 
 	@Override
-	public void save(Form form) throws Exception {
+	public void save(Form form) {
 		commandExecutor.execute(new CreateFormCmd(form));
 	}
 
 	@Override
-	public Form get(String formKey) throws Exception {
+	public Form get(String formKey) {
 		return commandExecutor.execute(new GetFormCmd(formKey));
 	}
 
 	@Override
-	public List<Form> find() throws Exception {
+	public List<Form> find() {
 		return commandExecutor.execute(new FindFormCmd());
 	}
 
 	@Override
-	public void delete(String formKey) throws Exception {
+	public void delete(String formKey) {
 		commandExecutor.execute(new DeleteFormCmd(formKey));
 	}
 
 	@Override
-	public void update(final String formKey, final Form form) throws Exception {
+	public void update(final String formKey, final Form form) {
 		commandExecutor.execute(new UpdateFormCmd(formKey, form));
 	}
 

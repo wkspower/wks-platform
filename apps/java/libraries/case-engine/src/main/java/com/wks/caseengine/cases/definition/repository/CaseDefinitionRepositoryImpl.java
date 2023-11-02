@@ -27,6 +27,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.db.EngineMongoDataConnection;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 @Component
 public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
@@ -58,13 +59,13 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	}
 
 	@Override
-	public CaseDefinition get(final String caseDefId) {
+	public CaseDefinition get(final String caseDefId) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", caseDefId);
 		Gson gson = gsonBuilder.create();
 
 		Optional<JsonObject> first = Optional.ofNullable(getCollection().find(filter).first());
 		if (first.isEmpty()) {
-			return null;
+			throw new DatabaseRecordNotFoundException();
 		}
 
 		return gson.fromJson(first.get().getJson(), CaseDefinition.class);

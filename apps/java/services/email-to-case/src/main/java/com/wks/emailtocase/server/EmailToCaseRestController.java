@@ -48,7 +48,7 @@ public class EmailToCaseRestController {
 	@PostMapping(value = "/receive")
 	public void receive(@RequestParam(name = "to") String to, @RequestParam(name = "from") String from,
 			@RequestParam(name = "subject") String subject, @RequestParam(name = "text") String text,
-			@RequestParam(name = "html") String html) throws Exception {
+			@RequestParam(name = "html") String html) {
 
 		log.debug("### Email received - Processing started ###");
 		log.debug("To: " + to);
@@ -75,7 +75,7 @@ public class EmailToCaseRestController {
 
 	@GetMapping
 	public List<CaseEmail> find(@RequestParam(required = false) String caseInstanceBusinessKey,
-			@RequestParam(required = false) String caseDefinitionId) throws Exception {
+			@RequestParam(required = false) String caseDefinitionId) {
 
 		return caseEmailService.find(Optional.ofNullable(caseInstanceBusinessKey),
 				Optional.ofNullable(caseDefinitionId));

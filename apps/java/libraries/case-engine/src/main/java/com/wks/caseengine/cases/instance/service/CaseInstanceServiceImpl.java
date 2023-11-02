@@ -19,6 +19,8 @@ import com.wks.caseengine.cases.instance.CaseDocument;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceFilter;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
+import com.wks.caseengine.cases.instance.command.CreateCaseInstanceCommentCmd;
+import com.wks.caseengine.cases.instance.command.CreateCaseInstanceDocumentCmd;
 import com.wks.caseengine.cases.instance.command.CreateCaseInstanceWithValuesCmd;
 import com.wks.caseengine.cases.instance.command.CreateEmptyCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.command.DeleteCaseInstanceCmd;
@@ -26,8 +28,6 @@ import com.wks.caseengine.cases.instance.command.DeleteCaseInstanceCommentCmd;
 import com.wks.caseengine.cases.instance.command.FindCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.command.GetCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.command.PatchCaseInstanceCmd;
-import com.wks.caseengine.cases.instance.command.CreateCaseInstanceCommentCmd;
-import com.wks.caseengine.cases.instance.command.CreateCaseInstanceDocumentCmd;
 import com.wks.caseengine.cases.instance.command.UpdateCaseInstanceCommentCmd;
 import com.wks.caseengine.command.CommandExecutor;
 import com.wks.caseengine.pagination.PageResult;
@@ -65,7 +65,7 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 
 	@Override
-	public void delete(final String businessKey) throws CaseInstanceNotFoundException {
+	public void delete(final String businessKey) {
 		commandExecutor.execute(new DeleteCaseInstanceCmd(businessKey));
 	}
 
@@ -75,19 +75,18 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 
 	@Override
-	public void saveComment(final String businessKey, final CaseComment comment) throws CaseInstanceNotFoundException {
+	public void saveComment(final String businessKey, final CaseComment comment) {
 		commandExecutor.execute(new CreateCaseInstanceCommentCmd(businessKey, comment));
 	}
 
 	@Override
-	public void updateComment(final String businessKey, final String commentId, final String body)
-			throws CaseInstanceNotFoundException {
+	public void updateComment(final String businessKey, final String commentId, final String body) {
 		commandExecutor.execute(new UpdateCaseInstanceCommentCmd(businessKey, commentId, body));
 	}
 
 	@Override
-	public void deleteComment(final String businessKey, final String commentId) throws CaseInstanceNotFoundException {
-		commandExecutor.equals(new DeleteCaseInstanceCommentCmd(businessKey, commentId));
+	public void deleteComment(final String businessKey, final String commentId) {
+		commandExecutor.execute(new DeleteCaseInstanceCommentCmd(businessKey, commentId));
 	}
 
 }

@@ -9,14 +9,23 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.emailtocase.server;
+package com.wks.caseengine.queue;
 
-public class CaseEmailBuilderException extends RuntimeException {
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
+/**
+ * @author victor.franca
+ *
+ */
+public class QueueNotFoundException extends RuntimeException {
+	
 	private static final long serialVersionUID = 1L;
 
-	public CaseEmailBuilderException(String message) {
-		super(message);
+	private static final String DEFAULT_MESSAGE = "Queue not found";
+
+	public QueueNotFoundException(DatabaseRecordNotFoundException e) {
+		super(DEFAULT_MESSAGE, e);
 	}
+
 
 }

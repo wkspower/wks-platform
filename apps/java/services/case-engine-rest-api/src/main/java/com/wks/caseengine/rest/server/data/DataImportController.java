@@ -31,7 +31,7 @@ public class DataImportController {
 	private DataImportService dataImportService;
 
 	@PostMapping
-	public void importData(@RequestBody final JsonObject data) throws Exception {
+	public void importData(@RequestBody final JsonObject data) {
 		dataImportService.importData(data);
 	}
 

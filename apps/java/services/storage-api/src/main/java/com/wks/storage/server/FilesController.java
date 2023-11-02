@@ -35,26 +35,26 @@ public class FilesController {
 	@GetMapping(value = "/storage/files/{dir}/downloads/{fileName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public DownloadFileUrl downloadFileWithDir(@PathVariable(required = true) String dir,
 			@PathVariable(required = true) String fileName,
-			@RequestParam(name = "content-type", required = true) String contentType) throws Exception {
+			@RequestParam(name = "content-type", required = true) String contentType) {
 		return downloadService().createPresignedObjectUrl(dir, fileName, contentType);
 	}
 
 	@GetMapping(value = "/storage/files/downloads/{fileName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public DownloadFileUrl downloadFile(@PathVariable(required = true) String fileName,
-			@RequestParam(name = "content-type", required = true) String contentType) throws Exception {
+			@RequestParam(name = "content-type", required = true) String contentType) {
 		return downloadService().createPresignedObjectUrl(fileName, contentType);
 	}
 
 	@GetMapping(value = "/storage/files/{dir}/uploads/{fileName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public UploadFileUrl uploadWithDir(@PathVariable(required = true) String dir,
 			@PathVariable(required = true) String fileName,
-			@RequestParam(name = "content-type", required = true) String contentType) throws Exception {
+			@RequestParam(name = "content-type", required = true) String contentType) {
 		return uploadService().createPresignedPostFormData(dir, fileName, contentType);
 	}
 
 	@GetMapping(value = "/storage/files/uploads/{fileName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public UploadFileUrl upload(@PathVariable(required = true) String fileName,
-			@RequestParam(name = "content-type", required = true) String contentType) throws Exception {
+			@RequestParam(name = "content-type", required = true) String contentType) {
 		return uploadService().createPresignedPostFormData(fileName, contentType);
 	}
 

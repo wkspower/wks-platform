@@ -23,6 +23,7 @@ import com.wks.caseengine.cases.instance.CaseAttributeType;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 import lombok.Setter;
@@ -39,15 +40,17 @@ public class CreateCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 
 	@Override
 	public CaseInstance execute(CommandContext commandContext) {
+		CaseDefinition caseDefinition;
+		try {
+			caseDefinition = commandContext.getCaseDefRepository().get(caseInstance.getCaseDefinitionId());
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseDefinitionNotFoundException(e);
+		}
+
 		caseInstance.addAttribute(
 				new CaseAttribute("createdAt", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
 						CaseAttributeType.STRING.getValue()));
 
-		CaseDefinition caseDefinition = commandContext.getCaseDefRepository().get(caseInstance.getCaseDefinitionId());
-
-		if (caseDefinition == null) {
-			throw new CaseDefinitionNotFoundException();
-		}
 
 		String businessKey = null;
 		if (caseInstance.getBusinessKey() == null) {

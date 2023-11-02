@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.GsonBuilder;
 import com.wks.bpm.engine.client.BpmEngineClientFacade;
-import com.wks.bpm.engine.exception.ProcessInstanceNotFoundException;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.caseengine.cases.instance.CaseAttribute;
@@ -75,7 +74,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	}
 
 	@Override
-	public List<ActivityInstance> getActivityInstances(String processInstanceId) throws ProcessInstanceNotFoundException {
+	public List<ActivityInstance> getActivityInstances(String processInstanceId) {
 		return Arrays.asList(processEngineClient.findActivityInstances(processInstanceId));
 	}
 

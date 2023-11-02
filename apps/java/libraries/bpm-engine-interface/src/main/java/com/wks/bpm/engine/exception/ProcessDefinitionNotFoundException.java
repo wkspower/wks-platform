@@ -11,7 +11,7 @@
  */
 package com.wks.bpm.engine.exception;
 
-public class ProcessDefinitionNotFoundException extends Exception {
+public class ProcessDefinitionNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

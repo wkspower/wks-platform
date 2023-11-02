@@ -37,27 +37,27 @@ public class FormController {
 	private FormService formService;
 
 	@GetMapping
-	public List<Form> find() throws Exception {
+	public List<Form> find() {
 		return formService.find();
 	}
 
 	@GetMapping(value = "/{formKey}")
-	public Form get(@PathVariable final String formKey) throws Exception {
+	public Form get(@PathVariable final String formKey) {
 		return formService.get(formKey);
 	}
 
 	@PostMapping
-	public void save(@RequestBody final Form form) throws Exception {
+	public void save(@RequestBody final Form form) {
 		formService.save(form);
 	}
 
 	@DeleteMapping(value = "/{formKey}")
-	public void delete(@PathVariable final String formKey) throws Exception {
+	public void delete(@PathVariable final String formKey) {
 		formService.delete(formKey);
 	}
 
 	@PatchMapping(value = "/{formKey}")
-	public void update(@PathVariable final String formKey, @RequestBody final Form form) throws Exception {
+	public void update(@PathVariable final String formKey, @RequestBody final Form form) {
 		formService.update(formKey, form);
 	}
 

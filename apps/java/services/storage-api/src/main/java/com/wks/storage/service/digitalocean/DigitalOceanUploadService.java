@@ -41,16 +41,16 @@ public class DigitalOceanUploadService implements UploadService {
 	private BucketService bucketService;
 
 	@Override
-	public UploadFileUrl createPresignedPostFormData(String fileName, String contentType) throws Exception {
+	public UploadFileUrl createPresignedPostFormData(String fileName, String contentType) {
 		return createPresigned(null, fileName, contentType);
 	}
 
 	@Override
-	public UploadFileUrl createPresignedPostFormData(String dir, String fileName, String contentType) throws Exception {
+	public UploadFileUrl createPresignedPostFormData(String dir, String fileName, String contentType) {
 		return createPresigned(dir, fileName, contentType);
 	}
 
-	private UploadFileUrl createPresigned(String dir, String fileName, String contentType) throws Exception {
+	private UploadFileUrl createPresigned(String dir, String fileName, String contentType) {
 		String bucketName = bucketService.createAssignedTenant();
 
 		String objectName = fileName;
