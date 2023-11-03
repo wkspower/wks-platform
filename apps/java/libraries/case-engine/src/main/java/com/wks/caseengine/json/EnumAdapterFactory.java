@@ -55,12 +55,12 @@ public class EnumAdapterFactory implements TypeAdapterFactory {
 								out.name(pd.getName());
 								out.value(String.valueOf(pd.getReadMethod().invoke(value)));
 							} catch (IllegalAccessException | InvocationTargetException | IOException e) {
-								e.printStackTrace();
+								throw new RuntimeException(e);
 							}
 						});
 				out.endObject();
 			} catch (IntrospectionException e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
 

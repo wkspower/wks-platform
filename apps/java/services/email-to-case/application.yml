@@ -5,9 +5,10 @@ logging:
    level:
       root: INFO
       com.wks: INFO
-      com.wks.emailtocase: DEBUG
-      com.wks.api.security: DEBUG
-      com.wks.caseengine: DEBUG      
+      com.wks.emailtocase: INFO
+      com.wks.api.security: INFO
+      com.wks.caseengine: INFO
+      com.wks.caseengine.command: INFO      
       org.springframework.web.client.RestTemplate: INFO
       org.apache.http: INFO
       httpclient.wire: INFO

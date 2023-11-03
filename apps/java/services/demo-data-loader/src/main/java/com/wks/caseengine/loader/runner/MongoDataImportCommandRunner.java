@@ -191,7 +191,6 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 
 	private void throwErrorIfNoDuplicateKey(Exception e) {
 		if (!e.getMessage().contains("duplicate key")) {
-			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 	}

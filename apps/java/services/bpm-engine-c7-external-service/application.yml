@@ -6,7 +6,7 @@ logging:
       root: INFO
       com:
          wks: INFO
-         wks.bpm.engine.camunda: DEBUG
+         wks.bpm.engine.camunda: INFO
       org.springframework.web.client.RestTemplate: ERROR
       org.apache.http: ERROR
       httpclient.wire: ERROR    

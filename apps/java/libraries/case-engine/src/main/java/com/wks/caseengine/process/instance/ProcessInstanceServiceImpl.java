@@ -58,12 +58,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	@Override
 	public void delete(final List<ProcessInstance> processInstances) {
 		processInstances.forEach(o -> {
-			try {
-				delete(o.getId());
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			delete(o.getId());
 		});
 	}
 
