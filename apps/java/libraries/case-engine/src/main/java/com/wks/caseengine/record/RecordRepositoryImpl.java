@@ -44,7 +44,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 
 		JsonObject jsonObject = getCollection(recordTypeId).find(filter).first();
 		if (jsonObject == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("Record", "id", id);
 		}
 
 		return gson.fromJson(jsonObject.getJson(), com.google.gson.JsonObject.class);
@@ -68,7 +68,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 		Bson filter = Filters.eq("_id", new ObjectId(id));
 		JsonObject jsonObject = getCollection(recordTypeId).findOneAndDelete(filter);
 		if (jsonObject == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("Record", "id", id);
 		}
 	}
 
@@ -80,7 +80,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 		JsonObject jsonObject = getCollection(recordTypeId).findOneAndReplace(filter,
 				(new JsonObject(gsonBuilder.create().toJson(record))));
 		if (jsonObject == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("Record", "id", id);
 		}
 	}
 

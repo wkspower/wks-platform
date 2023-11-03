@@ -22,7 +22,7 @@ public class GetQueueCmd implements Command<Queue> {
 		try {
 			return commandContext.getQueueRepository().get(queueId);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new QueueNotFoundException(e);
+			throw new QueueNotFoundException(e.getMessage(), e);
 		}
 	}
 

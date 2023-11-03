@@ -11,21 +11,22 @@
  */
 package com.wks.caseengine.queue;
 
-import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
-
 /**
  * @author victor.franca
  *
  */
 public class QueueNotFoundException extends RuntimeException {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	private static final String DEFAULT_MESSAGE = "Queue not found";
 
-	public QueueNotFoundException(DatabaseRecordNotFoundException e) {
-		super(DEFAULT_MESSAGE, e);
+	public QueueNotFoundException() {
+		super(DEFAULT_MESSAGE);
 	}
 
+	public QueueNotFoundException(final String message, Throwable e) {
+		super(message, e);
+	}
 
 }

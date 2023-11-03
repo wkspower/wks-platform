@@ -22,7 +22,7 @@ public class GetCaseDefinitionCmd implements Command<CaseDefinition> {
 		try {
 			return commandContext.getCaseDefRepository().get(caseDefId);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseDefinitionNotFoundException(e);
+			throw new CaseDefinitionNotFoundException(e.getMessage(), e);
 		}
 	}
 

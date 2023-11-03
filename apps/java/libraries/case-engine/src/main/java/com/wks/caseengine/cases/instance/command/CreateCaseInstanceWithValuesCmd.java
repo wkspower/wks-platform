@@ -44,7 +44,7 @@ public class CreateCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 		try {
 			caseDefinition = commandContext.getCaseDefRepository().get(caseInstance.getCaseDefinitionId());
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseDefinitionNotFoundException(e);
+			throw new CaseDefinitionNotFoundException(e.getMessage(), e);
 		}
 
 		caseInstance.addAttribute(

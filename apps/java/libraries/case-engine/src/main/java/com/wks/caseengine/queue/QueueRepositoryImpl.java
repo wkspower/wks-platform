@@ -48,7 +48,7 @@ public class QueueRepositoryImpl implements QueueRepository {
 		Gson gson = gsonBuilder.create();
 		JsonObject jsonObject = getCollection().find(filter).first();
 		if (jsonObject == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("Queue", "id", id);
 		}
 		return gson.fromJson(jsonObject.getJson(), Queue.class);
 	}
@@ -67,7 +67,7 @@ public class QueueRepositoryImpl implements QueueRepository {
 
 		JsonObject jsonObject = getCollection().findOneAndUpdate(filter, update);
 		if (jsonObject == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("Queue", "id", id);
 		}
 
 	}
@@ -78,7 +78,7 @@ public class QueueRepositoryImpl implements QueueRepository {
 		
 		JsonObject jsonObject = getCollection().findOneAndDelete(filter);
 		if (jsonObject == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("Queue", "id", id);
 		}
 
 	}

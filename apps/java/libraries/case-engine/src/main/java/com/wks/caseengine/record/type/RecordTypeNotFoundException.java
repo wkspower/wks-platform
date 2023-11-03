@@ -11,8 +11,6 @@
  */
 package com.wks.caseengine.record.type;
 
-import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
-
 /**
  * @author victor.franca
  *
@@ -23,8 +21,12 @@ public class RecordTypeNotFoundException extends RuntimeException {
 
 	private static final String DEFAULT_MESSAGE = "Record Type not found";
 
-	public RecordTypeNotFoundException(DatabaseRecordNotFoundException e) {
-		super(DEFAULT_MESSAGE, e);
+	public RecordTypeNotFoundException() {
+		super(DEFAULT_MESSAGE);
+	}
+
+	public RecordTypeNotFoundException(final String message, final Throwable e) {
+		super(message, e);
 	}
 
 }

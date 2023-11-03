@@ -9,20 +9,22 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.definition;
+package com.wks.caseengine.rest.exception;
 
-public class CaseDefinitionNotFoundException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-	private static final String DEFAULT_MESSAGE = "Case Definition not found";
+/**
+ * @author victor.franca
+ *
+ */
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class RestResourceNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public CaseDefinitionNotFoundException() {
-		super(DEFAULT_MESSAGE);
-	}
-
-	public CaseDefinitionNotFoundException(final String message, final Throwable e) {
-		super(message, e);
+	public RestResourceNotFoundException(final String message) {
+		super(message);
 	}
 
 }

@@ -17,12 +17,13 @@ package com.wks.caseengine.repository;
  */
 public class DatabaseRecordNotFoundException extends Exception {
 
-	private static final String DEFAULT_MESSAGE = "Database record not found";
+	private static final String DEFAULT_MESSAGE = "Database record %s with %s %s not found";
 
 	private static final long serialVersionUID = 1L;
 
-	public DatabaseRecordNotFoundException() {
-		super(DEFAULT_MESSAGE);
+	public DatabaseRecordNotFoundException(final String entityName, final String identifierName,
+			final String identifierValue) {
+		super(String.format(DEFAULT_MESSAGE, entityName, identifierName, identifierValue));
 	}
 
 }

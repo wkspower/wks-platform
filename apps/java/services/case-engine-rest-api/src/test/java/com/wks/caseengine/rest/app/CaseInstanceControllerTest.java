@@ -34,11 +34,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.wks.caseengine.cases.instance.service.CaseInstanceService;
 import com.wks.caseengine.pagination.PageResult;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
-import com.wks.caseengine.rest.server.CaseController;
+import com.wks.caseengine.rest.server.CaseInstanceController;
 
-@WebMvcTest(controllers = CaseController.class)
+@WebMvcTest(controllers = CaseInstanceController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class CaseControllerTest {
+public class CaseInstanceControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;

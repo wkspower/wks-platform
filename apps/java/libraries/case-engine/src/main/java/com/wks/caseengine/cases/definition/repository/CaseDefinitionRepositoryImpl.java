@@ -65,7 +65,7 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 
 		Optional<JsonObject> first = Optional.ofNullable(getCollection().find(filter).first());
 		if (first.isEmpty()) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("CaseDefinition", "id", caseDefId);
 		}
 
 		return gson.fromJson(first.get().getJson(), CaseDefinition.class);
@@ -91,7 +91,7 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 
 		JsonObject jsonObject = getCollection().findOneAndUpdate(filter, update);
 		if (jsonObject == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("CaseDefinition", "id", caseDefId);
 		}
 	}
 
@@ -100,7 +100,7 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 		Bson filter = Filters.eq("id", caseDefinitionId);
 		JsonObject jsonObject = getCollection().findOneAndDelete(filter);
 		if (jsonObject == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("CaseDefinition", "id", caseDefinitionId);
 		}
 	}
 

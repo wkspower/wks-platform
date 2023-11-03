@@ -21,8 +21,8 @@ public class FormNotFoundException extends RuntimeException {
 		super(DEFAULT_MESSAGE);
 	}
 
-	public FormNotFoundException(final Throwable e) {
-		super(DEFAULT_MESSAGE, e);
+	public FormNotFoundException(final String message, final Throwable e) {
+		super(message, e);
 	}
 
 }

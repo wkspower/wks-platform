@@ -41,7 +41,7 @@ public class CreateCaseInstanceCommentCmd implements Command<CaseComment> {
 		try {
 			caseInstance = commandContext.getCaseInstanceRepository().get(businessKey);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseInstanceNotFoundException(e);
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 
 		comment.setCreatedAt(new Date());
@@ -57,7 +57,7 @@ public class CreateCaseInstanceCommentCmd implements Command<CaseComment> {
 		try {
 			commandContext.getCaseInstanceRepository().update(comment.getCaseId(), caseInstance);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseInstanceNotFoundException(e);
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 
 		return comment;

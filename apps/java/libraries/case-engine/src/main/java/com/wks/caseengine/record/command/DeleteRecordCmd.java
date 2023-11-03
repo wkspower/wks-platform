@@ -33,7 +33,7 @@ public class DeleteRecordCmd implements Command<Void> {
 		try {
 			commandContext.getRecordRepository().delete(recordTypeId, recordId);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new RecordNotFoundException(e);
+			throw new RecordNotFoundException(e.getMessage(), e);
 		}
 		return null;
 	}

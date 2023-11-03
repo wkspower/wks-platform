@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.record.type.RecordType;
 import com.wks.caseengine.record.type.RecordTypeNotFoundException;
 import com.wks.caseengine.record.type.RecordTypeService;
-import com.wks.caseengine.rest.exception.ResourceNotFoundException;
+import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -49,7 +49,7 @@ public class RecordTypeController {
 		try {
 			return ResponseEntity.ok(recordTypeService.get(id));
 		} catch (RecordTypeNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 	}
 
@@ -64,7 +64,7 @@ public class RecordTypeController {
 		try {
 			recordTypeService.delete(id);
 		} catch (RecordTypeNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
 	}
@@ -74,7 +74,7 @@ public class RecordTypeController {
 		try {
 			recordTypeService.update(id, recordType);
 		} catch (RecordTypeNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 
 		return ResponseEntity.noContent().build();

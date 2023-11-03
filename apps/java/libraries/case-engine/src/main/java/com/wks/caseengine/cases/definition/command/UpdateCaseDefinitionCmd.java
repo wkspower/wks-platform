@@ -34,7 +34,7 @@ public class UpdateCaseDefinitionCmd implements Command<CaseDefinition> {
 		try {
 			commandContext.getCaseDefRepository().update(caseDefId, caseDefinition);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseDefinitionNotFoundException(e);
+			throw new CaseDefinitionNotFoundException(e.getMessage(), e);
 		}
 		return caseDefinition;
 	}

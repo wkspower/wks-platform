@@ -33,7 +33,7 @@ public class GetCaseInstanceCmd implements Command<CaseInstance> {
 		try {
 			return commandContext.getCaseInstanceRepository().get(businessKey);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseInstanceNotFoundException(e);
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 	}
 

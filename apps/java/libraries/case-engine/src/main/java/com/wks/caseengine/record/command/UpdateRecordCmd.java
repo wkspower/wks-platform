@@ -35,7 +35,7 @@ public class UpdateRecordCmd implements Command<Void> {
 		try {
 			commandContext.getRecordRepository().update(recordTypeId, recordId, record);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new RecordNotFoundException(e);
+			throw new RecordNotFoundException(e.getMessage(), e);
 		}
 		return null;
 	}

@@ -21,7 +21,7 @@ public class DeleteQueueCmd implements Command<Void> {
 		try {
 			commandContext.getQueueRepository().delete(queueId);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new QueueNotFoundException(e);
+			throw new QueueNotFoundException(e.getMessage(), e);
 		}
 		return null;
 	}

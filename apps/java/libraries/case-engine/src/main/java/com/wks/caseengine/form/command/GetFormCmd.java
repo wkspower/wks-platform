@@ -22,7 +22,7 @@ public class GetFormCmd implements Command<Form> {
 		try {
 			return commandContext.getFormRepository().get(formKey);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new FormNotFoundException(e);
+			throw new FormNotFoundException(e.getMessage(), e);
 		}
 	}
 

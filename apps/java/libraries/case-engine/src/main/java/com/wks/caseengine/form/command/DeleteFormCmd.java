@@ -21,7 +21,7 @@ public class DeleteFormCmd implements Command<Void> {
 		try {
 			commandContext.getFormRepository().delete(formKey);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new FormNotFoundException(e);
+			throw new FormNotFoundException(e.getMessage(), e);
 		}
 		return null;
 	}

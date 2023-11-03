@@ -33,7 +33,7 @@ public class GetRecordTypeCmd implements Command<RecordType> {
 		try {
 			return commandContext.getRecordTypeRepository().get(recordTypeId);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new RecordTypeNotFoundException(e);
+			throw new RecordTypeNotFoundException(e.getMessage(), e);
 		}
 	}
 

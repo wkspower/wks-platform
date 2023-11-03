@@ -34,13 +34,13 @@ public class UpdateCaseInstanceCommentCmd implements Command<Void> {
 		try {
 			commandContext.getCaseInstanceRepository().get(businessKey);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseInstanceNotFoundException(e);
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 
 		try {
 			commandContext.getCaseInstanceRepository().updateComment(businessKey, commentId, body);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseInstanceNotFoundException(e);
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 		return null;
 

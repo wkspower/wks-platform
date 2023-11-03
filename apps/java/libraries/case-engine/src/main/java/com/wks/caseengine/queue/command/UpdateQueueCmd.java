@@ -23,7 +23,7 @@ public class UpdateQueueCmd implements Command<Void> {
 		try {
 			commandContext.getQueueRepository().update(queueId, queue);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new QueueNotFoundException(e);
+			throw new QueueNotFoundException(e.getMessage(), e);
 		}
 		return null;
 	}

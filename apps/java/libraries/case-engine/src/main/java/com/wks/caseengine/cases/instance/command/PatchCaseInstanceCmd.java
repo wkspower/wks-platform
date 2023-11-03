@@ -35,7 +35,7 @@ public class PatchCaseInstanceCmd implements Command<CaseInstance> {
 		try {
 			target = commandContext.getCaseInstanceRepository().get(businessKey);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseInstanceNotFoundException(e);
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 
 		if (mergePatch.getStatus() != null) {
@@ -51,7 +51,7 @@ public class PatchCaseInstanceCmd implements Command<CaseInstance> {
 		try {
 			commandContext.getCaseInstanceRepository().update(businessKey, target);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseInstanceNotFoundException(e);
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 
 		// TODO return the updated case instance from DB

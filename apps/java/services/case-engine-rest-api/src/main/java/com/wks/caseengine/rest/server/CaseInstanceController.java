@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.GsonBuilder;
+import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseDocument;
 import com.wks.caseengine.cases.instance.CaseInstance;
@@ -33,14 +34,15 @@ import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.cases.instance.service.CaseInstanceService;
 import com.wks.caseengine.pagination.Cursor;
 import com.wks.caseengine.pagination.PageResult;
-import com.wks.caseengine.rest.exception.ResourceNotFoundException;
+import com.wks.caseengine.rest.exception.RestInvalidArgumentException;
+import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("case")
 @Tag(name = "Case Instance", description = "A Case Instance is created based in a Case Definition and is the 'Digital Folder' for related information, documents, communication and processes for case")
-public class CaseController {
+public class CaseInstanceController {
 
 	@Autowired
 	private CaseInstanceService caseInstanceService;
@@ -70,13 +72,17 @@ public class CaseController {
 		try {
 			return ResponseEntity.ok(caseInstanceService.get(businessKey));
 		} catch (CaseInstanceNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 	}
 
 	@PostMapping
 	public ResponseEntity<CaseInstance> save(@RequestBody final CaseInstance caseInstance) {
-		return ResponseEntity.ok(caseInstanceService.createWithValues(caseInstance));
+		try {
+			return ResponseEntity.ok(caseInstanceService.createWithValues(caseInstance));
+		} catch (CaseDefinitionNotFoundException e) {
+			throw new RestInvalidArgumentException("caseDefinitionId", e);
+		}
 	}
 
 	@PatchMapping(value = "/{businessKey}", consumes = "application/merge-patch+json")
@@ -87,7 +93,7 @@ public class CaseController {
 		try {
 			caseInstanceService.patch(businessKey, mergePatch);
 		} catch (CaseInstanceNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
 	}
@@ -97,7 +103,7 @@ public class CaseController {
 		try {
 			caseInstanceService.delete(businessKey);
 		} catch (CaseInstanceNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
 	}
@@ -109,7 +115,7 @@ public class CaseController {
 		try {
 			caseInstanceService.saveDocument(businessKey, document);
 		} catch (CaseInstanceNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
 	}
@@ -121,7 +127,7 @@ public class CaseController {
 		try {
 			caseInstanceService.saveComment(businessKey, newComment);
 		} catch (CaseInstanceNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
 	}
@@ -133,7 +139,7 @@ public class CaseController {
 		try {
 			caseInstanceService.updateComment(businessKey, commentId, comment.getBody());
 		} catch (CaseInstanceNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
 	}
@@ -145,7 +151,7 @@ public class CaseController {
 		try {
 			caseInstanceService.deleteComment(businessKey, commentId);
 		} catch (CaseInstanceNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
 	}

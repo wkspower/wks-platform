@@ -36,7 +36,7 @@ public class DeleteCaseInstanceCommentCmd implements Command<Void> {
 		try {
 			caseInstance = commandContext.getCaseInstanceRepository().get(businessKey);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseInstanceNotFoundException(e);
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 
 		CaseComment comment = caseInstance.getComments().stream().filter(o -> commentId.equals(o.getId()))
@@ -50,7 +50,7 @@ public class DeleteCaseInstanceCommentCmd implements Command<Void> {
 		try {
 			commandContext.getCaseInstanceRepository().deleteComment(businessKey, comment);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseInstanceNotFoundException(e);
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 
 		return null;

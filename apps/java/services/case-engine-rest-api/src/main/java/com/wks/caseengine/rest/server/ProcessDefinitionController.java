@@ -25,7 +25,7 @@ import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
-import com.wks.caseengine.rest.exception.ResourceNotFoundException;
+import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -49,7 +49,7 @@ public class ProcessDefinitionController {
 		try {
 			return ResponseEntity.ok(processEngineClientFacade.getProcessDefinitionXMLById(processDefinitionId));
 		} catch (ProcessDefinitionNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 	}
 

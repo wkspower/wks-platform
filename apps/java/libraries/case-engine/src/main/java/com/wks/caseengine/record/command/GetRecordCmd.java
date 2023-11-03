@@ -34,7 +34,7 @@ public class GetRecordCmd implements Command<JsonObject> {
 		try {
 			return commandContext.getRecordRepository().get(recordTypeId, recordId);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new RecordNotFoundException(e);
+			throw new RecordNotFoundException(e.getMessage(), e);
 		}
 	}
 

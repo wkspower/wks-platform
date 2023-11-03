@@ -32,7 +32,7 @@ public class DeleteCaseDefinitionCmd implements Command<Void> {
 		try {
 			commandContext.getCaseDefRepository().delete(caseDefinitionId);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseDefinitionNotFoundException(e);
+			throw new CaseDefinitionNotFoundException(e.getMessage(), e);
 		}
 		return null;
 	}

@@ -43,7 +43,7 @@ public class RecordTypeRepositoryImpl implements RecordTypeRepository {
 		JsonObject jsonObject = getCollection().find(filter).first();
 
 		if (jsonObject == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("RecordType", "id", id);
 		}
 
 		return gson.fromJson(jsonObject.getJson(), RecordType.class);
@@ -64,10 +64,10 @@ public class RecordTypeRepositoryImpl implements RecordTypeRepository {
 	@Override
 	public void delete(final String id) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", id);
-		
+
 		JsonObject jsonObject = getCollection().findOneAndDelete(filter);
 		if (jsonObject == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("RecordType", "id", id);
 		}
 
 	}
@@ -80,7 +80,7 @@ public class RecordTypeRepositoryImpl implements RecordTypeRepository {
 
 		JsonObject jsonObject = getCollection().findOneAndUpdate(filter, update);
 		if (jsonObject == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("RecordType", "id", id);
 		}
 
 	}

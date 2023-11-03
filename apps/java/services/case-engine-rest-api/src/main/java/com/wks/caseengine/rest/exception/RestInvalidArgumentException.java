@@ -11,20 +11,18 @@
  */
 package com.wks.caseengine.rest.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
 /**
  * @author victor.franca
  *
  */
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class ResourceNotFoundException extends RuntimeException {
+public class RestInvalidArgumentException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public ResourceNotFoundException(final String message) {
-		super(message);
+	private static final String DEFAULT_MESSAGE = "The value provided for %s is not valid.";
+
+	public RestInvalidArgumentException(final String argumentName, final Throwable t) {
+		super(String.format(DEFAULT_MESSAGE, argumentName), t);
 	}
 
 }

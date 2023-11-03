@@ -49,7 +49,7 @@ public class DeleteCaseInstanceCmd implements Command<Void> {
 			try {
 				commandContext.getCaseInstanceRepository().delete(o.getBusinessKey());
 			} catch (DatabaseRecordNotFoundException e) {
-				throw new CaseInstanceNotFoundException(e);
+				throw new CaseInstanceNotFoundException(e.getMessage(), e);
 			}
 
 		});

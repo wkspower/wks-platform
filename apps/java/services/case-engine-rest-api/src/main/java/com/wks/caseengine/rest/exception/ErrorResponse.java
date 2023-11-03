@@ -11,20 +11,18 @@
  */
 package com.wks.caseengine.rest.exception;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * @author victor.franca
  *
  */
+@Getter
+@AllArgsConstructor
 public class ErrorResponse {
 
+	private final String error;
 	private final String errorMessage;
-
-	public ErrorResponse(String errorMessage) {
-		this.errorMessage = errorMessage;
-	}
-
-	public String getErrorMessage() {
-		return errorMessage;
-	}
 
 }

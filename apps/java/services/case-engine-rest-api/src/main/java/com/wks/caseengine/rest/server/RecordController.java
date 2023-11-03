@@ -28,7 +28,7 @@ import org.springframework.web.client.ResourceAccessException;
 import com.google.gson.JsonObject;
 import com.wks.caseengine.record.RecordNotFoundException;
 import com.wks.caseengine.record.RecordService;
-import com.wks.caseengine.rest.exception.ResourceNotFoundException;
+import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -65,7 +65,7 @@ public class RecordController {
 		try {
 			recordService.delete(recordTypeId, id);
 		} catch (RecordNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
 	}
@@ -75,8 +75,8 @@ public class RecordController {
 			@RequestBody final JsonObject record) {
 		try {
 			recordService.update(recordTypeId, id, record);
-		} catch (ResourceNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+		} catch (RestResourceNotFoundException e) {
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
 	}

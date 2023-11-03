@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.form.Form;
 import com.wks.caseengine.form.FormNotFoundException;
 import com.wks.caseengine.form.FormService;
-import com.wks.caseengine.rest.exception.ResourceNotFoundException;
+import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -49,7 +49,7 @@ public class FormController {
 		try {
 			return ResponseEntity.ok(formService.get(formKey));
 		} catch (FormNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 	}
 
@@ -64,7 +64,7 @@ public class FormController {
 		try {
 			formService.delete(formKey);
 		} catch (FormNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
 	}
@@ -75,7 +75,7 @@ public class FormController {
 			formService.update(formKey, form);
 			
 		} catch (FormNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
 	}

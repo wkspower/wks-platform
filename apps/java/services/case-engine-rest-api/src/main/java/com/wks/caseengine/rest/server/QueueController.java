@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.queue.Queue;
 import com.wks.caseengine.queue.QueueNotFoundException;
 import com.wks.caseengine.queue.QueueService;
-import com.wks.caseengine.rest.exception.ResourceNotFoundException;
+import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -49,7 +49,7 @@ public class QueueController {
 		try {
 			return ResponseEntity.ok(queueService.get(queueId));
 		} catch (QueueNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 	}
 
@@ -64,7 +64,7 @@ public class QueueController {
 		try {
 			queueService.update(queueId, queue);
 		} catch (QueueNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
 	}
@@ -74,7 +74,7 @@ public class QueueController {
 		try {
 			queueService.delete(queueId);
 		} catch (QueueNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
 	}

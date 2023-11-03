@@ -37,7 +37,7 @@ public class CreateCaseInstanceDocumentCmd implements Command<CaseDocument> {
 		try {
 			caseInstance = commandContext.getCaseInstanceRepository().get(businessKey);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseInstanceNotFoundException(e);
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 
 		caseInstance.addDocument(document);
@@ -45,7 +45,7 @@ public class CreateCaseInstanceDocumentCmd implements Command<CaseDocument> {
 		try {
 			commandContext.getCaseInstanceRepository().update(businessKey, caseInstance);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseInstanceNotFoundException(e);
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 
 		return document;

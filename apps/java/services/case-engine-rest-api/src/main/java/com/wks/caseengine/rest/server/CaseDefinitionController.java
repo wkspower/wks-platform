@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.definition.service.CaseDefinitionService;
-import com.wks.caseengine.rest.exception.ResourceNotFoundException;
+import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -51,7 +51,7 @@ public class CaseDefinitionController {
 		try {
 			return ResponseEntity.ok(caseDefinitionService.get(caseDefId));
 		} catch (CaseDefinitionNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 	}
 
@@ -66,7 +66,7 @@ public class CaseDefinitionController {
 		try {
 			return ResponseEntity.ok(caseDefinitionService.update(caseDefId, caseDefinition));
 		} catch (CaseDefinitionNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 	}
 
@@ -75,7 +75,7 @@ public class CaseDefinitionController {
 		try {
 			caseDefinitionService.delete(caseDefId);
 		} catch (CaseDefinitionNotFoundException e) {
-			throw new ResourceNotFoundException(e.getMessage());
+			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
 	}

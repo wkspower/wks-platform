@@ -25,4 +25,8 @@ public class CaseEmailNotFoundException extends RuntimeException {
 		super(DEFAULT_MESSAGE, e);
 	}
 
+	public CaseEmailNotFoundException(final String message, final Throwable e) {
+		super(message, e);
+	}
+
 }

@@ -42,7 +42,7 @@ public class CreateEmptyCaseInstanceCmd implements Command<CaseInstance> {
 		try {
 			caseDefinition = commandContext.getCaseDefRepository().get(caseDefinitionId);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseDefinitionNotFoundException(e);
+			throw new CaseDefinitionNotFoundException(e.getMessage(), e);
 		}
 
 		String businessKey = commandContext.getBusinessKeyCreator().generate();

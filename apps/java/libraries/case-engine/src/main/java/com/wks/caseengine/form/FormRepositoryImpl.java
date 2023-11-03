@@ -43,7 +43,7 @@ public class FormRepositoryImpl implements FormRepository {
 
 		JsonObject jsonObject = getCollection().find(filter).first();
 		if (jsonObject == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("Form", "key", formKey);
 		}
 
 		return gson.fromJson(jsonObject.getJson(), Form.class);
@@ -67,7 +67,7 @@ public class FormRepositoryImpl implements FormRepository {
 		
 		JsonObject form = getCollection().findOneAndDelete(filter);
 		if(form == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("Form", "key", formKey);
 		}
 	}
 
@@ -80,7 +80,7 @@ public class FormRepositoryImpl implements FormRepository {
 		
 		JsonObject updatedForm = getCollection().findOneAndUpdate(filter, update);
 		if(updatedForm == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("Form", "key", formKey);
 		}
 
 	}

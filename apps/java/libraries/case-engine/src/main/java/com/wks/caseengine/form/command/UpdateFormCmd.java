@@ -23,7 +23,7 @@ public class UpdateFormCmd implements Command<Void> {
 		try {
 			commandContext.getFormRepository().update(formKey, form);
 		} catch (DatabaseRecordNotFoundException e) {
-			throw new FormNotFoundException(e);
+			throw new FormNotFoundException(e.getMessage(), e);
 		}
 		return null;
 	}

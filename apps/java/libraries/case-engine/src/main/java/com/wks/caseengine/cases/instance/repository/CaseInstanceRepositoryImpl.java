@@ -73,7 +73,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 		Bson filter = Filters.eq("businessKey", businessKey);
 		CaseInstance first = getCollection().find(filter).first();
 		if (first == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
 		}
 		return first;
 	}
@@ -94,7 +94,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 		
 		CaseInstance updatedCaseInstance = getCollection().findOneAndUpdate(filter, update);
 		if (updatedCaseInstance == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
 		}
 		
 	}
@@ -105,7 +105,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 		
 		CaseInstance updatedCaseInstance = getCollection().findOneAndDelete(filter);
 		if (updatedCaseInstance == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
 		}
 
 	}
@@ -119,7 +119,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 		
 		CaseInstance updatedCaseInstance = getCollection().findOneAndUpdate(filter, update);
 		if (updatedCaseInstance == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
 		}
 
 	}
@@ -132,7 +132,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 		
 		CaseInstance updatedCaseInstance = getCollection().findOneAndUpdate(filter, update);
 		if (updatedCaseInstance == null) {
-			throw new DatabaseRecordNotFoundException();
+			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
 		}
 
 	}
