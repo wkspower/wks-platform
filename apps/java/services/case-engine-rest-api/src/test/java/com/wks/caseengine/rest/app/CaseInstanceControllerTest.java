@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,7 +31,13 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.wks.caseengine.cases.instance.service.CaseInstanceService;
+import com.wks.bpm.engine.client.BpmEngineClientFacade;
+import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
+import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
+import com.wks.caseengine.cases.instance.CaseComment;
+import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
 import com.wks.caseengine.pagination.PageResult;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
 import com.wks.caseengine.rest.server.CaseInstanceController;
@@ -44,7 +50,13 @@ public class CaseInstanceControllerTest {
 	private MockMvc mockMvc;
 
 	@MockBean
-	private CaseInstanceService caseInstanceService;
+	private CaseDefinitionRepository caseDefinitionRepository;
+
+	@MockBean
+	private CaseInstanceRepository caseInstanceRepository;
+
+	@MockBean
+	private BpmEngineClientFacade bpmEngineClientFacade;
 
 	@BeforeEach
 	public void setup() {
@@ -57,58 +69,73 @@ public class CaseInstanceControllerTest {
 	}
 
 	@Test
-	public void testSave() throws Exception {
-		this.mockMvc.perform(post("/case").contentType(MediaType.APPLICATION_JSON).content("{}"))
+	public void shouldSaveCaseInstance() throws Exception {
+		when(caseDefinitionRepository.get("CD-1")).thenReturn(new CaseDefinition());
+		this.mockMvc.perform(post("/case").contentType(MediaType.APPLICATION_JSON).content("{caseDefinitionId: CD-1}"))
 				.andExpect(status().isOk());
 	}
 
 	@Test
-	public void testDelete() throws Exception {
-		this.mockMvc.perform(delete("/case/{businessKey}", "1")).andExpect(status().isNoContent());
+	public void shouldRespond404_whenSavingCaseInstanceWithNoCaseDefinitionId() throws Exception {
+		when(caseDefinitionRepository.get("CD-1")).thenThrow(CaseDefinitionNotFoundException.class);
+		this.mockMvc.perform(post("/case").contentType(MediaType.APPLICATION_JSON).content("{caseDefinitionId: CD-1}"))
+				.andExpect(status().isBadRequest());
 	}
 
 	@Test
-	public void testMergePatch() throws Exception {
-		this.mockMvc.perform(patch("/case/{businessKey}", "1").contentType("application/merge-patch+json").content("{}"))
+	public void shouldDeleteCaseInstance() throws Exception {
+		this.mockMvc.perform(delete("/case/{businessKey}", "CI-1")).andExpect(status().isNoContent());
+	}
+
+	@Test
+	public void shouldMergePatchCaseInstance() throws Exception {
+		this.mockMvc
+				.perform(patch("/case/{businessKey}", "1").contentType("application/merge-patch+json").content("{}"))
 				.andExpect(status().isNoContent());
 	}
 
 	@Test
-	public void testGet() throws Exception {
+	public void shouldGetCaseInstance() throws Exception {
 		this.mockMvc.perform(get("/case/{businessKey}", "1")).andExpect(status().isOk());
 	}
 
 	@Test
-	public void testFind() throws Exception {
-		when(caseInstanceService.find(ArgumentMatchers.any())).thenReturn(PageResult.EMPTY);
-
+	public void shouldFindCaseInstance() throws Exception {
+		when(caseInstanceRepository.find(Mockito.any())).thenReturn(PageResult.<CaseInstance>builder().build());
 		this.mockMvc.perform(get("/case")).andExpect(status().isOk());
 	}
 
 	@Test
-	public void testSaveDocument() throws Exception {
+	public void shouldSaveDocument() throws Exception {
+		when(caseInstanceRepository.get("BK-1")).thenReturn(new CaseInstance());
 		this.mockMvc
 				.perform(
-						post("/case/{businessKey}/document", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
+						post("/case/{businessKey}/document", "BK-1").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isNoContent());
 	}
 
 	@Test
-	public void testSaveComment() throws Exception {
+	public void shouldSaveComment() throws Exception {
+		when(caseInstanceRepository.get("BK-1")).thenReturn(new CaseInstance());
 		this.mockMvc
-				.perform(post("/case/{businessKey}/comment", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
+				.perform(post("/case/{businessKey}/comment", "BK-1").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isNoContent());
 	}
 
 	@Test
-	public void testUpdateComment() throws Exception {
+	public void shouldUpdateComment() throws Exception {
 		this.mockMvc.perform(put("/case/{businessKey}/comment/{commentId}", "1", "1")
 				.contentType(MediaType.APPLICATION_JSON).content("{}")).andExpect(status().isNoContent());
 	}
 
 	@Test
-	public void testDeleteComment() throws Exception {
-		this.mockMvc.perform(delete("/case/{businessKey}/comment/{commentId}", "1", "1")).andExpect(status().isNoContent());
+	public void shouldDeleteComment() throws Exception {
+		CaseInstance caseInstance = CaseInstance.builder().build();
+		caseInstance.addComment(CaseComment.builder().id("Comment-1").build());
+
+		when(caseInstanceRepository.get("BK-1")).thenReturn(caseInstance);
+		this.mockMvc.perform(delete("/case/{businessKey}/comment/{commentId}", "BK-1", "Comment-1"))
+				.andExpect(status().isNoContent());
 	}
 
 }

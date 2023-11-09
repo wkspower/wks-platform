@@ -29,6 +29,7 @@ import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseDocument;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.CaseInstanceCommentNotFoundException;
 import com.wks.caseengine.cases.instance.CaseInstanceFilter;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.cases.instance.service.CaseInstanceService;
@@ -150,7 +151,7 @@ public class CaseInstanceController {
 
 		try {
 			caseInstanceService.deleteComment(businessKey, commentId);
-		} catch (CaseInstanceNotFoundException e) {
+		} catch (CaseInstanceNotFoundException | CaseInstanceCommentNotFoundException e) {
 			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();

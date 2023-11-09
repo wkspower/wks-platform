@@ -9,20 +9,20 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.rest.exception;
+package com.wks.caseengine.cases.instance;
 
-/**
- * @author victor.franca
- *
- */
-public class RestInvalidArgumentException extends RuntimeException {
+public class CaseInstanceCommentNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String DEFAULT_MESSAGE = "The provided %s is empty or invalid.";
+	private static final String DEFAULT_MESSAGE = "Case Instance Comment not found";
 
-	public RestInvalidArgumentException(final String argumentName, final Throwable t) {
-		super(String.format(DEFAULT_MESSAGE, argumentName), t);
+	public CaseInstanceCommentNotFoundException() {
+		super(DEFAULT_MESSAGE);
+	}
+
+	public CaseInstanceCommentNotFoundException(final String message, final Throwable e) {
+		super(message, e);
 	}
 
 }

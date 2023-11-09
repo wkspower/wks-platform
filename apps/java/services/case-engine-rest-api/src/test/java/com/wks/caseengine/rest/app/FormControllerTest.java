@@ -53,13 +53,13 @@ public class FormControllerTest {
 	}
 
 	@Test
-	public void testSave() throws Exception {
+	public void shouldSabe() throws Exception {
 		this.mockMvc.perform(post("/form").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isNoContent());
 	}
 
 	@Test
-	public void testDelete() throws Exception {
+	public void shouldDelete() throws Exception {
 		this.mockMvc.perform(delete("/form/{formKey}", "1")).andExpect(status().isNoContent());
 	}
 
@@ -70,12 +70,12 @@ public class FormControllerTest {
 	}
 
 	@Test
-	public void testGet() throws Exception {
+	public void shouldGet() throws Exception {
 		this.mockMvc.perform(get("/form/{formKey}", "1")).andExpect(status().isOk());
 	}
 
 	@Test
-	public void testFind() throws Exception {
+	public void shouldFind() throws Exception {
 		this.mockMvc.perform(get("/form")).andExpect(status().isOk());
 	}
 

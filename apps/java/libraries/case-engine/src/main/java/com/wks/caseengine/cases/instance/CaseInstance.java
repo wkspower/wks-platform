@@ -20,6 +20,7 @@ import com.wks.caseengine.cases.definition.CaseStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -46,7 +47,8 @@ public class CaseInstance {
 
 	private String caseOwnerName;
 
-	private List<CaseComment> comments;
+	@Default
+	private List<CaseComment> comments = new ArrayList<>();
 
 	private List<CaseDocument> documents;
 

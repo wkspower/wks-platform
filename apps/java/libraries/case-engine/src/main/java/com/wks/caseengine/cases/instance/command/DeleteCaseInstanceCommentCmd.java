@@ -11,8 +11,11 @@
  */
 package com.wks.caseengine.cases.instance.command;
 
+import java.util.Optional;
+
 import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.CaseInstanceCommentNotFoundException;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
@@ -39,16 +42,16 @@ public class DeleteCaseInstanceCommentCmd implements Command<Void> {
 			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 
-		CaseComment comment = caseInstance.getComments().stream().filter(o -> commentId.equals(o.getId()))
+		Optional<CaseComment> comment = caseInstance.getComments().stream().filter(o -> commentId.equals(o.getId()))
 				.reduce((a, b) -> {
 					throw new IllegalStateException("Multiple elements: " + a + ", " + b);
-				}).get();
-		if (comment == null) {
-			throw new CaseInstanceNotFoundException();
+				});
+		if (comment.isEmpty()) {
+			throw new CaseInstanceCommentNotFoundException();
 		}
 
 		try {
-			commandContext.getCaseInstanceRepository().deleteComment(businessKey, comment);
+			commandContext.getCaseInstanceRepository().deleteComment(businessKey, comment.get());
 		} catch (DatabaseRecordNotFoundException e) {
 			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}

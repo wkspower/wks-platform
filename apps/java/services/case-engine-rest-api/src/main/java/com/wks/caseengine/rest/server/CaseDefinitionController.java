@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.definition.service.CaseDefinitionService;
+import com.wks.caseengine.rest.exception.RestInvalidArgumentException;
 import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -57,7 +58,11 @@ public class CaseDefinitionController {
 
 	@PostMapping
 	public ResponseEntity<CaseDefinition> save(@RequestBody final CaseDefinition caseDefinition) {
-		return ResponseEntity.ok(caseDefinitionService.create(caseDefinition));
+		try {
+			return ResponseEntity.ok(caseDefinitionService.create(caseDefinition));
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("caseDefinitionId", e);
+		}
 	}
 
 	@PutMapping(value = "/{caseDefId}")

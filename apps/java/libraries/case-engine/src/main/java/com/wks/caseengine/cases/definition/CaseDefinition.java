@@ -43,7 +43,8 @@ public class CaseDefinition {
 
 	private Boolean deployed;
 
-	private List<CaseStage> stages;
+	@Default
+	private List<CaseStage> stages = new ArrayList<>();;
 
 	@Default
 	private List<ActionHook> caseHooks = new ArrayList<>();

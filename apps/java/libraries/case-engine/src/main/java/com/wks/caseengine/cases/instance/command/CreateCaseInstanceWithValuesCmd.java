@@ -14,6 +14,7 @@ package com.wks.caseengine.cases.instance.command;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.Optional;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
@@ -59,11 +60,18 @@ public class CreateCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 			businessKey = caseInstance.getBusinessKey();
 		}
 
-		CaseInstance newCaseInstance = CaseInstance.builder().businessKey(businessKey)
-				.stage(caseDefinition.getStages().stream().sorted(Comparator.comparing(CaseStage::getIndex)).findFirst()
-						.get().getName())
+		
+		CaseInstance.CaseInstanceBuilder caseInstanceBuilder = CaseInstance.builder().businessKey(businessKey)
 				.attributes(caseInstance.getAttributes()).caseDefinitionId(caseInstance.getCaseDefinitionId())
-				.caseOwner(caseInstance.getCaseOwner()).caseOwnerName(caseInstance.getCaseOwnerName()).build();
+				.caseOwner(caseInstance.getCaseOwner()).caseOwnerName(caseInstance.getCaseOwnerName());
+
+		Optional<CaseStage> firstStage = caseDefinition.getStages().stream().sorted(Comparator.comparing(CaseStage::getIndex))
+				.findFirst();
+		if(firstStage.isPresent()) {
+			caseInstanceBuilder.stage(firstStage.get().getName());
+		}
+		
+		CaseInstance newCaseInstance = caseInstanceBuilder.build();
 
 		commandContext.getCaseInstanceRepository().save(newCaseInstance);
 

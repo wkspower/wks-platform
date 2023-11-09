@@ -53,29 +53,29 @@ public class QueueControllerTest {
 	}
 
 	@Test
-	public void testSave() throws Exception {
+	public void shouldSave() throws Exception {
 		this.mockMvc.perform(post("/queue").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isNoContent());
 	}
 
 	@Test
-	public void testDelete() throws Exception {
+	public void shouldDelete() throws Exception {
 		this.mockMvc.perform(delete("/queue/{queueId}", "1")).andExpect(status().isNoContent());
 	}
 
 	@Test
-	public void testUpdate() throws Exception {
+	public void shouldUpdate() throws Exception {
 		this.mockMvc.perform(put("/queue/{queueIdKey}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isNoContent());
 	}
 
 	@Test
-	public void testGet() throws Exception {
+	public void shouldGet() throws Exception {
 		this.mockMvc.perform(get("/queue/{queueId}", "1")).andExpect(status().isOk());
 	}
 
 	@Test
-	public void testFind() throws Exception {
+	public void shouldFind() throws Exception {
 		this.mockMvc.perform(get("/queue")).andExpect(status().isOk());
 	}
 
