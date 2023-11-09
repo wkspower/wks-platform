@@ -4,8 +4,8 @@ server:
 logging:
    level:
       root: INFO
-      com.wks.api.security: DEBUG
-      org.apache.http: DEBUG
+      com.wks.api.security: INFO
+      org.apache.http: INFO
             
 spring.mvc.converters.preferred-json-mapper: gson
 

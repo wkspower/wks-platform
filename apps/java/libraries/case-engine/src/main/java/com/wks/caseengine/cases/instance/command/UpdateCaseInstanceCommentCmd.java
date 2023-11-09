@@ -11,10 +11,10 @@
  */
 package com.wks.caseengine.cases.instance.command;
 
-import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 
@@ -31,13 +31,17 @@ public class UpdateCaseInstanceCommentCmd implements Command<Void> {
 
 	@Override
 	public Void execute(CommandContext commandContext) {
-		CaseInstance caseInstance = commandContext.getCaseInstanceRepository().get(businessKey);
-
-		if (caseInstance == null) {
-			throw new CaseInstanceNotFoundException();
+		try {
+			commandContext.getCaseInstanceRepository().get(businessKey);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 
-		commandContext.getCaseInstanceRepository().updateComment(businessKey, commentId, body);
+		try {
+			commandContext.getCaseInstanceRepository().updateComment(businessKey, commentId, body);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
+		}
 		return null;
 
 	}

@@ -15,6 +15,6 @@ import com.google.gson.JsonObject;
 
 public interface DataExportService {
 
-	JsonObject export() throws Exception;
+	JsonObject export();
 
 }

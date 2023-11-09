@@ -34,7 +34,7 @@ import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
 import com.wks.caseengine.command.CommandContext;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
-
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 /**
  * @author victor.franca
@@ -57,12 +57,12 @@ public class CreateEmptyCaseInstanceCmdTest {
 
 	@Mock
 	private GenericBusinessKeyGenerator businessKeyCreator;
-	
+
 	@Mock
 	private ProcessInstanceService processInstanceService;
 
 	@Test
-	public void shouldCreateCaseInstance() {
+	public void shouldCreateCaseInstance() throws DatabaseRecordNotFoundException {
 
 		// Given
 		createCaseInstanceCmd.setCaseDefinitionId("CD_1");
@@ -75,13 +75,13 @@ public class CreateEmptyCaseInstanceCmdTest {
 		when(caseDefinitionRepository.get("CD_1")).thenReturn(caseDefinition);
 		when(businessKeyCreator.generate()).thenReturn("BK_1");
 		CaseInstance savedCaseInstance = createCaseInstanceCmd.execute(commandContext);
-		
+
 		// Then
 		assertEquals("BK_1", savedCaseInstance.getBusinessKey());
 		assertEquals("CD_1", savedCaseInstance.getCaseDefinitionId());
 		assertNull(savedCaseInstance.getCaseOwner());
 		assertNull(savedCaseInstance.getCaseOwnerName());
-		assertNull(savedCaseInstance.getComments());
+		assertEquals(0, savedCaseInstance.getComments().size());
 		assertNull(savedCaseInstance.getDocuments());
 		assertNull(savedCaseInstance.getQueueId());
 		assertEquals("Stage 1", savedCaseInstance.getStage());

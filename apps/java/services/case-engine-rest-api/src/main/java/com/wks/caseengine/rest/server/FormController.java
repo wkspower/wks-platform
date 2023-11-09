@@ -14,6 +14,7 @@ package com.wks.caseengine.rest.server;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,7 +25,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.form.Form;
+import com.wks.caseengine.form.FormNotFoundException;
 import com.wks.caseengine.form.FormService;
+import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -37,28 +40,44 @@ public class FormController {
 	private FormService formService;
 
 	@GetMapping
-	public List<Form> find() throws Exception {
-		return formService.find();
+	public ResponseEntity<List<Form>> find() {
+		return ResponseEntity.ok(formService.find());
 	}
 
 	@GetMapping(value = "/{formKey}")
-	public Form get(@PathVariable final String formKey) throws Exception {
-		return formService.get(formKey);
+	public ResponseEntity<Form> get(@PathVariable final String formKey) {
+		try {
+			return ResponseEntity.ok(formService.get(formKey));
+		} catch (FormNotFoundException e) {
+			throw new RestResourceNotFoundException(e.getMessage());
+		}
 	}
 
 	@PostMapping
-	public void save(@RequestBody final Form form) throws Exception {
+	public ResponseEntity<Void> save(@RequestBody final Form form) {
 		formService.save(form);
+		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping(value = "/{formKey}")
-	public void delete(@PathVariable final String formKey) throws Exception {
-		formService.delete(formKey);
+	public ResponseEntity<Void> delete(@PathVariable final String formKey) {
+		try {
+			formService.delete(formKey);
+		} catch (FormNotFoundException e) {
+			throw new RestResourceNotFoundException(e.getMessage());
+		}
+		return ResponseEntity.noContent().build();
 	}
 
 	@PatchMapping(value = "/{formKey}")
-	public void update(@PathVariable final String formKey, @RequestBody final Form form) throws Exception {
-		formService.update(formKey, form);
+	public ResponseEntity<Void> update(@PathVariable final String formKey, @RequestBody final Form form) {
+		try {
+			formService.update(formKey, form);
+			
+		} catch (FormNotFoundException e) {
+			throw new RestResourceNotFoundException(e.getMessage());
+		}
+		return ResponseEntity.noContent().build();
 	}
 
 }

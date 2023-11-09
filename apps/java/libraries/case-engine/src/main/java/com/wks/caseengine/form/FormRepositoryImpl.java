@@ -25,6 +25,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.db.EngineMongoDataConnection;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 @Component
 public class FormRepositoryImpl implements FormRepository {
@@ -36,10 +37,16 @@ public class FormRepositoryImpl implements FormRepository {
 	private GsonBuilder gsonBuilder;
 
 	@Override
-	public Form get(final String formKey) {
+	public Form get(final String formKey) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("key", formKey);
 		Gson gson = gsonBuilder.create();
-		return gson.fromJson(getCollection().find(filter).first().getJson(), Form.class);
+
+		JsonObject jsonObject = getCollection().find(filter).first();
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException("Form", "key", formKey);
+		}
+
+		return gson.fromJson(jsonObject.getJson(), Form.class);
 	}
 
 	@Override
@@ -55,19 +62,27 @@ public class FormRepositoryImpl implements FormRepository {
 	}
 
 	@Override
-	public void delete(final String formKey) {
+	public void delete(final String formKey) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("key", formKey);
-		getCollection().deleteMany(filter);
+		
+		JsonObject form = getCollection().findOneAndDelete(filter);
+		if(form == null) {
+			throw new DatabaseRecordNotFoundException("Form", "key", formKey);
+		}
 	}
 
 	@Override
-	public void update(final String formKey, final Form form) {
+	public void update(final String formKey, final Form form) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("key", formKey);
 
 		Bson update = Updates.combine(Updates.set("title", form.getTitle()), Updates.set("toolTip", form.getToolTip()),
 				Updates.set("structure", (new JsonObject(gsonBuilder.create().toJson(form.getStructure())))));
+		
+		JsonObject updatedForm = getCollection().findOneAndUpdate(filter, update);
+		if(updatedForm == null) {
+			throw new DatabaseRecordNotFoundException("Form", "key", formKey);
+		}
 
-		getCollection().updateOne(filter, update);
 	}
 
 	private MongoCollection<JsonObject> getCollection() {

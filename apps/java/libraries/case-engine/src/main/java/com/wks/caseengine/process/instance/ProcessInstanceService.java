@@ -14,7 +14,6 @@ package com.wks.caseengine.process.instance;
 import java.util.List;
 import java.util.Optional;
 
-import com.wks.bpm.engine.exception.ProcessInstanceNotFoundException;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.caseengine.cases.instance.CaseAttribute;
@@ -34,6 +33,6 @@ public interface ProcessInstanceService {
 	List<ProcessInstance> find(final Optional<String> processDefinitionKey, final Optional<String> businessKey,
 			final Optional<String> activityIdIn);
 
-	List<ActivityInstance> getActivityInstances(final String processInstanceId) throws ProcessInstanceNotFoundException;
+	List<ActivityInstance> getActivityInstances(final String processInstanceId);
 
 }

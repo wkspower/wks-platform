@@ -59,7 +59,7 @@ public class EngineMongoDatabaseFactory extends SimpleMongoClientDatabaseFactory
 			return tenantId.get();
 		}
 
-		throw new IllegalArgumentException("Could't locate tenan database in session context holder");
+		throw new IllegalArgumentException("Could't locate tenant database in session context holder");
 	}
 
 }

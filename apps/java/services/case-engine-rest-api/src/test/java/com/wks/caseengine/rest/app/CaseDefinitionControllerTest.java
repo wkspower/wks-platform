@@ -11,6 +11,9 @@
  */
 package com.wks.caseengine.rest.app;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -20,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -28,7 +32,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.wks.caseengine.cases.definition.service.CaseDefinitionService;
+import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
 import com.wks.caseengine.rest.server.CaseDefinitionController;
 
@@ -40,7 +46,7 @@ public class CaseDefinitionControllerTest {
 	private MockMvc mockMvc;
 
 	@MockBean
-	private CaseDefinitionService caseDefinitionService;
+	private CaseDefinitionRepository caseDefinitionRepository;
 
 	@BeforeEach
 	public void setup() {
@@ -53,30 +59,59 @@ public class CaseDefinitionControllerTest {
 	}
 
 	@Test
-	public void testSave() throws Exception {
+	public void shouldSaveNewCaseDefinition() throws Exception {
+		this.mockMvc.perform(post("/case-definition").contentType(MediaType.APPLICATION_JSON).content("{id: CD-1}"))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void shouldRespond400_whenSavingWithNoCaseDefinnitionId() throws Exception {
 		this.mockMvc.perform(post("/case-definition").contentType(MediaType.APPLICATION_JSON).content("{}"))
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void shouldDeleteCaseDefinition() throws Exception {
+		this.mockMvc.perform(delete("/case-definition/{caseDefId}", "1")).andExpect(status().isNoContent());
+	}
+
+	@Test
+	public void shouldRespond404_whenDeletingWithInvalidCaseDefinnitionId() throws Exception {
+		Mockito.doThrow(new DatabaseRecordNotFoundException(null, null, null)).when(caseDefinitionRepository)
+				.delete("CD-1");
+		this.mockMvc.perform(delete("/case-definition/{caseDefId}", "CD-1")).andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void shouldUpdateCaseDefinition() throws Exception {
+		this.mockMvc
+				.perform(put("/case-definition/{caseDefId}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
 				.andExpect(status().isOk());
 	}
 
 	@Test
-	public void testDelete() throws Exception {
-		this.mockMvc.perform(delete("/case-definition/{caseDefId}", "1")).andExpect(status().isOk());
-	}
-
-	@Test
-	public void testUpdate() throws Exception {
+	public void shouldRespond404_whenUpdatingWithInvalidCaseDefinnitionId() throws Exception {
+		Mockito.doThrow(new DatabaseRecordNotFoundException(null, null, null)).when(caseDefinitionRepository)
+				.update(eq("CD-1"), any());
 		this.mockMvc.perform(
-				put("/case-definition/{caseDefId}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isOk());
+				put("/case-definition/{caseDefId}", "CD-1").contentType(MediaType.APPLICATION_JSON).content("{}"))
+				.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testGet() throws Exception {
-		this.mockMvc.perform(get("/case-definition/{caseDefId}", "1")).andExpect(status().isOk());
+	public void shouldGetCaseDefinition() throws Exception {
+		when(caseDefinitionRepository.get("CD-1")).thenReturn(new CaseDefinition());
+		this.mockMvc.perform(get("/case-definition/{caseDefId}", "CD-1")).andExpect(status().isOk());
 	}
 
 	@Test
-	public void testFind() throws Exception {
+	public void shouldRespond404_whenGetWithInvalidCaseDefinnitionId() throws Exception {
+		when(caseDefinitionRepository.get("CD-1")).thenThrow(DatabaseRecordNotFoundException.class );
+		this.mockMvc.perform(get("/case-definition/{caseDefId}", "CD-1")).andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void shouldFindCaseDefinition() throws Exception {
 		this.mockMvc.perform(get("/case-definition")).andExpect(status().isOk());
 	}
 

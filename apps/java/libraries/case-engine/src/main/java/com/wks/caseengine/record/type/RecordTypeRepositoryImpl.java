@@ -25,6 +25,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.db.EngineMongoDataConnection;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 @Component
 public class RecordTypeRepositoryImpl implements RecordTypeRepository {
@@ -36,10 +37,16 @@ public class RecordTypeRepositoryImpl implements RecordTypeRepository {
 	private GsonBuilder gsonBuilder;
 
 	@Override
-	public RecordType get(final String id) {
+	public RecordType get(final String id) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", id);
 		Gson gson = gsonBuilder.create();
-		return gson.fromJson(getCollection().find(filter).first().getJson(), RecordType.class);
+		JsonObject jsonObject = getCollection().find(filter).first();
+
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException("RecordType", "id", id);
+		}
+
+		return gson.fromJson(jsonObject.getJson(), RecordType.class);
 	}
 
 	@Override
@@ -55,18 +62,27 @@ public class RecordTypeRepositoryImpl implements RecordTypeRepository {
 	}
 
 	@Override
-	public void delete(final String id) {
+	public void delete(final String id) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", id);
-		getCollection().deleteMany(filter);
+
+		JsonObject jsonObject = getCollection().findOneAndDelete(filter);
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException("RecordType", "id", id);
+		}
+
 	}
 
 	@Override
-	public void update(final String id, final RecordType recordType) {
+	public void update(final String id, final RecordType recordType) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", id);
 
 		Bson update = Updates.set("fields", (new JsonObject(gsonBuilder.create().toJson(recordType.getFields()))));
 
-		getCollection().updateOne(filter, update);
+		JsonObject jsonObject = getCollection().findOneAndUpdate(filter, update);
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException("RecordType", "id", id);
+		}
+
 	}
 
 	private MongoCollection<JsonObject> getCollection() {

@@ -14,6 +14,7 @@ package com.wks.caseengine.rest.server;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,7 +25,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.record.type.RecordType;
+import com.wks.caseengine.record.type.RecordTypeNotFoundException;
 import com.wks.caseengine.record.type.RecordTypeService;
+import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -37,28 +40,44 @@ public class RecordTypeController {
 	private RecordTypeService recordTypeService;
 
 	@GetMapping
-	public List<RecordType> find() throws Exception {
-		return recordTypeService.find();
+	public ResponseEntity<List<RecordType>> find() {
+		return ResponseEntity.ok(recordTypeService.find());
 	}
 
 	@GetMapping(value = "/{id}")
-	public RecordType get(@PathVariable final String id) throws Exception {
-		return recordTypeService.get(id);
+	public ResponseEntity<RecordType> get(@PathVariable final String id) {
+		try {
+			return ResponseEntity.ok(recordTypeService.get(id));
+		} catch (RecordTypeNotFoundException e) {
+			throw new RestResourceNotFoundException(e.getMessage());
+		}
 	}
 
 	@PostMapping
-	public void save(@RequestBody final RecordType recordType) throws Exception {
+	public ResponseEntity<Void> save(@RequestBody final RecordType recordType) {
 		recordTypeService.save(recordType);
+		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping(value = "/{id}")
-	public void delete(@PathVariable final String id) throws Exception {
-		recordTypeService.delete(id);
+	public ResponseEntity<Void> delete(@PathVariable final String id) {
+		try {
+			recordTypeService.delete(id);
+		} catch (RecordTypeNotFoundException e) {
+			throw new RestResourceNotFoundException(e.getMessage());
+		}
+		return ResponseEntity.noContent().build();
 	}
 
 	@PatchMapping(value = "/{id}")
-	public void update(@PathVariable final String id, @RequestBody final RecordType recordType) throws Exception {
-		recordTypeService.update(id, recordType);
+	public ResponseEntity<Void> update(@PathVariable final String id, @RequestBody final RecordType recordType) {
+		try {
+			recordTypeService.update(id, recordType);
+		} catch (RecordTypeNotFoundException e) {
+			throw new RestResourceNotFoundException(e.getMessage());
+		}
+
+		return ResponseEntity.noContent().build();
 	}
 
 }

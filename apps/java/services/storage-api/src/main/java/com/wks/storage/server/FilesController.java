@@ -13,6 +13,7 @@ package com.wks.storage.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,29 +34,29 @@ public class FilesController {
 	private StorageServiceFactory factory;
 
 	@GetMapping(value = "/storage/files/{dir}/downloads/{fileName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public DownloadFileUrl downloadFileWithDir(@PathVariable(required = true) String dir,
+	public ResponseEntity<DownloadFileUrl> downloadFileWithDir(@PathVariable(required = true) String dir,
 			@PathVariable(required = true) String fileName,
-			@RequestParam(name = "content-type", required = true) String contentType) throws Exception {
-		return downloadService().createPresignedObjectUrl(dir, fileName, contentType);
+			@RequestParam(name = "content-type", required = true) String contentType) {
+		return ResponseEntity.ok(downloadService().createPresignedObjectUrl(dir, fileName, contentType));
 	}
 
 	@GetMapping(value = "/storage/files/downloads/{fileName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public DownloadFileUrl downloadFile(@PathVariable(required = true) String fileName,
-			@RequestParam(name = "content-type", required = true) String contentType) throws Exception {
-		return downloadService().createPresignedObjectUrl(fileName, contentType);
+	public ResponseEntity<DownloadFileUrl> downloadFile(@PathVariable(required = true) String fileName,
+			@RequestParam(name = "content-type", required = true) String contentType) {
+		return ResponseEntity.ok(downloadService().createPresignedObjectUrl(fileName, contentType));
 	}
 
 	@GetMapping(value = "/storage/files/{dir}/uploads/{fileName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public UploadFileUrl uploadWithDir(@PathVariable(required = true) String dir,
+	public ResponseEntity<UploadFileUrl> uploadWithDir(@PathVariable(required = true) String dir,
 			@PathVariable(required = true) String fileName,
-			@RequestParam(name = "content-type", required = true) String contentType) throws Exception {
-		return uploadService().createPresignedPostFormData(dir, fileName, contentType);
+			@RequestParam(name = "content-type", required = true) String contentType) {
+		return ResponseEntity.ok(uploadService().createPresignedPostFormData(dir, fileName, contentType));
 	}
 
 	@GetMapping(value = "/storage/files/uploads/{fileName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public UploadFileUrl upload(@PathVariable(required = true) String fileName,
-			@RequestParam(name = "content-type", required = true) String contentType) throws Exception {
-		return uploadService().createPresignedPostFormData(fileName, contentType);
+	public ResponseEntity<UploadFileUrl> upload(@PathVariable(required = true) String fileName,
+			@RequestParam(name = "content-type", required = true) String contentType) {
+		return ResponseEntity.ok(uploadService().createPresignedPostFormData(fileName, contentType));
 	}
 
 	private DownloadService downloadService() {

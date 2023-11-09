@@ -14,6 +14,8 @@ package com.wks.caseengine.record.type.command;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
 import com.wks.caseengine.record.type.RecordType;
+import com.wks.caseengine.record.type.RecordTypeNotFoundException;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 
@@ -28,7 +30,11 @@ public class GetRecordTypeCmd implements Command<RecordType> {
 
 	@Override
 	public RecordType execute(CommandContext commandContext) {
-		return commandContext.getRecordTypeRepository().get(recordTypeId);
+		try {
+			return commandContext.getRecordTypeRepository().get(recordTypeId);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new RecordTypeNotFoundException(e.getMessage(), e);
+		}
 	}
 
 }

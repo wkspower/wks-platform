@@ -15,14 +15,13 @@ import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseDocument;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceFilter;
-import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.pagination.PageResult;
 
 public interface CaseInstanceService {
 
 	PageResult<CaseInstance> find(CaseInstanceFilter filters);
 
-	CaseInstance get(final String businessKey) throws CaseInstanceNotFoundException;
+	CaseInstance get(final String businessKey);
 
 	CaseInstance createWithValues(final CaseInstance caseInstance);
 
@@ -30,15 +29,14 @@ public interface CaseInstanceService {
 
 	CaseInstance patch(final String businessKey, final CaseInstance caseInstance);
 
-	void delete(final String businessKey) throws CaseInstanceNotFoundException;
+	void delete(final String businessKey);
 
-	void saveDocument(final String businessKey, final CaseDocument document) throws CaseInstanceNotFoundException;
+	void saveDocument(final String businessKey, final CaseDocument document);
 
-	void saveComment(final String businessKey, final CaseComment comment) throws CaseInstanceNotFoundException;
+	void saveComment(final String businessKey, final CaseComment comment);
 
-	void updateComment(final String businessKey, final String commentId, final String body)
-			throws CaseInstanceNotFoundException;
+	void updateComment(final String businessKey, final String commentId, final String body);
 
-	void deleteComment(final String businessKey, final String commentId) throws CaseInstanceNotFoundException;
+	void deleteComment(final String businessKey, final String commentId);
 
 }

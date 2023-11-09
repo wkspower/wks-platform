@@ -15,14 +15,14 @@ import java.util.List;
 
 public interface QueueService {
 
-	void save(final Queue queue) throws Exception;
+	void save(final Queue queue);
 
-	Queue get(final String id) throws Exception;
+	Queue get(final String id);
 
-	List<Queue> find() throws Exception;
+	List<Queue> find();
 
-	void delete(final String id) throws Exception;
+	void delete(final String id);
 
-	void update(final String id, final Queue queue) throws Exception;
+	void update(final String id, final Queue queue);
 
 }

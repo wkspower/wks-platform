@@ -21,4 +21,8 @@ public class CaseDefinitionNotFoundException extends RuntimeException {
 		super(DEFAULT_MESSAGE);
 	}
 
+	public CaseDefinitionNotFoundException(final String message, final Throwable e) {
+		super(message, e);
+	}
+
 }

@@ -3,6 +3,8 @@ package com.wks.caseengine.queue.command;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
 import com.wks.caseengine.queue.Queue;
+import com.wks.caseengine.queue.QueueNotFoundException;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 
@@ -18,7 +20,11 @@ public class UpdateQueueCmd implements Command<Void> {
 
 	@Override
 	public Void execute(CommandContext commandContext) {
-		commandContext.getQueueRepository().update(queueId, queue);
+		try {
+			commandContext.getQueueRepository().update(queueId, queue);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new QueueNotFoundException(e.getMessage(), e);
+		}
 		return null;
 	}
 

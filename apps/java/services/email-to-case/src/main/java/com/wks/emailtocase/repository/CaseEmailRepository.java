@@ -18,7 +18,6 @@ import com.wks.emailtocase.caseemail.CaseEmail;
 
 public interface CaseEmailRepository extends Repository<CaseEmail> {
 
-	List<CaseEmail> find(final Optional<String> caseInstanceBusinessKey, final Optional<String> caseDefinitionId)
-			throws Exception;
+	List<CaseEmail> find(final Optional<String> caseInstanceBusinessKey, final Optional<String> caseDefinitionId);
 
 }

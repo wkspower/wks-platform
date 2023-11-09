@@ -15,14 +15,14 @@ import java.util.List;
 
 public interface FormService {
 
-	void save(final Form form) throws Exception;
+	void save(final Form form);
 
-	Form get(final String formKey) throws Exception;
+	Form get(final String formKey);
 
-	List<Form> find() throws Exception;
+	List<Form> find();
 
-	void delete(final String formKey) throws Exception;
+	void delete(final String formKey);
 
-	void update(final String formKey, final Form form) throws Exception;
+	void update(final String formKey, final Form form);
 
 }

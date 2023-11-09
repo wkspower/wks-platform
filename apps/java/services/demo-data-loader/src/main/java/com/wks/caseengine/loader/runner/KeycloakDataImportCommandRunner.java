@@ -87,7 +87,7 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 	private GsonBuilder gsonBuilder;
 
 	@Override
-	public void run(String... args) throws Exception {
+	public void run(String... args) throws IOException {
 		log.info("Start of data importing");
 
 		Keycloak keycloak = Keycloak.getInstance(url, "master", admin, adminPassword, "admin-cli");

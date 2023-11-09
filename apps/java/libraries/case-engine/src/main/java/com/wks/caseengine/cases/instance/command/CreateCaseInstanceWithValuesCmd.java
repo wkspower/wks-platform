@@ -14,6 +14,7 @@ package com.wks.caseengine.cases.instance.command;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.Optional;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
@@ -23,6 +24,7 @@ import com.wks.caseengine.cases.instance.CaseAttributeType;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 import lombok.Setter;
@@ -39,15 +41,17 @@ public class CreateCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 
 	@Override
 	public CaseInstance execute(CommandContext commandContext) {
+		CaseDefinition caseDefinition;
+		try {
+			caseDefinition = commandContext.getCaseDefRepository().get(caseInstance.getCaseDefinitionId());
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseDefinitionNotFoundException(e.getMessage(), e);
+		}
+
 		caseInstance.addAttribute(
 				new CaseAttribute("createdAt", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
 						CaseAttributeType.STRING.getValue()));
 
-		CaseDefinition caseDefinition = commandContext.getCaseDefRepository().get(caseInstance.getCaseDefinitionId());
-
-		if (caseDefinition == null) {
-			throw new CaseDefinitionNotFoundException();
-		}
 
 		String businessKey = null;
 		if (caseInstance.getBusinessKey() == null) {
@@ -56,11 +60,18 @@ public class CreateCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 			businessKey = caseInstance.getBusinessKey();
 		}
 
-		CaseInstance newCaseInstance = CaseInstance.builder().businessKey(businessKey)
-				.stage(caseDefinition.getStages().stream().sorted(Comparator.comparing(CaseStage::getIndex)).findFirst()
-						.get().getName())
+		
+		CaseInstance.CaseInstanceBuilder caseInstanceBuilder = CaseInstance.builder().businessKey(businessKey)
 				.attributes(caseInstance.getAttributes()).caseDefinitionId(caseInstance.getCaseDefinitionId())
-				.caseOwner(caseInstance.getCaseOwner()).caseOwnerName(caseInstance.getCaseOwnerName()).build();
+				.caseOwner(caseInstance.getCaseOwner()).caseOwnerName(caseInstance.getCaseOwnerName());
+
+		Optional<CaseStage> firstStage = caseDefinition.getStages().stream().sorted(Comparator.comparing(CaseStage::getIndex))
+				.findFirst();
+		if(firstStage.isPresent()) {
+			caseInstanceBuilder.stage(firstStage.get().getName());
+		}
+		
+		CaseInstance newCaseInstance = caseInstanceBuilder.build();
 
 		commandContext.getCaseInstanceRepository().save(newCaseInstance);
 

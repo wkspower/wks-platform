@@ -11,7 +11,7 @@
  */
 package com.wks.bpm.engine.exception;
 
-public class ProcessInstanceNotFoundException extends Exception {
+public class ProcessInstanceNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

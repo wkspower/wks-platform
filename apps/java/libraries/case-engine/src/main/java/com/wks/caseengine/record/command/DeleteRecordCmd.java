@@ -13,6 +13,8 @@ package com.wks.caseengine.record.command;
 
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.record.RecordNotFoundException;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 
@@ -28,7 +30,11 @@ public class DeleteRecordCmd implements Command<Void> {
 
 	@Override
 	public Void execute(CommandContext commandContext) {
-		commandContext.getRecordRepository().delete(recordTypeId, recordId);
+		try {
+			commandContext.getRecordRepository().delete(recordTypeId, recordId);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new RecordNotFoundException(e.getMessage(), e);
+		}
 		return null;
 	}
 

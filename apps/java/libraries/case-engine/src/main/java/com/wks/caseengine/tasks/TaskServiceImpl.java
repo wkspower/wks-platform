@@ -32,28 +32,28 @@ public class TaskServiceImpl implements TaskService {
 	private CommandExecutor commandExecutor;
 
 	@Override
-	public void create(Task task) throws Exception {
+	public void create(Task task){
 		commandExecutor.execute(new CreateTaskCmd(task));
 	}
 
 	@Override
-	public List<Task> find(final String processInstanceBusinessKey) throws Exception {
+	public List<Task> find(final String processInstanceBusinessKey){
 		return commandExecutor.execute(new FindTaskCmd(processInstanceBusinessKey));
 	}
 
 	@Override
-	public void claim(final String taskId, final String taskAssignee) throws Exception {
+	public void claim(final String taskId, final String taskAssignee){
 		commandExecutor.execute(new ClaimTaskCmd(taskId, taskAssignee));
 
 	}
 
 	@Override
-	public void unclaim(final String taskId) throws Exception {
+	public void unclaim(final String taskId){
 		commandExecutor.execute(new UnclaimTaskCmd(taskId));
 	}
 
 	@Override
-	public void complete(final String taskId, final JsonObject variables) throws Exception {
+	public void complete(final String taskId, final JsonObject variables){
 		commandExecutor.execute(new CompleteTaskCmd(taskId, variables));
 	}
 

@@ -11,8 +11,10 @@
  */
 package com.wks.caseengine.cases.definition.command;
 
+import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 
@@ -27,7 +29,11 @@ public class DeleteCaseDefinitionCmd implements Command<Void> {
 
 	@Override
 	public Void execute(final CommandContext commandContext) {
-		commandContext.getCaseDefRepository().delete(caseDefinitionId);
+		try {
+			commandContext.getCaseDefRepository().delete(caseDefinitionId);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseDefinitionNotFoundException(e.getMessage(), e);
+		}
 		return null;
 	}
 

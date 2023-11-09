@@ -39,16 +39,16 @@ public class DigitalOceanDownloadService implements DownloadService {
 	private BucketService bucketService;
 
 	@Override
-	public DownloadFileUrl createPresignedObjectUrl(String fileName, String contentType) throws Exception {
+	public DownloadFileUrl createPresignedObjectUrl(String fileName, String contentType) {
 		return createPresigned(null, fileName, contentType);
 	}
 
 	@Override
-	public DownloadFileUrl createPresignedObjectUrl(String dir, String fileName, String contentType) throws Exception {
+	public DownloadFileUrl createPresignedObjectUrl(String dir, String fileName, String contentType) {
 		return createPresigned(dir, fileName, contentType);
 	}
 
-	private DownloadFileUrl createPresigned(String dir, String fileName, String contentType) throws Exception {
+	private DownloadFileUrl createPresigned(String dir, String fileName, String contentType) {
 		Map<String, String> params = new HashMap<>();
 		params.put("response-content-type", contentType);
 

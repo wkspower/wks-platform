@@ -3,6 +3,8 @@ package com.wks.caseengine.form.command;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
 import com.wks.caseengine.form.Form;
+import com.wks.caseengine.form.FormNotFoundException;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 
@@ -17,7 +19,11 @@ public class GetFormCmd implements Command<Form> {
 
 	@Override
 	public Form execute(CommandContext commandContext) {
-		return commandContext.getFormRepository().get(formKey);
+		try {
+			return commandContext.getFormRepository().get(formKey);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new FormNotFoundException(e.getMessage(), e);
+		}
 	}
 
 }

@@ -37,7 +37,7 @@ public class DigitalOceanBucketService implements BucketService {
 	private MinioClientDelegate client;
 
 	@Override
-	public String createAssignedTenant() throws Exception {
+	public String createAssignedTenant() {
 		String bucketName = String.format("%s-%s", config.getBucketPrefix(), tenantHolder.getTenantId().get());
 
 		boolean found = client.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
@@ -49,7 +49,7 @@ public class DigitalOceanBucketService implements BucketService {
 	}
 
 	@Override
-	public String createObjectWithPath(String dir, String fileName) throws Exception {
+	public String createObjectWithPath(String dir, String fileName) {
 		return String.format("%s/%s", dir, fileName);
 	}
 

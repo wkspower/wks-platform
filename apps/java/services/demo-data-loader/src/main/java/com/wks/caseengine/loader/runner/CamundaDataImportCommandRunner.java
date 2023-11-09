@@ -54,7 +54,7 @@ public class CamundaDataImportCommandRunner implements CommandLineRunner {
 	private String tenantId;
 
 	@Override
-	public void run(String... args) throws Exception {
+	public void run(String... args) throws IOException {
 		log.info("Starting upload model to camunda....");
 
 		createTenant();
@@ -88,7 +88,7 @@ public class CamundaDataImportCommandRunner implements CommandLineRunner {
 		}
 	}
 
-	private void importData() throws Exception {
+	private void importData() throws IOException {
 		if (importDir != null && !importDir.isEmpty()) {
 			listFiles(importDir).forEach(fileName -> {
 				File file = new File(fileName);

@@ -21,6 +21,7 @@ import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 
@@ -36,9 +37,11 @@ public class CreateCaseInstanceCommentCmd implements Command<CaseComment> {
 
 	@Override
 	public CaseComment execute(CommandContext commandContext) {
-		CaseInstance caseInstance = commandContext.getCaseInstanceRepository().get(businessKey);
-		if (caseInstance == null) {
-			throw new CaseInstanceNotFoundException();
+		CaseInstance caseInstance;
+		try {
+			caseInstance = commandContext.getCaseInstanceRepository().get(businessKey);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 
 		comment.setCreatedAt(new Date());
@@ -51,7 +54,11 @@ public class CreateCaseInstanceCommentCmd implements Command<CaseComment> {
 			caseInstance.getComments().add(comment);
 		}
 
-		commandContext.getCaseInstanceRepository().update(comment.getCaseId(), caseInstance);
+		try {
+			commandContext.getCaseInstanceRepository().update(comment.getCaseId(), caseInstance);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
+		}
 
 		return comment;
 	}

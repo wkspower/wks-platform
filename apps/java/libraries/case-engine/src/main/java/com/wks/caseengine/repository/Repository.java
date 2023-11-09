@@ -17,12 +17,12 @@ public interface Repository<T> {
 
 	List<T> find();
 
-	T get(final String id);
+	T get(final String id) throws DatabaseRecordNotFoundException;
 
 	void save(final T object);
 
-	void update(final String id, final T object);
+	void update(final String id, final T object) throws DatabaseRecordNotFoundException;
 
-	void delete(final String id);
+	void delete(final String id) throws DatabaseRecordNotFoundException;
 
 }

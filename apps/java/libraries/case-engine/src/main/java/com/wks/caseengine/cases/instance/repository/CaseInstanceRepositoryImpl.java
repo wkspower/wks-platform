@@ -36,6 +36,7 @@ import com.wks.caseengine.pagination.Args;
 import com.wks.caseengine.pagination.CursorPagination;
 import com.wks.caseengine.pagination.PageResult;
 import com.wks.caseengine.pagination.mongo.MongoCursorPagination;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 import com.wks.caseengine.repository.Paginator;
 
 @Component
@@ -68,9 +69,12 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	}
 
 	@Override
-	public CaseInstance get(final String businessKey) {
+	public CaseInstance get(final String businessKey) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("businessKey", businessKey);
 		CaseInstance first = getCollection().find(filter).first();
+		if (first == null) {
+			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
+		}
 		return first;
 	}
 
@@ -80,43 +84,66 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	}
 
 	@Override
-	public void update(final String businessKey, final CaseInstance caseInstance) {
+	public void update(final String businessKey, final CaseInstance caseInstance)
+			throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("businessKey", businessKey);
 		Bson update = Updates.combine(Updates.set("status", caseInstance.getStatus()),
 				Updates.set("stage", caseInstance.getStage()), Updates.set("attributes", caseInstance.getAttributes()),
 				Updates.set("documents", caseInstance.getDocuments()),
-				Updates.set("queueId", caseInstance.getQueueId()),
-				Updates.set("comments", caseInstance.getComments()));
-		getCollection().updateMany(filter, update);
+				Updates.set("queueId", caseInstance.getQueueId()), Updates.set("comments", caseInstance.getComments()));
+		
+		CaseInstance updatedCaseInstance = getCollection().findOneAndUpdate(filter, update);
+		if (updatedCaseInstance == null) {
+			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
+		}
+		
 	}
 
 	@Override
-	public void delete(final String businessKey) {
+	public void delete(final String businessKey) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("businessKey", businessKey);
-		getCollection().deleteMany(filter);
-	}
+		
+		CaseInstance updatedCaseInstance = getCollection().findOneAndDelete(filter);
+		if (updatedCaseInstance == null) {
+			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
+		}
 
-	private MongoCollection<CaseInstance> getCollection() {
-		return connection.getCaseInstanceCollection();
 	}
 
 	@Override
-	public void deleteComment(final String businessKey, final CaseComment comment) {
+	public void deleteComment(final String businessKey, final CaseComment comment)
+			throws DatabaseRecordNotFoundException {
 
 		Bson filter = Filters.eq("businessKey", businessKey);
 		Bson update = Updates.pull("comments", comment);
-		getCollection().updateOne(filter, update);
+		
+		CaseInstance updatedCaseInstance = getCollection().findOneAndUpdate(filter, update);
+		if (updatedCaseInstance == null) {
+			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
+		}
+
 	}
 
 	@Override
-	public void updateComment(final String businessKey, final String commentId, final String body) {
+	public void updateComment(final String businessKey, final String commentId, final String body)
+			throws DatabaseRecordNotFoundException {
 		Bson filter = and(eq("businessKey", businessKey), eq("comments.id", commentId));
 		Bson update = set("comments.$.body", body);
-		getCollection().updateOne(filter, update);
+		
+		CaseInstance updatedCaseInstance = getCollection().findOneAndUpdate(filter, update);
+		if (updatedCaseInstance == null) {
+			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
+		}
+
 	}
 
 	protected MongoOperations getOperations() {
 		return connection.getOperations();
 	}
+	
+	private MongoCollection<CaseInstance> getCollection() {
+		return connection.getCaseInstanceCollection();
+	}
+
 
 }

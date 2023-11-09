@@ -49,7 +49,7 @@ public class VariableControllerTest {
 	}
 
 	@Test
-	public void testFind() throws Exception {
+	public void shouldFind() throws Exception {
 		this.mockMvc.perform(get("/variable").param("processInstanceId", "1")).andExpect(status().isOk());
 	}
 

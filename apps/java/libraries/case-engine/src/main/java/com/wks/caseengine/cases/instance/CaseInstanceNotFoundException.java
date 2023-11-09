@@ -15,4 +15,14 @@ public class CaseInstanceNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
+	private static final String DEFAULT_MESSAGE = "Case Instance not found";
+
+	public CaseInstanceNotFoundException() {
+		super(DEFAULT_MESSAGE);
+	}
+
+	public CaseInstanceNotFoundException(final String message, final Throwable e) {
+		super(message, e);
+	}
+
 }

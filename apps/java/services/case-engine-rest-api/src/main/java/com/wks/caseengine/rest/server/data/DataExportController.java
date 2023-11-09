@@ -30,7 +30,7 @@ public class DataExportController {
 	private DataExportService dataExportService;
 
 	@GetMapping
-	public JsonObject export() throws Exception {
+	public JsonObject export() {
 		return dataExportService.export();
 	}
 

@@ -53,29 +53,29 @@ public class RecordTypeControllerTest {
 	}
 
 	@Test
-	public void testSave() throws Exception {
+	public void shouldSave() throws Exception {
 		this.mockMvc.perform(post("/record-type").contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
-	public void testDelete() throws Exception {
-		this.mockMvc.perform(delete("/record-type/{id}", "1")).andExpect(status().isOk());
+	public void shouldDelete() throws Exception {
+		this.mockMvc.perform(delete("/record-type/{id}", "1")).andExpect(status().isNoContent());
 	}
 
 	@Test
-	public void testUpdate() throws Exception {
+	public void shouldUpdate() throws Exception {
 		this.mockMvc.perform(patch("/record-type/{id}", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
-	public void testGet() throws Exception {
+	public void shouldGet() throws Exception {
 		this.mockMvc.perform(get("/record-type/{id}", "1")).andExpect(status().isOk());
 	}
 
 	@Test
-	public void testFind() throws Exception {
+	public void shouldFind() throws Exception {
 		this.mockMvc.perform(get("/record-type")).andExpect(status().isOk());
 	}
 

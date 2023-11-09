@@ -25,6 +25,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.db.EngineMongoDataConnection;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 @Component
 public class QueueRepositoryImpl implements QueueRepository {
@@ -42,10 +43,14 @@ public class QueueRepositoryImpl implements QueueRepository {
 	}
 
 	@Override
-	public Queue get(String id) {
+	public Queue get(String id) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", id);
 		Gson gson = gsonBuilder.create();
-		return gson.fromJson(getCollection().find(filter).first().getJson(), Queue.class);
+		JsonObject jsonObject = getCollection().find(filter).first();
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException("Queue", "id", id);
+		}
+		return gson.fromJson(jsonObject.getJson(), Queue.class);
 	}
 
 	@Override
@@ -54,19 +59,28 @@ public class QueueRepositoryImpl implements QueueRepository {
 	}
 
 	@Override
-	public void update(String id, Queue queue) {
+	public void update(String id, Queue queue) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", id);
 
 		Bson update = Updates.combine(Updates.set("name", queue.getName()),
 				Updates.set("description", queue.getDescription()));
 
-		getCollection().updateOne(filter, update);
+		JsonObject jsonObject = getCollection().findOneAndUpdate(filter, update);
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException("Queue", "id", id);
+		}
+
 	}
 
 	@Override
-	public void delete(String id) {
+	public void delete(String id) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", id);
-		getCollection().deleteMany(filter);
+		
+		JsonObject jsonObject = getCollection().findOneAndDelete(filter);
+		if (jsonObject == null) {
+			throw new DatabaseRecordNotFoundException("Queue", "id", id);
+		}
+
 	}
 
 	private MongoCollection<JsonObject> getCollection() {

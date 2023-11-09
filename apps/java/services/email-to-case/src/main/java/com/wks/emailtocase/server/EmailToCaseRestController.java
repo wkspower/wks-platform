@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,9 +47,9 @@ public class EmailToCaseRestController {
 	private CaseEmailFactory caseEmailFactory;
 
 	@PostMapping(value = "/receive")
-	public void receive(@RequestParam(name = "to") String to, @RequestParam(name = "from") String from,
+	public ResponseEntity<Void> receive(@RequestParam(name = "to") String to, @RequestParam(name = "from") String from,
 			@RequestParam(name = "subject") String subject, @RequestParam(name = "text") String text,
-			@RequestParam(name = "html") String html) throws Exception {
+			@RequestParam(name = "html") String html) {
 
 		log.debug("### Email received - Processing started ###");
 		log.debug("To: " + to);
@@ -71,14 +72,16 @@ public class EmailToCaseRestController {
 
 		log.debug("### Email received - Processing finished ###");
 
+		return ResponseEntity.noContent().build();
+
 	}
 
 	@GetMapping
-	public List<CaseEmail> find(@RequestParam(required = false) String caseInstanceBusinessKey,
-			@RequestParam(required = false) String caseDefinitionId) throws Exception {
+	public ResponseEntity<List<CaseEmail>> find(@RequestParam(required = false) String caseInstanceBusinessKey,
+			@RequestParam(required = false) String caseDefinitionId) {
 
-		return caseEmailService.find(Optional.ofNullable(caseInstanceBusinessKey),
-				Optional.ofNullable(caseDefinitionId));
+		return ResponseEntity.ok(caseEmailService.find(Optional.ofNullable(caseInstanceBusinessKey),
+				Optional.ofNullable(caseDefinitionId)));
 	}
 
 }

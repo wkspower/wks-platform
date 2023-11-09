@@ -17,6 +17,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 import com.wks.emailtocase.repository.CaseEmailRepository;
 
 @Component
@@ -26,19 +27,22 @@ public class CaseEmailServiceImpl implements CaseEmailService {
 	private CaseEmailRepository caseEmailRepository;
 
 	@Override
-	public void save(CaseEmail caseEmail) throws Exception {
+	public void save(CaseEmail caseEmail) {
 		caseEmailRepository.save(caseEmail);
 	}
 
 	@Override
-	public List<CaseEmail> find(final Optional<String> caseInstanceBusinessKey, final Optional<String> caseDefinitionId)
-			throws Exception {
+	public List<CaseEmail> find(final Optional<String> caseInstanceBusinessKey, final Optional<String> caseDefinitionId) {
 		return caseEmailRepository.find(caseInstanceBusinessKey, caseDefinitionId);
 	}
 
 	@Override
-	public CaseEmail get(String caseEmailId) throws Exception {
-		return caseEmailRepository.get(caseEmailId);
+	public CaseEmail get(String caseEmailId) {
+		try {
+			return caseEmailRepository.get(caseEmailId);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseEmailNotFoundException(e);
+		}
 	}
 
 }

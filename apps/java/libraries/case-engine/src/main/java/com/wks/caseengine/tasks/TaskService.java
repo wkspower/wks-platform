@@ -18,14 +18,14 @@ import com.wks.bpm.engine.model.spi.Task;
 
 public interface TaskService {
 
-	void create(final Task task) throws Exception;
+	void create(final Task task);
 
-	List<Task> find(final String processInstanceBusinessKey) throws Exception;
+	List<Task> find(final String processInstanceBusinessKey);
 
-	void claim(final String taskId, final String taskAssignee) throws Exception;
+	void claim(final String taskId, final String taskAssignee);
 
-	void unclaim(final String taskId) throws Exception;
+	void unclaim(final String taskId);
 
-	void complete(final String taskId, final JsonObject variables) throws Exception;
+	void complete(final String taskId, final JsonObject variables);
 
 }

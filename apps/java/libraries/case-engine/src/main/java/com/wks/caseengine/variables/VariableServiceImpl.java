@@ -23,7 +23,7 @@ public class VariableServiceImpl implements VariableService {
 	private CommandExecutor commandExecutor;
 
 	@Override
-	public String findVariables(final String processInstanceId) throws Exception {
+	public String findVariables(final String processInstanceId){
 		return commandExecutor.execute(new FindVariableCommand(processInstanceId));
 	}
 

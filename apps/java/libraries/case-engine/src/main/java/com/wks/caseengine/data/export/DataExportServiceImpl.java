@@ -22,7 +22,7 @@ public class DataExportServiceImpl implements DataExportService {
 	private CommandExecutor commandExecutor;
 
 	@Override
-	public JsonObject export() throws Exception {
+	public JsonObject export() {
 		return commandExecutor.execute(new ExportDataCmd());
 	}
 

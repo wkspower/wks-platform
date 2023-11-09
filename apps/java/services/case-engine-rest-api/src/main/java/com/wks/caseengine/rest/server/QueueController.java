@@ -14,6 +14,7 @@ package com.wks.caseengine.rest.server;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +25,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.queue.Queue;
+import com.wks.caseengine.queue.QueueNotFoundException;
 import com.wks.caseengine.queue.QueueService;
+import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -37,28 +40,43 @@ public class QueueController {
 	private QueueService queueService;
 
 	@GetMapping
-	public List<Queue> find() throws Exception {
-		return queueService.find();
+	public ResponseEntity<List<Queue>> find() {
+		return ResponseEntity.ok(queueService.find());
 	}
 
 	@GetMapping(value = "/{queueId}")
-	public Queue get(@PathVariable final String queueId) throws Exception {
-		return queueService.get(queueId);
+	public ResponseEntity<Queue> get(@PathVariable final String queueId) {
+		try {
+			return ResponseEntity.ok(queueService.get(queueId));
+		} catch (QueueNotFoundException e) {
+			throw new RestResourceNotFoundException(e.getMessage());
+		}
 	}
 
 	@PostMapping
-	public void save(@RequestBody final Queue queue) throws Exception {
+	public ResponseEntity<Void> save(@RequestBody final Queue queue) {
 		queueService.save(queue);
+		return ResponseEntity.noContent().build();
 	}
 
 	@PutMapping(value = "/{queueId}")
-	public void update(@PathVariable final String queueId, @RequestBody final Queue queue) throws Exception {
-		queueService.update(queueId, queue);
+	public ResponseEntity<Void> update(@PathVariable final String queueId, @RequestBody final Queue queue) {
+		try {
+			queueService.update(queueId, queue);
+		} catch (QueueNotFoundException e) {
+			throw new RestResourceNotFoundException(e.getMessage());
+		}
+		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping(value = "/{queueId}")
-	public void delete(@PathVariable final String queueId) throws Exception {
-		queueService.delete(queueId);
+	public ResponseEntity<Void> delete(@PathVariable final String queueId) {
+		try {
+			queueService.delete(queueId);
+		} catch (QueueNotFoundException e) {
+			throw new RestResourceNotFoundException(e.getMessage());
+		}
+		return ResponseEntity.noContent().build();
 	}
 
 }

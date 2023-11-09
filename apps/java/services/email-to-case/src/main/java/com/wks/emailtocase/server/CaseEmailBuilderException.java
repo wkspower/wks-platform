@@ -11,7 +11,7 @@
  */
 package com.wks.emailtocase.server;
 
-public class CaseEmailBuilderException extends Exception {
+public class CaseEmailBuilderException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

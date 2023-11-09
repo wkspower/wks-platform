@@ -53,7 +53,7 @@ public class FilesControllerTest {
 	public void shouldCreateDownloadUrlWithoutDirPath() throws Exception {
 		when(downloadService.createPresignedObjectUrl("file", "application/json")).thenReturn(new DownloadFileUrl());
 
-		DownloadFileUrl description = controller.downloadFile("file", "application/json");
+		DownloadFileUrl description = controller.downloadFile("file", "application/json").getBody();
 
 		assertNotNull(description);
 	}
@@ -62,7 +62,7 @@ public class FilesControllerTest {
 	public void shouldCreateDownloadUrlWithtDirPath() throws Exception {
 		when(downloadService.createPresignedObjectUrl("dir", "file", "application/json")).thenReturn(new DownloadFileUrl());
 
-		DownloadFileUrl description = controller.downloadFileWithDir("dir", "file", "application/json");
+		DownloadFileUrl description = controller.downloadFileWithDir("dir", "file", "application/json").getBody();
 
 		assertNotNull(description);
 	}
@@ -71,7 +71,7 @@ public class FilesControllerTest {
 	public void shouldCreateUploadUrl() throws Exception {
 		when(uploadService.createPresignedPostFormData("file", "application/json")).thenReturn(new UploadFileUrl());
 
-		UploadFileUrl description = controller.upload("file", "application/json");
+		UploadFileUrl description = controller.upload("file", "application/json").getBody();
 
 		assertNotNull(description);
 	}
@@ -80,7 +80,7 @@ public class FilesControllerTest {
 	public void shouldCreateUploadUrlWithDirPath() throws Exception {
 		when(uploadService.createPresignedPostFormData("dir", "file", "application/json")).thenReturn(new UploadFileUrl());
 
-		UploadFileUrl description = controller.uploadWithDir("dir", "file", "application/json");
+		UploadFileUrl description = controller.uploadWithDir("dir", "file", "application/json").getBody();
 
 		assertNotNull(description);
 	}

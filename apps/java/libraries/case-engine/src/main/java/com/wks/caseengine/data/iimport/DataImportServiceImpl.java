@@ -24,7 +24,7 @@ public class DataImportServiceImpl implements DataImportService {
 	private CommandExecutor commandExecutor;
 
 	@Override
-	public void importData(JsonObject data) throws Exception {
+	public void importData(JsonObject data) {
 		commandExecutor.execute(new ImportaDataCmd(data));
 	}
 

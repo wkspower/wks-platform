@@ -12,8 +12,10 @@
 package com.wks.caseengine.cases.instance.command;
 
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
 
@@ -29,7 +31,12 @@ public class PatchCaseInstanceCmd implements Command<CaseInstance> {
 
 	@Override
 	public CaseInstance execute(CommandContext commandContext) {
-		CaseInstance target = commandContext.getCaseInstanceRepository().get(businessKey);
+		CaseInstance target;
+		try {
+			target = commandContext.getCaseInstanceRepository().get(businessKey);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
+		}
 
 		if (mergePatch.getStatus() != null) {
 			target.setStatus(mergePatch.getStatus());
@@ -41,7 +48,11 @@ public class PatchCaseInstanceCmd implements Command<CaseInstance> {
 			target.setQueueId(mergePatch.getQueueId());
 		}
 
-		commandContext.getCaseInstanceRepository().update(businessKey, target);
+		try {
+			commandContext.getCaseInstanceRepository().update(businessKey, target);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
+		}
 
 		// TODO return the updated case instance from DB
 		return target;

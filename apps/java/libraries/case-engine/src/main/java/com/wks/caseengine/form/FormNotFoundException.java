@@ -11,8 +11,18 @@
  */
 package com.wks.caseengine.form;
 
-public class FormNotFoundException extends Exception {
+public class FormNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final String DEFAULT_MESSAGE = "Form not found";
+
+	public FormNotFoundException() {
+		super(DEFAULT_MESSAGE);
+	}
+
+	public FormNotFoundException(final String message, final Throwable e) {
+		super(message, e);
+	}
 
 }
