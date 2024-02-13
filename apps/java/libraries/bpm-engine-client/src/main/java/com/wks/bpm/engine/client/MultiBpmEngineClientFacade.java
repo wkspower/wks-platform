@@ -92,14 +92,14 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonArray caseAttributes, final String tenantId) {
-		return getEngineClient().startProcess(processDefinitionKey, businessKey, caseAttributes, getBpmEngine());
+			final JsonArray variables, final String tenantId) {
+		return getEngineClient().startProcess(processDefinitionKey, businessKey, variables, getBpmEngine());
 	}
 
 	@Override
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonArray caseAttributes) {
-		return getEngineClient().startProcess(processDefinitionKey, businessKey, caseAttributes, getBpmEngine());
+			final JsonArray variables) {
+		return getEngineClient().startProcess(processDefinitionKey, businessKey, variables, getBpmEngine());
 	}
 
 	@Override
