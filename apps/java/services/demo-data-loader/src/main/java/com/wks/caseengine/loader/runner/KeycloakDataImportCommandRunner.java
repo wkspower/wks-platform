@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.ClientScopeRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
@@ -59,8 +60,14 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 	@Value("${keycloak.data.import.realm}")
 	private String realmName;
 
-	@Value("${keycloak.data.import.clientid}")
-	private String clientId;
+	@Value("${keycloak.data.import.portal-clientid}")
+	private String portalClientId;
+
+	@Value("${keycloak.data.import.externaltasks-clientid}")
+	private String externalTasksClientId;
+
+	@Value("${keycloak.data.import.externaltasks-secret}")
+	private String externalTasksSecret;
 
 	@Value("${keycloak.data.import.redirecturl}")
 	private String redirectUrl;
@@ -93,19 +100,36 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 		Keycloak keycloak = Keycloak.getInstance(url, "master", admin, adminPassword, "admin-cli");
 
 		List<ClientRepresentation> clients = new ArrayList<>();
-		ClientRepresentation client = new ClientRepresentation();
-		client.setClientId(clientId);
-		client.setPublicClient(true);
-		client.setProtocol("openid-connect");
-		client.setDirectAccessGrantsEnabled(true);
-		client.setStandardFlowEnabled(true);
-		client.setFullScopeAllowed(true);
-		client.setClientAuthenticatorType("client-secret");
-		client.setRedirectUris(Arrays.asList(redirectUrl));
-		client.setWebOrigins(Arrays.asList(webOrigins));
-		client.setDefaultClientScopes(createDefaultClientScopes());
-		client.setOptionalClientScopes(createOptionalClientScopes());
-		clients.add(client);
+		ClientRepresentation portalClient = new ClientRepresentation();
+		portalClient.setClientId(portalClientId);
+		portalClient.setPublicClient(true);
+		portalClient.setProtocol("openid-connect");
+		portalClient.setDirectAccessGrantsEnabled(true);
+		portalClient.setStandardFlowEnabled(true);
+		portalClient.setFullScopeAllowed(true);
+		portalClient.setClientAuthenticatorType("client-secret");
+		portalClient.setRedirectUris(Arrays.asList(redirectUrl));
+		portalClient.setWebOrigins(Arrays.asList(webOrigins));
+		portalClient.setDefaultClientScopes(createDefaultClientScopes());
+		portalClient.setOptionalClientScopes(createOptionalClientScopes());
+		clients.add(portalClient);
+
+		ClientRepresentation externalTasksClient = new ClientRepresentation();
+		externalTasksClient.setClientId(externalTasksClientId);
+		externalTasksClient.setSecret(externalTasksSecret);
+		externalTasksClient.setPublicClient(true);
+		externalTasksClient.setProtocol("openid-connect");
+		externalTasksClient.setDirectAccessGrantsEnabled(true);
+		externalTasksClient.setStandardFlowEnabled(true);
+		externalTasksClient.setServiceAccountsEnabled(true);
+		externalTasksClient.setAuthorizationServicesEnabled(true);
+		externalTasksClient.setFullScopeAllowed(true);
+		externalTasksClient.setClientAuthenticatorType("client-secret");
+		externalTasksClient.setRedirectUris(Arrays.asList(redirectUrl));
+		externalTasksClient.setWebOrigins(Arrays.asList(webOrigins));
+		externalTasksClient.setDefaultClientScopes(createDefaultClientScopes());
+		externalTasksClient.setOptionalClientScopes(createOptionalClientScopes());
+		clients.add(externalTasksClient);
 
 		RealmRepresentation realm = new RealmRepresentation();
 		realm.setRealm(realmName);
@@ -120,7 +144,11 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 		realm.setGroups(createGroups());
 
 		try {
+
 			keycloak.realms().create(realm);
+
+			addUserToGroups(keycloak, externalTasksClientId);
+
 		} catch (Exception e) {
 			log.error("error to create keycloack", e);
 		}
@@ -198,6 +226,12 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 			roles.add(new RoleRepresentation(r.get("name"), r.get("description"), false));
 		});
 		return roles;
+	}
+
+	private void addUserToGroups(final Keycloak keycloak, final String userId) {
+		UserRepresentation user = keycloak.realm(realmName).users().search("service-account-" + userId).get(0);
+		UserResource userResource = keycloak.realm(realmName).users().get(user.getId());
+		keycloak.realm(realmName).groups().groups().forEach(group -> userResource.joinGroup(group.getId()));
 	}
 
 }
