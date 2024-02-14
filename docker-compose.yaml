@@ -1,4 +1,5 @@
 version: '3.7'
+name: wks-platform
 services:
     traefik:
         profiles:
@@ -122,17 +123,15 @@ services:
         build:
             context: apps/java/services/bpm-engine-c7-external-service
         links:
-            - mongodb
             - camunda
+            - case-engine-rest-api
         environment:
             - CAMUNDA_BASE_URL=http://camunda:8080/engine-rest
             - CAMUNDA_USERNAME=demo
             - CAMUNDA_PASSWORD=demo
-            - MONGO_DATABASE=wks
-            - MONGO_CONN=mongodb://mongodb
+            - KEYCLOAK_URL=http://keycloak:8080/realms/localhost/protocol/openid-connect/token
+            - WKS_CASE_API_URL=http://case-engine-rest-api:8081
         depends_on:
-            mongodb:
-                condition: service_healthy
             camunda:
                 condition: service_healthy
 
@@ -181,6 +180,7 @@ services:
                 REACT_APP_API_URL: http://localhost:8081
                 REACT_APP_EMAIL_URL: http://localhost:8083
                 REACT_APP_STORAGE_URL: http://localhost:8085
+                REACT_APP_NOVU_ENABLED: false
         ports:
             - 3001:3000
 
