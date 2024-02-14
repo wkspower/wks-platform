@@ -13,6 +13,7 @@ package com.wks.caseengine.cases.instance.command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,9 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.gson.JsonArray;
 import com.wks.caseengine.cases.businesskey.GenericBusinessKeyGenerator;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseStage;
@@ -44,7 +45,7 @@ import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 public class CreateEmptyCaseInstanceCmdTest {
 
 	@InjectMocks
-	private CreateEmptyCaseInstanceCmd createCaseInstanceCmd;
+	private StartEmptyCaseInstanceCmd createCaseInstanceCmd;
 
 	@InjectMocks
 	private CommandContext commandContext;
@@ -86,7 +87,7 @@ public class CreateEmptyCaseInstanceCmdTest {
 		assertNull(savedCaseInstance.getQueueId());
 		assertEquals("Stage 1", savedCaseInstance.getStage());
 		assertNull(savedCaseInstance.getStatus());
-		verify(processInstanceService).create(eq("Process1"), eq("BK_1"), Mockito.any());
+		verify(processInstanceService).create(eq("Process1"), eq("BK_1"), any(JsonArray.class));
 
 	}
 

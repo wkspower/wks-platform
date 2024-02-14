@@ -40,21 +40,27 @@ public interface BpmEngineClient {
 	ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
 			final Optional<String> businessKey, final Optional<String> activityIdIn, final BpmEngine bpmEngine);
 
-	String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) throws ProcessDefinitionNotFoundException;
+	String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine)
+			throws ProcessDefinitionNotFoundException;
 
-	String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) throws ProcessDefinitionNotFoundException;
+	String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine)
+			throws ProcessDefinitionNotFoundException;
 
 	ProcessInstance startProcess(final String processDefinitionKey, final BpmEngine bpmEngine);
 
 	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
 			final BpmEngine bpmEngine);
 
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonArray caseAttributes, final BpmEngine bpmEngine);
+	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey, final JsonObject variable,
+			final BpmEngine bpmEngine);
+
+	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey, final JsonArray variables,
+			final BpmEngine bpmEngine);
 
 	void deleteProcessInstance(final String processInstanceId, final BpmEngine bpmEngine);
 
-	ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine) throws ProcessInstanceNotFoundException;
+	ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine)
+			throws ProcessInstanceNotFoundException;
 
 	public void createTask(final Task task, final BpmEngine bpmEngine);
 

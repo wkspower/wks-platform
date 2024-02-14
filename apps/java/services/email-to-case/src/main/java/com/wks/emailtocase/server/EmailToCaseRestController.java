@@ -61,7 +61,7 @@ public class EmailToCaseRestController {
 		CaseEmail caseEmail = caseEmailFactory.create(to, from, subject, text, html);
 
 		if (caseEmail.getCaseEmailType().equals(CaseEmailType.NEW_CASE_EMAIL)) {
-			CaseInstance caseInstance = caseInstanceService.createEmpty(caseEmail.getCaseDefinitionId());
+			CaseInstance caseInstance = caseInstanceService.startEmpty(caseEmail.getCaseDefinitionId());
 			caseEmail.setCaseInstanceBusinessKey(caseInstance.getBusinessKey());
 
 			caseEmailService.save(caseEmail);

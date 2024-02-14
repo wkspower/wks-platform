@@ -11,6 +11,8 @@
  */
 package com.wks.caseengine.rest.server;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
@@ -36,12 +40,18 @@ public class ProcessDefinitionController {
 
 	@Autowired
 	private BpmEngineClientFacade processEngineClientFacade;
-	
-	@PostMapping(value = "/key/{key}/start")
-	public ResponseEntity<ProcessInstance> start(@PathVariable final String key,
-			@RequestBody final ProcessInstance processInstance) {
-		return ResponseEntity.ok(processEngineClientFacade.startProcess(key, processInstance.getBusinessKey()));
 
+	@PostMapping(value = "/key/{key}/start")
+	public ResponseEntity<ProcessInstance> start(@PathVariable final String key, @RequestBody final JsonObject body) {
+
+		String businessKey = body.get("businessKey").getAsString();
+		Optional<JsonElement> attributes = Optional.of(body.get("attributes"));
+		if (attributes.isEmpty()) {
+			return ResponseEntity.ok(processEngineClientFacade.startProcess(key, businessKey));
+		} else {
+			return ResponseEntity
+					.ok(processEngineClientFacade.startProcess(key, businessKey, attributes.get().getAsJsonArray()));
+		}
 	}
 
 	@GetMapping(value = "/{processDefinitionId}/xml", produces = MediaType.APPLICATION_XML_VALUE)

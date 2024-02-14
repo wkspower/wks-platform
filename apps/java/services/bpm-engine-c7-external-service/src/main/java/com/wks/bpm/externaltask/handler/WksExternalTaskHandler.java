@@ -9,31 +9,26 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.engine.camunda.handler;
+package com.wks.bpm.externaltask.handler;
 
-import org.camunda.bpm.client.spring.annotation.ExternalTaskSubscription;
 import org.camunda.bpm.client.task.ExternalTask;
 import org.camunda.bpm.client.task.ExternalTaskHandler;
 import org.camunda.bpm.client.task.ExternalTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 
 import com.wks.api.security.context.SecurityContextTenantHolder;
-import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.cases.instance.service.CaseInstanceService;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Configuration
-@ExternalTaskSubscription(topicName = "caseQueueUpdate", includeExtensionProperties = true)
+/**
+ * @author victor.franca
+ *
+ */
 @Slf4j
-public class CaseQueueUpdateHandler implements ExternalTaskHandler {
+public abstract class WksExternalTaskHandler implements ExternalTaskHandler {
 
 	@Autowired
 	private SecurityContextTenantHolder securityContext;
-
-	@Autowired
-	private CaseInstanceService caseInstanceService;
 
 	@Autowired
 	private ExternalServiceErrorHandler errorHandler;
@@ -51,15 +46,14 @@ public class CaseQueueUpdateHandler implements ExternalTaskHandler {
 
 			securityContext.setTenantId(externalTask.getTenantId());
 
-			CaseInstance mergePatch = CaseInstance.builder().queueId(externalTask.getVariable("queue")).build();
-
-			caseInstanceService.patch(externalTask.getBusinessKey(), mergePatch);
+			doExecute(externalTask, externalTaskService);
 
 			externalTaskService.complete(externalTask);
 		} catch (Exception e) {
-			log.error("Error updating case queue with business key: {} and new queue: {}",
-					externalTask.getBusinessKey(), externalTask.getVariable("stage"), e);
-			errorHandler.handle("Error updating case stage", externalTaskService, externalTask, e);
+			log.error("Error on external task {} with businessKey {}", externalTask.getActivityId(),
+					externalTask.getBusinessKey(), e);
+			errorHandler.handle("Error on external task " + externalTask.getActivityId(), externalTaskService,
+					externalTask, e);
 		} finally {
 			log.debug("Finishing External Task Handler activity '{}' for tenant '{}'", externalTask.getActivityId(),
 					externalTask.getTenantId());
@@ -67,4 +61,5 @@ public class CaseQueueUpdateHandler implements ExternalTaskHandler {
 		}
 	}
 
+	abstract protected void doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService);
 }

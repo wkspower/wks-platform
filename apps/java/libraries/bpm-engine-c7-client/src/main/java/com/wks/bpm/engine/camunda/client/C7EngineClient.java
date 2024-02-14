@@ -142,6 +142,14 @@ public class C7EngineClient implements BpmEngineClient {
 
 	@Override
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final JsonObject caseInstance, final BpmEngine bpmEngine) {
+		JsonArray variables = new JsonArray();
+		variables.add(caseInstance);
+		return startProcess(processDefinitionKey, businessKey, variables, bpmEngine);
+	}
+
+	@Override
+	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
 			final JsonArray caseAttributes, final BpmEngine bpmEngine) {
 
 		JsonObject processVariables = variablesMapper.map(caseAttributes);

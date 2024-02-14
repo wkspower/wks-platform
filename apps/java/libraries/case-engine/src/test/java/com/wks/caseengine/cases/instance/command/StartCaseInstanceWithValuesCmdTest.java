@@ -12,6 +12,7 @@
 package com.wks.caseengine.cases.instance.command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,9 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.wks.caseengine.cases.businesskey.GenericBusinessKeyGenerator;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseStage;
@@ -40,10 +43,10 @@ import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
  *
  */
 @ExtendWith(MockitoExtension.class)
-public class CreateCaseInstanceWithValuesCmdTest {
+public class StartCaseInstanceWithValuesCmdTest {
 
 	@InjectMocks
-	private CreateCaseInstanceWithValuesCmd createCaseInstanceCmd;
+	private StartCaseInstanceWithValuesCmd createCaseInstanceCmd;
 
 	@InjectMocks
 	private CommandContext commandContext;
@@ -60,21 +63,27 @@ public class CreateCaseInstanceWithValuesCmdTest {
 	@Mock
 	private ProcessInstanceService processInstanceService;
 
+	@Mock
+	private GsonBuilder gsonBuilder;
+
 	@Test
 	public void shouldCreateCaseDefinition() throws DatabaseRecordNotFoundException {
-
+		
 		// Given
 		CaseInstance caseInstanceToSave = new CaseInstance();
 		caseInstanceToSave.setBusinessKey("BK_1");
 		caseInstanceToSave.setCaseDefinitionId("CD_1");
-		createCaseInstanceCmd.setCaseInstance(caseInstanceToSave);
+		createCaseInstanceCmd.setCaseInstanceParam(caseInstanceToSave);
 
 		CaseDefinition caseDefinition = new CaseDefinition();
 		caseDefinition.setStagesLifecycleProcessKey("Process1");
 		caseDefinition.setStages(Arrays.<CaseStage>asList(CaseStage.builder().name("Stage 1").build()));
 
+		commandContext.setCaseCreationProcess("Process1");
+
 		// When
 		when(caseDefinitionRepository.get("CD_1")).thenReturn(caseDefinition);
+		when(gsonBuilder.create()).thenReturn(new Gson());
 		CaseInstance savedCaseInstance = createCaseInstanceCmd.execute(commandContext);
 
 		// Then
@@ -87,7 +96,7 @@ public class CreateCaseInstanceWithValuesCmdTest {
 		assertEquals(caseInstanceToSave.getQueueId(), savedCaseInstance.getQueueId());
 		assertEquals("Stage 1", savedCaseInstance.getStage());
 		assertEquals(caseInstanceToSave.getStatus(), savedCaseInstance.getStatus());
-		verify(processInstanceService).create(eq("Process1"), eq("BK_1"), Mockito.any());
+		verify(processInstanceService).create(eq("Process1"), eq("BK_1"), any(JsonObject.class));
 	}
 
 }

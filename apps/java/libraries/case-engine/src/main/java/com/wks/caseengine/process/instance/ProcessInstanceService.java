@@ -14,17 +14,20 @@ package com.wks.caseengine.process.instance;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
-import com.wks.caseengine.cases.instance.CaseAttribute;
 
 public interface ProcessInstanceService {
 
 	ProcessInstance create(final String processDefinitionKey);
 
-	ProcessInstance create(final String processDefinitionKey, String businessKey);
+	ProcessInstance create(final String processDefinitionKey, final String businessKey);
 
-	ProcessInstance create(String processDefinitionKey, String businessKey, List<CaseAttribute> caseAttributes);
+	ProcessInstance create(final String processDefinitionKey, final String businessKey, final JsonObject caseInstance);
+
+	ProcessInstance create(final String processDefinitionKey, final String businessKey, final JsonArray caseAttributes);
 
 	void delete(final List<ProcessInstance> processInstances);
 

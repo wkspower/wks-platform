@@ -18,20 +18,17 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.wks.bpm.engine.client.BpmEngineClientFacade;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
-import com.wks.caseengine.cases.instance.CaseAttribute;
 
 @Component
 public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 
 	@Autowired
 	private BpmEngineClientFacade processEngineClient;
-
-	@Autowired
-	private GsonBuilder gsonBuilder;
 
 	@Override
 	public ProcessInstance create(final String processDefinitionKey) {
@@ -42,12 +39,16 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	public ProcessInstance create(final String processDefinitionKey, final String businessKey) {
 		return processEngineClient.startProcess(processDefinitionKey, businessKey);
 	}
+	
+	@Override
+	public ProcessInstance create(final String processDefinitionKey, final String businessKey, final JsonObject caseInstance) {
+		return processEngineClient.startProcess(processDefinitionKey, businessKey, caseInstance);
+	}
 
 	@Override
 	public ProcessInstance create(final String processDefinitionKey, final String businessKey,
-			final List<CaseAttribute> caseAttributes) {
-		return processEngineClient.startProcess(processDefinitionKey, businessKey,
-				gsonBuilder.create().toJsonTree(caseAttributes).getAsJsonArray());
+			final JsonArray caseAttributes) {
+		return processEngineClient.startProcess(processDefinitionKey, businessKey, caseAttributes);
 	}
 
 	@Override

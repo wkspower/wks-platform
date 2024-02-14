@@ -12,6 +12,7 @@
 package com.wks.caseengine.command;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,7 @@ import com.wks.caseengine.record.RecordRepository;
 import com.wks.caseengine.record.type.RecordTypeRepository;
 
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author victor.franca
@@ -36,7 +38,11 @@ import lombok.Getter;
  */
 @Component
 @Getter
+@Setter
 public class CommandContext {
+	
+	@Value("${case.engine.case-creation-process}")
+	private String caseCreationProcess;
 
 	@Autowired
 	private SecurityContextTenantHolder securityContextTenantHolder;

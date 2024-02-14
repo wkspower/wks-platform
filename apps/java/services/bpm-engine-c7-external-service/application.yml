@@ -9,19 +9,9 @@ logging:
          wks.bpm.engine.camunda: INFO
       org.springframework.web.client.RestTemplate: ERROR
       org.apache.http: ERROR
-      httpclient.wire: ERROR    
-
-camunda7.rest.oauth.token.uri:
-camunda7.rest.oauth.token.clientId:
-camunda7.rest.oauth.token.clientSecret:
-camunda7.rest.oauth.token.grantType:
-
-camunda7.rest.base-url: ${CAMUNDA_BASE_URL:http://localhost:8080/engine-rest}
-camunda7.rest.deployment.url: /deployment
-camunda7.rest.processdefinition.url: /process-definition
-camunda7.rest.processinstance.url: /process-instance
-camunda7.rest.task.url: /task
-camunda7.rest.correlate.url: /message
+      httpclient.wire: ERROR
+      
+spring.mvc.converters.preferred-json-mapper: gson    
 
 camunda.bpm.client:
   base-url: ${CAMUNDA_BASE_URL:http://localhost:8080/engine-rest}
@@ -33,8 +23,16 @@ camunda.bpm.client:
     username: ${CAMUNDA_USERNAME:demo}
     password: ${CAMUNDA_PASSWORD:demo}
 
-spring.data.mongodb.uri: ${MONGO_CONN:mongodb://localhost}
-spring.data.mongodb.database: ${MONGO_DATABASE:shared}
+wks-case-api.base.url: http://localhost:8081
+wks-case-api.auth.url: http://localhost:8082/realms/localhost/protocol/openid-connect/token
+wks-case-api.auth.client_id: ${WKS_CLIENT_ID:wks-external-tasks}
+wks-case-api.auth.client_secret: ${WKS_CLIENT_SECRET:123456789}
+wks-case-api.auth.grant_type: client_credentials
+
+wks-case-api.record.url: /record
+wks-case-api.case-instance.url: /case
+wks-case-api.process-definition.url: /process-definition
+wks-case-api.case-definition.url: /case-definition
 
 management.health.mongo.enabled: false
 management.health.reds.enabled: false

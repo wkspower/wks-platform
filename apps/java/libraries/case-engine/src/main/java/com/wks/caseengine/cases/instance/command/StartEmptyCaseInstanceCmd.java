@@ -14,6 +14,7 @@ package com.wks.caseengine.cases.instance.command;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import com.google.gson.JsonArray;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.definition.CaseStage;
@@ -31,11 +32,12 @@ import lombok.Setter;
  */
 @AllArgsConstructor
 @Setter
-public class CreateEmptyCaseInstanceCmd implements Command<CaseInstance> {
+public class StartEmptyCaseInstanceCmd implements Command<CaseInstance> {
 
 	private String caseDefinitionId;
 
 	@Override
+	// TODO replace by SAGA implementation using camunda case creation process
 	public CaseInstance execute(CommandContext commandContext) {
 
 		CaseDefinition caseDefinition;
@@ -46,18 +48,16 @@ public class CreateEmptyCaseInstanceCmd implements Command<CaseInstance> {
 		}
 
 		String businessKey = commandContext.getBusinessKeyCreator().generate();
-		CaseInstance newCaseInstance = CaseInstance.builder()
-				.businessKey(businessKey)
+		CaseInstance newCaseInstance = CaseInstance.builder().businessKey(businessKey)
 				.stage(caseDefinition.getStages().stream().sorted(Comparator.comparing(CaseStage::getIndex)).findFirst()
 						.get().getName())
 				.attributes(new ArrayList<>()).caseDefinitionId(caseDefinition.getId())
-				.caseDefinitionId(caseDefinitionId)
-				.build();
+				.caseDefinitionId(caseDefinitionId).build();
 
 		commandContext.getCaseInstanceRepository().save(newCaseInstance);
 
 		commandContext.getProcessInstanceService().create(caseDefinition.getStagesLifecycleProcessKey(),
-				newCaseInstance.getBusinessKey(), newCaseInstance.getAttributes());
+				newCaseInstance.getBusinessKey(), new JsonArray());
 
 		return newCaseInstance;
 	}

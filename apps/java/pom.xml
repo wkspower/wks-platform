@@ -78,7 +78,6 @@
 		<module>libraries/bpm-engine-c8-client</module>
 		<module>libraries/api-security</module>
 		<module>libraries/rest-client</module>
-		<module>libraries/case-engine-rest-client</module>		
 
 		<!-- Services -->
 		<module>services/case-engine-rest-api</module>

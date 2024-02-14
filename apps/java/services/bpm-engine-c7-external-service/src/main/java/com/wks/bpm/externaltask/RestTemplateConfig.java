@@ -9,8 +9,11 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.engine.camunda;
+package com.wks.bpm.externaltask;
 
+import java.util.Collections;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -21,11 +24,15 @@ import org.springframework.web.client.RestTemplate;
  */
 @Configuration
 public class RestTemplateConfig {
+	
+	@Autowired
+	AuthInterceptor authInterceptor;
 
 	@Bean
 	public RestTemplate getRestTemplate() {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+		restTemplate.setInterceptors(Collections.singletonList(authInterceptor));
 		return restTemplate;
 	}
 
