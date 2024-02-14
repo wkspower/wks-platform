@@ -78,12 +78,22 @@ public class CaseInstanceController {
 	}
 
 	@PostMapping
-	public ResponseEntity<CaseInstance> save(@RequestBody final CaseInstance caseInstance) {
+	public ResponseEntity<CaseInstance> startCaseCreationProcess(@RequestBody final CaseInstance caseInstance) {
 		try {
-			return ResponseEntity.ok(caseInstanceService.createWithValues(caseInstance));
+			return ResponseEntity.ok(caseInstanceService.startWithValues(caseInstance));
 		} catch (CaseDefinitionNotFoundException e) {
 			throw new RestInvalidArgumentException("caseDefinitionId", e);
 		}
+	}
+
+	@PostMapping(value = "/save")
+	public ResponseEntity<Void> save(@RequestBody final CaseInstance caseInstance) {
+		try {
+			caseInstanceService.saveWithValues(caseInstance);
+		} catch (CaseDefinitionNotFoundException e) {
+			throw new RestInvalidArgumentException("caseDefinitionId", e);
+		}
+		return ResponseEntity.noContent().build();
 	}
 
 	@PatchMapping(value = "/{businessKey}", consumes = "application/merge-patch+json")

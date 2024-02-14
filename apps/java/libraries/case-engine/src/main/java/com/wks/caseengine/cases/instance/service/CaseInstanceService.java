@@ -23,9 +23,11 @@ public interface CaseInstanceService {
 
 	CaseInstance get(final String businessKey);
 
-	CaseInstance createWithValues(final CaseInstance caseInstance);
+	CaseInstance startWithValues(final CaseInstance caseInstance);
 
-	CaseInstance createEmpty(final String caseDefinitionId);
+	CaseInstance startEmpty(final String caseDefinitionId);
+	
+	void saveWithValues(final CaseInstance caseInstance);
 
 	CaseInstance patch(final String businessKey, final CaseInstance caseInstance);
 

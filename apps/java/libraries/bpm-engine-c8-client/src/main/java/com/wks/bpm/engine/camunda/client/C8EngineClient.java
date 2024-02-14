@@ -148,6 +148,13 @@ public class C8EngineClient implements BpmEngineClient {
 
 	@Override
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final JsonObject caseInstance, final BpmEngine bpmEngine) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
 			final JsonArray caseAttributes, final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
 		return null;

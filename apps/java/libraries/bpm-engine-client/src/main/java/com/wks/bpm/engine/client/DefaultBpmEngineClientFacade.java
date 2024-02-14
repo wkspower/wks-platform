@@ -88,6 +88,13 @@ public class DefaultBpmEngineClientFacade implements BpmEngineClientFacade {
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey) {
 		return getEngineClient().startProcess(processDefinitionKey, businessKey, getBpmEngine());
 	}
+	
+	@Override
+	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final JsonObject variable) {
+		return getEngineClient().startProcess(processDefinitionKey, businessKey, variable, getBpmEngine());
+	}
+
 
 	@Override
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,

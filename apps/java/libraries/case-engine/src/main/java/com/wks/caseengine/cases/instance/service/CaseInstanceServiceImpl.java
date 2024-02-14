@@ -20,13 +20,14 @@ import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceFilter;
 import com.wks.caseengine.cases.instance.command.CreateCaseInstanceCommentCmd;
 import com.wks.caseengine.cases.instance.command.CreateCaseInstanceDocumentCmd;
-import com.wks.caseengine.cases.instance.command.CreateCaseInstanceWithValuesCmd;
-import com.wks.caseengine.cases.instance.command.CreateEmptyCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.command.DeleteCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.command.DeleteCaseInstanceCommentCmd;
 import com.wks.caseengine.cases.instance.command.FindCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.command.GetCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.command.PatchCaseInstanceCmd;
+import com.wks.caseengine.cases.instance.command.SaveCaseInstanceWithValuesCmd;
+import com.wks.caseengine.cases.instance.command.StartCaseInstanceWithValuesCmd;
+import com.wks.caseengine.cases.instance.command.StartEmptyCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.command.UpdateCaseInstanceCommentCmd;
 import com.wks.caseengine.command.CommandExecutor;
 import com.wks.caseengine.pagination.PageResult;
@@ -48,14 +49,19 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 
 	@Override
-	public CaseInstance createWithValues(final CaseInstance caseInstance) {
-		return commandExecutor.execute(new CreateCaseInstanceWithValuesCmd(caseInstance));
+	public CaseInstance startWithValues(final CaseInstance caseInstance) {
+		return commandExecutor.execute(new StartCaseInstanceWithValuesCmd(caseInstance));
 	}
 
 	@Override
-	public CaseInstance createEmpty(final String caseDefinitionId) {
-		return commandExecutor.execute(new CreateEmptyCaseInstanceCmd(caseDefinitionId));
+	public CaseInstance startEmpty(final String caseDefinitionId) {
+		return commandExecutor.execute(new StartEmptyCaseInstanceCmd(caseDefinitionId));
 
+	}
+
+	@Override
+	public void saveWithValues(final CaseInstance caseInstance) {
+		commandExecutor.execute(new SaveCaseInstanceWithValuesCmd(caseInstance));
 	}
 
 	@Override

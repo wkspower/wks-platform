@@ -48,7 +48,10 @@ public interface BpmEngineClientFacade {
 	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey);
 
 	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonArray variables);
+			final JsonObject caseInstance);
+
+	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
+			final JsonArray caseAttributes);
 
 	void deleteProcessInstance(String processInstanceId);
 

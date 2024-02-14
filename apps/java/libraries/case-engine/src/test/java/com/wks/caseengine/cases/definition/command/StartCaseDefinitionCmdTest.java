@@ -28,7 +28,7 @@ import com.wks.caseengine.command.CommandContext;
  *
  */
 @ExtendWith(MockitoExtension.class)
-public class CreateCaseDefinitionCmdTest {
+public class StartCaseDefinitionCmdTest {
 
 	@InjectMocks
 	private CreateCaseDefinitionCmd createCaseDefinitionCmd;
