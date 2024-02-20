@@ -116,7 +116,7 @@ public class C7EngineClient implements BpmEngineClient {
 			final Optional<String> businessKey, final Optional<String> activityIdIn, final BpmEngine bpmEngine) {
 
 		return restTemplate.getForEntity(camundaHttpRequestFactory
-				.getProcessInstanceListRequest(processDefinitionKey, activityIdIn, businessKey, bpmEngine)
+				.getProcessInstanceListRequest(processDefinitionKey, businessKey, activityIdIn, bpmEngine)
 				.getHttpRequestUrl(), ProcessInstance[].class).getBody();
 	}
 

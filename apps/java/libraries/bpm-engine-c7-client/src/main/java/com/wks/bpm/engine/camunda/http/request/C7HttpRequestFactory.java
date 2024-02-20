@@ -122,7 +122,7 @@ public class C7HttpRequestFactory {
 			url.append("&businessKey=" + businessKey.get());
 		}
 		if (activityIdIn.isPresent()) {
-			url.append("&activityIdIn=" + activityIdIn);
+			url.append("&activityIdIn=" + activityIdIn.get());
 		}
 
 		return new C7HttpGetRequest<ProcessInstance>(url.toString(), new HttpEntity<>(httpHeadersFactory.json()));
