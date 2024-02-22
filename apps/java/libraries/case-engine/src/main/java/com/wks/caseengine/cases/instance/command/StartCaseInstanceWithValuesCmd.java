@@ -56,7 +56,7 @@ public class StartCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 
 		CaseInstance.CaseInstanceBuilder caseInstanceBuilder = CaseInstance.builder().businessKey(businessKey)
 				.attributes(caseInstanceParam.getAttributes()).caseDefinitionId(caseInstanceParam.getCaseDefinitionId())
-				.caseOwner(caseInstanceParam.getCaseOwner()).caseOwnerName(caseInstanceParam.getCaseOwnerName());
+				.owner(caseInstanceParam.getOwner());
 
 		Optional<CaseStage> firstStage = caseDefinition.getStages().stream()
 				.sorted(Comparator.comparing(CaseStage::getIndex)).findFirst();

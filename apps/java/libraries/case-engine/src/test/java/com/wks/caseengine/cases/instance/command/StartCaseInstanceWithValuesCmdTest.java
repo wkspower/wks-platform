@@ -68,7 +68,7 @@ public class StartCaseInstanceWithValuesCmdTest {
 
 	@Test
 	public void shouldCreateCaseDefinition() throws DatabaseRecordNotFoundException {
-		
+
 		// Given
 		CaseInstance caseInstanceToSave = new CaseInstance();
 		caseInstanceToSave.setBusinessKey("BK_1");
@@ -89,8 +89,7 @@ public class StartCaseInstanceWithValuesCmdTest {
 		// Then
 		assertEquals("BK_1", savedCaseInstance.getBusinessKey());
 		assertEquals("CD_1", savedCaseInstance.getCaseDefinitionId());
-		assertEquals(caseInstanceToSave.getCaseOwner(), savedCaseInstance.getCaseOwner());
-		assertEquals(caseInstanceToSave.getCaseOwnerName(), savedCaseInstance.getCaseOwnerName());
+		assertEquals(caseInstanceToSave.getOwner(), savedCaseInstance.getOwner());
 		assertEquals(caseInstanceToSave.getComments(), savedCaseInstance.getComments());
 		assertEquals(caseInstanceToSave.getDocuments(), savedCaseInstance.getDocuments());
 		assertEquals(caseInstanceToSave.getQueueId(), savedCaseInstance.getQueueId());

@@ -43,9 +43,7 @@ public class CaseInstance {
 
 	private String stage;
 
-	private String caseOwner;
-
-	private String caseOwnerName;
+	private CaseOwner owner;
 
 	@Default
 	private List<CaseComment> comments = new ArrayList<>();
@@ -55,7 +53,7 @@ public class CaseInstance {
 	private List<CaseAttribute> attributes;
 
 	private String status;
-	
+
 	private String queueId;
 
 	public CaseInstance(String _id, String businessKey, String caseDefinitionId, String stage, String status) {
@@ -90,12 +88,12 @@ public class CaseInstance {
 
 		this.comments.add(comment);
 	}
-	
+
 	public void addAttribute(final CaseAttribute attribute) {
 		if (attributes == null) {
 			this.attributes = new ArrayList<>();
 		}
-		
+
 		this.attributes.add(attribute);
 	}
 
