@@ -62,8 +62,10 @@ export const NewCaseForm = ({ open, handleClose, caseDefId, setLastCreatedCase }
             keycloak,
             JSON.stringify({
                 caseDefinitionId: caseDefId,
-                caseOwner: keycloak.subject || '',
-                caseOwnerName: keycloak.idTokenParsed.name || '',
+                owner: {
+                    id: keycloak.subject || '',
+                    name: keycloak.idTokenParsed.name || '',
+                },
                 attributes: caseAttributes
             })
         )

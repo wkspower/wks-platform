@@ -75,9 +75,10 @@ export const CaseList = ({ status, caseDefId }) => {
                 width: 220
             },
             {
-                field: 'caseOwnerName',
+                field: 'ownerName',
                 headerName: t('pages.caselist.datagrid.columns.caseOwnerName'),
-                width: 150
+                width: 150,
+                valueGetter: (params) => params.row?.owner?.name
             },
             {
                 field: 'queueId',

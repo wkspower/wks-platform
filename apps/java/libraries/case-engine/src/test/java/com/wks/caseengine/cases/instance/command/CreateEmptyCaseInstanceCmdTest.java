@@ -80,8 +80,7 @@ public class CreateEmptyCaseInstanceCmdTest {
 		// Then
 		assertEquals("BK_1", savedCaseInstance.getBusinessKey());
 		assertEquals("CD_1", savedCaseInstance.getCaseDefinitionId());
-		assertNull(savedCaseInstance.getCaseOwner());
-		assertNull(savedCaseInstance.getCaseOwnerName());
+		assertNull(savedCaseInstance.getOwner());
 		assertEquals(0, savedCaseInstance.getComments().size());
 		assertNull(savedCaseInstance.getDocuments());
 		assertNull(savedCaseInstance.getQueueId());
