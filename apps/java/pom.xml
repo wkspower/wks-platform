@@ -74,7 +74,8 @@
 		<module>libraries/case-engine</module>
 		<module>libraries/bpm-engine-interface</module>
 		<module>libraries/bpm-engine-client</module>
-		<module>libraries/bpm-engine-c7-client</module>
+		<module>libraries/bpm-engine-c7-plugins</module>
+		<module>libraries/bpm-engine-c7-client</module>		
 		<module>libraries/bpm-engine-c8-client</module>
 		<module>libraries/api-security</module>
 		<module>libraries/rest-client</module>
