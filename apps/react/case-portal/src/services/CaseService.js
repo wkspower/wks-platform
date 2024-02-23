@@ -149,7 +149,6 @@ async function createCase(keycloak, body) {
 }
 
 async function addDocuments(keycloak, businessKey, document) {
-    console.log(businessKey);
     const url = `${Config.CaseEngineUrl}/case/${businessKey}/document`;
 
     try {

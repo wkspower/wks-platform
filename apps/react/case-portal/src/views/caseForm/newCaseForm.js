@@ -65,6 +65,8 @@ export const NewCaseForm = ({ open, handleClose, caseDefId, setLastCreatedCase }
                 owner: {
                     id: keycloak.subject || '',
                     name: keycloak.idTokenParsed.name || '',
+                    email: keycloak.idTokenParsed.email || '',
+                    phone: keycloak.idTokenParsed.phone || '',
                 },
                 attributes: caseAttributes
             })

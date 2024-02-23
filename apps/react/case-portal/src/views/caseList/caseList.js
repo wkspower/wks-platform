@@ -20,6 +20,7 @@ import { useSession } from 'SessionStoreContext';
 import { KeyboardArrowLeft } from '@mui/icons-material';
 import { KeyboardArrowRight } from '@mui/icons-material';
 import TablePagination from '@mui/material/TablePagination';
+import Config from 'consts/index';
 
 export const CaseList = ({ status, caseDefId }) => {
     const PaginationContext = createContext();
@@ -47,7 +48,38 @@ export const CaseList = ({ status, caseDefId }) => {
     });
 
     useEffect(() => {
-        fetchCases(setFetching, keycloak, caseDefId, setStages, status, filter, setCases, setFilter);
+        if (Config.WebsocketsEnabled) {
+            const topic = Config.WebsocketsTopicCaseCreated;
+            const ws = new WebSocket(`ws://localhost:8484/${topic}`);
+            ws.onmessage = (event) => {
+                fetchCases(
+                    setFetching,
+                    keycloak,
+                    caseDefId,
+                    setStages,
+                    status,
+                    filter,
+                    setCases,
+                    setFilter
+                );
+            };
+            return () => {
+                ws.close(); // Close WebSocket connection when component unmounts
+            };
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchCases(
+            setFetching,
+            keycloak,
+            caseDefId,
+            setStages,
+            status,
+            filter,
+            setCases,
+            setFilter
+        );
     }, [caseDefId, status, openNewCaseForm]);
 
     useEffect(() => {
@@ -108,7 +140,16 @@ export const CaseList = ({ status, caseDefId }) => {
 
     const handleCloseCaseForm = () => {
         setOpenCaseForm(false);
-        fetchCases(setFetching, keycloak, caseDefId, setStages, status, filter, setCases, setFilter);
+        fetchCases(
+            setFetching,
+            keycloak,
+            caseDefId,
+            setStages,
+            status,
+            filter,
+            setCases,
+            setFilter
+        );
     };
 
     const handleCloseNewCaseForm = () => {
@@ -392,12 +433,21 @@ export const CaseList = ({ status, caseDefId }) => {
         </div>
     );
 };
-function fetchCases(setFetching, keycloak, caseDefId, setStages, status, filter, setCases, setFilter) {
+function fetchCases(
+    setFetching,
+    keycloak,
+    caseDefId,
+    setStages,
+    status,
+    filter,
+    setCases,
+    setFilter
+) {
     setFetching(true);
 
     CaseService.getCaseDefinitionsById(keycloak, caseDefId)
         .then((resp) => {
-            resp.stages.sort((a, b) => a.index - b.index).map((o) => o.name)
+            resp.stages.sort((a, b) => a.index - b.index).map((o) => o.name);
             setStages(resp.stages);
             return CaseService.filterCase(keycloak, caseDefId, status, filter);
         })
@@ -415,4 +465,3 @@ function fetchCases(setFetching, keycloak, caseDefId, setStages, status, filter,
             setFetching(false);
         });
 }
-

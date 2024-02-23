@@ -15,6 +15,7 @@
         "@mui/lab": "^5.0.0-alpha.106",
         "@mui/material": "^5.10.12",
         "@mui/x-data-grid": "^5.17.10",
+        "@novu/notification-center": "^0.23.1",
         "@reduxjs/toolkit": "^1.7.1",
         "@syncfusion/ej2-react-kanban": "^20.4.42",
         "@tabler/icons": "^1.96.0",
@@ -53,6 +54,7 @@
         "simplebar": "^5.3.5",
         "simplebar-react": "^2.3.6",
         "web-vitals": "^3.0.2",
+        "websocket": "^1.0.34",
         "yup": "^0.32.11"
     },
     "scripts": {

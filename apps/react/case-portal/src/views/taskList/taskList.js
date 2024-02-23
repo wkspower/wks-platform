@@ -14,6 +14,7 @@ import { useSession } from '../../SessionStoreContext';
 import { TaskForm } from '../taskForm/taskForm';
 import Typography from '@mui/material/Typography';
 import './taskList.css';
+import Config from 'consts/index';
 
 export const TaskList = ({ businessKey, callback }) => {
     const [tasks, setTasks] = useState(null);
@@ -33,11 +34,39 @@ export const TaskList = ({ businessKey, callback }) => {
         assignee: '',
         caseInstanceId: businessKey
     });
+
+    useEffect(() => {
+        if (Config.WebsocketsEnabled) {
+            const topic = Config.WebsocketsTopicHumanTaskCreated;
+            const ws = new WebSocket(`ws://localhost:8484/${topic}`);
+            ws.onmessage = (event) => {
+                fetchTasks(
+                    setFetching,
+                    keycloak,
+                    businessKey,
+                    setTasks,
+                    setProcessDefId,
+                    setActivityInstances
+                );
+            };
+            return () => {
+                ws.close(); // Close WebSocket connection when component unmounts
+            };
+        }
+    }, []);
+
     const handleNewTaskSubmit = () => {
         // Perform any necessary validation on the new task data
         // ...
         TaskService.createNewTask(keycloak, newTaskData).then(() => {
-            fetchTasks(setFetching, keycloak, businessKey, setTasks, setProcessDefId, setActivityInstances);
+            fetchTasks(
+                setFetching,
+                keycloak,
+                businessKey,
+                setTasks,
+                setProcessDefId,
+                setActivityInstances
+            );
         });
 
         // Reset the new task form
@@ -53,9 +82,15 @@ export const TaskList = ({ businessKey, callback }) => {
         setModalOpen(false);
     };
 
-
     useEffect(() => {
-        fetchTasks(setFetching, keycloak, businessKey, setTasks, setProcessDefId, setActivityInstances);
+        fetchTasks(
+            setFetching,
+            keycloak,
+            businessKey,
+            setTasks,
+            setProcessDefId,
+            setActivityInstances
+        );
     }, [open, businessKey]);
 
     const makeColumns = () => {
@@ -175,7 +210,10 @@ export const TaskList = ({ businessKey, callback }) => {
                                         label={t('pages.tasklist.newTask.description')}
                                         value={newTaskData.description}
                                         onChange={(e) =>
-                                            setNewTaskData({ ...newTaskData, description: e.target.value })
+                                            setNewTaskData({
+                                                ...newTaskData,
+                                                description: e.target.value
+                                            })
                                         }
                                     />
                                     <TextField
@@ -189,10 +227,17 @@ export const TaskList = ({ businessKey, callback }) => {
                                         label={t('pages.tasklist.newTask.assignee')}
                                         value={newTaskData.assignee}
                                         onChange={(e) =>
-                                            setNewTaskData({ ...newTaskData, assignee: e.target.value })
+                                            setNewTaskData({
+                                                ...newTaskData,
+                                                assignee: e.target.value
+                                            })
                                         }
                                     />
-                                    <Button type="submit" variant="contained" onClick={handleNewTaskSubmit}>
+                                    <Button
+                                        type="submit"
+                                        variant="contained"
+                                        onClick={handleNewTaskSubmit}
+                                    >
                                         Submit
                                     </Button>
                                 </Box>
@@ -221,12 +266,29 @@ export const TaskList = ({ businessKey, callback }) => {
     );
 };
 
-function fetchTasks(setFetching, keycloak, businessKey, setTasks, setProcessDefId, setActivityInstances) {
+function fetchTasks(
+    setFetching,
+    keycloak,
+    businessKey,
+    setTasks,
+    setProcessDefId,
+    setActivityInstances
+) {
     setFetching(true);
 
     TaskService.filterTasks(keycloak, businessKey)
         .then((data) => {
-            setTasks(data.map(o => o = { ...o, created: format(new Date(o.created), 'P'), due: o.due && format(new Date(o.due), 'P'), followUp: o.followUp && format(new Date(o.followUp), 'P') }));
+            setTasks(
+                data.map(
+                    (o) =>
+                        (o = {
+                            ...o,
+                            created: format(new Date(o.created), 'P'),
+                            due: o.due && format(new Date(o.due), 'P'),
+                            followUp: o.followUp && format(new Date(o.followUp), 'P')
+                        })
+                )
+            );
         })
         .finally(() => {
             setFetching(false);
@@ -244,4 +306,3 @@ function fetchTasks(setFetching, keycloak, businessKey, setTasks, setProcessDefI
             console.log(err.message);
         });
 }
-
