@@ -9,12 +9,14 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.externaltask.api.client;
+package com.wks.bpm.externaltask.api.gateway.impl;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+
+import com.wks.bpm.externaltask.api.gateway.ApiGateway;
 
 /**
  * @author victor.franca

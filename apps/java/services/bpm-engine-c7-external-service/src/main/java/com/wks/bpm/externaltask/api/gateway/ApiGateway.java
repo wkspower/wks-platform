@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.externaltask.api.client;
+package com.wks.bpm.externaltask.api.gateway;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +19,7 @@ import org.springframework.web.client.RestTemplate;
  * @author victor.franca
  *
  */
-public class ApiGateway {
+public abstract class ApiGateway {
 
 	@Autowired
 	protected RestTemplate restTemplate;
