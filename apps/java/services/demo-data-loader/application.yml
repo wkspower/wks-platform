@@ -34,11 +34,11 @@ keycloak.data.import.port: :3001
 keycloak.data.import.protocol: http://
 keycloak.data.import.redirecturl: ${keycloak.data.import.protocol}${keycloak.data.import.dns}${keycloak.data.import.port}/*
 keycloak.data.import.weborigins: ${keycloak.data.import.protocol}${keycloak.data.import.dns}${keycloak.data.import.port}
-keycloak.data.import.username: demo
-keycloak.data.import.password: demo
-keycloak.data.import.firstname: demo
-keycloak.data.import.lastname: demo
-keycloak.data.import.email: demo@demo.com
+keycloak.data.import.username: ${KEYCLOAK_DEFAULT_USER:demo}
+keycloak.data.import.password: ${KEYCLOAK_DEFAULT_USER_PASSWORD:demo}
+keycloak.data.import.firstname: ${KEYCLOAK_DEFAULT_USER_FIRST_NAME:demo}
+keycloak.data.import.lastname: ${KEYCLOAK_DEFAULT_USER_LAST_NAME:demo}
+keycloak.data.import.email: ${KEYCLOAK_DEFAULT_USER_EMAIL:demo@demo.com}
 
 camunda.data.import.enabled: true
 camunda.data.import.url: ${CAMUNDA_URL:http://localhost:8080/engine-rest}

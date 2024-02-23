@@ -1,0 +1,24 @@
+version: '3.7'
+
+services:
+  email-to-case:
+      build:
+          context: apps/java/services/email-to-case
+      ports:
+          - 8083:8083
+      links:
+          - mongodb
+          - camunda
+      environment:
+          - CAMUNDA_BASE_URL=${CAMUNDA_BASE_URL}
+          - MONGO_DATABASE=${MONGO_WKS_DATABASE}
+          - MONGO_CONN=${MONGO_CONNECTION_URL}
+          - EMAIL_CASE_PATTERN_NEW=new-case
+          - EMAIL_CASE_PATTERN_UPDATE=update-case
+          - KEYCLOAK_URL=${KEYCLOAK_URL}
+          - OPA_URL=${OPA_URL}
+      depends_on:
+          mongodb:
+              condition: service_healthy
+          camunda:
+              condition: service_healthy
