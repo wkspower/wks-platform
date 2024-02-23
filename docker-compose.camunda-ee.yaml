@@ -1,0 +1,5 @@
+version: '3.7'
+
+services:
+    camunda:
+        image: registry.camunda.cloud/cambpm-ee/camunda-bpm-platform-ee:run-7.20.0

@@ -1,0 +1,24 @@
+version: '3.7'
+
+services:            
+    traefik:
+        image: traefik:v2.8
+        command:
+            - --log.level=debug
+            - --api.insecure=true
+            - --api.dashboard=true
+            - --entrypoints.web.address=:80
+            - --entrypoints.websecure.address=:443
+            - --providers.docker=true
+            - --experimental.hub=true
+            - --providers.docker.exposedbydefault=false
+            - --serversTransport.insecureSkipVerify=true
+            - --providers.file.watch=true
+            - --providers.file.directory=/traefik            
+        ports:
+            - 80:80
+            - 443:443
+            - 8888:8080
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - ./configs/traefik:/traefik:ro

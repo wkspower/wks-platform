@@ -1,0 +1,18 @@
+version: '3.7'
+
+services:
+
+  novu-publisher:
+    build:
+      context: apps/node/novu-publisher
+    environment:
+        - WEBSOCKET_ENABLED=${WEBSOCKET_ENABLED}
+        - REACT_APP_KAFKA_URL=${KAFKA_URL}
+        - REACT_APP_NOVU_TRIGGER_URL=${REACT_APP_NOVU_TRIGGER_URL}
+        - REACT_APP_NOVU_API_KEY=${NOVU_API_KEY}
+        - REACT_APP_NOVU_CASE_CREATE_WORKFLOW=${KAFKA_TOPIC_CASE_CREATE}
+        - REACT_APP_NOVU_HUMAN_TASK_CREATE_WORKFLOW=${KAFKA_TOPIC_CREATE_HUMAN_TASK}
+    depends_on:
+      - kafka
+      - zookeeper
+                    
