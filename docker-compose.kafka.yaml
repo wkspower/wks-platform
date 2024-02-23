@@ -1,0 +1,49 @@
+version: '3.7'
+
+services:
+  camunda:
+      links:
+          - kafka
+      volumes:
+          - ./apps/java/libraries/bpm-engine-c7-plugins/target/bpm-engine-c7-plugins-1.0-SNAPSHOT.jar:/camunda/configuration/userlib/bpm-engine-c7-plugins-1.0-SNAPSHOT.jar
+          - ./configs/camunda/kafka-clients-3.4.1.jar:/camunda/configuration/userlib/kafka-clients-3.4.1.jar
+          - ./configs/camunda/default.yml:/camunda/configuration/default.yml
+      environment:
+          - KAFKA_URL=${KAFKA_URL}
+          - KAFKA_TOPIC_CREATE_HUMAN_TASK=${KAFKA_TOPIC_CREATE_HUMAN_TASK}
+      depends_on:
+        - kafka
+        - zookeeper
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka:
+    image: wurstmeister/kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://kafka:9093,OUTSIDE://kafka:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - zookeeper
+
+  bpm-engine-c7-external-service:
+      links:
+          - kafka
+      environment:
+          - KAFKA_ENABLED=true
+          - KAFKA_URL=${KAFKA_URL}
+          - KAFKA_TOPIC_CASE_CREATE=${KAFKA_TOPIC_CASE_CREATE}
+      depends_on:
+        - kafka
+        - zookeeper

@@ -1,0 +1,84 @@
+version: '3.7'
+
+services:            
+    minio:
+        image: quay.io/minio/minio
+        command: server /data --console-address ":9090"
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+            interval: 30s
+            timeout: 20s
+            retries: 3
+        ports:
+            - 9000:9000
+            - 9090:9090
+        environment:
+            - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+            - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+        volumes:
+            - minio:/data:rw
+
+    mongodb:
+        image: mongo
+        ports:
+            - 27017:27017
+        healthcheck:
+            test: mongosh --eval 'db.stats().ok' --quiet
+            interval: 10s
+            retries: 3
+            start_period: 5s
+            timeout: 10s
+        volumes:
+            - mongo:/data/db:rw
+
+    opa:
+        image: openpolicyagent/opa:edge-static
+        ports:
+            - 8181:8181        
+        command:
+            - run
+            - --server
+            - /etc/rules/wks_policy_rules.rego
+        volumes:
+            - ./opa:/etc/rules:ro
+
+    camunda:
+        image: camunda/camunda-bpm-platform:run-7.20.0
+        command: ./camunda.sh --rest --webapps
+        ports:
+            - 8080:8080
+        healthcheck:
+            test: curl --fail http://localhost:8080/engine-rest/version || exit 1
+            interval: 10s
+            retries: 3
+            start_period: 5s
+            timeout: 10s
+        depends_on:
+            mongodb:
+                condition: service_healthy
+
+    keycloak:
+        image: quay.io/keycloak/keycloak:20.0.3
+        command: start-dev
+        environment:
+            KC_HEALTH_ENABLED: "true"
+            KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+            KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+        healthcheck:
+            test: curl --fail http://localhost:8080/health/ready || exit 1
+            interval: 10s
+            retries: 3
+            start_period: 5s
+            timeout: 10s
+        ports:
+            - 8082:8080
+        volumes:
+            - keycloak:/opt/keycloak/data/
+
+volumes:
+    mongo:
+        driver: local
+    minio:
+        driver: local
+    keycloak:
+        driver: local

@@ -1,104 +1,6 @@
 version: '3.7'
 name: wks-platform
-services:
-    traefik:
-        profiles:
-            - servers
-        image: traefik:v2.8
-        command:
-            - --log.level=debug
-            - --api.insecure=true
-            - --api.dashboard=true
-            - --entrypoints.web.address=:80
-            - --entrypoints.websecure.address=:443
-            - --providers.docker=true
-            - --experimental.hub=true
-            - --providers.docker.exposedbydefault=false
-            - --serversTransport.insecureSkipVerify=true
-            - --providers.file.watch=true
-            - --providers.file.directory=/traefik            
-        ports:
-            - 80:80
-            - 443:443
-            - 8888:8080
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock:ro
-            - ./configs/traefik:/traefik:ro
-            
-    minio:
-        image: quay.io/minio/minio
-        command: server /data --console-address ":9090"
-        healthcheck:
-            test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-            interval: 30s
-            timeout: 20s
-            retries: 3
-        ports:
-            - 9000:9000
-            - 9090:9090
-        environment:
-            - MINIO_ROOT_USER=minio
-            - MINIO_ROOT_PASSWORD=#minio00#
-        volumes:
-            - minio:/data:rw
-
-    mongodb:
-        image: mongo
-        ports:
-            - 27017:27017
-        healthcheck:
-            test: mongosh --eval 'db.stats().ok' --quiet
-            interval: 10s
-            retries: 3
-            start_period: 5s
-            timeout: 10s
-        volumes:
-            - mongo:/data/db:rw
-
-    opa:
-        image: openpolicyagent/opa:edge-static
-        ports:
-            - 8181:8181        
-        command:
-            - run
-            - --server
-            - /etc/rules/wks_policy_rules.rego
-        volumes:
-            - ./opa:/etc/rules:ro
-
-    camunda:
-        image: camunda/camunda-bpm-platform:run-7.20.0
-        command: ./camunda.sh --rest --webapps
-        ports:
-            - 8080:8080
-        healthcheck:
-            test: curl --fail http://localhost:8080/engine-rest/version || exit 1
-            interval: 10s
-            retries: 3
-            start_period: 5s
-            timeout: 10s
-        depends_on:
-            mongodb:
-                condition: service_healthy
-
-    keycloak:
-        image: quay.io/keycloak/keycloak:20.0.3
-        command: start-dev
-        environment:
-            KC_HEALTH_ENABLED: "true"
-            KEYCLOAK_ADMIN: admin
-            KEYCLOAK_ADMIN_PASSWORD: admin
-        healthcheck:
-            test: curl --fail http://localhost:8080/health/ready || exit 1
-            interval: 10s
-            retries: 3
-            start_period: 5s
-            timeout: 10s
-        ports:
-            - 8082:8080
-        volumes:
-            - keycloak:/opt/keycloak/data/
-
+services:            
     case-engine-rest-api:
         build:
             context: apps/java/services/case-engine-rest-api
@@ -108,11 +10,11 @@ services:
             - mongodb
             - camunda
         environment:
-            - CAMUNDA_BASE_URL=http://camunda:8080/engine-rest
-            - MONGO_DATABASE=wks
-            - MONGO_CONN=mongodb://mongodb
-            - KEYCLOAK_URL=http://keycloak:8080
-            - OPA_URL=http://opa:8181/v1/data/wks/authz/allow
+            - CAMUNDA_BASE_URL=${CAMUNDA_BASE_URL}
+            - MONGO_DATABASE=${MONGO_WKS_DATABASE}
+            - MONGO_CONN=${MONGO_CONNECTION_URL}
+            - KEYCLOAK_URL=${KEYCLOAK_URL}
+            - OPA_URL=${OPA_URL}
         depends_on:
             mongodb:
                 condition: service_healthy
@@ -126,34 +28,13 @@ services:
             - camunda
             - case-engine-rest-api
         environment:
-            - CAMUNDA_BASE_URL=http://camunda:8080/engine-rest
-            - CAMUNDA_USERNAME=demo
-            - CAMUNDA_PASSWORD=demo
-            - KEYCLOAK_URL=http://keycloak:8080/realms/localhost/protocol/openid-connect/token
-            - WKS_CASE_API_URL=http://case-engine-rest-api:8081
+            - CAMUNDA_BASE_URL=${CAMUNDA_BASE_URL}
+            - CAMUNDA_USERNAME=${CAMUNDA_USERNAME}
+            - CAMUNDA_PASSWORD=${CAMUNDA_PASSWORD}
+            - KEYCLOAK_URL=${KEYCLOAK_TOKEN_URL}
+            - WKS_CASE_API_URL=${WKS_CASE_API_URL}
+            - WEBSOCKET_ENABLED=${WEBSOCKET_ENABLED}
         depends_on:
-            camunda:
-                condition: service_healthy
-
-    email-to-case:
-        build:
-            context: apps/java/services/email-to-case
-        ports:
-            - 8083:8083
-        links:
-            - mongodb
-            - camunda
-        environment:
-            - CAMUNDA_BASE_URL=http://camunda:8080/engine-rest
-            - MONGO_DATABASE=wks
-            - MONGO_CONN=mongodb://mongodb
-            - EMAIL_CASE_PATTERN_NEW=new-case
-            - EMAIL_CASE_PATTERN_UPDATE=update-case
-            - KEYCLOAK_URL=http://keycloak:8080
-            - OPA_URL=http://opa:8181/v1/data/wks/authz/allow
-        depends_on:
-            mongodb:
-                condition: service_healthy
             camunda:
                 condition: service_healthy
 
@@ -165,49 +46,9 @@ services:
         links:
             - minio
         environment:
-            - OPA_URL=http://opa:8181/v1/data/wks/authz/allow
-            - KEYCLOAK_URL=http://keycloak:8080
+            - OPA_URL=${OPA_URL}
+            - KEYCLOAK_URL=${KEYCLOAK_URL}
             - MINIO_HOST=minio
         depends_on:
             minio:
                 condition: service_healthy
-
-    case-portal:
-        build:
-            context: apps/react/case-portal
-            args:
-                REACT_APP_KEYCLOAK_URL: http://localhost:8082
-                REACT_APP_API_URL: http://localhost:8081
-                REACT_APP_EMAIL_URL: http://localhost:8083
-                REACT_APP_STORAGE_URL: http://localhost:8085
-                REACT_APP_NOVU_ENABLED: false
-        ports:
-            - 3001:3000
-
-    demo-data-loader:
-        build:
-            context: apps/java/services/demo-data-loader
-        environment:
-            - CAMUNDA_URL=http://camunda:8080/engine-rest
-            - MONGO_DATABASE=localhost
-            - MONGO_CONN=mongodb://mongodb
-            - KEYCLOAK_URL=http://keycloak:8080
-        links:
-            - mongodb
-            - camunda
-            - keycloak
-        depends_on:
-            mongodb:
-                condition: service_healthy
-            camunda:
-                condition: service_healthy
-            keycloak:
-                condition: service_healthy            
-                
-volumes:
-    mongo:
-        driver: local
-    minio:
-        driver: local
-    keycloak:
-        driver: local

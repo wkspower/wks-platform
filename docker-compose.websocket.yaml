@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  websocket-publisher:
+    build:
+      context: apps/node/websocket-publisher
+    ports:
+      - "8484:8484"
+    environment:
+        - REACT_APP_WEBSOCKET_PORT=8484
+        - REACT_APP_KAFKA_URL=${KAFKA_URL}
+    depends_on:
+      - kafka
+      - zookeeper
