@@ -9,6 +9,7 @@ target
 
 # Environment properties
 env.properties
+.env
 
 ### Eclipse ###
 .metadata
