@@ -32,5 +32,7 @@ public class CaseOwner {
 
 	public String id;
 	private String name;
+	private String email;
+	private String phone;
 
 }
