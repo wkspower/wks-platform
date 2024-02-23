@@ -11,14 +11,19 @@
  */
 package com.wks.bpm.externaltask.handler.impl;
 
+import java.util.Optional;
+
 import org.camunda.bpm.client.spring.annotation.ExternalTaskSubscription;
 import org.camunda.bpm.client.task.ExternalTask;
 import org.camunda.bpm.client.task.ExternalTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
-import com.wks.bpm.externaltask.api.client.CaseInstanceApiGateway;
+import com.wks.bpm.externaltask.api.gateway.impl.CaseInstanceApiGateway;
 import com.wks.bpm.externaltask.handler.WksExternalTaskHandler;
+import com.wks.bpm.externaltask.kafka.KafkaProducer;
 
 @Configuration
 @ExternalTaskSubscription(topicName = "caseSave", includeExtensionProperties = true)
@@ -27,12 +32,20 @@ public class CaseSaveHandler extends WksExternalTaskHandler {
 	@Autowired
 	private CaseInstanceApiGateway caseInstanceApiGateway;
 
+    @Autowired(required = false)
+    @Qualifier("kafkaProducer")
+    private Optional<KafkaProducer> kafkaProducerOptional;
+    
+	@Value("${wks.kafka.topic.case-create}")
+	protected String topic;
+
 	@Override
 	public void doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
 
 		String caseInstanceJson = externalTask.getVariable("caseInstance");
 		caseInstanceApiGateway.save(caseInstanceJson);
 
+		kafkaProducerOptional.ifPresent(kafkaProducer -> kafkaProducer.sendMessage(topic, caseInstanceJson));
 	}
 
 }

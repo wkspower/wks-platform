@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.externaltask;
+package com.wks.bpm.externaltask.api.gateway;
 
 import java.util.Collections;
 

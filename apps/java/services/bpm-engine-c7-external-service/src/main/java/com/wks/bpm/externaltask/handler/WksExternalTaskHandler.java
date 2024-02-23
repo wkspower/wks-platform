@@ -49,6 +49,7 @@ public abstract class WksExternalTaskHandler implements ExternalTaskHandler {
 			doExecute(externalTask, externalTaskService);
 
 			externalTaskService.complete(externalTask);
+
 		} catch (Exception e) {
 			log.error("Error on external task {} with businessKey {}", externalTask.getActivityId(),
 					externalTask.getBusinessKey(), e);

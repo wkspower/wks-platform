@@ -19,8 +19,8 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.wks.bpm.externaltask.api.client.CaseDefinitionApiGateway;
-import com.wks.bpm.externaltask.api.client.ProcessDefinitionApiGateway;
+import com.wks.bpm.externaltask.api.gateway.impl.CaseDefinitionApiGateway;
+import com.wks.bpm.externaltask.api.gateway.impl.ProcessDefinitionApiGateway;
 import com.wks.bpm.externaltask.handler.WksExternalTaskHandler;
 
 @Configuration

@@ -38,3 +38,7 @@ management.health.mongo.enabled: false
 management.health.reds.enabled: false
 management.endpoints.web.exposure.include: health,info 
 management.endpoint.health.show-details: never
+
+wks.kafka.enabled: ${KAFKA_ENABLED:false}
+wks.kafka.topic.case-create: ${KAFKA_TOPIC_CASE_CREATE:case-create}
+spring.kafka.bootstrap-servers: ${KAFKA_URL:localhost:9092}

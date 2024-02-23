@@ -17,7 +17,7 @@ import org.camunda.bpm.client.task.ExternalTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
-import com.wks.bpm.externaltask.api.client.CaseInstanceApiGateway;
+import com.wks.bpm.externaltask.api.gateway.impl.CaseInstanceApiGateway;
 import com.wks.bpm.externaltask.handler.WksExternalTaskHandler;
 
 @Configuration
