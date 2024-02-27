@@ -50,7 +50,11 @@ public class NotifyAssigneeTaskListener implements TaskListener {
 	@Override
 	public void notify(DelegateTask delegateTask) {
 		String businessKey = delegateTask.getExecution().getProcessInstance().getBusinessKey();
-		String json = "{\"businessKey\": \"" + businessKey + "\",\"taskName\": \"" + delegateTask.getName() + "\"}";
+		String taskName = delegateTask.getName();
+		String assigneeEmail = delegateTask.getAssignee();
+
+		String json = "{\"businessKey\": \"" + businessKey + "\",\"taskName\": \"" + taskName + "\",\"owner\": {\"id\": \""
+				+ assigneeEmail + "\" }}";
 
 		publishToKafka(topic, "taskDefKey", json);
 	}

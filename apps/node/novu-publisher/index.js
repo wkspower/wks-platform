@@ -16,12 +16,10 @@ const createConsumer = async (topic) => {
   await consumer.run({
     eachMessage: async ({ message }) => {
       const kafkaMessage = message.value.toString();
-      console.log(`new message received: ${kafkaMessage}`);
 
       // Make HTTP request for each Kafka message
       try {
         await sendHttpRequest(kafkaMessage, topic);
-        console.log("HTTP request sent successfully");
       } catch (error) {
         console.error("Error sending HTTP request:", error);
       }
@@ -29,11 +27,25 @@ const createConsumer = async (topic) => {
   });
 };
 
+const axiosInstance = axios.create();
+
+// Add a request interceptor to log the request before sending
+axiosInstance.interceptors.request.use(function (config) {
+  console.log('HTTP Request:');
+  console.log('Method:', config.method.toUpperCase());
+  console.log('URL:', config.url);
+  console.log('Headers:', config.headers);
+  console.log('Body:', config.data);
+  return config;
+}, function (error) {
+  return Promise.reject(error);
+});
+
 // Function to send HTTP request
 const sendHttpRequest = async (kafkaMessage, novuWorkflow) => {
   const json = JSON.parse(kafkaMessage);
   try {
-    await axios.post(
+    await axiosInstance.post(
       config.NovuTriggerUrl,
       {
         name: novuWorkflow,
