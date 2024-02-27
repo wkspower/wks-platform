@@ -49,8 +49,9 @@ export const CaseList = ({ status, caseDefId }) => {
 
     useEffect(() => {
         if (Config.WebsocketsEnabled) {
-            const topic = Config.WebsocketsTopicCaseCreated;
-            const ws = new WebSocket(`ws://localhost:8484/${topic}`);
+            const websocketUrl = Config.WebsocketUrl;
+            const topic = Config.WebsocketsTopicCaseCreated;            
+            const ws = new WebSocket(`${websocketUrl}/${topic}`);
             ws.onmessage = (event) => {
                 fetchCases(
                     setFetching,

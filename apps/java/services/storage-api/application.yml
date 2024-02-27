@@ -24,8 +24,8 @@ driver.storage.endpoint.port: 9000
 driver.storage.endpoint.secure: false
 driver.storage.endpoint.signing.region: nyc3
 driver.storage.endpoint.bucket.prefix: 
-driver.storage.accesskey: minio
-driver.storage.secretkey: "#minio00#"
+driver.storage.accesskey: ${MINIO_ROOT_USER:minio}
+driver.storage.secretkey: ${MINIO_ROOT_PASSWORD:#minio00#}
 driver.storage.uploads.backend.protocol: http
 driver.storage.uploads.backend.port: 9000
 driver.storage.uploads.backend.url: localhost

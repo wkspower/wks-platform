@@ -123,6 +123,8 @@ services:
             - OPA_URL=${OPA_URL}
             - KEYCLOAK_URL=${KEYCLOAK_URL}
             - MINIO_HOST=minio
+            - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+            - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
         depends_on:
             minio:
                 condition: service_healthy

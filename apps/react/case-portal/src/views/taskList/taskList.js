@@ -37,8 +37,9 @@ export const TaskList = ({ businessKey, callback }) => {
 
     useEffect(() => {
         if (Config.WebsocketsEnabled) {
+            const websocketUrl = Config.WebsocketUrl;
             const topic = Config.WebsocketsTopicHumanTaskCreated;
-            const ws = new WebSocket(`ws://localhost:8484/${topic}`);
+            const ws = new WebSocket(`${websocketUrl}/${topic}`);
             ws.onmessage = (event) => {
                 fetchTasks(
                     setFetching,

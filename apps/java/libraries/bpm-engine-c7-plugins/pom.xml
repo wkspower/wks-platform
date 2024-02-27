@@ -7,17 +7,14 @@
 		<groupId>com.wks</groupId>
 		<artifactId>platform</artifactId>
 		<version>1.0-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	
 	<artifactId>bpm-engine-c7-plugins</artifactId>
 	<name>bpm-engine-c7-plugins</name>
 	<description>Camunda 7 plugins</description>
+
 	<packaging>jar</packaging>
-	
-	
-	<properties>
-		<camunda-bpm-junit5.version>1.1.0</camunda-bpm-junit5.version>
-	</properties>
 	
 	<dependencies>
 	
