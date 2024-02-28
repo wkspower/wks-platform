@@ -54,7 +54,6 @@
         "simplebar": "^5.3.5",
         "simplebar-react": "^2.3.6",
         "web-vitals": "^3.0.2",
-        "websocket": "^1.0.34",
         "yup": "^0.32.11"
     },
     "scripts": {
