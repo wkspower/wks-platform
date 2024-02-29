@@ -18,7 +18,7 @@ test('should be initialize realm default realm when using localhost', () => {
     const { keycloak, realm, clientId } = store.bootstrap();
 
     expect(keycloak).not.toBeNull();
-    expect(realm).toEqual('wks-platform');
+    expect(realm).toEqual('localhost');
     expect(clientId).toEqual('wks-portal');
 });
 
@@ -28,6 +28,6 @@ test('should be initialize default realm when using app dns', () => {
     const { keycloak, realm, clientId } = store.bootstrap();
 
     expect(keycloak).not.toBeNull();
-    expect(realm).toEqual('wks-platform');
+    expect(realm).toEqual('app');
     expect(clientId).toEqual('wks-portal');
 });
