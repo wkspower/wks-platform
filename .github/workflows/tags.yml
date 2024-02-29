@@ -13,6 +13,11 @@ env:
   WKS_API_URL: http://localhost:8081
   WKS_EMAIL_API_URL: http://localhost:8083
   WKS_STORAGE_API_URL: http://localhost:8085
+  KAFKA_URL: localhost:9092
+  WEBSOCKET_PORT: 8484
+  NOVU_TRIGGER_URL: https://api.novu.co/v1/events/trigger
+  NOVU_CASE_CREATE_WORKFLOW: case-create
+  NOVU_HUMAN_TASK_CREATE_WORKFLOW: human-task-create
   
 jobs:
   build:
@@ -56,6 +61,18 @@ jobs:
       env:
           NODE_OPTIONS: "--max_old_space_size=4096"
       run: REACT_APP_KEYCLOAK_URL=${{ env.KEYCLOAK_URL }} REACT_APP_API_URL=${{ env.WKS_API_URL }} REACT_APP_EMAIL_URL=${{ env.WKS_EMAIL_API_URL }} REACT_APP_STORAGE_URL=${{ env.WKS_STORAGE_API_URL }} yarn --cwd apps/react/case-portal build
+
+    - name: Install dependencies for websocket-publisher
+      run: yarn --cwd apps/node/websocket-publisher install
+
+    - name: Build for websocket-publisher
+      run: REACT_APP_KAFKA_URL=${{ env.KAFKA_URL }} REACT_APP_WEBSOCKET_PORT=${{ env.WEBSOCKET_PORT }} yarn --cwd apps/node/websocket-publisher build
+
+    - name: Install dependencies for novu-publisher
+      run: yarn --cwd apps/node/novu-publisher install
+
+    - name: Build for novu-publisher
+      run: REACT_APP_KAFKA_URL=${{ env.KAFKA_URL }} REACT_APP_NOVU_TRIGGER_URL=${{ env.NOVU_TRIGGER_URL }} REACT_APP_NOVU_API_KEY=${{ env.NOVU_API_KEY }} REACT_APP_NOVU_CASE_CREATE_WORKFLOW=${{ env.NOVU_CASE_CREATE_WORKFLOW }} REACT_APP_NOVU_HUMAN_TASK_CREATE_WORKFLOW=${{ env.NOVU_HUMAN_TASK_CREATE_WORKFLOW }} yarn --cwd apps/node/novu-publisher build
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
@@ -125,3 +142,30 @@ jobs:
         file: apps/react/case-portal/deployments/Dockerfile
         push: true
         tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal:${{ steps.extract_tag.outputs.tag }}"
+
+    - name: Build and push Docker image for case-portal
+      uses: docker/build-push-action@v2
+      with:
+        context: ./apps/react/case-portal
+        platforms: linux/amd64,linux/arm64
+        file: apps/react/case-portal/deployments/Dockerfile
+        push: true
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal:${{ steps.extract_tag.outputs.tag }}"
+
+    - name: Build and push Docker image for websocket-publisher
+      uses: docker/build-push-action@v2
+      with:
+        context: ./apps/node/websocket-publisher
+        platforms: linux/amd64,linux/arm64
+        file: apps/node/websocket-publisher/Dockerfile
+        push: true
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/websocket-publisher:${{ steps.extract_tag.outputs.tag }}"
+
+    - name: Build and push Docker image for novu-publisher
+      uses: docker/build-push-action@v2
+      with:
+        context: ./apps/node/novu-publisher
+        platforms: linux/amd64,linux/arm64
+        file: apps/node/novu-publisher/Dockerfile
+        push: true
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/novu-publisher:${{ steps.extract_tag.outputs.tag }}"
