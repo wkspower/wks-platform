@@ -7,8 +7,9 @@ services:
     ports:
       - "8484:8484"
     environment:
-        - REACT_APP_WEBSOCKET_PORT=8484
-        - REACT_APP_KAFKA_URL=${KAFKA_URL}
+        - LOG_LEVEL=${WEBSOCKET_LOG_LEVEL}
+        - WEBSOCKET_PORT=8484
+        - KAFKA_URL=${KAFKA_URL}
     depends_on:
       - kafka
       - zookeeper

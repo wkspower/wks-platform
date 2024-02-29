@@ -33,7 +33,6 @@ const App = () => {
         };
 
         keycloak.onTokenExpired = () => {
-            console.log('Token expired');
 
             keycloak
                 .updateToken(70)
@@ -62,7 +61,6 @@ const App = () => {
 
     async function forceLogoutIfUserNoMinimalRoleForSystem(keycloak) {
         if (!accountStore.hasAnyRole(keycloak)) {
-            console.log('auto logout because user dont have any permission');
             return keycloak.logout({ redirectUri: window.location.origin });
         }
     }

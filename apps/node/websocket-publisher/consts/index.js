@@ -1,8 +1,9 @@
 require('dotenv').config();
 
 const config = {
-    WebsockerPort: process.env.REACT_APP_WEBSOCKET_PORT,
-    KafkaUrl: process.env.REACT_APP_KAFKA_URL,
+    LogLevel: process.env.LOG_LEVEL || 'info', 
+    WebsockerPort: process.env.WEBSOCKET_PORT,
+    KafkaUrl: process.env.KAFKA_URL,
 };
 
 module.exports = config;
