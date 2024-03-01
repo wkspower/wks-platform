@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 const { Kafka } = require('kafkajs');
-const config = require('./consts');
+const config = require('./config');
 const pino = require("pino");
 
 const logger = pino({level: config.LogLevel});
