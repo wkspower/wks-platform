@@ -16,4 +16,6 @@ services:
     depends_on:
       - kafka
       - zookeeper
+    ports:
+        - 3002:3002
                     
