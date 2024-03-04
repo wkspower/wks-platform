@@ -3,8 +3,8 @@ name: tags
 on:
   push:
     tags:
-      - '**'
-  workflow_dispatch:      
+      - "**"
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -13,12 +13,13 @@ env:
   WKS_API_URL: http://localhost:8081
   WKS_EMAIL_API_URL: http://localhost:8083
   WKS_STORAGE_API_URL: http://localhost:8085
-  KAFKA_URL: localhost:9092
-  WEBSOCKET_PORT: 8484
-  NOVU_TRIGGER_URL: https://api.novu.co/v1/events/trigger
-  NOVU_CASE_CREATE_WORKFLOW: case-create
-  NOVU_HUMAN_TASK_CREATE_WORKFLOW: human-task-create
-  
+  WEBSOCKET_ENABLED: false
+  WEBSOCKET_URL: ws://localhost:8484
+  TOPIC_CASE_CREATE: case-create
+  TOPIC_CREATE_HUMAN_TASK: human-task-create
+  NOVU_ENABLED: false
+  NOVU_PUBLISHER_API_URL: http://localhost:3002
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,145 +28,144 @@ jobs:
       packages: write
 
     steps:
-    - uses: actions/checkout@v3
-        
-    - name: Extract tag name
-      id: extract_tag
-      run: echo "::set-output name=tag::$(echo ${GITHUB_REF#refs/tags/})"
+      - uses: actions/checkout@v3
 
-    - name: Set up jdk 18
-      uses: actions/setup-java@v3
-      with:
-        java-version: '18'
-        distribution: 'temurin'
+      - name: Extract tag name
+        id: extract_tag
+        run: echo "::set-output name=tag::$(echo ${GITHUB_REF#refs/tags/})"
 
-    - name: Set up maven
-      uses: stCarolas/setup-maven@v4.5
-      with:
-        maven-version: 3.8.2
+      - name: Set up jdk 18
+        uses: actions/setup-java@v3
+        with:
+          java-version: "18"
+          distribution: "temurin"
 
-    - name: Log in to the Container registry
-      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.2
 
-    - name: Build all for backend api
-      run: mvn -B package --file apps/java/pom.xml
+      - name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Install dependencies for case-portal
-      run: yarn --cwd apps/react/case-portal install
+      - name: Build all for backend api
+        run: mvn -B package --file apps/java/pom.xml
 
-    - name: Build for case-portal
-      env:
+      - name: Install dependencies for case-portal
+        run: yarn --cwd apps/react/case-portal install
+
+      - name: Build for case-portal
+        env:
           NODE_OPTIONS: "--max_old_space_size=4096"
-      run: REACT_APP_KEYCLOAK_URL=${{ env.KEYCLOAK_URL }} REACT_APP_API_URL=${{ env.WKS_API_URL }} REACT_APP_EMAIL_URL=${{ env.WKS_EMAIL_API_URL }} REACT_APP_STORAGE_URL=${{ env.WKS_STORAGE_API_URL }} yarn --cwd apps/react/case-portal build
+        run: |
+          export REACT_APP_KEYCLOAK_URL="${{ env.KEYCLOAK_URL }}"
+          export REACT_APP_API_URL="${{ env.WKS_API_URL }}"
+          export REACT_APP_EMAIL_URL="${{ env.WKS_EMAIL_API_URL }}"
+          export REACT_APP_STORAGE_URL="${{ env.WKS_STORAGE_API_URL }}"
+          export REACT_APP_WEBSOCKETS_ENABLED="${{ env.WEBSOCKET_ENABLED }}"
+          export REACT_APP_WEBSOCKETS_URL="${{ env.WEBSOCKET_URL }}"
+          export REACT_APP_WEBSOCKETS_CASE_CREATED="${{ env.TOPIC_CASE_CREATE }}"
+          export REACT_APP_WEBSOCKETS_HUMAN_TASK_CREATED="${{ env.TOPIC_CREATE_HUMAN_TASK }}"
+          export REACT_APP_NOVU_ENABLED="${{ env.NOVU_ENABLED }}"
+          export REACT_APP_NOVU_PUBLISHER_API_URL="${{ env.NOVU_PUBLISHER_API_URL }}"
+          yarn --cwd apps/react/case-portal build
 
-    - name: Install dependencies for websocket-publisher
-      run: yarn --cwd apps/node/websocket-publisher install
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
 
-    - name: Build for websocket-publisher
-      run: REACT_APP_KAFKA_URL=${{ env.KAFKA_URL }} REACT_APP_WEBSOCKET_PORT=${{ env.WEBSOCKET_PORT }} yarn --cwd apps/node/websocket-publisher build
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-    - name: Install dependencies for novu-publisher
-      run: yarn --cwd apps/node/novu-publisher install
+      - name: Build and push Docker image for storage-api
+        uses: docker/build-push-action@v2
+        with:
+          context: ./apps/java/services/storage-api
+          platforms: linux/amd64,linux/arm64
+          file: apps/java/services/storage-api/Dockerfile
+          push: true
+          tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/storage-api:${{ steps.extract_tag.outputs.tag }}"
 
-    - name: Build for novu-publisher
-      run: REACT_APP_KAFKA_URL=${{ env.KAFKA_URL }} REACT_APP_NOVU_TRIGGER_URL=${{ env.NOVU_TRIGGER_URL }} REACT_APP_NOVU_API_KEY=${{ env.NOVU_API_KEY }} REACT_APP_NOVU_CASE_CREATE_WORKFLOW=${{ env.NOVU_CASE_CREATE_WORKFLOW }} REACT_APP_NOVU_HUMAN_TASK_CREATE_WORKFLOW=${{ env.NOVU_HUMAN_TASK_CREATE_WORKFLOW }} yarn --cwd apps/node/novu-publisher build
+      - name: Build and push Docker image for opa
+        uses: docker/build-push-action@v2
+        with:
+          context: ./opa
+          platforms: linux/amd64,linux/arm64
+          file: opa/Dockerfile
+          push: true
+          tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/opa:${{ steps.extract_tag.outputs.tag }}"
 
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
+      - name: Build and push Docker image for bpm-engine-c7-external-service
+        uses: docker/build-push-action@v2
+        with:
+          context: ./apps/java/services/bpm-engine-c7-external-service
+          platforms: linux/amd64,linux/arm64
+          file: apps/java/services/bpm-engine-c7-external-service/Dockerfile
+          push: true
+          tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ steps.extract_tag.outputs.tag }}"
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      - name: Build and push Docker image for case-engine-rest-api
+        uses: docker/build-push-action@v2
+        with:
+          context: ./apps/java/services/case-engine-rest-api
+          platforms: linux/amd64,linux/arm64
+          file: apps/java/services/case-engine-rest-api/Dockerfile
+          push: true
+          tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ steps.extract_tag.outputs.tag }}"
 
-    - name: Build and push Docker image for storage-api
-      uses: docker/build-push-action@v2
-      with:
-        context: ./apps/java/services/storage-api
-        platforms: linux/amd64,linux/arm64
-        file: apps/java/services/storage-api/Dockerfile
-        push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/storage-api:${{ steps.extract_tag.outputs.tag }}"
+      - name: Build and push Docker image for demo-data-loader
+        uses: docker/build-push-action@v2
+        with:
+          context: ./apps/java/services/demo-data-loader
+          platforms: linux/amd64,linux/arm64
+          file: apps/java/services/demo-data-loader/Dockerfile
+          push: true
+          tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader:${{ steps.extract_tag.outputs.tag }}"
 
-    - name: Build and push Docker image for opa
-      uses: docker/build-push-action@v2
-      with:
-        context: ./opa
-        platforms: linux/amd64,linux/arm64
-        file: opa/Dockerfile
-        push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/opa:${{ steps.extract_tag.outputs.tag }}"
+      - name: Build and push Docker image email-to-case
+        uses: docker/build-push-action@v2
+        with:
+          context: ./apps/java/services/email-to-case
+          platforms: linux/amd64,linux/arm64
+          file: apps/java/services/email-to-case/Dockerfile
+          push: true
+          tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case:${{ steps.extract_tag.outputs.tag }}"
 
-    - name: Build and push Docker image for bpm-engine-c7-external-service
-      uses: docker/build-push-action@v2
-      with:
-        context: ./apps/java/services/bpm-engine-c7-external-service
-        platforms: linux/amd64,linux/arm64
-        file: apps/java/services/bpm-engine-c7-external-service/Dockerfile
-        push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ steps.extract_tag.outputs.tag }}"
+      - name: Build and push Docker image for case-portal
+        uses: docker/build-push-action@v2
+        with:
+          context: ./apps/react/case-portal
+          platforms: linux/amd64,linux/arm64
+          file: apps/react/case-portal/deployments/Dockerfile
+          push: true
+          tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal:${{ steps.extract_tag.outputs.tag }}"
 
-    - name: Build and push Docker image for case-engine-rest-api
-      uses: docker/build-push-action@v2
-      with:
-        context: ./apps/java/services/case-engine-rest-api
-        platforms: linux/amd64,linux/arm64
-        file: apps/java/services/case-engine-rest-api/Dockerfile
-        push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ steps.extract_tag.outputs.tag }}"
+      - name: Build and push Docker image for case-portal
+        uses: docker/build-push-action@v2
+        with:
+          context: ./apps/react/case-portal
+          platforms: linux/amd64,linux/arm64
+          file: apps/react/case-portal/deployments/Dockerfile
+          push: true
+          tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal:${{ steps.extract_tag.outputs.tag }}"
 
-    - name: Build and push Docker image for demo-data-loader
-      uses: docker/build-push-action@v2
-      with:
-        context: ./apps/java/services/demo-data-loader
-        platforms: linux/amd64,linux/arm64
-        file: apps/java/services/demo-data-loader/Dockerfile
-        push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader:${{ steps.extract_tag.outputs.tag }}"
+      - name: Build and push Docker image for websocket-publisher
+        uses: docker/build-push-action@v2
+        with:
+          context: ./apps/node/websocket-publisher
+          platforms: linux/amd64,linux/arm64
+          file: apps/node/websocket-publisher/Dockerfile
+          push: true
+          tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/websocket-publisher:${{ steps.extract_tag.outputs.tag }}"
 
-    - name: Build and push Docker image email-to-case
-      uses: docker/build-push-action@v2
-      with:
-        context: ./apps/java/services/email-to-case
-        platforms: linux/amd64,linux/arm64
-        file: apps/java/services/email-to-case/Dockerfile
-        push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case:${{ steps.extract_tag.outputs.tag }}"
-
-    - name: Build and push Docker image for case-portal
-      uses: docker/build-push-action@v2
-      with:
-        context: ./apps/react/case-portal
-        platforms: linux/amd64,linux/arm64
-        file: apps/react/case-portal/deployments/Dockerfile
-        push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal:${{ steps.extract_tag.outputs.tag }}"
-
-    - name: Build and push Docker image for case-portal
-      uses: docker/build-push-action@v2
-      with:
-        context: ./apps/react/case-portal
-        platforms: linux/amd64,linux/arm64
-        file: apps/react/case-portal/deployments/Dockerfile
-        push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal:${{ steps.extract_tag.outputs.tag }}"
-
-    - name: Build and push Docker image for websocket-publisher
-      uses: docker/build-push-action@v2
-      with:
-        context: ./apps/node/websocket-publisher
-        platforms: linux/amd64,linux/arm64
-        file: apps/node/websocket-publisher/Dockerfile
-        push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/websocket-publisher:${{ steps.extract_tag.outputs.tag }}"
-
-    - name: Build and push Docker image for novu-publisher
-      uses: docker/build-push-action@v2
-      with:
-        context: ./apps/node/novu-publisher
-        platforms: linux/amd64,linux/arm64
-        file: apps/node/novu-publisher/Dockerfile
-        push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/novu-publisher:${{ steps.extract_tag.outputs.tag }}"
+      - name: Build and push Docker image for novu-publisher
+        uses: docker/build-push-action@v2
+        with:
+          context: ./apps/node/novu-publisher
+          platforms: linux/amd64,linux/arm64
+          file: apps/node/novu-publisher/Dockerfile
+          push: true
+          tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/novu-publisher:${{ steps.extract_tag.outputs.tag }}"
