@@ -57,7 +57,7 @@ WKS Platform is designed as a multi-tenant solution, allowing multiple organizat
 
 ## Installation
 
-https://www.wkspower.com/docs/instalation-guide/
+[https://www.wkspower.com/docs/instalation-guide/](https://www.wkspower.com/docs/Installation/)
 
 ## Diagrams 
 
