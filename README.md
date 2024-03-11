@@ -61,11 +61,14 @@ https://www.wkspower.com/docs/instalation-guide/
 
 ## Diagrams 
 
-Find an architecture overview of WKS Platform below: 
+### Architecture overview
 <img width="1507" alt="architecture-overview" src="https://github.com/wkspower/wks-platform/assets/85225281/fcd0718d-ea2a-4d05-91fa-8bcbbbb1a88b">
 
-The diagram below visually depicts the relationships between Case Definitions, their constituent components (highlighted in yellow boxes), and the Case Instances generated in accordance with their structures:
+### Case Definition structure
 <img width="1507" alt="case-definition-structure" src="https://github.com/wkspower/wks-platform/assets/85225281/d478345f-8192-4196-ae53-868151363cf1">
+
+### Event Hub
+![image](https://github.com/wkspower/wks-platform/assets/85225281/8be3eb96-7ebd-48f4-9118-f96c009d8f27)
 
 ## Screenshots
 
