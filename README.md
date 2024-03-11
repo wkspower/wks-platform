@@ -68,7 +68,8 @@ https://www.wkspower.com/docs/instalation-guide/
 <img width="1507" alt="case-definition-structure" src="https://github.com/wkspower/wks-platform/assets/85225281/d478345f-8192-4196-ae53-868151363cf1">
 
 ### Event Hub
-![image](https://github.com/wkspower/wks-platform/assets/85225281/8be3eb96-7ebd-48f4-9118-f96c009d8f27)
+![image](https://github.com/wkspower/wks-platform/assets/85225281/1f393c1a-84b7-42d3-971b-0e9a49240d27)
+
 
 ## Screenshots
 
