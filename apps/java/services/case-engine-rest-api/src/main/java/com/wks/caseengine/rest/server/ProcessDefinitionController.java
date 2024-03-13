@@ -45,7 +45,7 @@ public class ProcessDefinitionController {
 	public ResponseEntity<ProcessInstance> start(@PathVariable final String key, @RequestBody final JsonObject body) {
 
 		String businessKey = body.get("businessKey").getAsString();
-		Optional<JsonElement> attributes = Optional.of(body.get("attributes"));
+		Optional<JsonElement> attributes = Optional.ofNullable(body.get("attributes"));
 		if (attributes.isEmpty()) {
 			return ResponseEntity.ok(processEngineClientFacade.startProcess(key, businessKey));
 		} else {
