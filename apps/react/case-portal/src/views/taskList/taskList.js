@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
 import TextField from '@mui/material/TextField';
-import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import MainCard from 'components/MainCard';
 import { format } from 'date-fns';
 import React, { useEffect, useState } from 'react';
@@ -173,7 +173,6 @@ export const TaskList = ({ businessKey, callback }) => {
                                 columns={makeColumns()}
                                 pageSize={10}
                                 rowsPerPageOptions={[10]}
-                                components={{ Toolbar: GridToolbar }}
                                 localeText={{
                                     toolbarColumns: t('pages.tasklist.datagrid.toolbar.columns'),
                                     toolbarFilters: t('pages.tasklist.datagrid.toolbar.filters'),
