@@ -273,7 +273,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                 open={isMenuOpen}
                                 onClose={handleMenuClose}
                             >
-                                {manualInitProcessDefs && (
+                                {(
                                     <MenuItem onClick={handleOpenProcessesDialog}>
                                         {t('pages.caseform.actions.startProcess')}
                                     </MenuItem>
