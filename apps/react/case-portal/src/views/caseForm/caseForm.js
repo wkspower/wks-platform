@@ -130,7 +130,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
         setRightTabIndex(newValue);
     };
 
-    const handleUpdateCaseStatus = (keycloak, newStatus) => {
+    const handleUpdateCaseStatus = (newStatus) => {
         CaseService.patch(
             keycloak,
             aCase.businessKey,
@@ -201,7 +201,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                     color="inherit"
                                     onClick={() =>
                                         handleUpdateCaseStatus(
-                                            keycloak,
                                             CaseStatus.ClosedCaseStatus.description
                                         )
                                     }
@@ -215,7 +214,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                         color="inherit"
                                         onClick={() =>
                                             handleUpdateCaseStatus(
-                                                keycloak,
                                                 CaseStatus.WipCaseStatus.description
                                             )
                                         }
@@ -227,7 +225,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                         color="inherit"
                                         onClick={() =>
                                             handleUpdateCaseStatus(
-                                                keycloak,
                                                 CaseStatus.ArchivedCaseStatus.description
                                             )
                                         }
@@ -242,7 +239,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                         color="inherit"
                                         onClick={() =>
                                             handleUpdateCaseStatus(
-                                                keycloak,
                                                 CaseStatus.WipCaseStatus.description
                                             )
                                         }
