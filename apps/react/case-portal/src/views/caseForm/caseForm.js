@@ -26,7 +26,6 @@ import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { CaseStatus } from 'common/caseStatus';
-import MainCard from 'components/MainCard';
 import { StorageService } from 'plugins/storage';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
@@ -314,9 +313,9 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                         </Stepper>
                     </Box>
 
-                    <Grid container spacing={2}>
+                    <Grid container spacing={2} sx={{ paddingLeft: 1, paddingRight: 1 }}>
                         <Grid item xs={12} sm={8}>
-                            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                            <Box>
                                 <Tabs value={mainTabIndex} onChange={handleMainTabChanged}>
                                     <Tab
                                         label={t('pages.caseform.tabs.details')}
@@ -324,49 +323,47 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                     />
                                 </Tabs>
                             </Box>
-                            <TabPanel value={mainTabIndex} index={0}>
-                                {/* Case Details  */}
-                                <Grid
-                                    container
-                                    spacing={2}
-                                    sx={{ display: 'flex', flexDirection: 'column' }}
-                                >
-                                    <Grid item xs={12}>
-                                        <MainCard sx={{ p: 2 }} content={false}>
-                                            <Box
-                                                sx={{
-                                                    pb: 1,
-                                                    display: 'flex',
-                                                    flexDirection: 'row'
-                                                }}
+                            <Box sx={{ border: 1, borderColor: 'divider', borderRadius: '5px' }}>
+                                <TabPanel value={mainTabIndex} index={0}>
+                                    {/* Case Details  */}
+                                    <Grid
+                                        container
+                                        spacing={2}
+                                        sx={{ display: 'flex', flexDirection: 'column' }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                pb: 1,
+                                                display: 'flex',
+                                                flexDirection: 'row'
+                                            }}
+                                        >
+                                            <Typography
+                                                variant="h5"
+                                                color="textSecondary"
+                                                sx={{ pr: 0.5 }}
                                             >
-                                                <Typography
-                                                    variant="h5"
-                                                    color="textSecondary"
-                                                    sx={{ pr: 0.5 }}
-                                                >
-                                                    {form.title}
-                                                </Typography>
-                                                <Tooltip title={form.toolTip}>
-                                                    <QuestionCircleOutlined />
-                                                </Tooltip>
-                                            </Box>
-                                            <Form
-                                                form={form.structure}
-                                                submission={formData}
-                                                options={{
-                                                    readOnly: true,
-                                                    fileService: new StorageService()
-                                                }}
-                                            />
-                                        </MainCard>
+                                                {form.title}
+                                            </Typography>
+                                            <Tooltip title={form.toolTip}>
+                                                <QuestionCircleOutlined />
+                                            </Tooltip>
+                                        </Box>
+                                        <Form
+                                            form={form.structure}
+                                            submission={formData}
+                                            options={{
+                                                readOnly: true,
+                                                fileService: new StorageService()
+                                            }}
+                                        />
                                     </Grid>
-                                </Grid>
-                            </TabPanel>
+                                </TabPanel>
+                            </Box>
                         </Grid>
 
                         <Grid item xs={12} sm={4}>
-                            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                            <Box>
                                 <Tabs value={rightTabIndex} onChange={handleRightTabChanged}>
                                     <Tab label={t('pages.caseform.tabs.tasks')} {...a11yProps(0)} />
                                     <Tab
@@ -374,7 +371,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                         {...a11yProps(1)}
                                     />
                                     <Tab
-                                        label={t('pages.caseform.tabs.documents')}
+                                        label={t('pages.caseform.tabs.attachments')}
                                         {...a11yProps(2)}
                                     />
                                     <Tab
@@ -383,36 +380,38 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                     />
                                 </Tabs>
                             </Box>
-                            <TabPanel value={rightTabIndex} index={0}>
-                                <TaskList
-                                    businessKey={aCase.businessKey}
-                                    callback={updateActiveState}
-                                />
-                            </TabPanel>
+                            <Box sx={{ border: 1, borderColor: 'divider', borderRadius: '5px' }}>
+                                <TabPanel value={rightTabIndex} index={0}>
+                                    <TaskList
+                                        businessKey={aCase.businessKey}
+                                        callback={updateActiveState}
+                                    />
+                                </TabPanel>
 
-                            <TabPanel value={rightTabIndex} index={1}>
-                                <CaseEmailsList caseInstanceBusinessKey={aCase.businessKey} />
-                            </TabPanel>
+                                <TabPanel value={rightTabIndex} index={1}>
+                                    <CaseEmailsList caseInstanceBusinessKey={aCase.businessKey} />
+                                </TabPanel>
 
-                            <TabPanel value={rightTabIndex} index={2}>
-                                <Documents aCase={aCase} initialValue={documents || []} />
-                            </TabPanel>
+                                <TabPanel value={rightTabIndex} index={2}>
+                                    <Documents aCase={aCase} initialValue={documents || []} />
+                                </TabPanel>
 
-                            <TabPanel value={rightTabIndex} index={3}>
-                                <Grid
-                                    container
-                                    spacing={2}
-                                    sx={{ display: 'flex', flexDirection: 'column' }}
-                                >
-                                    <Grid item xs={12}>
-                                        <Comments
-                                            aCase={aCase}
-                                            getCaseInfo={getCaseInfo}
-                                            comments={comments ? comments : []}
-                                        />
+                                <TabPanel value={rightTabIndex} index={3}>
+                                    <Grid
+                                        container
+                                        spacing={2}
+                                        sx={{ display: 'flex', flexDirection: 'column' }}
+                                    >
+                                        <Grid item xs={12}>
+                                            <Comments
+                                                aCase={aCase}
+                                                getCaseInfo={getCaseInfo}
+                                                comments={comments ? comments : []}
+                                            />
+                                        </Grid>
                                     </Grid>
-                                </Grid>
-                            </TabPanel>
+                                </TabPanel>
+                            </Box>
                         </Grid>
                     </Grid>
                 </Dialog>

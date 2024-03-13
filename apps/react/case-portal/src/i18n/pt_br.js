@@ -70,7 +70,7 @@ const defs = {
                 details: 'Detalhes do Caso',
                 tasks: 'Tarefas',
                 comments: 'Comentários',
-                documents: 'Documentos',
+                attachments: 'Anexos',
                 emails: 'Emails'
             },
             manualProcesses: {

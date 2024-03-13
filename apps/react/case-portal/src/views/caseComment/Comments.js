@@ -1,12 +1,12 @@
+import React from 'react';
+import Typography from '@mui/material/Typography';
+import { useSession } from 'SessionStoreContext';
 import { useEffect, useState } from 'react';
-import { deleteComment as deleteCommentApi } from './api';
+import { CaseService } from '../../services';
 import Comment from './Comment';
 import CommentForm from './CommentForm';
-import Typography from '@mui/material/Typography';
-import MainCard from 'components/MainCard';
+import { deleteComment as deleteCommentApi } from './api';
 import './comments.css';
-import { useSession } from 'SessionStoreContext';
-import { CaseService } from '../../services';
 
 export const Comments = ({ comments, aCase, getCaseInfo }) => {
     const [backendComments, setBackendComments] = useState(comments);
@@ -30,23 +30,23 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
             .then(() => {
                 getCaseInfo(aCase);
             })
-        .then(() => {
-            getCaseInfo(aCase);
-            setActiveComment(null);
-        })
-        .catch((err) => console.error(err));
+            .then(() => {
+                getCaseInfo(aCase);
+                setActiveComment(null);
+            })
+            .catch((err) => console.error(err));
     };
 
     const updateComment = (text, commentId) => {
         CaseService.updateComment(keycloak, text, commentId, aCase.businessKey)
-        .then(() => {
-            getCaseInfo(aCase);
-            setActiveComment(null);
-        })
-        .catch((err) => {
-            console.error(err);
-            setActiveComment(null);
-        });
+            .then(() => {
+                getCaseInfo(aCase);
+                setActiveComment(null);
+            })
+            .catch((err) => {
+                console.error(err);
+                setActiveComment(null);
+            });
     };
 
     const deleteComment = (commentId) => {
@@ -74,7 +74,7 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
     });
 
     return (
-        <MainCard sx={{ p: 2 }} content={false}>
+        <React.Fragment>
             <Typography variant="h5" sx={{ textDecoration: 'none' }} color="textSecondary">
                 Comments
             </Typography>
@@ -93,6 +93,6 @@ export const Comments = ({ comments, aCase, getCaseInfo }) => {
                     currentUserId={keycloak.tokenParsed.preferred_username}
                 />
             ))}
-        </MainCard>
+        </React.Fragment>
     );
 };
