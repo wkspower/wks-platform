@@ -383,39 +383,35 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                     />
                                 </Tabs>
                             </Box>
-                            <TabPanel>
-                                <TabPanel value={rightTabIndex} index={0}>
-                                    <div style={{ display: 'grid', padding: '10px' }}>
-                                        <TaskList
-                                            businessKey={aCase.businessKey}
-                                            callback={updateActiveState}
+                            <TabPanel value={rightTabIndex} index={0}>
+                                <TaskList
+                                    businessKey={aCase.businessKey}
+                                    callback={updateActiveState}
+                                />
+                            </TabPanel>
+
+                            <TabPanel value={rightTabIndex} index={1}>
+                                <CaseEmailsList caseInstanceBusinessKey={aCase.businessKey} />
+                            </TabPanel>
+
+                            <TabPanel value={rightTabIndex} index={2}>
+                                <Documents aCase={aCase} initialValue={documents || []} />
+                            </TabPanel>
+
+                            <TabPanel value={rightTabIndex} index={3}>
+                                <Grid
+                                    container
+                                    spacing={2}
+                                    sx={{ display: 'flex', flexDirection: 'column' }}
+                                >
+                                    <Grid item xs={12}>
+                                        <Comments
+                                            aCase={aCase}
+                                            getCaseInfo={getCaseInfo}
+                                            comments={comments ? comments : []}
                                         />
-                                    </div>
-                                </TabPanel>
-
-                                <TabPanel value={rightTabIndex} index={1}>
-                                    <CaseEmailsList caseInstanceBusinessKey={aCase.businessKey} />
-                                </TabPanel>
-
-                                <TabPanel value={rightTabIndex} index={2}>
-                                    <Documents aCase={aCase} initialValue={documents || []} />
-                                </TabPanel>
-
-                                <TabPanel value={rightTabIndex} index={3}>
-                                    <Grid
-                                        container
-                                        spacing={2}
-                                        sx={{ display: 'flex', flexDirection: 'column' }}
-                                    >
-                                        <Grid item xs={12}>
-                                            <Comments
-                                                aCase={aCase}
-                                                getCaseInfo={getCaseInfo}
-                                                comments={comments ? comments : []}
-                                            />
-                                        </Grid>
                                     </Grid>
-                                </TabPanel>
+                                </Grid>
                             </TabPanel>
                         </Grid>
                     </Grid>
