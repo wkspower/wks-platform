@@ -93,9 +93,6 @@ const defs = {
                     filters: 'Filtros',
                     density: 'Densidade',
                     export: 'Exportação'
-                },
-                action: {
-                    details: 'Detalhar'
                 }
             },
             newTask:{
@@ -103,7 +100,8 @@ const defs = {
                 description: 'Descrição',
                 dueDate: 'Prazo',
                 assignee: 'Responsável'
-            }
+            },
+            upcoming: 'Futuras e Atrasadas'
 
         },
         taskform: {
