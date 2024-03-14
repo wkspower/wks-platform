@@ -43,7 +43,7 @@ services:
             - ./opa:/etc/rules:ro
 
     camunda:
-        image: camunda/camunda-bpm-platform:run-7.20.0
+        image: ${CAMUNDA_DOCKER_IMAGE}:${CAMUNDA_VERSION}
         command: ./camunda.sh --rest --webapps
         ports:
             - 8080:8080
