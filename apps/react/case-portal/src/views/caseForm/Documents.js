@@ -1,26 +1,24 @@
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import React, { useState } from 'react';
+import FileExcelOutlined from '@ant-design/icons/FileExcelOutlined';
+import FileImageOutlined from '@ant-design/icons/FileImageOutlined';
+import FileOutlined from '@ant-design/icons/FileOutlined';
+import FilePdfOutlined from '@ant-design/icons/FilePdfOutlined';
 import { Grid } from '@mui/material';
-import MainCard from 'components/MainCard';
+import MuiAlert from '@mui/material/Alert';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import Fade from '@mui/material/Fade';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
-import ListItemButton from '@mui/material/ListItemButton';
-import Avatar from '@mui/material/Avatar';
-import FilePdfOutlined from '@ant-design/icons/FilePdfOutlined';
-import FileExcelOutlined from '@ant-design/icons/FileExcelOutlined';
-import FileOutlined from '@ant-design/icons/FileOutlined';
-import FileImageOutlined from '@ant-design/icons/FileImageOutlined';
-import Fade from '@mui/material/Fade';
-import CircularProgress from '@mui/material/CircularProgress';
 import Snackbar from '@mui/material/Snackbar';
-import MuiAlert from '@mui/material/Alert';
+import Typography from '@mui/material/Typography';
 import { useSession } from 'SessionStoreContext';
+import React, { useState } from 'react';
+import Files from 'react-files';
 import { FileService } from '../../services';
 import CaseStore from './store';
-import Files from 'react-files';
 
 function Documents({ aCase, initialValue }) {
     const keycloak = useSession();
@@ -91,97 +89,83 @@ function Documents({ aCase, initialValue }) {
 
     return (
         <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Grid item xs={12}>
-                <MainCard sx={{ mb: 1 }}>
-                    <Box sx={{ border: '1px dashed #d9d9d9', padding: 5 }}>
-                        <Grid
-                            container
-                            direction="column"
-                            justifyContent="center"
-                            alignItems="center"
-                        >
-                            <Avatar
-                                style={{
-                                    backgroundColor: '#27CDF2',
-                                    fontSize: 40,
-                                    height: 60,
-                                    width: 60,
-                                    opacity: 0.5
-                                }}
-                            >
-                                <FilePdfOutlined />
-                            </Avatar>
+            <Box sx={{ padding: 5 }}>
+                <Grid container direction="column" justifyContent="center" alignItems="center">
+                    <Avatar
+                        style={{
+                            backgroundColor: '#27CDF2',
+                            fontSize: 40,
+                            height: 60,
+                            width: 60,
+                            opacity: 0.5
+                        }}
+                    >
+                        <FilePdfOutlined />
+                    </Avatar>
 
-                            <br />
+                    <br />
 
-                            <Files
-                                className="files-dropzone"
-                                onChange={handleChange}
-                                onError={handleError}
-                                multiple
-                                clickable
-                            >
-                                <Typography variant="h4" color="textSecondary" sx={{ pr: 0.5 }}>
-                                    Drop files here or click to upload
-                                </Typography>
-                            </Files>
+                    <Files
+                        className="files-dropzone"
+                        onChange={handleChange}
+                        onError={handleError}
+                        multiple
+                        clickable
+                    >
+                        <Typography variant="h4" color="textSecondary" sx={{ pr: 0.5 }}>
+                            Drop files here or click to upload
+                        </Typography>
+                    </Files>
 
-                            <Fade in={fetching}>
-                                <AnimatedCircularProgress value={percent} />
-                            </Fade>
-                        </Grid>
-                    </Box>
+                    <Fade in={fetching}>
+                        <AnimatedCircularProgress value={percent} />
+                    </Fade>
+                </Grid>
+            </Box>
 
-                    <List>
-                        {filesUploaded.map((file, index) => {
-                            return (
-                                <ListItem key={index}>
-                                    <ListItemAvatar>
-                                        {file.type === 'application/pdf' && (
-                                            <Avatar style={{ backgroundColor: 'red' }}>
-                                                <FilePdfOutlined />
+            {filesUploaded && filesUploaded.length > 0 && (
+                <List sx={{ border: '1px dashed #d9d9d9' }}>
+                    {filesUploaded.map((file, index) => {
+                        return (
+                            <ListItem key={index} onClick={() => downloadFile(file, keycloak)}>
+                                <ListItemAvatar>
+                                    {file.type === 'application/pdf' && (
+                                        <Avatar style={{ backgroundColor: 'red' }}>
+                                            <FilePdfOutlined />
+                                        </Avatar>
+                                    )}
+
+                                    {file.type === 'application/xls' && (
+                                        <Avatar style={{ backgroundColor: 'green' }}>
+                                            <FileExcelOutlined />
+                                        </Avatar>
+                                    )}
+
+                                    {file.type && file.type.includes('image/') && (
+                                        <Avatar style={{ backgroundColor: 'lightblue' }}>
+                                            <FileImageOutlined />
+                                        </Avatar>
+                                    )}
+
+                                    {file.type !== 'application/xls' &&
+                                        file.type !== 'application/pdf' &&
+                                        file.type &&
+                                        !file.type.includes('image/') && (
+                                            <Avatar style={{ backgroundColor: 'grey' }}>
+                                                <FileOutlined />
                                             </Avatar>
                                         )}
-
-                                        {file.type === 'application/xls' && (
-                                            <Avatar style={{ backgroundColor: 'green' }}>
-                                                <FileExcelOutlined />
-                                            </Avatar>
-                                        )}
-
-                                        {file.type && file.type.includes('image/') && (
-                                            <Avatar style={{ backgroundColor: 'lightblue' }}>
-                                                <FileImageOutlined />
-                                            </Avatar>
-                                        )}
-
-                                        {file.type !== 'application/xls' &&
-                                            file.type !== 'application/pdf' &&
-                                            file.type &&
-                                            !file.type.includes('image/') && (
-                                                <Avatar style={{ backgroundColor: 'grey' }}>
-                                                    <FileOutlined />
-                                                </Avatar>
-                                            )}
-                                    </ListItemAvatar>
-                                    <ListItemText
-                                        primary={file.name}
-                                        secondary={file.size + 'KB'}
-                                        style={{ maxWidth: '80%' }}
-                                    />
-                                    <ListItemButton
-                                        style={{ maxWidth: '10%' }}
-                                        component="button"
-                                        onClick={() => downloadFile(file, keycloak)}
-                                    >
-                                        <ListItemText primary="Download" />
-                                    </ListItemButton>
-                                </ListItem>
-                            );
-                        })}
-                    </List>
-                </MainCard>
-            </Grid>
+                                </ListItemAvatar>
+                                <ListItemText
+                                    primary={file.name}
+                                    secondary={file.size + 'KB'}
+                                    style={{ maxWidth: '80%' }}
+                                />
+                            </ListItem>
+                        );
+                    })}
+                </List>
+            )}
 
             <Snackbar open={!!messageError} autoHideDuration={6000} onClose={handleCloseMesssage}>
                 <Alert onClose={handleCloseMesssage} severity="error" sx={{ width: '100%' }}>

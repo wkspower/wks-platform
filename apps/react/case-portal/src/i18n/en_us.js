@@ -70,7 +70,7 @@ const defs = {
                 details: 'Case Details',
                 tasks: 'Tasks',
                 comments: 'Comments',
-                documents: 'Documents',
+                attachments: 'Attachments',
                 emails: 'Emails'
             },
             manualProcesses: {
@@ -93,9 +93,6 @@ const defs = {
                     filters: 'Filters',
                     density: 'Density',
                     export: 'Export'
-                },
-                action: {
-                    details: 'Details'
                 }
             },
             newTask: {
@@ -103,7 +100,8 @@ const defs = {
                 description: 'Description',
                 dueDate: 'Due Date',
                 assignee: 'Assignee'
-            }
+            },
+            upcoming: 'Upcoming & Overdue'
         },
         taskform: {
             claim: 'Claim',

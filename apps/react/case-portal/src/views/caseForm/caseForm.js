@@ -26,7 +26,6 @@ import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { CaseStatus } from 'common/caseStatus';
-import MainCard from 'components/MainCard';
 import { StorageService } from 'plugins/storage';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
@@ -45,7 +44,8 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     const [formData, setFormData] = useState(null);
     const [comments, setComments] = useState(null);
     const [documents, setDocuments] = useState(null);
-    const [tabIndex, setTabIndex] = useState(0);
+    const [mainTabIndex, setMainTabIndex] = useState(0);
+    const [rightTabIndex, setRightTabIndex] = useState(0);
     const [activeStage, setActiveStage] = React.useState(0);
     const [stages, setStages] = useState([]);
     const { t } = useTranslation();
@@ -67,12 +67,14 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
 
     useEffect(() => {
         if (activeStage) {
-            const stage = caseDef.stages.find(o => o.name === activeStage);
+            const stage = caseDef.stages.find((o) => o.name === activeStage);
             const stageProcesses = stage ? stage.processesDefinitions : [];
-            const autoStartProcesses = stageProcesses ? stageProcesses.filter(o => o.autoStart === false) : undefined;
+            const autoStartProcesses = stageProcesses
+                ? stageProcesses.filter((o) => o.autoStart === false)
+                : undefined;
             setManualInitProcessDefs(autoStartProcesses);
         }
-    }, [activeStage])
+    }, [activeStage]);
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -120,11 +122,15 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
             });
     };
 
-    const handleTabChanged = (event, newValue) => {
-        setTabIndex(newValue);
+    const handleMainTabChanged = (event, newValue) => {
+        setMainTabIndex(newValue);
     };
 
-    const handleUpdateCaseStatus = (keycloak, newStatus) => {
+    const handleRightTabChanged = (event, newValue) => {
+        setRightTabIndex(newValue);
+    };
+
+    const handleUpdateCaseStatus = (newStatus) => {
         CaseService.patch(
             keycloak,
             aCase.businessKey,
@@ -156,7 +162,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     };
 
     const startProcess = (key) => {
-        ProcessDefService.start(keycloak, key, aCase.businessKey)
+        ProcessDefService.start(keycloak, key, aCase.businessKey);
 
         // Close the dialog
         handleCloseProcessesDialog();
@@ -195,7 +201,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                     color="inherit"
                                     onClick={() =>
                                         handleUpdateCaseStatus(
-                                            keycloak,
                                             CaseStatus.ClosedCaseStatus.description
                                         )
                                     }
@@ -209,7 +214,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                         color="inherit"
                                         onClick={() =>
                                             handleUpdateCaseStatus(
-                                                keycloak,
                                                 CaseStatus.WipCaseStatus.description
                                             )
                                         }
@@ -221,7 +225,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                         color="inherit"
                                         onClick={() =>
                                             handleUpdateCaseStatus(
-                                                keycloak,
                                                 CaseStatus.ArchivedCaseStatus.description
                                             )
                                         }
@@ -236,7 +239,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                         color="inherit"
                                         onClick={() =>
                                             handleUpdateCaseStatus(
-                                                keycloak,
                                                 CaseStatus.WipCaseStatus.description
                                             )
                                         }
@@ -271,12 +273,12 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                 open={isMenuOpen}
                                 onClose={handleMenuClose}
                             >
-                                {manualInitProcessDefs && <MenuItem onClick={handleOpenProcessesDialog}>
-                                    {t('pages.caseform.actions.startProcess')}
-                                </MenuItem>
-                                }
+                                {(
+                                    <MenuItem onClick={handleOpenProcessesDialog}>
+                                        {t('pages.caseform.actions.startProcess')}
+                                    </MenuItem>
+                                )}
                             </Menu>
-
                         </Toolbar>
                     </AppBar>
 
@@ -307,88 +309,114 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                         </Stepper>
                     </Box>
 
-                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                        <Tabs value={tabIndex} onChange={handleTabChanged}>
-                            <Tab label={t('pages.caseform.tabs.details')} {...a11yProps(0)} />
-                            <Tab label={t('pages.caseform.tabs.tasks')} {...a11yProps(1)} />
-                            <Tab label={t('pages.caseform.tabs.comments')} {...a11yProps(2)} />
-                            <Tab label={t('pages.caseform.tabs.documents')} {...a11yProps(3)} />
-                            <Tab label={t('pages.caseform.tabs.emails')} {...a11yProps(4)} />
-                        </Tabs>
-                    </Box>
-
-                    <TabPanel value={tabIndex} index={0}>
-                        {/* Case Details  */}
-                        <Grid
-                            container
-                            spacing={2}
-                            sx={{ display: 'flex', flexDirection: 'column' }}
-                        >
-                            <Grid item xs={12}>
-                                <MainCard sx={{ p: 2 }} content={false}>
-                                    <Box sx={{ pb: 1, display: 'flex', flexDirection: 'row' }}>
-                                        <Typography
-                                            variant="h5"
-                                            color="textSecondary"
-                                            sx={{ pr: 0.5 }}
-                                        >
-                                            {form.title}
-                                        </Typography>
-                                        <Tooltip title={form.toolTip}>
-                                            <QuestionCircleOutlined />
-                                        </Tooltip>
-                                    </Box>
-                                    <Form
-                                        form={form.structure}
-                                        submission={formData}
-                                        options={{
-                                            readOnly: true,
-                                            fileService: new StorageService()
-                                        }}
+                    <Grid container spacing={2} sx={{ paddingLeft: 1, paddingRight: 1 }}>
+                        <Grid item xs={12} sm={8}>
+                            <Box>
+                                <Tabs value={mainTabIndex} onChange={handleMainTabChanged}>
+                                    <Tab
+                                        label={t('pages.caseform.tabs.details')}
+                                        {...a11yProps(0)}
                                     />
-                                </MainCard>
-                            </Grid>
+                                </Tabs>
+                            </Box>
+                            <Box sx={{ border: 1, borderColor: 'divider', borderRadius: '5px' }}>
+                                <TabPanel value={mainTabIndex} index={0}>
+                                    {/* Case Details  */}
+                                    <Grid
+                                        container
+                                        spacing={2}
+                                        sx={{ display: 'flex', flexDirection: 'column' }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                pb: 1,
+                                                display: 'flex',
+                                                flexDirection: 'row'
+                                            }}
+                                        >
+                                            <Typography
+                                                variant="h5"
+                                                color="textSecondary"
+                                                sx={{ pr: 0.5 }}
+                                            >
+                                                {form.title}
+                                            </Typography>
+                                            <Tooltip title={form.toolTip}>
+                                                <QuestionCircleOutlined />
+                                            </Tooltip>
+                                        </Box>
+                                        <Form
+                                            form={form.structure}
+                                            submission={formData}
+                                            options={{
+                                                readOnly: true,
+                                                fileService: new StorageService()
+                                            }}
+                                        />
+                                    </Grid>
+                                </TabPanel>
+                            </Box>
                         </Grid>
-                    </TabPanel>
-                    <TabPanel value={tabIndex} index={1}>
-                        <div style={{ display: 'grid', padding: '10px' }}>
-                            <TaskList
-                                businessKey={aCase.businessKey}
-                                keycloak={keycloak}
-                                getCaseInfo={getCaseInfo}
-                                callback={updateActiveState}
-                            />
-                        </div>
-                    </TabPanel>
 
-                    <TabPanel value={tabIndex} index={2}>
-                        <Grid
-                            container
-                            spacing={2}
-                            sx={{ display: 'flex', flexDirection: 'column' }}
-                        >
-                            <Grid item xs={12}>
-                                <Comments
-                                    aCase={aCase}
-                                    getCaseInfo={getCaseInfo}
-                                    comments={comments ? comments : []}
-                                />
-                            </Grid>
+                        <Grid item xs={12} sm={4}>
+                            <Box>
+                                <Tabs value={rightTabIndex} onChange={handleRightTabChanged}>
+                                    <Tab label={t('pages.caseform.tabs.tasks')} {...a11yProps(0)} />
+                                    <Tab
+                                        label={t('pages.caseform.tabs.emails')}
+                                        {...a11yProps(1)}
+                                    />
+                                    <Tab
+                                        label={t('pages.caseform.tabs.attachments')}
+                                        {...a11yProps(2)}
+                                    />
+                                    <Tab
+                                        label={t('pages.caseform.tabs.comments')}
+                                        {...a11yProps(3)}
+                                    />
+                                </Tabs>
+                            </Box>
+                            <Box sx={{ border: 1, borderColor: 'divider', borderRadius: '5px' }}>
+                                <TabPanel value={rightTabIndex} index={0}>
+                                    <TaskList
+                                        businessKey={aCase.businessKey}
+                                        callback={updateActiveState}
+                                    />
+                                </TabPanel>
+
+                                <TabPanel value={rightTabIndex} index={1}>
+                                    <CaseEmailsList caseInstanceBusinessKey={aCase.businessKey} />
+                                </TabPanel>
+
+                                <TabPanel value={rightTabIndex} index={2}>
+                                    <Documents aCase={aCase} initialValue={documents || []} />
+                                </TabPanel>
+
+                                <TabPanel value={rightTabIndex} index={3}>
+                                    <Grid
+                                        container
+                                        spacing={2}
+                                        sx={{ display: 'flex', flexDirection: 'column' }}
+                                    >
+                                        <Grid item xs={12}>
+                                            <Comments
+                                                aCase={aCase}
+                                                getCaseInfo={getCaseInfo}
+                                                comments={comments ? comments : []}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </TabPanel>
+                            </Box>
                         </Grid>
-                    </TabPanel>
-
-                    <TabPanel value={tabIndex} index={3}>
-                        <Documents aCase={aCase} initialValue={documents || []} />
-                    </TabPanel>
-
-                    <TabPanel value={tabIndex} index={4}>
-                        <CaseEmailsList caseInstanceBusinessKey={aCase.businessKey} />
-                    </TabPanel>
+                    </Grid>
                 </Dialog>
 
-                {manualInitProcessDefs &&
+                {manualInitProcessDefs && (
                     <Dialog onClose={handleCloseProcessesDialog} open={openProcessesDialog}>
-                        <DialogTitle sx={{ paddingBottom: 2 }}>{t('pages.caseform.manualProcesses.title')}</DialogTitle>
+                        <DialogTitle sx={{ paddingBottom: 2 }}>
+                            {t('pages.caseform.manualProcesses.title')}
+                        </DialogTitle>
                         <List>
                             {manualInitProcessDefs.map((process, index) => (
                                 <React.Fragment key={process.definitionKey}>
@@ -401,14 +429,16 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                                             }
                                         }}
                                     >
-                                        <ListItemText primary={process.name || process.definitionKey} />
+                                        <ListItemText
+                                            primary={process.name || process.definitionKey}
+                                        />
                                     </ListItem>
                                     {index !== manualInitProcessDefs.length - 1 && <Divider />}
                                 </React.Fragment>
                             ))}
                         </List>
                     </Dialog>
-                }
+                )}
             </div>
         )
     );
