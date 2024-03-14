@@ -7,8 +7,8 @@
 		<version>1.0-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
-	<artifactId>bpm-engine-c7-external-service</artifactId>
-	<name>bpm-engine-c7-external-service</name>
+	<artifactId>c7-external-tasks</artifactId>
+	<name>c7-external-tasks</name>
 	<description>C7 External Service</description>
 	<dependencies>
 		<dependency>

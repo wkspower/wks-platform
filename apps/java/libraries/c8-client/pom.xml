@@ -9,8 +9,8 @@
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>bpm-engine-c8-client</artifactId>
-	<name>bpm-engine-c8-client</name>
+	<artifactId>c8-client</artifactId>
+	<name>c8-client</name>
 	<description>C8 Client</description>
 
 	<packaging>jar</packaging>

@@ -79,14 +79,14 @@ jobs:
         push: true
         tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/opa:${{ env.BUILD_VERSION }}"
 
-    - name: Build and push Docker image for bpm-engine-c7-external-service
+    - name: Build and push Docker image for c7-external-tasks
       uses: docker/build-push-action@v2
       with:
-        context: ./bpm-engine-c7-external-service
+        context: ./c7-external-tasks
         platforms: linux/amd64,linux/arm64
-        file: bpm-engine-c7-external-service/Dockerfile
+        file: c7-external-tasks/Dockerfile
         push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ env.BUILD_VERSION }}"
+        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c7-external-tasks:${{ env.BUILD_VERSION }}"
 
     - name: Build and push Docker image for case-engine-rest-api
       uses: docker/build-push-action@v2
@@ -167,8 +167,8 @@ jobs:
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader:${{ env.BUILD_VERSION }}
         cd ../../
 
-        cd bpm-engine-c7-external-service/local
-        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ env.BUILD_VERSION }}
+        cd c7-external-tasks/local
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c7-external-tasks=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c7-external-tasks:${{ env.BUILD_VERSION }}
         cd ../../
 
         cd email-to-case/local
@@ -199,8 +199,8 @@ jobs:
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader:${{ env.BUILD_VERSION }}
         cd ../../
 
-        cd bpm-engine-c7-external-service/staging
-        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/bpm-engine-c7-external-service:${{ env.BUILD_VERSION }}
+        cd c7-external-tasks/staging
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c7-external-tasks=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c7-external-tasks:${{ env.BUILD_VERSION }}
         cd ../../
 
         cd email-to-case/staging

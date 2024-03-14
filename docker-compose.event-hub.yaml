@@ -5,7 +5,7 @@ services:
       links:
           - kafka
       volumes:
-          - ./apps/java/libraries/bpm-engine-c7-plugins/target/bpm-engine-c7-plugins-1.0-SNAPSHOT.jar:/camunda/configuration/userlib/bpm-engine-c7-plugins-1.0-SNAPSHOT.jar
+          - ./apps/java/libraries/c7-plugins/target/c7-plugins-1.0-SNAPSHOT.jar:/camunda/configuration/userlib/c7-plugins-1.0-SNAPSHOT.jar
           - ./configs/camunda/kafka-clients-3.4.1.jar:/camunda/configuration/userlib/kafka-clients-3.4.1.jar
           - ./configs/camunda/default.yml:/camunda/configuration/default.yml
       environment:
@@ -38,7 +38,7 @@ services:
     depends_on:
       - zookeeper
 
-  bpm-engine-c7-external-service:
+  c7-external-tasks:
       links:
           - kafka
       environment:
