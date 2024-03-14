@@ -1,4 +1,0 @@
-- need to adapt tasklist component for the task list menu (with case instance) since that CaseId/BusinessKey was deleted
-- review/fix 'New Task'
-- attachments -> it doesn't update the list before reopen the entire case form
-- fix the diagram issue(there is a GH issue for that)
