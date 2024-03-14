@@ -41,13 +41,13 @@
 
 		<dependency>
 			<groupId>com.wks</groupId>
-			<artifactId>bpm-engine-c7-client</artifactId>
+			<artifactId>c7-client</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.wks</groupId>
-			<artifactId>bpm-engine-c8-client</artifactId>
+			<artifactId>c8-client</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
 

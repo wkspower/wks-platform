@@ -10,8 +10,8 @@
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	
-	<artifactId>bpm-engine-c7-plugins</artifactId>
-	<name>bpm-engine-c7-plugins</name>
+	<artifactId>c7-plugins</artifactId>
+	<name>c7-plugins</name>
 	<description>Camunda 7 plugins</description>
 
 	<packaging>jar</packaging>

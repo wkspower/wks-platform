@@ -95,9 +95,9 @@ services:
             camunda:
                 condition: service_healthy
 
-    bpm-engine-c7-external-service:
+    c7-external-tasks:
         build:
-            context: apps/java/services/bpm-engine-c7-external-service
+            context: apps/java/services/c7-external-tasks
         links:
             - camunda
             - case-engine-rest-api
