@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.engine.client;
+package com.wks.bpm.engine.client.facade;
 
 import java.util.Optional;
 

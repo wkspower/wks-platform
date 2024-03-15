@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.externaltask.handler;
+package com.wks.bpm.externaltask.worker;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.engine.client;
+package com.wks.bpm.engine.client.facade;
 
 import java.util.Optional;
 
@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.BpmEngine;
+import com.wks.bpm.engine.BpmEngineType;
+import com.wks.bpm.engine.client.BpmEngineClient;
 import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
 import com.wks.bpm.engine.exception.ProcessInstanceNotFoundException;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
@@ -64,12 +66,14 @@ public class DefaultBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public String getProcessDefinitionXMLById(final String processDefinitionId) throws ProcessDefinitionNotFoundException {
+	public String getProcessDefinitionXMLById(final String processDefinitionId)
+			throws ProcessDefinitionNotFoundException {
 		return getEngineClient().getProcessDefinitionXMLById(processDefinitionId, getBpmEngine());
 	}
 
 	@Override
-	public String getProcessDefinitionXMLByKey(final String processDefinitionKey) throws ProcessDefinitionNotFoundException {
+	public String getProcessDefinitionXMLByKey(final String processDefinitionKey)
+			throws ProcessDefinitionNotFoundException {
 		return getEngineClient().getProcessDefinitionXMLByKey(processDefinitionKey, getBpmEngine());
 	}
 
@@ -88,13 +92,12 @@ public class DefaultBpmEngineClientFacade implements BpmEngineClientFacade {
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey) {
 		return getEngineClient().startProcess(processDefinitionKey, businessKey, getBpmEngine());
 	}
-	
+
 	@Override
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
 			final JsonObject variable) {
 		return getEngineClient().startProcess(processDefinitionKey, businessKey, variable, getBpmEngine());
 	}
-
 
 	@Override
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
@@ -150,6 +153,28 @@ public class DefaultBpmEngineClientFacade implements BpmEngineClientFacade {
 	@Override
 	public void sendMessage(ProcessMessage processMesage, Optional<JsonArray> variables) {
 		getEngineClient().sendMessage(processMesage, variables, getBpmEngine());
+	}
+
+	public class DefaultC7BpmEngine extends BpmEngine {
+
+		private String DEFAULT_C7_BPM_ID = "default-camunda7-engine";
+		private String DEFAULT_C7_BPM_NAME = "Default Camunda 7";
+
+		@Override
+		public String getId() {
+			return DEFAULT_C7_BPM_ID;
+		}
+
+		@Override
+		public String getName() {
+			return DEFAULT_C7_BPM_NAME;
+		}
+
+		@Override
+		public BpmEngineType getType() {
+			return BpmEngineType.BPM_ENGINE_CAMUNDA7;
+		}
+
 	}
 
 }

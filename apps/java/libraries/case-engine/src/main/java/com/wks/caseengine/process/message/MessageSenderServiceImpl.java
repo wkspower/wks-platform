@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonArray;
-import com.wks.bpm.engine.client.BpmEngineClientFacade;
+import com.wks.bpm.engine.client.facade.BpmEngineClientFacade;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
 
 @Component

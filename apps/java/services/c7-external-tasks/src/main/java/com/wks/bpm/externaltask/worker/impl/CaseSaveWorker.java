@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.externaltask.handler.impl;
+package com.wks.bpm.externaltask.worker.impl;
 
 import java.util.Optional;
 
@@ -22,12 +22,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import com.wks.bpm.externaltask.api.gateway.impl.CaseInstanceApiGateway;
-import com.wks.bpm.externaltask.handler.WksExternalTaskHandler;
 import com.wks.bpm.externaltask.kafka.KafkaProducer;
+import com.wks.bpm.externaltask.worker.WksExternalTaskHandler;
 
 @Configuration
 @ExternalTaskSubscription(topicName = "caseSave", includeExtensionProperties = true)
-public class CaseSaveHandler extends WksExternalTaskHandler {
+public class CaseSaveWorker extends WksExternalTaskHandler {
 
 	@Autowired
 	private CaseInstanceApiGateway caseInstanceApiGateway;

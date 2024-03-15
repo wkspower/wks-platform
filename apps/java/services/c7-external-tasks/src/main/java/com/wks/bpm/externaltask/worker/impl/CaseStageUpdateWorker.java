@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.externaltask.handler.impl;
+package com.wks.bpm.externaltask.worker.impl;
 
 import org.camunda.bpm.client.spring.annotation.ExternalTaskSubscription;
 import org.camunda.bpm.client.task.ExternalTask;
@@ -17,22 +17,20 @@ import org.camunda.bpm.client.task.ExternalTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
-import com.wks.bpm.externaltask.api.gateway.impl.RecordApiGateway;
-import com.wks.bpm.externaltask.handler.WksExternalTaskHandler;
+import com.wks.bpm.externaltask.api.gateway.impl.CaseInstanceApiGateway;
+import com.wks.bpm.externaltask.worker.WksExternalTaskHandler;
 
 @Configuration
-@ExternalTaskSubscription(topicName = "recordSave", includeExtensionProperties = true)
-public class RecordSaveUpdateHandler extends WksExternalTaskHandler {
+@ExternalTaskSubscription(topicName = "caseStageUpdate", includeExtensionProperties = true)
+public class CaseStageUpdateWorker extends WksExternalTaskHandler {
 
 	@Autowired
-	private RecordApiGateway recordApiGateway;
+	private CaseInstanceApiGateway caseInstanceApiGateway;
 
 	@Override
 	public void doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
-		String recordJsonString = externalTask.getVariable("record");
-		String recordTypeId = externalTask.getVariable("recordTypeId");
-
-		recordApiGateway.save(recordTypeId, recordJsonString);
+		String stagePatch = "{\"stage\": " + "\"" + externalTask.getVariable("stage") + "\"" + "}";
+		caseInstanceApiGateway.patch(externalTask.getBusinessKey(), stagePatch);
 	}
 
 }

@@ -1,0 +1,34 @@
+server:
+   port: 8086
+
+logging:
+   level:
+      root: INFO
+      org.springframework.web.client.RestTemplate: ERROR
+      org.apache.http: ERROR
+      httpclient.wire: ERROR
+
+spring.mvc.converters.preferred-json-mapper: gson
+
+zeebe.client.broker.gateway-address: 127.0.0.1:26500
+zeebe.client.security.plaintext: true
+
+wks-case-api.base.url: ${WKS_CASE_API_URL:http://localhost:8081}
+wks-case-api.auth.url: ${KEYCLOAK_URL:http://localhost:8082/realms/localhost/protocol/openid-connect/token}
+wks-case-api.auth.client_id: ${WKS_CLIENT_ID:wks-external-tasks}
+wks-case-api.auth.client_secret: ${WKS_CLIENT_SECRET:123456789}
+wks-case-api.auth.grant_type: client_credentials
+
+wks-case-api.record.url: /record
+wks-case-api.case-instance.url: /case
+wks-case-api.process-definition.url: /process-definition
+wks-case-api.case-definition.url: /case-definition
+
+management.health.mongo.enabled: false
+management.health.reds.enabled: false
+management.endpoints.web.exposure.include: health,info
+management.endpoint.health.show-details: never
+
+wks.kafka.enabled: ${KAFKA_ENABLED:false}
+wks.kafka.topic.case-create: ${KAFKA_TOPIC_CASE_CREATE:case-create}
+spring.kafka.bootstrap-servers: ${KAFKA_URL:localhost:9092}
