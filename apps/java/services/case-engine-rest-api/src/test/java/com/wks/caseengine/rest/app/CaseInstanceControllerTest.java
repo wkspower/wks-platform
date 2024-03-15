@@ -31,7 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.wks.bpm.engine.client.BpmEngineClientFacade;
+import com.wks.bpm.engine.client.facade.BpmEngineClientFacade;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;

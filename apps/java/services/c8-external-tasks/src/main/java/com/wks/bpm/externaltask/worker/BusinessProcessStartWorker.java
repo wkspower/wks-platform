@@ -9,23 +9,30 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.externaltask.handler.impl;
+package com.wks.bpm.externaltask.worker;
 
-import org.camunda.bpm.client.spring.annotation.ExternalTaskSubscription;
-import org.camunda.bpm.client.task.ExternalTask;
-import org.camunda.bpm.client.task.ExternalTaskService;
+import java.util.LinkedHashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.wks.bpm.externaltask.api.gateway.impl.CaseDefinitionApiGateway;
 import com.wks.bpm.externaltask.api.gateway.impl.ProcessDefinitionApiGateway;
-import com.wks.bpm.externaltask.handler.WksExternalTaskHandler;
 
-@Configuration
-@ExternalTaskSubscription(topicName = "businessProcessStart", includeExtensionProperties = true)
-public class BusinessProcessStartHandler extends WksExternalTaskHandler {
+import io.camunda.zeebe.client.api.response.ActivatedJob;
+import io.camunda.zeebe.client.api.worker.JobClient;
+import io.camunda.zeebe.spring.client.annotation.JobWorker;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * @author victor.franca
+ *
+ */
+@Component
+@Slf4j
+public class BusinessProcessStartWorker {
 
 	@Autowired
 	private CaseDefinitionApiGateway caseDefinitionApiGateway;
@@ -36,16 +43,17 @@ public class BusinessProcessStartHandler extends WksExternalTaskHandler {
 	@Autowired
 	private GsonBuilder gsonBuilder;
 
-	@Override
-	public void doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
+	@JobWorker(type = "businessProcessStart", fetchVariables = { "caseInstance" })
+	public void handleJobFoo(final JobClient client, final ActivatedJob job) {
 
-		String caseInstanceJson = externalTask.getVariable("caseInstance");
+		log.info("Starting Worker '{}'", job.getType());
 
-		String processDefKey = getProcessDefinitionId(
-				gsonBuilder.create().fromJson(caseInstanceJson, JsonObject.class));
+		String caseInstance = gsonBuilder.create()
+				.toJson((LinkedHashMap<?, ?>) job.getVariablesAsMap().get("caseInstance"));
 
-		processDefinitionApiGateway.start(processDefKey, caseInstanceJson);
+		String processDefKey = getProcessDefinitionId(gsonBuilder.create().fromJson(caseInstance, JsonObject.class));
 
+		processDefinitionApiGateway.start(processDefKey, caseInstance);
 	}
 
 	private String getProcessDefinitionId(JsonObject caseInstanceJson) {

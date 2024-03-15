@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.externaltask.handler.impl;
+package com.wks.bpm.externaltask.worker.impl;
 
 import org.camunda.bpm.client.spring.annotation.ExternalTaskSubscription;
 import org.camunda.bpm.client.task.ExternalTask;
@@ -18,19 +18,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import com.wks.bpm.externaltask.api.gateway.impl.CaseInstanceApiGateway;
-import com.wks.bpm.externaltask.handler.WksExternalTaskHandler;
+import com.wks.bpm.externaltask.worker.WksExternalTaskHandler;
 
 @Configuration
-@ExternalTaskSubscription(topicName = "caseStageUpdate", includeExtensionProperties = true)
-public class CaseStageUpdateHandler extends WksExternalTaskHandler {
+@ExternalTaskSubscription(topicName = "caseQueueUpdate", includeExtensionProperties = true)
+public class CaseQueueUpdateWorker extends WksExternalTaskHandler {
 
 	@Autowired
 	private CaseInstanceApiGateway caseInstanceApiGateway;
 
 	@Override
 	public void doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
-		String stagePatch = "{\"stage\": " + "\"" + externalTask.getVariable("stage") + "\"" + "}";
-		caseInstanceApiGateway.patch(externalTask.getBusinessKey(), stagePatch);
+		String queuePatch = "{\"queue\": " + "\"" + externalTask.getVariable("queue") + "\"" + "}";
+
+		caseInstanceApiGateway.patch(externalTask.getBusinessKey(), queuePatch);
 	}
 
 }

@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.engine.client;
+package com.wks.bpm.engine.client.facade;
 
 import java.util.Optional;
 
@@ -19,6 +19,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.BpmEngineType;
+import com.wks.bpm.engine.client.BpmEngineClient;
 import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
 import com.wks.bpm.engine.exception.ProcessInstanceNotFoundException;
 import com.wks.bpm.engine.model.spi.ActivityInstance;

@@ -26,7 +26,8 @@
 		<spring.doc.version>1.6.6</spring.doc.version>
 
 		<camunda7.version>7.20.0</camunda7.version>
-		<camunda8.version>8.1.0</camunda8.version>
+		<camunda8.version>8.4.5</camunda8.version>
+		<camunda8.spring.version>8.4.2</camunda8.spring.version>
 		<camunda-bpm-junit5.version>1.1.0</camunda-bpm-junit5.version>
 
 		<lombok.version>1.18.22</lombok.version>
@@ -75,15 +76,18 @@
 		<module>libraries/case-engine</module>
 		<module>libraries/bpm-engine-interface</module>
 		<module>libraries/bpm-engine-client</module>
+		<module>libraries/api-security</module>
+		<module>libraries/rest-client</module>
+		<module>libraries/case-engine-rest-client</module>
+
 		<module>libraries/c7-plugins</module>
 		<module>libraries/c7-client</module>		
 		<module>libraries/c8-client</module>
-		<module>libraries/api-security</module>
-		<module>libraries/rest-client</module>
 
 		<!-- Services -->
 		<module>services/case-engine-rest-api</module>
 		<module>services/c7-external-tasks</module>
+		<module>services/c8-external-tasks</module>
 		<module>services/storage-api</module>
 		<module>services/email-to-case</module>
 		<module>services/demo-data-loader</module>

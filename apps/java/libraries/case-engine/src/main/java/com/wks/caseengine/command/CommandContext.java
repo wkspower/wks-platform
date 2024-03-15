@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.GsonBuilder;
 import com.wks.api.security.context.SecurityContextTenantHolder;
-import com.wks.bpm.engine.client.BpmEngineClientFacade;
+import com.wks.bpm.engine.client.facade.BpmEngineClientFacade;
 import com.wks.caseengine.cases.businesskey.GenericBusinessKeyGenerator;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
