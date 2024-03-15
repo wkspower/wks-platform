@@ -39,18 +39,18 @@ import org.springframework.web.client.RestTemplate;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
-@ConditionalOnProperty("camunda.data.import.enabled")
+@ConditionalOnProperty("camunda7.data.import.enabled")
 @Order(3)
 @Slf4j
-public class CamundaDataImportCommandRunner implements CommandLineRunner {
+public class Camunda7DataImportCommandRunner implements CommandLineRunner {
 
-	@Value("${camunda.data.import.folder}")
+	@Value("${camunda7.data.import.folder}")
 	private String importDir;
 
-	@Value("${camunda.data.import.url}")
+	@Value("${camunda7.data.import.url}")
 	private String baseUrl;
 
-	@Value("${camunda.data.import.tenant}")
+	@Value("${camunda7.data.import.tenant}")
 	private String tenantId;
 
 	@Override
