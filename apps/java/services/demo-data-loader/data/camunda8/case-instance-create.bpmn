@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:conversion="http://camunda.org/schema/conversion/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_03l1mae" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.21.0" conversion:converterVersion="0.8.2-SNAPSHOT" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.4.0">
+  <bpmn:process id="case-instance-create" name="Create Case Instance" processType="None" isClosed="false" isExecutable="true">
+    <bpmn:extensionElements>
+      <conversion:message severity="INFO">Unused attribute 'historyTimeToLive' on 'process' is removed.</conversion:message>
+    </bpmn:extensionElements>
+    <bpmn:startEvent id="StartEvent_1" name="started">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="={&#34;businessKey&#34;:&#34;250&#34;,&#34;caseDefinitionId&#34;:&#34;customer-support&#34;,&#34;stage&#34;:&#34;Ticket Creation&#34;,&#34;owner&#34;:{&#34;id&#34;:&#34;fc51878a-c415-41b3-b2b3-b9ee120acb93&#34;,&#34;name&#34;:&#34;demo demo&#34;,&#34;email&#34;:&#34;demo@demo.com&#34;,&#34;phone&#34;:&#34;&#34;},&#34;comments&#34;:[],&#34;attributes&#34;:[{&#34;name&#34;:&#34;ticketTitle&#34;,&#34;value&#34;:&#34;&#34;,&#34;type&#34;:&#34;String&#34;},{&#34;name&#34;:&#34;description&#34;,&#34;value&#34;:&#34;&#34;,&#34;type&#34;:&#34;String&#34;},{&#34;name&#34;:&#34;contactName&#34;,&#34;value&#34;:&#34;&#34;,&#34;type&#34;:&#34;String&#34;},{&#34;name&#34;:&#34;contactEmail&#34;,&#34;value&#34;:&#34;&#34;,&#34;type&#34;:&#34;String&#34;},{&#34;name&#34;:&#34;priority&#34;,&#34;value&#34;:&#34;low&#34;,&#34;type&#34;:&#34;String&#34;},{&#34;name&#34;:&#34;attachments&#34;,&#34;value&#34;:&#34;[]&#34;,&#34;type&#34;:&#34;Json&#34;},{&#34;name&#34;:&#34;createdAt&#34;,&#34;value&#34;:&#34;15/03/2024&#34;,&#34;type&#34;:&#34;String&#34;}]}" target="caseInstance" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_1qkqmkr</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1qkqmkr" sourceRef="StartEvent_1" targetRef="create-case-instance" />
+    <bpmn:serviceTask id="create-case-instance" name="Create Case Instance" implementation="##WebService">
+      <bpmn:extensionElements>
+        <conversion:message severity="REVIEW">Attribute 'topic' on 'serviceTask' was mapped. Is set as job type.</conversion:message>
+        <conversion:message severity="INFO">Unused attribute 'asyncBefore' on 'serviceTask' is removed.</conversion:message>
+        <conversion:message severity="INFO">Unused attribute 'type' on 'serviceTask' is removed.</conversion:message>
+        <zeebe:taskDefinition type="caseSave" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1qkqmkr</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ke7udj</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="Event_1kbjo3u" name="case created">
+      <bpmn:incoming>Flow_0bo5rg0</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0ke7udj" sourceRef="create-case-instance" targetRef="start-business-process" />
+    <bpmn:sequenceFlow id="Flow_0bo5rg0" sourceRef="start-business-process" targetRef="Event_1kbjo3u" />
+    <bpmn:serviceTask id="start-business-process" name="Start Business Process" implementation="##WebService">
+      <bpmn:extensionElements>
+        <conversion:message severity="REVIEW">Attribute 'topic' on 'serviceTask' was mapped. Is set as job type.</conversion:message>
+        <conversion:message severity="INFO">Unused attribute 'asyncBefore' on 'serviceTask' is removed.</conversion:message>
+        <conversion:message severity="INFO">Unused attribute 'type' on 'serviceTask' is removed.</conversion:message>
+        <zeebe:taskDefinition type="businessProcessStart" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0ke7udj</bpmn:incoming>
+      <bpmn:outgoing>Flow_0bo5rg0</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="case-instance-create">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="79" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="180" y="122" width="34" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ffgrbr_di" bpmnElement="create-case-instance">
+        <dc:Bounds x="290" y="57" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1kbjo3u_di" bpmnElement="Event_1kbjo3u">
+        <dc:Bounds x="752" y="79" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="740" y="122" width="63" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0dreacy_di" bpmnElement="start-business-process">
+        <dc:Bounds x="510" y="57" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1qkqmkr_di" bpmnElement="Flow_1qkqmkr">
+        <di:waypoint x="215" y="97" />
+        <di:waypoint x="290" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ke7udj_di" bpmnElement="Flow_0ke7udj">
+        <di:waypoint x="390" y="97" />
+        <di:waypoint x="510" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0bo5rg0_di" bpmnElement="Flow_0bo5rg0">
+        <di:waypoint x="610" y="97" />
+        <di:waypoint x="752" y="97" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

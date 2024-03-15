@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:conversion="http://camunda.org/schema/conversion/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_5pc6zufq4loqfzj6ppvi" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.21.0" conversion:converterVersion="0.8.2-SNAPSHOT" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.4.0">
+  <bpmn:process id="employee-onboarding" name="Employee Onboarding" processType="None" isClosed="false" isExecutable="true">
+    <bpmn:extensionElements>
+      <conversion:message severity="INFO">Unused attribute 'historyTimeToLive' on 'process' is removed.</conversion:message>
+    </bpmn:extensionElements>
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="registration" name="Employee Registration" implementation="##unspecified">
+      <bpmn:extensionElements>
+        <conversion:message severity="REVIEW">Attribute 'formKey' on 'userTask' was mapped. Form key is now set in Zeebe namespace.</conversion:message>
+        <zeebe:formDefinition formKey="employee-onboarding-registration" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="department-assignment" name="Department Assignment" implementation="##unspecified">
+      <bpmn:extensionElements>
+        <conversion:message severity="WARNING">Listener at 'end' with implementation 'javascript' cannot be transformed. Execution Listeners do not exist in Zeebe.</conversion:message>
+        <conversion:message severity="WARNING">Element 'script' cannot be transformed. Script 'var businessKey = execution.getBusinessKey(); 
+execution.getProcessEngineServices().getRuntimeService().createMessageCorrelation("taskCompleted").processInstanceBusinessKey(businessKey).correlate();' with format 'javascript' on 'executionListener'.</conversion:message>
+        <conversion:message severity="REVIEW">Attribute 'formKey' on 'userTask' was mapped. Form key is now set in Zeebe namespace.</conversion:message>
+        <zeebe:formDefinition formKey="employee-onboarding-department-assignment" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_2</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_3</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="manager-approval" name="Manager Approval" implementation="##unspecified">
+      <bpmn:extensionElements>
+        <conversion:message severity="REVIEW">Attribute 'formKey' on 'userTask' was mapped. Form key is now set in Zeebe namespace.</conversion:message>
+        <zeebe:formDefinition formKey="employee-onboarding-manager-approval" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_3</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_4</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="it-setup" name="IT Setup" implementation="##unspecified">
+      <bpmn:extensionElements>
+        <conversion:message severity="REVIEW">Attribute 'formKey' on 'userTask' was mapped. Form key is now set in Zeebe namespace.</conversion:message>
+        <zeebe:formDefinition formKey="employee-onboarding-it-setup" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_4</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_5</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="orientation-trainning" name="Orientation Training" implementation="##unspecified">
+      <bpmn:extensionElements>
+        <conversion:message severity="REVIEW">Attribute 'formKey' on 'userTask' was mapped. Form key is now set in Zeebe namespace.</conversion:message>
+        <zeebe:formDefinition formKey="employee-onboarding-orientation-training" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_5</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_6</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent_1">
+      <bpmn:incoming>SequenceFlow_6</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1" sourceRef="StartEvent_1" targetRef="registration" />
+    <bpmn:sequenceFlow id="SequenceFlow_2" sourceRef="registration" targetRef="department-assignment" />
+    <bpmn:sequenceFlow id="SequenceFlow_3" sourceRef="department-assignment" targetRef="manager-approval" />
+    <bpmn:sequenceFlow id="SequenceFlow_4" sourceRef="manager-approval" targetRef="it-setup" />
+    <bpmn:sequenceFlow id="SequenceFlow_5" sourceRef="it-setup" targetRef="orientation-trainning" />
+    <bpmn:sequenceFlow id="SequenceFlow_6" sourceRef="orientation-trainning" targetRef="EndEvent_1" />
+    <bpmn:subProcess id="Activity_137gwwr" name="Update Case Stage and Queue" triggeredByEvent="true">
+      <bpmn:serviceTask id="Activity_0dw5ogu" name="Progress Stage: Approval" implementation="##WebService" camunda:modelerTemplate="com.wks.camunda.template.case-stage-update">
+        <bpmn:extensionElements>
+          <conversion:message severity="REVIEW">Attribute 'topic' on 'serviceTask' was mapped. Is set as job type.</conversion:message>
+          <conversion:message severity="REVIEW">Element 'inputParameter' was transformed. Parameter 'stage': Please review transformed expression: 'Approval' -&gt; 'Approval'.</conversion:message>
+          <conversion:message severity="INFO">Unused attribute 'type' on 'serviceTask' is removed.</conversion:message>
+          <zeebe:ioMapping>
+            <zeebe:input source="Approval" target="stage" />
+          </zeebe:ioMapping>
+          <zeebe:taskDefinition type="caseStageUpdate" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_09ajcay</bpmn:incoming>
+        <bpmn:outgoing>Flow_0hpfj9y</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="Flow_0hpfj9y" sourceRef="Activity_0dw5ogu" targetRef="Event_1ifoz9y" />
+      <bpmn:endEvent id="Event_1ifoz9y" name="Stage and Queue updated">
+        <bpmn:incoming>Flow_0hpfj9y</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flow_0kwovlc" sourceRef="Event_14450i3" targetRef="Activity_0wa8jtu" />
+      <bpmn:sequenceFlow id="Flow_09ajcay" sourceRef="Activity_0wa8jtu" targetRef="Activity_0dw5ogu" />
+      <bpmn:serviceTask id="Activity_0wa8jtu" name="Update queue: Regular Customer" implementation="##WebService" camunda:modelerTemplate="com.wks.camunda.template.case-queue-update">
+        <bpmn:extensionElements>
+          <conversion:message severity="REVIEW">Attribute 'topic' on 'serviceTask' was mapped. Is set as job type.</conversion:message>
+          <conversion:message severity="REVIEW">Element 'inputParameter' was transformed. Parameter 'queue': Please review transformed expression: 'regular-customer' -&gt; 'regular-customer'.</conversion:message>
+          <conversion:message severity="INFO">Unused attribute 'type' on 'serviceTask' is removed.</conversion:message>
+          <zeebe:ioMapping>
+            <zeebe:input source="regular-customer" target="queue" />
+          </zeebe:ioMapping>
+          <zeebe:taskDefinition type="caseQueueUpdate" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_0kwovlc</bpmn:incoming>
+        <bpmn:outgoing>Flow_09ajcay</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:startEvent id="Event_14450i3" isInterrupting="false">
+        <bpmn:extensionElements>
+          <conversion:reference>Message_13155ci</conversion:reference>
+        </bpmn:extensionElements>
+        <bpmn:outgoing>Flow_0kwovlc</bpmn:outgoing>
+        <bpmn:messageEventDefinition id="MessageEventDefinition_161abna" messageRef="Message_13155ci" />
+      </bpmn:startEvent>
+    </bpmn:subProcess>
+  </bpmn:process>
+  <bpmn:message id="Message_13155ci" name="taskCompleted">
+    <bpmn:extensionElements>
+      <conversion:message severity="TASK">Please define a correlation key.</conversion:message>
+      <conversion:referencedBy>Event_14450i3</conversion:referencedBy>
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_27of7v4" name="stageProgressed">
+    <bpmn:extensionElements>
+      <conversion:message severity="TASK">Please define a correlation key.</conversion:message>
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:signal id="Signal_04qq07q" name="taskCompletedSignal" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="employee-onboarding">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_1" bpmnElement="StartEvent_1">
+        <dc:Bounds x="173" y="362" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_1_di" bpmnElement="registration">
+        <dc:Bounds x="270" y="340" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_2_di" bpmnElement="department-assignment">
+        <dc:Bounds x="425" y="340" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_3_di" bpmnElement="manager-approval">
+        <dc:Bounds x="590" y="340" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_4_di" bpmnElement="it-setup">
+        <dc:Bounds x="755" y="340" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_5_di" bpmnElement="orientation-trainning">
+        <dc:Bounds x="920" y="340" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_EndEvent_1" bpmnElement="EndEvent_1">
+        <dc:Bounds x="1085" y="362" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_04aeyws_di" bpmnElement="Activity_137gwwr" isExpanded="true">
+        <dc:Bounds x="260" y="80" width="745" height="180" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1476mm7_di" bpmnElement="Activity_0dw5ogu">
+        <dc:Bounds x="735" y="130" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1f3pvi5_di" bpmnElement="Event_1ifoz9y">
+        <dc:Bounds x="917" y="152" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="892" y="195" width="87" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0uwvm4d_di" bpmnElement="Activity_0wa8jtu">
+        <dc:Bounds x="490" y="130" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0x8lzgm_di" bpmnElement="Event_14450i3">
+        <dc:Bounds x="312" y="152" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0hpfj9y_di" bpmnElement="Flow_0hpfj9y">
+        <di:waypoint x="835" y="170" />
+        <di:waypoint x="917" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0kwovlc_di" bpmnElement="Flow_0kwovlc">
+        <di:waypoint x="348" y="170" />
+        <di:waypoint x="490" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09ajcay_di" bpmnElement="Flow_09ajcay">
+        <di:waypoint x="590" y="170" />
+        <di:waypoint x="735" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1_di" bpmnElement="SequenceFlow_1">
+        <di:waypoint x="209" y="380" />
+        <di:waypoint x="270" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_2_di" bpmnElement="SequenceFlow_2">
+        <di:waypoint x="370" y="380" />
+        <di:waypoint x="425" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_3_di" bpmnElement="SequenceFlow_3">
+        <di:waypoint x="525" y="380" />
+        <di:waypoint x="590" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_4_di" bpmnElement="SequenceFlow_4">
+        <di:waypoint x="690" y="380" />
+        <di:waypoint x="755" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_5_di" bpmnElement="SequenceFlow_5">
+        <di:waypoint x="855" y="380" />
+        <di:waypoint x="920" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_6_di" bpmnElement="SequenceFlow_6">
+        <di:waypoint x="1020" y="380" />
+        <di:waypoint x="1085" y="380" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
