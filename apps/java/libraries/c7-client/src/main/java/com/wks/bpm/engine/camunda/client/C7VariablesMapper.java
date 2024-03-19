@@ -11,6 +11,7 @@
  */
 package com.wks.bpm.engine.camunda.client;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonArray;
@@ -18,6 +19,7 @@ import com.google.gson.JsonObject;
 import com.wks.bpm.engine.client.VariablesMapper;
 
 @Component
+@Qualifier("c7VariablesMapper")
 public class C7VariablesMapper implements VariablesMapper {
 
 	@Override
@@ -27,7 +29,7 @@ public class C7VariablesMapper implements VariablesMapper {
 
 		caseAttributes.forEach(caseAttribute -> {
 			JsonObject valueObject = new JsonObject();
-			valueObject.addProperty("value", caseAttribute.getAsJsonObject().get("value").getAsString());
+			valueObject.addProperty("value", caseAttribute.getAsJsonObject().get("value").toString());
 			valueObject.addProperty("type", caseAttribute.getAsJsonObject().get("type").getAsString());
 			processVariables.add(caseAttribute.getAsJsonObject().get("name").getAsString(), valueObject);
 
