@@ -108,7 +108,7 @@ public class C8EngineClient implements BpmEngineClient {
 
 	@Override
 	public ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine) {
-		throw new UnsupportedOperationException();
+		return new ActivityInstance[0];
 	}
 
 	@Override
@@ -147,7 +147,7 @@ public class C8EngineClient implements BpmEngineClient {
 
 	@Override
 	public String findVariables(final String processInstanceId, final BpmEngine bpmEngine) {
-		throw new UnsupportedOperationException();
+		return operateClient.findVariables(processInstanceId, bpmEngine);
 	}
 
 	@Override

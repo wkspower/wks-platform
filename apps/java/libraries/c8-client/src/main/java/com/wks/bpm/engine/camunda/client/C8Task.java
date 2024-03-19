@@ -31,4 +31,11 @@ public class C8Task extends Task {
 		this.followUp = followUp;
 	}
 
+	public void setProcessInstanceKey(String processInstanceKey) {
+		this.processInstanceId = processInstanceKey;
+	}
+
+	public void setProcessDefinitionKey(String processInstanceKey) {
+		this.processDefinitionId = processInstanceKey;
+	}
 }

@@ -11,12 +11,15 @@
  */
 package com.wks.bpm.engine.camunda.client;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 
@@ -35,6 +38,9 @@ public class C8OperateClient {
 
 	@Autowired
 	private CamundaOperateClient operateClient;
+
+	@Autowired
+	private GsonBuilder gsonBuilder;
 
 	public String getProcessDefinitionXML(String processDefinitionId, final BpmEngine bpmEngine) {
 		throw new UnsupportedOperationException();
@@ -58,7 +64,7 @@ public class C8OperateClient {
 					// variables on variable queries. Camunda Bug?
 					.value(businessKey.isPresent() ? ("\"" + businessKey.get() + "\"") : null);
 
-			SearchQuery searchQuery = new SearchQuery.Builder().filter(filterBuilder.build()).size(100).build();
+			SearchQuery searchQuery = new SearchQuery.Builder().filter(filterBuilder.build()).build();
 
 			List<Variable> variables = operateClient.searchVariables(searchQuery).stream().filter(variable -> {
 				try {
@@ -97,6 +103,30 @@ public class C8OperateClient {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	/**
+	 * @param processInstanceId
+	 * @param bpmEngine
+	 * @return the variable list as a json string
+	 */
+	public String findVariables(String processInstanceId, BpmEngine bpmEngine) {
+
+		VariableFilterBuilder filterBuilder = VariableFilter.builder()
+				.processInstanceKey(Long.valueOf(processInstanceId));
+
+		Gson gson = gsonBuilder.create();
+		try {
+			SearchQuery searchQuery = new SearchQuery.Builder().filter(filterBuilder.build()).build();
+
+			List<Variable> variables = operateClient.searchVariables(searchQuery).stream().toList();
+			return gson.toJson(variables);
+		} catch (NumberFormatException | OperateException e) {
+			log.error("Error retrieving variables in zeebe", e);
+			e.printStackTrace();
+			return gson.toJson(Arrays.asList());
+		}
+
 	}
 
 }
