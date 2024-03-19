@@ -39,44 +39,43 @@ public class C8EngineClient implements BpmEngineClient {
 	@Autowired
 	private C8ZeebeClient zeebeClient;
 
-//	@Autowired
-//	private C8OperateClient operateClient;
-//
-//	@Autowired
-//	private C8TasklistClient tasklistClient;
+	@Autowired
+	private C8OperateClient operateClient;
+
+	@Autowired
+	private C8TasklistClient tasklistClient;
 
 	@Override
 	public void deploy(final BpmEngine bpmEngine, final String fileName, final String bpmnXml) {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Deployment[] findDeployments(final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
-		return new Deployment[] {};
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public ProcessDefinition[] findProcessDefinitions(final BpmEngine bpmEngine) {
 		// TODO Auto-generated method stub
-		return new ProcessDefinition[] {};
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
 			final Optional<String> businessKey, final Optional<String> activityIdIn, final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-		return new ProcessInstance[] {};
+		return operateClient.searchProcessInstances(processDefinitionKey, businessKey, activityIdIn, bpmEngine);
 	}
 
 	@Override
 	public String getProcessDefinitionXMLById(final String processDefinitionId, final BpmEngine bpmEngine) {
-		return String.valueOf("");
+		return operateClient.getProcessDefinitionXMLById(processDefinitionId, bpmEngine);
 	}
 
 	@Override
 	public String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine) {
-		return String.valueOf("");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -91,73 +90,70 @@ public class C8EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public void deleteProcessInstance(final String processInstanceId, final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-		return new ActivityInstance[] {};
-	}
-
-	@Override
-	public void createTask(Task task, BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public Task getTask(String taskId, BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Task[] findTasks(final String processInstanceBusinessKey, final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-		return new Task[] {};
-	}
-
-	@Override
-	public void claimTask(final String taskId, final String taskAssignee, final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void unclaimTask(final String taskId, final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void complete(final String taskId, final JsonObject variables, final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public String findVariables(final String processInstanceId, final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-		return String.valueOf("");
-	}
-
-	@Override
-	public void sendMessage(final ProcessMessage processMesage, final Optional<JsonArray> variables,
-			final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
 			final JsonObject caseInstance, final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-		return null;
+		return zeebeClient.startProcess(processDefinitionKey, businessKey, caseInstance, bpmEngine);
 	}
 
 	@Override
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
 			final JsonArray caseAttributes, final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-		return null;
+		return zeebeClient.startProcess(processDefinitionKey, businessKey, caseAttributes, bpmEngine);
+	}
+
+	@Override
+	public void deleteProcessInstance(final String processInstanceId, final BpmEngine bpmEngine) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void createTask(Task task, BpmEngine bpmEngine) {
+		throw new UnsupportedOperationException();
+
+	}
+
+	@Override
+	public Task getTask(String taskId, BpmEngine bpmEngine) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Task[] findTasks(final String processInstanceBusinessKey, final BpmEngine bpmEngine) {
+		ProcessInstance[] processInstances = operateClient.searchProcessInstances(Optional.empty(),
+				Optional.of(processInstanceBusinessKey), Optional.empty(), bpmEngine);
+
+		return tasklistClient.find(processInstances[0].getId(), bpmEngine);
+	}
+
+	@Override
+	public void claimTask(final String taskId, final String taskAssignee, final BpmEngine bpmEngine) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void unclaimTask(final String taskId, final BpmEngine bpmEngine) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void complete(final String taskId, final JsonObject variables, final BpmEngine bpmEngine) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String findVariables(final String processInstanceId, final BpmEngine bpmEngine) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void sendMessage(final ProcessMessage processMesage, final Optional<JsonArray> variables,
+			final BpmEngine bpmEngine) {
+		throw new UnsupportedOperationException();
 	}
 
 }

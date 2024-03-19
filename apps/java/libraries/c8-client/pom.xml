@@ -1,66 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
 	<parent>
 		<groupId>com.wks</groupId>
 		<artifactId>platform</artifactId>
 		<version>1.0-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
-
 	<artifactId>c8-client</artifactId>
 	<name>c8-client</name>
 	<description>C8 Client</description>
-
 	<packaging>jar</packaging>
-
 	<dependencies>
+		
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
+		
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
+		
 		<dependency>
 			<groupId>com.wks</groupId>
 			<artifactId>bpm-engine-interface</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
-
+		
+		<dependency>
+			<groupId>io.camunda.spring</groupId>
+			<artifactId>spring-boot-starter-camunda</artifactId>
+			<version>${camunda8.spring.version}</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>io.camunda</groupId>
 			<artifactId>zeebe-client-java</artifactId>
 			<version>${camunda8.version}</version>
 		</dependency>
-
+		
 		<dependency>
-			<groupId>com.wks</groupId>
-			<artifactId>rest-client</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.httpcomponents.client5</groupId>
-			<artifactId>httpclient5</artifactId>
-		</dependency>
-
+		  <groupId>io.camunda.spring</groupId>
+		  <artifactId>java-client-operate</artifactId>
+		  <version>${camunda8.spring.version}</version>
+		</dependency>		
 	</dependencies>
-
+	
+	<repositories>
+		<!-- identity -->
+		<repository>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>identity</id>
+			<name>Camunda Identity</name>
+			<url>https://artifacts.camunda.com/artifactory/camunda-identity/</url>
+		</repository>
+		<repository>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<id>identity-snapshots</id>
+			<name>Camunda Snapshot Identity</name>
+			<url>https://artifacts.camunda.com/artifactory/camunda-identity-snapshots/</url>
+		</repository>
+	</repositories>
 </project>

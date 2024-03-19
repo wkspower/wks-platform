@@ -11,21 +11,92 @@
  */
 package com.wks.bpm.engine.camunda.client;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.bpm.engine.BpmEngine;
+import com.wks.bpm.engine.model.spi.ProcessInstance;
+
+import io.camunda.operate.CamundaOperateClient;
+import io.camunda.operate.exception.OperateException;
+import io.camunda.operate.model.ProcessInstanceState;
+import io.camunda.operate.model.Variable;
+import io.camunda.operate.search.SearchQuery;
+import io.camunda.operate.search.VariableFilter;
+import io.camunda.operate.search.VariableFilterBuilder;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class C8OperateClient {
 
-//	@Autowired
-//	private RestTemplate restTemplate;
-//
-//	@Autowired
-//	private C8OperateHttpRequestFactory camundaHttpRequestFactory;
+	@Autowired
+	private CamundaOperateClient operateClient;
 
 	public String getProcessDefinitionXML(String processDefinitionId, final BpmEngine bpmEngine) {
 		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * @param processDefinitionKey
+	 * @param businessKey
+	 * @param activityIdIn
+	 * @param bpmEngine
+	 * @return
+	 */
+	public ProcessInstance[] searchProcessInstances(Optional<String> processDefinitionKey, Optional<String> businessKey,
+			Optional<String> activityIdIn, BpmEngine bpmEngine) {
+
+		try {
+
+			VariableFilterBuilder filterBuilder = VariableFilter.builder()
+					.name(businessKey.isPresent() ? "businessKey" : null)
+					// adding double quotes here because that's how operate is converting string
+					// variables on variable queries. Camunda Bug?
+					.value(businessKey.isPresent() ? ("\"" + businessKey.get() + "\"") : null);
+
+			SearchQuery searchQuery = new SearchQuery.Builder().filter(filterBuilder.build()).size(100).build();
+
+			List<Variable> variables = operateClient.searchVariables(searchQuery).stream().filter(variable -> {
+				try {
+					return ProcessInstanceState.ACTIVE
+							.equals(operateClient.getProcessInstance(variable.getProcessInstanceKey()).getState());
+				} catch (OperateException e) {
+					log.error("Error searching process instances in zeebe", e);
+					e.printStackTrace();
+					return false;
+				}
+			}).toList();
+
+			return variables.stream()
+					.map(variable -> ProcessInstance.builder().businessKey(variable.getValue())
+							.id(String.valueOf(variable.getProcessInstanceKey())).tenantId(variable.getTenantId())
+							.build())
+					.toArray(ProcessInstance[]::new);
+
+		} catch (OperateException e) {
+			log.error("Error searching process instances in zeebe", e);
+			e.printStackTrace();
+			return new ProcessInstance[0];
+		}
+	}
+
+	/**
+	 * @param processDefinitionId
+	 * @param bpmEngine
+	 * @return the process definition xml
+	 */
+	public String getProcessDefinitionXMLById(String processDefinitionId, BpmEngine bpmEngine) {
+		try {
+			return operateClient.getProcessDefinitionXml(Long.valueOf(processDefinitionId));
+		} catch (NumberFormatException | OperateException e) {
+			log.error("Error retrieving process definition xml in zeebe", e);
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 }
