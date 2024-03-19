@@ -28,6 +28,17 @@ camunda7.rest.processinstance.url: /process-instance
 camunda7.rest.task.url: /task
 camunda7.rest.correlate.url: /message
 
+zeebe.client.broker.gateway-address: 127.0.0.1:26500
+zeebe.client.security.plaintext: true
+camunda.operate.client.enabled: true
+camunda.operate.client.url: http://localhost:8281
+camunda.operate.client.username: demo
+camunda.operate.client.password: demo
+
+camunda.tasklist.client.url: http://localhost:8182
+camunda.tasklist.client.username: demo
+camunda.tasklist.client.password: demo
+
 spring.data.mongodb.uri: ${MONGO_CONN:mongodb://localhost}
 spring.data.mongodb.database: ${MONGO_DATABASE:shared}
 spring.data.mongodb.database.min-pool-size: 0
