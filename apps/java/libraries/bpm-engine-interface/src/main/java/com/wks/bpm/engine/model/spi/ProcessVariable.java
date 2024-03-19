@@ -11,6 +11,8 @@
  */
 package com.wks.bpm.engine.model.spi;
 
+import com.google.gson.JsonElement;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,7 +31,7 @@ import lombok.Setter;
 public class ProcessVariable {
 
 	private String name;
-	private String value;
+	private JsonElement value;
 	private String type;
 
 }
