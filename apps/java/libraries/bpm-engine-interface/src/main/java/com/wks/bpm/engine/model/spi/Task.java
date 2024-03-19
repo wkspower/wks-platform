@@ -11,9 +11,7 @@
  */
 package com.wks.bpm.engine.model.spi;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -22,8 +20,6 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Task {
 
 	protected String id;
@@ -32,9 +28,6 @@ public class Task {
 	protected String name;
 	protected String description;
 	protected String priority;
-	protected String created;
-	protected String due;
-	protected String followUp;
 	protected String tenantId;
 	protected String executionId;
 	protected String processInstanceId;
@@ -44,5 +37,9 @@ public class Task {
 	protected String caseDefinitionId;
 	protected String taskDefinitionKey;
 	protected String formKey;
+
+	protected String created;
+	protected String due;
+	protected String followUp;
 
 }
