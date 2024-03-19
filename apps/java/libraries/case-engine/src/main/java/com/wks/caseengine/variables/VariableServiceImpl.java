@@ -14,6 +14,7 @@ package com.wks.caseengine.variables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.caseengine.command.CommandExecutor;
 
 @Component
@@ -23,7 +24,7 @@ public class VariableServiceImpl implements VariableService {
 	private CommandExecutor commandExecutor;
 
 	@Override
-	public String findVariables(final String processInstanceId){
+	public ProcessVariable[] findVariables(final String processInstanceId) {
 		return commandExecutor.execute(new FindVariableCommand(processInstanceId));
 	}
 

@@ -16,14 +16,16 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.wks.bpm.engine.client.VariablesMapper;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 
 @Component
 @Qualifier("c7VariablesMapper")
-public class C7VariablesMapper implements VariablesMapper {
+public class C7VariablesMapper implements VariablesMapper<String> {
 
 	@Override
-	public JsonObject map(JsonArray caseAttributes) {
+	public JsonObject toJsonObject(JsonArray caseAttributes) {
 
 		JsonObject processVariables = new JsonObject();
 
@@ -34,6 +36,25 @@ public class C7VariablesMapper implements VariablesMapper {
 			processVariables.add(caseAttribute.getAsJsonObject().get("name").getAsString(), valueObject);
 
 		});
+
+		return processVariables;
+	}
+
+	@Override
+	public ProcessVariable[] toProcessVariablesArray(String variablesJsonString) {
+		JsonObject jsonObject = JsonParser.parseString(variablesJsonString).getAsJsonObject();
+
+		ProcessVariable[] processVariables = new ProcessVariable[jsonObject.size()];
+
+		int i = 0;
+		for (String key : jsonObject.keySet()) {
+
+			JsonObject variableObject = jsonObject.getAsJsonObject(key);
+			String type = variableObject.get("type").getAsString();
+			processVariables[i] = ProcessVariable.builder().name(key).type(type).value(variableObject.get("value"))
+					.build();
+			i++;
+		}
 
 		return processVariables;
 	}

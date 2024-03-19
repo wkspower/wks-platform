@@ -83,7 +83,7 @@ public class C8ZeebeClient {
 	public ProcessInstance startProcess(String processDefinitionKey, String businessKey, JsonArray caseAttributes,
 			BpmEngine bpmEngine) {
 		
-		JsonObject processVariables = c8VariablesMapper.map(caseAttributes);
+		JsonObject processVariables = c8VariablesMapper.toJsonObject(caseAttributes);
 		
 		processVariables.addProperty("businessKey", businessKey);
 		

@@ -11,18 +11,19 @@
  */
 package com.wks.caseengine.variables;
 
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
 
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class FindVariableCommand implements Command<String> {
+public class FindVariableCommand implements Command<ProcessVariable[]> {
 
 	private String processInstanceId;
 
 	@Override
-	public String execute(CommandContext commandContext) {
+	public ProcessVariable[] execute(CommandContext commandContext) {
 		return commandContext.getBpmEngineClientFacade().findVariables(processInstanceId);
 	}
 

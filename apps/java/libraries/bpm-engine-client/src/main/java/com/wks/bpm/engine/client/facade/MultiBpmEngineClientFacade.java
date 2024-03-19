@@ -27,6 +27,7 @@ import com.wks.bpm.engine.model.spi.Deployment;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Task;
 
 /**
@@ -67,12 +68,14 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public String getProcessDefinitionXMLById(final String processDefinitionId) throws ProcessDefinitionNotFoundException {
+	public String getProcessDefinitionXMLById(final String processDefinitionId)
+			throws ProcessDefinitionNotFoundException {
 		return getEngineClient().getProcessDefinitionXMLById(processDefinitionId, getBpmEngine());
 	}
 
 	@Override
-	public String getProcessDefinitionXMLByKey(final String processDefinitionKey) throws ProcessDefinitionNotFoundException {
+	public String getProcessDefinitionXMLByKey(final String processDefinitionKey)
+			throws ProcessDefinitionNotFoundException {
 		return getEngineClient().getProcessDefinitionXMLByKey(processDefinitionKey, getBpmEngine());
 	}
 
@@ -145,7 +148,7 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public String findVariables(String processInstanceId) {
+	public ProcessVariable[] findVariables(String processInstanceId) {
 		return getEngineClient().findVariables(processInstanceId, getBpmEngine());
 	}
 

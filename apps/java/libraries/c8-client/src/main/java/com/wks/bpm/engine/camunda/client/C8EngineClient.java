@@ -26,6 +26,7 @@ import com.wks.bpm.engine.model.spi.Deployment;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Task;
 
 /**
@@ -146,7 +147,7 @@ public class C8EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public String findVariables(final String processInstanceId, final BpmEngine bpmEngine) {
+	public ProcessVariable[] findVariables(final String processInstanceId, final BpmEngine bpmEngine) {
 		return operateClient.findVariables(processInstanceId, bpmEngine);
 	}
 

@@ -23,6 +23,7 @@ import com.wks.bpm.engine.model.spi.Deployment;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Task;
 
 /**
@@ -74,7 +75,7 @@ public interface BpmEngineClient {
 
 	void complete(String taskId, JsonObject variables, final BpmEngine bpmEngine);
 
-	String findVariables(final String processInstanceId, final BpmEngine bpmEngine);
+	ProcessVariable[] findVariables(final String processInstanceId, final BpmEngine bpmEngine);
 
 	void sendMessage(final ProcessMessage processMesage, final Optional<JsonArray> variables,
 			final BpmEngine bpmEngine);

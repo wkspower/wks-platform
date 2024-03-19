@@ -35,10 +35,11 @@ import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
 import com.wks.bpm.engine.exception.ProcessInstanceNotFoundException;
 import com.wks.bpm.engine.model.impl.DeploymentImpl;
 import com.wks.bpm.engine.model.impl.ProcessDefinitionImpl;
-import com.wks.bpm.engine.model.spi.Task;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
+import com.wks.bpm.engine.model.spi.Task;
 import com.wks.rest.client.WksHttpRequest;
 
 /**
@@ -53,7 +54,7 @@ public class C7EngineClient implements BpmEngineClient {
 	private RestTemplate restTemplate;
 
 	@Autowired
-	private VariablesMapper c7VariablesMapper;
+	private VariablesMapper<String> c7VariablesMapper;
 
 	@Autowired
 	private C7HttpRequestFactory camundaHttpRequestFactory;
@@ -154,7 +155,7 @@ public class C7EngineClient implements BpmEngineClient {
 	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
 			final JsonArray caseAttributes, final BpmEngine bpmEngine) {
 
-		JsonObject processVariables = c7VariablesMapper.map(caseAttributes);
+		JsonObject processVariables = c7VariablesMapper.toJsonObject(caseAttributes);
 
 		WksHttpRequest request = camundaHttpRequestFactory.getProcessInstanceCreateRequest(processDefinitionKey,
 				businessKey, processVariables, bpmEngine, tenantHolder.getTenantId().get());
@@ -236,10 +237,13 @@ public class C7EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public String findVariables(final String processInstanceId, final BpmEngine bpmEngine) {
-		return restTemplate.getForEntity(
+	public ProcessVariable[] findVariables(final String processInstanceId, final BpmEngine bpmEngine) {
+		String variables = restTemplate.getForEntity(
 				camundaHttpRequestFactory.getVariablesListRequest(processInstanceId, bpmEngine).getHttpRequestUrl(),
 				String.class).getBody();
+
+		return c7VariablesMapper.toProcessVariablesArray(variables);
+
 	}
 
 	@Override
@@ -248,7 +252,7 @@ public class C7EngineClient implements BpmEngineClient {
 		processMessage.setTenantId(tenantHolder.getTenantId().get());
 
 		Optional<JsonObject> variablesCamundaJson = variables.isPresent()
-				? Optional.of(c7VariablesMapper.map(variables.get()))
+				? Optional.of(c7VariablesMapper.toJsonObject(variables.get()))
 				: Optional.empty();
 
 		WksHttpRequest request = camundaHttpRequestFactory.getMessageSendRequest(processMessage, variablesCamundaJson,

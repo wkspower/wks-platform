@@ -22,6 +22,7 @@ import com.wks.bpm.engine.model.spi.Deployment;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Task;
 
 /**
@@ -69,7 +70,7 @@ public interface BpmEngineClientFacade {
 
 	void complete(String taskId, JsonObject variables);
 
-	String findVariables(String processInstanceId);
+	ProcessVariable[] findVariables(String processInstanceId);
 
 	void sendMessage(ProcessMessage processMesage, Optional<JsonArray> variables);
 

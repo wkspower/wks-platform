@@ -13,9 +13,12 @@ package com.wks.bpm.engine.client;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 
-public interface VariablesMapper {
+public interface VariablesMapper<T> {
 
-	JsonObject map(JsonArray caseAttributes);
+	JsonObject toJsonObject(JsonArray caseAttributes);
+
+	ProcessVariable[] toProcessVariablesArray(T variablesFromProcessEngine);
 
 }

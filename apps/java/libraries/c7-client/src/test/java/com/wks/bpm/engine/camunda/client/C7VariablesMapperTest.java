@@ -30,7 +30,7 @@ public class C7VariablesMapperTest {
 		String caseAttributes = "[{\"name\": \"when\",\"value\": \"01/01/1990\",\"type\": \"String\"},{\"name\": \"where\",\"value\": \"Toronto\",\"type\": \"String\"}]";
 
 		// when
-		JsonObject processVariables = c7VariablesMapper.map(new Gson().fromJson(caseAttributes, JsonArray.class));
+		JsonObject processVariables = c7VariablesMapper.toJsonObject(new Gson().fromJson(caseAttributes, JsonArray.class));
 
 		assertEquals("{\"value\":\"01/01/1990\",\"type\":\"String\"}", String.valueOf(processVariables.get("when")));
 		assertEquals("{\"value\":\"Toronto\",\"type\":\"String\"}", String.valueOf(processVariables.get("where")));

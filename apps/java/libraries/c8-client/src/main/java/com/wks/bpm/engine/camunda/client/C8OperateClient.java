@@ -11,17 +11,16 @@
  */
 package com.wks.bpm.engine.camunda.client;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.wks.bpm.engine.BpmEngine;
+import com.wks.bpm.engine.client.VariablesMapper;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 
 import io.camunda.operate.CamundaOperateClient;
 import io.camunda.operate.exception.OperateException;
@@ -40,7 +39,7 @@ public class C8OperateClient {
 	private CamundaOperateClient operateClient;
 
 	@Autowired
-	private GsonBuilder gsonBuilder;
+	private VariablesMapper<List<?>> c8VariablesMapper;
 
 	public String getProcessDefinitionXML(String processDefinitionId, final BpmEngine bpmEngine) {
 		throw new UnsupportedOperationException();
@@ -110,21 +109,20 @@ public class C8OperateClient {
 	 * @param bpmEngine
 	 * @return the variable list as a json string
 	 */
-	public String findVariables(String processInstanceId, BpmEngine bpmEngine) {
+	public ProcessVariable[] findVariables(String processInstanceId, BpmEngine bpmEngine) {
 
 		VariableFilterBuilder filterBuilder = VariableFilter.builder()
 				.processInstanceKey(Long.valueOf(processInstanceId));
 
-		Gson gson = gsonBuilder.create();
 		try {
 			SearchQuery searchQuery = new SearchQuery.Builder().filter(filterBuilder.build()).build();
 
 			List<Variable> variables = operateClient.searchVariables(searchQuery).stream().toList();
-			return gson.toJson(variables);
+			return c8VariablesMapper.toProcessVariablesArray(variables);
 		} catch (NumberFormatException | OperateException e) {
 			log.error("Error retrieving variables in zeebe", e);
 			e.printStackTrace();
-			return gson.toJson(Arrays.asList());
+			return new ProcessVariable[0];
 		}
 
 	}

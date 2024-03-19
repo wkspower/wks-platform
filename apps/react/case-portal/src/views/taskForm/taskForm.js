@@ -46,10 +46,13 @@ export const TaskForm = ({ open, handleClose, task }) => {
                 return VariableService.getByProcessInstanceId(keycloak, task.processInstanceId);
             })
             .then((data) => {
-                for (var key in data) {
-                    apiDataVariables.data[key] =
-                        data[key].type === 'Json' ? JSON.parse(data[key].value) : data[key].value;
-                }
+                data.forEach((item) => {
+                    if (item.type === 'Json') {
+                        apiDataVariables.data[item.name] = JSON.parse(item.value);
+                    } else {
+                        apiDataVariables.data[item.name] = item.value;
+                    }
+                });
 
                 setFormComponents(apiDataFormComponents);
                 setVariableValues(apiDataVariables);
