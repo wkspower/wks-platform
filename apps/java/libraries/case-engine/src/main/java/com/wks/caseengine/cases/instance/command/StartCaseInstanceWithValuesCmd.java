@@ -79,7 +79,7 @@ public class StartCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 			CaseInstance preparedCaseInstance) {
 		Gson gson = commandContext.getGsonBuilder().create();
 		ProcessVariable caseInstanceProcessVariable = ProcessVariable.builder()
-				.type(ProcessVariableType.JSON.getValue()).name("caseInstance").value(gson.toJson(preparedCaseInstance))
+				.type(ProcessVariableType.JSON.getValue()).name("caseInstance").value(gson.toJsonTree(preparedCaseInstance))
 				.build();
 
 		JsonObject caseInstanceProcessVariableJson = gson.toJsonTree(caseInstanceProcessVariable).getAsJsonObject();
