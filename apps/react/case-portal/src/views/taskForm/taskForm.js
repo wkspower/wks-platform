@@ -69,7 +69,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
     }, [open, task]);
 
     const handleClaim = function () {
-        TaskService.createTaskClaim(keycloak, task.id)
+        TaskService.claim(keycloak, task.id)
             .then(() => {
                 setClaimed(true);
                 setAssignee(keycloak.idTokenParsed.name);
@@ -80,7 +80,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
     };
 
     const handleUnclaim = function () {
-        TaskService.createTaskUnclaim(keycloak, task.id)
+        TaskService.unclaim(keycloak, task.id)
             .then(() => {
                 setClaimed(false);
                 setAssignee(null);
@@ -100,7 +100,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
                     : { value: variables[key] };
         });
 
-        TaskService.createTaskComplete(keycloak, task.id, variables)
+        TaskService.complete(keycloak, task.id, variables)
             .then(() => handleClose())
             .catch((err) => {
                 console.log(err.message);

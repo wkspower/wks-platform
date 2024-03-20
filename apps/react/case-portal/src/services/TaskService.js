@@ -3,9 +3,9 @@ import Config from 'consts/index';
 
 export const TaskService = {
     getActivityInstancesById,
-    createTaskClaim,
-    createTaskUnclaim,
-    createTaskComplete,
+    claim,
+    unclaim,
+    complete,
     createNewTask,
     filterTasks,
     filterProcessInstances
@@ -27,7 +27,7 @@ async function getActivityInstancesById(keycloak, processInstanceId) {
     }
 }
 
-async function createTaskClaim(keycloak, taskId) {
+async function claim(keycloak, taskId) {
     const url = `${Config.CaseEngineUrl}/task/${taskId}/claim/${keycloak.idTokenParsed.name}`;
 
     const headers = {
@@ -45,7 +45,7 @@ async function createTaskClaim(keycloak, taskId) {
     }
 }
 
-async function createTaskUnclaim(keycloak, taskId) {
+async function unclaim(keycloak, taskId) {
     const url = `${Config.CaseEngineUrl}/task/${taskId}/unclaim/${keycloak.idTokenParsed.name}`;
 
     const headers = {
@@ -63,7 +63,7 @@ async function createTaskUnclaim(keycloak, taskId) {
     }
 }
 
-async function createTaskComplete(keycloak, taskId, body) {
+async function complete(keycloak, taskId, body) {
     const url = `${Config.CaseEngineUrl}/task/${taskId}/complete`;
 
     const headers = {
