@@ -72,7 +72,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
         TaskService.claim(keycloak, task.id)
             .then(() => {
                 setClaimed(true);
-                setAssignee(keycloak.idTokenParsed.name);
+                setAssignee(keycloak.idTokenParsed.given_name);
             })
             .catch((err) => {
                 console.log(err.message);
@@ -93,14 +93,21 @@ export const TaskForm = ({ open, handleClose, task }) => {
     const handleComplete = function () {
         let variables = { ...variableValues.data };
 
+        let variablesList = [];
+
         Object.keys(variables).forEach(function (key, index) {
-            variables[key] =
-                typeof variables[key] === 'object'
-                    ? { value: JSON.stringify(variables[key]), type: 'Json' }
-                    : { value: variables[key] };
+            let variable = {
+                name: key,
+                value:
+                    typeof variables[key] === 'object'
+                        ? JSON.stringify(variables[key])
+                        : variables[key],
+                type: typeof variables[key] === 'object' ? 'Json' : typeof variables[key]
+            };
+            variablesList.push(variable);
         });
 
-        TaskService.complete(keycloak, task.id, variables)
+        TaskService.complete(keycloak, task.id, variablesList)
             .then(() => handleClose())
             .catch((err) => {
                 console.log(err.message);

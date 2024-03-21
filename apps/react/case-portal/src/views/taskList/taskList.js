@@ -40,12 +40,7 @@ export const TaskList = ({ businessKey, callback }) => {
             const topic = Config.WebsocketsTopicHumanTaskCreated;
             const ws = new WebSocket(`${websocketUrl}/${topic}`);
             ws.onmessage = (event) => {
-                fetchTasks(
-                    setFetching,
-                    keycloak,
-                    businessKey,
-                    setTasks,
-                );
+                fetchTasks(setFetching, keycloak, businessKey, setTasks);
             };
             return () => {
                 ws.close(); // Close WebSocket connection when component unmounts
@@ -57,12 +52,7 @@ export const TaskList = ({ businessKey, callback }) => {
         // Perform any necessary validation on the new task data
         // ...
         TaskService.createNewTask(keycloak, newTaskData).then(() => {
-            fetchTasks(
-                setFetching,
-                keycloak,
-                businessKey,
-                setTasks,
-            );
+            fetchTasks(setFetching, keycloak, businessKey, setTasks);
         });
 
         // Reset the new task form
@@ -79,12 +69,7 @@ export const TaskList = ({ businessKey, callback }) => {
     };
 
     useEffect(() => {
-        fetchTasks(
-            setFetching,
-            keycloak,
-            businessKey,
-            setTasks,
-        );
+        fetchTasks(setFetching, keycloak, businessKey, setTasks);
     }, [open, businessKey]);
 
     const handleClose = () => {
@@ -237,30 +222,26 @@ export const TaskList = ({ businessKey, callback }) => {
     );
 };
 
-function fetchTasks(
-    setFetching,
-    keycloak,
-    businessKey,
-    setTasks,
-) {
+function fetchTasks(setFetching, keycloak, businessKey, setTasks) {
     setFetching(true);
 
     TaskService.filterTasks(keycloak, businessKey)
         .then((data) => {
-            setTasks(
-                data.map(
-                    (o) =>
-                        (o = {
-                            ...o,
-                            created: o.created &&format(new Date(o.created), 'P'),
-                            due: o.due && format(new Date(o.due), 'P'),
-                            followUp: o.followUp && format(new Date(o.followUp), 'P')
-                        })
-                )
-            );
+            if (data && data.length > 0) {
+                setTasks(
+                    data.map(
+                        (o) =>
+                            (o = {
+                                ...o,
+                                created: o.created && format(new Date(o.created), 'P'),
+                                due: o.due && format(new Date(o.due), 'P'),
+                                followUp: o.followUp && format(new Date(o.followUp), 'P')
+                            })
+                    )
+                );
+            }
         })
         .finally(() => {
             setFetching(false);
         });
-
 }

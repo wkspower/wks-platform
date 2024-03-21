@@ -28,7 +28,7 @@ async function getActivityInstancesById(keycloak, processInstanceId) {
 }
 
 async function claim(keycloak, taskId) {
-    const url = `${Config.CaseEngineUrl}/task/${taskId}/claim/${keycloak.idTokenParsed.name}`;
+    const url = `${Config.CaseEngineUrl}/task/${taskId}/claim/${keycloak.idTokenParsed.given_name}`;
 
     const headers = {
         Accept: 'application/json',
@@ -46,7 +46,7 @@ async function claim(keycloak, taskId) {
 }
 
 async function unclaim(keycloak, taskId) {
-    const url = `${Config.CaseEngineUrl}/task/${taskId}/unclaim/${keycloak.idTokenParsed.name}`;
+    const url = `${Config.CaseEngineUrl}/task/${taskId}/unclaim`;
 
     const headers = {
         Accept: 'application/json',
@@ -76,9 +76,7 @@ async function complete(keycloak, taskId, body) {
         const resp = await fetch(url, {
             method: 'POST',
             headers,
-            body: JSON.stringify({
-                variables: body
-            })
+            body: JSON.stringify(body)
         });
         return nop(keycloak, resp);
     } catch (e) {
