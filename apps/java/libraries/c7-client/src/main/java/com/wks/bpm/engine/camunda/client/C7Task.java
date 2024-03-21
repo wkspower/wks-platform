@@ -13,9 +13,7 @@ package com.wks.bpm.engine.camunda.client;
 
 import com.wks.bpm.engine.model.spi.Task;
 
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**

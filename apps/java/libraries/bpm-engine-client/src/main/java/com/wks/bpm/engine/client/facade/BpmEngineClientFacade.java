@@ -57,7 +57,7 @@ public interface BpmEngineClientFacade {
 
 	Task getTask(final String taskId);
 
-	Task[] findTasks(final String processInstanceBusinessKey);
+	Task[] findTasks(final Optional<String> processInstanceBusinessKey);
 
 	void claimTask(String taskId, String taskAssignee);
 

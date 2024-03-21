@@ -61,7 +61,7 @@ public interface BpmEngineClient {
 
 	public Task getTask(final String taskId, final BpmEngine bpmEngine);
 
-	Task[] findTasks(final String processInstanceBusinessKey, final BpmEngine bpmEngine);
+	Task[] findTasks(final Optional<String> processInstanceBusinessKey, final BpmEngine bpmEngine);
 
 	void claimTask(String taskId, String taskAssignee, final BpmEngine bpmEngine);
 

@@ -80,8 +80,7 @@ public class C8EngineClient implements BpmEngineClient {
 	@Override
 	public ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
 			Optional<ProcessVariable> processVariable, BpmEngine bpmEngine) {
-		return zeebeClient.startProcess(processDefinitionKey, businessKey, processVariable,
-				bpmEngine);
+		return zeebeClient.startProcess(processDefinitionKey, businessKey, processVariable, bpmEngine);
 	}
 
 	@Override
@@ -112,9 +111,9 @@ public class C8EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public Task[] findTasks(final String processInstanceBusinessKey, final BpmEngine bpmEngine) {
+	public Task[] findTasks(final Optional<String> processInstanceBusinessKey, final BpmEngine bpmEngine) {
 		ProcessInstance[] processInstances = operateClient.searchProcessInstances(Optional.empty(),
-				Optional.of(processInstanceBusinessKey), Optional.empty(), bpmEngine);
+				processInstanceBusinessKey, Optional.empty(), bpmEngine);
 
 		return processInstances.length > 0 ? tasklistClient.find(processInstances[0].getId(), bpmEngine) : new Task[0];
 	}

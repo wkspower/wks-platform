@@ -13,6 +13,7 @@ package com.wks.caseengine.tasks.command;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import com.wks.bpm.engine.model.spi.Task;
 import com.wks.caseengine.command.Command;
@@ -27,7 +28,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class FindTaskCmd implements Command<List<Task>> {
 
-	private String processInstanceBusinessKey;
+	private Optional<String> processInstanceBusinessKey;
 
 	@Override
 	public List<Task> execute(CommandContext commandContext) {

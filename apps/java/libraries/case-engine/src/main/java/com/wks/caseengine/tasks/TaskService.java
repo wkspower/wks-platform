@@ -12,6 +12,7 @@
 package com.wks.caseengine.tasks;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Task;
@@ -20,7 +21,7 @@ public interface TaskService {
 
 	void create(final Task task);
 
-	List<Task> find(final String processInstanceBusinessKey);
+	List<Task> find(final Optional<String> processInstanceBusinessKey);
 
 	void claim(final String taskId, final String taskAssignee);
 

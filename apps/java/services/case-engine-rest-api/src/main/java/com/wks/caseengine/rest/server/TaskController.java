@@ -12,6 +12,7 @@
 package com.wks.caseengine.rest.server;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +46,7 @@ public class TaskController {
 
 	@GetMapping
 	public ResponseEntity<List<Task>> find(@RequestParam(required = false) String businessKey) {
-		return ResponseEntity.ok(taskService.find(businessKey));
+		return ResponseEntity.ok(taskService.find(Optional.ofNullable(businessKey)));
 	}
 
 	@PostMapping(value = "/{taskId}/claim/{taskAssignee}")

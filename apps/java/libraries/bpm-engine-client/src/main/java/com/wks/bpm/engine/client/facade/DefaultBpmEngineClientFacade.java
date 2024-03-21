@@ -116,7 +116,7 @@ public class DefaultBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public Task[] findTasks(final String processInstanceBusinessKey) {
+	public Task[] findTasks(final Optional<String> processInstanceBusinessKey) {
 		return getEngineClient().findTasks(processInstanceBusinessKey, getBpmEngine());
 	}
 

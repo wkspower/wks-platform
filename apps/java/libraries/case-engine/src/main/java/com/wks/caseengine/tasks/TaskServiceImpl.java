@@ -12,6 +12,7 @@
 package com.wks.caseengine.tasks;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,7 +38,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
-	public List<Task> find(final String processInstanceBusinessKey) {
+	public List<Task> find(final Optional<String> processInstanceBusinessKey) {
 		return commandExecutor.execute(new FindTaskCmd(processInstanceBusinessKey));
 	}
 

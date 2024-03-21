@@ -255,6 +255,12 @@ public class C7EngineClient implements BpmEngineClient {
 		TaskDto taskDto = new TaskDto();
 		taskDto.setId(String.valueOf(UUID.nameUUIDFromBytes((task.getDescription() + new Date()).getBytes())));
 		taskDto.setTenantId(tenantHolder.getTenantId().get());
+		taskDto.setName(task.getName());
+		taskDto.setAssignee(task.getAssignee());
+		taskDto.setDescription(task.getDescription());
+		taskDto.setProcessInstanceId(task.getProcessInstanceId());
+		taskDto.setCaseInstanceId(task.getCaseInstanceId());
+
 		try {
 			taskApi.createTask(taskDto);
 		} catch (ApiException e) {
@@ -278,16 +284,16 @@ public class C7EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public Task[] findTasks(final String processInstanceBusinessKey, final BpmEngine bpmEngine) {
+	public Task[] findTasks(final Optional<String> processInstanceBusinessKey, final BpmEngine bpmEngine) {
 		try {
 			return taskApi
-					.getTasks(null, null, null, null, processInstanceBusinessKey, null, null, null, null, null, null,
+					.getTasks(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+							processInstanceBusinessKey.orElse(null), null, null, null, null, null, null, null, null,
 							null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
 							null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
 							null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
 							null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-							null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-							null, null, null, null, null, null, null, null, null, null, null)
+							null, null, null, null, null, null, null, null, null, null, null, null, null)
 					.stream().map(o -> convertFromTaskDto(o)).toArray(Task[]::new);
 		} catch (ApiException e) {
 			log.error("Error getting camunda tasks", e);
