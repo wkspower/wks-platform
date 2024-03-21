@@ -58,8 +58,7 @@ public class C8EngineClient implements BpmEngineClient {
 
 	@Override
 	public ProcessDefinition[] findProcessDefinitions(final BpmEngine bpmEngine) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return operateClient.findProcessDefinitions(bpmEngine);
 	}
 
 	@Override

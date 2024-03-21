@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.bpm.engine.BpmEngine;
+import com.wks.bpm.engine.model.impl.ProcessDefinitionImpl;
+import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.ProcessVariableType;
@@ -26,6 +28,7 @@ import io.camunda.operate.CamundaOperateClient;
 import io.camunda.operate.exception.OperateException;
 import io.camunda.operate.model.ProcessInstanceState;
 import io.camunda.operate.model.Variable;
+import io.camunda.operate.search.ProcessDefinitionFilter;
 import io.camunda.operate.search.SearchQuery;
 import io.camunda.operate.search.VariableFilter;
 import io.camunda.operate.search.VariableFilterBuilder;
@@ -127,6 +130,35 @@ public class C8OperateClient {
 			return new ProcessVariable[0];
 		}
 
+	}
+
+	/**
+	 * @param bpmEngine
+	 * @return ProcessDefinition array
+	 */
+	public ProcessDefinition[] findProcessDefinitions(BpmEngine bpmEngine) {
+		try {
+			SearchQuery searchQuery = new SearchQuery.Builder().filter(ProcessDefinitionFilter.builder().build())
+					.build();
+			return operateClient.searchProcessDefinitions(searchQuery).stream()
+
+					.map(o ->
+
+					ProcessDefinitionImpl.builder()
+					.bpmEngineId(bpmEngine.getId())
+					.id(o.getBpmnProcessId())
+					.key(String.valueOf(o.getKey()))
+					.version(String.valueOf(o.getVersion()))
+					.name(o.getName())
+					.build())
+
+					.toArray(ProcessDefinitionImpl[]::new);
+
+		} catch (OperateException e) {
+			log.error("Error retrieving process definitions from zeebe", e);
+			e.printStackTrace();
+			return new ProcessDefinition[0];
+		}
 	}
 
 }
