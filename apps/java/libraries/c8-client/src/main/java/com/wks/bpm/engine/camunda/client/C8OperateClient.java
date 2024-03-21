@@ -113,7 +113,7 @@ public class C8OperateClient {
 
 		try {
 			SearchQuery searchQuery = new SearchQuery.Builder()
-					.filter(filterBuilder.scopeKey(Long.valueOf(processInstanceId)).build()).build();
+					.filter(filterBuilder.processInstanceKey(Long.valueOf(processInstanceId)).build()).build();
 
 			return operateClient.searchVariables(searchQuery).stream()
 					.map(o -> ProcessVariable.builder().name(o.getName()).type(ProcessVariableType.JSON.getValue())
