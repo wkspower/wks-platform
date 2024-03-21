@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.GsonBuilder;
-import com.wks.bpm.externaltask.api.gateway.impl.CaseInstanceApiGateway;
+import com.wks.api.client.gateway.impl.CaseInstanceApiGateway;
 
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.client.api.worker.JobClient;
