@@ -227,19 +227,17 @@ function fetchTasks(setFetching, keycloak, businessKey, setTasks) {
 
     TaskService.filterTasks(keycloak, businessKey)
         .then((data) => {
-            if (data && data.length > 0) {
-                setTasks(
-                    data.map(
-                        (o) =>
-                            (o = {
-                                ...o,
-                                created: o.created && format(new Date(o.created), 'P'),
-                                due: o.due && format(new Date(o.due), 'P'),
-                                followUp: o.followUp && format(new Date(o.followUp), 'P')
-                            })
-                    )
-                );
-            }
+            setTasks(
+                data?.map(
+                    (o) =>
+                        (o = {
+                            ...o,
+                            created: o.created && format(new Date(o.created), 'P'),
+                            due: o.due && format(new Date(o.due), 'P'),
+                            followUp: o.followUp && format(new Date(o.followUp), 'P')
+                        })
+                )
+            );
         })
         .finally(() => {
             setFetching(false);
