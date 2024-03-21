@@ -107,14 +107,19 @@ public class C7EngineClient implements BpmEngineClient {
 	@Override
 	public ProcessDefinitionImpl[] findProcessDefinitions(final BpmEngine bpmEngine) {
 		try {
+			boolean latestVersion = true;
 			return processDefinitionApi
-					.getProcessDefinitions(null, null, null, null, null, null, null, null, null, null, null, null, null,
-							null, null, null, null, null, null, null, null, null, null, null, null, null,
-							tenantHolder.getTenantId().get(), null, null, null, null, null, null, null, null, null)
-					.stream()
-					.map(o -> ProcessDefinitionImpl.builder().id(o.getId()).key(o.getKey()).name(o.getName())
-							.tenantId(o.getTenantId()).version(o.getVersionTag()))
-					.toArray(ProcessDefinitionImpl[]::new);
+					.getProcessDefinitions(
+							null, null, null, null, null, null, null, null, null, null, null, null, null, latestVersion,
+							null, null, null, null, null, null, null, null, null, tenantHolder.getTenantId().get(),
+							null, null, null, null, null, null, null, null, null, null, null, null)
+					.stream().map(o -> ProcessDefinitionImpl.builder()
+
+							.id(o.getId()).key(o.getKey()).name(o.getName()).bpmEngineId(bpmEngine.getId())
+							.version(String.valueOf(o.getVersion())).tenantId(o.getTenantId())
+							.version(o.getVersionTag()).build()
+
+					).toArray(ProcessDefinitionImpl[]::new);
 		} catch (ApiException e) {
 			log.error("Error getting camunda process definitions", e);
 			e.printStackTrace();
