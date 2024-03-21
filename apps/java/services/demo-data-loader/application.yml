@@ -37,11 +37,6 @@ camunda7.data.import.enabled: ${CAMUNDA7_DATA_IMPORT_ENABLED:true}
 camunda7.data.import.url: ${CAMUNDA_URL:http://localhost:8080/engine-rest}
 camunda7.data.import.folder: ${IMPORT_DIR_PATH:./data/camunda7}
 camunda7.data.import.tenant: ${spring.data.mongodb.database.tenant}
-camunda7.rest.deployment.url: /deployment
-camunda7.rest.processdefinition.url: /process-definition
-camunda7.rest.processinstance.url: /process-instance
-camunda7.rest.task.url: /task
-camunda7.rest.correlate.url: /message
 
 camunda8.data.import.enabled: ${CAMUNDA8_DATA_IMPORT_ENABLED:false}
 camunda8.data.import.folder: ${IMPORT_DIR_PATH:data/camunda8}

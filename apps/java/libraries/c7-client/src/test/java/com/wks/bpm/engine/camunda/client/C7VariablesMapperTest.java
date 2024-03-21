@@ -11,13 +11,7 @@
  */
 package com.wks.bpm.engine.camunda.client;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Test;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 public class C7VariablesMapperTest {
 
@@ -25,15 +19,17 @@ public class C7VariablesMapperTest {
 
 	@Test
 	public void testMap() {
-
-		// given
-		String caseAttributes = "[{\"name\": \"when\",\"value\": \"01/01/1990\",\"type\": \"String\"},{\"name\": \"where\",\"value\": \"Toronto\",\"type\": \"String\"}]";
-
-		// when
-		JsonObject processVariables = c7VariablesMapper.toJsonObject(new Gson().fromJson(caseAttributes, JsonArray.class));
-
-		assertEquals("{\"value\":\"01/01/1990\",\"type\":\"String\"}", String.valueOf(processVariables.get("when")));
-		assertEquals("{\"value\":\"Toronto\",\"type\":\"String\"}", String.valueOf(processVariables.get("where")));
+		int x = 1 / 0;
+//		// given
+//		String caseAttributes = "[{\"name\": \"when\",\"value\": \"01/01/1990\",\"type\": \"String\"},{\"name\": \"where\",\"value\": \"Toronto\",\"type\": \"String\"}]";
+//
+//		// when
+//		Type listType = new TypeToken<ArrayList<ProcessVariable>>() {
+//		}.getType();
+//		JsonObject processVariables = c7VariablesMapper.toEngineFormat(new Gson().fromJson(caseAttributes, listType));
+//
+//		assertEquals("{\"value\":\"01/01/1990\",\"type\":\"String\"}", String.valueOf(processVariables.get("when")));
+//		assertEquals("{\"value\":\"Toronto\",\"type\":\"String\"}", String.valueOf(processVariables.get("where")));
 	}
 
 }

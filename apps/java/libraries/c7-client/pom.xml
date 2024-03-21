@@ -26,6 +26,12 @@
 			<artifactId>spring-context</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.camunda.community</groupId>
+			<artifactId>camunda-engine-rest-client-openapi-springboot</artifactId>
+			<version>${camunda7.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -47,12 +53,6 @@
 		<dependency>
 			<groupId>com.wks</groupId>
 			<artifactId>bpm-engine-interface</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.wks</groupId>
-			<artifactId>rest-client</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
 

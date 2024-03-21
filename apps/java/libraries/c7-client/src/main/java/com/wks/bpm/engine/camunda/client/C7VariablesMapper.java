@@ -11,52 +11,33 @@
  */
 package com.wks.bpm.engine.camunda.client;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.camunda.community.rest.client.dto.VariableValueDto;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.wks.bpm.engine.client.VariablesMapper;
 import com.wks.bpm.engine.model.spi.ProcessVariable;
 
 @Component
 @Qualifier("c7VariablesMapper")
-public class C7VariablesMapper implements VariablesMapper<String> {
+public class C7VariablesMapper implements VariablesMapper<Map<String, VariableValueDto>> {
 
 	@Override
-	public JsonObject toJsonObject(JsonArray caseAttributes) {
+	public Map<String, VariableValueDto> toEngineFormat(final List<ProcessVariable> processVariables) {
+		Map<String, VariableValueDto> variableValueMap = new HashMap<>();
 
-		JsonObject processVariables = new JsonObject();
-
-		caseAttributes.forEach(caseAttribute -> {
-			JsonObject valueObject = new JsonObject();
-			valueObject.addProperty("value", caseAttribute.getAsJsonObject().get("value").toString());
-			valueObject.addProperty("type", caseAttribute.getAsJsonObject().get("type").getAsString());
-			processVariables.add(caseAttribute.getAsJsonObject().get("name").getAsString(), valueObject);
-
-		});
-
-		return processVariables;
-	}
-
-	@Override
-	public ProcessVariable[] toProcessVariablesArray(String variablesJsonString) {
-		JsonObject jsonObject = JsonParser.parseString(variablesJsonString).getAsJsonObject();
-
-		ProcessVariable[] processVariables = new ProcessVariable[jsonObject.size()];
-
-		int i = 0;
-		for (String key : jsonObject.keySet()) {
-
-			JsonObject variableObject = jsonObject.getAsJsonObject(key);
-			String type = variableObject.get("type").getAsString();
-			processVariables[i] = ProcessVariable.builder().name(key).type(type).value(variableObject.get("value"))
-					.build();
-			i++;
+		for (ProcessVariable processVariable : processVariables) {
+			VariableValueDto variableValueDto = new VariableValueDto();
+			variableValueDto.setValue(processVariable.getValue());
+			variableValueDto.setType(processVariable.getType());
+			variableValueMap.put(processVariable.getName(), variableValueDto);
 		}
 
-		return processVariables;
+		return variableValueMap;
 	}
 
 }

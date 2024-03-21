@@ -16,17 +16,7 @@ logging:
       
 spring.mvc.converters.preferred-json-mapper: gson
 
-camunda7.rest.oauth.token.uri:
-camunda7.rest.oauth.token.clientId:
-camunda7.rest.oauth.token.clientSecret:
-camunda7.rest.oauth.token.grantType:
-
-camunda7.rest.base-url: ${CAMUNDA_BASE_URL:http://localhost:8080/engine-rest}
-camunda7.rest.deployment.url: /deployment
-camunda7.rest.processdefinition.url: /process-definition
-camunda7.rest.processinstance.url: /process-instance
-camunda7.rest.task.url: /task
-camunda7.rest.correlate.url: /message
+camunda.bpm.client.base-url: http://localhost:8080/engine-rest
 
 zeebe.client.broker.gateway-address: 127.0.0.1:26500
 zeebe.client.security.plaintext: true
