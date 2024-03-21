@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:conversion="http://camunda.org/schema/conversion/1.0" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" conversion:converterVersion="0.8.2-SNAPSHOT" exporter="Camunda Modeler" exporterVersion="5.16.0" expressionLanguage="http://www.w3.org/1999/XPath" id="Definitions_5pc6zufq4loqfzj6ppvi" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.4.0" targetNamespace="http://bpmn.io/schema/bpmn" typeLanguage="http://www.w3.org/2001/XMLSchema">
+  <bpmn:process id="customer-support" isClosed="false" isExecutable="true" name="Customer Support" processType="None">
+    <bpmn:extensionElements>
+      <conversion:message severity="INFO">Unused attribute 'historyTimeToLive' on 'process' is removed.</conversion:message>
+    </bpmn:extensionElements>
+    <bpmn:startEvent id="StartEvent_1" isInterrupting="true" parallelMultiple="false">
+      <bpmn:outgoing>SequenceFlow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask completionQuantity="1" id="create-ticket" implementation="##unspecified" isForCompensation="false" name="Create Support Ticket" startQuantity="1">
+      <bpmn:extensionElements>
+        <conversion:message severity="REVIEW">Attribute 'formKey' on 'userTask' was mapped. Form key is now set in Zeebe namespace.</conversion:message>
+        <conversion:message severity="REVIEW">Element 'outputParameter' was transformed. Parameter 'resolved': Please review transformed expression: '${true}' -&gt; '=true'.</conversion:message>
+        <zeebe:ioMapping>
+          <zeebe:output source="=true" target="resolved"/>
+        </zeebe:ioMapping>
+        <zeebe:formDefinition formKey="customer-support-create-ticket"/>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway gatewayDirection="Unspecified" id="ExclusiveGateway_1">
+      <bpmn:incoming>SequenceFlow_2</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_3</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_4</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask completionQuantity="1" id="resolve-issue" implementation="##unspecified" isForCompensation="false" name="Resolve Issue" startQuantity="1">
+      <bpmn:extensionElements>
+        <conversion:message severity="REVIEW">Attribute 'formKey' on 'userTask' was mapped. Form key is now set in Zeebe namespace.</conversion:message>
+        <zeebe:formDefinition formKey="customer-support-resolve"/>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_3</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_5</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent_1">
+      <bpmn:incoming>SequenceFlow_5</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask completionQuantity="1" id="escalate-issue" implementation="##unspecified" isForCompensation="false" name="Escalate Issue" startQuantity="1">
+      <bpmn:extensionElements>
+        <conversion:message severity="REVIEW">Attribute 'formKey' on 'userTask' was mapped. Form key is now set in Zeebe namespace.</conversion:message>
+        <zeebe:formDefinition formKey="customer-support-escalate"/>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_4</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_6</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent_2">
+      <bpmn:incoming>SequenceFlow_6</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1" sourceRef="StartEvent_1" targetRef="create-ticket"/>
+    <bpmn:sequenceFlow id="SequenceFlow_2" sourceRef="create-ticket" targetRef="ExclusiveGateway_1"/>
+    <bpmn:sequenceFlow id="SequenceFlow_3" sourceRef="ExclusiveGateway_1" targetRef="resolve-issue">
+      <bpmn:extensionElements>
+        <conversion:message severity="REVIEW">Condition expression: Please review transformed expression: '${resolved == true}' -&gt; '=resolved = true'.</conversion:message>
+      </bpmn:extensionElements>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=resolved = true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_4" sourceRef="ExclusiveGateway_1" targetRef="escalate-issue">
+      <bpmn:extensionElements>
+        <conversion:message severity="REVIEW">Condition expression: Please review transformed expression: '${resolved == false}' -&gt; '=resolved = false'.</conversion:message>
+      </bpmn:extensionElements>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=resolved = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_5" sourceRef="resolve-issue" targetRef="EndEvent_1"/>
+    <bpmn:sequenceFlow id="SequenceFlow_6" sourceRef="escalate-issue" targetRef="EndEvent_2"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane bpmnElement="customer-support" id="BPMNPlane_1">
+      <bpmndi:BPMNShape bpmnElement="StartEvent_1" id="_BPMNShape_StartEvent_2">
+        <dc:Bounds height="36" width="36" x="173" y="102"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="14" width="55" x="183" y="145"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="create-ticket" id="Task_1_di">
+        <dc:Bounds height="80" width="100" x="270" y="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ExclusiveGateway_1" id="ExclusiveGateway_1_di" isMarkerVisible="true">
+        <dc:Bounds height="50" width="50" x="450" y="95"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="14" width="24" x="438" y="154"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="resolve-issue" id="Task_2_di">
+        <dc:Bounds height="80" width="100" x="550" y="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="EndEvent_1" id="EndEvent_1_di">
+        <dc:Bounds height="36" width="36" x="720" y="102"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="escalate-issue" id="Task_3_di">
+        <dc:Bounds height="80" width="100" x="425" y="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="EndEvent_2" id="EndEvent_2_di">
+        <dc:Bounds height="36" width="36" x="720" y="242"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="SequenceFlow_1" id="SequenceFlow_1_di">
+        <di:waypoint x="209" y="120"/>
+        <di:waypoint x="270" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="SequenceFlow_2" id="SequenceFlow_2_di">
+        <di:waypoint x="370" y="120"/>
+        <di:waypoint x="450" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="SequenceFlow_3" id="SequenceFlow_3_di">
+        <di:waypoint x="500" y="120"/>
+        <di:waypoint x="550" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="SequenceFlow_4" id="SequenceFlow_4_di">
+        <di:waypoint x="475" y="145"/>
+        <di:waypoint x="475" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="SequenceFlow_5" id="SequenceFlow_5_di">
+        <di:waypoint x="650" y="120"/>
+        <di:waypoint x="720" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="SequenceFlow_6" id="SequenceFlow_6_di">
+        <di:waypoint x="525" y="260"/>
+        <di:waypoint x="720" y="260"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

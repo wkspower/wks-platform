@@ -12,9 +12,10 @@
 package com.wks.caseengine.cases.instance.command;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Optional;
 
-import com.google.gson.JsonArray;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.definition.CaseStage;
@@ -57,7 +58,7 @@ public class StartEmptyCaseInstanceCmd implements Command<CaseInstance> {
 		commandContext.getCaseInstanceRepository().save(newCaseInstance);
 
 		commandContext.getProcessInstanceService().create(caseDefinition.getStagesLifecycleProcessKey(),
-				newCaseInstance.getBusinessKey(), new JsonArray());
+				Optional.of(newCaseInstance.getBusinessKey()), Arrays.asList());
 
 		return newCaseInstance;
 	}

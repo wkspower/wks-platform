@@ -3,9 +3,9 @@ import Config from 'consts/index';
 
 export const TaskService = {
     getActivityInstancesById,
-    createTaskClaim,
-    createTaskUnclaim,
-    createTaskComplete,
+    claim,
+    unclaim,
+    complete,
     createNewTask,
     filterTasks,
     filterProcessInstances
@@ -27,8 +27,8 @@ async function getActivityInstancesById(keycloak, processInstanceId) {
     }
 }
 
-async function createTaskClaim(keycloak, taskId) {
-    const url = `${Config.CaseEngineUrl}/task/${taskId}/claim/${keycloak.idTokenParsed.name}`;
+async function claim(keycloak, taskId) {
+    const url = `${Config.CaseEngineUrl}/task/${taskId}/claim/${keycloak.idTokenParsed.given_name}`;
 
     const headers = {
         Accept: 'application/json',
@@ -45,8 +45,8 @@ async function createTaskClaim(keycloak, taskId) {
     }
 }
 
-async function createTaskUnclaim(keycloak, taskId) {
-    const url = `${Config.CaseEngineUrl}/task/${taskId}/unclaim/${keycloak.idTokenParsed.name}`;
+async function unclaim(keycloak, taskId) {
+    const url = `${Config.CaseEngineUrl}/task/${taskId}/unclaim`;
 
     const headers = {
         Accept: 'application/json',
@@ -63,7 +63,7 @@ async function createTaskUnclaim(keycloak, taskId) {
     }
 }
 
-async function createTaskComplete(keycloak, taskId, body) {
+async function complete(keycloak, taskId, body) {
     const url = `${Config.CaseEngineUrl}/task/${taskId}/complete`;
 
     const headers = {
@@ -76,9 +76,7 @@ async function createTaskComplete(keycloak, taskId, body) {
         const resp = await fetch(url, {
             method: 'POST',
             headers,
-            body: JSON.stringify({
-                variables: body
-            })
+            body: JSON.stringify(body)
         });
         return nop(keycloak, resp);
     } catch (e) {

@@ -71,11 +71,6 @@
 		</dependency>
 		
 		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>${h2.version}</version> <!--$NO-MVN-MAN-VER$ -->

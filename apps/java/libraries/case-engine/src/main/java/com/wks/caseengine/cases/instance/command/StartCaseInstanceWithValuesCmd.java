@@ -17,7 +17,6 @@ import java.util.Comparator;
 import java.util.Optional;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.ProcessVariableType;
 import com.wks.caseengine.cases.definition.CaseDefinition;
@@ -66,24 +65,24 @@ public class StartCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 
 		CaseInstance preparedCaseInstance = caseInstanceBuilder.build();
 
-		JsonObject caseInstanceProcessVariableJson = generateCaseInstanceProcessVariable(commandContext,
+		ProcessVariable caseInstanceProcessVariable = generateCaseInstanceProcessVariable(commandContext,
 				preparedCaseInstance);
 
-		commandContext.getProcessInstanceService().create(commandContext.getCaseCreationProcess(), businessKey,
-				caseInstanceProcessVariableJson);
+		commandContext.getProcessInstanceService().create(commandContext.getCaseCreationProcess(),
+				Optional.of(businessKey), Optional.of(caseInstanceProcessVariable));
 
 		return preparedCaseInstance;
 	}
 
-	private JsonObject generateCaseInstanceProcessVariable(CommandContext commandContext,
+	private ProcessVariable generateCaseInstanceProcessVariable(CommandContext commandContext,
 			CaseInstance preparedCaseInstance) {
+
 		Gson gson = commandContext.getGsonBuilder().create();
 		ProcessVariable caseInstanceProcessVariable = ProcessVariable.builder()
-				.type(ProcessVariableType.JSON.getValue()).name("caseInstance").value(gson.toJson(preparedCaseInstance))
-				.build();
+				.type(ProcessVariableType.JSON.getValue()).name("caseInstance")
+				.value(gson.toJsonTree(preparedCaseInstance).toString()).build();
 
-		JsonObject caseInstanceProcessVariableJson = gson.toJsonTree(caseInstanceProcessVariable).getAsJsonObject();
-		return caseInstanceProcessVariableJson;
+		return caseInstanceProcessVariable;
 	}
 
 	private String generateBusinessKey(CommandContext commandContext) {

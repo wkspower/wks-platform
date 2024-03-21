@@ -11,15 +11,20 @@
  */
 package com.wks.bpm.externaltask.worker;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.wks.bpm.externaltask.api.gateway.impl.CaseDefinitionApiGateway;
-import com.wks.bpm.externaltask.api.gateway.impl.ProcessDefinitionApiGateway;
+import com.wks.api.client.gateway.impl.CaseDefinitionApiGateway;
+import com.wks.api.client.gateway.impl.ProcessDefinitionApiGateway;
+import com.wks.api.dto.ProcessDefinitionStartDto;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.client.api.worker.JobClient;
@@ -48,12 +53,18 @@ public class BusinessProcessStartWorker {
 
 		log.info("Starting Worker '{}'", job.getType());
 
-		String caseInstance = gsonBuilder.create()
-				.toJson((LinkedHashMap<?, ?>) job.getVariablesAsMap().get("caseInstance"));
+		String caseInstanceJson = String.valueOf(job.getVariablesAsMap().get("caseInstance"));
 
-		String processDefKey = getProcessDefinitionId(gsonBuilder.create().fromJson(caseInstance, JsonObject.class));
+		JsonObject jsonObject = gsonBuilder.create().fromJson(caseInstanceJson, JsonObject.class);
 
-		processDefinitionApiGateway.start(processDefKey, caseInstance);
+		JsonArray caseAttributesArray = jsonObject.get("attributes").getAsJsonArray();
+		List<ProcessVariable> processVariables = new ArrayList<>();
+		for (JsonElement element : caseAttributesArray) {
+			processVariables.add(gsonBuilder.create().fromJson(element, ProcessVariable.class));
+		}
+
+		processDefinitionApiGateway.start(getProcessDefinitionId(jsonObject), ProcessDefinitionStartDto.builder()
+				.processVariables(processVariables).businessKey(jsonObject.get("businessKey").getAsString()).build());
 	}
 
 	private String getProcessDefinitionId(JsonObject caseInstanceJson) {

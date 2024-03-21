@@ -12,11 +12,12 @@
 package com.wks.caseengine.tasks;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonObject;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Task;
 import com.wks.caseengine.command.CommandExecutor;
 import com.wks.caseengine.tasks.command.ClaimTaskCmd;
@@ -32,28 +33,28 @@ public class TaskServiceImpl implements TaskService {
 	private CommandExecutor commandExecutor;
 
 	@Override
-	public void create(Task task){
+	public void create(Task task) {
 		commandExecutor.execute(new CreateTaskCmd(task));
 	}
 
 	@Override
-	public List<Task> find(final String processInstanceBusinessKey){
+	public List<Task> find(final Optional<String> processInstanceBusinessKey) {
 		return commandExecutor.execute(new FindTaskCmd(processInstanceBusinessKey));
 	}
 
 	@Override
-	public void claim(final String taskId, final String taskAssignee){
+	public void claim(final String taskId, final String taskAssignee) {
 		commandExecutor.execute(new ClaimTaskCmd(taskId, taskAssignee));
 
 	}
 
 	@Override
-	public void unclaim(final String taskId){
+	public void unclaim(final String taskId) {
 		commandExecutor.execute(new UnclaimTaskCmd(taskId));
 	}
 
 	@Override
-	public void complete(final String taskId, final JsonObject variables){
+	public void complete(final String taskId, final List<ProcessVariable> variables) {
 		commandExecutor.execute(new CompleteTaskCmd(taskId, variables));
 	}
 

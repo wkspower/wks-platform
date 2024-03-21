@@ -18,11 +18,10 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.wks.bpm.engine.client.facade.BpmEngineClientFacade;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 
 @Component
 public class ProcessInstanceServiceImpl implements ProcessInstanceService {
@@ -31,24 +30,25 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	private BpmEngineClientFacade processEngineClient;
 
 	@Override
-	public ProcessInstance create(final String processDefinitionKey) {
-		return processEngineClient.startProcess(processDefinitionKey);
+	public ProcessInstance start(final String processDefinitionKey) {
+		return processEngineClient.startProcess(processDefinitionKey, Optional.empty(), Optional.empty());
 	}
 
 	@Override
-	public ProcessInstance create(final String processDefinitionKey, final String businessKey) {
-		return processEngineClient.startProcess(processDefinitionKey, businessKey);
-	}
-	
-	@Override
-	public ProcessInstance create(final String processDefinitionKey, final String businessKey, final JsonObject caseInstance) {
-		return processEngineClient.startProcess(processDefinitionKey, businessKey, caseInstance);
+	public ProcessInstance start(final String processDefinitionKey, final Optional<String> businessKey) {
+		return processEngineClient.startProcess(processDefinitionKey, businessKey, Optional.empty());
 	}
 
 	@Override
-	public ProcessInstance create(final String processDefinitionKey, final String businessKey,
-			final JsonArray caseAttributes) {
-		return processEngineClient.startProcess(processDefinitionKey, businessKey, caseAttributes);
+	public ProcessInstance create(final String processDefinitionKey, final Optional<String> businessKey,
+			final Optional<ProcessVariable> processVariable) {
+		return processEngineClient.startProcess(processDefinitionKey, businessKey, processVariable);
+	}
+
+	@Override
+	public ProcessInstance create(final String processDefinitionKey, final Optional<String> businessKey,
+			final List<ProcessVariable> processVariables) {
+		return processEngineClient.startProcess(processDefinitionKey, businessKey, processVariables);
 	}
 
 	@Override

@@ -28,12 +28,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>com.wks</groupId>
 			<artifactId>bpm-engine-interface</artifactId>
 			<version>${project.parent.version}</version>

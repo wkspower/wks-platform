@@ -11,13 +11,14 @@
  */
 package com.wks.caseengine.process.message;
 
+import java.util.List;
 import java.util.Optional;
 
-import com.google.gson.JsonArray;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 
 public interface MessageSenderService {
 
-	void sendMessage(final ProcessMessage processMessage, final Optional<JsonArray> variables);
+	void sendMessage(final ProcessMessage processMessage, final Optional<List<ProcessVariable>> variables);
 
 }

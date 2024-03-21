@@ -11,7 +11,6 @@
  */
 package com.wks.bpm.externaltask.worker;
 
-import java.util.LinkedHashMap;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.GsonBuilder;
-import com.wks.bpm.externaltask.api.gateway.impl.CaseInstanceApiGateway;
+import com.wks.api.client.gateway.impl.CaseInstanceApiGateway;
 import com.wks.bpm.externaltask.kafka.KafkaProducer;
 
 import io.camunda.zeebe.client.api.response.ActivatedJob;
@@ -34,9 +32,6 @@ public class CaseSaveWorker {
 
 	@Autowired
 	private CaseInstanceApiGateway caseInstanceApiGateway;
-	
-	@Autowired
-	private GsonBuilder gsonBuilder;
 
 	@Autowired(required = false)
 	@Qualifier("kafkaProducer")
@@ -47,11 +42,10 @@ public class CaseSaveWorker {
 
 	@JobWorker(type = "caseSave", fetchVariables = { "caseInstance" })
 	public void handleJobFoo(final JobClient client, final ActivatedJob job) {
-		
+
 		log.info("Starting Worker '{}'", job.getType());
-		
-		String caseInstanceJson = gsonBuilder.create()
-				.toJson((LinkedHashMap<?, ?>) job.getVariablesAsMap().get("caseInstance"));
+
+		String caseInstanceJson = String.valueOf(job.getVariablesAsMap().get("caseInstance"));
 
 		caseInstanceApiGateway.save(caseInstanceJson);
 

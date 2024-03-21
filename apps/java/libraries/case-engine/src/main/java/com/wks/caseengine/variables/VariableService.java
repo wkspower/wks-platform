@@ -11,8 +11,10 @@
  */
 package com.wks.caseengine.variables;
 
+import com.wks.bpm.engine.model.spi.ProcessVariable;
+
 public interface VariableService {
 
-	String findVariables(final String processInstanceId);
+	ProcessVariable[] findVariables(final String processInstanceId);
 
 }

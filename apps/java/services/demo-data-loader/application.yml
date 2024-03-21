@@ -7,19 +7,12 @@ logging:
       
 spring.mvc.converters.preferred-json-mapper: gson
 
-
-camunda7.rest.deployment.url: /deployment
-camunda7.rest.processdefinition.url: /process-definition
-camunda7.rest.processinstance.url: /process-instance
-camunda7.rest.task.url: /task
-camunda7.rest.correlate.url: /message
-
 spring.data.mongodb.uri: ${MONGO_CONN:mongodb://localhost}
 spring.data.mongodb.database: ${MONGO_SHARED_DATABASE:shared}
 spring.data.mongodb.database.tenant: ${MONGO_DATABASE:localhost}
 
 mongo.data.import.enabled: true
-mongo.data.import.folder: ${IMPORT_DIR_PATH:./data}
+mongo.data.import.folder: ${IMPORT_DIR_PATH:./data/mongodb}
 
 keycloak.data.import.enabled: true
 keycloak.data.import.url: ${KEYCLOAK_URL:http://localhost:8082}
@@ -40,7 +33,12 @@ keycloak.data.import.firstname: ${KEYCLOAK_DEFAULT_USER_FIRST_NAME:demo}
 keycloak.data.import.lastname: ${KEYCLOAK_DEFAULT_USER_LAST_NAME:demo}
 keycloak.data.import.email: ${KEYCLOAK_DEFAULT_USER_EMAIL:demo@demo.com}
 
-camunda.data.import.enabled: true
-camunda.data.import.url: ${CAMUNDA_URL:http://localhost:8080/engine-rest}
-camunda.data.import.folder: ${IMPORT_DIR_PATH:./data}
-camunda.data.import.tenant: ${spring.data.mongodb.database.tenant}
+camunda7.data.import.enabled: ${CAMUNDA7_DATA_IMPORT_ENABLED:true}
+camunda7.data.import.url: ${CAMUNDA_URL:http://localhost:8080/engine-rest}
+camunda7.data.import.folder: ${IMPORT_DIR_PATH:./data/camunda7}
+camunda7.data.import.tenant: ${spring.data.mongodb.database.tenant}
+
+camunda8.data.import.enabled: ${CAMUNDA8_DATA_IMPORT_ENABLED:false}
+camunda8.data.import.folder: ${IMPORT_DIR_PATH:data/camunda8}
+zeebe.client.broker.gateway-address: 127.0.0.1:26500
+zeebe.client.security.plaintext: true

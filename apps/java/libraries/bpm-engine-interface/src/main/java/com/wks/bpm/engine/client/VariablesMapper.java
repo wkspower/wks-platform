@@ -11,11 +11,12 @@
  */
 package com.wks.bpm.engine.client;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import java.util.List;
 
-public interface VariablesMapper {
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 
-	JsonObject map(JsonArray caseAttributes);
+public interface VariablesMapper<T> {
+
+	public T toEngineFormat(List<ProcessVariable> processVariables);
 
 }

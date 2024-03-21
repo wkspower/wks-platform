@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-@ConditionalOnProperty(value = "kafka.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(value = "wks.kafka.enabled", havingValue = "true", matchIfMissing = false)
 public class KafkaProducer {
 
 	@Autowired

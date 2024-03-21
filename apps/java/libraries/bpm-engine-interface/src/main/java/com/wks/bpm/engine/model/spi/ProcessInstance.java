@@ -11,7 +11,7 @@
  */
 package com.wks.bpm.engine.model.spi;
 
-import com.google.gson.JsonObject;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,6 +42,6 @@ public class ProcessInstance {
 	private Boolean suspended;
 	private String tenantId;
 
-	private JsonObject variables;
+	private List<ProcessVariable> variables;
 
 }

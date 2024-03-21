@@ -11,10 +11,9 @@
  */
 package com.wks.bpm.engine.client.facade;
 
+import java.util.List;
 import java.util.Optional;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
 import com.wks.bpm.engine.exception.ProcessInstanceNotFoundException;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
@@ -22,6 +21,7 @@ import com.wks.bpm.engine.model.spi.Deployment;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Task;
 
 /**
@@ -43,15 +43,11 @@ public interface BpmEngineClientFacade {
 	ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
 			final Optional<String> businessKey, final Optional<String> activityIdIn);
 
-	ProcessInstance startProcess(final String processDefinitionKey);
+	ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
+			final Optional<ProcessVariable> processVariable);
 
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey);
-
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonObject caseInstance);
-
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonArray caseAttributes);
+	ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
+			final List<ProcessVariable> processVariables);
 
 	void deleteProcessInstance(String processInstanceId);
 
@@ -61,16 +57,16 @@ public interface BpmEngineClientFacade {
 
 	Task getTask(final String taskId);
 
-	Task[] findTasks(final String processInstanceBusinessKey);
+	Task[] findTasks(final Optional<String> processInstanceBusinessKey);
 
 	void claimTask(String taskId, String taskAssignee);
 
 	void unclaimTask(String taskId);
 
-	void complete(String taskId, JsonObject variables);
+	void complete(String taskId, List<ProcessVariable> variables);
 
-	String findVariables(String processInstanceId);
+	ProcessVariable[] findVariables(String processInstanceId);
 
-	void sendMessage(ProcessMessage processMesage, Optional<JsonArray> variables);
+	void sendMessage(ProcessMessage processMesage, Optional<List<ProcessVariable>> variables);
 
 }

@@ -13,7 +13,6 @@ import { format } from 'date-fns';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TaskService } from 'services';
-import { ProcessDiagram } from 'views/bpmnViewer/ProcessDiagram';
 import { useSession } from '../../SessionStoreContext';
 import { TaskForm } from '../taskForm/taskForm';
 import './taskList.css';
@@ -22,8 +21,6 @@ export const TaskList = ({ businessKey, callback }) => {
     const [tasks, setTasks] = useState(null);
     const [open, setOpen] = useState(false);
     const [task, setTask] = useState(null);
-    const [processDefId, setProcessDefId] = useState(null);
-    const [activityInstances, setActivityInstances] = useState(null);
     const { t } = useTranslation();
     const [fetching, setFetching] = useState(false);
     const keycloak = useSession();
@@ -43,14 +40,7 @@ export const TaskList = ({ businessKey, callback }) => {
             const topic = Config.WebsocketsTopicHumanTaskCreated;
             const ws = new WebSocket(`${websocketUrl}/${topic}`);
             ws.onmessage = (event) => {
-                fetchTasks(
-                    setFetching,
-                    keycloak,
-                    businessKey,
-                    setTasks,
-                    setProcessDefId,
-                    setActivityInstances
-                );
+                fetchTasks(setFetching, keycloak, businessKey, setTasks);
             };
             return () => {
                 ws.close(); // Close WebSocket connection when component unmounts
@@ -62,14 +52,7 @@ export const TaskList = ({ businessKey, callback }) => {
         // Perform any necessary validation on the new task data
         // ...
         TaskService.createNewTask(keycloak, newTaskData).then(() => {
-            fetchTasks(
-                setFetching,
-                keycloak,
-                businessKey,
-                setTasks,
-                setProcessDefId,
-                setActivityInstances
-            );
+            fetchTasks(setFetching, keycloak, businessKey, setTasks);
         });
 
         // Reset the new task form
@@ -86,14 +69,7 @@ export const TaskList = ({ businessKey, callback }) => {
     };
 
     useEffect(() => {
-        fetchTasks(
-            setFetching,
-            keycloak,
-            businessKey,
-            setTasks,
-            setProcessDefId,
-            setActivityInstances
-        );
+        fetchTasks(setFetching, keycloak, businessKey, setTasks);
     }, [open, businessKey]);
 
     const handleClose = () => {
@@ -209,13 +185,13 @@ export const TaskList = ({ businessKey, callback }) => {
                                         })
                                     }
                                 />
-                                <TextField
+                                {/* <TextField
                                     label={t('pages.tasklist.newTask.dueDate')}
                                     value={newTaskData.due}
                                     onChange={(e) =>
                                         setNewTaskData({ ...newTaskData, due: e.target.value })
                                     }
-                                />
+                                /> */}
                                 <TextField
                                     label={t('pages.tasklist.newTask.assignee')}
                                     value={newTaskData.assignee}
@@ -239,13 +215,6 @@ export const TaskList = ({ businessKey, callback }) => {
                 </React.Fragment>
             )}
 
-            {(!tasks || tasks.length === 0) && processDefId && activityInstances && (
-                <ProcessDiagram
-                    processDefinitionId={processDefId}
-                    activityInstances={activityInstances}
-                />
-            )}
-
             {open && task && (
                 <TaskForm task={task} handleClose={handleClose} open={open} keycloak={keycloak} />
             )}
@@ -253,24 +222,17 @@ export const TaskList = ({ businessKey, callback }) => {
     );
 };
 
-function fetchTasks(
-    setFetching,
-    keycloak,
-    businessKey,
-    setTasks,
-    setProcessDefId,
-    setActivityInstances
-) {
+function fetchTasks(setFetching, keycloak, businessKey, setTasks) {
     setFetching(true);
 
     TaskService.filterTasks(keycloak, businessKey)
         .then((data) => {
             setTasks(
-                data.map(
+                data?.map(
                     (o) =>
                         (o = {
                             ...o,
-                            created: format(new Date(o.created), 'P'),
+                            created: o.created && format(new Date(o.created), 'P'),
                             due: o.due && format(new Date(o.due), 'P'),
                             followUp: o.followUp && format(new Date(o.followUp), 'P')
                         })
@@ -279,17 +241,5 @@ function fetchTasks(
         })
         .finally(() => {
             setFetching(false);
-        });
-
-    TaskService.filterProcessInstances(keycloak, businessKey)
-        .then((data) => {
-            setProcessDefId(data[0].definitionId);
-            return TaskService.getActivityInstancesById(keycloak, data[0].id);
-        })
-        .then((data) => {
-            setActivityInstances(data);
-        })
-        .catch((err) => {
-            console.log(err.message);
         });
 }

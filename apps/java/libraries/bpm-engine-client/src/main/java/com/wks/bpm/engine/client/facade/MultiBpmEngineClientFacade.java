@@ -11,12 +11,11 @@
  */
 package com.wks.bpm.engine.client.facade;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.BpmEngineType;
 import com.wks.bpm.engine.client.BpmEngineClient;
@@ -27,6 +26,7 @@ import com.wks.bpm.engine.model.spi.Deployment;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Task;
 
 /**
@@ -67,12 +67,14 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public String getProcessDefinitionXMLById(final String processDefinitionId) throws ProcessDefinitionNotFoundException {
+	public String getProcessDefinitionXMLById(final String processDefinitionId)
+			throws ProcessDefinitionNotFoundException {
 		return getEngineClient().getProcessDefinitionXMLById(processDefinitionId, getBpmEngine());
 	}
 
 	@Override
-	public String getProcessDefinitionXMLByKey(final String processDefinitionKey) throws ProcessDefinitionNotFoundException {
+	public String getProcessDefinitionXMLByKey(final String processDefinitionKey)
+			throws ProcessDefinitionNotFoundException {
 		return getEngineClient().getProcessDefinitionXMLByKey(processDefinitionKey, getBpmEngine());
 	}
 
@@ -83,24 +85,14 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey) {
-		return getEngineClient().startProcess(processDefinitionKey, getBpmEngine());
-	}
-
-	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey) {
-		return getEngineClient().startProcess(processDefinitionKey, businessKey, getBpmEngine());
-	}
-
-	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonObject caseInstance) {
+	public ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
+			final Optional<ProcessVariable> caseInstance) {
 		return getEngineClient().startProcess(processDefinitionKey, businessKey, caseInstance, getBpmEngine());
 	}
 
 	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonArray caseAttributes) {
+	public ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
+			final List<ProcessVariable> caseAttributes) {
 		return getEngineClient().startProcess(processDefinitionKey, businessKey, caseAttributes, getBpmEngine());
 	}
 
@@ -125,7 +117,7 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public Task[] findTasks(final String processInstanceBusinessKey) {
+	public Task[] findTasks(final Optional<String> processInstanceBusinessKey) {
 		return getEngineClient().findTasks(processInstanceBusinessKey, getBpmEngine());
 	}
 
@@ -140,17 +132,17 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public void complete(String taskId, JsonObject variables) {
+	public void complete(String taskId, List<ProcessVariable> variables) {
 		getEngineClient().complete(taskId, variables, getBpmEngine());
 	}
 
 	@Override
-	public String findVariables(String processInstanceId) {
+	public ProcessVariable[] findVariables(String processInstanceId) {
 		return getEngineClient().findVariables(processInstanceId, getBpmEngine());
 	}
 
 	@Override
-	public void sendMessage(ProcessMessage processMesage, Optional<JsonArray> variables) {
+	public void sendMessage(ProcessMessage processMesage, Optional<List<ProcessVariable>> variables) {
 		getEngineClient().sendMessage(processMesage, variables, getBpmEngine());
 	}
 

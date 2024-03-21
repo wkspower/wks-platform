@@ -11,13 +11,12 @@
  */
 package com.wks.bpm.engine.client.facade;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.BpmEngineType;
 import com.wks.bpm.engine.client.BpmEngineClient;
@@ -28,6 +27,7 @@ import com.wks.bpm.engine.model.spi.Deployment;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Task;
 
 /**
@@ -84,24 +84,14 @@ public class DefaultBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey) {
-		return getEngineClient().startProcess(processDefinitionKey, getBpmEngine());
-	}
-
-	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey) {
-		return getEngineClient().startProcess(processDefinitionKey, businessKey, getBpmEngine());
-	}
-
-	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonObject variable) {
+	public ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
+			final Optional<ProcessVariable> variable) {
 		return getEngineClient().startProcess(processDefinitionKey, businessKey, variable, getBpmEngine());
 	}
 
 	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonArray variables) {
+	public ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
+			final List<ProcessVariable> variables) {
 		return getEngineClient().startProcess(processDefinitionKey, businessKey, variables, getBpmEngine());
 	}
 
@@ -126,7 +116,7 @@ public class DefaultBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public Task[] findTasks(final String processInstanceBusinessKey) {
+	public Task[] findTasks(final Optional<String> processInstanceBusinessKey) {
 		return getEngineClient().findTasks(processInstanceBusinessKey, getBpmEngine());
 	}
 
@@ -141,17 +131,17 @@ public class DefaultBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public void complete(String taskId, JsonObject variables) {
+	public void complete(String taskId, List<ProcessVariable> variables) {
 		getEngineClient().complete(taskId, variables, getBpmEngine());
 	}
 
 	@Override
-	public String findVariables(String processInstanceId) {
+	public ProcessVariable[] findVariables(String processInstanceId) {
 		return getEngineClient().findVariables(processInstanceId, getBpmEngine());
 	}
 
 	@Override
-	public void sendMessage(ProcessMessage processMesage, Optional<JsonArray> variables) {
+	public void sendMessage(ProcessMessage processMesage, Optional<List<ProcessVariable>> variables) {
 		getEngineClient().sendMessage(processMesage, variables, getBpmEngine());
 	}
 

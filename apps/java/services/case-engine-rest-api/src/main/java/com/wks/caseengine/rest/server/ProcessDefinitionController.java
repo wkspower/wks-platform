@@ -11,6 +11,7 @@
  */
 package com.wks.caseengine.rest.server;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.wks.api.dto.ProcessDefinitionStartDto;
 import com.wks.bpm.engine.client.facade.BpmEngineClientFacade;
 import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,15 +43,18 @@ public class ProcessDefinitionController {
 	private BpmEngineClientFacade processEngineClientFacade;
 
 	@PostMapping(value = "/key/{key}/start")
-	public ResponseEntity<ProcessInstance> start(@PathVariable final String key, @RequestBody final JsonObject body) {
+	public ResponseEntity<ProcessInstance> start(@PathVariable final String key,
+			@RequestBody final ProcessDefinitionStartDto processDefinitionStartDto) {
 
-		String businessKey = body.get("businessKey").getAsString();
-		Optional<JsonElement> attributes = Optional.ofNullable(body.get("attributes"));
-		if (attributes.isEmpty()) {
-			return ResponseEntity.ok(processEngineClientFacade.startProcess(key, businessKey));
+		String businessKey = processDefinitionStartDto.getBusinessKey();
+		Optional<List<ProcessVariable>> processVariables = Optional
+				.ofNullable(processDefinitionStartDto.getProcessVariables());
+		if (processVariables.isEmpty()) {
+			return ResponseEntity
+					.ok(processEngineClientFacade.startProcess(key, Optional.ofNullable(businessKey), Optional.empty()));
 		} else {
 			return ResponseEntity
-					.ok(processEngineClientFacade.startProcess(key, businessKey, attributes.get().getAsJsonArray()));
+					.ok(processEngineClientFacade.startProcess(key, Optional.ofNullable(businessKey), processVariables.get()));
 		}
 	}
 

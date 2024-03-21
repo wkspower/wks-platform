@@ -1,5 +1,5 @@
 /*
- * WKS Platform - Open-Source Project
+\ * WKS Platform - Open-Source Project
  * 
  * This file is part of the WKS Platform, an open-source project developed by WKS Power.
  * 
@@ -67,8 +67,10 @@ public class TaskControllerTest {
 
 	@Test
 	public void shouldComplete() throws Exception {
-		this.mockMvc.perform(post("/task/{taskId}/complete", "1").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		this.mockMvc.perform(post("/task/{taskId}/complete", "1").contentType(MediaType.APPLICATION_JSON).content("[]"))
 				.andExpect(status().isNoContent());
+		
+		
 	}
 
 }

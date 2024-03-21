@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import com.wks.caseengine.cases.businesskey.GenericBusinessKeyGenerator;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseStage;
@@ -95,7 +95,13 @@ public class StartCaseInstanceWithValuesCmdTest {
 		assertEquals(caseInstanceToSave.getQueueId(), savedCaseInstance.getQueueId());
 		assertEquals("Stage 1", savedCaseInstance.getStage());
 		assertEquals(caseInstanceToSave.getStatus(), savedCaseInstance.getStatus());
-		verify(processInstanceService).create(eq("Process1"), eq("BK_1"), any(JsonObject.class));
+
+		verify(processInstanceService).create(eq("Process1"), eq(Optional.of("BK_1")), anyOptionalOfProcessVariable());
+	}
+
+	// Helper method to create a properly typed Optional
+	private static <T> Optional<T> anyOptionalOfProcessVariable() {
+		return any();
 	}
 
 }

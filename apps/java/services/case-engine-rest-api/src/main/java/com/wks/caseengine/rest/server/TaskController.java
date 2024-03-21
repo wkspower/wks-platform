@@ -12,6 +12,7 @@
 package com.wks.caseengine.rest.server;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.gson.JsonParser;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Task;
 import com.wks.caseengine.tasks.TaskService;
 
@@ -45,7 +46,7 @@ public class TaskController {
 
 	@GetMapping
 	public ResponseEntity<List<Task>> find(@RequestParam(required = false) String businessKey) {
-		return ResponseEntity.ok(taskService.find(businessKey));
+		return ResponseEntity.ok(taskService.find(Optional.ofNullable(businessKey)));
 	}
 
 	@PostMapping(value = "/{taskId}/claim/{taskAssignee}")
@@ -61,8 +62,9 @@ public class TaskController {
 	}
 
 	@PostMapping(value = "/{taskId}/complete")
-	public ResponseEntity<Void> complete(@PathVariable final String taskId, @RequestBody final String variables) {
-		taskService.complete(taskId, JsonParser.parseString(variables).getAsJsonObject());
+	public ResponseEntity<Void> complete(@PathVariable final String taskId,
+			@RequestBody final List<ProcessVariable> variables) {
+		taskService.complete(taskId, variables);
 		return ResponseEntity.noContent().build();
 	}
 

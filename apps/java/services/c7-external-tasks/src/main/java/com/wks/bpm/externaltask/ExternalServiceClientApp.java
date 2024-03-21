@@ -16,7 +16,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan({ "com.wks.bpm.externaltask", "com.wks.api.security" })
+@ComponentScan({ "com.wks.bpm.externaltask", "com.wks.api.security", "com.wks.api.client" })
 public class ExternalServiceClientApp {
 
 	public static void main(final String[] args) {

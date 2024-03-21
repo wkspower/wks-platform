@@ -46,10 +46,13 @@ export const TaskForm = ({ open, handleClose, task }) => {
                 return VariableService.getByProcessInstanceId(keycloak, task.processInstanceId);
             })
             .then((data) => {
-                for (var key in data) {
-                    apiDataVariables.data[key] =
-                        data[key].type === 'Json' ? JSON.parse(data[key].value) : data[key].value;
-                }
+                data.forEach((item) => {
+                    if (item.type === 'Json') {
+                        apiDataVariables.data[item.name] = JSON.parse(item.value);
+                    } else {
+                        apiDataVariables.data[item.name] = item.value;
+                    }
+                });
 
                 setFormComponents(apiDataFormComponents);
                 setVariableValues(apiDataVariables);
@@ -66,10 +69,10 @@ export const TaskForm = ({ open, handleClose, task }) => {
     }, [open, task]);
 
     const handleClaim = function () {
-        TaskService.createTaskClaim(keycloak, task.id)
+        TaskService.claim(keycloak, task.id)
             .then(() => {
                 setClaimed(true);
-                setAssignee(keycloak.idTokenParsed.name);
+                setAssignee(keycloak.idTokenParsed.given_name);
             })
             .catch((err) => {
                 console.log(err.message);
@@ -77,7 +80,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
     };
 
     const handleUnclaim = function () {
-        TaskService.createTaskUnclaim(keycloak, task.id)
+        TaskService.unclaim(keycloak, task.id)
             .then(() => {
                 setClaimed(false);
                 setAssignee(null);
@@ -90,14 +93,21 @@ export const TaskForm = ({ open, handleClose, task }) => {
     const handleComplete = function () {
         let variables = { ...variableValues.data };
 
+        let variablesList = [];
+
         Object.keys(variables).forEach(function (key, index) {
-            variables[key] =
-                typeof variables[key] === 'object'
-                    ? { value: JSON.stringify(variables[key]), type: 'Json' }
-                    : { value: variables[key] };
+            let variable = {
+                name: key,
+                value:
+                    typeof variables[key] === 'object'
+                        ? JSON.stringify(variables[key])
+                        : variables[key],
+                type: typeof variables[key] === 'object' ? 'Json' : typeof variables[key]
+            };
+            variablesList.push(variable);
         });
 
-        TaskService.createTaskComplete(keycloak, task.id, variables)
+        TaskService.complete(keycloak, task.id, variablesList)
             .then(() => handleClose())
             .catch((err) => {
                 console.log(err.message);

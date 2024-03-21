@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
-import com.wks.bpm.externaltask.api.gateway.impl.CaseInstanceApiGateway;
+import com.wks.api.client.gateway.impl.CaseInstanceApiGateway;
 import com.wks.bpm.externaltask.kafka.KafkaProducer;
 import com.wks.bpm.externaltask.worker.WksExternalTaskHandler;
 
@@ -43,6 +43,7 @@ public class CaseSaveWorker extends WksExternalTaskHandler {
 	public void doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
 
 		String caseInstanceJson = externalTask.getVariable("caseInstance");
+
 		caseInstanceApiGateway.save(caseInstanceJson);
 
 		kafkaProducerOptional.ifPresent(kafkaProducer -> kafkaProducer.sendMessage(topic, caseInstanceJson));
