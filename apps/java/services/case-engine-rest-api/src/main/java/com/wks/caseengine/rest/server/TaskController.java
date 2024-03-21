@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.gson.JsonParser;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Task;
 import com.wks.caseengine.tasks.TaskService;
 
@@ -61,8 +61,9 @@ public class TaskController {
 	}
 
 	@PostMapping(value = "/{taskId}/complete")
-	public ResponseEntity<Void> complete(@PathVariable final String taskId, @RequestBody final String variables) {
-		taskService.complete(taskId, JsonParser.parseString(variables).getAsJsonObject());
+	public ResponseEntity<Void> complete(@PathVariable final String taskId,
+			@RequestBody final List<ProcessVariable> variables) {
+		taskService.complete(taskId, variables);
 		return ResponseEntity.noContent().build();
 	}
 

@@ -9,27 +9,31 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.externaltask.api.gateway.impl;
+package com.wks.api.client.gateway.impl;
 
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
-import com.wks.bpm.externaltask.api.gateway.ApiGateway;
+import com.wks.api.client.gateway.ApiGateway;
 
 /**
  * @author victor.franca
  *
  */
 @Component
-public class CaseDefinitionApiGateway extends ApiGateway {
+public class RecordApiGateway extends ApiGateway{
 
-	public String get(final String caseDefinitionId) {
+
+	public void save(final String recordTypeId, final String record) {
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		return restTemplate.getForEntity(baseUrl + caseDefinitionUrl + "/" + caseDefinitionId, String.class).getBody();
+		HttpEntity<String> entity = new HttpEntity<>(record, headers);
 
+		restTemplate.postForEntity(baseUrl + recordUrl + "/" + recordTypeId, entity, String.class);
 	}
 
 }

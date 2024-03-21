@@ -9,14 +9,15 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.externaltask.api.gateway.impl;
+package com.wks.api.client.gateway.impl;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
-import com.wks.bpm.externaltask.api.gateway.ApiGateway;
+import com.wks.api.client.gateway.ApiGateway;
+import com.wks.api.dto.ProcessDefinitionStartDto;
 
 /**
  * @author victor.franca
@@ -25,12 +26,13 @@ import com.wks.bpm.externaltask.api.gateway.ApiGateway;
 @Component
 public class ProcessDefinitionApiGateway extends ApiGateway {
 
-	public void start(final String processDefinitionKey, final String processInstance) {
+	public void start(final String processDefinitionKey, final ProcessDefinitionStartDto processDefinitionStartDto) {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		HttpEntity<String> entity = new HttpEntity<>(processInstance, headers);
+		HttpEntity<ProcessDefinitionStartDto> entity = new HttpEntity<ProcessDefinitionStartDto>(
+				processDefinitionStartDto, headers);
 		restTemplate.postForEntity(baseUrl + processDefinitionUrl + "/key/" + processDefinitionKey + "/start", entity,
 				String.class);
 	}
