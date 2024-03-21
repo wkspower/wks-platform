@@ -31,6 +31,7 @@ import org.camunda.community.rest.client.dto.ProcessInstanceWithVariablesDto;
 import org.camunda.community.rest.client.dto.StartProcessInstanceDto;
 import org.camunda.community.rest.client.dto.TaskDto;
 import org.camunda.community.rest.client.dto.UserIdDto;
+import org.camunda.community.rest.client.dto.VariableInstanceDto;
 import org.camunda.community.rest.client.dto.VariableValueDto;
 import org.camunda.community.rest.client.invoker.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -358,8 +359,10 @@ public class C7EngineClient implements BpmEngineClient {
 	@Override
 	public ProcessVariable[] findVariables(final String processInstanceId, final BpmEngine bpmEngine) {
 		try {
-			return variableInstanceApi.getVariableInstances(null, null, processInstanceId, null, null, null, null, null,
-					null, tenantHolder.getTenantId().orElse(null), null, null, null, null, null, null, null, null, null)
+			return variableInstanceApi
+					.getVariableInstances(null, null, processInstanceId, null, null, null, null, null, null,
+							tenantHolder.getTenantId().orElse(null), null, null, null, null, null, null, null, null,
+							false)
 					.stream().map(o -> ProcessVariable.builder().name(o.getName()).type(o.getType())
 							.value(String.valueOf(o.getValue())).build())
 					.toArray(ProcessVariable[]::new);
