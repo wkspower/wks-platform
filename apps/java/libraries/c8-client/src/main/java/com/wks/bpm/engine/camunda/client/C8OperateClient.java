@@ -18,9 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.bpm.engine.BpmEngine;
-import com.wks.bpm.engine.client.VariablesMapper;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessVariable;
+import com.wks.bpm.engine.model.spi.ProcessVariableType;
 
 import io.camunda.operate.CamundaOperateClient;
 import io.camunda.operate.exception.OperateException;
@@ -37,9 +37,6 @@ public class C8OperateClient {
 
 	@Autowired
 	private CamundaOperateClient operateClient;
-
-	@Autowired
-	private VariablesMapper<List<?>> c8VariablesMapper;
 
 	public String getProcessDefinitionXML(String processDefinitionId, final BpmEngine bpmEngine) {
 		throw new UnsupportedOperationException();
@@ -59,8 +56,8 @@ public class C8OperateClient {
 
 			VariableFilterBuilder filterBuilder = VariableFilter.builder()
 					.name(businessKey.isPresent() ? "businessKey" : null)
-					// adding double quotes here because that's how operate is converting string
-					// variables on variable queries. Camunda Bug?
+					// adding double quotes because that's how operate is converting string
+					// variables on variable queries.
 					.value(businessKey.isPresent() ? ("\"" + businessKey.get() + "\"") : null);
 
 			SearchQuery searchQuery = new SearchQuery.Builder().filter(filterBuilder.build()).build();
@@ -115,10 +112,15 @@ public class C8OperateClient {
 				.processInstanceKey(Long.valueOf(processInstanceId));
 
 		try {
-			SearchQuery searchQuery = new SearchQuery.Builder().filter(filterBuilder.build()).build();
+			SearchQuery searchQuery = new SearchQuery.Builder()
+					.filter(filterBuilder.scopeKey(Long.valueOf(processInstanceId)).build()).build();
 
-			List<Variable> variables = operateClient.searchVariables(searchQuery).stream().toList();
-			return c8VariablesMapper.toProcessVariablesArray(variables);
+			return operateClient.searchVariables(searchQuery).stream()
+					.map(o -> ProcessVariable.builder().name(o.getName()).type(ProcessVariableType.JSON.getValue())
+							.value(o.getValue()).build())
+
+					.toArray(ProcessVariable[]::new);
+
 		} catch (NumberFormatException | OperateException e) {
 			log.error("Error retrieving variables in zeebe", e);
 			e.printStackTrace();

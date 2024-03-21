@@ -11,10 +11,9 @@
  */
 package com.wks.bpm.engine.client.facade;
 
+import java.util.List;
 import java.util.Optional;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
 import com.wks.bpm.engine.exception.ProcessInstanceNotFoundException;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
@@ -44,15 +43,11 @@ public interface BpmEngineClientFacade {
 	ProcessInstance[] findProcessInstances(final Optional<String> processDefinitionKey,
 			final Optional<String> businessKey, final Optional<String> activityIdIn);
 
-	ProcessInstance startProcess(final String processDefinitionKey);
+	ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
+			final Optional<ProcessVariable> processVariable);
 
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey);
-
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonObject caseInstance);
-
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonArray caseAttributes);
+	ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
+			final List<ProcessVariable> processVariables);
 
 	void deleteProcessInstance(String processInstanceId);
 
@@ -68,10 +63,10 @@ public interface BpmEngineClientFacade {
 
 	void unclaimTask(String taskId);
 
-	void complete(String taskId, JsonObject variables);
+	void complete(String taskId, List<ProcessVariable> variables);
 
 	ProcessVariable[] findVariables(String processInstanceId);
 
-	void sendMessage(ProcessMessage processMesage, Optional<JsonArray> variables);
+	void sendMessage(ProcessMessage processMesage, Optional<List<ProcessVariable>> variables);
 
 }

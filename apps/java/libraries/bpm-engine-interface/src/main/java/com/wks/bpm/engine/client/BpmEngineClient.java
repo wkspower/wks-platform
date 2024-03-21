@@ -11,10 +11,9 @@
  */
 package com.wks.bpm.engine.client;
 
+import java.util.List;
 import java.util.Optional;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
 import com.wks.bpm.engine.exception.ProcessInstanceNotFoundException;
@@ -47,16 +46,11 @@ public interface BpmEngineClient {
 	String getProcessDefinitionXMLByKey(final String processDefinitionKey, final BpmEngine bpmEngine)
 			throws ProcessDefinitionNotFoundException;
 
-	ProcessInstance startProcess(final String processDefinitionKey, final BpmEngine bpmEngine);
+	public ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
+			final Optional<ProcessVariable> processVariable, final BpmEngine bpmEngine);
 
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final BpmEngine bpmEngine);
-
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey, final JsonObject variable,
-			final BpmEngine bpmEngine);
-
-	ProcessInstance startProcess(final String processDefinitionKey, final String businessKey, final JsonArray variables,
-			final BpmEngine bpmEngine);
+	public ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
+			final List<ProcessVariable> processVariables, final BpmEngine bpmEngine);
 
 	void deleteProcessInstance(final String processInstanceId, final BpmEngine bpmEngine);
 
@@ -73,11 +67,11 @@ public interface BpmEngineClient {
 
 	void unclaimTask(String taskId, final BpmEngine bpmEngine);
 
-	void complete(String taskId, JsonObject variables, final BpmEngine bpmEngine);
+	void complete(String taskId, List<ProcessVariable> variables, final BpmEngine bpmEngine);
 
 	ProcessVariable[] findVariables(final String processInstanceId, final BpmEngine bpmEngine);
 
-	void sendMessage(final ProcessMessage processMesage, final Optional<JsonArray> variables,
+	void sendMessage(final ProcessMessage processMesage, final Optional<List<ProcessVariable>> variables,
 			final BpmEngine bpmEngine);
 
 }

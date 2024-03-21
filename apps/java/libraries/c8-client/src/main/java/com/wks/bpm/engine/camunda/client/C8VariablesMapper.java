@@ -1,5 +1,4 @@
 /*
- * WKS Platform - Open-Source Project
  * 
  * This file is part of the WKS Platform, an open-source project developed by WKS Power.
  * 
@@ -11,48 +10,30 @@
  */
 package com.wks.bpm.engine.camunda.client;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.wks.bpm.engine.client.VariablesMapper;
 import com.wks.bpm.engine.model.spi.ProcessVariable;
 
-import io.camunda.operate.model.Variable;
-
 @Component
 @Qualifier("c8VariablesMapper")
-public class C8VariablesMapper implements VariablesMapper<List<Variable>> {
-
-	@Autowired
-	private GsonBuilder gsonBuilder;
+public class C8VariablesMapper implements VariablesMapper<Map<String, String>> {
 
 	@Override
-	public JsonObject toJsonObject(JsonArray caseAttributes) {
+	public Map<String, String> toEngineFormat(final List<ProcessVariable> caseAttributes) {
 
-		JsonObject processVariables = new JsonObject();
+		Map<String, String> processVariablesMap = new LinkedHashMap<>();
 
 		caseAttributes.forEach(caseAttribute -> {
-			processVariables.add(caseAttribute.getAsJsonObject().get("name").getAsString(),
-					caseAttribute.getAsJsonObject().get("value"));
+			processVariablesMap.put(caseAttribute.getName(), caseAttribute.getValue());
 		});
 
-		return processVariables;
-	}
-
-	@Override
-	public ProcessVariable[] toProcessVariablesArray(List<Variable> variablesFromProcessEngine) {
-
-		return variablesFromProcessEngine.stream()
-				.map(variable -> ProcessVariable.builder().name(variable.getName())
-						.value(gsonBuilder.create().toJsonTree(variable.getValue())).build())
-				.toArray(ProcessVariable[]::new);
-
+		return processVariablesMap;
 	}
 
 }

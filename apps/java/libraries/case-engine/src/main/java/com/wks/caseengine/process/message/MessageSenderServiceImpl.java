@@ -11,14 +11,15 @@
  */
 package com.wks.caseengine.process.message;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonArray;
 import com.wks.bpm.engine.client.facade.BpmEngineClientFacade;
 import com.wks.bpm.engine.model.spi.ProcessMessage;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 
 @Component
 public class MessageSenderServiceImpl implements MessageSenderService {
@@ -27,7 +28,7 @@ public class MessageSenderServiceImpl implements MessageSenderService {
 	private BpmEngineClientFacade processEngineClient;
 
 	@Override
-	public void sendMessage(final ProcessMessage processMessage, final Optional<JsonArray> variables) {
+	public void sendMessage(final ProcessMessage processMessage, final Optional<List<ProcessVariable>> variables) {
 		processEngineClient.sendMessage(processMessage, variables);
 
 	}

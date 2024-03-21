@@ -11,14 +11,13 @@
  */
 package com.wks.bpm.engine.camunda.client;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.client.BpmEngineClient;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
@@ -80,26 +79,16 @@ public class C8EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final BpmEngine bpmEngine) {
-		return zeebeClient.startProcess(processDefinitionKey, bpmEngine);
+	public ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
+			Optional<ProcessVariable> processVariable, BpmEngine bpmEngine) {
+		return zeebeClient.startProcess(processDefinitionKey, businessKey, processVariable,
+				bpmEngine);
 	}
 
 	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final BpmEngine bpmEngine) {
-		return zeebeClient.startProcess(processDefinitionKey, businessKey, bpmEngine);
-	}
-
-	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonObject caseInstance, final BpmEngine bpmEngine) {
-		return zeebeClient.startProcess(processDefinitionKey, businessKey, caseInstance, bpmEngine);
-	}
-
-	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonArray caseAttributes, final BpmEngine bpmEngine) {
-		return zeebeClient.startProcess(processDefinitionKey, businessKey, caseAttributes, bpmEngine);
+	public ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
+			List<ProcessVariable> processVariables, BpmEngine bpmEngine) {
+		return zeebeClient.startProcess(processDefinitionKey, businessKey, processVariables, bpmEngine);
 	}
 
 	@Override
@@ -119,8 +108,8 @@ public class C8EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public Task getTask(String taskId, BpmEngine bpmEngine) {
-		throw new UnsupportedOperationException();
+	public Task getTask(final String taskId, final BpmEngine bpmEngine) {
+		return tasklistClient.getTask(taskId, bpmEngine);
 	}
 
 	@Override
@@ -128,22 +117,23 @@ public class C8EngineClient implements BpmEngineClient {
 		ProcessInstance[] processInstances = operateClient.searchProcessInstances(Optional.empty(),
 				Optional.of(processInstanceBusinessKey), Optional.empty(), bpmEngine);
 
-		return tasklistClient.find(processInstances[0].getId(), bpmEngine);
+		return processInstances.length > 0 ? tasklistClient.find(processInstances[0].getId(), bpmEngine) : new Task[0];
 	}
 
 	@Override
 	public void claimTask(final String taskId, final String taskAssignee, final BpmEngine bpmEngine) {
-		throw new UnsupportedOperationException();
+		tasklistClient.claimTask(taskId, taskAssignee, bpmEngine);
 	}
 
 	@Override
 	public void unclaimTask(final String taskId, final BpmEngine bpmEngine) {
-		throw new UnsupportedOperationException();
+		tasklistClient.unclaimTask(taskId, bpmEngine);
 	}
 
 	@Override
-	public void complete(final String taskId, final JsonObject variables, final BpmEngine bpmEngine) {
-		throw new UnsupportedOperationException();
+	public void complete(final String taskId, final List<ProcessVariable> variables, final BpmEngine bpmEngine) {
+		C8Task task = tasklistClient.complete(taskId, bpmEngine);
+		zeebeClient.setVariables(task.getProcessInstanceId(), variables);
 	}
 
 	@Override
@@ -152,7 +142,7 @@ public class C8EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public void sendMessage(final ProcessMessage processMesage, final Optional<JsonArray> variables,
+	public void sendMessage(final ProcessMessage processMesage, final Optional<List<ProcessVariable>> variables,
 			final BpmEngine bpmEngine) {
 		throw new UnsupportedOperationException();
 	}

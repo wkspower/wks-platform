@@ -11,7 +11,7 @@
  */
 package com.wks.bpm.engine.model.spi;
 
-import com.google.gson.JsonObject;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,6 +38,6 @@ public class ProcessMessage {
 	private String messageName;
 	private String businessKey;
 
-	private JsonObject processVariables;
+	private List<ProcessVariable> processVariables;
 
 }

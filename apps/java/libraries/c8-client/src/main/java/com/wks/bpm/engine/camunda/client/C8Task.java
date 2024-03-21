@@ -22,7 +22,7 @@ public class C8Task extends Task {
 	public void setCreationDate(String creationDate) {
 		this.created = creationDate;
 	}
-	
+
 	public void setDueDate(String due) {
 		this.due = due;
 	}
@@ -37,5 +37,9 @@ public class C8Task extends Task {
 
 	public void setProcessDefinitionKey(String processInstanceKey) {
 		this.processDefinitionId = processInstanceKey;
+	}
+
+	public void setTaskDefinitionId(String taskDefinitionKey) {
+		this.taskDefinitionKey = taskDefinitionKey;
 	}
 }

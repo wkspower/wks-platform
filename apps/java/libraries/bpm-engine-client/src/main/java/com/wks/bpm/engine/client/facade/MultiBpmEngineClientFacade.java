@@ -11,12 +11,11 @@
  */
 package com.wks.bpm.engine.client.facade;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.wks.bpm.engine.BpmEngine;
 import com.wks.bpm.engine.BpmEngineType;
 import com.wks.bpm.engine.client.BpmEngineClient;
@@ -86,24 +85,14 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey) {
-		return getEngineClient().startProcess(processDefinitionKey, getBpmEngine());
-	}
-
-	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey) {
-		return getEngineClient().startProcess(processDefinitionKey, businessKey, getBpmEngine());
-	}
-
-	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonObject caseInstance) {
+	public ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
+			final Optional<ProcessVariable> caseInstance) {
 		return getEngineClient().startProcess(processDefinitionKey, businessKey, caseInstance, getBpmEngine());
 	}
 
 	@Override
-	public ProcessInstance startProcess(final String processDefinitionKey, final String businessKey,
-			final JsonArray caseAttributes) {
+	public ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
+			final List<ProcessVariable> caseAttributes) {
 		return getEngineClient().startProcess(processDefinitionKey, businessKey, caseAttributes, getBpmEngine());
 	}
 
@@ -143,7 +132,7 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public void complete(String taskId, JsonObject variables) {
+	public void complete(String taskId, List<ProcessVariable> variables) {
 		getEngineClient().complete(taskId, variables, getBpmEngine());
 	}
 
@@ -153,7 +142,7 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public void sendMessage(ProcessMessage processMesage, Optional<JsonArray> variables) {
+	public void sendMessage(ProcessMessage processMesage, Optional<List<ProcessVariable>> variables) {
 		getEngineClient().sendMessage(processMesage, variables, getBpmEngine());
 	}
 

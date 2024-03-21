@@ -14,6 +14,7 @@ package com.wks.bpm.engine.model.impl;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,6 +27,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ProcessDefinitionImpl implements ProcessDefinition {
 
 	private String bpmEngineId;
