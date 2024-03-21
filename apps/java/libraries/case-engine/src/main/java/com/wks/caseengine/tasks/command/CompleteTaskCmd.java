@@ -34,13 +34,15 @@ public class CompleteTaskCmd implements Command<Void> {
 
 	@Override
 	public Void execute(CommandContext commandContext) {
+		
 		Task task = commandContext.getBpmEngineClientFacade().getTask(taskId);
+		
 		commandContext.getBpmEngineClientFacade().complete(taskId, variables);
 
 		
 		// Won't work for Camunda8 since there is no CaseDefinitionId
 		if (task.getProcessDefinitionId() != null && task.getTaskDefinitionKey() != null
-				&& task.getCaseDefinitionId() != null) {
+				&& task.getCaseInstanceId() != null) {
 			commandContext.getApplicationEventPublisher()
 					.publishEvent(new TaskCompleteEvent(new TaskCompleteEventObject(task.getProcessDefinitionId(),
 							task.getTaskDefinitionKey(), task.getCaseInstanceId())));

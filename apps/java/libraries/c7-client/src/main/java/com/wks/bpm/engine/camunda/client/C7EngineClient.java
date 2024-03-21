@@ -13,8 +13,10 @@ package com.wks.bpm.engine.camunda.client;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,7 +33,6 @@ import org.camunda.community.rest.client.dto.ProcessInstanceWithVariablesDto;
 import org.camunda.community.rest.client.dto.StartProcessInstanceDto;
 import org.camunda.community.rest.client.dto.TaskDto;
 import org.camunda.community.rest.client.dto.UserIdDto;
-import org.camunda.community.rest.client.dto.VariableInstanceDto;
 import org.camunda.community.rest.client.dto.VariableValueDto;
 import org.camunda.community.rest.client.invoker.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,6 +184,7 @@ public class C7EngineClient implements BpmEngineClient {
 
 			StartProcessInstanceDto requestDto = new StartProcessInstanceDto();
 			requestDto.businessKey(businessKey.orElse(null));
+			requestDto.setCaseInstanceId(businessKey.orElse(null));
 			requestDto.variables(c7VariablesMapper.toEngineFormat(processVariables));
 
 			ProcessInstanceWithVariablesDto responseDto = processDefinitionApi.startProcessInstanceByKeyAndTenantId(
@@ -212,35 +214,35 @@ public class C7EngineClient implements BpmEngineClient {
 	@Override
 	public ActivityInstance[] findActivityInstances(final String processInstanceId, final BpmEngine bpmEngine)
 			throws ProcessInstanceNotFoundException {
-//		ActivityInstanceDto activityInstanceDto;
-//		try {
-//			activityInstanceDto = processInstanceApi.getActivityInstanceTree(processInstanceId);
-//			ActivityInstance[] activityInstances = new ActivityInstance[1];
-//			activityInstances[0] = convertFromActivityInstanceDto(activityInstanceDto);
-//			return activityInstances;
-//		} catch (ApiException e) {
-//			log.error("Error getting camunda activity instances", e);
-//			e.printStackTrace();
-		return new ActivityInstance[0];
-//		}
+		ActivityInstanceDto activityInstanceDto;
+		try {
+			activityInstanceDto = processInstanceApi.getActivityInstanceTree(processInstanceId);
 
+			if (activityInstanceDto == null) {
+				throw new ProcessInstanceNotFoundException();
+			}
+
+			return convertFromActivityInstanceDto(activityInstanceDto.getChildActivityInstances());
+		} catch (ApiException e) {
+			log.error("Error getting camunda activity instances", e);
+			e.printStackTrace();
+			return new ActivityInstance[0];
+		}
 	}
 
-	private ActivityInstance convertFromActivityInstanceDto(ActivityInstanceDto dto) {
-		ActivityInstance activityInstance = new ActivityInstance();
-		activityInstance.setId(dto.getId());
-		activityInstance.setActivityId(dto.getActivityId());
-		activityInstance.setActivityType(dto.getActivityType());
+	private ActivityInstance[] convertFromActivityInstanceDto(List<ActivityInstanceDto> activityInstancesDtos) {
+		List<ActivityInstance> activityInstances = new ArrayList<ActivityInstance>();
 
-		if (dto.getChildActivityInstances() != null && !dto.getChildActivityInstances().isEmpty()) {
-			ActivityInstance[] childInstances = new ActivityInstance[dto.getChildActivityInstances().size()];
-			for (int i = 0; i < dto.getChildActivityInstances().size(); i++) {
-				childInstances[i] = convertFromActivityInstanceDto(dto.getChildActivityInstances().get(i));
-			}
-			activityInstance.setChildActivityInstances(childInstances);
+		for (Iterator<ActivityInstanceDto> iterator = activityInstancesDtos.iterator(); iterator.hasNext();) {
+			ActivityInstanceDto activityInstanceDto = (ActivityInstanceDto) iterator.next();
+			ActivityInstance activityInstance = new ActivityInstance();
+			activityInstance.setId(activityInstanceDto.getId());
+			activityInstance.setActivityId(activityInstanceDto.getActivityId());
+			activityInstance.setActivityType(activityInstanceDto.getActivityType());
+			activityInstances.add(activityInstance);
 		}
 
-		return activityInstance;
+		return activityInstances.toArray(ActivityInstance[]::new);
 	}
 
 	@Override
