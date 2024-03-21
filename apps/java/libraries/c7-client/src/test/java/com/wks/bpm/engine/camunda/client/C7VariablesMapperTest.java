@@ -11,7 +11,19 @@
  */
 package com.wks.bpm.engine.camunda.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Map;
+
+import org.camunda.community.rest.client.dto.VariableValueDto;
 import org.junit.jupiter.api.Test;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.wks.bpm.engine.camunda7.client.C7VariablesMapper;
+import com.wks.bpm.engine.model.spi.ProcessVariable;
 
 public class C7VariablesMapperTest {
 
@@ -19,17 +31,22 @@ public class C7VariablesMapperTest {
 
 	@Test
 	public void testMap() {
-		int x = 1 / 0;
-//		// given
-//		String caseAttributes = "[{\"name\": \"when\",\"value\": \"01/01/1990\",\"type\": \"String\"},{\"name\": \"where\",\"value\": \"Toronto\",\"type\": \"String\"}]";
-//
-//		// when
-//		Type listType = new TypeToken<ArrayList<ProcessVariable>>() {
-//		}.getType();
-//		JsonObject processVariables = c7VariablesMapper.toEngineFormat(new Gson().fromJson(caseAttributes, listType));
-//
-//		assertEquals("{\"value\":\"01/01/1990\",\"type\":\"String\"}", String.valueOf(processVariables.get("when")));
-//		assertEquals("{\"value\":\"Toronto\",\"type\":\"String\"}", String.valueOf(processVariables.get("where")));
+		// given
+		String caseAttributes = "[{\"name\": \"when\",\"value\": \"01/01/1990\",\"type\": \"String\"},{\"name\": \"where\",\"value\": \"Toronto\",\"type\": \"String\"}]";
+
+		// when
+		Type listType = new TypeToken<ArrayList<ProcessVariable>>() {
+		}.getType();
+		Map<String, VariableValueDto> processVariables = c7VariablesMapper
+				.toEngineFormat(new Gson().fromJson(caseAttributes, listType));
+
+		// then
+		assertEquals("{\"value\":\"01/01/1990\",\"type\":\"String\"}", convertToJson(processVariables.get("when")));
+		assertEquals("{\"value\":\"Toronto\",\"type\":\"String\"}", convertToJson(processVariables.get("where")));
+	}
+
+	private String convertToJson(VariableValueDto variableValueDto) {
+		return "{\"value\":\"" + variableValueDto.getValue() + "\",\"type\":\"" + variableValueDto.getType() + "\"}";
 	}
 
 }

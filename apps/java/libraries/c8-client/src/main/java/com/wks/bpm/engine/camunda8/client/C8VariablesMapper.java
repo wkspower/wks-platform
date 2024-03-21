@@ -8,7 +8,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.engine.camunda.client;
+package com.wks.bpm.engine.camunda8.client;
 
 import java.util.LinkedHashMap;
 import java.util.List;

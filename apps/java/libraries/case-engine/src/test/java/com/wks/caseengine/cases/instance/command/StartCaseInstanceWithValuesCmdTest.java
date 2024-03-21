@@ -12,9 +12,13 @@
 package com.wks.caseengine.cases.instance.command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -91,8 +95,13 @@ public class StartCaseInstanceWithValuesCmdTest {
 		assertEquals(caseInstanceToSave.getQueueId(), savedCaseInstance.getQueueId());
 		assertEquals("Stage 1", savedCaseInstance.getStage());
 		assertEquals(caseInstanceToSave.getStatus(), savedCaseInstance.getStatus());
-//		verify(processInstanceService).create(eq("Process1"), eq("BK_1"), any(ProcessVariable.class));
-		int x = 1 / 0;
+
+		verify(processInstanceService).create(eq("Process1"), eq(Optional.of("BK_1")), anyOptionalOfProcessVariable());
+	}
+
+	// Helper method to create a properly typed Optional
+	private static <T> Optional<T> anyOptionalOfProcessVariable() {
+		return any();
 	}
 
 }

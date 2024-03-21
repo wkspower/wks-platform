@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.engine.camunda.client;
+package com.wks.bpm.engine.camunda7.client;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
