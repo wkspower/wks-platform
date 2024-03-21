@@ -77,7 +77,7 @@
 		<module>libraries/bpm-engine-interface</module>
 		<module>libraries/bpm-engine-client</module>
 		<module>libraries/api-security</module>
-		<module>libraries/rest-client</module>
+		<module>libraries/case-engine-rest-dto</module>
 		<module>libraries/case-engine-rest-client</module>
 
 		<module>libraries/c7-plugins</module>
