@@ -5,6 +5,9 @@ services:
         build:
             context: apps/java/services/demo-data-loader
         environment:
+            - CAMUNDA7_DATA_IMPORT_ENABLED=false
+            - CAMUNDA8_DATA_IMPORT_ENABLED=true
+            - CAMUNDA8_ZEEBE_GATEWAY_ADDRESS=${CAMUNDA8_ZEEBE_GATEWAY_ADDRESS}
             - MONGO_DATABASE=${MONGO_DEMO_DATA_LOADER_DATABASE}
             - MONGO_CONN=${MONGO_CONNECTION_URL}
             - KEYCLOAK_URL=${KEYCLOAK_URL}

@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 import io.camunda.zeebe.client.ZeebeClient;
 import lombok.extern.slf4j.Slf4j;
 
-//@Component
+@Component
 @ConditionalOnProperty("camunda8.data.import.enabled")
 @Order(4)
 @Slf4j
