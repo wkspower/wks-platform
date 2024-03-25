@@ -100,7 +100,6 @@ services:
       timeout: 1s
       retries: 5
       start_period: 30s
-    env_file: connector-secrets.txt
     depends_on:
       - zeebe
       - operate
