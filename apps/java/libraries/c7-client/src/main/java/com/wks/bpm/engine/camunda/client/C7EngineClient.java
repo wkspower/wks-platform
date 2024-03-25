@@ -36,7 +36,7 @@ import org.camunda.community.rest.client.dto.UserIdDto;
 import org.camunda.community.rest.client.dto.VariableValueDto;
 import org.camunda.community.rest.client.invoker.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.wks.api.security.context.SecurityContextTenantHolder;
@@ -60,7 +60,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Component
-@Qualifier("c7EngineClient")
+@ConditionalOnProperty(value = "wks.bpm.engine.camunda.version", havingValue = "camunda7", matchIfMissing = true)
 @Slf4j
 public class C7EngineClient implements BpmEngineClient {
 

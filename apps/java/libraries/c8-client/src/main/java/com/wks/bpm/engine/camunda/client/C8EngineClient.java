@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.wks.bpm.engine.BpmEngine;
@@ -33,7 +33,7 @@ import com.wks.bpm.engine.model.spi.Task;
  *
  */
 @Component
-@Qualifier("c8EngineClient")
+@ConditionalOnProperty(value = "wks.bpm.engine.camunda.version", havingValue = "camunda8", matchIfMissing = false)
 public class C8EngineClient implements BpmEngineClient {
 
 	@Autowired
