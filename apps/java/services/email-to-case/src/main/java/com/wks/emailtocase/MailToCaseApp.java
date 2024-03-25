@@ -18,7 +18,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 @ComponentScan(basePackages = { "com.wks.bpm.engine.client", "com.wks.bpm.engine.camunda7", "com.wks.caseengine",
-		"com.wks.rest.client", "com.wks.api.security", "org.camunda.community.rest.client.springboot" })
+		"com.wks.api.security", "org.camunda.community.rest.client.springboot" })
 public class MailToCaseApp {
 
 	public static void main(String[] args) {
