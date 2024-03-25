@@ -25,6 +25,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.wks.api.security.context.SecurityContextTenantHolder;
+import com.wks.caseengine.rest.config.security.InjectorTenantHandlerInterceptor;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
 
 @ExtendWith(MockitoExtension.class)

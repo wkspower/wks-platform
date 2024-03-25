@@ -5,11 +5,7 @@
       <conversion:message severity="INFO">Unused attribute 'historyTimeToLive' on 'process' is removed.</conversion:message>
     </bpmn:extensionElements>
     <bpmn:startEvent id="StartEvent_1" name="started">
-      <bpmn:extensionElements>
-        <zeebe:ioMapping>
-          <zeebe:output source="={&#34;businessKey&#34;:&#34;250&#34;,&#34;caseDefinitionId&#34;:&#34;customer-support&#34;,&#34;stage&#34;:&#34;Ticket Creation&#34;,&#34;owner&#34;:{&#34;id&#34;:&#34;fc51878a-c415-41b3-b2b3-b9ee120acb93&#34;,&#34;name&#34;:&#34;demo demo&#34;,&#34;email&#34;:&#34;demo@demo.com&#34;,&#34;phone&#34;:&#34;&#34;},&#34;comments&#34;:[],&#34;attributes&#34;:[{&#34;name&#34;:&#34;ticketTitle&#34;,&#34;value&#34;:&#34;&#34;,&#34;type&#34;:&#34;String&#34;},{&#34;name&#34;:&#34;description&#34;,&#34;value&#34;:&#34;&#34;,&#34;type&#34;:&#34;String&#34;},{&#34;name&#34;:&#34;contactName&#34;,&#34;value&#34;:&#34;&#34;,&#34;type&#34;:&#34;String&#34;},{&#34;name&#34;:&#34;contactEmail&#34;,&#34;value&#34;:&#34;&#34;,&#34;type&#34;:&#34;String&#34;},{&#34;name&#34;:&#34;priority&#34;,&#34;value&#34;:&#34;low&#34;,&#34;type&#34;:&#34;String&#34;},{&#34;name&#34;:&#34;attachments&#34;,&#34;value&#34;:&#34;[]&#34;,&#34;type&#34;:&#34;Json&#34;},{&#34;name&#34;:&#34;createdAt&#34;,&#34;value&#34;:&#34;15/03/2024&#34;,&#34;type&#34;:&#34;String&#34;}]}" target="caseInstance" />
-        </zeebe:ioMapping>
-      </bpmn:extensionElements>
+      <bpmn:extensionElements />
       <bpmn:outgoing>Flow_1qkqmkr</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_1qkqmkr" sourceRef="StartEvent_1" targetRef="create-case-instance" />

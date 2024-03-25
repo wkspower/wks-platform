@@ -71,6 +71,12 @@
 		</dependency>
 		
 		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>${h2.version}</version> <!--$NO-MVN-MAN-VER$ -->
@@ -82,7 +88,7 @@
 			<artifactId>mongodb-driver-sync</artifactId>
 			<version>${mongo.version}</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
-		
+				
 		<dependency>
 			<groupId>de.flapdoodle.embed</groupId>
 			<artifactId>de.flapdoodle.embed.mongo.spring31x</artifactId>

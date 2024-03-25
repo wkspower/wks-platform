@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+    demo-data-loader:
+        build:
+            context: apps/java/services/demo-data-loader
+        environment:
+            - CAMUNDA7_DATA_IMPORT_ENABLED=true
+            - CAMUNDA8_DATA_IMPORT_ENABLED=false
+            - CAMUNDA_URL=${CAMUNDA_BASE_URL}
+            - MONGO_DATABASE=${MONGO_DEMO_DATA_LOADER_DATABASE}
+            - MONGO_CONN=${MONGO_CONNECTION_URL}
+            - KEYCLOAK_URL=${KEYCLOAK_URL}
+            - KEYCLOAK_DEFAULT_USER=${KEYCLOAK_DEFAULT_USER}
+            - KEYCLOAK_DEFAULT_USER_PASSWORD=${KEYCLOAK_DEFAULT_USER_PASSWORD}
+            - KEYCLOAK_DEFAULT_USER_EMAIL=${KEYCLOAK_DEFAULT_USER_EMAIL}
+            - KEYCLOAK_DEFAULT_USER_FIRST_NAME=${KEYCLOAK_DEFAULT_USER_FIRST_NAME}
+            - KEYCLOAK_DEFAULT_USER_LAST_NAME=${KEYCLOAK_DEFAULT_USER_LAST_NAME}
+        links:
+            - mongodb
+            - camunda
+            - keycloak
+        depends_on:
+            mongodb:
+                condition: service_healthy
+            camunda:
+                condition: service_healthy
+            keycloak:
+                condition: service_healthy            

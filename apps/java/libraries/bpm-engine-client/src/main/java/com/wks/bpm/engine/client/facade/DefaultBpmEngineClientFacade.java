@@ -38,7 +38,7 @@ import com.wks.bpm.engine.model.spi.Task;
 public class DefaultBpmEngineClientFacade implements BpmEngineClientFacade {
 
 	@Autowired
-	private BpmEngineClient c7EngineClient;
+	private BpmEngineClient engineClient;
 
 	private BpmEngine bpmEngine = new DefaultC7BpmEngine();
 
@@ -47,7 +47,7 @@ public class DefaultBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	private BpmEngineClient getEngineClient() {
-		return c7EngineClient;
+		return engineClient;
 	}
 
 	@Override
