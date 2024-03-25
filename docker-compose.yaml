@@ -52,9 +52,9 @@ services:
         healthcheck:
             test: curl --fail http://localhost:8080/health/ready || exit 1
             interval: 10s
-            retries: 3
+            retries: 10
             start_period: 5s
-            timeout: 60s
+            timeout: 20s
         ports:
             - 8082:8080
         volumes:
