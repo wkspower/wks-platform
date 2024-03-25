@@ -10,7 +10,7 @@ logging:
 
 spring.mvc.converters.preferred-json-mapper: gson
 
-zeebe.client.broker.gateway-address: 127.0.0.1:26500
+zeebe.client.broker.gateway-address: ${CAMUNDA8_ZEEBE_GATEWAY_ADDRESS:127.0.0.1:26500}
 zeebe.client.security.plaintext: true
 
 wks-case-api.base.url: ${WKS_CASE_API_URL:http://localhost:8081}

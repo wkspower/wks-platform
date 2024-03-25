@@ -13,21 +13,23 @@ logging:
       org.springframework.security: INFO
       org.apache.http: INFO
       httpclient.wire: INFO
-      
+
 spring.mvc.converters.preferred-json-mapper: gson
 
-camunda.bpm.client.base-url: http://localhost:8080/engine-rest
+wks.bpm.engine.camunda.version: ${CAMUNDA_VERSION:camunda7}
 
-zeebe.client.broker.gateway-address: 127.0.0.1:26500
+camunda.bpm.client.base-url: ${CAMUNDA_BASE_URL:http://localhost:8080/engine-rest}
+
+zeebe.client.broker.gateway-address: ${CAMUNDA8_ZEEBE_GATEWAY_ADDRESS:127.0.0.1:26500}
 zeebe.client.security.plaintext: true
 camunda.operate.client.enabled: true
-camunda.operate.client.url: http://localhost:8281
-camunda.operate.client.username: demo
-camunda.operate.client.password: demo
+camunda.operate.client.url: ${CAMUNDA8_OPERATE_URL:http://localhost:8281}
+camunda.operate.client.username: ${CAMUNDA8_OPERATE_USERNAME:demo}
+camunda.operate.client.password: ${CAMUNDA8_OPERATE_PASSWORD:demo}
 
-camunda.tasklist.client.url: http://localhost:8182
-camunda.tasklist.client.username: demo
-camunda.tasklist.client.password: demo
+camunda.tasklist.client.url: ${CAMUNDA8_TASKLIST_URL:http://localhost:8182}
+camunda.tasklist.client.username: ${CAMUNDA8_TASKLIST_USERNAME:demo}
+camunda.tasklist.client.password: ${CAMUNDA8_TASKLIST_PASSWORD:demo}
 
 spring.data.mongodb.uri: ${MONGO_CONN:mongodb://localhost}
 spring.data.mongodb.database: ${MONGO_DATABASE:shared}
@@ -41,7 +43,7 @@ keycloak.url: ${KEYCLOAK_URL:http://localhost:8082}
 
 management.health.mongo.enabled: false
 management.health.reds.enabled: false
-management.endpoints.web.exposure.include: health,info 
+management.endpoints.web.exposure.include: health,info
 management.endpoint.health.show-details: never
 
 case.engine.case-creation-process: case-instance-create
