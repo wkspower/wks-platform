@@ -30,7 +30,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.wks.caseengine.queue.QueueService;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
-import com.wks.caseengine.rest.server.QueueController;
 
 @WebMvcTest(controllers = QueueController.class)
 @AutoConfigureMockMvc(addFilters = false)

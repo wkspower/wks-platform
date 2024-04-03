@@ -26,7 +26,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.wks.caseengine.cases.definition.service.CaseDefinitionService;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
-import com.wks.caseengine.rest.server.HealthCheckController;
 
 @WebMvcTest(controllers = HealthCheckController.class)
 @AutoConfigureMockMvc(addFilters = false)

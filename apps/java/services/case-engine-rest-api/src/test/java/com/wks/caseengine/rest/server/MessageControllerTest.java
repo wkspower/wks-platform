@@ -27,7 +27,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.wks.caseengine.process.message.MessageSenderService;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
-import com.wks.caseengine.rest.server.MessageController;
 
 @WebMvcTest(controllers = MessageController.class)
 @AutoConfigureMockMvc(addFilters = false)
