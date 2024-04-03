@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.engine.camunda7.client.exception;
+package com.wks.bpm.engine.camunda.client.exception;
 
 /**
  * @author victor.franca
