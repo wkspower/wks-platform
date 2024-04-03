@@ -36,7 +36,6 @@ import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
-import com.wks.caseengine.rest.server.CaseDefinitionController;
 
 @WebMvcTest(controllers = CaseDefinitionController.class)
 @AutoConfigureMockMvc(addFilters = false)

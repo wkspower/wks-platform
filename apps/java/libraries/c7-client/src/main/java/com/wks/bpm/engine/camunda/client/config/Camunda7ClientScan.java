@@ -9,14 +9,17 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.engine.camunda7.client.exception;
+package com.wks.bpm.engine.camunda.client.config;
+
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author victor.franca
  *
  */
-public class ProcessEngineNotDefinedException extends Exception {
-
-	private static final long serialVersionUID = 1L;
+@Configuration
+@ComponentScan(basePackages = { "com.wks.bpm.engine.camunda.client", "org.camunda.community.rest.client.springboot" })
+public class Camunda7ClientScan {
 
 }

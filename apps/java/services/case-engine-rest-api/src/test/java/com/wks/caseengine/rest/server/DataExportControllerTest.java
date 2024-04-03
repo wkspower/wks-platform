@@ -26,7 +26,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.wks.caseengine.data.export.DataExportService;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
-import com.wks.caseengine.rest.server.VariableController;
 
 @WebMvcTest(controllers = VariableController.class)
 @AutoConfigureMockMvc(addFilters = false)

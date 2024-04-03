@@ -40,7 +40,6 @@ import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
 import com.wks.caseengine.pagination.PageResult;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
-import com.wks.caseengine.rest.server.CaseInstanceController;
 
 @WebMvcTest(controllers = CaseInstanceController.class)
 @AutoConfigureMockMvc(addFilters = false)

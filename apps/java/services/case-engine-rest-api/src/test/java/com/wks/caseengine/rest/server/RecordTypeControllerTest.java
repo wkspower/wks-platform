@@ -30,7 +30,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.wks.caseengine.record.type.RecordTypeService;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
-import com.wks.caseengine.rest.server.RecordTypeController;
 
 @WebMvcTest(controllers = RecordTypeController.class)
 @AutoConfigureMockMvc(addFilters = false)

@@ -26,7 +26,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
-import com.wks.caseengine.rest.server.VariableController;
 import com.wks.caseengine.rest.server.data.DataImportController;
 
 @WebMvcTest(controllers = VariableController.class)
