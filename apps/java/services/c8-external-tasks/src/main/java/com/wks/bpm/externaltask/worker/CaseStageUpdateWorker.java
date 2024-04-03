@@ -35,7 +35,7 @@ public class CaseStageUpdateWorker {
 	private GsonBuilder gsonBuilder;
 
 	@JobWorker(type = "caseStageUpdate", fetchVariables = { "stage" })
-	public void handleJobFoo(final JobClient client, final ActivatedJob job) {
+	public void handleJob(final JobClient client, final ActivatedJob job) {
 
 		log.info("Starting Worker '{}'", job.getType());
 
