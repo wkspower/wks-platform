@@ -72,12 +72,6 @@ public class EngineMongoDataConnectionImpl implements EngineMongoDataConnection 
 	}
 
 	@Override
-	public MongoCollection<JsonObject> getOrganizationCollection() {
-		MongoDatabase db = byTenant.getDb();
-		return db.getCollection("organization", JsonObject.class);
-	}
-
-	@Override
 	public MongoCollection<JsonObject> getBpmEngineCollection() {
 		MongoDatabase db = byShared.getDb();
 		return db.getCollection("bpmEngine", JsonObject.class);

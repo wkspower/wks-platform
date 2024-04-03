@@ -27,7 +27,6 @@ import com.wks.caseengine.cases.instance.command.GetCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.command.PatchCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.command.SaveCaseInstanceWithValuesCmd;
 import com.wks.caseengine.cases.instance.command.StartCaseInstanceWithValuesCmd;
-import com.wks.caseengine.cases.instance.command.StartEmptyCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.command.UpdateCaseInstanceCommentCmd;
 import com.wks.caseengine.command.CommandExecutor;
 import com.wks.caseengine.pagination.PageResult;
@@ -51,12 +50,6 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	@Override
 	public CaseInstance startWithValues(final CaseInstance caseInstance) {
 		return commandExecutor.execute(new StartCaseInstanceWithValuesCmd(caseInstance));
-	}
-
-	@Override
-	public CaseInstance startEmpty(final String caseDefinitionId) {
-		return commandExecutor.execute(new StartEmptyCaseInstanceCmd(caseDefinitionId));
-
 	}
 
 	@Override

@@ -32,8 +32,6 @@ public interface EngineMongoDataConnection {
 
 	MongoCollection<JsonObject> getCaseEmailCollection();
 
-	MongoCollection<JsonObject> getOrganizationCollection();
-
 	MongoCollection<JsonObject> getBpmEngineCollection();
 
 	MongoCollection<CaseInstance> getCaseInstanceCollection();
