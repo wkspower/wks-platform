@@ -37,14 +37,12 @@
 			<groupId>com.wks</groupId>
 			<artifactId>c7-client</artifactId>
 			<version>${project.parent.version}</version>
-			<scope>runtime</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.wks</groupId>
 			<artifactId>c8-client</artifactId>
 			<version>${project.parent.version}</version>
-			<scope>runtime</scope>
 		</dependency>
 
 	</dependencies>

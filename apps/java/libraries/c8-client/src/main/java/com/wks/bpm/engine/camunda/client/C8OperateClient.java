@@ -144,13 +144,9 @@ public class C8OperateClient {
 
 					.map(o ->
 
-					ProcessDefinitionImpl.builder()
-					.bpmEngineId(bpmEngine.getId())
-					.id(o.getBpmnProcessId())
-					.key(String.valueOf(o.getKey()))
-					.version(String.valueOf(o.getVersion()))
-					.name(o.getName())
-					.build())
+					ProcessDefinitionImpl.builder().bpmEngineId(bpmEngine.getId()).id(o.getBpmnProcessId())
+							.key(String.valueOf(o.getKey())).version(String.valueOf(o.getVersion())).name(o.getName())
+							.build())
 
 					.toArray(ProcessDefinitionImpl[]::new);
 

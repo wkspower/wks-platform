@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.wks.bpm.engine.camunda.client.C7VariablesMapper;
 import com.wks.bpm.engine.model.spi.ProcessVariable;
 
 public class C7VariablesMapperTest {
