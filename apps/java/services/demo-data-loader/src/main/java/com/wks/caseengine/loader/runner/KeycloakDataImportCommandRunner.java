@@ -69,6 +69,12 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 	@Value("${keycloak.data.import.externaltasks-secret}")
 	private String externalTasksSecret;
 
+	@Value("${keycloak.data.import.emailtocase-clientid}")
+	private String emailToCaseClientId;
+
+	@Value("${keycloak.data.import.emailtocase-secret}")
+	private String emailToCaseSecret;
+
 	@Value("${keycloak.data.import.redirecturl}")
 	private String redirectUrl;
 
@@ -131,6 +137,23 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 		externalTasksClient.setOptionalClientScopes(createOptionalClientScopes());
 		clients.add(externalTasksClient);
 
+		ClientRepresentation emailToCaseClient = new ClientRepresentation();
+		emailToCaseClient.setClientId(emailToCaseClientId);
+		emailToCaseClient.setSecret(emailToCaseSecret);
+		emailToCaseClient.setPublicClient(true);
+		emailToCaseClient.setProtocol("openid-connect");
+		emailToCaseClient.setDirectAccessGrantsEnabled(true);
+		emailToCaseClient.setStandardFlowEnabled(true);
+		emailToCaseClient.setServiceAccountsEnabled(true);
+		emailToCaseClient.setAuthorizationServicesEnabled(true);
+		emailToCaseClient.setFullScopeAllowed(true);
+		emailToCaseClient.setClientAuthenticatorType("client-secret");
+		emailToCaseClient.setRedirectUris(Arrays.asList(redirectUrl));
+		emailToCaseClient.setWebOrigins(Arrays.asList(webOrigins));
+		emailToCaseClient.setDefaultClientScopes(createDefaultClientScopes());
+		emailToCaseClient.setOptionalClientScopes(createOptionalClientScopes());
+		clients.add(emailToCaseClient);
+
 		RealmRepresentation realm = new RealmRepresentation();
 		realm.setRealm(realmName);
 		realm.setUsers(createUsers());
@@ -148,6 +171,7 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 			keycloak.realms().create(realm);
 
 			addUserToGroups(keycloak, externalTasksClientId);
+			addUserToGroups(keycloak, emailToCaseClientId);
 
 		} catch (Exception e) {
 			log.error("error to create keycloack", e);
