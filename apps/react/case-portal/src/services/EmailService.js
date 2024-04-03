@@ -10,7 +10,7 @@ async function getAllByBusinessKey(keycloak, caseInstanceBusinessKey) {
         Authorization: `Bearer ${keycloak.token}`
     };
 
-    var url = `${Config.EmailUrl}/email/?caseInstanceBusinessKey=${caseInstanceBusinessKey}`;
+    var url = `${Config.EmailUrl}/email-to-case/?caseInstanceBusinessKey=${caseInstanceBusinessKey}`;
 
     try {
         const resp = await fetch(url, { headers });

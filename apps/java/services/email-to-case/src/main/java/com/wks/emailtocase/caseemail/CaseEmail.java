@@ -29,8 +29,7 @@ public class CaseEmail {
 	private String to;
 	private String from;
 	private String subject;
-	private String text;
-	private String html;
+	private String body;
 
 	private String caseInstanceBusinessKey;
 

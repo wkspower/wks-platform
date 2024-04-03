@@ -16,6 +16,10 @@ has_manager_role := {
     "mgmt_record_type"
 }
 
+has_email_to_case_role := {
+    "email_to_case", 
+}
+
 allow {
     input.path == "case"
     input.method in ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTION"]
@@ -88,8 +92,9 @@ allow {
 
 
 allow {
-    input.path = "email"
+    input.path = "case-email"
     input.method in ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTION", "HEAD"]
+    is_email_to_case_profile
 }
 
 allow {
@@ -167,4 +172,10 @@ is_manager_profile {
     some role in input.realm_access.roles
     has_manager_role[role]
 }
+
+is_email_to_case_profile {
+    some role in input.realm_access.roles
+    has_email_to_case_role[role]
+}
+
 

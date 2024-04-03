@@ -17,8 +17,12 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
-@ComponentScan(basePackages = { "com.wks.bpm.engine.client", "com.wks.bpm.engine.camunda7", "com.wks.caseengine",
-		"com.wks.api.security", "org.camunda.community.rest.client.springboot" })
+@ComponentScan(
+
+		basePackageClasses = { com.wks.api.security.config.ApiSecurityScan.class },
+
+		basePackages = { "com.wks.emailtocase.config", "com.wks.emailtocase.security", "com.wks.emailtocase.server" })
+
 public class MailToCaseApp {
 
 	public static void main(String[] args) {

@@ -29,8 +29,7 @@ public class CaseEmailFactory {
 	@Value("${email-to-case.routing.update-case.pattern}")
 	private String emailToCaseRoutingUpdateCasePattern;
 
-	public CaseEmail create(final String to, final String from, final String subject, final String text,
-			final String html) {
+	public CaseEmail create(final String to, final String from, final String subject, final String body) {
 
 		CaseEmail.CaseEmailBuilder caseEmailBuilder = CaseEmail.builder();
 
@@ -65,7 +64,7 @@ public class CaseEmailFactory {
 			throw new CaseEmailBuilderException("Could not retrieve Case Definition or Case Instance from Email");
 		}
 
-		return caseEmailBuilder.to(to).from(from).subject(subject).text(text).html(html).build();
+		return caseEmailBuilder.to(to).from(from).subject(subject).body(body).build();
 
 	}
 
