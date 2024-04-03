@@ -91,7 +91,6 @@
 		<module>services/c7-external-tasks</module>
 		<module>services/c8-external-tasks</module>
 		<module>services/storage-api</module>
-		<module>services/email-to-case</module>
 		<module>services/demo-data-loader</module>
 	</modules>
 
