@@ -81,22 +81,6 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 	public void importData(JsonObject data) {
 		Gson gson = gsonBuilder.create();
 
-		JsonElement organizationJson = data.get("organization");
-		if (organizationJson != null) {
-			List<JsonObject> organization = gson.fromJson(organizationJson, new TypeToken<List<JsonObject>>() {
-			}.getType());
-
-			try {
-				getOrganizationCollection().insertMany(organization.stream().map(o -> {
-					o.remove("mailReceiveApiKey");
-					o.addProperty("mailReceiveApiKey", new SecretGenerator(64).generate());
-					return new org.bson.json.JsonObject(gson.toJson(o));
-				}).collect(Collectors.toList()));
-			} catch (Exception e) {
-				throwErrorIfNoDuplicateKey(e);
-			}
-		}
-
 		// Cases Definitions
 		JsonElement casesDefinitionsJson = data.get("casesDefinitions");
 		if (casesDefinitionsJson != null) {
@@ -218,11 +202,6 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 	private MongoCollection<org.bson.json.JsonObject> getRecordTypeCollection() {
 		MongoDatabase db = config.mongoTemplateTenant().getDb();
 		return db.getCollection("recordType", org.bson.json.JsonObject.class);
-	}
-
-	private MongoCollection<org.bson.json.JsonObject> getOrganizationCollection() {
-		MongoDatabase db = config.mongoTemplateTenant().getDb();
-		return db.getCollection("organization", org.bson.json.JsonObject.class);
 	}
 
 	private MongoDatabase getDatabase() {

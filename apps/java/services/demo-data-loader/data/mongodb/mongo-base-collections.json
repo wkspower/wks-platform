@@ -1,13 +1,4 @@
 {
-  "organization": [
-    {
-      "_id": {
-        "$oid": "536bb856cf1d3002f5d8d3b6"
-      },
-      "name": "WKS Power Limited",
-      "mailReceiveApiKey": "V3VMR0QzaHE0a1F1NWloQ0lrVkJldjIyY3U0dDgvbytXYjBPclU3eVU3Yz0K"
-    }
-  ],
   "casesDefinitions": [
     {
       "_id": {
