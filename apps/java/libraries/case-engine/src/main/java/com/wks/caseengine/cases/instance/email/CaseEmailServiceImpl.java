@@ -11,6 +11,9 @@
  */
 package com.wks.caseengine.cases.instance.email;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +33,11 @@ public class CaseEmailServiceImpl implements CaseEmailService {
 	@Override
 	public void save(CaseEmail caseEmail) {
 		commandExecutor.execute(new SaveCaseEmailCmd(caseEmail));
+	}
+
+	@Override
+	public List<CaseEmail> find(Optional<String> businessKey) {
+		return commandExecutor.execute(new FindCaseEmailCmd(businessKey));
 	}
 
 }

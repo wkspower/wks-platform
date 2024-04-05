@@ -11,10 +11,15 @@
  */
 package com.wks.caseengine.cases.instance.email;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface CaseEmailService {
 
 	void start(final CaseEmail caseEmail);
-	
+
 	void save(final CaseEmail caseEmail);
+
+	List<CaseEmail> find(final Optional<String> businessKey);
 
 }

@@ -133,9 +133,21 @@ const defs = {
         },
         emails: {
             datagrid: {
+                receivedDateTime: 'Recebido',
+                hasAttachments: 'Anexos?',
                 from: 'De',
                 to: 'Para',
-                text: 'Texto'
+                bodyPreview: 'Prévia',
+                action: {
+                    compose: 'Novo'
+                }
+            },
+            form:{
+                title: 'Novo E-mail',
+                recipient: 'Para',
+                subject: 'Assunto',
+                body: 'Corpo',
+                send: 'Enviar'
             }
         },
         message: {

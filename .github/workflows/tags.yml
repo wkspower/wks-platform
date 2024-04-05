@@ -11,7 +11,6 @@ env:
   REPOSITORY_OWNER: wkspower
   KEYCLOAK_URL: http://localhost:8082
   WKS_API_URL: http://localhost:8081
-  WKS_EMAIL_API_URL: http://localhost:8083
   WKS_STORAGE_API_URL: http://localhost:8085
   WEBSOCKET_ENABLED: false
   WEBSOCKET_URL: ws://localhost:8484
@@ -64,7 +63,6 @@ jobs:
         run: |
           export REACT_APP_KEYCLOAK_URL="${{ env.KEYCLOAK_URL }}"
           export REACT_APP_API_URL="${{ env.WKS_API_URL }}"
-          export REACT_APP_EMAIL_URL="${{ env.WKS_EMAIL_API_URL }}"
           export REACT_APP_STORAGE_URL="${{ env.WKS_STORAGE_API_URL }}"
           export REACT_APP_WEBSOCKETS_ENABLED="${{ env.WEBSOCKET_ENABLED }}"
           export REACT_APP_WEBSOCKETS_URL="${{ env.WEBSOCKET_URL }}"

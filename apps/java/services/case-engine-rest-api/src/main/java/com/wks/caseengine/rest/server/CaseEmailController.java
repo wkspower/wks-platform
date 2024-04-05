@@ -12,6 +12,7 @@
 package com.wks.caseengine.rest.server;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @Tag(name = "Case Email", description = "Email to case API")
 @Slf4j
 public class CaseEmailController {
-	
+
 	@Autowired
 	private CaseEmailService caseEmailService;
 
@@ -45,14 +46,14 @@ public class CaseEmailController {
 		log.debug("Subject: " + caseEmail.getSubject());
 		log.debug("Body: " + caseEmail.getBody());
 		log.debug("Definition Id: " + caseEmail.getCaseDefinitionId());
-		
+
 		caseEmailService.start(caseEmail);
 
 		log.debug("### Email processing finished ###");
 		return ResponseEntity.noContent().build();
 
 	}
-	
+
 	@PostMapping(value = "/save")
 	public ResponseEntity<Void> save(@RequestBody final CaseEmail caseEmail) {
 		log.debug("### Email processing started ###");
@@ -61,7 +62,7 @@ public class CaseEmailController {
 		log.debug("Subject: " + caseEmail.getSubject());
 		log.debug("Body: " + caseEmail.getBody());
 		log.debug("Definition Id: " + caseEmail.getCaseDefinitionId());
-		
+
 		caseEmailService.save(caseEmail);
 
 		log.debug("### Email processing finished ###");
@@ -73,9 +74,7 @@ public class CaseEmailController {
 	public ResponseEntity<List<CaseEmail>> find(@RequestParam(required = false) String caseInstanceBusinessKey,
 			@RequestParam(required = false) String caseDefinitionId) {
 
-//		return ResponseEntity.ok(caseEmailService.find(Optional.ofNullable(caseInstanceBusinessKey),
-//				Optional.ofNullable(caseDefinitionId)));
-		return ResponseEntity.ok(null);
+		return ResponseEntity.ok(caseEmailService.find(Optional.ofNullable(caseInstanceBusinessKey)));
 	}
 
 }

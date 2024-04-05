@@ -90,6 +90,12 @@ allow {
     is_user_profile
 }
 
+allow {
+    input.path = "case-email"
+    input.method in ["GET", "OPTION"]
+    check_origin_request
+    is_user_profile
+}
 
 allow {
     input.path = "case-email"
