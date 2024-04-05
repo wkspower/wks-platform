@@ -20,14 +20,10 @@ import com.wks.bpm.engine.model.spi.ProcessVariable;
 
 public interface ProcessInstanceService {
 
-	ProcessInstance start(final String processDefinitionKey);
-
-	ProcessInstance start(final String processDefinitionKey, final Optional<String> businessKey);
-
-	public ProcessInstance create(final String processDefinitionKey, final Optional<String> businessKey,
+	public ProcessInstance start(final String processDefinitionKey, final Optional<String> businessKey,
 			final Optional<ProcessVariable> processVariable);
 
-	public ProcessInstance create(final String processDefinitionKey, final Optional<String> businessKey,
+	public ProcessInstance start(final String processDefinitionKey, final Optional<String> businessKey,
 			final List<ProcessVariable> processVariables);
 	
 	void delete(final List<ProcessInstance> processInstances);

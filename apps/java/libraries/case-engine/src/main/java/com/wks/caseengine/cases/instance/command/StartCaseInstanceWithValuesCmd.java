@@ -68,7 +68,7 @@ public class StartCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 		ProcessVariable caseInstanceProcessVariable = generateCaseInstanceProcessVariable(commandContext,
 				preparedCaseInstance);
 
-		commandContext.getProcessInstanceService().create(commandContext.getCaseCreationProcess(),
+		commandContext.getProcessInstanceService().start(commandContext.getCaseCreationProcess(),
 				Optional.of(businessKey), Optional.of(caseInstanceProcessVariable));
 
 		return preparedCaseInstance;

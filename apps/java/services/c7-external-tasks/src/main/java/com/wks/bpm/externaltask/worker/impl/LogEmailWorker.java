@@ -20,20 +20,22 @@ import org.camunda.bpm.client.task.ExternalTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
-import com.wks.api.client.gateway.impl.CaseInstanceApiGateway;
+import com.wks.api.client.gateway.impl.CaseEmailApiGateway;
 import com.wks.bpm.externaltask.worker.WksExternalTaskHandler;
 
 @Configuration
-@ExternalTaskSubscription(topicName = "caseStageUpdate", includeExtensionProperties = true)
-public class CaseStageUpdateWorker extends WksExternalTaskHandler {
+@ExternalTaskSubscription(topicName = "logEmail", includeExtensionProperties = true)
+public class LogEmailWorker extends WksExternalTaskHandler {
 
 	@Autowired
-	private CaseInstanceApiGateway caseInstanceApiGateway;
+	private CaseEmailApiGateway caseEmailApiGateway;
 
 	@Override
 	public Optional<Map<String, Object>> doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
-		String stagePatch = "{\"stage\": " + "\"" + externalTask.getVariable("stage") + "\"" + "}";
-		caseInstanceApiGateway.patch(externalTask.getBusinessKey(), stagePatch);
+
+		String caseEmailJson = externalTask.getVariable("caseEmail");
+
+		caseEmailApiGateway.save(caseEmailJson);
 		return Optional.empty();
 	}
 

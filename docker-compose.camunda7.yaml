@@ -51,6 +51,7 @@ services:
             - KEYCLOAK_URL=${KEYCLOAK_TOKEN_URL}
             - WKS_CASE_API_URL=${WKS_CASE_API_URL}
             - WEBSOCKET_ENABLED=${WEBSOCKET_ENABLED}
+            - DISABLE_BACKOFF_STRATEGY=${DISABLE_BACKOFF_STRATEGY}
         depends_on:
             camunda:
                 condition: service_healthy

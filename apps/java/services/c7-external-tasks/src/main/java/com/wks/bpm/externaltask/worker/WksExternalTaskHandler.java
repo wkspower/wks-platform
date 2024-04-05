@@ -11,6 +11,9 @@
  */
 package com.wks.bpm.externaltask.worker;
 
+import java.util.Map;
+import java.util.Optional;
+
 import org.camunda.bpm.client.task.ExternalTask;
 import org.camunda.bpm.client.task.ExternalTaskHandler;
 import org.camunda.bpm.client.task.ExternalTaskService;
@@ -46,10 +49,17 @@ public abstract class WksExternalTaskHandler implements ExternalTaskHandler {
 
 			securityContext.setTenantId(externalTask.getTenantId());
 
-			doExecute(externalTask, externalTaskService);
+			Optional<Map<String, Object>> newVariables = doExecute(externalTask, externalTaskService);
 
-			externalTaskService.complete(externalTask);
-
+			if (newVariables.isEmpty()) {
+				externalTaskService.complete(externalTask);
+			}else {
+				externalTaskService.complete(externalTask, newVariables.get());
+			}
+			
+		} catch (BpmnError bpmnError) {
+			log.debug("BPMN Error on external task {} with businessKey {}", externalTask.getActivityId(),
+					externalTask.getBusinessKey(), bpmnError);
 		} catch (Exception e) {
 			log.error("Error on external task {} with businessKey {}", externalTask.getActivityId(),
 					externalTask.getBusinessKey(), e);
@@ -62,5 +72,6 @@ public abstract class WksExternalTaskHandler implements ExternalTaskHandler {
 		}
 	}
 
-	abstract protected void doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService);
+	abstract protected Optional<Map<String, Object>> doExecute(final ExternalTask externalTask,
+			final ExternalTaskService externalTaskService) throws BpmnError;
 }

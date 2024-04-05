@@ -23,6 +23,7 @@ wks-case-api.record.url: /record
 wks-case-api.case-instance.url: /case
 wks-case-api.process-definition.url: /process-definition
 wks-case-api.case-definition.url: /case-definition
+wks-case-api.case-email.url: /case-email
 
 management.health.mongo.enabled: false
 management.health.reds.enabled: false

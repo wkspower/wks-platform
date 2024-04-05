@@ -9,39 +9,26 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.api.dto;
+package com.wks.caseengine.cases.instance.email;
 
-import java.util.Date;
+import com.wks.caseengine.command.Command;
+import com.wks.caseengine.command.CommandContext;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * @author victor.franca
  *
  */
-@Getter
-@Setter
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class CaseCommentDto {
+public class SaveCaseEmailCmd implements Command<Void> {
 
-	private String id;
+	private CaseEmail caseEmail;
 
-	private String body;
-
-	private String userName;
-
-	private String userId;
-
-	private String parentId;
-
-	private Date createdAt;
-
-	private String caseId;
+	@Override
+	public Void execute(CommandContext commandContext) {
+		commandContext.getCaseEmailRepository().save(caseEmail);
+		return null;
+	}
 
 }

@@ -21,6 +21,7 @@ import com.wks.api.security.context.SecurityContextTenantHolder;
 import com.wks.bpm.engine.client.facade.BpmEngineClientFacade;
 import com.wks.caseengine.cases.businesskey.GenericBusinessKeyGenerator;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
+import com.wks.caseengine.cases.instance.email.repository.CaseEmailRepository;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
 import com.wks.caseengine.db.EngineMongoDataConnection;
 import com.wks.caseengine.form.FormRepository;
@@ -40,13 +41,16 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CommandContext {
-	
+
 	@Value("${case.engine.case-creation-process}")
 	private String caseCreationProcess;
 
+	@Value("${case.engine.email-to-case-process}")
+	private String emailToCaseProcess;
+
 	@Autowired
 	private SecurityContextTenantHolder securityContextTenantHolder;
-	
+
 	@Autowired
 	private ApplicationEventPublisher applicationEventPublisher;
 
@@ -55,6 +59,9 @@ public class CommandContext {
 
 	@Autowired
 	private CaseInstanceRepository caseInstanceRepository;
+
+	@Autowired
+	private CaseEmailRepository caseEmailRepository;
 
 	@Autowired
 	private FormRepository formRepository;
@@ -70,7 +77,7 @@ public class CommandContext {
 
 	@Autowired
 	private ProcessInstanceService processInstanceService;
-	
+
 	@Autowired
 	private BpmEngineClientFacade bpmEngineClientFacade;
 

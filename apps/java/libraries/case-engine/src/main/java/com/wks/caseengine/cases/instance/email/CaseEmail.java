@@ -11,6 +11,8 @@
  */
 package com.wks.caseengine.cases.instance.email;
 
+import java.time.ZonedDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,13 +28,17 @@ public class CaseEmail {
 
 	private Object _id;
 
+	private ZonedDateTime receivedDateTime;
+	private Boolean hasAttachments;
+
 	private String to;
 	private String from;
 	private String subject;
+	private String bodyPreview;
 	private String body;
+	private String importance;
 
 	private String caseInstanceBusinessKey;
-
 	private String caseDefinitionId;
 
 }

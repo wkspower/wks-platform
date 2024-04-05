@@ -11,6 +11,7 @@
  */
 package com.wks.bpm.externaltask.worker.impl;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.camunda.bpm.client.spring.annotation.ExternalTaskSubscription;
@@ -40,13 +41,14 @@ public class CaseSaveWorker extends WksExternalTaskHandler {
 	protected String topic;
 
 	@Override
-	public void doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
+	public Optional<Map<String, Object>> doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
 
 		String caseInstanceJson = externalTask.getVariable("caseInstance");
 
 		caseInstanceApiGateway.save(caseInstanceJson);
 
 		kafkaProducerOptional.ifPresent(kafkaProducer -> kafkaProducer.sendMessage(topic, caseInstanceJson));
+		return Optional.empty();
 	}
 
 }

@@ -13,6 +13,8 @@ package com.wks.bpm.externaltask.worker.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.camunda.bpm.client.spring.annotation.ExternalTaskSubscription;
 import org.camunda.bpm.client.task.ExternalTask;
@@ -44,7 +46,7 @@ public class BusinessProcessStartWorker extends WksExternalTaskHandler {
 	private GsonBuilder gsonBuilder;
 
 	@Override
-	public void doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
+	public Optional<Map<String, Object>> doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
 
 		String caseInstanceJson = externalTask.getVariable("caseInstance");
 
@@ -58,6 +60,7 @@ public class BusinessProcessStartWorker extends WksExternalTaskHandler {
 
 		processDefinitionApiGateway.start(getProcessDefinitionId(jsonObject), ProcessDefinitionStartDto.builder()
 				.processVariables(processVariables).businessKey(jsonObject.get("businessKey").getAsString()).build());
+		return Optional.empty();
 	}
 
 	private String getProcessDefinitionId(final JsonObject caseInstanceJson) {

@@ -30,23 +30,13 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 	private BpmEngineClientFacade processEngineClient;
 
 	@Override
-	public ProcessInstance start(final String processDefinitionKey) {
-		return processEngineClient.startProcess(processDefinitionKey, Optional.empty(), Optional.empty());
-	}
-
-	@Override
-	public ProcessInstance start(final String processDefinitionKey, final Optional<String> businessKey) {
-		return processEngineClient.startProcess(processDefinitionKey, businessKey, Optional.empty());
-	}
-
-	@Override
-	public ProcessInstance create(final String processDefinitionKey, final Optional<String> businessKey,
+	public ProcessInstance start(final String processDefinitionKey, final Optional<String> businessKey,
 			final Optional<ProcessVariable> processVariable) {
 		return processEngineClient.startProcess(processDefinitionKey, businessKey, processVariable);
 	}
 
 	@Override
-	public ProcessInstance create(final String processDefinitionKey, final Optional<String> businessKey,
+	public ProcessInstance start(final String processDefinitionKey, final Optional<String> businessKey,
 			final List<ProcessVariable> processVariables) {
 		return processEngineClient.startProcess(processDefinitionKey, businessKey, processVariables);
 	}

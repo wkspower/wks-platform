@@ -19,7 +19,7 @@ const HeaderContent = ({ keycloak }) => {
             {matchesXs && <Box sx={{ width: '100%', ml: 1 }} />}
             {Config.NovuEnabled ? (
                 <NovuProvider
-                    subscriberId={keycloak.idTokenParsed.sub}
+                    subscriberId={keycloak.idTokenParsed.email}
                     applicationIdentifier={Config.NovuAppId}
                 >
                     <PopoverNotificationCenter colorScheme={'light'}>

@@ -170,7 +170,7 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 
 			keycloak.realms().create(realm);
 
-			addUserToGroups(keycloak, externalTasksClientId, Arrays.asList("user", "manager"));
+			addUserToGroups(keycloak, externalTasksClientId, Arrays.asList("user", "manager", "email-to-case"));
 			addUserToGroups(keycloak, emailToCaseClientId, Arrays.asList("email-to-case"));
 
 		} catch (Exception e) {

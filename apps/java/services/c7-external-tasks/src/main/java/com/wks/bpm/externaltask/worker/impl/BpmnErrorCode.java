@@ -9,12 +9,24 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.instance.email;
+package com.wks.bpm.externaltask.worker.impl;
 
-public interface CaseEmailService {
+/**
+ * @author victor.franca
+ *
+ */
+public enum BpmnErrorCode {
 
-	void start(final CaseEmail caseEmail);
-	
-	void save(final CaseEmail caseEmail);
+	CASE_NOT_FOUND("case-not-found"), CASE_DEFINITION_NOT_FOUND("case-def-not-found"),;
+
+	private final String code;
+
+	BpmnErrorCode(final String code) {
+		this.code = code;
+	}
+
+	public String getCode() {
+		return code;
+	}
 
 }

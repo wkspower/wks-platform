@@ -9,12 +9,20 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.cases.instance.email;
+package com.wks.bpm.externaltask.worker;
 
-public interface CaseEmailService {
+import org.springframework.web.client.HttpClientErrorException.NotFound;
 
-	void start(final CaseEmail caseEmail);
-	
-	void save(final CaseEmail caseEmail);
+/**
+ * @author victor.franca
+ *
+ */
+public class BpmnError extends Exception {
+
+	private static final long serialVersionUID = 1L;
+
+	public BpmnError(NotFound ex) {
+		super(ex);
+	}
 
 }

@@ -7,13 +7,6 @@ http:
         - delpath
       service: case-engine-rest-api
       rule: PathPrefix("/engine")
-    email-to-case:
-      entryPoints:
-        - web
-      middlewares:
-        - delpath
-      service: email-to-case
-      rule: PathPrefix("/inbound")
     storage-api:
       entryPoints:
         - web
@@ -25,10 +18,6 @@ http:
       loadBalancer:
         servers:
           - url: http://docker.formac.localhost:8081
-    email-to-case:
-      loadBalancer:
-        servers:
-          - url: http://docker.formac.localhost:8083
     storage-api:
       loadBalancer:
         servers:

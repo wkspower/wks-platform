@@ -19,22 +19,32 @@ import org.camunda.bpm.client.task.ExternalTask;
 import org.camunda.bpm.client.task.ExternalTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.HttpClientErrorException.NotFound;
 
 import com.wks.api.client.gateway.impl.CaseInstanceApiGateway;
+import com.wks.bpm.externaltask.worker.BpmnError;
 import com.wks.bpm.externaltask.worker.WksExternalTaskHandler;
 
+/**
+ * @author victor.franca
+ *
+ */
 @Configuration
-@ExternalTaskSubscription(topicName = "caseStageUpdate", includeExtensionProperties = true)
-public class CaseStageUpdateWorker extends WksExternalTaskHandler {
+@ExternalTaskSubscription(topicName = "validateCaseBusinessKey", includeExtensionProperties = true)
+public class ValidateCaseBusinessKeyWorker extends WksExternalTaskHandler {
 
 	@Autowired
 	private CaseInstanceApiGateway caseInstanceApiGateway;
 
 	@Override
-	public Optional<Map<String, Object>> doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
-		String stagePatch = "{\"stage\": " + "\"" + externalTask.getVariable("stage") + "\"" + "}";
-		caseInstanceApiGateway.patch(externalTask.getBusinessKey(), stagePatch);
-		return Optional.empty();
-	}
+	protected Optional<Map<String, Object>> doExecute(ExternalTask externalTask, ExternalTaskService externalTaskService) throws BpmnError {
 
+		try {
+			caseInstanceApiGateway.get(externalTask.getVariable("caseInstanceBusinessKey"));
+			return Optional.empty();
+		} catch (NotFound ex) {
+			externalTaskService.handleBpmnError(externalTask, BpmnErrorCode.CASE_NOT_FOUND.getCode());
+			throw new BpmnError(ex);
+		}
+	}
 }

@@ -38,5 +38,8 @@ public abstract class ApiGateway {
 
 	@Value("${wks-case-api.process-definition.url}")
 	protected String processDefinitionUrl;
+	
+	@Value("${wks-case-api.case-email.url}")
+	protected String caseEmailUrl;
 
 }
