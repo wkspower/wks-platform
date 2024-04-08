@@ -42,4 +42,5 @@ management.endpoint.health.show-details: never
 
 wks.kafka.enabled: ${KAFKA_ENABLED:true}
 wks.kafka.topic.case-create: ${KAFKA_TOPIC_CASE_CREATE:case-create}
+wks.kafka.topic.case-email-outbound: ${KAFKA_TOPIC_CASE_EMAIL_OUTBOUND:case-email-outbound}
 spring.kafka.bootstrap-servers: ${KAFKA_URL:localhost:9092}

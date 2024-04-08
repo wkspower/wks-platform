@@ -1,7 +1,5 @@
 package com.wks.caseengine.json;
 
-import java.time.ZonedDateTime;
-
 import org.springframework.stereotype.Component;
 
 import com.google.gson.GsonBuilder;
@@ -23,8 +21,6 @@ public class GsonBuilderFactory {
 
 		builder.registerTypeAdapter(CaseAction.class, new CaseActionDeserializer());
 		builder.registerTypeAdapter(CaseAction.class, new CaseActionSerializer<>());
-
-		builder.registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeTypeAdapter());
 
 		return builder;
 	}

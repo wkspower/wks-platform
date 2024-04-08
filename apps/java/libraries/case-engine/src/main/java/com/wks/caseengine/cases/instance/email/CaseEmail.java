@@ -11,24 +11,29 @@
  */
 package com.wks.caseengine.cases.instance.email;
 
-import java.time.ZonedDateTime;
+import java.util.Date;
+
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
+@Document("caseEmail")
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class CaseEmail {
 
-	private Object _id;
+	private String _id;
 
-	private ZonedDateTime receivedDateTime;
+	private Date receivedDateTime;
 	private Boolean hasAttachments;
 
 	private String to;
@@ -40,5 +45,9 @@ public class CaseEmail {
 
 	private String caseInstanceBusinessKey;
 	private String caseDefinitionId;
+
+	private boolean outbound;
+
+	private String status;
 
 }

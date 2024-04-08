@@ -26,18 +26,31 @@ public class CaseEmailServiceImpl implements CaseEmailService {
 	private CommandExecutor commandExecutor;
 
 	@Override
-	public void start(CaseEmail caseEmail) {
-		commandExecutor.execute(new StartCaseEmailCmd(caseEmail));
-	}
-
-	@Override
-	public void save(CaseEmail caseEmail) {
-		commandExecutor.execute(new SaveCaseEmailCmd(caseEmail));
-	}
-
-	@Override
 	public List<CaseEmail> find(Optional<String> businessKey) {
 		return commandExecutor.execute(new FindCaseEmailCmd(businessKey));
 	}
 
+	@Override
+	public void start(CaseEmail caseEmail) {
+		if (!caseEmail.isOutbound()) {
+			commandExecutor.execute(new StartCaseEmailCmd(caseEmail));
+		} else {
+			commandExecutor.execute(new StartCaseEmailOutboundCmd(caseEmail));
+		}
+	}
+
+	@Override
+	public CaseEmail save(CaseEmail caseEmail) {
+		return commandExecutor.execute(new SaveCaseEmailCmd(caseEmail));
+	}
+
+	@Override
+	public void markAsSent(final String id) {
+		commandExecutor.execute(new MarkAsSentCaseEmailCmd(id));
+	}
+
+	@Override
+	public void patch(final String id, final CaseEmail mergePatch) {
+		commandExecutor.execute(new PatchCaseEmailCmd(id, mergePatch));
+	}
 }

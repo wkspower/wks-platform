@@ -45,6 +45,7 @@ services:
           - KAFKA_ENABLED=true
           - KAFKA_URL=${KAFKA_URL}
           - KAFKA_TOPIC_CASE_CREATE=${KAFKA_TOPIC_CASE_CREATE}
+          - KAFKA_TOPIC_CASE_EMAIL_OUTBOUND=${KAFKA_TOPIC_CASE_EMAIL_OUTBOUND}
       depends_on:
         - kafka
         - zookeeper

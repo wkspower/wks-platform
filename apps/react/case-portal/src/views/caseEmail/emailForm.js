@@ -21,7 +21,7 @@ export const EmailForm = ({ onSubmit }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit({ recipient, subject, body });
+        onSubmit({ to: recipient, subject, body });
         // Clear the form after submission
         setRecipient('');
         setSubject('');

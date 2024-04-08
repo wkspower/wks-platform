@@ -1,5 +1,5 @@
 {
-  "casesDefinitions": [
+  "caseDefinition": [
     {
       "_id": {
         "$oid": "64a53688c0c8884b1e83fdfe"
@@ -297,7 +297,7 @@
       ]
     }
   ],
-  "forms": [
+  "form": [
     {
       "_id": {
         "$oid": "64a5371222c70cba3b209fbd"
@@ -7070,7 +7070,7 @@
       "toolTip": "Orientation Training"
     }
   ],
-  "queues": [
+  "queue": [
     {
       "_id": {
         "$oid": "64bfcea90f4949f8dd971ac8"

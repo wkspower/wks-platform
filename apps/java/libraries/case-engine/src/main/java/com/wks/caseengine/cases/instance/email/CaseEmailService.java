@@ -16,10 +16,15 @@ import java.util.Optional;
 
 public interface CaseEmailService {
 
+	List<CaseEmail> find(final Optional<String> businessKey);
+
 	void start(final CaseEmail caseEmail);
 
-	void save(final CaseEmail caseEmail);
+	CaseEmail save(final CaseEmail caseEmail);
 
-	List<CaseEmail> find(final Optional<String> businessKey);
+	void markAsSent(final String id);
+
+	void patch(final String id, final CaseEmail mergePatch);
+
 
 }

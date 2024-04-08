@@ -17,6 +17,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.email.CaseEmail;
 
 public interface EngineMongoDataConnection {
 
@@ -30,12 +31,12 @@ public interface EngineMongoDataConnection {
 
 	MongoCollection<JsonObject> getRecordTypeCollection();
 
-	MongoCollection<JsonObject> getCaseEmailCollection();
+	MongoCollection<CaseEmail> getCaseEmailCollection();
 
 	MongoCollection<JsonObject> getBpmEngineCollection();
 
 	MongoCollection<CaseInstance> getCaseInstanceCollection();
-	
+
 	MongoCollection<JsonObject> getQueueCollection();
 
 	MongoDatabase getDatabase();

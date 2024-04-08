@@ -15,17 +15,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.bson.BsonObjectId;
 import org.bson.conversions.Bson;
-import org.bson.json.JsonObject;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.InsertOneResult;
 import com.wks.caseengine.cases.instance.email.CaseEmail;
 import com.wks.caseengine.db.EngineMongoDataConnection;
+import com.wks.caseengine.pagination.Args;
+import com.wks.caseengine.pagination.CursorPagination;
+import com.wks.caseengine.pagination.PageResult;
+import com.wks.caseengine.pagination.mongo.MongoCursorPagination;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 @Component
@@ -34,44 +40,42 @@ public class CaseEmailRepositoryImpl implements CaseEmailRepository {
 	@Autowired
 	private EngineMongoDataConnection connection;
 
-	@Autowired
-	private GsonBuilder gsonBuilder;
-
 	@Override
 	public List<CaseEmail> find() {
-		Gson gson = gsonBuilder.create();
-		return getCollection().find().map(o -> gson.fromJson(o.getJson(), CaseEmail.class)).into(new ArrayList<>());
+		return getCollection().find().into(new ArrayList<>());
 	}
 
 	@Override
-	public List<CaseEmail> find(final Optional<String> caseInstanceBusinessKey, final Optional<String> caseDefinitionId) {
+	public List<CaseEmail> find(final Optional<String> caseInstanceBusinessKey) {
 
-		Bson caseInstanceBKFilter = caseInstanceBusinessKey.isPresent()
-				? Filters.eq("caseInstanceBusinessKey", caseInstanceBusinessKey.get())
-				: Filters.empty();
-		Bson caseDefIdFilter = caseDefinitionId.isPresent() ? Filters.eq("caseDefinitionId", caseDefinitionId.get())
-				: Filters.empty();
+		CursorPagination pagination = new MongoCursorPagination(getOperations());
 
-		Gson gson = gsonBuilder.create();
-		return getCollection().find().filter(Filters.and(caseInstanceBKFilter, caseDefIdFilter))
-				.map(o -> gson.fromJson(o.getJson(), CaseEmail.class)).into(new ArrayList<>());
+		Args args = Args.of(100).key("_id").criteria(c -> {
+			caseInstanceBusinessKey
+					.ifPresent(a -> c.add(Criteria.where("caseInstanceBusinessKey").is(caseInstanceBusinessKey.get())));
+		});
+
+		PageResult<CaseEmail> results = pagination.executeQuery(args, CaseEmail.class);
+
+		return results.content();
 	}
 
 	@Override
 	public CaseEmail get(String caseEmailId) throws DatabaseRecordNotFoundException {
-		Bson filter = Filters.eq("id", caseEmailId);
-		Gson gson = gsonBuilder.create();
-		return gson.fromJson(getCollection().find(filter).first().getJson(), CaseEmail.class);
+		Bson filter = Filters.eq("_id", new ObjectId(caseEmailId));
+		return getCollection().find(filter).first();
 	}
 
 	@Override
-	public void save(CaseEmail caseEmail) {
-		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(caseEmail))));
+	public String save(final CaseEmail caseEmail) {
+		InsertOneResult result = getCollection().insertOne(caseEmail);
+		return ((BsonObjectId) result.getInsertedId()).getValue().toHexString();
 	}
 
 	@Override
-	public void update(String id, CaseEmail object) {
-		throw new UnsupportedOperationException();
+	public void update(String id, CaseEmail caseEmail) {
+		Bson filter = Filters.eq("_id", new ObjectId(id));
+		getCollection().replaceOne(filter, caseEmail);
 	}
 
 	@Override
@@ -79,8 +83,12 @@ public class CaseEmailRepositoryImpl implements CaseEmailRepository {
 		throw new UnsupportedOperationException();
 	}
 
-	private MongoCollection<JsonObject> getCollection() {
+	private MongoCollection<CaseEmail> getCollection() {
 		return connection.getCaseEmailCollection();
+	}
+
+	protected MongoOperations getOperations() {
+		return connection.getOperations();
 	}
 
 }

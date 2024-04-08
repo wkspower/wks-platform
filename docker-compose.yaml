@@ -19,7 +19,7 @@ services:
             - minio:/data:rw
 
     mongodb:
-        image: mongo
+        image: mongo:6.0.14
         ports:
             - 27017:27017
         healthcheck:

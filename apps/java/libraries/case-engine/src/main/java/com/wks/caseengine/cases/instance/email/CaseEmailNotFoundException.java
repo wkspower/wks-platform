@@ -19,7 +19,7 @@ public class CaseEmailNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String DEFAULT_MESSAGE = "Email not found";
+	private static final String DEFAULT_MESSAGE = "Case Email not found";
 
 	public CaseEmailNotFoundException(final Throwable e) {
 		super(DEFAULT_MESSAGE, e);

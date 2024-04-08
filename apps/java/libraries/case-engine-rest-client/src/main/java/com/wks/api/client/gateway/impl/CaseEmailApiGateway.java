@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import com.wks.api.client.gateway.ApiGateway;
+import com.wks.api.dto.CaseEmailDto;
 
 /**
  * @author victor.franca
@@ -25,12 +26,23 @@ import com.wks.api.client.gateway.ApiGateway;
 @Component
 public class CaseEmailApiGateway extends ApiGateway {
 
-	public void save(final String caseEmail) {
+	public CaseEmailDto save(final String caseEmail) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
 		HttpEntity<String> entity = new HttpEntity<>(caseEmail, headers);
-		restTemplate.postForEntity(baseUrl + caseEmailUrl + "/save", entity, String.class);
+		return restTemplate.postForEntity(baseUrl + caseEmailUrl + "/save", entity, CaseEmailDto.class).getBody();
+
+	}
+
+	public void mergePatch(final String caseEmailId, final String patch) {
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Content-Type", "application/merge-patch+json");
+
+		HttpEntity<String> entity = new HttpEntity<>(patch, headers);
+
+		restTemplate.patchForObject(baseUrl + caseEmailUrl + "/" + caseEmailId, entity, String.class);
 	}
 
 }

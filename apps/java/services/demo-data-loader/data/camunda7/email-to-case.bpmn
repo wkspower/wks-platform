@@ -50,7 +50,7 @@ execution.setVariable('from', caseEmail.from);
     <bpmn:sequenceFlow id="Flow_1i0f8v3" sourceRef="Gateway_0mgw61j" targetRef="log-email" />
     <bpmn:sequenceFlow id="Flow_11edbur" sourceRef="start-new-case" targetRef="update-email-bk-ref" />
     <bpmn:sequenceFlow id="Flow_0vebjw1" sourceRef="log-email" targetRef="Event_0errv1s" />
-    <bpmn:serviceTask id="log-email" name="Log Email" camunda:type="external" camunda:topic="logEmail">
+    <bpmn:serviceTask id="log-email" name="Log Email" camunda:type="external" camunda:topic="emailLog">
       <bpmn:incoming>Flow_1i0f8v3</bpmn:incoming>
       <bpmn:outgoing>Flow_0vebjw1</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -120,6 +120,12 @@ execution.setVariable("caseEmail", updatedCaseEmailJson);</bpmn:script>
           <dc:Bounds x="161" y="252" width="73" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0errv1s_di" bpmnElement="Event_0errv1s">
+        <dc:Bounds x="1792" y="209" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1776" y="252" width="68" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1t68b1x_di" bpmnElement="extract-bk">
         <dc:Bounds x="310" y="187" width="100" height="80" />
         <bpmndi:BPMNLabel />
@@ -128,6 +134,27 @@ execution.setVariable("caseEmail", updatedCaseEmailJson);</bpmn:script>
         <dc:Bounds x="515" y="202" width="50" height="50" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="500" y="160" width="80" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1scc35r_di" bpmnElement="start-new-case">
+        <dc:Bounds x="1080" y="400" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0mgw61j_di" bpmnElement="Gateway_0mgw61j" isMarkerVisible="true">
+        <dc:Bounds x="1485" y="202" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_12ah09n_di" bpmnElement="log-email">
+        <dc:Bounds x="1590" y="187" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_144dlo1_di" bpmnElement="validate-bk">
+        <dc:Bounds x="970" y="187" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1reo8lp_di" bpmnElement="Event_0cbf5lu">
+        <dc:Bounds x="1162" y="82" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1143" y="125" width="75" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0pqmyhi_di" bpmnElement="Event_0av5zq8">
@@ -140,35 +167,8 @@ execution.setVariable("caseEmail", updatedCaseEmailJson);</bpmn:script>
         <dc:Bounds x="640" y="400" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0errv1s_di" bpmnElement="Event_0errv1s">
-        <dc:Bounds x="1792" y="209" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1776" y="252" width="68" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_12ah09n_di" bpmnElement="log-email">
-        <dc:Bounds x="1590" y="187" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_0mgw61j_di" bpmnElement="Gateway_0mgw61j" isMarkerVisible="true">
-        <dc:Bounds x="1485" y="202" width="50" height="50" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_059k1su_di" bpmnElement="update-email-bk-ref">
         <dc:Bounds x="1300" y="400" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1scc35r_di" bpmnElement="start-new-case">
-        <dc:Bounds x="1080" y="400" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_144dlo1_di" bpmnElement="validate-bk">
-        <dc:Bounds x="1080" y="187" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1reo8lp_di" bpmnElement="Event_0cbf5lu">
-        <dc:Bounds x="1252" y="82" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1233" y="125" width="75" height="14" />
-        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0nwteoc_di" bpmnElement="Activity_1i7z233">
         <dc:Bounds x="900" y="400" width="100" height="80" />
@@ -177,7 +177,7 @@ execution.setVariable("caseEmail", updatedCaseEmailJson);</bpmn:script>
         <dc:Bounds x="722" y="462" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_00h6t3e_di" bpmnElement="Event_0p4leg9">
-        <dc:Bounds x="1162" y="169" width="36" height="36" />
+        <dc:Bounds x="1052" y="169" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="931" y="67" width="85" height="27" />
         </bpmndi:BPMNLabel>
@@ -186,15 +186,11 @@ execution.setVariable("caseEmail", updatedCaseEmailJson);</bpmn:script>
         <di:waypoint x="215" y="227" />
         <di:waypoint x="310" y="227" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0e8fv31_di" bpmnElement="Flow_0e8fv31">
-        <di:waypoint x="410" y="227" />
-        <di:waypoint x="515" y="227" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1uox3rq_di" bpmnElement="Flow_1uox3rq">
         <di:waypoint x="565" y="227" />
-        <di:waypoint x="1080" y="227" />
+        <di:waypoint x="970" y="227" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="603" y="209" width="67" height="14" />
+          <dc:Bounds x="588" y="209" width="67" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_10r6he4_di" bpmnElement="Flow_10r6he4">
@@ -205,44 +201,48 @@ execution.setVariable("caseEmail", updatedCaseEmailJson);</bpmn:script>
           <dc:Bounds x="550" y="313" width="59" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1eng9ao_di" bpmnElement="Flow_1eng9ao">
-        <di:waypoint x="740" y="498" />
-        <di:waypoint x="740" y="560" />
-        <di:waypoint x="812" y="560" />
+      <bpmndi:BPMNEdge id="Flow_1i0f8v3_di" bpmnElement="Flow_1i0f8v3">
+        <di:waypoint x="1535" y="227" />
+        <di:waypoint x="1590" y="227" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1a3ijjt_di" bpmnElement="Flow_1a3ijjt">
-        <di:waypoint x="740" y="440" />
-        <di:waypoint x="900" y="440" />
+      <bpmndi:BPMNEdge id="Flow_11edbur_di" bpmnElement="Flow_11edbur">
+        <di:waypoint x="1180" y="440" />
+        <di:waypoint x="1300" y="440" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0vebjw1_di" bpmnElement="Flow_0vebjw1">
         <di:waypoint x="1690" y="227" />
         <di:waypoint x="1792" y="227" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1i0f8v3_di" bpmnElement="Flow_1i0f8v3">
-        <di:waypoint x="1535" y="227" />
-        <di:waypoint x="1590" y="227" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1710tmv_di" bpmnElement="Flow_1710tmv">
-        <di:waypoint x="1180" y="227" />
+        <di:waypoint x="1070" y="227" />
         <di:waypoint x="1485" y="227" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0j3gdck_di" bpmnElement="Flow_0j3gdck">
+        <di:waypoint x="1070" y="169" />
+        <di:waypoint x="1070" y="100" />
+        <di:waypoint x="1162" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1a3ijjt_di" bpmnElement="Flow_1a3ijjt">
+        <di:waypoint x="740" y="440" />
+        <di:waypoint x="900" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1eng9ao_di" bpmnElement="Flow_1eng9ao">
+        <di:waypoint x="740" y="498" />
+        <di:waypoint x="740" y="560" />
+        <di:waypoint x="812" y="560" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0c5exn4_di" bpmnElement="Flow_0c5exn4">
         <di:waypoint x="1400" y="440" />
         <di:waypoint x="1510" y="440" />
         <di:waypoint x="1510" y="252" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_11edbur_di" bpmnElement="Flow_11edbur">
-        <di:waypoint x="1180" y="440" />
-        <di:waypoint x="1300" y="440" />
+      <bpmndi:BPMNEdge id="Flow_0e8fv31_di" bpmnElement="Flow_0e8fv31">
+        <di:waypoint x="410" y="227" />
+        <di:waypoint x="515" y="227" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_10ghfk1_di" bpmnElement="Flow_10ghfk1">
         <di:waypoint x="1000" y="440" />
         <di:waypoint x="1080" y="440" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0j3gdck_di" bpmnElement="Flow_0j3gdck">
-        <di:waypoint x="1180" y="169" />
-        <di:waypoint x="1180" y="100" />
-        <di:waypoint x="1252" y="100" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

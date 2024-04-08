@@ -23,12 +23,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.camunda.community.rest.client.api.DeploymentApi;
+import org.camunda.community.rest.client.api.MessageApi;
 import org.camunda.community.rest.client.api.ProcessDefinitionApi;
 import org.camunda.community.rest.client.api.ProcessInstanceApi;
 import org.camunda.community.rest.client.api.TaskApi;
 import org.camunda.community.rest.client.api.VariableInstanceApi;
 import org.camunda.community.rest.client.dto.ActivityInstanceDto;
 import org.camunda.community.rest.client.dto.CompleteTaskDto;
+import org.camunda.community.rest.client.dto.CorrelationMessageAsyncDto;
+import org.camunda.community.rest.client.dto.CorrelationMessageDto;
 import org.camunda.community.rest.client.dto.ProcessInstanceWithVariablesDto;
 import org.camunda.community.rest.client.dto.StartProcessInstanceDto;
 import org.camunda.community.rest.client.dto.TaskDto;
@@ -78,6 +81,9 @@ public class C7EngineClient implements BpmEngineClient {
 
 	@Autowired
 	private VariableInstanceApi variableInstanceApi;
+
+	@Autowired
+	private MessageApi messageApi;
 
 	@Autowired
 	private SecurityContextTenantHolder tenantHolder;
@@ -388,9 +394,17 @@ public class C7EngineClient implements BpmEngineClient {
 	}
 
 	@Override
-	public void sendMessage(final ProcessMessage processMessage, final Optional<List<ProcessVariable>> variables,
+	public void sendMessage(final ProcessMessage processMessage, final Optional<List<ProcessVariable>> correlateKeys,
 			final BpmEngine bpmEngine) {
-		throw new UnsupportedOperationException();
+		try {
+			messageApi.deliverMessage(
+					new CorrelationMessageDto()
+					.messageName(processMessage.getMessageCode())
+					.correlationKeys(c7VariablesMapper.toEngineFormat(correlateKeys.get())));
+		} catch (ApiException e) {
+			log.error("Error sending message to camunda", e);
+			e.printStackTrace();
+		}
 	}
 
 }

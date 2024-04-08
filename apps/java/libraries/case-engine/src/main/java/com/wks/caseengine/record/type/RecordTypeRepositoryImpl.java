@@ -14,6 +14,7 @@ package com.wks.caseengine.record.type;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.BsonObjectId;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +51,9 @@ public class RecordTypeRepositoryImpl implements RecordTypeRepository {
 	}
 
 	@Override
-	public void save(final RecordType recordType) {
-		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(recordType))));
-
+	public String save(final RecordType recordType) {
+		return ((BsonObjectId) getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(recordType))))
+				.getInsertedId()).getValue().toHexString();
 	}
 
 	@Override

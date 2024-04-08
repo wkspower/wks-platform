@@ -37,7 +37,6 @@ import com.google.gson.stream.JsonReader;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.wks.caseengine.loader.config.MongoLocalConfigFactory;
-import com.wks.caseengine.loader.utils.SecretGenerator;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -82,7 +81,7 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 		Gson gson = gsonBuilder.create();
 
 		// Cases Definitions
-		JsonElement casesDefinitionsJson = data.get("casesDefinitions");
+		JsonElement casesDefinitionsJson = data.get("caseDefinition");
 		if (casesDefinitionsJson != null) {
 			List<JsonObject> caseDefinitions = gson.fromJson(casesDefinitionsJson, new TypeToken<List<JsonObject>>() {
 			}.getType());
@@ -96,7 +95,7 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 		}
 
 		// Cases Instances
-		JsonElement casesInstancesJson = data.get("casesInstances");
+		JsonElement casesInstancesJson = data.get("caseInstance");
 		if (casesInstancesJson != null) {
 			List<JsonObject> caseInstances = gson.fromJson(casesInstancesJson, new TypeToken<List<JsonObject>>() {
 			}.getType());
@@ -110,7 +109,7 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 		}
 
 		// Forms
-		JsonElement formsJson = data.get("forms");
+		JsonElement formsJson = data.get("form");
 		if (formsJson != null) {
 			List<JsonObject> forms = gson.fromJson(formsJson, new TypeToken<List<JsonObject>>() {
 			}.getType());
@@ -124,7 +123,7 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 		}
 
 		// Records Types
-		JsonElement recordTypesJson = data.get("recordsTypes");
+		JsonElement recordTypesJson = data.get("recordType");
 		if (recordTypesJson != null) {
 			List<JsonObject> recordTypes = gson.fromJson(recordTypesJson, new TypeToken<List<JsonObject>>() {
 			}.getType());
@@ -138,7 +137,7 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 		}
 
 		// Records
-		JsonElement recordsJson = data.get("records");
+		JsonElement recordsJson = data.get("record");
 		if (recordsJson != null) {
 			List<JsonObject> records = gson.fromJson(recordsJson, new TypeToken<List<JsonObject>>() {
 			}.getType());
@@ -158,7 +157,7 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 		}
 
 		// Queues
-		JsonElement queuesJson = data.get("queues");
+		JsonElement queuesJson = data.get("queue");
 		if (queuesJson != null) {
 			List<JsonObject> queues = gson.fromJson(queuesJson, new TypeToken<List<JsonObject>>() {
 			}.getType());
@@ -181,22 +180,22 @@ public class MongoDataImportCommandRunner implements CommandLineRunner {
 
 	private MongoCollection<org.bson.json.JsonObject> getCaseDefCollection() {
 		MongoDatabase db = config.mongoTemplateTenant().getDb();
-		return db.getCollection("caseDefinitions", org.bson.json.JsonObject.class);
+		return db.getCollection("caseDefinition", org.bson.json.JsonObject.class);
 	}
 
 	private MongoCollection<org.bson.json.JsonObject> getCaseInstCollection() {
 		MongoDatabase db = config.mongoTemplateTenant().getDb();
-		return db.getCollection("caseInstances", org.bson.json.JsonObject.class);
+		return db.getCollection("caseInstance", org.bson.json.JsonObject.class);
 	}
 
 	private MongoCollection<org.bson.json.JsonObject> getFormCollection() {
 		MongoDatabase db = config.mongoTemplateTenant().getDb();
-		return db.getCollection("forms", org.bson.json.JsonObject.class);
+		return db.getCollection("form", org.bson.json.JsonObject.class);
 	}
 
 	private MongoCollection<org.bson.json.JsonObject> getQueueCollection() {
 		MongoDatabase db = config.mongoTemplateTenant().getDb();
-		return db.getCollection("queues", org.bson.json.JsonObject.class);
+		return db.getCollection("queue", org.bson.json.JsonObject.class);
 	}
 
 	private MongoCollection<org.bson.json.JsonObject> getRecordTypeCollection() {

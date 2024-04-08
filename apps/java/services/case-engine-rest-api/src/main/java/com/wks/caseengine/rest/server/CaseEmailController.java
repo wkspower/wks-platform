@@ -17,14 +17,18 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.cases.instance.email.CaseEmail;
 import com.wks.caseengine.cases.instance.email.CaseEmailService;
+import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +41,13 @@ public class CaseEmailController {
 
 	@Autowired
 	private CaseEmailService caseEmailService;
+	
+	@GetMapping
+	public ResponseEntity<List<CaseEmail>> find(@RequestParam(required = false) String caseInstanceBusinessKey,
+			@RequestParam(required = false) String caseDefinitionId) {
+
+		return ResponseEntity.ok(caseEmailService.find(Optional.ofNullable(caseInstanceBusinessKey)));
+	}
 
 	@PostMapping
 	public ResponseEntity<Void> start(@RequestBody final CaseEmail caseEmail) {
@@ -55,7 +66,7 @@ public class CaseEmailController {
 	}
 
 	@PostMapping(value = "/save")
-	public ResponseEntity<Void> save(@RequestBody final CaseEmail caseEmail) {
+	public ResponseEntity<CaseEmail> save(@RequestBody final CaseEmail caseEmail) {
 		log.debug("### Email processing started ###");
 		log.debug("To: " + caseEmail.getTo());
 		log.debug("From: " + caseEmail.getFrom());
@@ -63,18 +74,31 @@ public class CaseEmailController {
 		log.debug("Body: " + caseEmail.getBody());
 		log.debug("Definition Id: " + caseEmail.getCaseDefinitionId());
 
-		caseEmailService.save(caseEmail);
-
 		log.debug("### Email processing finished ###");
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(caseEmailService.save(caseEmail));
 
 	}
 
-	@GetMapping
-	public ResponseEntity<List<CaseEmail>> find(@RequestParam(required = false) String caseInstanceBusinessKey,
-			@RequestParam(required = false) String caseDefinitionId) {
+	@PatchMapping(value = "/{id}/sent", consumes = "application/merge-patch+json")
+	public ResponseEntity<CaseEmail> markAsSent(@PathVariable final String id) {
+		try {
+			caseEmailService.markAsSent(id);
+		} catch (CaseInstanceNotFoundException e) {
+			throw new RestResourceNotFoundException(e.getMessage());
+		}
 
-		return ResponseEntity.ok(caseEmailService.find(Optional.ofNullable(caseInstanceBusinessKey)));
+		return ResponseEntity.noContent().build();
+	}
+
+	@PatchMapping(value = "/{id}", consumes = "application/merge-patch+json")
+	public ResponseEntity<CaseEmail> mergePatch(@PathVariable final String id, @RequestBody CaseEmail mergePatch) {
+		try {
+			caseEmailService.patch(id, mergePatch);
+		} catch (CaseInstanceNotFoundException e) {
+			throw new RestResourceNotFoundException(e.getMessage());
+		}
+
+		return ResponseEntity.noContent().build();
 	}
 
 }

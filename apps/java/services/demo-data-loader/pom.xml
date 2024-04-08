@@ -71,6 +71,11 @@
 			<version>${mongo.version}</version> <!--$NO-MVN-MAN-VER$-->
 		</dependency>
 		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongodb-driver-core</artifactId>
+			<version>${mongo.version}</version> <!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
 			<groupId>io.camunda.spring</groupId>
 			<artifactId>spring-boot-starter-camunda</artifactId>
 			<version>${camunda8.spring.version}</version>

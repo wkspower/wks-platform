@@ -71,7 +71,7 @@ public interface BpmEngineClient {
 
 	ProcessVariable[] findVariables(final String processInstanceId, final BpmEngine bpmEngine);
 
-	void sendMessage(final ProcessMessage processMesage, final Optional<List<ProcessVariable>> variables,
+	void sendMessage(final ProcessMessage processMesage, final Optional<List<ProcessVariable>> correlateKeys,
 			final BpmEngine bpmEngine);
 
 }

@@ -48,6 +48,9 @@ public class CommandContext {
 	@Value("${case.engine.email-to-case-process}")
 	private String emailToCaseProcess;
 
+	@Value("${case.engine.email-to-case-outbound-process}")
+	private String emailToCaseOutboundProcess;
+
 	@Autowired
 	private SecurityContextTenantHolder securityContextTenantHolder;
 

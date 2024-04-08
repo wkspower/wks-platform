@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Document("caseInstances")
+@Document("caseInstance")
 @Getter
 @Setter
 @ToString

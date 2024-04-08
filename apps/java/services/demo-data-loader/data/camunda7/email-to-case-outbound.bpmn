@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0b3shfa" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.21.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.20.0">
+  <bpmn:process id="email-to-case-outbound" name="Email to Case Outbound" isExecutable="true" camunda:historyTimeToLive="180">
+    <bpmn:startEvent id="StartEvent_1" name="Received new outbound email">
+      <bpmn:outgoing>Flow_0zz4o4a</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0zz4o4a" sourceRef="StartEvent_1" targetRef="extract-bk" />
+    <bpmn:endEvent id="Event_0errv1s" name="E-mail sent">
+      <bpmn:incoming>Flow_0vebjw1</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:scriptTask id="extract-bk" name="Extract Email variables" camunda:asyncBefore="true" scriptFormat="javascript">
+      <bpmn:incoming>Flow_0zz4o4a</bpmn:incoming>
+      <bpmn:outgoing>Flow_0e8fv31</bpmn:outgoing>
+      <bpmn:script>var caseEmail = JSON.parse(execution.getVariable('caseEmail'));
+
+if (caseEmail &amp;&amp; caseEmail.caseInstanceBusinessKey) {
+execution.setBusinessKey(caseEmail.caseInstanceBusinessKey);
+}</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_0vebjw1" sourceRef="log-email" targetRef="Event_0errv1s" />
+    <bpmn:serviceTask id="log-email" name="Update Sent Email Log" camunda:type="external" camunda:topic="emailUpdateSent">
+      <bpmn:incoming>Flow_1y89oel</bpmn:incoming>
+      <bpmn:outgoing>Flow_0vebjw1</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0e8fv31" sourceRef="extract-bk" targetRef="Activity_0sngd0u" />
+    <bpmn:sequenceFlow id="Flow_1cokex2" sourceRef="Activity_0miilwg" targetRef="Activity_0bjptsw" />
+    <bpmn:sendTask id="Activity_0miilwg" name="Send E-mail" camunda:type="external" camunda:topic="emailSend">
+      <bpmn:incoming>Flow_0tzo2jw</bpmn:incoming>
+      <bpmn:outgoing>Flow_1cokex2</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="Activity_0sngd0u" name="Log Sending Email" camunda:type="external" camunda:topic="emailLog">
+      <bpmn:incoming>Flow_0e8fv31</bpmn:incoming>
+      <bpmn:outgoing>Flow_0tzo2jw</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0tzo2jw" sourceRef="Activity_0sngd0u" targetRef="Activity_0miilwg" />
+    <bpmn:sequenceFlow id="Flow_1y89oel" sourceRef="Activity_0bjptsw" targetRef="log-email" />
+    <bpmn:receiveTask id="Activity_0bjptsw" name="Acknowledge Email sent" messageRef="Message_1k8ldcs">
+      <bpmn:incoming>Flow_1cokex2</bpmn:incoming>
+      <bpmn:outgoing>Flow_1y89oel</bpmn:outgoing>
+    </bpmn:receiveTask>
+  </bpmn:process>
+  <bpmn:error id="Error_187dh1f" name="Case Not Found" errorCode="case-not-found" camunda:errorMessage="Case not found error" />
+  <bpmn:error id="Error_05fg0qs" name="Case Definition Not Found" errorCode="case-def-not-found" camunda:errorMessage="Case Definition not found error" />
+  <bpmn:message id="Message_1k8ldcs" name="emailSentConfirmation" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="email-to-case-outbound">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="160" y="142" width="76" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1t68b1x_di" bpmnElement="extract-bk">
+        <dc:Bounds x="310" y="77" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_08sz7de" bpmnElement="Activity_0sngd0u">
+        <dc:Bounds x="510" y="77" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_126cy8n_di" bpmnElement="Activity_0miilwg">
+        <dc:Bounds x="710" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0spgqnj_di" bpmnElement="Activity_0bjptsw">
+        <dc:Bounds x="910" y="77" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0errv1s_di" bpmnElement="Event_0errv1s">
+        <dc:Bounds x="1322" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1312" y="142" width="56" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_12ah09n_di" bpmnElement="log-email">
+        <dc:Bounds x="1120" y="77" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0zz4o4a_di" bpmnElement="Flow_0zz4o4a">
+        <di:waypoint x="215" y="117" />
+        <di:waypoint x="310" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0e8fv31_di" bpmnElement="Flow_0e8fv31">
+        <di:waypoint x="410" y="117" />
+        <di:waypoint x="510" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0vebjw1_di" bpmnElement="Flow_0vebjw1">
+        <di:waypoint x="1220" y="117" />
+        <di:waypoint x="1322" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1cokex2_di" bpmnElement="Flow_1cokex2">
+        <di:waypoint x="810" y="117" />
+        <di:waypoint x="910" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0tzo2jw_di" bpmnElement="Flow_0tzo2jw">
+        <di:waypoint x="610" y="117" />
+        <di:waypoint x="710" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1y89oel_di" bpmnElement="Flow_1y89oel">
+        <di:waypoint x="1010" y="117" />
+        <di:waypoint x="1120" y="117" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

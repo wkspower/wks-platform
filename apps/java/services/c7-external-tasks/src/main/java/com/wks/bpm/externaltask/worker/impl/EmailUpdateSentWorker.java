@@ -20,22 +20,28 @@ import org.camunda.bpm.client.task.ExternalTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.gson.JsonObject;
 import com.wks.api.client.gateway.impl.CaseEmailApiGateway;
 import com.wks.bpm.externaltask.worker.WksExternalTaskHandler;
 
 @Configuration
-@ExternalTaskSubscription(topicName = "logEmail", includeExtensionProperties = true)
-public class LogEmailWorker extends WksExternalTaskHandler {
+@ExternalTaskSubscription(topicName = "emailUpdateSent", includeExtensionProperties = true)
+public class EmailUpdateSentWorker extends WksExternalTaskHandler {
 
 	@Autowired
 	private CaseEmailApiGateway caseEmailApiGateway;
 
 	@Override
-	public Optional<Map<String, Object>> doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
+	public Optional<Map<String, Object>> doExecute(final ExternalTask externalTask,
+			final ExternalTaskService externalTaskService) {
 
-		String caseEmailJson = externalTask.getVariable("caseEmail");
+		String caseEmailId = externalTask.getVariable("caseEmailId");
 
-		caseEmailApiGateway.save(caseEmailJson);
+		JsonObject patch = new JsonObject();
+		patch.addProperty("status", "sent");
+
+		caseEmailApiGateway.mergePatch(caseEmailId, patch.toString());
+
 		return Optional.empty();
 	}
 

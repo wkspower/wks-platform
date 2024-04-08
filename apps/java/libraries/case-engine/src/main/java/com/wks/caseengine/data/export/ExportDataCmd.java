@@ -41,15 +41,15 @@ public class ExportDataCmd implements Command<JsonObject> {
 		// Cases Definitions
 		List<JsonObject> caseDefinitions = connection.getCaseDefCollection().find()
 				.map(o -> gson.fromJson(o.getJson(), JsonObject.class)).into(new ArrayList<JsonObject>());
-		exportedData.add("casesDefinitions", gson.toJsonTree(caseDefinitions).getAsJsonArray());
+		exportedData.add("caseDefinition", gson.toJsonTree(caseDefinitions).getAsJsonArray());
 
 		// Cases Instances
 		ArrayList<JsonObject> caseInstances = connection.getCaseInstCollection().find()
 				.map(o -> gson.fromJson(o.getJson(), JsonObject.class)).into(new ArrayList<JsonObject>());
-		exportedData.add("casesInstances", gson.toJsonTree(caseInstances).getAsJsonArray());
+		exportedData.add("casesInstance", gson.toJsonTree(caseInstances).getAsJsonArray());
 
 		// Forms
-		exportedData.add("forms",
+		exportedData.add("form",
 				gson.toJsonTree(connection.getFormCollection().find()
 						.map(o -> gson.fromJson(o.getJson(), JsonObject.class)).into(new ArrayList<JsonObject>()))
 						.getAsJsonArray());
@@ -57,7 +57,7 @@ public class ExportDataCmd implements Command<JsonObject> {
 		// Records Types
 		List<JsonObject> recordTypes = connection.getRecordTypeCollection().find()
 				.map(o -> gson.fromJson(o.getJson(), JsonObject.class)).into(new ArrayList<JsonObject>());
-		exportedData.add("recordsTypes", gson.toJsonTree(recordTypes).getAsJsonArray());
+		exportedData.add("recordType", gson.toJsonTree(recordTypes).getAsJsonArray());
 
 		// Records
 		JsonArray recordsArray = new JsonArray();
@@ -75,7 +75,7 @@ public class ExportDataCmd implements Command<JsonObject> {
 				recordsArray.add(newRecord);
 			}
 		}
-		exportedData.add("records", recordsArray);
+		exportedData.add("record", recordsArray);
 
 		return exportedData;
 	}

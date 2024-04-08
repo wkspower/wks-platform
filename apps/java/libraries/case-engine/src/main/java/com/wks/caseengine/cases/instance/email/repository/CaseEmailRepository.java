@@ -19,6 +19,6 @@ import com.wks.caseengine.repository.Repository;
 
 public interface CaseEmailRepository extends Repository<CaseEmail> {
 
-	List<CaseEmail> find(final Optional<String> caseInstanceBusinessKey, final Optional<String> caseDefinitionId);
+	List<CaseEmail> find(final Optional<String> caseInstanceBusinessKey);
 
 }

@@ -67,6 +67,6 @@ public interface BpmEngineClientFacade {
 
 	ProcessVariable[] findVariables(String processInstanceId);
 
-	void sendMessage(ProcessMessage processMesage, Optional<List<ProcessVariable>> variables);
+	void sendMessage(ProcessMessage processMesage, Optional<List<ProcessVariable>> messageCorrelateKeys);
 
 }

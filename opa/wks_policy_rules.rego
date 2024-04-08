@@ -92,7 +92,7 @@ allow {
 
 allow {
     input.path = "case-email"
-    input.method in ["GET", "OPTION"]
+    input.method in ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTION", "HEAD"]
     check_origin_request
     is_user_profile
 }

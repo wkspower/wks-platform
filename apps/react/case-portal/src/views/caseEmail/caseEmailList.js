@@ -40,7 +40,11 @@ export const CaseEmailsList = ({ caseInstanceBusinessKey }) => {
     };
 
     const handleEmailSend = (emailData) => {
-        console.log('Sending email...', emailData);
+        EmailService.send(keycloak, {
+            ...emailData,
+            outbound: true,
+            caseInstanceBusinessKey
+        });
         setIsModalOpen(false);
     };
 
@@ -87,7 +91,7 @@ export const CaseEmailsList = ({ caseInstanceBusinessKey }) => {
             <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
                 {emails.map((email) => (
                     <>
-                        <ListItem button onClick={() => handleExpandToggle(email._id.$oid)}>
+                        <ListItem button onClick={() => handleExpandToggle(email._id)}>
                             <ListItemAvatar>
                                 <Avatar alt={email.from}>
                                     <EmailIcon />
@@ -113,7 +117,7 @@ export const CaseEmailsList = ({ caseInstanceBusinessKey }) => {
                             />
                         </ListItem>
                         <Collapse
-                            in={expandedEmailId === email._id.$oid}
+                            in={expandedEmailId === email._id}
                             timeout="auto"
                             unmountOnExit
                         >

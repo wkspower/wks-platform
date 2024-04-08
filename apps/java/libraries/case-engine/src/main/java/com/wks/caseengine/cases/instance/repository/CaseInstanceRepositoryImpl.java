@@ -19,6 +19,7 @@ import static com.mongodb.client.model.Updates.set;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.BsonObjectId;
 import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -79,8 +80,8 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	}
 
 	@Override
-	public void save(final CaseInstance caseInstance) {
-		getCollection().insertOne(caseInstance);
+	public String save(final CaseInstance caseInstance) {
+		return ((BsonObjectId) getCollection().insertOne(caseInstance).getInsertedId()).getValue().toHexString();
 	}
 
 	@Override
@@ -91,18 +92,18 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 				Updates.set("stage", caseInstance.getStage()), Updates.set("attributes", caseInstance.getAttributes()),
 				Updates.set("documents", caseInstance.getDocuments()),
 				Updates.set("queueId", caseInstance.getQueueId()), Updates.set("comments", caseInstance.getComments()));
-		
+
 		CaseInstance updatedCaseInstance = getCollection().findOneAndUpdate(filter, update);
 		if (updatedCaseInstance == null) {
 			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
 		}
-		
+
 	}
 
 	@Override
 	public void delete(final String businessKey) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("businessKey", businessKey);
-		
+
 		CaseInstance updatedCaseInstance = getCollection().findOneAndDelete(filter);
 		if (updatedCaseInstance == null) {
 			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
@@ -116,7 +117,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 
 		Bson filter = Filters.eq("businessKey", businessKey);
 		Bson update = Updates.pull("comments", comment);
-		
+
 		CaseInstance updatedCaseInstance = getCollection().findOneAndUpdate(filter, update);
 		if (updatedCaseInstance == null) {
 			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
@@ -129,7 +130,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 			throws DatabaseRecordNotFoundException {
 		Bson filter = and(eq("businessKey", businessKey), eq("comments.id", commentId));
 		Bson update = set("comments.$.body", body);
-		
+
 		CaseInstance updatedCaseInstance = getCollection().findOneAndUpdate(filter, update);
 		if (updatedCaseInstance == null) {
 			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
@@ -140,10 +141,9 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	protected MongoOperations getOperations() {
 		return connection.getOperations();
 	}
-	
+
 	private MongoCollection<CaseInstance> getCollection() {
 		return connection.getCaseInstanceCollection();
 	}
-
 
 }
