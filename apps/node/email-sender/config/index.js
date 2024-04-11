@@ -5,7 +5,7 @@ const config = {
     Port: process.env.PORT || '3002', 
     KafkaUrl: process.env.KAFKA_URL,
     KafkaTopic: process.env.KAFKA_TOPIC,
-    CaseEngineApiBaseUrl: process.env.CASE_ENGINE_API_BASE_URL,
+    CaseEngineApiBaseUrl: process.env.WKS_CASE_API_URL,
 
     JwtTokenUrl: process.env.JWT_TOKEN_URL,
     JwtTokenClientId: process.env.JWT_TOKEN_CLIENT_ID,

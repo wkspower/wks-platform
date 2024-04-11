@@ -119,9 +119,14 @@ public class Camunda7DataImportCommandRunner implements CommandLineRunner {
 
 	private Set<String> listFiles(String dir) throws IOException {
 		try (Stream<Path> stream = Files.list(Paths.get(dir))) {
-			return stream.filter(file -> !Files.isDirectory(file)).filter(f -> f.toFile().getName().endsWith(".bpmn"))
+			return stream.filter(file -> !Files.isDirectory(file)).filter(this::isBpmnOrDmnFile)
 					.map(Path::toAbsolutePath).map(Path::toString).collect(Collectors.toSet());
 		}
+	}
+
+	private boolean isBpmnOrDmnFile(Path file) {
+		String fileName = file.toFile().getName();
+		return fileName.endsWith(".bpmn") || fileName.endsWith(".dmn");
 	}
 
 }
