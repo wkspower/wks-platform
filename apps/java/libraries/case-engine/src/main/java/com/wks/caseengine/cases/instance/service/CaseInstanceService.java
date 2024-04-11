@@ -25,8 +25,6 @@ public interface CaseInstanceService {
 
 	CaseInstance startWithValues(final CaseInstance caseInstance);
 
-	CaseInstance startEmpty(final String caseDefinitionId);
-	
 	void saveWithValues(final CaseInstance caseInstance);
 
 	CaseInstance patch(final String businessKey, final CaseInstance caseInstance);

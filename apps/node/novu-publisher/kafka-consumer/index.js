@@ -58,7 +58,7 @@ async function sendHttpRequest(kafkaMessage, novuWorkflow) {
       {
         name: novuWorkflow,
         to: {
-          subscriberId: json.owner?.id,
+          subscriberId: json.owner?.email,
           email: json.owner?.email,
           phone: json.owner?.phone,
         },

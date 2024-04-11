@@ -41,7 +41,7 @@ public class ImportaDataCmd implements Command<Void> {
 		EngineMongoDataConnection connection = commandContext.getConnection();
 
 		// Cases Definitions
-		JsonElement casesDefinitionsJson = data.get("casesDefinitions");
+		JsonElement casesDefinitionsJson = data.get("caseDefinition");
 		if (casesDefinitionsJson != null) {
 			List<JsonObject> caseDefinitions = gsonBuilder.create().fromJson(casesDefinitionsJson,
 					new TypeToken<List<JsonObject>>() {
@@ -53,7 +53,7 @@ public class ImportaDataCmd implements Command<Void> {
 		}
 
 		// Cases Instances
-		JsonElement casesInstancesJson = data.get("casesInstances");
+		JsonElement casesInstancesJson = data.get("caseInstance");
 		if (casesInstancesJson != null) {
 			List<JsonObject> caseInstances = gsonBuilder.create().fromJson(casesInstancesJson,
 					new TypeToken<List<JsonObject>>() {
@@ -65,7 +65,7 @@ public class ImportaDataCmd implements Command<Void> {
 		}
 
 		// Forms
-		JsonElement formsJson = data.get("forms");
+		JsonElement formsJson = data.get("form");
 		if (formsJson != null) {
 			List<JsonObject> forms = gsonBuilder.create().fromJson(formsJson, new TypeToken<List<JsonObject>>() {
 			}.getType());
@@ -75,7 +75,7 @@ public class ImportaDataCmd implements Command<Void> {
 		}
 
 		// Records Types
-		JsonElement recordTypesJson = data.get("recordsTypes");
+		JsonElement recordTypesJson = data.get("recordType");
 		if (recordTypesJson != null) {
 			List<JsonObject> recordTypes = gsonBuilder.create().fromJson(recordTypesJson,
 					new TypeToken<List<JsonObject>>() {
@@ -87,7 +87,7 @@ public class ImportaDataCmd implements Command<Void> {
 		}
 
 		// Records
-		JsonElement recordsJson = data.get("records");
+		JsonElement recordsJson = data.get("record");
 		if (recordsJson != null) {
 			List<JsonObject> records = gsonBuilder.create().fromJson(recordsJson, new TypeToken<List<JsonObject>>() {
 			}.getType());

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.bson.BsonObjectId;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,8 +73,9 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 	}
 
 	@Override
-	public void save(final CaseDefinition caseDefinition) {
-		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(caseDefinition))));
+	public String save(final CaseDefinition caseDefinition) {
+		return ((BsonObjectId) getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(caseDefinition))))
+				.getInsertedId()).getValue().toHexString();
 	}
 
 	@Override

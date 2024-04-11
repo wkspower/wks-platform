@@ -28,7 +28,7 @@ import lombok.ToString;
 @ToString
 @Getter
 @Setter
-@Document("caseInstances")
+@Document("caseInstance")
 public class Case {
 
 	@Id

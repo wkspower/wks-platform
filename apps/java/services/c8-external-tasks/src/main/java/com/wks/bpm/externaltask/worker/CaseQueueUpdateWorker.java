@@ -35,7 +35,7 @@ public class CaseQueueUpdateWorker {
 	private GsonBuilder gsonBuilder;
 
 	@JobWorker(type = "caseQueueUpdate", fetchVariables = { "queue" })
-	public void handleJobFoo(final JobClient client, final ActivatedJob job) {
+	public void handleJob(final JobClient client, final ActivatedJob job) {
 
 		log.info("Starting Worker '{}'", job.getType());
 

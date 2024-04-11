@@ -19,5 +19,12 @@
       "mgmt_form",
       "mgmt_ bpm_engine_type"
     ]
+  },
+  {
+    "name": "email-to-case",
+    "path": "/email-to-case",
+    "realmRoles": [
+      "email_to_case"
+    ]
   }    
 ]

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0b3shfa" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.22.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.20.0">
+  <bpmn:process id="email-to-case" name="Email to Case" isExecutable="true" camunda:historyTimeToLive="180">
+    <bpmn:startEvent id="StartEvent_1" name="Email received">
+      <bpmn:outgoing>Flow_0zz4o4a</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0zz4o4a" sourceRef="StartEvent_1" targetRef="extract-bk" />
+    <bpmn:endEvent id="Event_0errv1s" name="E-mail logged">
+      <bpmn:incoming>Flow_0vebjw1</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:scriptTask id="extract-bk" name="Extract Email variables" camunda:asyncBefore="true" scriptFormat="javascript">
+      <bpmn:incoming>Flow_0zz4o4a</bpmn:incoming>
+      <bpmn:outgoing>Flow_0e8fv31</bpmn:outgoing>
+      <bpmn:script>var caseEmail = JSON.parse(execution.getVariable('caseEmail'));
+
+if (caseEmail &amp;&amp; caseEmail.caseDefinitionId) {
+    var caseDefinitionId = caseEmail.caseDefinitionId;    
+    execution.setVariable('caseDefinitionId', caseDefinitionId);
+}
+
+if (caseEmail &amp;&amp; caseEmail.caseInstanceBusinessKey) {
+    var caseInstanceBusinessKey = caseEmail.caseInstanceBusinessKey;    
+    execution.setVariable('caseInstanceBusinessKey', caseInstanceBusinessKey);
+}
+
+execution.setVariable('from', caseEmail.from);
+</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:exclusiveGateway id="Gateway_05wjj5h" name="Business Key or Case Def Id present?">
+      <bpmn:incoming>Flow_0e8fv31</bpmn:incoming>
+      <bpmn:outgoing>Flow_1uox3rq</bpmn:outgoing>
+      <bpmn:outgoing>Flow_10r6he4</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1uox3rq" name="Business Key" sourceRef="Gateway_05wjj5h" targetRef="validate-bk">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.getVariable('caseInstanceBusinessKey') != null}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_10r6he4" name="Case Def Id" sourceRef="Gateway_05wjj5h" targetRef="validate-case-def">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${execution.getVariable('caseDefinitionId') != null}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="start-new-case" name="Start new case" camunda:type="external" camunda:topic="caseStart">
+      <bpmn:extensionElements />
+      <bpmn:incoming>Flow_10ghfk1</bpmn:incoming>
+      <bpmn:outgoing>Flow_11edbur</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_0mgw61j">
+      <bpmn:incoming>Flow_1710tmv</bpmn:incoming>
+      <bpmn:incoming>Flow_0c5exn4</bpmn:incoming>
+      <bpmn:outgoing>Flow_1i0f8v3</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1i0f8v3" sourceRef="Gateway_0mgw61j" targetRef="log-email" />
+    <bpmn:sequenceFlow id="Flow_11edbur" sourceRef="start-new-case" targetRef="update-email-bk-ref" />
+    <bpmn:sequenceFlow id="Flow_0vebjw1" sourceRef="log-email" targetRef="Event_0errv1s" />
+    <bpmn:serviceTask id="log-email" name="Log Email" camunda:type="external" camunda:topic="emailLog">
+      <bpmn:incoming>Flow_1i0f8v3</bpmn:incoming>
+      <bpmn:outgoing>Flow_0vebjw1</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1710tmv" sourceRef="validate-bk" targetRef="Gateway_0mgw61j" />
+    <bpmn:serviceTask id="validate-bk" name="Validate Case exists" camunda:type="external" camunda:topic="validateCaseBusinessKey">
+      <bpmn:incoming>Flow_1uox3rq</bpmn:incoming>
+      <bpmn:outgoing>Flow_1710tmv</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="Event_0p4leg9" name="" attachedToRef="validate-bk">
+      <bpmn:outgoing>Flow_0j3gdck</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0q4jqlc" errorRef="Error_187dh1f" camunda:errorCodeVariable="caseNotFoundErrorCode" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_0j3gdck" sourceRef="Event_0p4leg9" targetRef="Event_0cbf5lu" />
+    <bpmn:sequenceFlow id="Flow_1a3ijjt" sourceRef="validate-case-def" targetRef="Activity_1i7z233" />
+    <bpmn:boundaryEvent id="Event_113xse0" attachedToRef="validate-case-def">
+      <bpmn:outgoing>Flow_1eng9ao</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_1dqup9k" errorRef="Error_05fg0qs" camunda:errorCodeVariable="caseDefNotFoundErrorCode" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_1eng9ao" sourceRef="Event_113xse0" targetRef="Event_0av5zq8" />
+    <bpmn:endEvent id="Event_0cbf5lu" name="Case not found">
+      <bpmn:incoming>Flow_0j3gdck</bpmn:incoming>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0oz9apn" errorRef="Error_187dh1f" />
+    </bpmn:endEvent>
+    <bpmn:endEvent id="Event_0av5zq8" name="Case Definition Not Found">
+      <bpmn:incoming>Flow_1eng9ao</bpmn:incoming>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_1u1ss2v" errorRef="Error_05fg0qs" />
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="validate-case-def" name="Validate Case Definition exists" camunda:type="external" camunda:topic="validateCaseDefinitionId">
+      <bpmn:incoming>Flow_10r6he4</bpmn:incoming>
+      <bpmn:outgoing>Flow_1a3ijjt</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0c5exn4" sourceRef="update-email-bk-ref" targetRef="Gateway_0mgw61j" />
+    <bpmn:scriptTask id="update-email-bk-ref" name="Update Email Business Key reference" scriptFormat="javascript">
+      <bpmn:incoming>Flow_11edbur</bpmn:incoming>
+      <bpmn:outgoing>Flow_0c5exn4</bpmn:outgoing>
+      <bpmn:script>var caseEmail = execution.getVariable("caseEmail");
+var caseInstanceBusinessKey = execution.getVariable("caseInstanceBusinessKey");
+
+var caseEmailJson = JSON.parse(caseEmail);
+
+caseEmailJson.caseInstanceBusinessKey = caseInstanceBusinessKey;
+
+var updatedCaseEmailJson = JSON.stringify(caseEmailJson);
+
+"caseEmail"
+execution.setVariable("caseEmail", updatedCaseEmailJson);</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_0e8fv31" sourceRef="extract-bk" targetRef="Gateway_05wjj5h" />
+    <bpmn:sequenceFlow id="Flow_10ghfk1" sourceRef="Activity_1i7z233" targetRef="start-new-case" />
+    <bpmn:businessRuleTask id="Activity_1i7z233" name="Choose case owner" camunda:resultVariable="caseOwnerEmail" camunda:decisionRef="email-to-case-owner-decision" camunda:mapDecisionResult="singleEntry">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="from">${from}</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1a3ijjt</bpmn:incoming>
+      <bpmn:outgoing>Flow_10ghfk1</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+  </bpmn:process>
+  <bpmn:error id="Error_187dh1f" name="Case Not Found" errorCode="case-not-found" camunda:errorMessage="Case not found error" />
+  <bpmn:error id="Error_05fg0qs" name="Case Definition Not Found" errorCode="case-def-not-found" camunda:errorMessage="Case Definition not found error" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="email-to-case">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="209" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="161" y="252" width="73" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0errv1s_di" bpmnElement="Event_0errv1s">
+        <dc:Bounds x="1792" y="209" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1776" y="252" width="68" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1t68b1x_di" bpmnElement="extract-bk">
+        <dc:Bounds x="310" y="187" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_05wjj5h_di" bpmnElement="Gateway_05wjj5h" isMarkerVisible="true">
+        <dc:Bounds x="515" y="202" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="500" y="160" width="80" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1scc35r_di" bpmnElement="start-new-case">
+        <dc:Bounds x="1080" y="400" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0mgw61j_di" bpmnElement="Gateway_0mgw61j" isMarkerVisible="true">
+        <dc:Bounds x="1485" y="202" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_12ah09n_di" bpmnElement="log-email">
+        <dc:Bounds x="1590" y="187" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_144dlo1_di" bpmnElement="validate-bk">
+        <dc:Bounds x="970" y="187" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1reo8lp_di" bpmnElement="Event_0cbf5lu">
+        <dc:Bounds x="1162" y="82" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1143" y="125" width="75" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0pqmyhi_di" bpmnElement="Event_0av5zq8">
+        <dc:Bounds x="812" y="542" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="793" y="585" width="75" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1pcppya_di" bpmnElement="validate-case-def">
+        <dc:Bounds x="640" y="400" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_059k1su_di" bpmnElement="update-email-bk-ref">
+        <dc:Bounds x="1300" y="400" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0nwteoc_di" bpmnElement="Activity_1i7z233">
+        <dc:Bounds x="900" y="400" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ah39wm_di" bpmnElement="Event_113xse0">
+        <dc:Bounds x="722" y="462" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_00h6t3e_di" bpmnElement="Event_0p4leg9">
+        <dc:Bounds x="1052" y="169" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="931" y="67" width="85" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0zz4o4a_di" bpmnElement="Flow_0zz4o4a">
+        <di:waypoint x="215" y="227" />
+        <di:waypoint x="310" y="227" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1uox3rq_di" bpmnElement="Flow_1uox3rq">
+        <di:waypoint x="565" y="227" />
+        <di:waypoint x="970" y="227" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="588" y="209" width="67" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10r6he4_di" bpmnElement="Flow_10r6he4">
+        <di:waypoint x="540" y="252" />
+        <di:waypoint x="540" y="440" />
+        <di:waypoint x="640" y="440" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="550" y="313" width="59" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1i0f8v3_di" bpmnElement="Flow_1i0f8v3">
+        <di:waypoint x="1535" y="227" />
+        <di:waypoint x="1590" y="227" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11edbur_di" bpmnElement="Flow_11edbur">
+        <di:waypoint x="1180" y="440" />
+        <di:waypoint x="1300" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0vebjw1_di" bpmnElement="Flow_0vebjw1">
+        <di:waypoint x="1690" y="227" />
+        <di:waypoint x="1792" y="227" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1710tmv_di" bpmnElement="Flow_1710tmv">
+        <di:waypoint x="1070" y="227" />
+        <di:waypoint x="1485" y="227" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0j3gdck_di" bpmnElement="Flow_0j3gdck">
+        <di:waypoint x="1070" y="169" />
+        <di:waypoint x="1070" y="100" />
+        <di:waypoint x="1162" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1a3ijjt_di" bpmnElement="Flow_1a3ijjt">
+        <di:waypoint x="740" y="440" />
+        <di:waypoint x="900" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1eng9ao_di" bpmnElement="Flow_1eng9ao">
+        <di:waypoint x="740" y="498" />
+        <di:waypoint x="740" y="560" />
+        <di:waypoint x="812" y="560" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0c5exn4_di" bpmnElement="Flow_0c5exn4">
+        <di:waypoint x="1400" y="440" />
+        <di:waypoint x="1510" y="440" />
+        <di:waypoint x="1510" y="252" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0e8fv31_di" bpmnElement="Flow_0e8fv31">
+        <di:waypoint x="410" y="227" />
+        <di:waypoint x="515" y="227" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10ghfk1_di" bpmnElement="Flow_10ghfk1">
+        <di:waypoint x="1000" y="440" />
+        <di:waypoint x="1080" y="440" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -49,7 +49,7 @@ public class BusinessProcessStartWorker {
 	private GsonBuilder gsonBuilder;
 
 	@JobWorker(type = "businessProcessStart", fetchVariables = { "caseInstance" })
-	public void handleJobFoo(final JobClient client, final ActivatedJob job) {
+	public void handleJob(final JobClient client, final ActivatedJob job) {
 
 		log.info("Starting Worker '{}'", job.getType());
 

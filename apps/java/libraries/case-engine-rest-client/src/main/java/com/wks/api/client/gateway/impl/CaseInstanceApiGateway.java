@@ -13,10 +13,12 @@ package com.wks.api.client.gateway.impl;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import com.wks.api.client.gateway.ApiGateway;
+import com.wks.api.dto.CaseInstanceDto;
 
 /**
  * @author victor.franca
@@ -24,6 +26,24 @@ import com.wks.api.client.gateway.ApiGateway;
  */
 @Component
 public class CaseInstanceApiGateway extends ApiGateway {
+
+	public CaseInstanceDto get(final String businessKey) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		HttpEntity<String> entity = new HttpEntity<>(headers);
+		return restTemplate
+				.exchange(baseUrl + caseInstanceUrl + "/" + businessKey, HttpMethod.GET, entity, CaseInstanceDto.class)
+				.getBody();
+	}
+
+	public CaseInstanceDto start(final CaseInstanceDto caseInstance) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		HttpEntity<CaseInstanceDto> entity = new HttpEntity<>(caseInstance, headers);
+		return restTemplate.postForEntity(baseUrl + caseInstanceUrl, entity, CaseInstanceDto.class).getBody();
+	}
 
 	public void save(final String caseInstance) {
 		HttpHeaders headers = new HttpHeaders();

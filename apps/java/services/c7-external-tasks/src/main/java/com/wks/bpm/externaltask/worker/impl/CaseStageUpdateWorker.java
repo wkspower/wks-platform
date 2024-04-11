@@ -11,6 +11,9 @@
  */
 package com.wks.bpm.externaltask.worker.impl;
 
+import java.util.Map;
+import java.util.Optional;
+
 import org.camunda.bpm.client.spring.annotation.ExternalTaskSubscription;
 import org.camunda.bpm.client.task.ExternalTask;
 import org.camunda.bpm.client.task.ExternalTaskService;
@@ -28,9 +31,10 @@ public class CaseStageUpdateWorker extends WksExternalTaskHandler {
 	private CaseInstanceApiGateway caseInstanceApiGateway;
 
 	@Override
-	public void doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
+	public Optional<Map<String, Object>> doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
 		String stagePatch = "{\"stage\": " + "\"" + externalTask.getVariable("stage") + "\"" + "}";
 		caseInstanceApiGateway.patch(externalTask.getBusinessKey(), stagePatch);
+		return Optional.empty();
 	}
 
 }

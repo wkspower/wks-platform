@@ -35,7 +35,7 @@
 		<lombok.version>1.18.22</lombok.version>
 		<gson.version>2.10.1</gson.version>
 		<h2.version>2.1.214</h2.version>
-		<mongo.version>4.9.1</mongo.version>
+		<mongo.version>4.11.2</mongo.version>
 		<minio.version>8.4.5</minio.version>
 
 		<findbugs-version>3.0.2</findbugs-version>
@@ -91,7 +91,6 @@
 		<module>services/c7-external-tasks</module>
 		<module>services/c8-external-tasks</module>
 		<module>services/storage-api</module>
-		<module>services/email-to-case</module>
 		<module>services/demo-data-loader</module>
 	</modules>
 

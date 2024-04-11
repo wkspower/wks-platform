@@ -35,7 +35,7 @@ public class RecordSaveUpdateWorker {
 	private GsonBuilder gsonBuilder;
 
 	@JobWorker(type = "recordSave", fetchVariables = { "record", "recordTypeId" })
-	public void handleJobFoo(final JobClient client, final ActivatedJob job) {
+	public void handleJob(final JobClient client, final ActivatedJob job) {
 		
 		log.info("Starting Worker '{}'", job.getType());
 		

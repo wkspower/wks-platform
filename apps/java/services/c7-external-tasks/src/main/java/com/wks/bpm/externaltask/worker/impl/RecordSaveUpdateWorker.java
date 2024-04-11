@@ -11,6 +11,9 @@
  */
 package com.wks.bpm.externaltask.worker.impl;
 
+import java.util.Map;
+import java.util.Optional;
+
 import org.camunda.bpm.client.spring.annotation.ExternalTaskSubscription;
 import org.camunda.bpm.client.task.ExternalTask;
 import org.camunda.bpm.client.task.ExternalTaskService;
@@ -28,11 +31,12 @@ public class RecordSaveUpdateWorker extends WksExternalTaskHandler {
 	private RecordApiGateway recordApiGateway;
 
 	@Override
-	public void doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
+	public Optional<Map<String, Object>> doExecute(final ExternalTask externalTask, final ExternalTaskService externalTaskService) {
 		String recordJsonString = externalTask.getVariable("record");
 		String recordTypeId = externalTask.getVariable("recordTypeId");
 
 		recordApiGateway.save(recordTypeId, recordJsonString);
+		return Optional.empty();
 	}
 
 }

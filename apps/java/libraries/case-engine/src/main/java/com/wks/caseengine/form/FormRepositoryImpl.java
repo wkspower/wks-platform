@@ -14,6 +14,7 @@ package com.wks.caseengine.form;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.BsonObjectId;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +51,9 @@ public class FormRepositoryImpl implements FormRepository {
 	}
 
 	@Override
-	public void save(final Form form) {
-		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(form))));
-
+	public String save(final Form form) {
+		return ((BsonObjectId) getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(form))))
+				.getInsertedId()).getValue().toHexString();
 	}
 
 	@Override
@@ -64,9 +65,9 @@ public class FormRepositoryImpl implements FormRepository {
 	@Override
 	public void delete(final String formKey) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("key", formKey);
-		
+
 		JsonObject form = getCollection().findOneAndDelete(filter);
-		if(form == null) {
+		if (form == null) {
 			throw new DatabaseRecordNotFoundException("Form", "key", formKey);
 		}
 	}
@@ -77,9 +78,9 @@ public class FormRepositoryImpl implements FormRepository {
 
 		Bson update = Updates.combine(Updates.set("title", form.getTitle()), Updates.set("toolTip", form.getToolTip()),
 				Updates.set("structure", (new JsonObject(gsonBuilder.create().toJson(form.getStructure())))));
-		
+
 		JsonObject updatedForm = getCollection().findOneAndUpdate(filter, update);
-		if(updatedForm == null) {
+		if (updatedForm == null) {
 			throw new DatabaseRecordNotFoundException("Form", "key", formKey);
 		}
 

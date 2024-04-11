@@ -14,6 +14,7 @@ package com.wks.caseengine.queue;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.BsonObjectId;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,8 +55,9 @@ public class QueueRepositoryImpl implements QueueRepository {
 	}
 
 	@Override
-	public void save(Queue queue) {
-		getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(queue))));
+	public String save(Queue queue) {
+		return ((BsonObjectId) getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(queue))))
+				.getInsertedId()).getValue().toHexString();
 	}
 
 	@Override
@@ -75,7 +77,7 @@ public class QueueRepositoryImpl implements QueueRepository {
 	@Override
 	public void delete(String id) throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("id", id);
-		
+
 		JsonObject jsonObject = getCollection().findOneAndDelete(filter);
 		if (jsonObject == null) {
 			throw new DatabaseRecordNotFoundException("Queue", "id", id);

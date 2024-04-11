@@ -34,5 +34,9 @@
       {
         "name": "mgmt_form",
         "description": ""
+      },
+      {
+        "name": "email_to_case",
+        "description": ""
       }      
 ]

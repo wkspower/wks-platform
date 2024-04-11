@@ -170,8 +170,8 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 
 			keycloak.realms().create(realm);
 
-			addUserToGroups(keycloak, externalTasksClientId);
-			addUserToGroups(keycloak, emailToCaseClientId);
+			addUserToGroups(keycloak, externalTasksClientId, Arrays.asList("user", "manager", "email-to-case"));
+			addUserToGroups(keycloak, emailToCaseClientId, Arrays.asList("email-to-case"));
 
 		} catch (Exception e) {
 			log.error("error to create keycloack", e);
@@ -252,10 +252,25 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 		return roles;
 	}
 
-	private void addUserToGroups(final Keycloak keycloak, final String userId) {
+	private void addUserToGroups(final Keycloak keycloak, final String userId, List<String>... groupNames) {
 		UserRepresentation user = keycloak.realm(realmName).users().search("service-account-" + userId).get(0);
 		UserResource userResource = keycloak.realm(realmName).users().get(user.getId());
-		keycloak.realm(realmName).groups().groups().forEach(group -> userResource.joinGroup(group.getId()));
+
+		// If groupNames is provided, join the user to the specified groups
+		if (groupNames != null && groupNames.length > 0) {
+			for (List<String> names : groupNames) {
+				if (names != null) {
+					for (String groupName : names) {
+						keycloak.realm(realmName).groups().groups().stream()
+								.filter(group -> group.getName().equals(groupName)).findFirst()
+								.ifPresent(group -> userResource.joinGroup(group.getId()));
+					}
+				}
+			}
+		} else {
+			// If no group names provided, add the user to all groups
+			keycloak.realm(realmName).groups().groups().forEach(group -> userResource.joinGroup(group.getId()));
+		}
 	}
 
 }

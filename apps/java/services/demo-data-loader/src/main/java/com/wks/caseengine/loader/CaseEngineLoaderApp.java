@@ -13,11 +13,12 @@ package com.wks.caseengine.loader;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
-@SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
+@SpringBootApplication(exclude = { UserDetailsServiceAutoConfiguration.class, MongoAutoConfiguration.class })
 @ComponentScan
 public class CaseEngineLoaderApp {
 

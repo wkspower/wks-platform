@@ -47,3 +47,5 @@ management.endpoints.web.exposure.include: health,info
 management.endpoint.health.show-details: never
 
 case.engine.case-creation-process: case-instance-create
+case.engine.email-to-case-process: email-to-case
+case.engine.email-to-case-outbound-process: email-to-case-outbound

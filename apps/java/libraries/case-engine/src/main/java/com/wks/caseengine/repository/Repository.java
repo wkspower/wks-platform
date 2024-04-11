@@ -19,7 +19,11 @@ public interface Repository<T> {
 
 	T get(final String id) throws DatabaseRecordNotFoundException;
 
-	void save(final T object);
+	/**
+	 * @param object
+	 * @return The id of the inserted record
+	 */
+	String save(final T object);
 
 	void update(final String id, final T object) throws DatabaseRecordNotFoundException;
 

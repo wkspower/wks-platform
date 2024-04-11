@@ -1,14 +1,5 @@
 {
-  "organization": [
-    {
-      "_id": {
-        "$oid": "536bb856cf1d3002f5d8d3b6"
-      },
-      "name": "WKS Power Limited",
-      "mailReceiveApiKey": "V3VMR0QzaHE0a1F1NWloQ0lrVkJldjIyY3U0dDgvbytXYjBPclU3eVU3Yz0K"
-    }
-  ],
-  "casesDefinitions": [
+  "caseDefinition": [
     {
       "_id": {
         "$oid": "64a53688c0c8884b1e83fdfe"
@@ -306,7 +297,7 @@
       ]
     }
   ],
-  "forms": [
+  "form": [
     {
       "_id": {
         "$oid": "64a5371222c70cba3b209fbd"
@@ -7079,7 +7070,7 @@
       "toolTip": "Orientation Training"
     }
   ],
-  "queues": [
+  "queue": [
     {
       "_id": {
         "$oid": "64bfcea90f4949f8dd971ac8"

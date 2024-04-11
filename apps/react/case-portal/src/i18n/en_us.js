@@ -132,9 +132,21 @@ const defs = {
         },
         emails: {
             datagrid: {
-                from: 'from',
-                to: 'to',
-                text: 'text'
+                receivedDateTime: 'Received',
+                hasAttachments: 'Attachments?',
+                from: 'From',
+                to: 'To',
+                bodyPreview: 'Preview',
+                action: {
+                    compose: 'New'
+                }
+            },
+            form:{
+                title: 'New e-mail',
+                recipient: 'To',
+                subject: 'Subject',
+                body: 'Body',
+                send: 'Send'
             }
         },
         message: {

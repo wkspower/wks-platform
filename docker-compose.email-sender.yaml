@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+
+  email-sender:
+    build:
+      context: apps/node/email-sender
+    links:      
+        - case-engine-rest-api
+    environment:
+        - LOG_LEVEL=${EMAIL_SENDER_LOG_LEVEL}
+        - KAFKA_URL=${KAFKA_URL}
+        - KAFKA_TOPIC=${KAFKA_TOPIC_CASE_EMAIL_OUTBOUND}
+        - WKS_CASE_API_URL=${WKS_CASE_API_URL}
+        - JWT_TOKEN_URL=${KEYCLOAK_TOKEN_URL}
+        - JWT_TOKEN_CLIENT_ID=${MAIL_TO_CASE_JWT_TOKEN_CLIENT_ID}
+        - JWT_TOKEN_CLIENT_SECRET=${MAIL_TO_CASE_JWT_TOKEN_CLIENT_SECRET}
+        - JWT_TOKEN_GRANT_TYPE=${MAIL_TO_CASE_JWT_TOKEN_GRANT_TYPE}
+    depends_on:
+      - kafka
+      - zookeeper                    

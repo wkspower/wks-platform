@@ -53,7 +53,7 @@ jobs:
       run: yarn --cwd case-portal install
 
     - name: Build for case-portal
-      run: REACT_APP_KEYCLOAK_URL=${{ env.KEYCLOAK_URL }} REACT_APP_API_URL=${{ env.WKS_API_URL }} REACT_APP_EMAIL_URL=${{ env.WKS_EMAIL_API_URL }} REACT_APP_STORAGE_URL=${{ env.WKS_STORAGE_API_URL }} yarn --cwd case-portal build
+      run: REACT_APP_KEYCLOAK_URL=${{ env.KEYCLOAK_URL }} REACT_APP_API_URL=${{ env.WKS_API_URL }} REACT_APP_STORAGE_URL=${{ env.WKS_STORAGE_API_URL }} yarn --cwd case-portal build
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
@@ -105,15 +105,6 @@ jobs:
         file: demo-data-loader/Dockerfile
         push: true
         tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader:${{ env.BUILD_VERSION }}"
-
-    - name: Build and push Docker image email-to-case
-      uses: docker/build-push-action@v2
-      with:
-        context: ./email-to-case
-        platforms: linux/amd64,linux/arm64
-        file: email-to-case/Dockerfile
-        push: true
-        tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case:${{ env.BUILD_VERSION }}"
 
     - name: Build and push Docker image for case-portal
       uses: docker/build-push-action@v2
@@ -171,10 +162,6 @@ jobs:
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c7-external-tasks=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c7-external-tasks:${{ env.BUILD_VERSION }}
         cd ../../
 
-        cd email-to-case/local
-        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case:${{ env.BUILD_VERSION }}
-        cd ../../
-
         cd case-portal-client/local
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal:${{ env.BUILD_VERSION }}
         cd ../../
@@ -201,10 +188,6 @@ jobs:
 
         cd c7-external-tasks/staging
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c7-external-tasks=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c7-external-tasks:${{ env.BUILD_VERSION }}
-        cd ../../
-
-        cd email-to-case/staging
-        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/email-to-case:${{ env.BUILD_VERSION }}
         cd ../../
 
         cd case-portal-client/staging

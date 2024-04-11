@@ -142,8 +142,8 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	@Override
-	public void sendMessage(ProcessMessage processMesage, Optional<List<ProcessVariable>> variables) {
-		getEngineClient().sendMessage(processMesage, variables, getBpmEngine());
+	public void sendMessage(ProcessMessage processMesage, Optional<List<ProcessVariable>> correlateKeys) {
+		getEngineClient().sendMessage(processMesage, correlateKeys, getBpmEngine());
 	}
 
 }

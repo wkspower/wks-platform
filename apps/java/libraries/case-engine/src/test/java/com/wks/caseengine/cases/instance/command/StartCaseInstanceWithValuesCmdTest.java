@@ -96,7 +96,7 @@ public class StartCaseInstanceWithValuesCmdTest {
 		assertEquals("Stage 1", savedCaseInstance.getStage());
 		assertEquals(caseInstanceToSave.getStatus(), savedCaseInstance.getStatus());
 
-		verify(processInstanceService).create(eq("Process1"), eq(Optional.of("BK_1")), anyOptionalOfProcessVariable());
+		verify(processInstanceService).start(eq("Process1"), eq(Optional.of("BK_1")), anyOptionalOfProcessVariable());
 	}
 
 	// Helper method to create a properly typed Optional

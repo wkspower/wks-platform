@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.email.CaseEmail;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,24 +40,30 @@ public class EngineMongoDataConnectionImpl implements EngineMongoDataConnection 
 	public MongoTemplate getOperations() {
 		return byTenant;
 	}
+	
+	@Override
+	public MongoCollection<JsonObject> getBpmEngineCollection() {
+		MongoDatabase db = byShared.getDb();
+		return db.getCollection("bpmEngine", JsonObject.class);
+	}
 
 	@Override
 	public MongoCollection<JsonObject> getCaseDefCollection() {
 		MongoDatabase db = byTenant.getDb();
 		log.debug("using database MongoDataConnection: {}", db.getName());
-		return db.getCollection("caseDefinitions", JsonObject.class);
+		return db.getCollection("caseDefinition", JsonObject.class);
 	}
 
 	@Override
 	public MongoCollection<JsonObject> getCaseInstCollection() {
 		MongoDatabase db = byTenant.getDb();
-		return db.getCollection("caseInstances", JsonObject.class);
+		return db.getCollection("caseInstance", JsonObject.class);
 	}
 
 	@Override
 	public MongoCollection<JsonObject> getFormCollection() {
 		MongoDatabase db = byTenant.getDb();
-		return db.getCollection("forms", JsonObject.class);
+		return db.getCollection("form", JsonObject.class);
 	}
 
 	@Override
@@ -66,33 +73,21 @@ public class EngineMongoDataConnectionImpl implements EngineMongoDataConnection 
 	}
 
 	@Override
-	public MongoCollection<JsonObject> getCaseEmailCollection() {
+	public MongoCollection<CaseEmail> getCaseEmailCollection() {
 		MongoDatabase db = byTenant.getDb();
-		return db.getCollection("caseEmail", JsonObject.class);
-	}
-
-	@Override
-	public MongoCollection<JsonObject> getOrganizationCollection() {
-		MongoDatabase db = byTenant.getDb();
-		return db.getCollection("organization", JsonObject.class);
-	}
-
-	@Override
-	public MongoCollection<JsonObject> getBpmEngineCollection() {
-		MongoDatabase db = byShared.getDb();
-		return db.getCollection("bpmEngine", JsonObject.class);
+		return db.getCollection("caseEmail", CaseEmail.class);
 	}
 
 	@Override
 	public MongoCollection<CaseInstance> getCaseInstanceCollection() {
 		MongoDatabase db = byTenant.getDb();
-		return db.getCollection("caseInstances", CaseInstance.class);
+		return db.getCollection("caseInstance", CaseInstance.class);
 	}
-	
+
 	@Override
 	public MongoCollection<JsonObject> getQueueCollection() {
 		MongoDatabase db = byTenant.getDb();
-		return db.getCollection("queues", JsonObject.class);
+		return db.getCollection("queue", JsonObject.class);
 	}
 
 	@Override
