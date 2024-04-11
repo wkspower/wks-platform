@@ -29,7 +29,7 @@ import lombok.Setter;
 public class ProcessVariable {
 
 	private String name;
-	private String value;
+	private Object value;
 	private String type;
 
 }

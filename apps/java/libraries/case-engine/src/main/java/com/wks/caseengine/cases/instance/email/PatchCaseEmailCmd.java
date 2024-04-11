@@ -34,6 +34,7 @@ public class PatchCaseEmailCmd implements Command<Void> {
 		try {
 			storedCaseEmail = commandContext.getCaseEmailRepository().get(id);
 			storedCaseEmail.setStatus(mergePatch.getStatus());
+			storedCaseEmail.setReceivedDateTime(mergePatch.getReceivedDateTime());
 			commandContext.getCaseEmailRepository().update(id, storedCaseEmail);
 		} catch (DatabaseRecordNotFoundException e) {
 			throw new CaseEmailNotFoundException(e.getMessage(), e);

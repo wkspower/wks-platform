@@ -30,7 +30,7 @@ public class C8VariablesMapper implements VariablesMapper<Map<String, String>> {
 		Map<String, String> processVariablesMap = new LinkedHashMap<>();
 
 		caseAttributes.forEach(caseAttribute -> {
-			processVariablesMap.put(caseAttribute.getName(), caseAttribute.getValue());
+			processVariablesMap.put(caseAttribute.getName(), String.valueOf(caseAttribute.getValue()));
 		});
 
 		return processVariablesMap;

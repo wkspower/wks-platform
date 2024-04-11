@@ -12,6 +12,7 @@
 package com.wks.caseengine.cases.instance.email;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Optional;
 
 import com.wks.bpm.engine.model.spi.ProcessMessage;
@@ -29,15 +30,19 @@ import lombok.AllArgsConstructor;
 public class MarkAsSentCaseEmailCmd implements Command<Void> {
 
 	private String id;
+	private Date sentDateTime;
 
 	@Override
 	public Void execute(CommandContext commandContext) {
 
 		ProcessVariable caseEmailIdCorrelateKey = ProcessVariable.builder().name("caseEmailId").value(id).build();
 
-		commandContext.getBpmEngineClientFacade().sendMessage(
-				ProcessMessage.builder().messageCode("emailSentConfirmation").build(),
-				Optional.of(Arrays.asList(caseEmailIdCorrelateKey)));
+		commandContext.getBpmEngineClientFacade().sendMessage(ProcessMessage.builder()
+				.messageCode("emailSentConfirmation")
+				.processVariables(Optional
+						.of(Arrays.asList(ProcessVariable.builder().name("sentDateTime").value(sentDateTime).build())))
+
+				.build(), Optional.of(Arrays.asList(caseEmailIdCorrelateKey)));
 
 		return null;
 	}

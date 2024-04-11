@@ -80,9 +80,10 @@ public class CaseEmailController {
 	}
 
 	@PatchMapping(value = "/{id}/sent", consumes = "application/merge-patch+json")
-	public ResponseEntity<CaseEmail> markAsSent(@PathVariable final String id) {
+	public ResponseEntity<CaseEmail> markAsSent(@PathVariable final String id,
+			@RequestBody final CaseEmail mergePatch) {
 		try {
-			caseEmailService.markAsSent(id);
+			caseEmailService.markAsSent(id, mergePatch.getReceivedDateTime());
 		} catch (CaseInstanceNotFoundException e) {
 			throw new RestResourceNotFoundException(e.getMessage());
 		}
@@ -91,7 +92,7 @@ public class CaseEmailController {
 	}
 
 	@PatchMapping(value = "/{id}", consumes = "application/merge-patch+json")
-	public ResponseEntity<CaseEmail> mergePatch(@PathVariable final String id, @RequestBody CaseEmail mergePatch) {
+	public ResponseEntity<CaseEmail> mergePatch(@PathVariable final String id, @RequestBody final CaseEmail mergePatch) {
 		try {
 			caseEmailService.patch(id, mergePatch);
 		} catch (CaseInstanceNotFoundException e) {

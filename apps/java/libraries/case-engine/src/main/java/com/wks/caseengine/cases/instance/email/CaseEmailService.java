@@ -11,6 +11,7 @@
  */
 package com.wks.caseengine.cases.instance.email;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +23,7 @@ public interface CaseEmailService {
 
 	CaseEmail save(final CaseEmail caseEmail);
 
-	void markAsSent(final String id);
+	void markAsSent(final String id, final Date sentDateTime);
 
 	void patch(final String id, final CaseEmail mergePatch);
 

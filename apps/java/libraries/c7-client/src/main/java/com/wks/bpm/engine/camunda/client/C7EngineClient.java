@@ -30,7 +30,6 @@ import org.camunda.community.rest.client.api.TaskApi;
 import org.camunda.community.rest.client.api.VariableInstanceApi;
 import org.camunda.community.rest.client.dto.ActivityInstanceDto;
 import org.camunda.community.rest.client.dto.CompleteTaskDto;
-import org.camunda.community.rest.client.dto.CorrelationMessageAsyncDto;
 import org.camunda.community.rest.client.dto.CorrelationMessageDto;
 import org.camunda.community.rest.client.dto.ProcessInstanceWithVariablesDto;
 import org.camunda.community.rest.client.dto.StartProcessInstanceDto;
@@ -397,10 +396,17 @@ public class C7EngineClient implements BpmEngineClient {
 	public void sendMessage(final ProcessMessage processMessage, final Optional<List<ProcessVariable>> correlateKeys,
 			final BpmEngine bpmEngine) {
 		try {
-			messageApi.deliverMessage(
-					new CorrelationMessageDto()
-					.messageName(processMessage.getMessageCode())
-					.correlationKeys(c7VariablesMapper.toEngineFormat(correlateKeys.get())));
+			CorrelationMessageDto messageDto = new CorrelationMessageDto().messageName(processMessage.getMessageCode());
+
+			if (correlateKeys.isPresent()) {
+				messageDto.correlationKeys(c7VariablesMapper.toEngineFormat(correlateKeys.get()));
+			}
+			if (processMessage.getProcessVariables().isPresent()) {
+				messageDto
+						.processVariables(c7VariablesMapper.toEngineFormat(processMessage.getProcessVariables().get()));
+			}
+
+			messageApi.deliverMessage(messageDto);
 		} catch (ApiException e) {
 			log.error("Error sending message to camunda", e);
 			e.printStackTrace();

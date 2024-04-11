@@ -11,6 +11,7 @@
  */
 package com.wks.caseengine.cases.instance.email;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,8 +46,8 @@ public class CaseEmailServiceImpl implements CaseEmailService {
 	}
 
 	@Override
-	public void markAsSent(final String id) {
-		commandExecutor.execute(new MarkAsSentCaseEmailCmd(id));
+	public void markAsSent(final String id, final Date sentDateTime) {
+		commandExecutor.execute(new MarkAsSentCaseEmailCmd(id, sentDateTime));
 	}
 
 	@Override

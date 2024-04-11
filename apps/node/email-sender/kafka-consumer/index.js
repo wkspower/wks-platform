@@ -64,7 +64,7 @@ async function sendHttpRequest(caseEmail) {
     logger.debug(`Sending Email Acknowledgement patch request`);
     await axiosInstance.patch(
       `${config.CaseEngineApiBaseUrl}/case-email/${json.caseEmailId}/sent`,
-      {},
+      { receivedDateTime: new Date() },
       {
         headers: {
           Authorization: `Bearer ${config}`,

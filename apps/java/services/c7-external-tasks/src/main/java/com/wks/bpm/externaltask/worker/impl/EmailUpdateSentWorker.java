@@ -36,9 +36,11 @@ public class EmailUpdateSentWorker extends WksExternalTaskHandler {
 			final ExternalTaskService externalTaskService) {
 
 		String caseEmailId = externalTask.getVariable("caseEmailId");
+		String sentDateTime = externalTask.getVariable("sentDateTime");
 
 		JsonObject patch = new JsonObject();
 		patch.addProperty("status", "sent");
+		patch.addProperty("receivedDateTime", sentDateTime);
 
 		caseEmailApiGateway.mergePatch(caseEmailId, patch.toString());
 

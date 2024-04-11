@@ -11,6 +11,9 @@
  */
 package com.wks.bpm.engine.model.spi;
 
+import java.util.List;
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,5 +35,6 @@ import lombok.ToString;
 public class ProcessMessage {
 
 	private String messageCode;
+	private Optional<List<ProcessVariable>> processVariables;
 
 }
