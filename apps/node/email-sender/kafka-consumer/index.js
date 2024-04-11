@@ -67,7 +67,6 @@ async function sendHttpRequest(caseEmail) {
       { receivedDateTime: new Date() },
       {
         headers: {
-          Authorization: `Bearer ${config}`,
           "Content-Type": "application/merge-patch+json",
         },
       }
@@ -81,11 +80,11 @@ async function sendHttpRequest(caseEmail) {
 async function getToken() {
   try {
     const response = await axios.post(
-      `http://localhost:8082/realms/localhost/protocol/openid-connect/token`,
+      `${config.JwtTokenUrl}`,
       {
-        client_id: "wks-email-to-case",
-        client_secret: "replaceme",
-        grant_type: "client_credentials",
+        client_id: config.JwtTokenClientId,
+        client_secret: config.JwtTokenClientSecret,
+        grant_type: config.JwtTokenGrantType,
       },
       {
         headers: {
