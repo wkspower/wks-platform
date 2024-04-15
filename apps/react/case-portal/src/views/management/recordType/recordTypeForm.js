@@ -17,97 +17,102 @@ import { useSession } from 'SessionStoreContext';
 import { StorageService } from 'plugins/storage';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
+  return <Slide direction='up' ref={ref} {...props} />;
 });
 
-export const RecordTypeForm = ({ open, handleClose, recordType, handleInputChange }) => {
-    const keycloak = useSession();
+export const RecordTypeForm = ({
+  open,
+  handleClose,
+  recordType,
+  handleInputChange,
+}) => {
+  const keycloak = useSession();
 
-    const save = () => {
-        if (recordType.mode && recordType.mode === 'new') {
-            RecordTypeService.create(keycloak, recordType)
-                .then(() => handleClose())
-                .catch((err) => {
-                    console.log(err.message);
-                });
-        } else {
-            RecordTypeService.update(keycloak, recordType.id, recordType)
-                .then(() => handleClose())
-                .catch((err) => {
-                    console.log(err.message);
-                });
-        }
-    };
+  const save = () => {
+    if (recordType.mode && recordType.mode === 'new') {
+      RecordTypeService.create(keycloak, recordType)
+        .then(() => handleClose())
+        .catch((err) => {
+          console.log(err.message);
+        });
+    } else {
+      RecordTypeService.update(keycloak, recordType.id, recordType)
+        .then(() => handleClose())
+        .catch((err) => {
+          console.log(err.message);
+        });
+    }
+  };
 
-    const deleteRecordType = () => {
-        RecordTypeService.remove(keycloak, recordType.id)
-            .then(() => handleClose())
-            .catch((err) => {
-                console.log(err.message);
-            });
-    };
+  const deleteRecordType = () => {
+    RecordTypeService.remove(keycloak, recordType.id)
+      .then(() => handleClose())
+      .catch((err) => {
+        console.log(err.message);
+      });
+  };
 
-    return (
-        recordType && (
-            <Dialog
-                fullScreen
-                open={open}
-                onClose={handleClose}
-                TransitionComponent={Transition}
-                disableEnforceFocus={true}
+  return (
+    recordType && (
+      <Dialog
+        fullScreen
+        open={open}
+        onClose={handleClose}
+        TransitionComponent={Transition}
+        disableEnforceFocus={true}
+      >
+        <AppBar sx={{ position: 'relative' }}>
+          <Toolbar>
+            <IconButton
+              edge='start'
+              color='inherit'
+              onClick={handleClose}
+              aria-label='close'
             >
-                <AppBar sx={{ position: 'relative' }}>
-                    <Toolbar>
-                        <IconButton
-                            edge="start"
-                            color="inherit"
-                            onClick={handleClose}
-                            aria-label="close"
-                        >
-                            <CloseIcon />
-                        </IconButton>
-                        <Typography sx={{ ml: 2, flex: 1 }} component="div">
-                            <div>{recordType?.id}</div>
-                        </Typography>
-                        <Button color="inherit" onClick={save}>
-                            Save
-                        </Button>
-                        <Button color="inherit" onClick={deleteRecordType}>
-                            Delete
-                        </Button>
-                    </Toolbar>
-                </AppBar>
+              <CloseIcon />
+            </IconButton>
+            <Typography sx={{ ml: 2, flex: 1 }} component='div'>
+              <div>{recordType?.id}</div>
+            </Typography>
+            <Button color='inherit' onClick={save}>
+              Save
+            </Button>
+            <Button color='inherit' onClick={deleteRecordType}>
+              Delete
+            </Button>
+          </Toolbar>
+        </AppBar>
 
-                <Box sx={{ p: 1 }}>
-                    <MainCard>
-                        <Grid container spacing={1}>
-                            <Grid item>
-                                <TextField
-                                    id="txtId"
-                                    name="id"
-                                    value={recordType.id}
-                                    label="Id"
-                                    onChange={handleInputChange}
-                                    disabled={!(recordType.mode && recordType.mode === 'new')}
-                                />
-                            </Grid>
-                        </Grid>
-                    </MainCard>
-                </Box>
+        <Box sx={{ p: 1 }}>
+          <MainCard>
+            <Grid container spacing={1}>
+              <Grid item>
+                <TextField
+                  id='txtId'
+                  name='id'
+                  value={recordType.id}
+                  label='Id'
+                  onChange={handleInputChange}
+                  disabled={!(recordType.mode && recordType.mode === 'new')}
+                />
+              </Grid>
+            </Grid>
+          </MainCard>
+        </Box>
 
-                <Box sx={{ p: 1 }}>
-                    <MainCard>
-                        <FormBuilder
-                            form={recordType.fields}
-                            options={{
-                                noNewEdit: true,
-                                noDefaultSubmitButton: true,
-                                fileService: new StorageService()
-                            }}
-                        />
-                    </MainCard>
-                </Box>
-            </Dialog>
-        )
-    );
+        <Box sx={{ p: 1 }}>
+          <MainCard>
+            <FormBuilder
+              form={recordType.fields}
+              options={{
+                noNewEdit: true,
+                noDefaultSubmitButton: true,
+                fileService: new StorageService(),
+              }}
+            />
+          </MainCard>
+        </Box>
+      </Dialog>
+    )
+  );
 };

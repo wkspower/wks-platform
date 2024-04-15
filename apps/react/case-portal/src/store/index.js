@@ -4,7 +4,7 @@ import accountStore from './account';
 import sessionStore from './session';
 
 const store = configureStore({
-    reducer: reducers
+  reducer: reducers,
 });
 
 const { dispatch } = store;

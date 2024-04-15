@@ -1,11 +1,14 @@
 import { Suspense } from 'react';
 import Loader from './Loader';
 
-const Loadable = (Component) => (props) =>
-    (
-        <Suspense fallback={<Loader />}>
-            <Component {...props} />
-        </Suspense>
+function Loadable(Component) {
+  return function LoadableComponent(props) {
+    return (
+      <Suspense fallback={<Loader />}>
+        <Component {...props} />
+      </Suspense>
     );
+  };
+}
 
 export default Loadable;

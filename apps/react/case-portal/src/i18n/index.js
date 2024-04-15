@@ -6,23 +6,23 @@ var lang = 'en';
 var fallbackLng = 'en';
 
 if (navigator.language === 'pt-BR') {
-    lang = 'ptBR';
+  lang = 'ptBR';
 }
 
 i18n.init({
-    resources: {
-        en: {
-            translation: enUS
-        },
-        ptBR: {
-            translation: ptBR
-        }
+  resources: {
+    en: {
+      translation: enUS,
     },
-    lng: lang,
-    fallbackLng: fallbackLng,
-    interpolation: {
-        escapeValue: false
-    }
+    ptBR: {
+      translation: ptBR,
+    },
+  },
+  lng: lang,
+  fallbackLng: fallbackLng,
+  interpolation: {
+    escapeValue: false,
+  },
 });
 
 export default i18n;
