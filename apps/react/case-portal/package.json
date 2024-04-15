@@ -1,112 +1,88 @@
 {
-    "name": "case-portal",
-    "version": "1.0.0",
-    "private": true,
-    "homepage": "https://www.wkspower.com",
-    "dependencies": {
-        "@ant-design/colors": "^6.0.0",
-        "@ant-design/icons": "^4.0.0-rc.0",
-        "@emotion/cache": "^11.7.1",
-        "@emotion/react": "^11.7.1",
-        "@emotion/styled": "^11.6.0",
-        "@formio/react": "^5.2.4-rc.1",
-        "@miragon/camunda-web-modeler": "^0.0.4",
-        "@mui/icons-material": "^5.10.9",
-        "@mui/lab": "^5.0.0-alpha.106",
-        "@mui/material": "^5.10.12",
-        "@mui/styles": "^5.15.15",
-        "@mui/x-data-grid": "^5.17.10",
-        "@novu/notification-center": "^0.23.1",
-        "@reduxjs/toolkit": "^1.7.1",
-        "@syncfusion/ej2-react-kanban": "^20.4.42",
-        "@tabler/icons": "^1.96.0",
-        "@testing-library/jest-dom": "^5.11.4",
-        "@testing-library/react": "^13.4.0",
-        "@testing-library/user-event": "^14.4.3",
-        "add": "^2.0.6",
-        "apexcharts": "^3.27.3",
-        "bpmn-js": "^10.0.0",
-        "date-fns": "^2.29.3",
-        "dompurify": "^3.0.11",
-        "formik": "^2.2.9",
-        "formiojs": "^4.14.8",
-        "framer-motion": "^7.3.5",
-        "history": "^5.0.0",
-        "i18next": "^22.4.10",
-        "keycloak-js": "^18.0.0",
-        "lodash": "^4.17.21",
-        "moment": "^2.29.4",
-        "prop-types": "^15.8.1",
-        "react": "^18.2.0",
-        "react-apexcharts": "^1.3.9",
-        "react-copy-to-clipboard": "^5.0.4",
-        "react-device-detect": "^2.1.2",
-        "react-dom": "^18.2.0",
-        "react-draggable": "^4.4.4",
-        "react-files": "^3.0.0",
-        "react-i18next": "^12.2.0",
-        "react-number-format": "^5.0.0-beta.4",
-        "react-perfect-scrollbar": "^1.5.8",
-        "react-redux": "^8.0.2",
-        "react-router": "^6.2.1",
-        "react-router-dom": "^6.2.1",
-        "react-scripts": "^5.0.1",
-        "react-syntax-highlighter": "^15.4.5",
-        "react-window": "^1.8.6",
-        "redux": "^4.1.2",
-        "remove": "^0.1.5",
-        "simplebar": "^5.3.5",
-        "simplebar-react": "^2.3.6",
-        "web-vitals": "^3.0.2",
-        "yup": "^0.32.11"
-    },
-    "scripts": {
-        "start": "react-scripts start",
-        "build": "react-scripts build",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject"
-    },
-    "eslintConfig": {
-        "extends": [
-            "react-app",
-            "react-app/jest"
-        ]
-    },
-    "babel": {
-        "presets": [
-            "@babel/preset-env",
-            "@babel/preset-react",
-            "@babel/preset-typescript"
-        ]
-    },
-    "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
-    },
-    "devDependencies": {
-        "@babel/core": "^7.14.3",
-        "@babel/eslint-parser": "^7.15.8",
-        "@babel/preset-react": "^7.18.6",
-        "eslint": "^8.23.1",
-        "eslint-config-airbnb-typescript": "^17.0.0",
-        "eslint-config-prettier": "^8.3.0",
-        "eslint-config-react-app": "7.0.1",
-        "eslint-import-resolver-typescript": "3.5.1",
-        "eslint-plugin-flowtype": "^8.0.3",
-        "eslint-plugin-import": "^2.23.3",
-        "eslint-plugin-jsx-a11y": "6.6.1",
-        "eslint-plugin-prettier": "^4.2.1",
-        "eslint-plugin-react": "^7.26.1",
-        "eslint-plugin-react-hooks": "4.6.0",
-        "jest-location-mock": "^1.0.9",
-        "prettier": "2.7.1"
-    }
+  "name": "case-portal",
+  "version": "1.0.0",
+  "private": true,
+  "homepage": "https://www.wkspower.com",
+  "license": "MIT",
+  "dependencies": {
+    "@ant-design/icons": "^5.3.6",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@formio/react": "^5.3.0",
+    "@miragon/camunda-web-modeler": "^0.0.4",
+    "@mui/icons-material": "^5.15.15",
+    "@mui/material": "^5.15.15",
+    "@mui/styles": "^5.15.15",
+    "@mui/x-data-grid": "^7.1.1",
+    "@novu/notification-center": "^0.24.0",
+    "@reduxjs/toolkit": "^2.2.3",
+    "@syncfusion/ej2-react-kanban": "^20.4.42",
+    "@tabler/icons-react": "^3.2.0",
+    "babel-loader": "^9.1.3",
+    "bpmn-js": "^10.0.0",
+    "date-fns": "^3.6.0",
+    "dompurify": "^3.1.0",
+    "formiojs": "^4.19.1",
+    "framer-motion": "^11.0.28",
+    "i18next": "^23.11.1",
+    "keycloak-js": "^24.0.2",
+    "lodash": "^4.17.21",
+    "moment": "^2.30.1",
+    "prop-types": "^15.8.1",
+    "react": "^18.2.0",
+    "react-device-detect": "^2.2.3",
+    "react-dom": "^18.2.0",
+    "react-files": "^3.0.0",
+    "react-i18next": "^14.1.0",
+    "react-redux": "^9.1.0",
+    "react-router-dom": "^6.22.3",
+    "react-syntax-highlighter": "^15.5.0",
+    "redux": "^5.0.1",
+    "simplebar": "^6.2.5",
+    "simplebar-react": "^3.2.4"
+  },
+  "scripts": {
+    "start": "webpack serve --mode=development --port 3001",
+    "build": "eslint --fix . && webpack --mode=production",
+    "test": "jest",
+    "lint": "eslint --fix .",
+    "format": "prettier --write \"**/*.{js,jsx,json,css,scss,md}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,json,css,scss,md}\""
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-react"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.4",
+    "@babel/eslint-parser": "^7.24.1",
+    "@babel/preset-env": "^7.24.4",
+    "@babel/preset-react": "^7.24.1",
+    "@babel/preset-typescript": "^7.24.1",
+    "css-loader": "^7.1.1",
+    "dotenv-webpack": "^8.1.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.1",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.6.0",
+    "jest-location-mock": "^2.0.0",
+    "prettier": "3.2.5",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.4"
+  }
 }

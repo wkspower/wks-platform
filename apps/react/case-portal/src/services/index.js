@@ -12,16 +12,16 @@ import { DeploymentService } from './DeploymentService';
 import { VariableService } from './VariableService';
 
 export {
-    NotificationService,
-    CaseService,
-    EmailService,
-    FormService,
-    RecordService,
-    TaskService,
-    CaseDefService,
-    ProcessDefService,
-    RecordTypeService,
-    FileService,
-    DeploymentService,
-    VariableService,
+  NotificationService,
+  CaseService,
+  EmailService,
+  FormService,
+  RecordService,
+  TaskService,
+  CaseDefService,
+  ProcessDefService,
+  RecordTypeService,
+  FileService,
+  DeploymentService,
+  VariableService,
 };

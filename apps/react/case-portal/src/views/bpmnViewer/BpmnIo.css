@@ -1,3 +1,3 @@
 .highlight:not(.djs-connection) .djs-visual > :nth-child(1) {
-    fill: rgb(167, 204, 167) !important; /* color elements as green */
+  fill: rgb(167, 204, 167) !important; /* color elements as green */
 }
