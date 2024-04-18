@@ -53,7 +53,7 @@ public class NotifyAssigneeTaskListener implements TaskListener {
 		String taskName = delegateTask.getName();
 		String assigneeEmail = delegateTask.getAssignee();
 
-		String json = "{\"businessKey\": \"" + businessKey + "\",\"taskName\": \"" + taskName + "\",\"owner\": {\"id\": \""
+		String json = "{\"businessKey\": \"" + businessKey + "\",\"taskName\": \"" + taskName + "\",\"owner\": {\"email\": \""
 				+ assigneeEmail + "\" }}";
 
 		publishToKafka(topic, "taskDefKey", json);
