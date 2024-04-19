@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_5pc6zufq4loqfzj6ppvi" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.16.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_5pc6zufq4loqfzj6ppvi" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.22.0">
   <bpmn:process id="customer-support" name="Customer Support" isExecutable="true" camunda:historyTimeToLive="30">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>SequenceFlow_1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:userTask id="create-ticket" name="Create Support Ticket" camunda:formKey="customer-support-create-ticket">
+    <bpmn:userTask id="create-ticket" name="Create Support Ticket" camunda:formKey="customer-support-create-ticket" camunda:assignee="demo@demo.com">
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:outputParameter name="resolved">${true}</camunda:outputParameter>
@@ -18,14 +18,14 @@
       <bpmn:outgoing>SequenceFlow_3</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_4</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:userTask id="resolve-issue" name="Resolve Issue" camunda:formKey="customer-support-resolve">
+    <bpmn:userTask id="resolve-issue" name="Resolve Issue" camunda:formKey="customer-support-resolve" camunda:assignee="demo@demo.com">
       <bpmn:incoming>SequenceFlow_3</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_5</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:endEvent id="EndEvent_1">
       <bpmn:incoming>SequenceFlow_5</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:userTask id="escalate-issue" name="Escalate Issue" camunda:formKey="customer-support-escalate">
+    <bpmn:userTask id="escalate-issue" name="Escalate Issue" camunda:formKey="customer-support-escalate" camunda:assignee="demo@demo.com">
       <bpmn:incoming>SequenceFlow_4</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_6</bpmn:outgoing>
     </bpmn:userTask>
