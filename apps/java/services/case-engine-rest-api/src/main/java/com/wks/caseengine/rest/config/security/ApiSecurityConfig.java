@@ -12,6 +12,7 @@
 package com.wks.caseengine.rest.config.security;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +24,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import com.wks.api.security.JwksIssuerAuthenticationManagerResolver;
 import com.wks.api.security.OpenPolicyAuthzEnforcer;
+import com.wks.api.security.OpenPolicyAuthzEnforcerConfig;
 
 @Configuration
 public class ApiSecurityConfig {
@@ -32,6 +34,12 @@ public class ApiSecurityConfig {
 
 	@Value("${keycloak.url}")
 	private String keycloakUrl;
+
+	@Value("${case.engine.actuator.enabled}")
+	private Boolean actuatorEnabled;
+
+	@Value("${case.engine.swagger.enabled}")
+	private Boolean swaggerEnabled;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -44,7 +52,8 @@ public class ApiSecurityConfig {
 	}
 
 	public AccessDecisionManager accessDecisionManager() {
-		return new UnanimousBased(Arrays.asList(new OpenPolicyAuthzEnforcer(opaUrl)));
+		return new UnanimousBased(Arrays.asList(new OpenPolicyAuthzEnforcer(OpenPolicyAuthzEnforcerConfig.builder()
+				.opaAuthURL(opaUrl).actuatorEnabled(actuatorEnabled).swaggerEnabled(swaggerEnabled).build())));
 	}
 
 }

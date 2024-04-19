@@ -50,7 +50,7 @@
 		<!-- Swagger UI -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${spring.doc.version}</version>
 		</dependency>
 
