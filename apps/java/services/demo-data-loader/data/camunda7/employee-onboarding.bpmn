@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_5pc6zufq4loqfzj6ppvi" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.16.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_5pc6zufq4loqfzj6ppvi" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.22.0">
   <bpmn:process id="employee-onboarding" name="Employee Onboarding" isExecutable="true" camunda:historyTimeToLive="30">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>SequenceFlow_1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:userTask id="registration" name="Employee Registration" camunda:formKey="employee-onboarding-registration">
+    <bpmn:userTask id="registration" name="Employee Registration" camunda:formKey="employee-onboarding-registration" camunda:assignee="demo@demo.com">
       <bpmn:incoming>SequenceFlow_1</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_2</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask id="department-assignment" name="Department Assignment" camunda:formKey="employee-onboarding-department-assignment">
+    <bpmn:userTask id="department-assignment" name="Department Assignment" camunda:formKey="employee-onboarding-department-assignment" camunda:assignee="demo@demo.com">
       <bpmn:extensionElements>
         <camunda:executionListener event="end">
           <camunda:script scriptFormat="javascript">var businessKey = execution.getBusinessKey(); 
@@ -18,15 +18,15 @@ execution.getProcessEngineServices().getRuntimeService().createMessageCorrelatio
       <bpmn:incoming>SequenceFlow_2</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_3</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask id="manager-approval" name="Manager Approval" camunda:formKey="employee-onboarding-manager-approval">
+    <bpmn:userTask id="manager-approval" name="Manager Approval" camunda:formKey="employee-onboarding-manager-approval" camunda:assignee="demo@demo.com">
       <bpmn:incoming>SequenceFlow_3</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_4</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask id="it-setup" name="IT Setup" camunda:formKey="employee-onboarding-it-setup">
+    <bpmn:userTask id="it-setup" name="IT Setup" camunda:formKey="employee-onboarding-it-setup" camunda:assignee="demo@demo.com">
       <bpmn:incoming>SequenceFlow_4</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_5</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask id="orientation-trainning" name="Orientation Training" camunda:formKey="employee-onboarding-orientation-training">
+    <bpmn:userTask id="orientation-trainning" name="Orientation Training" camunda:formKey="employee-onboarding-orientation-training" camunda:assignee="demo@demo.com">
       <bpmn:incoming>SequenceFlow_5</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_6</bpmn:outgoing>
     </bpmn:userTask>
