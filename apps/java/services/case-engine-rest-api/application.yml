@@ -49,3 +49,6 @@ management.endpoint.health.show-details: never
 case.engine.case-creation-process: case-instance-create
 case.engine.email-to-case-process: email-to-case
 case.engine.email-to-case-outbound-process: email-to-case-outbound
+
+case.engine.actuator.enabled: true
+case.engine.swagger.enabled: true
