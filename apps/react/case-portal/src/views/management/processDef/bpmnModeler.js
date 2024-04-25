@@ -17,7 +17,7 @@ import {
   isNotificationEvent,
   isPropertiesPanelResizedEvent,
   isUIUpdateRequiredEvent,
-} from '@miragon/camunda-web-modeler';
+} from '@wkspower/camunda-web-modeler';
 import newProcessXml from './new-process';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -171,7 +171,20 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
         onClose={handleClose}
         TransitionComponent={Transition}
       >
-        <AppBar sx={{ position: 'relative' }}>
+        <div
+          style={{
+            height: '100vh',
+          }}
+        >
+          <CamundaWebModeler
+            xml={bpmnXml}
+            onEvent={onEvent}
+            xmlTabOptions={xmlTabOptions}
+            modelerTabOptions={modelerTabOptions}
+          />
+        </div>
+
+        <AppBar sx={{ top: 'auto', left: 0, bottom: 0, width: '20%', zIndex: '1' }}>
           <Toolbar>
             <IconButton
               edge='start'
@@ -189,19 +202,6 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
             </Button>
           </Toolbar>
         </AppBar>
-
-        <div
-          style={{
-            height: '100vh',
-          }}
-        >
-          <CamundaWebModeler
-            xml={bpmnXml}
-            onEvent={onEvent}
-            xmlTabOptions={xmlTabOptions}
-            modelerTabOptions={modelerTabOptions}
-          />
-        </div>
       </Dialog>
     </div>
   );
