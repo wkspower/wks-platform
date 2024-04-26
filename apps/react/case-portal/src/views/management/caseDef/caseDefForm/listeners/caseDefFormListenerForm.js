@@ -10,11 +10,11 @@ import {
   MenuItem,
   Select,
   TextField,
-} from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { ProcessDefService } from 'services/ProcessDefService';
-import { useSession } from 'SessionStoreContext';
-import { QueueService } from 'services/QueueService';
+} from '@mui/material'
+import React, { useEffect, useState } from 'react'
+import { ProcessDefService } from 'services/ProcessDefService'
+import { useSession } from 'SessionStoreContext'
+import { QueueService } from 'services/QueueService'
 
 const styles = {
   dialogContent: {
@@ -34,7 +34,7 @@ const styles = {
   saveButton: {
     color: '#4caf50',
   },
-};
+}
 
 export const CaseDefFormEventsForm = ({
   open,
@@ -43,60 +43,60 @@ export const CaseDefFormEventsForm = ({
   hookData,
   stages,
 }) => {
-  const keycloak = useSession();
-  const [taskDefKey, setTaskDefKey] = useState('');
-  const [processDefKey, setProcessDefKey] = useState('');
-  const [eventType, setEventType] = useState('');
-  const [actionType, setActionType] = useState('');
-  const [newStage, setNewStage] = useState('');
-  const [queueId, setQueueId] = useState('');
+  const keycloak = useSession()
+  const [taskDefKey, setTaskDefKey] = useState('')
+  const [processDefKey, setProcessDefKey] = useState('')
+  const [eventType, setEventType] = useState('')
+  const [actionType, setActionType] = useState('')
+  const [newStage, setNewStage] = useState('')
+  const [queueId, setQueueId] = useState('')
 
-  const [processesDefinitions, setProcessesDefinitions] = useState();
-  const [queues, setQueues] = useState();
+  const [processesDefinitions, setProcessesDefinitions] = useState()
+  const [queues, setQueues] = useState()
 
   useEffect(() => {
     ProcessDefService.find(keycloak)
       .then((data) => {
-        setProcessesDefinitions(data);
+        setProcessesDefinitions(data)
       })
       .catch((err) => {
-        setProcessesDefinitions(null);
-        console.log(err.message);
-      });
+        setProcessesDefinitions(null)
+        console.log(err.message)
+      })
 
     QueueService.find(keycloak)
       .then((data) => {
-        setQueues(data);
+        setQueues(data)
       })
       .catch((err) => {
-        setQueues(null);
-        console.log(err.message);
-      });
+        setQueues(null)
+        console.log(err.message)
+      })
 
     if (hookData) {
-      setTaskDefKey(hookData.taskDefKey || '');
-      setProcessDefKey(hookData.processDefKey || '');
-      setEventType(hookData.eventType || '');
-      setActionType(hookData.actions[0]?.actionType || '');
-      setNewStage(hookData.actions[0]?.newStage || '');
-      setQueueId(hookData.actions[0]?.queueId || '');
+      setTaskDefKey(hookData.taskDefKey || '')
+      setProcessDefKey(hookData.processDefKey || '')
+      setEventType(hookData.eventType || '')
+      setActionType(hookData.actions[0]?.actionType || '')
+      setNewStage(hookData.actions[0]?.newStage || '')
+      setQueueId(hookData.actions[0]?.queueId || '')
     } else {
-      setTaskDefKey('');
-      setProcessDefKey('');
-      setEventType('');
-      setActionType('');
-      setNewStage('');
-      setQueueId('');
+      setTaskDefKey('')
+      setProcessDefKey('')
+      setEventType('')
+      setActionType('')
+      setNewStage('')
+      setQueueId('')
     }
-  }, [hookData]);
+  }, [hookData])
 
   const handleSubmit = () => {
-    let actions = [];
+    let actions = []
 
     if (actionType === 'CASE_STAGE_UPDATE_ACTION') {
-      actions = [...actions, { actionType: actionType, newStage: newStage }];
+      actions = [...actions, { actionType: actionType, newStage: newStage }]
     } else if (actionType === 'CASE_QUEUE_UPDATE_ACTION') {
-      actions = [...actions, { actionType: actionType, queueId: queueId }];
+      actions = [...actions, { actionType: actionType, queueId: queueId }]
     }
 
     const newHook = {
@@ -104,9 +104,9 @@ export const CaseDefFormEventsForm = ({
       taskDefKey,
       processDefKey,
       actions,
-    };
-    onSubmit(newHook);
-  };
+    }
+    onSubmit(newHook)
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='sm'>
@@ -146,7 +146,7 @@ export const CaseDefFormEventsForm = ({
                       >
                         {processDefinition.name}
                       </MenuItem>
-                    );
+                    )
                   })}
                 </Select>
               </FormControl>
@@ -191,7 +191,7 @@ export const CaseDefFormEventsForm = ({
                     <MenuItem key={stage.index} value={stage.name}>
                       {stage.name}
                     </MenuItem>
-                  );
+                  )
                 })}
               </Select>
             </FormControl>
@@ -210,7 +210,7 @@ export const CaseDefFormEventsForm = ({
                     <MenuItem key={queue.id} value={queue.name}>
                       {queue.name}
                     </MenuItem>
-                  );
+                  )
                 })}
               </Select>
             </FormControl>
@@ -226,5 +226,5 @@ export const CaseDefFormEventsForm = ({
         </Button>
       </DialogActions>
     </Dialog>
-  );
-};
+  )
+}

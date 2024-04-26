@@ -1,9 +1,9 @@
-import MemoryTokenManager from './MemoryTokenManager';
+import MemoryTokenManager from './MemoryTokenManager'
 
 export function RegisteOptions(keycloak) {
   if (keycloak == null) {
-    MemoryTokenManager.setToken(null);
+    MemoryTokenManager.setToken(null)
   } else {
-    MemoryTokenManager.setToken(keycloak.token);
+    MemoryTokenManager.setToken(keycloak.token)
   }
 }

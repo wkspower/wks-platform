@@ -1,12 +1,12 @@
-import PropTypes from 'prop-types';
-import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
-import Grid from '@mui/material/Grid';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import MainCard from 'components/MainCard';
-import RiseOutlined from '@ant-design/icons/RiseOutlined';
-import FallOutlined from '@ant-design/icons/FallOutlined';
+import PropTypes from 'prop-types'
+import Box from '@mui/material/Box'
+import Chip from '@mui/material/Chip'
+import Grid from '@mui/material/Grid'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
+import MainCard from 'components/MainCard'
+import RiseOutlined from '@ant-design/icons/RiseOutlined'
+import FallOutlined from '@ant-design/icons/FallOutlined'
 
 const AnalyticEcommerce = ({
   color,
@@ -68,7 +68,7 @@ const AnalyticEcommerce = ({
       </Typography>
     </Box>
   </MainCard>
-);
+)
 
 AnalyticEcommerce.propTypes = {
   color: PropTypes.string,
@@ -77,10 +77,10 @@ AnalyticEcommerce.propTypes = {
   percentage: PropTypes.number,
   isLoss: PropTypes.bool,
   extra: PropTypes.oneOfType([PropTypes.node, PropTypes.string]),
-};
+}
 
 AnalyticEcommerce.defaultProps = {
   color: 'primary',
-};
+}
 
-export default AnalyticEcommerce;
+export default AnalyticEcommerce

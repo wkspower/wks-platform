@@ -1,42 +1,42 @@
-import PropTypes from 'prop-types';
-import { useState } from 'react';
-import Collapse from '@mui/material/Collapse';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
-import NavItem from './NavItem';
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
+import PropTypes from 'prop-types'
+import { useState } from 'react'
+import Collapse from '@mui/material/Collapse'
+import List from '@mui/material/List'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import ListItemText from '@mui/material/ListItemText'
+import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
+import NavItem from './NavItem'
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
+import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
 
 const NavCollapse = ({ menu, level }) => {
-  const theme = useTheme();
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(null);
+  const theme = useTheme()
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState(null)
 
   const handleClick = () => {
-    setOpen(!open);
-    setSelected(!selected ? menu.id : null);
-  };
+    setOpen(!open)
+    setSelected(!selected ? menu.id : null)
+  }
 
   const menus = menu.children?.map((item) => {
     switch (item.type) {
       case 'collapse':
-        return <NavCollapse key={item.id} menu={item} level={level + 1} />;
+        return <NavCollapse key={item.id} menu={item} level={level + 1} />
       case 'item':
-        return <NavItem key={item.id} item={item} level={level + 1} />;
+        return <NavItem key={item.id} item={item} level={level + 1} />
       default:
         return (
           <Typography key={item.id} variant='h6' color='error' align='center'>
             Menu Items Error
           </Typography>
-        );
+        )
     }
-  });
+  })
 
-  const Icon = menu.icon;
+  const Icon = menu.icon
   const menuIcon = menu.icon ? (
     <Icon
       strokeWidth={1.5}
@@ -51,7 +51,7 @@ const NavCollapse = ({ menu, level }) => {
       }}
       fontSize={level > 0 ? 'inherit' : 'medium'}
     />
-  );
+  )
 
   return (
     <>
@@ -114,7 +114,7 @@ const NavCollapse = ({ menu, level }) => {
           sx={{
             position: 'relative',
             '&:after': {
-              content: '\'\'',
+              content: "''",
               position: 'absolute',
               left: '32px',
               top: 0,
@@ -129,12 +129,12 @@ const NavCollapse = ({ menu, level }) => {
         </List>
       </Collapse>
     </>
-  );
-};
+  )
+}
 
 NavCollapse.propTypes = {
   menu: PropTypes.object,
   level: PropTypes.number,
-};
+}
 
-export default NavCollapse;
+export default NavCollapse

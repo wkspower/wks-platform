@@ -1,58 +1,58 @@
-import React, { useEffect, useState } from 'react';
-import FormControl from '@mui/material/FormControl';
-import TextField from '@mui/material/TextField';
-import AppBar from '@mui/material/AppBar';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
-import InputLabel from '@mui/material/InputLabel';
-import Slide from '@mui/material/Slide';
-import Toolbar from '@mui/material/Toolbar';
-import CloseIcon from '@mui/icons-material/Close';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import MainCard from 'components/MainCard';
-import { FormBuilder } from '@formio/react';
-import { FormService } from 'services';
-import { useSession } from 'SessionStoreContext';
-import { StorageService } from 'plugins/storage';
+import React, { useEffect, useState } from 'react'
+import FormControl from '@mui/material/FormControl'
+import TextField from '@mui/material/TextField'
+import AppBar from '@mui/material/AppBar'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import Grid from '@mui/material/Grid'
+import IconButton from '@mui/material/IconButton'
+import InputLabel from '@mui/material/InputLabel'
+import Slide from '@mui/material/Slide'
+import Toolbar from '@mui/material/Toolbar'
+import CloseIcon from '@mui/icons-material/Close'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
+import MainCard from 'components/MainCard'
+import { FormBuilder } from '@formio/react'
+import { FormService } from 'services'
+import { useSession } from 'SessionStoreContext'
+import { StorageService } from 'plugins/storage'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction='up' ref={ref} {...props} />;
-});
+  return <Slide direction='up' ref={ref} {...props} />
+})
 
 export const FormNew = ({ open, handleClose }) => {
-  const [form, setForm] = useState(null);
-  const keycloak = useSession();
+  const [form, setForm] = useState(null)
+  const keycloak = useSession()
 
   useEffect(() => {
     setForm({
       key: '',
       description: '',
       structure: { components: [], display: 'form' },
-    });
-  }, [open]);
+    })
+  }, [open])
 
   const saveNewForm = () => {
     FormService.create(keycloak, form)
       .then(() => handleClose())
       .catch((err) => {
-        console.log(err.message);
-      });
-  };
+        console.log(err.message)
+      })
+  }
 
   const handleInputChange = (event) => {
-    setForm({ ...form, [event.target.name]: event.target.value });
-  };
+    setForm({ ...form, [event.target.name]: event.target.value })
+  }
 
   const handleSelectDisplay = (event) => {
-    let structure = { ...form.structure };
-    structure.display = event.target.value;
-    setForm({ ...form, structure: structure });
-  };
+    let structure = { ...form.structure }
+    structure.display = event.target.value
+    setForm({ ...form, structure: structure })
+  }
 
   return (
     form && (
@@ -145,5 +145,5 @@ export const FormNew = ({ open, handleClose }) => {
         </Box>
       </Dialog>
     )
-  );
-};
+  )
+}

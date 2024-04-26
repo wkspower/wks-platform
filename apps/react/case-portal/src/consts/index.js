@@ -14,23 +14,23 @@ const Config = {
     process.env.REACT_APP_NOVU_ENABLED === 'true'
       ? await fetchNovuAppId()
       : undefined,
-};
+}
 
 async function fetchNovuAppId() {
   try {
-    const apiUrl = `${process.env.REACT_APP_NOVU_PUBLISHER_API_URL}/novu-app-id`;
+    const apiUrl = `${process.env.REACT_APP_NOVU_PUBLISHER_API_URL}/novu-app-id`
 
-    const response = await fetch(apiUrl);
+    const response = await fetch(apiUrl)
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch NovuAppId. Status: ${response.status}`);
+      throw new Error(`Failed to fetch NovuAppId. Status: ${response.status}`)
     }
 
-    const data = await response.json();
-    return data.novuAppId;
+    const data = await response.json()
+    return data.novuAppId
   } catch (error) {
-    console.error('Error fetching NovuAppId:', error);
-    return null;
+    console.error('Error fetching NovuAppId:', error)
+    return null
   }
 }
-export default Config;
+export default Config

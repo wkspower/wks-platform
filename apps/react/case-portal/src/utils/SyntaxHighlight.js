@@ -1,8 +1,8 @@
-import PropTypes from 'prop-types';
+import PropTypes from 'prop-types'
 
 // third-party
-import SyntaxHighlighter from 'react-syntax-highlighter';
-import { a11yDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import SyntaxHighlighter from 'react-syntax-highlighter'
+import { a11yDark } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 
 // ==============================|| CODE HIGHLIGHTER ||============================== //
 
@@ -16,9 +16,9 @@ export default function SyntaxHighlight({ children, ...others }) {
     >
       {children}
     </SyntaxHighlighter>
-  );
+  )
 }
 
 SyntaxHighlight.propTypes = {
   children: PropTypes.node,
-};
+}

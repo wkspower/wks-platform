@@ -40,12 +40,13 @@
     "simplebar-react": "^3.2.4"
   },
   "scripts": {
-    "start": "webpack serve --mode=development --port 3001",
-    "build": "eslint --fix . && webpack --mode=production",
-    "test": "jest",
-    "lint": "eslint --fix .",
-    "format": "prettier --write \"**/*.{js,jsx,json,css,scss,md}\"",
-    "format:check": "prettier --check \"**/*.{js,jsx,json,css,scss,md}\""
+    "start": "echo 'Starting development server...' && webpack serve --mode=development --port 3001",
+    "build": "echo 'Running ESLint...' && eslint . && echo 'Checking code formatting...' && prettier --check \"**/*.{js,jsx,json,css,scss,md}\" && echo 'Building for production...' && webpack --mode=production",
+    "lint:fix": "echo 'Fixing linting issues...' && eslint --fix .",
+    "lint:check": "echo 'Checking for linting issues...' && eslint .",
+    "format:fix": "echo 'Fixing code formatting...' && prettier --write \"**/*.{js,jsx,json,css,scss,md}\"",
+    "format:check": "echo 'Checking code formatting...' && prettier --check \"**/*.{js,jsx,json,css,scss,md}\"",
+    "test": "echo 'Running tests...' && jest"
   },
   "babel": {
     "presets": [

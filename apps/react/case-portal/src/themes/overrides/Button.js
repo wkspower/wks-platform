@@ -5,7 +5,7 @@ export default function Button(theme) {
     '&.Mui-disabled': {
       backgroundColor: theme.palette.grey[200],
     },
-  };
+  }
 
   return {
     MuiButton: {
@@ -24,5 +24,5 @@ export default function Button(theme) {
         },
       },
     },
-  };
+  }
 }

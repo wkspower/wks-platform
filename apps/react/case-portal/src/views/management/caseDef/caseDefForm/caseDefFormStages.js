@@ -1,20 +1,20 @@
-import React from 'react';
-import Box from '@mui/material/Box';
-import { DataGrid } from '@mui/x-data-grid';
-import MainCard from 'components/MainCard';
-import Button from '@mui/material/Button';
-import { CaseDefStageProcesses } from './caseDefStageProcesses';
+import React from 'react'
+import Box from '@mui/material/Box'
+import { DataGrid } from '@mui/x-data-grid'
+import MainCard from 'components/MainCard'
+import Button from '@mui/material/Button'
+import { CaseDefStageProcesses } from './caseDefStageProcesses'
 
 export const CaseDefFormStages = ({ caseDef, setCaseDef }) => {
-  const [openProcessesList, setOpenProcessesList] = React.useState(false);
-  const [currentStage, setCurrentStage] = React.useState(null);
+  const [openProcessesList, setOpenProcessesList] = React.useState(false)
+  const [currentStage, setCurrentStage] = React.useState(null)
 
   const [sortModel] = React.useState([
     {
       field: 'index',
       sort: 'asc',
     },
-  ]);
+  ])
 
   const columns = [
     {
@@ -43,7 +43,7 @@ export const CaseDefFormStages = ({ caseDef, setCaseDef }) => {
               Processes
             </Button>
           </React.Fragment>
-        );
+        )
       },
     },
     {
@@ -53,24 +53,24 @@ export const CaseDefFormStages = ({ caseDef, setCaseDef }) => {
       renderCell: (params) => {
         const onClick = (e) => {
           const newCaseDefStages = caseDef.stages.filter(function (value) {
-            return value.id !== params.row.id;
-          });
-          setCaseDef({ ...caseDef, stages: newCaseDefStages });
-          e.stopPropagation(); // don't select this row after clicking
-        };
+            return value.id !== params.row.id
+          })
+          setCaseDef({ ...caseDef, stages: newCaseDefStages })
+          e.stopPropagation() // don't select this row after clicking
+        }
 
         return (
           <React.Fragment>
             <Button onClick={onClick}>Delete</Button>
           </React.Fragment>
-        );
+        )
       },
     },
-  ];
+  ]
 
   const handleNewStage = () => {
-    const length = caseDef.stages.length;
-    const lastStage = caseDef.stages[length - 1];
+    const length = caseDef.stages.length
+    const lastStage = caseDef.stages[length - 1]
     setCaseDef({
       ...caseDef,
       stages: [
@@ -81,32 +81,32 @@ export const CaseDefFormStages = ({ caseDef, setCaseDef }) => {
           name: 'Stage ' + (parseInt(lastStage.id) + 1),
         },
       ],
-    });
-  };
+    })
+  }
 
   const processRowUpdate = (newRow) => {
-    let newCaseDefStages = [...caseDef.stages];
-    newCaseDefStages[newRow.id] = newRow;
-    setCaseDef({ ...caseDef, stages: newCaseDefStages });
-    return newRow;
-  };
+    let newCaseDefStages = [...caseDef.stages]
+    newCaseDefStages[newRow.id] = newRow
+    setCaseDef({ ...caseDef, stages: newCaseDefStages })
+    return newRow
+  }
 
   const openProcessesDialog = (stage) => {
-    setCurrentStage(stage);
-    setOpenProcessesList(true);
-  };
+    setCurrentStage(stage)
+    setOpenProcessesList(true)
+  }
 
   const closeProcessesDialog = () => {
-    setOpenProcessesList(false);
-    setCurrentStage(null);
-  };
+    setOpenProcessesList(false)
+    setCurrentStage(null)
+  }
 
   const updateProcesses = (stageId, processes) => {
-    let newStages = [...caseDef.stages];
-    let stage = newStages.find((s) => s.id === stageId);
-    stage.processesDefinitions = processes;
-    setCaseDef({ ...caseDef, stages: newStages });
-  };
+    let newStages = [...caseDef.stages]
+    let stage = newStages.find((s) => s.id === stageId)
+    stage.processesDefinitions = processes
+    setCaseDef({ ...caseDef, stages: newStages })
+  }
 
   return (
     <div style={{ height: 650, width: '100%' }}>
@@ -139,5 +139,5 @@ export const CaseDefFormStages = ({ caseDef, setCaseDef }) => {
         </MainCard>
       )}
     </div>
-  );
-};
+  )
+}

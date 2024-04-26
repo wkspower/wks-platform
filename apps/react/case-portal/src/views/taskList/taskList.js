@@ -1,62 +1,62 @@
-import { AddCircleOutline, PlayCircle } from '@mui/icons-material';
-import { Box } from '@mui/material';
-import Button from '@mui/material/Button';
-import List from '@mui/material/List';
+import { AddCircleOutline, PlayCircle } from '@mui/icons-material'
+import { Box } from '@mui/material'
+import Button from '@mui/material/Button'
+import List from '@mui/material/List'
 import {
   default as IconButton,
   default as ListItem,
-} from '@mui/material/ListItem';
-import { default as ListItemSecondaryAction } from '@mui/material/ListItemIcon';
-import ListSubheader from '@mui/material/ListSubheader';
-import Modal from '@mui/material/Modal';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import Config from 'consts/index';
-import { format } from 'date-fns';
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { TaskService } from 'services';
-import { useSession } from '../../SessionStoreContext';
-import { TaskForm } from '../taskForm/taskForm';
-import './taskList.css';
+} from '@mui/material/ListItem'
+import { default as ListItemSecondaryAction } from '@mui/material/ListItemIcon'
+import ListSubheader from '@mui/material/ListSubheader'
+import Modal from '@mui/material/Modal'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
+import Config from 'consts/index'
+import { format } from 'date-fns'
+import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { TaskService } from 'services'
+import { useSession } from '../../SessionStoreContext'
+import { TaskForm } from '../taskForm/taskForm'
+import './taskList.css'
 
 export const TaskList = ({ businessKey, callback }) => {
-  const [tasks, setTasks] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [task, setTask] = useState(null);
-  const { t } = useTranslation();
-  const [fetching, setFetching] = useState(false);
-  const keycloak = useSession();
+  const [tasks, setTasks] = useState(null)
+  const [open, setOpen] = useState(false)
+  const [task, setTask] = useState(null)
+  const { t } = useTranslation()
+  const [fetching, setFetching] = useState(false)
+  const keycloak = useSession()
 
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false)
   const [newTaskData, setNewTaskData] = useState({
     name: '',
     description: '',
     due: null,
     assignee: '',
     caseInstanceId: businessKey,
-  });
+  })
 
   useEffect(() => {
     if (Config.WebsocketsEnabled) {
-      const websocketUrl = Config.WebsocketUrl;
-      const topic = Config.WebsocketsTopicHumanTaskCreated;
-      const ws = new WebSocket(`${websocketUrl}/${topic}`);
+      const websocketUrl = Config.WebsocketUrl
+      const topic = Config.WebsocketsTopicHumanTaskCreated
+      const ws = new WebSocket(`${websocketUrl}/${topic}`)
       ws.onmessage = () => {
-        fetchTasks(setFetching, keycloak, businessKey, setTasks);
-      };
+        fetchTasks(setFetching, keycloak, businessKey, setTasks)
+      }
       return () => {
-        ws.close(); // Close WebSocket connection when component unmounts
-      };
+        ws.close() // Close WebSocket connection when component unmounts
+      }
     }
-  }, []);
+  }, [])
 
   const handleNewTaskSubmit = () => {
     // Perform any necessary validation on the new task data
     // ...
     TaskService.createNewTask(keycloak, newTaskData).then(() => {
-      fetchTasks(setFetching, keycloak, businessKey, setTasks);
-    });
+      fetchTasks(setFetching, keycloak, businessKey, setTasks)
+    })
 
     // Reset the new task form
     setNewTaskData({
@@ -65,20 +65,20 @@ export const TaskList = ({ businessKey, callback }) => {
       due: null,
       assignee: '',
       caseInstanceId: businessKey,
-    });
+    })
 
     // Close the modal
-    setModalOpen(false);
-  };
+    setModalOpen(false)
+  }
 
   useEffect(() => {
-    fetchTasks(setFetching, keycloak, businessKey, setTasks);
-  }, [open, businessKey]);
+    fetchTasks(setFetching, keycloak, businessKey, setTasks)
+  }, [open, businessKey])
 
   const handleClose = () => {
-    setOpen(false);
-    callback();
-  };
+    setOpen(false)
+    callback()
+  }
 
   return (
     <React.Fragment>
@@ -143,8 +143,8 @@ export const TaskList = ({ businessKey, callback }) => {
                     edge='end'
                     aria-label='complete'
                     onClick={() => {
-                      setTask(task);
-                      setOpen(true);
+                      setTask(task)
+                      setOpen(true)
                     }}
                   >
                     <PlayCircle color='primary' />
@@ -230,11 +230,11 @@ export const TaskList = ({ businessKey, callback }) => {
         />
       )}
     </React.Fragment>
-  );
-};
+  )
+}
 
 function fetchTasks(setFetching, keycloak, businessKey, setTasks) {
-  setFetching(true);
+  setFetching(true)
 
   TaskService.filterTasks(keycloak, businessKey)
     .then((data) => {
@@ -248,9 +248,9 @@ function fetchTasks(setFetching, keycloak, businessKey, setTasks) {
               followUp: o.followUp && format(new Date(o.followUp), 'P'),
             }),
         ),
-      );
+      )
     })
     .finally(() => {
-      setFetching(false);
-    });
+      setFetching(false)
+    })
 }

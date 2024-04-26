@@ -1,18 +1,18 @@
-import PropTypes from 'prop-types';
-import { useState } from 'react';
-import Box from '@mui/material/Box';
-import CardActions from '@mui/material/CardActions';
-import Collapse from '@mui/material/Collapse';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import SyntaxHighlight from 'utils/SyntaxHighlight';
-import CodeOutlined from '@ant-design/icons/CodeOutlined';
+import PropTypes from 'prop-types'
+import { useState } from 'react'
+import Box from '@mui/material/Box'
+import CardActions from '@mui/material/CardActions'
+import Collapse from '@mui/material/Collapse'
+import Divider from '@mui/material/Divider'
+import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
+import SyntaxHighlight from 'utils/SyntaxHighlight'
+import CodeOutlined from '@ant-design/icons/CodeOutlined'
 
 // ==============================|| CLIPBOARD & HIGHLIGHTER   ||============================== //
 
 const Highlighter = () => {
-  const [highlight, setHighlight] = useState(false);
+  const [highlight, setHighlight] = useState(false)
 
   return (
     <Box sx={{ position: 'relative' }}>
@@ -57,11 +57,11 @@ const Highlighter = () => {
         )}
       </Collapse>
     </Box>
-  );
-};
+  )
+}
 
 Highlighter.propTypes = {
   children: PropTypes.node,
-};
+}
 
-export default Highlighter;
+export default Highlighter

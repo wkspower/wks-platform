@@ -1,10 +1,10 @@
-import Avatar from '@mui/material/Avatar';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import User1 from 'assets/images/users/avatar-3.png';
-import { useTranslation } from 'react-i18next';
-import CommentForm from './CommentForm';
+import Avatar from '@mui/material/Avatar'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
+import User1 from 'assets/images/users/avatar-3.png'
+import { useTranslation } from 'react-i18next'
+import CommentForm from './CommentForm'
 
 const Comment = ({
   comment,
@@ -20,20 +20,20 @@ const Comment = ({
   const isEditing =
     activeComment &&
     activeComment.id === comment.id &&
-    activeComment.type === 'editing';
+    activeComment.type === 'editing'
   const isReplying =
     activeComment &&
     activeComment.id === comment.id &&
-    activeComment.type === 'replying';
+    activeComment.type === 'replying'
   // const fiveMinutes = 300000;
   // const timePassed = new Date() - new Date(comment.createdAt) > fiveMinutes;
-  const canDelete = replies.length === 0; // && currentUserId === comment.userId && !timePassed;
-  const canReply = true; //Boolean(currentUserId);
-  const canEdit = true; //currentUserId === comment.userId && !timePassed;
-  const replyId = parentId ? parentId : comment.id;
-  const createdAt = new Date(comment.createdAt).toLocaleDateString();
+  const canDelete = replies.length === 0 // && currentUserId === comment.userId && !timePassed;
+  const canReply = true //Boolean(currentUserId);
+  const canEdit = true //currentUserId === comment.userId && !timePassed;
+  const replyId = parentId ? parentId : comment.id
+  const createdAt = new Date(comment.createdAt).toLocaleDateString()
 
-  const { t } = useTranslation();
+  const { t } = useTranslation()
 
   return (
     <div key={comment.id} className='comment'>
@@ -57,7 +57,7 @@ const Comment = ({
             initialText={comment.body}
             handleSubmit={(text) => updateComment(text, comment.id)}
             handleCancel={() => {
-              setActiveComment(null);
+              setActiveComment(null)
             }}
           />
         )}
@@ -117,7 +117,7 @@ const Comment = ({
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Comment;
+export default Comment

@@ -1,5 +1,5 @@
-import { Suspense } from 'react';
-import Loader from './Loader';
+import { Suspense } from 'react'
+import Loader from './Loader'
 
 function Loadable(Component) {
   return function LoadableComponent(props) {
@@ -7,8 +7,8 @@ function Loadable(Component) {
       <Suspense fallback={<Loader />}>
         <Component {...props} />
       </Suspense>
-    );
-  };
+    )
+  }
 }
 
-export default Loadable;
+export default Loadable

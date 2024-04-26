@@ -1,30 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import { DataGrid } from '@mui/x-data-grid';
-import MainCard from 'components/MainCard';
-import { CaseDefForm } from '../caseDefForm/caseDefForm';
-import { CaseDefService } from 'services';
-import { useSession } from 'SessionStoreContext';
+import React, { useEffect, useState } from 'react'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import { DataGrid } from '@mui/x-data-grid'
+import MainCard from 'components/MainCard'
+import { CaseDefForm } from '../caseDefForm/caseDefForm'
+import { CaseDefService } from 'services'
+import { useSession } from 'SessionStoreContext'
 
 export const CaseDefList = () => {
-  const [caseDefs, setCaseDefs] = useState([]);
-  const [aCaseDef, setACaseDef] = useState(null);
-  const [openCaseDefForm, setOpenCaseDefForm] = useState(false);
-  const [fetching, setFetching] = useState(false);
-  const keycloak = useSession();
+  const [caseDefs, setCaseDefs] = useState([])
+  const [aCaseDef, setACaseDef] = useState(null)
+  const [openCaseDefForm, setOpenCaseDefForm] = useState(false)
+  const [fetching, setFetching] = useState(false)
+  const keycloak = useSession()
 
   useEffect(() => {
-    setFetching(true);
+    setFetching(true)
 
     CaseDefService.getAll(keycloak)
       .then((data) => {
-        setCaseDefs(data);
+        setCaseDefs(data)
       })
       .finally(() => {
-        setFetching(false);
-      });
-  }, [openCaseDefForm]);
+        setFetching(false)
+      })
+  }, [openCaseDefForm])
 
   const columns = [
     { field: 'id', headerName: 'Id', width: 300 },
@@ -35,23 +35,23 @@ export const CaseDefList = () => {
       sortable: false,
       renderCell: (params) => {
         const onClick = (e) => {
-          setACaseDef(params.row);
-          e.stopPropagation(); // don't select this row after clicking
-          setOpenCaseDefForm(true);
-        };
+          setACaseDef(params.row)
+          e.stopPropagation() // don't select this row after clicking
+          setOpenCaseDefForm(true)
+        }
 
         return (
           <React.Fragment>
             <Button onClick={onClick}>Edit</Button>
           </React.Fragment>
-        );
+        )
       },
     },
-  ];
+  ]
 
   const handleCloseCaseDefForm = () => {
-    setOpenCaseDefForm(false);
-  };
+    setOpenCaseDefForm(false)
+  }
 
   const handleNewCaseDef = () => {
     setACaseDef({
@@ -63,9 +63,9 @@ export const CaseDefList = () => {
       stages: [{ id: 0, index: 0, name: 'Stage 0' }],
       taskCompleteHooks: [],
       kanbanConfig: {},
-    });
-    setOpenCaseDefForm(true);
-  };
+    })
+    setOpenCaseDefForm(true)
+  }
 
   return (
     <div style={{ height: 650, width: '100%' }}>
@@ -92,5 +92,5 @@ export const CaseDefList = () => {
         />
       )}
     </div>
-  );
-};
+  )
+}

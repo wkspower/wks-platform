@@ -1,28 +1,28 @@
 export function json(keycloak, resp) {
   if (resp.status === 401) {
-    forceLogoutWhenTokenExpired(keycloak, resp);
-    return Promise.reject(resp);
+    forceLogoutWhenTokenExpired(keycloak, resp)
+    return Promise.reject(resp)
   }
 
   if (resp.ok) {
-    return resp.json();
+    return resp.json()
   }
 
-  return Promise.resolve(resp);
+  return Promise.resolve(resp)
 }
 
 export function nop(keycloak, resp) {
   if (resp.status === 401) {
-    forceLogoutWhenTokenExpired(keycloak, resp);
-    return Promise.reject(resp);
+    forceLogoutWhenTokenExpired(keycloak, resp)
+    return Promise.reject(resp)
   }
 
-  return resp;
+  return resp
 }
 
 function forceLogoutWhenTokenExpired(keycloak, resp) {
   if (keycloak.isTokenExpired()) {
-    console.error(resp);
-    keycloak.logout({ redirectUri: window.location.origin });
+    console.error(resp)
+    keycloak.logout({ redirectUri: window.location.origin })
   }
 }

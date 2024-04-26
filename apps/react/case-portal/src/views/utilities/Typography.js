@@ -1,10 +1,10 @@
-import Grid from '@mui/material/Grid';
-import Link from '@mui/material/Link';
-import MuiTypography from '@mui/material/Typography';
-import SubCard from 'ui-component/cards/SubCard';
-import MainCard from 'ui-component/cards/MainCard';
-import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
-import { gridSpacing } from 'store/constant';
+import Grid from '@mui/material/Grid'
+import Link from '@mui/material/Link'
+import MuiTypography from '@mui/material/Typography'
+import SubCard from 'ui-component/cards/SubCard'
+import MainCard from 'ui-component/cards/MainCard'
+import SecondaryAction from 'ui-component/cards/CardSecondaryAction'
+import { gridSpacing } from 'store/constant'
 
 // ==============================|| TYPOGRAPHY ||============================== //
 
@@ -129,6 +129,6 @@ const Typography = () => (
       </Grid>
     </Grid>
   </MainCard>
-);
+)
 
-export default Typography;
+export default Typography

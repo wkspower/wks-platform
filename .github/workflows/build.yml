@@ -1,0 +1,75 @@
+name: Build artifacts
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  REPOSITORY_OWNER: wkspower
+  KEYCLOAK_URL: http://localhost:8082
+  WKS_API_URL: http://localhost:8081
+  WKS_STORAGE_API_URL: http://localhost:8085
+  WEBSOCKET_ENABLED: false
+  WEBSOCKET_URL: ws://localhost:8484
+  TOPIC_CASE_CREATE: case-create
+  TOPIC_CREATE_HUMAN_TASK: human-task-create
+  NOVU_ENABLED: false
+  NOVU_PUBLISHER_API_URL: http://localhost:3002
+
+jobs:
+  build-java:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        id: checkout
+        uses: actions/checkout@v3    
+      - name: Set up jdk 18
+        uses: actions/setup-java@v3
+        with:
+          java-version: "18"
+          distribution: "temurin"
+
+      - name: Set up maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.2
+
+      - name: Build all for backend api
+        run: mvn -B package --file apps/java/pom.xml
+
+  build-react:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        id: checkout
+        uses: actions/checkout@v3    
+
+      - name: Install dependencies for case-portal
+        run: yarn --cwd apps/react/case-portal install
+
+      - name: Build for case-portal
+        env:
+          NODE_OPTIONS: "--max_old_space_size=4096"
+        run: |
+          export REACT_APP_KEYCLOAK_URL="${{ env.KEYCLOAK_URL }}"
+          export REACT_APP_API_URL="${{ env.WKS_API_URL }}"
+          export REACT_APP_STORAGE_URL="${{ env.WKS_STORAGE_API_URL }}"
+          export REACT_APP_WEBSOCKETS_ENABLED="${{ env.WEBSOCKET_ENABLED }}"
+          export REACT_APP_WEBSOCKETS_URL="${{ env.WEBSOCKET_URL }}"
+          export REACT_APP_WEBSOCKETS_CASE_CREATED="${{ env.TOPIC_CASE_CREATE }}"
+          export REACT_APP_WEBSOCKETS_HUMAN_TASK_CREATED="${{ env.TOPIC_CREATE_HUMAN_TASK }}"
+          export REACT_APP_NOVU_ENABLED="${{ env.NOVU_ENABLED }}"
+          export REACT_APP_NOVU_PUBLISHER_API_URL="${{ env.NOVU_PUBLISHER_API_URL }}"
+          yarn --cwd apps/react/case-portal build

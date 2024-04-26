@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import DeleteIcon from '@mui/icons-material/Delete';
-import Checkbox from '@mui/material/Checkbox';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import IconButton from '@mui/material/IconButton';
-import List from '@mui/material/List';
-import Button from '@mui/material/Button';
-import ListItem from '@mui/material/ListItem';
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
-import ListItemText from '@mui/material/ListItemText';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import { ProcessDefService } from 'services/ProcessDefService';
-import { useSession } from 'SessionStoreContext';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
+import React, { useEffect, useState } from 'react'
+import DeleteIcon from '@mui/icons-material/Delete'
+import Checkbox from '@mui/material/Checkbox'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import IconButton from '@mui/material/IconButton'
+import List from '@mui/material/List'
+import Button from '@mui/material/Button'
+import ListItem from '@mui/material/ListItem'
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction'
+import ListItemText from '@mui/material/ListItemText'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
+import { ProcessDefService } from 'services/ProcessDefService'
+import { useSession } from 'SessionStoreContext'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
 
 export const CaseDefStageProcesses = ({
   open,
@@ -24,45 +24,45 @@ export const CaseDefStageProcesses = ({
   stage,
   updateProcesses,
 }) => {
-  const keycloak = useSession();
+  const keycloak = useSession()
   const [processes, setProcesses] = React.useState(
     stage.processesDefinitions || [],
-  );
+  )
   const [newProcess, setNewProcess] = React.useState({
     definitionKey: '',
     autoStart: false,
-  });
+  })
 
-  const [processesDefinitions, setProcessesDefinitions] = useState();
+  const [processesDefinitions, setProcessesDefinitions] = useState()
 
   useEffect(() => {
     ProcessDefService.find(keycloak)
       .then((data) => {
-        setProcessesDefinitions(data);
+        setProcessesDefinitions(data)
       })
       .catch((err) => {
-        setProcessesDefinitions(null);
-        console.log(err.message);
-      });
-  }, [open]);
+        setProcessesDefinitions(null)
+        console.log(err.message)
+      })
+  }, [open])
 
   const handleAddProcess = () => {
     if (newProcess.definitionKey) {
-      setProcesses([...processes, newProcess]);
-      setNewProcess({ definitionKey: '', autoStart: false });
+      setProcesses([...processes, newProcess])
+      setNewProcess({ definitionKey: '', autoStart: false })
     }
-  };
+  }
 
   const handleDeleteProcess = (index) => {
-    const updatedProcesses = [...processes];
-    updatedProcesses.splice(index, 1);
-    setProcesses(updatedProcesses);
-  };
+    const updatedProcesses = [...processes]
+    updatedProcesses.splice(index, 1)
+    setProcesses(updatedProcesses)
+  }
 
   const handleSave = () => {
-    updateProcesses(stage.id, processes);
-    handleClose();
-  };
+    updateProcesses(stage.id, processes)
+    handleClose()
+  }
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth>
@@ -121,7 +121,7 @@ export const CaseDefStageProcesses = ({
                     >
                       {processDefinition.name}
                     </MenuItem>
-                  );
+                  )
                 })}
               </Select>
             </FormControl>
@@ -157,5 +157,5 @@ export const CaseDefStageProcesses = ({
         </Button>
       </DialogActions>
     </Dialog>
-  );
-};
+  )
+}

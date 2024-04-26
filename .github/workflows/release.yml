@@ -29,10 +29,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Extract tag name
-        id: extract_tag
-        run: echo "::set-output name=tag::$(echo ${GITHUB_REF#refs/tags/})"
-
       - name: Set up jdk 18
         uses: actions/setup-java@v3
         with:
@@ -43,13 +39,6 @@ jobs:
         uses: stCarolas/setup-maven@v4.5
         with:
           maven-version: 3.8.2
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build all for backend api
         run: mvn -B package --file apps/java/pom.xml
@@ -71,6 +60,17 @@ jobs:
           export REACT_APP_NOVU_ENABLED="${{ env.NOVU_ENABLED }}"
           export REACT_APP_NOVU_PUBLISHER_API_URL="${{ env.NOVU_PUBLISHER_API_URL }}"
           yarn --cwd apps/react/case-portal build
+
+      - name: Extract tag name
+        id: extract_tag
+        run: echo "::set-output name=tag::$(echo ${GITHUB_REF#refs/tags/})"
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -122,15 +122,6 @@ jobs:
           file: apps/java/services/demo-data-loader/Dockerfile
           push: true
           tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader:${{ steps.extract_tag.outputs.tag }}"
-
-      - name: Build and push Docker image for case-portal
-        uses: docker/build-push-action@v2
-        with:
-          context: ./apps/react/case-portal
-          platforms: linux/amd64,linux/arm64
-          file: apps/react/case-portal/deployments/Dockerfile
-          push: true
-          tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal:${{ steps.extract_tag.outputs.tag }}"
 
       - name: Build and push Docker image for case-portal
         uses: docker/build-push-action@v2

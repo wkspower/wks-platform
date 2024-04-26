@@ -1,12 +1,12 @@
-import PropTypes from 'prop-types';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import SubCard from 'ui-component/cards/SubCard';
-import MainCard from 'ui-component/cards/MainCard';
-import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
-import { gridSpacing } from 'store/constant';
+import PropTypes from 'prop-types'
+import Box from '@mui/material/Box'
+import Card from '@mui/material/Card'
+import Grid from '@mui/material/Grid'
+import Typography from '@mui/material/Typography'
+import SubCard from 'ui-component/cards/SubCard'
+import MainCard from 'ui-component/cards/MainCard'
+import SecondaryAction from 'ui-component/cards/CardSecondaryAction'
+import { gridSpacing } from 'store/constant'
 
 // ===============================|| COLOR BOX ||=============================== //
 
@@ -44,14 +44,14 @@ const ColorBox = ({ bgcolor, title, data, dark }) => (
       </Grid>
     )}
   </>
-);
+)
 
 ColorBox.propTypes = {
   bgcolor: PropTypes.string,
   title: PropTypes.string,
   data: PropTypes.object.isRequired,
   dark: PropTypes.bool,
-};
+}
 
 // ===============================|| UI COLOR ||=============================== //
 
@@ -345,6 +345,6 @@ const UIColor = () => (
       </Grid>
     </Grid>
   </MainCard>
-);
+)
 
-export default UIColor;
+export default UIColor

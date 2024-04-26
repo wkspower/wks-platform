@@ -1,5 +1,5 @@
-import SimpleBar from 'components/third-party/SimpleBar';
-import Navigation from './Navigation';
+import SimpleBar from 'components/third-party/SimpleBar'
+import Navigation from './Navigation'
 
 const DrawerContent = () => (
   <SimpleBar
@@ -12,6 +12,6 @@ const DrawerContent = () => (
   >
     <Navigation />
   </SimpleBar>
-);
+)
 
-export default DrawerContent;
+export default DrawerContent

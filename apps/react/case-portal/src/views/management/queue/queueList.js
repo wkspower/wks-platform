@@ -1,31 +1,31 @@
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import { DataGrid } from '@mui/x-data-grid';
-import { useSession } from 'SessionStoreContext';
-import MainCard from 'components/MainCard';
-import { useEffect, useState } from 'react';
-import { QueueService } from 'services/QueueService';
-import { QueueForm } from './queueForm';
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import { DataGrid } from '@mui/x-data-grid'
+import { useSession } from 'SessionStoreContext'
+import MainCard from 'components/MainCard'
+import { useEffect, useState } from 'react'
+import { QueueService } from 'services/QueueService'
+import { QueueForm } from './queueForm'
 
 export const QueueList = () => {
-  const [queues, setQueues] = useState([]);
-  const [openForm, setOpenForm] = useState(false);
-  const [queue, setQueue] = useState(null);
-  const keycloak = useSession();
+  const [queues, setQueues] = useState([])
+  const [openForm, setOpenForm] = useState(false)
+  const [queue, setQueue] = useState(null)
+  const keycloak = useSession()
 
   useEffect(() => {
     QueueService.find(keycloak)
       .then((data) => {
-        setQueues(data);
+        setQueues(data)
       })
       .catch((err) => {
-        console.log(err.message);
-      });
-  }, [openForm]);
+        console.log(err.message)
+      })
+  }, [openForm])
 
   const handleCloseForm = () => {
-    setOpenForm(false);
-  };
+    setOpenForm(false)
+  }
 
   const columns = [
     { field: 'id', headerName: 'Id', width: 300 },
@@ -37,28 +37,28 @@ export const QueueList = () => {
       sortable: false,
       renderCell: (params) => {
         const onDetailsClick = (e) => {
-          setQueue(params.row);
-          e.stopPropagation(); // don't select this row after clicking
-          setOpenForm(true);
-        };
+          setQueue(params.row)
+          e.stopPropagation() // don't select this row after clicking
+          setOpenForm(true)
+        }
 
-        return <Button onClick={onDetailsClick}>Edit</Button>;
+        return <Button onClick={onDetailsClick}>Edit</Button>
       },
     },
-  ];
+  ]
 
   const handleInputChange = (event) => {
-    setQueue({ ...queue, [event.target.name]: event.target.value });
-  };
+    setQueue({ ...queue, [event.target.name]: event.target.value })
+  }
 
   const handleNew = () => {
     setQueue({
       id: '',
       fields: { components: [], display: 'form' },
       mode: 'new',
-    });
-    setOpenForm(true);
-  };
+    })
+    setOpenForm(true)
+  }
 
   return (
     <div style={{ height: 650, width: '100%' }}>
@@ -85,5 +85,5 @@ export const QueueList = () => {
         />
       )}
     </div>
-  );
-};
+  )
+}

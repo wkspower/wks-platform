@@ -3,8 +3,8 @@ import {
   AssignmentTurnedIn,
   DeleteOutline,
   EditOutlined,
-} from '@mui/icons-material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+} from '@mui/icons-material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
   Accordion,
   AccordionDetails,
@@ -17,17 +17,17 @@ import {
   Grid,
   IconButton,
   Typography,
-} from '@mui/material';
-import MainCard from 'components/MainCard';
-import React, { useEffect, useState } from 'react';
-import { CaseDefFormEventsForm } from './caseDefFormListenerForm';
+} from '@mui/material'
+import MainCard from 'components/MainCard'
+import React, { useEffect, useState } from 'react'
+import { CaseDefFormEventsForm } from './caseDefFormListenerForm'
 
 export const CaseDefFormEvents = ({ caseDef, setCaseDef }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [hooks, setHooks] = useState([]);
-  const [selectedHookIndex, setSelectedHookIndex] = useState(null);
+  const [isLoading, setIsLoading] = useState(false)
+  const [hooks, setHooks] = useState([])
+  const [selectedHookIndex, setSelectedHookIndex] = useState(null)
 
-  const [isHookFormOpen, setIsHookFormOpen] = useState(false);
+  const [isHookFormOpen, setIsHookFormOpen] = useState(false)
 
   const addButtonStyle = {
     position: 'fixed',
@@ -37,30 +37,30 @@ export const CaseDefFormEvents = ({ caseDef, setCaseDef }) => {
     boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.2)',
     borderRadius: '50%',
     background: '#fff',
-  };
+  }
 
   useEffect(() => {
-    setIsLoading(true);
-    setHooks(caseDef.caseHooks);
-    setIsLoading(false);
-  }, [caseDef.caseHooks]);
+    setIsLoading(true)
+    setHooks(caseDef.caseHooks)
+    setIsLoading(false)
+  }, [caseDef.caseHooks])
 
   const handleAddHook = (event) => {
-    setCaseDef({ ...caseDef, caseHooks: [...caseDef.caseHooks, event] });
-    closeHookForm();
-  };
+    setCaseDef({ ...caseDef, caseHooks: [...caseDef.caseHooks, event] })
+    closeHookForm()
+  }
 
   const handleReplaceHook = (event) => {
-    let hooksCopy = [...caseDef.caseHooks];
-    hooksCopy[selectedHookIndex] = event;
-    setCaseDef({ ...caseDef, caseHooks: hooksCopy });
-    closeHookForm();
-  };
+    let hooksCopy = [...caseDef.caseHooks]
+    hooksCopy[selectedHookIndex] = event
+    setCaseDef({ ...caseDef, caseHooks: hooksCopy })
+    closeHookForm()
+  }
 
   const handleEditHook = (hookIndex) => {
-    setSelectedHookIndex(hookIndex);
-    setIsHookFormOpen(true);
-  };
+    setSelectedHookIndex(hookIndex)
+    setIsHookFormOpen(true)
+  }
 
   const handleRemoveHook = (hookIndex) => {
     setCaseDef({
@@ -68,34 +68,34 @@ export const CaseDefFormEvents = ({ caseDef, setCaseDef }) => {
       caseHooks: caseDef.caseHooks.filter(
         (element, index) => index !== hookIndex,
       ),
-    });
-    closeHookForm();
-  };
+    })
+    closeHookForm()
+  }
 
   const formatActionList = (actions) => {
-    if (!actions.length) return '';
+    if (!actions.length) return ''
 
     const actionList = actions.map((action) => {
       if (action.actionType === 'CASE_STAGE_UPDATE_ACTION') {
-        return `Progress Case Stage to ${action.newStage}`;
+        return `Progress Case Stage to ${action.newStage}`
       } else if (action.actionType === 'CASE_QUEUE_UPDATE_ACTION') {
-        return `Update Case Queue to ${action.queueId}`;
+        return `Update Case Queue to ${action.queueId}`
       } else {
-        return '';
+        return ''
       }
-    });
+    })
 
-    return actionList.join(' AND ');
-  };
+    return actionList.join(' AND ')
+  }
 
   const openHookForm = () => {
-    setSelectedHookIndex(null); // Reset the selected hook index when opening the form for adding
-    setIsHookFormOpen(true);
-  };
+    setSelectedHookIndex(null) // Reset the selected hook index when opening the form for adding
+    setIsHookFormOpen(true)
+  }
 
   const closeHookForm = () => {
-    setIsHookFormOpen(false);
-  };
+    setIsHookFormOpen(false)
+  }
 
   return (
     <Grid rowSpacing={4.5} columnSpacing={2.75}>
@@ -207,5 +207,5 @@ export const CaseDefFormEvents = ({ caseDef, setCaseDef }) => {
         <AddCircleOutline fontSize='large' />
       </IconButton>
     </Grid>
-  );
-};
+  )
+}

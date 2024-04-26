@@ -1,6 +1,6 @@
-import { Grid, Typography } from '@mui/material';
-import DashboardCard from 'components/cards/DashboardCard';
-import { IconForms, IconPalette, IconPencil } from '@tabler/icons-react';
+import { Grid, Typography } from '@mui/material'
+import DashboardCard from 'components/cards/DashboardCard'
+import { IconForms, IconPalette, IconPencil } from '@tabler/icons-react'
 
 const DashboardDefault = () => {
   return (
@@ -59,7 +59,7 @@ const DashboardDefault = () => {
         sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }}
       />
     </Grid>
-  );
-};
+  )
+}
 
-export default DashboardDefault;
+export default DashboardDefault

@@ -1,15 +1,15 @@
-import PropTypes from 'prop-types';
-import { forwardRef } from 'react';
-import Fade from '@mui/material/Fade';
-import Box from '@mui/material/Box';
-import Grow from '@mui/material/Grow';
+import PropTypes from 'prop-types'
+import { forwardRef } from 'react'
+import Fade from '@mui/material/Fade'
+import Box from '@mui/material/Box'
+import Grow from '@mui/material/Grow'
 
 // ==============================|| TRANSITIONS ||============================== //
 
 function CreateTransitions({ children, position, type, ...others }, ref) {
   let positionSX = {
     transformOrigin: '0 0 0',
-  };
+  }
 
   switch (position) {
     case 'top-right':
@@ -21,8 +21,8 @@ function CreateTransitions({ children, position, type, ...others }, ref) {
     default:
       positionSX = {
         transformOrigin: '0 0 0',
-      };
-      break;
+      }
+      break
   }
 
   return (
@@ -45,10 +45,10 @@ function CreateTransitions({ children, position, type, ...others }, ref) {
         </Fade>
       )}
     </Box>
-  );
+  )
 }
 
-const Transitions = forwardRef(CreateTransitions);
+const Transitions = forwardRef(CreateTransitions)
 
 Transitions.propTypes = {
   children: PropTypes.node,
@@ -61,11 +61,11 @@ Transitions.propTypes = {
     'bottom-right',
     'bottom',
   ]),
-};
+}
 
 Transitions.defaultProps = {
   type: 'grow',
   position: 'top-left',
-};
+}
 
-export default Transitions;
+export default Transitions

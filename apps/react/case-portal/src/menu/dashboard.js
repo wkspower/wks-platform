@@ -1,7 +1,7 @@
-import HomeOutlined from '@ant-design/icons/HomeOutlined';
-import i18n from '../i18n';
+import HomeOutlined from '@ant-design/icons/HomeOutlined'
+import i18n from '../i18n'
 
-const icons = { HomeOutlined };
+const icons = { HomeOutlined }
 
 const dashboard = {
   id: 'dashboard',
@@ -17,6 +17,6 @@ const dashboard = {
       breadcrumbs: false,
     },
   ],
-};
+}
 
-export default dashboard;
+export default dashboard

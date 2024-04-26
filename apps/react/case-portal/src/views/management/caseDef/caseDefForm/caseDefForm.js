@@ -1,38 +1,38 @@
-import CloseIcon from '@mui/icons-material/Close';
-import AppBar from '@mui/material/AppBar';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import IconButton from '@mui/material/IconButton';
-import Slide from '@mui/material/Slide';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import React, { useState } from 'react';
-import Box from '@mui/material/Box';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
-import PropTypes from 'prop-types';
-import { useEffect } from 'react';
-import { CaseDefFormEvents } from './listeners/caseDefFormListenerList';
-import { CaseDefFormStages } from './caseDefFormStages';
-import { CaseDefGeneralForm } from './caseDefGeneralForm';
-import { CaseDefFormForm } from './caseDefFormForm';
-import { CaseKanbanForm } from './caseDefKanban';
-import { CaseDefService } from 'services';
-import { useSession } from 'SessionStoreContext';
+import CloseIcon from '@mui/icons-material/Close'
+import AppBar from '@mui/material/AppBar'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import IconButton from '@mui/material/IconButton'
+import Slide from '@mui/material/Slide'
+import Toolbar from '@mui/material/Toolbar'
+import Typography from '@mui/material/Typography'
+import React, { useState } from 'react'
+import Box from '@mui/material/Box'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
+import PropTypes from 'prop-types'
+import { useEffect } from 'react'
+import { CaseDefFormEvents } from './listeners/caseDefFormListenerList'
+import { CaseDefFormStages } from './caseDefFormStages'
+import { CaseDefGeneralForm } from './caseDefGeneralForm'
+import { CaseDefFormForm } from './caseDefFormForm'
+import { CaseKanbanForm } from './caseDefKanban'
+import { CaseDefService } from 'services'
+import { useSession } from 'SessionStoreContext'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction='up' ref={ref} {...props} />;
-});
+  return <Slide direction='up' ref={ref} {...props} />
+})
 
 function a11yProps(index) {
   return {
     id: `simple-tab-${index}`,
     'aria-controls': `simple-tabpanel-${index}`,
-  };
+  }
 }
 
 function TabPanel(props) {
-  const { children, value, index, ...other } = props;
+  const { children, value, index, ...other } = props
 
   return (
     <div
@@ -48,51 +48,51 @@ function TabPanel(props) {
         </Box>
       )}
     </div>
-  );
+  )
 }
 
 TabPanel.propTypes = {
   children: PropTypes.node,
   index: PropTypes.number.isRequired,
   value: PropTypes.number.isRequired,
-};
+}
 
 export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
-  const [tabValue, setTabValue] = useState(0);
-  const [caseDef, setCaseDef] = useState(caseDefParam);
-  const keycloak = useSession();
+  const [tabValue, setTabValue] = useState(0)
+  const [caseDef, setCaseDef] = useState(caseDefParam)
+  const keycloak = useSession()
 
   useEffect(() => {
-    setCaseDef(caseDefParam);
-  }, [open, caseDefParam]);
+    setCaseDef(caseDefParam)
+  }, [open, caseDefParam])
 
   const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
+    setTabValue(newValue)
+  }
 
   const handleSave = () => {
     if (caseDef.status && caseDef.status === 'new') {
       CaseDefService.create(keycloak, caseDef)
         .then(() => handleClose())
         .catch((err) => {
-          console.log(err.message);
-        });
+          console.log(err.message)
+        })
     } else {
       CaseDefService.update(keycloak, caseDef.id, caseDef)
         .then(() => handleClose())
         .catch((err) => {
-          console.log(err.message);
-        });
+          console.log(err.message)
+        })
     }
-  };
+  }
 
   const handleDelete = () => {
     CaseDefService.remove(keycloak, caseDef.id)
       .then(() => handleClose())
       .catch((err) => {
-        console.log(err.message);
-      });
-  };
+        console.log(err.message)
+      })
+  }
 
   return (
     <div>
@@ -162,5 +162,5 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
         </TabPanel>
       </Dialog>
     </div>
-  );
-};
+  )
+}

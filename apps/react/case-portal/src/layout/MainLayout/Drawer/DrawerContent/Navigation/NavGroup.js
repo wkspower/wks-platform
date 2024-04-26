@@ -1,21 +1,21 @@
-import PropTypes from 'prop-types';
-import { useSelector } from 'react-redux';
-import Box from '@mui/material/Box';
-import List from '@mui/material/List';
-import Typography from '@mui/material/Typography';
-import NavItem from './NavItem';
-import NavCollapse from './NavCollapse';
+import PropTypes from 'prop-types'
+import { useSelector } from 'react-redux'
+import Box from '@mui/material/Box'
+import List from '@mui/material/List'
+import Typography from '@mui/material/Typography'
+import NavItem from './NavItem'
+import NavCollapse from './NavCollapse'
 
 const NavGroup = ({ item }) => {
-  const menu = useSelector((state) => state.menu);
-  const { drawerOpen } = menu;
+  const menu = useSelector((state) => state.menu)
+  const { drawerOpen } = menu
 
   const navCollapse = item.children?.map((menuItem) => {
     switch (menuItem.type) {
       case 'collapse':
-        return <NavCollapse key={menuItem.id} menu={menuItem} level={1} />;
+        return <NavCollapse key={menuItem.id} menu={menuItem} level={1} />
       case 'item':
-        return <NavItem key={menuItem.id} item={menuItem} level={1} />;
+        return <NavItem key={menuItem.id} item={menuItem} level={1} />
       default:
         return (
           <Typography
@@ -26,9 +26,9 @@ const NavGroup = ({ item }) => {
           >
             Fix - Group Collapse or Items
           </Typography>
-        );
+        )
     }
-  });
+  })
 
   return (
     <List
@@ -46,11 +46,11 @@ const NavGroup = ({ item }) => {
     >
       {navCollapse}
     </List>
-  );
-};
+  )
+}
 
 NavGroup.propTypes = {
   item: PropTypes.object,
-};
+}
 
-export default NavGroup;
+export default NavGroup

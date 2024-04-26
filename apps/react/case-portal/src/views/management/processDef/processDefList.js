@@ -1,10 +1,10 @@
-import React, { useEffect, useState, lazy } from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import { DataGrid } from '@mui/x-data-grid';
-import MainCard from 'components/MainCard';
-import { useSession } from 'SessionStoreContext';
-import { ProcessDefService } from 'services/ProcessDefService';
+import React, { useEffect, useState, lazy } from 'react'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import { DataGrid } from '@mui/x-data-grid'
+import MainCard from 'components/MainCard'
+import { useSession } from 'SessionStoreContext'
+import { ProcessDefService } from 'services/ProcessDefService'
 
 const BPMNModeler = lazy(() =>
   import('./bpmnModeler').then((module) => ({
@@ -13,23 +13,23 @@ const BPMNModeler = lazy(() =>
 )
 
 export const ProcessDefList = () => {
-  const [processDefs, setProcessDefs] = useState([]);
-  const [processDef, setProcessDef] = useState(null);
-  const [openBPMNModeler, setOpenBPMNModeler] = useState(false);
-  const [fetching, setFetching] = useState(false);
-  const keycloak = useSession();
+  const [processDefs, setProcessDefs] = useState([])
+  const [processDef, setProcessDef] = useState(null)
+  const [openBPMNModeler, setOpenBPMNModeler] = useState(false)
+  const [fetching, setFetching] = useState(false)
+  const keycloak = useSession()
 
   useEffect(() => {
-    setFetching(true);
+    setFetching(true)
 
     ProcessDefService.find(keycloak)
       .then((data) => {
-        setProcessDefs(data);
+        setProcessDefs(data)
       })
       .finally(() => {
-        setFetching(false);
-      });
-  }, [openBPMNModeler]);
+        setFetching(false)
+      })
+  }, [openBPMNModeler])
 
   const columns = [
     { field: 'id', headerName: 'Id', width: 300 },
@@ -42,32 +42,32 @@ export const ProcessDefList = () => {
       sortable: false,
       renderCell: (params) => {
         const onClick = (e) => {
-          setProcessDef(params.row);
-          e.stopPropagation(); // don't select this row after clicking
-          setOpenBPMNModeler(true);
-        };
+          setProcessDef(params.row)
+          e.stopPropagation() // don't select this row after clicking
+          setOpenBPMNModeler(true)
+        }
 
         return (
           <React.Fragment>
             <Button onClick={onClick}>Edit</Button>
           </React.Fragment>
-        );
+        )
       },
     },
-  ];
+  ]
 
   const handleCloseBPMNModeler = () => {
-    setOpenBPMNModeler(false);
-  };
+    setOpenBPMNModeler(false)
+  }
 
   const handleNewProcessDef = () => {
     setProcessDef({
       id: '',
       name: '',
       key: '',
-    });
-    setOpenBPMNModeler(true);
-  };
+    })
+    setOpenBPMNModeler(true)
+  }
 
   return (
     <div style={{ height: 650, width: '100%' }}>
@@ -99,5 +99,5 @@ export const ProcessDefList = () => {
         />
       )}
     </div>
-  );
-};
+  )
+}

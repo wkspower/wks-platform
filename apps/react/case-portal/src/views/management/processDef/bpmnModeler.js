@@ -1,14 +1,14 @@
-import CloseIcon from '@mui/icons-material/Close';
-import AppBar from '@mui/material/AppBar';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import IconButton from '@mui/material/IconButton';
-import Slide from '@mui/material/Slide';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { ProcessDefService } from 'services/ProcessDefService';
-import { DeploymentService } from 'services/DeploymentService';
+import CloseIcon from '@mui/icons-material/Close'
+import AppBar from '@mui/material/AppBar'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import IconButton from '@mui/material/IconButton'
+import Slide from '@mui/material/Slide'
+import Toolbar from '@mui/material/Toolbar'
+import Typography from '@mui/material/Typography'
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react'
+import { ProcessDefService } from 'services/ProcessDefService'
+import { DeploymentService } from 'services/DeploymentService'
 
 import {
   BpmnModeler as CamundaWebModeler,
@@ -17,92 +17,92 @@ import {
   isNotificationEvent,
   isPropertiesPanelResizedEvent,
   isUIUpdateRequiredEvent,
-} from '@wkspower/camunda-web-modeler';
-import newProcessXml from './new-process';
+} from '@wkspower/camunda-web-modeler'
+import newProcessXml from './new-process'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction='up' ref={ref} {...props} />;
-});
+  return <Slide direction='up' ref={ref} {...props} />
+})
 
 export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
-  const [bpmnXml, setBpmnXml] = useState();
+  const [bpmnXml, setBpmnXml] = useState()
 
   useEffect(() => {
     if (!processDef.id) {
-      setBpmnXml(newProcessXml);
+      setBpmnXml(newProcessXml)
     } else {
       ProcessDefService.getBPMNXml(keycloak, processDef.id)
         .then((data) => {
-          setBpmnXml(data);
+          setBpmnXml(data)
         })
         .catch((err) => {
-          setBpmnXml(null);
-          console.log(err.message);
-        });
+          setBpmnXml(null)
+          console.log(err.message)
+        })
     }
-  }, [open]);
+  }, [open])
 
-  const modelerRef = useRef();
+  const modelerRef = useRef()
 
   const onXmlChanged = useCallback((newXml) => {
     // console.log(`Model has been changed because of ${reason}`);
     // Do whatever you want here, save the XML and SVG in the backend etc.
-    setBpmnXml(newXml);
-  }, []);
+    setBpmnXml(newXml)
+  }, [])
 
   const onSaveClicked = useCallback(async () => {
     if (!modelerRef.current) {
       // Should actually never happen, but required for type safety
-      return;
+      return
     }
 
     // console.log("Saving model...");
 
-    const result = await modelerRef.current.save();
+    const result = await modelerRef.current.save()
     DeploymentService.deploy(keycloak, result.xml).then(() => {
-      handleClose();
-    });
+      handleClose()
+    })
 
     // console.log("Saved model!", result.xml, result.svg);
-  }, []);
+  }, [])
 
   const onEvent = useCallback(
     async (event) => {
       if (isContentSavedEvent(event)) {
         // Content has been saved, e.g. because user edited the model or because he switched
         // from BPMN to XML.
-        onXmlChanged(event.data.xml, event.data.svg, event.data.reason);
-        return;
+        onXmlChanged(event.data.xml, event.data.svg, event.data.reason)
+        return
       }
 
       if (isNotificationEvent(event)) {
         // There's a notification the user is supposed to see, e.g. the model could not be
         // imported because it was invalid.
-        return;
+        return
       }
 
       if (isUIUpdateRequiredEvent(event)) {
         // Something in the modeler has changed and the UI (e.g. menu) should be updated.
         // This happens when the user selects an element, for example.
-        return;
+        return
       }
 
       if (isPropertiesPanelResizedEvent(event)) {
         // The user has resized the properties panel. You can save this value e.g. in local
         // storage to restore it on next load and pass it as initializing option.
         // console.log(`Properties panel has been resized to ${event.data.width}`);
-        return;
+        return
       }
 
       if (isBpmnIoEvent(event)) {
         // Just a regular bpmn-js event - actually lots of them
-        return;
+        return
       }
 
       // console.log("Unhandled event received", event);
     },
     [onXmlChanged],
-  );
+  )
 
   /**
    * ====
@@ -117,7 +117,7 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
       monacoOptions: undefined,
     }),
     [],
-  );
+  )
 
   const propertiesPanelOptions = useMemo(
     () => ({
@@ -133,7 +133,7 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
       },
     }),
     [],
-  );
+  )
 
   const modelerOptions = useMemo(
     () => ({
@@ -148,9 +148,9 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
       },
     }),
     [],
-  );
+  )
 
-  const bpmnJsOptions = useMemo(() => undefined, []);
+  const bpmnJsOptions = useMemo(() => undefined, [])
 
   const modelerTabOptions = useMemo(
     () => ({
@@ -161,7 +161,7 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
       propertiesPanelOptions: propertiesPanelOptions,
     }),
     [bpmnJsOptions, modelerOptions, propertiesPanelOptions],
-  );
+  )
 
   return (
     <div>
@@ -184,7 +184,9 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
           />
         </div>
 
-        <AppBar sx={{ top: 'auto', left: 0, bottom: 0, width: '20%', zIndex: '1' }}>
+        <AppBar
+          sx={{ top: 'auto', left: 0, bottom: 0, width: '20%', zIndex: '1' }}
+        >
           <Toolbar>
             <IconButton
               edge='start'
@@ -204,5 +206,5 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
         </AppBar>
       </Dialog>
     </div>
-  );
-};
+  )
+}

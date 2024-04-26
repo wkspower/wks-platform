@@ -1,17 +1,17 @@
-import moment from 'moment';
-import { CaseService } from './CaseService';
-import { Typography } from '@mui/material';
+import moment from 'moment'
+import { CaseService } from './CaseService'
+import { Typography } from '@mui/material'
 
 export const NotificationService = {
   getNotifications,
-};
+}
 
 async function getNotifications(keycloak) {
   function truncIfAboveFiveElements(resp) {
-    const { data } = resp;
+    const { data } = resp
 
     if (!data || !data.length) {
-      return Promise.resolve({ data: [], page: {} });
+      return Promise.resolve({ data: [], page: {} })
     }
 
     return Promise.resolve({
@@ -20,7 +20,7 @@ async function getNotifications(keycloak) {
         total: data.length,
         limit: 5,
       },
-    });
+    })
   }
 
   function toMessage({ data, page }) {
@@ -31,9 +31,9 @@ async function getNotifications(keycloak) {
             'Data Collection': 'data_collection_stg',
             'Contract Writing': 'contract_writing_stg',
             'Info & Docs Analysis': 'info_docs_analysis_stg',
-          };
+          }
 
-          return mapper[s] || 'data_collection_stg';
+          return mapper[s] || 'data_collection_stg'
         }
 
         return {
@@ -55,9 +55,9 @@ async function getNotifications(keycloak) {
               stage
             </Typography>
           ),
-        };
+        }
       }),
-    );
+    )
   }
 
   try {
@@ -65,11 +65,11 @@ async function getNotifications(keycloak) {
       keycloak,
       'WIP_CASE_STATUS',
       5,
-    );
-    const data = await truncIfAboveFiveElements(resp);
-    return toMessage(data);
+    )
+    const data = await truncIfAboveFiveElements(resp)
+    return toMessage(data)
   } catch (e) {
-    console.log(e);
-    return await Promise.reject(e);
+    console.log(e)
+    return await Promise.reject(e)
   }
 }

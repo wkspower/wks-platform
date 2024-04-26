@@ -1,7 +1,7 @@
 // material-ui
-import { styled } from '@mui/material/styles';
-import Drawer from '@mui/material/Drawer';
-import { drawerWidth } from 'config';
+import { styled } from '@mui/material/styles'
+import Drawer from '@mui/material/Drawer'
+import { drawerWidth } from 'config'
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -12,7 +12,7 @@ const openedMixin = (theme) => ({
   }),
   overflowX: 'hidden',
   boxShadow: 'none',
-});
+})
 
 const closedMixin = (theme) => ({
   transition: theme.transitions.create('width', {
@@ -23,7 +23,7 @@ const closedMixin = (theme) => ({
   width: 0,
   borderRight: 'none',
   boxShadow: theme.customShadows.z1,
-});
+})
 
 const MiniDrawerStyled = styled(Drawer, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -40,6 +40,6 @@ const MiniDrawerStyled = styled(Drawer, {
     ...closedMixin(theme),
     '& .MuiDrawer-paper': closedMixin(theme),
   }),
-}));
+}))
 
-export default MiniDrawerStyled;
+export default MiniDrawerStyled

@@ -1,17 +1,17 @@
-import { Box, useMediaQuery } from '@mui/material';
+import { Box, useMediaQuery } from '@mui/material'
 import {
   NotificationBell,
   NovuProvider,
   PopoverNotificationCenter,
-} from '@novu/notification-center';
-import MobileSection from './MobileSection';
-import Profile from './Profile';
-import Search from './Search';
-import Config from 'consts/index';
-import Notification from './Notification';
+} from '@novu/notification-center'
+import MobileSection from './MobileSection'
+import Profile from './Profile'
+import Search from './Search'
+import Config from 'consts/index'
+import Notification from './Notification'
 
 const HeaderContent = ({ keycloak }) => {
-  const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'));
+  const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
 
   return (
     <>
@@ -35,7 +35,7 @@ const HeaderContent = ({ keycloak }) => {
       {!matchesXs && <Profile keycloak={keycloak} />}
       {matchesXs && <MobileSection />}
     </>
-  );
-};
+  )
+}
 
-export default HeaderContent;
+export default HeaderContent

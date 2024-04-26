@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { useTheme } from '@mui/material/styles';
+import { useEffect, useRef, useState } from 'react'
+import { useTheme } from '@mui/material/styles'
 import {
   AppBar,
   Box,
@@ -8,38 +8,38 @@ import {
   Paper,
   Popper,
   Toolbar,
-} from '@mui/material';
-import Search from './Search';
-import Profile from './Profile';
-import Transitions from 'components/@extended/Transitions';
-import MoreOutlined from '@ant-design/icons/MoreOutlined';
+} from '@mui/material'
+import Search from './Search'
+import Profile from './Profile'
+import Transitions from 'components/@extended/Transitions'
+import MoreOutlined from '@ant-design/icons/MoreOutlined'
 
 const MobileSection = () => {
-  const theme = useTheme();
+  const theme = useTheme()
 
-  const [open, setOpen] = useState(false);
-  const anchorRef = useRef(null);
+  const [open, setOpen] = useState(false)
+  const anchorRef = useRef(null)
 
   const handleToggle = () => {
-    setOpen((prevOpen) => !prevOpen);
-  };
+    setOpen((prevOpen) => !prevOpen)
+  }
 
   const handleClose = (event) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
-      return;
+      return
     }
 
-    setOpen(false);
-  };
+    setOpen(false)
+  }
 
-  const prevOpen = useRef(open);
+  const prevOpen = useRef(open)
   useEffect(() => {
     if (prevOpen.current === true && open === false) {
-      anchorRef.current.focus();
+      anchorRef.current.focus()
     }
 
-    prevOpen.current = open;
-  }, [open]);
+    prevOpen.current = open
+  }, [open])
 
   return (
     <>
@@ -96,7 +96,7 @@ const MobileSection = () => {
         )}
       </Popper>
     </>
-  );
-};
+  )
+}
 
-export default MobileSection;
+export default MobileSection

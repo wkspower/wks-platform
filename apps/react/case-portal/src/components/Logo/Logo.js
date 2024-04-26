@@ -1,8 +1,8 @@
-import { useTheme } from '@mui/material/styles';
-import logo from 'assets/images/logo.svg';
+import { useTheme } from '@mui/material/styles'
+import logo from 'assets/images/logo.svg'
 
 const Logo = () => {
-  const theme = useTheme();
+  const theme = useTheme()
 
   return (
     <>
@@ -49,7 +49,7 @@ const Logo = () => {
         </defs>
       </svg>
     </>
-  );
-};
+  )
+}
 
-export default Logo;
+export default Logo

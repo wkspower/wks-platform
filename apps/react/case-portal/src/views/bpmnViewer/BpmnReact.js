@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import BpmnJS from 'bpmn-js/dist/bpmn-navigated-viewer.production.min.js';
-import './BpmnIo.css';
-import { useSession } from 'SessionStoreContext';
+import React, { useCallback, useEffect, useState } from 'react'
+import BpmnJS from 'bpmn-js/dist/bpmn-navigated-viewer.production.min.js'
+import './BpmnIo.css'
+import { useSession } from 'SessionStoreContext'
 
 export const ReactBpmn = ({ url, activities }) => {
-  const [containerRef, setContainerRef] = useState(React.createRef);
-  const keycloak = useSession();
+  const [containerRef, setContainerRef] = useState(React.createRef)
+  const keycloak = useSession()
 
   useEffect(() => {
     fetch(url, {
@@ -15,26 +15,26 @@ export const ReactBpmn = ({ url, activities }) => {
     })
       .then((response) => response.text())
       .then((text) => {
-        memoizedCallback(text);
-      });
-  }, [activities]);
+        memoizedCallback(text)
+      })
+  }, [activities])
 
   const memoizedCallback = useCallback(
     (text) => {
-      setContainerRef(React.createRef);
-      const container = containerRef.current;
-      const bpmnViewer = new BpmnJS({ container });
+      setContainerRef(React.createRef)
+      const container = containerRef.current
+      const bpmnViewer = new BpmnJS({ container })
       bpmnViewer.importXML(text).then(() => {
-        const canvas = bpmnViewer.get('canvas');
+        const canvas = bpmnViewer.get('canvas')
         activities.forEach((activity) =>
           canvas.addMarker(activity.activityId, 'highlight'),
-        );
-        canvas.zoom('fit-viewport');
-      });
+        )
+        canvas.zoom('fit-viewport')
+      })
     },
 
     [activities],
-  );
+  )
 
   const Div = useCallback(
     ({ containerRef }) => {
@@ -49,11 +49,11 @@ export const ReactBpmn = ({ url, activities }) => {
           className='react-bpmn-diagram-container'
           ref={containerRef}
         ></div>
-      );
+      )
     },
 
     [activities],
-  );
+  )
 
-  return <Div containerRef={containerRef} />;
-};
+  return <Div containerRef={containerRef} />
+}

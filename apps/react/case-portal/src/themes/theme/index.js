@@ -1,7 +1,7 @@
 // ==============================|| PRESET THEME - THEME SELECTOR ||============================== //
 
 const Theme = (colors) => {
-  const { red, gold, cyan, green, grey } = colors;
+  const { red, gold, cyan, green, grey } = colors
 
   const blue = [
     '#e8faff',
@@ -14,7 +14,7 @@ const Theme = (colors) => {
     '#025ca6',
     '#004280',
     '#002b59',
-  ];
+  ]
 
   const greyColors = {
     0: grey[0],
@@ -34,8 +34,8 @@ const Theme = (colors) => {
     A400: grey[13],
     A700: grey[14],
     A800: grey[16],
-  };
-  const contrastText = '#fff';
+  }
+  const contrastText = '#fff'
 
   return {
     primary: {
@@ -100,7 +100,7 @@ const Theme = (colors) => {
       contrastText,
     },
     grey: greyColors,
-  };
-};
+  }
+}
 
-export default Theme;
+export default Theme

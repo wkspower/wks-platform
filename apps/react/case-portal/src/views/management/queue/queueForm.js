@@ -1,48 +1,48 @@
-import CloseIcon from '@mui/icons-material/Close';
-import { FormControl, TextField } from '@mui/material';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import IconButton from '@mui/material/IconButton';
-import Slide from '@mui/material/Slide';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import { useSession } from 'SessionStoreContext';
-import MainCard from 'components/MainCard';
-import React from 'react';
-import { QueueService } from 'services/QueueService';
+import CloseIcon from '@mui/icons-material/Close'
+import { FormControl, TextField } from '@mui/material'
+import AppBar from '@mui/material/AppBar'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import IconButton from '@mui/material/IconButton'
+import Slide from '@mui/material/Slide'
+import Toolbar from '@mui/material/Toolbar'
+import Typography from '@mui/material/Typography'
+import { useSession } from 'SessionStoreContext'
+import MainCard from 'components/MainCard'
+import React from 'react'
+import { QueueService } from 'services/QueueService'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction='up' ref={ref} {...props} />;
-});
+  return <Slide direction='up' ref={ref} {...props} />
+})
 
 export const QueueForm = ({ open, handleClose, queue, handleInputChange }) => {
-  const keycloak = useSession();
+  const keycloak = useSession()
 
   const save = () => {
     if (queue.mode && queue.mode === 'new') {
       QueueService.save(keycloak, queue)
         .then(() => handleClose())
         .catch((err) => {
-          console.log(err.message);
-        });
+          console.log(err.message)
+        })
     } else {
       QueueService.update(keycloak, queue.id, queue)
         .then(() => handleClose())
         .catch((err) => {
-          console.log(err.message);
-        });
+          console.log(err.message)
+        })
     }
-  };
+  }
 
   const deleteQueue = () => {
     QueueService.remove(keycloak, queue.id)
       .then(() => handleClose())
       .catch((err) => {
-        console.log(err.message);
-      });
-  };
+        console.log(err.message)
+      })
+  }
 
   return (
     queue && (
@@ -111,5 +111,5 @@ export const QueueForm = ({ open, handleClose, queue, handleInputChange }) => {
         </Box>
       </Dialog>
     )
-  );
-};
+  )
+}

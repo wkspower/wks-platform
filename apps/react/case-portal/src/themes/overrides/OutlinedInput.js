@@ -1,5 +1,5 @@
 // material-ui
-import { alpha } from '@mui/material/styles';
+import { alpha } from '@mui/material/styles'
 
 // ==============================|| OVERRIDES - OUTLINED INPUT ||============================== //
 
@@ -43,5 +43,5 @@ export default function OutlinedInput(theme) {
         },
       },
     },
-  };
+  }
 }

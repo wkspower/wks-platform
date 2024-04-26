@@ -1,34 +1,34 @@
-import FileExcelOutlined from '@ant-design/icons/FileExcelOutlined';
-import FileImageOutlined from '@ant-design/icons/FileImageOutlined';
-import FileOutlined from '@ant-design/icons/FileOutlined';
-import FilePdfOutlined from '@ant-design/icons/FilePdfOutlined';
-import { Grid } from '@mui/material';
-import MuiAlert from '@mui/material/Alert';
-import Avatar from '@mui/material/Avatar';
-import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
-import Fade from '@mui/material/Fade';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemText from '@mui/material/ListItemText';
-import Snackbar from '@mui/material/Snackbar';
-import Typography from '@mui/material/Typography';
-import { useSession } from 'SessionStoreContext';
-import React, { useState } from 'react';
-import Files from 'react-files';
-import { FileService } from '../../services';
-import CaseStore from './store';
+import FileExcelOutlined from '@ant-design/icons/FileExcelOutlined'
+import FileImageOutlined from '@ant-design/icons/FileImageOutlined'
+import FileOutlined from '@ant-design/icons/FileOutlined'
+import FilePdfOutlined from '@ant-design/icons/FilePdfOutlined'
+import { Grid } from '@mui/material'
+import MuiAlert from '@mui/material/Alert'
+import Avatar from '@mui/material/Avatar'
+import Box from '@mui/material/Box'
+import CircularProgress from '@mui/material/CircularProgress'
+import Fade from '@mui/material/Fade'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemAvatar from '@mui/material/ListItemAvatar'
+import ListItemText from '@mui/material/ListItemText'
+import Snackbar from '@mui/material/Snackbar'
+import Typography from '@mui/material/Typography'
+import { useSession } from 'SessionStoreContext'
+import React, { useState } from 'react'
+import Files from 'react-files'
+import { FileService } from '../../services'
+import CaseStore from './store'
 
 function Documents({ aCase, initialValue }) {
-  const keycloak = useSession();
-  const [fetching, setFetching] = useState(false);
-  const [percent, setPercent] = useState(0);
-  const [messageError, setMessageError] = useState(null);
-  const [filesUploaded, setFilesUploaded] = useState(initialValue);
+  const keycloak = useSession()
+  const [fetching, setFetching] = useState(false)
+  const [percent, setPercent] = useState(0)
+  const [messageError, setMessageError] = useState(null)
+  const [filesUploaded, setFilesUploaded] = useState(initialValue)
 
   const handleChange = (files) => {
-    setFetching(true);
+    setFetching(true)
 
     CaseStore.saveDocumentsFromFiles(
       keycloak,
@@ -37,28 +37,28 @@ function Documents({ aCase, initialValue }) {
       setPercent,
     )
       .then((data) => {
-        setFilesUploaded([...filesUploaded, ...data]);
+        setFilesUploaded([...filesUploaded, ...data])
       })
       .catch((e) => {
-        console.log(e);
-        setMessageError(e);
+        console.log(e)
+        setMessageError(e)
       })
       .finally(() => {
         const timer = setTimeout(() => {
-          setPercent(0);
-          setFetching(false);
-          clearTimeout(timer);
-        }, 800);
-      });
-  };
+          setPercent(0)
+          setFetching(false)
+          clearTimeout(timer)
+        }, 800)
+      })
+  }
 
   const handleError = (error) => {
-    console.log('error code ' + error.code + ': ' + error.message);
-  };
+    console.log('error code ' + error.code + ': ' + error.message)
+  }
 
   const handleCloseMesssage = () => {
-    setMessageError(null);
-  };
+    setMessageError(null)
+  }
 
   const AnimatedCircularProgress = React.forwardRef(
     function AnimatedCircularProgress(props, ref) {
@@ -86,13 +86,13 @@ function Documents({ aCase, initialValue }) {
             </Box>
           </Box>
         </div>
-      );
+      )
     },
-  );
+  )
 
   const Alert = React.forwardRef(function Alert(props, ref) {
-    return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
-  });
+    return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />
+  })
 
   return (
     <Grid
@@ -181,7 +181,7 @@ function Documents({ aCase, initialValue }) {
                   style={{ maxWidth: '80%' }}
                 />
               </ListItem>
-            );
+            )
           })}
         </List>
       )}
@@ -200,11 +200,11 @@ function Documents({ aCase, initialValue }) {
         </Alert>
       </Snackbar>
     </Grid>
-  );
+  )
 }
 
 const downloadFile = (file, keycloak) => {
-  return FileService.download(file, keycloak);
-};
+  return FileService.download(file, keycloak)
+}
 
-export default Documents;
+export default Documents

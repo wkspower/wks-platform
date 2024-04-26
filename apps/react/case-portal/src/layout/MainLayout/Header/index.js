@@ -1,16 +1,16 @@
-import PropTypes from 'prop-types';
-import { AppBar, IconButton, Toolbar, useMediaQuery } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import AppBarStyled from './AppBarStyled';
-import HeaderContent from './HeaderContent';
-import MenuFoldOutlined from '@ant-design/icons/MenuFoldOutlined';
-import MenuUnfoldOutlined from '@ant-design/icons/MenuUnfoldOutlined';
+import PropTypes from 'prop-types'
+import { AppBar, IconButton, Toolbar, useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import AppBarStyled from './AppBarStyled'
+import HeaderContent from './HeaderContent'
+import MenuFoldOutlined from '@ant-design/icons/MenuFoldOutlined'
+import MenuUnfoldOutlined from '@ant-design/icons/MenuUnfoldOutlined'
 
 const Header = ({ open, handleDrawerToggle, keycloak }) => {
-  const theme = useTheme();
-  const matchDownMD = useMediaQuery(theme.breakpoints.down('lg'));
-  const iconBackColor = 'grey.100';
-  const iconBackColorOpen = 'grey.200';
+  const theme = useTheme()
+  const matchDownMD = useMediaQuery(theme.breakpoints.down('lg'))
+  const iconBackColor = 'grey.100'
+  const iconBackColorOpen = 'grey.200'
 
   const mainHeader = (
     <Toolbar>
@@ -30,7 +30,7 @@ const Header = ({ open, handleDrawerToggle, keycloak }) => {
       </IconButton>
       <HeaderContent keycloak={keycloak} />
     </Toolbar>
-  );
+  )
 
   const appBar = {
     position: 'fixed',
@@ -39,7 +39,7 @@ const Header = ({ open, handleDrawerToggle, keycloak }) => {
     sx: {
       borderBottom: `1px solid ${theme.palette.divider}`,
     },
-  };
+  }
 
   return (
     <>
@@ -51,12 +51,12 @@ const Header = ({ open, handleDrawerToggle, keycloak }) => {
         <AppBar {...appBar}>{mainHeader}</AppBar>
       )}
     </>
-  );
-};
+  )
+}
 
 Header.propTypes = {
   open: PropTypes.bool,
   handleDrawerToggle: PropTypes.func,
-};
+}
 
-export default Header;
+export default Header

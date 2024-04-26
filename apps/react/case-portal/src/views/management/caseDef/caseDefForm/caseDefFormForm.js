@@ -1,29 +1,29 @@
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import React from 'react';
-import { useEffect, useState } from 'react';
-import { FormService } from 'services';
-import { useSession } from 'SessionStoreContext';
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
+import React from 'react'
+import { useEffect, useState } from 'react'
+import { FormService } from 'services'
+import { useSession } from 'SessionStoreContext'
 
 export const CaseDefFormForm = ({ caseDef, setCaseDef }) => {
-  const [forms, setForms] = useState();
-  const keycloak = useSession();
+  const [forms, setForms] = useState()
+  const keycloak = useSession()
 
   useEffect(() => {
     FormService.getAll(keycloak)
       .then((data) => {
-        setForms(data);
+        setForms(data)
       })
       .catch((err) => {
-        console.log(err.message);
-      });
-  }, [caseDef]);
+        console.log(err.message)
+      })
+  }, [caseDef])
 
   const handleFormChange = (event) => {
-    setCaseDef({ ...caseDef, formKey: event.target.value });
-  };
+    setCaseDef({ ...caseDef, formKey: event.target.value })
+  }
 
   return (
     <React.Fragment>
@@ -42,11 +42,11 @@ export const CaseDefFormForm = ({ caseDef, setCaseDef }) => {
                 <MenuItem key={form.key} value={form.key}>
                   {form.title}
                 </MenuItem>
-              );
+              )
             })}
           </Select>
         </FormControl>
       )}
     </React.Fragment>
-  );
-};
+  )
+}

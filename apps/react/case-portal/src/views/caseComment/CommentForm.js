@@ -1,7 +1,7 @@
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import { useState } from 'react';
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import { useState } from 'react'
 
 const CommentForm = ({
   handleSubmit,
@@ -10,13 +10,13 @@ const CommentForm = ({
   handleCancel,
   initialText = '',
 }) => {
-  const [text, setText] = useState(initialText);
-  const isTextareaDisabled = text.length === 0;
+  const [text, setText] = useState(initialText)
+  const isTextareaDisabled = text.length === 0
   const onSubmit = (event) => {
-    event.preventDefault();
-    handleSubmit(text);
-    setText('');
-  };
+    event.preventDefault()
+    handleSubmit(text)
+    setText('')
+  }
   return (
     <Box sx={{ flexDirection: 'column', m: 1 }}>
       <TextField
@@ -43,7 +43,7 @@ const CommentForm = ({
         </Button>
       )}
     </Box>
-  );
-};
+  )
+}
 
-export default CommentForm;
+export default CommentForm

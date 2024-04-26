@@ -1,5 +1,5 @@
-import { Box, FormControl, InputAdornment, OutlinedInput } from '@mui/material';
-import SearchOutlined from '@ant-design/icons/SearchOutlined';
+import { Box, FormControl, InputAdornment, OutlinedInput } from '@mui/material'
+import SearchOutlined from '@ant-design/icons/SearchOutlined'
 
 // ==============================|| HEADER CONTENT - SEARCH ||============================== //
 
@@ -22,6 +22,6 @@ const Search = () => (
       />
     </FormControl>
   </Box>
-);
+)
 
-export default Search;
+export default Search

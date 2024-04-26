@@ -1,5 +1,5 @@
 // types
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit'
 
 // initial state
 const initialState = {
@@ -7,7 +7,7 @@ const initialState = {
   openComponent: 'buttons',
   drawerOpen: true,
   componentDrawerOpen: true,
-};
+}
 
 // ==============================|| SLICE - MENU ||============================== //
 
@@ -16,24 +16,24 @@ const menu = createSlice({
   initialState,
   reducers: {
     activeItem(state, action) {
-      state.openItem = action.payload.openItem;
+      state.openItem = action.payload.openItem
     },
 
     activeComponent(state, action) {
-      state.openComponent = action.payload.openComponent;
+      state.openComponent = action.payload.openComponent
     },
 
     openDrawer(state, action) {
-      state.drawerOpen = action.payload.drawerOpen;
+      state.drawerOpen = action.payload.drawerOpen
     },
 
     openComponentDrawer(state, action) {
-      state.componentDrawerOpen = action.payload.componentDrawerOpen;
+      state.componentDrawerOpen = action.payload.componentDrawerOpen
     },
   },
-});
+})
 
-export default menu.reducer;
+export default menu.reducer
 
 export const { activeItem, activeComponent, openDrawer, openComponentDrawer } =
-  menu.actions;
+  menu.actions

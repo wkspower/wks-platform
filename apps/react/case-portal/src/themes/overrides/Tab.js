@@ -10,5 +10,5 @@ export default function Tab(theme) {
         },
       },
     },
-  };
+  }
 }

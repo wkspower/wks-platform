@@ -157,6 +157,6 @@ const defs = {
       },
     },
   },
-};
+}
 
-export default defs;
+export default defs

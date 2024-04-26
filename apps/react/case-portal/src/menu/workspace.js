@@ -1,4 +1,4 @@
-import FolderOutlined from '@ant-design/icons/FolderOutlined';
+import FolderOutlined from '@ant-design/icons/FolderOutlined'
 
 import {
   IconArchive,
@@ -7,9 +7,9 @@ import {
   IconList,
   IconSquareAsterisk,
   IconDatabase,
-} from '@tabler/icons-react';
+} from '@tabler/icons-react'
 
-import i18n from '../i18n';
+import i18n from '../i18n'
 
 const icons = {
   FolderOutlined,
@@ -19,7 +19,7 @@ const icons = {
   IconSquareAsterisk,
   IconList,
   IconDatabase,
-};
+}
 
 const workspace = {
   id: 'utilities',
@@ -49,6 +49,6 @@ const workspace = {
       children: [],
     },
   ],
-};
+}
 
-export default workspace;
+export default workspace

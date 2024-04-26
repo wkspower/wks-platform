@@ -1,14 +1,14 @@
-var _TokenInMemory_ = null;
+var _TokenInMemory_ = null
 
 class MemoryTokenManager {
   static getToken() {
-    return _TokenInMemory_;
+    return _TokenInMemory_
   }
 
   static setToken(token) {
-    _TokenInMemory_ = token;
-    return true;
+    _TokenInMemory_ = token
+    return true
   }
 }
 
-export default MemoryTokenManager;
+export default MemoryTokenManager

@@ -1,12 +1,12 @@
-import './kanban.css';
-import { extend, addClass } from '@syncfusion/ej2-base';
+import './kanban.css'
+import { extend, addClass } from '@syncfusion/ej2-base'
 import {
   KanbanComponent,
   ColumnsDirective,
   ColumnDirective,
-} from '@syncfusion/ej2-react-kanban';
-import { registerLicense } from '@syncfusion/ej2-base';
-import Link from '@mui/material/Link';
+} from '@syncfusion/ej2-react-kanban'
+import { registerLicense } from '@syncfusion/ej2-base'
+import Link from '@mui/material/Link'
 
 export const Kanban = ({
   stages,
@@ -18,13 +18,13 @@ export const Kanban = ({
 }) => {
   registerLicense(
     'ORg4AjUWIQA/Gnt2VVhkQlFadVdJXGFWfVJpTGpQdk5xdV9DaVZUTWY/P1ZhSXxQdkdiX39adXNWRGZYVkw=',
-  );
+  )
 
-  let data = extend([], cases, null, true);
+  let data = extend([], cases, null, true)
 
   function cardRendered(args) {
-    let val = 'Low';
-    addClass([args.element], val);
+    let val = 'Low'
+    addClass([args.element], val)
   }
 
   function columnTemplate(props) {
@@ -33,14 +33,14 @@ export const Kanban = ({
         <div className={'header-icon e-icons Open'}></div>
         <div className='header-text'>{props.headerText}</div>
       </div>
-    );
+    )
   }
 
   function cardTemplate(props) {
     // card css styling docs: https://ej2.syncfusion.com/angular/documentation/card/style
 
-    let title = kanbanConfig?.title;
-    let content = kanbanConfig?.content;
+    let title = kanbanConfig?.title
+    let content = kanbanConfig?.content
 
     return (
       <div className={'card-template'}>
@@ -54,9 +54,9 @@ export const Kanban = ({
                   setACase({
                     businessKey: props.businessKey,
                     caseDefinitionId: caseDefId,
-                  });
-                  e.stopPropagation();
-                  setOpenCaseForm(true);
+                  })
+                  e.stopPropagation()
+                  setOpenCaseForm(true)
                 }}
               >
                 {props.businessKey}
@@ -67,7 +67,7 @@ export const Kanban = ({
               {title
                 ?.map((attributeName) => {
                   return props.attributes.find((o) => o.name === attributeName)
-                    ?.value;
+                    ?.value
                 })
                 .join(' ')}
             </div>
@@ -78,7 +78,7 @@ export const Kanban = ({
             {content
               ?.map((attributeName) => {
                 return props.attributes.find((o) => o.name === attributeName)
-                  ?.value;
+                  ?.value
               })
               .join(' ')}
           </div>
@@ -89,11 +89,11 @@ export const Kanban = ({
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   function DialogOpen(args) {
-    args.cancel = true;
+    args.cancel = true
   }
 
   return (
@@ -122,12 +122,12 @@ export const Kanban = ({
                     allowDrop={false}
                     template={columnTemplate.bind(this)}
                   />
-                );
+                )
               })}
             </ColumnsDirective>
           </KanbanComponent>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

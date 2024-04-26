@@ -1,10 +1,10 @@
-import { Grid, Typography } from '@mui/material';
-import DashboardCard from 'components/cards/DashboardCard';
-import { IconArchive, IconList, IconSquareAsterisk } from '@tabler/icons-react';
-import { useTranslation } from 'react-i18next';
+import { Grid, Typography } from '@mui/material'
+import DashboardCard from 'components/cards/DashboardCard'
+import { IconArchive, IconList, IconSquareAsterisk } from '@tabler/icons-react'
+import { useTranslation } from 'react-i18next'
 
 const DashboardDefault = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
 
   return (
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
@@ -40,7 +40,7 @@ const DashboardDefault = () => {
         sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }}
       />
     </Grid>
-  );
-};
+  )
+}
 
-export default DashboardDefault;
+export default DashboardDefault

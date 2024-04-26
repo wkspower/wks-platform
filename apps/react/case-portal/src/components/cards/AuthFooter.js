@@ -1,11 +1,11 @@
-import useMediaQuery from '@mui/material/useMediaQuery';
-import Container from '@mui/material/Container';
-import Link from '@mui/material/Link';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
+import useMediaQuery from '@mui/material/useMediaQuery'
+import Container from '@mui/material/Container'
+import Link from '@mui/material/Link'
+import Typography from '@mui/material/Typography'
+import Stack from '@mui/material/Stack'
 
 const AuthFooter = () => {
-  const matchDownSM = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+  const matchDownSM = useMediaQuery((theme) => theme.breakpoints.down('sm'))
 
   return (
     <Container maxWidth='xl'>
@@ -66,7 +66,7 @@ const AuthFooter = () => {
         </Stack>
       </Stack>
     </Container>
-  );
-};
+  )
+}
 
-export default AuthFooter;
+export default AuthFooter

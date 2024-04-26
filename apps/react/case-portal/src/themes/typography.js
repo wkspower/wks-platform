@@ -66,6 +66,6 @@ const Typography = (fontFamily) => ({
   button: {
     textTransform: 'capitalize',
   },
-});
+})
 
-export default Typography;
+export default Typography

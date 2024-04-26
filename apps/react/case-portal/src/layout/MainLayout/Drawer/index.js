@@ -1,21 +1,21 @@
-import PropTypes from 'prop-types';
-import { useMemo } from 'react';
-import { useTheme } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import DrawerHeader from './DrawerHeader';
-import DrawerContent from './DrawerContent';
-import MiniDrawerStyled from './MiniDrawerStyled';
-import { drawerWidth } from 'config';
+import PropTypes from 'prop-types'
+import { useMemo } from 'react'
+import { useTheme } from '@mui/material/styles'
+import Box from '@mui/material/Box'
+import Drawer from '@mui/material/Drawer'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import DrawerHeader from './DrawerHeader'
+import DrawerContent from './DrawerContent'
+import MiniDrawerStyled from './MiniDrawerStyled'
+import { drawerWidth } from 'config'
 
 const MainDrawer = ({ open, handleDrawerToggle, window }) => {
-  const theme = useTheme();
-  const matchDownMD = useMediaQuery(theme.breakpoints.down('lg'));
+  const theme = useTheme()
+  const matchDownMD = useMediaQuery(theme.breakpoints.down('lg'))
   const container =
-    window !== undefined ? () => window().document.body : undefined;
-  const drawerContent = useMemo(() => <DrawerContent />, []);
-  const drawerHeader = useMemo(() => <DrawerHeader open={open} />, [open]);
+    window !== undefined ? () => window().document.body : undefined
+  const drawerContent = useMemo(() => <DrawerContent />, [])
+  const drawerHeader = useMemo(() => <DrawerHeader open={open} />, [open])
 
   return (
     <Box
@@ -51,13 +51,13 @@ const MainDrawer = ({ open, handleDrawerToggle, window }) => {
         </Drawer>
       )}
     </Box>
-  );
-};
+  )
+}
 
 MainDrawer.propTypes = {
   open: PropTypes.bool,
   handleDrawerToggle: PropTypes.func,
   window: PropTypes.object,
-};
+}
 
-export default MainDrawer;
+export default MainDrawer

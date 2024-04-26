@@ -1,5 +1,5 @@
-import { json, nop } from './request';
-import Config from '../consts';
+import { json, nop } from './request'
+import Config from '../consts'
 
 export const RecordService = {
   getRecordTypeById,
@@ -9,58 +9,58 @@ export const RecordService = {
   updateRecord,
   createRecord,
   deleteRecord,
-};
+}
 
 async function getRecordById(keycloak, id) {
-  const url = `${Config.CaseEngineUrl}/record/${id}`;
+  const url = `${Config.CaseEngineUrl}/record/${id}`
 
   const headers = {
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
 
   try {
-    const resp = await fetch(url, { headers });
-    return json(keycloak, resp);
+    const resp = await fetch(url, { headers })
+    return json(keycloak, resp)
   } catch (e) {
-    console.log(e);
-    return await Promise.reject(e);
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
 
 async function getAllRecordTypes(keycloak) {
-  const url = `${Config.CaseEngineUrl}/record-type`;
+  const url = `${Config.CaseEngineUrl}/record-type`
 
   const headers = {
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
 
   try {
-    const resp = await fetch(url, { headers });
-    return json(keycloak, resp);
+    const resp = await fetch(url, { headers })
+    return json(keycloak, resp)
   } catch (e) {
-    console.log(e);
-    return await Promise.reject(e);
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
 
 async function getRecordTypeById(keycloak, id) {
-  const url = `${Config.CaseEngineUrl}/record-type/${id}`;
+  const url = `${Config.CaseEngineUrl}/record-type/${id}`
 
   const headers = {
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
 
   try {
-    const resp = await fetch(url, { headers });
-    return json(keycloak, resp);
+    const resp = await fetch(url, { headers })
+    return json(keycloak, resp)
   } catch (e) {
-    console.log(e);
-    return await Promise.reject(e);
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
 
 async function createRecordType(keycloak, id, data) {
-  const url = `${Config.CaseEngineUrl}/record-type/${id}`;
+  const url = `${Config.CaseEngineUrl}/record-type/${id}`
 
   try {
     const resp = await fetch(url, {
@@ -71,16 +71,16 @@ async function createRecordType(keycloak, id, data) {
         Authorization: `Bearer ${keycloak.token}`,
       },
       body: JSON.stringify(data),
-    });
-    return json(keycloak, resp);
+    })
+    return json(keycloak, resp)
   } catch (e) {
-    console.log(e);
-    return await Promise.reject(e);
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
 
 async function createRecord(keycloak, id, data) {
-  const url = `${Config.CaseEngineUrl}/record/${id}`;
+  const url = `${Config.CaseEngineUrl}/record/${id}`
 
   try {
     const resp = await fetch(url, {
@@ -91,16 +91,16 @@ async function createRecord(keycloak, id, data) {
         Authorization: `Bearer ${keycloak.token}`,
       },
       body: JSON.stringify(data),
-    });
-    return nop(keycloak, resp);
+    })
+    return nop(keycloak, resp)
   } catch (e) {
-    console.log(e);
-    return await Promise.reject(e);
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
 
 async function updateRecord(keycloak, id, oid, data) {
-  const url = `${Config.CaseEngineUrl}/record/${id}/${oid}`;
+  const url = `${Config.CaseEngineUrl}/record/${id}/${oid}`
 
   try {
     const resp = await fetch(url, {
@@ -111,16 +111,16 @@ async function updateRecord(keycloak, id, oid, data) {
         Authorization: `Bearer ${keycloak.token}`,
       },
       body: JSON.stringify(data),
-    });
-    return nop(keycloak, resp);
+    })
+    return nop(keycloak, resp)
   } catch (e) {
-    console.log(e);
-    return await Promise.reject(e);
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
 
 async function deleteRecord(keycloak, id, oid) {
-  const url = `${Config.CaseEngineUrl}/record/${id}/${oid}`;
+  const url = `${Config.CaseEngineUrl}/record/${id}/${oid}`
 
   try {
     const resp = await fetch(url, {
@@ -130,10 +130,10 @@ async function deleteRecord(keycloak, id, oid) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${keycloak.token}`,
       },
-    });
-    return nop(keycloak, resp);
+    })
+    return nop(keycloak, resp)
   } catch (e) {
-    console.log(e);
-    return await Promise.reject(e);
+    console.log(e)
+    return await Promise.reject(e)
   }
 }

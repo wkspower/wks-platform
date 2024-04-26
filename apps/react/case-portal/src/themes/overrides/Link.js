@@ -7,5 +7,5 @@ export default function Link() {
         underline: 'hover',
       },
     },
-  };
+  }
 }

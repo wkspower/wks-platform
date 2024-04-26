@@ -1,15 +1,15 @@
-import { json, nop } from './request';
-import Config from '../consts';
+import { json, nop } from './request'
+import Config from '../consts'
 
 export const RecordTypeService = {
   create,
   update,
   remove,
   getAll,
-};
+}
 
 async function getAll(keycloak) {
-  const url = `${Config.CaseEngineUrl}/record-type`;
+  const url = `${Config.CaseEngineUrl}/record-type`
 
   try {
     const resp = await fetch(url, {
@@ -18,16 +18,16 @@ async function getAll(keycloak) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${keycloak.token}`,
       },
-    });
-    return json(keycloak, resp);
+    })
+    return json(keycloak, resp)
   } catch (e) {
-    console.log(e);
-    return await Promise.reject(e);
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
 
 async function create(keycloak, data) {
-  const url = `${Config.CaseEngineUrl}/record-type`;
+  const url = `${Config.CaseEngineUrl}/record-type`
 
   try {
     const resp = await fetch(url, {
@@ -38,16 +38,16 @@ async function create(keycloak, data) {
         Authorization: `Bearer ${keycloak.token}`,
       },
       body: JSON.stringify(data),
-    });
-    return nop(keycloak, resp);
+    })
+    return nop(keycloak, resp)
   } catch (e) {
-    console.log(e);
-    return await Promise.reject(e);
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
 
 async function update(keycloak, id, data) {
-  const url = `${Config.CaseEngineUrl}/record-type/${id}`;
+  const url = `${Config.CaseEngineUrl}/record-type/${id}`
 
   try {
     const resp = await fetch(url, {
@@ -58,16 +58,16 @@ async function update(keycloak, id, data) {
         Authorization: `Bearer ${keycloak.token}`,
       },
       body: JSON.stringify(data),
-    });
-    return nop(keycloak, resp);
+    })
+    return nop(keycloak, resp)
   } catch (e) {
-    console.log(e);
-    return await Promise.reject(e);
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
 
 async function remove(keycloak, id) {
-  const url = `${Config.CaseEngineUrl}/record-type/${id}`;
+  const url = `${Config.CaseEngineUrl}/record-type/${id}`
 
   try {
     const resp = await fetch(url, {
@@ -77,10 +77,10 @@ async function remove(keycloak, id) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${keycloak.token}`,
       },
-    });
-    return nop(keycloak, resp);
+    })
+    return nop(keycloak, resp)
   } catch (e) {
-    console.log(e);
-    return await Promise.reject(e);
+    console.log(e)
+    return await Promise.reject(e)
   }
 }

@@ -1,12 +1,12 @@
-import { nop } from './request';
-import Config from 'consts/index';
+import { nop } from './request'
+import Config from 'consts/index'
 
 export const DeploymentService = {
   deploy,
-};
+}
 
 async function deploy(keycloak, file) {
-  const url = `${Config.CaseEngineUrl}/deployment`;
+  const url = `${Config.CaseEngineUrl}/deployment`
 
   try {
     const resp = await fetch(url, {
@@ -17,10 +17,10 @@ async function deploy(keycloak, file) {
         Authorization: `Bearer ${keycloak.token}`,
       },
       body: file,
-    });
-    return nop(keycloak, resp);
+    })
+    return nop(keycloak, resp)
   } catch (err) {
-    console.log(err);
-    return await Promise.reject(err);
+    console.log(err)
+    return await Promise.reject(err)
   }
 }

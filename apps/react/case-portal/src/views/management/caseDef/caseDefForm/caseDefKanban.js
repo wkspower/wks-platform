@@ -1,6 +1,6 @@
-import FormControl from '@mui/material/FormControl';
-import TextField from '@mui/material/TextField';
-import React from 'react';
+import FormControl from '@mui/material/FormControl'
+import TextField from '@mui/material/TextField'
+import React from 'react'
 
 export const CaseKanbanForm = ({ caseDef, setCaseDef }) => {
   const handleInputChange = (event) => {
@@ -10,8 +10,8 @@ export const CaseKanbanForm = ({ caseDef, setCaseDef }) => {
         ...caseDef.kanbanConfig,
         [event.target.name]: event.target.value.split(','),
       },
-    });
-  };
+    })
+  }
 
   return (
     <React.Fragment>
@@ -35,5 +35,5 @@ export const CaseKanbanForm = ({ caseDef, setCaseDef }) => {
         />
       </FormControl>
     </React.Fragment>
-  );
-};
+  )
+}

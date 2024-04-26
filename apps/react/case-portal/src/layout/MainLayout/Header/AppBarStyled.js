@@ -1,9 +1,9 @@
 // material-ui
-import { styled } from '@mui/material/styles';
-import AppBar from '@mui/material/AppBar';
+import { styled } from '@mui/material/styles'
+import AppBar from '@mui/material/AppBar'
 
 // project import
-import { drawerWidth } from 'config';
+import { drawerWidth } from 'config'
 
 // ==============================|| HEADER - APP BAR STYLED ||============================== //
 
@@ -23,6 +23,6 @@ const AppBarStyled = styled(AppBar, {
       duration: theme.transitions.duration.enteringScreen,
     }),
   }),
-}));
+}))
 
-export default AppBarStyled;
+export default AppBarStyled

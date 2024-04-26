@@ -1,11 +1,11 @@
-import PropTypes from 'prop-types';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Grid from '@mui/material/Grid';
-import SubCard from 'ui-component/cards/SubCard';
-import MainCard from 'ui-component/cards/MainCard';
-import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
-import { gridSpacing } from 'store/constant';
+import PropTypes from 'prop-types'
+import Box from '@mui/material/Box'
+import Card from '@mui/material/Card'
+import Grid from '@mui/material/Grid'
+import SubCard from 'ui-component/cards/SubCard'
+import MainCard from 'ui-component/cards/MainCard'
+import SecondaryAction from 'ui-component/cards/CardSecondaryAction'
+import { gridSpacing } from 'store/constant'
 
 const ShadowBox = ({ shadow }) => (
   <Card sx={{ mb: 3, boxShadow: shadow }}>
@@ -22,11 +22,11 @@ const ShadowBox = ({ shadow }) => (
       <Box sx={{ color: 'inherit' }}>boxShadow: {shadow}</Box>
     </Box>
   </Card>
-);
+)
 
 ShadowBox.propTypes = {
   shadow: PropTypes.string.isRequired,
-};
+}
 
 // ============================|| UTILITIES SHADOW ||============================ //
 
@@ -121,6 +121,6 @@ const UtilitiesShadow = () => (
       </Grid>
     </Grid>
   </MainCard>
-);
+)
 
-export default UtilitiesShadow;
+export default UtilitiesShadow

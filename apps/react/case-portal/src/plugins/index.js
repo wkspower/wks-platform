@@ -1,4 +1,4 @@
-import { RegisterInjectUserSession } from './RegisterInjectUserSession';
-import { RegisteOptions } from './RegisterOptions';
+import { RegisterInjectUserSession } from './RegisterInjectUserSession'
+import { RegisteOptions } from './RegisterOptions'
 
-export { RegisterInjectUserSession, RegisteOptions };
+export { RegisterInjectUserSession, RegisteOptions }

@@ -1,5 +1,5 @@
-import { useRoutes } from 'react-router-dom';
-import { MainRoutes } from './MainRoutes';
+import { useRoutes } from 'react-router-dom'
+import { MainRoutes } from './MainRoutes'
 
 export const ThemeRoutes = ({
   keycloak,
@@ -9,5 +9,5 @@ export const ThemeRoutes = ({
 }) => {
   return useRoutes([
     MainRoutes(keycloak, authenticated, recordsTypes, casesDefinitions),
-  ]);
-};
+  ])
+}

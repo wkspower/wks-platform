@@ -1,44 +1,44 @@
-import Checkbox from '@mui/material/Checkbox';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import TextField from '@mui/material/TextField';
-import { useSession } from 'SessionStoreContext';
-import React, { useEffect, useState } from 'react';
-import { ProcessDefService } from 'services/ProcessDefService';
+import Checkbox from '@mui/material/Checkbox'
+import FormControl from '@mui/material/FormControl'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import InputLabel from '@mui/material/InputLabel'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
+import TextField from '@mui/material/TextField'
+import { useSession } from 'SessionStoreContext'
+import React, { useEffect, useState } from 'react'
+import { ProcessDefService } from 'services/ProcessDefService'
 
 export const CaseDefGeneralForm = ({ caseDef, setCaseDef }) => {
-  const [processesDefinitions, setProcessesDefinitions] = useState();
-  const keycloak = useSession();
+  const [processesDefinitions, setProcessesDefinitions] = useState()
+  const keycloak = useSession()
 
   useEffect(() => {
     ProcessDefService.find(keycloak)
       .then((data) => {
-        setProcessesDefinitions(data);
+        setProcessesDefinitions(data)
       })
       .catch((err) => {
-        setProcessesDefinitions(null);
-        console.log(err.message);
-      });
-  }, [caseDef]);
+        setProcessesDefinitions(null)
+        console.log(err.message)
+      })
+  }, [caseDef])
 
   const handleInputChange = (event) => {
     setCaseDef({
       ...caseDef,
       deployed: event.target.checked,
       [event.target.name]: event.target.value,
-    });
-  };
+    })
+  }
 
   const handleDeployedChange = (event) => {
-    setCaseDef({ ...caseDef, deployed: event.target.checked });
-  };
+    setCaseDef({ ...caseDef, deployed: event.target.checked })
+  }
 
   const handleProcessDefinitionChange = (event) => {
-    setCaseDef({ ...caseDef, stagesLifecycleProcessKey: event.target.value });
-  };
+    setCaseDef({ ...caseDef, stagesLifecycleProcessKey: event.target.value })
+  }
 
   return (
     <React.Fragment>
@@ -88,7 +88,7 @@ export const CaseDefGeneralForm = ({ caseDef, setCaseDef }) => {
                 >
                   {processDefinition.name}
                 </MenuItem>
-              );
+              )
             })}
           </Select>
         </FormControl>
@@ -104,5 +104,5 @@ export const CaseDefGeneralForm = ({ caseDef, setCaseDef }) => {
         />
       </FormControl>
     </React.Fragment>
-  );
-};
+  )
+}

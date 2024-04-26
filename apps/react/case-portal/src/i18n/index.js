@@ -1,12 +1,12 @@
-import i18n from 'i18next';
-import ptBR from './pt_br';
-import enUS from './en_us';
+import i18n from 'i18next'
+import ptBR from './pt_br'
+import enUS from './en_us'
 
-var lang = 'en';
-var fallbackLng = 'en';
+var lang = 'en'
+var fallbackLng = 'en'
 
 if (navigator.language === 'pt-BR') {
-  lang = 'ptBR';
+  lang = 'ptBR'
 }
 
 i18n.init({
@@ -23,6 +23,6 @@ i18n.init({
   interpolation: {
     escapeValue: false,
   },
-});
+})
 
-export default i18n;
+export default i18n

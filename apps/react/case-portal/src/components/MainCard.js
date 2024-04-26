@@ -1,18 +1,18 @@
-import PropTypes from 'prop-types';
-import { forwardRef } from 'react';
-import { useTheme } from '@mui/material/styles';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
-import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
-import Highlighter from './third-party/Highlighter';
+import PropTypes from 'prop-types'
+import { forwardRef } from 'react'
+import { useTheme } from '@mui/material/styles'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import CardHeader from '@mui/material/CardHeader'
+import Divider from '@mui/material/Divider'
+import Typography from '@mui/material/Typography'
+import Highlighter from './third-party/Highlighter'
 
 // header style
 const headerSX = {
   p: 2.5,
   '& .MuiCardHeader-action': { m: '0px auto', alignSelf: 'center' },
-};
+}
 
 // ==============================|| CUSTOM - MAIN CARD ||============================== //
 
@@ -35,8 +35,8 @@ function CreateMainCard(
   },
   ref,
 ) {
-  const theme = useTheme();
-  boxShadow = theme.palette.mode === 'dark' ? boxShadow || true : boxShadow;
+  const theme = useTheme()
+  boxShadow = theme.palette.mode === 'dark' ? boxShadow || true : boxShadow
 
   return (
     <Card
@@ -100,10 +100,10 @@ function CreateMainCard(
         </>
       )}
     </Card>
-  );
+  )
 }
 
-const MainCard = forwardRef(CreateMainCard);
+const MainCard = forwardRef(CreateMainCard)
 
 MainCard.propTypes = {
   border: PropTypes.bool,
@@ -119,6 +119,6 @@ MainCard.propTypes = {
   codeHighlight: PropTypes.bool,
   content: PropTypes.bool,
   children: PropTypes.node,
-};
+}
 
-export default MainCard;
+export default MainCard

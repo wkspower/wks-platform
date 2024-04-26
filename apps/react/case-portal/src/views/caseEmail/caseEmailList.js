@@ -1,4 +1,4 @@
-import EmailIcon from '@mui/icons-material/Email';
+import EmailIcon from '@mui/icons-material/Email'
 import {
   Avatar,
   Box,
@@ -10,51 +10,51 @@ import {
   ListItemText,
   Modal,
   Typography,
-} from '@mui/material';
-import { useSession } from 'SessionStoreContext';
-import DOMPurify from 'dompurify';
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { EmailService } from '../../services';
-import { EmailForm } from './emailForm';
+} from '@mui/material'
+import { useSession } from 'SessionStoreContext'
+import DOMPurify from 'dompurify'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { EmailService } from '../../services'
+import { EmailForm } from './emailForm'
 
 export const CaseEmailsList = ({ caseInstanceBusinessKey }) => {
-  const [emails, setEmails] = useState([]);
-  const [expandedEmailId, setExpandedEmailId] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const { t } = useTranslation();
-  const keycloak = useSession();
+  const [emails, setEmails] = useState([])
+  const [expandedEmailId, setExpandedEmailId] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const { t } = useTranslation()
+  const keycloak = useSession()
 
   useEffect(() => {
     EmailService.getAllByBusinessKey(keycloak, caseInstanceBusinessKey)
       .then((data) => {
-        setEmails(data);
+        setEmails(data)
       })
       .catch((err) => {
-        console.log(err.message);
-      });
-  }, [caseInstanceBusinessKey]);
+        console.log(err.message)
+      })
+  }, [caseInstanceBusinessKey])
 
   const handleExpandToggle = (emailId) => {
-    setExpandedEmailId(expandedEmailId === emailId ? null : emailId);
-  };
+    setExpandedEmailId(expandedEmailId === emailId ? null : emailId)
+  }
 
   const handleEmailSend = (emailData) => {
     EmailService.send(keycloak, {
       ...emailData,
       outbound: true,
       caseInstanceBusinessKey,
-    });
-    setIsModalOpen(false);
-  };
+    })
+    setIsModalOpen(false)
+  }
 
   const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
+    setIsModalOpen(true)
+  }
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
+    setIsModalOpen(false)
+  }
 
   return (
     <>
@@ -138,5 +138,5 @@ export const CaseEmailsList = ({ caseInstanceBusinessKey }) => {
         ))}
       </List>
     </>
-  );
-};
+  )
+}

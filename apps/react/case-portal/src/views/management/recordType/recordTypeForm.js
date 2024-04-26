@@ -1,24 +1,24 @@
-import React from 'react';
-import CloseIcon from '@mui/icons-material/Close';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
-import Slide from '@mui/material/Slide';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import { FormBuilder } from '@formio/react';
-import { TextField } from '@mui/material';
-import MainCard from 'components/MainCard';
-import { RecordTypeService } from 'services';
-import { useSession } from 'SessionStoreContext';
-import { StorageService } from 'plugins/storage';
+import React from 'react'
+import CloseIcon from '@mui/icons-material/Close'
+import AppBar from '@mui/material/AppBar'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import Grid from '@mui/material/Grid'
+import IconButton from '@mui/material/IconButton'
+import Slide from '@mui/material/Slide'
+import Toolbar from '@mui/material/Toolbar'
+import Typography from '@mui/material/Typography'
+import { FormBuilder } from '@formio/react'
+import { TextField } from '@mui/material'
+import MainCard from 'components/MainCard'
+import { RecordTypeService } from 'services'
+import { useSession } from 'SessionStoreContext'
+import { StorageService } from 'plugins/storage'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction='up' ref={ref} {...props} />;
-});
+  return <Slide direction='up' ref={ref} {...props} />
+})
 
 export const RecordTypeForm = ({
   open,
@@ -26,31 +26,31 @@ export const RecordTypeForm = ({
   recordType,
   handleInputChange,
 }) => {
-  const keycloak = useSession();
+  const keycloak = useSession()
 
   const save = () => {
     if (recordType.mode && recordType.mode === 'new') {
       RecordTypeService.create(keycloak, recordType)
         .then(() => handleClose())
         .catch((err) => {
-          console.log(err.message);
-        });
+          console.log(err.message)
+        })
     } else {
       RecordTypeService.update(keycloak, recordType.id, recordType)
         .then(() => handleClose())
         .catch((err) => {
-          console.log(err.message);
-        });
+          console.log(err.message)
+        })
     }
-  };
+  }
 
   const deleteRecordType = () => {
     RecordTypeService.remove(keycloak, recordType.id)
       .then(() => handleClose())
       .catch((err) => {
-        console.log(err.message);
-      });
-  };
+        console.log(err.message)
+      })
+  }
 
   return (
     recordType && (
@@ -114,5 +114,5 @@ export const RecordTypeForm = ({
         </Box>
       </Dialog>
     )
-  );
-};
+  )
+}

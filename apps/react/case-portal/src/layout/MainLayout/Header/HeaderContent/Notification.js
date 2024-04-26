@@ -1,5 +1,5 @@
-import { useRef, useState, useEffect } from 'react';
-import { useTheme } from '@mui/material/styles';
+import { useRef, useState, useEffect } from 'react'
+import { useTheme } from '@mui/material/styles'
 import {
   Avatar,
   Badge,
@@ -16,23 +16,23 @@ import {
   Popper,
   Typography,
   useMediaQuery,
-} from '@mui/material';
-import MainCard from 'components/MainCard';
-import Transitions from 'components/@extended/Transitions';
-import BellOutlined from '@ant-design/icons/BellOutlined';
-import CloseOutlined from '@ant-design/icons/CloseOutlined';
-import GiftOutlined from '@ant-design/icons/GiftOutlined';
-import MessageOutlined from '@ant-design/icons/MessageOutlined';
-import SettingOutlined from '@ant-design/icons/SettingOutlined';
-import { NotificationService } from '../../../../services';
-import { useSession } from 'SessionStoreContext';
+} from '@mui/material'
+import MainCard from 'components/MainCard'
+import Transitions from 'components/@extended/Transitions'
+import BellOutlined from '@ant-design/icons/BellOutlined'
+import CloseOutlined from '@ant-design/icons/CloseOutlined'
+import GiftOutlined from '@ant-design/icons/GiftOutlined'
+import MessageOutlined from '@ant-design/icons/MessageOutlined'
+import SettingOutlined from '@ant-design/icons/SettingOutlined'
+import { NotificationService } from '../../../../services'
+import { useSession } from 'SessionStoreContext'
 
 // sx styles
 const avatarSX = {
   width: 36,
   height: 36,
   fontSize: '1rem',
-};
+}
 
 const actionSX = {
   mt: '6px',
@@ -42,54 +42,54 @@ const actionSX = {
   alignSelf: 'flex-start',
 
   transform: 'none',
-};
+}
 
-const iconBackColorOpen = 'grey.300';
-const iconBackColor = 'grey.100';
+const iconBackColorOpen = 'grey.300'
+const iconBackColor = 'grey.100'
 
 const Notification = () => {
-  const theme = useTheme();
-  const matchesXs = useMediaQuery(theme.breakpoints.down('md'));
-  const anchorRef = useRef(null);
-  const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [badge, setBudget] = useState(0);
-  const keycloak = useSession();
+  const theme = useTheme()
+  const matchesXs = useMediaQuery(theme.breakpoints.down('md'))
+  const anchorRef = useRef(null)
+  const [open, setOpen] = useState(false)
+  const [messages, setMessages] = useState([])
+  const [badge, setBudget] = useState(0)
+  const keycloak = useSession()
 
   const handleToggle = () => {
-    setOpen((prevOpen) => !prevOpen);
-  };
+    setOpen((prevOpen) => !prevOpen)
+  }
 
   const handleClose = (event) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
-      return;
+      return
     }
-    setOpen(false);
-  };
+    setOpen(false)
+  }
 
   useEffect(() => {
-    let delay = 1000;
-    let timeout = null;
+    let delay = 1000
+    let timeout = null
 
     const updateNotify = () => {
       NotificationService.getNotifications(keycloak)
         .then((data) => {
-          setBudget(data.length ? data[0].total : 0);
-          setMessages(data);
-          delay = delay * 30;
-          timeout = setTimeout(updateNotify, delay);
+          setBudget(data.length ? data[0].total : 0)
+          setMessages(data)
+          delay = delay * 30
+          timeout = setTimeout(updateNotify, delay)
         })
         .catch((error) => {
-          console.error('Could not update notify. waiting a bit...', error);
-          delay = delay * 2;
-          timeout = setTimeout(updateNotify, delay);
-        });
-    };
+          console.error('Could not update notify. waiting a bit...', error)
+          delay = delay * 2
+          timeout = setTimeout(updateNotify, delay)
+        })
+    }
 
-    updateNotify();
+    updateNotify()
 
-    return () => timeout && clearTimeout(timeout);
-  }, []);
+    return () => timeout && clearTimeout(timeout)
+  }, [])
 
   return (
     <Box sx={{ flexShrink: 0, ml: 0.75 }}>
@@ -177,11 +177,11 @@ const Notification = () => {
         )}
       </Popper>
     </Box>
-  );
-};
+  )
+}
 
 function NotificationList({ items }) {
-  const hasMoreView = items.length ? items[0].total > 5 : false;
+  const hasMoreView = items.length ? items[0].total > 5 : false
 
   return (
     <>
@@ -200,7 +200,7 @@ function NotificationList({ items }) {
               </Typography>
             </ListItemSecondaryAction>
           </ListItemButton>
-        );
+        )
       })}
 
       <Divider />
@@ -219,7 +219,7 @@ function NotificationList({ items }) {
         </ListItemButton>
       )}
     </>
-  );
+  )
 }
 
 function AvatarIcon({ stage }) {
@@ -233,7 +233,7 @@ function AvatarIcon({ stage }) {
       >
         <GiftOutlined />
       </Avatar>
-    );
+    )
   }
 
   if (stage === 'contract_writing_stg') {
@@ -246,7 +246,7 @@ function AvatarIcon({ stage }) {
       >
         <MessageOutlined />
       </Avatar>
-    );
+    )
   }
 
   if (stage === 'info_docs_analysis_stg') {
@@ -259,10 +259,10 @@ function AvatarIcon({ stage }) {
       >
         <SettingOutlined />
       </Avatar>
-    );
+    )
   }
 
-  return;
+  return
 }
 
-export default Notification;
+export default Notification

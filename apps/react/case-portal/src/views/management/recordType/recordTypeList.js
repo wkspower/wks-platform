@@ -1,31 +1,31 @@
-import { useEffect, useState } from 'react';
-import Box from '@mui/material/Box';
-import { DataGrid } from '@mui/x-data-grid';
-import MainCard from 'components/MainCard';
-import Button from '@mui/material/Button';
-import { RecordTypeForm } from './recordTypeForm';
-import { RecordTypeService } from 'services';
-import { useSession } from 'SessionStoreContext';
+import { useEffect, useState } from 'react'
+import Box from '@mui/material/Box'
+import { DataGrid } from '@mui/x-data-grid'
+import MainCard from 'components/MainCard'
+import Button from '@mui/material/Button'
+import { RecordTypeForm } from './recordTypeForm'
+import { RecordTypeService } from 'services'
+import { useSession } from 'SessionStoreContext'
 
 export const RecordTypeList = () => {
-  const [recordTypes, setRecordTypes] = useState([]);
-  const [openForm, setOpenForm] = useState(false);
-  const [recordType, setRecordType] = useState(null);
-  const keycloak = useSession();
+  const [recordTypes, setRecordTypes] = useState([])
+  const [openForm, setOpenForm] = useState(false)
+  const [recordType, setRecordType] = useState(null)
+  const keycloak = useSession()
 
   useEffect(() => {
     RecordTypeService.getAll(keycloak)
       .then((data) => {
-        setRecordTypes(data);
+        setRecordTypes(data)
       })
       .catch((err) => {
-        console.log(err.message);
-      });
-  }, [openForm]);
+        console.log(err.message)
+      })
+  }, [openForm])
 
   const handleCloseForm = () => {
-    setOpenForm(false);
-  };
+    setOpenForm(false)
+  }
 
   const columns = [
     { field: 'id', headerName: 'Id', width: 300 },
@@ -35,28 +35,28 @@ export const RecordTypeList = () => {
       sortable: false,
       renderCell: (params) => {
         const onDetailsClick = (e) => {
-          setRecordType(params.row);
-          e.stopPropagation(); // don't select this row after clicking
-          setOpenForm(true);
-        };
+          setRecordType(params.row)
+          e.stopPropagation() // don't select this row after clicking
+          setOpenForm(true)
+        }
 
-        return <Button onClick={onDetailsClick}>Edit</Button>;
+        return <Button onClick={onDetailsClick}>Edit</Button>
       },
     },
-  ];
+  ]
 
   const handleInputChange = (event) => {
-    setRecordType({ ...recordType, [event.target.name]: event.target.value });
-  };
+    setRecordType({ ...recordType, [event.target.name]: event.target.value })
+  }
 
   const handleNew = () => {
     setRecordType({
       id: '',
       fields: { components: [], display: 'form' },
       mode: 'new',
-    });
-    setOpenForm(true);
-  };
+    })
+    setOpenForm(true)
+  }
 
   return (
     <div style={{ height: 650, width: '100%' }}>
@@ -83,5 +83,5 @@ export const RecordTypeList = () => {
         />
       )}
     </div>
-  );
-};
+  )
+}

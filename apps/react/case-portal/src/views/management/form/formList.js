@@ -1,33 +1,33 @@
-import { useEffect, useState } from 'react';
-import Box from '@mui/material/Box';
-import { DataGrid } from '@mui/x-data-grid';
-import MainCard from 'components/MainCard';
-import Button from '@mui/material/Button';
-import { FormDetail } from './formDetail';
-import { FormNew as NewForm } from './formNew';
-import { FormService } from 'services';
-import { useSession } from 'SessionStoreContext';
+import { useEffect, useState } from 'react'
+import Box from '@mui/material/Box'
+import { DataGrid } from '@mui/x-data-grid'
+import MainCard from 'components/MainCard'
+import Button from '@mui/material/Button'
+import { FormDetail } from './formDetail'
+import { FormNew as NewForm } from './formNew'
+import { FormService } from 'services'
+import { useSession } from 'SessionStoreContext'
 
 export const FormList = () => {
-  const [forms, setForms] = useState([]);
-  const [openForm, setOpenForm] = useState(false);
-  const [openNewForm, setOpenNewForm] = useState(false);
-  const [form, setForm] = useState(null);
-  const keycloak = useSession();
+  const [forms, setForms] = useState([])
+  const [openForm, setOpenForm] = useState(false)
+  const [openNewForm, setOpenNewForm] = useState(false)
+  const [form, setForm] = useState(null)
+  const keycloak = useSession()
 
   useEffect(() => {
     FormService.getAll(keycloak)
       .then((data) => {
-        setForms(data);
+        setForms(data)
       })
       .catch((err) => {
-        console.log(err.message);
-      });
-  }, [openForm, openNewForm]);
+        console.log(err.message)
+      })
+  }, [openForm, openNewForm])
 
   const handleCloseForm = () => {
-    setOpenForm(false);
-  };
+    setOpenForm(false)
+  }
 
   const columns = [
     { field: 'key', headerName: 'Form Key', width: 300 },
@@ -38,33 +38,33 @@ export const FormList = () => {
       sortable: false,
       renderCell: (params) => {
         const onDetailsClick = (e) => {
-          setForm(params.row);
-          e.stopPropagation(); // don't select this row after clicking
-          setOpenForm(true);
-        };
+          setForm(params.row)
+          e.stopPropagation() // don't select this row after clicking
+          setOpenForm(true)
+        }
 
-        return <Button onClick={onDetailsClick}>Edit</Button>;
+        return <Button onClick={onDetailsClick}>Edit</Button>
       },
     },
-  ];
+  ]
 
   const handleNewForm = () => {
-    setOpenNewForm(true);
-  };
+    setOpenNewForm(true)
+  }
 
   const handleCloseNewForm = () => {
-    setOpenNewForm(false);
-  };
+    setOpenNewForm(false)
+  }
 
   const handleInputChange = (event) => {
-    setForm({ ...form, [event.target.name]: event.target.value });
-  };
+    setForm({ ...form, [event.target.name]: event.target.value })
+  }
 
   const handleSelectDisplay = (event) => {
-    let structure = { ...form.structure };
-    structure.display = event.target.value;
-    setForm({ ...form, structure: structure });
-  };
+    let structure = { ...form.structure }
+    structure.display = event.target.value
+    setForm({ ...form, structure: structure })
+  }
 
   return (
     <div style={{ height: 650, width: '100%' }}>
@@ -94,5 +94,5 @@ export const FormList = () => {
       )}
       {<NewForm handleClose={handleCloseNewForm} open={openNewForm} />}
     </div>
-  );
-};
+  )
+}

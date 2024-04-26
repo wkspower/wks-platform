@@ -1,101 +1,101 @@
-import QuestionCircleOutlined from '@ant-design/icons/QuestionCircleOutlined';
-import { Form } from '@formio/react';
-import CloseIcon from '@mui/icons-material/Close';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
-import { Grid } from '@mui/material';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Slide from '@mui/material/Slide';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import Stepper from '@mui/material/Stepper';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
-import Toolbar from '@mui/material/Toolbar';
-import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
-import { CaseStatus } from 'common/caseStatus';
-import { StorageService } from 'plugins/storage';
-import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { ProcessDefService } from 'services/ProcessDefService';
-import { Comments } from 'views/caseComment/Comments';
-import { CaseEmailsList } from 'views/caseEmail/caseEmailList';
-import { CaseService, FormService } from '../../services';
-import { tryParseJSONObject } from '../../utils/jsonStringCheck';
-import { TaskList } from '../taskList/taskList';
-import Documents from './Documents';
+import QuestionCircleOutlined from '@ant-design/icons/QuestionCircleOutlined'
+import { Form } from '@formio/react'
+import CloseIcon from '@mui/icons-material/Close'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive'
+import { Grid } from '@mui/material'
+import AppBar from '@mui/material/AppBar'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import Divider from '@mui/material/Divider'
+import IconButton from '@mui/material/IconButton'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemText from '@mui/material/ListItemText'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import Slide from '@mui/material/Slide'
+import Step from '@mui/material/Step'
+import StepLabel from '@mui/material/StepLabel'
+import Stepper from '@mui/material/Stepper'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
+import Toolbar from '@mui/material/Toolbar'
+import Tooltip from '@mui/material/Tooltip'
+import Typography from '@mui/material/Typography'
+import { CaseStatus } from 'common/caseStatus'
+import { StorageService } from 'plugins/storage'
+import PropTypes from 'prop-types'
+import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { ProcessDefService } from 'services/ProcessDefService'
+import { Comments } from 'views/caseComment/Comments'
+import { CaseEmailsList } from 'views/caseEmail/caseEmailList'
+import { CaseService, FormService } from '../../services'
+import { tryParseJSONObject } from '../../utils/jsonStringCheck'
+import { TaskList } from '../taskList/taskList'
+import Documents from './Documents'
 
 export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
-  const [caseDef, setCaseDef] = useState(null);
-  const [form, setForm] = useState(null);
-  const [formData, setFormData] = useState(null);
-  const [comments, setComments] = useState(null);
-  const [documents, setDocuments] = useState(null);
-  const [mainTabIndex, setMainTabIndex] = useState(0);
-  const [rightTabIndex, setRightTabIndex] = useState(0);
-  const [activeStage, setActiveStage] = React.useState(0);
-  const [stages, setStages] = useState([]);
-  const { t } = useTranslation();
+  const [caseDef, setCaseDef] = useState(null)
+  const [form, setForm] = useState(null)
+  const [formData, setFormData] = useState(null)
+  const [comments, setComments] = useState(null)
+  const [documents, setDocuments] = useState(null)
+  const [mainTabIndex, setMainTabIndex] = useState(0)
+  const [rightTabIndex, setRightTabIndex] = useState(0)
+  const [activeStage, setActiveStage] = React.useState(0)
+  const [stages, setStages] = useState([])
+  const { t } = useTranslation()
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const isMenuOpen = Boolean(anchorEl);
+  const [anchorEl, setAnchorEl] = React.useState(null)
+  const isMenuOpen = Boolean(anchorEl)
 
-  const [openProcessesDialog, setOpenProcessesDialog] = useState(false);
-  const [manualInitProcessDefs, setManualInitProcessDefs] = useState([]);
+  const [openProcessesDialog, setOpenProcessesDialog] = useState(false)
+  const [manualInitProcessDefs, setManualInitProcessDefs] = useState([])
 
-  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false)
   const handleFollowClick = () => {
-    setIsFollowing(!isFollowing);
-  };
+    setIsFollowing(!isFollowing)
+  }
 
   useEffect(() => {
-    getCaseInfo(aCase);
-  }, [open, aCase]);
+    getCaseInfo(aCase)
+  }, [open, aCase])
 
   useEffect(() => {
     if (activeStage) {
-      const stage = caseDef.stages.find((o) => o.name === activeStage);
-      const stageProcesses = stage ? stage.processesDefinitions : [];
+      const stage = caseDef.stages.find((o) => o.name === activeStage)
+      const stageProcesses = stage ? stage.processesDefinitions : []
       const autoStartProcesses = stageProcesses
         ? stageProcesses.filter((o) => o.autoStart === false)
-        : undefined;
-      setManualInitProcessDefs(autoStartProcesses);
+        : undefined
+      setManualInitProcessDefs(autoStartProcesses)
     }
-  }, [activeStage]);
+  }, [activeStage])
 
   const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+    setAnchorEl(event.currentTarget)
+  }
 
   const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+    setAnchorEl(null)
+  }
 
   const getCaseInfo = (aCase) => {
     CaseService.getCaseDefinitionsById(keycloak, aCase.caseDefinitionId)
       .then((data) => {
-        setCaseDef(data);
+        setCaseDef(data)
         setStages(
           data.stages.sort((a, b) => a.index - b.index).map((o) => o.name),
-        );
-        return FormService.getByKey(keycloak, data.formKey);
+        )
+        return FormService.getByKey(keycloak, data.formKey)
       })
       .then((data) => {
-        setForm(data);
-        return CaseService.getCaseById(keycloak, aCase.businessKey);
+        setForm(data)
+        return CaseService.getCaseById(keycloak, aCase.businessKey)
       })
       .then((caseData) => {
         setComments(
@@ -103,8 +103,8 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
             (a, b) =>
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           ),
-        );
-        setDocuments(caseData?.documents);
+        )
+        setDocuments(caseData?.documents)
         setFormData({
           data: caseData.attributes.reduce(
             (obj, item) =>
@@ -117,21 +117,21 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
           ),
           metadata: {},
           isValid: true,
-        });
-        setActiveStage(caseData.stage);
+        })
+        setActiveStage(caseData.stage)
       })
       .catch((err) => {
-        console.log(err.message);
-      });
-  };
+        console.log(err.message)
+      })
+  }
 
   const handleMainTabChanged = (event, newValue) => {
-    setMainTabIndex(newValue);
-  };
+    setMainTabIndex(newValue)
+  }
 
   const handleRightTabChanged = (event, newValue) => {
-    setRightTabIndex(newValue);
-  };
+    setRightTabIndex(newValue)
+  }
 
   const handleUpdateCaseStatus = (newStatus) => {
     CaseService.patch(
@@ -142,34 +142,34 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
       }),
     )
       .then(() => {
-        handleClose();
+        handleClose()
       })
       .catch((err) => {
-        console.log(err.message);
-      });
-  };
+        console.log(err.message)
+      })
+  }
 
   const updateActiveState = () => {
     CaseService.getCaseById(keycloak, aCase.businessKey).then((data) =>
       setActiveStage(data.stage),
-    );
-  };
+    )
+  }
 
   const handleOpenProcessesDialog = () => {
-    setOpenProcessesDialog(true);
-    handleMenuClose();
-  };
+    setOpenProcessesDialog(true)
+    handleMenuClose()
+  }
 
   const handleCloseProcessesDialog = () => {
-    setOpenProcessesDialog(false);
-  };
+    setOpenProcessesDialog(false)
+  }
 
   const startProcess = (key) => {
-    ProcessDefService.start(keycloak, key, aCase.businessKey);
+    ProcessDefService.start(keycloak, key, aCase.businessKey)
 
     // Close the dialog
-    handleCloseProcessesDialog();
-  };
+    handleCloseProcessesDialog()
+  }
 
   return (
     aCase &&
@@ -299,17 +299,17 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
           >
             <Stepper
               activeStep={stages.findIndex((o) => {
-                return o === activeStage;
+                return o === activeStage
               })}
             >
               {stages.map((label) => {
-                const stagesProps = {};
-                const labelProps = {};
+                const stagesProps = {}
+                const labelProps = {}
                 return (
                   <Step key={label} {...stagesProps}>
                     <StepLabel {...labelProps}>{label}</StepLabel>
                   </Step>
-                );
+                )
               })}
             </Stepper>
           </Box>
@@ -456,22 +456,22 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
         )}
       </div>
     )
-  );
-};
+  )
+}
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction='up' ref={ref} {...props} />;
-});
+  return <Slide direction='up' ref={ref} {...props} />
+})
 
 function a11yProps(index) {
   return {
     id: `simple-tab-${index}`,
     'aria-controls': `simple-tabpanel-${index}`,
-  };
+  }
 }
 
 function TabPanel(props) {
-  const { children, value, index, ...other } = props;
+  const { children, value, index, ...other } = props
 
   return (
     <div
@@ -487,11 +487,11 @@ function TabPanel(props) {
         </Box>
       )}
     </div>
-  );
+  )
 }
 
 TabPanel.propTypes = {
   children: PropTypes.node,
   index: PropTypes.number.isRequired,
   value: PropTypes.number.isRequired,
-};
+}

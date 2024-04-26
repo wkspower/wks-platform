@@ -1,4 +1,4 @@
-import i18n from '../i18n';
+import i18n from '../i18n'
 
 // assets
 import {
@@ -6,7 +6,7 @@ import {
   IconDatabase,
   IconPencil,
   IconSchema,
-} from '@tabler/icons-react';
+} from '@tabler/icons-react'
 
 // icons
 const icons = {
@@ -14,7 +14,7 @@ const icons = {
   IconDatabase,
   IconPencil,
   IconSchema,
-};
+}
 
 const management = {
   id: 'management',
@@ -87,6 +87,6 @@ const management = {
       ],
     },
   ],
-};
+}
 
-export default management;
+export default management

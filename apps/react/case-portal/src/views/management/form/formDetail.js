@@ -1,28 +1,28 @@
-import React from 'react';
-import CloseIcon from '@mui/icons-material/Close';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import FormControl from '@mui/material/FormControl';
-import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import Slide from '@mui/material/Slide';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import { FormBuilder } from '@formio/react';
-import { TextField } from '@mui/material';
-import MainCard from 'components/MainCard';
-import { FormService } from 'services';
-import { useSession } from 'SessionStoreContext';
-import { StorageService } from 'plugins/storage';
+import React from 'react'
+import CloseIcon from '@mui/icons-material/Close'
+import AppBar from '@mui/material/AppBar'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import FormControl from '@mui/material/FormControl'
+import Grid from '@mui/material/Grid'
+import IconButton from '@mui/material/IconButton'
+import InputLabel from '@mui/material/InputLabel'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
+import Slide from '@mui/material/Slide'
+import Toolbar from '@mui/material/Toolbar'
+import Typography from '@mui/material/Typography'
+import { FormBuilder } from '@formio/react'
+import { TextField } from '@mui/material'
+import MainCard from 'components/MainCard'
+import { FormService } from 'services'
+import { useSession } from 'SessionStoreContext'
+import { StorageService } from 'plugins/storage'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction='up' ref={ref} {...props} />;
-});
+  return <Slide direction='up' ref={ref} {...props} />
+})
 
 export const FormDetail = ({
   open,
@@ -31,23 +31,23 @@ export const FormDetail = ({
   handleInputChange,
   handleSelectDisplay,
 }) => {
-  const keycloak = useSession();
+  const keycloak = useSession()
 
   const saveForm = () => {
     FormService.update(keycloak, form.key, form)
       .then(() => handleClose())
       .catch((err) => {
-        console.log(err.message);
-      });
-  };
+        console.log(err.message)
+      })
+  }
 
   const deleteForm = () => {
     FormService.remove(keycloak, form.key)
       .then(() => handleClose())
       .catch((err) => {
-        console.log(err.message);
-      });
-  };
+        console.log(err.message)
+      })
+  }
 
   return (
     form && (
@@ -144,5 +144,5 @@ export const FormDetail = ({
         </Box>
       </Dialog>
     )
-  );
-};
+  )
+}
