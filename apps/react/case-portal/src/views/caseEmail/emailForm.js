@@ -1,39 +1,28 @@
-import { useState } from 'react';
-import { TextField, Button, Grid, Typography } from '@mui/material';
-import { makeStyles } from '@mui/styles';
-import { useTranslation } from 'react-i18next';
-
-const useStyles = makeStyles(() => ({
-  form: {
-    width: '100%',
-  },
-  submitButton: {
-    marginTop: '16px',
-  },
-}));
+import { useState } from 'react'
+import { TextField, Button, Grid, Typography } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 
 export const EmailForm = ({ onSubmit }) => {
-  const [recipient, setRecipient] = useState('');
-  const [subject, setSubject] = useState('');
-  const [body, setBody] = useState('');
-  const { t } = useTranslation();
-  const classes = useStyles();
+  const [recipient, setRecipient] = useState('')
+  const [subject, setSubject] = useState('')
+  const [body, setBody] = useState('')
+  const { t } = useTranslation()
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit({ to: recipient, subject, body });
+    e.preventDefault()
+    onSubmit({ to: recipient, subject, body })
     // Clear the form after submission
-    setRecipient('');
-    setSubject('');
-    setBody('');
-  };
+    setRecipient('')
+    setSubject('')
+    setBody('')
+  }
 
   return (
     <>
       <Typography variant='h5' gutterBottom>
         {t('pages.emails.form.title')}
       </Typography>
-      <form onSubmit={handleSubmit}>
+      <form style={{ width: '100%' }} onSubmit={handleSubmit}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
@@ -69,7 +58,7 @@ export const EmailForm = ({ onSubmit }) => {
               type='submit'
               variant='contained'
               color='primary'
-              className={classes.submitButton}
+              style={{ marginTop: '16px' }}
             >
               {t('pages.emails.form.send')}
             </Button>
@@ -77,5 +66,5 @@ export const EmailForm = ({ onSubmit }) => {
         </Grid>
       </form>
     </>
-  );
-};
+  )
+}
