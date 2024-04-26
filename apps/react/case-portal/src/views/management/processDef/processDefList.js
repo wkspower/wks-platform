@@ -1,11 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { DataGrid } from '@mui/x-data-grid';
 import MainCard from 'components/MainCard';
 import { useSession } from 'SessionStoreContext';
 import { ProcessDefService } from 'services/ProcessDefService';
-import { BPMNModeler } from './bpmnModeler';
+
+const BPMNModeler = lazy(() =>
+  import('./bpmnModeler').then((module) => ({
+    default: module.BPMNModeler,
+  })),
+)
 
 export const ProcessDefList = () => {
   const [processDefs, setProcessDefs] = useState([]);

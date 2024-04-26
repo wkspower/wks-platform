@@ -1,42 +1,63 @@
-import { useTheme } from '@mui/material';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import { Kanban } from 'components/Kanban/kanban';
-import MainCard from 'components/MainCard';
-import React, { createContext, useEffect, useState, useContext } from 'react';
-import { CaseForm } from '../caseForm/caseForm';
-import { NewCaseForm } from '../caseForm/newCaseForm';
-import { DataGrid } from '@mui/x-data-grid';
-import ViewListIcon from '@mui/icons-material/ViewList';
-import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import Snackbar from '@mui/material/Snackbar';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
-import { useTranslation } from 'react-i18next';
-import { CaseService } from '../../services';
-import { useSession } from 'SessionStoreContext';
-import { KeyboardArrowLeft } from '@mui/icons-material';
-import { KeyboardArrowRight } from '@mui/icons-material';
-import TablePagination from '@mui/material/TablePagination';
-import Config from 'consts/index';
+import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material'
+import CloseIcon from '@mui/icons-material/Close'
+import ViewKanbanIcon from '@mui/icons-material/ViewKanban'
+import ViewListIcon from '@mui/icons-material/ViewList'
+import { useTheme } from '@mui/material'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
+import Snackbar from '@mui/material/Snackbar'
+import TablePagination from '@mui/material/TablePagination'
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import { useSession } from 'SessionStoreContext'
+import MainCard from 'components/MainCard'
+import Config from 'consts/index'
+import React, {
+  Suspense,
+  createContext,
+  lazy,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
+import { useTranslation } from 'react-i18next'
+import { CaseService } from '../../services'
+
+const DataGrid = lazy(() =>
+  import('@mui/x-data-grid').then((module) => ({ default: module.DataGrid })),
+)
+const Kanban = lazy(() =>
+  import('components/Kanban/kanban').then((module) => ({
+    default: module.Kanban,
+  })),
+)
+const CaseForm = lazy(() =>
+  import('../caseForm/caseForm').then((module) => ({
+    default: module.CaseForm,
+  })),
+)
+const NewCaseForm = lazy(() =>
+  import('../caseForm/newCaseForm').then((module) => ({
+    default: module.NewCaseForm,
+  })),
+)
 
 export const CaseList = ({ status, caseDefId }) => {
-  const PaginationContext = createContext();
-  const { t } = useTranslation();
-  const [stages, setStages] = useState([]);
-  const [cases, setCases] = useState([]);
-  const [aCase, setACase] = useState(null);
-  const [newCaseDefId, setNewCaseDefId] = useState(null);
-  const [lastCreatedCase, setLastCreatedCase] = useState(null);
-  const [openCaseForm, setOpenCaseForm] = useState(false);
-  const [openNewCaseForm, setOpenNewCaseForm] = useState(false);
-  const [view, setView] = React.useState('list');
-  const [snackOpen, setSnackOpen] = useState(false);
-  const keycloak = useSession();
-  const [caseDefs, setCaseDefs] = useState([]);
-  const [fetching, setFetching] = useState(false);
+  const PaginationContext = createContext()
+  const { t } = useTranslation()
+  const [stages, setStages] = useState([])
+  const [cases, setCases] = useState([])
+  const [aCase, setACase] = useState(null)
+  const [newCaseDefId, setNewCaseDefId] = useState(null)
+  const [lastCreatedCase, setLastCreatedCase] = useState(null)
+  const [openCaseForm, setOpenCaseForm] = useState(false)
+  const [openNewCaseForm, setOpenNewCaseForm] = useState(false)
+  const [view, setView] = React.useState('list')
+  const [snackOpen, setSnackOpen] = useState(false)
+  const keycloak = useSession()
+  const [caseDefs, setCaseDefs] = useState([])
+  const [fetching, setFetching] = useState(false)
   const [filter, setFilter] = useState({
     sort: '',
     limit: 10,
@@ -45,13 +66,13 @@ export const CaseList = ({ status, caseDefId }) => {
     cursors: {},
     hasPrevious: false,
     hasNext: false,
-  });
+  })
 
   useEffect(() => {
     if (Config.WebsocketsEnabled) {
-      const websocketUrl = Config.WebsocketUrl;
-      const topic = Config.WebsocketsTopicCaseCreated;
-      const ws = new WebSocket(`${websocketUrl}/${topic}`);
+      const websocketUrl = Config.WebsocketUrl
+      const topic = Config.WebsocketsTopicCaseCreated
+      const ws = new WebSocket(`${websocketUrl}/${topic}`)
       ws.onmessage = () => {
         fetchCases(
           setFetching,
@@ -62,13 +83,13 @@ export const CaseList = ({ status, caseDefId }) => {
           filter,
           setCases,
           setFilter,
-        );
-      };
+        )
+      }
       return () => {
-        ws.close(); // Close WebSocket connection when component unmounts
-      };
+        ws.close() // Close WebSocket connection when component unmounts
+      }
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
     fetchCases(
@@ -80,14 +101,14 @@ export const CaseList = ({ status, caseDefId }) => {
       filter,
       setCases,
       setFilter,
-    );
-  }, [caseDefId, status, openNewCaseForm]);
+    )
+  }, [caseDefId, status, openNewCaseForm])
 
   useEffect(() => {
     CaseService.getCaseDefinitions(keycloak).then((resp) => {
-      setCaseDefs(resp);
-    });
-  }, []);
+      setCaseDefs(resp)
+    })
+  }, [])
 
   const makeColumns = () => {
     return [
@@ -128,23 +149,23 @@ export const CaseList = ({ status, caseDefId }) => {
         sortable: false,
         renderCell: (data) => {
           const onClick = (e) => {
-            setACase(data.row);
-            e.stopPropagation();
-            setOpenCaseForm(true);
-          };
+            setACase(data.row)
+            e.stopPropagation()
+            setOpenCaseForm(true)
+          }
 
           return (
             <Button onClick={onClick}>
               {t('pages.caselist.datagrid.action.details')}
             </Button>
-          );
+          )
         },
       },
-    ];
-  };
+    ]
+  }
 
   const handleCloseCaseForm = () => {
-    setOpenCaseForm(false);
+    setOpenCaseForm(false)
     fetchCases(
       setFetching,
       keycloak,
@@ -154,37 +175,37 @@ export const CaseList = ({ status, caseDefId }) => {
       filter,
       setCases,
       setFilter,
-    );
-  };
+    )
+  }
 
   const handleCloseNewCaseForm = () => {
-    setOpenNewCaseForm(false);
-    setSnackOpen(true);
-  };
+    setOpenNewCaseForm(false)
+    setSnackOpen(true)
+  }
 
   const handleNewCaseAction = () => {
-    setLastCreatedCase(null);
-    setNewCaseDefId(caseDefId);
-    setOpenNewCaseForm(true);
-  };
+    setLastCreatedCase(null)
+    setNewCaseDefId(caseDefId)
+    setOpenNewCaseForm(true)
+  }
 
   const handleChangeView = (event, nextView) => {
     if (nextView !== null) {
-      setView(nextView);
+      setView(nextView)
     }
-  };
+  }
 
   const fetchKanbanConfig = () => {
-    return caseDefs.find((o) => o.id === caseDefId).kanbanConfig;
-  };
+    return caseDefs.find((o) => o.id === caseDefId).kanbanConfig
+  }
 
   const handleCloseSnack = (event, reason) => {
     if (reason === 'clickaway') {
-      return;
+      return
     }
 
-    setSnackOpen(false);
-  };
+    setSnackOpen(false)
+  }
 
   const snackAction = lastCreatedCase && (
     <React.Fragment>
@@ -195,9 +216,9 @@ export const CaseList = ({ status, caseDefId }) => {
           setACase({
             businessKey: lastCreatedCase.businessKey,
             caseDefinitionId: caseDefId,
-          });
-          setOpenCaseForm(true);
-          handleCloseSnack();
+          })
+          setOpenCaseForm(true)
+          handleCloseSnack()
         }}
       >
         {lastCreatedCase.businessKey}
@@ -211,74 +232,74 @@ export const CaseList = ({ status, caseDefId }) => {
         <CloseIcon fontSize='small' />
       </IconButton>
     </React.Fragment>
-  );
+  )
 
   const handlerNextPage = () => {
-    setFetching(true);
+    setFetching(true)
 
     const next = {
       sort: filter.sort,
       limit: filter.limit,
       after: filter.cursors.after,
-    };
+    }
 
     CaseService.filterCase(keycloak, caseDefId, status, next)
       .then((resp) => {
-        const { data, paging } = resp;
+        const { data, paging } = resp
 
-        setCases(data);
+        setCases(data)
         setFilter({
           ...filter,
           cursors: paging.cursors,
           hasPrevious: paging.hasPrevious,
           hasNext: paging.hasNext,
-        });
+        })
       })
       .finally(() => {
-        setFetching(false);
-      });
-  };
+        setFetching(false)
+      })
+  }
 
   const handlerPriorPage = () => {
-    setFetching(true);
+    setFetching(true)
 
     const prior = {
       sort: filter.sort,
       limit: filter.limit,
       before: filter.cursors.before,
-    };
+    }
 
     CaseService.filterCase(keycloak, caseDefId, status, prior)
       .then((resp) => {
-        const { data, paging } = resp;
+        const { data, paging } = resp
 
-        setCases(data);
+        setCases(data)
         setFilter({
           ...filter,
           cursors: paging.cursors,
           hasPrevious: paging.hasPrevious,
           hasNext: paging.hasNext,
-        });
+        })
       })
       .finally(() => {
-        setFetching(false);
-      });
-  };
+        setFetching(false)
+      })
+  }
 
   function TablePaginationActions(props) {
-    const theme = useTheme();
-    const filter = useContext(PaginationContext);
-    const { onPageChange } = props;
+    const theme = useTheme()
+    const filter = useContext(PaginationContext)
+    const { onPageChange } = props
 
     const handleBackButtonClick = (event) => {
-      onPageChange(event, 'back');
-    };
+      onPageChange(event, 'back')
+    }
 
     const handleNextButtonClick = (event) => {
-      onPageChange(event, 'next');
-    };
+      onPageChange(event, 'next')
+    }
 
-    const { hasPrevious, hasNext } = filter;
+    const { hasPrevious, hasNext } = filter
 
     return (
       <Box sx={{ flexShrink: 0, ml: 2.5 }}>
@@ -305,7 +326,7 @@ export const CaseList = ({ status, caseDefId }) => {
           )}
         </IconButton>
       </Box>
-    );
+    )
   }
 
   const CustomPagination = () => {
@@ -326,30 +347,30 @@ export const CaseList = ({ status, caseDefId }) => {
             const action = {
               next: handlerNextPage,
               back: handlerPriorPage,
-            };
-            action[type]();
+            }
+            action[type]()
           }}
           onRowsPerPageChange={(e) => {
-            setFetching(true);
+            setFetching(true)
 
             CaseService.filterCase(keycloak, caseDefId, status, {
               limit: e.target.value,
             })
               .then((resp) => {
-                const { data, paging } = resp;
+                const { data, paging } = resp
 
-                setCases(data);
+                setCases(data)
                 setFilter({
                   ...filter,
                   limit: e.target.value,
                   cursors: paging.cursors,
                   hasPrevious: paging.hasPrevious,
                   hasNext: paging.hasNext,
-                });
+                })
               })
               .finally(() => {
-                setFetching(false);
-              });
+                setFetching(false)
+              })
           }}
           SelectProps={{
             inputProps: {
@@ -360,8 +381,8 @@ export const CaseList = ({ status, caseDefId }) => {
           ActionsComponent={TablePaginationActions}
         />
       </PaginationContext.Provider>
-    );
-  };
+    )
+  }
 
   return (
     <div style={{ height: 650, width: '100%' }}>
@@ -397,30 +418,34 @@ export const CaseList = ({ status, caseDefId }) => {
         <Box>
           {view === 'list' && (
             <div>
-              <DataGrid
-                sx={{
-                  height: 500,
-                  width: '100%',
-                  backgroundColor: '#ffffff',
-                  mt: 1,
-                }}
-                rows={cases}
-                columns={makeColumns()}
-                getRowId={(row) => row.businessKey}
-                loading={fetching}
-                components={{ Pagination: CustomPagination }}
-              />
+              <Suspense fallback={<div>Loading...</div>}>
+                <DataGrid
+                  sx={{
+                    height: 500,
+                    width: '100%',
+                    backgroundColor: '#ffffff',
+                    mt: 1,
+                  }}
+                  rows={cases}
+                  columns={makeColumns()}
+                  getRowId={(row) => row.businessKey}
+                  loading={fetching}
+                  components={{ Pagination: CustomPagination }}
+                />
+              </Suspense>
             </div>
           )}
           {view === 'kanban' && (
-            <Kanban
-              stages={stages}
-              cases={cases}
-              caseDefId={caseDefId}
-              kanbanConfig={fetchKanbanConfig()}
-              setACase={setACase}
-              setOpenCaseForm={setOpenCaseForm}
-            />
+            <Suspense fallback={<div>Loading...</div>}>
+              <Kanban
+                stages={stages}
+                cases={cases}
+                caseDefId={caseDefId}
+                kanbanConfig={fetchKanbanConfig()}
+                setACase={setACase}
+                setOpenCaseForm={setOpenCaseForm}
+              />
+            </Suspense>
           )}
         </Box>
       </MainCard>
@@ -455,8 +480,8 @@ export const CaseList = ({ status, caseDefId }) => {
         />
       )}
     </div>
-  );
-};
+  )
+}
 function fetchCases(
   setFetching,
   keycloak,
@@ -467,25 +492,25 @@ function fetchCases(
   setCases,
   setFilter,
 ) {
-  setFetching(true);
+  setFetching(true)
 
   CaseService.getCaseDefinitionsById(keycloak, caseDefId)
     .then((resp) => {
-      resp.stages.sort((a, b) => a.index - b.index).map((o) => o.name);
-      setStages(resp.stages);
-      return CaseService.filterCase(keycloak, caseDefId, status, filter);
+      resp.stages.sort((a, b) => a.index - b.index).map((o) => o.name)
+      setStages(resp.stages)
+      return CaseService.filterCase(keycloak, caseDefId, status, filter)
     })
     .then((resp) => {
-      const { data, paging } = resp;
-      setCases(data);
+      const { data, paging } = resp
+      setCases(data)
       setFilter({
         ...filter,
         cursors: paging.cursors,
         hasPrevious: paging.hasPrevious,
         hasNext: paging.hasNext,
-      });
+      })
     })
     .finally(() => {
-      setFetching(false);
-    });
+      setFetching(false)
+    })
 }

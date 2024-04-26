@@ -1,7 +1,7 @@
 /*eslint-disable no-undef*/
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const Dotenv = require('dotenv-webpack');
+const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const Dotenv = require('dotenv-webpack')
 
 /*eslint-disable no-undef*/
 module.exports = {
@@ -12,8 +12,15 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js',
+    filename: 'build/[name].js',
     publicPath: '/',
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      minSize: 10000,
+      maxSize: 250000,
+    },
   },
   module: {
     rules: [
@@ -67,4 +74,4 @@ module.exports = {
     historyApiFallback: true,
   },
   devtool: 'source-map',
-};
+}

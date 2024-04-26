@@ -1,45 +1,46 @@
-import ScrollTop from './components/ScrollTop';
-import { useEffect, useState } from 'react';
-import { ThemeRoutes } from './routes';
-import ThemeCustomization from './themes';
-import { SessionStoreProvider } from './SessionStoreContext';
-import { CaseService, RecordService } from 'services';
-import menuItemsDefs from './menu';
-import { RegisterInjectUserSession, RegisteOptions } from './plugins';
-import { accountStore, sessionStore } from './store';
-import './App.css';
+import { useEffect, useState, lazy, Suspense } from 'react'
+import { ThemeRoutes } from './routes'
+import ThemeCustomization from './themes'
+import { SessionStoreProvider } from './SessionStoreContext'
+import { CaseService, RecordService } from 'services'
+import menuItemsDefs from './menu'
+import { RegisterInjectUserSession, RegisteOptions } from './plugins'
+import { accountStore, sessionStore } from './store'
+import './App.css'
+
+const ScrollTop = lazy(() => import('./components/ScrollTop'))
 
 const App = () => {
-  const [keycloak, setKeycloak] = useState({});
-  const [authenticated, setAuthenticated] = useState(null);
-  const [recordsTypes, setRecordsTypes] = useState([]);
-  const [casesDefinitions, setCasesDefinitions] = useState([]);
-  const [menu, setMenu] = useState({ items: [] });
+  const [keycloak, setKeycloak] = useState({})
+  const [authenticated, setAuthenticated] = useState(null)
+  const [recordsTypes, setRecordsTypes] = useState([])
+  const [casesDefinitions, setCasesDefinitions] = useState([])
+  const [menu, setMenu] = useState({ items: [] })
 
   useEffect(() => {
-    const { keycloak } = sessionStore.bootstrap();
+    const { keycloak } = sessionStore.bootstrap()
 
     keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
-      setKeycloak(keycloak);
-      setAuthenticated(authenticated);
-      buildMenuItems(keycloak);
-      RegisterInjectUserSession(keycloak);
-      RegisteOptions(keycloak);
-      forceLogoutIfUserNoMinimalRoleForSystem(keycloak);
-    });
+      setKeycloak(keycloak)
+      setAuthenticated(authenticated)
+      buildMenuItems(keycloak)
+      RegisterInjectUserSession(keycloak)
+      RegisteOptions(keycloak)
+      forceLogoutIfUserNoMinimalRoleForSystem(keycloak)
+    })
 
     keycloak.onAuthRefreshError = () => {
-      window.location.reload();
-    };
+      window.location.reload()
+    }
 
     keycloak.onTokenExpired = () => {
       keycloak
         .updateToken(70)
         .then((refreshed) => {
           if (refreshed) {
-            console.info('Token refreshed: ' + refreshed);
-            RegisterInjectUserSession(keycloak);
-            RegisteOptions(keycloak);
+            console.info('Token refreshed: ' + refreshed)
+            RegisterInjectUserSession(keycloak)
+            RegisteOptions(keycloak)
           } else {
             console.info(
               'Token not refreshed, valid for ' +
@@ -49,28 +50,28 @@ const App = () => {
                     new Date().getTime() / 1000,
                 ) +
                 ' seconds',
-            );
+            )
           }
         })
         .catch(() => {
-          console.error('Failed to refresh token');
-        });
-    };
-  }, []);
+          console.error('Failed to refresh token')
+        })
+    }
+  }, [])
 
   async function forceLogoutIfUserNoMinimalRoleForSystem(keycloak) {
     if (!accountStore.hasAnyRole(keycloak)) {
-      return keycloak.logout({ redirectUri: window.location.origin });
+      return keycloak.logout({ redirectUri: window.location.origin })
     }
   }
 
   async function buildMenuItems(keycloak) {
     const menu = {
       items: [...menuItemsDefs.items],
-    };
+    }
 
     await RecordService.getAllRecordTypes(keycloak).then((data) => {
-      setRecordsTypes(data);
+      setRecordsTypes(data)
 
       data.forEach((element) => {
         menu.items[1].children
@@ -81,12 +82,12 @@ const App = () => {
             type: 'item',
             url: '/record-list/' + element.id,
             breadcrumbs: true,
-          });
-      });
-    });
+          })
+      })
+    })
 
     await CaseService.getCaseDefinitions(keycloak).then((data) => {
-      setCasesDefinitions(data);
+      setCasesDefinitions(data)
 
       data.forEach((element) => {
         menu.items[1].children
@@ -97,34 +98,36 @@ const App = () => {
             type: 'item',
             url: '/case-list/' + element.id,
             breadcrumbs: true,
-          });
-      });
-    });
+          })
+      })
+    })
 
     if (!accountStore.isManagerUser(keycloak)) {
-      delete menu.items[2];
+      delete menu.items[2]
     }
 
-    return setMenu(menu);
+    return setMenu(menu)
   }
 
   return (
     keycloak &&
     authenticated && (
       <ThemeCustomization>
-        <ScrollTop>
-          <SessionStoreProvider value={{ keycloak, menu }}>
-            <ThemeRoutes
-              keycloak={keycloak}
-              authenticated={authenticated}
-              recordsTypes={recordsTypes}
-              casesDefinitions={casesDefinitions}
-            />
-          </SessionStoreProvider>
-        </ScrollTop>
+        <Suspense fallback={<div>Loading...</div>}>
+          <ScrollTop>
+            <SessionStoreProvider value={{ keycloak, menu }}>
+              <ThemeRoutes
+                keycloak={keycloak}
+                authenticated={authenticated}
+                recordsTypes={recordsTypes}
+                casesDefinitions={casesDefinitions}
+              />
+            </SessionStoreProvider>
+          </ScrollTop>
+        </Suspense>
       </ThemeCustomization>
     )
-  );
-};
+  )
+}
 
-export default App;
+export default App
