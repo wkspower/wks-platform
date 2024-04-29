@@ -1,4 +1,4 @@
-name: deploy
+name: deploy docs website
 
 on:
   push:
@@ -32,5 +32,5 @@ jobs:
       uses: osiegmar/s3-publisher-action@v1
       with:
         bucket: ${{ secrets.AWS_S3_DOCS_BUCKET }}
-        dir: build
+        dir: apps/react/docs/build
         delete-orphaned: true
