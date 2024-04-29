@@ -24,6 +24,8 @@ const config: Config = {
     locales: ["en"],
   },
 
+  scripts: [],
+
   presets: [
     [
       "classic",
@@ -149,7 +151,7 @@ const config: Config = {
 
 if (process.env.PROD === "true") {
   config.scripts.push({
-    src: "https://www.googletagmanager.com/gtag/js?id=G-DD0FWZXED7",
+    src: `https://www.googletagmanager.com/gtag/js?id=${process.env.GTAG_ID}`,
     async: true,
   });
   config.scripts.push({
