@@ -1,0 +1,36 @@
+name: deploy docs website
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:      
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v3
+        
+    - name: install dependencies
+      run: yarn --cwd apps/react/docs install
+
+    - name: build website
+      run: PROD=true GTAG_ID=${{ secrets.GTAG_ID }} yarn --cwd apps/react/docs build
+      
+    - name: Set AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_S3_DOCS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_S3_DOCS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1      
+      
+    - name: S3 Publisher
+      uses: osiegmar/s3-publisher-action@v1
+      with:
+        bucket: ${{ secrets.AWS_S3_DOCS_BUCKET }}
+        dir: apps/react/docs/build
+        delete-orphaned: true
