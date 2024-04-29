@@ -1,0 +1,235 @@
+---
+id: instalation-guide
+title: Instalation Guide
+---
+
+# WKS Platform Installation Guide
+
+## Option 1: Running with Pre-built Docker Images
+
+To quickly set up and run the project in a development environment, you can use pre-built Docker images. This approach ensures that all necessary dependencies and services are configured automatically, providing a seamless and consistent environment.
+
+```bash
+git clone https://github.com/wkspower/wks-platform-docker.git
+cd wks-platform-docker
+docker-compose up -d
+```
+
+After successfully running `docker-compose up` to start the Docker Compose configuration, it may take a while for all the web applications to finish their startup process. Once the startup is complete, you can access the following web applications:
+
+- **WKS Platform Portal**: You can access the WKS Platform Portal by opening your web browser and navigating to [http://localhost:3001](http://localhost:3001). Use the following credentials to log in: 
+    - Username: demo
+    - Password: demo
+
+- **Camunda**: To access the Camunda web application, open your web browser and visit [http://localhost:8080](http://localhost:8080). Use the following credentials to log in: 
+    - Username: demo
+    - Password: demo
+
+- **Keycloak**: Access the Keycloak web application by opening your web browser and visiting [http://localhost:8082](http://localhost:8082). Use the following credentials to log in as an administrator: 
+    - Username: admin
+    - Password: admin
+
+- **MinIO**: Access the MinIO web application by opening your web browser and visiting [http://localhost:9000](http://localhost:9000). Use the following credentials to log in as an administrator: 
+    - Username: minio
+    - Password: #minio00#
+
+Please note that it may take some time for the web applications to become fully operational, especially if this is the first time you are running them. If you encounter any issues, wait a few moments and try accessing the applications again.
+
+Additionally, the MongoDB database used by these applications is running on port 27017.
+
+Remember to ensure that you have Docker installed on your system before running the `docker-compose up` command.
+
+## Option 2: Custom Docker Setup with Local Java and Node
+
+### Prerequisites
+- Docker and Docker Compose are installed on your system.
+- Java 17 and Maven 3.8.x or higher are installed for building the Spring Boot microservices.
+- Node.js, npm, and Yarn are installed for building and running the Node.js React apps.
+
+### Step-by-Step Guide
+
+1. Clone the WKS Platform repository:
+	```bash
+	git clone https://github.com/wkspower/wks-platform.git
+	```
+
+2. Navigate to the root directory of the cloned repository:
+	```bash
+	cd wks-platform
+	```
+
+3. Open a terminal or command prompt and run the following command to start the required dependencies in detached mode:
+   ```bash
+   docker-compose up minio mongodb opa camunda keycloak -d
+   ```
+The command instructs Docker Compose to pull the necessary Docker images for MinIO, MongoDB, OPA, Camunda, and Keycloak from the Docker registry if they are not already available locally. It then starts the containers for each of these middlewares.
+
+Starting these middlewares is crucial for the proper functioning of the WKS Platform. They provide essential functionalities such as storage (MinIO), database (MongoDB), policy enforcement (OPA), workflow management (Camunda), and authentication (Keycloak).
+
+5. Wait for the dependencies to start up successfully. You can monitor the logs by running:
+	```bash
+	docker-compose logs -f
+	```
+
+6. Once all the dependencies are up and running without any errors, you can proceed to start the microservices of the WKS Platform.
+
+    a. From the project root folder, navigate to the java project folder:
+   ```bash
+   cd apps/java
+   ```
+
+    b. Build all the microservices at once using Maven:
+   ```bash
+   mvn clean install package
+   ```
+
+    c. To start each microservice individually using Maven, run the following command in the root directory:
+   ```bash
+   mvn spring-boot:run -pl services/case-engine-rest-api
+   ```
+
+   Replace `case-engine-rest-api` with the appropriate submodule directory name for each microservice.
+
+   Repeat this command for each microservice in the following order: `case-engine-rest-api`, `bpm-engine-c7-external-service`, `email-to-case`, `storage-api`, `demo-data-loader`.
+
+   Each microservice serves a specific purpose within the WKS Platform:
+
+- **case-engine-rest-api**: This microservice provides a RESTful API for managing case-related operations, such as creating, updating, and retrieving cases.
+
+- **bpm-engine-c7-external-service**: This microservice handles external service integrations with the Camunda BPM engine, enabling communication and coordination with external systems or services.
+
+- **email-to-case**: This microservice is responsible for converting incoming emails into cases, allowing users to create cases by sending emails to a specified email address.
+
+- **storage-api**: This microservice provides an API for managing storage-related operations, such as storing and retrieving files associated with cases or processes.
+
+- **demo-data-loader**: This microservice serves as a default data loader component. It is responsible for loading the Keycloak realm configuration and default case definitions into the system. The Keycloak realm configuration includes authentication and authorization settings, while the default case definitions define the initial set of case management processes available in the WKS Platform.
+
+7. For the case-portal (React application):
+
+    a. From the project root folder, navigate to the case-portal directory:
+   ```bash
+   cd apps/react/case-portal
+   ```
+
+    b. Install the necessary dependencies using Yarn:
+   ```bash
+   yarn install
+   ```
+   
+    c. Create a .env file by copying the contents from .env-sample provided in the repository and adjust the values as needed.
+
+    d. Start the case-portal using Yarn:
+   ```bash
+   yarn start
+   ```
+
+8. Once all the microservices are up and running, you should be able to access access the WKS Platform Portal by opening your web browser and navigating to [http://localhost:3001](http://localhost:3001). Use the following credentials to log in: 
+    - Username: demo
+    - Password: demo
+
+### Websocket Publisher (Optional)
+#### Prerequisite: [Startup Kafka](#kafka)
+
+1. From the project root folder, navigate to the websocket-publisher directory:
+   ```bash
+   cd apps/node/websocket-publisher
+   ```
+
+2. Install the necessary dependencies using Yarn:
+   ```bash
+   yarn install
+   ```
+   
+3. Create a .env file by copying the contents from .env-sample provided in the repository and adjust the values as needed.
+
+4. Start the websocket-publisher:
+   ```bash
+   node index.js
+   ```
+
+5. Restart the React App Case Portal enabling websocket listener
+
+    a. From the project root folder, navigate to the case-portal directory:
+   ```bash
+   cd apps/react/case-portal
+   ```
+   
+   b. Update .env file updating the following variable:
+   ```bash
+   REACT_APP_WEBSOCKETS_ENABLED=true
+   ```
+
+    c. Start the case-portal using Yarn:
+   ```bash
+   yarn start
+   ```
+
+### Novu Notifications Publisher (Optional)
+#### Prerequisite: [Startup Kafka](#startup-kafka)
+
+1. From the project root folder, navigate to the novu-publisher directory:
+   ```bash
+   cd apps/node/novu-publisher
+   ```
+
+2. Install the necessary dependencies using Yarn:
+   ```bash
+   yarn install
+   ```
+   
+3. Create a .env file by copying the contents from .env-sample provided in the repository and adjust the values as needed.
+
+4. Start the novu-publisher:
+   ```bash
+   node index.js
+   ```
+
+4. Update BPMN processes setting a user id(from Keycloak) into the Assignee field of desired human tasks
+
+6. Refer to [Novu Documentation](https://docs.novu.co/workflows/notification-workflows) in order to create the required notification workflows.
+      - case-create (sends case creation related notifications)
+      - human-task-create (sends case human task related notifications)
+
+7. Restart the React App Case Portal enabling Novu Listener
+
+    a. From the project root folder, navigate to the case-portal directory:
+   ```bash
+   cd apps/react/case-portal
+   ```
+
+    b. Update .env file updating the following variable:
+   ```bash
+   REACT_APP_NOVU_ENABLED=true
+   ```
+
+    c. Start the case-portal using Yarn:
+   ```bash
+   yarn start
+   ```
+
+
+### Startup Kafka
+1. Navigate to the root directory of the cloned repository:
+	```bash
+	cd wks-platform
+	```
+
+2. Open a terminal or command prompt and run the following command to start the required dependencies in detached mode:
+   ```bash
+   docker-compose -f docker-compose.yaml -f docker-compose.event-hub.yaml up kafka zookeeper camunda -d
+   ```
+   This command will:
+   1. Start Kafka and Zookeeper
+   2. Recreate the Camunda container, this time including the event publishing plugin
+
+3. Restarting the java service bpm-engine-c7-external-service:
+
+    a. Run the following command in the root directory:
+   ```bash
+   cd apps/java/bpm-engine-c7-external-service
+   ```
+
+   b. To start the microservice individually using Maven, run the following command in the root directory:
+   ```bash
+   KAFKA_ENABLED=true mvn spring-boot:run
+   ```

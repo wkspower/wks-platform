@@ -1,0 +1,24 @@
+---
+id: rest-api
+title: REST API
+---
+
+## Getting Started
+
+To get started, familiarize yourself with the various endpoints available in our API. You can explore the API documentation using Swagger, which provides an interactive interface for testing and exploring API endpoints.
+
+The Swagger documentation for our REST API can be accessed at the following URL:
+
+http://localhost:8081/swagger-ui/index.html
+
+Please note that the address (`/swagger-ui/index.html`) is relative to the REST API host URL. By default, it runs on port 8081. If no changes have been made to the configurations, the URL mentioned above should work. However, configurations for the REST API server port and enabling/disabling Swagger public access can be found in `apps/java/services/case-engine-rest-api/application.yml`.
+
+The default configurations in the `application.yml` file are as follows:
+
+```yaml
+server:
+  port: 8081
+case:
+  engine:
+    swagger:
+      enabled: true

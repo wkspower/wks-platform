@@ -1,0 +1,82 @@
+---
+id: platform-architecture
+title: Platform Architecture
+---
+
+## The platform consists of the following components:
+
+1.	**Camunda**: A BPM (Business Process Management) platform used for workflow automation and process execution.
+2.	**Case Engine - Rest API**: A custom REST API service for the case engine, providing case-related functionality.
+3.	**Case Engine - Camunda External Tasks**: Interacts with the BPM engine to process async operations within a business process.
+4.	**E-mail to Case**: A service responsible for converting emails into cases in the platform.
+5.	**Storage API**: An API service for interacting with the Minio storage.
+6.	**Case Portal**: A web application built with React, serving as the user interface for interacting with the platform.
+7.  **Websocket Publisher**: Responsible for sending backend event notifications to the UI.
+8.  **Novu Publisher**: Integrates with [Novu](https://novu.co/), a communication management platform offering simple components and APIs for managing all communication channels in one place, including Email, SMS, Direct, In-App, and Push notifications.
+9. **Kafka**: Serves as the middleware for all asynchronous event processing on the platform, facilitating seamless communication between components. It is utilized by the Websocket Publisher and Novu Publisher to capture and handle backend events efficiently.
+10.	**Minio**: An object storage server used for storing and accessing files and data.
+11.	**MongoDB**: A document-oriented NoSQL database used for persistent data storage.
+12.	**OPA**: Open Policy Agent, used for policy-based authorization and access control.
+13.	**Traefik**: A reverse proxy and load balancer used for routing and securing HTTP traffic to different services.
+14.	**Keycloak**: An open-source identity and access management solution used for authentication and authorization.
+15.	**Demo Data Loader**: A service responsible for loading demo data into the platform.
+
+## Architecture Overview
+
+The platform architecture is composed of multiple microservices, each fulfilling specific functions and communicating with each other to provide a cohesive system.
+
+The main architectural components are shown in the diagram below and are elaborated on in the further sections.
+![Platform Architecture](../../static/img/wks-platform-architecture.svg)
+
+### Custom API Services
+
+Several custom API services are developed to provide specific functionalities within the platform:
+- **Case Engine - Rest API**: This API service exposes functionality related to the case engine, allowing the creation, modification, and retrieval of cases.
+- **Case Engine - Camunda External Tasks**: Camunda External tasks interacts with the BPM engine and performs specific tasks related to business process management.
+- **E-mail to case**: This service converts incoming emails into cases within the platform, automating the process of creating cases from email communication.
+- **Storage API**: This API service enables interaction with the Minio storage, allowing other services to store and retrieve files and data.
+- **Websocket Publisher**: Ensures seamless transmission of backend event notifications to the User Interface (UI), keeping your interface updated in real-time.
+- **Novu Publisher**: Seamlessly integrates with [Novu](https://novu.co/), a comprehensive communication management platform. Novu offers intuitive components and APIs, centralizing the management of all communication channels, including Email, SMS, Direct, In-App, and Push notifications, simplifying your communication workflows.
+- **Demo data loader** service is responsible for loading demo data into the platform. It interacts with MongoDB, the BPM engine, and Keycloak to populate the necessary data for the platform's operation.
+
+### Business Process Management
+
+Camunda is used as the BPM platform, providing workflow automation and process execution capabilities. It allows the definition and execution of complex business processes, managing process instances, tasks, and user interactions.
+
+### User Interface
+
+The `case-portal` web application serves as the user interface for the platform. It is built with React and provides a user-friendly interface for interacting with cases, processes, and platform functionalities.
+
+### Storage
+
+Minio is employed as the object storage server, providing durable and scalable storage for files and data within the platform. It offers an S3-compatible API and allows services to store and retrieve data from the storage backend.
+
+### Database
+
+MongoDB is the chosen NoSQL database for persistent data storage. It provides high performance, scalability, and flexibility for storing structured and unstructured data. Services within the platform interact with MongoDB for data persistence and retrieval.
+
+### Authorization and Access Control
+
+OPA (Open Policy Agent) is integrated into the platform for policy-based authorization and access control. It enables fine-grained control over access to platform resources based on defined policies.
+
+### Identity and Access Management
+
+Keycloak is utilized as the identity and access management solution. It enables user authentication, authorization, and user management functionalities within the platform. Keycloak ensures secure access to platform resources and APIs.
+
+### Reverse Proxy and Load Balancer
+
+Traefik is utilized as the reverse proxy and load balancer. It provides routing capabilities, SSL termination, and load balancing for the services deployed in the platform. Traefik enables secure access to services through HTTP and HTTPS protocols.
+
+### Kafka Event Hub
+Kafka plays a pivotal role as the event hub within the platform, supporting seamless communication between services and ensuring real-time event processing. It serves as the backbone for asynchronous event handling, facilitating reliable and scalable communication between components.
+
+Kafka supports both Websockets and Novu integrations, enabling the Websocket Publisher and Novu Publisher to capture and process backend events efficiently. By centralizing event streams and decoupling producers and consumers, Kafka enhances the platform's flexibility and scalability, enabling efficient communication across distributed systems.
+
+### Communication and Dependencies
+The services within the platform communicate with each other through well-defined APIs and network connections, with microservices orchestration meticulously handled by Camunda. Acting as a microservice orchestrator, Camunda ensures transaction correctness and maintains data integrity across service interactions.
+
+Camunda leverages the SAGA (Saga Pattern) to manage distributed transactions effectively. By coordinating the sequence of operations across multiple services, Camunda ensures that complex platform operations are executed reliably and consistently, even in the face of failures.
+
+The Case Enginr Rest API serves as the gateway to the database, facilitating data access for Camunda External Tasks, Email to Case, and Storage API. This streamlined approach enhances efficiency and maintains data integrity throughout the platform.
+
+These services rely on MongoDB, Camunda, and Keycloak for seamless operation, leveraging their functionalities to perform specific tasks efficiently. The architecture is meticulously designed to be scalable and resilient, enabling seamless addition and removal of services as per the platform's evolving requirements.
