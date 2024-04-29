@@ -24,8 +24,6 @@ const config: Config = {
     locales: ["en"],
   },
 
-  scripts: [],
-
   presets: [
     [
       "classic",
@@ -47,6 +45,8 @@ const config: Config = {
       } satisfies Preset.Options,
     ],
   ],
+
+  plugins: [],
 
   themeConfig: {
     // Replace with your project's social card
@@ -150,14 +150,13 @@ const config: Config = {
 };
 
 if (process.env.PROD === "true") {
-  config.scripts.push({
-    src: `https://www.googletagmanager.com/gtag/js?id=${process.env.GTAG_ID}`,
-    async: true,
-  });
-  config.scripts.push({
-    src: "/js/gtag.js",
-    async: false,
-  });
+  config.plugins.push([
+    "@docusaurus/plugin-google-gtag",
+    {
+      trackingID: process.env.GTAG_ID,
+      anonymizeIP: true,
+    },
+  ]);
 }
 
 export default config;
