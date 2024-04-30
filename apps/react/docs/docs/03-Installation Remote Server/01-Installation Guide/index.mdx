@@ -5,18 +5,71 @@ title: 🛠️ Installation Guide
 
 # Installation Guide
 
+### Docker-Compose Files Overview
+
+:::info
+**This guide is currently under development**
+Please note that some of the information in this guide may be incorrect or subject to change as we continue to update and refine the content.
+:::
+
+:::warning
+**For Development/Test Environments Only**
+The provided docker-compose files are recommended only for use in development or test environments.
+:::
+
+### Core Components
+- `docker-compose.yaml`: Sets up essential services like Minio, MongoDB, OPA, Keycloak, and Storage-API.
+- `docker-compose.camunda[CAMUNDA_VERSION].yaml`: Incorporates Camunda servers with key backend components such as the REST-API and [External Tasks](https://docs.camunda.org/manual/7.21/user-guide/process-engine/external-tasks/).
+- `docker-compose.demo-data-loader.[CAMUNDA_VERSION].yaml`: Automates the loading of demo data into the platform
+    - [Demo Case Definitions, Forms and Processes](https://github.com/wkspower/wks-platform/tree/develop/apps/java/services/demo-data-loader/data) into Camunda and MongoDB
+    - [Realms, Groups and Users](https://github.com/wkspower/wks-platform/tree/develop/apps/java/services/demo-data-loader/src/main/resources) into Keycloak.
+- `docker-compose.event-hub.[CAMUNDA_VERSION].yaml`: Optional but necessary for integrating [System Notifications](https://docs.wkspower.com/docs/System%20Notifications/) and/or [websockets for the case-portal](https://github.com/wkspower/wks-platform/issues/246).
+    - Customizes Camunda with a plugin sending Kafka messages for registered events.
+    - Starts Kafka and Zookeeper.
+    - Enables Kafka communication from [External Tasks](https://docs.camunda.org/manual/7.21/user-guide/process-engine/external-tasks/).
+
+### Additional Components
+- `docker-compose.websocket.yaml`: Enables real-time communication for the case-portal. See [websockets for the case-portal](https://github.com/wkspower/wks-platform/issues/246).
+- `docker-compose.novu.yaml`: Manages notification dispatch using [novu-publisher](https://docs.wkspower.com/docs/System%20Notifications/).
+- `docker-compose.email-sender.yaml`: Handles outgoing [email communications](https://www.wkspower.com/blog/presenting-email-to-case/).
+- `docker-compose.portal.yaml`: Deploys the front-end React case-portal.
+
+## 🤖 Shell Scripts for Local Development
+
+For ease of local development, various shell scripts are available:
+- **Server Management:** `docker-servers-[startup/shutdown].sh` for managing all servers using Docker, ideal for UI development.
+- **Portal Management:** `docker-portal-[startup/shutdown].sh` focuses on backend development needs.
+- **Full Startup Scripts:** `docker-full-startup.sh` for comprehensive loading of all components, available for Camunda 7 and 8, facilitating quick testing and demos.
+
+## 📋 Configuration File Management
+
+Effective management of configuration files is essential for customizing how the WKS Power Platform operates in various environments:
+
+- **.yml/.yaml Files:** These files control the configuration of services and should be carefully managed to ensure correct application behavior. Tips on managing these files include understanding their structure, knowing which parameters can be safely altered, and recognizing the implications of these changes.
+
+- **Environment Variables and Docker Compose:** It's important to coordinate environment variables with `.yml/.yaml` settings. The `docker-compose` files often override environment variables specified in `.env-sample` files. Ensure that these are aligned to avoid configuration conflicts.
+
 ### Customizing Environment Variables 🛠️
 
-> Instructions on how to effectively set and customize environment variables.
-
-### Configuration File Management 📋
-
-> Tips on managing .yml/.yaml files, including common tweaks and optimizations.
+- **For Java Applications:** Variables are typically set in the `application.yml` of each Java application and can be overridden by system environment variables or specified at application startup.
+- **For the React Case-Portal:** Environment variables are defined at build time and can be customized by copying values from `.env-sample`.
 
 ## 🚀 Installing the WKS Power Platform
 
-> Detailed steps for installing the platform, including downloading necessary software, deploying services, and initial service configuration.
+Installation involves several key steps to ensure all components of the WKS Power Platform are properly set up and integrated:
+
+- **Preparation:** Before installing, ensure all prerequisites are met, including system requirements and necessary software tools.
+
+- **Deployment:** Follow the provided docker-compose files to deploy the necessary services. Use the specific docker-compose configurations based on your environment's needs, such as development, testing, or demo setups.
+
+- **Service Configuration:** After deployment, configure the services according to your operational requirements, ensuring all components communicate effectively.
 
 ## ✅ Post-Installation Checks
 
-> Checklist to ensure everything is set up correctly and running as expected.
+After installation, perform a series of checks to ensure that the platform is correctly set up and functional:
+
+- **Service Verification:** Check that all services started by docker-compose are running without errors.
+
+- **Connectivity Tests:** Verify that there is proper connectivity between services, such as databases being accessible from application servers.
+
+- **Functionality Tests:** Conduct basic functionality tests to ensure that the platform's core features are working as expected, such as user authentication via Keycloak and data retrieval from MongoDB.
