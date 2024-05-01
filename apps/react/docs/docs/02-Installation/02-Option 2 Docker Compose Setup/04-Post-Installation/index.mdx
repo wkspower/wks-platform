@@ -1,0 +1,46 @@
+---
+id: post-installation
+title: Post-Installation
+---
+
+# Post-Installation
+
+:::info
+**This guide is currently under development**<br />
+Please note that some of the information in this guide may be incorrect or subject to change as we continue to update and refine the content. If you encounter any issues, don't hesitate to reach out for support and contribute to improving the documentation!
+:::
+
+:::warning
+**For Development/Test Environments Only**<br />
+The provided docker-compose files are recommended only for use in development or test environments.
+:::
+
+Once the installation is complete, should be able to access the following web applications:
+
+- **WKS Platform Portal**: You can access the WKS Platform Portal by opening your web browser and navigating to [http://subdomain.domain.io:3001](http://subdomain.domain.io:3001). Use the following credentials to log in:
+    ```bash
+    Username: demo
+    Password: demo
+    ```
+
+- **Camunda**: To access the Camunda web application, open your web browser and visit [http://subdomain.domain.io:8080](http://subdomain.domain.io:8080). Use the following credentials to log in: 
+    ```bash
+    Username: demo
+    Password: demo
+    ```
+
+- **Keycloak**: Access the Keycloak web application by opening your web browser and visiting [http://subdomain.domain.io:8082](http://subdomain.domain.io:8082). Use the following credentials to log in as an administrator: 
+    ```bash
+    Username: admin
+    Password: admin
+    ```
+
+- **MinIO**: Access the MinIO web application by opening your web browser and visiting [http://subdomain.domain.io:9000](http://subdomain.domain.io:9000). Use the following credentials to log in as an administrator: 
+    ```bash
+    Username: minio
+    Password: #minio00#
+    ```
+
+Please note that it may take some time for the web applications to become fully operational, especially if this is the first time you are running them. If you encounter any issues, wait a few moments and try accessing the applications again.
+
+Additionally, the MongoDB database used by these applications is running on port 27017.

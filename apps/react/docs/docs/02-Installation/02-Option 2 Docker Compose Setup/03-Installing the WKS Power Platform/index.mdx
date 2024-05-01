@@ -1,0 +1,80 @@
+---
+id: installing-the-wks-power-platform
+title: Installing the WKS Power Platform
+---
+
+# Installing the WKS Power Platform
+
+:::info
+**This guide is currently under development**<br />
+Please note that some of the information in this guide may be incorrect or subject to change as we continue to update and refine the content. If you encounter any issues, don't hesitate to reach out for support and contribute to improving the documentation!
+:::
+
+:::warning
+**For Development/Test Environments Only**<br />
+The provided docker-compose files are recommended only for use in development or test environments.
+:::
+
+Installation involves several key steps to ensure all components of the WKS Power Platform are properly set up and integrated:
+
+## Prerequisites
+    - Docker and Docker Compose are installed on your system.
+    - Java 17 and Maven 3.8.x or higher are installed for building the Spring Boot microservices.
+    - Node.js, npm, and Yarn are installed for building and running the Node.js React apps.
+
+## Step 1: Preparation
+
+### I. Clone the WKS Platform repository.
+    ```bash
+    git clone https://github.com/wkspower/wks-platform.git
+    cd wks-platform
+    ```
+### II. From the project root folder, navigate to the java project folder.
+    ```bash
+    cd apps/java
+    ```
+### III. Build all the microservices at once using Maven for later usage.
+    ```bash
+    mvn clean install package
+    ```
+
+## Step 2: Custom Domain Configuration
+:::note
+Skip if you only intent to only use it on localhost
+:::
+
+- Copy settings from `/.env-sample` to `/.env` then updated the file to configure essential service URLs, Keycloak Realms, and operational flags:
+    - `MONGO_DEMO_DATA_LOADER_DATABASE=subdomain`
+    - `KEYCLOAK_TOKEN_URL=http://keycloak:8080/realms/subdomain/protocol/openid-connect/token`
+    - `WEBSOCKET_ENABLED=true`
+    - `WEBSOCKET_URL=ws://subdomain.domain.io:8484/`
+    - Optional for novu notifications:
+        - `NOVU_ENABLED=true`
+        - `NOVU_PUBLISHER_API_URL=http://subdomain.domain.io:3002/`
+        - `NOVU_APP_ID=your-id`
+        - `NOVU_API_KEY=your-key`
+    - Default Usernames & Passwords also can be changed:
+        - `KEYCLOAK_ADMIN=admin`
+        - `KEYCLOAK_ADMIN_PASSWORD=admin`
+        - `KEYCLOAK_DEFAULT_USER=demo`
+        - `KEYCLOAK_DEFAULT_USER_PASSWORD=demo`
+        - `KEYCLOAK_DEFAULT_USER_FIRST_NAME=demo`
+        - `KEYCLOAK_DEFAULT_USER_LAST_NAME=demo`
+        - `KEYCLOAK_DEFAULT_USER_EMAIL=demo@demo.com`
+
+- Update `docker-compose.portal.yaml:` to ensure front-end configuration aligns with backend services:
+    - `REACT_APP_KEYCLOAK_URL=http://subdomain.domain.io:8082/`
+    - `REACT_APP_API_URL=http://subdomain.domain.io:8081/`
+    - `REACT_APP_STORAGE_URL=http://subdomain.domain.io:8085/`
+
+## Step 3: Deployment
+
+### Run Full Startup Shell Script.
+    ```bash
+    sh docker-full-startup.sh
+    ```
+After successfully running the shell script to start all of the the Docker Compose configurations, it may take a while for all the web applications to finish their startup process.
+
+## Step 4: Service Configuration (Skip if application domain havn't been customized)
+
+Once the startup is complete, Manually replace wks-portal Keycloak Client's `Web origins` and `Valid redirect URIs` to match your domain.

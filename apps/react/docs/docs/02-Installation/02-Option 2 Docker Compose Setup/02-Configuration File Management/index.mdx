@@ -1,0 +1,26 @@
+---
+id: configuration-file-management
+title: Configuration File Management
+---
+
+# Configuration File Management
+
+:::info
+**This guide is currently under development**<br />
+Please note that some of the information in this guide may be incorrect or subject to change as we continue to update and refine the content. If you encounter any issues, don't hesitate to reach out for support and contribute to improving the documentation!
+:::
+
+:::warning
+**For Development/Test Environments Only**<br />
+The provided docker-compose files are recommended only for use in development or test environments.
+:::
+
+- ## For Java Applications ♨️
+    - **Build-Time Configuration:** Environment variables for Java applications are typically defined in `application.yml` files located at the root of each Java project (e.g., the REST-API).
+    - **Docker Compose Overrides:** These variables can be overridden at application startup through command line arguments or through Docker Compose configurations. For example, `CAMUNDA_BASE_URL` might be set in the `application.yml`, but it can be overridden by Docker environment settings to suit different deployment environments.
+- ## For React Case-Portal ⚛️
+    - **Build-Time Configuration:** Environment variables for the React Case-Portal are set during the build phase. These are defined in a `.env` file, which must be prepared before building the application.
+    - **Docker Compose Overrides:** When deploying with Docker, the environment variables set in the React project's `.env` file can be overridden by those specified in the `docker-compose` files. This is critical when settings need to be adjusted post-deployment without rebuilding the app.
+- ## For Node Applications 🌐
+    - **Build-Time Configuration:** Node applications, such as the mail-sender, use `.env` files for environment configuration. These are crucial for running the applications in different environments, whether locally with Yarn or in Dockerized environments.
+    - **Docker Compose Overrides:** In Docker environments, the settings in `.env-sample` are overridden by those specified in the `docker-compose.yml` files. This allows for easy customization of environment variables without modifying the application's code.
