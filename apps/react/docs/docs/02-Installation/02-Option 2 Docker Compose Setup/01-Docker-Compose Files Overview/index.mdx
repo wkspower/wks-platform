@@ -1,21 +1,21 @@
 ---
 id: docker-compose files overview
-title: Docker-Compose Files Overview
+title: 📦 Docker-Compose Files
 ---
 
-# Docker-Compose Files Overview
+# Docker-Compose Files Overview 📦
 
 :::info
-**This guide is currently under development**<br />
+**🚧 This guide is currently under development 🚧**<br />
 Please note that some of the information in this guide may be incorrect or subject to change as we continue to update and refine the content. If you encounter any issues, don't hesitate to reach out for support and contribute to improving the documentation!
 :::
 
 :::warning
-**For Development/Test Environments Only**<br />
+**⚠️ For Development/Test Environments Only ⚠️**<br />
 The provided docker-compose files are recommended only for use in development or test environments.
 :::
 
-## Core Components
+## 🏗️ Core Components
 - `docker-compose.yaml`: Sets up essential services like Minio, MongoDB, OPA, Keycloak, and Storage-API.
 - `docker-compose.camunda[CAMUNDA_VERSION].yaml`: Incorporates Camunda servers with key backend components such as the REST-API and [External Tasks](https://docs.camunda.org/manual/7.21/user-guide/process-engine/external-tasks/).
 - `docker-compose.demo-data-loader.[CAMUNDA_VERSION].yaml`: Automates the loading of demo data into the platform
@@ -26,13 +26,13 @@ The provided docker-compose files are recommended only for use in development or
     - Starts Kafka and Zookeeper.
     - Enables Kafka communication from [External Tasks](https://docs.camunda.org/manual/7.21/user-guide/process-engine/external-tasks/).
 
-## Additional Components
+## 🛠️ Additional Components
 - `docker-compose.websocket.yaml`: Enables real-time communication for the case-portal. See [websockets for the case-portal](https://github.com/wkspower/wks-platform/issues/246).
 - `docker-compose.novu.yaml`: Manages notification dispatch using [novu-publisher](https://docs.wkspower.com/docs/System%20Notifications/).
 - `docker-compose.email-sender.yaml`: Handles outgoing [email communications](https://www.wkspower.com/blog/presenting-email-to-case/).
 - `docker-compose.portal.yaml`: Deploys the front-end React case-portal.
 
-## Shell Scripts for Local Development
+## 🖥️ Shell Scripts for Local Development
 
 For ease of local development, various shell scripts are available:
 - **Server Management:** `docker-servers-[startup/shutdown].sh` for managing all servers using Docker, ideal for UI development.
