@@ -5,16 +5,6 @@ title: 📋 Customizing Environment Variables
 
 # Customizing Environment Variables 📋
 
-:::info
-**🚧 This guide is currently under development 🚧**<br />
-Please note that some of the information in this guide may be incorrect or subject to change as we continue to update and refine the content. If you encounter any issues, don't hesitate to reach out for support and contribute to improving the documentation!
-:::
-
-:::warning
-**⚠️ For Development/Test Environments Only ⚠️**<br />
-The provided docker-compose files are recommended only for use in development or test environments.
-:::
-
 - ## For Java Applications ♨️
     - **Build-Time Configuration:** Environment variables for Java applications are typically defined in `application.yml` files located at the root of each Java project (e.g., the REST-API).
     - **Docker Compose Overrides:** These variables can be overridden at application startup through command line arguments or through Docker Compose configurations. For example, `CAMUNDA_BASE_URL` might be set in the `application.yml`, but it can be overridden by Docker environment settings to suit different deployment environments.
