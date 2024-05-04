@@ -3,29 +3,36 @@ id: installation-option-2
 title: Option 2 - Docker Compose Setup
 ---
 
-# WKS Platform Installation Guide for Remote Servers
+# WKS Platform Installation Guide
 
-:::note
-To be moved to Introduction & Platform Architecture
+## Option 2: Running with Docker Compose Images
+
+:::info
+**🚧 This guide is currently under development 🚧**<br />
+Please note that some of the information in this guide may be incorrect or subject to change as we continue to update and refine the content. If you encounter any issues, don't hesitate to reach out for support and contribute to improving the documentation!
 :::
 
-## 🌟 Introduction
+:::warning
+**⚠️ For Development/Test Environments Only ⚠️**<br />
+The provided docker-compose files are recommended only for use in development or test environments.
+:::
 
-Multi-tenancy on the WKS Power Platform is designed to provide each tenant with a secure and isolated operational environment, akin to providing separate office suites within a single corporate building. This architecture allows service providers to manage multiple clients efficiently while ensuring that each client's data and operations remain private and secure.
+Welcome to the secondary installation guide for the WKS Power Platform! This guide provides an alternative installation approach using Docker Compose, tailored for those who prefer or require a different setup method. Covering everything from the initial Docker-Compose configuration to the final checks post-installation, this guide ensures a comprehensive and clear path to getting your system operational.
 
-## 🏛️ Architectural Overview
+## 🗂️ Guide Structure
 
-### Tenant URL Structure 🌐
+- **Docker-Compose Files Overview 📦**: Discover the core and additional components necessary for the setup, tailored specifically for development or test environments.
+- **Configuration File Management ⚙️**: Understand how to effectively manage and adapt configuration files to meet your environment's requirements.
+- **Installing the WKS Power Platform 🛠️**: Follow detailed, step-by-step instructions to complete the Docker Compose setup, ensuring all components are properly configured and integrated.
+- **Post-Installation 🚀**: Check the installation results, understand how to access and use the platform's main components after installation.
 
-- Each tenant accesses their environment through a unique subdomain, following the format tenant_id.somedomain.com (e.g., saasCustomer1.wksplatform.com).
-- This subdomain serves as the dedicated entry point to the tenant’s specific portion of the platform, ensuring direct and secure access.
+## 📋 Prerequisites
 
-### Keycloak Realms 🔐
+Before you begin, ensure you have:
+- A foundational knowledge of Docker and Docker-Compose technologies.
+- Appropriate permissions to install and configure software on your machine.
+- Access to an environment suitable for development or testing purposes.
 
-- Each tenant has a separate Keycloak realm, providing a dedicated security domain that controls authentication and authorization. This setup ensures that user credentials and permissions are managed locally within each tenant's realm, enhancing security and privacy.
-- Upon onboarding a new tenant, a realm is specifically created and configured with unique security settings and user management protocols tailored to meet the tenant's needs.
-
-### MongoDB Databases 🗃️
-
-- Each tenant has a separate database to store tenant-specific data securely and maintain complete data isolation between tenants.
-- Creating a dedicated MongoDB database for each new tenant setup, ensuring that data from one tenant is completely inaccessible to another.
+:::note
+📝 This guide is part of our ongoing effort to provide clear and flexible documentation. It is continually updated to reflect the most current information. If you run into issues or have improvements to suggest, please feel free to contribute to our documentation or reach out for support.
+:::
