@@ -44,3 +44,7 @@ img[alt$="><"] {
   margin: auto;
   float: none!important;
 }
+
+h1 {
+  margin-top: 1rem;
+}

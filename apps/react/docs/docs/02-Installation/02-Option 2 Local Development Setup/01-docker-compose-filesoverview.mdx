@@ -1,0 +1,30 @@
+---
+id: docker-compose files overview
+title: 📦 Docker-Compose Files
+---
+
+# Docker-Compose Files Overview 📦
+
+## 🏗️ Core Components
+- `docker-compose.yaml`: Sets up essential services like Minio, MongoDB, OPA, Keycloak, and Storage-API.
+- `docker-compose.camunda[CAMUNDA_VERSION].yaml`: Incorporates Camunda servers with key backend components such as the REST-API and [External Tasks](https://docs.camunda.org/manual/7.21/user-guide/process-engine/external-tasks/).
+- `docker-compose.demo-data-loader.[CAMUNDA_VERSION].yaml`: Automates the loading of demo data into the platform
+    - [Demo Case Definitions, Forms and Processes](https://github.com/wkspower/wks-platform/tree/develop/apps/java/services/demo-data-loader/data) into Camunda and MongoDB
+    - [Realms, Groups and Users](https://github.com/wkspower/wks-platform/tree/develop/apps/java/services/demo-data-loader/src/main/resources) into Keycloak.
+- `docker-compose.event-hub.[CAMUNDA_VERSION].yaml`: Optional but necessary for integrating [System Notifications](https://docs.wkspower.com/docs/System%20Notifications/) and/or [websockets for the case-portal](https://github.com/wkspower/wks-platform/issues/246).
+    - Customizes Camunda with a plugin sending Kafka messages for registered events.
+    - Starts Kafka and Zookeeper.
+    - Enables Kafka communication from [External Tasks](https://docs.camunda.org/manual/7.21/user-guide/process-engine/external-tasks/).
+
+## 🛠️ Additional Components
+- `docker-compose.websocket.yaml`: Enables real-time communication for the case-portal. See [websockets for the case-portal](https://github.com/wkspower/wks-platform/issues/246).
+- `docker-compose.novu.yaml`: Manages notification dispatch using [novu-publisher](https://docs.wkspower.com/docs/System%20Notifications/).
+- `docker-compose.email-sender.yaml`: Handles outgoing [email communications](https://www.wkspower.com/blog/presenting-email-to-case/).
+- `docker-compose.portal.yaml`: Deploys the front-end React case-portal.
+
+## 🖥️ Shell Scripts for Local Development
+
+For ease of local development, various shell scripts are available:
+- **Server Management:** `docker-servers-[startup/shutdown].sh` for managing all servers using Docker, ideal for UI development.
+- **Portal Management:** `docker-portal-[startup/shutdown].sh` focuses on backend development needs.
+- **Full Startup Scripts:** `docker-full-startup.sh` for comprehensive loading of all components, available for Camunda 7 and 8, facilitating quick testing and demos.
