@@ -93,7 +93,7 @@ jobs:
       with:
         repository: wkspower/wks-gitops
         path: wks-gitops
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.GH_PAT }}
 
     - name: Extract tag name
       id: extract_tag
