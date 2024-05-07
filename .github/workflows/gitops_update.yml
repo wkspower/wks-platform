@@ -1,4 +1,4 @@
-name: deploy(disabled)
+name: gitops_update
 
 on:
   workflow_dispatch:
