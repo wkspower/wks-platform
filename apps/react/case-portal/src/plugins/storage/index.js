@@ -3,26 +3,16 @@ import Config from '../../consts'
 import MemoryTokenManager from '../MemoryTokenManager'
 
 export class StorageService {
-  async uploadFile(file, fileName, dir, evt) {
-    return minio().uploadFile(
-      file,
-      fileName,
-      dir,
-      evt,
-      null,
-      null,
-      null,
-      null,
-      () => null,
-    )
+  async uploadFile(storage, file, fileName, dir, evt) {
+    return minio().uploadFile(file, dir, evt)
   }
 
   async deleteFile() {
     //do something
   }
 
-  async downloadFile(fileInfo) {
-    return minio().downloadFile(fileInfo)
+  async downloadFile(file) {
+    return minio().downloadFile(file)
   }
 }
 
