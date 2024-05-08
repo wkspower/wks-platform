@@ -151,7 +151,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [build-local, build-demo]
     permissions:
       contents: read
       packages: write
