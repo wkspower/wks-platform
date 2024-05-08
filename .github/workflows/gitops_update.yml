@@ -16,8 +16,12 @@ env:
   WEBSOCKET_URL_LOCAL: ws://ws.wkspower.local
   NOVU_PUBLISHER_API_URL_LOCAL: http://novu.wkspower.local
 
+  WKS_STORAGE_API_URL_DEMO: http://api.wkspower.com/storage
+  WEBSOCKET_URL_DEMO: ws://ws.wkspower.com
+  NOVU_PUBLISHER_API_URL_DEMO: http://novu.wkspower.com
+
 jobs:
-  build:
+  build-local:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -81,6 +85,70 @@ jobs:
           push: true
           tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-local:${{ steps.extract_tag.outputs.tag }}"
 
+  build-demo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up jdk 18
+        uses: actions/setup-java@v3
+        with:
+          java-version: "18"
+          distribution: "temurin"
+
+      - name: Set up maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.2
+
+      - name: Install dependencies for case-portal
+        run: yarn --cwd apps/react/case-portal install
+
+      - name: Build for case-portal
+        env:
+          NODE_OPTIONS: "--max_old_space_size=4096"
+        run: |
+          export REACT_APP_KEYCLOAK_URL="${{ env.KEYCLOAK_URL_DEMO }}"
+          export REACT_APP_API_URL="${{ env.WKS_API_URL_DEMO }}"
+          export REACT_APP_STORAGE_URL="${{ env.WKS_STORAGE_API_URL_DEMO }}"
+          export REACT_APP_WEBSOCKETS_ENABLED="${{ env.WEBSOCKET_ENABLED }}"
+          export REACT_APP_WEBSOCKETS_URL="${{ env.WEBSOCKET_URL_DEMO }}"
+          export REACT_APP_WEBSOCKETS_CASE_CREATED="${{ env.TOPIC_CASE_CREATE }}"
+          export REACT_APP_WEBSOCKETS_HUMAN_TASK_CREATED="${{ env.TOPIC_CREATE_HUMAN_TASK }}"
+          export REACT_APP_NOVU_ENABLED="${{ env.NOVU_ENABLED }}"
+          export REACT_APP_NOVU_PUBLISHER_API_URL="${{ env.NOVU_PUBLISHER_API_URL_LOCAL }}"
+          yarn --cwd apps/react/case-portal build
+
+      - name: Extract tag name
+        id: extract_tag
+        run: echo "::set-output name=tag::$(echo ${GITHUB_REF#refs/tags/})"
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and push Docker image for case-portal
+        uses: docker/build-push-action@v2
+        with:
+          context: ./apps/react/case-portal
+          platforms: linux/amd64,linux/arm64
+          file: apps/react/case-portal/deployments/Dockerfile
+          push: true
+          tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-demo:${{ steps.extract_tag.outputs.tag }}"          
+
   deploy:
     runs-on: ubuntu-latest
     needs: [build]
@@ -128,6 +196,34 @@ jobs:
         cd case-portal/local
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-local=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-local:${{ steps.extract_tag.outputs.tag }}
         cd ../../
+
+    - name: Update kubernetes resources with new tag to Demo Environment
+      run: |
+        cd wks-gitops/apps
+
+        cd storage-api/demo
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/storage-api=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/storage-api:${{ steps.extract_tag.outputs.tag }}
+        cd ../../
+
+        cd policy-decision-api/demo
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/opa=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/opa:${{ steps.extract_tag.outputs.tag }}
+        cd ../../
+
+        cd case-engine-rest-api/demo
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-engine-rest-api:${{ steps.extract_tag.outputs.tag }}
+        cd ../../
+
+        cd demo-data-loader/demo
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/demo-data-loader:${{ steps.extract_tag.outputs.tag }}
+        cd ../../
+
+        cd c7-external-tasks/demo
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c7-external-tasks=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c7-external-tasks:${{ steps.extract_tag.outputs.tag }}
+        cd ../../
+
+        cd case-portal/demo
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-demo=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-local:${{ steps.extract_tag.outputs.tag }}
+        cd ../../      
 
     - name: Update kubernetes resources with new tag to Staging Environment
       run: |
