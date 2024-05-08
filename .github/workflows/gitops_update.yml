@@ -15,7 +15,8 @@ env:
   WKS_STORAGE_API_URL_LOCAL: http://api.wkspower.local/storage
   WEBSOCKET_URL_LOCAL: ws://ws.wkspower.local
   NOVU_PUBLISHER_API_URL_LOCAL: http://novu.wkspower.local
-
+  KEYCLOAK_URL_DEMO: http://login.wkspower.com
+  WKS_API_URL_DEMO: http://api.wkspower.com
   WKS_STORAGE_API_URL_DEMO: http://api.wkspower.com/storage
   WEBSOCKET_URL_DEMO: ws://ws.wkspower.com
   NOVU_PUBLISHER_API_URL_DEMO: http://novu.wkspower.com
@@ -120,7 +121,7 @@ jobs:
           export REACT_APP_WEBSOCKETS_CASE_CREATED="${{ env.TOPIC_CASE_CREATE }}"
           export REACT_APP_WEBSOCKETS_HUMAN_TASK_CREATED="${{ env.TOPIC_CREATE_HUMAN_TASK }}"
           export REACT_APP_NOVU_ENABLED="${{ env.NOVU_ENABLED }}"
-          export REACT_APP_NOVU_PUBLISHER_API_URL="${{ env.NOVU_PUBLISHER_API_URL_LOCAL }}"
+          export REACT_APP_NOVU_PUBLISHER_API_URL="${{ env.NOVU_PUBLISHER_API_URL_DEMO }}"
           yarn --cwd apps/react/case-portal build
 
       - name: Extract tag name
