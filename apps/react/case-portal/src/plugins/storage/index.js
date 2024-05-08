@@ -11,8 +11,8 @@ export class StorageService {
     //do something
   }
 
-  async downloadFile(fileInfo) {
-    return minio().downloadFile(fileInfo)
+  async downloadFile(file) {
+    return minio().downloadFile(file)
   }
 }
 
