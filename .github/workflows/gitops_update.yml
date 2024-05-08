@@ -109,7 +109,7 @@ jobs:
       run: |
         cd wks-gitops/apps
 
-        cd opa/local
+        cd policy-decision-api/local
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/opa=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/opa:${{ steps.extract_tag.outputs.tag }}
         cd ../../
 
@@ -137,7 +137,7 @@ jobs:
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/storage-api=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/storage-api:${{ steps.extract_tag.outputs.tag }}
         cd ../../
 
-        cd opa/staging
+        cd policy-decision-api/staging
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/opa=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/opa:${{ steps.extract_tag.outputs.tag }}
         cd ../../
 
@@ -153,7 +153,7 @@ jobs:
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c7-external-tasks=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c7-external-tasks:${{ steps.extract_tag.outputs.tag }}
         cd ../../
 
-        cd case-portal-client/staging
+        cd case-portal/staging
         kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-local=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-local:${{ steps.extract_tag.outputs.tag }}
         cd ../../        
 
