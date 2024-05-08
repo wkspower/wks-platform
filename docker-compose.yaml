@@ -70,7 +70,7 @@ services:
         environment:
             - OPA_URL=${OPA_URL}
             - KEYCLOAK_URL=${KEYCLOAK_URL}
-            - MINIO_HOST=minio
+            - MINIO_HOST=${MINIO_HOST}
             - MINIO_ROOT_USER=${MINIO_ROOT_USER}
             - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
         depends_on:
