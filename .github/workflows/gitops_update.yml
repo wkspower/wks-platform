@@ -222,7 +222,7 @@ jobs:
         cd ../../
 
         cd case-portal/demo
-        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-demo=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-local:${{ steps.extract_tag.outputs.tag }}
+        kustomize edit set image ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-demo=${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/case-portal-demo:${{ steps.extract_tag.outputs.tag }}
         cd ../../      
 
     - name: Update kubernetes resources with new tag to Staging Environment
