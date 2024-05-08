@@ -1,4 +1,4 @@
-name: gitops_update
+name: Gitops Update
 
 on:
   workflow_dispatch:
