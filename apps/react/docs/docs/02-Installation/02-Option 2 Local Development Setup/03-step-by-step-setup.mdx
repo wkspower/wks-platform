@@ -38,7 +38,7 @@ Skip if you only intent to only use it on localhost
     - `KEYCLOAK_TOKEN_URL=http://keycloak:8080/realms/subdomain/protocol/openid-connect/token`
     - `WEBSOCKET_ENABLED=true`
     - `WEBSOCKET_URL=ws://subdomain.domain.io:8484/`
-    - `MINIO_HOST=subdomain.domain.io`
+    - `MINIO_HOST_EXTERNAL=subdomain.domain.io`
     - Optional for novu notifications:
         - `NOVU_ENABLED=true`
         - `NOVU_PUBLISHER_API_URL=http://subdomain.domain.io:3002/`
@@ -69,8 +69,5 @@ Skip if you only intent to only use it on localhost
 After successfully running the shell script to start all of the the Docker Compose configurations, it may take a while for all the web applications to finish their startup process.
 
 ## Step 4: Service Configuration
-:::note
-Skip if application domain havn't been customized
-:::
 
-Once the startup is complete, Manually replace wks-portal Keycloak Client's `Web origins` and `Valid redirect URIs` to match your domain.
+Once the startup is complete, Manually replace `wks-portal` Keycloak Client's `Web origins` and `Valid redirect URIs` to match your domain.
