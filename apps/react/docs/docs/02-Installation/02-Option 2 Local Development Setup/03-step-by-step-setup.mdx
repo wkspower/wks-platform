@@ -41,7 +41,7 @@ Skip if you only intent to only use it on localhost
     - `KEYCLOAK_TOKEN_URL=http://keycloak:8080/realms/subdomain/protocol/openid-connect/token`
     - `WEBSOCKET_ENABLED=true`
     - `WEBSOCKET_URL=ws://subdomain.domain.io:8484/`
-    - `MINIO_HOST=subdomain.domain.io`
+    - `MINIO_HOST_EXTERNAL=subdomain.domain.io`
     - Optional for novu notifications:
         - `NOVU_ENABLED=true`
         - `NOVU_PUBLISHER_API_URL=http://subdomain.domain.io:3002/`
@@ -73,20 +73,4 @@ After successfully running the shell script to start all of the the Docker Compo
 
 ## Step 4: Service Configuration
 
-<Tabs>
-    <TabItem value="custom" label="Custom Domain" default>
-        Once the startup is complete, Manually replace `wks-portal` Keycloak Client's `Web origins` and `Valid redirect URIs` to match your domain.
-    </TabItem>
-    <TabItem value="local" label="Localhost">
-        Since the domain isn't customized and MINIO_HOST is set to the default (minio), you'll need to modify your system's hosts file to ensure file uploads work correctly. Follow these steps:
-        1. Edit the `/etc/hosts` file with administrative privileges. You can use Nano or any other text editor. Enter the following command in your terminal:
-            ```bash"
-            sudo nano /etc/hosts
-            ```
-        2. Append `minio` to the line that contains `localhost`. This points requests for minio to your local machine, which is useful for development and testing. Update the file to look like this:
-            ```bash title="/etc/hosts"
-            127.0.0.1 localhost minio
-            ```
-        Save and exit the editor. For Nano, you can do this by pressing Ctrl+O to write the changes, followed by Ctrl+X to close the editor.
-    </TabItem>
-</Tabs>
+Once the startup is complete, Manually replace `wks-portal` Keycloak Client's `Web origins` and `Valid redirect URIs` to match your domain.
