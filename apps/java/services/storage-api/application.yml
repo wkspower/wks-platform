@@ -19,7 +19,7 @@ keycloak.url: ${KEYCLOAK_URL:http://localhost:8082}
 
 # minio
 driver.storage.factoryclass: minio
-driver.storage.endpoint.url: ${MINIO_HOST:localhost}
+driver.storage.endpoint.url: ${MINIO_HOST:minio}
 driver.storage.endpoint.port: 9000
 driver.storage.endpoint.secure: false
 driver.storage.endpoint.signing.region: nyc3
@@ -28,7 +28,7 @@ driver.storage.accesskey: ${MINIO_ROOT_USER:minio}
 driver.storage.secretkey: ${MINIO_ROOT_PASSWORD:#minio00#}
 driver.storage.uploads.backend.protocol: http
 driver.storage.uploads.backend.port: 9000
-driver.storage.uploads.backend.url: ${MINIO_HOST:localhost}
+driver.storage.uploads.backend.url: ${MINIO_HOST:minio}
 driver.storage.uploads.file.min.size:  1024
 driver.storage.uploads.file.max.size:  20000000
 
