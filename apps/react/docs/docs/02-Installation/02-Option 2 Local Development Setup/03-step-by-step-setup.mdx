@@ -3,6 +3,9 @@ id: step-by-step-setup
 title: 🛠️ Step by step for local development setup
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Step by step for local development setup 🛠️
 
 This section will involves several key steps to ensure all components of the WKS Power Platform are properly set up and integrated:
@@ -69,8 +72,21 @@ Skip if you only intent to only use it on localhost
 After successfully running the shell script to start all of the the Docker Compose configurations, it may take a while for all the web applications to finish their startup process.
 
 ## Step 4: Service Configuration
-:::note
-Skip if application domain havn't been customized
-:::
 
-Once the startup is complete, Manually replace wks-portal Keycloak Client's `Web origins` and `Valid redirect URIs` to match your domain.
+<Tabs>
+    <TabItem value="custom" label="Custom Domain" default>
+        Once the startup is complete, Manually replace `wks-portal` Keycloak Client's `Web origins` and `Valid redirect URIs` to match your domain.
+    </TabItem>
+    <TabItem value="local" label="Localhost">
+        Since the domain isn't customized and MINIO_HOST is set to the default (minio), you'll need to modify your system's hosts file to ensure file uploads work correctly. Follow these steps:
+        1. Edit the `/etc/hosts` file with administrative privileges. You can use Nano or any other text editor. Enter the following command in your terminal:
+            ```bash"
+            sudo nano /etc/hosts
+            ```
+        2. Append `minio` to the line that contains `localhost`. This points requests for minio to your local machine, which is useful for development and testing. Update the file to look like this:
+            ```bash title="/etc/hosts"
+            127.0.0.1 localhost minio
+            ```
+        Save and exit the editor. For Nano, you can do this by pressing Ctrl+O to write the changes, followed by Ctrl+X to close the editor.
+    </TabItem>
+</Tabs>
