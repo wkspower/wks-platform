@@ -36,6 +36,9 @@ Skip if you only intent to only use it on localhost
 - Copy settings from `/.env-sample` to `/.env` then updated the file to configure essential service URLs, Keycloak Realms, and operational flags:
     - `MONGO_DEMO_DATA_LOADER_DATABASE=subdomain`
     - `KEYCLOAK_TOKEN_URL=http://keycloak:8080/realms/subdomain/protocol/openid-connect/token`
+    - `REACT_APP_KEYCLOAK_URL=http://subdomain.domain.io:8082/`
+    - `REACT_APP_API_URL=http://subdomain.domain.io:8081/`
+    - `REACT_APP_STORAGE_URL=http://subdomain.domain.io:8085/`
     - `WEBSOCKET_ENABLED=true`
     - `WEBSOCKET_URL=ws://subdomain.domain.io:8484/`
     - `MINIO_HOST_EXTERNAL=subdomain.domain.io`
@@ -54,11 +57,6 @@ Skip if you only intent to only use it on localhost
         - `KEYCLOAK_DEFAULT_USER_EMAIL=demo@demo.com`
         - `MINIO_ROOT_USER=minio`
         - `MINIO_ROOT_PASSWORD='#minio00#'`
-
-- Update `docker-compose.portal.yaml:` to ensure front-end configuration aligns with backend services:
-    - `REACT_APP_KEYCLOAK_URL=http://subdomain.domain.io:8082/`
-    - `REACT_APP_API_URL=http://subdomain.domain.io:8081/`
-    - `REACT_APP_STORAGE_URL=http://subdomain.domain.io:8085/`
 
 ## Step 3: Deployment
 
