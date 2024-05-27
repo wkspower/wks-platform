@@ -5,7 +5,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 const config: Config = {
   title: "WKS Platform",
   tagline: "Adaptive Case Management Platform",
-  url: "https://docs.wkspower.com",
+  url: "https://www.wkspower.com",
   baseUrl: "/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
