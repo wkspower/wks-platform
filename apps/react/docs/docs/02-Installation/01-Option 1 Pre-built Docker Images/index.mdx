@@ -17,7 +17,14 @@ To quickly set up and run the project in a development environment, you can use 
 ```bash
 git clone https://github.com/wkspower/wks-platform-docker.git
 cd wks-platform-docker
-docker-compose up -d
+
+# Now choose one of two options below:
+
+# For camunda 7
+docker-compose -f docker-compose.yaml -f docker-compose.camunda7.yaml -f docker-compose.demo-data-loader.camunda7.yaml -f docker-compose.portal.yaml up -d --build "$@"
+
+# For camunda 8
+docker-compose -f docker-compose.yaml -f docker-compose.camunda8.yaml -f docker-compose.demo-data-loader.camunda8.yaml -f docker-compose.portal.yaml up -d --build "$@"
 ```
 
 After successfully running `docker-compose up` to start the Docker Compose configuration, it may take a while for all the web applications to finish their startup process. Once the startup is complete, you can access the following web applications:
