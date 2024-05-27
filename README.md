@@ -61,12 +61,13 @@ WKS Platform is designed as a multi-tenant solution, allowing multiple organizat
 
 ## Installation
 
-[https://www.wkspower.com/docs/instalation-guide/](https://www.wkspower.com/docs/Installation/)
+[https://www.wkspower.com/docs/instalation-guide/](https://doc.wkspower.com/docs/Installation/Option%201%20Pre-built%20Docker%20Images/)
 
 ## Diagrams 
 
 ### Architecture overview
-<img width="1507" alt="architecture-overview" src="https://github.com/wkspower/wks-platform/assets/85225281/fcd0718d-ea2a-4d05-91fa-8bcbbbb1a88b">
+<img width="840" alt="image" src="https://github.com/wkspower/wks-platform/assets/85225281/323e4811-2a44-4c23-9d38-1f99942dcae5">
+
 
 ### Case Definition structure
 <img width="1507" alt="case-definition-structure" src="https://github.com/wkspower/wks-platform/assets/85225281/d478345f-8192-4196-ae53-868151363cf1">
