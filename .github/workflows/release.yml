@@ -105,6 +105,15 @@ jobs:
           push: true
           tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c7-external-tasks:${{ steps.extract_tag.outputs.tag }}"
 
+      - name: Build and push Docker image for c8-external-tasks
+        uses: docker/build-push-action@v2
+        with:
+          context: ./apps/java/services/c8-external-tasks
+          platforms: linux/amd64,linux/arm64
+          file: apps/java/services/c8-external-tasks/Dockerfile
+          push: true
+          tags: "${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/c8-external-tasks:${{ steps.extract_tag.outputs.tag }}"
+
       - name: Build and push Docker image for case-engine-rest-api
         uses: docker/build-push-action@v2
         with:
