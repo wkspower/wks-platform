@@ -27,6 +27,15 @@ docker-compose -f docker-compose.yaml -f docker-compose.camunda7.yaml -f docker-
 docker-compose -f docker-compose.yaml -f docker-compose.camunda8.yaml -f docker-compose.demo-data-loader.camunda8.yaml -f docker-compose.portal.yaml up -d --build
 ```
 
+### Add the following lines to your local hosts file
+
+```bash
+# Required to correctly route case-portal requests to localhost
+127.0.0.1 minio
+::1 minio
+```
+
+
 After successfully running `docker-compose up` to start the Docker Compose configuration, it may take a while for all the web applications to finish their startup process. Once the startup is complete, you can access the following web applications:
 
 - **WKS Platform Portal**: You can access the WKS Platform Portal by opening your web browser and navigating to [http://localhost:3001](http://localhost:3001). Use the following credentials to log in: 
