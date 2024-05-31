@@ -144,8 +144,10 @@ public class C8OperateClient {
 
 					.map(o ->
 
-					ProcessDefinitionImpl.builder().bpmEngineId(bpmEngine.getId()).id(o.getBpmnProcessId())
-							.key(String.valueOf(o.getKey())).version(String.valueOf(o.getVersion())).name(o.getName())
+					// for C8, case definition BpmnProcessId  = WKS process definition key
+					// for C8, case definition key  = WKS process definition Id
+					ProcessDefinitionImpl.builder().bpmEngineId(bpmEngine.getId()).id(String.valueOf(o.getKey()))
+							.key(o.getBpmnProcessId()).version(String.valueOf(o.getVersion())).name(o.getName())
 							.build())
 
 					.toArray(ProcessDefinitionImpl[]::new);

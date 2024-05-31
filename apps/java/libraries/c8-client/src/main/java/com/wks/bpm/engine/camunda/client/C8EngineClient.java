@@ -11,8 +11,10 @@
  */
 package com.wks.bpm.engine.camunda.client;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -115,7 +117,11 @@ public class C8EngineClient implements BpmEngineClient {
 		ProcessInstance[] processInstances = operateClient.searchProcessInstances(Optional.empty(),
 				processInstanceBusinessKey, Optional.empty(), bpmEngine);
 
-		return processInstances.length > 0 ? tasklistClient.find(processInstances[0].getId(), bpmEngine) : new Task[0];
+		List<Task> allTasks = Arrays.stream(processInstances)
+				.flatMap(processInstance -> Arrays.stream(tasklistClient.find(processInstance.getId(), bpmEngine)))
+				.collect(Collectors.toList());
+
+		return allTasks.toArray(new Task[0]);
 	}
 
 	@Override
