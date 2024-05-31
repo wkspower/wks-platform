@@ -31,13 +31,7 @@ const config: Config = {
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
           breadcrumbs: false,
-          editUrl: "https://github.com/wkspower/wks-platform-website/tree/main",
-        },
-        blog: {
-          showReadingTime: false,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl: "https://github.com/wkspower/wks-platform-website/tree/main",
+          editUrl: "https://github.com/wkspower/wks-platform/tree/develop/apps/react/docs/",
         },
         theme: {
           customCss: "./src/css/custom.css",
