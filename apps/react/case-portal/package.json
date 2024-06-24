@@ -37,7 +37,8 @@
     "react-syntax-highlighter": "^15.5.0",
     "redux": "^5.0.1",
     "simplebar": "^6.2.5",
-    "simplebar-react": "^3.2.4"
+    "simplebar-react": "^3.2.4",
+    "ws": "^8.17.1"
   },
   "scripts": {
     "start": "echo 'Starting development server...' && webpack serve --mode=development --port 3001",

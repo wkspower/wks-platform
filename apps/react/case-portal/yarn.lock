@@ -1623,25 +1623,25 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@novu/client@^0.24.1":
-  version "0.24.1"
-  resolved "https://registry.yarnpkg.com/@novu/client/-/client-0.24.1.tgz#6c57cc45e5b538a6a5dcb0093b4b260b5f8afc3f"
-  integrity sha512-gbZaOHFcBfwa9hUB7tt7P+Q8OoJmcvnYFOz91O8p/K0nA0nYe0dUNHL+fppCDAt7SiIoBHDAF2Pe3NXHVmIHOw==
+"@novu/client@^0.24.2":
+  version "0.24.2"
+  resolved "https://registry.yarnpkg.com/@novu/client/-/client-0.24.2.tgz#d245ddf915428215812c01c8d7a9d6ddf54183a3"
+  integrity sha512-h07iLX8mAKTQ6lE7Sa4Bndblue9rcMRhwhHMY41VcWlDot1UmPP38nNh+GmpNaBdxgFfs0MMDBZrndn64jdQog==
   dependencies:
-    "@novu/shared" "^0.24.1"
+    "@novu/shared" "^0.24.2"
 
-"@novu/notification-center@^0.24.0":
-  version "0.24.1"
-  resolved "https://registry.yarnpkg.com/@novu/notification-center/-/notification-center-0.24.1.tgz#beefb3944a255b1b3e0a4e5bbc80fd919d72a86c"
-  integrity sha512-v0g7Dsav54ZT89ri+mG7aOTpnmIRwDyVEBEwuhUxlrgYjR8LiG8VD5xAXtGcYTBkDwksROEy2xB3I0qVNvrNAA==
+"@novu/notification-center@^0.24.2":
+  version "0.24.2"
+  resolved "https://registry.yarnpkg.com/@novu/notification-center/-/notification-center-0.24.2.tgz#03b930fdcfe0b1c630be616eca5c666706196350"
+  integrity sha512-fFOvaf4ABz4gRw2Mit0QAG3Se9k9rmouEz/LPSb2db571I7WfNpKi0Ig8Oy3ich/QwoFRxXY5t6bRpOKdJaQ7A==
   dependencies:
     "@emotion/css" "^11.10.5"
     "@emotion/react" "^11.7.1"
     "@emotion/styled" "^11.6.0"
     "@mantine/core" "^5.7.1"
     "@mantine/hooks" "^5.7.1"
-    "@novu/client" "^0.24.1"
-    "@novu/shared" "^0.24.1"
+    "@novu/client" "^0.24.2"
+    "@novu/shared" "^0.24.2"
     "@tanstack/react-query" "^4.20.4"
     acorn-jsx "^5.3.2"
     axios "^1.6.2"
@@ -1653,10 +1653,10 @@
     tslib "^2.3.1"
     webfontloader "^1.6.28"
 
-"@novu/shared@^0.24.1":
-  version "0.24.1"
-  resolved "https://registry.yarnpkg.com/@novu/shared/-/shared-0.24.1.tgz#6fa1f7aad8b1fb6943479806d74cf787437f1f83"
-  integrity sha512-9tar3FG+v1iB6MZlt5wcL8gsqK17GCCDdwk1w1VTmbefetJIF6PTIVLEknPwKIy7Qb/xmsf1SYlBDwe1VFgKUg==
+"@novu/shared@^0.24.2":
+  version "0.24.2"
+  resolved "https://registry.yarnpkg.com/@novu/shared/-/shared-0.24.2.tgz#4258458555f2325c0587caf309facacd932284b6"
+  integrity sha512-RaPf+wUxluGGPqv+QdRkXS+rNgbSTXe5Iu87vs+SyOzrV4R24lx8TAe3tpDLJTyMcs9sQ5eF5qyz0kwIGf7JiA==
   dependencies:
     axios "^1.6.2"
     class-transformer "0.5.1"
@@ -7782,6 +7782,11 @@ ws@^8.16.0:
   version "8.16.0"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.16.0.tgz#d1cd774f36fbc07165066a60e40323eab6446fd4"
   integrity sha512-HS0c//TP7Ina87TfiPUz1rQzMhHrl/SG2guqRcTOIUYD2q8uhUdNHZYJUaQ8aTGPzCh+c6oawMKW35nFl1dxyQ==
+
+ws@^8.17.1:
+  version "8.17.1"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.17.1.tgz#9293da530bb548febc95371d90f9c878727d919b"
+  integrity sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==
 
 ws@~8.11.0:
   version "8.11.0"
