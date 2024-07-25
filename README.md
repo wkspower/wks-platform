@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-[On-line documentation](https://www.wkspower.com/docs/Introduction/)
+[On-line documentation](https://docs.wkspower.com/docs/Introduction/)
 
 [Contact Form](https://share-eu1.hsforms.com/1tpt0kdYDS5CbimQTH7xmVA2dcag3)
 
