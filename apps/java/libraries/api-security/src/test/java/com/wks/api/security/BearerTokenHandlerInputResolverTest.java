@@ -11,9 +11,6 @@
  */
 package com.wks.api.security;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import com.wks.api.security.mocks.MockAuthentication;
+
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class BearerTokenHandlerInputResolverTest {
@@ -49,8 +48,7 @@ public class BearerTokenHandlerInputResolverTest {
 
 		Map<String, Object> input = resolver.resolver(request, authz);
 
-		assertFalse(input.isEmpty());
-		assertEquals(new HashMap<String, Object>() {
+		assertThat(input).containsAllEntriesOf(new HashMap<>() {
 			{
 				put("path", "files");
 				put("method", "GET");
@@ -59,7 +57,7 @@ public class BearerTokenHandlerInputResolverTest {
 				put("host", "localhost");
 				put("allowed_origin", "localhost");
 			}
-		}, input);
+		});
 	}
 
 }
