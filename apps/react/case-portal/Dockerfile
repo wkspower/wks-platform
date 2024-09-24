@@ -39,6 +39,9 @@ ENV GENERATE_SOURCEMAP=${GENERATE_SOURCEMAP} \
     REACT_APP_WEBSOCKETS_CASE_CREATED=${REACT_APP_WEBSOCKETS_CASE_CREATED} \
     REACT_APP_WEBSOCKETS_HUMAN_TASK_CREATED=${REACT_APP_WEBSOCKETS_HUMAN_TASK_CREATED}
 
+# Fix the formatting issues:
+RUN yarn prettier --write "**/*.{js,jsx,json,css,scss,md}"
+
 # Build the application
 RUN yarn build
 
