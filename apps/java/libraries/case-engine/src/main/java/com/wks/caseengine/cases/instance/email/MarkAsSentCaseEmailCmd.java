@@ -37,11 +37,15 @@ public class MarkAsSentCaseEmailCmd implements Command<Void> {
 
 		ProcessVariable caseEmailIdCorrelateKey = ProcessVariable.builder().name("caseEmailId").value(id).build();
 
+		System.out.println("id "+id);
+		System.out.println("caseEmailIdCorrelateKeys "+caseEmailIdCorrelateKey.toString());
+        
 		commandContext.getBpmEngineClientFacade().sendMessage(ProcessMessage.builder()
 				.messageCode("emailSentConfirmation")
 				.processVariables(Optional
-						.of(Arrays.asList(ProcessVariable.builder().name("sentDateTime").value(sentDateTime).build())))
+						.of(Arrays.asList(ProcessVariable.builder().name("sentDateTime").value(sentDateTime).type("String").build())))
 
+				//.build(), Optional.of(Arrays.asList(caseEmailIdCorrelateKey)));
 				.build(), Optional.of(Arrays.asList(caseEmailIdCorrelateKey)));
 
 		return null;

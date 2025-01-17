@@ -5,18 +5,18 @@ const pino = require("pino");
 
 const logger = pino({level: config.LogLevel});
 
-logger.info('Initing websocket-publisher');
+console.log('Initing websocket-publisher');
 const wss = new WebSocket.Server({ port: config.WebsockerPort });
 const kafka = new Kafka({ clientId: 'websocket-publisher-app', brokers: [config.KafkaUrl] });
 const kafkaConsumers = new Map();
 
 wss.on('connection', async function connection(ws, req) {
 
-    logger.debug(`Connection request received to: ${req.url}`);
+    console.log(`Connection request received to: ${req.url}`);
 
     const topic = req.url.substring(1); // Extract topic from the WebSocket URL. (ex: ws://host/topicName)
     if (!topic) {
-        logger.error('Topic not specified at connection request');
+        console.log('Topic not specified at connection request');
         ws.close();
         return;
     }
@@ -28,7 +28,7 @@ wss.on('connection', async function connection(ws, req) {
     kafkaConsumers.get(topic).add(ws);
 
     ws.on('close', function close() {
-        logger.debug(`WebSocket connection closed for topic: ${topic}`);
+        console.log(`WebSocket connection closed for topic: ${topic}`);
         const clients = kafkaConsumers.get(topic);
         if (clients) {
             clients.delete(ws);
@@ -40,22 +40,22 @@ wss.on('connection', async function connection(ws, req) {
 });
 
 const createConsumer = async (topic) => {
-    logger.debug(`Initing kafka consumer for topic: ${topic}`);
+    console.log(`Initing kafka consumer for topic: ${topic}`);
 
     const consumer = kafka.consumer({ groupId: `websocker-publisher-${topic}` });
     await consumer.connect();
     await consumer.subscribe({ topic, fromBeginning: true });
-    logger.debug(`Kafka consumer connected and subscribed: ${topic}`);
+    console.log(`Kafka consumer connected and subscribed: ${topic}`);
 
     await consumer.run({
         eachMessage: async ({ message }) => {
             const kafkaMessage = message.value.toString();
-            logger.debug(`Kafka message received: ${kafkaMessage}`);
+            console.log(`Kafka message received: ${kafkaMessage}`);
             const clients = kafkaConsumers.get(topic);
             if (clients) {
                 clients.forEach(client => {
                     if (client.readyState === WebSocket.OPEN) {
-                        logger.debug(`Message sent to websocket client: ${client}`);
+                        console.log(`Message sent to websocket client: ${client}`);
                         client.send(kafkaMessage);
                     }
                 });
@@ -64,5 +64,5 @@ const createConsumer = async (topic) => {
     });
 
     kafkaConsumers.set(topic, new Set());
-    logger.debug(`New kafka consumer created: ${topic}`);
+    console.log(`New kafka consumer created: ${topic}`);
 };

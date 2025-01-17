@@ -32,7 +32,7 @@ services:
             - mongo:/data/db:rw
 
     opa:
-        image: openpolicyagent/opa:edge-static
+        image: openpolicyagent/opa:0.70.0-static
         ports:
             - 8181:8181        
         command:

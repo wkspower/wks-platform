@@ -42,7 +42,7 @@ public class C8ZeebeClient {
 	 * @return
 	 */
 	public ProcessInstance startProcess(final String processDefinitionKey, final BpmEngine bpmEngine) {
-
+       System.out.println("C8ZeebeClient start Processs1 "+processDefinitionKey+bpmEngine.toString());
 		final ProcessInstanceEvent processInstanceEvent = zeebeClient.newCreateInstanceCommand()
 				.bpmnProcessId(processDefinitionKey).latestVersion().send().join();
 		ProcessInstance processInstance = ProcessInstance.builder()
@@ -60,7 +60,7 @@ public class C8ZeebeClient {
 	 */
 	public ProcessInstance startProcess(final String processDefinitionKey, final Optional<String> businessKey,
 			final Optional<ProcessVariable> processVariable, final BpmEngine bpmEngine) {
-
+			System.out.println("C8ZeebeClient start Processs2 "+processDefinitionKey+bpmEngine.toString()+" process variable "+processVariable+" businessKey "+businessKey );
 		List<ProcessVariable> variables = processVariable.isPresent() ? Arrays.asList(processVariable.get())
 				: Arrays.asList();
 

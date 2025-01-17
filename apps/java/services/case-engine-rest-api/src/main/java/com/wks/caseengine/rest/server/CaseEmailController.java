@@ -51,15 +51,20 @@ public class CaseEmailController {
 
 	@PostMapping
 	public ResponseEntity<Void> start(@RequestBody final CaseEmail caseEmail) {
+        System.out.println("in case email start 123"+ caseEmail.toString());
+		caseEmail.setFrom("rakeshittam27@gmail.com");
+		//caseEmail.setCaseDefinitionId("send-email-outbound");
 		log.debug("### Email processing started ###");
 		log.debug("To: " + caseEmail.getTo());
 		log.debug("From: " + caseEmail.getFrom());
 		log.debug("Subject: " + caseEmail.getSubject());
 		log.debug("Body: " + caseEmail.getBody());
+		
+
 		log.debug("Definition Id: " + caseEmail.getCaseDefinitionId());
 
 		caseEmailService.start(caseEmail);
-
+        System.out.println("in case email start 123 end");
 		log.debug("### Email processing finished ###");
 		return ResponseEntity.noContent().build();
 
@@ -82,7 +87,9 @@ public class CaseEmailController {
 	@PatchMapping(value = "/{id}/sent", consumes = "application/merge-patch+json")
 	public ResponseEntity<CaseEmail> markAsSent(@PathVariable final String id,
 			@RequestBody final CaseEmail mergePatch) {
+
 		try {
+			System.out.println("in case email markAsSent 123"+ mergePatch.toString());
 			caseEmailService.markAsSent(id, mergePatch.getReceivedDateTime());
 		} catch (CaseInstanceNotFoundException e) {
 			throw new RestResourceNotFoundException(e.getMessage());
@@ -94,6 +101,7 @@ public class CaseEmailController {
 	@PatchMapping(value = "/{id}", consumes = "application/merge-patch+json")
 	public ResponseEntity<CaseEmail> mergePatch(@PathVariable final String id, @RequestBody final CaseEmail mergePatch) {
 		try {
+			System.out.println("in case email mergePatch 123"+ mergePatch.toString());
 			caseEmailService.patch(id, mergePatch);
 		} catch (CaseInstanceNotFoundException e) {
 			throw new RestResourceNotFoundException(e.getMessage());

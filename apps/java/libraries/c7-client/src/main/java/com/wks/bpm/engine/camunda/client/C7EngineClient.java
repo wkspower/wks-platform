@@ -191,7 +191,7 @@ public class C7EngineClient implements BpmEngineClient {
 			final List<ProcessVariable> processVariables, final BpmEngine bpmEngine) {
 
 		try {
-
+             System.out.println("In C7Engine Client "+processDefinitionKey+bpmEngine.toString()+" process variable "+processVariables+" businessKey "+businessKey );
 			StartProcessInstanceDto requestDto = new StartProcessInstanceDto();
 			requestDto.businessKey(businessKey.orElse(null));
 			requestDto.setCaseInstanceId(businessKey.orElse(null));
@@ -398,6 +398,8 @@ public class C7EngineClient implements BpmEngineClient {
 		try {
 			CorrelationMessageDto messageDto = new CorrelationMessageDto().messageName(processMessage.getMessageCode());
 
+
+            System.out.println(messageDto.toString());
 			if (correlateKeys.isPresent()) {
 				messageDto.correlationKeys(c7VariablesMapper.toEngineFormat(correlateKeys.get()));
 			}

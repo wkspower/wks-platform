@@ -14,11 +14,11 @@ const axiosInstance = axios.create();
 
 axiosInstance.interceptors.request.use(
   function (config) {
-    logger.debug("HTTP Request:");
-    logger.debug(`Method: ${config.method.toUpperCase()}`);
-    logger.debug(`URL: ${config.url}`);
-    logger.debug(`Headers: ${JSON.stringify(config.headers)}`);
-    logger.debug(`Body: ${JSON.stringify(config.data)}`);
+    console.log("HTTP Request:");
+    console.log(`Method: ${config.method.toUpperCase()}`);
+    console.log(`URL: ${config.url}`);
+    console.log(`Headers: ${JSON.stringify(config.headers)}`);
+    console.log(`Body: ${JSON.stringify(config.data)}`);
 
     return getToken()
       .then((token) => {
@@ -26,7 +26,7 @@ axiosInstance.interceptors.request.use(
         return config;
       })
       .catch((error) => {
-        logger.error(error, "Error while getting token");
+        console.log(error, "Error while getting token");
         return Promise.reject(error);
       });
   },
@@ -35,36 +35,39 @@ axiosInstance.interceptors.request.use(
   }
 );
 async function createConsumer(topic) {
-  logger.debug(`Initiating Kafka consumer for topic: ${topic}`);
+   
+  console.log(`Initiating Kafka consumer for topic: ${topic}`);
   const consumer = kafka.consumer({ groupId: `email-sender-${topic}` });
 
   await consumer.connect();
   await consumer.subscribe({ topic, fromBeginning: true });
-  logger.debug(`Kafka consumer connected and subscribed: ${topic}`);
+  console.log(`Kafka consumer connected and subscribed: ${topic}`);
 
   await consumer.run({
     eachMessage: async ({ message }) => {
       const kafkaMessage = message.value.toString();
-      logger.debug(`Kafka message received: ${kafkaMessage}`);
+      console.log(`Kafka message received: ${kafkaMessage}`);
       try {
-        logger.info(`Sending email...`);
+        console.log(`Sending email...`);
         sendHttpRequest(kafkaMessage);
       } catch (error) {
-        logger.error(error, `Error sending HTTP request`);
+        console.log(error, `Error sending HTTP request`);
       }
     },
   });
 }
 
 async function sendHttpRequest(caseEmail) {
-  logger.debug(`Preparing Email Acknowledgement patch request`);
+  console.log(`Preparing Email Acknowledgement patch request`);
+  
 
   const json = JSON.parse(caseEmail);
   try {
-    logger.debug(`Sending Email Acknowledgement patch request`);
+    console.log(`Sending Email Acknowledgement patch request`);
     await axiosInstance.patch(
-      `${config.CaseEngineApiBaseUrl}/case-email/${json.caseEmailId}/sent`,
-      { receivedDateTime: new Date() },
+      //`${config.CaseEngineApiBaseUrl}/case-email/${json.caseEmailId}/sent`,
+      `${config.CaseEngineApiBaseUrl}/case-email/rakeshittam27@gmail.com/sent`,
+      caseEmail,
       {
         headers: {
           "Content-Type": "application/merge-patch+json",
@@ -72,7 +75,7 @@ async function sendHttpRequest(caseEmail) {
       }
     );
   } catch (error) {
-    logger.debug(error, "Error sending request");
+    console.log(error, "Error sending request");
     throw error;
   }
 }
@@ -94,7 +97,7 @@ async function getToken() {
     );
     return response.data.access_token;
   } catch (error) {
-    logger.error(error, "Error while getting token");
+    console.log(error, "Error while getting token");
     throw error;
   }
 }

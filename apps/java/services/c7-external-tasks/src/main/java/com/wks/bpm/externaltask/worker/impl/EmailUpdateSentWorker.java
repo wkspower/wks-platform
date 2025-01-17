@@ -37,7 +37,9 @@ public class EmailUpdateSentWorker extends WksExternalTaskHandler {
 
 		String caseEmailId = externalTask.getVariable("caseEmailId");
 		String sentDateTime = externalTask.getVariable("sentDateTime");
-
+		System.out.println(
+			"in emailUpdateSent worker c7 external tasks sentDateTime= "+sentDateTime+"caseEmailId "+caseEmailId
+		);
 		JsonObject patch = new JsonObject();
 		patch.addProperty("status", "sent");
 		patch.addProperty("receivedDateTime", sentDateTime);

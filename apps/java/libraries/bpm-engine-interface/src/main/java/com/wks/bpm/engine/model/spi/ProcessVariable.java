@@ -32,4 +32,13 @@ public class ProcessVariable {
 	private Object value;
 	private String type;
 
+	
+	@Override
+	public String toString() {
+		return "ProcessVariable [name=" + name + ", value=" + value + ", type=" + type + "]";
+	}
+
+
+	
+
 }

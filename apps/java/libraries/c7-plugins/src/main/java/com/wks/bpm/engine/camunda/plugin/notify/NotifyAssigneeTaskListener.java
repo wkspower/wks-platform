@@ -32,6 +32,9 @@ public class NotifyAssigneeTaskListener implements TaskListener {
 
 		// Instantiate Kafka producer
 		kafkaProducer = new KafkaProducer<>(props);
+
+        System.out.println("In Kafka NotifyAssigneeTaskListener c7-plugins");
+
 	}
 
 	public static NotifyAssigneeTaskListener getInstance() {

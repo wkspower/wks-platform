@@ -46,7 +46,9 @@ public class EmailSendWorker extends WksExternalTaskHandler {
 
 		String caseEmailJson = externalTask.getVariable("caseEmail");
 		String caseEmailId = externalTask.getVariable("caseEmailId");
-		
+		System.out.println(
+			"in Email send worker c7 external tasks aseEmailJson= "+caseEmailJson+"caseEmailId "+caseEmailId
+		);
 		JsonObject jsonObject = gsonBuilder.create().fromJson(caseEmailJson, JsonObject.class);
 		jsonObject.addProperty("caseEmailId", caseEmailId);
 
