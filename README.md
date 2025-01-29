@@ -14,7 +14,7 @@ Table of Contents
 - [Installation](#installation)
 - [Diagrams](#diagrams)
 - [Screenshots](#screenshots)
-- [License](#license)
+- [License](#license)1
 - [Contact](#contact)
 
 WKS Platform is an open-source Case Management and Process Automation solution that leverages a powerful stack of technologies, including Camunda, MongoDB, Keycloak, Traefik, MinIO, OPA (Open Policy Agent), Form.io, Spring Boot, and React. It provides a comprehensive framework for managing and automating business processes, enabling organizations to streamline their operations, enhance efficiency, and improve decision-making.
