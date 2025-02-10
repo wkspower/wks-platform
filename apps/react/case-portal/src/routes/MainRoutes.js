@@ -1,6 +1,13 @@
 import { lazy } from 'react'
 import Loadable from 'components/Loadable'
 import MainLayout from 'layout/MainLayout'
+import TurnaroundPlanTable from 'components/data-tables/TurnaroundPlanTable'
+import AssessmentForm from 'components/data-tables/AssesmentForm/AssessmentContext'
+import ProductionvolumeData from 'components/data-tables/ProductionVoluemData'
+import BusinessDemand from 'components/data-tables/BusinessDemand'
+import ShutDown from 'components/data-tables/ShutDown'
+import SlowDown from 'components/data-tables/Slowdown'
+
 import { CaseStatus } from 'common/caseStatus'
 import { CaseList } from 'views/caseList/caseList'
 import { RecordList } from 'views/record/recordList'
@@ -10,6 +17,7 @@ import { ProcessDefList } from 'views/management/processDef/processDefList'
 import { FormList } from 'views/management/form/formList'
 import { RecordTypeList } from 'views/management/recordType/recordTypeList'
 import { QueueList } from 'views/management/queue/queueList'
+import FeedStockAvailability from 'components/data-tables/FeedStockavailability'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -71,7 +79,8 @@ export const MainRoutes = (
           },
         ],
       },
-      {
+      
+            {
         path: 'case-life-cycle',
         children: [
           {
@@ -95,6 +104,57 @@ export const MainRoutes = (
             element: <QueueList />,
           },
         ],
+      },
+      
+      
+      {
+        path: 'production-norms-plan',
+        children: [
+          {
+            path: 'product-mcu-val',
+            element: <ProductionvolumeData />,
+          },
+          {
+            path: 'product-demand',
+            element: <BusinessDemand />,
+          },
+          {
+            path: 'shutdown-plan',
+            element: <ShutDown />,
+          },
+          {
+            path: 'slowdown-plan',
+            element: <SlowDown />,
+          },
+          {
+            path: 'ta-plan',
+            element: <TurnaroundPlanTable />,
+          },
+          {
+            path: 'feed-stock',
+            element: <FeedStockAvailability />,
+          },
+        ],
+      },
+      {
+        path: 'functions',
+        children: [
+          { path: 'safety', element: <DashboardDefault /> },
+          { path: 'reliability', element: <DashboardDefault /> },
+        ],
+      },
+      {
+        path: 'reports',
+        children: [
+          { path: 'contribution-report', element: <DashboardDefault /> },
+          { path: 'previous-fy-aop-result', element: <DashboardDefault /> },
+          { path: 'previous-fy-aop-result', element: <DashboardDefault /> },
+          { path: 'mat-bal-sheet', element: <DashboardDefault /> },
+        ],
+      },
+      {
+        path: 'workflow',
+        element: <DashboardDefault />,
       },
     ],
   }

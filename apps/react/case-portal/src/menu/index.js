@@ -3,6 +3,7 @@ import workspace from './workspace'
 import management from './management'
 
 const menuItems = {
+  items: [dashboard, workspace],
   items: [dashboard, workspace, management],
 }
 
