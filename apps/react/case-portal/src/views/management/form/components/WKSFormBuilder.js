@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FormBuilder } from '@formio/react'
 import { RecordService } from 'services'
 import { StorageService } from 'plugins/storage'
@@ -56,14 +56,6 @@ function WKSFormBuilder({ form = {}, keycloak = {} }) {
     records.map((entry) => {
       addComponent(entry)
     })
-
-    const builder = {
-      custom: {
-        title: 'Record Types',
-        weight: 10,
-        components: components,
-      },
-    }
 
     setBuilder((prevBuilder) => ({
       ...prevBuilder,
