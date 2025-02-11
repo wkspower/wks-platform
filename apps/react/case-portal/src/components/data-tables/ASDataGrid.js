@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import {
   Button,
@@ -9,15 +9,16 @@ import {
   Typography,
   Box,
   InputAdornment,
-  Modal
+  Modal,
 } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import SearchIcon from '@mui/icons-material/Search'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
+import { useSession } from 'SessionStoreContext'
 
-
+import { Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'
 
 const jioColors = {
   primaryBlue: '#1B4E9B',
@@ -44,10 +45,14 @@ const DataGridTable = ({
   const [anchorEl, setAnchorEl] = useState(null)
   const [selectedRow, setSelectedRow] = useState(null)
   const [isFilterActive, setIsFilterActive] = useState(false)
-  const [paginationModel, setPaginationModel] = useState({page: 0,pageSize: paginationOptions[0],})
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: paginationOptions[0],
+  })
   const [resizedColumns, setResizedColumns] = useState({})
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
   
+  const keycloak = useSession()
 
   const handleSearchChange = (event) => {
     setSearchText(event.target.value)
@@ -67,8 +72,10 @@ const DataGridTable = ({
     setIsFilterActive(!isFilterActive)
   }
 
-  const filteredRows = rows.filter((row) => {
+ 
   
+
+  const filteredRows = rows.filter((row) => {
     const matchesSearch = Object.values(row).some((value) =>
       String(value).toLowerCase().includes(searchText.toLowerCase()),
     )
@@ -93,11 +100,41 @@ const DataGridTable = ({
     handleMenuClose()
   }
 
-  const handleEditRow = (id) => {
+  const handleEditRow2 = (id) => {
     // Implement your edit row logic here
     console.log(`Edit row with id: ${id}`)
     handleMenuClose()
   }
+
+
+  const handleEditRow = async (id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8081/task?businessKey=${84000}`, 
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${keycloak.token}`,
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log('API Response:', data);
+  
+      // Implement further edit logic here using data
+    } catch (error) {
+      console.error('Error fetching task:', error);
+    } finally {
+      handleMenuClose();
+    }
+  };
 
   const processRowUpdate = (newRow) => {
     const updatedRow = { ...newRow, isNew: false }
@@ -194,11 +231,72 @@ const DataGridTable = ({
   ]
 
   const handleCellClick = (params) => {
-    setSelectedRow(params.row);
-    setOpen(true);
-  };
+    console.log('params',params.isEditable == true);
+    console.log('title',title='Production Volume Data');
+    if(title='Production Volume Data' && params.isEditable == true){
+      setSelectedRow(params.row)
+      setOpen(true)
+    }
+  }
 
-  
+  const [days, setDays] = useState([])
+
+  useEffect(() => {
+    const getDaysInMonth = () => {
+      const date = new Date()
+      const year = date.getFullYear()
+      const month = date.getMonth()
+      const totalDays = new Date(year, month + 1, 0).getDate() // Get total days in month
+
+      const daysArray = []
+      for (let day = 1; day <= totalDays; day++) {
+        daysArray.push({
+          date: day, // Just the day number (1, 2, 3, ...30)
+          value: Math.floor(Math.random() * 100), // Random value
+        })
+      }
+      return daysArray
+    }
+
+    setDays(getDaysInMonth())
+  }, [])
+
+  // Handle Submit
+  const handleSubmit = () => {
+    console.log('Submitted Data:', days)
+    setOpen(false) // Close the modal
+  }
+
+  // Handle Cancel
+  const handleCancel = () => {
+    setOpen(false) // Just close the modal
+  }
+
+  useEffect(() => {
+    const getDaysInMonth = () => {
+      const date = new Date()
+      const year = date.getFullYear()
+      const month = date.getMonth()
+      const totalDays = new Date(year, month + 1, 0).getDate() // Get total number of days in the month
+
+      return Array.from({ length: totalDays }, (_, index) => ({
+        date: index + 1, // Day number (1, 2, 3, ...30)
+        value: Math.floor(Math.random() * 100), // Random value
+      }))
+    }
+
+    setDays(getDaysInMonth())
+  }, [])
+
+  // Handle input changes
+  const handleValueChange = (index, newValue) => {
+    setDays((prevDays) =>
+      prevDays.map((day, i) =>
+        i === index ? { ...day, value: newValue } : day,
+      ),
+    )
+  }
+
   return (
     <Box
       sx={{
@@ -338,7 +436,6 @@ const DataGridTable = ({
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? 'even-row' : 'odd-row'
           }
-
           sx={{
             borderRadius: '4px',
             border: `1px solid ${jioColors.border}`,
@@ -382,10 +479,10 @@ const DataGridTable = ({
               alignSelf: 'flex-end',
             },
             '& .MuiDataGrid-columnHeaders .last-column-header': {
-              paddingRight: '16px', // Add padding to the header
+              paddingRight: '16px',
             },
             '& .MuiDataGrid-cell.last-column-cell': {
-              paddingRight: '16px', // Add padding to the cells in the actions column
+              paddingRight: '16px',
             },
           }}
         />
@@ -412,29 +509,100 @@ const DataGridTable = ({
         Add Item
       </Button>
 
-      <Modal open={open} onClose={() => setOpen(false)}>
+      <Modal open={open} onClose={handleCancel}>
         <Box
           sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '90%',
+            bgcolor: 'background.paper',
             p: 4,
             boxShadow: 24,
             borderRadius: 2,
+            maxHeight: '80vh',
+            overflowX: 'auto',
           }}
         >
-          <Typography variant="h6">Row Details</Typography>
-          {selectedRow && (
-            <Typography variant="body1">
-              {JSON.stringify(selectedRow, null, 2)}
-            </Typography>
-          )}
+          <Typography variant='h6' sx={{ mb: 2 }}>
+            Month Overview
+          </Typography>
+
+          {/* Table */}
+          <Table>
+            <TableHead>
+              {/* Headers for Days 1-15 */}
+              <TableRow>
+                {days.slice(0, 15).map((day, index) => (
+                  <TableCell
+                    key={index}
+                    sx={{ textAlign: 'center', fontWeight: 'bold' }}
+                  >
+                    Day {day.date}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {/* Values for Days 1-15 */}
+              <TableRow>
+                {days.slice(0, 15).map((day, index) => (
+                  <TableCell key={index} sx={{ textAlign: 'center' }}>
+                    <TextField
+                      type='number'
+                      value={day.value}
+                      onChange={(e) => handleValueChange(index, e.target.value)}
+                      size='small'
+                      sx={{ width: '70px' }}
+                    />
+                  </TableCell>
+                ))}
+              </TableRow>
+
+              {/* Headers for Days 16-30 */}
+              <TableRow>
+                {days.slice(15).map((day, index) => (
+                  <TableCell
+                    key={index + 15}
+                    sx={{ textAlign: 'center', fontWeight: 'bold' }}
+                  >
+                    Day {day.date}
+                  </TableCell>
+                ))}
+              </TableRow>
+
+              {/* Values for Days 16-30 */}
+              <TableRow>
+                {days.slice(15).map((day, index) => (
+                  <TableCell key={index + 15} sx={{ textAlign: 'center' }}>
+                    <TextField
+                      type='number'
+                      value={day.value}
+                      onChange={(e) =>
+                        handleValueChange(index + 15, e.target.value)
+                      }
+                      size='small'
+                      sx={{ width: '70px' }}
+                    />
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableBody>
+          </Table>
+
+          {/* Buttons */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+            <Button onClick={handleCancel} variant='outlined' sx={{ mr: 2 }}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} variant='contained' color='primary'>
+              Submit
+            </Button>
+          </Box>
         </Box>
       </Modal>
-
     </Box>
   )
 }

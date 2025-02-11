@@ -1,7 +1,7 @@
 import ASDataGrid from './ASDataGrid'
 
 const productionColumns = [
-  { field: 'product', headerName: 'Product', width: 150, editable: true },
+  { field: 'product', headerName: 'Product', width: 150, editable: false },
   { field: 'apr24', headerName: 'Apr-24', width: 100, editable: true },
   { field: 'may24', headerName: 'May-24', width: 100, editable: true },
   { field: 'jun24', headerName: 'Jun-24', width: 100, editable: true },
@@ -18,7 +18,7 @@ const productionColumns = [
     field: 'averageTPH',
     headerName: 'Average TPH',
     width: 150,
-    editable: true,
+    editable: false,
     renderHeader: () => (
       <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
         <div>Average</div>
@@ -26,7 +26,7 @@ const productionColumns = [
       </div>
     ),
   },
-  { field: 'remark', headerName: 'Remark', width: 200, editable: true },
+  { field: 'remark', headerName: 'Remark', width: 200, editable: false },
 ]
 const productionData = [
   {
