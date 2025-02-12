@@ -29,7 +29,12 @@ export const RecordList = ({ recordTypeId }) => {
             const key = element.key
             const label = element.label
 
-            dynamicColumns.push({ field: key, headerName: label, width: 100 })
+            dynamicColumns.push({ 
+              field: key, 
+              headerName: label, 
+              width: 100, 
+              flex: 1,
+            })
           })
 
         dynamicColumns.push({
