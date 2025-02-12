@@ -19,6 +19,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import { useSession } from 'SessionStoreContext'
 
 import { Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'
+import { DataService } from 'services/DataService'
 
 const jioColors = {
   primaryBlue: '#1B4E9B',
@@ -53,6 +54,7 @@ const DataGridTable = ({
   const [open, setOpen] = useState(false)
   
   const keycloak = useSession()
+  const [days, setDays] = useState([])
 
   const handleSearchChange = (event) => {
     setSearchText(event.target.value)
@@ -71,6 +73,7 @@ const DataGridTable = ({
   const handleFilterClick = () => {
     setIsFilterActive(!isFilterActive)
   }
+
 
   const filteredRows = rows.filter((row) => {
     const matchesSearch = Object.values(row).some((value) =>
@@ -97,40 +100,23 @@ const DataGridTable = ({
     handleMenuClose()
   }
 
-  // const handleEditRow2 = (id) => {
-  //   // Implement your edit row logic here
-  //   console.log(`Edit row with id: ${id}`)
-  //   handleMenuClose()
-  // }
-
-  const handleEditRow = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:8081/task?businessKey=${84000}`,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${keycloak.token}`,
-          },
-        },
-      )
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      console.log('API Response:', data)
-
-      // Implement further edit logic here using data
-    } catch (error) {
-      console.error('Error fetching task:', error)
-    } finally {
-      handleMenuClose()
-    }
+  const handleEditRow2 = (id) => {
+    // Implement your edit row logic here
+    console.log(`Edit row with id: ${id}`)
+    handleMenuClose()
   }
+
+
+  const handleEditRow = async (id) => {
+    try {
+      const data = await DataService.getProductById(keycloak, id);
+      console.log('API Response:', data);
+    } catch (error) {
+      console.error('Error fetching product:', error);
+    } finally {
+      handleMenuClose();
+    }
+  };
 
   const processRowUpdate = (newRow) => {
     const updatedRow = { ...newRow, isNew: false }
@@ -227,15 +213,12 @@ const DataGridTable = ({
   ]
 
   const handleCellClick = (params) => {
-    console.log('params',params.isEditable == true);
-    console.log('title',title='Production Volume Data');
-    if(title='Production Volume Data' && params.isEditable == true){
+    if(title=='Production Volume Data' && params.isEditable == true && params.field != 'product'){
       setSelectedRow(params.row)
       setOpen(true)
     }
   }
 
-  const [days, setDays] = useState([])
 
   useEffect(() => {
     const getDaysInMonth = () => {
@@ -257,13 +240,11 @@ const DataGridTable = ({
     setDays(getDaysInMonth())
   }, [])
 
-  // Handle Submit
   const handleSubmit = () => {
     console.log('Submitted Data:', days)
     setOpen(false) // Close the modal
   }
-
-  // Handle Cancel
+  
   const handleCancel = () => {
     setOpen(false) // Just close the modal
   }
@@ -430,7 +411,7 @@ const DataGridTable = ({
           onPaginationModelChange={(model) => setPaginationModel(model)}
           rowsPerPageOptions={paginationOptions}
           onColumnResized={onColumnResized}
-          // onCellClick={handleCellClick}
+          onCellClick={handleCellClick}
           pagination
           disableColumnResize
           disableSelectionOnClick
