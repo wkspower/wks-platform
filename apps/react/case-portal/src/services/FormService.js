@@ -95,11 +95,14 @@ async function getByKey(keycloak, formKey) {
   try {
     const resp = await fetch(url, { headers })
 
-    const requested = await json(keycloak, resp);
+    const requested = await json(keycloak, resp)
 
-    const data = requestRemoteDataSourceAndFillRecordTypesIfRequired(requested, keycloak)
+    const data = requestRemoteDataSourceAndFillRecordTypesIfRequired(
+      requested,
+      keycloak,
+    )
 
-    return Promise.resolve(data);
+    return Promise.resolve(data)
   } catch (err) {
     console.log(err)
     return await Promise.reject(err)
@@ -124,21 +127,25 @@ async function getVariableById(keycloak, processInstanceId) {
   }
 }
 
-
-function requestRemoteDataSourceAndFillRecordTypesIfRequired(original, keycloak) {
+function requestRemoteDataSourceAndFillRecordTypesIfRequired(
+  original,
+  keycloak,
+) {
   const components = original.structure?.components?.map((comp) => {
-    if (comp.properties._internalClass_ === "recordType") {
-      return ({
+    if (comp.properties._internalClass_ === 'recordType') {
+      return {
         ...comp,
         dataSrc: 'url',
         data: {
           url: `${Config.CaseEngineUrl}/record/${comp.key}`,
-          headers: [{
-            key: 'Authorization',
-            value: `Bearer ${keycloak.token}`,
-          }]
-        }
-      })
+          headers: [
+            {
+              key: 'Authorization',
+              value: `Bearer ${keycloak.token}`,
+            },
+          ],
+        },
+      }
     }
     return comp
   })
@@ -148,6 +155,6 @@ function requestRemoteDataSourceAndFillRecordTypesIfRequired(original, keycloak)
     structure: {
       ...original.structure,
       components,
-    }
+    },
   }
 }

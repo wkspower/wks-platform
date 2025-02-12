@@ -30,9 +30,7 @@ function WKSFormBuilder({ form = {}, keycloak = {} }) {
         }
 
         return acc
-      }, { })
-
-
+      }, {})
 
       components[record.id] = {
         title: record.id,
