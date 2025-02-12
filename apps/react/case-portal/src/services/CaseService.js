@@ -54,10 +54,10 @@ async function getCaseDefinitions(keycloak) {
 }
 
 async function getCaseDefinitionsById(keycloak, caseDefId) {
-  const url = `${Config.CaseEngineUrl}/case-definition/${caseDefId || ''}`
+  const url = `${Config?.CaseEngineUrl}/case-definition/${caseDefId || ''}`
 
   const headers = {
-    Authorization: `Bearer ${keycloak.token}`,
+    Authorization: `Bearer ${keycloak?.token}`,
   }
 
   try {
@@ -89,10 +89,10 @@ async function filterCase(keycloak, caseDefId, status, cursor) {
   let url = `${Config.CaseEngineUrl}/case?`
   url = url + (status ? `status=${status}` : '')
   url = url + (caseDefId ? `&caseDefinitionId=${caseDefId}` : '')
-  url = url + `&before=${cursor.before || ''}`
-  url = url + `&after=${cursor.after || ''}`
-  url = url + `&sort=${cursor.sort || 'asc'}`
-  url = url + `&limit=${cursor.limit || 10}`
+  url = url + `&before=${cursor?.before || ''}`
+  url = url + `&after=${cursor?.after || ''}`
+  url = url + `&sort=${cursor?.sort || 'asc'}`
+  url = url + `&limit=${cursor?.limit || 10}`
 
   const headers = {
     Authorization: `Bearer ${keycloak.token}`,

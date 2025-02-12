@@ -1,5 +1,5 @@
 import ASDataGrid from './ASDataGrid'
-// import dayjs from 'dayjs'
+import dayjs from 'dayjs'
 
 const columns = [
   { field: 'id', headerName: 'Sr. No.', width: 100, flex: 0.1, editable: true },
@@ -44,6 +44,10 @@ const columns = [
     //     />
     //   )
     // },
+    renderCell: (params) => {
+      const date = params.value
+      return date ? dayjs(date).format('DD/MM/YYYY') : 'No Date'
+    },
   },
   {
     field: 'taTo',
@@ -56,10 +60,10 @@ const columns = [
     //   const date = dayjs(params?.row?.tato)
     //   return date.isValid() ? date.toDate() : null
     // },
-    // renderCell: (params) => {
-    //   const date = params.value
-    //   return date ? dayjs(date).format('DD/MM/YYYY') : 'No Date'
-    // },
+    renderCell: (params) => {
+      const date = params.value
+      return date ? dayjs(date).format('DD/MM/YYYY') : 'No Date'
+    },
     // renderCell: (params) => {
     //   return (
     //     <input
@@ -117,87 +121,87 @@ const productionData = [
     period: '1 day',
     remark: 'Routine cleaning of preheater unit',
   },
-  // {
-  //   id: 2,
-  //   activities: 'Strippers inspection',
-  //   taFrom: '2024-03-15',
-  //   taTo: '2024-03-16',
-  //   durationHrs: 14,
-  //   period: '1.5 days',
-  //   remark: 'Visual inspection and minor repairs',
-  // },
-  // {
-  //   id: 3,
-  //   activities: 'Rotary kiln overhaul',
-  //   taFrom: '2024-03-18',
-  //   taTo: '2024-03-22',
-  //   durationHrs: 40,
-  //   period: '5 days',
-  //   remark: 'Complete overhaul, including internal parts replacement',
-  // },
-  // {
-  //   id: 4,
-  //   activities: 'Cooling system check',
-  //   taFrom: '2024-03-20',
-  //   taTo: '2024-03-21',
-  //   durationHrs: 16,
-  //   period: '2 days',
-  //   remark: 'Maintenance and efficiency check of cooling system',
-  // },
-  // {
-  //   id: 5,
-  //   activities: 'Pump calibration',
-  //   taFrom: '2024-03-22',
-  //   taTo: '2024-03-23',
-  //   durationHrs: 12,
-  //   period: '1 day',
-  //   remark: 'Calibrating pumps for accurate performance',
-  // },
-  // {
-  //   id: 6,
-  //   activities: 'Power grid inspection',
-  //   taFrom: '2024-03-25',
-  //   taTo: '2024-03-26',
-  //   durationHrs: 18,
-  //   period: '1.5 days',
-  //   remark: 'Inspection and maintenance of power grid systems',
-  // },
-  // {
-  //   id: 7,
-  //   activities: 'Exchanger tube cleaning',
-  //   taFrom: '2024-03-27',
-  //   taTo: '2024-03-28',
-  //   durationHrs: 8,
-  //   period: '1 day',
-  //   remark: 'Cleaning of heat exchanger tubes',
-  // },
-  // {
-  //   id: 8,
-  //   activities: 'Dryer system testing',
-  //   taFrom: '2024-03-30',
-  //   taTo: '2024-03-31',
-  //   durationHrs: 10,
-  //   period: '1 day',
-  //   remark: 'Test run of the dryer system after maintenance',
-  // },
-  // {
-  //   id: 9,
-  //   activities: 'Compressor inspection',
-  //   taFrom: '2024-04-02',
-  //   taTo: '2024-04-03',
-  //   durationHrs: 15,
-  //   period: '1.5 days',
-  //   remark: 'Inspection and oil change for the compressor',
-  // },
-  // {
-  //   id: 10,
-  //   activities: 'Boiler re-commissioning',
-  //   taFrom: '2024-04-05',
-  //   taTo: '2024-04-07',
-  //   durationHrs: 24,
-  //   period: '3 days',
-  //   remark: 'Re-commissioning of the boiler system post maintenance',
-  // },
+  {
+    id: 2,
+    activities: 'Strippers inspection',
+    // taFrom: '2024-03-15',
+    // taTo: '2024-03-16',
+    durationHrs: 14,
+    period: '1.5 days',
+    remark: 'Visual inspection and minor repairs',
+  },
+  {
+    id: 3,
+    activities: 'Rotary kiln overhaul',
+    // taFrom: '2024-03-18',
+    // taTo: '2024-03-22',
+    durationHrs: 40,
+    period: '5 days',
+    remark: 'Complete overhaul, including internal parts replacement',
+  },
+  {
+    id: 4,
+    activities: 'Cooling system check',
+    // taFrom: '2024-03-20',
+    // taTo: '2024-03-21',
+    durationHrs: 16,
+    period: '2 days',
+    remark: 'Maintenance and efficiency check of cooling system',
+  },
+  {
+    id: 5,
+    activities: 'Pump calibration',
+    // taFrom: '2024-03-22',
+    // taTo: '2024-03-23',
+    durationHrs: 12,
+    period: '1 day',
+    remark: 'Calibrating pumps for accurate performance',
+  },
+  {
+    id: 6,
+    activities: 'Power grid inspection',
+    // taFrom: '2024-03-25',
+    // taTo: '2024-03-26',
+    durationHrs: 18,
+    period: '1.5 days',
+    remark: 'Inspection and maintenance of power grid systems',
+  },
+  {
+    id: 7,
+    activities: 'Exchanger tube cleaning',
+    // taFrom: '2024-03-27',
+    // taTo: '2024-03-28',
+    durationHrs: 8,
+    period: '1 day',
+    remark: 'Cleaning of heat exchanger tubes',
+  },
+  {
+    id: 8,
+    activities: 'Dryer system testing',
+    // taFrom: '2024-03-30',
+    // taTo: '2024-03-31',
+    durationHrs: 10,
+    period: '1 day',
+    remark: 'Test run of the dryer system after maintenance',
+  },
+  {
+    id: 9,
+    activities: 'Compressor inspection',
+    // taFrom: '2024-04-02',
+    // taTo: '2024-04-03',
+    durationHrs: 15,
+    period: '1.5 days',
+    remark: 'Inspection and oil change for the compressor',
+  },
+  {
+    id: 10,
+    activities: 'Boiler re-commissioning',
+    // taFrom: '2024-04-05',
+    // taTo: '2024-04-07',
+    durationHrs: 24,
+    period: '3 days',
+    remark: 'Re-commissioning of the boiler system post maintenance',
+  },
 ]
 
 const TurnaroundPlanTable = () => (

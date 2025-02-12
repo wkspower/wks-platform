@@ -1,7 +1,82 @@
+import {
+  Autocomplete,
+  MenuItem,
+  Select,
+  TextField,
+} from '../../../node_modules/@mui/material/index'
 import ASDataGrid from './ASDataGrid'
-
+const productOptions = [
+  'Product A',
+  'Product B',
+  'Product C',
+  'Product D',
+  'Product E',
+  'Product F',
+  'Product G',
+  'Product H',
+  'Product I',
+  'Product J',
+  'Product K',
+  'Product L',
+]
 const productionColumns = [
-  { field: 'product', headerName: 'Product', width: 150, editable: false },
+  {
+    field: 'product',
+    headerName: 'Product',
+    width: 150,
+    editable: false,
+    // renderEditCell: (params) => {
+    //   console.log(params)
+    //   const { id } = params
+    //   const isEditable = id > 10
+
+    //   return (
+    //     <Select
+    //       value={params?.value}
+    //       onChange={(e) =>
+    //         params.api.setEditCellValue({
+    //           id: params?.id,
+    //           field: 'product',
+    //           value: e.target.value,
+    //         })
+    //       }
+    //       disabled={!isEditable}
+    //       fullWidth
+    //     >
+    //       {productOptions.map((option) => (
+    //         <MenuItem key={option} value={option}>
+    //           {option}
+    //         </MenuItem>
+    //       ))}
+    //     </Select>
+    //   )
+    // },
+    renderEditCell: (params) => {
+      console.log(params)
+      const { id } = params
+      const isEditable = id > 10 // Enable only for rows beyond 10
+
+      return (
+        <Autocomplete
+          options={productOptions}
+          value={params.value || ''}
+          disableClearable // Prevent clearing the selection
+          onChange={(event, newValue) => {
+            params.api.setEditCellValue({
+              id: params.id,
+              field: 'product',
+              value: newValue,
+            })
+          }}
+          renderInput={(params) => (
+            <TextField {...params} variant='outlined' size='small' />
+          )}
+          disabled={!isEditable}
+          fullWidth
+        />
+      )
+    },
+  },
   { field: 'apr24', headerName: 'Apr-24', width: 100, editable: true },
   { field: 'may24', headerName: 'May-24', width: 100, editable: true },
   { field: 'jun24', headerName: 'Jun-24', width: 100, editable: true },
@@ -225,4 +300,3 @@ const ProductionvolumeData = () => (
 )
 
 export default ProductionvolumeData
- 

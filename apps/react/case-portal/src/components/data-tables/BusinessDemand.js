@@ -1,7 +1,52 @@
+import { MenuItem, Select } from '../../../node_modules/@mui/material/index'
 import ASDataGrid from './ASDataGrid'
-
+const productOptions = [
+  'Product A',
+  'Product B',
+  'Product C',
+  'Product D',
+  'Product E',
+  'Product F',
+  'Product G',
+  'Product H',
+  'Product I',
+  'Product J',
+  'Product K',
+  'Product L',
+]
 const productionColumns = [
-  { field: 'product', headerName: 'Product', width: 150, editable: true },
+  {
+    field: 'product',
+    headerName: 'Product',
+    width: 150,
+    editable: true,
+    renderEditCell: (params) => {
+      console.log(params)
+      const { id } = params
+      const isEditable = id > 10
+
+      return (
+        <Select
+          value={params?.value}
+          onChange={(e) =>
+            params.api.setEditCellValue({
+              id: params?.id,
+              field: 'product',
+              value: e.target.value,
+            })
+          }
+          disabled={!isEditable}
+          fullWidth
+        >
+          {productOptions.map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </Select>
+      )
+    },
+  },
   { field: 'apr24', headerName: 'Apr-24', width: 100, editable: true },
   { field: 'may24', headerName: 'May-24', width: 100, editable: true },
   { field: 'jun24', headerName: 'Jun-24', width: 100, editable: true },

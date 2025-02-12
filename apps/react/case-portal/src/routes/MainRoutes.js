@@ -2,7 +2,7 @@ import { lazy } from 'react'
 import Loadable from 'components/Loadable'
 import MainLayout from 'layout/MainLayout'
 import TurnaroundPlanTable from 'components/data-tables/TurnaroundPlanTable'
-import AssessmentForm from 'components/data-tables/AssesmentForm/AssessmentContext'
+// import AssessmentForm from 'components/data-tables/AssesmentForm/AssessmentContext'
 import ProductionvolumeData from 'components/data-tables/ProductionVoluemData'
 import BusinessDemand from 'components/data-tables/BusinessDemand'
 import ShutDown from 'components/data-tables/ShutDown'
@@ -79,8 +79,8 @@ export const MainRoutes = (
           },
         ],
       },
-      
-            {
+
+      {
         path: 'case-life-cycle',
         children: [
           {
@@ -105,8 +105,7 @@ export const MainRoutes = (
           },
         ],
       },
-      
-      
+
       {
         path: 'production-norms-plan',
         children: [

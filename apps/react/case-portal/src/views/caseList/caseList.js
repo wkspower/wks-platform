@@ -496,9 +496,9 @@ function fetchCases(
 
   CaseService.getCaseDefinitionsById(keycloak, caseDefId)
     .then((resp) => {
-      resp.stages.sort((a, b) => a.index - b.index).map((o) => o.name)
-      setStages(resp.stages)
-      return CaseService.filterCase(keycloak, caseDefId, status, filter)
+      resp?.stages?.sort((a, b) => a?.index - b?.index).map((o) => o?.name)
+      setStages(resp?.stages)
+      return CaseService?.filterCase(keycloak, caseDefId, status, filter)
     })
     .then((resp) => {
       const { data, paging } = resp

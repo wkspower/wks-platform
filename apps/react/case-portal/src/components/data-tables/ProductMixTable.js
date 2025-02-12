@@ -1,445 +1,52 @@
-// import { useState } from 'react'
-// import { DataGrid } from '@mui/x-data-grid'
-// import {
-//   Button,
-//   TextField,
-//   InputAdornment,
-//   IconButton,
-//   Menu,
-//   MenuItem,
-// } from '@mui/material'
-// import SearchIcon from '@mui/icons-material/Search'
-// // import FilterListIcon from '@mui/icons-material/FilterList'
-// import FilterAltIcon from '@mui/icons-material/FilterAlt'
-// import MoreVertIcon from '@mui/icons-material/MoreVert'
-// import { Box } from '../../../node_modules/@mui/material/index'
-
-// const jioColors = {
-//   primaryBlue: '#1B4E9B',
-//   accentRed: '#E31C3D',
-//   background: '#FFFFFF',
-//   headerBg: '#DAE0EF',
-//   rowEven: '#FFFFFF',
-//   rowOdd: '#FFFFFF',
-//   textPrimary: '#2D2D2D',
-//   border: '#D0D0D0',
-// }
-
-// const ProductMixTable = () => {
-//   const months = [
-//     'Apr-24',
-//     'May-24',
-//     'Jun-24',
-//     'Jul-24',
-//     'Aug-24',
-//     'Sep-24',
-//     'Oct-24',
-//     'Nov-24',
-//     'Dec-24',
-//     'Jan-25',
-//     'Feb-25',
-//     'Mar-25',
-//   ]
-
-//   const initialRows = [
-//     {
-//       id: 1,
-//       gradeName: 'HDPE E52009',
-//       'Apr-24': '',
-//       'May-24': '',
-//       'Jun-24': '',
-//       'Jul-24': '',
-//       'Aug-24': '',
-//       'Sep-24': '',
-//       'Oct-24': '',
-//       'Nov-24': '',
-//       'Dec-24': '',
-//       'Jan-25': '',
-//       'Feb-25': '',
-//       'Mar-25': '',
-//       averageTPH: '',
-//       remark: '',
-//     },
-//     {
-//       id: 2,
-//       gradeName: 'HDPE S46005',
-//       'Apr-24': '',
-//       'May-24': '',
-//       'Jun-24': '',
-//       'Jul-24': '',
-//       'Aug-24': '',
-//       'Sep-24': '',
-//       'Oct-24': '',
-//       'Nov-24': '',
-//       'Dec-24': '',
-//       'Jan-25': '',
-//       'Feb-25': '',
-//       'Mar-25': '',
-//       averageTPH: '',
-//       remark: '',
-//     },
-//   ]
-
-//   const [rows, setRows] = useState(initialRows)
-//   const [searchText, setSearchText] = useState('')
-//   const [isFilterActive, setIsFilterActive] = useState(false)
-//   const [anchorEl, setAnchorEl] = useState(null)
-//   const [selectedRow, setSelectedRow] = useState(null)
-//   const [paginationModel, setPaginationModel] = useState({
-//     page: 0,
-//     pageSize: 10,
-//   })
-//   const handleSearchChange = (event) => {
-//     setSearchText(event.target.value)
-//   }
-//   const handleFilterClick = () => {
-//     setIsFilterActive(!isFilterActive)
-//   }
-
-//   const filteredRows = rows.filter((row) => {
-//     const matchesSearch = Object.values(row).some((value) =>
-//       String(value).toLowerCase().includes(searchText.toLowerCase()),
-//     )
-//     const matchesFilter = !isFilterActive || row.averageTPH > 0 // Example filter: averageTPH > 0
-//     return matchesSearch && matchesFilter
-//   })
-
-//   const processRowUpdate = (newRow) => {
-//     if (!rows?.some((row) => row?.id === newRow?.id)) {
-//       console.error(`No row with id ${newRow?.id}`)
-//       return newRow
-//     }
-//     const updatedRow = { ...newRow, isNew: false }
-//     setRows(rows?.map((row) => (row?.id === newRow?.id ? updatedRow : row)))
-//     return updatedRow
-//   }
-
-//   const handleAddItem = () => {
-//     const newRow = {
-//       id: rows.length + 1,
-//       gradeName: '',
-//       'Apr-24': '',
-//       'May-24': '',
-//       'Jun-24': '',
-//       'Jul-24': '',
-//       'Aug-24': '',
-//       'Sep-24': '',
-//       'Oct-24': '',
-//       'Nov-24': '',
-//       'Dec-24': '',
-//       'Jan-25': '',
-//       'Feb-25': '',
-//       'Mar-25': '',
-//       averageTPH: '',
-//       remark: '',
-//     }
-//     setRows([...rows, newRow])
-//   }
-
-//   const handleMenuClick = (event, row) => {
-//     setAnchorEl(event.currentTarget)
-//     setSelectedRow(row)
-//   }
-
-//   const handleMenuClose = () => {
-//     setAnchorEl(null)
-//     setSelectedRow(null)
-//   }
-
-//   const handleDeleteRow = (id) => {
-//     setRows((prevRows) => prevRows.filter((row) => row?.id !== id))
-//     handleMenuClose()
-//   }
-
-//   const columns = [
-//     {
-//       field: 'gradeName',
-//       headerName: 'Grade Name',
-//       width: 200,
-//       editable: true,
-//     },
-//     ...months.map((month) => ({
-//       field: month,
-//       headerName: month,
-//       width: 120,
-//       editable: true,
-//     })),
-//     {
-//       field: 'averageTPH',
-//       headerName: 'Average TPH',
-//       width: 150,
-//       editable: true,
-//     },
-//     {
-//       field: 'remark',
-//       headerName: 'Remark',
-//       width: 200,
-//       editable: true,
-//     },
-//     {
-//       field: 'actions',
-//       headerName: 'Actions',
-//       width: 120,
-//       textAlign: 'center',
-//       renderCell: (params) => (
-//         <>
-//           <IconButton
-//             onClick={(event) => handleMenuClick(event, params.row)}
-//             aria-label='more'
-//             aria-controls='long-menu'
-//             aria-haspopup='true'
-//           >
-//             <MoreVertIcon />
-//           </IconButton>
-//           <Menu
-//             id='long-menu'
-//             anchorEl={anchorEl}
-//             keepMounted
-//             open={Boolean(anchorEl)}
-//             onClose={handleMenuClose}
-//           >
-//             <MenuItem onClick={() => handleDeleteRow(selectedRow.id)}>
-//               Delete
-//             </MenuItem>
-//             {/* Additional menu items can be added here */}
-//           </Menu>
-//         </>
-//       ),
-//     },
-//   ]
-
-//   return (
-//     <div
-//       style={{
-//         height: '81vh',
-//         width: '100%',
-//         padding: 20,
-//         backgroundColor: '#FAFAFB',
-//         borderRadius: '8px',
-//         className: 'product-mix-table',
-//       }}
-//     >
-//       {/* Header Section */}
-//       <div
-//         style={{
-//           display: 'flex',
-//           justifyContent: 'space-between',
-//           alignItems: 'center',
-//           padding: '5px',
-//         }}
-//       >
-//         <h3
-//           style={{
-//             color: '#040510',
-//             fontSize: '1.5rem',
-//             fontWeight: 600,
-//             letterSpacing: '0.5px',
-//             margin: 0,
-//           }}
-//         >
-//           Product Mix Entry (%)
-//         </h3>
-//       </div>
-
-//       {/* Controls (Search & Filter) */}
-//       {/* <div
-//         style={{
-//           display: 'flex',
-//           alignItems: 'center',
-//           gap: '10px',
-//           marginTop: '20px',
-//           marginBottom: '10px',
-//           justifyContent: 'flex-end',
-//         }}
-//       >
-//         <TextField
-//           variant='outlined'
-//           placeholder='Search...'
-//           value={searchText}
-//           onChange={handleSearchChange}
-//           style={{
-//             width: '250px',
-//             borderRadius: '8px',
-//             backgroundColor: jioColors.background,
-//           }}
-//           InputProps={{
-//             startAdornment: (
-//               <InputAdornment position='start'>
-//                 <SearchIcon />
-//               </InputAdornment>
-//             ),
-//           }}
-//         />
-//         <IconButton
-//           aria-label='filter'
-//           onClick={() => setIsFilterActive(!isFilterActive)}
-//         >
-//           <FilterListIcon color={isFilterActive ? 'primary' : 'inherit'} />
-//         </IconButton>
-//       </div> */}
-//       <div
-//         style={{
-//           display: 'flex',
-//           justifyContent: 'space-between',
-//           alignItems: 'center',
-//           marginTop: '20px',
-//           marginBottom: '10px',
-//         }}
-//       >
-//         {/* Show entries dropdown */}
-//         <div style={{ display: 'flex', alignItems: 'center' }}>
-//           <label
-//             style={{ marginRight: '8px', fontWeight: 'bold', color: '#8A9BC2' }}
-//           >
-//             Show:
-//           </label>
-//           <select
-//             value={paginationModel.pageSize}
-//             onChange={(e) => {
-//               const newSize = Number(e.target.value)
-//               // Update pageSize in the controlled pagination model and reset to page 0
-//               setPaginationModel({
-//                 ...paginationModel,
-//                 pageSize: newSize,
-//                 page: 0,
-//               })
-//             }}
-//             style={{ padding: '4px' }}
-//           >
-//             <option value={5}>5</option>
-//             <option value={10}>10</option>
-//             <option value={20}>20</option>
-//           </select>
-//           <label
-//             style={{ marginLeft: '8px', fontWeight: 'bold', color: '#8A9BC2' }}
-//           >
-//             Entries
-//           </label>
-//         </div>
-//         {/* Search box and filter icon */}
-//         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-//           <TextField
-//             variant='outlined'
-//             placeholder='Search...'
-//             value={searchText}
-//             onChange={handleSearchChange}
-//             style={{
-//               width: '250px',
-//               borderRadius: '8px',
-//               backgroundColor: jioColors.background,
-//             }}
-//             InputProps={{
-//               startAdornment: (
-//                 <InputAdornment position='start'>
-//                   <SearchIcon />
-//                 </InputAdornment>
-//               ),
-//             }}
-//           />
-//           <IconButton aria-label='filter' onClick={handleFilterClick}>
-//             <Box>
-//               <FilterAltIcon color={isFilterActive ? 'primary' : 'inherit'} />
-//             </Box>
-//           </IconButton>
-//         </div>
-//       </div>
-
-//       {/* DataGrid Section */}
-//       <div
-//         style={{
-//           height: 'calc(100% - 150px)',
-//           width: '100%',
-//         }}
-//       >
-//         <DataGrid
-//           rows={filteredRows}
-//           columns={columns}
-//           rowHeight={35}
-//           paginationModel={paginationModel} // Use controlled pagination model
-//           onPaginationModelChange={(model) => setPaginationModel(model)}
-//           rowsPerPageOptions={[5, 10, 20]}
-//           pagination
-//           processRowUpdate={processRowUpdate}
-//           disableColumnResize
-//           disableSelectionOnClick
-//           getRowClassName={(params) =>
-//             params.indexRelativeToCurrentPage % 2 === 0 ? 'even-row' : 'odd-row'
-//           }
-//           sx={{
-//             borderRadius: '4px',
-//             border: `2px solid ${jioColors.border}`,
-//             '& .MuiDataGrid-columnHeaders': {
-//               color: '#3E4E75',
-//               fontSize: '0.875rem',
-//               fontWeight: 600,
-//               borderBottom: `2px solid ${jioColors.primaryBlue}`,
-//             },
-//             '& .MuiDataGrid-columnHeaderTitleContainer': {
-//               backgroundColor: '#FAFAFC',
-//             },
-//             '& .MuiDataGrid-cell': {
-//               borderRight: `1px solid ${jioColors.border}`,
-//               borderBottom: `1px solid ${jioColors.border}`,
-//               color: '#3E4E75',
-//             },
-//             '& .MuiDataGrid-row': {
-//               borderBottom: `1px solid ${jioColors.border}`,
-//             },
-//             '& .even-row': {
-//               backgroundColor: jioColors.rowEven,
-//             },
-//             '& .odd-row': {
-//               backgroundColor: jioColors.rowOdd,
-//             },
-//             '& .MuiDataGrid-footerContainer': {
-//               borderTop: `1px solid ${jioColors.border}`,
-//             },
-//             '& .MuiDataGrid-root': {
-//               border: 'none',
-//             },
-//             '& .MuiDataGrid-cell:last-child': {
-//               borderRight: 'none',
-//             },
-//             '& .MuiDataGrid-cellEmpty': {
-//               display: 'none',
-//             },
-//           }}
-//         />
-//       </div>
-
-//       {/* Add Item Button */}
-//       <Button
-//         variant='contained'
-//         onClick={handleAddItem}
-//         style={{
-//           marginTop: 20,
-//           backgroundColor: jioColors.primaryBlue,
-//           color: jioColors.background,
-//           borderRadius: '4px',
-//           padding: '8px 24px',
-//           textTransform: 'none',
-//           fontSize: '0.875rem',
-//           fontWeight: 500,
-//         }}
-//         sx={{
-//           '&:hover': {
-//             backgroundColor: '#143B6F',
-//             boxShadow: 'none',
-//           },
-//         }}
-//       >
-//         Add Item
-//       </Button>
-//     </div>
-//   )
-// }
-
-// export default ProductMixTable
-
+import { MenuItem, Select } from '../../../node_modules/@mui/material/index'
 import ASDataGrid from './ASDataGrid'
-
+const productOptions = [
+  'Product A',
+  'Product B',
+  'Product C',
+  'Product D',
+  'Product E',
+  'Product F',
+  'Product G',
+  'Product H',
+  'Product I',
+  'Product J',
+  'Product K',
+  'Product L',
+]
 const productionColumns = [
-  { field: 'product', headerName: 'Product', width: 150, editable: true },
+  {
+    field: 'product',
+    headerName: 'Product',
+    width: 150,
+    editable: true,
+    renderEditCell: (params) => {
+      console.log(params)
+      const { id } = params
+      const isEditable = id > 10
+
+      return (
+        <Select
+          value={params?.value}
+          onChange={(e) =>
+            params.api.setEditCellValue({
+              id: params?.id,
+              field: 'product',
+              value: e.target.value,
+            })
+          }
+          disabled={!isEditable}
+          fullWidth
+        >
+          {productOptions.map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </Select>
+      )
+    },
+  },
   { field: 'apr24', headerName: 'Apr-24', width: 100, editable: true },
   { field: 'may24', headerName: 'May-24', width: 100, editable: true },
   { field: 'jun24', headerName: 'Jun-24', width: 100, editable: true },

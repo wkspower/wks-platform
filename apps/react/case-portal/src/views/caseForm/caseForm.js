@@ -85,13 +85,13 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
   }
 
   const getCaseInfo = (aCase) => {
-    CaseService.getCaseDefinitionsById(keycloak, aCase.caseDefinitionId)
+    CaseService.getCaseDefinitionsById(keycloak, aCase?.caseDefinitionId)
       .then((data) => {
         setCaseDef(data)
         setStages(
-          data.stages.sort((a, b) => a.index - b.index).map((o) => o.name),
+          data?.stages?.sort((a, b) => a?.index - b.index).map((o) => o.name),
         )
-        return FormService.getByKey(keycloak, data.formKey)
+        return FormService?.getByKey(keycloak, data?.formKey)
       })
       .then((data) => {
         setForm(data)

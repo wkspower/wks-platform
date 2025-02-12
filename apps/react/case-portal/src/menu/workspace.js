@@ -33,9 +33,8 @@ const workspace = {
     //   icon: icons.FolderOutlined,
     //   children: [],
     // },
-    
-    
-     {
+
+    {
       id: 'case-list',
       title: i18n.t('menu.case'),
       type: 'collapse',
@@ -50,18 +49,18 @@ const workspace = {
       icon: icons.IconArchive, // You can choose an appropriate icon
       children: [
         {
-          id: 'product-mcu-val',
-          title: i18n.t('menu.productMCUVal'),
-          type: 'item',
-          url: '/production-norms-plan/product-mcu-val',
-          icon: icons.IconList,
-          breadcrumbs: true,
-        },
-        {
           id: 'product-demand',
           title: i18n.t('menu.productDemand'),
           type: 'item',
           url: '/production-norms-plan/product-demand',
+          icon: icons.IconList,
+          breadcrumbs: true,
+        },
+        {
+          id: 'product-mcu-val',
+          title: i18n.t('menu.productMCUVal'),
+          type: 'item',
+          url: '/production-norms-plan/product-mcu-val',
           icon: icons.IconList,
           breadcrumbs: true,
         },
@@ -124,16 +123,16 @@ const workspace = {
         },
       ],
     },
-    
+
     {
-     id: 'record-list',
+      id: 'record-list',
       title: i18n.t('menu.record'),
       type: 'collapse',
       icon: icons.IconDatabase,
       children: [],
     },
     {
-     id: 'task-list',
+      id: 'task-list',
       title: i18n.t('menu.task'),
       type: 'item',
       url: '/task-list',

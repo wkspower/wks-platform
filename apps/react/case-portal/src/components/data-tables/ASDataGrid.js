@@ -72,9 +72,6 @@ const DataGridTable = ({
     setIsFilterActive(!isFilterActive)
   }
 
- 
-  
-
   const filteredRows = rows.filter((row) => {
     const matchesSearch = Object.values(row).some((value) =>
       String(value).toLowerCase().includes(searchText.toLowerCase()),
@@ -100,17 +97,16 @@ const DataGridTable = ({
     handleMenuClose()
   }
 
-  const handleEditRow2 = (id) => {
-    // Implement your edit row logic here
-    console.log(`Edit row with id: ${id}`)
-    handleMenuClose()
-  }
+  // const handleEditRow2 = (id) => {
+  //   // Implement your edit row logic here
+  //   console.log(`Edit row with id: ${id}`)
+  //   handleMenuClose()
+  // }
 
-
-  const handleEditRow = async (id) => {
+  const handleEditRow = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8081/task?businessKey=${84000}`, 
+        `http://localhost:8081/task?businessKey=${84000}`,
         {
           method: 'GET',
           headers: {
@@ -118,23 +114,23 @@ const DataGridTable = ({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${keycloak.token}`,
           },
-        }
-      );
-  
+        },
+      )
+
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`HTTP error! Status: ${response.status}`)
       }
-  
-      const data = await response.json();
-      console.log('API Response:', data);
-  
+
+      const data = await response.json()
+      console.log('API Response:', data)
+
       // Implement further edit logic here using data
     } catch (error) {
-      console.error('Error fetching task:', error);
+      console.error('Error fetching task:', error)
     } finally {
-      handleMenuClose();
+      handleMenuClose()
     }
-  };
+  }
 
   const processRowUpdate = (newRow) => {
     const updatedRow = { ...newRow, isNew: false }
@@ -422,14 +418,19 @@ const DataGridTable = ({
       <Box sx={{ height: 'calc(100% - 150px)', width: '100%' }}>
         <DataGrid
           rows={filteredRows}
-          columns={columns}
+          // columns={columns}
+          columns={columns.map((col) => ({
+            ...col,
+            editable:
+              col.field === 'product' ? rows.length >= 10 : col.editable,
+          }))}
           rowHeight={35}
           processRowUpdate={processRowUpdate}
           paginationModel={paginationModel}
           onPaginationModelChange={(model) => setPaginationModel(model)}
           rowsPerPageOptions={paginationOptions}
           onColumnResized={onColumnResized}
-          onCellClick={handleCellClick}
+          // onCellClick={handleCellClick}
           pagination
           disableColumnResize
           disableSelectionOnClick

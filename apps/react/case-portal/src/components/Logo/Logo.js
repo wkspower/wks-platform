@@ -1,12 +1,12 @@
 import { useTheme } from '@mui/material/styles'
-import logo from 'assets/images/logo.svg'
+// import logo from 'assets/images/logo.svg'
 
 const Logo = () => {
   const theme = useTheme()
 
   return (
     <>
-      <img src={logo} alt='WKS Power' />
+      {/* <img src={logo} alt='WKS Power' /> */}
 
       <svg
         width='118'
