@@ -1,0 +1,150 @@
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_5pc6zufq4loqfzj6ppvi" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.22.0">
+  <bpmn:process id="approval-flow" name="Approval flow" isExecutable="true" camunda:historyTimeToLive="30">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="approveL1" name="Approve Level1" camunda:formKey="approval-form" camunda:assignee="demo@demo.com">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:outputParameter name="resolved">${true}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_1">
+      <bpmn:incoming>SequenceFlow_2</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_3</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0czcy9j</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="approveL2" name="Approve Level2" camunda:formKey="approval-form" camunda:assignee="demo@demo.com">
+      <bpmn:incoming>SequenceFlow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_01onup7</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent_1">
+      <bpmn:incoming>Flow_10c1mpf</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="approveL3" name="Approve Level3" camunda:formKey="approval-form" camunda:assignee="demo@demo.com">
+      <bpmn:incoming>Flow_1aef9on</bpmn:incoming>
+      <bpmn:outgoing>Flow_1jfm7ez</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent_2">
+      <bpmn:incoming>Flow_0czcy9j</bpmn:incoming>
+      <bpmn:incoming>Flow_0ko3sas</bpmn:incoming>
+      <bpmn:incoming>Flow_1imgk2h</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1" sourceRef="StartEvent_1" targetRef="approveL1" />
+    <bpmn:sequenceFlow id="SequenceFlow_2" sourceRef="approveL1" targetRef="ExclusiveGateway_1" />
+    <bpmn:sequenceFlow id="SequenceFlow_3" sourceRef="ExclusiveGateway_1" targetRef="approveL2">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${resolved == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1jfm7ez" sourceRef="approveL3" targetRef="Gateway_0yk52r7" />
+    <bpmn:sequenceFlow id="Flow_0czcy9j" sourceRef="ExclusiveGateway_1" targetRef="EndEvent_2">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${resolved == false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="Gateway_0ifab72">
+      <bpmn:incoming>Flow_01onup7</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ko3sas</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1aef9on</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0ko3sas" sourceRef="Gateway_0ifab72" targetRef="EndEvent_2">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${resolved == false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="Gateway_0yk52r7">
+      <bpmn:incoming>Flow_1jfm7ez</bpmn:incoming>
+      <bpmn:outgoing>Flow_10c1mpf</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1imgk2h</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_10c1mpf" sourceRef="Gateway_0yk52r7" targetRef="EndEvent_1">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${resolved == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1imgk2h" sourceRef="Gateway_0yk52r7" targetRef="EndEvent_2">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${resolved == false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_01onup7" sourceRef="approveL2" targetRef="Gateway_0ifab72" />
+    <bpmn:sequenceFlow id="Flow_1aef9on" sourceRef="Gateway_0ifab72" targetRef="approveL3">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${resolved == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="approval-flow">
+      <bpmndi:BPMNEdge id="SequenceFlow_3_di" bpmnElement="SequenceFlow_3">
+        <di:waypoint x="500" y="120" />
+        <di:waypoint x="550" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_2_di" bpmnElement="SequenceFlow_2">
+        <di:waypoint x="370" y="120" />
+        <di:waypoint x="450" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1_di" bpmnElement="SequenceFlow_1">
+        <di:waypoint x="209" y="120" />
+        <di:waypoint x="270" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1jfm7ez_di" bpmnElement="Flow_1jfm7ez">
+        <di:waypoint x="960" y="120" />
+        <di:waypoint x="1025" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0czcy9j_di" bpmnElement="Flow_0czcy9j">
+        <di:waypoint x="475" y="145" />
+        <di:waypoint x="475" y="260" />
+        <di:waypoint x="720" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ko3sas_di" bpmnElement="Flow_0ko3sas">
+        <di:waypoint x="750" y="145" />
+        <di:waypoint x="750" y="194" />
+        <di:waypoint x="738" y="194" />
+        <di:waypoint x="738" y="242" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10c1mpf_di" bpmnElement="Flow_10c1mpf">
+        <di:waypoint x="1075" y="120" />
+        <di:waypoint x="1192" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1imgk2h_di" bpmnElement="Flow_1imgk2h">
+        <di:waypoint x="1050" y="145" />
+        <di:waypoint x="1050" y="260" />
+        <di:waypoint x="756" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_01onup7_di" bpmnElement="Flow_01onup7">
+        <di:waypoint x="650" y="120" />
+        <di:waypoint x="725" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1aef9on_di" bpmnElement="Flow_1aef9on">
+        <di:waypoint x="775" y="120" />
+        <di:waypoint x="860" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="173" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="183" y="145" width="55" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_1_di" bpmnElement="approveL1">
+        <dc:Bounds x="270" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_1_di" bpmnElement="ExclusiveGateway_1" isMarkerVisible="true">
+        <dc:Bounds x="450" y="95" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="438" y="154" width="24" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_2_di" bpmnElement="approveL2">
+        <dc:Bounds x="550" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_2_di" bpmnElement="EndEvent_2">
+        <dc:Bounds x="720" y="242" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">
+        <dc:Bounds x="1192" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_3_di" bpmnElement="approveL3">
+        <dc:Bounds x="860" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0ifab72_di" bpmnElement="Gateway_0ifab72" isMarkerVisible="true">
+        <dc:Bounds x="725" y="95" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0yk52r7_di" bpmnElement="Gateway_0yk52r7" isMarkerVisible="true">
+        <dc:Bounds x="1025" y="95" width="50" height="50" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

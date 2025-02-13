@@ -58,8 +58,8 @@ public class DB1Config {
     @Autowired
     private Environment env;
   
-//    @Value("${SQL_SERVER_1_USERNAME}")
-//    private String envvv;
+    @Value("${SQL_SERVER_1_USERNAME}")
+    private String envvv;
 
     @Primary
     @Bean

@@ -13,6 +13,10 @@ logging:
       org.springframework.security: INFO
       org.apache.http: INFO
       httpclient.wire: INFO
+      org.hibernate.SQL: DEBUG
+      org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+      org.springframework.mail: DEBUG
+
 
 spring.mvc.converters.preferred-json-mapper: gson
 
@@ -50,9 +54,9 @@ spring:
       #url: jdbc:sqlserver://216.48.180.83;databaseName=AOP;trustServerCertificate=true
       #username: sa
       #password: "#Qwer123"
-      url: ${SQL_SERVER_1_URL:jdbc:sqlserver://216.48.180.83;databaseName=AOP;trustServerCertificate=true;portNumber=1433}
-      username: ${SQL_SERVER_1_USERNAME:sa}
-      password: ${SQL_SERVER_1_PASSWORD:"#Qwer123"}
+      url: ${SQL_SERVER_1_URL}
+      username: ${SQL_SERVER_1_USERNAME}
+      password: ${SQL_SERVER_1_PASSWORD}
       driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
       hikari:
         maximum-pool-size: 10
@@ -60,12 +64,10 @@ spring:
 
     # Configuration for Database 2
     db2:
-      #url: jdbc:sqlserver://216.48.180.83;databaseName=AOP;trustServerCertificate=true
-      #username: sa
-      #password: "#Qwer123"
-      url: ${SQL_SERVER_2_URL:jdbc:sqlserver://216.48.180.83;databaseName=AOP;trustServerCertificate=true;portNumber=1433}
-      username: ${SQL_SERVER_2_USERNAME:sa}
-      password: ${SQL_SERVER_2_PASSWORD:"#Qwer123"}
+      # url: jdbc:sqlserver://216.48.180.83;databaseName=CaseManagement;trustServerCertificate=true
+      url: ${SQL_SERVER_2_URL}
+      username: ${SQL_SERVER_2_USERNAME}
+      password: ${SQL_SERVER_2_PASSWORD}
       driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
       hikari:
         maximum-pool-size: 10
@@ -80,8 +82,8 @@ spring:
         dialect: org.hibernate.dialect.SQLServerDialect
         format_sql: true
 
-        
-management.endpoints.web.exposure.include: health,info
+
+management.endpoints.web.exposure.include: health,info, metrics,db
 management.endpoint.health.show-details: never
 
 case.engine.case-creation-process: case-instance-create

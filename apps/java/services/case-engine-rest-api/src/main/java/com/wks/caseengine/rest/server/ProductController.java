@@ -13,7 +13,7 @@ import com.wks.caseengine.tasks.ProductService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("product")
+@RequestMapping("task")
 @Tag(name = "Product", description = "test Product")
 public class ProductController {
 	private ProductService productService;
@@ -25,7 +25,7 @@ public class ProductController {
     }
     
     
-	@GetMapping(value = "")
+	@GetMapping(value = "/productList")
 	public ResponseEntity<List<Product>> getProducts() {
 	    List<Product> products = productService.getAllProducts(); 
 	    return ResponseEntity.ok(products);

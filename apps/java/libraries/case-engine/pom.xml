@@ -75,20 +75,6 @@
 			<artifactId>bpm-engine-client</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
-
-		<dependency>
-	        <groupId>com.microsoft.sqlserver</groupId>
-	        <artifactId>mssql-jdbc</artifactId>
-	        <version>11.2.0.jre17</version> <!-- Ensure compatibility with your Java version -->
-	    </dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jdbc</artifactId>
-		</dependency>
-
-
-
 		
 		<dependency>
 			<groupId>com.wks</groupId>
