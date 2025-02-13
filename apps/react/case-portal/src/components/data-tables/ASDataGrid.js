@@ -16,10 +16,10 @@ import SearchIcon from '@mui/icons-material/Search'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 // import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-// import { useSession } from 'SessionStoreContext'
+import { useSession } from 'SessionStoreContext'
 
 import { Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'
-// import { DataService } from 'services/DataService'
+import { DataService } from 'services/DataService'
 
 const jioColors = {
   primaryBlue: '#0F3CC9',
@@ -53,7 +53,7 @@ const DataGridTable = ({
   const [resizedColumns, setResizedColumns] = useState({})
   const [open, setOpen] = useState(false)
 
-  // const keycloak = useSession()
+  const keycloak = useSession()
   const [days, setDays] = useState([])
 
   const handleSearchChange = (event) => {
@@ -155,6 +155,26 @@ const DataGridTable = ({
   useEffect(() => {
     console.log('Current Page:', paginationModel.page)
   }, [paginationModel])
+
+
+
+   useEffect(() => {
+    console.log('api call here ')
+    dummyApiCall(1)
+  }, [])
+
+
+  const dummyApiCall = async (id) => {
+    try {
+      const data = await DataService.getProductById(keycloak, id);
+      console.log('API Response:', data);
+    } catch (error) {
+      console.error('Error fetching product:', error);
+    } finally {
+      // handleMenuClose();
+    }
+  };
+
 
   const defaultColumns = useMemo(() => {
     return initialColumns.map((col) => ({
