@@ -6,7 +6,7 @@ export const DataService = {
 }
 
 async function getProductById(keycloak, id) {
-    const url = `${process.env.REACT_APP_API_URL}/product/product`; 
+    const url = `${process.env.REACT_APP_API_URL}/task/productList`; 
   
     const headers = {
       Accept: 'application/json',

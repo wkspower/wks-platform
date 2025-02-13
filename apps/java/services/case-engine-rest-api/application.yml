@@ -43,6 +43,44 @@ keycloak.url: ${KEYCLOAK_URL:http://localhost:8082}
 
 management.health.mongo.enabled: false
 management.health.reds.enabled: false
+spring:
+  datasource:
+    # Configuration for Database 1
+    db1:
+      #url: jdbc:sqlserver://216.48.180.83;databaseName=AOP;trustServerCertificate=true
+      #username: sa
+      #password: "#Qwer123"
+      url: ${SQL_SERVER_1_URL:jdbc:sqlserver://216.48.180.83;databaseName=AOP;trustServerCertificate=true;portNumber=1433}
+      username: ${SQL_SERVER_1_USERNAME:sa}
+      password: ${SQL_SERVER_1_PASSWORD:"#Qwer123"}
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      hikari:
+        maximum-pool-size: 10
+        minimum-idle: 5
+
+    # Configuration for Database 2
+    db2:
+      #url: jdbc:sqlserver://216.48.180.83;databaseName=AOP;trustServerCertificate=true
+      #username: sa
+      #password: "#Qwer123"
+      url: ${SQL_SERVER_2_URL:jdbc:sqlserver://216.48.180.83;databaseName=AOP;trustServerCertificate=true;portNumber=1433}
+      username: ${SQL_SERVER_2_USERNAME:sa}
+      password: ${SQL_SERVER_2_PASSWORD:"#Qwer123"}
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      hikari:
+        maximum-pool-size: 10
+        minimum-idle: 5
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
+        format_sql: true
+
+        
 management.endpoints.web.exposure.include: health,info
 management.endpoint.health.show-details: never
 

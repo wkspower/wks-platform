@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.wks.bpm.engine.model.spi.ProcessVariable;
+import com.wks.bpm.engine.model.spi.Product;
 import com.wks.bpm.engine.model.spi.Task;
 
 public interface TaskService {
