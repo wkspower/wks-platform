@@ -131,57 +131,50 @@ function requestRemoteDataSourceAndFillRecordTypesIfRequired(
   original,
   keycloak,
 ) {
-  const components = original.structure?.components?.map((item) => {
-    if (item.type === 'recordtype') {
-      const options = item.customOptions
-      const typeRender =
-        options.inputType === 'selectone' ? 'select' : 'selectboxes'
-      const template = options.template
-      const recordId = options.recordType.id
-      const valueProperty = options.valueProperty
+  function processComponentWithContext(components) {
+    return components?.map((item) => {
+      if (item.type === 'recordtype') {
+        const options = item.customOptions
+        const typeRender =
+          options.inputType === 'selectone' ? 'select' : 'selectboxes'
+        const template = options.template
+        const recordId = options.recordType.id
+        const valueProperty = options.valueProperty
 
-      return {
-        ...item,
-        type: typeRender,
-        dataSrc: 'url',
-        template: `<span>${template}</span>`,
-        valueProperty: valueProperty,
-        data: {
-          url: `${Config.CaseEngineUrl}/record/${recordId}`,
-          headers: [
-            {
-              key: 'Authorization',
-              value: `Bearer ${keycloak.token}`,
-            },
-          ],
-        },
+        return {
+          ...item,
+          type: typeRender,
+          dataSrc: 'url',
+          template: `<span>${template}</span>`,
+          valueProperty: valueProperty,
+          data: {
+            url: `${Config.CaseEngineUrl}/record/${recordId}`,
+            headers: [
+              {
+                key: 'Authorization',
+                value: `Bearer ${keycloak.token}`,
+              },
+            ],
+          },
+        }
       }
-    }
 
-    if (item.properties._internalClass_ === 'recordType') {
-      return {
-        ...item,
-        dataSrc: 'url',
-        data: {
-          url: `${Config.CaseEngineUrl}/record/${item.key}`,
-          headers: [
-            {
-              key: 'Authorization',
-              value: `Bearer ${keycloak.token}`,
-            },
-          ],
-        },
+      if (item.components) {
+        return {
+          ...item,
+          components: processComponentWithContext(item.components),
+        }
       }
-    }
 
-    return item
-  })
+      return item
+    })
+  }
 
   return {
     ...original,
     structure: {
       ...original.structure,
-      components,
+      components: processComponentWithContext(original.structure?.components),
     },
   }
 }
