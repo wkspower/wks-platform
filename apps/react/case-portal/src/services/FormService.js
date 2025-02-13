@@ -131,7 +131,6 @@ function requestRemoteDataSourceAndFillRecordTypesIfRequired(
   original,
   keycloak,
 ) {
-
   const components = original.structure?.components?.map((item) => {
     if (item.type === 'recordtype') {
       const options = item.customOptions

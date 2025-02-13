@@ -95,6 +95,6 @@ class RecordTypeChoice extends Formio.Components.components.field {
   }
 }
 
-Formio.Components.addComponent('recordtype', RecordTypeChoice);
+Formio.Components.addComponent('recordtype', RecordTypeChoice)
 
 export default RecordTypeChoice

@@ -29,7 +29,7 @@ const App = () => {
       RegisterInjectUserSession(keycloak)
       RegisteOptions(keycloak)
       forceLogoutIfUserNoMinimalRoleForSystem(keycloak)
-      registerExtensionModulesFormio();
+      registerExtensionModulesFormio()
     })
 
     keycloak.onAuthRefreshError = () => {

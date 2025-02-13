@@ -196,4 +196,3 @@ function injectGlobalVariables(apiDataVariables, task) {
     processInstanceId: task.processInstanceId,
   }
 }
-
