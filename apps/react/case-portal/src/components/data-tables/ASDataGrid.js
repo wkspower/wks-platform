@@ -3,29 +3,29 @@ import { DataGrid } from '@mui/x-data-grid'
 import {
   Button,
   TextField,
-  Menu,
-  MenuItem,
+  // Menu,
+  // MenuItem,
   IconButton,
   Typography,
   Box,
   InputAdornment,
   Modal,
 } from '@mui/material'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
+// import MoreVertIcon from '@mui/icons-material/MoreVert'
 import SearchIcon from '@mui/icons-material/Search'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
-import EditIcon from '@mui/icons-material/Edit'
+// import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { useSession } from 'SessionStoreContext'
+// import { useSession } from 'SessionStoreContext'
 
 import { Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'
-import { DataService } from 'services/DataService'
+// import { DataService } from 'services/DataService'
 
 const jioColors = {
-  primaryBlue: '#1B4E9B',
+  primaryBlue: '#0F3CC9',
   accentRed: '#E31C3D',
   background: '#FFFFFF',
-  headerBg: '#DAE0EF',
+  headerBg: '#0F3CC9',
   rowEven: '#FFFFFF',
   rowOdd: '#FFFFFF',
   textPrimary: '#2D2D2D',
@@ -43,8 +43,8 @@ const DataGridTable = ({
 }) => {
   const [rows, setRows] = useState(initialRows)
   const [searchText, setSearchText] = useState('')
-  const [anchorEl, setAnchorEl] = useState(null)
-  const [selectedRow, setSelectedRow] = useState(null)
+  // const [anchorEl, setAnchorEl] = useState(null)
+  // const [selectedRow, setSelectedRow] = useState(null)
   const [isFilterActive, setIsFilterActive] = useState(false)
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
@@ -52,8 +52,8 @@ const DataGridTable = ({
   })
   const [resizedColumns, setResizedColumns] = useState({})
   const [open, setOpen] = useState(false)
-  
-  const keycloak = useSession()
+
+  // const keycloak = useSession()
   const [days, setDays] = useState([])
 
   const handleSearchChange = (event) => {
@@ -74,7 +74,6 @@ const DataGridTable = ({
     setIsFilterActive(!isFilterActive)
   }
 
-
   const filteredRows = rows.filter((row) => {
     const matchesSearch = Object.values(row).some((value) =>
       String(value).toLowerCase().includes(searchText.toLowerCase()),
@@ -83,40 +82,39 @@ const DataGridTable = ({
     return matchesSearch && matchesDuration
   })
 
-  const handleMenuClick = (event, row) => {
-    setAnchorEl(event.currentTarget)
-    setSelectedRow(row)
-  }
+  // const handleMenuClick = (event, row) => {
+  //   setAnchorEl(event.currentTarget)
+  //   setSelectedRow(row)
+  // }
 
-  const handleMenuClose = () => {
-    setAnchorEl(null)
-    setSelectedRow(null)
-  }
+  // const handleMenuClose = () => {
+  //   setAnchorEl(null)
+  //   setSelectedRow(null)
+  // }
 
   const handleDeleteRow = (id) => {
     const updatedRows = rows.filter((row) => row?.id !== id)
     setRows(updatedRows)
     onDeleteRow?.(id) // Call the onDeleteRow prop if provided
-    handleMenuClose()
+    // handleMenuClose()
   }
 
-  const handleEditRow2 = (id) => {
-    // Implement your edit row logic here
-    console.log(`Edit row with id: ${id}`)
-    handleMenuClose()
-  }
+  // const handleEditRow2 = (id) => {
+  //   // Implement your edit row logic here
+  //   console.log(`Edit row with id: ${id}`)
+  //   handleMenuClose()
+  // }
 
-
-  const handleEditRow = async (id) => {
-    try {
-      const data = await DataService.getProductById(keycloak, id);
-      console.log('API Response:', data);
-    } catch (error) {
-      console.error('Error fetching product:', error);
-    } finally {
-      handleMenuClose();
-    }
-  };
+  // const handleEditRow = async (id) => {
+  //   try {
+  //     const data = await DataService.getProductById(keycloak, id)
+  //     console.log('API Response:', data)
+  //   } catch (error) {
+  //     console.error('Error fetching product:', error)
+  //   } finally {
+  //     handleMenuClose()
+  //   }
+  // }
 
   const processRowUpdate = (newRow) => {
     const updatedRow = { ...newRow, isNew: false }
@@ -139,7 +137,24 @@ const DataGridTable = ({
     const updatedRows = [...rows, newRow]
     setRows(updatedRows)
     onAddRow?.(newRow)
+
+    // Check if new row exceeds the current page limit
+    const totalRows = updatedRows.length
+    const maxRowsOnCurrentPage =
+      paginationModel.pageSize * (paginationModel.page + 1)
+    // const exactRows = maxRowsOnCurrentPage - 1
+    // console.log(totalRows, maxRowsOnCurrentPage, exactRows)
+    if (totalRows > maxRowsOnCurrentPage) {
+      console.log('test', totalRows > maxRowsOnCurrentPage)
+      setPaginationModel((prev) => ({
+        ...prev,
+        page: prev.page + 1, // Move to the next page
+      }))
+    }
   }
+  useEffect(() => {
+    console.log('Current Page:', paginationModel.page)
+  }, [paginationModel])
 
   const defaultColumns = useMemo(() => {
     return initialColumns.map((col) => ({
@@ -155,70 +170,108 @@ const DataGridTable = ({
       headerName: 'Actions',
       width: 180,
       cellClassName: 'with-border',
-      textAlign: 'center',
+      headerAlign: 'center',
+      align: 'center',
       renderCell: (params) => (
-        <>
-          <IconButton
-            onClick={(event) => handleMenuClick(event, params.row)}
-            aria-label='more'
-            aria-controls='long-menu'
-            aria-haspopup='true'
-          >
-            <MoreVertIcon />
-          </IconButton>
-          <Menu
-            id='long-menu'
-            anchorEl={anchorEl}
-            keepMounted
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-            sx={{ boxShadow: 'none', '&:focus': { boxShadow: 'none' } }}
-          >
-            <MenuItem
-              onClick={() => handleEditRow(selectedRow?.id)}
-              sx={{
-                boxShadow: 'none',
-                '&:focus': { boxShadow: 'none' },
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1, // Adds spacing between icon and text
-              }}
-            >
-              <EditIcon sx={{ color: jioColors.primaryBlue }} />
-              Edit
-            </MenuItem>
-
-            {/* Delete Option */}
-            <MenuItem
-              onClick={() => handleDeleteRow(selectedRow?.id)}
-              sx={{
-                boxShadow: 'none',
-                '&:focus': { boxShadow: 'none' },
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1, // Adds spacing between icon and text
-              }}
-            >
-              <DeleteIcon sx={{ color: jioColors.primaryBlue }} />
-              Delete
-            </MenuItem>
-          </Menu>
-        </>
+        <IconButton
+          onClick={() => handleDeleteRow(params.row.id)}
+          aria-label='delete'
+        >
+          <DeleteIcon sx={{ color: jioColors.accentRed }} />
+        </IconButton>
       ),
-
       flex: 1,
       headerClassName: 'last-column-header',
-      // cellClassName: 'last-column-cell',
     },
   ]
 
+  // const handleCellClick = (params) => {
+  //   if (
+  //     // title == 'Production Volume Data' &&
+  //     params.isEditable == true &&
+  //     params.field != 'product' &&
+  //     params.field != 'averageTPH' &&
+  //     params.field != 'remark' &&
+  //     params.field != 'id' &&
+  //     params.field != 'actions' &&
+  //     params.field != 'isNew' &&
+  //     params.field != 'taTo' &&
+  //     params.field != 'taFrom' &&
+  //     params.field != 'activities' &&
+  //     params.field != 'durationHrs' &&
+  //     params.field != 'period' &&
+  //     params.value !== null && // Check if the cell is not empty
+  //     params.value !== undefined &&
+  //     params.value !== ''
+  //   ) {
+  //     // setSelectedRow(params.row)
+  //     setOpen(true)
+  //   }
+  // }
   const handleCellClick = (params) => {
-    if(title=='Production Volume Data' && params.isEditable == true && params.field != 'product'){
-      setSelectedRow(params.row)
+    const nonEditableFields = [
+      'product',
+      'averageTPH',
+      'remark',
+      'id',
+      'actions',
+      'isNew',
+      'taTo',
+      'taFrom',
+      'activities',
+      'durationHrs',
+      'period',
+    ]
+
+    // if (params.isEditable && !nonEditableFields.includes(params.field) && params.value != null) {
+    //   setOpen(true);
+    // }
+    if (
+      params.isEditable &&
+      !nonEditableFields.includes(params.field) &&
+      params.value !== null && // Check if the cell is not empty
+      params.value !== undefined &&
+      params.value !== ''
+    ) {
+      // Extract month and year from the column's field (e.g., 'apr24')
+      const field = params.field
+      const monthAbbr = field.substring(0, 3).toLowerCase()
+      const yearShort = field.substring(3)
+      const year = 2000 + parseInt(yearShort, 10)
+
+      const monthMap = {
+        jan: 0,
+        feb: 1,
+        mar: 2,
+        apr: 3,
+        may: 4,
+        jun: 5,
+        jul: 6,
+        aug: 7,
+        sep: 8,
+        oct: 9,
+        nov: 10,
+        dec: 11,
+      }
+      const month = monthMap[monthAbbr]
+
+      if (month === undefined) {
+        console.error('Invalid month abbreviation:', monthAbbr)
+        return
+      }
+
+      // Calculate days in the selected month
+      const totalDays = new Date(year, month + 1, 0).getDate()
+      const daysArray = Array.from({ length: totalDays }, (_, index) => ({
+        date: index + 1,
+        value: Math.floor(Math.random() * 100), // Replace with actual data if needed
+      }))
+
+      // Update the days state and open the modal
+      setDays(daysArray)
       setOpen(true)
     }
   }
-
 
   useEffect(() => {
     const getDaysInMonth = () => {
@@ -244,7 +297,7 @@ const DataGridTable = ({
     console.log('Submitted Data:', days)
     setOpen(false) // Close the modal
   }
-  
+
   const handleCancel = () => {
     setOpen(false) // Just close the modal
   }
@@ -281,7 +334,7 @@ const DataGridTable = ({
         width: '100%',
         padding: 2,
         backgroundColor: '#fff',
-        borderRadius: 2,
+        borderRadius: 0,
         borderBottom: 'none',
       }}
     >
@@ -366,7 +419,7 @@ const DataGridTable = ({
           />
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        {/* <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography
             sx={{ marginRight: 1, fontWeight: 300, color: '#8A9BC2' }}
           >
@@ -393,11 +446,12 @@ const DataGridTable = ({
           <Typography sx={{ marginLeft: 1, fontWeight: 300, color: '#8A9BC2' }}>
             Entries
           </Typography>
-        </Box>
+        </Box> */}
       </Box>
 
       <Box sx={{ height: 'calc(100% - 150px)', width: '100%' }}>
         <DataGrid
+          key={paginationModel.page}
           rows={filteredRows}
           // columns={columns}
           columns={columns.map((col) => ({
@@ -419,21 +473,29 @@ const DataGridTable = ({
             params.indexRelativeToCurrentPage % 2 === 0 ? 'even-row' : 'odd-row'
           }
           sx={{
-            borderRadius: '4px',
+            borderRadius: '0px',
             border: `1px solid ${jioColors.border}`,
             fontSize: '0.8rem',
             '& .MuiDataGrid-root .MuiDataGrid-cell': {
               fontSize: '0.8rem',
               color: '#A9A9A9',
             },
+            '& .MuiDataGrid-root': {
+              borderRadius: '0px',
+            },
+            '& .MuiDataGrid-footerContainer': {
+              display: 'none',
+            },
             '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: '#F2F3F8',
-              color: '#3E4E75',
+              backgroundColor: jioColors.headerBg,
+              color: '#FFFFFF',
+              // backgroundColor: '#F2F3F8',
+              // color: '#3E4E75',
               fontSize: '0.8rem',
               fontWeight: 600,
               borderBottom: `2px solid ${'#DAE0EF'}`,
-              borderTopLeftRadius: '14px',
-              borderTopRightRadius: '14px',
+              borderTopLeftRadius: '0px',
+              borderTopRightRadius: '0px',
             },
             '& .MuiDataGrid-cell': {
               borderRight: `none`,
@@ -577,10 +639,15 @@ const DataGridTable = ({
           {/* Buttons */}
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
             <Button onClick={handleCancel} variant='outlined' sx={{ mr: 2 }}>
-              Cancel
+              Discard
             </Button>
-            <Button onClick={handleSubmit} variant='contained' color='primary'>
-              Submit
+            <Button
+              onClick={handleSubmit}
+              variant='contained'
+              //  color='primary'
+              sx={{ backgroundColor: jioColors?.headerBg, color: 'white' }}
+            >
+              Save
             </Button>
           </Box>
         </Box>

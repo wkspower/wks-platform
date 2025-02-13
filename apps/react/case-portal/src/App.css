@@ -1,3 +1,37 @@
 legend {
   width: auto;
 }
+
+header {
+  background-color: #0f3cc9 !important ; /* Example: Light gray background */
+}
+
+.css-1ynvhpv-MuiButtonBase-root-MuiListItemButton-root.Mui-selected {
+  background-color: #3f93dc; /* Example: Light gray background */
+  color: white;
+}
+
+.css-1ynvhpv-MuiButtonBase-root-MuiListItemButton-root.Mui-selected:hover {
+  background-color: #3f93dc; /* Example: Light gray background */
+  color: white;
+}
+.css-hd56dl-MuiTypography-root {
+  color: #ffffff; /* Example: Light gray background */
+}
+.css-h404g3-MuiButtonBase-root-MuiListItemButton-root.Mui-selected {
+  background-color: #3f93dc; /* Example: Light gray background */
+  color: white;
+}
+
+.css-h404g3-MuiButtonBase-root-MuiListItemButton-root.Mui-selected {
+  border-radius: 0px;
+}
+
+.css-1ynvhpv-MuiButtonBase-root-MuiListItemButton-root:hover {
+  background-color: #fff; /* Example: Light gray background */
+  color: white;
+}
+
+.css-s857sy-MuiInputBase-input-MuiOutlinedInput-input {
+  color: #ffffff; /* Example: Light gray background */
+}

@@ -1,7 +1,5 @@
 import {
   Autocomplete,
-  MenuItem,
-  Select,
   TextField,
 } from '../../../node_modules/@mui/material/index'
 import ASDataGrid from './ASDataGrid'
@@ -25,32 +23,7 @@ const productionColumns = [
     headerName: 'Product',
     width: 150,
     editable: false,
-    // renderEditCell: (params) => {
-    //   console.log(params)
-    //   const { id } = params
-    //   const isEditable = id > 10
 
-    //   return (
-    //     <Select
-    //       value={params?.value}
-    //       onChange={(e) =>
-    //         params.api.setEditCellValue({
-    //           id: params?.id,
-    //           field: 'product',
-    //           value: e.target.value,
-    //         })
-    //       }
-    //       disabled={!isEditable}
-    //       fullWidth
-    //     >
-    //       {productOptions.map((option) => (
-    //         <MenuItem key={option} value={option}>
-    //           {option}
-    //         </MenuItem>
-    //       ))}
-    //     </Select>
-    //   )
-    // },
     renderEditCell: (params) => {
       console.log(params)
       const { id } = params

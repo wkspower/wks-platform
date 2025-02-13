@@ -91,9 +91,9 @@ const UIColor = () => (
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={2}>
               <ColorBox
-                bgcolor='primary.dark'
+                bgcolor='primary?.dark'
                 data={{ label: 'Blue-600', color: '#1E88E5' }}
-                title='primary.dark'
+                title='primary?.dark'
               />
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={2}>
@@ -134,9 +134,9 @@ const UIColor = () => (
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={2}>
               <ColorBox
-                bgcolor='secondary.dark'
+                bgcolor='secondary?.dark'
                 data={{ label: 'DeepPurple-600', color: '#5e35b1' }}
-                title='secondary.dark'
+                title='secondary?.dark'
               />
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={2}>
@@ -176,9 +176,9 @@ const UIColor = () => (
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={2}>
               <ColorBox
-                bgcolor='success.dark'
+                bgcolor='success?.dark'
                 data={{ label: 'Green-A700', color: '#00c853' }}
-                title='success.dark'
+                title='success?.dark'
               />
             </Grid>
           </Grid>
@@ -204,9 +204,9 @@ const UIColor = () => (
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={2}>
               <ColorBox
-                bgcolor='orange.dark'
+                bgcolor='orange?.dark'
                 data={{ label: 'DeepOrange-800', color: '#d84315' }}
-                title='orange.dark'
+                title='orange?.dark'
               />
             </Grid>
           </Grid>
@@ -232,9 +232,9 @@ const UIColor = () => (
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={2}>
               <ColorBox
-                bgcolor='error.dark'
+                bgcolor='error?.dark'
                 data={{ label: 'Red-800', color: '#c62828' }}
-                title='error.dark'
+                title='error?.dark'
               />
             </Grid>
           </Grid>
@@ -261,9 +261,9 @@ const UIColor = () => (
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={2}>
               <ColorBox
-                bgcolor='warning.dark'
+                bgcolor='warning?.dark'
                 data={{ label: 'Amber-500', color: '#FFC107' }}
-                title='warning.dark'
+                title='warning?.dark'
               />
             </Grid>
           </Grid>

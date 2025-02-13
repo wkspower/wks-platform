@@ -1,4 +1,7 @@
-import { MenuItem, Select } from '../../../node_modules/@mui/material/index'
+import {
+  Autocomplete,
+  TextField,
+} from '../../../node_modules/@mui/material/index'
 import ASDataGrid from './ASDataGrid'
 const productOptions = [
   'Product A',
@@ -20,30 +23,63 @@ const productionColumns = [
     headerName: 'Product',
     width: 150,
     editable: true,
+    // renderEditCell: (params) => {
+    //   console.log(params)
+    //   const { id } = params
+    //   const isEditable = id > 10
+
+    //   return (
+    //     <Select
+    //       value={params?.value}
+    //       onChange={(e) =>
+    //         params.api.setEditCellValue({
+    //           id: params?.id,
+    //           field: 'product',
+    //           value: e.target.value,
+    //         })
+    //       }
+    //       disabled={!isEditable}
+    //       fullWidth
+    //     >
+    //       {productOptions.map((option) => (
+    //         <MenuItem key={option} value={option}>
+    //           {option}
+    //         </MenuItem>
+    //       ))}
+    //     </Select>
+    //   )
+    // },
     renderEditCell: (params) => {
-      console.log(params)
       const { id } = params
-      const isEditable = id > 10
+      const isEditable = id > 10 // Enable only for rows beyond 10
 
       return (
-        <Select
-          value={params?.value}
-          onChange={(e) =>
+        <Autocomplete
+          options={productOptions}
+          value={params.value || ''}
+          disableClearable
+          onChange={(event, newValue) => {
             params.api.setEditCellValue({
-              id: params?.id,
+              id: params.id,
               field: 'product',
-              value: e.target.value,
+              value: newValue,
             })
-          }
+          }}
+          onInputChange={(event, newInputValue) => {
+            if (event && event.type === 'keydown' && event.key === 'Enter') {
+              params.api.setEditCellValue({
+                id: params.id,
+                field: 'product',
+                value: newInputValue,
+              })
+            }
+          }}
+          renderInput={(params) => (
+            <TextField {...params} variant='outlined' size='small' />
+          )}
           disabled={!isEditable}
           fullWidth
-        >
-          {productOptions.map((option) => (
-            <MenuItem key={option} value={option}>
-              {option}
-            </MenuItem>
-          ))}
-        </Select>
+        />
       )
     },
   },

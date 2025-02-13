@@ -30,11 +30,11 @@ const defs = {
     dataForm2: 'WKS Form2',
     // New menu items for "Production / Norms Plan"
     productionNormsPlan: 'Production / Norms Plan',
-    productMCUVal: 'Product MCU Val',
-    productDemand: 'Product Demand',
+    productMCUVal: 'Production Valume Data',
+    productDemand: 'Business Demand Data',
     shutdownPlan: 'Shutdown Plan',
     slowdownPlan: 'Slowdown Plan',
-    taPlan: 'TA Plan',
+    taPlan: 'Turnaround Plan',
     feedStock: 'Feed Stock Availability',
 
     productionNormsOutput: 'Production Norms (Output)',
@@ -184,11 +184,11 @@ const defs = {
     productionNormsPlanPage: {
       title: 'Production / Norms Plan',
       subPages: {
-        productMCUVal: 'Product MCU Val',
-        productDemand: 'Product Demand',
+        productMCUVal: 'Production Valume Data',
+        productDemand: 'Business Demand Data',
         shutdownPlan: 'Shutdown Plan',
         slowdownPlan: 'Slowdown Plan',
-        taPlan: 'TA Plan',
+        taPlan: 'Turnaround Plan',
         productionNormsOutput: 'Production Norms (Output)',
         consumptionNormsOutput: 'Consumption Norms (Output)',
         shutdownNormsOutput: 'Shutdown Norms (Output)',

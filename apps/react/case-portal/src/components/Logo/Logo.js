@@ -27,7 +27,7 @@ const Logo = () => {
             <stop stopColor={theme.palette.primary.darker} />
             <stop
               offset='0.9637'
-              stopColor={theme.palette.primary.dark}
+              stopColor={theme.palette.primary?.dark}
               stopOpacity='0'
             />
           </linearGradient>
@@ -42,7 +42,7 @@ const Logo = () => {
             <stop stopColor={theme.palette.primary.darker} />
             <stop
               offset='1'
-              stopColor={theme.palette.primary.dark}
+              stopColor={theme.palette.primary?.dark}
               stopOpacity='0'
             />
           </linearGradient>

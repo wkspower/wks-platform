@@ -7,6 +7,17 @@ import {
   IconList,
   IconSquareAsterisk,
   IconDatabase,
+  IconChartBar, // For analytics/data trend
+  IconSettings, // For settings/reliability
+  IconPower, // For shutdown-related items
+  IconTrendingDown, // For slowdown
+  IconTools, // For maintenance (TA Plan)
+  IconShield, // For safety
+  IconFunction, // For functions module
+  IconReport, // For reports section
+  IconFile, // General file icon
+  IconFileText, // For textual reports
+  // IconFlow, // For workflow-related processes
 } from '@tabler/icons-react'
 
 import i18n from '../i18n'
@@ -19,6 +30,17 @@ const icons = {
   IconSquareAsterisk,
   IconList,
   IconDatabase,
+  IconChartBar,
+  IconSettings,
+  IconPower,
+  IconTrendingDown,
+  IconTools,
+  IconShield,
+  IconFunction,
+  IconReport,
+  IconFile,
+  IconFileText,
+  // IconFlow,
 }
 
 const workspace = {
@@ -53,7 +75,7 @@ const workspace = {
           title: i18n.t('menu.productDemand'),
           type: 'item',
           url: '/production-norms-plan/product-demand',
-          icon: icons.IconList,
+          icon: icons.IconChartBar,
           breadcrumbs: true,
         },
         {
@@ -61,7 +83,7 @@ const workspace = {
           title: i18n.t('menu.productMCUVal'),
           type: 'item',
           url: '/production-norms-plan/product-mcu-val',
-          icon: icons.IconList,
+          icon: icons.IconSettings,
           breadcrumbs: true,
         },
         {
@@ -69,7 +91,7 @@ const workspace = {
           title: i18n.t('menu.shutdownPlan'),
           type: 'item',
           url: '/production-norms-plan/shutdown-plan',
-          icon: icons.IconList,
+          icon: icons.IconPower,
           breadcrumbs: true,
         },
         {
@@ -77,7 +99,7 @@ const workspace = {
           title: i18n.t('menu.slowdownPlan'),
           type: 'item',
           url: '/production-norms-plan/slowdown-plan',
-          icon: icons.IconList,
+          icon: icons.IconTrendingDown,
           breadcrumbs: true,
         },
         {
@@ -85,7 +107,7 @@ const workspace = {
           title: i18n.t('menu.taPlan'),
           type: 'item',
           url: '/production-norms-plan/ta-plan',
-          icon: icons.IconList,
+          icon: icons.IconTools,
           breadcrumbs: true,
         },
         {
@@ -93,7 +115,7 @@ const workspace = {
           title: i18n.t('menu.feedStock'),
           type: 'item',
           url: '/production-norms-plan/feed-stock',
-          icon: icons.IconList,
+          icon: icons.IconDatabase,
           breadcrumbs: true,
         },
       ],
@@ -176,7 +198,7 @@ const workspace = {
       title: i18n.t('menu.workflow'),
       type: 'item',
       url: '/workflow',
-      icon: icons.IconFlow,
+      icon: icons?.IconList,
       breadcrumbs: true,
     },
   ],

@@ -17,9 +17,9 @@ import useTheme from '@mui/material/styles/useTheme'
 import Transitions from 'components/@extended/Transitions'
 import MainCard from 'components/MainCard'
 import ProfileTab from './ProfileTab'
-import SettingTab from './SettingTab'
+// import SettingTab from './SettingTab'
 import LogoutOutlined from '@ant-design/icons/LogoutOutlined'
-import SettingOutlined from '@ant-design/icons/SettingOutlined'
+// import SettingOutlined from '@ant-design/icons/SettingOutlined'
 import UserOutlined from '@ant-design/icons/UserOutlined'
 import avatar2 from 'assets/images/users/avatar-2.png'
 
@@ -202,7 +202,7 @@ const Profile = ({ keycloak }) => {
                               label='Profile'
                               {...a11yProps(0)}
                             />
-                            <Tab
+                            {/* <Tab
                               sx={{
                                 display: 'flex',
                                 flexDirection: 'row',
@@ -220,15 +220,15 @@ const Profile = ({ keycloak }) => {
                               }
                               label='Setting'
                               {...a11yProps(1)}
-                            />
+                            /> */}
                           </Tabs>
                         </Box>
                         <TabPanel value={value} index={0} dir={theme.direction}>
                           <ProfileTab handleLogout={handleLogout} />
                         </TabPanel>
-                        <TabPanel value={value} index={1} dir={theme.direction}>
+                        {/* <TabPanel value={value} index={1} dir={theme.direction}>
                           <SettingTab />
-                        </TabPanel>
+                        </TabPanel> */}
                       </>
                     )}
                   </MainCard>

@@ -10,7 +10,7 @@ const Search = () => (
         size='small'
         id='header-search'
         startAdornment={
-          <InputAdornment position='start' sx={{ mr: -0.5 }}>
+          <InputAdornment position='start' sx={{ color: '#fff', mr: -0.5 }}>
             <SearchOutlined />
           </InputAdornment>
         }
