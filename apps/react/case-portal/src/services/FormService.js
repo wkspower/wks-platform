@@ -131,13 +131,24 @@ function requestRemoteDataSourceAndFillRecordTypesIfRequired(
   original,
   keycloak,
 ) {
-  const components = original.structure?.components?.map((comp) => {
-    if (comp.properties._internalClass_ === 'recordType') {
+
+  const components = original.structure?.components?.map((item) => {
+    if (item.type === 'recordtype') {
+      const options = item.customOptions
+      const typeRender =
+        options.inputType === 'selectone' ? 'select' : 'selectboxes'
+      const template = options.template
+      const recordId = options.recordType.id
+      const valueProperty = options.valueProperty
+
       return {
-        ...comp,
+        ...item,
+        type: typeRender,
         dataSrc: 'url',
+        template: `<span>${template}</span>`,
+        valueProperty: valueProperty,
         data: {
-          url: `${Config.CaseEngineUrl}/record/${comp.key}`,
+          url: `${Config.CaseEngineUrl}/record/${recordId}`,
           headers: [
             {
               key: 'Authorization',
@@ -147,7 +158,24 @@ function requestRemoteDataSourceAndFillRecordTypesIfRequired(
         },
       }
     }
-    return comp
+
+    if (item.properties._internalClass_ === 'recordType') {
+      return {
+        ...item,
+        dataSrc: 'url',
+        data: {
+          url: `${Config.CaseEngineUrl}/record/${item.key}`,
+          headers: [
+            {
+              key: 'Authorization',
+              value: `Bearer ${keycloak.token}`,
+            },
+          ],
+        },
+      }
+    }
+
+    return item
   })
 
   return {

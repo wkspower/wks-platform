@@ -6,6 +6,8 @@ import { CaseService, RecordService } from 'services'
 import menuItemsDefs from './menu'
 import { RegisterInjectUserSession, RegisteOptions } from './plugins'
 import { accountStore, sessionStore } from './store'
+import RecordTypeChoice from './components/@formio/RecordTypeChoice'
+import { Formio } from 'formiojs'
 import './App.css'
 
 const ScrollTop = lazy(() => import('./components/ScrollTop'))
@@ -27,6 +29,7 @@ const App = () => {
       RegisterInjectUserSession(keycloak)
       RegisteOptions(keycloak)
       forceLogoutIfUserNoMinimalRoleForSystem(keycloak)
+      registerExtensionModulesFormio();
     })
 
     keycloak.onAuthRefreshError = () => {
@@ -58,6 +61,10 @@ const App = () => {
         })
     }
   }, [])
+
+  function registerExtensionModulesFormio() {
+    Formio.use(RecordTypeChoice)
+  }
 
   async function forceLogoutIfUserNoMinimalRoleForSystem(keycloak) {
     if (!accountStore.hasAnyRole(keycloak)) {
