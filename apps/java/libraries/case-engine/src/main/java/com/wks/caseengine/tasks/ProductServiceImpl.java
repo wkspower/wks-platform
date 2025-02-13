@@ -11,25 +11,19 @@
  */
 package com.wks.caseengine.tasks;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.wks.bpm.engine.model.spi.Product;
-import com.wks.caseengine.command.CommandExecutor;
-import com.wks.caseengine.tasks.command.FindTaskCmd;
+import com.wks.caseengine.rest.db1.entity.Product;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Service;
 
 @Component
 public class ProductServiceImpl implements ProductService {
@@ -38,25 +32,17 @@ public class ProductServiceImpl implements ProductService {
 	@Qualifier("db1JdbcTemplate")
 	private JdbcTemplate jdbcTemplate;
 
+	@PersistenceContext(unitName = "db1")
+	private EntityManager entityManager;
+
 	@Override
 	public List<Product> getAllProducts() {
-		try {
-			String sql = "SELECT * FROM [MST].[mesProduct]";
-			List<Product> products = jdbcTemplate.query(sql,
-					(rs, rowNum) -> new Product(rs.getInt("productId"), rs.getString("productName")));
+		String queryStr = "SELECT * FROM [MST].[mesProduct]";
 
-			// If no products are found, return a default product
-			if (products.isEmpty()) {
-				return List.of(new Product(0, "No Products Available"));
-			}
+		Query query = entityManager.createNativeQuery(queryStr, Product.class);
+		List<Product> searchResults = query.getResultList();
+		return searchResults;
 
-			return products;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		// Return a default product when an error occurs
-		return List.of(new Product(-1, "Error Fetching Products"));
 	}
 
 }

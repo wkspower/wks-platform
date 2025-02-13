@@ -7,17 +7,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.wks.bpm.engine.model.spi.Product;
+import com.wks.caseengine.rest.db1.entity.Product;
 import com.wks.caseengine.tasks.ProductService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("task")
+@RequestMapping("product")
 @Tag(name = "Product", description = "test Product")
-
-
-
 public class ProductController {
 	private ProductService productService;
 	
@@ -28,7 +25,7 @@ public class ProductController {
     }
     
     
-	@GetMapping(value = "/productList")
+	@GetMapping(value = "")
 	public ResponseEntity<List<Product>> getProducts() {
 	    List<Product> products = productService.getAllProducts(); 
 	    return ResponseEntity.ok(products);
