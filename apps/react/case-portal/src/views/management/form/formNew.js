@@ -15,9 +15,10 @@ import Typography from '@mui/material/Typography'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
 import MainCard from 'components/MainCard'
+import { FormBuilder } from '@formio/react'
 import { FormService } from 'services'
 import { useSession } from 'SessionStoreContext'
-import WKSFormBuilder from './components/WKSFormBuilder'
+import { StorageService } from 'plugins/storage'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction='up' ref={ref} {...props} />
@@ -132,7 +133,14 @@ export const FormNew = ({ open, handleClose }) => {
 
         <Box sx={{ p: 1 }}>
           <MainCard>
-            <WKSFormBuilder form={form} keycloak={keycloak} />
+            <FormBuilder
+              form={form.structure}
+              options={{
+                noNewEdit: true,
+                noDefaultSubmitButton: true,
+                fileService: new StorageService(),
+              }}
+            />
           </MainCard>
         </Box>
       </Dialog>
