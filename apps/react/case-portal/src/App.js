@@ -70,7 +70,7 @@ const App = () => {
       items: [...menuItemsDefs.items],
     }
 
-    await RecordService.getAllRecordTypes(keycloak).then((data) => {
+    await RecordService?.getAllRecordTypes(keycloak).then((data) => {
       setRecordsTypes(data)
 
       data.forEach((element) => {
@@ -88,7 +88,6 @@ const App = () => {
 
     await CaseService.getCaseDefinitions(keycloak).then((data) => {
       setCasesDefinitions(data)
-
       data.forEach((element) => {
         menu.items[1].children
           .filter((menu) => menu.id === 'case-list')[0]

@@ -21,34 +21,7 @@ const productionColumns = [
   {
     field: 'product',
     headerName: 'Product',
-    width: 150,
     editable: true,
-    // renderEditCell: (params) => {
-    //   console.log(params)
-    //   const { id } = params
-    //   const isEditable = id > 10
-
-    //   return (
-    //     <Select
-    //       value={params?.value}
-    //       onChange={(e) =>
-    //         params.api.setEditCellValue({
-    //           id: params?.id,
-    //           field: 'product',
-    //           value: e.target.value,
-    //         })
-    //       }
-    //       disabled={!isEditable}
-    //       fullWidth
-    //     >
-    //       {productOptions.map((option) => (
-    //         <MenuItem key={option} value={option}>
-    //           {option}
-    //         </MenuItem>
-    //       ))}
-    //     </Select>
-    //   )
-    // },
     renderEditCell: (params) => {
       const { id } = params
       const isEditable = id > 10 // Enable only for rows beyond 10
@@ -83,18 +56,18 @@ const productionColumns = [
       )
     },
   },
-  { field: 'apr24', headerName: 'Apr-24', width: 100, editable: true },
-  { field: 'may24', headerName: 'May-24', width: 100, editable: true },
-  { field: 'jun24', headerName: 'Jun-24', width: 100, editable: true },
-  { field: 'jul24', headerName: 'Jul-24', width: 100, editable: true },
-  { field: 'aug24', headerName: 'Aug-24', width: 100, editable: true },
-  { field: 'sep24', headerName: 'Sep-24', width: 100, editable: true },
-  { field: 'oct24', headerName: 'Oct-24', width: 100, editable: true },
-  { field: 'nov24', headerName: 'Nov-24', width: 100, editable: true },
-  { field: 'dec24', headerName: 'Dec-24', width: 100, editable: true },
-  { field: 'jan25', headerName: 'Jan-25', width: 100, editable: true },
-  { field: 'feb25', headerName: 'Feb-25', width: 100, editable: true },
-  { field: 'mar25', headerName: 'Mar-25', width: 100, editable: true },
+  { field: 'apr24', headerName: 'Apr-24',  editable: true },
+  { field: 'may24', headerName: 'May-24',  editable: true },
+  { field: 'jun24', headerName: 'Jun-24',  editable: true },
+  { field: 'jul24', headerName: 'Jul-24',  editable: true },
+  { field: 'aug24', headerName: 'Aug-24',  editable: true },
+  { field: 'sep24', headerName: 'Sep-24',  editable: true },
+  { field: 'oct24', headerName: 'Oct-24',  editable: true },
+  { field: 'nov24', headerName: 'Nov-24',  editable: true },
+  { field: 'dec24', headerName: 'Dec-24',  editable: true },
+  { field: 'jan25', headerName: 'Jan-25',  editable: true },
+  { field: 'feb25', headerName: 'Feb-25',  editable: true },
+  { field: 'mar25', headerName: 'Mar-25',  editable: true },
   {
     field: 'averageTPH',
     headerName: 'Average TPH',
@@ -301,7 +274,7 @@ const BusinessDemand = () => (
       onAddRow={(newRow) => console.log('New Row Added:', newRow)}
       onDeleteRow={(id) => console.log('Row Deleted:', id)}
       onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-      paginationOptions={[10, 20, 30]}
+      paginationOptions={[100, 200, 300]}
     />
   </div>
 )

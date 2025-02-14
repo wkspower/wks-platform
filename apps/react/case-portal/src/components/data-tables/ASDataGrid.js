@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import {
   Button,
@@ -21,6 +21,24 @@ import { useSession } from 'SessionStoreContext'
 import { Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'
 import { DataService } from 'services/DataService'
 
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
+import DialogTitle from '@mui/material/DialogTitle'
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+}
+
 const jioColors = {
   primaryBlue: '#0F3CC9',
   accentRed: '#E31C3D',
@@ -30,7 +48,9 @@ const jioColors = {
   rowOdd: '#FFFFFF',
   textPrimary: '#2D2D2D',
   border: '#D0D0D0',
+  darkTransparentBlue: 'rgba(127, 147, 206, 0.8)', // New color added
 }
+
 
 const DataGridTable = ({
   columns: initialColumns = [],
@@ -39,7 +59,7 @@ const DataGridTable = ({
   onAddRow,
   onDeleteRow,
   onRowUpdate,
-  paginationOptions = [10, 20, 30],
+  paginationOptions = [100, 200, 300],
 }) => {
   const [rows, setRows] = useState(initialRows)
   const [searchText, setSearchText] = useState('')
@@ -52,6 +72,10 @@ const DataGridTable = ({
   })
   const [resizedColumns, setResizedColumns] = useState({})
   const [open, setOpen] = useState(false)
+  const [open1, setOpen1] = useState(false)
+  const [deleteId, setDeleteId] = useState(null)
+
+  const handleClose1 = () => setOpen1(false)
 
   const keycloak = useSession()
   const [days, setDays] = useState([])
@@ -68,6 +92,20 @@ const DataGridTable = ({
         [field]: true,
       }))
     }
+  }
+
+  const [openYearData, setOpenYearData] = useState(false)
+  const [yearData, setYearData] = useState('')
+
+  const handleOpenYearData = () => setOpenYearData(true)
+  const handleCloseYearData = () => {
+    setOpenYearData(false)
+    setYearData('')
+  }
+
+  const addYearData = () => {
+    console.log("Year's Data:", yearData)
+    handleCloseYearData()
   }
 
   const handleFilterClick = () => {
@@ -93,28 +131,17 @@ const DataGridTable = ({
   // }
 
   const handleDeleteRow = (id) => {
-    const updatedRows = rows.filter((row) => row?.id !== id)
-    setRows(updatedRows)
-    onDeleteRow?.(id) // Call the onDeleteRow prop if provided
-    // handleMenuClose()
+    setDeleteId(id)
+    setOpen1(true)
   }
 
-  // const handleEditRow2 = (id) => {
-  //   // Implement your edit row logic here
-  //   console.log(`Edit row with id: ${id}`)
-  //   handleMenuClose()
-  // }
-
-  // const handleEditRow = async (id) => {
-  //   try {
-  //     const data = await DataService.getProductById(keycloak, id)
-  //     console.log('API Response:', data)
-  //   } catch (error) {
-  //     console.error('Error fetching product:', error)
-  //   } finally {
-  //     handleMenuClose()
-  //   }
-  // }
+  const deleteTheRecord = () => {
+    const updatedRows = rows.filter((row) => row?.id !== deleteId)
+    setRows(updatedRows)
+    onDeleteRow?.(deleteId)
+    setDeleteId(null)
+    setOpen1(false)
+  }
 
   const processRowUpdate = (newRow) => {
     const updatedRow = { ...newRow, isNew: false }
@@ -134,47 +161,37 @@ const DataGridTable = ({
       id: newRowId,
       ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])),
     }
-    const updatedRows = [...rows, newRow]
+    const updatedRows = [newRow, ...rows] // Add new row at the top
     setRows(updatedRows)
     onAddRow?.(newRow)
 
-    // Check if new row exceeds the current page limit
-    const totalRows = updatedRows.length
-    const maxRowsOnCurrentPage =
-      paginationModel.pageSize * (paginationModel.page + 1)
-    // const exactRows = maxRowsOnCurrentPage - 1
-    // console.log(totalRows, maxRowsOnCurrentPage, exactRows)
-    if (totalRows > maxRowsOnCurrentPage) {
-      console.log('test', totalRows > maxRowsOnCurrentPage)
-      setPaginationModel((prev) => ({
-        ...prev,
-        page: prev.page + 1, // Move to the next page
-      }))
-    }
+    // Ensure the pagination stays on the current page
+    setPaginationModel((prev) => ({
+      ...prev,
+      page: 0, // Keep the view on the first page to show the new top row
+    }))
   }
+
   useEffect(() => {
     console.log('Current Page:', paginationModel.page)
+    console.log('titile', title)
   }, [paginationModel])
 
-
-
-   useEffect(() => {
+  useEffect(() => {
     console.log('api call here ')
     dummyApiCall(1)
   }, [])
 
-
   const dummyApiCall = async (id) => {
     try {
-      const data = await DataService.getProductById(keycloak, id);
-      console.log('API Response:', data);
+      const data = await DataService.getProductById(keycloak, id)
+      console.log('API Response:', data)
     } catch (error) {
-      console.error('Error fetching product:', error);
+      console.error('Error fetching product:', error)
     } finally {
       // handleMenuClose();
     }
-  };
-
+  }
 
   const defaultColumns = useMemo(() => {
     return initialColumns.map((col) => ({
@@ -182,27 +199,30 @@ const DataGridTable = ({
       flex: !resizedColumns[col.field] ? 1 : undefined,
     }))
   }, [initialColumns, resizedColumns])
-
   const columns = [
     ...defaultColumns,
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 180,
-      cellClassName: 'with-border',
-      headerAlign: 'center',
-      align: 'center',
-      renderCell: (params) => (
-        <IconButton
-          onClick={() => handleDeleteRow(params.row.id)}
-          aria-label='delete'
-        >
-          <DeleteIcon sx={{ color: jioColors.accentRed }} />
-        </IconButton>
-      ),
-      flex: 1,
-      headerClassName: 'last-column-header',
-    },
+    ...(title === 'Business Demand Data'
+      ? [
+          {
+            field: 'actions',
+            headerName: 'Actions',
+            width: 180,
+            cellClassName: 'with-border',
+            headerAlign: 'center',
+            align: 'center',
+            renderCell: (params) => (
+              <IconButton
+                onClick={() => handleDeleteRow(params.row.id)}
+                aria-label='delete'
+              >
+                <DeleteIcon sx={{ color: jioColors.accentRed }} />
+              </IconButton>
+            ),
+            flex: 1,
+            headerClassName: 'last-column-header',
+          },
+        ]
+      : []),
   ]
 
   // const handleCellClick = (params) => {
@@ -228,68 +248,101 @@ const DataGridTable = ({
   //     setOpen(true)
   //   }
   // }
+
+  const [remark, setRemark] = React.useState('')
+  const [openRemark, setOpenRemark] = React.useState(false)
+
+  const handleOpenRemark = () => setOpenRemark(true)
+  const handleCloseRemark = () => setOpenRemark(false)
+
+  const addRemark = () => {
+    console.log('Remark:', remark)
+    setOpenRemark(false)
+    setRemark('')
+  }
+
   const handleCellClick = (params) => {
-    const nonEditableFields = [
-      'product',
-      'averageTPH',
-      'remark',
-      'id',
-      'actions',
-      'isNew',
-      'taTo',
-      'taFrom',
-      'activities',
-      'durationHrs',
-      'period',
-    ]
-
-    // if (params.isEditable && !nonEditableFields.includes(params.field) && params.value != null) {
-    //   setOpen(true);
-    // }
-    if (
-      params.isEditable &&
-      !nonEditableFields.includes(params.field) &&
-      params.value !== null && // Check if the cell is not empty
-      params.value !== undefined &&
-      params.value !== ''
-    ) {
-      // Extract month and year from the column's field (e.g., 'apr24')
-      const field = params.field
-      const monthAbbr = field.substring(0, 3).toLowerCase()
-      const yearShort = field.substring(3)
-      const year = 2000 + parseInt(yearShort, 10)
-
-      const monthMap = {
-        jan: 0,
-        feb: 1,
-        mar: 2,
-        apr: 3,
-        may: 4,
-        jun: 5,
-        jul: 6,
-        aug: 7,
-        sep: 8,
-        oct: 9,
-        nov: 10,
-        dec: 11,
-      }
-      const month = monthMap[monthAbbr]
-
-      if (month === undefined) {
-        console.error('Invalid month abbreviation:', monthAbbr)
+    if (title != 'Business Demand Data') {
+      return
+    }
+    if (params?.field === 'remark') {
+      setRemark(params?.value || '') // Auto-fetch the params value
+      handleOpenRemark()
+    } else {
+      if (params.value == '' && params.field != 'product') {
+        handleOpenYearData()
         return
       }
 
-      // Calculate days in the selected month
-      const totalDays = new Date(year, month + 1, 0).getDate()
-      const daysArray = Array.from({ length: totalDays }, (_, index) => ({
-        date: index + 1,
-        value: Math.floor(Math.random() * 100), // Replace with actual data if needed
-      }))
+      console.log(params)
 
-      // Update the days state and open the modal
-      setDays(daysArray)
-      setOpen(true)
+      const nonEditableFields = [
+        'product',
+        'averageTPH',
+
+        'id',
+        'actions',
+        'isNew',
+        'taTo',
+        'taFrom',
+        'activities',
+        'durationHrs',
+        'period',
+      ]
+
+      if (
+        params.isEditable &&
+        !nonEditableFields.includes(params.field) &&
+        params.value !== null &&
+        params.value !== undefined
+      ) {
+        const field = params.field
+        const monthAbbr = field.substring(0, 3).toLowerCase()
+        const yearShort = field.substring(3)
+        const year = 2000 + parseInt(yearShort, 10)
+
+        const monthMap = {
+          jan: 0,
+          feb: 1,
+          mar: 2,
+          apr: 3,
+          may: 4,
+          jun: 5,
+          jul: 6,
+          aug: 7,
+          sep: 8,
+          oct: 9,
+          nov: 10,
+          dec: 11,
+        }
+        const month = monthMap[monthAbbr]
+
+        if (month === undefined) {
+          console.error('Invalid month abbreviation:', monthAbbr)
+          return
+        }
+
+        // Calculate days in the selected month
+        const totalDays = new Date(year, month + 1, 0).getDate()
+        const daysArray = Array.from({ length: totalDays }, (_, index) => {
+          const date = new Date(year, month, index + 1)
+          const formattedDate = date
+            .toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: '2-digit',
+              year: '2-digit',
+            })
+            .replace(/\//g, '-') // 'DD-MM-YY' format
+          return {
+            date: formattedDate,
+            value: Math.floor(Math.random() * 100), // Replace with actual data if needed
+          }
+        })
+
+        setDays(daysArray)
+
+        setOpen(true)
+      }
     }
   }
 
@@ -381,13 +434,34 @@ const DataGridTable = ({
       <Box
         sx={{
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
           marginTop: 2,
           marginBottom: 1,
         }}
       >
+        
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <TextField
+            variant='outlined'
+            placeholder='Search...'
+            value={searchText}
+            onChange={handleSearchChange}
+            sx={{
+              width: '300px',
+              borderRadius: 1,
+              backgroundColor: jioColors.background,
+              color: '#8A9BC2',
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position='start'>
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+
           <IconButton
             aria-label='filter'
             onClick={handleFilterClick}
@@ -417,26 +491,6 @@ const DataGridTable = ({
               Filter
             </span>
           </IconButton>
-
-          <TextField
-            variant='outlined'
-            placeholder='Search...'
-            value={searchText}
-            onChange={handleSearchChange}
-            sx={{
-              width: '250px',
-              borderRadius: 1,
-              backgroundColor: jioColors.background,
-              color: '#8A9BC2',
-            }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position='start'>
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
         </Box>
 
         {/* <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -487,7 +541,6 @@ const DataGridTable = ({
           onColumnResized={onColumnResized}
           onCellClick={handleCellClick}
           pagination
-          disableColumnResize
           disableSelectionOnClick
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? 'even-row' : 'odd-row'
@@ -507,10 +560,10 @@ const DataGridTable = ({
               display: 'none',
             },
             '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: jioColors.headerBg,
-              color: '#FFFFFF',
-              // backgroundColor: '#F2F3F8',
-              // color: '#3E4E75',
+              // backgroundColor: jioColors.headerBg,
+              // color: '#FFFFFF',
+              backgroundColor: '#F2F3F8',
+              color: '#3E4E75',
               fontSize: '0.8rem',
               fontWeight: 600,
               borderBottom: `2px solid ${'#DAE0EF'}`,
@@ -552,126 +605,193 @@ const DataGridTable = ({
         />
       </Box>
 
-      <Button
-        variant='contained'
-        sx={{
-          marginTop: 2,
-          backgroundColor: jioColors.primaryBlue,
-          color: jioColors.background,
-          borderRadius: 1,
-          padding: '8px 24px',
-          textTransform: 'none',
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          '&:hover': {
-            backgroundColor: '#143B6F',
-            boxShadow: 'none',
-          },
-        }}
-        onClick={handleAddRow}
-      >
-        Add Item
-      </Button>
-
-      <Modal open={open} onClose={handleCancel}>
-        <Box
+      {title === 'Business Demand Data' && (
+        <Button
+          variant='contained'
           sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '90%',
-            bgcolor: 'background.paper',
-            p: 4,
-            boxShadow: 24,
-            borderRadius: 2,
-            maxHeight: '80vh',
-            overflowX: 'auto',
+            marginTop: 2,
+            backgroundColor: jioColors.primaryBlue,
+            color: jioColors.background,
+            borderRadius: 1,
+            padding: '8px 24px',
+            textTransform: 'none',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            '&:hover': {
+              backgroundColor: '#143B6F',
+              boxShadow: 'none',
+            },
           }}
+          onClick={handleAddRow}
         >
-          <Typography variant='h6' sx={{ mb: 2 }}>
-            Month Overview
-          </Typography>
+          Add Item
+        </Button>
+      )}
 
-          {/* Table */}
-          <Table>
-            <TableHead>
-              {/* Headers for Days 1-15 */}
-              <TableRow>
-                {days.slice(0, 15).map((day, index) => (
-                  <TableCell
-                    key={index}
-                    sx={{ textAlign: 'center', fontWeight: 'bold' }}
-                  >
-                    Day {day.date}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
+      <Dialog
+        open={open1}
+        onClose={handleClose1}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      >
+        <DialogTitle id='alert-dialog-title'>{'Delete ?'}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>
+            Are you sure you want to delete this row?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose1}>Cancel</Button>
+          <Button onClick={deleteTheRecord} autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-            <TableBody>
-              {/* Values for Days 1-15 */}
-              <TableRow>
-                {days.slice(0, 15).map((day, index) => (
-                  <TableCell key={index} sx={{ textAlign: 'center' }}>
-                    <TextField
-                      type='number'
-                      value={day.value}
-                      onChange={(e) => handleValueChange(index, e.target.value)}
-                      size='small'
-                      sx={{ width: '70px' }}
-                    />
-                  </TableCell>
-                ))}
-              </TableRow>
+      <Dialog open={openRemark} onClose={handleCloseRemark}>
+        <DialogTitle>Add Remark</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin='dense'
+            id='remark'
+            label='Remark'
+            type='text'
+            fullWidth
+            variant='outlined'
+            sx={{ width: '100%', minWidth: '400px' }}
+            value={remark}
+            onChange={(e) => setRemark(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseRemark}>Cancel</Button>
+          <Button onClick={addRemark}>Add</Button>
+        </DialogActions>
+      </Dialog>
 
-              {/* Headers for Days 16-30 */}
-              <TableRow>
-                {days.slice(15).map((day, index) => (
-                  <TableCell
-                    key={index + 15}
-                    sx={{ textAlign: 'center', fontWeight: 'bold' }}
-                  >
-                    Day {day.date}
-                  </TableCell>
-                ))}
-              </TableRow>
+      <Dialog open={openYearData} onClose={handleCloseYearData}>
+        <DialogTitle>Add Months's Data</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin='dense'
+            id='yearData'
+            label="Months's Data"
+            type='text'
+            fullWidth
+            variant='outlined'
+            sx={{ width: '100%', minWidth: '400px' }}
+            value={yearData}
+            onChange={(e) => setYearData(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseYearData}>Cancel</Button>
+          <Button onClick={addYearData}>Add</Button>
+        </DialogActions>
+      </Dialog>
 
-              {/* Values for Days 16-30 */}
-              <TableRow>
-                {days.slice(15).map((day, index) => (
-                  <TableCell key={index + 15} sx={{ textAlign: 'center' }}>
-                    <TextField
-                      type='number'
-                      value={day.value}
-                      onChange={(e) =>
-                        handleValueChange(index + 15, e.target.value)
-                      }
-                      size='small'
-                      sx={{ width: '70px' }}
-                    />
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableBody>
-          </Table>
+      <Dialog open={open} onClose={handleCancel} maxWidth='xl' fullWidth>
+        <DialogTitle>
+          <Typography variant='h6'>Add Data for the Month</Typography>
+        </DialogTitle>
 
-          {/* Buttons */}
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-            <Button onClick={handleCancel} variant='outlined' sx={{ mr: 2 }}>
-              Discard
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              variant='contained'
-              //  color='primary'
-              sx={{ backgroundColor: jioColors?.headerBg, color: 'white' }}
-            >
-              Save
-            </Button>
+        <DialogContent>
+          <Box sx={{ maxHeight: '80vh', overflowX: 'auto', padding: '10px' }}>
+            <Table>
+              <TableHead>
+                {/* Headers for Days 1-15 */}
+                <TableRow>
+                  {days.slice(0, 15).map((day, index) => (
+                    <TableCell
+                      key={index}
+                      sx={{
+                        textAlign: 'center',
+                        fontWeight: 'bold',
+                        padding: '6px',
+                      }}
+                    >
+                      {day.date}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {/* Values for Days 1-15 */}
+                <TableRow>
+                  {days.slice(0, 15).map((day, index) => (
+                    <TableCell
+                      key={index}
+                      sx={{ textAlign: 'center', padding: '6px' }}
+                    >
+                      <TextField
+                        type='number'
+                        value={day.value}
+                        onChange={(e) =>
+                          handleValueChange(index, e.target.value)
+                        }
+                        size='small'
+                        sx={{ width: '85px', marginTop: '2px' }}
+                      />
+                    </TableCell>
+                  ))}
+                </TableRow>
+
+                {/* Headers for Days 16-30 */}
+                <TableRow>
+                  {days.slice(15).map((day, index) => (
+                    <TableCell
+                      key={index + 15}
+                      sx={{
+                        textAlign: 'center',
+                        fontWeight: 'bold',
+                        padding: '6px',
+                      }}
+                    >
+                      {day.date}
+                    </TableCell>
+                  ))}
+                </TableRow>
+
+                {/* Values for Days 16-30 */}
+                <TableRow>
+                  {days.slice(15).map((day, index) => (
+                    <TableCell
+                      key={index + 15}
+                      sx={{ textAlign: 'center', padding: '6px' }}
+                    >
+                      <TextField
+                        type='number'
+                        value={day.value}
+                        onChange={(e) =>
+                          handleValueChange(index + 15, e.target.value)
+                        }
+                        size='small'
+                        sx={{ width: '85px', marginTop: '2px' }}
+                      />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableBody>
+            </Table>
           </Box>
-        </Box>
-      </Modal>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCancel} variant='outlined' sx={{ mr: 2 }}>
+            Discard
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            variant='contained'
+            sx={{ backgroundColor: jioColors?.headerBg, color: 'white' }}
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }
