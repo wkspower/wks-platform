@@ -5,15 +5,18 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.dto.product.ProductMonthWiseDataDTO;
 import com.wks.caseengine.rest.db1.entity.Product;
-import com.wks.caseengine.tasks.ProductService;
+import com.wks.caseengine.rest.db1.entity.ProductMonthWiseData;
+import com.wks.caseengine.service.product.ProductService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("task")
+@RequestMapping("product")
 @Tag(name = "Product", description = "test Product")
 public class ProductController {
 	private ProductService productService;
@@ -30,4 +33,11 @@ public class ProductController {
 	    List<Product> products = productService.getAllProducts(); 
 	    return ResponseEntity.ok(products);
 	}
+	@GetMapping(value = "/getMonthWiseData")
+	public ResponseEntity<List<ProductMonthWiseDataDTO>> getProductListByTypeAndYear(@RequestParam String type, @RequestParam int year) {
+		List<ProductMonthWiseDataDTO> productMonthWiseDataList = productService.getMonthWiseDataByTypeAndYear(type,year); 
+	    return ResponseEntity.ok(productMonthWiseDataList);
+	}
+
+
 }
