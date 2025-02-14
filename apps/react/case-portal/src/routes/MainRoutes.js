@@ -18,6 +18,8 @@ import { FormList } from 'views/management/form/formList'
 import { RecordTypeList } from 'views/management/recordType/recordTypeList'
 import { QueueList } from 'views/management/queue/queueList'
 import FeedStockAvailability from 'components/data-tables/FeedStockavailability'
+import NormalOpNormsScreen from 'components/data-tables/NormsScreens/NormalOpNorms'
+import ShutdownNorms from 'components/data-tables/NormsScreens/ShutdownNorms'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -112,6 +114,14 @@ export const MainRoutes = (
           {
             path: 'product-mcu-val',
             element: <ProductionvolumeData />,
+          },
+          {
+            path: 'normal-op-norms',
+            element: <NormalOpNormsScreen />,
+          },
+          {
+            path: 'shutdown-norms',
+            element: <ShutdownNorms />,
           },
           {
             path: 'product-demand',

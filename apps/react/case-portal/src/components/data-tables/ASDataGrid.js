@@ -3,13 +3,10 @@ import { DataGrid } from '@mui/x-data-grid'
 import {
   Button,
   TextField,
-  // Menu,
-  // MenuItem,
   IconButton,
   Typography,
   Box,
   InputAdornment,
-  Modal,
 } from '@mui/material'
 // import MoreVertIcon from '@mui/icons-material/MoreVert'
 import SearchIcon from '@mui/icons-material/Search'
@@ -26,18 +23,19 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
+import { MenuItem } from '../../../node_modules/@mui/material/index'
 
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-}
+// const style = {
+//   position: 'absolute',
+//   top: '50%',
+//   left: '50%',
+//   transform: 'translate(-50%, -50%)',
+//   width: 400,
+//   bgcolor: 'background.paper',
+//   border: '2px solid #000',
+//   boxShadow: 24,
+//   p: 4,
+// }
 
 const jioColors = {
   primaryBlue: '#0F3CC9',
@@ -50,7 +48,6 @@ const jioColors = {
   border: '#D0D0D0',
   darkTransparentBlue: 'rgba(127, 147, 206, 0.8)', // New color added
 }
-
 
 const DataGridTable = ({
   columns: initialColumns = [],
@@ -410,13 +407,16 @@ const DataGridTable = ({
       ),
     )
   }
+  const [selectedUnit, setSelectedUnit] = useState('')
+
+  const unitOptions = ['TPH', 'Liters', 'Units']
 
   return (
     <Box
       sx={{
         height: '81vh',
         width: '100%',
-        padding: 2,
+        padding: 1,
         backgroundColor: '#fff',
         borderRadius: 0,
         borderBottom: 'none',
@@ -451,8 +451,24 @@ const DataGridTable = ({
           marginBottom: 1,
         }}
       >
-        
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <TextField
+            select
+            value={selectedUnit}
+            onChange={(e) => setSelectedUnit(e.target.value)}
+            sx={{ width: '150px', backgroundColor: jioColors.background }}
+            variant='outlined'
+            label='Select Unit'
+          >
+            <MenuItem value='' disabled>
+              Select Unit
+            </MenuItem>
+            {unitOptions.map((unit) => (
+              <MenuItem key={unit} value={unit}>
+                {unit}
+              </MenuItem>
+            ))}
+          </TextField>
           <TextField
             variant='outlined'
             placeholder='Search...'
@@ -560,6 +576,7 @@ const DataGridTable = ({
             borderRadius: '0px',
             border: `1px solid ${jioColors.border}`,
             fontSize: '0.8rem',
+            // borderRight: `1px solid ${jioColors.border}`,
             '& .MuiDataGrid-root .MuiDataGrid-cell': {
               fontSize: '0.8rem',
               color: '#A9A9A9',
@@ -570,7 +587,45 @@ const DataGridTable = ({
             '& .MuiDataGrid-footerContainer': {
               display: 'none',
             },
+            // Remove the direct right border from cells and headers
+            '& .MuiDataGrid-cell, & .MuiDataGrid-columnHeaders & .MuiDataGrid-columnHeaderTitleContainer':
+              {
+                borderRight: 'none',
+                position: 'relative',
+              },
+            // Apply a pseudo-element for a short right border on cells
+            '& .MuiDataGrid-cell:after': {
+              content: '""',
+              position: 'absolute',
+              right: 0,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              height: '60%', // Adjust this percentage as needed for the "short" border
+              borderRight: `1px solid ${jioColors.border}`,
+            },
+
+            // Apply a similar pseudo-element for header cells
+            '& .MuiDataGrid-columnHeaders:after': {
+              content: '""',
+              position: 'absolute',
+              right: 0,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              height: '60%', // Adjust as needed
+              borderRight: `1px solid ${jioColors.border}`,
+            },
+            '& .MuiDataGrid-columnHeaderTitleContainer:after': {
+              content: '""',
+              position: 'absolute',
+              right: 0,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              height: '60%', // Adjust as needed
+              borderRight: `1px solid ${jioColors.border}`,
+            },
+
             '& .MuiDataGrid-columnHeaders': {
+              // borderRight: `1px solid ${jioColors.border}`,
               // backgroundColor: jioColors.headerBg,
               // color: '#FFFFFF',
               backgroundColor: '#F2F3F8',
@@ -582,7 +637,7 @@ const DataGridTable = ({
               borderTopRightRadius: '0px',
             },
             '& .MuiDataGrid-cell': {
-              borderRight: `none`,
+              // borderRight: `1px solid ${jioColors.border}`,
               borderBottom: `1px solid ${'#DAE0EF'}`,
               color: '#3E4E75',
               whiteSpace: 'nowrap',
@@ -606,12 +661,12 @@ const DataGridTable = ({
               paddingRight: 2,
               alignSelf: 'flex-end',
             },
-            '& .MuiDataGrid-columnHeaders .last-column-header': {
-              paddingRight: '16px',
-            },
-            '& .MuiDataGrid-cell.last-column-cell': {
-              paddingRight: '16px',
-            },
+            // '& .MuiDataGrid-columnHeaders .last-column-header': {
+            //   paddingRight: '16px',
+            // },
+            // '& .MuiDataGrid-cell.last-column-cell': {
+            //   paddingRight: '16px',
+            // },
           }}
         />
       </Box>
@@ -682,7 +737,7 @@ const DataGridTable = ({
       </Dialog>
 
       <Dialog open={openYearData} onClose={handleCloseYearData}>
-        <DialogTitle>Add Months's Data</DialogTitle>
+        <DialogTitle>Add Months Data</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus

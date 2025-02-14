@@ -3,28 +3,26 @@ legend {
 }
 
 header {
-  background-color: rgba(127, 147, 206, 0.8) !important; /* Darker transparent light blue */
+  background-color: #0f3cc9 !important ; /* Example: Light gray background */
 }
 
 .css-1ynvhpv-MuiButtonBase-root-MuiListItemButton-root.Mui-selected {
-  background-color: rgba(127, 147, 206, 0.8); /* 80% transparency */
+  background-color: #3f93dc; /* Example: Light gray background */
   color: white;
 }
 
 .css-1ynvhpv-MuiButtonBase-root-MuiListItemButton-root.Mui-selected:hover {
-  background-color: rgba(127, 147, 206, 0.9); /* Slightly darker on hover */
+  background-color: #3f93dc; /* Example: Light gray background */
   color: white;
 }
 
 .css-hd56dl-MuiTypography-root {
-  color: #ffffff;
+  color: #ffffff; /* Example: Light gray background */
 }
-
 .css-h404g3-MuiButtonBase-root-MuiListItemButton-root.Mui-selected {
-  background-color: rgba(127, 147, 206, 0.8); /* Darker transparent light blue */
+  background-color: #0f3cc9; /* Example: Light gray background */
   color: white;
 }
-
 
 .css-h404g3-MuiButtonBase-root-MuiListItemButton-root.Mui-selected {
   border-radius: 0px;
@@ -39,3 +37,6 @@ header {
   color: #ffffff; /* Example: Light gray background */
 }
 
+.css-1imnto4-MuiPaper-root-MuiCard-root {
+  display: none;
+}
