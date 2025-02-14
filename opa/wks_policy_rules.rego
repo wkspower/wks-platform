@@ -147,20 +147,9 @@ allow {
 
 allow {
     input.path = "queue"
-    input.method in ["GET","OPTION"]
-	check_origin_request
-    debug("check_origin_request passed")
-    is_user_profile
-    debug("is_user_profile passed")
-}
-
-allow {
-    input.path = "queue"
     input.method in ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTION", "HEAD"]
-	check_origin_request
-    debug("check_origin_request passed")
+	check_origin_request    
     is_manager_profile
-    debug("is_manager_profile passed")
 }
 
 allow {
@@ -168,29 +157,16 @@ allow {
     input.method in ["GET", "POST", "OPTION", "HEAD"]
 }
 
-allow {
-    input.path = "product"
-    input.method in ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTION", "HEAD"]
-	check_origin_request    
-    is_manager_profile
-}
-
 check_origin_request if {
-    input.allowed_origin == "*"  # Allow any origin
-    input.host == "*"            # Allow any host
-    input.org == "*"  # Allow any origin
+	input.allowed_origin == "localhost"
+    input.host = "localhost"
+} else if {
+	input.allowed_origin == "localhost"
+    input.host = ""
 } else {
-    not is_null(input.org)  # Ensure 'org' is not null
-    input.allowed_origin == input.host  # Match allowed_origin with org
-} else {
-    is_null(input.host)    # Allow null host
-    input.allowed_origin == input.org  # Match allowed_origin with org
-} else {
-    input.host == ""     # Allow empty host
-    input.allowed_origin == input.org  # Match allowed_origin with org
-} else {
-    input.host == ""             # Allow empty host
-    not is_null(input.org)       # Ensure 'org' is not null
+    not is_null(input.org)
+    startswith(input.host, input.org)
+    input.allowed_origin == input.host
 }
 
 is_user_profile {
@@ -207,3 +183,5 @@ is_email_to_case_profile {
     some role in input.realm_access.roles
     has_email_to_case_role[role]
 }
+
+
