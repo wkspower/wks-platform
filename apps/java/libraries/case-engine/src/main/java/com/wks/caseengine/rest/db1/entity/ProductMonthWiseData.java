@@ -6,7 +6,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
+@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "product_month_plant_wise_data", schema = "dbo")
 public class ProductMonthWiseData {
@@ -24,11 +30,15 @@ public class ProductMonthWiseData {
 	private String month;
 	
 	@Column(name="year")
-	private String year;
+	private Long year;
 	
 	@Column(name="month_value")
 	private Long monthValue;
 	
 	@Column(name="plant_id")
 	private Long plantId;
+	
+	public ProductMonthWiseData() {
+	    // Default constructor
+	}
 }
