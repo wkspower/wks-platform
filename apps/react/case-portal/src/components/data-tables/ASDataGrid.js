@@ -648,12 +648,12 @@ const DataGridTable = ({
             '& .MuiDataGrid-row': {
               borderBottom: `1px solid ${jioColors.border}`,
             },
-            '& .even-row': {
-              backgroundColor: jioColors.rowEven,
-            },
-            '& .odd-row': {
-              backgroundColor: jioColors.rowOdd,
-            },
+            // '& .even-row': {
+            //   backgroundColor: jioColors.rowEven,
+            // },
+            // '& .odd-row': {
+            //   backgroundColor: jioColors.rowOdd,
+            // },
             '& .MuiDataGrid-toolbarContainer': {
               display: 'flex',
               justifyContent: 'flex-end',

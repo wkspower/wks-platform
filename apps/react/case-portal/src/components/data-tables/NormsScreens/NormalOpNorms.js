@@ -233,11 +233,11 @@
 
 // export default NormalOpNormsScreen
 
-// import React from 'react';
 import DataGridTable from '../ASDataGrid'
 
+// Define columns as usual
 const productionColumns = [
-  { field: 'srNo', headerName: 'Sr. No', width: 80, editable: false },
+  { field: 'srNo', headerName: 'Sr. No', width: 80, editable: false, flex: 2 },
   {
     field: 'particulars',
     headerName: 'Particulars',
@@ -260,6 +260,7 @@ const productionColumns = [
   { field: 'remark', headerName: 'Remark', width: 200, editable: true },
 ]
 
+// Sample production data (10 rows)
 const productionData = [
   {
     id: 1,
@@ -453,45 +454,71 @@ const productionData = [
   },
 ]
 
-// Split data into three groups based on requirement
+// Create groups by inserting a row with a groupHeader property
 const rawMaterialsData = productionData.slice(0, 2) // 2 rows for Raw Materials
 const byProductsData = productionData.slice(2, 5) // 3 rows for By Products
-const calChemData = productionData.slice(5, 6) // 1 row for Cal-chem
+const calChemData = productionData.slice(5, 9) // 1 row for Cal-chem
+
+const groupedRows = [
+  { id: 'group-raw', groupHeader: 'Raw Materials' },
+  ...rawMaterialsData,
+  { id: 'group-by', groupHeader: 'By Products' },
+  ...byProductsData,
+  { id: 'group-cal', groupHeader: 'Cat-chem' },
+  ...calChemData,
+]
+
+// Custom render function for cells
+const groupRenderCell = (params) => {
+  if (params.row.groupHeader) {
+    // In the first column show the group title
+    if (params.field === 'srNo') {
+      return (
+        <span
+          style={{
+            fontWeight: 'bold',
+            padding: '4px 8px',
+          }}
+        >
+          {params.row.groupHeader}
+        </span>
+      )
+    }
+    // For other columns, render empty
+    return ''
+  }
+  return params.value
+}
+
+// Enhance columns to use the custom render function
+const enhancedColumns = productionColumns.map((col) => ({
+  ...col,
+  renderCell: groupRenderCell,
+}))
 
 const NormalOpNormsScreen = () => {
   return (
     <div>
-      {/* Raw Materials Grid */}
       <DataGridTable
-        columns={productionColumns}
-        rows={rawMaterialsData}
-        title='Raw Materials'
+        columns={enhancedColumns}
+        rows={groupedRows}
+        title='Normal Operations Norms'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[10, 20, 30]}
-      />
-
-      {/* By Products Grid */}
-      <DataGridTable
-        columns={productionColumns}
-        rows={byProductsData}
-        title='By Products'
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-        paginationOptions={[10, 20, 30]}
-      />
-
-      {/* Cal-chem Grid */}
-      <DataGridTable
-        columns={productionColumns}
-        rows={calChemData}
-        title='Cal-chem'
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-        paginationOptions={[10, 20, 30]}
+        getRowClassName={(params) =>
+          params.row.groupHeader ? 'group-header-row' : ''
+        }
+        sx={{
+          '& .group-header-row .MuiDataGrid-cell': {
+            borderRight: 'none !important',
+          },
+          '& .MuiDataGrid-row.MuiDataGrid-row--firstVisible:nth-child(even) .MuiDataGrid-cell':
+            {
+              borderRight: 'none !important',
+            },
+        }}
       />
     </div>
   )

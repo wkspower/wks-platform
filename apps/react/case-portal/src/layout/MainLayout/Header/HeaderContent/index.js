@@ -35,30 +35,37 @@ const HeaderContent = ({ keycloak }) => {
 
       {/* Horizontal layout for Plant & Site */}
       <Stack direction='row' spacing={2} alignItems='center'>
-        {/* Site Dropdown */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography sx={{ mr: 1 }}>Site </Typography>
-          <FormControl sx={{ minWidth: 150 }}>
-            <Select value={selectedSite} onChange={handleSiteChange}>
-              <MenuItem value='Site A'>Site A</MenuItem>
-              <MenuItem value='Site B'>Site B</MenuItem>
-              <MenuItem value='Site C'>Site C</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
+      {/* Site Dropdown */}
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <FormControl sx={{ minWidth: 150 }}>
+          <Select
+            value={selectedSite}
+            onChange={handleSiteChange}
+            sx={{ color: 'white' }}
+          >
+            <MenuItem value='Site A'>Site A</MenuItem>
+            <MenuItem value='Site B'>Site B</MenuItem>
+            <MenuItem value='Site C'>Site C</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
 
-        {/* Plant Dropdown */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography sx={{ mr: 1 }}>Plant </Typography>
-          <FormControl sx={{ minWidth: 150 }}>
-            <Select value={selectedOption} onChange={handleOptionChange}>
-              <MenuItem value='Plant 1'>Plant 1</MenuItem>
-              <MenuItem value='Plant 2'>Plant 2</MenuItem>
-              <MenuItem value='Plant 3'>Plant 3</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </Stack>
+      {/* Plant Dropdown */}
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <FormControl sx={{ minWidth: 150 }}>
+          <Select
+            value={selectedOption}
+            onChange={handleOptionChange}
+            sx={{ color: 'white' }}
+          >
+            <MenuItem value='Plant 1'>Plant 1</MenuItem>
+            <MenuItem value='Plant 2'>Plant 2</MenuItem>
+            <MenuItem value='Plant 3'>Plant 3</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+    </Stack>
+
 
       {Config.NovuEnabled ? (
         <NovuProvider
