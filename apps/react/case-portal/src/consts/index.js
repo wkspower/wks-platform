@@ -1,24 +1,41 @@
+console.log(process.env.NODE_ENV)
+
 const Config = {
-  CaseEngineUrl: process.env.REACT_APP_API_URL,
-  LoginUrl: process.env.REACT_APP_KEYCLOAK_URL,
-  StorageUrl: process.env.REACT_APP_STORAGE_URL,
-  WebsocketsEnabled:
-    process.env.REACT_APP_WEBSOCKETS_ENABLED === 'true' || false,
-  WebsocketUrl: process.env.REACT_APP_WEBSOCKETS_URL,
-  WebsocketsTopicCaseCreated: process.env.REACT_APP_WEBSOCKETS_CASE_CREATED,
-  WebsocketsTopicHumanTaskCreated:
+  CaseEngineUrl: getEnv(process.env.REACT_APP_API_URL, window.API_URL),
+  LoginUrl: getEnv(process.env.REACT_APP_KEYCLOAK_URL, window.KEYCLOAK_URL),
+  StorageUrl: getEnv(process.env.REACT_APP_STORAGE_URL, window.STORAGE_URL),
+  WebsocketsEnabled: getEnv(
+    process.env.REACT_APP_WEBSOCKETS_ENABLED,
+    window.WEBSOCKETS_ENABLED,
+  ),
+  WebsocketUrl: getEnv(
+    process.env.REACT_APP_WEBSOCKETS_URL,
+    window.WEBSOCKETS_URL,
+  ),
+  WebsocketsTopicCaseCreated: getEnv(
+    process.env.REACT_APP_WEBSOCKETS_CASE_CREATED,
+    window.WEBSOCKETS_CASE_CREATED,
+  ),
+  WebsocketsTopicHumanTaskCreated: getEnv(
     process.env.REACT_APP_WEBSOCKETS_HUMAN_TASK_CREATED,
-  NovuEnabled: process.env.REACT_APP_NOVU_ENABLED === 'true' || false,
-  NovuPublisherApiUrl: process.env.REACT_APP_NOVU_PUBLISHER_API_URL,
+    window.HUMAN_TASK_CREATED,
+  ),
+  NovuEnabled: getEnv(process.env.REACT_APP_NOVU_ENABLED, window.NOVU_ENABLED),
+  NovuPublisherApiUrl: getEnv(
+    process.env.REACT_APP_NOVU_PUBLISHER_API_URL,
+    window.NOVU_PUBLISHER_API_URL,
+  ),
   NovuAppId:
-    process.env.REACT_APP_NOVU_ENABLED === 'true'
+    getEnv(process.env.REACT_APP_NOVU_ENABLED, window.NOVU_ENABLED) === 'true'
       ? await fetchNovuAppId()
       : undefined,
 }
 
 async function fetchNovuAppId() {
   try {
-    const apiUrl = `${process.env.REACT_APP_NOVU_PUBLISHER_API_URL}/novu-app-id`
+    const host = getEnv('REACT_APP_NOVU_PUBLISHER_API_URL')
+
+    const apiUrl = `${host}/novu-app-id`
 
     const response = await fetch(apiUrl)
 
@@ -33,4 +50,15 @@ async function fetchNovuAppId() {
     return null
   }
 }
+
+function getEnv(key, defaultValue) {
+  const isDev = process.env.NODE_ENV === 'development'
+
+  if (isDev && !!key) {
+    return key
+  }
+
+  return defaultValue
+}
+
 export default Config
