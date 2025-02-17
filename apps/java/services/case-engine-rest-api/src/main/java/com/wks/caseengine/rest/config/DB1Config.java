@@ -19,6 +19,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -38,10 +39,14 @@ import jakarta.persistence.EntityManagerFactory;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-    basePackages = "com.wks.caseengine.rest.db1.repository", // Repository package for DB1
-    entityManagerFactoryRef = "db1EntityManagerFactory",
-    transactionManagerRef = "db1TransactionManager"
-)
+	    basePackages = {
+	        "com.wks.caseengine.rest.db1.repository", // Repository package for DB1
+	        "com.wks.caseengine.product.repository"  // Additional repository package
+	    },
+	    entityManagerFactoryRef = "db1EntityManagerFactory",
+	    transactionManagerRef = "db1TransactionManager"
+	)
+
 public class DB1Config {
 	
 	
@@ -86,14 +91,18 @@ public class DB1Config {
     @Primary
     @Bean(name = "db1EntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean db1EntityManagerFactory(
-        EntityManagerFactoryBuilder builder) {
+            EntityManagerFactoryBuilder builder) {
         return builder
-            .dataSource(db1DataSource())
-            .packages("com.wks.caseengine.rest.db1.entity") // Change to your model package
-            .persistenceUnit("db1")
-            .properties(hibernateProperties())
-            .build();
+                .dataSource(db1DataSource())
+                .packages(
+                    "com.wks.caseengine.rest.db1.entity", 
+                    "com.wks.caseengine.entity"
+                ) // Include both packages
+                .persistenceUnit("db1")
+                .properties(hibernateProperties())
+                .build();
     }
+
     
     private Map<String, Object> hibernateProperties() {
         Map<String, Object> properties = new HashMap<>();
