@@ -24,6 +24,7 @@ keycloak.data.import.externaltasks-secret: ${KEYCLOAK_EXTERNALTASKS_SECRET:repla
 keycloak.data.import.emailtocase-clientid: wks-email-to-case
 keycloak.data.import.emailtocase-secret: ${KEYCLOAK_EMAILTOCASE_SECRET:replaceme}
 keycloak.data.import.realm: ${spring.data.mongodb.database.tenant}
+keycloak.data.import.realm.display.name: ${KEYCLOAK_DATA_IMPORT_REALM_DISPLAY_NAME}
 keycloak.data.import.dns: localhost
 keycloak.data.import.port: :3001
 keycloak.data.import.protocol: http://

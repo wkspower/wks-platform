@@ -96,6 +96,9 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 	@Value("${keycloak.data.import.password}")
 	private String userPassword;
 
+	@Value("${keycloak.data.import.realm.display.name}")
+	private String realmDisplayName;
+	
 	@Autowired
 	private GsonBuilder gsonBuilder;
 
@@ -154,29 +157,84 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 		emailToCaseClient.setOptionalClientScopes(createOptionalClientScopes());
 		clients.add(emailToCaseClient);
 
-		RealmRepresentation realm = new RealmRepresentation();
-		realm.setRealm(realmName);
-		realm.setUsers(createUsers());
-		realm.setClients(clients);
-		realm.setClientScopes(createScopes());
-		realm.setEnabled(true);
-
-		RolesRepresentation roleRepresentation = new RolesRepresentation();
-		roleRepresentation.setRealm(createRealmRoles());
-		realm.setRoles(roleRepresentation);
-		realm.setGroups(createGroups());
+//		RealmRepresentation realm = new RealmRepresentation();
+//		realm.setRealm(realmName);
+//		realm.setUsers(createUsers());
+//		realm.setClients(clients);
+//		realm.setClientScopes(createScopes());
+//		realm.setEnabled(true);
+//
+//		RolesRepresentation roleRepresentation = new RolesRepresentation();
+//		roleRepresentation.setRealm(createRealmRoles());
+//		realm.setRoles(roleRepresentation);
+//		realm.setGroups(createGroups());
+//
+//		try {
+//
+//			keycloak.realms().create(realm);
+//
+//			addUserToGroups(keycloak, externalTasksClientId, Arrays.asList("user", "manager", "email-to-case"));
+//			addUserToGroups(keycloak, emailToCaseClientId, Arrays.asList("email-to-case"));
+//
+//		} catch (Exception e) {
+//			log.error("error to create keycloack", e);
+//		}
 
 		try {
+		    // Check if the realm exists
+		    RealmRepresentation existingRealm = null;
+		    try {
+		        existingRealm = keycloak.realms().realm(realmName).toRepresentation();
+		    } catch (Exception e) {
+		        // Realm doesn't exist, proceed with creation
+		        log.info("Realm does not exist, creating a new realm.");
+		    }
 
-			keycloak.realms().create(realm);
+		    if (existingRealm == null) {
+		        // Create a new realm if it doesn't exist
+				RealmRepresentation realm = new RealmRepresentation();
 
-			addUserToGroups(keycloak, externalTasksClientId, Arrays.asList("user", "manager", "email-to-case"));
-			addUserToGroups(keycloak, emailToCaseClientId, Arrays.asList("email-to-case"));
+		        realm.setRealm(realmName);
+		        realm.setDisplayName(realmDisplayName);
+		        realm.setUsers(createUsers());
+		        realm.setClients(clients);
+		        realm.setClientScopes(createScopes());
+		        realm.setEnabled(true);
+
+		        RolesRepresentation roleRepresentation = new RolesRepresentation();
+		        roleRepresentation.setRealm(createRealmRoles());
+		        realm.setRoles(roleRepresentation);
+		        realm.setGroups(createGroups());
+
+		        keycloak.realms().create(realm);
+		        log.info("Realm created: " + realmName);
+		    } else {
+		        // Update the existing realm
+		        log.info("Realm exists, updating the realm.");
+
+		        // Update the existing realm properties
+		        existingRealm.setDisplayName(realmDisplayName);
+
+		        existingRealm.setUsers(createUsers());
+		        existingRealm.setClients(clients);
+		        existingRealm.setClientScopes(createScopes());
+//		        existingRealm.setRoles(createRealmRoles());
+		        existingRealm.setGroups(createGroups());
+
+		        // You may need to update other properties as necessary
+		        keycloak.realms().realm(realmName).update(existingRealm);
+		        log.info("Realm updated: " + realmName);
+		    }
+
+		    // Add users to groups
+		    addUserToGroups(keycloak, externalTasksClientId, Arrays.asList("user", "manager", "email-to-case"));
+		    addUserToGroups(keycloak, emailToCaseClientId, Arrays.asList("email-to-case"));
 
 		} catch (Exception e) {
-			log.error("error to create keycloack", e);
+		    log.error("Error creating or updating Keycloak realm", e);
 		}
 
+		
 		log.info("End of data importing");
 	}
 

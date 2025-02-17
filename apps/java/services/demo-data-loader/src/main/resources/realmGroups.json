@@ -13,11 +13,11 @@
     "path": "/manager",
     "realmRoles": [
       "mgmt_case_def",
-      "mgmt_ bpm_engine",
+      "mgmt_bpm_engine",
       "mgmt_process_engine",
       "mgmt_record_type",
       "mgmt_form",
-      "mgmt_ bpm_engine_type"
+      "mgmt_bpm_engine_type"
     ]
   },
   {
