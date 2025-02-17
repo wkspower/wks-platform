@@ -1,9 +1,8 @@
-import dashboard from './dashboard'
 import workspace from './workspace'
 import management from './management'
 
 const menuItems = {
-  items: [dashboard, workspace, management],
+  items: [workspace, management],
 }
 
 export default menuItems

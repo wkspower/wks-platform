@@ -81,7 +81,7 @@ const App = () => {
       setRecordsTypes(data)
 
       data.forEach((element) => {
-        menu.items[1].children
+        menu.items[0].children
           .filter((menu) => menu.id === 'record-list')[0]
           .children.push({
             id: element.id,
@@ -97,7 +97,7 @@ const App = () => {
       setCasesDefinitions(data)
 
       data.forEach((element) => {
-        menu.items[1].children
+        menu.items[0].children
           .filter((menu) => menu.id === 'case-list')[0]
           .children.push({
             id: element.id,
@@ -110,9 +110,9 @@ const App = () => {
     })
 
     if (!accountStore.isManagerUser(keycloak)) {
-      delete menu.items[2]
+      delete menu.items[1]
     }
-
+    
     return setMenu(menu)
   }
 
