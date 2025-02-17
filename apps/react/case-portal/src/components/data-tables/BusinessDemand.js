@@ -22,6 +22,7 @@ const productionColumns = [
     field: 'product',
     headerName: 'Product',
     editable: true,
+    minWidth : 125,
     renderEditCell: (params) => {
       const { id } = params
       const isEditable = id > 10 // Enable only for rows beyond 10
@@ -80,7 +81,7 @@ const productionColumns = [
       </div>
     ),
   },
-  { field: 'remark', headerName: 'Remark', width: 200, editable: true },
+  { field: 'remark', headerName: 'Remark', minWidth : 150, editable: true },
 ]
 
 const productionData = [

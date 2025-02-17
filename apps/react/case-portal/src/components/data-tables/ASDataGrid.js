@@ -12,7 +12,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 // import EditIcon from '@mui/icons-material/Edit'
-import DeleteIcon from '@mui/icons-material/Delete'
+
 import { useSession } from 'SessionStoreContext'
 
 import { Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'
@@ -25,17 +25,13 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { MenuItem } from '../../../node_modules/@mui/material/index'
 
-// const style = {
-//   position: 'absolute',
-//   top: '50%',
-//   left: '50%',
-//   transform: 'translate(-50%, -50%)',
-//   width: 400,
-//   bgcolor: 'background.paper',
-//   border: '2px solid #000',
-//   boxShadow: 24,
-//   p: 4,
-// }
+
+import Notification from 'components/Utilities/Notification'
+
+import DeleteIcon from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
+
 
 const jioColors = {
   primaryBlue: '#0F3CC9',
@@ -56,27 +52,27 @@ const DataGridTable = ({
   onAddRow,
   onDeleteRow,
   onRowUpdate,
-  paginationOptions = [100, 200, 300],
 }) => {
-  const [rows, setRows] = useState(initialRows)
-  const [searchText, setSearchText] = useState('')
-  // const [anchorEl, setAnchorEl] = useState(null)
-  // const [selectedRow, setSelectedRow] = useState(null)
-  const [isFilterActive, setIsFilterActive] = useState(false)
-  const [paginationModel, setPaginationModel] = useState({
-    page: 0,
-    pageSize: paginationOptions[0],
-  })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [openYearData, setOpenYearData] = useState(false)
+  const [yearData, setYearData] = useState('')
+  const [snackbarMessage, setSnackbarMessage] = useState('')
   const [resizedColumns, setResizedColumns] = useState({})
   const [open, setOpen] = useState(false)
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
-
-  const handleClose1 = () => setOpen1(false)
-
+  const [remark, setRemark] = useState('')
+  const [product, setProduct] = useState('')
+  const [openRemark, setOpenRemark] = useState(false)
   const keycloak = useSession()
   const [days, setDays] = useState([])
+  const [rows, setRows] = useState(initialRows)
+  const [searchText, setSearchText] = useState('')
+  const [isFilterActive, setIsFilterActive] = useState(false)
 
+  const handleOpenRemark = () => setOpenRemark(true)
+  const handleCloseRemark = () => setOpenRemark(false)
+  const handleClose1 = () => setOpen1(false)
   const handleSearchChange = (event) => {
     setSearchText(event.target.value)
   }
@@ -91,10 +87,15 @@ const DataGridTable = ({
     }
   }
 
-  const [openYearData, setOpenYearData] = useState(false)
-  const [yearData, setYearData] = useState('')
+  const handleOpenYearData = () => {
+    if (product === '') {
+      setSnackbarOpen(true)
+      setSnackbarMessage('Select a Product First!')
+      return
+    }
+    setOpenYearData(true)
+  }
 
-  const handleOpenYearData = () => setOpenYearData(true)
   const handleCloseYearData = () => {
     setOpenYearData(false)
     setYearData('')
@@ -151,28 +152,18 @@ const DataGridTable = ({
   }
 
   const handleAddRow = () => {
-    const newRowId = rows.length
-      ? Math.max(...rows.map((row) => row.id)) + 1
-      : 1
+    const newRowId = rows.length ? Math.max(...rows.map((row) => row.id)) + 1 : 1;
     const newRow = {
       id: newRowId,
+      isNew: true, // Identify new rows
       ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])),
-    }
-    const updatedRows = [newRow, ...rows] // Add new row at the top
-    setRows(updatedRows)
-    onAddRow?.(newRow)
-
-    // Ensure the pagination stays on the current page
-    setPaginationModel((prev) => ({
-      ...prev,
-      page: 0, // Keep the view on the first page to show the new top row
-    }))
-  }
-
-  useEffect(() => {
-    console.log('Current Page:', paginationModel.page)
-    console.log('titile', title)
-  }, [paginationModel])
+    };
+    const updatedRows = [newRow, ...rows];
+    setRows(updatedRows);
+    onAddRow?.(newRow);
+    setProduct('');
+  };
+  
 
   useEffect(() => {
     console.log('api call here ')
@@ -201,6 +192,24 @@ const DataGridTable = ({
     }
   }
 
+
+
+  const handleSaveRow = (id) => {
+    const updatedRows = rows.map((row) => 
+      row.id === id ? { ...row, isNew: false } : row
+    );
+    setRows(updatedRows);
+  };
+  
+  const handleCancelRow = (id) => {
+    const updatedRows = rows.filter((row) => row.id !== id);
+    setRows(updatedRows);
+  };
+  
+
+
+
+
   const defaultColumns = useMemo(() => {
     return initialColumns.map((col) => ({
       ...col,
@@ -209,59 +218,40 @@ const DataGridTable = ({
   }, [initialColumns, resizedColumns])
   const columns = [
     ...defaultColumns,
-    ...(title === 'Business Demand Data'
+    ...(title != 'Production Volume Data'
       ? [
-          {
-            field: 'actions',
-            headerName: 'Actions',
-            width: 180,
-            cellClassName: 'with-border',
-            headerAlign: 'center',
-            align: 'center',
-            renderCell: (params) => (
-              <IconButton
-                onClick={() => handleDeleteRow(params.row.id)}
-                aria-label='delete'
-              >
+        {
+          field: 'actions',
+          headerName: 'Actions',
+          width: 180,
+          cellClassName: 'with-border',
+          headerAlign: 'center',
+          align: 'center',
+          pinned:'right',
+          renderCell: (params) => {
+            const { id, isNew } = params.row;
+      
+            return isNew ? (
+              <>
+                <IconButton onClick={() => handleSaveRow(id)} aria-label="save">
+                  <SaveIcon sx={{ color: 'green' }} />
+                </IconButton>
+                <IconButton onClick={() => handleCancelRow(id)} aria-label="cancel">
+                  <CancelIcon sx={{ color: 'red' }} />
+                </IconButton>
+              </>
+            ) : (
+              <IconButton onClick={() => handleDeleteRow(id)} aria-label="delete">
                 <DeleteIcon sx={{ color: jioColors.accentRed }} />
               </IconButton>
-            ),
-            flex: 1,
-            headerClassName: 'last-column-header',
+            );
           },
+          flex: 1,
+          headerClassName: 'last-column-header',
+        }
         ]
       : []),
   ]
-
-  // const handleCellClick = (params) => {
-  //   if (
-  //     // title == 'Production Volume Data' &&
-  //     params.isEditable == true &&
-  //     params.field != 'product' &&
-  //     params.field != 'averageTPH' &&
-  //     params.field != 'remark' &&
-  //     params.field != 'id' &&
-  //     params.field != 'actions' &&
-  //     params.field != 'isNew' &&
-  //     params.field != 'taTo' &&
-  //     params.field != 'taFrom' &&
-  //     params.field != 'activities' &&
-  //     params.field != 'durationHrs' &&
-  //     params.field != 'period' &&
-  //     params.value !== null && // Check if the cell is not empty
-  //     params.value !== undefined &&
-  //     params.value !== ''
-  //   ) {
-  //     // setSelectedRow(params.row)
-  //     setOpen(true)
-  //   }
-  // }
-
-  const [remark, setRemark] = React.useState('')
-  const [openRemark, setOpenRemark] = React.useState(false)
-
-  const handleOpenRemark = () => setOpenRemark(true)
-  const handleCloseRemark = () => setOpenRemark(false)
 
   const addRemark = () => {
     console.log('Remark:', remark)
@@ -270,9 +260,18 @@ const DataGridTable = ({
   }
 
   const handleCellClick = (params) => {
-    if (title != 'Business Demand Data') {
+    if (title == 'Production Volume Data') {
       return
     }
+
+    if (params.row.prduct === '') {
+      setSnackbarOpen(true)
+      setSnackbarMessage('Select a Product First!')
+      return
+    } else {
+      setProduct(params.row.product)
+    }
+
     if (params?.field === 'remark') {
       setRemark(params?.value || '') // Auto-fetch the params value
       handleOpenRemark()
@@ -281,9 +280,6 @@ const DataGridTable = ({
         handleOpenYearData()
         return
       }
-
-      console.log(params)
-
       const nonEditableFields = [
         'product',
         'averageTPH',
@@ -331,21 +327,20 @@ const DataGridTable = ({
         }
 
         // Calculate days in the selected month
-        const totalDays = new Date(year, month + 1, 0).getDate()
+        const totalDays = new Date(year, month + 1, 0).getDate();
         const daysArray = Array.from({ length: totalDays }, (_, index) => {
-          const date = new Date(year, month, index + 1)
-          const formattedDate = date
-            .toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: '2-digit',
-              year: '2-digit',
-            })
-            .replace(/\//g, '-') // 'DD-MM-YY' format
+          const date = new Date(year, month, index + 1);
+          const day = String(date.getDate()).padStart(2, '0');
+          const monthName = date.toLocaleString('en-GB', { month: 'short' }); 
+          const yearShort = date.getFullYear().toString().slice(-2); 
+
+          const formattedDate = `${day}-${monthName}-${yearShort}`;
+
           return {
             date: formattedDate,
-            value: Math.floor(Math.random() * 100), // Replace with actual data if needed
-          }
-        })
+            value: Math.floor(Math.random() * 100), 
+          };
+        });
 
         setDays(daysArray)
 
@@ -375,8 +370,18 @@ const DataGridTable = ({
   }, [])
 
   const handleSubmit = () => {
+    const isEmpty = days.some((day) => day.value === '' || day.value === null)
+    if (isEmpty) {
+      setSnackbarOpen(true)
+      setSnackbarMessage('Add data for all fields!')
+      return
+    }
     console.log('Submitted Data:', days)
     setOpen(false) // Close the modal
+  }
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false)
   }
 
   const handleCancel = () => {
@@ -409,7 +414,7 @@ const DataGridTable = ({
   }
   const [selectedUnit, setSelectedUnit] = useState('')
 
-  const unitOptions = ['TPH', 'Liters', 'Units']
+  const unitOptions = ['TPH', 'BPH', 'Units']
 
   return (
     <Box
@@ -519,42 +524,11 @@ const DataGridTable = ({
             </span>
           </IconButton>
         </Box>
-
-        {/* <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography
-            sx={{ marginRight: 1, fontWeight: 300, color: '#8A9BC2' }}
-          >
-            Show:
-          </Typography>
-          <select
-            value={paginationModel.pageSize}
-            onChange={(e) => {
-              const newSize = Number(e.target.value)
-              setPaginationModel({
-                ...paginationModel,
-                pageSize: newSize,
-                page: 0,
-              })
-            }}
-            style={{ padding: '4px' }}
-          >
-            {paginationOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-          <Typography sx={{ marginLeft: 1, fontWeight: 300, color: '#8A9BC2' }}>
-            Entries
-          </Typography>
-        </Box> */}
       </Box>
 
       <Box sx={{ height: 'calc(100% - 150px)', width: '100%' }}>
         <DataGrid
-          key={paginationModel.page}
           rows={filteredRows}
-          // columns={columns}
           columns={columns.map((col) => ({
             ...col,
             editable:
@@ -562,12 +536,8 @@ const DataGridTable = ({
           }))}
           rowHeight={35}
           processRowUpdate={processRowUpdate}
-          paginationModel={paginationModel}
-          onPaginationModelChange={(model) => setPaginationModel(model)}
-          rowsPerPageOptions={paginationOptions}
           onColumnResized={onColumnResized}
           onCellClick={handleCellClick}
-          pagination
           disableSelectionOnClick
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? 'even-row' : 'odd-row'
@@ -671,7 +641,7 @@ const DataGridTable = ({
         />
       </Box>
 
-      {title === 'Business Demand Data' && (
+      {title != 'Production Volume Data' && (
         <Button
           variant='contained'
           sx={{
@@ -693,6 +663,13 @@ const DataGridTable = ({
           Add Item
         </Button>
       )}
+
+      <Notification
+        open={snackbarOpen}
+        message={snackbarMessage}
+        severity='error'
+        onClose={handleCloseSnackbar}
+      />
 
       <Dialog
         open={open1}
@@ -758,22 +735,24 @@ const DataGridTable = ({
         </DialogActions>
       </Dialog>
 
-      <Dialog open={open} onClose={handleCancel} maxWidth='xl' fullWidth>
+      <Dialog open={open} onClose={handleCancel} maxWidth='lg' fullWidth>
         <DialogTitle>
-          <Typography variant='h6'>Add Data for the Month</Typography>
+          <Typography variant='h6'>
+            Day wise monthly Data for Financial Year 2024-2025
+          </Typography>
         </DialogTitle>
 
         <DialogContent>
           <Box sx={{ maxHeight: '80vh', overflowX: 'auto', padding: '10px' }}>
             <Table>
               <TableHead>
-                {/* Headers for Days 1-15 */}
+                {/* First row: Days 1 to 11 */}
                 <TableRow>
-                  {days.slice(0, 15).map((day, index) => (
+                  {days.slice(0, 11).map((day, index) => (
                     <TableCell
                       key={index}
                       sx={{
-                        textAlign: 'center',
+                        textAlign: 'left',
                         fontWeight: 'bold',
                         padding: '6px',
                       }}
@@ -785,12 +764,12 @@ const DataGridTable = ({
               </TableHead>
 
               <TableBody>
-                {/* Values for Days 1-15 */}
+                {/* Values for Days 1 to 11 */}
                 <TableRow>
-                  {days.slice(0, 15).map((day, index) => (
+                  {days.slice(0, 11).map((day, index) => (
                     <TableCell
                       key={index}
-                      sx={{ textAlign: 'center', padding: '6px' }}
+                      sx={{ textAlign: 'left', padding: '6px' }}
                     >
                       <TextField
                         type='number'
@@ -800,18 +779,19 @@ const DataGridTable = ({
                         }
                         size='small'
                         sx={{ width: '85px', marginTop: '2px' }}
+                        error={!day.value}
                       />
                     </TableCell>
                   ))}
                 </TableRow>
 
-                {/* Headers for Days 16-30 */}
+                {/* Second row: Days 12 to 22 */}
                 <TableRow>
-                  {days.slice(15).map((day, index) => (
+                  {days.slice(11, 22).map((day, index) => (
                     <TableCell
-                      key={index + 15}
+                      key={index}
                       sx={{
-                        textAlign: 'center',
+                        textAlign: 'left',
                         fontWeight: 'bold',
                         padding: '6px',
                       }}
@@ -821,21 +801,57 @@ const DataGridTable = ({
                   ))}
                 </TableRow>
 
-                {/* Values for Days 16-30 */}
                 <TableRow>
-                  {days.slice(15).map((day, index) => (
+                  {days.slice(11, 22).map((day, index) => (
                     <TableCell
-                      key={index + 15}
-                      sx={{ textAlign: 'center', padding: '6px' }}
+                      key={index}
+                      sx={{ textAlign: 'left', padding: '6px' }}
                     >
                       <TextField
                         type='number'
                         value={day.value}
                         onChange={(e) =>
-                          handleValueChange(index + 15, e.target.value)
+                          handleValueChange(index + 11, e.target.value)
                         }
                         size='small'
                         sx={{ width: '85px', marginTop: '2px' }}
+                        error={!day.value}
+                      />
+                    </TableCell>
+                  ))}
+                </TableRow>
+
+                {/* Third row: Days 23 to 30 */}
+                <TableRow>
+                  {days.slice(22, 31).map((day, index) => (
+                    <TableCell
+                      key={index}
+                      sx={{
+                        textAlign: 'left',
+                        fontWeight: 'bold',
+                        padding: '6px',
+                      }}
+                    >
+                      {day.date}
+                    </TableCell>
+                  ))}
+                </TableRow>
+
+                <TableRow>
+                  {days.slice(22, 31).map((day, index) => (
+                    <TableCell
+                      key={index}
+                      sx={{ textAlign: 'left', padding: '6px' }}
+                    >
+                      <TextField
+                        type='number'
+                        value={day.value}
+                        onChange={(e) =>
+                          handleValueChange(index + 22, e.target.value)
+                        }
+                        size='small'
+                        sx={{ width: '85px', marginTop: '2px' }}
+                        error={!day.value}
                       />
                     </TableCell>
                   ))}
