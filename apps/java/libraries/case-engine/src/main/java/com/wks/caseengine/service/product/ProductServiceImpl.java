@@ -19,8 +19,8 @@ import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.dto.product.ProductMonthWiseDataDTO;
 import com.wks.caseengine.product.repository.ProductMonthWiseDataRepository;
-import com.wks.caseengine.rest.db1.entity.Product;
-import com.wks.caseengine.rest.db1.entity.ProductMonthWiseData;
+import com.wks.caseengine.rest.entity.Product;
+import com.wks.caseengine.entity.ProductMonthWiseData;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -51,21 +51,56 @@ public class ProductServiceImpl implements ProductService {
 		return searchResults;
 
 	}
-	
+	public String getMonthName(int monthNumber) {
+	    return switch (monthNumber) {
+	        case 1 -> "January";
+	        case 2 -> "February";
+	        case 3 -> "March";
+	        case 4 -> "April";
+	        case 5 -> "May";
+	        case 6 -> "June";
+	        case 7 -> "July";
+	        case 8 -> "August";
+	        case 9 -> "September";
+	        case 10 -> "October";
+	        case 11 -> "November";
+	        case 12 -> "December";
+	        default -> "Invalid Month";
+	    };
+	}
+
 	@Override
-	public List<ProductMonthWiseDataDTO> getMonthWiseDataByTypeAndYear(String type, int currentYear) {
+	public List<Object[]> getMonthWiseDataByTypeAndYear(String type, int currentYear) {
 		List<Object[]> productMonthWiseData= productMonthWiseDataRepository.getMonthWiseDataByTypeAndYear(type,currentYear,currentYear+1);
-		List<ProductMonthWiseDataDTO> productMonthWiseDataDTOList = new ArrayList<ProductMonthWiseDataDTO>();
-		for(Object obj:productMonthWiseData) {
-			Object[] data = (Object[]) obj;
-			ProductMonthWiseDataDTO productMonthWiseDataDTO= new ProductMonthWiseDataDTO();
-			productMonthWiseDataDTO.setMonth(data[0].toString());
-			productMonthWiseDataDTO.setPlantId((Long) data[1]);
-			productMonthWiseDataDTO.setMonthValue((Long) data[2]);
-			productMonthWiseDataDTOList.add(productMonthWiseDataDTO);
-		}
-		return productMonthWiseDataDTOList;
 		
+		List<ProductMonthWiseDataDTO> productMonthWiseDataDTOList = new ArrayList<>();
+		/*for(Object obj : productMonthWiseData) {
+		    Object[] data = (Object[]) obj;
+		    ProductMonthWiseDataDTO productMonthWiseDataDTO = new ProductMonthWiseDataDTO();
+		    
+		    int monthNumber = ((Number) data[0]).intValue();
+		    //productMonthWiseDataDTO.setMonth(getMonthName(monthNumber));
+		    
+		    productMonthWiseDataDTO.setPlantId(((Number) data[1]).longValue());
+		    productMonthWiseDataDTO.setMonthValue(((Number) data[2]).longValue());
+		    
+		    productMonthWiseDataDTOList.add(productMonthWiseDataDTO);
+		}*/
+
+		return productMonthWiseData;
+
+	}
+	
+	public ProductMonthWiseDataDTO saveMonthWiseData(ProductMonthWiseDataDTO productMonthWiseDataDTO) {
+		ProductMonthWiseData productMonthWiseData=new ProductMonthWiseData();
+		productMonthWiseData.setMonth(productMonthWiseDataDTO.getMonth());
+		productMonthWiseData.setMonthValue(productMonthWiseDataDTO.getMonthValue());
+		productMonthWiseData.setPlantId(productMonthWiseDataDTO.getPlantId());
+		productMonthWiseData.setProductId(productMonthWiseDataDTO.getProductId());
+		productMonthWiseData.setType(productMonthWiseDataDTO.getType());
+		productMonthWiseData.setYear(productMonthWiseDataDTO.getYear());
+		productMonthWiseDataRepository.save(productMonthWiseData);
+		return productMonthWiseDataDTO;
 	}
 
 }
