@@ -11,17 +11,11 @@
  */
 package com.wks.caseengine.service.product;
 
-import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.wks.caseengine.dto.product.ProductMonthWiseDataDTO;
 import com.wks.caseengine.product.repository.ProductMonthWiseDataRepository;
 import com.wks.caseengine.rest.entity.Product;
-import com.wks.caseengine.entity.ProductMonthWiseData;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -73,7 +67,7 @@ public class ProductServiceImpl implements ProductService {
 	public List<Object[]> getMonthWiseDataByTypeAndYear(String type, int currentYear) {
 		List<Object[]> productMonthWiseData= productMonthWiseDataRepository.getMonthWiseDataByTypeAndYear(type,currentYear,currentYear+1);
 		
-		List<ProductMonthWiseDataDTO> productMonthWiseDataDTOList = new ArrayList<>();
+		//List<ProductMonthWiseDataDTO> productMonthWiseDataDTOList = new ArrayList<>();
 		/*for(Object obj : productMonthWiseData) {
 		    Object[] data = (Object[]) obj;
 		    ProductMonthWiseDataDTO productMonthWiseDataDTO = new ProductMonthWiseDataDTO();
@@ -91,7 +85,7 @@ public class ProductServiceImpl implements ProductService {
 
 	}
 	
-	public ProductMonthWiseDataDTO saveMonthWiseData(ProductMonthWiseDataDTO productMonthWiseDataDTO) {
+	/*public ProductMonthWiseDataDTO saveMonthWiseData(ProductMonthWiseDataDTO productMonthWiseDataDTO) {
 		ProductMonthWiseData productMonthWiseData=new ProductMonthWiseData();
 		productMonthWiseData.setMonth(productMonthWiseDataDTO.getMonth());
 		productMonthWiseData.setMonthValue(productMonthWiseDataDTO.getMonthValue());
@@ -101,6 +95,6 @@ public class ProductServiceImpl implements ProductService {
 		productMonthWiseData.setYear(productMonthWiseDataDTO.getYear());
 		productMonthWiseDataRepository.save(productMonthWiseData);
 		return productMonthWiseDataDTO;
-	}
+	}*/
 
 }

@@ -1,10 +1,10 @@
 package com.wks.caseengine.service;
 import java.util.List;
 
-import com.wks.caseengine.rest.entity.Site;
+import com.wks.caseengine.entity.Sites;
 
 public interface SiteService {
 	
-	public List<Site> getAllSites();
+	public List<Sites> getAllSites();
 
 }

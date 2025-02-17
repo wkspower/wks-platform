@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.wks.caseengine.rest.entity.Site;
+import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.service.SiteService;
 
 @RestController
@@ -17,8 +17,8 @@ public class SiteController {
 	private SiteService siteService;
 	
 	@GetMapping(value = "/getAllSites")
-	public ResponseEntity<List<Site>> getAllSites() {
-		List<Site> listOfSites = siteService.getAllSites(); 
+	public ResponseEntity<List<Sites>> getAllSites() {
+		List<Sites> listOfSites = siteService.getAllSites(); 
 	    return ResponseEntity.ok(listOfSites);
 	}
 

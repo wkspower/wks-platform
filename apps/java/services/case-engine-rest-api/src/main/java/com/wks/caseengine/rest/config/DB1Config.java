@@ -41,15 +41,14 @@ import jakarta.persistence.EntityManagerFactory;
 @EnableJpaRepositories(
 	    basePackages = {
 	        "com.wks.caseengine.rest.db1.repository", // Repository package for DB1
-	        "com.wks.caseengine.product.repository"  // Additional repository package
+	        "com.wks.caseengine.product.repository",
+	        "com.wks.caseengine.repository"// Additional repository package
 	    },
 	    entityManagerFactoryRef = "db1EntityManagerFactory",
 	    transactionManagerRef = "db1TransactionManager"
 	)
 
 public class DB1Config {
-	
-	
 
     @Value("${spring.datasource.db1.url}")
     private String url;
