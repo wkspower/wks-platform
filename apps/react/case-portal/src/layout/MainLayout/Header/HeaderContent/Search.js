@@ -18,6 +18,11 @@ const Search = () => (
         inputProps={{
           'aria-label': 'weight',
         }}
+        sx={{
+          input: {
+            '&::placeholder': { color: '#fff', opacity: 1 }, // Makes placeholder fully visible
+          },
+        }}
         placeholder='Ctrl + K'
       />
     </FormControl>

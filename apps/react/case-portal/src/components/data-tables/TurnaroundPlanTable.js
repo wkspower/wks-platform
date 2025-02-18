@@ -1,19 +1,81 @@
+import {
+  Autocomplete,
+  TextField,
+} from '../../../node_modules/@mui/material/index'
 import ASDataGrid from './ASDataGrid'
 import dayjs from 'dayjs'
-
+const productOptions = [
+  'Product A',
+  'Product B',
+  'Product C',
+  'Product D',
+  'Product E',
+  'Product F',
+  'Product G',
+  'Product H',
+  'Product I',
+  'Product J',
+  'Product K',
+  'Product L',
+]
 const columns = [
-  { field: 'id', headerName: 'Sr. No.', width: 100, flex: 0.1, editable: true },
+  {
+    field: 'id',
+    headerName: 'Sr. No.',
+    minWidth: 10,
+    // flex: 0.5,
+    editable: true,
+  },
   {
     field: 'activities',
     headerName: 'Activities',
     width: 300,
     editable: true,
-    flex: 1,
+    flex: 3,
+  },
+  {
+    field: 'product',
+    headerName: 'Product',
+    editable: true,
+    minWidth: 125,
+    renderEditCell: (params) => {
+      const { id } = params
+      const isEditable = id > 10 // Enable only for rows beyond 10
+
+      return (
+        <Autocomplete
+          options={productOptions}
+          value={params.value || ''}
+          disableClearable
+          onChange={(event, newValue) => {
+            params.api.setEditCellValue({
+              id: params.id,
+              field: 'product',
+              value: newValue,
+            })
+          }}
+          onInputChange={(event, newInputValue) => {
+            if (event && event.type === 'keydown' && event.key === 'Enter') {
+              params.api.setEditCellValue({
+                id: params.id,
+                field: 'product',
+                value: newInputValue,
+              })
+            }
+          }}
+          renderInput={(params) => (
+            <TextField {...params} variant='outlined' size='small' />
+          )}
+          disabled={!isEditable}
+          fullWidth
+        />
+      )
+    },
   },
   {
     field: 'taFrom',
     headerName: 'TA - From',
-    type: 'date',
+    type: 'dateTime',
     width: 180,
     editable: true,
     flex: 0.4,
@@ -46,13 +108,19 @@ const columns = [
     // },
     renderCell: (params) => {
       const date = params.value
-      return date ? dayjs(date).format('DD/MM/YYYY') : 'No Date'
+      return date && dayjs(date).isValid()
+        ? dayjs(date).format('DD/MM/YYYY HH:mm:ss') // Format as date + time
+        : 'No Date' // If the date is invalid or empty, show 'No Date'
     },
+    // renderCell: (params) => {
+    //   const date = params.value
+    //   return date ? dayjs(date).format('DD/MM/YYYY') : 'No Date'
+    // },
   },
   {
     field: 'taTo',
     headerName: 'TA - To',
-    type: 'date',
+    type: 'dateTime',
     width: 180,
     editable: true,
     flex: 0.4,
@@ -62,7 +130,9 @@ const columns = [
     // },
     renderCell: (params) => {
       const date = params.value
-      return date ? dayjs(date).format('DD/MM/YYYY') : 'No Date'
+      return date && dayjs(date).isValid()
+        ? dayjs(date).format('DD/MM/YYYY HH:mm:ss') // Format as date + time
+        : 'No Date' // If the date is invalid or empty, show 'No Date'
     },
     // renderCell: (params) => {
     //   return (
@@ -91,9 +161,10 @@ const columns = [
   {
     field: 'durationHrs',
     headerName: 'Duration Hrs',
-    width: 150,
+    width: 130,
     editable: true,
     flex: 0.5,
+    type: 'number',
   },
   {
     field: 'period',
@@ -101,6 +172,7 @@ const columns = [
     width: 250,
     editable: true,
     flex: 0.5,
+    // align: 'center',
   },
   {
     field: 'remark',
@@ -111,12 +183,109 @@ const columns = [
   },
 ]
 
+// const productionData = [
+//   {
+//     id: 1,
+//     activities: 'Preheater cleaning',
+//     product: 'Product A',
+
+//     // taFrom: '2024-03-12',
+//     // taTo: '2024-03-13',
+//     durationHrs: 10,
+//     period: '1 day',
+//     remark: 'Routine cleaning of preheater unit',
+//   },
+//   {
+//     id: 2,
+//     activities: 'Strippers inspection',
+//     product: 'Product A',
+
+//     // taFrom: '2024-03-15',
+//     // taTo: '2024-03-16',
+//     durationHrs: 14,
+//     period: '1.5 days',
+//     remark: 'Visual inspection and minor repairs',
+//   },
+//   {
+//     id: 3,
+//     activities: 'Rotary kiln overhaul',
+//     product: 'Product A',
+//     // taFrom: '2024-03-18',
+//     // taTo: '2024-03-22',
+//     durationHrs: 40,
+//     period: '5 days',
+//     remark: 'Complete overhaul, including internal parts replacement',
+//   },
+//   {
+//     id: 4,
+//     activities: 'Cooling system check',
+//     // taFrom: '2024-03-20',
+//     // taTo: '2024-03-21',
+//     durationHrs: 16,
+//     period: '2 days',
+//     remark: 'Maintenance and efficiency check of cooling system',
+//   },
+//   {
+//     id: 5,
+//     activities: 'Pump calibration',
+//     // taFrom: '2024-03-22',
+//     // taTo: '2024-03-23',
+//     durationHrs: 12,
+//     period: '1 day',
+//     remark: 'Calibrating pumps for accurate performance',
+//   },
+//   {
+//     id: 6,
+//     activities: 'Power grid inspection',
+//     // taFrom: '2024-03-25',
+//     // taTo: '2024-03-26',
+//     durationHrs: 18,
+//     period: '1.5 days',
+//     remark: 'Inspection and maintenance of power grid systems',
+//   },
+//   {
+//     id: 7,
+//     activities: 'Exchanger tube cleaning',
+//     // taFrom: '2024-03-27',
+//     // taTo: '2024-03-28',
+//     durationHrs: 8,
+//     period: '1 day',
+//     remark: 'Cleaning of heat exchanger tubes',
+//   },
+//   {
+//     id: 8,
+//     activities: 'Dryer system testing',
+//     // taFrom: '2024-03-30',
+//     // taTo: '2024-03-31',
+//     durationHrs: 10,
+//     period: '1 day',
+//     remark: 'Test run of the dryer system after maintenance',
+//   },
+//   {
+//     id: 9,
+//     activities: 'Compressor inspection',
+//     // taFrom: '2024-04-02',
+//     // taTo: '2024-04-03',
+//     durationHrs: 15,
+//     period: '1.5 days',
+//     remark: 'Inspection and oil change for the compressor',
+//   },
+//   {
+//     id: 10,
+//     activities: 'Boiler re-commissioning',
+//     // taFrom: '2024-04-05',
+//     // taTo: '2024-04-07',
+//     durationHrs: 24,
+//     period: '3 days',
+//     remark: 'Re-commissioning of the boiler system post maintenance',
+//   },
+// ]
+
 const productionData = [
   {
     id: 1,
     activities: 'Preheater cleaning',
-    // taFrom: '2024-03-12',
-    // taTo: '2024-03-13',
+    product: 'Product A',
     durationHrs: 10,
     period: '1 day',
     remark: 'Routine cleaning of preheater unit',
@@ -124,8 +293,7 @@ const productionData = [
   {
     id: 2,
     activities: 'Strippers inspection',
-    // taFrom: '2024-03-15',
-    // taTo: '2024-03-16',
+    product: 'Product B',
     durationHrs: 14,
     period: '1.5 days',
     remark: 'Visual inspection and minor repairs',
@@ -133,8 +301,7 @@ const productionData = [
   {
     id: 3,
     activities: 'Rotary kiln overhaul',
-    // taFrom: '2024-03-18',
-    // taTo: '2024-03-22',
+    product: 'Product C',
     durationHrs: 40,
     period: '5 days',
     remark: 'Complete overhaul, including internal parts replacement',
@@ -142,8 +309,7 @@ const productionData = [
   {
     id: 4,
     activities: 'Cooling system check',
-    // taFrom: '2024-03-20',
-    // taTo: '2024-03-21',
+    product: 'Product A',
     durationHrs: 16,
     period: '2 days',
     remark: 'Maintenance and efficiency check of cooling system',
@@ -151,8 +317,7 @@ const productionData = [
   {
     id: 5,
     activities: 'Pump calibration',
-    // taFrom: '2024-03-22',
-    // taTo: '2024-03-23',
+    product: 'Product B',
     durationHrs: 12,
     period: '1 day',
     remark: 'Calibrating pumps for accurate performance',
@@ -160,8 +325,7 @@ const productionData = [
   {
     id: 6,
     activities: 'Power grid inspection',
-    // taFrom: '2024-03-25',
-    // taTo: '2024-03-26',
+    product: 'Product C',
     durationHrs: 18,
     period: '1.5 days',
     remark: 'Inspection and maintenance of power grid systems',
@@ -169,8 +333,7 @@ const productionData = [
   {
     id: 7,
     activities: 'Exchanger tube cleaning',
-    // taFrom: '2024-03-27',
-    // taTo: '2024-03-28',
+    product: 'Product A',
     durationHrs: 8,
     period: '1 day',
     remark: 'Cleaning of heat exchanger tubes',
@@ -178,8 +341,7 @@ const productionData = [
   {
     id: 8,
     activities: 'Dryer system testing',
-    // taFrom: '2024-03-30',
-    // taTo: '2024-03-31',
+    product: 'Product B',
     durationHrs: 10,
     period: '1 day',
     remark: 'Test run of the dryer system after maintenance',
@@ -187,8 +349,7 @@ const productionData = [
   {
     id: 9,
     activities: 'Compressor inspection',
-    // taFrom: '2024-04-02',
-    // taTo: '2024-04-03',
+    product: 'Product C',
     durationHrs: 15,
     period: '1.5 days',
     remark: 'Inspection and oil change for the compressor',
@@ -196,8 +357,7 @@ const productionData = [
   {
     id: 10,
     activities: 'Boiler re-commissioning',
-    // taFrom: '2024-04-05',
-    // taTo: '2024-04-07',
+    product: 'Product A',
     durationHrs: 24,
     period: '3 days',
     remark: 'Re-commissioning of the boiler system post maintenance',
@@ -213,7 +373,7 @@ const TurnaroundPlanTable = () => (
       onAddRow={(newRow) => console.log('New Row Added:', newRow)}
       onDeleteRow={(id) => console.log('Row Deleted:', id)}
       onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-      paginationOptions={[10, 20, 30]}
+      paginationOptions={[100, 200, 300]}
     />
   </div>
 )

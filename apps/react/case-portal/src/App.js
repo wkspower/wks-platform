@@ -2,7 +2,7 @@ import { useEffect, useState, lazy, Suspense } from 'react'
 import { ThemeRoutes } from './routes'
 import ThemeCustomization from './themes'
 import { SessionStoreProvider } from './SessionStoreContext'
-import { CaseService, RecordService } from 'services'
+// import { CaseService, RecordService } from 'services'
 import menuItemsDefs from './menu'
 import { RegisterInjectUserSession, RegisteOptions } from './plugins'
 import { accountStore, sessionStore } from './store'
@@ -13,8 +13,8 @@ const ScrollTop = lazy(() => import('./components/ScrollTop'))
 const App = () => {
   const [keycloak, setKeycloak] = useState({})
   const [authenticated, setAuthenticated] = useState(null)
-  const [recordsTypes, setRecordsTypes] = useState([])
-  const [casesDefinitions, setCasesDefinitions] = useState([])
+  // const [recordsTypes, setRecordsTypes] = useState([])
+  // const [casesDefinitions, setCasesDefinitions] = useState([])
   const [menu, setMenu] = useState({ items: [] })
 
   useEffect(() => {
@@ -70,36 +70,36 @@ const App = () => {
       items: [...menuItemsDefs.items],
     }
 
-    await RecordService?.getAllRecordTypes(keycloak).then((data) => {
-      setRecordsTypes(data)
+    // await RecordService?.getAllRecordTypes(keycloak).then((data) => {
+    //   setRecordsTypes(data)
 
-      data.forEach((element) => {
-        menu.items[2].children
-          .filter((menu) => menu.id === 'record-list')[0]
-          .children.push({
-            id: element.id,
-            title: element.id,
-            type: 'item',
-            url: '/record-list/' + element.id,
-            breadcrumbs: true,
-          })
-      })
-    })
+    //   data.forEach((element) => {
+    //     menu.items[2].children
+    //       .filter((menu) => menu.id === 'record-list')[0]
+    //       .children.push({
+    //         id: element.id,
+    //         title: element.id,
+    //         type: 'item',
+    //         url: '/record-list/' + element.id,
+    //         breadcrumbs: true,
+    //       })
+    //   })
+    // })
 
-    await CaseService.getCaseDefinitions(keycloak).then((data) => {
-      setCasesDefinitions(data)
-      data.forEach((element) => {
-        menu.items[2].children
-          .filter((menu) => menu.id === 'case-list')[0]
-          .children.push({
-            id: element.id,
-            title: element.name,
-            type: 'item',
-            url: '/case-list/' + element.id,
-            breadcrumbs: true,
-          })
-      })
-    })
+    // await CaseService.getCaseDefinitions(keycloak).then((data) => {
+    //   setCasesDefinitions(data)
+    //   data.forEach((element) => {
+    //     menu.items[2].children
+    //       .filter((menu) => menu.id === 'case-list')[0]
+    //       .children.push({
+    //         id: element.id,
+    //         title: element.name,
+    //         type: 'item',
+    //         url: '/case-list/' + element.id,
+    //         breadcrumbs: true,
+    //       })
+    //   })
+    // })
 
     if (!accountStore.isManagerUser(keycloak)) {
       delete menu.items[3]
@@ -118,8 +118,8 @@ const App = () => {
               <ThemeRoutes
                 keycloak={keycloak}
                 authenticated={authenticated}
-                recordsTypes={recordsTypes}
-                casesDefinitions={casesDefinitions}
+                // recordsTypes={recordsTypes}
+                // casesDefinitions={casesDefinitions}
               />
             </SessionStoreProvider>
           </ScrollTop>

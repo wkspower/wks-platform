@@ -1,0 +1,138 @@
+[
+  {
+    "site": {
+      "name": "HMD",
+      "id": "58326F41-F3C4-4C0C-9895-1A52C435255A",
+      "plants": [
+        {
+          "name": "LDPE",
+          "id": "48C9CA50-3917-43A8-A942-4C2EAA327510",
+          "displayName": "LDPE",
+          "isActive": true
+        },
+        {
+          "name": "MEG3",
+          "id": "3E3FDF54-391D-4BAB-A78F-50EBCA9FBEA6",
+          "displayName": "MEG3",
+          "isActive": true
+        },
+        {
+          "name": "MEG2",
+          "id": "E3FA0C8D-5F2C-4F90-894A-C836859A0CE9",
+          "displayName": "MEG2",
+          "isActive": true
+        },
+        {
+          "name": "MEG1",
+          "id": "7B7E0D7C-2666-43BB-847C-D78E144673DE",
+          "displayName": "MEG1",
+          "isActive": true
+        }
+      ]
+    }
+  },
+  {
+    "site": {
+      "name": "DMD",
+      "id": "E2E9D24C-80DF-40B4-A278-4C4D60742BCE",
+      "plants": [
+        {
+          "name": "EOEG",
+          "id": "AACDBE12-C5F6-4B79-9C88-751169815B42",
+          "displayName": "EOEG",
+          "isActive": true
+        },
+        {
+          "name": "HDPE",
+          "id": "35EC0EE1-DC8A-43EF-B850-9C3DD8AF60AE",
+          "displayName": "HDPE",
+          "isActive": true
+        },
+        {
+          "name": "LDPE",
+          "id": "B989E3EE-00C8-493C-9CA4-709D340FA5A1",
+          "displayName": "LDPE",
+          "isActive": true
+        }
+      ]
+    }
+  },
+  {
+    "site": {
+      "name": "C2",
+      "id": "A5ACC899-5898-4CA4-A53E-693FE5A29D4E",
+      "plants": [
+        {
+          "name": "PE1",
+          "id": "0A76E7DA-4BED-4611-B628-4EBB087B8D64",
+          "displayName": "PE1",
+          "isActive": true
+        },
+        {
+          "name": "PE2",
+          "id": "CEE4AABF-23E5-4525-A29C-DE8DE800B5CC",
+          "displayName": "PE2",
+          "isActive": true
+        },
+        {
+          "name": "LDPE",
+          "id": "525746F2-7E9F-4F0E-9755-ADA3A4EE0A8C",
+          "displayName": "LDPE",
+          "isActive": true
+        }
+      ]
+    }
+  },
+  {
+    "site": {
+      "name": "NMD",
+      "id": "C6F8ABE3-B3E3-4107-B59F-6F5E54F8D893",
+      "plants": [
+        {
+          "name": "EOEG",
+          "id": "EC2F706E-8181-4650-BD5B-CA35E84E6F9E",
+          "displayName": "EOEG",
+          "isActive": true
+        },
+        {
+          "name": "LLDPE",
+          "id": "19A43C4E-7E19-47FF-B5D2-9A7C804A0052",
+          "displayName": "LLDPE",
+          "isActive": true
+        },
+        {
+          "name": "HDPE",
+          "id": "35EC0EE1-DC8A-43EF-B850-9C3DD8AF60AE",
+          "displayName": "HDPE",
+          "isActive": true
+        }
+      ]
+    }
+  },
+  {
+    "site": {
+      "name": "VMD",
+      "id": "0AC0AC55-1DD5-4900-A78A-C5FF3EBAEC14",
+      "plants": [
+        {
+          "name": "MEG1",
+          "id": "7B7E0D7C-2666-43BB-847C-D78E144673DE",
+          "displayName": "MEG1",
+          "isActive": true
+        },
+        {
+          "name": "LLDPE",
+          "id": "19A43C4E-7E19-47FF-B5D2-9A7C804A0052",
+          "displayName": "LLDPE",
+          "isActive": true
+        },
+        {
+          "name": "HDPE",
+          "id": "35EC0EE1-DC8A-43EF-B850-9C3DD8AF60AE",
+          "displayName": "HDPE",
+          "isActive": true
+        }
+      ]
+    }
+  }
+]
