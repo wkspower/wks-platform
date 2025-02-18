@@ -167,8 +167,9 @@ const DataGridTable = ({
 
   useEffect(() => {
     console.log('api call here ')
-    dummyApiCall(1)
-    dummyApiCall1(1)
+    // dummyApiCall(1)
+    // dummyApiCall1(1)
+    getAllSites()
   }, [])
 
   const dummyApiCall = async (id) => {
@@ -184,6 +185,16 @@ const DataGridTable = ({
   const dummyApiCall1 = async (id) => {
     try {
       const data = await DataService.getYearWiseProduct(keycloak, id)
+      console.log('API Response:', data)
+    } catch (error) {
+      console.error('Error fetching product:', error)
+    } finally {
+      // handleMenuClose();
+    }
+  }
+  const getAllSites = async () => {
+    try {
+      const data = await DataService.getAllSites(keycloak)
       console.log('API Response:', data)
     } catch (error) {
       console.error('Error fetching product:', error)
