@@ -32,66 +32,15 @@ public class PlantServiceImpl implements PlantService {
 	}
 
 	@Override
-	public List getPlantAndSite() {
+	public List<Object[]> getPlantAndSite() {
 		String queryStr = "select sites.Id, sites.Name, sites.DisplayName, plants.Id, plants.Name, plants.DisplayName, plants.Site_FK_Id from   [dbo].[Sites] sites join   [dbo].[Plants] plants on sites.id = plants.Site_FK_Id";
 
 		// Query query = entityManager.createNativeQuery(queryStr, Plant.class);
 
 		Query query = entityManager.createNativeQuery(queryStr); 
 		List<Object[]> searchResults = query.getResultList();
-		List<SitesModel> siteList = new ArrayList<>();
-		Map<String, List<String>> map = new HashMap<>();
-		for (Object[] obj : searchResults) {
-
-			boolean result = map.containsValue(obj[0].toString());
-
-			if (result) {
-
-				if (obj[0].toString().equals(obj[6].toString()))
-					map.get(obj[0].toString()).add(obj[5].toString());
-
-			} else {
-				List<String> list = new ArrayList<>();
-				list.add(obj[5].toString());
-				map.put(obj[0].toString(), list);
-			}
-
-			System.out.println(obj[0]);
-			System.out.println(obj[1]);
-			System.out.println(obj[2]);
-			System.out.println(obj[3]);
-			System.out.println(obj[4]);
-			System.out.println(obj[5]);
-			System.out.println(obj[6]);
-
-		}
-
-		for (Map.Entry<String, List<String>> entry : map.entrySet()) {
-			String key = entry.getKey();
-			List<String> value = entry.getValue();
-			SitesModel siteModel = new SitesModel();
-			siteModel.setSiteName(key);
-			siteModel.setPlantList(value);
-			siteList.add(siteModel);
-		}
-		return siteList;
+				return searchResults;
 	}
 
 }
 
-class SitesModel {
-	String siteName;
-	List<String> plantList;
-	public String getSiteName() {
-		return siteName;
-	}
-	public List<String> getPlantList() {
-		return plantList;
-	}
-	public void setSiteName(String siteName) {
-		this.siteName = siteName;
-	}
-	public void setPlantList(List<String> plantList) {
-		this.plantList = plantList;
-	}
-}

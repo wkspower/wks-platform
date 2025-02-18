@@ -1,12 +1,15 @@
 package com.wks.caseengine.rest.server;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.dto.product.SiteAndPlantDTO;
 import com.wks.caseengine.service.PlantService;
 
 @RestController
@@ -21,8 +24,20 @@ public class SiteAndPlantController {
     }
 
     @GetMapping(value = "/getPlantAndSite")
-    public ResponseEntity<List> getPlantAndSite() {
-        List listOfSite = plantService.getPlantAndSite();
-        return ResponseEntity.ok(listOfSite);
+    public ResponseEntity<List<SiteAndPlantDTO>> getPlantAndSite() {
+        List<Object[]> listOfSite = plantService.getPlantAndSite();
+        List<SiteAndPlantDTO> dtoList = new ArrayList<>();
+        for (Object[] result : listOfSite) {
+            SiteAndPlantDTO dto = new SiteAndPlantDTO();
+            dto.setSiteId((UUID) result[0]);
+            dto.setSiteName((String) result[1]);
+            dto.setDisplayName((String) result[2]);
+            dto.setPlantId((UUID) result[3]);
+            dto.setPlantName((String) result[4]);
+            dto.setPlantDisplayName((String) result[5]);
+            dtoList.add(dto);
+        }
+
+        return ResponseEntity.ok(dtoList);
     }
 }

@@ -5,12 +5,17 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.service.SiteService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
+@RequestMapping("site")
+@Tag(name = "Site", description = "test Site")
 public class SiteController {
 	
 	@Autowired
@@ -19,6 +24,15 @@ public class SiteController {
 	@GetMapping(value = "/getAllSites")
 	public ResponseEntity<List<Sites>> getAllSites() {
 		List<Sites> listOfSites = siteService.getAllSites(); 
+	    return ResponseEntity.ok(listOfSites);
+	}
+	
+	@GetMapping(value = "/getAllSitesAndPlants")
+	public ResponseEntity<List<Object[]>> getAllSitesAndPlants() {
+		System.out.println("In getAllSitesAndPlants");
+		List<Object[]> listOfSites = siteService.getAllSitesAndPlants(); 
+		System.out.println("In getAllSitesAndPlants");
+		System.out.println("In getAllSitesAndPlants");
 	    return ResponseEntity.ok(listOfSites);
 	}
 

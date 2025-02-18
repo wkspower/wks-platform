@@ -6,5 +6,7 @@ import com.wks.caseengine.entity.Sites;
 public interface SiteService {
 	
 	public List<Sites> getAllSites();
+	
+	public List<Object[]> getAllSitesAndPlants();
 
 }
