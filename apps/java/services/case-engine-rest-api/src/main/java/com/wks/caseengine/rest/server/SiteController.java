@@ -29,8 +29,11 @@ public class SiteController {
 	
 	@GetMapping(value = "/getAllSitesAndPlants")
 	public ResponseEntity<List<Object[]>> getAllSitesAndPlants() {
+		System.out.println("In getAllSitesAndPlants");
 		List<Object[]> listOfSites = siteService.getAllSitesAndPlants(); 
-		return ResponseEntity.ok(listOfSites);
+		System.out.println("In getAllSitesAndPlants");
+		System.out.println("In getAllSitesAndPlants");
+	    return ResponseEntity.ok(listOfSites);
 	}
 
 }

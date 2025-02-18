@@ -171,8 +171,9 @@ const DataGridTable = ({
 
   useEffect(() => {
     console.log('api call here ')
-    dummyApiCall(1)
-    dummyApiCall1(1)
+    // dummyApiCall(1)
+    // dummyApiCall1(1)
+    getPlantAndSite()
   }, [])
 
   const dummyApiCall = async (id) => {
@@ -188,6 +189,16 @@ const DataGridTable = ({
   const dummyApiCall1 = async (id) => {
     try {
       const data = await DataService.getYearWiseProduct(keycloak, id)
+      console.log('API Response:', data)
+    } catch (error) {
+      console.error('Error fetching product:', error)
+    } finally {
+      // handleMenuClose();
+    }
+  }
+  const getPlantAndSite = async () => {
+    try {
+      const data = await DataService.getAllSites(keycloak)
       console.log('API Response:', data)
     } catch (error) {
       console.error('Error fetching product:', error)
@@ -379,21 +390,27 @@ const DataGridTable = ({
           return
         }
 
-        // Calculate days in the selected month
-        const totalDays = new Date(year, month + 1, 0).getDate()
-        const daysArray = Array.from({ length: totalDays }, (_, index) => {
-          const date = new Date(year, month, index + 1)
-          const day = String(date.getDate()).padStart(2, '0')
-          const monthName = date.toLocaleString('en-GB', { month: 'short' })
-          const yearShort = date.getFullYear().toString().slice(-2)
+        console.log('params-params',params);
+        
 
-          const formattedDate = `${day}-${monthName}-${yearShort}`
+        // Calculate days in the selected month
+        const totalDays = new Date(year, month + 1, 0).getDate();
+        const perDayValue = (params.value / totalDays).toFixed(2); // Keep 2 decimal places
+
+        const daysArray = Array.from({ length: totalDays }, (_, index) => {
+          const date = new Date(year, month, index + 1);
+          const day = String(date.getDate()).padStart(2, '0');
+          const monthName = date.toLocaleString('en-GB', { month: 'short' });
+          const yearShort = date.getFullYear().toString().slice(-2);
+
+          const formattedDate = `${day}-${monthName}-${yearShort}`;
 
           return {
             date: formattedDate,
-            value: Math.floor(Math.random() * 100),
-          }
-        })
+            value: parseFloat(perDayValue), // Convert back to number with 2 decimals
+          };
+        });
+
 
         setDays(daysArray)
         setOpen(true)
