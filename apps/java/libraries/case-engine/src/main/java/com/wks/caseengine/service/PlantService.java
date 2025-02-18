@@ -5,5 +5,6 @@ import com.wks.caseengine.rest.entity.Plant;
 public interface PlantService {
 	
 	public List<Plant> getPlantBySite(String siteId);
+	public List getPlantAndSite();
 
 }

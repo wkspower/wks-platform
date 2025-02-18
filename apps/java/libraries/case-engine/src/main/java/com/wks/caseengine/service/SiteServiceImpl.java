@@ -17,12 +17,9 @@ public class SiteServiceImpl implements SiteService{
 
 	@Override
 	public List<Sites> getAllSites() {
-		
-		String queryStr = "SELECT * FROM [MST].[Site]";
-
+		String queryStr = "SELECT * FROM [dbo].[Sites]";
 		Query query = entityManager.createNativeQuery(queryStr, Sites.class);
 		List<Sites> searchResults = query.getResultList();
 		return searchResults;
 	}
-
 }
