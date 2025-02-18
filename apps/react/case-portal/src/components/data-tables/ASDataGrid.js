@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import {
   Button,
@@ -25,13 +25,11 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { MenuItem } from '../../../node_modules/@mui/material/index'
 
-
 import Notification from 'components/Utilities/Notification'
 
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Cancel';
-
+import DeleteIcon from '@mui/icons-material/Delete'
+import SaveIcon from '@mui/icons-material/Save'
+import CancelIcon from '@mui/icons-material/Cancel'
 
 const jioColors = {
   primaryBlue: '#0F3CC9',
@@ -69,6 +67,9 @@ const DataGridTable = ({
   const [rows, setRows] = useState(initialRows)
   const [searchText, setSearchText] = useState('')
   const [isFilterActive, setIsFilterActive] = useState(false)
+  const [selectedRowId, setSelectedRowId] = useState(null) // Store selected row ID
+  const [selectedUnit, setSelectedUnit] = useState('')
+  const unitOptions = ['TPH', 'BPH', 'Units']
 
   const handleOpenRemark = () => setOpenRemark(true)
   const handleCloseRemark = () => setOpenRemark(false)
@@ -89,8 +90,10 @@ const DataGridTable = ({
 
   const handleOpenYearData = () => {
     if (product === '') {
-      setSnackbarOpen(true)
-      setSnackbarMessage('Select a Product First!')
+      if (!product) {
+        setSnackbarOpen(true)
+        setSnackbarMessage('Select a Product First!')
+      }
       return
     }
     setOpenYearData(true)
@@ -152,24 +155,24 @@ const DataGridTable = ({
   }
 
   const handleAddRow = () => {
-    const newRowId = rows.length ? Math.max(...rows.map((row) => row.id)) + 1 : 1;
+    const newRowId = rows.length
+      ? Math.max(...rows.map((row) => row.id)) + 1
+      : 1
     const newRow = {
       id: newRowId,
       isNew: true, // Identify new rows
       ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])),
-    };
-    const updatedRows = [newRow, ...rows];
-    setRows(updatedRows);
-    onAddRow?.(newRow);
-    setProduct('');
-  };
-  
+    }
+    const updatedRows = [newRow, ...rows]
+    setRows(updatedRows)
+    onAddRow?.(newRow)
+    setProduct('')
+  }
 
   useEffect(() => {
     console.log('api call here ')
-    // dummyApiCall(1)
-    // dummyApiCall1(1)
-    getAllSites()
+    dummyApiCall(1)
+    dummyApiCall1(1)
   }, [])
 
   const dummyApiCall = async (id) => {
@@ -192,34 +195,18 @@ const DataGridTable = ({
       // handleMenuClose();
     }
   }
-  const getAllSites = async () => {
-    try {
-      const data = await DataService.getAllSites(keycloak)
-      console.log('API Response:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
-
-
 
   const handleSaveRow = (id) => {
-    const updatedRows = rows.map((row) => 
-      row.id === id ? { ...row, isNew: false } : row
-    );
-    setRows(updatedRows);
-  };
-  
+    const updatedRows = rows.map((row) =>
+      row.id === id ? { ...row, isNew: false } : row,
+    )
+    setRows(updatedRows)
+  }
+
   const handleCancelRow = (id) => {
-    const updatedRows = rows.filter((row) => row.id !== id);
-    setRows(updatedRows);
-  };
-  
-
-
-
+    const updatedRows = rows.filter((row) => row.id !== id)
+    setRows(updatedRows)
+  }
 
   const defaultColumns = useMemo(() => {
     return initialColumns.map((col) => ({
@@ -231,51 +218,111 @@ const DataGridTable = ({
     ...defaultColumns,
     ...(title != 'Production Volume Data'
       ? [
-        {
-          field: 'actions',
-          headerName: 'Actions',
-          width: 180,
-          cellClassName: 'with-border',
-          headerAlign: 'center',
-          align: 'center',
-          pinned:'right',
-          renderCell: (params) => {
-            const { id, isNew } = params.row;
-      
-            return isNew ? (
-              <>
-                <IconButton onClick={() => handleSaveRow(id)} aria-label="save">
-                  <SaveIcon sx={{ color: 'green' }} />
+          {
+            field: 'actions',
+            headerName: 'Actions',
+            width: 180,
+            cellClassName: 'with-border',
+            headerAlign: 'center',
+            align: 'center',
+            pinned: 'right',
+            renderCell: (params) => {
+              const { id, isNew } = params.row
+
+              return isNew ? (
+                <>
+                  <IconButton
+                    onClick={() => handleSaveRow(id)}
+                    aria-label='save'
+                  >
+                    <SaveIcon sx={{ color: 'green' }} />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleCancelRow(id)}
+                    aria-label='cancel'
+                  >
+                    <CancelIcon sx={{ color: 'red' }} />
+                  </IconButton>
+                </>
+              ) : (
+                <IconButton
+                  onClick={() => handleDeleteRow(id)}
+                  aria-label='delete'
+                >
+                  <DeleteIcon sx={{ color: jioColors.accentRed }} />
                 </IconButton>
-                <IconButton onClick={() => handleCancelRow(id)} aria-label="cancel">
-                  <CancelIcon sx={{ color: 'red' }} />
-                </IconButton>
-              </>
-            ) : (
-              <IconButton onClick={() => handleDeleteRow(id)} aria-label="delete">
-                <DeleteIcon sx={{ color: jioColors.accentRed }} />
-              </IconButton>
-            );
+              )
+            },
+            flex: 1,
+            headerClassName: 'last-column-header',
           },
-          flex: 1,
-          headerClassName: 'last-column-header',
-        }
         ]
       : []),
   ]
 
   const addRemark = () => {
     console.log('Remark:', remark)
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === selectedRowId ? { ...row, remark } : row,
+      ),
+    )
+
     setOpenRemark(false)
     setRemark('')
   }
+  const monthFields = new Set([
+    'apr24',
+    'may24',
+    'jun24',
+    'jul24',
+    'aug24',
+    'sep24',
+    'oct24',
+    'nov24',
+    'dec24',
+    'jan25',
+    'feb25',
+    'mar25',
+  ])
+  const nonEditableFields = [
+    'product',
+    'averageTPH',
+    'desc',
+    'shutdown',
+    'to',
+    'from',
+    'id',
+    'actions',
+    'isNew',
+    'taTo',
+    'taFrom',
+    'activities',
+    'durationHrs',
+    'period',
+  ]
 
   const handleCellClick = (params) => {
     if (title == 'Production Volume Data') {
-      return
+      if (nonEditableFields.includes(params.field)) return // Block non-editable fields
+
+      if (params?.field === 'remark') {
+        setRemark(params?.value || '')
+        setSelectedRowId(params.id)
+        handleOpenRemark()
+      } else if (monthFields.has(params.field)) {
+        // Allow editing only if value exists
+        if (params.value !== '' && params.value !== null) {
+          setOpen(true)
+        }
+      }
     }
 
-    if (params.row.prduct === '') {
+    if (
+      params.row.product === '' &&
+      nonEditableFields.includes(params.field) &&
+      monthFields.has(params.field)
+    ) {
       setSnackbarOpen(true)
       setSnackbarMessage('Select a Product First!')
       return
@@ -285,26 +332,21 @@ const DataGridTable = ({
 
     if (params?.field === 'remark') {
       setRemark(params?.value || '') // Auto-fetch the params value
+      setSelectedRowId(params.id)
       handleOpenRemark()
     } else {
-      if (params.value == '' && params.field != 'product') {
-        handleOpenYearData()
-        return
+      // ✅ Check if the clicked column is a month field
+      if (monthFields.has(params.field)) {
+        if (params.value == '') {
+          handleOpenYearData() // Open popup only for month fields with no value
+          return
+        }
       }
-      const nonEditableFields = [
-        'product',
-        'averageTPH',
 
-        'id',
-        'actions',
-        'isNew',
-        'taTo',
-        'taFrom',
-        'activities',
-        'durationHrs',
-        'period',
-      ]
+      // If not a month field, just return
+      if (nonEditableFields.includes(params.field)) return
 
+      // Handle editable fields
       if (
         params.isEditable &&
         !nonEditableFields.includes(params.field) &&
@@ -338,23 +380,22 @@ const DataGridTable = ({
         }
 
         // Calculate days in the selected month
-        const totalDays = new Date(year, month + 1, 0).getDate();
+        const totalDays = new Date(year, month + 1, 0).getDate()
         const daysArray = Array.from({ length: totalDays }, (_, index) => {
-          const date = new Date(year, month, index + 1);
-          const day = String(date.getDate()).padStart(2, '0');
-          const monthName = date.toLocaleString('en-GB', { month: 'short' }); 
-          const yearShort = date.getFullYear().toString().slice(-2); 
+          const date = new Date(year, month, index + 1)
+          const day = String(date.getDate()).padStart(2, '0')
+          const monthName = date.toLocaleString('en-GB', { month: 'short' })
+          const yearShort = date.getFullYear().toString().slice(-2)
 
-          const formattedDate = `${day}-${monthName}-${yearShort}`;
+          const formattedDate = `${day}-${monthName}-${yearShort}`
 
           return {
             date: formattedDate,
-            value: Math.floor(Math.random() * 100), 
-          };
-        });
+            value: Math.floor(Math.random() * 100),
+          }
+        })
 
         setDays(daysArray)
-
         setOpen(true)
       }
     }
@@ -389,6 +430,15 @@ const DataGridTable = ({
     }
     console.log('Submitted Data:', days)
     setOpen(false) // Close the modal
+    if (title === 'Production Volume Data') {
+      // Update the row with the new data
+      setOpenRemark(true)
+      setRows((prevRows) =>
+        prevRows.map((row) =>
+          row.id === selectedRowId ? { ...row, ...days } : row,
+        ),
+      )
+    }
   }
 
   const handleCloseSnackbar = () => {
@@ -423,9 +473,6 @@ const DataGridTable = ({
       ),
     )
   }
-  const [selectedUnit, setSelectedUnit] = useState('')
-
-  const unitOptions = ['TPH', 'BPH', 'Units']
 
   return (
     <Box
@@ -433,7 +480,8 @@ const DataGridTable = ({
         height: '81vh',
         width: '100%',
         padding: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#F2F3F8',
+        // backgroundColor: '#fff',
         borderRadius: 0,
         borderBottom: 'none',
       }}
@@ -515,20 +563,22 @@ const DataGridTable = ({
               display: 'flex',
               alignItems: 'center',
               gap: 1,
-              backgroundColor: isFilterActive
-                ? jioColors.primaryBlue
-                : 'inherit',
-              color: isFilterActive ? 'inherit' : 'inherit',
+              backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
+              color: 'inherit',
               width: '150px',
+              '&:hover': {
+                backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF', // Removes hover effect
+              },
             }}
           >
             <FilterAltIcon
-              color={isFilterActive ? jioColors.background : 'inherit'}
+              sx={{ color: '#2A3ACD' }}
+              // sx={{ color: isFilterActive ? jioColors.background : 'inherit' }}
             />
             <span
               style={{
                 fontSize: '0.875rem',
-                color: isFilterActive ? '#ffffff' : '#2A3ACD',
+                color: '#2A3ACD',
               }}
             >
               Filter
@@ -556,7 +606,33 @@ const DataGridTable = ({
           sx={{
             borderRadius: '0px',
             border: `1px solid ${jioColors.border}`,
+            backgroundColor: jioColors.background,
             fontSize: '0.8rem',
+            ' & .MuiDataGrid-columnHeaderTitleContainer:last-child:after .MuiDataGrid-columnHeaderTitleContainer:after':
+              {
+                bordeRight: 'none !important',
+              },
+
+            '& .MuiDataGrid-cell:last-child:after': {
+              borderRight: 'none',
+            },
+            '& .MuiDataGrid-columnHeader:last-child:after': {
+              borderRight: 'none',
+            },
+            '& .MuiDataGrid-columnHeader:last-child .MuiDataGrid-columnHeaderTitleContainer:after':
+              {
+                borderRight: 'none',
+              },
+            // Added direct rule for the title container without the pseudo-element:
+            '& .MuiDataGrid-columnHeader:last-child .MuiDataGrid-columnHeaderTitleContainer':
+              {
+                borderRight: 'none',
+              },
+            '& .MuiDataGrid-cell.last-column, & .MuiDataGrid-columnHeaderTitleContainer.last-column & .MuiDataGrid-columnHeader.last-column':
+              {
+                borderRight: 'none',
+              },
+
             // borderRight: `1px solid ${jioColors.border}`,
             '& .MuiDataGrid-root .MuiDataGrid-cell': {
               fontSize: '0.8rem',
@@ -609,7 +685,7 @@ const DataGridTable = ({
               // borderRight: `1px solid ${jioColors.border}`,
               // backgroundColor: jioColors.headerBg,
               // color: '#FFFFFF',
-              backgroundColor: '#F2F3F8',
+              backgroundColor: '#FAFAFC',
               color: '#3E4E75',
               fontSize: '0.8rem',
               fontWeight: 600,
@@ -625,6 +701,7 @@ const DataGridTable = ({
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               fontSize: '0.8rem',
+              cursor: 'pointer',
             },
             '& .MuiDataGrid-row': {
               borderBottom: `1px solid ${jioColors.border}`,
@@ -716,6 +793,8 @@ const DataGridTable = ({
             sx={{ width: '100%', minWidth: '400px' }}
             value={remark}
             onChange={(e) => setRemark(e.target.value)}
+            multiline // ✅ Enables textarea behavior
+            rows={4} // ✅ Adjusts textarea height
           />
         </DialogContent>
         <DialogActions>

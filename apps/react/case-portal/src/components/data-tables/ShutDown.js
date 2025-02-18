@@ -1,193 +1,197 @@
+import {
+  Autocomplete,
+  TextField,
+} from '../../../node_modules/@mui/material/index'
 import ASDataGrid from './ASDataGrid'
+import dayjs from 'dayjs'
 
+const productOptions = [
+  'Product A',
+  'Product B',
+  'Product C',
+  'Product D',
+  'Product E',
+  'Product F',
+  'Product G',
+  'Product H',
+  'Product I',
+  'Product J',
+  'Product K',
+  'Product L',
+]
 const productionColumns = [
   {
     field: 'shutdown',
     headerName: 'Shutdown Desc',
-    width: 150,
+    // width: 150,
+    minWidth: 200,
     editable: true,
     renderHeader: () => (
       <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
-        <div>Shutdown</div>
-        <div>Desc</div>
+        <div>Shutdown Desc</div>
+        {/* <div>Desc</div> */}
       </div>
     ),
-    flex: 2,
+    flex: 3,
   },
-  { field: 'apr24', headerName: 'Apr-24', width: 100, editable: true },
-  { field: 'may24', headerName: 'May-24', width: 100, editable: true },
-  { field: 'jun24', headerName: 'Jun-24', width: 100, editable: true },
-  { field: 'jul24', headerName: 'Jul-24', width: 100, editable: true },
-  { field: 'aug24', headerName: 'Aug-24', width: 100, editable: true },
-  { field: 'sep24', headerName: 'Sep-24', width: 100, editable: true },
-  { field: 'oct24', headerName: 'Oct-24', width: 100, editable: true },
-  { field: 'nov24', headerName: 'Nov-24', width: 100, editable: true },
-  { field: 'dec24', headerName: 'Dec-24', width: 100, editable: true },
-  { field: 'jan25', headerName: 'Jan-25', width: 100, editable: true },
-  { field: 'feb25', headerName: 'Feb-25', width: 100, editable: true },
-  { field: 'mar25', headerName: 'Mar-25', width: 100, editable: true },
+  {
+    field: 'product',
+    headerName: 'Product',
+    editable: true,
+    minWidth: 125,
+    renderEditCell: (params) => {
+      const { id } = params
+      const isEditable = id > 10 // Enable only for rows beyond 10
+
+      return (
+        <Autocomplete
+          options={productOptions}
+          value={params.value || ''}
+          disableClearable
+          onChange={(event, newValue) => {
+            params.api.setEditCellValue({
+              id: params.id,
+              field: 'product',
+              value: newValue,
+            })
+          }}
+          onInputChange={(event, newInputValue) => {
+            if (event && event.type === 'keydown' && event.key === 'Enter') {
+              params.api.setEditCellValue({
+                id: params.id,
+                field: 'product',
+                value: newInputValue,
+              })
+            }
+          }}
+          renderInput={(params) => (
+            <TextField {...params} variant='outlined' size='small' />
+          )}
+          disabled={!isEditable}
+          fullWidth
+        />
+      )
+    },
+  },
+  {
+    field: 'from',
+    headerName: 'SD- From',
+    width: 150,
+    editable: true,
+    type: 'dateTime',
+    renderCell: (params) => {
+      const date = params.value
+      return date && dayjs(date).isValid()
+        ? dayjs(date).format('DD/MM/YYYY HH:mm:ss') // Format as date + time
+        : 'No Date' // If the date is invalid or empty, show 'No Date'
+    },
+  },
+  {
+    field: 'to',
+    headerName: 'SD- To',
+    width: 150,
+    editable: true,
+    type: 'dateTime',
+    renderCell: (params) => {
+      const date = params.value
+      return date && dayjs(date).isValid()
+        ? dayjs(date).format('DD/MM/YYYY HH:mm:ss') // Format as date + time
+        : 'No Date' // If the date is invalid or empty, show 'No Date'
+    },
+  },
+  {
+    field: 'durationHrs',
+    headerName: 'Duration Hrs',
+    width: 120,
+    editable: true,
+    type: 'number',
+    flex: 0.5,
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 ]
 
-const productionData = [
+const shutdownData = [
   {
     id: 1,
     shutdown: 'Routine Maintenance',
-    apr24: 3,
-    may24: 5,
-    jun24: 4,
-    jul24: 3,
-    aug24: 2,
-    sep24: 3,
-    oct24: 4,
-    nov24: 5,
-    dec24: 3,
-    jan25: 4,
-    feb25: 3,
-    mar25: 5,
+    product: 'Product A',
+    // taFrom: new Date('2024-04-01T02:30:00'),
+    // taTo: new Date('2024-04-02T01:02:00'),
+    durationHrs: 24,
   },
   {
     id: 2,
     shutdown: 'Emergency Repair',
-    apr24: 2,
-    may24: 1,
-    jun24: 3,
-    jul24: 4,
-    aug24: 5,
-    sep24: 2,
-    oct24: 1,
-    nov24: 4,
-    dec24: 3,
-    jan25: 2,
-    feb25: 4,
-    mar25: 5,
+    product: 'Product B',
+    // taFrom: '2024-05-10',
+    // taTo: '2024-05-11',
+    durationHrs: 18,
   },
   {
     id: 3,
     shutdown: 'System Upgrade',
-    apr24: 5,
-    may24: 4,
-    jun24: 3,
-    jul24: 4,
-    aug24: 3,
-    sep24: 5,
-    oct24: 4,
-    nov24: 3,
-    dec24: 4,
-    jan25: 5,
-    feb25: 3,
-    mar25: 4,
+    product: 'Product C',
+    // taFrom: '2024-06-15',
+    // taTo: '2024-06-16',
+    durationHrs: 30,
   },
   {
     id: 4,
     shutdown: 'Scheduled Cleaning',
-    apr24: 1,
-    may24: 2,
-    jun24: 1,
-    jul24: 3,
-    aug24: 2,
-    sep24: 3,
-    oct24: 1,
-    nov24: 2,
-    dec24: 3,
-    jan25: 1,
-    feb25: 2,
-    mar25: 3,
+    product: 'Product D',
+    // taFrom: '2024-07-05',
+    // taTo: '2024-07-06',
+    durationHrs: 12,
   },
   {
     id: 5,
     shutdown: 'Machine Calibration',
-    apr24: 3,
-    may24: 3,
-    jun24: 2,
-    jul24: 4,
-    aug24: 5,
-    sep24: 4,
-    oct24: 3,
-    nov24: 2,
-    dec24: 3,
-    jan25: 4,
-    feb25: 5,
-    mar25: 4,
+    product: 'Product E',
+    // taFrom: '2024-08-20',
+    // taTo: '2024-08-21',
+    durationHrs: 20,
   },
   {
     id: 6,
-    shutdown: 'Inspection and Testing',
-    apr24: 4,
-    may24: 5,
-    jun24: 3,
-    jul24: 2,
-    aug24: 1,
-    sep24: 4,
-    oct24: 5,
-    nov24: 3,
-    dec24: 2,
-    jan25: 3,
-    feb25: 4,
-    mar25: 2,
+    shutdown: 'Software Patch Update',
+    product: 'Product F',
+    // taFrom: '2024-09-10',
+    // taTo: '2024-09-11',
+    durationHrs: 10,
   },
   {
     id: 7,
-    shutdown: 'Software Patch Deployment',
-    apr24: 2,
-    may24: 3,
-    jun24: 4,
-    jul24: 5,
-    aug24: 3,
-    sep24: 2,
-    oct24: 4,
-    nov24: 5,
-    dec24: 3,
-    jan25: 2,
-    feb25: 3,
-    mar25: 5,
+    shutdown: 'Network Maintenance',
+    product: 'Product G',
+    // taFrom: '2024-10-15',
+    // taTo: '2024-10-16',
+    durationHrs: 16,
   },
   {
     id: 8,
-    shutdown: 'Utility Maintenance',
-    apr24: 1,
-    may24: 2,
-    jun24: 3,
-    jul24: 4,
-    aug24: 5,
-    sep24: 2,
-    oct24: 3,
-    nov24: 4,
-    dec24: 5,
-    jan25: 4,
-    feb25: 3,
-    mar25: 2,
+    shutdown: 'Cooling System Check',
+    product: 'Product H',
+    // taFrom: '2024-11-25',
+    // taTo: '2024-11-26',
+    durationHrs: 22,
   },
   {
     id: 9,
-    shutdown: 'Safety Inspection',
-    apr24: 4,
-    may24: 3,
-    jun24: 5,
-    jul24: 4,
-    aug24: 2,
-    sep24: 3,
-    oct24: 4,
-    nov24: 5,
-    dec24: 3,
-    jan25: 5,
-    feb25: 4,
-    mar25: 3,
+    shutdown: 'Hardware Replacement',
+    product: 'Product I',
+    // taFrom: '2024-12-05',
+    // taTo: '2024-12-06',
+    durationHrs: 28,
   },
   {
     id: 10,
-    shutdown: 'Regulatory Compliance Check',
-    apr24: 5,
-    may24: 4,
-    jun24: 3,
-    jul24: 5,
-    aug24: 4,
-    sep24: 3,
-    oct24: 2,
-    nov24: 3,
-    dec24: 4,
-    jan25: 5,
-    feb25: 3,
-    mar25: 4,
+    shutdown: 'Factory Power Audit',
+    product: 'Product J',
+    // taFrom: '2025-01-15',
+    // taTo: '2025-01-16',
+    durationHrs: 14,
   },
 ]
 
@@ -195,12 +199,12 @@ const ShutDown = () => (
   <div>
     <ASDataGrid
       columns={productionColumns}
-      rows={productionData}
+      rows={shutdownData}
       title='Shutdown Plan Data'
       onAddRow={(newRow) => console.log('New Row Added:', newRow)}
       onDeleteRow={(id) => console.log('Row Deleted:', id)}
       onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-      paginationOptions={[10, 20, 30]}
+      paginationOptions={[100, 200, 300]}
     />
   </div>
 )

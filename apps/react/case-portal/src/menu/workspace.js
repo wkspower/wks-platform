@@ -56,56 +56,47 @@ const workspace = {
     //   children: [],
     // },
 
-    {
-      id: 'case-list',
-      title: i18n.t('menu.case'),
-      type: 'collapse',
-      icon: icons.FolderOutlined,
-      children: [],
-    },
+    // {
 
-    {
+    //   id: 'functions',
+    //   title: i18n.t('menu.functions'),
+    //   type: 'collapse',
+    //   icon: icons.IconFunction, // You can choose an appropriate icon
+    //   children: [
+    //     {
+    //       id: 'safety',
+    //       title: i18n.t('menu.safety'),
+    //       type: 'item',
+    //       url: '/functions/safety',
+    //       icon: icons.IconShield,
+    //       breadcrumbs: true,
+    //     },
+    //     {
+    //       id: 'reliability',
+    //       title: i18n.t('menu.reliability'),
+    //       type: 'item',
+    //       url: '/functions/reliability',
+    //       icon: icons.IconSettings,
+    //       breadcrumbs: true,
+    //     },
+    //   ],
+    // },
 
-
-      id: 'functions',
-      title: i18n.t('menu.functions'),
-      type: 'collapse',
-      icon: icons.IconFunction, // You can choose an appropriate icon
-      children: [
-        {
-          id: 'safety',
-          title: i18n.t('menu.safety'),
-          type: 'item',
-          url: '/functions/safety',
-          icon: icons.IconShield,
-          breadcrumbs: true,
-        },
-        {
-          id: 'reliability',
-          title: i18n.t('menu.reliability'),
-          type: 'item',
-          url: '/functions/reliability',
-          icon: icons.IconSettings,
-          breadcrumbs: true,
-        },
-      ],
-    },
-
-    {
-      id: 'record-list',
-      title: i18n.t('menu.record'),
-      type: 'collapse',
-      icon: icons.IconDatabase,
-      children: [],
-    },
-    {
-      id: 'task-list',
-      title: i18n.t('menu.task'),
-      type: 'item',
-      url: '/task-list',
-      icon: icons.IconList,
-      breadcrumbs: true,
-    },
+    // {
+    //   id: 'record-list',
+    //   title: i18n.t('menu.record'),
+    //   type: 'collapse',
+    //   icon: icons.IconDatabase,
+    //   children: [],
+    // },
+    // {
+    //   id: 'task-list',
+    //   title: i18n.t('menu.task'),
+    //   type: 'item',
+    //   url: '/task-list',
+    //   icon: icons.IconList,
+    //   breadcrumbs: true,
+    // },
     {
       id: 'reports',
       title: i18n.t('menu.reports'),

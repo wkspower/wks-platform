@@ -267,7 +267,7 @@ const ProductionvolumeData = () => (
       onAddRow={(newRow) => console.log('New Row Added:', newRow)}
       onDeleteRow={(id) => console.log('Row Deleted:', id)}
       onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-      paginationOptions={[10, 20, 30]}
+      paginationOptions={[100, 200, 300]}
     />
   </div>
 )
