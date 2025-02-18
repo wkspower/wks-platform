@@ -72,6 +72,17 @@ const App = () => {
     }
   }
 
+  function enableExternalLinkMenuItemIfRequired(menu, keycloak) {
+    if (!accountStore.isManagerUser(keycloak)) {
+      delete menu.items[2]
+      return
+    }
+
+    if (!menu.items[2]?.children[0]?.children?.length) {
+      delete menu.items[2]
+    }
+  }
+
   async function buildMenuItems(keycloak) {
     const menu = {
       items: [...menuItemsDefs.items],
@@ -112,7 +123,9 @@ const App = () => {
     if (!accountStore.isManagerUser(keycloak)) {
       delete menu.items[1]
     }
-    
+
+    enableExternalLinkMenuItemIfRequired(menu, keycloak)
+
     return setMenu(menu)
   }
 

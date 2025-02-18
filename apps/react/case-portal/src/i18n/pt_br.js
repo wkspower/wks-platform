@@ -24,6 +24,8 @@ const defs = {
     processEngines: 'Motores de Processos',
     forms: 'Formulários',
     queues: 'Filas',
+
+    externalLinks: 'Links Externos',
   },
   pages: {
     dashboard: {
