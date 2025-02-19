@@ -1,9 +1,16 @@
+import { DataService } from 'services/DataService'
 import {
   Autocomplete,
   TextField,
 } from '../../../node_modules/@mui/material/index'
 import ASDataGrid from './ASDataGrid'
 import dayjs from 'dayjs'
+import { useState, useEffect } from 'react'
+import { useSession } from 'SessionStoreContext'
+
+
+
+
 const productOptions = [
   'Product A',
   'Product B',
@@ -18,29 +25,29 @@ const productOptions = [
   'Product K',
   'Product L',
 ]
-const columns = [
+
+const colDefs = [
   {
-    field: 'id',
-    headerName: 'Sr. No.',
-    minWidth: 10,
-    // flex: 0.5,
+    field: 'discription',
+    headerName: 'Shutdown Desc',
+    minWidth: 300,
     editable: true,
-  },
-  {
-    field: 'activities',
-    headerName: 'Activities',
-    width: 300,
-    editable: true,
+    renderHeader: () => (
+      <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
+        Shutdown Desc
+      </div>
+    ),
     flex: 3,
   },
+  
   {
     field: 'product',
     headerName: 'Product',
     editable: true,
-    minWidth: 125,
+    minWidth: 200,
     renderEditCell: (params) => {
       const { id } = params
-      const isEditable = id > 10 // Enable only for rows beyond 10
+      const isEditable = id > 10 
 
       return (
         <Autocomplete
@@ -72,310 +79,100 @@ const columns = [
       )
     },
   },
+
+
   {
-    field: 'taFrom',
-    headerName: 'TA - From',
-    type: 'dateTime',
-    width: 180,
-    editable: true,
-    flex: 0.4,
-    // valueGetter: (params) => {
-    //   const date = dayjs(params?.row?.taFrom)
-    //   return date.isValid() ? date.toDate() : null
-    // },
-    // renderCell: (params) => {
-    //   return (
-    //     <input
-    //       type='date'
-    //       value={params.value ? dayjs(params.value).format('YYYY-MM-DD') : ''}
-    //       onChange={(e) => {
-    //         const newDate = e.target.value // Get selected date
-    //         params.api.setEditCellValue({
-    //           id: params.id,
-    //           field: params.field,
-    //           value: newDate, // Set new value
-    //         })
-    //       }}
-    //       style={{
-    //         border: 'none',
-    //         outline: 'none',
-    //         background: 'transparent',
-    //         fontSize: 'inherit',
-    //         width: '100%',
-    //       }}
-    //     />
-    //   )
-    // },
-    renderCell: (params) => {
-      const date = params.value
-      return date && dayjs(date).isValid()
-        ? dayjs(date).format('DD/MM/YYYY HH:mm:ss') // Format as date + time
-        : 'No Date' // If the date is invalid or empty, show 'No Date'
+    field: "maintStartDateTime",
+    headerName: "SD- From",
+    type: "dateTime",
+    minWidth: 200,
+    valueGetter: (params) => {
+      const value = params; 
+      const parsedDate = value
+        ? dayjs(value, "MMM D, YYYY, h:mm:ss A").toDate()
+        : null;
+      return parsedDate;
     },
-    // renderCell: (params) => {
-    //   const date = params.value
-    //   return date ? dayjs(date).format('DD/MM/YYYY') : 'No Date'
-    // },
   },
+  
   {
-    field: 'taTo',
-    headerName: 'TA - To',
-    type: 'dateTime',
-    width: 180,
-    editable: true,
-    flex: 0.4,
-    // valueGetter: (params) => {
-    //   const date = dayjs(params?.row?.tato)
-    //   return date.isValid() ? date.toDate() : null
-    // },
-    renderCell: (params) => {
-      const date = params.value
-      return date && dayjs(date).isValid()
-        ? dayjs(date).format('DD/MM/YYYY HH:mm:ss') // Format as date + time
-        : 'No Date' // If the date is invalid or empty, show 'No Date'
+    field: "maintEndDateTime",
+    headerName: "SD- To",
+    type: "dateTime",
+    minWidth: 200,
+    valueGetter: (params) => {
+      const value = params; 
+      const parsedDate = value
+        ? dayjs(value, "MMM D, YYYY, h:mm:ss A").toDate()
+        : null;
+      return parsedDate;
     },
-    // renderCell: (params) => {
-    //   return (
-    //     <input
-    //       type='date'
-    //       value={params.value ? dayjs(params.value).format('YYYY-MM-DD') : ''}
-    //       onChange={(e) => {
-    //         const newDate = e.target.value // Get selected date
-    //         params.api.setEditCellValue({
-    //           id: params.id,
-    //           field: params.field,
-    //           value: newDate, // Set new value
-    //         })
-    //       }}
-    //       style={{
-    //         border: 'none',
-    //         outline: 'none',
-    //         background: 'transparent',
-    //         fontSize: 'inherit',
-    //         width: '100%',
-    //       }}
-    //     />
-    //   )
-    // },
   },
+  
+  
+  
+  
   {
-    field: 'durationHrs',
-    headerName: 'Duration Hrs',
-    width: 130,
-    editable: true,
-    flex: 0.5,
-    type: 'number',
+    field: "durationInMins",
+    headerName: "Duration (hrs)",
+    editable: false,
+    type: "number",
+    minWidth: 100,
+    maxWidth: 150,
+    renderCell: (params) => {
+      const durationInHours = params.value ? (params.value / 60).toFixed(2) : "0.00";
+      return `${durationInHours}`;
+    },
   },
+
+
   {
-    field: 'period',
-    headerName: 'Period',
-    width: 250,
-    editable: true,
-    flex: 0.5,
-    // align: 'center',
+    field: "remark",
+    headerName: "Remarks",
+    editable: false,
+    minWidth: 200,
+    maxWidth: 400,
   },
-  {
-    field: 'remark',
-    headerName: 'Remark',
-    width: 200,
-    editable: true,
-    flex: 0.5,
-  },
+  
 ]
 
-// const productionData = [
-//   {
-//     id: 1,
-//     activities: 'Preheater cleaning',
-//     product: 'Product A',
+const TurnaroundPlanTable = () => {
+  const [TaData, setTaData] = useState([])
+  const keycloak = useSession()
 
-//     // taFrom: '2024-03-12',
-//     // taTo: '2024-03-13',
-//     durationHrs: 10,
-//     period: '1 day',
-//     remark: 'Routine cleaning of preheater unit',
-//   },
-//   {
-//     id: 2,
-//     activities: 'Strippers inspection',
-//     product: 'Product A',
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const data = await DataService.getTAPlantData(keycloak)
+      const formattedData = data.map((item, index) => ({
+        ...item,
+        id: index, 
+      }))
 
-//     // taFrom: '2024-03-15',
-//     // taTo: '2024-03-16',
-//     durationHrs: 14,
-//     period: '1.5 days',
-//     remark: 'Visual inspection and minor repairs',
-//   },
-//   {
-//     id: 3,
-//     activities: 'Rotary kiln overhaul',
-//     product: 'Product A',
-//     // taFrom: '2024-03-18',
-//     // taTo: '2024-03-22',
-//     durationHrs: 40,
-//     period: '5 days',
-//     remark: 'Complete overhaul, including internal parts replacement',
-//   },
-//   {
-//     id: 4,
-//     activities: 'Cooling system check',
-//     // taFrom: '2024-03-20',
-//     // taTo: '2024-03-21',
-//     durationHrs: 16,
-//     period: '2 days',
-//     remark: 'Maintenance and efficiency check of cooling system',
-//   },
-//   {
-//     id: 5,
-//     activities: 'Pump calibration',
-//     // taFrom: '2024-03-22',
-//     // taTo: '2024-03-23',
-//     durationHrs: 12,
-//     period: '1 day',
-//     remark: 'Calibrating pumps for accurate performance',
-//   },
-//   {
-//     id: 6,
-//     activities: 'Power grid inspection',
-//     // taFrom: '2024-03-25',
-//     // taTo: '2024-03-26',
-//     durationHrs: 18,
-//     period: '1.5 days',
-//     remark: 'Inspection and maintenance of power grid systems',
-//   },
-//   {
-//     id: 7,
-//     activities: 'Exchanger tube cleaning',
-//     // taFrom: '2024-03-27',
-//     // taTo: '2024-03-28',
-//     durationHrs: 8,
-//     period: '1 day',
-//     remark: 'Cleaning of heat exchanger tubes',
-//   },
-//   {
-//     id: 8,
-//     activities: 'Dryer system testing',
-//     // taFrom: '2024-03-30',
-//     // taTo: '2024-03-31',
-//     durationHrs: 10,
-//     period: '1 day',
-//     remark: 'Test run of the dryer system after maintenance',
-//   },
-//   {
-//     id: 9,
-//     activities: 'Compressor inspection',
-//     // taFrom: '2024-04-02',
-//     // taTo: '2024-04-03',
-//     durationHrs: 15,
-//     period: '1.5 days',
-//     remark: 'Inspection and oil change for the compressor',
-//   },
-//   {
-//     id: 10,
-//     activities: 'Boiler re-commissioning',
-//     // taFrom: '2024-04-05',
-//     // taTo: '2024-04-07',
-//     durationHrs: 24,
-//     period: '3 days',
-//     remark: 'Re-commissioning of the boiler system post maintenance',
-//   },
-// ]
+      setTaData(formattedData)
 
-const productionData = [
-  {
-    id: 1,
-    activities: 'Preheater cleaning',
-    product: 'Product A',
-    durationHrs: 10,
-    period: '1 day',
-    remark: 'Routine cleaning of preheater unit',
-  },
-  {
-    id: 2,
-    activities: 'Strippers inspection',
-    product: 'Product B',
-    durationHrs: 14,
-    period: '1.5 days',
-    remark: 'Visual inspection and minor repairs',
-  },
-  {
-    id: 3,
-    activities: 'Rotary kiln overhaul',
-    product: 'Product C',
-    durationHrs: 40,
-    period: '5 days',
-    remark: 'Complete overhaul, including internal parts replacement',
-  },
-  {
-    id: 4,
-    activities: 'Cooling system check',
-    product: 'Product A',
-    durationHrs: 16,
-    period: '2 days',
-    remark: 'Maintenance and efficiency check of cooling system',
-  },
-  {
-    id: 5,
-    activities: 'Pump calibration',
-    product: 'Product B',
-    durationHrs: 12,
-    period: '1 day',
-    remark: 'Calibrating pumps for accurate performance',
-  },
-  {
-    id: 6,
-    activities: 'Power grid inspection',
-    product: 'Product C',
-    durationHrs: 18,
-    period: '1.5 days',
-    remark: 'Inspection and maintenance of power grid systems',
-  },
-  {
-    id: 7,
-    activities: 'Exchanger tube cleaning',
-    product: 'Product A',
-    durationHrs: 8,
-    period: '1 day',
-    remark: 'Cleaning of heat exchanger tubes',
-  },
-  {
-    id: 8,
-    activities: 'Dryer system testing',
-    product: 'Product B',
-    durationHrs: 10,
-    period: '1 day',
-    remark: 'Test run of the dryer system after maintenance',
-  },
-  {
-    id: 9,
-    activities: 'Compressor inspection',
-    product: 'Product C',
-    durationHrs: 15,
-    period: '1.5 days',
-    remark: 'Inspection and oil change for the compressor',
-  },
-  {
-    id: 10,
-    activities: 'Boiler re-commissioning',
-    product: 'Product A',
-    durationHrs: 24,
-    period: '3 days',
-    remark: 'Re-commissioning of the boiler system post maintenance',
-  },
-]
+    } catch (error) {
+      console.error('Error fetching shutdown data:', error)
+    }
+  }
+  fetchData()
+}, [])
+  
 
-const TurnaroundPlanTable = () => (
-  <div>
-    <ASDataGrid
-      columns={columns}
-      rows={productionData}
-      title='Turnaround Plan Table'
-      onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-      onDeleteRow={(id) => console.log('Row Deleted:', id)}
-      onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-      paginationOptions={[100, 200, 300]}
-    />
-  </div>
-)
+  return (
+    <div>
+      <ASDataGrid
+        columns={colDefs}
+        rows={TaData}
+        title='Turnaround Plan Table'
+        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
+        onDeleteRow={(id) => console.log('Row Deleted:', id)}
+        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
+        paginationOptions={[100, 200, 300]}
+      />
+    </div>
+  )
+}
 
 export default TurnaroundPlanTable
+

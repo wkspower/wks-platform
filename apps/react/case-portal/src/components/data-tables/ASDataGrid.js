@@ -78,6 +78,16 @@ const DataGridTable = ({
     setSearchText(event.target.value)
   }
 
+
+
+  useEffect(() => {
+    console.log("Updated initialRows:", initialRows);
+    setRows(initialRows);
+  }, [initialRows]);
+
+  
+
+
   const onColumnResized = (params) => {
     if (params.column) {
       const field = params.column.getColDef().field
@@ -173,8 +183,14 @@ const DataGridTable = ({
     console.log('api call here ')
     // dummyApiCall(1)
     // dummyApiCall1(1)
-    getPlantAndSite()
-  }, [])
+    // getPlantAndSite()
+    // getShutDownPlantData()
+    // getSlowDownPlantData()
+    // getTAPlantData()
+    // getAllProducts()
+    // getYearlyData('2025')
+    console.log('rows',rows);
+  }, [rows])
 
   const dummyApiCall = async (id) => {
     try {
@@ -186,10 +202,10 @@ const DataGridTable = ({
       // handleMenuClose();
     }
   }
-  const dummyApiCall1 = async (id) => {
+  const getYearlyData = async (year) => {
     try {
-      const data = await DataService.getYearWiseProduct(keycloak, id)
-      console.log('API Response:', data)
+      const data = await DataService.getYearlyData(keycloak, year)
+      console.log('API getYearlyData:', data)
     } catch (error) {
       console.error('Error fetching product:', error)
     } finally {
@@ -199,6 +215,47 @@ const DataGridTable = ({
   const getPlantAndSite = async () => {
     try {
       const data = await DataService.getAllSites(keycloak)
+      console.log('API Response:', data)
+    } catch (error) {
+      console.error('Error fetching product:', error)
+    } finally {
+      // handleMenuClose();
+    }
+  }
+  const getShutDownPlantData = async () => {
+    try {
+      const data = await DataService.getShutDownPlantData(keycloak)
+      console.log('API Response:', data)
+    } catch (error) {
+      console.error('Error fetching product:', error)
+    } finally {
+      // handleMenuClose();
+    }
+  }
+  const getSlowDownPlantData = async () => {
+    try {
+      const data = await DataService.getSlowDownPlantData(keycloak)
+      console.log('API Response:', data)
+    } catch (error) {
+      console.error('Error fetching product:', error)
+    } finally {
+      // handleMenuClose();
+    }
+  }
+
+  const getTAPlantData = async () => {
+    try {
+      const data = await DataService.getTAPlantData(keycloak)
+      console.log('API Response:', data)
+    } catch (error) {
+      console.error('Error fetching product:', error)
+    } finally {
+      // handleMenuClose();
+    }
+  }
+  const getAllProducts = async () => {
+    try {
+      const data = await DataService.getAllProducts(keycloak)
       console.log('API Response:', data)
     } catch (error) {
       console.error('Error fetching product:', error)
