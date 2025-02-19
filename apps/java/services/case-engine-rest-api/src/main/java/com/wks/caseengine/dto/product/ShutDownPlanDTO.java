@@ -1,43 +1,60 @@
 package com.wks.caseengine.dto.product;
 
 import java.util.Date;
-
+import java.util.UUID;
 
 public class ShutDownPlanDTO {
 
-	private String discription;
-	private Date maintStartDateTime;
-	private Date maintEndDateTime;
-	private Integer durationInMins;
+    private String discription;
+    private Date maintStartDateTime;
+    private Date maintEndDateTime;
+	// Change from Integer to Long
+    private Long durationInMins; 
+    
+	//FOR ID : pmt.Id
+	private UUID maintenanceId; 
+	
+
 	private Double rate;
 	private String remark;
 	private String product;
 	private String maintenanceTypeName;
 	private Double durationInHrs;
 	private Double durationInDays;
-	
-	public String getDiscription() {
-		return discription;
-	}
-	public void setDiscription(String discription) {
-		this.discription = discription;
-	}
-	public Date getMaintStartDateTime() {
-		return maintStartDateTime;
-	}
-	public void setMaintStartDateTime(Date maintStartDateTime) {
-		this.maintStartDateTime = maintStartDateTime;
-	}
-	public Date getMaintEndDateTime() {
-		return maintEndDateTime;
-	}
-	public void setMaintEndDateTime(Date maintEndDateTime) {
-		this.maintEndDateTime = maintEndDateTime;
-	}
-	public Integer getDurationInMins() {
-		return durationInMins;
-	}
-	public void setDurationInMins(Integer durationInMins) {
+
+
+    public String getDiscription() {
+        return discription;
+    }
+
+    public void setDiscription(String discription) {
+        this.discription = discription;
+    }
+
+    public Date getMaintStartDateTime() {
+        return maintStartDateTime;
+    }
+
+    public void setMaintStartDateTime(Date maintStartDateTime) {
+        this.maintStartDateTime = maintStartDateTime;
+    }
+
+    public Date getMaintEndDateTime() {
+        return maintEndDateTime;
+    }
+
+    public void setMaintEndDateTime(Date maintEndDateTime) {
+        this.maintEndDateTime = maintEndDateTime;
+    }
+
+
+	// Changed return type to Long
+    public Long getDurationInMins() { 
+        return durationInMins;
+    }
+
+	// Changed parameter type to Long
+    public void setDurationInMins(Long durationInMins) { 
 		this.durationInMins = durationInMins;
 	}
 	public String getProduct() {
@@ -76,5 +93,12 @@ public class ShutDownPlanDTO {
 	public void setDurationInDays(Double durationInDays) {
 		this.durationInDays = durationInDays;
 	}
+	 public void setMaintenanceId(UUID maintenanceId) { 
+        this.maintenanceId = maintenanceId;
+    }
+	public UUID getMaintenanceId() { 
+        return maintenanceId;
+    }
+
 	
 }

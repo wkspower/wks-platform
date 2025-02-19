@@ -24,47 +24,58 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 public class ShutDownPlanController {
 	
 	@Autowired
-	private ShutDownPlanService shutDownPlanService;
+	private ShutDownPlanService planService;
 	
 	@GetMapping(value = "/getShutDownPlanData")
-    public ResponseEntity<List<ShutDownPlanDTO>> findMaintenanceDetailsByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName) {
-		List<Object[]> listOfSite=null;
-		try {
-			listOfSite = shutDownPlanService.findMaintenanceDetailsByPlantIdAndType(plantId,maintenanceTypeName);
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-		
+    public ResponseEntity<List<ShutDownPlanDTO>> findMaintenanceDetailsByPlantIdAndType(
+            // Change UUID to String
+            @RequestParam String plantId, 
+            @RequestParam String maintenanceTypeName) {
+
+        List<Object[]> listOfSite = new ArrayList<>();
         List<ShutDownPlanDTO> dtoList = new ArrayList<>();
-		
-		  for (Object[] result : listOfSite) { 
-			  ShutDownPlanDTO dto = new  ShutDownPlanDTO();
-			  dto.setDiscription((String) result[0]); 
-			  dto.setMaintStartDateTime((Date)result[1]);
-			  dto.setMaintEndDateTime((Date) result[2]); 
-			  dto.setDurationInMins((Integer) result[3]);
-			  dto.setProduct((String) result[4]);
-			   
-			  dtoList.add(dto); 
-		}
-		 
+
+        try {
+            // Convert String to UUID
+            UUID plantUuid = UUID.fromString(plantId); 
+            listOfSite = planService.findMaintenanceDetailsByPlantIdAndType(plantUuid, maintenanceTypeName);
+
+            for (Object[] result : listOfSite) {
+                ShutDownPlanDTO dto = new ShutDownPlanDTO();
+                dto.setDiscription((String) result[0]);
+                dto.setMaintStartDateTime((Date) result[1]);
+                dto.setMaintEndDateTime((Date) result[2]);
+                dto.setDurationInMins(result[3] != null ? ((Number) result[3]).longValue() : 0L); 
+                dto.setProduct((String) result[4]);
+                //FOR ID : pmt.Id
+                dto.setMaintenanceId(result[5] != null ? UUID.fromString(result[5].toString()) : null); 
+                dtoList.add(dto);
+            }
+            
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null); 
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(null); 
+        }
+
         return ResponseEntity.ok(dtoList);
     }
 	
+		
 	@PostMapping(value="/saveShutdownData/{plantId}")
 	public ResponseEntity<ShutDownPlanDTO> saveShutdownData(@PathVariable UUID plantId,@RequestBody ShutDownPlanDTO shutDownPlanDTO){
-		UUID plantMaintenanceId=shutDownPlanService.findPlantMaintenanceId(shutDownPlanDTO.getProduct());
+		UUID plantMaintenanceId=planService.findPlantMaintenanceId(shutDownPlanDTO.getProduct());
 		PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
 		plantMaintenanceTransaction.setId(UUID.randomUUID());
 		plantMaintenanceTransaction.setDescription(shutDownPlanDTO.getDiscription());
-		plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
+		plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
 		plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 		plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 		plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
 		plantMaintenanceTransaction.setPlantFkId(plantId);
-		shutDownPlanService.saveShutdownData(plantMaintenanceTransaction);
+		planService.saveShutdownData(plantMaintenanceTransaction);
 		return null;
 	}
-
 
 }

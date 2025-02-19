@@ -97,4 +97,18 @@ public class ProductServiceImpl implements ProductService {
 		return productMonthWiseDataDTO;
 	}*/
 
+
+	// Service method to fetch products from NormParameters table
+	public List<Object[]> getAllProductsFromNormParameters() {
+		String query = "SELECT Id, Name, DisplayName FROM [RIL.AOP].[dbo].[NormParameters]";
+		return entityManager.createNativeQuery(query).getResultList();
+	}
+
+
+
+    public List<Object[]> getMonthlyDataForYear(int year) {
+        String query = "SELECT NormParameters_FK_Id, month, monthValue, Remarks FROM [RIL.AOP].[dbo].[NormParameterMonthlyTransaction] WHERE year = :year";
+        return entityManager.createNativeQuery(query).setParameter("year", year).getResultList();
+    }
+
 }

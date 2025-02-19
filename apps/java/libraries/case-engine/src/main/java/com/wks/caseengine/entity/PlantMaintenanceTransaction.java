@@ -38,7 +38,7 @@ public class PlantMaintenanceTransaction {
     private Date maintForMonth;
 
     @Column(name = "Rate")
-    private Double rate;
+    private Float rate;
 
     @Column(name = "Remarks", length = 500)
     private String remarks;

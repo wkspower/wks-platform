@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.dto.product.SlowDownPlanDTO;
 import com.wks.caseengine.dto.product.ShutDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.service.ShutDownPlanService;
 import com.wks.caseengine.service.SlowdownPlanService;
+
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
@@ -32,7 +34,7 @@ public class SlowdownPlanController {
 	private ShutDownPlanService shutDownPlanService;
 	
 	@GetMapping(value = "/getSlowDownPlanData")
-    public ResponseEntity<List<ShutDownPlanDTO>> findSlowdownDetailsByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName) {
+    public ResponseEntity<List<SlowDownPlanDTO>> findSlowdownDetailsByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName) {
 		List<Object[]> listOfSite=null;
 		try {
 			listOfSite = slowdownPlanService.findSlowdownPlanDetailsByPlantIdAndType(plantId,maintenanceTypeName);
@@ -40,19 +42,20 @@ public class SlowdownPlanController {
 			e.printStackTrace();
 		}
 		
-        List<ShutDownPlanDTO> dtoList = new ArrayList<>();
+        List<SlowDownPlanDTO> dtoList = new ArrayList<>();
 		
-		  for (Object[] result : listOfSite) { 
-			  ShutDownPlanDTO dto = new  ShutDownPlanDTO();
-			  dto.setDiscription((String) result[0]); 
-			  dto.setMaintStartDateTime((Date)result[1]);
-			  dto.setMaintEndDateTime((Date) result[2]); 
-			  dto.setDurationInMins((Integer) result[3]);
-			  dto.setRate((Double)result[4]);
-			  dto.setRemark((String)result[5]);
-			  dto.setProduct((String) result[6]);
-			   
-			  dtoList.add(dto); 
+		for (Object[] result : listOfSite) {
+			SlowDownPlanDTO dto = new SlowDownPlanDTO();
+			dto.setDiscription((String) result[0]);
+			dto.setMaintStartDateTime((Date) result[1]);
+			dto.setMaintEndDateTime((Date) result[2]);
+			dto.setDurationInMins(result[3] != null ? ((Number) result[3]).longValue() : 0L);
+			dto.setRate(result[4] != null ? ((Number) result[4]).doubleValue() : null); // Extract Rate
+			dto.setRemarks(result[5] != null ? result[5].toString() : null); // Extract Remarks
+			dto.setProduct(result[6] != null ? result[6].toString() : null);
+			dto.setMaintenanceId(result[7] != null ? UUID.fromString(result[7].toString()) : null);
+	
+			dtoList.add(dto);
 		}
 		 
         return ResponseEntity.ok(dtoList);
@@ -64,12 +67,18 @@ public class SlowdownPlanController {
 		PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
 		plantMaintenanceTransaction.setId(UUID.randomUUID());
 		plantMaintenanceTransaction.setDescription(shutDownPlanDTO.getDiscription());
-		plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
+
+		// plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
+		plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
+
 		plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 		plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 		plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
 		plantMaintenanceTransaction.setPlantFkId(plantId);
-		plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
+		
+		// plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
+		plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate().floatValue());
+
 		plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 		shutDownPlanService.saveShutdownData(plantMaintenanceTransaction);
 		return ResponseEntity.ok(shutDownPlanDTO); 

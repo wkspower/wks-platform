@@ -9,7 +9,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.Map;
+import java.util.HashMap;
 import org.springframework.http.HttpStatus;
+
+import com.wks.caseengine.dto.product.ProductDTO;
+import com.wks.caseengine.dto.product.ProductYearlyDataDTO;
 import com.wks.caseengine.dto.product.ProductMonthWiseDataDTO;
 import com.wks.caseengine.rest.entity.Product;
 import com.wks.caseengine.service.product.ProductService;
@@ -69,12 +74,89 @@ public class ProductController {
 
 	    return ResponseEntity.ok(productMonthWiseDataDTOList);
 	}
+
+
+	@GetMapping(value = "/getAllProducts")
+	public ResponseEntity<List<ProductDTO>> getAllProducts() {
+		List<Object[]> productList = productService.getAllProductsFromNormParameters();
+		List<ProductDTO> productDTOList = new ArrayList<>();
+	
+		for (Object[] obj : productList) {
+			ProductDTO productDTO = new ProductDTO();
+	
+			try {
+				productDTO.setId(Long.parseLong(String.valueOf(obj[0]))); // Handle ID conversion safely
+			} catch (NumberFormatException e) {
+				productDTO.setId(null); // Handle cases where ID is not a valid number
+			}
+	
+			productDTO.setName((String) obj[1]);
+			productDTO.setDisplayName((String) obj[2]);
+			productDTOList.add(productDTO);
+		}
+	
+		return ResponseEntity.ok(productDTOList);
+	}
+	
 	
 	/*@PostMapping(value = "/saveMonthWiseData")
 	public ResponseEntity<ProductMonthWiseDataDTO> saveProductMonthWiseData(@RequestBody ProductMonthWiseDataDTO productMonthWiseDataDTO) {
 	    ProductMonthWiseDataDTO savedData = productService.saveMonthWiseData(productMonthWiseDataDTO);
 	    return ResponseEntity.status(HttpStatus.CREATED).body(savedData);
 	}*/
+
+
+	@GetMapping("/yearly-data")
+	public ResponseEntity<List<ProductYearlyDataDTO>> getProductYearlyData(@RequestParam int year) {
+		List<Object[]> products = productService.getAllProductsFromNormParameters();
+		List<Object[]> monthlyData = productService.getMonthlyDataForYear(year);
+		Map<String, ProductYearlyDataDTO> productDataMap = new HashMap<>();
+	
+		// Store product details
+		for (Object[] obj : products) {
+			String id = obj[0].toString();  // Convert to String to handle both UUID and Long
+			String name = (String) obj[1];
+			productDataMap.put(id, new ProductYearlyDataDTO(id, name));
+		}
+	
+		// Store monthly data
+		for (Object[] obj : monthlyData) {
+			String productId = obj[0].toString(); // Convert to String to handle UUID and Long
+			String month = getFormattedMonth((String) obj[1], year);
+			Long monthValue = Long.parseLong(obj[2].toString()); // Ensure proper conversion
+			String remark = (String) obj[3];
+	
+			if (productDataMap.containsKey(productId)) {
+				ProductYearlyDataDTO product = productDataMap.get(productId);
+				product.addMonthData(month, monthValue);
+				product.setRemark(remark);
+			}
+		}
+	
+		List<ProductYearlyDataDTO> responseList = new ArrayList<>(productDataMap.values());
+		return ResponseEntity.ok(responseList);
+	}
+	
+	
+
+
+	private String getFormattedMonth(String month, int year) {
+        return switch (month.toLowerCase()) {
+            case "january" -> "Jan" + (year % 100);
+            case "february" -> "Feb" + (year % 100);
+            case "march" -> "Mar" + (year % 100);
+            case "april" -> "Apr" + (year % 100);
+            case "may" -> "May" + (year % 100);
+            case "june" -> "Jun" + (year % 100);
+            case "july" -> "Jul" + (year % 100);
+            case "august" -> "Aug" + (year % 100);
+            case "september" -> "Sep" + (year % 100);
+            case "october" -> "Oct" + (year % 100);
+            case "november" -> "Nov" + (year % 100);
+            case "december" -> "Dec" + (year % 100);
+            default -> month;
+        };
+    }
 
 
 }

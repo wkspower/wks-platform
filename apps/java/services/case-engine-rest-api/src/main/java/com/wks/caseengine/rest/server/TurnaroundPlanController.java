@@ -47,7 +47,8 @@ public class TurnaroundPlanController {
 			  dto.setDiscription((String) result[0]); 
 			  dto.setMaintStartDateTime((Date)result[1]);
 			  dto.setMaintEndDateTime((Date) result[2]);
-			  dto.setDurationInMins((Integer) result[3]); // Duration in minutes
+			  // dto.setDurationInMins((Integer) result[3]); // Duration in minutes
+			  dto.setDurationInMins(result[3] != null ? ((Number) result[3]).longValue() : 0L); 
 			  double durationInHrs = ((Integer) result[3]) / 60.0;
 			  dto.setDurationInHrs(durationInHrs);
 			  dto.setRemark((String)result[4]);
@@ -67,7 +68,7 @@ public class TurnaroundPlanController {
 		PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
 		plantMaintenanceTransaction.setId(UUID.randomUUID());
 		plantMaintenanceTransaction.setDescription(shutDownPlanDTO.getDiscription());
-		plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
+		plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
 		plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 		plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 		plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
