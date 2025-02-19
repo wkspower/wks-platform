@@ -29,10 +29,10 @@ public class SiteAndPlantController {
         List<SiteAndPlantDTO> dtoList = new ArrayList<>();
         for (Object[] result : listOfSite) {
             SiteAndPlantDTO dto = new SiteAndPlantDTO();
-            dto.setSiteId(UUID.fromString((String) result[0])); // Convert String to UUID
+            dto.setSiteId((UUID) result[0]);
             dto.setSiteName((String) result[1]);
             dto.setDisplayName((String) result[2]);
-            dto.setPlantId(UUID.fromString((String) result[3])); // Convert String to UUID
+            dto.setPlantId((UUID) result[3]);
             dto.setPlantName((String) result[4]);
             dto.setPlantDisplayName((String) result[5]);
             dtoList.add(dto);

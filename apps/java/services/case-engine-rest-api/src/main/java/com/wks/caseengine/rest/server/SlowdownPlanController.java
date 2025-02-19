@@ -1,9 +1,10 @@
 package com.wks.caseengine.rest.server;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,20 +13,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.product.ShutDownPlanDTO;
-import com.wks.caseengine.service.ShutDownPlanService;
+import com.wks.caseengine.service.SlowdownPlanService;
 
 @RestController
 @RequestMapping("task")
-public class ShutDownPlanController {
+public class SlowdownPlanController {
 	
 	@Autowired
-	private ShutDownPlanService planService;
+	private SlowdownPlanService slowdownPlanService;
 	
-	@GetMapping(value = "/getShutDownPlanData")
-    public ResponseEntity<List<ShutDownPlanDTO>> findMaintenanceDetailsByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName) {
+	@GetMapping(value = "/getSlowDownPlanData")
+    public ResponseEntity<List<ShutDownPlanDTO>> findSlowdownDetailsByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName) {
 		List<Object[]> listOfSite=null;
 		try {
-			listOfSite = planService.findMaintenanceDetailsByPlantIdAndType(plantId,maintenanceTypeName);
+			listOfSite = slowdownPlanService.findSlowdownPlanDetailsByPlantIdAndType(plantId,maintenanceTypeName);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -38,7 +39,9 @@ public class ShutDownPlanController {
 			  dto.setMaintStartDateTime((Date)result[1]);
 			  dto.setMaintEndDateTime((Date) result[2]); 
 			  dto.setDurationInMins((Integer) result[3]);
-			  dto.setProduct((String) result[4]);
+			  dto.setRate((Double)result[4]);
+			  dto.setRemark((String)result[5]);
+			  dto.setProduct((String) result[6]);
 			   
 			  dtoList.add(dto); 
 		}

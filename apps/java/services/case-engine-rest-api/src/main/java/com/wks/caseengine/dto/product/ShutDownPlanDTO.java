@@ -8,7 +8,9 @@ public class ShutDownPlanDTO {
 	private String discription;
 	private Date maintStartDateTime;
 	private Date maintEndDateTime;
-	private Long durationInMins;
+	private Integer durationInMins;
+	private Double rate;
+	private String remark;
 	private String product;
 	public String getDiscription() {
 		return discription;
@@ -28,10 +30,10 @@ public class ShutDownPlanDTO {
 	public void setMaintEndDateTime(Date maintEndDateTime) {
 		this.maintEndDateTime = maintEndDateTime;
 	}
-	public Long getDurationInMins() {
+	public Integer getDurationInMins() {
 		return durationInMins;
 	}
-	public void setDurationInMins(Long durationInMins) {
+	public void setDurationInMins(Integer durationInMins) {
 		this.durationInMins = durationInMins;
 	}
 	public String getProduct() {
@@ -39,6 +41,18 @@ public class ShutDownPlanDTO {
 	}
 	public void setProduct(String product) {
 		this.product = product;
+	}
+	public Double getRate() {
+		return rate;
+	}
+	public void setRate(Double rate) {
+		this.rate = rate;
+	}
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 	
 	
