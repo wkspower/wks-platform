@@ -72,6 +72,17 @@ const App = () => {
     }
   }
 
+  function enableExternalLinkMenuItemIfRequired(menu, keycloak) {
+    if (!accountStore.isManagerUser(keycloak)) {
+      delete menu.items[2]
+      return
+    }
+
+    if (!menu.items[2]?.children[0]?.children?.length) {
+      delete menu.items[2]
+    }
+  }
+
   async function buildMenuItems(keycloak) {
     const menu = {
       items: [...menuItemsDefs.items],
@@ -81,7 +92,7 @@ const App = () => {
       setRecordsTypes(data)
 
       data.forEach((element) => {
-        menu.items[1].children
+        menu.items[0].children
           .filter((menu) => menu.id === 'record-list')[0]
           .children.push({
             id: element.id,
@@ -97,7 +108,7 @@ const App = () => {
       setCasesDefinitions(data)
 
       data.forEach((element) => {
-        menu.items[1].children
+        menu.items[0].children
           .filter((menu) => menu.id === 'case-list')[0]
           .children.push({
             id: element.id,
@@ -110,8 +121,10 @@ const App = () => {
     })
 
     if (!accountStore.isManagerUser(keycloak)) {
-      delete menu.items[2]
+      delete menu.items[1]
     }
+
+    enableExternalLinkMenuItemIfRequired(menu, keycloak)
 
     return setMenu(menu)
   }

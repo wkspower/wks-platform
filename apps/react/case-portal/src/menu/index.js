@@ -1,9 +1,11 @@
-import dashboard from './dashboard'
 import workspace from './workspace'
 import management from './management'
+import externalLinks from './externalLinks'
+
+const items = [workspace, management, externalLinks]
 
 const menuItems = {
-  items: [dashboard, workspace, management],
+  items: items,
 }
 
 export default menuItems
