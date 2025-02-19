@@ -159,10 +159,22 @@ function requestRemoteDataSourceAndFillRecordTypesIfRequired(
         }
       }
 
+      // Handle components recursively
       if (item.components) {
         return {
           ...item,
           components: processComponentWithContext(item.components),
+        }
+      }
+
+      // Handle columns (each column has a "components" array)
+      if (item.columns) {
+        return {
+          ...item,
+          columns: item.columns.map((column) => ({
+            ...column,
+            components: processComponentWithContext(column.components || []),
+          })),
         }
       }
 
