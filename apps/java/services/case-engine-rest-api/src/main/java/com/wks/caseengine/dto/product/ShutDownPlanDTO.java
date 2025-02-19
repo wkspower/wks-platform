@@ -12,6 +12,10 @@ public class ShutDownPlanDTO {
 	private Double rate;
 	private String remark;
 	private String product;
+	private String maintenanceTypeName;
+	private Double durationInHrs;
+	private Double durationInDays;
+	
 	public String getDiscription() {
 		return discription;
 	}
@@ -54,7 +58,23 @@ public class ShutDownPlanDTO {
 	public void setRemark(String remark) {
 		this.remark = remark;
 	}
-	
-	
+	public String getMaintenanceTypeName() {
+		return maintenanceTypeName;
+	}
+	public void setMaintenanceTypeName(String maintenanceTypeName) {
+		this.maintenanceTypeName = maintenanceTypeName;
+	}
+	public Double getDurationInHrs() {
+		return durationInHrs;
+	}
+	public void setDurationInHrs(Double durationInHrs) {
+		this.durationInHrs = durationInHrs;
+	}
+	public Double getDurationInDays() {
+		return durationInDays;
+	}
+	public void setDurationInDays(Double durationInDays) {
+		this.durationInDays = durationInDays;
+	}
 	
 }

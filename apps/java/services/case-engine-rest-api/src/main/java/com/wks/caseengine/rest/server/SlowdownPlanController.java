@@ -8,12 +8,18 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.product.ShutDownPlanDTO;
+import com.wks.caseengine.entity.PlantMaintenanceTransaction;
+import com.wks.caseengine.service.ShutDownPlanService;
 import com.wks.caseengine.service.SlowdownPlanService;
+
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 @RestController
 @RequestMapping("task")
@@ -21,6 +27,9 @@ public class SlowdownPlanController {
 	
 	@Autowired
 	private SlowdownPlanService slowdownPlanService;
+	
+	@Autowired
+	private ShutDownPlanService shutDownPlanService;
 	
 	@GetMapping(value = "/getSlowDownPlanData")
     public ResponseEntity<List<ShutDownPlanDTO>> findSlowdownDetailsByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName) {
@@ -48,6 +57,23 @@ public class SlowdownPlanController {
 		 
         return ResponseEntity.ok(dtoList);
     }
+	
+	@PostMapping(value="/saveSlowdownData/{plantId}")
+	public ResponseEntity<ShutDownPlanDTO> saveShutdownData(@PathVariable UUID plantId,@RequestBody ShutDownPlanDTO shutDownPlanDTO){
+		UUID plantMaintenanceId=shutDownPlanService.findPlantMaintenanceId(shutDownPlanDTO.getProduct());
+		PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
+		plantMaintenanceTransaction.setId(UUID.randomUUID());
+		plantMaintenanceTransaction.setDescription(shutDownPlanDTO.getDiscription());
+		plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
+		plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+		plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+		plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
+		plantMaintenanceTransaction.setPlantFkId(plantId);
+		plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
+		plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+		shutDownPlanService.saveShutdownData(plantMaintenanceTransaction);
+		return ResponseEntity.ok(shutDownPlanDTO); 
+	}
 
 
 }
