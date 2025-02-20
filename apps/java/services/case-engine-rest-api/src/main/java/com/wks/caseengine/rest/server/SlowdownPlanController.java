@@ -66,7 +66,10 @@ public class SlowdownPlanController {
 		UUID plantMaintenanceId=shutDownPlanService.findPlantMaintenanceId(shutDownPlanDTO.getProduct());
 		PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
 		plantMaintenanceTransaction.setId(UUID.randomUUID());
-		plantMaintenanceTransaction.setDescription(shutDownPlanDTO.getDiscription());
+
+
+
+		plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
 
 		// plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
 		plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
@@ -75,6 +78,9 @@ public class SlowdownPlanController {
 		plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 		plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
 		plantMaintenanceTransaction.setPlantFkId(plantId);
+
+
+		plantMaintenanceTransaction.setCreatedOn(new Date());
 		
 		// plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
 		plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate().floatValue());

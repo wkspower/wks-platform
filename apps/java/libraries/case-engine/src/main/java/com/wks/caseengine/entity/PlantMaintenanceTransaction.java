@@ -1,13 +1,8 @@
 package com.wks.caseengine.entity;
 
-
 import java.util.Date;
 import java.util.UUID;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -23,18 +18,30 @@ public class PlantMaintenanceTransaction {
     private String name;
 
     @Column(name = "Discription", nullable = false, length = 500)
-    private String description;
+    private String discription;
+
+    
+
+
+
+
+
+
+
 
     @Column(name = "MaintStartDateTime")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date maintStartDateTime;
 
     @Column(name = "MaintEndDateTime")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date maintEndDateTime;
 
     @Column(name = "DurationInMins")
     private Integer durationInMins;
 
     @Column(name = "MaintForMonth")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date maintForMonth;
 
     @Column(name = "Rate")
@@ -43,7 +50,8 @@ public class PlantMaintenanceTransaction {
     @Column(name = "Remarks", length = 500)
     private String remarks;
 
-    @Column(name = "CreatedOn", nullable = false)
+    @Column(name = "CreatedOn", nullable = false, updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date createdOn;
 
     @Column(name = "User", nullable = false, length = 255)
@@ -57,4 +65,11 @@ public class PlantMaintenanceTransaction {
 
     @Column(name = "Plant_FK_Id")
     private UUID plantFkId;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdOn == null) {
+            createdOn = new Date();
+        }
+    }
 }

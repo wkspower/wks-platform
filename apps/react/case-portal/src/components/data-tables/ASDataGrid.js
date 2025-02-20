@@ -735,7 +735,7 @@ const DataGridTable = ({
           columns={columns.map((col) => ({
             ...col,
             editable:
-              col.field === 'product' ? rows.length >= 10 : col.editable,
+              col.field === 'product' ? rows.length >= 1 : col.editable,
           }))}
           rowHeight={35}
           processRowUpdate={processRowUpdate}

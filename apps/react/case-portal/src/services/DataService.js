@@ -10,6 +10,7 @@ export const DataService = {
   getYearlyData,
   getSlowDownPlantData,
   getTAPlantData,
+  saveShutdownData,
 }
 
 async function getProductById(keycloak, id) {
@@ -29,6 +30,35 @@ async function getProductById(keycloak, id) {
     return await Promise.reject(e)
   }
 }
+
+
+async function saveShutdownData( plantId,shutdownDetails,keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/saveShutdownData/${plantId}`;
+
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${keycloak.token}`,
+  };
+
+  try {
+    const resp = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(shutdownDetails),
+    });
+    return json(keycloak, resp);
+  } catch (e) {
+    console.log(e);
+    return await Promise.reject(e);
+  }
+}
+
+export default saveShutdownData;
+
+
+
+
 async function getYearlyData(keycloak, year) {
   const url = `${process.env.REACT_APP_API_URL}/task/yearly-data?year=${year}`
 

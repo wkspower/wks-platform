@@ -68,8 +68,29 @@ public class ShutDownPlanController {
 		UUID plantMaintenanceId=planService.findPlantMaintenanceId(shutDownPlanDTO.getProduct());
 		PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
 		plantMaintenanceTransaction.setId(UUID.randomUUID());
-		plantMaintenanceTransaction.setDescription(shutDownPlanDTO.getDiscription());
-		plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
+
+
+
+		// plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+
+
+
+        if (shutDownPlanDTO.getDiscription() != null) {
+			plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+		} else {
+			plantMaintenanceTransaction.setDiscription("Default Description"); // Or handle appropriately
+		}
+		
+
+
+
+
+
+
+        if(shutDownPlanDTO.getDurationInMins() != null) {
+            plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
+        }
+		// plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
 		plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 		plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 		plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
