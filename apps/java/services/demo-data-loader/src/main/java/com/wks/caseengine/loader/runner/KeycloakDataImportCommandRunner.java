@@ -243,7 +243,7 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 	}
 
 	private List<String> createDefaultClientScopes() {
-		return Arrays.asList("web-origins", "acr", "org", "roles", "profile", "email");
+		return Arrays.asList("web-origins", "acr", "org", "roles", "profile", "email", "plants");
 	}
 
 	private List<UserRepresentation> createUsers() {

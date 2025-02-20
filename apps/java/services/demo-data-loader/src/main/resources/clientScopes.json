@@ -493,5 +493,30 @@
           }
         }
       ]
+    },
+	{
+	      "name": "plants",
+	      "description": "Associated Site and Plant details",
+	      "protocol": "openid-connect",
+	      "attributes": {
+	        "include.in.token.scope": "true",
+	        "display.on.consent.screen": "true"
+	      },
+	      "protocolMappers": [
+	        {
+	          "name": "plants",
+	          "protocol": "openid-connect",
+	          "protocolMapper": "oidc-usermodel-attribute-mapper",
+	          "consentRequired": false,
+	          "config": {
+	            "userinfo.token.claim": "true",
+	            "user.attribute": "plants",
+	            "id.token.claim": "true",
+	            "access.token.claim": "true",
+	            "claim.name": "plants",
+	            "jsonType.label": "String"
     }
+	        }
+	      ]
+	    }
  ]
