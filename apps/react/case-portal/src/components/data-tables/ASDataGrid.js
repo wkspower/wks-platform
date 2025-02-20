@@ -10,7 +10,7 @@ import {
 } from '@mui/material'
 // import MoreVertIcon from '@mui/icons-material/MoreVert'
 import SearchIcon from '@mui/icons-material/Search'
-import FilterAltIcon from '@mui/icons-material/FilterAlt'
+// import FilterAltIcon from '@mui/icons-material/FilterAlt'
 // import EditIcon from '@mui/icons-material/Edit'
 
 import { useSession } from 'SessionStoreContext'
@@ -30,6 +30,10 @@ import Notification from 'components/Utilities/Notification'
 import DeleteIcon from '@mui/icons-material/Delete'
 import SaveIcon from '@mui/icons-material/Save'
 import CancelIcon from '@mui/icons-material/Cancel'
+import {
+  FileDownload,
+  FileUpload,
+} from '../../../node_modules/@mui/icons-material/index'
 
 const jioColors = {
   primaryBlue: '#0F3CC9',
@@ -37,7 +41,7 @@ const jioColors = {
   background: '#FFFFFF',
   headerBg: '#0F3CC9',
   rowEven: '#FFFFFF',
-  rowOdd: '#FFFFFF',
+  rowOdd: '#E8F1FF',
   textPrimary: '#2D2D2D',
   border: '#D0D0D0',
   darkTransparentBlue: 'rgba(127, 147, 206, 0.8)', // New color added
@@ -68,8 +72,8 @@ const DataGridTable = ({
   const [searchText, setSearchText] = useState('')
   const [isFilterActive, setIsFilterActive] = useState(false)
   const [selectedRowId, setSelectedRowId] = useState(null) // Store selected row ID
-  const [selectedUnit, setSelectedUnit] = useState('')
-  const unitOptions = ['TPH', 'BPH', 'Units']
+  const unitOptions = ['In percentage (%)', 'Absolute number']
+  const [selectedUnit, setSelectedUnit] = useState()
 
   const handleOpenRemark = () => setOpenRemark(true)
   const handleCloseRemark = () => setOpenRemark(false)
@@ -98,15 +102,15 @@ const DataGridTable = ({
     }
   }
 
-  const handleOpenYearData = () => {
-    if (product === '') {
-      if (!product) {
-        setSnackbarOpen(true)
-        setSnackbarMessage('Select a Product First!')
-      }
+  const handleOpenYearData = (params) => {
+    if (params.row.product || product === '') {
+      setSnackbarOpen(true)
+      setSnackbarMessage('Select a Product First!')
+
       return
     }
-    setOpenYearData(true)
+    setOpenYearData(false)
+    // setOpenYearData(true)
   }
 
   const handleCloseYearData = () => {
@@ -119,8 +123,11 @@ const DataGridTable = ({
     handleCloseYearData()
   }
 
-  const handleFilterClick = () => {
-    setIsFilterActive(!isFilterActive)
+  // const handleFilterClick = () => {
+  //   setIsFilterActive(!isFilterActive)
+  // }
+  const handleImportExport = () => {
+    alert('File Import/Export feature coming soon!')
   }
 
   const filteredRows = rows.filter((row) => {
@@ -321,7 +328,9 @@ const DataGridTable = ({
                 </IconButton>
               )
             },
-            flex: 1,
+            // flex: 1,
+            minWidth: 70,
+            maxWidth: 100,
             headerClassName: 'last-column-header',
           },
         ]
@@ -381,7 +390,8 @@ const DataGridTable = ({
       } else if (monthFields.has(params.field)) {
         // Allow editing only if value exists
         if (params.value !== '' && params.value !== null) {
-          setOpen(true)
+          setOpen(false)
+          // setOpen(true)
         }
       }
     }
@@ -403,10 +413,9 @@ const DataGridTable = ({
       setSelectedRowId(params.id)
       handleOpenRemark()
     } else {
-      // ✅ Check if the clicked column is a month field
       if (monthFields.has(params.field)) {
         if (params.value == '') {
-          handleOpenYearData() // Open popup only for month fields with no value
+          handleOpenYearData(params) // Open popup only for month fields with no value
           return
         }
       }
@@ -468,9 +477,9 @@ const DataGridTable = ({
           };
         });
 
-
         setDays(daysArray)
-        setOpen(true)
+        setOpen(false)
+        // setOpen(true)
       }
     }
   }
@@ -590,23 +599,50 @@ const DataGridTable = ({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <TextField
-            select
-            value={selectedUnit}
-            onChange={(e) => setSelectedUnit(e.target.value)}
-            sx={{ width: '150px', backgroundColor: jioColors.background }}
-            variant='outlined'
-            label='Select Unit'
-          >
-            <MenuItem value='' disabled>
-              Select Unit
-            </MenuItem>
-            {unitOptions.map((unit) => (
-              <MenuItem key={unit} value={unit}>
-                {unit}
+          {(title === 'Production Volume Data' ||
+            title === 'Business Demand Data' ||
+            title === 'Feed Stock Availability') && (
+            // <FormControl sx={{ minWidth: 150 }}>
+            //   <Select
+            //     value={selectedUnit}
+            //     onChange={(e) => setSelectedUnit(e.target.value)}
+            //     displayEmpty
+            //     inputProps={{ 'aria-label': 'Unit selection' }}
+            //     sx={{
+            //       width: '150px',
+            //       backgroundColor: jioColors.background,
+            //       color: 'white',
+            //     }}
+            //   >
+            //     <MenuItem value='' disabled>
+            //       Select Unit
+            //     </MenuItem>
+            //     {unitOptions.map((unit) => (
+            //       <MenuItem key={unit} value={unit}>
+            //         {unit}
+            //       </MenuItem>
+            //     ))}
+            //   </Select>
+            // </FormControl>
+
+            <TextField
+              select
+              value={selectedUnit}
+              onChange={(e) => setSelectedUnit(e.target.value)}
+              sx={{ width: '150px', backgroundColor: jioColors.background }}
+              variant='outlined'
+              label='Select Unit'
+            >
+              <MenuItem value='' disabled>
+                Select Unit
               </MenuItem>
-            ))}
-          </TextField>
+              {unitOptions.map((unit) => (
+                <MenuItem key={unit} value={unit}>
+                  {unit}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
           <TextField
             variant='outlined'
             placeholder='Search...'
@@ -628,8 +664,8 @@ const DataGridTable = ({
           />
 
           <IconButton
-            aria-label='filter'
-            onClick={handleFilterClick}
+            aria-label='export'
+            onClick={handleImportExport}
             sx={{
               border: `1px solid ${jioColors.border}`,
               borderRadius: 1,
@@ -645,7 +681,7 @@ const DataGridTable = ({
               },
             }}
           >
-            <FilterAltIcon
+            <FileUpload
               sx={{ color: '#2A3ACD' }}
               // sx={{ color: isFilterActive ? jioColors.background : 'inherit' }}
             />
@@ -655,7 +691,39 @@ const DataGridTable = ({
                 color: '#2A3ACD',
               }}
             >
-              Filter
+              Export
+            </span>
+          </IconButton>
+
+          <IconButton
+            aria-label='import'
+            onClick={handleImportExport}
+            sx={{
+              border: `1px solid ${jioColors.border}`,
+              borderRadius: 1,
+              padding: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
+              color: 'inherit',
+              width: '150px',
+              '&:hover': {
+                backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF', // Removes hover effect
+              },
+            }}
+          >
+            <FileDownload
+              sx={{ color: '#2A3ACD' }}
+              // sx={{ color: isFilterActive ? jioColors.background : 'inherit' }}
+            />
+            <span
+              style={{
+                fontSize: '0.875rem',
+                color: '#2A3ACD',
+              }}
+            >
+              Import
             </span>
           </IconButton>
         </Box>
@@ -780,12 +848,12 @@ const DataGridTable = ({
             '& .MuiDataGrid-row': {
               borderBottom: `1px solid ${jioColors.border}`,
             },
-            // '& .even-row': {
-            //   backgroundColor: jioColors.rowEven,
-            // },
-            // '& .odd-row': {
-            //   backgroundColor: jioColors.rowOdd,
-            // },
+            '& .even-row': {
+              backgroundColor: jioColors.rowEven,
+            },
+            '& .odd-row': {
+              backgroundColor: jioColors.rowOdd,
+            },
             '& .MuiDataGrid-toolbarContainer': {
               display: 'flex',
               justifyContent: 'flex-end',
@@ -867,8 +935,8 @@ const DataGridTable = ({
             sx={{ width: '100%', minWidth: '400px' }}
             value={remark}
             onChange={(e) => setRemark(e.target.value)}
-            multiline // ✅ Enables textarea behavior
-            rows={4} // ✅ Adjusts textarea height
+            multiline
+            rows={4}
           />
         </DialogContent>
         <DialogActions>

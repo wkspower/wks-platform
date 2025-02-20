@@ -30,6 +30,10 @@ header {
   background-color: #3f93dc; /* Example: Light gray background */
   /* color: white; */
 }
+.css-qztmtg-MuiTypography-root:hover {
+  color: white;
+  background-color: #3f93dc;
+}
 
 .css-hd56dl-MuiTypography-root {
   color: #ffffff; /* Example: Light gray background */

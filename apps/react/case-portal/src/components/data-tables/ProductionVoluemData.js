@@ -74,7 +74,13 @@ const productionColumns = [
       </div>
     ),
   },
-  { field: 'remark', headerName: 'Remark', width: 200, editable: false },
+  {
+    field: 'remark',
+    headerName: 'Remark',
+    minWidth: 200,
+    maxWidth: 280,
+    editable: false,
+  },
 ]
 const productionData = [
   {

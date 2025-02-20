@@ -17,7 +17,9 @@ import Search from './Search'
 import Config from 'consts/index'
 import Notification from './Notification'
 import { useState, useEffect } from 'react'
+import sitesData from '../../../../assets/SitesData.json' // Adjust the import path
 import { DataService } from 'services/DataService'
+import { Typography } from '../../../../../node_modules/@mui/material/index'
 
 const HeaderContent = ({ keycloak }) => {
   const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
@@ -134,7 +136,10 @@ const HeaderContent = ({ keycloak }) => {
       {/* Horizontal layout for Plant & Site */}
       <Stack direction='row' spacing={2} alignItems='center'>
         {/* Site Dropdown */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant='body1' color='white'>
+            Site:
+          </Typography>
           <FormControl sx={{ minWidth: 150 }}>
             <Select
               value={selectedSite}
@@ -152,7 +157,10 @@ const HeaderContent = ({ keycloak }) => {
         </Box>
 
         {/* Plant Dropdown */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant='body1' color='white'>
+            Plant:
+          </Typography>
           <FormControl sx={{ minWidth: 150 }}>
             <Select
               value={selectedOption}
@@ -168,7 +176,6 @@ const HeaderContent = ({ keycloak }) => {
             </Select>
           </FormControl>
         </Box>
-
       </Stack>
 
       {Config.NovuEnabled ? (

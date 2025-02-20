@@ -31,6 +31,7 @@ const defs = {
     // Menu items for "Production / Norms Plan"
     productionNormsPlan: 'Plano de Produção / Normas',
     productMCUVal: 'Valor MCU Produto',
+    maintenanceDetails: 'Maintenance Details',
     productDemand: 'Demanda de Produto',
     shutdownPlan: 'Plano de Parada',
     shutdownNorms: 'Shutdown Norms',
@@ -186,6 +187,7 @@ const defs = {
       title: 'Plano de Produção / Normas',
       subPages: {
         productMCUVal: 'Valor MCU Produto',
+        maintenanceDetails: 'Maintenance Details',
         productDemand: 'Demanda de Produto',
         shutdownPlan: 'Plano de Parada',
         shutdownNorms: 'Shutdown Norms',

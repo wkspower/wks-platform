@@ -17,6 +17,7 @@ import {
   IconReport, // For reports section
   IconFile, // General file icon
   IconFileText, // For textual reports
+  IconCalendarCog,
 } from '@tabler/icons-react'
 
 import i18n from '../i18n'
@@ -39,6 +40,7 @@ const icons = {
   IconReport,
   IconFile,
   IconFileText,
+  IconCalendarCog,
 }
 
 const plan = {
@@ -86,6 +88,14 @@ const plan = {
           breadcrumbs: true,
         },
         {
+          id: 'maintenance-details',
+          title: i18n.t('menu.maintenanceDetails'),
+          type: 'item',
+          url: '/production-norms-plan/maintenance-details',
+          icon: icons.IconCalendarCog,
+          breadcrumbs: true,
+        },
+        {
           id: 'product-mcu-val',
           title: i18n.t('menu.productMCUVal'),
           type: 'item',
@@ -93,6 +103,7 @@ const plan = {
           icon: icons.IconSettings,
           breadcrumbs: true,
         },
+
         {
           id: 'shutdown-norms',
           title: i18n.t('menu.shutdownNorms'),
@@ -106,6 +117,14 @@ const plan = {
           title: i18n.t('menu.normalOpNorms'),
           type: 'item',
           url: '/production-norms-plan/normal-op-norms',
+          icon: icons.IconDatabase,
+          breadcrumbs: true,
+        },
+        {
+          id: 'consumption-norms',
+          title: i18n.t('menu.consumptionNorms'),
+          type: 'item',
+          url: '/production-norms-plan/consumption-norms',
           icon: icons.IconDatabase,
           breadcrumbs: true,
         },

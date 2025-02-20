@@ -20,6 +20,8 @@ import SlowDown from 'components/data-tables/Slowdown'
 import FeedStockAvailability from 'components/data-tables/FeedStockavailability'
 import NormalOpNormsScreen from 'components/data-tables/NormsScreens/NormalOpNorms'
 import ShutdownNorms from 'components/data-tables/NormsScreens/ShutdownNorms'
+import MaintenanceTable from 'components/data-tables/MaintenanceTable'
+import ConsumptionNorms from 'components/data-tables/ConsumptionNorms'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -114,6 +116,14 @@ export const MainRoutes = (
           {
             path: 'product-mcu-val',
             element: <ProductionvolumeData />,
+          },
+          {
+            path: 'maintenance-details',
+            element: <MaintenanceTable />,
+          },
+          {
+            path: 'consumption-norms',
+            element: <ConsumptionNorms />,
           },
           {
             path: 'normal-op-norms',

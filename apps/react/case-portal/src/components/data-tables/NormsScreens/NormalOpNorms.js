@@ -1,14 +1,20 @@
-
-
 import DataGridTable from '../ASDataGrid'
 
 // Define columns as usual
 const productionColumns = [
-  { field: 'srNo', headerName: 'Sr. No', width: 80, editable: false, flex: 2 },
+  {
+    field: 'srNo',
+    headerName: 'Sr. No',
+    minWidth: 210,
+    maxWidth: 200,
+    editable: false,
+    flex: 2,
+  },
   {
     field: 'particulars',
     headerName: 'Particulars',
-    width: 200,
+    minWidth: 150,
+    maxWidth: 160,
     editable: true,
   },
   { field: 'unit', headerName: 'Unit', width: 100, editable: true },
@@ -24,7 +30,13 @@ const productionColumns = [
   { field: 'jan25', headerName: 'Jan-25', width: 100, editable: true },
   { field: 'feb25', headerName: 'Feb-25', width: 100, editable: true },
   { field: 'mar25', headerName: 'Mar-25', width: 100, editable: true },
-  { field: 'remark', headerName: 'Remark', width: 200, editable: true },
+  {
+    field: 'remark',
+    headerName: 'Remark',
+    minWidth: 180,
+    maxWidth: 200,
+    editable: true,
+  },
 ]
 
 // Sample production data (10 rows)
