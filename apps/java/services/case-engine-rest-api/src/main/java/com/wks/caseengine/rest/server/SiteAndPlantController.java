@@ -6,12 +6,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.product.SiteAndPlantDTO;
+import com.wks.caseengine.service.NormParameterMonthlyTransactionService;
 import com.wks.caseengine.service.PlantService;
 
 @RestController
@@ -19,6 +21,9 @@ import com.wks.caseengine.service.PlantService;
 public class SiteAndPlantController {
 
     private final PlantService plantService;
+    
+    @Autowired
+    private NormParameterMonthlyTransactionService normParameterMonthlyTransactionService;
 
     // Constructor injection
     public SiteAndPlantController(PlantService plantService) {
