@@ -14,13 +14,14 @@ import com.wks.caseengine.service.NormParameterMonthlyTransactionService;
 
 @RestController
 @RequestMapping("task")
-public class NormParameterMonthlyTransactionController {
+public class NormParameterMonthlyTransactionController{
 	
 	@Autowired
 	private NormParameterMonthlyTransactionService normParameterMonthlyTransactionService;
 	
 	@GetMapping(value="/getBusinessDemandData")
-	public	List<Object[]> getBusinessDemandData(@RequestParam int year,@RequestParam UUID plantId,@RequestParam UUID siteId){	
-		return List<Map<String, Object>> data=normParameterMonthlyTransactionService.getBusinessDemandData(year, plantId, siteId);
-
+	public	List<Map<String, Object>> getBusinessDemandData(@RequestParam int year,@RequestParam UUID plantId,@RequestParam UUID siteId){	
+		return normParameterMonthlyTransactionService.getBusinessDemandData(year, plantId, siteId);
+		
+	}
 }
