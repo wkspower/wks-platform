@@ -20,15 +20,6 @@ public class PlantMaintenanceTransaction {
     @Column(name = "Discription", nullable = false, length = 500)
     private String discription;
 
-    
-
-
-
-
-
-
-
-
     @Column(name = "MaintStartDateTime")
     @Temporal(TemporalType.TIMESTAMP)
     private Date maintStartDateTime;
@@ -65,6 +56,10 @@ public class PlantMaintenanceTransaction {
 
     @Column(name = "Plant_FK_Id")
     private UUID plantFkId;
+    
+    @Column(name = "NormParameters_FK_Id")
+    private UUID normParametersFKId;
+    
 
     @PrePersist
     protected void onCreate() {

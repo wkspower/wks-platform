@@ -1,25 +1,25 @@
 package com.wks.caseengine.dto.product;
 
 public class ProductDTO {
-    private Long id;
+    private String id;
     private String name;
     private String displayName;
 
     // Constructors
     public ProductDTO() {}
 
-    public ProductDTO(Long id, String name, String displayName) {
+    public ProductDTO(String id, String name, String displayName) {
         this.id = id;
         this.name = name;
         this.displayName = displayName;
     }
 
     // Getters and Setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

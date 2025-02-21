@@ -52,7 +52,7 @@ public class SlowdownPlanController {
 			dto.setDurationInMins(result[3] != null ? ((Number) result[3]).longValue() : 0L);
 			dto.setRate(result[4] != null ? ((Number) result[4]).doubleValue() : null); // Extract Rate
 			dto.setRemarks(result[5] != null ? result[5].toString() : null); // Extract Remarks
-			dto.setProduct(result[6] != null ? result[6].toString() : null);
+			dto.setProduct(result[8] != null ? result[8].toString() : null);
 			dto.setMaintenanceId(result[7] != null ? UUID.fromString(result[7].toString()) : null);
 	
 			dtoList.add(dto);

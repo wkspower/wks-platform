@@ -46,7 +46,7 @@ public class ShutDownPlanController {
                 dto.setMaintStartDateTime((Date) result[1]);
                 dto.setMaintEndDateTime((Date) result[2]);
                 dto.setDurationInMins(result[3] != null ? ((Number) result[3]).longValue() : 0L); 
-                dto.setProduct((String) result[4]);
+                dto.setProduct((String) result[6]);
                 //FOR ID : pmt.Id
                 dto.setMaintenanceId(result[5] != null ? UUID.fromString(result[5].toString()) : null); 
                 dtoList.add(dto);

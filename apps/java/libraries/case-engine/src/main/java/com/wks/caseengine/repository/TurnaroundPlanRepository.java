@@ -18,13 +18,16 @@ public interface TurnaroundPlanRepository extends JpaRepository<PlantMaintenance
             "pm.MaintEndDateTime, " +
             "pm.DurationInMins, " +
             "pm.Remarks, " +
-            "pmt.MaintenanceText " +
+            "pmt.MaintenanceText, " +
+            "np.Name " +
             "FROM [RIL.AOP].[dbo].[PlantMaintenanceTransaction] pm " +
             "JOIN [RIL.AOP].[dbo].[PlantMaintenance] pmt ON pm.PlantMaintenance_FK_Id = pmt.Id " +
             "JOIN [RIL.AOP].[dbo].[MaintenanceTypes] mt ON pmt.MaintenanceType_FK_Id = mt.Id " +
+            "LEFT JOIN [RIL.AOP].[dbo].[NormParameters] np ON pm.NormParameters_FK_Id = np.Id " +
             "WHERE pm.Plant_FK_Id = :plantId AND mt.Name = :maintenanceTypeName", 
             nativeQuery = true)
-    		List<Object[]> findTurnaroundPlanDetailsByPlantIdAndType(@Param("plantId") UUID plantId, 
-    				@Param("maintenanceTypeName") String maintenanceTypeName);
+	List<Object[]> findTurnaroundPlanDetailsByPlantIdAndType(@Param("plantId") UUID plantId, 
+        @Param("maintenanceTypeName") String maintenanceTypeName);
+
 
 }

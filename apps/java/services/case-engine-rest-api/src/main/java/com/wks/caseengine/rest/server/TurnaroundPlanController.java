@@ -52,7 +52,7 @@ public class TurnaroundPlanController {
 			  double durationInHrs = ((Integer) result[3]) / 60.0;
 			  dto.setDurationInHrs(durationInHrs);
 			  dto.setRemark((String)result[4]);
-			  dto.setProduct((String) result[5]);
+			  dto.setProduct((String) result[6]);
 			  long diffInMillis = dto.getMaintEndDateTime().getTime() - dto.getMaintStartDateTime().getTime();
 			  double diffInDays = diffInMillis / (1000.0 * 60 * 60 * 24);
 			  dto.setDurationInDays(diffInDays);

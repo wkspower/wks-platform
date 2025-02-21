@@ -85,7 +85,7 @@ public class ProductController {
 			ProductDTO productDTO = new ProductDTO();
 	
 			try {
-				productDTO.setId(Long.parseLong(String.valueOf(obj[0]))); // Handle ID conversion safely
+				productDTO.setId((obj[0]).toString()); // Handle ID conversion safely
 			} catch (NumberFormatException e) {
 				productDTO.setId(null); // Handle cases where ID is not a valid number
 			}
