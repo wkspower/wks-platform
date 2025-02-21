@@ -1,0 +1,17 @@
+@font-face {
+    font-family: 'Inter';
+    src: url('./../fonts/inter-v18-latin-regular.woff2') format('woff2');
+    font-weight: 400;
+  }
+  
+  @font-face {
+    font-family: 'Poppins';
+    src: url('./../fonts/poppins-v22-latin-regular.woff2') format('woff2');
+    font-weight: 400;
+  }
+  
+  @font-face {
+    font-family: 'Open Sans';
+    src: url('./../fonts/open-sans-v40-latin-regular.woff2') format('woff2');
+    font-weight: 400;
+  }

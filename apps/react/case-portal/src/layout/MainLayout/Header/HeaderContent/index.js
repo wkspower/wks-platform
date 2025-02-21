@@ -27,6 +27,7 @@ const HeaderContent = ({ keycloak }) => {
   const [selectedSite, setSelectedSite] = useState('')
   const [sites, setSites] = useState([])
   const [plants, setPlants] = useState([])
+  const [userSiteToPlants, setUserSiteToPlants] = useState([])
 
   useEffect(() => {
     getPlantAndSite()
@@ -35,27 +36,42 @@ const HeaderContent = ({ keycloak }) => {
   useEffect(() => {
     if (sites.length > 0 && selectedSite) {
       const site = sites.find((s) => s.name === selectedSite)
+      // if (site) {
+      //   setPlants(site.plants)
+      //   setSelectedOption(site.plants[0]?.name || '')
+
+      //   localStorage.setItem(
+      //     'selectedSite',
+      //     JSON.stringify({
+      //       id: site.id,
+      //       name: site.name,
+      //     }),
+      //   )
+
+      //   if (site.plants.length > 0) {
+      //     localStorage.setItem(
+      //       'selectedPlant',
+      //       JSON.stringify({
+      //         id: site.plants[0].id,
+      //         name: site.plants[0].name,
+      //         displayName: site.plants[0].displayName,
+      //       }),
+      //     )
+      //   }
+      // }
+
       if (site) {
-        setPlants(site.plants)
-        setSelectedOption(site.plants[0]?.name || '')
-
-        localStorage.setItem(
-          'selectedSite',
-          JSON.stringify({
-            id: site.id,
-            name: site.name,
-          }),
-        )
-
-        if (site.plants.length > 0) {
-          localStorage.setItem(
-            'selectedPlant',
-            JSON.stringify({
-              id: site.plants[0].id,
-              name: site.plants[0].name,
-              displayName: site.plants[0].displayName,
-            }),
-          )
+        const userPlantIds= userSiteToPlants[site.id];
+  
+        if(userPlantIds){
+          const sitePlants = site.plants;
+          const userPlants = sitePlants.filter((plant)=> userPlantIds[0].includes(plant.id));
+  
+          setPlants(userPlants)
+          setSelectedOption(userPlants[0]?.name) // Default to first plant
+        }else{
+          setPlants(site.plants)
+          setSelectedOption(site.plants[0]?.name) // Default to first plant
         }
       }
     }
@@ -72,11 +88,52 @@ const HeaderContent = ({ keycloak }) => {
 
   const getPlantAndSite = async () => {
     try {
-      const data = await DataService.getAllSites(keycloak)
-      // console.log('API Response:', data)
+      const sitesData = await DataService.getAllSites(keycloak)
 
-      setSites(data)
-      setSelectedSite(data[0]?.name)
+      const sitePlantMap = sitesData.reduce((acc, site) => {
+        acc[site.id] = site.plants.map(plant => plant.id);
+        return acc;
+      }, {});
+      
+      console.log(JSON.stringify(sitePlantMap));
+      
+      // setSites(data)
+      // setSelectedSite(data[0]?.name)
+
+      if(keycloak.idTokenParsed.plants){
+        const siteToPlants = {};
+  
+        const data = JSON.parse(keycloak.idTokenParsed.plants);
+        // const data = keycloak.idTokenParsed.plants;
+  
+        data.forEach(obj => {
+          Object.entries(obj).forEach(([site, plant]) => {
+              if (!siteToPlants[site]) {
+                  siteToPlants[site] = [];
+              }
+              // Ensure plant is stored as an array
+              if (!siteToPlants[site].includes(plant)) {
+                  siteToPlants[site].push(plant);
+              }
+          });
+        });
+  
+        if(siteToPlants){
+          setUserSiteToPlants(siteToPlants);
+          const sitesIds = Object.keys(siteToPlants);
+          const userSitesIds = sitesIds.map(id => id.toLowerCase())
+
+          const userSites = sitesData.filter((site)=> userSitesIds.includes(site.id?.toLowerCase()));
+
+          if(userSites){
+            setSites(userSites)
+            setSelectedSite(userSites[0]?.name) // Default to first site
+          }
+        }
+      }else{
+        setSites(sitesData) // Setting the entire site data
+        setSelectedSite(sitesData[0]?.name) // Default to first site
+      }
     } catch (error) {
       console.error('Error fetching product:', error)
     } finally {

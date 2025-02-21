@@ -41,6 +41,19 @@ services:
             - /etc/rules/wks_policy_rules.rego
         volumes:
             - ./opa:/etc/rules:ro
+    postgres:
+        image: postgres:14
+        environment:
+            - POSTGRES_DB=keycloak
+            - POSTGRES_USER=keycloak
+            - POSTGRES_PASSWORD=keycloak
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER}']
+            interval: 5s
+            timeout: 5s
+            retries: 10
+        ports:
+        - "5432:5432"
 
     keycloak:
         image: quay.io/keycloak/keycloak:20.0.3
@@ -49,6 +62,11 @@ services:
             KC_HEALTH_ENABLED: "true"
             KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
             KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+            KC_DB: postgres
+            KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+            KC_DB_USERNAME: keycloak
+            KC_DB_PASSWORD: keycloak
+            KC_TRANSACTION_XA_ENABLED: false
         healthcheck:
             test: curl --fail http://localhost:8080/health/ready || exit 1
             interval: 10s
@@ -59,6 +77,9 @@ services:
             - 8082:8080
         volumes:
             - keycloak:/opt/keycloak/data/
+        depends_on:
+            postgres:
+                condition: service_healthy
 
     storage-api:
         build:
@@ -80,6 +101,8 @@ services:
 
 volumes:
     mongo:
+        driver: local
+    postgres:
         driver: local
     minio:
         driver: local
