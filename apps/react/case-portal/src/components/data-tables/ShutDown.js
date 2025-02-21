@@ -43,27 +43,33 @@ useEffect(() => {
 
   const getAllProducts = async () => {
     try {
-      const data = await DataService.getAllProducts(keycloak)
-      console.log('API Response:', data)
+      const data = await DataService.getAllProducts(keycloak);
+      console.log('API Response:', data);
          
-      const productNames = data.map((product) => product.name);
-
-      setAllProducts(productNames);
+      // Extract only displayName and id
+      const productList = data.map((product) => ({
+        id: product.id,
+        displayName: product.displayName
+      }));
+  
+      setAllProducts(productList);
+      
     } catch (error) {
-      console.error('Error fetching product:', error)
+      console.error('Error fetching product:', error);
     } finally {
       // handleMenuClose();
     }
-  }
+  };
+  
 
   const saveShutdownData = async () => {
     try {
       var plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1';
       // var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
       // var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
-      
+
       const shutdownDetails = {
-        product: "Mode C/O",
+        product: "Oxygen",
         discription: "1 Shutdown maintenance",
         durationInMins: 120,
         maintEndDateTime: "2025-02-20T18:00:00Z",
@@ -105,39 +111,44 @@ const colDefs = [
     editable: true,
     minWidth: 225,
     renderEditCell: (params) => {
-      const { id } = params
-      const isEditable = id > 0 
-
+      const { id } = params;
+      const isEditable = id > 0;
+  
       return (
         <Autocomplete
           options={allProducts}
-          value={params.value || ''}
+          getOptionLabel={(option) => option.displayName} // Show displayName in the dropdown
+          value={allProducts.find((product) => product.id === params.value) || null} // Set selected value correctly
           disableClearable
           onChange={(event, newValue) => {
             params.api.setEditCellValue({
               id: params.id,
               field: 'product',
-              value: newValue,
-            })
+              value: newValue ? newValue.id : '', // Store id instead of displayName
+            });
           }}
           onInputChange={(event, newInputValue) => {
             if (event && event.type === 'keydown' && event.key === 'Enter') {
+              const selectedProduct = allProducts.find(
+                (product) => product.displayName.toLowerCase() === newInputValue.toLowerCase()
+              );
               params.api.setEditCellValue({
                 id: params.id,
                 field: 'product',
-                value: newInputValue,
-              })
+                value: selectedProduct ? selectedProduct.id : '',
+              });
             }
           }}
           renderInput={(params) => (
-            <TextField {...params} variant='outlined' size='small' />
+            <TextField {...params} variant="outlined" size="small" />
           )}
           disabled={!isEditable}
           fullWidth
         />
-      )
+      );
     },
   },
+  
 
 
   {
@@ -169,9 +180,6 @@ const colDefs = [
       return parsedDate;
     },
   },
-  
-  
-  
   
   {
     field: "durationInMins",

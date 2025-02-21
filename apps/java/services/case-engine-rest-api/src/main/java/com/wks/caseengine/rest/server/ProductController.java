@@ -84,11 +84,8 @@ public class ProductController {
 		for (Object[] obj : productList) {
 			ProductDTO productDTO = new ProductDTO();
 	
-			try {
-				productDTO.setId((obj[0]).toString()); // Handle ID conversion safely
-			} catch (NumberFormatException e) {
-				productDTO.setId(null); // Handle cases where ID is not a valid number
-			}
+			// Convert UUID to String (Avoid using Long)
+			productDTO.setId(obj[0] != null ? obj[0].toString() : null);
 	
 			productDTO.setName((String) obj[1]);
 			productDTO.setDisplayName((String) obj[2]);

@@ -63,50 +63,57 @@ public class ShutDownPlanController {
     }
 	
 		  @PostMapping(value = "/saveShutdownData/{plantId}")
-            public ResponseEntity<ShutDownPlanDTO> saveShutdownData(@PathVariable UUID plantId, @RequestBody ShutDownPlanDTO shutDownPlanDTO) {
+            public ResponseEntity<ShutDownPlanDTO> saveShutdownData(@PathVariable String plantId, @RequestBody ShutDownPlanDTO shutDownPlanDTO) {
                 // Log incoming request body
+
+
+
+                System.out.println("toString: " + shutDownPlanDTO.toString());
+                System.out.println("plantId: " + plantId);
+            
                 
             
-                UUID plantMaintenanceId = planService.findPlantMaintenanceId(shutDownPlanDTO.getProduct());
-                PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
-                plantMaintenanceTransaction.setId(UUID.randomUUID());
+                // UUID plantMaintenanceId = planService.findPlantMaintenanceId(shutDownPlanDTO.getProduct());
+                // PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
+                // plantMaintenanceTransaction.setId(UUID.randomUUID());
             
-                // Set mandatory fields with default values if missing
-                plantMaintenanceTransaction.setDiscription(
-                    shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
-                );
+                // // Set mandatory fields with default values if missing
+                // plantMaintenanceTransaction.setDiscription(
+                //     shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
+                // );
             
-                plantMaintenanceTransaction.setDurationInMins(
-                    shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0
-                );
+                // plantMaintenanceTransaction.setDurationInMins(
+                //     shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0
+                // );
 
-                plantMaintenanceTransaction.setUser("test_user"); 
+                // plantMaintenanceTransaction.setUser("test_user"); 
 
                 
-                System.out.println("1: " + shutDownPlanDTO.getMaintEndDateTime());
-                System.out.println("2: " + shutDownPlanDTO.getMaintStartDateTime());
+                // System.out.println("1: " + shutDownPlanDTO.getMaintEndDateTime());
+                // System.out.println("2: " + shutDownPlanDTO.getMaintStartDateTime());
             
-                plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+                // plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 
 
                
-                plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+                // plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 
 
             
-                // Ensure required fields exist
-                plantMaintenanceTransaction.setName("Default Name"); // Add default name
-                plantMaintenanceTransaction.setVersion("V1"); // Ensure version is set
+                // // Ensure required fields exist
+                // plantMaintenanceTransaction.setName("Default Name"); // Add default name
+                // plantMaintenanceTransaction.setVersion("V1"); // Ensure version is set
 
-                plantMaintenanceTransaction.setCreatedOn(new Date());
+                // plantMaintenanceTransaction.setCreatedOn(new Date());
             
-                plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
-                plantMaintenanceTransaction.setPlantFkId(plantId);
+                // plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
+                // // plantMaintenanceTransaction.setPlantFkId(plantId);
             
-                // Save entity
-                planService.saveShutdownData(plantMaintenanceTransaction);
+                // // Save entity
+                // planService.saveShutdownData(plantMaintenanceTransaction);
                 
                 return ResponseEntity.ok(shutDownPlanDTO);
             }
+
 
 }

@@ -135,39 +135,58 @@ const DataGridTable = ({
   // };
 
 
-  const handleSaveClick = (id) => () => {
+  // const handleSaveClick = (id) => () => {
 
 
 
-    console.log(id);
-    console.log(rows);
+  //   console.log(id);
+  //   console.log(rows);
 
-    handleRowEditCommit(id)
+  //   handleRowEditCommit(id)
     
-    const rowData = rows.find((row) => row.id === id);
+  //   const rowData = rows.find((row) => row.id === id);
   
-    console.log('Full Row Data:', rowData); // Log all field values before validation
+  //   console.log('Full Row Data:', rowData); // Log all field values before validation
   
-    if (!rowData) {
-      console.error(`No row found for ID: ${id}`);
-      return;
-    }
+  //   if (!rowData) {
+  //     console.error(`No row found for ID: ${id}`);
+  //     return;
+  //   }
   
-    // Find empty fields (null, undefined, empty string, or whitespace)
-    const emptyFields = Object.entries(rowData)
-      .filter(([key, value]) => value === null || value === undefined || String(value).trim() === '')
-      .map(([key, value]) => ({ field: key, value })); // Store key-value pairs
+  //   // Find empty fields (null, undefined, empty string, or whitespace)
+  //   const emptyFields = Object.entries(rowData)
+  //     .filter(([key, value]) => value === null || value === undefined || String(value).trim() === '')
+  //     .map(([key, value]) => ({ field: key, value })); // Store key-value pairs
   
-    console.log('Empty Fields:', emptyFields);
+  //   console.log('Empty Fields:', emptyFields);
   
-    if (emptyFields.length > 0) {
-      setSnackbarOpen(true);
-      setSnackbarMessage(`Please fill the following fields: ${emptyFields.map(f => f.field).join(', ')}`);
-    } else {
-      console.log('Row Data (Valid):', rowData);
-      setRowModesModel((prev) => ({ ...prev, [id]: { mode: GridRowModes.View } }));
-    }
+  //   if (emptyFields.length > 0) {
+  //     setSnackbarOpen(true);
+  //     setSnackbarMessage(`Please fill the following fields: ${emptyFields.map(f => f.field).join(', ')}`);
+  //   } else {
+  //     console.log('Row Data (Valid):', rowData);
+  //     setRowModesModel((prev) => ({ ...prev, [id]: { mode: GridRowModes.View } }));
+  //   }
+  // };
+
+
+
+
+
+  const handleSaveClick = (id, params) => {  
+
+    console.log("Newly Added Row Data:", params);
+    setRowModesModel((prev) => ({
+      ...prev,
+      [id]: { mode: GridRowModes.View },
+    }));
+
   };
+  
+
+
+
+
   
   useEffect(() => {
     console.log("Updated Rows!!!!!!!!!!!!!!!!!!!!!!!:", rows);
@@ -426,7 +445,7 @@ const DataGridTable = ({
   }, [initialColumns, resizedColumns])
   const columns = [
     ...defaultColumns,
-    ...(title != 'Production Volume Data' || title != 'Production Norms Data'
+    ...(title != 'Production Volume Data'
       ? [
         {
           field: 'actions',
@@ -434,44 +453,45 @@ const DataGridTable = ({
           headerName: 'Actions',
           width: 180,
           cellClassName: 'actions',
-          getActions: ({ id }) => {
+
+
+
+          getActions: (params) => {
+            const { id, row } = params;  // Extract row data
             const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-    
+
             if (isInEditMode) {
               return [
                 <GridActionsCellItem
                   icon={<SaveIcon />}
                   label="Save"
-                  sx={{
-                    color: 'primary.main',
-                  }}
-                  onClick={handleSaveClick(id)}
+                  sx={{ color: 'primary.main' }}
+                  onClick={() => handleSaveClick(id, params)} // Pass row data
                 />,
                 <GridActionsCellItem
                   icon={<CancelIcon />}
                   label="Cancel"
                   className="textPrimary"
-                  onClick={handleCancelClick(id)}
+                  onClick={() => handleCancelClick(id)}
                   color="inherit"
                 />,
               ];
             }
-    
+
             return [
               <GridActionsCellItem
-                icon={<EditIcon sx={{ color: jioColors.primaryBlue }}/>}
+                icon={<EditIcon sx={{ color: jioColors.primaryBlue }} />}
                 label="Edit"
                 className="textPrimary"
-                onClick={handleEditClick(id)}
+                onClick={() => handleEditClick(id)}
                 color="inherit"
               />,
               <GridActionsCellItem
-              icon={<DeleteIcon sx={{ color: jioColors.accentRed }} />}
-              label="Delete"
-              onClick={handleDeleteClick(id)}
-              color="inherit"
-            />
-            
+                icon={<DeleteIcon sx={{ color: jioColors.accentRed }} />}
+                label="Delete"
+                onClick={() => handleDeleteClick(id)}
+                color="inherit"
+              />,
             ];
           },
             minWidth: 70,
@@ -525,7 +545,7 @@ const DataGridTable = ({
   ]
 
   const handleCellClick = (params) => {
-    if (title == 'Production Volume Data' || title == 'Production Norms Data') {
+    if (title == 'Production Volume Data') {
       if (nonEditableFields.includes(params.field)) return // Block non-editable fields
 
       if (params?.field === 'remark') {
@@ -658,10 +678,7 @@ const DataGridTable = ({
     }
     console.log('Submitted Data:', days)
     setOpen(false) // Close the modal
-    if (
-      title === 'Production Volume Data' ||
-      title === 'Production Norms Data'
-    ) {
+    if (title === 'Production Volume Data') {
       // Update the row with the new data
       setOpenRemark(true)
       setRows((prevRows) =>
@@ -1027,29 +1044,28 @@ const DataGridTable = ({
         />
       </Box>
 
-      {title != 'Production Volume Data' ||
-        (title != 'Production Norms Data' && (
-          <Button
-            variant='contained'
-            sx={{
-              marginTop: 2,
-              backgroundColor: jioColors.primaryBlue,
-              color: jioColors.background,
-              borderRadius: 1,
-              padding: '8px 24px',
-              textTransform: 'none',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              '&:hover': {
-                backgroundColor: '#143B6F',
-                boxShadow: 'none',
-              },
-            }}
-            onClick={handleAddRow}
-          >
-            Add Item
-          </Button>
-        ))}
+      {title != 'Production Volume Data' && (
+        <Button
+          variant='contained'
+          sx={{
+            marginTop: 2,
+            backgroundColor: jioColors.primaryBlue,
+            color: jioColors.background,
+            borderRadius: 1,
+            padding: '8px 24px',
+            textTransform: 'none',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            '&:hover': {
+              backgroundColor: '#143B6F',
+              boxShadow: 'none',
+            },
+          }}
+          onClick={handleAddRow}
+        >
+          Add Item
+        </Button>
+      )}
 
       <Notification
         open={snackbarOpen}

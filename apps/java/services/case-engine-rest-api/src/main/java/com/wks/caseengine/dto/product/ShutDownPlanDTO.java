@@ -100,5 +100,15 @@ public class ShutDownPlanDTO {
         return maintenanceId;
     }
 
+	@Override
+	public String toString() {
+		return "ShutDownPlanDTO [discription=" + discription + ", maintStartDateTime=" + maintStartDateTime
+				+ ", maintEndDateTime=" + maintEndDateTime + ", durationInMins=" + durationInMins + ", maintenanceId="
+				+ maintenanceId + ", rate=" + rate + ", remark=" + remark + ", product=" + product
+				+ ", maintenanceTypeName=" + maintenanceTypeName + ", durationInHrs=" + durationInHrs
+				+ ", durationInDays=" + durationInDays + "]";
+	}
+
+
 	
 }
