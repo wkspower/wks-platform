@@ -426,7 +426,7 @@ const DataGridTable = ({
   }, [initialColumns, resizedColumns])
   const columns = [
     ...defaultColumns,
-    ...(title != 'Production Volume Data'
+    ...(title != 'Production Volume Data' || title != 'Production Norms Data'
       ? [
         {
           field: 'actions',
@@ -474,7 +474,10 @@ const DataGridTable = ({
             
             ];
           },
-        },
+            minWidth: 70,
+            maxWidth: 100,
+            headerClassName: 'last-column-header',
+          },
         ]
       : []),
   ]
@@ -522,7 +525,7 @@ const DataGridTable = ({
   ]
 
   const handleCellClick = (params) => {
-    if (title == 'Production Volume Data') {
+    if (title == 'Production Volume Data' || title == 'Production Norms Data') {
       if (nonEditableFields.includes(params.field)) return // Block non-editable fields
 
       if (params?.field === 'remark') {
@@ -655,7 +658,10 @@ const DataGridTable = ({
     }
     console.log('Submitted Data:', days)
     setOpen(false) // Close the modal
-    if (title === 'Production Volume Data') {
+    if (
+      title === 'Production Volume Data' ||
+      title === 'Production Norms Data'
+    ) {
       // Update the row with the new data
       setOpenRemark(true)
       setRows((prevRows) =>
@@ -1021,28 +1027,29 @@ const DataGridTable = ({
         />
       </Box>
 
-      {title != 'Production Volume Data' && (
-        <Button
-          variant='contained'
-          sx={{
-            marginTop: 2,
-            backgroundColor: jioColors.primaryBlue,
-            color: jioColors.background,
-            borderRadius: 1,
-            padding: '8px 24px',
-            textTransform: 'none',
-            fontSize: '0.875rem',
-            fontWeight: 500,
-            '&:hover': {
-              backgroundColor: '#143B6F',
-              boxShadow: 'none',
-            },
-          }}
-          onClick={handleAddRow}
-        >
-          Add Item
-        </Button>
-      )}
+      {title != 'Production Volume Data' ||
+        (title != 'Production Norms Data' && (
+          <Button
+            variant='contained'
+            sx={{
+              marginTop: 2,
+              backgroundColor: jioColors.primaryBlue,
+              color: jioColors.background,
+              borderRadius: 1,
+              padding: '8px 24px',
+              textTransform: 'none',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              '&:hover': {
+                backgroundColor: '#143B6F',
+                boxShadow: 'none',
+              },
+            }}
+            onClick={handleAddRow}
+          >
+            Add Item
+          </Button>
+        ))}
 
       <Notification
         open={snackbarOpen}

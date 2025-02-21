@@ -56,31 +56,30 @@ const workspace = {
     //   children: [],
     // },
 
-    // {
-
-    //   id: 'functions',
-    //   title: i18n.t('menu.functions'),
-    //   type: 'collapse',
-    //   icon: icons.IconFunction, // You can choose an appropriate icon
-    //   children: [
-    //     {
-    //       id: 'safety',
-    //       title: i18n.t('menu.safety'),
-    //       type: 'item',
-    //       url: '/functions/safety',
-    //       icon: icons.IconShield,
-    //       breadcrumbs: true,
-    //     },
-    //     {
-    //       id: 'reliability',
-    //       title: i18n.t('menu.reliability'),
-    //       type: 'item',
-    //       url: '/functions/reliability',
-    //       icon: icons.IconSettings,
-    //       breadcrumbs: true,
-    //     },
-    //   ],
-    // },
+    {
+      id: 'functions',
+      title: i18n.t('menu.functions'),
+      type: 'collapse',
+      icon: icons.IconFunction, // You can choose an appropriate icon
+      children: [
+        {
+          id: 'safety',
+          title: i18n.t('menu.safety'),
+          type: 'item',
+          url: '/functions/safety',
+          icon: icons.IconShield,
+          breadcrumbs: true,
+        },
+        {
+          id: 'reliability',
+          title: i18n.t('menu.reliability'),
+          type: 'item',
+          url: '/functions/reliability',
+          icon: icons.IconSettings,
+          breadcrumbs: true,
+        },
+      ],
+    },
 
     // {
     //   id: 'record-list',

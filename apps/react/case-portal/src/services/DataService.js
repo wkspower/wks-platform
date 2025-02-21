@@ -11,6 +11,10 @@ export const DataService = {
   getSlowDownPlantData,
   getTAPlantData,
   saveShutdownData,
+  createCase,
+  getTasksByBusinessKey,
+  getProcessInstanceVariables,
+  completeTask,
 }
 
 async function getProductById(keycloak, id) {
@@ -31,33 +35,29 @@ async function getProductById(keycloak, id) {
   }
 }
 
-
-async function saveShutdownData( plantId,shutdownDetails,keycloak) {
-  const url = `${process.env.REACT_APP_API_URL}/task/saveShutdownData/${plantId}`;
+async function saveShutdownData(plantId, shutdownDetails, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/saveShutdownData/${plantId}`
 
   const headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json",
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
 
   try {
     const resp = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers,
       body: JSON.stringify(shutdownDetails),
-    });
-    return json(keycloak, resp);
+    })
+    return json(keycloak, resp)
   } catch (e) {
-    console.log(e);
-    return await Promise.reject(e);
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
 
-export default saveShutdownData;
-
-
-
+export default saveShutdownData
 
 async function getYearlyData(keycloak, year) {
   const url = `${process.env.REACT_APP_API_URL}/task/yearly-data?year=${year}`
@@ -218,7 +218,6 @@ async function getTAPlantData(keycloak) {
     return await Promise.reject(e)
   }
 }
-
 async function getMonthWiseData(keycloak) {
   const url = `${process.env.REACT_APP_API_URL}/getMonthWiseData`
 
@@ -230,6 +229,83 @@ async function getMonthWiseData(keycloak) {
 
   try {
     const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+// New API function: Create a case
+async function createCase(keycloak, caseData) {
+  // Assuming process.env.REACT_APP_API_URL is set to http://localhost:8081 or similar
+  const url = `${process.env.REACT_APP_API_URL}/case`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(caseData),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+// New API function: Get tasks by businessKey
+async function getTasksByBusinessKey(keycloak, businessKey) {
+  const url = `${process.env.REACT_APP_API_URL}/task?businessKey=${businessKey}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+// New API function: Get process instance variables by processInstanceId
+async function getProcessInstanceVariables(keycloak, processInstanceId) {
+  const url = `${process.env.REACT_APP_API_URL}/variable?processInstanceId=${processInstanceId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function completeTask(keycloak, taskId, payload) {
+  const url = `${process.env.REACT_APP_API_URL}/task/${taskId}/complete`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    })
     return json(keycloak, resp)
   } catch (e) {
     console.log(e)
