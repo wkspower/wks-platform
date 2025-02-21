@@ -90,12 +90,7 @@ const HeaderContent = ({ keycloak }) => {
     try {
       const sitesData = await DataService.getAllSites(keycloak)
 
-      const sitePlantMap = sitesData.reduce((acc, site) => {
-        acc[site.id] = site.plants.map(plant => plant.id);
-        return acc;
-      }, {});
       
-      console.log(JSON.stringify(sitePlantMap));
       
       // setSites(data)
       // setSelectedSite(data[0]?.name)
