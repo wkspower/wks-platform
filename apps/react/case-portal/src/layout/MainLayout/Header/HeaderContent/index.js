@@ -146,7 +146,7 @@ const HeaderContent = ({ keycloak }) => {
 
     if (selectedSiteData) {
       setPlants(selectedSiteData.plants)
-      setSelectedOption(selectedSiteData.plants[0]?.name || '') // Default to first plant
+      setSelectedOption(selectedSiteData?.plants[0]?.name || '') // Default to first plant
 
       // Update local storage
       localStorage.setItem(

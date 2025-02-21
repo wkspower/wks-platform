@@ -103,7 +103,22 @@ const plan = {
           icon: icons.IconSettings,
           breadcrumbs: true,
         },
-
+        {
+          id: 'production-norms',
+          title: i18n.t('menu.productionNorms'),
+          type: 'item',
+          url: '/production-norms-plan/production-norms',
+          icon: icons.IconDatabase,
+          breadcrumbs: true,
+        },
+        {
+          id: 'catalyst-selectivity',
+          title: i18n.t('menu.catalystSelectivity'),
+          type: 'item',
+          url: '/production-norms-plan/catalyst-selectivity',
+          icon: icons.IconDatabase,
+          breadcrumbs: true,
+        },
         {
           id: 'shutdown-norms',
           title: i18n.t('menu.shutdownNorms'),

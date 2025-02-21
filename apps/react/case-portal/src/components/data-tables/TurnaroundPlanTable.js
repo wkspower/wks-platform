@@ -8,9 +8,6 @@ import dayjs from 'dayjs'
 import { useState, useEffect } from 'react'
 import { useSession } from 'SessionStoreContext'
 
-
-
-
 const productOptions = [
   'Product A',
   'Product B',
@@ -39,7 +36,7 @@ const colDefs = [
     ),
     flex: 3,
   },
-  
+
   {
     field: 'product',
     headerName: 'Product',
@@ -47,7 +44,7 @@ const colDefs = [
     minWidth: 200,
     renderEditCell: (params) => {
       const { id } = params
-      const isEditable = id > 10 
+      const isEditable = id > 10
 
       return (
         <Autocomplete
@@ -80,84 +77,78 @@ const colDefs = [
     },
   },
 
+  {
+    field: 'maintStartDateTime',
+    headerName: 'Ta- From',
+    type: 'dateTime',
+    minWidth: 200,
+    valueGetter: (params) => {
+      const value = params
+      const parsedDate = value
+        ? dayjs(value, 'MMM D, YYYY, h:mm:ss A').toDate()
+        : null
+      return parsedDate
+    },
+  },
 
   {
-    field: "maintStartDateTime",
-    headerName: "SD- From",
-    type: "dateTime",
+    field: 'maintEndDateTime',
+    headerName: 'Ta- To',
+    type: 'dateTime',
     minWidth: 200,
     valueGetter: (params) => {
-      const value = params; 
+      const value = params
       const parsedDate = value
-        ? dayjs(value, "MMM D, YYYY, h:mm:ss A").toDate()
-        : null;
-      return parsedDate;
+        ? dayjs(value, 'MMM D, YYYY, h:mm:ss A').toDate()
+        : null
+      return parsedDate
     },
   },
-  
+
   {
-    field: "maintEndDateTime",
-    headerName: "SD- To",
-    type: "dateTime",
-    minWidth: 200,
-    valueGetter: (params) => {
-      const value = params; 
-      const parsedDate = value
-        ? dayjs(value, "MMM D, YYYY, h:mm:ss A").toDate()
-        : null;
-      return parsedDate;
-    },
-  },
-  
-  
-  
-  
-  {
-    field: "durationInMins",
-    headerName: "Duration (hrs)",
+    field: 'durationInMins',
+    headerName: 'Duration (hrs)',
     editable: false,
-    type: "number",
+    type: 'number',
     minWidth: 100,
     maxWidth: 150,
     renderCell: (params) => {
-      const durationInHours = params.value ? (params.value / 60).toFixed(2) : "0.00";
-      return `${durationInHours}`;
+      const durationInHours = params.value
+        ? (params.value / 60).toFixed(2)
+        : '0.00'
+      return `${durationInHours}`
     },
   },
 
-
   {
-    field: "remark",
-    headerName: "Remarks",
+    field: 'remark',
+    headerName: 'Remarks',
     editable: false,
     minWidth: 200,
     maxWidth: 400,
   },
-  
 ]
 
 const TurnaroundPlanTable = () => {
   const [TaData, setTaData] = useState([])
   const keycloak = useSession()
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const data = await DataService.getTAPlantData(keycloak)
-      const formattedData = data.map((item, index) => ({
-        ...item,
-        id: index, 
-      }))
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await DataService.getTAPlantData(keycloak)
+        const formattedData = data.map((item, index) => ({
+          ...item,
+          id: index,
+        }))
 
-      setTaData(formattedData)
-
-    } catch (error) {
-      console.error('Error fetching shutdown data:', error)
+        setTaData(formattedData)
+      } catch (error) {
+        console.error('Error fetching shutdown data:', error)
+      }
     }
-  }
-  fetchData()
-}, [])
-  
+    fetchData()
+  }, [])
 
   return (
     <div>
@@ -175,4 +166,3 @@ useEffect(() => {
 }
 
 export default TurnaroundPlanTable
-

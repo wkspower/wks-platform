@@ -32,6 +32,9 @@ const defs = {
     productionNormsPlan: 'Production / Norms Plan',
     productMCUVal: 'Production Volume Data',
     maintenanceDetails: 'Maintenance Details',
+    consumptionNorms: 'Consumption Norms',
+    productionNorms: 'Production Norms',
+    catalystSelectivity: 'Catalyst Selectivity',
     productDemand: 'Business Demand Data',
     shutdownPlan: 'Shutdown Plan',
     shutdownNorms: 'Shutdown Norms',
@@ -189,6 +192,7 @@ const defs = {
       subPages: {
         productMCUVal: 'Production Volume Data',
         maintenanceDetails: 'Maintenance Details',
+        consumptionNorms: 'Consumption Norms',
         productDemand: 'Business Demand Data',
         shutdownPlan: 'Shutdown Plan',
         shutdownNorms: 'Shutdown Norms',

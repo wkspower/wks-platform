@@ -22,6 +22,8 @@ import NormalOpNormsScreen from 'components/data-tables/NormsScreens/NormalOpNor
 import ShutdownNorms from 'components/data-tables/NormsScreens/ShutdownNorms'
 import MaintenanceTable from 'components/data-tables/MaintenanceTable'
 import ConsumptionNorms from 'components/data-tables/ConsumptionNorms'
+import ProductionNorms from 'components/data-tables/ProductionNorms'
+import SelectivityData from 'components/data-tables/SelectivityData'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -124,6 +126,14 @@ export const MainRoutes = (
           {
             path: 'consumption-norms',
             element: <ConsumptionNorms />,
+          },
+          {
+            path: 'production-norms',
+            element: <ProductionNorms />,
+          },
+          {
+            path: 'catalyst-selectivity',
+            element: <SelectivityData />,
           },
           {
             path: 'normal-op-norms',

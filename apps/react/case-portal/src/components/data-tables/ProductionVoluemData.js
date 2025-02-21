@@ -1,281 +1,415 @@
-import {
-  Autocomplete,
-  TextField,
-} from '../../../node_modules/@mui/material/index'
+// import {
+//   Autocomplete,
+//   TextField,
+// } from '../../../node_modules/@mui/material/index'
+// import ASDataGrid from './ASDataGrid'
+// const productOptions = [
+//   'Product A',
+//   'Product B',
+//   'Product C',
+//   'Product D',
+//   'Product E',
+//   'Product F',
+//   'Product G',
+//   'Product H',
+//   'Product I',
+//   'Product J',
+//   'Product K',
+//   'Product L',
+// ]
+// const productionColumns = [
+//   {
+//     field: 'product',
+//     headerName: 'Product',
+//     width: 150,
+//     editable: false,
+
+//     renderEditCell: (params) => {
+//       console.log(params)
+//       const isEditable = params.id > 10 // Enable only for rows beyond 10
+
+//       return (
+//         <Autocomplete
+//           options={productOptions}
+//           value={params.value || ''}
+//           disableClearable // Prevent clearing the selection
+//           onChange={(event, newValue) => {
+//             params.api.setEditCellValue({
+//               id: params.id,
+//               field: 'product',
+//               value: newValue,
+//             })
+//           }}
+//           renderInput={(params) => (
+//             <TextField {...params} variant='outlined' size='small' />
+//           )}
+//           disabled={!isEditable}
+//           fullWidth
+//         />
+//       )
+//     },
+//   },
+//   { field: 'apr24', headerName: 'Apr-24', width: 100, editable: true },
+//   { field: 'may24', headerName: 'May-24', width: 100, editable: true },
+//   { field: 'jun24', headerName: 'Jun-24', width: 100, editable: true },
+//   { field: 'jul24', headerName: 'Jul-24', width: 100, editable: true },
+//   { field: 'aug24', headerName: 'Aug-24', width: 100, editable: true },
+//   { field: 'sep24', headerName: 'Sep-24', width: 100, editable: true },
+//   { field: 'oct24', headerName: 'Oct-24', width: 100, editable: true },
+//   { field: 'nov24', headerName: 'Nov-24', width: 100, editable: true },
+//   { field: 'dec24', headerName: 'Dec-24', width: 100, editable: true },
+//   { field: 'jan25', headerName: 'Jan-25', width: 100, editable: true },
+//   { field: 'feb25', headerName: 'Feb-25', width: 100, editable: true },
+//   { field: 'mar25', headerName: 'Mar-25', width: 100, editable: true },
+//   {
+//     field: 'averageTPH',
+//     headerName: 'Average TPH',
+//     width: 150,
+//     editable: false,
+//     renderHeader: () => (
+//       <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
+//         <div>Average</div>
+//         <div>TPH</div>
+//       </div>
+//     ),
+//   },
+//   {
+//     field: 'remark',
+//     headerName: 'Remark',
+//     minWidth: 200,
+//     maxWidth: 280,
+//     editable: false,
+//   },
+// ]
+// const productionData = [
+//   {
+//     id: 1,
+//     product: 'Product X',
+//     apr24: 200,
+//     may24: 210,
+//     jun24: 220,
+//     jul24: 230,
+//     aug24: 240,
+//     sep24: 250,
+//     oct24: 260,
+//     nov24: 270,
+//     dec24: 280,
+//     jan25: 290,
+//     feb25: 300,
+//     mar25: 310,
+//     averageTPH: 255,
+//     remark: 'Stable Growth',
+//   },
+//   {
+//     id: 2,
+//     product: 'Product Y',
+//     apr24: 180,
+//     may24: 185,
+//     jun24: 190,
+//     jul24: 195,
+//     aug24: 200,
+//     sep24: 205,
+//     oct24: 210,
+//     nov24: 215,
+//     dec24: 220,
+//     jan25: 225,
+//     feb25: 230,
+//     mar25: 235,
+//     averageTPH: 204,
+//     remark: 'Slight Growth',
+//   },
+//   {
+//     id: 3,
+//     product: 'Product Z',
+//     apr24: 220,
+//     may24: 230,
+//     jun24: 240,
+//     jul24: 250,
+//     aug24: 260,
+//     sep24: 270,
+//     oct24: 280,
+//     nov24: 290,
+//     dec24: 300,
+//     jan25: 310,
+//     feb25: 320,
+//     mar25: 330,
+//     averageTPH: 275,
+//     remark: 'Excellent',
+//   },
+//   {
+//     id: 4,
+//     product: 'Product A1',
+//     apr24: 150,
+//     may24: 160,
+//     jun24: 170,
+//     jul24: 180,
+//     aug24: 190,
+//     sep24: 200,
+//     oct24: 210,
+//     nov24: 220,
+//     dec24: 230,
+//     jan25: 240,
+//     feb25: 250,
+//     mar25: 260,
+//     averageTPH: 200,
+//     remark: 'Consistent',
+//   },
+//   {
+//     id: 5,
+//     product: 'Product B2',
+//     apr24: 130,
+//     may24: 135,
+//     jun24: 140,
+//     jul24: 145,
+//     aug24: 150,
+//     sep24: 155,
+//     oct24: 160,
+//     nov24: 165,
+//     dec24: 170,
+//     jan25: 175,
+//     feb25: 180,
+//     mar25: 185,
+//     averageTPH: 156,
+//     remark: 'Moderate',
+//   },
+//   {
+//     id: 6,
+//     product: 'Product C3',
+//     apr24: 250,
+//     may24: 260,
+//     jun24: 270,
+//     jul24: 280,
+//     aug24: 290,
+//     sep24: 300,
+//     oct24: 310,
+//     nov24: 320,
+//     dec24: 330,
+//     jan25: 340,
+//     feb25: 350,
+//     mar25: 360,
+//     averageTPH: 305,
+//     remark: 'High Demand',
+//   },
+//   {
+//     id: 7,
+//     product: 'Product D4',
+//     apr24: 110,
+//     may24: 120,
+//     jun24: 130,
+//     jul24: 140,
+//     aug24: 150,
+//     sep24: 160,
+//     oct24: 170,
+//     nov24: 180,
+//     dec24: 190,
+//     jan25: 200,
+//     feb25: 210,
+//     mar25: 220,
+//     averageTPH: 160,
+//     remark: 'Improving',
+//   },
+//   {
+//     id: 8,
+//     product: 'Product E5',
+//     apr24: 190,
+//     may24: 200,
+//     jun24: 210,
+//     jul24: 220,
+//     aug24: 230,
+//     sep24: 240,
+//     oct24: 250,
+//     nov24: 260,
+//     dec24: 270,
+//     jan25: 280,
+//     feb25: 290,
+//     mar25: 300,
+//     averageTPH: 245,
+//     remark: 'Growing',
+//   },
+//   {
+//     id: 9,
+//     product: 'Product F6',
+//     apr24: 160,
+//     may24: 170,
+//     jun24: 180,
+//     jul24: 190,
+//     aug24: 200,
+//     sep24: 210,
+//     oct24: 220,
+//     nov24: 230,
+//     dec24: 240,
+//     jan25: 250,
+//     feb25: 260,
+//     mar25: 270,
+//     averageTPH: 205,
+//     remark: 'Stable',
+//   },
+//   {
+//     id: 10,
+//     product: 'Product G7',
+//     apr24: 140,
+//     may24: 150,
+//     jun24: 160,
+//     jul24: 170,
+//     aug24: 180,
+//     sep24: 190,
+//     oct24: 200,
+//     nov24: 210,
+//     dec24: 220,
+//     jan25: 230,
+//     feb25: 240,
+//     mar25: 250,
+//     averageTPH: 195,
+//     remark: 'Slow Growth',
+//   },
+// ]
+// const ProductionvolumeData = () => (
+//   <div>
+//     <ASDataGrid
+//       columns={productionColumns}
+//       rows={productionData}
+//       title='Production Volume Data'
+//       onAddRow={(newRow) => console.log('New Row Added:', newRow)}
+//       onDeleteRow={(id) => console.log('Row Deleted:', id)}
+//       onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
+//       paginationOptions={[100, 200, 300]}
+//     />
+//   </div>
+// )
+
+// export default ProductionvolumeData
+import { DataService } from 'services/DataService'
+import { Autocomplete, TextField } from '@mui/material'
 import ASDataGrid from './ASDataGrid'
-const productOptions = [
-  'Product A',
-  'Product B',
-  'Product C',
-  'Product D',
-  'Product E',
-  'Product F',
-  'Product G',
-  'Product H',
-  'Product I',
-  'Product J',
-  'Product K',
-  'Product L',
-]
-const productionColumns = [
-  {
-    field: 'product',
-    headerName: 'Product',
-    width: 150,
-    editable: false,
+import { useEffect, useState } from 'react'
+import { useSession } from 'SessionStoreContext'
 
-    renderEditCell: (params) => {
-      console.log(params)
-      const { id } = params
-      const isEditable = id > 10 // Enable only for rows beyond 10
+const ProductionvolumeData = () => {
+  const keycloak = useSession()
+  const [productOptions, setProductOptions] = useState([])
+  const [productionData, setProductionData] = useState([])
 
-      return (
-        <Autocomplete
-          options={productOptions}
-          value={params.value || ''}
-          disableClearable // Prevent clearing the selection
-          onChange={(event, newValue) => {
-            params.api.setEditCellValue({
-              id: params.id,
-              field: 'product',
-              value: newValue,
-            })
-          }}
-          renderInput={(params) => (
-            <TextField {...params} variant='outlined' size='small' />
-          )}
-          disabled={!isEditable}
-          fullWidth
-        />
-      )
+  useEffect(() => {
+    getAllProducts()
+  }, [])
+
+  const getAllProducts = async () => {
+    try {
+      const data = await DataService.getAllProducts(keycloak)
+      console.log('API Response:', data)
+      // Assuming each product object has a "name" property
+      const products = data.map((item) => item.displayName || item.name || item)
+      setProductOptions(products)
+    } catch (error) {
+      console.error('Error fetching product:', error)
+    }
+  }
+
+  // Create row data based on the productOptions list
+  useEffect(() => {
+    if (productOptions.length > 0) {
+      const rows = productOptions.map((option, index) => ({
+        id: index + 1,
+        product: option,
+        apr24: Math.floor(Math.random() * 100),
+        may24: Math.floor(Math.random() * 100),
+        jun24: Math.floor(Math.random() * 100),
+        jul24: Math.floor(Math.random() * 100),
+        aug24: Math.floor(Math.random() * 100),
+        sep24: Math.floor(Math.random() * 100),
+        oct24: Math.floor(Math.random() * 100),
+        nov24: Math.floor(Math.random() * 100),
+        dec24: Math.floor(Math.random() * 100),
+        jan25: Math.floor(Math.random() * 100),
+        feb25: Math.floor(Math.random() * 100),
+        mar25: Math.floor(Math.random() * 100),
+        averageTPH: Math.floor(Math.random() * 100),
+        remark: 'Good',
+      }))
+      setProductionData(rows)
+    }
+  }, [productOptions])
+
+  const productionColumns = [
+    {
+      field: 'product',
+      headerName: 'Product',
+      editable: true,
+      filterable: true,
+      minWidth: 125,
+
+      renderEditCell: (params) => {
+        const isEditable = params.id > productOptions.length
+        return (
+          <Autocomplete
+            options={productOptions}
+            value={params.value || ''}
+            disableClearable
+            disabled={!isEditable}
+            onChange={(event, newValue) => {
+              params.api.setEditCellValue({
+                id: params.id,
+                field: 'product',
+                value: newValue,
+              })
+            }}
+            onInputChange={(event, newInputValue) => {
+              if (event && event.type === 'keydown' && event.key === 'Enter') {
+                params.api.setEditCellValue({
+                  id: params.id,
+                  field: 'product',
+                  value: newInputValue,
+                })
+              }
+            }}
+            renderInput={(params) => (
+              <TextField {...params} variant='outlined' size='small' />
+            )}
+            fullWidth
+          />
+        )
+      },
     },
-  },
-  { field: 'apr24', headerName: 'Apr-24', width: 100, editable: true },
-  { field: 'may24', headerName: 'May-24', width: 100, editable: true },
-  { field: 'jun24', headerName: 'Jun-24', width: 100, editable: true },
-  { field: 'jul24', headerName: 'Jul-24', width: 100, editable: true },
-  { field: 'aug24', headerName: 'Aug-24', width: 100, editable: true },
-  { field: 'sep24', headerName: 'Sep-24', width: 100, editable: true },
-  { field: 'oct24', headerName: 'Oct-24', width: 100, editable: true },
-  { field: 'nov24', headerName: 'Nov-24', width: 100, editable: true },
-  { field: 'dec24', headerName: 'Dec-24', width: 100, editable: true },
-  { field: 'jan25', headerName: 'Jan-25', width: 100, editable: true },
-  { field: 'feb25', headerName: 'Feb-25', width: 100, editable: true },
-  { field: 'mar25', headerName: 'Mar-25', width: 100, editable: true },
-  {
-    field: 'averageTPH',
-    headerName: 'Average TPH',
-    width: 150,
-    editable: false,
-    renderHeader: () => (
-      <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
-        <div>Average</div>
-        <div>TPH</div>
-      </div>
-    ),
-  },
-  {
-    field: 'remark',
-    headerName: 'Remark',
-    minWidth: 200,
-    maxWidth: 280,
-    editable: false,
-  },
-]
-const productionData = [
-  {
-    id: 1,
-    product: 'Product X',
-    apr24: 200,
-    may24: 210,
-    jun24: 220,
-    jul24: 230,
-    aug24: 240,
-    sep24: 250,
-    oct24: 260,
-    nov24: 270,
-    dec24: 280,
-    jan25: 290,
-    feb25: 300,
-    mar25: 310,
-    averageTPH: 255,
-    remark: 'Stable Growth',
-  },
-  {
-    id: 2,
-    product: 'Product Y',
-    apr24: 180,
-    may24: 185,
-    jun24: 190,
-    jul24: 195,
-    aug24: 200,
-    sep24: 205,
-    oct24: 210,
-    nov24: 215,
-    dec24: 220,
-    jan25: 225,
-    feb25: 230,
-    mar25: 235,
-    averageTPH: 204,
-    remark: 'Slight Growth',
-  },
-  {
-    id: 3,
-    product: 'Product Z',
-    apr24: 220,
-    may24: 230,
-    jun24: 240,
-    jul24: 250,
-    aug24: 260,
-    sep24: 270,
-    oct24: 280,
-    nov24: 290,
-    dec24: 300,
-    jan25: 310,
-    feb25: 320,
-    mar25: 330,
-    averageTPH: 275,
-    remark: 'Excellent',
-  },
-  {
-    id: 4,
-    product: 'Product A1',
-    apr24: 150,
-    may24: 160,
-    jun24: 170,
-    jul24: 180,
-    aug24: 190,
-    sep24: 200,
-    oct24: 210,
-    nov24: 220,
-    dec24: 230,
-    jan25: 240,
-    feb25: 250,
-    mar25: 260,
-    averageTPH: 200,
-    remark: 'Consistent',
-  },
-  {
-    id: 5,
-    product: 'Product B2',
-    apr24: 130,
-    may24: 135,
-    jun24: 140,
-    jul24: 145,
-    aug24: 150,
-    sep24: 155,
-    oct24: 160,
-    nov24: 165,
-    dec24: 170,
-    jan25: 175,
-    feb25: 180,
-    mar25: 185,
-    averageTPH: 156,
-    remark: 'Moderate',
-  },
-  {
-    id: 6,
-    product: 'Product C3',
-    apr24: 250,
-    may24: 260,
-    jun24: 270,
-    jul24: 280,
-    aug24: 290,
-    sep24: 300,
-    oct24: 310,
-    nov24: 320,
-    dec24: 330,
-    jan25: 340,
-    feb25: 350,
-    mar25: 360,
-    averageTPH: 305,
-    remark: 'High Demand',
-  },
-  {
-    id: 7,
-    product: 'Product D4',
-    apr24: 110,
-    may24: 120,
-    jun24: 130,
-    jul24: 140,
-    aug24: 150,
-    sep24: 160,
-    oct24: 170,
-    nov24: 180,
-    dec24: 190,
-    jan25: 200,
-    feb25: 210,
-    mar25: 220,
-    averageTPH: 160,
-    remark: 'Improving',
-  },
-  {
-    id: 8,
-    product: 'Product E5',
-    apr24: 190,
-    may24: 200,
-    jun24: 210,
-    jul24: 220,
-    aug24: 230,
-    sep24: 240,
-    oct24: 250,
-    nov24: 260,
-    dec24: 270,
-    jan25: 280,
-    feb25: 290,
-    mar25: 300,
-    averageTPH: 245,
-    remark: 'Growing',
-  },
-  {
-    id: 9,
-    product: 'Product F6',
-    apr24: 160,
-    may24: 170,
-    jun24: 180,
-    jul24: 190,
-    aug24: 200,
-    sep24: 210,
-    oct24: 220,
-    nov24: 230,
-    dec24: 240,
-    jan25: 250,
-    feb25: 260,
-    mar25: 270,
-    averageTPH: 205,
-    remark: 'Stable',
-  },
-  {
-    id: 10,
-    product: 'Product G7',
-    apr24: 140,
-    may24: 150,
-    jun24: 160,
-    jul24: 170,
-    aug24: 180,
-    sep24: 190,
-    oct24: 200,
-    nov24: 210,
-    dec24: 220,
-    jan25: 230,
-    feb25: 240,
-    mar25: 250,
-    averageTPH: 195,
-    remark: 'Slow Growth',
-  },
-]
-const ProductionvolumeData = () => (
-  <div>
-    <ASDataGrid
-      columns={productionColumns}
-      rows={productionData}
-      title='Production Volume Data'
-      onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-      onDeleteRow={(id) => console.log('Row Deleted:', id)}
-      onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-      paginationOptions={[100, 200, 300]}
-    />
-  </div>
-)
+    { field: 'apr24', headerName: 'Apr-24', editable: true },
+    { field: 'may24', headerName: 'May-24', editable: true },
+    { field: 'jun24', headerName: 'Jun-24', editable: true },
+    { field: 'jul24', headerName: 'Jul-24', editable: true },
+    { field: 'aug24', headerName: 'Aug-24', editable: true },
+    { field: 'sep24', headerName: 'Sep-24', editable: true },
+    { field: 'oct24', headerName: 'Oct-24', editable: true },
+    { field: 'nov24', headerName: 'Nov-24', editable: true },
+    { field: 'dec24', headerName: 'Dec-24', editable: true },
+    { field: 'jan25', headerName: 'Jan-25', editable: true },
+    { field: 'feb25', headerName: 'Feb-25', editable: true },
+    { field: 'mar25', headerName: 'Mar-25', editable: true },
+    {
+      field: 'averageTPH',
+      headerName: 'Average TPH',
+      width: 150,
+      editable: false,
+      renderHeader: () => (
+        <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
+          <div>Average</div>
+          <div>TPH</div>
+        </div>
+      ),
+    },
+    { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
+  ]
+
+  return (
+    <div>
+      <ASDataGrid
+        columns={productionColumns}
+        rows={productionData}
+        title='Production Volume Data'
+        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
+        onDeleteRow={(id) => console.log('Row Deleted:', id)}
+        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
+        paginationOptions={[100, 200, 300]}
+      />
+    </div>
+  )
+}
 
 export default ProductionvolumeData

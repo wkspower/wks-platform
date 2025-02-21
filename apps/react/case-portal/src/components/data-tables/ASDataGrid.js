@@ -82,15 +82,10 @@ const DataGridTable = ({
     setSearchText(event.target.value)
   }
 
-
-
   useEffect(() => {
-    console.log("Updated initialRows:", initialRows);
-    setRows(initialRows);
-  }, [initialRows]);
-
-  
-
+    console.log('Updated initialRows:', initialRows)
+    setRows(initialRows)
+  }, [initialRows])
 
   const onColumnResized = (params) => {
     if (params.column) {
@@ -196,7 +191,7 @@ const DataGridTable = ({
     // getTAPlantData()
     // getAllProducts()
     // getYearlyData('2025')
-    console.log('rows',rows);
+    console.log('rows', rows)
   }, [rows])
 
   const dummyApiCall = async (id) => {
@@ -456,26 +451,25 @@ const DataGridTable = ({
           return
         }
 
-        console.log('params-params',params);
-        
+        console.log('params-params', params)
 
         // Calculate days in the selected month
-        const totalDays = new Date(year, month + 1, 0).getDate();
-        const perDayValue = (params.value / totalDays).toFixed(2); // Keep 2 decimal places
+        const totalDays = new Date(year, month + 1, 0).getDate()
+        const perDayValue = (params.value / totalDays).toFixed(2) // Keep 2 decimal places
 
         const daysArray = Array.from({ length: totalDays }, (_, index) => {
-          const date = new Date(year, month, index + 1);
-          const day = String(date.getDate()).padStart(2, '0');
-          const monthName = date.toLocaleString('en-GB', { month: 'short' });
-          const yearShort = date.getFullYear().toString().slice(-2);
+          const date = new Date(year, month, index + 1)
+          const day = String(date.getDate()).padStart(2, '0')
+          const monthName = date.toLocaleString('en-GB', { month: 'short' })
+          const yearShort = date.getFullYear().toString().slice(-2)
 
-          const formattedDate = `${day}-${monthName}-${yearShort}`;
+          const formattedDate = `${day}-${monthName}-${yearShort}`
 
           return {
             date: formattedDate,
             value: parseFloat(perDayValue), // Convert back to number with 2 decimals
-          };
-        });
+          }
+        })
 
         setDays(daysArray)
         setOpen(false)
@@ -662,39 +656,6 @@ const DataGridTable = ({
               ),
             }}
           />
-
-          <IconButton
-            aria-label='export'
-            onClick={handleImportExport}
-            sx={{
-              border: `1px solid ${jioColors.border}`,
-              borderRadius: 1,
-              padding: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
-              color: 'inherit',
-              width: '150px',
-              '&:hover': {
-                backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF', // Removes hover effect
-              },
-            }}
-          >
-            <FileUpload
-              sx={{ color: '#2A3ACD' }}
-              // sx={{ color: isFilterActive ? jioColors.background : 'inherit' }}
-            />
-            <span
-              style={{
-                fontSize: '0.875rem',
-                color: '#2A3ACD',
-              }}
-            >
-              Export
-            </span>
-          </IconButton>
-
           <IconButton
             aria-label='import'
             onClick={handleImportExport}
@@ -726,6 +687,37 @@ const DataGridTable = ({
               Import
             </span>
           </IconButton>
+          <IconButton
+            aria-label='export'
+            onClick={handleImportExport}
+            sx={{
+              border: `1px solid ${jioColors.border}`,
+              borderRadius: 1,
+              padding: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
+              color: 'inherit',
+              width: '150px',
+              '&:hover': {
+                backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF', // Removes hover effect
+              },
+            }}
+          >
+            <FileUpload
+              sx={{ color: '#2A3ACD' }}
+              // sx={{ color: isFilterActive ? jioColors.background : 'inherit' }}
+            />
+            <span
+              style={{
+                fontSize: '0.875rem',
+                color: '#2A3ACD',
+              }}
+            >
+              Export
+            </span>
+          </IconButton>
         </Box>
       </Box>
 
@@ -734,8 +726,7 @@ const DataGridTable = ({
           rows={filteredRows}
           columns={columns.map((col) => ({
             ...col,
-            editable:
-              col.field === 'product' ? rows.length >= 1 : col.editable,
+            editable: col.field === 'product' ? rows.length >= 1 : col.editable,
           }))}
           rowHeight={35}
           processRowUpdate={processRowUpdate}

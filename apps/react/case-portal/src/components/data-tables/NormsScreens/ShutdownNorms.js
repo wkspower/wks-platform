@@ -1,10 +1,28 @@
 import DataGridTable from '../ASDataGrid'
 
 const shutdownNormsColumns = [
-  { field: 'srNo', headerName: 'Sr. No', width: 80, editable: false },
+  {
+    field: 'srNo',
+    headerName: 'Sr. No',
+    minWidth: 50,
+    maxWidth: 70,
+    editable: false,
+  },
   { field: 'particular', headerName: 'Particular', width: 200, editable: true },
-  { field: 'unit', headerName: 'Unit', width: 100, editable: true },
-  { field: 'norms', headerName: 'Norms', width: 150, editable: true },
+  {
+    field: 'unit',
+    headerName: 'Unit',
+    minWidth: 50,
+    maxWidth: 70,
+    editable: true,
+  },
+  {
+    field: 'norms',
+    headerName: 'Norms',
+    minWidth: 50,
+    maxWidth: 70,
+    editable: true,
+  },
 ]
 
 const shutdownNormsData = [
