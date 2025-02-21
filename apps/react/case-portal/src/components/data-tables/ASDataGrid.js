@@ -7,11 +7,31 @@ import {
   Typography,
   Box,
   InputAdornment,
+
+
+
+
 } from '@mui/material'
+
+
+
+import {
+  GridRowModes,
+  
+  GridToolbarContainer,
+  GridActionsCellItem,
+  GridRowEditStopReasons,
+} from '@mui/x-data-grid';
 // import MoreVertIcon from '@mui/icons-material/MoreVert'
 import SearchIcon from '@mui/icons-material/Search'
 // import FilterAltIcon from '@mui/icons-material/FilterAlt'
 // import EditIcon from '@mui/icons-material/Edit'
+
+
+
+
+
+
 
 import { useSession } from 'SessionStoreContext'
 
@@ -27,9 +47,13 @@ import { MenuItem } from '../../../node_modules/@mui/material/index'
 
 import Notification from 'components/Utilities/Notification'
 
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete'
-import SaveIcon from '@mui/icons-material/Save'
-import CancelIcon from '@mui/icons-material/Cancel'
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Close';
+
+
 import {
   FileDownload,
   FileUpload,
@@ -82,10 +106,110 @@ const DataGridTable = ({
     setSearchText(event.target.value)
   }
 
+
+  
+  const [rowModesModel, setRowModesModel] = useState({});
+
+
+  const handleRowEditStop = (params, event) => {
+    console.log('handleRowEditStop',params);
+    
+    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
+      event.defaultMuiPrevented = true;
+    }
+  };
+
+
+  const handleRowEditCommit = (id, event) => {
+    const editedRow = rows.find(row => row.id === id);
+    console.log("Row Data After Editing:", editedRow);
+  };
+  
+
+  const handleEditClick = (id) => () => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
+  };
+
+  // const handleSaveClick = (id) => () => {
+  //   setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+  // };
+
+
+  const handleSaveClick = (id) => () => {
+
+
+
+    console.log(id);
+    console.log(rows);
+
+    handleRowEditCommit(id)
+    
+    const rowData = rows.find((row) => row.id === id);
+  
+    console.log('Full Row Data:', rowData); // Log all field values before validation
+  
+    if (!rowData) {
+      console.error(`No row found for ID: ${id}`);
+      return;
+    }
+  
+    // Find empty fields (null, undefined, empty string, or whitespace)
+    const emptyFields = Object.entries(rowData)
+      .filter(([key, value]) => value === null || value === undefined || String(value).trim() === '')
+      .map(([key, value]) => ({ field: key, value })); // Store key-value pairs
+  
+    console.log('Empty Fields:', emptyFields);
+  
+    if (emptyFields.length > 0) {
+      setSnackbarOpen(true);
+      setSnackbarMessage(`Please fill the following fields: ${emptyFields.map(f => f.field).join(', ')}`);
+    } else {
+      console.log('Row Data (Valid):', rowData);
+      setRowModesModel((prev) => ({ ...prev, [id]: { mode: GridRowModes.View } }));
+    }
+  };
+  
   useEffect(() => {
-    console.log('Updated initialRows:', initialRows)
-    setRows(initialRows)
-  }, [initialRows])
+    console.log("Updated Rows!!!!!!!!!!!!!!!!!!!!!!!:", rows);
+  }, [rows]);
+  
+
+  const handleDeleteClick = (id) => () => {
+
+    setOpen1(true)
+    setDeleteId(id)
+    // setRows(rows.filter((row) => row.id !== id));
+  };
+
+  const handleCancelClick = (id) => () => {
+    setRowModesModel({
+      ...rowModesModel,
+      [id]: { mode: GridRowModes.View, ignoreModifications: true },
+    });
+
+    const editedRow = rows.find((row) => row.id === id);
+    if (editedRow.isNew) {
+      setRows(rows.filter((row) => row.id !== id));
+    }
+  };
+
+
+
+  const handleRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel);
+  };
+
+
+
+
+
+  useEffect(() => {
+    console.log("Updated initialRows:", initialRows);
+    setRows(initialRows);
+  }, [initialRows]);
+
+  
+
 
   const onColumnResized = (params) => {
     if (params.column) {
@@ -150,6 +274,7 @@ const DataGridTable = ({
 
   const deleteTheRecord = () => {
     const updatedRows = rows.filter((row) => row?.id !== deleteId)
+    setRows(rows.filter((row) => row.id !== deleteId));
     setRows(updatedRows)
     onDeleteRow?.(deleteId)
     setDeleteId(null)
@@ -163,23 +288,37 @@ const DataGridTable = ({
     )
     setRows(updatedRows)
     onRowUpdate?.(updatedRow) // Call the onRowUpdate prop if provided
+
+    console.log('updatedRow',updatedRow);
+    
     return updatedRow
   }
 
   const handleAddRow = () => {
-    const newRowId = rows.length
-      ? Math.max(...rows.map((row) => row.id)) + 1
-      : 1
+    const newRowId = rows.length ? Math.max(...rows.map((row) => row.id)) + 1 : 1;
+  
     const newRow = {
       id: newRowId,
-      isNew: true, // Identify new rows
-      ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])),
-    }
-    const updatedRows = [newRow, ...rows]
-    setRows(updatedRows)
-    onAddRow?.(newRow)
-    setProduct('')
-  }
+      isNew: true, // Mark row as new
+      ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])), // Empty values
+    };
+  
+    // ? Add new row **at the bottom** of the existing rows
+    setRows((prevRows) => [...prevRows, newRow]);
+  
+    // ? Trigger onAddRow callback
+    onAddRow?.(newRow);
+  
+    // ? Clear product input
+    setProduct('');
+  
+    // ? Enable edit mode for the new row
+    setRowModesModel((oldModel) => ({
+      ...oldModel,
+      [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
+    }));
+  };
+  
 
   useEffect(() => {
     console.log('api call here ')
@@ -191,7 +330,8 @@ const DataGridTable = ({
     // getTAPlantData()
     // getAllProducts()
     // getYearlyData('2025')
-    console.log('rows', rows)
+    // getYearlyData('2025')
+    console.log('rows',rows);
   }, [rows])
 
   const dummyApiCall = async (id) => {
@@ -288,46 +428,53 @@ const DataGridTable = ({
     ...defaultColumns,
     ...(title != 'Production Volume Data'
       ? [
-          {
-            field: 'actions',
-            headerName: 'Actions',
-            width: 180,
-            cellClassName: 'with-border',
-            headerAlign: 'center',
-            align: 'center',
-            pinned: 'right',
-            renderCell: (params) => {
-              const { id, isNew } = params.row
-
-              return isNew ? (
-                <>
-                  <IconButton
-                    onClick={() => handleSaveRow(id)}
-                    aria-label='save'
-                  >
-                    <SaveIcon sx={{ color: 'green' }} />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => handleCancelRow(id)}
-                    aria-label='cancel'
-                  >
-                    <CancelIcon sx={{ color: 'red' }} />
-                  </IconButton>
-                </>
-              ) : (
-                <IconButton
-                  onClick={() => handleDeleteRow(id)}
-                  aria-label='delete'
-                >
-                  <DeleteIcon sx={{ color: jioColors.accentRed }} />
-                </IconButton>
-              )
-            },
-            // flex: 1,
-            minWidth: 70,
-            maxWidth: 100,
-            headerClassName: 'last-column-header',
+        {
+          field: 'actions',
+          type: 'actions',
+          headerName: 'Actions',
+          width: 180,
+          cellClassName: 'actions',
+          getActions: ({ id }) => {
+            const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+    
+            if (isInEditMode) {
+              return [
+                <GridActionsCellItem
+                  icon={<SaveIcon />}
+                  label="Save"
+                  sx={{
+                    color: 'primary.main',
+                  }}
+                  onClick={handleSaveClick(id)}
+                />,
+                <GridActionsCellItem
+                  icon={<CancelIcon />}
+                  label="Cancel"
+                  className="textPrimary"
+                  onClick={handleCancelClick(id)}
+                  color="inherit"
+                />,
+              ];
+            }
+    
+            return [
+              <GridActionsCellItem
+                icon={<EditIcon sx={{ color: jioColors.primaryBlue }}/>}
+                label="Edit"
+                className="textPrimary"
+                onClick={handleEditClick(id)}
+                color="inherit"
+              />,
+              <GridActionsCellItem
+              icon={<DeleteIcon sx={{ color: jioColors.accentRed }} />}
+              label="Delete"
+              onClick={handleDeleteClick(id)}
+              color="inherit"
+            />
+            
+            ];
           },
+        },
         ]
       : []),
   ]
@@ -396,9 +543,9 @@ const DataGridTable = ({
       nonEditableFields.includes(params.field) &&
       monthFields.has(params.field)
     ) {
-      setSnackbarOpen(true)
-      setSnackbarMessage('Select a Product First!')
-      return
+      // setSnackbarOpen(true)
+      // setSnackbarMessage('Select a Product First!')
+      // return
     } else {
       setProduct(params.row.product)
     }
@@ -451,25 +598,26 @@ const DataGridTable = ({
           return
         }
 
-        console.log('params-params', params)
+        console.log('params-params',params);
+        
 
         // Calculate days in the selected month
-        const totalDays = new Date(year, month + 1, 0).getDate()
-        const perDayValue = (params.value / totalDays).toFixed(2) // Keep 2 decimal places
+        const totalDays = new Date(year, month + 1, 0).getDate();
+        const perDayValue = (params.value / totalDays).toFixed(2); // Keep 2 decimal places
 
         const daysArray = Array.from({ length: totalDays }, (_, index) => {
-          const date = new Date(year, month, index + 1)
-          const day = String(date.getDate()).padStart(2, '0')
-          const monthName = date.toLocaleString('en-GB', { month: 'short' })
-          const yearShort = date.getFullYear().toString().slice(-2)
+          const date = new Date(year, month, index + 1);
+          const day = String(date.getDate()).padStart(2, '0');
+          const monthName = date.toLocaleString('en-GB', { month: 'short' });
+          const yearShort = date.getFullYear().toString().slice(-2);
 
-          const formattedDate = `${day}-${monthName}-${yearShort}`
+          const formattedDate = `${day}-${monthName}-${yearShort}`;
 
           return {
             date: formattedDate,
             value: parseFloat(perDayValue), // Convert back to number with 2 decimals
-          }
-        })
+          };
+        });
 
         setDays(daysArray)
         setOpen(false)
@@ -726,13 +874,24 @@ const DataGridTable = ({
           rows={filteredRows}
           columns={columns.map((col) => ({
             ...col,
-            editable: col.field === 'product' ? rows.length >= 1 : col.editable,
+            editable:
+              col.field === 'product' ? rows.length >= 1 : col.editable,
           }))}
           rowHeight={35}
           processRowUpdate={processRowUpdate}
           onColumnResized={onColumnResized}
           onCellClick={handleCellClick}
-          disableSelectionOnClick
+          onRowEditCommit={handleRowEditCommit}
+          editMode="row"
+          rowModesModel={rowModesModel}
+          onRowModesModelChange={handleRowModesModelChange}
+          onRowEditStop={handleRowEditStop}
+          slotProps={{
+            toolbar: { setRows, setRowModesModel },
+          }}
+
+
+
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? 'even-row' : 'odd-row'
           }

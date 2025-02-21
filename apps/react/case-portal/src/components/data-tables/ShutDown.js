@@ -45,7 +45,10 @@ useEffect(() => {
     try {
       const data = await DataService.getAllProducts(keycloak)
       console.log('API Response:', data)
-      setAllProducts(data)
+         
+      const productNames = data.map((product) => product.name);
+
+      setAllProducts(productNames);
     } catch (error) {
       console.error('Error fetching product:', error)
     } finally {
@@ -55,8 +58,10 @@ useEffect(() => {
 
   const saveShutdownData = async () => {
     try {
-      // var plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1';
-      var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
+      var plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1';
+      // var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
+      // var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
+      
       const shutdownDetails = {
         product: "Mode C/O",
         discription: "1 Shutdown maintenance",
@@ -85,7 +90,7 @@ const colDefs = [
   {
     field: 'discription',
     headerName: 'Shutdown Desc',
-    minWidth: 300,
+    minWidth: 325,
     editable: true,
     renderHeader: () => (
       <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
@@ -98,7 +103,7 @@ const colDefs = [
     field: 'product',
     headerName: 'Product',
     editable: true,
-    minWidth: 200,
+    minWidth: 225,
     renderEditCell: (params) => {
       const { id } = params
       const isEditable = id > 0 
@@ -139,7 +144,7 @@ const colDefs = [
     field: "maintStartDateTime",
     headerName: "SD- From",
     type: "dateTime",
-    minWidth: 200,
+    minWidth: 175,
     editable: true,
     valueGetter: (params) => {
       const value = params; 
@@ -155,7 +160,7 @@ const colDefs = [
     headerName: "SD- To",
     type: "dateTime",
     editable:true,
-    minWidth: 200,
+    minWidth: 175,
     valueGetter: (params) => {
       const value = params; 
       const parsedDate = value
@@ -172,12 +177,12 @@ const colDefs = [
     field: "durationInMins",
     headerName: "Duration (hrs)",
     editable: true,
-    type: "number",
+    // type: "number",
     minWidth: 100,
     maxWidth: 150,
     renderCell: (params) => {
-      const durationInHours = params.value ? (params.value / 60).toFixed(2) : "0.00";
-      return `${durationInHours}`;
+      // const durationInHours = params.value ? (params.value / 60).toFixed(2) : "0.00";
+      return `${params.value}`;
     },
   },
   

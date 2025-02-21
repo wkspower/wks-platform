@@ -36,42 +36,27 @@ const HeaderContent = ({ keycloak }) => {
   useEffect(() => {
     if (sites.length > 0 && selectedSite) {
       const site = sites.find((s) => s.name === selectedSite)
-      // if (site) {
-      //   setPlants(site.plants)
-      //   setSelectedOption(site.plants[0]?.name || '')
-
-      //   localStorage.setItem(
-      //     'selectedSite',
-      //     JSON.stringify({
-      //       id: site.id,
-      //       name: site.name,
-      //     }),
-      //   )
-
-      //   if (site.plants.length > 0) {
-      //     localStorage.setItem(
-      //       'selectedPlant',
-      //       JSON.stringify({
-      //         id: site.plants[0].id,
-      //         name: site.plants[0].name,
-      //         displayName: site.plants[0].displayName,
-      //       }),
-      //     )
-      //   }
-      // }
-
       if (site) {
-        const userPlantIds= userSiteToPlants[site.id];
-  
-        if(userPlantIds){
-          const sitePlants = site.plants;
-          const userPlants = sitePlants.filter((plant)=> userPlantIds[0].includes(plant.id));
-  
-          setPlants(userPlants)
-          setSelectedOption(userPlants[0]?.name) // Default to first plant
-        }else{
-          setPlants(site.plants)
-          setSelectedOption(site.plants[0]?.name) // Default to first plant
+        setPlants(site.plants)
+        setSelectedOption(site.plants[0]?.name || '')
+
+        localStorage.setItem(
+          'selectedSite',
+          JSON.stringify({
+            id: site.id,
+            name: site.name,
+          }),
+        )
+
+        if (site.plants.length > 0) {
+          localStorage.setItem(
+            'selectedPlant',
+            JSON.stringify({
+              id: site.plants[0].id,
+              name: site.plants[0].name,
+              displayName: site.plants[0].displayName,
+            }),
+          )
         }
       }
     }

@@ -54,7 +54,7 @@ public class PlantMaintenanceTransaction {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdOn;
 
-    @Column(name = "User", nullable = false, length = 255)
+    @Column(name = "[User]", nullable = false, length = 255)
     private String user;
 
     @Column(name = "Version", nullable = false, length = 10)
