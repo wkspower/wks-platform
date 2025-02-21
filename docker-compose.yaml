@@ -54,6 +54,8 @@ services:
             retries: 10
         ports:
         - "5432:5432"
+        volumes:
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
     keycloak:
         image: quay.io/keycloak/keycloak:20.0.3

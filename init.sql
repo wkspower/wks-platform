@@ -1,0 +1,1 @@
+ALTER TABLE user_attribute ALTER COLUMN value TYPE TEXT;
