@@ -10,5 +10,6 @@ public interface ShutDownPlanService {
 	public List<Object[]> findMaintenanceDetailsByPlantIdAndType(UUID plantId,String maintenanceTypeName);
 	public UUID findPlantMaintenanceId(String productName);
 	public void saveShutdownData(PlantMaintenanceTransaction plantMaintenanceTransaction);
+	public UUID findIdByPlantIdAndMaintenanceTypeName(UUID plantId,String maintenanceTypeName);
 
 }

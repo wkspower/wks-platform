@@ -36,5 +36,11 @@ public interface ShutDownPlanRepository extends JpaRepository<PlantMaintenanceTr
             nativeQuery = true)
     UUID findPlantMaintenanceId( 
             @Param("productName") String productName);
-
+    
+    @Query(value = "SELECT pm.Id FROM PlantMaintenance pm " +
+            "JOIN MaintenanceTypes mt ON pm.MaintenanceType_FK_Id = mt.Id " +
+            "WHERE pm.Plant_FK_Id = :plantFkId AND mt.Name = :maintenanceTypeName", 
+    nativeQuery = true)
+	UUID findIdByPlantIdAndMaintenanceTypeName(@Param("plantFkId") UUID plantFkId, 
+	                                                   @Param("maintenanceTypeName") String maintenanceTypeName);
 }

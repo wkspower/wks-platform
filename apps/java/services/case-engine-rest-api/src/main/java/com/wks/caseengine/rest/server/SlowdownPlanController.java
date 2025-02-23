@@ -19,9 +19,7 @@ import com.wks.caseengine.dto.product.ShutDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.service.ShutDownPlanService;
 import com.wks.caseengine.service.SlowdownPlanService;
-
-
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("task")
@@ -63,7 +61,7 @@ public class SlowdownPlanController {
 	
 	@PostMapping(value="/saveSlowdownData/{plantId}")
 	public ResponseEntity<ShutDownPlanDTO> saveShutdownData(@PathVariable UUID plantId,@RequestBody ShutDownPlanDTO shutDownPlanDTO){
-		UUID plantMaintenanceId=shutDownPlanService.findPlantMaintenanceId(shutDownPlanDTO.getProduct());
+		UUID plantMaintenanceId=shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId,"Slowdown");
 		PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
 		plantMaintenanceTransaction.setId(UUID.randomUUID());
 
@@ -89,6 +87,5 @@ public class SlowdownPlanController {
 		shutDownPlanService.saveShutdownData(plantMaintenanceTransaction);
 		return ResponseEntity.ok(shutDownPlanDTO); 
 	}
-
-
+	
 }

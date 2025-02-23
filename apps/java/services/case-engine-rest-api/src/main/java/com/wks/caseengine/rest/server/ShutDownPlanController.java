@@ -12,19 +12,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.RequestBody;
 import com.wks.caseengine.dto.product.ShutDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.service.ShutDownPlanService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+
 
 @RestController
 @RequestMapping("task")
 public class ShutDownPlanController {
 	
 	@Autowired
-	private ShutDownPlanService planService;
+	private ShutDownPlanService shutDownPlanService;
 	
 	@GetMapping(value = "/getShutDownPlanData")
     public ResponseEntity<List<ShutDownPlanDTO>> findMaintenanceDetailsByPlantIdAndType(
@@ -38,7 +38,7 @@ public class ShutDownPlanController {
         try {
             // Convert String to UUID
             UUID plantUuid = UUID.fromString(plantId); 
-            listOfSite = planService.findMaintenanceDetailsByPlantIdAndType(plantUuid, maintenanceTypeName);
+            listOfSite = shutDownPlanService.findMaintenanceDetailsByPlantIdAndType(plantUuid, maintenanceTypeName);
 
             for (Object[] result : listOfSite) {
                 ShutDownPlanDTO dto = new ShutDownPlanDTO();
@@ -63,57 +63,42 @@ public class ShutDownPlanController {
     }
 	
 		  @PostMapping(value = "/saveShutdownData/{plantId}")
-            public ResponseEntity<ShutDownPlanDTO> saveShutdownData(@PathVariable String plantId, @RequestBody ShutDownPlanDTO shutDownPlanDTO) {
+            public ResponseEntity<ShutDownPlanDTO> saveShutdownData(@PathVariable UUID plantId, @RequestBody ShutDownPlanDTO shutDownPlanDTO) {
                 // Log incoming request body
-
-
-
-                System.out.println("toString: " + shutDownPlanDTO.toString());
-                System.out.println("plantId: " + plantId);
-            
                 
+                //UUID plantMaintenanceId = planService.findPlantMaintenanceId(shutDownPlanDTO.getProduct());
+			  	UUID plantMaintenanceId=shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId,"Shutdown");
+			  	System.out.println(plantMaintenanceId);
+                PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
+                plantMaintenanceTransaction.setId(UUID.randomUUID());
+                // Set mandatory fields with default values if missing
+                plantMaintenanceTransaction.setDiscription(
+                    shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
+                );
             
-                // UUID plantMaintenanceId = planService.findPlantMaintenanceId(shutDownPlanDTO.getProduct());
-                // PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
-                // plantMaintenanceTransaction.setId(UUID.randomUUID());
-            
-                // // Set mandatory fields with default values if missing
-                // plantMaintenanceTransaction.setDiscription(
-                //     shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
-                // );
-            
-                // plantMaintenanceTransaction.setDurationInMins(
-                //     shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0
-                // );
+                plantMaintenanceTransaction.setDurationInMins(
+                    shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0
+                );
 
-                // plantMaintenanceTransaction.setUser("test_user"); 
-
+                plantMaintenanceTransaction.setUser("test_user"); 
+                plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+                plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+                // Ensure required fields exist
+                plantMaintenanceTransaction.setName("Default Name"); // Add default name
+                plantMaintenanceTransaction.setVersion("V1"); // Ensure version is set
+                plantMaintenanceTransaction.setCreatedOn(new Date());
+                plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
+                plantMaintenanceTransaction.setPlantFkId(plantId);
+                if(shutDownPlanDTO.getProductId()!=null) {
+                	plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+                }
                 
-                // System.out.println("1: " + shutDownPlanDTO.getMaintEndDateTime());
-                // System.out.println("2: " + shutDownPlanDTO.getMaintStartDateTime());
-            
-                // plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
-
-
-               
-                // plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
-
-
-            
-                // // Ensure required fields exist
-                // plantMaintenanceTransaction.setName("Default Name"); // Add default name
-                // plantMaintenanceTransaction.setVersion("V1"); // Ensure version is set
-
-                // plantMaintenanceTransaction.setCreatedOn(new Date());
-            
-                // plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
-                // // plantMaintenanceTransaction.setPlantFkId(plantId);
-            
-                // // Save entity
-                // planService.saveShutdownData(plantMaintenanceTransaction);
+                // Save entity
+                shutDownPlanService.saveShutdownData(plantMaintenanceTransaction);
                 
                 return ResponseEntity.ok(shutDownPlanDTO);
             }
-
+		  
+		  
 
 }

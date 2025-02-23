@@ -33,5 +33,10 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	public void saveShutdownData(PlantMaintenanceTransaction plantMaintenanceTransaction) {
 		plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
 	}
+	
+	@Override
+	public UUID findIdByPlantIdAndMaintenanceTypeName(UUID plantId,String maintenanceTypeName) {
+		return shutDownPlanRepository.findIdByPlantIdAndMaintenanceTypeName(plantId, maintenanceTypeName);
+	}
 
 }
