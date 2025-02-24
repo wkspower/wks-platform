@@ -1,6 +1,7 @@
 package com.wks.caseengine.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
 import com.wks.caseengine.repository.ShutDownPlanRepository;
+
 
 @Service
 public class ShutDownPlanServiceImpl implements ShutDownPlanService{
@@ -37,6 +39,14 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	@Override
 	public UUID findIdByPlantIdAndMaintenanceTypeName(UUID plantId,String maintenanceTypeName) {
 		return shutDownPlanRepository.findIdByPlantIdAndMaintenanceTypeName(plantId, maintenanceTypeName);
+	}
+
+	@Override
+	public PlantMaintenanceTransaction editShutDownPlanData(UUID plantMaintenanceTransactionId) {
+		Optional<PlantMaintenanceTransaction> plantMaintenanceTransaction=	shutDownPlanRepository.findById(plantMaintenanceTransactionId);
+		return plantMaintenanceTransaction.get();
+			
+		
 	}
 
 }

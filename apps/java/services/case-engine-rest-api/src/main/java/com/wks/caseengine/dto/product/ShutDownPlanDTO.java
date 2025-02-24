@@ -12,7 +12,7 @@ public class ShutDownPlanDTO {
     private Date maintStartDateTime;
     private Date maintEndDateTime;
 	// Change from Integer to Long
-    private Long durationInMins; 
+    private Integer durationInMins; 
     
 	//FOR ID : pmt.Id
 	private UUID maintenanceId; 

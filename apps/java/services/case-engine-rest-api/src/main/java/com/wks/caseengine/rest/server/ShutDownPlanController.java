@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,7 +46,7 @@ public class ShutDownPlanController {
                 dto.setDiscription((String) result[0]);
                 dto.setMaintStartDateTime((Date) result[1]);
                 dto.setMaintEndDateTime((Date) result[2]);
-                dto.setDurationInMins(result[3] != null ? ((Number) result[3]).longValue() : 0L); 
+                dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : 0); 
                 dto.setProduct((String) result[6]);
                 //FOR ID : pmt.Id
                 dto.setMaintenanceId(result[5] != null ? UUID.fromString(result[5].toString()) : null); 
@@ -68,7 +69,6 @@ public class ShutDownPlanController {
                 
                 //UUID plantMaintenanceId = planService.findPlantMaintenanceId(shutDownPlanDTO.getProduct());
 			  	UUID plantMaintenanceId=shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId,"Shutdown");
-			  	System.out.println(plantMaintenanceId);
                 PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
                 plantMaintenanceTransaction.setId(UUID.randomUUID());
                 // Set mandatory fields with default values if missing
@@ -99,6 +99,21 @@ public class ShutDownPlanController {
                 return ResponseEntity.ok(shutDownPlanDTO);
             }
 		  
+		  @PutMapping(value = "/editShutdownData/{plantMaintenanceTransactionId}")
+          public ResponseEntity<ShutDownPlanDTO> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId, @RequestBody ShutDownPlanDTO shutDownPlanDTO) {
+              
+			  PlantMaintenanceTransaction plantMaintenanceTransaction=shutDownPlanService.editShutDownPlanData(plantMaintenanceTransactionId);
+			  plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+			  plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
+			  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+			  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+			  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());             
+              // Save entity
+              shutDownPlanService.saveShutdownData(plantMaintenanceTransaction);
+              
+              return ResponseEntity.ok(shutDownPlanDTO);
+          }
+
 		  
 
 }

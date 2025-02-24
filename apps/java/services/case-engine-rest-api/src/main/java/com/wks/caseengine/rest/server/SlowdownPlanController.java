@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -81,11 +82,27 @@ public class SlowdownPlanController {
 		plantMaintenanceTransaction.setCreatedOn(new Date());
 		
 		// plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
-		plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate().floatValue());
+		plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
 
 		plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 		shutDownPlanService.saveShutdownData(plantMaintenanceTransaction);
 		return ResponseEntity.ok(shutDownPlanDTO); 
 	}
+	
+	@PutMapping(value = "/editSlowdownData/{plantMaintenanceTransactionId}")
+    public ResponseEntity<ShutDownPlanDTO> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId, @RequestBody ShutDownPlanDTO shutDownPlanDTO) {
+        
+		  PlantMaintenanceTransaction plantMaintenanceTransaction=shutDownPlanService.editShutDownPlanData(plantMaintenanceTransactionId);
+		  plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+		  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+		  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+		  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+		  plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
+		  plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+        // Save entity
+        shutDownPlanService.saveShutdownData(plantMaintenanceTransaction);
+        
+        return ResponseEntity.ok(shutDownPlanDTO);
+    }
 	
 }

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,7 +47,7 @@ public class TurnaroundPlanController {
 			  dto.setMaintStartDateTime((Date)result[1]);
 			  dto.setMaintEndDateTime((Date) result[2]);
 			  // dto.setDurationInMins((Integer) result[3]); // Duration in minutes
-			  dto.setDurationInMins(result[3] != null ? ((Number) result[3]).longValue() : 0L); 
+			  dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : 0); 
 			  double durationInHrs = ((Integer) result[3]) / 60.0;
 			  dto.setDurationInHrs(durationInHrs);
 			  dto.setRemark((String)result[4]);
@@ -75,5 +76,21 @@ public class TurnaroundPlanController {
 		shutDownPlanService.saveShutdownData(plantMaintenanceTransaction);
 		return ResponseEntity.ok(shutDownPlanDTO); 
 	}
+	
+	@PutMapping(value = "/editTurnaroundData/{plantMaintenanceTransactionId}")
+    public ResponseEntity<ShutDownPlanDTO> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId, @RequestBody ShutDownPlanDTO shutDownPlanDTO) {
+        
+		  PlantMaintenanceTransaction plantMaintenanceTransaction=shutDownPlanService.editShutDownPlanData(plantMaintenanceTransactionId);
+		  plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+		  plantMaintenanceTransaction.setDurationInHrs((shutDownPlanDTO.getDurationInMins())/60.0);
+		  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+		  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+		  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+		  plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+        // Save entity
+        shutDownPlanService.saveShutdownData(plantMaintenanceTransaction);
+        
+        return ResponseEntity.ok(shutDownPlanDTO);
+    }
 
 }
