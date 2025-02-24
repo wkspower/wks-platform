@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -87,10 +88,16 @@ public class TurnaroundPlanController {
 		  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 		  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
 		  plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
-        // Save entity
-        shutDownPlanService.saveShutdownData(plantMaintenanceTransaction);
+	        // Save entity
+	        shutDownPlanService.saveShutdownData(plantMaintenanceTransaction);
         
         return ResponseEntity.ok(shutDownPlanDTO);
+    }
+	
+	@DeleteMapping("/deleteTurnaroundData/{plantMaintenanceTransactionId}")
+    public ResponseEntity<String> deletePlant(@PathVariable UUID plantMaintenanceTransactionId) {
+	  	shutDownPlanService.deletePlanData(plantMaintenanceTransactionId);
+        return ResponseEntity.ok("Plant with ID " + plantMaintenanceTransactionId + " deleted successfully");
     }
 
 }

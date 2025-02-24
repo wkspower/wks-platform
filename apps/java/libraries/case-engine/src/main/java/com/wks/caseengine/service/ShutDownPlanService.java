@@ -12,6 +12,6 @@ public interface ShutDownPlanService {
 	public void saveShutdownData(PlantMaintenanceTransaction plantMaintenanceTransaction);
 	public UUID findIdByPlantIdAndMaintenanceTypeName(UUID plantId,String maintenanceTypeName);
 	public PlantMaintenanceTransaction editShutDownPlanData(UUID plantMaintenanceTransactionId);
-	
+	public void deletePlanData(UUID plantMaintenanceTransactionId);
 
 }

@@ -45,8 +45,12 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	public PlantMaintenanceTransaction editShutDownPlanData(UUID plantMaintenanceTransactionId) {
 		Optional<PlantMaintenanceTransaction> plantMaintenanceTransaction=	shutDownPlanRepository.findById(plantMaintenanceTransactionId);
 		return plantMaintenanceTransaction.get();
-			
-		
+	}
+
+	@Override
+	public void deletePlanData(UUID plantMaintenanceTransactionId) {
+		Optional<PlantMaintenanceTransaction> plantMaintenanceTransaction=plantMaintenanceTransactionRepository.findById(plantMaintenanceTransactionId);
+		plantMaintenanceTransactionRepository.delete(plantMaintenanceTransaction.get());	
 	}
 
 }
