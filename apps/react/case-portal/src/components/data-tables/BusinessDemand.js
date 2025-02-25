@@ -29,25 +29,25 @@ const BusinessDemand = () => {
       const transformed = {}
 
       inputData.forEach((item) => {
-        const productKey = item.Product
+        const productKey = item.NormParametersId
 
         if (!transformed[productKey]) {
           transformed[productKey] = {
             product: productKey,
-            apr24: 0,
-            may24: 0,
-            jun24: 0,
-            jul24: 0,
-            aug24: 0,
-            sep24: 0,
-            oct24: 0,
-            nov24: 0,
-            dec24: 0,
-            jan25: 0,
-            feb25: 0,
-            mar25: 0,
-            averageTPH: 0,
-            remark: '',
+            apr24: item.apr24,
+            may24: item.may24,
+            jun24: item.jun24,
+            jul24: item.jul24,
+            aug24: item.aug24,
+            sep24: item.aug24,
+            oct24: item.oct24,
+            nov24: item.nov24,
+            dec24: item.dec24,
+            jan25: item.jan25,
+            feb25: item.feb25,
+            mar25: item.mar25,
+            averageTPH: item.TPH,
+            remark: item.Remark,
           }
         }
 

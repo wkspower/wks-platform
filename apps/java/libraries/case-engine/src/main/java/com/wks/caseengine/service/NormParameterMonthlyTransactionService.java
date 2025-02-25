@@ -6,6 +6,8 @@ import java.util.UUID;
 
 public interface NormParameterMonthlyTransactionService {
 	
-	public	List<Map<String, Object>> getBusinessDemandData(int year, UUID plantId, UUID siteId);
+	public String getBusinessDemandData(int year, UUID plantId, UUID siteId);
+
+	public String getProductionNormData(int year, UUID plantId, UUID siteId);
 
 }

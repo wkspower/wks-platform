@@ -20,8 +20,20 @@ public class NormParameterMonthlyTransactionController{
 	private NormParameterMonthlyTransactionService normParameterMonthlyTransactionService;
 	
 	@GetMapping(value="/getBusinessDemandData")
-	public	List<Map<String, Object>> getBusinessDemandData(@RequestParam int year,@RequestParam UUID plantId,@RequestParam UUID siteId){	
-		return normParameterMonthlyTransactionService.getBusinessDemandData(year, plantId, siteId);
-		
+	public	String getBusinessDemandData(@RequestParam int year,@RequestParam UUID plantId,@RequestParam UUID siteId){	
+	
+		 String obj = normParameterMonthlyTransactionService.getBusinessDemandData(year, plantId, siteId);
+		System.out.println("obj "+obj);
+		 return obj;
 	}
+
+
+	@GetMapping(value="/getProductionNormData")
+	public	String getProductionNormData(@RequestParam int year,@RequestParam UUID plantId,@RequestParam UUID siteId){	
+	
+		 String obj = normParameterMonthlyTransactionService.getProductionNormData(year, plantId, siteId);
+		System.out.println("obj "+obj);
+		 return obj;
+	}
+	// s
 }

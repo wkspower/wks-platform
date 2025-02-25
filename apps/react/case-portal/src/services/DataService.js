@@ -129,7 +129,7 @@ async function getProductById(keycloak, id) {
   }
 }
 async function getBDData(keycloak) {
-  const url = `${process.env.REACT_APP_API_URL}/task/getBusinessDemandData?year=2025&plantId=7B7E0D7C-2666-43BB-847C-D78E144673DE&siteId=58326F41-F3C4-4C0C-9895-1A52C435255A`
+  const url = `${process.env.REACT_APP_API_URL}/task/getBusinessDemandData?year=2024&plantId=7B7E0D7C-2666-43BB-847C-D78E144673DE&siteId=58326F41-F3C4-4C0C-9895-1A52C435255A`
 
   const headers = {
     Accept: 'application/json',
@@ -146,7 +146,7 @@ async function getBDData(keycloak) {
   }
 }
 async function getCatalystSelectivityData(keycloak) {
-  const url = `${process.env.REACT_APP_API_URL}/task/getCatalystSelectivityData?year=2025&plantId=7B7E0D7C-2666-43BB-847C-D78E144673DE&siteId=58326F41-F3C4-4C0C-9895-1A52C435255A`
+  const url = `${process.env.REACT_APP_API_URL}/task/getCatalystSelectivityData?year=2024&plantId=7B7E0D7C-2666-43BB-847C-D78E144673DE&siteId=58326F41-F3C4-4C0C-9895-1A52C435255A`
 
   const headers = {
     Accept: 'application/json',
@@ -163,7 +163,7 @@ async function getCatalystSelectivityData(keycloak) {
   }
 }
 async function getProductionNormsData(keycloak) {
-  const url = `${process.env.REACT_APP_API_URL}/task/getProductionNormsData?year=2025&plantId=7B7E0D7C-2666-43BB-847C-D78E144673DE&siteId=58326F41-F3C4-4C0C-9895-1A52C435255A`
+  const url = `${process.env.REACT_APP_API_URL}/task/getProductionNormsData?year=2024&plantId=7B7E0D7C-2666-43BB-847C-D78E144673DE&siteId=58326F41-F3C4-4C0C-9895-1A52C435255A`
 
   const headers = {
     Accept: 'application/json',
