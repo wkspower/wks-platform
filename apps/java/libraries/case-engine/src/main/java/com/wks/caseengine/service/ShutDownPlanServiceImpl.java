@@ -27,7 +27,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	@Override
 	public List<ShutDownPlanDTO> findMaintenanceDetailsByPlantIdAndType(UUID plantId,String maintenanceTypeName) {
 		List<ShutDownPlanDTO> dtoList = new ArrayList<>();
-		List<Object[]> listOfSite=	shutDownPlanRepository.findMaintenanceDetailsByPlantIdAndType(plantId,maintenanceTypeName);
+		List<Object[]> listOfSite=	shutDownPlanRepository.findMaintenanceDetailsByPlantIdAndType(maintenanceTypeName);
 		for (Object[] result : listOfSite) {
             ShutDownPlanDTO dto = new ShutDownPlanDTO();
             dto.setDiscription((String) result[0]);

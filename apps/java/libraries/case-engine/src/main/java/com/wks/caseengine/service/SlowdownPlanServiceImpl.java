@@ -28,7 +28,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 		
 		List<Object[]> listOfSite=null;
 		try {
-			listOfSite =slowdownPlanRepository.findSlowdownPlanDetailsByPlantIdAndType(plantId,maintenanceTypeName);
+			listOfSite =slowdownPlanRepository.findSlowdownPlanDetailsByPlantIdAndType(maintenanceTypeName);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

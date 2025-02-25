@@ -25,7 +25,7 @@ public interface ShutDownPlanRepository extends JpaRepository<PlantMaintenanceTr
             "LEFT JOIN NormParameters np ON pm.NormParameter_FK_Id = np.Id " +
             "WHERE mt.Name = :maintenanceTypeName", 
             nativeQuery = true)
-	List<Object[]> findMaintenanceDetailsByPlantIdAndType(@Param("plantId") UUID plantId, 
+	List<Object[]> findMaintenanceDetailsByPlantIdAndType( 
         @Param("maintenanceTypeName") String maintenanceTypeName);
 
     

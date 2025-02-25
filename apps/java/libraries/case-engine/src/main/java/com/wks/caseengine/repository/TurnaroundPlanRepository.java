@@ -26,7 +26,7 @@ public interface TurnaroundPlanRepository extends JpaRepository<PlantMaintenance
             "LEFT JOIN NormParameters np ON pm.NormParameter_FK_Id = np.Id " +
             "WHERE mt.Name = :maintenanceTypeName", 
             nativeQuery = true)
-	List<Object[]> findTurnaroundPlanDetailsByPlantIdAndType(@Param("plantId") UUID plantId, 
+	List<Object[]> findTurnaroundPlanDetailsByPlantIdAndType( 
         @Param("maintenanceTypeName") String maintenanceTypeName);
 
 

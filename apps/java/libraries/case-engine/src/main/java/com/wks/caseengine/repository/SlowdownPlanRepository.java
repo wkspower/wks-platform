@@ -28,7 +28,7 @@ public interface SlowdownPlanRepository extends JpaRepository<PlantMaintenanceTr
             "LEFT JOIN NormParameters np ON pm.NormParameter_FK_Id = np.Id " +
             "WHERE mt.Name = :maintenanceTypeName", 
             nativeQuery = true)
-	List<Object[]> findSlowdownPlanDetailsByPlantIdAndType(@Param("plantId") UUID plantId, 
+	List<Object[]> findSlowdownPlanDetailsByPlantIdAndType( 
         @Param("maintenanceTypeName") String maintenanceTypeName);
 
 
