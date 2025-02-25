@@ -30,7 +30,6 @@ const productionColumns = [
   { field: 'mar25', headerName: 'Mar-25', width: 100, editable: true },
 ]
 
-
 const FeedStockAvailability = () => {
   const keycloak = useSession()
   const [productOptions, setProductOptions] = useState([])
@@ -80,6 +79,14 @@ const FeedStockAvailability = () => {
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[10, 20, 30]}
+        permissions={{
+          showAction: true,
+          addButton: true,
+          deleteButton: true,
+          editButton: true,
+          showUnit: true,
+          saveWithRemark: true,
+        }}
       />
     </div>
   )

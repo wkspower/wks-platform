@@ -7,31 +7,18 @@ import {
   Typography,
   Box,
   InputAdornment,
-
-
-
-
 } from '@mui/material'
-
-
 
 import {
   GridRowModes,
-  
   GridToolbarContainer,
   GridActionsCellItem,
   GridRowEditStopReasons,
-} from '@mui/x-data-grid';
+} from '@mui/x-data-grid'
 // import MoreVertIcon from '@mui/icons-material/MoreVert'
 import SearchIcon from '@mui/icons-material/Search'
 // import FilterAltIcon from '@mui/icons-material/FilterAlt'
 // import EditIcon from '@mui/icons-material/Edit'
-
-
-
-
-
-
 
 import { useSession } from 'SessionStoreContext'
 
@@ -47,12 +34,11 @@ import { MenuItem } from '../../../node_modules/@mui/material/index'
 
 import Notification from 'components/Utilities/Notification'
 
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add'
+import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Close';
-
+import SaveIcon from '@mui/icons-material/Save'
+import CancelIcon from '@mui/icons-material/Close'
 
 import {
   FileDownload,
@@ -78,6 +64,7 @@ const DataGridTable = ({
   onAddRow,
   onDeleteRow,
   onRowUpdate,
+  permissions,
 }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [openYearData, setOpenYearData] = useState(false)
@@ -98,7 +85,6 @@ const DataGridTable = ({
   const [selectedRowId, setSelectedRowId] = useState(null) // Store selected row ID
   const unitOptions = ['In percentage (%)', 'Absolute number']
   const [selectedUnit, setSelectedUnit] = useState()
-
   const handleOpenRemark = () => setOpenRemark(true)
   const handleCloseRemark = () => setOpenRemark(false)
   const handleClose1 = () => setOpen1(false)
@@ -106,60 +92,52 @@ const DataGridTable = ({
     setSearchText(event.target.value)
   }
 
-
-  
-  const [rowModesModel, setRowModesModel] = useState({});
-
+  const [rowModesModel, setRowModesModel] = useState({})
 
   const handleRowEditStop = (params, event) => {
-    console.log('handleRowEditStop',params);
-    
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
+    console.log('handleRowEditStop', params)
 
+    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
+      event.defaultMuiPrevented = true
+    }
+  }
 
   const handleRowEditCommit = (id, event) => {
-    const editedRow = rows.find(row => row.id === id);
-    console.log("Row Data After Editing:", editedRow);
-  };
-  
+    const editedRow = rows.find((row) => row.id === id)
+    console.log('Row Data After Editing:', editedRow)
+  }
 
   const handleEditClick = (id) => () => {
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
-  };
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } })
+  }
 
   // const handleSaveClick = (id) => () => {
   //   setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   // };
 
-
   // const handleSaveClick = (id) => () => {
-
-
 
   //   console.log(id);
   //   console.log(rows);
 
   //   handleRowEditCommit(id)
-    
+
   //   const rowData = rows.find((row) => row.id === id);
-  
+
   //   console.log('Full Row Data:', rowData); // Log all field values before validation
-  
+
   //   if (!rowData) {
   //     console.error(`No row found for ID: ${id}`);
   //     return;
   //   }
-  
+
   //   // Find empty fields (null, undefined, empty string, or whitespace)
   //   const emptyFields = Object.entries(rowData)
   //     .filter(([key, value]) => value === null || value === undefined || String(value).trim() === '')
   //     .map(([key, value]) => ({ field: key, value })); // Store key-value pairs
-  
+
   //   console.log('Empty Fields:', emptyFields);
-  
+
   //   if (emptyFields.length > 0) {
   //     setSnackbarOpen(true);
   //     setSnackbarMessage(`Please fill the following fields: ${emptyFields.map(f => f.field).join(', ')}`);
@@ -168,67 +146,201 @@ const DataGridTable = ({
   //     setRowModesModel((prev) => ({ ...prev, [id]: { mode: GridRowModes.View } }));
   //   }
   // };
+  const caseData = {
+    caseDefinitionId: 'parallel-case',
+    owner: {
+      id: '6b66866b-f293-11ef-a904-0242ac12000a',
+      name: 'demo demo',
+      email: 'demo@demo.com',
+      phone: '',
+    },
+    attributes: [
+      { name: 'textField', value: '9', type: 'String' },
+      { name: 'submit', value: false, type: 'String' },
+      { name: 'submit1', value: false, type: 'String' },
+    ],
+  }
+  // const caseData = {
+  //   caseDefinitionId: 'parallel-case',
+  //   owner: {
+  //     id: '6b66866b-f293-11ef-a904-0242ac12000a',
+  //     // id: '1619205a-e115-4e54-97d4-58bf519f3bb1',
+  //     name: 'demo demo',
+  //     email: 'demo@demo.com',
+  //     phone: '',
+  //   },
+  //   attributes: [
+  //     { name: 'textField', value: '9', type: 'String' },
+  //     { name: 'submit', value: true, type: 'String' },
+  //     { name: 'submit1', value: true, type: 'String' },
+  //   ],
+  // }
 
+  // useEffect(() => {
+  //   console.log('api call here ')
+  //   createCase(keycloak, caseData)
+  //   getTasksByBusinessKey(keycloak, '54366')
+  //   getProcessInstanceVariables(keycloak, '54366')
+  //   completeTask(keycloak, '54366', { textField: '9', submit: true })
+  //   // getPlantAndSite()
+  //   // getShutDownPlantData()
+  //   // getSlowDownPlantData()
+  //   // getTAPlantData()
+  //   // getAllProducts()
+  //   // getYearlyData('2025')
+  //   console.log('rows')
+  // }, [])
+  const BASE_URL = 'http://localhost:8081'
 
+  async function createCase(keycloak, caseData) {
+    const url = `${BASE_URL}/case`
+    const headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${keycloak.token}`,
+    }
 
+    try {
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(caseData),
+      })
+      console.log(resp)
+      return resp.json()
+    } catch (e) {
+      console.log(e)
+      return Promise.reject(e)
+    }
+  }
 
+  async function getTasksByBusinessKey(keycloak, businessKey) {
+    const url = `${BASE_URL}/task?businessKey=${businessKey}`
+    const headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${keycloak.token}`,
+    }
 
-  const handleSaveClick = (id, params) => {  
+    try {
+      const resp = await fetch(url, { method: 'GET', headers })
+      console.log(resp)
+      return resp.json()
+    } catch (e) {
+      console.log(e)
+      return Promise.reject(e)
+    }
+  }
 
-    console.log("Newly Added Row Data:", params);
+  async function getProcessInstanceVariables(keycloak, processInstanceId) {
+    const url = `${BASE_URL}/variable?processInstanceId=${processInstanceId}`
+    const headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${keycloak.token}`,
+    }
+
+    try {
+      const resp = await fetch(url, { method: 'GET', headers })
+      console.log(resp)
+      return resp.json()
+    } catch (e) {
+      console.log(e)
+      return Promise.reject(e)
+    }
+  }
+
+  // useEffect(() => {
+  //   callAPIsSequentially();
+  // }, []);
+
+  const callAPIsSequentially = async () => {
+    try {
+      console.log('Starting API sequence...')
+
+      // Step 1: Create Case
+      // console.log('Creating case...')
+      const caseResponse = await createCase(keycloak, caseData)
+      console.log('Case Created:', caseResponse)
+
+      // Step 2: Get Tasks by Business Key
+      console.log('Fetching tasks by business key...', caseResponse.businessKey)
+      const tasksResponse = await getTasksByBusinessKey(keycloak, '54366')
+      console.log('Tasks Fetched:', tasksResponse)
+
+      // Step 3: Get Process Instance Variables
+      console.log('Fetching process instance variables...')
+      const variablesResponse = await getProcessInstanceVariables(
+        keycloak,
+        '54366',
+      )
+      console.log('Process Variables Fetched:', variablesResponse)
+
+      console.log('All API calls completed successfully.')
+    } catch (error) {
+      console.error('Error in API sequence:', error)
+    }
+  }
+
+  async function completeTask(keycloak, taskId, payload) {
+    const url = `${BASE_URL}/task/${taskId}/complete`
+    const headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${keycloak.token}`,
+    }
+
+    try {
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      })
+      console.log(resp)
+      return resp.json()
+    } catch (e) {
+      console.log(e)
+      return Promise.reject(e)
+    }
+  }
+  const handleSaveClick = (id, params) => {
+    console.log('Newly Added Row Data:', params)
     setRowModesModel((prev) => ({
       ...prev,
       [id]: { mode: GridRowModes.View },
-    }));
+    }))
+  }
 
-  };
-  
-
-
-
-
-  
   useEffect(() => {
-    console.log("Updated Rows!!!!!!!!!!!!!!!!!!!!!!!:", rows);
-  }, [rows]);
-  
+    console.log('Updated Rows!!!!!!!!!!!!!!!!!!!!!!!:', rows)
+  }, [rows])
 
   const handleDeleteClick = (id) => () => {
-
     setOpen1(true)
     setDeleteId(id)
     // setRows(rows.filter((row) => row.id !== id));
-  };
+  }
 
   const handleCancelClick = (id) => () => {
     setRowModesModel({
       ...rowModesModel,
       [id]: { mode: GridRowModes.View, ignoreModifications: true },
-    });
+    })
 
-    const editedRow = rows.find((row) => row.id === id);
+    const editedRow = rows.find((row) => row.id === id)
     if (editedRow.isNew) {
-      setRows(rows.filter((row) => row.id !== id));
+      setRows(rows.filter((row) => row.id !== id))
     }
-  };
-
-
+  }
 
   const handleRowModesModelChange = (newRowModesModel) => {
-    setRowModesModel(newRowModesModel);
-  };
-
-
-
-
+    setRowModesModel(newRowModesModel)
+  }
 
   useEffect(() => {
-    console.log("Updated initialRows:", initialRows);
-    setRows(initialRows);
-  }, [initialRows]);
-
-  
-
+    console.log('Updated initialRows:', initialRows)
+    setRows(initialRows)
+  }, [initialRows])
 
   const onColumnResized = (params) => {
     if (params.column) {
@@ -266,6 +378,8 @@ const DataGridTable = ({
   // }
   const handleImportExport = () => {
     alert('File Import/Export feature coming soon!')
+    // alert('all api called')
+    // callAPIsSequentially()
   }
 
   const filteredRows = rows.filter((row) => {
@@ -286,14 +400,14 @@ const DataGridTable = ({
   //   setSelectedRow(null)
   // }
 
-  const handleDeleteRow = (id) => {
-    setDeleteId(id)
-    setOpen1(true)
-  }
+  // const handleDeleteRow = (id) => {
+  //   setDeleteId(id)
+  //   setOpen1(true)
+  // }
 
   const deleteTheRecord = () => {
     const updatedRows = rows.filter((row) => row?.id !== deleteId)
-    setRows(rows.filter((row) => row.id !== deleteId));
+    setRows(rows.filter((row) => row.id !== deleteId))
     setRows(updatedRows)
     onDeleteRow?.(deleteId)
     setDeleteId(null)
@@ -308,36 +422,37 @@ const DataGridTable = ({
     setRows(updatedRows)
     onRowUpdate?.(updatedRow) // Call the onRowUpdate prop if provided
 
-    console.log('updatedRow',updatedRow);
-    
+    console.log('updatedRow', updatedRow)
+
     return updatedRow
   }
 
   const handleAddRow = () => {
-    const newRowId = rows.length ? Math.max(...rows.map((row) => row.id)) + 1 : 1;
-  
+    const newRowId = rows.length
+      ? Math.max(...rows.map((row) => row.id)) + 1
+      : 1
+
     const newRow = {
       id: newRowId,
       isNew: true, // Mark row as new
       ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])), // Empty values
-    };
-  
+    }
+
     // ? Add new row **at the bottom** of the existing rows
-    setRows((prevRows) => [...prevRows, newRow]);
-  
+    setRows((prevRows) => [...prevRows, newRow])
+
     // ? Trigger onAddRow callback
-    onAddRow?.(newRow);
-  
+    onAddRow?.(newRow)
+
     // ? Clear product input
-    setProduct('');
-  
+    setProduct('')
+
     // ? Enable edit mode for the new row
     setRowModesModel((oldModel) => ({
       ...oldModel,
       [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
-    }));
-  };
-  
+    }))
+  }
 
   useEffect(() => {
     console.log('api call here ')
@@ -350,92 +465,92 @@ const DataGridTable = ({
     // getAllProducts()
     // getYearlyData('2025')
     // getYearlyData('2025')
-    console.log('rows',rows);
+    console.log('rows', rows)
   }, [rows])
 
-  const dummyApiCall = async (id) => {
-    try {
-      const data = await DataService.getProductById(keycloak, id)
-      console.log('API Response:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
-  const getYearlyData = async (year) => {
-    try {
-      const data = await DataService.getYearlyData(keycloak, year)
-      console.log('API getYearlyData:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
-  const getPlantAndSite = async () => {
-    try {
-      const data = await DataService.getAllSites(keycloak)
-      console.log('API Response:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
-  const getShutDownPlantData = async () => {
-    try {
-      const data = await DataService.getShutDownPlantData(keycloak)
-      console.log('API Response:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
-  const getSlowDownPlantData = async () => {
-    try {
-      const data = await DataService.getSlowDownPlantData(keycloak)
-      console.log('API Response:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
+  // const dummyApiCall = async (id) => {
+  //   try {
+  //     const data = await DataService.getProductById(keycloak, id)
+  //     console.log('API Response:', data)
+  //   } catch (error) {
+  //     console.error('Error fetching product:', error)
+  //   } finally {
+  //     // handleMenuClose();
+  //   }
+  // }
+  // const getYearlyData = async (year) => {
+  //   try {
+  //     const data = await DataService.getYearlyData(keycloak, year)
+  //     console.log('API getYearlyData:', data)
+  //   } catch (error) {
+  //     console.error('Error fetching product:', error)
+  //   } finally {
+  //     // handleMenuClose();
+  //   }
+  // }
+  // const getPlantAndSite = async () => {
+  //   try {
+  //     const data = await DataService.getAllSites(keycloak)
+  //     console.log('API Response:', data)
+  //   } catch (error) {
+  //     console.error('Error fetching product:', error)
+  //   } finally {
+  //     // handleMenuClose();
+  //   }
+  // }
+  // const getShutDownPlantData = async () => {
+  //   try {
+  //     const data = await DataService.getShutDownPlantData(keycloak)
+  //     console.log('API Response:', data)
+  //   } catch (error) {
+  //     console.error('Error fetching product:', error)
+  //   } finally {
+  //     // handleMenuClose();
+  //   }
+  // }
+  // const getSlowDownPlantData = async () => {
+  //   try {
+  //     const data = await DataService.getSlowDownPlantData(keycloak)
+  //     console.log('API Response:', data)
+  //   } catch (error) {
+  //     console.error('Error fetching product:', error)
+  //   } finally {
+  //     // handleMenuClose();
+  //   }
+  // }
 
-  const getTAPlantData = async () => {
-    try {
-      const data = await DataService.getTAPlantData(keycloak)
-      console.log('API Response:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
-  const getAllProducts = async () => {
-    try {
-      const data = await DataService.getAllProducts(keycloak)
-      console.log('API Response:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
+  // const getTAPlantData = async () => {
+  //   try {
+  //     const data = await DataService.getTAPlantData(keycloak)
+  //     console.log('API Response:', data)
+  //   } catch (error) {
+  //     console.error('Error fetching product:', error)
+  //   } finally {
+  //     // handleMenuClose();
+  //   }
+  // }
+  // const getAllProducts = async () => {
+  //   try {
+  //     const data = await DataService.getAllProducts(keycloak)
+  //     console.log('API Response:', data)
+  //   } catch (error) {
+  //     console.error('Error fetching product:', error)
+  //   } finally {
+  //     // handleMenuClose();
+  //   }
+  // }
 
-  const handleSaveRow = (id) => {
-    const updatedRows = rows.map((row) =>
-      row.id === id ? { ...row, isNew: false } : row,
-    )
-    setRows(updatedRows)
-  }
+  // const handleSaveRow = (id) => {
+  //   const updatedRows = rows.map((row) =>
+  //     row.id === id ? { ...row, isNew: false } : row,
+  //   )
+  //   setRows(updatedRows)
+  // }
 
-  const handleCancelRow = (id) => {
-    const updatedRows = rows.filter((row) => row.id !== id)
-    setRows(updatedRows)
-  }
+  // const handleCancelRow = (id) => {
+  //   const updatedRows = rows.filter((row) => row.id !== id)
+  //   setRows(updatedRows)
+  // }
 
   const defaultColumns = useMemo(() => {
     return initialColumns.map((col) => ({
@@ -443,63 +558,129 @@ const DataGridTable = ({
       flex: !resizedColumns[col.field] ? 1 : undefined,
     }))
   }, [initialColumns, resizedColumns])
+  // const columns = [
+  //   ...defaultColumns,
+  //   ...(title != 'Production Volume Data'
+  //     ? [
+  //         {
+  //           field: 'actions',
+  //           type: 'actions',
+  //           headerName: 'Actions',
+  //           width: 180,
+  //           cellClassName: 'actions',
+
+  //           getActions: (params) => {
+  //             const { id } = params // Extract row data
+  //             const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
+
+  //             if (isInEditMode) {
+  //               return [
+  //                 <GridActionsCellItem
+  //                   key={`save-${id}`}
+  //                   icon={<SaveIcon />}
+  //                   label='Save'
+  //                   sx={{ color: 'primary.main' }}
+  //                   onClick={() => handleSaveClick(id, params)} // Pass row data
+  //                 />,
+  //                 <GridActionsCellItem
+  //                   key={`cancel-${id}`}
+  //                   icon={<CancelIcon />}
+  //                   label='Cancel'
+  //                   className='textPrimary'
+  //                   onClick={() => handleCancelClick(id)}
+  //                   color='inherit'
+  //                 />,
+  //               ]
+  //             }
+
+  //             return [
+  //               <GridActionsCellItem
+  //                 key={`save-${id}`}
+  //                 icon={<EditIcon sx={{ color: jioColors.primaryBlue }} />}
+  //                 label='Edit'
+  //                 className='textPrimary'
+  //                 onClick={() => handleEditClick(id)}
+  //                 color='inherit'
+  //               />,
+  //               <GridActionsCellItem
+  //                 key={`save-${id}`}
+  //                 icon={<DeleteIcon sx={{ color: jioColors.accentRed }} />}
+  //                 label='Delete'
+  //                 onClick={() => handleDeleteClick(id)}
+  //                 color='inherit'
+  //               />,
+  //             ]
+  //           },
+  //           minWidth: 70,
+  //           maxWidth: 100,
+  //           headerClassName: 'last-column-header',
+  //         },
+  //       ]
+  //     : []),
+  // ]
+
   const columns = [
     ...defaultColumns,
-    ...(title != 'Production Volume Data'
+    ...(permissions?.showAction
       ? [
-        {
-          field: 'actions',
-          type: 'actions',
-          headerName: 'Actions',
-          width: 180,
-          cellClassName: 'actions',
+          {
+            field: 'actions',
+            type: 'actions',
+            headerName: 'Actions',
+            width: 180,
+            cellClassName: 'actions',
+            getActions: (params) => {
+              const { id } = params // Extract row data
+              const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
 
+              if (isInEditMode) {
+                return [
+                  <GridActionsCellItem
+                    key={`save-${id}`}
+                    icon={<SaveIcon />}
+                    label='Save'
+                    sx={{ color: 'primary.main' }}
+                    onClick={() => handleSaveClick(id, params)} // Pass row data
+                  />,
+                  <GridActionsCellItem
+                    key={`cancel-${id}`}
+                    icon={<CancelIcon />}
+                    label='Cancel'
+                    className='textPrimary'
+                    onClick={() => handleCancelClick(id)}
+                    color='inherit'
+                  />,
+                ]
+              }
 
-
-          getActions: (params) => {
-            const { id, row } = params;  // Extract row data
-            const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-
-            if (isInEditMode) {
               return [
-                <GridActionsCellItem
-                  icon={<SaveIcon />}
-                  label="Save"
-                  sx={{ color: 'primary.main' }}
-                  onClick={() => handleSaveClick(id, params)} // Pass row data
-                />,
-                <GridActionsCellItem
-                  icon={<CancelIcon />}
-                  label="Cancel"
-                  className="textPrimary"
-                  onClick={() => handleCancelClick(id)}
-                  color="inherit"
-                />,
-              ];
-            }
-
-            return [
-              <GridActionsCellItem
-                icon={<EditIcon sx={{ color: jioColors.primaryBlue }} />}
-                label="Edit"
-                className="textPrimary"
-                onClick={() => handleEditClick(id)}
-                color="inherit"
-              />,
-              <GridActionsCellItem
-                icon={<DeleteIcon sx={{ color: jioColors.accentRed }} />}
-                label="Delete"
-                onClick={() => handleDeleteClick(id)}
-                color="inherit"
-              />,
-            ];
-          },
+                permissions?.editButton && (
+                  <GridActionsCellItem
+                    key={`edit-${id}`}
+                    icon={<EditIcon sx={{ color: jioColors.primaryBlue }} />}
+                    label='Edit'
+                    className='textPrimary'
+                    onClick={() => handleEditClick(id)}
+                    color='inherit'
+                  />
+                ),
+                permissions?.deleteButton && (
+                  <GridActionsCellItem
+                    key={`delete-${id}`}
+                    icon={<DeleteIcon sx={{ color: jioColors.accentRed }} />}
+                    label='Delete'
+                    onClick={() => handleDeleteClick(id)}
+                    color='inherit'
+                  />
+                ),
+              ].filter(Boolean) // Remove `null` values if permission is false
+            },
             minWidth: 70,
             maxWidth: 100,
             headerClassName: 'last-column-header',
           },
         ]
-      : []),
+      : []), // If no permissions, hide the Actions column
   ]
 
   const addRemark = () => {
@@ -621,26 +802,25 @@ const DataGridTable = ({
           return
         }
 
-        console.log('params-params',params);
-        
+        console.log('params-params', params)
 
         // Calculate days in the selected month
-        const totalDays = new Date(year, month + 1, 0).getDate();
-        const perDayValue = (params.value / totalDays).toFixed(2); // Keep 2 decimal places
+        const totalDays = new Date(year, month + 1, 0).getDate()
+        const perDayValue = (params.value / totalDays).toFixed(2) // Keep 2 decimal places
 
         const daysArray = Array.from({ length: totalDays }, (_, index) => {
-          const date = new Date(year, month, index + 1);
-          const day = String(date.getDate()).padStart(2, '0');
-          const monthName = date.toLocaleString('en-GB', { month: 'short' });
-          const yearShort = date.getFullYear().toString().slice(-2);
+          const date = new Date(year, month, index + 1)
+          const day = String(date.getDate()).padStart(2, '0')
+          const monthName = date.toLocaleString('en-GB', { month: 'short' })
+          const yearShort = date.getFullYear().toString().slice(-2)
 
-          const formattedDate = `${day}-${monthName}-${yearShort}`;
+          const formattedDate = `${day}-${monthName}-${yearShort}`
 
           return {
             date: formattedDate,
             value: parseFloat(perDayValue), // Convert back to number with 2 decimals
-          };
-        });
+          }
+        })
 
         setDays(daysArray)
         setOpen(false)
@@ -678,7 +858,7 @@ const DataGridTable = ({
     }
     console.log('Submitted Data:', days)
     setOpen(false) // Close the modal
-    if (title === 'Production Volume Data') {
+    if (permissions?.saveWithRemark) {
       // Update the row with the new data
       setOpenRemark(true)
       setRows((prevRows) =>
@@ -764,32 +944,7 @@ const DataGridTable = ({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {(title === 'Production Volume Data' ||
-            title === 'Business Demand Data' ||
-            title === 'Feed Stock Availability') && (
-            // <FormControl sx={{ minWidth: 150 }}>
-            //   <Select
-            //     value={selectedUnit}
-            //     onChange={(e) => setSelectedUnit(e.target.value)}
-            //     displayEmpty
-            //     inputProps={{ 'aria-label': 'Unit selection' }}
-            //     sx={{
-            //       width: '150px',
-            //       backgroundColor: jioColors.background,
-            //       color: 'white',
-            //     }}
-            //   >
-            //     <MenuItem value='' disabled>
-            //       Select Unit
-            //     </MenuItem>
-            //     {unitOptions.map((unit) => (
-            //       <MenuItem key={unit} value={unit}>
-            //         {unit}
-            //       </MenuItem>
-            //     ))}
-            //   </Select>
-            // </FormControl>
-
+          {permissions?.showUnit && (
             <TextField
               select
               value={selectedUnit}
@@ -897,24 +1052,20 @@ const DataGridTable = ({
           rows={filteredRows}
           columns={columns.map((col) => ({
             ...col,
-            editable:
-              col.field === 'product' ? rows.length >= 1 : col.editable,
+            editable: col.field === 'product' ? rows.length >= 1 : col.editable,
           }))}
           rowHeight={35}
           processRowUpdate={processRowUpdate}
           onColumnResized={onColumnResized}
           onCellClick={handleCellClick}
           onRowEditCommit={handleRowEditCommit}
-          editMode="row"
+          editMode='row'
           rowModesModel={rowModesModel}
           onRowModesModelChange={handleRowModesModelChange}
           onRowEditStop={handleRowEditStop}
           slotProps={{
             toolbar: { setRows, setRowModesModel },
           }}
-
-
-
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? 'even-row' : 'odd-row'
           }
@@ -1044,7 +1195,7 @@ const DataGridTable = ({
         />
       </Box>
 
-      {title != 'Production Volume Data' && (
+      {permissions.addButton && (
         <Button
           variant='contained'
           sx={{

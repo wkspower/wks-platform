@@ -11,6 +11,8 @@ export const DataService = {
   getSlowDownPlantData,
   getTAPlantData,
   saveShutdownData,
+  saveSlowdownData,
+  saveTurnAroundData,
   createCase,
   getTasksByBusinessKey,
   getProcessInstanceVariables,
@@ -49,6 +51,51 @@ async function saveShutdownData(plantId, shutdownDetails, keycloak) {
       method: 'POST',
       headers,
       body: JSON.stringify(shutdownDetails),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveSlowdownData(plantId, slowDownDetails, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/saveSlowdownData/${plantId}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(slowDownDetails),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+
+async function saveTurnAroundData(plantId, turnAroundDetails, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/saveTurnaroundPlanData/${plantId}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(turnAroundDetails),
     })
     return json(keycloak, resp)
   } catch (e) {
@@ -163,10 +210,10 @@ async function getShutDownPlantData(keycloak) {
 }
 
 async function getSlowDownPlantData(keycloak) {
-  // const plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1';
-  const plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
+  const plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1';
+  // const plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
 
-  const maintenanceTypeName = 'Slowdown' // Assuming the maintenance type is 'Shutdown'
+  const maintenanceTypeName = 'Slowdown' // Assuming the maintenance type is 'Slowdown'
 
   // const storedPlant = localStorage.getItem('selectedPlant')
   // if (storedPlant) {
@@ -192,8 +239,8 @@ async function getSlowDownPlantData(keycloak) {
 }
 
 async function getTAPlantData(keycloak) {
-  // const plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1';
-  const plantId = '3E3FDF54-391D-4BAB-A78F-50EBCA9FBEA6'
+  const plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1';
+  // const plantId = '3E3FDF54-391D-4BAB-A78F-50EBCA9FBEA6'
   const maintenanceTypeName = 'TA_Plan' // Assuming the maintenance type is 'Shutdown'
 
   // const storedPlant = localStorage.getItem('selectedPlant')
@@ -218,6 +265,7 @@ async function getTAPlantData(keycloak) {
     return await Promise.reject(e)
   }
 }
+
 async function getMonthWiseData(keycloak) {
   const url = `${process.env.REACT_APP_API_URL}/getMonthWiseData`
 

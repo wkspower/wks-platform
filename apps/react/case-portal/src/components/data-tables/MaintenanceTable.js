@@ -3,7 +3,7 @@ import ASDataGrid from './ASDataGrid'
 const productionColumns = [
   {
     field: 'description',
-    headerName: 'Description',
+    headerName: 'Description ( in Hrs )',
     editable: true,
     minWidth: 250,
     maxWidth: 300,
@@ -27,7 +27,7 @@ const productionColumns = [
 const productionData = [
   {
     id: 1,
-    description: 'Total available hrs for the month, Hrs',
+    description: 'Total available hrs for the month',
     apr24: 720,
     may24: 720,
     jun24: 720,
@@ -43,7 +43,7 @@ const productionData = [
   },
   {
     id: 2,
-    description: 'Shutdowns, Hrs',
+    description: 'Shutdown',
     apr24: 50,
     may24: 40,
     jun24: 60,
@@ -59,7 +59,7 @@ const productionData = [
   },
   {
     id: 3,
-    description: 'Non-shutdown operating hrs for the month, Hrs',
+    description: 'Non-shutdown operating hrs for the month',
     apr24: 670,
     may24: 680,
     jun24: 660,
@@ -75,7 +75,7 @@ const productionData = [
   },
   {
     id: 4,
-    description: 'Average Slowdown Load, % of PVT',
+    description: 'Average slowdown load, % of PVT',
     apr24: 85,
     may24: 80,
     jun24: 90,
@@ -91,7 +91,7 @@ const productionData = [
   },
   {
     id: 5,
-    description: 'Slowdown load reduction as Shutdown hrs Equivalent, Hrs',
+    description: 'Slowdown load reduction as shutdown hrs equivalent',
     apr24: 30,
     may24: 35,
     jun24: 28,
@@ -107,7 +107,7 @@ const productionData = [
   },
   {
     id: 6,
-    description: 'Effective Operating Hrs @ PVT, Hrs',
+    description: 'Effective operating hrs @ PVT',
     apr24: 640,
     may24: 645,
     jun24: 632,
@@ -197,6 +197,14 @@ const MaintenanceTable = () => (
       onDeleteRow={(id) => console.log('Row Deleted:', id)}
       onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
       paginationOptions={[100, 200, 300]}
+      permissions={{
+        showAction: false,
+        addButton: false,
+        deleteButton: false,
+        editButton: false,
+        showUnit: false,
+        saveWithRemark: true,
+      }}
     />
   </div>
 )
