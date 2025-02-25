@@ -71,7 +71,7 @@ const DataGridTable = ({
     message: '',
     severity: 'info',
   })
-  const [rowModesModel, setRowModesModel] = useState({})
+  // const [rowModesModel, setRowModesModel] = useState({})
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [openYearData, setOpenYearData] = useState(false)
@@ -839,7 +839,7 @@ const DataGridTable = ({
           },
         ]
       : []), // If no permissions, hide the Actions column
-  ]
+  ])
 
   const addRemark = () => {
     console.log('Remark:', remark)
