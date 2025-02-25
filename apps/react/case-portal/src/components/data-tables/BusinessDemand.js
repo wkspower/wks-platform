@@ -100,7 +100,7 @@ const BusinessDemand = () => {
 
   const colDefs = [
 
-    
+
     {
       field: 'product',
       headerName: 'Product',
@@ -187,6 +187,15 @@ const BusinessDemand = () => {
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
+
+        permissions={{
+          showAction: true,
+          addButton: true,
+          deleteButton: true,
+          editButton: true,
+          showUnit: true,
+          saveWithRemark: true,
+        }}
       />
     </div>
   )
