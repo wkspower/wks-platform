@@ -65,55 +65,60 @@ const TurnaroundPlanTable = () => {
       flex: 3,
     },
 
+    
+    {
+      field: 'maintenanceId',
+      headerName: 'maintenanceId',
+      editable: false,
+      hide: true,
+    },
+
+    
+
     {
       field: 'product',
       headerName: 'Product',
       editable: true,
       minWidth: 225,
-      valueGetter: (params) => {
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : params
+      valueGetter: (params , params2) => {
+        // console.log('p1', params); 
+        // console.log('p2', params2); 
+        return params || ''; 
       },
-      renderEditCell: (params) => {
-        const { id } = params
-        const isEditable = id > 0
-
+      valueFormatter: (params) => {
+        console.log('params valueFormatter ',params);
+        const product = allProducts.find((p) => p.id === params);
+        return product ? product.displayName : '';
+      },
+      renderEditCell: (params , params2) => {
+        const { id, value } = params; 
+        // console.log('q1', params); 
+        // console.log('q2', params2); 
         return (
-          <Autocomplete
-            options={allProducts}
-            getOptionLabel={(option) => option.displayName}
-            value={
-              allProducts.find((product) => product.id === params.value) || null
-            }
-            disableClearable
-            onChange={(event, newValue) => {
+          <select
+            value={value || allProducts[0]?.id} 
+            onChange={(event) => {
               params.api.setEditCellValue({
                 id: params.id,
                 field: 'product',
-                value: newValue ? newValue.id : '',
-              })
+                value: event.target.value, 
+              });
             }}
-            onInputChange={(event, newInputValue) => {
-              if (event && event.type === 'keydown' && event.key === 'Enter') {
-                const selectedProduct = allProducts.find(
-                  (product) =>
-                    product.displayName.toLowerCase() ===
-                    newInputValue.toLowerCase(),
-                )
-                params.api.setEditCellValue({
-                  id: params.id,
-                  field: 'product',
-                  value: selectedProduct ? selectedProduct.id : '',
-                })
-              }
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none',  // Removes border
+              outline: 'none', // Removes focus outline
+              background: 'transparent', // Keeps background clean
             }}
-            renderInput={(params) => (
-              <TextField {...params} variant='outlined' size='small' />
-            )}
-            disabled={!isEditable}
-            fullWidth
-          />
-        )
+          >
+            {allProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.displayName}
+              </option>
+            ))}
+          </select>
+        );
       },
     },
 
@@ -151,7 +156,7 @@ const TurnaroundPlanTable = () => {
       field: 'durationInMins',
       headerName: 'Duration (hrs)',
       editable: true,
-      type: 'number',
+      // type: 'number',
       minWidth: 100,
       maxWidth: 150,
       renderCell: (params) => {

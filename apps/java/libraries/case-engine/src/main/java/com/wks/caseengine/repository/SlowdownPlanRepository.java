@@ -21,7 +21,7 @@ public interface SlowdownPlanRepository extends JpaRepository<PlantMaintenanceTr
             "pm.Remarks, " +
             "pmt.MaintenanceText, " +
             "pm.Id, " +
-            "np.Name " +
+            "np.Id " +
             "FROM [RIL.AOP].[dbo].[PlantMaintenanceTransaction] pm " +
             "JOIN [RIL.AOP].[dbo].[PlantMaintenance] pmt ON pm.PlantMaintenance_FK_Id = pmt.Id " +
             "JOIN [RIL.AOP].[dbo].[MaintenanceTypes] mt ON pmt.MaintenanceType_FK_Id = mt.Id " +

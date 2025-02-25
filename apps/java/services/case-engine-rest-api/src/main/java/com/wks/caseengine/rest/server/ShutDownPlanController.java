@@ -70,6 +70,9 @@ public class ShutDownPlanController {
                 
                 //UUID plantMaintenanceId = planService.findPlantMaintenanceId(shutDownPlanDTO.getProduct());
 			  	UUID plantMaintenanceId=shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId,"Shutdown");
+			  	System.out.println(plantMaintenanceId);
+
+
                 PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
                 plantMaintenanceTransaction.setId(UUID.randomUUID());
                 // Set mandatory fields with default values if missing
@@ -81,18 +84,29 @@ public class ShutDownPlanController {
                     shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0
                 );
 
-                plantMaintenanceTransaction.setUser("test_user"); 
+                
                 plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
                 plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
                 // Ensure required fields exist
-                plantMaintenanceTransaction.setName("Default Name"); // Add default name
-                plantMaintenanceTransaction.setVersion("V1"); // Ensure version is set
+
+
+                plantMaintenanceTransaction.setUser("test_user"); 
+                plantMaintenanceTransaction.setName("Default Name"); 
+                plantMaintenanceTransaction.setVersion("V1"); 
+
                 plantMaintenanceTransaction.setCreatedOn(new Date());
-                plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
-                plantMaintenanceTransaction.setPlantFkId(plantId);
+
+                
                 if(shutDownPlanDTO.getProductId()!=null) {
                 	plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
                 }
+
+
+
+                plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
+                plantMaintenanceTransaction.setPlantFkId(plantId);
+
+
                 
                 // Save entity
                 shutDownPlanService.saveShutdownData(plantMaintenanceTransaction);

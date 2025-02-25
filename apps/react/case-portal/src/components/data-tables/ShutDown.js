@@ -101,7 +101,7 @@ const ShutDown = () => {
       field: 'maintenanceId',
       headerName: 'maintenanceId',
       editable: false,
-      visible: false,
+      hide: true,
     },
 
     {
@@ -109,50 +109,45 @@ const ShutDown = () => {
       headerName: 'Product',
       editable: true,
       minWidth: 225,
-      valueGetter: (params) => {
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : params
+      valueGetter: (params , params2) => {
+        // console.log('p1', params); 
+        // console.log('p2', params2); 
+        return params || ''; 
       },
-      renderEditCell: (params) => {
-        const { id } = params
-        const isEditable = id > 0
-
+      valueFormatter: (params) => {
+        console.log('params valueFormatter ',params);
+        const product = allProducts.find((p) => p.id === params);
+        return product ? product.displayName : '';
+      },
+      renderEditCell: (params , params2) => {
+        const { id, value } = params; 
+        // console.log('q1', params); 
+        // console.log('q2', params2); 
         return (
-          <Autocomplete
-            options={allProducts}
-            getOptionLabel={(option) => option.displayName} // Show displayName in the dropdown
-            value={
-              allProducts.find((product) => product.id === params.value) || null
-            } // Set selected value correctly
-            disableClearable
-            onChange={(event, newValue) => {
+          <select
+            value={value || allProducts[0]?.id} 
+            onChange={(event) => {
               params.api.setEditCellValue({
                 id: params.id,
                 field: 'product',
-                value: newValue ? newValue.id : '', // Store id instead of displayName
-              })
+                value: event.target.value, 
+              });
             }}
-            onInputChange={(event, newInputValue) => {
-              if (event && event.type === 'keydown' && event.key === 'Enter') {
-                const selectedProduct = allProducts.find(
-                  (product) =>
-                    product.displayName.toLowerCase() ===
-                    newInputValue.toLowerCase(),
-                )
-                params.api.setEditCellValue({
-                  id: params.id,
-                  field: 'product',
-                  value: selectedProduct ? selectedProduct.id : '',
-                })
-              }
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none',  // Removes border
+              outline: 'none', // Removes focus outline
+              background: 'transparent', // Keeps background clean
             }}
-            renderInput={(params) => (
-              <TextField {...params} variant='outlined' size='small' />
-            )}
-            disabled={!isEditable}
-            fullWidth
-          />
-        )
+          >
+            {allProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.displayName}
+              </option>
+            ))}
+          </select>
+        );
       },
     },
 
@@ -186,7 +181,7 @@ const ShutDown = () => {
       },
     },
     {
-      field: 'durationInHrs',
+      field: 'durationInMins',
       headerName: 'Duration (hrs)',
       valueGetter: (id, params) => {
         console.log(id, params)
@@ -199,6 +194,7 @@ const ShutDown = () => {
       },
       editable: false,
       minWidth: 100,
+      maxWidth: 150,
     },
     // {
     //   field: 'durationInHrs',

@@ -74,6 +74,11 @@ public class SlowdownPlanController {
 		// plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
 		plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
 
+
+		plantMaintenanceTransaction.setName("Default Name"); // Add default name
+        plantMaintenanceTransaction.setVersion("V1"); // Ensure version is set
+		plantMaintenanceTransaction.setUser("test_user"); 
+
 		plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 		plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 		plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
@@ -81,6 +86,12 @@ public class SlowdownPlanController {
 
 
 		plantMaintenanceTransaction.setCreatedOn(new Date());
+
+
+		if(shutDownPlanDTO.getProductId()!=null) {
+			plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+		}
+		
 		
 		// plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
 		plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());

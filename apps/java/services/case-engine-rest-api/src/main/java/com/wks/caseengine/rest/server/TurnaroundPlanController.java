@@ -52,10 +52,11 @@ public class TurnaroundPlanController {
 			  double durationInHrs = ((Integer) result[3]) / 60.0;
 			  dto.setDurationInHrs(durationInHrs);
 			  dto.setRemark((String)result[4]);
-			  dto.setProduct((String) result[6]);
+			  dto.setProduct((String) result[7]);
 			  long diffInMillis = dto.getMaintEndDateTime().getTime() - dto.getMaintStartDateTime().getTime();
 			  double diffInDays = diffInMillis / (1000.0 * 60 * 60 * 24);
 			  dto.setDurationInDays(diffInDays);
+			  dto.setMaintenanceId(result[6] != null ? UUID.fromString(result[6].toString()) : null); 
 			  dtoList.add(dto); 
 		}
 		 
@@ -71,9 +72,28 @@ public class TurnaroundPlanController {
 		plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
 		plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 		plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+
+
+		plantMaintenanceTransaction.setUser("test_user"); 
+		plantMaintenanceTransaction.setName("Default Name"); 
+		plantMaintenanceTransaction.setVersion("V1"); 
+
+		plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+
+
+		if(shutDownPlanDTO.getProductId()!=null) {
+			plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+		}
+
+
+		plantMaintenanceTransaction.setCreatedOn(new Date());
+
 		plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
 		plantMaintenanceTransaction.setPlantFkId(plantId);
-		plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+
+
+
+
 		shutDownPlanService.saveShutdownData(plantMaintenanceTransaction);
 		return ResponseEntity.ok(shutDownPlanDTO); 
 	}
@@ -83,7 +103,10 @@ public class TurnaroundPlanController {
         
 		  PlantMaintenanceTransaction plantMaintenanceTransaction=shutDownPlanService.editShutDownPlanData(plantMaintenanceTransactionId);
 		  plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-		  plantMaintenanceTransaction.setDurationInHrs((shutDownPlanDTO.getDurationInMins())/60.0);
+
+
+		  plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
+
 		  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 		  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 		  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
