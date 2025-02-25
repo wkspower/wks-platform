@@ -48,6 +48,14 @@ const ShutdownNorms = () => (
       onDeleteRow={(id) => console.log('Row Deleted:', id)}
       onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
       paginationOptions={[100, 200, 300]}
+      permissions={{
+        showAction: true,
+        addButton: false,
+        deleteButton: false,
+        editButton: true,
+        showUnit: true,
+        saveWithRemark: true,
+      }}
     />
   </div>
 )

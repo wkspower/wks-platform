@@ -10,7 +10,17 @@ export const DataService = {
   getYearlyData,
   getSlowDownPlantData,
   getTAPlantData,
+  getBDData,
+
   saveShutdownData,
+  saveSlowdownData,
+  saveTurnAroundData,
+
+
+  updateSlowdownData,
+  updateShutdownData,
+  updateTurnAroundData,
+  
   createCase,
   getTasksByBusinessKey,
   getProcessInstanceVariables,
@@ -34,6 +44,24 @@ async function getProductById(keycloak, id) {
     return await Promise.reject(e)
   }
 }
+async function getBDData(keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/getBusinessDemandData?year=2025&plantId=7B7E0D7C-2666-43BB-847C-D78E144673DE&siteId=58326F41-F3C4-4C0C-9895-1A52C435255A`;
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  };
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
 
 async function saveShutdownData(plantId, shutdownDetails, keycloak) {
   const url = `${process.env.REACT_APP_API_URL}/task/saveShutdownData/${plantId}`
@@ -49,6 +77,141 @@ async function saveShutdownData(plantId, shutdownDetails, keycloak) {
       method: 'POST',
       headers,
       body: JSON.stringify(shutdownDetails),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveSlowdownData(plantId, slowDownDetails, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/saveSlowdownData/${plantId}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(slowDownDetails),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+
+async function updateSlowdownData(maintenanceId, slowDownDetails, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/editSlowdownData/${maintenanceId}`;
+
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${keycloak.token}`,
+  };
+
+  try {
+    const resp = await fetch(url, {
+      method: "PUT", // Changed from POST to PUT
+      headers,
+      body: JSON.stringify(slowDownDetails),
+    });
+
+    if (!resp.ok) {
+      throw new Error(`Failed to update data: ${resp.status} ${resp.statusText}`);
+    }
+
+    return await resp.json(); // Ensure proper response handling
+  } catch (e) {
+    console.error("Error updating slowdown data:", e);
+    return Promise.reject(e);
+  }
+}
+
+
+async function updateShutdownData(maintenanceId, slowDownDetails, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/editShutdownData/${maintenanceId}`;
+
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${keycloak.token}`,
+  };
+
+  try {
+    const resp = await fetch(url, {
+      method: "PUT", // Changed from POST to PUT
+      headers,
+      body: JSON.stringify(slowDownDetails),
+    });
+
+    if (!resp.ok) {
+      throw new Error(`Failed to update data: ${resp.status} ${resp.statusText}`);
+    }
+
+    return await resp.json(); // Ensure proper response handling
+  } catch (e) {
+    console.error("Error updating shutdown data:", e);
+    return Promise.reject(e);
+  }
+}
+
+async function updateTurnAroundData(maintenanceId, turnAroundDetails, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/editTurnaroundData/${maintenanceId}`; // Corrected endpoint
+
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${keycloak.token}`,
+  };
+
+  try {
+    const resp = await fetch(url, {
+      method: "PUT", // Ensure it matches @PutMapping
+      headers,
+      body: JSON.stringify(turnAroundDetails), // Updated variable name for clarity
+    });
+
+    if (!resp.ok) {
+      throw new Error(`Failed to update data: ${resp.status} ${resp.statusText}`);
+    }
+
+    return await resp.json(); // Ensure proper response handling
+  } catch (e) {
+    console.error("Error updating turnaround data:", e);
+    return Promise.reject(e);
+  }
+}
+
+
+
+
+
+
+
+
+
+async function saveTurnAroundData(plantId, turnAroundDetails, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/saveTurnaroundPlanData/${plantId}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(turnAroundDetails),
     })
     return json(keycloak, resp)
   } catch (e) {
@@ -163,10 +326,10 @@ async function getShutDownPlantData(keycloak) {
 }
 
 async function getSlowDownPlantData(keycloak) {
-  // const plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1';
-  const plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
+  const plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1';
+  // const plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
 
-  const maintenanceTypeName = 'Slowdown' // Assuming the maintenance type is 'Shutdown'
+  const maintenanceTypeName = 'Slowdown' // Assuming the maintenance type is 'Slowdown'
 
   // const storedPlant = localStorage.getItem('selectedPlant')
   // if (storedPlant) {
@@ -192,8 +355,8 @@ async function getSlowDownPlantData(keycloak) {
 }
 
 async function getTAPlantData(keycloak) {
-  // const plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1';
-  const plantId = '3E3FDF54-391D-4BAB-A78F-50EBCA9FBEA6'
+  const plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1';
+  // const plantId = '3E3FDF54-391D-4BAB-A78F-50EBCA9FBEA6'
   const maintenanceTypeName = 'TA_Plan' // Assuming the maintenance type is 'Shutdown'
 
   // const storedPlant = localStorage.getItem('selectedPlant')
@@ -218,6 +381,7 @@ async function getTAPlantData(keycloak) {
     return await Promise.reject(e)
   }
 }
+
 async function getMonthWiseData(keycloak) {
   const url = `${process.env.REACT_APP_API_URL}/getMonthWiseData`
 

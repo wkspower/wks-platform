@@ -6,79 +6,139 @@ import { useSession } from 'SessionStoreContext'
 
 const BusinessDemand = () => {
   const keycloak = useSession()
-  const [productOptions, setProductOptions] = useState([])
-  const [productionData, setProductionData] = useState([])
+  const [allProducts, setAllProducts] = useState([])
+  const [bdData, setBDData] = useState([])
 
   useEffect(() => {
+    function transformData(inputData) {
+      const months = [
+        "apr24", "may24", "jun24", "jul24", "aug24", "sep24", 
+        "oct24", "nov24", "dec24", "jan25", "feb25", "mar25"
+      ];
+      
+      const transformed = {};
+      
+      inputData.forEach((item) => {
+        const productKey = item.Product;
+        
+        if (!transformed[productKey]) {
+          transformed[productKey] = {
+            product: productKey,
+            apr24: 0,
+            may24: 0,
+            jun24: 0,
+            jul24: 0,
+            aug24: 0,
+            sep24: 0,
+            oct24: 0,
+            nov24: 0,
+            dec24: 0,
+            jan25: 0,
+            feb25: 0,
+            mar25: 0,
+            averageTPH: 0,
+            remark: "",
+          };
+        }
+        
+        const monthKey = Object.keys(item).find((key) => key.match(/^[A-Za-z]{3}-\d{2}$/));
+        
+        if (monthKey) {
+          const formattedMonth = monthKey.toLowerCase().replace("-25", "25").replace("-24", "24");
+          transformed[productKey][formattedMonth] = item[monthKey];
+        }
+        
+        transformed[productKey].averageTPH = item.Average || transformed[productKey].averageTPH;
+        transformed[productKey].remark = item.Remark || transformed[productKey].remark;
+      });
+      
+      return Object.values(transformed);
+    }
+
+    const fetchData = async () => {
+      try {
+        const data = await DataService.getBDData(keycloak)
+
+
+    
+
+
+        const transformedData = transformData(data);
+
+        const formattedData = transformedData.map((item, index) => ({
+          ...item,
+          id: index,
+        }))
+
+
+        setBDData(formattedData)
+        
+      } catch (error) {
+        console.error('Error fetching Turnaround data:', error)
+      }
+    }
+
+    const getAllProducts = async () => {
+      try {
+        const data = await DataService.getAllProducts(keycloak)
+        const productList = data.map((product) => ({
+          id: product.id,
+          displayName: product.displayName,
+        }))
+        setAllProducts(productList)
+      } catch (error) {
+        console.error('Error fetching product:', error)
+      } finally {
+        // handleMenuClose();
+      }
+    }
     getAllProducts()
+    fetchData()    
   }, [])
 
-  const getAllProducts = async () => {
-    try {
-      const data = await DataService.getAllProducts(keycloak)
-      console.log('API Response:', data)
-      // Assuming each product object has a "name" property
-      const products = data.map((item) => item.displayName || item.name || item)
-      setProductOptions(products)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    }
-  }
 
-  // Create row data based on the productOptions list
-  useEffect(() => {
-    if (productOptions.length > 0) {
-      const rows = productOptions.map((option, index) => ({
-        id: index + 1,
-        product: option,
-        apr24: Math.floor(Math.random() * 100),
-        may24: Math.floor(Math.random() * 100),
-        jun24: Math.floor(Math.random() * 100),
-        jul24: Math.floor(Math.random() * 100),
-        aug24: Math.floor(Math.random() * 100),
-        sep24: Math.floor(Math.random() * 100),
-        oct24: Math.floor(Math.random() * 100),
-        nov24: Math.floor(Math.random() * 100),
-        dec24: Math.floor(Math.random() * 100),
-        jan25: Math.floor(Math.random() * 100),
-        feb25: Math.floor(Math.random() * 100),
-        mar25: Math.floor(Math.random() * 100),
-        averageTPH: Math.floor(Math.random() * 100),
-        remark: 'Good',
-      }))
-      setProductionData(rows)
-    }
-  }, [productOptions])
 
-  const productionColumns = [
+  const colDefs = [
+
+
     {
       field: 'product',
       headerName: 'Product',
       editable: true,
-      filterable: true,
-      minWidth: 125,
-
+      minWidth: 225,
+      valueGetter: (params) => {
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : params
+      },
       renderEditCell: (params) => {
-        const isEditable = params.id > productOptions.length
+        const { id } = params
+
         return (
           <Autocomplete
-            options={productOptions}
-            value={params.value || ''}
+            options={allProducts}
+            getOptionLabel={(option) => option.displayName}
+            value={
+              allProducts.find((product) => product.id === params.value) || null
+            }
             disableClearable
-            disabled={!isEditable}
             onChange={(event, newValue) => {
               params.api.setEditCellValue({
                 id: params.id,
                 field: 'product',
-                value: newValue,
+                value: newValue ? newValue.id : '',
               })
             }}
             onInputChange={(event, newInputValue) => {
               if (event && event.type === 'keydown' && event.key === 'Enter') {
+                const selectedProduct = allProducts.find(
+                  (product) =>
+                    product.displayName.toLowerCase() ===
+                    newInputValue.toLowerCase(),
+                )
                 params.api.setEditCellValue({
                   id: params.id,
                   field: 'product',
-                  value: newInputValue,
+                  value: selectedProduct ? selectedProduct.id : '',
                 })
               }
             }}
@@ -120,13 +180,22 @@ const BusinessDemand = () => {
   return (
     <div>
       <ASDataGrid
-        columns={productionColumns}
-        rows={productionData}
+        columns={colDefs}
+        rows={bdData}
         title='Business Demand Data'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
+
+        permissions={{
+          showAction: true,
+          addButton: true,
+          deleteButton: true,
+          editButton: true,
+          showUnit: true,
+          saveWithRemark: true,
+        }}
       />
     </div>
   )
