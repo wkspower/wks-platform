@@ -49,7 +49,7 @@ public class NormParameterMonthlyTransaction {
 	@Column(name="Version")
 	private String Version;
 	
-	@Column(name="NormParameters_FK_Id")
-	private UUID NormParameters_FK_Id;
+	@Column(name="NormParameter_FK_Id")
+	private UUID NormParameter_FK_Id;
 	
 }

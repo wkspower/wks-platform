@@ -34,6 +34,9 @@ public class PlantMaintenanceTransaction {
     @Column(name = "MaintForMonth")
     @Temporal(TemporalType.TIMESTAMP)
     private Date maintForMonth;
+    
+    @Column(name = "AuditYear")
+    private Integer auditYear;
 
     @Column(name = "Rate")
     private Double rate;
@@ -53,11 +56,8 @@ public class PlantMaintenanceTransaction {
 
     @Column(name = "PlantMaintenance_FK_Id")
     private UUID plantMaintenanceFkId;
-
-    @Column(name = "Plant_FK_Id")
-    private UUID plantFkId;
     
-    @Column(name = "NormParameters_FK_Id")
+    @Column(name = "NormParameter_FK_Id")
     private UUID normParametersFKId;
     
     @Transient

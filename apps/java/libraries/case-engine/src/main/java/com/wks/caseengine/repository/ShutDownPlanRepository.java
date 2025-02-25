@@ -19,11 +19,11 @@ public interface ShutDownPlanRepository extends JpaRepository<PlantMaintenanceTr
             "pmt.MaintenanceText, " +
             "pm.Id, " +
             "np.Name " +
-            "FROM [RIL.AOP].[dbo].[PlantMaintenanceTransaction] pm " +
-            "JOIN [RIL.AOP].[dbo].[PlantMaintenance] pmt ON pm.PlantMaintenance_FK_Id = pmt.Id " +
-            "JOIN [RIL.AOP].[dbo].[MaintenanceTypes] mt ON pmt.MaintenanceType_FK_Id = mt.Id " +
-            "LEFT JOIN [RIL.AOP].[dbo].[NormParameters] np ON pm.NormParameters_FK_Id = np.Id " +
-            "WHERE pm.Plant_FK_Id = :plantId AND mt.Name = :maintenanceTypeName", 
+            "FROM PlantMaintenanceTransaction pm " +
+            "JOIN PlantMaintenance pmt ON pm.PlantMaintenance_FK_Id = pmt.Id " +
+            "JOIN MaintenanceTypes mt ON pmt.MaintenanceType_FK_Id = mt.Id " +
+            "LEFT JOIN NormParameters np ON pm.NormParameter_FK_Id = np.Id " +
+            "WHERE mt.Name = :maintenanceTypeName", 
             nativeQuery = true)
 	List<Object[]> findMaintenanceDetailsByPlantIdAndType(@Param("plantId") UUID plantId, 
         @Param("maintenanceTypeName") String maintenanceTypeName);
@@ -31,7 +31,7 @@ public interface ShutDownPlanRepository extends JpaRepository<PlantMaintenanceTr
     
     @Query(value = "SELECT " +
             "pm.Id " +
-            "FROM [RIL.AOP].[dbo].[PlantMaintenance] pm " +
+            "FROM PlantMaintenance pm " +
             "WHERE pm.MaintenanceText = :productName", 
             nativeQuery = true)
     UUID findPlantMaintenanceId( 

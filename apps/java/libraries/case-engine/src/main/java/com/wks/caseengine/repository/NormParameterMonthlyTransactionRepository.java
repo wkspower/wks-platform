@@ -20,9 +20,9 @@ public interface NormParameterMonthlyTransactionRepository extends JpaRepository
 	                FORMAT(DATEFROMPARTS(npmt.year, npmt.month, 1), 'MMM-yy') AS MonthYear,
 	                TRY_CAST(npmt.monthValue AS FLOAT) AS monthValue,
 	                npmt.Remarks
-	            FROM [RIL.AOP].[dbo].[NormParameterMonthlyTransaction] npmt
-	            JOIN [RIL.AOP].[dbo].[NormParameters] np
-	                ON npmt.NormParameters_FK_Id = np.Id
+	            FROM NormParameterMonthlyTransaction npmt
+	            JOIN NormParameters np
+	                ON npmt.NormParameter_FK_Id = np.Id
 	            WHERE 
 	                (npmt.year = :year AND npmt.month >= 4)  -- April of given year
 	                OR (npmt.year = :nextYear AND npmt.month <= 3) -- March of next year

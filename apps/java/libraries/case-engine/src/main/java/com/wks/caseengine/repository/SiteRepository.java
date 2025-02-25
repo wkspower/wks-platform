@@ -13,7 +13,7 @@ public interface SiteRepository extends JpaRepository<Sites, UUID>{
 	
 	@Query(value = "select sites.Id, sites.Name, sites.DisplayName, " +
 	        "plants.Id, plants.Name, plants.DisplayName, plants.Site_FK_Id " +
-	        "  from   [RIL.AOP].[dbo].[Sites] sites join   [RIL.AOP].[dbo].[Plants] plants " +
+	        "  from  Sites sites join   Plants plants " +
 	        "   on sites.id = plants.Site_FK_Id", 
 	        nativeQuery = true)
 	List<Object[]> getAllSitesAndPlants();
@@ -21,8 +21,8 @@ public interface SiteRepository extends JpaRepository<Sites, UUID>{
 	@Query(value = "SELECT s.Id AS siteId, s.Name AS siteName, s.DisplayName AS siteDisplayName, " +
             "p.Id AS plantId, p.Name AS plantName, p.DisplayName AS plantDisplayName, " +
             "p.Site_FK_Id AS siteFkId " +
-            "FROM [dbo].[Sites] s " +
-            "JOIN [dbo].[Plants] p ON s.id = p.Site_FK_Id", 
+            "FROM Sites s " +
+            "JOIN Plants p ON s.id = p.Site_FK_Id", 
 		    nativeQuery = true)
 		List<Object[]> getPlantAndSite();
 

@@ -36,7 +36,7 @@ public class NormParameterMonthlyTransactionServiceImpl implements NormParameter
 	            "           TRY_CAST(npmt.monthValue AS FLOAT) AS monthValue, " +
 	            "           npmt.Remarks,npmt.Id AS NormParameterMonthlyTransactionId,np.Id AS NormParametersId " +
 	            "    FROM NormParameterMonthlyTransaction npmt " +
-	            "    JOIN NormParameters np ON npmt.NormParameters_FK_Id = np.Id " +
+	            "    JOIN NormParameters np ON npmt.NormParameter_FK_Id = np.Id " +
 	            "    WHERE (npmt.year = :year AND npmt.month >= 4) " +  
 	            "          OR (npmt.year = :nextYear AND npmt.month <= 3) " + 
 	            "), " +

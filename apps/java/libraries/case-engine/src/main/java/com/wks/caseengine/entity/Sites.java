@@ -23,9 +23,6 @@ public class Sites {
     @Column(name = "DisplayName", nullable = false, length = 255)
     private String displayName;
 
-    @Column(name = "Vertical_FK_Id")
-    private UUID verticalFkId;
-
     @Column(name = "IsActive")
     private Boolean isActive;
 

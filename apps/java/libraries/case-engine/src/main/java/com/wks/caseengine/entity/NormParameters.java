@@ -28,6 +28,9 @@ public class NormParameters {
 
     @Column(name = "Expression", length = 1000)
     private String expression;
+    
+    @Column(name = "ExecuteQuery", length = 1000)
+    private String executeQuery;
 
     @Column(name = "DependantAttributeId", length = 250)
     private String dependantAttributeId;
@@ -40,5 +43,8 @@ public class NormParameters {
 
     @Column(name = "Plant_FK_Id")
     private UUID plantFkId;
+    
+    @Column(name = "NormType_FK_Id")
+    private UUID normTypeFKId;
 }
 

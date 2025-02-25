@@ -25,6 +25,9 @@ public class Plants {
 
     @Column(name = "Site_FK_Id")
     private UUID siteFkId;
+    
+    @Column(name = "Vertical_FK_Id")
+    private UUID verticalFKId;
 
     @Column(name = "IsActive")
     private Boolean isActive;
