@@ -8,227 +8,226 @@ import dayjs from 'dayjs'
 import { useState, useEffect } from 'react'
 import { useSession } from 'SessionStoreContext'
 
-
-
-
 const SlowDown = () => {
   const [slowDownData, setSlowDownData] = useState([])
   const [allProducts, setAllProducts] = useState([])
 
   const keycloak = useSession()
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const data = await DataService.getSlowDownPlantData(keycloak)
-      const formattedData = data.map((item, index) => ({
-        ...item,
-        // id: item?.maintenanceId, 
-        id: index,
-
-      }))
-      setSlowDownData(formattedData)
-    } catch (error) {
-      console.error('Error fetching SlowDown data:', error)
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await DataService.getSlowDownPlantData(keycloak)
+        const formattedData = data.map((item, index) => ({
+          ...item,
+          // id: item?.maintenanceId,
+          id: index,
+        }))
+        setSlowDownData(formattedData)
+      } catch (error) {
+        console.error('Error fetching SlowDown data:', error)
+      }
     }
-  }
 
+    const getAllProducts = async () => {
+      try {
+        const data = await DataService.getAllProducts(keycloak)
+        // console.log('API Response:', data);
 
-  const getAllProducts = async () => {
-    try {
-      const data = await DataService.getAllProducts(keycloak);
-      // console.log('API Response:', data);
-         
-      // Extract only displayName and id
-      const productList = data.map((product) => ({
-        id: product.id,
-        displayName: product.displayName
-      }));
-  
-      setAllProducts(productList);
-      
-    } catch (error) {
-      console.error('Error fetching product:', error);
-    } finally {
-      // handleMenuClose();
+        // Extract only displayName and id
+        const productList = data.map((product) => ({
+          id: product.id,
+          displayName: product.displayName,
+        }))
+
+        setAllProducts(productList)
+      } catch (error) {
+        console.error('Error fetching product:', error)
+      } finally {
+        // handleMenuClose();
+      }
     }
-  };
-  
-  const saveShutdownData = async () => {
-    try {
-      var plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1';
-      // var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
-      // var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
-      // discription
-      // maintStartDateTime
-      // maintEndDateTime
-      // durationInMins
-      // product
 
-      const shutdownDetails = {
-        product: "Oxygen",
-        discription: "1 Shutdown maintenance",
-        durationInMins: 120,
-        maintEndDateTime: "2025-02-20T18:00:00Z",
-        maintStartDateTime: "2025-02-20T16:00:00Z",
-      };
-      
-      const response = await DataService.saveShutdownData(plantId, shutdownDetails, keycloak);
-      console.log("Shutdown data saved successfully:", response);
-      return response;
-    } catch (error) {
-      console.error("Error saving shutdown data:", error);
+    const saveShutdownData = async () => {
+      try {
+        var plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1'
+        // var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
+        // var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
+        // discription
+        // maintStartDateTime
+        // maintEndDateTime
+        // durationInMins
+        // product
+
+        const shutdownDetails = {
+          product: 'Oxygen',
+          discription: '1 Shutdown maintenance',
+          durationInMins: 120,
+          maintEndDateTime: '2025-02-20T18:00:00Z',
+          maintStartDateTime: '2025-02-20T16:00:00Z',
+        }
+
+        const response = await DataService.saveShutdownData(
+          plantId,
+          shutdownDetails,
+          keycloak,
+        )
+        console.log('Shutdown data saved successfully:', response)
+        return response
+      } catch (error) {
+        console.error('Error saving shutdown data:', error)
+      }
     }
-  };
 
+    fetchData()
+    // saveShutdownData()
+    getAllProducts()
+  }, [])
 
-  
-  fetchData()
-  // saveShutdownData()
-  getAllProducts()
-}, [])
-
-
-const colDefs = [
-  {
-    field: 'discription',
-    headerName: 'Slowdown Desc',
-    minWidth: 200,
-    editable: true,
-    renderHeader: () => (
-      <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
-        Slowdown Desc
-      </div>
-    ),
-    flex: 3,
-  },
-
-
-  {
-    field: 'maintenanceId',
-    headerName: 'maintenanceId',
-    editable: false,
-    hide: true,
-  },
-
-  {
-    field: 'product',
-    headerName: 'Product',
-    editable: true,
-    minWidth: 225,
-    valueGetter: (params , params2) => {
-      // console.log('p1', params); 
-      // console.log('p2', params2); 
-      return params || ''; 
+  const colDefs = [
+    {
+      field: 'discription',
+      headerName: 'Slowdown Desc',
+      minWidth: 200,
+      editable: true,
+      renderHeader: () => (
+        <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
+          Slowdown Desc
+        </div>
+      ),
+      flex: 3,
     },
-    valueFormatter: (params) => {
-      console.log('params valueFormatter ',params);
-      const product = allProducts.find((p) => p.id === params);
-      return product ? product.displayName : '';
+
+    {
+      field: 'maintenanceId',
+      headerName: 'maintenanceId',
+      editable: false,
+      hide: true,
     },
-    renderEditCell: (params , params2) => {
-      const { id, value } = params; 
-      // console.log('q1', params); 
-      // console.log('q2', params2); 
-      return (
-        <select
-          value={value || allProducts[0]?.id} 
-          onChange={(event) => {
-            params.api.setEditCellValue({
-              id: params.id,
-              field: 'product',
-              value: event.target.value, 
-            });
-          }}
-          style={{
-            width: '100%',
-            padding: '5px',
-            border: 'none',  // Removes border
-            outline: 'none', // Removes focus outline
-            background: 'transparent', // Keeps background clean
-          }}
-        >
-          {allProducts.map((product) => (
-            <option key={product.id} value={product.id}>
-              {product.displayName}
-            </option>
-          ))}
-        </select>
-      );
+
+    {
+      field: 'product',
+      headerName: 'Product',
+      editable: true,
+      minWidth: 225,
+      valueGetter: (params, params2) => {
+        // console.log('p1', params);
+        // console.log('p2', params2);
+        return params || ''
+      },
+      valueFormatter: (params) => {
+        console.log('params valueFormatter ', params)
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : ''
+      },
+      renderEditCell: (params, params2) => {
+        const { id, value } = params
+        // console.log('q1', params);
+        // console.log('q2', params2);
+        return (
+          <select
+            value={value || allProducts[0]?.id}
+            onChange={(event) => {
+              params.api.setEditCellValue({
+                id: params.id,
+                field: 'product',
+                value: event.target.value,
+              })
+            }}
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none', // Removes border
+              outline: 'none', // Removes focus outline
+              background: 'transparent', // Keeps background clean
+            }}
+          >
+            {allProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.displayName}
+              </option>
+            ))}
+          </select>
+        )
+      },
     },
-  },  
-
-
-  {
-    field: "maintStartDateTime",
-    headerName: "SD- From",
-    type: "dateTime",
-    minWidth: 200,
-    editable: true,
-    valueGetter: (params) => {
-      const value = params; 
-      const parsedDate = value
-        ? dayjs(value, "MMM D, YYYY, h:mm:ss A").toDate()
-        : null;
-      return parsedDate;
+    {
+      field: 'maintStartDateTime',
+      headerName: 'SD- From',
+      type: 'dateTime',
+      minWidth: 200,
+      editable: true,
+      valueGetter: (params) => {
+        const value = params
+        const parsedDate = value
+          ? dayjs(value, 'MMM D, YYYY, h:mm:ss A').toDate()
+          : null
+        return parsedDate
+      },
     },
-  },
-  
-  {
-    field: "maintEndDateTime",
-    headerName: "SD- To",
-    type: "dateTime",
-    minWidth: 200,
-    editable:true,
-    valueGetter: (params) => {
-      const value = params; 
-      const parsedDate = value
-        ? dayjs(value, "MMM D, YYYY, h:mm:ss A").toDate()
-        : null;
-      return parsedDate;
+    {
+      field: 'maintEndDateTime',
+      headerName: 'SD- To',
+      type: 'dateTime',
+      minWidth: 200,
+      editable: true,
+      // Validate the edited value before committing
+      preProcessEditCellProps: (params) => {
+        const startDate = dayjs(params.row.maintStartDateTime)
+        const newEndDate = dayjs(params.props.value)
+        const hasError = newEndDate.isBefore(startDate)
+        return { ...params.props, error: hasError }
+      },
+      valueGetter: (params) => {
+        const value = params.value
+        return value ? dayjs(value, 'MMM D, YYYY, h:mm:ss A').toDate() : null
+      },
     },
-  },
 
+    // {
+    //   field: "maintEndDateTime",
+    //   headerName: "SD- To",
+    //   type: "dateTime",
+    //   minWidth: 200,
+    //   editable:true,
+    //   valueGetter: (params) => {
+    //     const value = params;
+    //     const parsedDate = value
+    //       ? dayjs(value, "MMM D, YYYY, h:mm:ss A").toDate()
+    //       : null;
+    //     return parsedDate;
+    //   },
+    // },
 
-  {
-    field: "durationInMins",
-    headerName: "Duration (hrs)",
-    editable: true,
-    // type: "number",
-    minWidth: 100,
-    maxWidth: 150,
-    renderCell: (params) => {
-      return `${params.value}`;
+    {
+      field: 'durationInMins',
+      headerName: 'Duration (hrs)',
+      editable: true,
+      // type: "number",
+      minWidth: 100,
+      maxWidth: 150,
+      renderCell: (params) => {
+        return `${params.value}`
+      },
     },
-  },
-  
-  
-  {
-    field: "rate",
-    headerName: "Rate",
-    editable: true,
-    type: "number",
-    minWidth: 100,
-    maxWidth: 150,
-  },
 
+    {
+      field: 'rate',
+      headerName: 'Rate',
+      editable: true,
+      type: 'number',
+      minWidth: 100,
+      maxWidth: 150,
+    },
 
-
-
-  {
-    field: "remarks",
-    headerName: "Remarks",
-    editable: true,
-    minWidth: 200,
-    maxWidth: 400,
-  },
-  
-]
-
-
-
-
-  
+    {
+      field: 'remarks',
+      headerName: 'Remarks',
+      editable: true,
+      minWidth: 200,
+      maxWidth: 400,
+    },
+  ]
 
   return (
     <div>

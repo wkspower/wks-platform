@@ -122,7 +122,7 @@ const ProductionvolumeData = () => {
       <ASDataGrid
         columns={productionColumns}
         rows={productionData}
-        title='Production Volume Data'
+        title='Product Volume Data'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}

@@ -30,7 +30,7 @@ const defs = {
     dataForm2: 'WKS Form2',
     // New menu items for "Production / Norms Plan"
     productionNormsPlan: 'Production / Norms Plan',
-    productMCUVal: 'Production Volume Data',
+    productMCUVal: 'Product Volume Data',
     maintenanceDetails: 'Maintenance Details',
     consumptionNorms: 'Consumption Norms',
     productionNorms: 'Production Norms',
@@ -190,7 +190,7 @@ const defs = {
     productionNormsPlanPage: {
       title: 'Production / Norms Plan',
       subPages: {
-        productMCUVal: 'Production Volume Data',
+        productMCUVal: 'Product Volume Data',
         maintenanceDetails: 'Maintenance Details',
         consumptionNorms: 'Consumption Norms',
         productDemand: 'Business Demand Data',

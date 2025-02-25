@@ -124,7 +124,7 @@ const TurnaroundPlanTable = () => {
 
     {
       field: 'maintStartDateTime',
-      headerName: 'Ta- From',
+      headerName: 'TA- From',
       type: 'dateTime',
       editable: true,
       minWidth: 200,
@@ -139,7 +139,7 @@ const TurnaroundPlanTable = () => {
 
     {
       field: 'maintEndDateTime',
-      headerName: 'Ta- To',
+      headerName: 'TA- To',
       type: 'dateTime',
       editable: true,
       minWidth: 200,

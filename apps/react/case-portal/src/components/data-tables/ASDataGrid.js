@@ -29,7 +29,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
-import { MenuItem } from '../../../node_modules/@mui/material/index'
+import { Grid, MenuItem } from '../../../node_modules/@mui/material/index'
 
 import Notification from 'components/Utilities/Notification'
 
@@ -113,9 +113,9 @@ const DataGridTable = ({
     console.log('Row Data After Editing:', editedRow)
   }
 
-  const handleEditClick = (id,row) => () => {
-    console.log('id',id)
-    console.log('row',row)
+  const handleEditClick = (id, row) => () => {
+    console.log('id', id)
+    console.log('row', row)
     setIsUpdating(true)
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } })
   }
@@ -125,11 +125,8 @@ const DataGridTable = ({
   // };
 
   const handleSaveClick = (id, rowData) => {
-
     console.log('Newly Added Row Data:', rowData)
     console.log('selectedRows:', selectedRows)
-
-
 
     setRowModesModel((prev) => ({
       ...prev,
@@ -141,9 +138,30 @@ const DataGridTable = ({
   //   console.log("Updated Rows!!!!!!!!!!!!!!!!!!!!!!!:", rows);
   // }, [rows]);
 
-  const handleDeleteClick = (id) => () => {
-    setOpen1(true)
-    setDeleteId(id)
+  const handleDeleteClick = async (id, params) => {
+    try {
+      var maintenanceId = id?.maintenanceId || params?.row.maintenanceId
+      console.log('test', maintenanceId, id)
+      console.log('test', params?.row.maintenanceId)
+      const response = await DataService.deleteSlowdownData(
+        maintenanceId,
+        keycloak,
+      )
+      console.log('Slowdown data Updated successfully:', response)
+      setSnackbarOpen(true)
+      setOpen1(true)
+      setDeleteId(id)
+      // setSnackbarMessage("Slowdown data Updated successfully !");
+      setSnackbarData({
+        message: 'Slowdown data deleted successfully!',
+        severity: 'success',
+      })
+      // setSnackbarOpen(true);
+      // setSnackbarData({ message: "Slowdown data Updated successfully!", severity: "success" });
+      return response
+    } catch (error) {
+      console.error('Error saving Slowdown data:', error)
+    }
     // setRows(rows.filter((row) => row.id !== id));
   }
 
@@ -229,7 +247,6 @@ const DataGridTable = ({
     }
   }
 
-
   const updateShutdownData = async (newRow) => {
     try {
       var maintenanceId = newRow?.maintenanceId
@@ -261,7 +278,6 @@ const DataGridTable = ({
       console.error('Error saving Slowdown data:', error)
     }
   }
-
 
   const updateTurnAroundData = async (newRow) => {
     try {
@@ -296,7 +312,6 @@ const DataGridTable = ({
     }
   }
 
-
   const saveSlowDownData = async (newRow) => {
     try {
       var plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1'
@@ -328,7 +343,6 @@ const DataGridTable = ({
       console.error('Error saving Slowdown data:', error)
     }
   }
-
 
   const saveTurnAroundData = async (newRow) => {
     try {
@@ -393,9 +407,9 @@ const DataGridTable = ({
 
         setRows(updatedRows)
 
-        if(newRow?.maintenanceId){
+        if (newRow?.maintenanceId) {
           updateShutdownData(newRow)
-        }else{
+        } else {
           saveShutdownData(newRow)
         }
 
@@ -435,9 +449,9 @@ const DataGridTable = ({
 
         setRows(updatedRows)
 
-        if(newRow?.maintenanceId){
+        if (newRow?.maintenanceId) {
           updateSlowdownData(newRow)
-        }else{
+        } else {
           saveSlowDownData(newRow)
         }
         onRowUpdate?.(updatedRow)
@@ -445,7 +459,7 @@ const DataGridTable = ({
         return updatedRow // Ensure function returns the updated row
       }
       if (title == 'Turnaround Plan Table') {
-        console.log('TA',newRow)
+        console.log('TA', newRow)
         if (
           !newRow.discription?.trim() ||
           !newRow.product?.trim() ||
@@ -475,10 +489,9 @@ const DataGridTable = ({
 
         setRows(updatedRows)
 
-        if(newRow?.maintenanceId){
+        if (newRow?.maintenanceId) {
           updateTurnAroundData(newRow)
-        }else
-        saveTurnAroundData(newRow)
+        } else saveTurnAroundData(newRow)
 
         onRowUpdate?.(updatedRow)
         console.log('Updated Row inside processRowUpdate:', updatedRow)
@@ -537,13 +550,13 @@ const DataGridTable = ({
     // callAPIsSequentially()
   }
 
-  const filteredRows = rows.filter((row) => {
-    const matchesSearch = Object.values(row).some((value) =>
-      String(value).toLowerCase().includes(searchText.toLowerCase()),
-    )
-    const matchesDuration = !isFilterActive || row.durationHrs > 100
-    return matchesSearch && matchesDuration
-  })
+  // const filteredRows = rows.filter((row) => {
+  //   const matchesSearch = Object.values(row).some((value) =>
+  //     String(value).toLowerCase().includes(searchText.toLowerCase()),
+  //   )
+  //   const matchesDuration = !isFilterActive || row.durationHrs > 100
+  //   return matchesSearch && matchesDuration
+  // })
 
   // const handleMenuClick = (event, row) => {
   //   setAnchorEl(event.currentTarget)
@@ -596,8 +609,8 @@ const DataGridTable = ({
       isNew: true, // Mark row as new
       ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])), // Empty values
     }
-    
-    setRows((prevRows) => [newRow, ...prevRows]) 
+
+    setRows((prevRows) => [newRow, ...prevRows])
     onAddRow?.(newRow)
     setProduct('')
     setRowModesModel((oldModel) => ({
@@ -776,8 +789,7 @@ const DataGridTable = ({
   //     : []),
   // ]
 
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => [
     ...defaultColumns,
     ...(permissions?.showAction
       ? [
@@ -788,24 +800,24 @@ const DataGridTable = ({
             width: 180,
             cellClassName: 'actions',
             getActions: (params) => {
-                const { id, row } = params // Extract row data
+              const { id, row } = params // Extract row data
               const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
 
               if (isInEditMode) {
                 return [
                   <GridActionsCellItem
                     key={`save-${id}`}
-                      icon={<SaveIcon />}
-                      label='Save'
-                      sx={{ color: 'primary.main' }}
-                      onClick={() => handleSaveClick(id, params.row)} // Pass row data
-                    />,
-                    <GridActionsCellItem
+                    icon={<SaveIcon />}
+                    label='Save'
+                    sx={{ color: 'primary.main' }}
+                    onClick={() => handleSaveClick(id, params.row)} // Pass row data
+                  />,
+                  <GridActionsCellItem
                     key={`cancel-${id}`}
                     icon={<CancelIcon />}
                     label='Cancel'
                     className='textPrimary'
-                      onClick={handleCancelClick(id)}
+                    onClick={handleCancelClick(id)}
                     color='inherit'
                   />,
                 ]
@@ -818,7 +830,7 @@ const DataGridTable = ({
                     icon={<EditIcon sx={{ color: jioColors.primaryBlue }} />}
                     label='Edit'
                     className='textPrimary'
-                    onClick={handleEditClick(id,row)}
+                    onClick={handleEditClick(id, row)}
                     color='inherit'
                   />
                 ),
@@ -827,7 +839,7 @@ const DataGridTable = ({
                     key={`delete-${id}`}
                     icon={<DeleteIcon sx={{ color: jioColors.accentRed }} />}
                     label='Delete'
-                    onClick={handleDeleteClick(id)}
+                    onClick={() => handleDeleteClick(id, params)}
                     color='inherit'
                   />
                 ),
@@ -1066,6 +1078,40 @@ const DataGridTable = ({
       ),
     )
   }
+  const [columnFilters, setColumnFilters] = useState({})
+
+  // Update the filter state for each column
+  const handleFilterChange = (field, value) => {
+    setColumnFilters((prevFilters) => ({
+      ...prevFilters,
+      [field]: value,
+    }))
+  }
+
+  // Combine all filters: global search, duration filter, and column filters
+  const filteredRows = useMemo(() => {
+    return rows.filter((row) => {
+      // Global search across all fields
+      const matchesSearch = Object.values(row).some((value) =>
+        String(value).toLowerCase().includes(searchText.toLowerCase()),
+      )
+
+      // Duration filter condition
+      const matchesDuration = !isFilterActive || row.durationHrs > 100
+
+      // Column-specific filters: For each column filter, check if row's value includes the filter
+      const matchesColumnFilters = Object.entries(columnFilters).every(
+        ([field, filterValue]) => {
+          if (!filterValue) return true // No filter applied for this column
+          return String(row[field])
+            .toLowerCase()
+            .includes(filterValue.toLowerCase())
+        },
+      )
+
+      return matchesSearch && matchesDuration && matchesColumnFilters
+    })
+  }, [rows, searchText, isFilterActive, columnFilters])
 
   return (
     <Box
@@ -1213,20 +1259,27 @@ const DataGridTable = ({
       </Box>
 
       <Box sx={{ height: 'calc(100% - 150px)', width: '100%' }}>
+        {/* <Grid container spacing={2}>
+          {columns.map((col) => (
+            <Grid item xs key={col.field}>
+              <TextField
+                placeholder={`Filter ${col.headerName}`}
+                variant='outlined'
+                size='small'
+                onChange={(e) => handleFilterChange(col.field, e.target.value)}
+              />
+            </Grid>
+          ))}
+        </Grid> */}
         <DataGrid
           rows={filteredRows}
-
-
-
-            columns={columns.map((col) => ({
-              ...col,
-              editable: col.field === 'product' ? true : col.editable,
-            }))}
-
-
-            columnVisibilityModel={{
-              maintenanceId: false, 
-            }}
+          columns={columns.map((col) => ({
+            ...col,
+            editable: col.field === 'product' ? true : col.editable,
+          }))}
+          columnVisibilityModel={{
+            maintenanceId: false,
+          }}
           rowHeight={35}
           processRowUpdate={processRowUpdate}
           onColumnResized={onColumnResized}

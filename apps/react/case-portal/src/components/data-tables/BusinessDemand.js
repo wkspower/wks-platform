@@ -12,15 +12,25 @@ const BusinessDemand = () => {
   useEffect(() => {
     function transformData(inputData) {
       const months = [
-        "apr24", "may24", "jun24", "jul24", "aug24", "sep24", 
-        "oct24", "nov24", "dec24", "jan25", "feb25", "mar25"
-      ];
-      
-      const transformed = {};
-      
+        'apr24',
+        'may24',
+        'jun24',
+        'jul24',
+        'aug24',
+        'sep24',
+        'oct24',
+        'nov24',
+        'dec24',
+        'jan25',
+        'feb25',
+        'mar25',
+      ]
+
+      const transformed = {}
+
       inputData.forEach((item) => {
-        const productKey = item.Product;
-        
+        const productKey = item.Product
+
         if (!transformed[productKey]) {
           transformed[productKey] = {
             product: productKey,
@@ -37,42 +47,42 @@ const BusinessDemand = () => {
             feb25: 0,
             mar25: 0,
             averageTPH: 0,
-            remark: "",
-          };
+            remark: '',
+          }
         }
-        
-        const monthKey = Object.keys(item).find((key) => key.match(/^[A-Za-z]{3}-\d{2}$/));
-        
+
+        const monthKey = Object.keys(item).find((key) =>
+          key.match(/^[A-Za-z]{3}-\d{2}$/),
+        )
+
         if (monthKey) {
-          const formattedMonth = monthKey.toLowerCase().replace("-25", "25").replace("-24", "24");
-          transformed[productKey][formattedMonth] = item[monthKey];
+          const formattedMonth = monthKey
+            .toLowerCase()
+            .replace('-25', '25')
+            .replace('-24', '24')
+          transformed[productKey][formattedMonth] = item[monthKey]
         }
-        
-        transformed[productKey].averageTPH = item.Average || transformed[productKey].averageTPH;
-        transformed[productKey].remark = item.Remark || transformed[productKey].remark;
-      });
-      
-      return Object.values(transformed);
+
+        transformed[productKey].averageTPH =
+          item.Average || transformed[productKey].averageTPH
+        transformed[productKey].remark =
+          item.Remark || transformed[productKey].remark
+      })
+
+      return Object.values(transformed)
     }
 
     const fetchData = async () => {
       try {
         const data = await DataService.getBDData(keycloak)
-
-
-    
-
-
-        const transformedData = transformData(data);
+        const transformedData = transformData(data)
 
         const formattedData = transformedData.map((item, index) => ({
           ...item,
           id: index,
         }))
 
-
         setBDData(formattedData)
-        
       } catch (error) {
         console.error('Error fetching Turnaround data:', error)
       }
@@ -93,14 +103,10 @@ const BusinessDemand = () => {
       }
     }
     getAllProducts()
-    fetchData()    
+    fetchData()
   }, [])
 
-
-
   const colDefs = [
-
-
     {
       field: 'product',
       headerName: 'Product',
@@ -187,7 +193,6 @@ const BusinessDemand = () => {
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
-
         permissions={{
           showAction: true,
           addButton: true,
