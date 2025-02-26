@@ -54,9 +54,9 @@ spring:
       #url: jdbc:sqlserver://216.48.180.83;databaseName=AOP;trustServerCertificate=true
       #username: sa
       #password: "#Qwer123"
-      url: ${SQL_SERVER_1_URL}
-      username: ${SQL_SERVER_1_USERNAME}
-      password: ${SQL_SERVER_1_PASSWORD}
+      url: ${SQL_SERVER_3_URL}
+      username: ${SQL_SERVER_3_USERNAME}
+      password: ${SQL_SERVER_3_PASSWORD}
       driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
       hikari:
         maximum-pool-size: 10

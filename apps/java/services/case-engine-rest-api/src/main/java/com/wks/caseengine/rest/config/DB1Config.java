@@ -62,7 +62,7 @@ public class DB1Config {
     @Autowired
     private Environment env;
   
-    @Value("${SQL_SERVER_1_USERNAME}")
+    @Value("${SQL_SERVER_3_USERNAME}")
     private String envvv;
 
     @Primary
