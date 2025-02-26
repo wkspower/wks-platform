@@ -79,13 +79,26 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
             shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0
         );
 
-        plantMaintenanceTransaction.setUser("test_user"); 
+        
         plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
         plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
         // Ensure required fields exist
-        plantMaintenanceTransaction.setName("Default Name"); // Add default name
-        plantMaintenanceTransaction.setVersion("V1"); // Ensure version is set
+
+
+		plantMaintenanceTransaction.setUser("system"); 
+        plantMaintenanceTransaction.setName("Default Name");
+        plantMaintenanceTransaction.setVersion("V1");
         plantMaintenanceTransaction.setCreatedOn(new Date());
+
+
+
+		// plantMaintenanceTransaction.setName("Default Name"); 
+        // plantMaintenanceTransaction.setVersion("V1");
+		// plantMaintenanceTransaction.setUser("system"); 
+		// plantMaintenanceTransaction.setCreatedOn(new Date());
+
+
+
         plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
         if(shutDownPlanDTO.getProductId()!=null) {
         	plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());

@@ -76,6 +76,26 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 		plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
 
 		plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+		
+		
+		plantMaintenanceTransaction.setName("Default Name"); 
+        plantMaintenanceTransaction.setVersion("V1");
+		plantMaintenanceTransaction.setUser("system"); 
+	
+
+
+
+		
+        if(shutDownPlanDTO.getProductId()!=null) {
+        	plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+        }
+        if(shutDownPlanDTO.getAudityear()==null) {
+        	plantMaintenanceTransaction.setAuditYear(2025);
+        }else {
+        	plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
+        }
+		
+			
 		slowdownPlanRepository.save(plantMaintenanceTransaction);
 
 		// TODO Auto-generated method stub

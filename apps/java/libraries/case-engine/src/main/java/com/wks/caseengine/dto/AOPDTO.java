@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class AOPDTO {
 	
-	private UUID id;
+	private String id;
     private String aopCaseId;
     private String aopStatus;
     private String aopRemarks;
@@ -35,7 +35,7 @@ public class AOPDTO {
     private Float nov;
     private Float dec;
     private String aopYear;
-    private UUID plantFkId;
+    private String plantFkId;
     private Float avgTPH;
 
 }

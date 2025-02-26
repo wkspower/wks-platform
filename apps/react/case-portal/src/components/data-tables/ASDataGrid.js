@@ -18,9 +18,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search'
 // import FilterAltIcon from '@mui/icons-material/FilterAlt'
 // import EditIcon from '@mui/icons-material/Edit'
-
 import { useSession } from 'SessionStoreContext'
-
 import { Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'
 import { DataService } from 'services/DataService'
 
@@ -91,17 +89,17 @@ const DataGridTable = ({
   const [selectedRowId, setSelectedRowId] = useState(null) // Store selected row ID
   const unitOptions = ['In percentage (%)', 'Absolute number']
   const [selectedUnit, setSelectedUnit] = useState()
+  // const [localEditState, setLocalEditState] = useState(null); // Local edit state for validation errors
   const handleOpenRemark = () => setOpenRemark(true)
   const handleCloseRemark = () => setOpenRemark(false)
   const handleClose1 = () => setOpen1(false)
   const handleSearchChange = (event) => {
     setSearchText(event.target.value)
   }
-
   const [rowModesModel, setRowModesModel] = useState({})
 
   const handleRowEditStop = (params, event) => {
-    console.log('handleRowEditStop', params)
+    //console.log('handleRowEditStop', params)
 
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
       event.defaultMuiPrevented = true
@@ -110,12 +108,12 @@ const DataGridTable = ({
 
   const handleRowEditCommit = (id, event) => {
     const editedRow = rows.find((row) => row.id === id)
-    console.log('Row Data After Editing:', editedRow)
+    //console.log('Row Data After Editing:', editedRow)
   }
 
-  const handleEditClick = (id, row) => () => {
-    console.log('id', id)
-    console.log('row', row)
+  const handleEditClick = (id,row) => () => {
+    //console.log('id',id)
+    //console.log('row',row)
     setIsUpdating(true)
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } })
   }
@@ -125,8 +123,11 @@ const DataGridTable = ({
   // };
 
   const handleSaveClick = (id, rowData) => {
-    console.log('Newly Added Row Data:', rowData)
-    console.log('selectedRows:', selectedRows)
+
+    //console.log('Newly Added Row Data:', rowData)
+    //console.log('selectedRows:', selectedRows)
+
+
 
     setRowModesModel((prev) => ({
       ...prev,
@@ -135,19 +136,20 @@ const DataGridTable = ({
   }
 
   // useEffect(() => {
-  //   console.log("Updated Rows!!!!!!!!!!!!!!!!!!!!!!!:", rows);
+  //   //console.log("Updated Rows!!!!!!!!!!!!!!!!!!!!!!!:", rows);
   // }, [rows]);
 
   const handleDeleteClick = async (id, params) => {
+    if(!(id?.maintenanceId) || (!(params?.row.maintenanceId))) return
     try {
       var maintenanceId = id?.maintenanceId || params?.row.maintenanceId
-      console.log('test', maintenanceId, id)
-      console.log('test', params?.row.maintenanceId)
+      //console.log('test', maintenanceId, id)
+      //console.log('test', params?.row.maintenanceId)
       const response = await DataService.deleteSlowdownData(
         maintenanceId,
         keycloak,
       )
-      console.log('Slowdown data Updated successfully:', response)
+      //console.log('Slowdown data Updated successfully:', response)
       setSnackbarOpen(true)
       setOpen1(true)
       setDeleteId(id)
@@ -208,7 +210,7 @@ const DataGridTable = ({
         shutdownDetails,
         keycloak,
       )
-      console.log('Shutdown data saved successfully:', response)
+      //console.log('Shutdown data saved successfully:', response)
       setSnackbarOpen(true)
       // setSnackbarMessage("Shutdown data saved successfully !");
       setSnackbarData({
@@ -242,7 +244,7 @@ const DataGridTable = ({
         slowDownDetails,
         keycloak,
       )
-      console.log('Slowdown data Updated successfully:', response)
+      //console.log('Slowdown data Updated successfully:', response)
       setSnackbarOpen(true)
       // setSnackbarMessage("Slowdown data Updated successfully !");
       setSnackbarData({
@@ -256,6 +258,7 @@ const DataGridTable = ({
       console.error('Error saving Slowdown data:', error)
     }
   }
+
 
   const updateShutdownData = async (newRow) => {
     try {
@@ -276,18 +279,19 @@ const DataGridTable = ({
       )
       
       setSnackbarOpen(true)
-      // setSnackbarMessage("Slowdown data Updated successfully !");
+      // setSnackbarMessage("Shutdown data Updated successfully !");
       setSnackbarData({
         message: 'Shutdown data Updated successfully!',
         severity: 'success',
       })
       // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Slowdown data Updated successfully!", severity: "success" });
+      // setSnackbarData({ message: "Shutdown data Updated successfully!", severity: "success" });
       return response
     } catch (error) {
       console.error('Error saving Shutdown data:', error)
     }
   }
+
 
   const updateTurnAroundData = async (newRow) => {
     try {
@@ -307,7 +311,7 @@ const DataGridTable = ({
         turnAroundDetails,
         keycloak,
       )
-      console.log('TurnAround data Updated successfully:', response)
+      //console.log('TurnAround data Updated successfully:', response)
       setSnackbarOpen(true)
       // setSnackbarMessage("TurnAround data Updated successfully !");
       setSnackbarData({
@@ -325,15 +329,15 @@ const DataGridTable = ({
 
   const updateProductNormData = async (newRow) => {
     try {
-      // var maintenanceId = newRow?.maintenanceId
-
-      const turnAroundDetails = {
+      const productNormData = {
         id: newRow.id,
         aopType: newRow.aopType,
+        aopCaseId: newRow.aopCaseId,
+        aopStatus: newRow.aopStatus,
         aopYear: newRow.aopYear,
         plantFkId: newRow.plantFkId,
-        normItem: newRow.normItem, // Corrected from `maintStartDateTime`
-        april: newRow.april,       // Ensure each month has correct values
+        normItem: newRow.normItem,
+        april: newRow.april,       
         may: newRow.may,
         june: newRow.june,
         july: newRow.july,
@@ -345,43 +349,31 @@ const DataGridTable = ({
         jan: newRow.jan,
         feb: newRow.feb,
         march: newRow.march,
-        remark: newRow.remark // If remark is a separate field, keep it separately
       };
-      
-
       const response = await DataService.updateProductNormData(
-        turnAroundDetails,
+        productNormData,
         keycloak,
       )
-      console.log('Product Norm data Updated successfully:', response)
       setSnackbarOpen(true)
-      // setSnackbarMessage("Product Norm data Updated successfully !");
       setSnackbarData({
-        message: 'Product Norm data Updated successfully!',
+        message: 'Product Volume data updated successfully !',
         severity: 'success',
       })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Product Norm data Updated successfully!", severity: "success" });
       return response
     } catch (error) {
-      console.error('Error Updating Product Norm data:', error)
+      console.error('Error Updating Product Volume data:', error)
     }
   }
 
 
   const saveSlowDownData = async (newRow) => {
     try {
-      // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
       var plantId = ''
-
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-
-
-
       const slowDownDetails = {
         productId: newRow.product,
         discription: newRow.discription,
@@ -396,7 +388,7 @@ const DataGridTable = ({
         slowDownDetails,
         keycloak,
       )
-      console.log('Slowdown data saved successfully:', response)
+      //console.log('Slowdown data saved successfully:', response)
       setSnackbarOpen(true)
       // setSnackbarMessage("Slowdown data saved successfully !");
       setSnackbarData({
@@ -438,7 +430,7 @@ const DataGridTable = ({
         turnAroundDetails,
         keycloak,
       )
-      console.log('Turnaround Plan data saved successfully:', response)
+      //console.log('Turnaround Plan data saved successfully:', response)
       setSnackbarOpen(true)
       // setSnackbarMessage("Turnaround Plan data saved successfully !");
       setSnackbarData({
@@ -455,7 +447,7 @@ const DataGridTable = ({
 
   const processRowUpdate = useCallback(
     (newRow) => {
-      // console.log('title is ',title);
+      // //console.log('title is ',title);
       if (title == 'Shutdown Plan Data') {
         if (
           !newRow.discription?.trim() ||
@@ -484,14 +476,14 @@ const DataGridTable = ({
 
         setRows(updatedRows)
 
-        if (newRow?.maintenanceId) {
+        if(newRow?.maintenanceId){
           updateShutdownData(newRow)
-        } else {
+        }else{
           saveShutdownData(newRow)
         }
 
         onRowUpdate?.(updatedRow)
-        console.log('Updated Row inside processRowUpdate:', updatedRow)
+        //console.log('Updated Row inside processRowUpdate:', updatedRow)
         setSelectedRows(updatedRow)
 
         return updatedRow // Ensure function returns the updated row
@@ -526,9 +518,9 @@ const DataGridTable = ({
 
         setRows(updatedRows)
 
-        if (newRow?.maintenanceId) {
+        if(newRow?.maintenanceId){
           updateSlowdownData(newRow)
-        } else {
+        }else{
           saveSlowDownData(newRow)
         }
         onRowUpdate?.(updatedRow)
@@ -536,7 +528,7 @@ const DataGridTable = ({
         return updatedRow // Ensure function returns the updated row
       }
       if (title == 'Turnaround Plan Table') {
-        console.log('TA', newRow)
+        //console.log('TA',newRow)
         if (
           !newRow.discription?.trim() ||
           !newRow.product?.trim() ||
@@ -572,16 +564,24 @@ const DataGridTable = ({
         saveTurnAroundData(newRow)
 
         onRowUpdate?.(updatedRow)
-        console.log('Updated Row inside processRowUpdate:', updatedRow)
         setSelectedRows(updatedRow)
 
         return updatedRow // Ensure function returns the updated row
       }
       if (title == 'Product Volume Data') {
-        console.log('Product Volume Data',newRow)
         if (
           !newRow.april ||
-          !newRow.may 
+          !newRow.aug ||
+          !newRow.dec ||
+          !newRow.feb ||
+          !newRow.jan ||
+          !newRow.july ||
+          !newRow.june ||
+          !newRow.march ||
+          !newRow.may ||
+          !newRow.nov ||
+          !newRow.oct ||
+          !newRow.sep 
         ) {
           setSnackbarOpen(true)
           setSnackbarData({
@@ -611,7 +611,7 @@ const DataGridTable = ({
         // saveTurnAroundData(newRow)
         }
         onRowUpdate?.(updatedRow)
-        console.log('Updated Row inside processRowUpdate:', updatedRow)
+        //console.log('Updated Row inside processRowUpdate:', updatedRow)
         setSelectedRows(updatedRow)
 
         return updatedRow // Ensure function returns the updated row
@@ -654,7 +654,7 @@ const DataGridTable = ({
   }
 
   const addYearData = () => {
-    console.log("Year's Data:", yearData)
+    //console.log("Year's Data:", yearData)
     handleCloseYearData()
   }
 
@@ -724,8 +724,8 @@ const DataGridTable = ({
       isNew: true, // Mark row as new
       ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])), // Empty values
     }
-
-    setRows((prevRows) => [newRow, ...prevRows])
+    
+    setRows((prevRows) => [newRow, ...prevRows]) 
     onAddRow?.(newRow)
     setProduct('')
     setRowModesModel((oldModel) => ({
@@ -733,25 +733,13 @@ const DataGridTable = ({
       [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
     }))
   }
+  
 
-  // useEffect(() => {
-  //   console.log('api call here ')
-  //   // dummyApiCall(1)
-  //   // dummyApiCall1(1)
-  //   // getPlantAndSite()
-  //   // getShutDownPlantData()
-  //   // getSlowDownPlantData()
-  //   // getTAPlantData()
-  //   // getAllProducts()
-  //   // getYearlyData('2025')
-  //   // getYearlyData('2025')
-  //   console.log('rows',rows);
-  // }, [rows])
 
   const dummyApiCall = async (id) => {
     try {
       const data = await DataService.getProductById(keycloak, id)
-      console.log('API Response:', data)
+      //console.log('API Response:', data)
     } catch (error) {
       console.error('Error fetching product:', error)
     } finally {
@@ -762,7 +750,7 @@ const DataGridTable = ({
   const getYearlyData = async (year) => {
     try {
       const data = await DataService.getYearlyData(keycloak, year)
-      console.log('API getYearlyData:', data)
+      //console.log('API getYearlyData:', data)
     } catch (error) {
       console.error('Error fetching product:', error)
     } finally {
@@ -773,7 +761,7 @@ const DataGridTable = ({
   const getPlantAndSite = async () => {
     try {
       const data = await DataService.getAllSites(keycloak)
-      console.log('API Response:', data)
+      //console.log('API Response:', data)
     } catch (error) {
       console.error('Error fetching product:', error)
     } finally {
@@ -784,7 +772,7 @@ const DataGridTable = ({
   const getShutDownPlantData = async () => {
     try {
       const data = await DataService.getShutDownPlantData(keycloak)
-      console.log('API Response:', data)
+      //console.log('API Response:', data)
     } catch (error) {
       console.error('Error fetching product:', error)
     } finally {
@@ -795,7 +783,7 @@ const DataGridTable = ({
   const getSlowDownPlantData = async () => {
     try {
       const data = await DataService.getSlowDownPlantData(keycloak)
-      console.log('API Response:', data)
+      //console.log('API Response:', data)
     } catch (error) {
       console.error('Error fetching product:', error)
     } finally {
@@ -806,7 +794,7 @@ const DataGridTable = ({
   const getTAPlantData = async () => {
     try {
       const data = await DataService.getTAPlantData(keycloak)
-      console.log('API Response:', data)
+      //console.log('API Response:', data)
     } catch (error) {
       console.error('Error fetching product:', error)
     } finally {
@@ -817,7 +805,7 @@ const DataGridTable = ({
   const getAllProducts = async () => {
     try {
       const data = await DataService.getAllProducts(keycloak)
-      console.log('API Response:', data)
+      //console.log('API Response:', data)
     } catch (error) {
       console.error('Error fetching product:', error)
     } finally {
@@ -843,100 +831,47 @@ const DataGridTable = ({
       flex: !resizedColumns[col.field] ? 1 : undefined,
     }))
   }, [initialColumns, resizedColumns])
-  // const columns = [
-  //   ...defaultColumns,
-  //   ...(title != 'Production Volume Data'
-  //     ? [
-  //         {
-  //           field: 'actions',
-  //           type: 'actions',
-  //           headerName: 'Actions',
-  //           width: 180,
-  //           cellClassName: 'actions',
 
-  //           getActions: (params) => {
-  //             const { id } = params // Extract row data
-  //             const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
 
-  //             if (isInEditMode) {
-  //               return [
-  //                 <GridActionsCellItem
-  //                   key={`save-${id}`}
-  //                   icon={<SaveIcon />}
-  //                   label='Save'
-  //                   sx={{ color: 'primary.main' }}
-  //                   onClick={() => handleSaveClick(id, params)} // Pass row data
-  //                 />,
-  //                 <GridActionsCellItem
-  //                   key={`cancel-${id}`}
-  //                   icon={<CancelIcon />}
-  //                   label='Cancel'
-  //                   className='textPrimary'
-  //                   onClick={() => handleCancelClick(id)}
-  //                   color='inherit'
-  //                 />,
-  //               ]
-  //             }
 
-  //             return [
-  //               <GridActionsCellItem
-  //                 key={`save-${id}`}
-  //                 icon={<EditIcon sx={{ color: jioColors.primaryBlue }} />}
-  //                 label='Edit'
-  //                 className='textPrimary'
-  //                 onClick={() => handleEditClick(id)}
-  //                 color='inherit'
-  //               />,
-  //               <GridActionsCellItem
-  //                 key={`save-${id}`}
-  //                 icon={<DeleteIcon sx={{ color: jioColors.accentRed }} />}
-  //                 label='Delete'
-  //                 onClick={() => handleDeleteClick(id)}
-  //                 color='inherit'
-  //               />,
-  //             ]
-  //           },
-  //           minWidth: 70,
-  //           maxWidth: 100,
-  //           headerClassName: 'last-column-header',
-  //         },
-  //       ]
-  //     : []),
-  // ]
-
-  const columns = useMemo(() => [
-    ...defaultColumns,
+  const columns = useMemo(
+    () => [
+      ...defaultColumns,
     ...(permissions?.showAction
-      ? [
-          {
-            field: 'actions',
-            type: 'actions',
-            headerName: 'Actions',
-            width: 180,
-            cellClassName: 'actions',
-            getActions: (params) => {
-              const { id, row } = params // Extract row data
+        ? [
+            {
+              field: 'actions',
+              type: 'actions',
+              headerName: 'Actions',
+              width: 180,
+              cellClassName: 'actions',
+
+              getActions: (params) => {
+                const { id, row } = params // Extract row data
+                // //console.log("Row Data inside getActions:", params.row);
+                // setSelectedRows(row)
+              
               const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
 
-              if (isInEditMode) {
-                return [
-                  <GridActionsCellItem
+                if (isInEditMode) {
+                  return [
+                    <GridActionsCellItem
                     key={`save-${id}`}
-                    icon={<SaveIcon />}
-                    label='Save'
-                    sx={{ color: 'primary.main' }}
-                    onClick={() => handleSaveClick(id, params.row)} // Pass row data
-                  />,
-                  <GridActionsCellItem
+                      icon={<SaveIcon />}
+                      label='Save'
+                      sx={{ color: 'primary.main' }}
+                      onClick={() => handleSaveClick(id, params.row)} // Pass row data
+                    />,
+                    <GridActionsCellItem
                     key={`cancel-${id}`}
-                    icon={<CancelIcon />}
-                    label='Cancel'
-                    className='textPrimary'
-                    onClick={handleCancelClick(id)}
-                    color='inherit'
-                  />,
-                ]
-              }
+                      icon={<CancelIcon />}
+                      label='Cancel'
+                      className='textPrimary'
+                      onClick={handleCancelClick(id)}
+                      color='inherit'
+                    />,
+                  ]
+                }
 
               return [
                 permissions?.editButton && (
@@ -945,7 +880,7 @@ const DataGridTable = ({
                     icon={<EditIcon sx={{ color: jioColors.primaryBlue }} />}
                     label='Edit'
                     className='textPrimary'
-                    onClick={handleEditClick(id, row)}
+                    onClick={handleEditClick(id,row)}
                     color='inherit'
                   />
                 ),
@@ -954,7 +889,7 @@ const DataGridTable = ({
                     key={`delete-${id}`}
                     icon={<DeleteIcon sx={{ color: jioColors.accentRed }} />}
                     label='Delete'
-                    onClick={() => handleDeleteClick(id, params)}
+                    onClick={handleDeleteClick(id)}
                     color='inherit'
                   />
                 ),
@@ -969,7 +904,7 @@ const DataGridTable = ({
   ])
 
   const addRemark = () => {
-    console.log('Remark:', remark)
+    //console.log('Remark:', remark)
     setRows((prevRows) =>
       prevRows.map((row) =>
         row.id === selectedRowId ? { ...row, remark } : row,
@@ -979,6 +914,8 @@ const DataGridTable = ({
     setOpenRemark(false)
     setRemark('')
   }
+
+
   const monthFields = new Set([
     'apr24',
     'may24',
@@ -993,6 +930,8 @@ const DataGridTable = ({
     'feb25',
     'mar25',
   ])
+
+
   const nonEditableFields = [
     'product',
     'averageTPH',
@@ -1089,7 +1028,7 @@ const DataGridTable = ({
           return
         }
 
-        console.log('params-params', params)
+        //console.log('params-params', params)
 
         // Calculate days in the selected month
         const totalDays = new Date(year, month + 1, 0).getDate()
@@ -1148,7 +1087,7 @@ const DataGridTable = ({
 
       return
     }
-    console.log('Submitted Data:', days)
+    //console.log('Submitted Data:', days)
     setOpen(false) // Close the modal
     if (permissions?.saveWithRemark) {
       // Update the row with the new data
@@ -1289,6 +1228,8 @@ const DataGridTable = ({
               ))}
             </TextField>
           )}
+
+
           <TextField
             variant='outlined'
             placeholder='Search...'
@@ -1388,15 +1329,24 @@ const DataGridTable = ({
         </Grid> */}
         <DataGrid
           rows={filteredRows}
-          columns={columns.map((col) => ({
-            ...col,
-            editable: col.field === 'product' ? true : col.editable,
-          }))}
-          columnVisibilityModel={{
-            maintenanceId: false,
+
+
+
+            columns={columns.map((col) => ({
+              ...col,
+              editable: col.field === 'product' ? true : col.editable,
+            }))}
+
+
+            columnVisibilityModel={{
+              maintenanceId: false, 
               id: false, 
               plantFkId: false, 
-          }}
+            }}
+
+
+
+          
           rowHeight={35}
           processRowUpdate={processRowUpdate}
           onColumnResized={onColumnResized}
@@ -1406,6 +1356,7 @@ const DataGridTable = ({
           rowModesModel={rowModesModel}
           onRowModesModelChange={handleRowModesModelChange}
           onRowEditStop={handleRowEditStop}
+          
           slotProps={{
             toolbar: { setRows, setRowModesModel },
           }}

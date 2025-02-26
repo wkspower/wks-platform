@@ -10,6 +10,8 @@ import com.wks.caseengine.dto.AOPDTO;
 import com.wks.caseengine.entity.AOP;
 import com.wks.caseengine.repository.AOPRepository;
 
+import java.util.UUID;
+
 @Service
 public class AOPServiceImpl implements  AOPService{
 	
@@ -24,7 +26,16 @@ public class AOPServiceImpl implements  AOPService{
 		
 		for(AOP aOP: listAOP) {
 			AOPDTO aOPDTO = new AOPDTO();
-			aOPDTO.setId(aOP.getId());
+
+
+			
+
+
+			
+			aOPDTO.setId(aOP.getId().toString());
+
+
+
 			aOPDTO.setAopCaseId(aOP.getAopCaseId());
 			aOPDTO.setAopRemarks(aOP.getAopRemarks());
 			aOPDTO.setAopStatus(aOP.getAopStatus());
@@ -43,7 +54,12 @@ public class AOPServiceImpl implements  AOPService{
 			aOPDTO.setNormItem(aOP.getNormItem());
 			aOPDTO.setNov(aOP.getNov());
 			aOPDTO.setOct(aOP.getOct());
-			aOPDTO.setPlantFkId(aOP.getPlantFkId());
+
+
+
+			aOPDTO.setPlantFkId(aOP.getPlantFkId().toString());
+
+
 			aOPDTO.setSep(aOP.getSep());
 			aOPList.add(aOPDTO);
 		}
@@ -54,7 +70,17 @@ public class AOPServiceImpl implements  AOPService{
 
 	@Override
 	public AOPDTO updateAOP(AOPDTO aOPDTO) {
-		AOP aOP=aOPRepository.findById(aOPDTO.getId()).get();
+
+
+		System.out.println(aOPDTO.getId());
+		System.out.println(UUID.fromString(aOPDTO.getId()));
+	
+		AOP aOP=aOPRepository.findById(UUID.fromString(aOPDTO.getId())).get();
+
+		// import java.util.UUID;
+
+		// aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFkId()));
+
 		aOP.setAopCaseId(aOPDTO.getAopCaseId());
 		aOP.setAopRemarks(aOPDTO.getAopRemarks());
 		aOP.setAopStatus(aOPDTO.getAopStatus());
@@ -73,7 +99,10 @@ public class AOPServiceImpl implements  AOPService{
 		aOP.setNormItem(aOPDTO.getNormItem());
 		aOP.setNov(aOPDTO.getNov());
 		aOP.setOct(aOPDTO.getOct());
-		aOP.setPlantFkId(aOPDTO.getPlantFkId());
+
+
+		aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFkId()));
+		
 		aOP.setSep(aOPDTO.getSep());
 		aOPRepository.save(aOP);
 		// TODO Auto-generated method stub

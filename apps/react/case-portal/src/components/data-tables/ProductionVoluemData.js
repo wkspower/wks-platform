@@ -1,14 +1,11 @@
 import { DataService } from 'services/DataService'
-import { Autocomplete, TextField } from '@mui/material'
 import ASDataGrid from './ASDataGrid'
 import { useEffect, useState } from 'react'
 import { useSession } from 'SessionStoreContext'
 
 const ProductionvolumeData = () => {
   const keycloak = useSession()
-
   const [productNormData, setProductNormData] = useState([])
-
   const [slowDownData, setSlowDownData] = useState([])
   const [allProducts, setAllProducts] = useState([])
 
@@ -19,7 +16,6 @@ const ProductionvolumeData = () => {
           const formattedData = data.map((item, index) => ({
             ...item,
             id: item.id,
-    
           }))
           setProductNormData(formattedData)
         } catch (error) {
@@ -34,13 +30,10 @@ const ProductionvolumeData = () => {
             id: product.id,
             displayName: product.displayName
           }));
-      
           setAllProducts(productList);
-          
         } catch (error) {
           console.error('Error fetching product:', error);
         } finally {
-          // handleMenuClose();
         }
       }
 
@@ -50,14 +43,12 @@ const ProductionvolumeData = () => {
   )
 
   const productionColumns = [
-
-    { field: 'id', headerName: 'id'},
-   
-    { field: 'aopType', headerName: 'aopType'},
-    { field: 'aopYear', headerName: 'aopYear'},
-    { field: 'plantFkId', headerName: 'plantFkId'},
-    
-    { field: 'normItem', headerName: 'Product', editable: false },
+    { field: 'id', headerName: 'ID' },
+    { field: 'aopCaseId', headerName: 'Case ID', minWidth: 120, editable: false },
+    { field: 'aopType', headerName: 'Type', minWidth: 80 },
+    { field: 'aopYear', headerName: 'Year', minWidth: 80 },
+    { field: 'plantFkId', headerName: 'Plant ID', minWidth: 80 },
+    { field: 'normItem', headerName: 'Product', minWidth: 80, editable: false },
     { field: 'april', headerName: 'Apr-24', editable: true },
     { field: 'may', headerName: 'May-24', editable: true },
     { field: 'june', headerName: 'Jun-24', editable: true },
@@ -70,12 +61,9 @@ const ProductionvolumeData = () => {
     { field: 'jan', headerName: 'Jan-25', editable: true },
     { field: 'feb', headerName: 'Feb-25', editable: true },
     { field: 'march', headerName: 'Mar-25', editable: true },
-    { field: 'aopCaseId', headerName: 'AOP Case ID', editable: false },
-    { field: 'aopStatus', headerName: 'Status', editable: false },
-    { field: 'aopRemarks', headerName: 'Remarks', minWidth: 150, editable: true },
-
-
-  ]
+    { field: 'aopStatus', headerName: 'Status', minWidth: 75, editable: false },
+  ];
+  
   
 
   return (
