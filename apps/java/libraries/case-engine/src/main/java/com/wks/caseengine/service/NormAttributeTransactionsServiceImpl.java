@@ -6,11 +6,16 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+
+import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
+import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -20,6 +25,9 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 
 	@PersistenceContext
     private EntityManager entityManager;
+	
+	@Autowired
+	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
 	
 	@Override
 	public String getCatalystSelectivityData(int year) {
@@ -131,5 +139,22 @@ return "";
 	            .map(col -> col.substring(col.indexOf("[") + 1, col.indexOf("]"))) // Extract text between brackets []
 	            .collect(Collectors.toList());
 	}
+
+
+
+	@Override
+	public NormAttributeTransactionsDTO updateNormAttributeTransactions(NormAttributeTransactionsDTO normAttributeTransactionsDTO) {
+		String attributeValue=normAttributeTransactionsDTO.getAttributeValue();
+		Integer month = normAttributeTransactionsDTO.getMonth();
+		UUID normParameterFKId=normAttributeTransactionsDTO.getNormParameterFKId();
+		Integer auditYear= normAttributeTransactionsDTO.getAuditYear();
+		
+		normAttributeTransactionsRepository.updateNormAttributeTransactions(attributeValue,month,normParameterFKId,auditYear);
+			
+		// TODO Auto-generated method stub
+		return normAttributeTransactionsDTO;
+	}
+	
+	
 
 }

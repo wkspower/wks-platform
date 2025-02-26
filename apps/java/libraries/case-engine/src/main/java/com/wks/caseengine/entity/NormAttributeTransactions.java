@@ -65,5 +65,8 @@ public class NormAttributeTransactions {
 
     @Column(name = "CatalystAttribute_FK_Id")
     private UUID catalystAttributeFKId;
+    
+    @Column(name="Month")
+    private Integer month;
 
 }

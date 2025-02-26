@@ -1,11 +1,14 @@
 package com.wks.caseengine.rest.server;
-
+import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +25,11 @@ public class NormAttributeTransactionsController {
 	@GetMapping(value="/getCatalystSelectivityData")
 	public	String getCatalystSelectivityData(@RequestParam int year,@RequestParam UUID plantId,@RequestParam UUID siteId){	
 		return normAttributeTransactionsService.getCatalystSelectivityData(year);
-		
+	}
+	
+	@PutMapping(value="/updateNormAttributeTransactions")
+	public NormAttributeTransactionsDTO updateNormAttributeTransactions(@RequestBody NormAttributeTransactionsDTO normAttributeTransactionsDTO) {
+		return normAttributeTransactionsService.updateNormAttributeTransactions(normAttributeTransactionsDTO);
 	}
 
 }
