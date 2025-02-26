@@ -10,4 +10,7 @@ public interface NormParameterMonthlyTransactionService {
 
 	public String getProductionNormData(int year, UUID plantId, UUID siteId);
 
+	public String getCosnumptionNormData(int year, UUID plantId, UUID siteId);
+	
+
 }

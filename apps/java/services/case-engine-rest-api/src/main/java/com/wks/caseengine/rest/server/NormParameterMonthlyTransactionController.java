@@ -35,5 +35,17 @@ public class NormParameterMonthlyTransactionController{
 		System.out.println("obj "+obj);
 		 return obj;
 	}
+
+	
 	// s
+
+
+	@GetMapping(value="/getCosnumptionNormData")
+	public	String getCosnumptionNormData(@RequestParam int year,@RequestParam UUID plantId,@RequestParam UUID siteId){	
+	
+		 String obj = normParameterMonthlyTransactionService.getCosnumptionNormData(year, plantId, siteId);
+		System.out.println("obj "+obj);
+		 return obj;
+	}
+
 }
