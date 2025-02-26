@@ -5,6 +5,6 @@ import java.util.Map;
 
 public interface NormAttributeTransactionsService {
 	
-	public	List<Map<String, Object>> getCatalystSelectivityData(int year);
+	public String getCatalystSelectivityData(int year);
 
 }

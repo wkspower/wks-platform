@@ -2,12 +2,15 @@ package com.wks.caseengine.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -19,7 +22,7 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
     private EntityManager entityManager;
 	
 	@Override
-	public List<Map<String, Object>> getCatalystSelectivityData(int year) {
+	public String getCatalystSelectivityData(int year) {
 	    // Generate dynamic pivot columns
 	    String monthQuery = "WITH Months AS (" +
 	            "    SELECT DISTINCT FORMAT(AOPMonth, 'MMM') + RIGHT(CAST(YEAR(AOPMonth) AS VARCHAR), 2) AS MonthYear " +
@@ -75,7 +78,49 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	        responseList.add(map);
 	    }
 
-	    return responseList;
+   Map<String, Map<String, Object>> groupedByProduct = new HashMap<>();
+   List<Map<String, Object>> output = new ArrayList<>();
+        for (Map<String, Object> data : responseList) {
+            String product = (String) data.get("catalyst");
+            Map<String, Object> productData = groupedByProduct.getOrDefault(product, new HashMap<>());
+
+            // Iterate through the columns and add non-null values
+            for (String column : data.keySet()) {
+                if (column.equals("catalyst")) ;  // Skip the "Product" column
+                Object value = data.get(column);
+                if (value != null) {
+                    productData.put(column, value);
+                }
+            }
+
+            // Store the non-null grouped data by product
+            groupedByProduct.put(product, productData);
+        }
+
+
+        // Printing the result
+        for (Map.Entry<String, Map<String, Object>> entry : groupedByProduct.entrySet()) {
+            System.out.println("Product: " + entry.getKey());
+            Map<String, Object> productData = entry.getValue();
+            output.add(productData);
+            for (Map.Entry<String, Object> columnEntry : productData.entrySet()) {
+                System.out.println(columnEntry.getKey() + ": " + columnEntry.getValue());
+            }
+            System.out.println("-------------------------");
+        }
+
+try{
+    ObjectMapper objectMapper = new ObjectMapper();
+    String jsonOutput = objectMapper.writeValueAsString(output);
+
+   return jsonOutput;
+}catch(Exception e){
+    e.printStackTrace();
+}
+         
+return "";
+
+
 	}
 
 	/**

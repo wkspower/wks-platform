@@ -20,7 +20,7 @@ public class NormAttributeTransactionsController {
 	private NormAttributeTransactionsService normAttributeTransactionsService;
 	
 	@GetMapping(value="/getCatalystSelectivityData")
-	public	List<Map<String, Object>> getCatalystSelectivityData(@RequestParam int year,@RequestParam UUID plantId,@RequestParam UUID siteId){	
+	public	String getCatalystSelectivityData(@RequestParam int year,@RequestParam UUID plantId,@RequestParam UUID siteId){	
 		return normAttributeTransactionsService.getCatalystSelectivityData(year);
 		
 	}
