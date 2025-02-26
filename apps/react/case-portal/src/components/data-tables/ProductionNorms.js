@@ -297,13 +297,13 @@ const ProductionNorms = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await DataService.getShutDownPlantData(keycloak)
+        const data = await DataService.getProductionNormsData(keycloak)
         console.log(data)
-        // const formattedData = data.map((item, index) => ({
-        //   ...item,
-        //   id: index,
-        // }))
-        setCsData(formattedDataHardCoded)
+        const formattedData = data.map((item, index) => ({
+          ...item,
+          id: index,
+        }))
+        setCsData(formattedData)
       } catch (error) {
         console.error('Error fetching Shutdown data:', error)
       }
@@ -366,7 +366,7 @@ const ProductionNorms = () => {
   }, [])
   const productionColumns = [
     {
-      field: 'product',
+      field: 'NormParametersId',
       headerName: 'Product',
       editable: true,
       minWidth: 225,
@@ -423,8 +423,8 @@ const ProductionNorms = () => {
     { field: 'jan25', headerName: 'Jan-25', editable: true },
     { field: 'feb25', headerName: 'Feb-25', editable: true },
     { field: 'mar25', headerName: 'Mar-25', editable: true },
-    { field: 'averageTPH', headerName: 'Average TPH', editable: true },
-    { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
+    { field: 'Average', headerName: 'Average TPH', editable: true },
+    { field: 'Remark', headerName: 'Remark', minWidth: 150, editable: true },
   ]
   // useEffect(() => {
   //   console.log('api call here ')

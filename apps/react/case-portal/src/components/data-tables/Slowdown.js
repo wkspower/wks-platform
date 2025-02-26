@@ -51,13 +51,14 @@ const SlowDown = () => {
     const saveShutdownData = async () => {
       try {
         var plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1'
-        // var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
-        // var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
-        // discription
-        // maintStartDateTime
-        // maintEndDateTime
-        // durationInMins
-        // product
+      // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D';
+      var plantId = ''
+
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
 
         const shutdownDetails = {
           product: 'Oxygen',

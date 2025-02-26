@@ -190,14 +190,16 @@ const SelectivityData = () => {
 
         console.log(data)
 
-        // if (data) {
-        //   const formattedData = data?.map((item, index) => ({
-        //     ...item,
-        //     id: index,
-        //   }))
-        // }
 
-        setCsData(formattedDataHardCoded)
+        var formattedData = []
+        if (data) {
+           formattedData = data?.map((item, index) => ({
+            ...item,
+            id: index,
+          }))
+        }
+
+        setCsData(formattedData)
       } catch (error) {
         console.error('Error fetching Turnaround data:', error)
       }
@@ -266,52 +268,62 @@ const SelectivityData = () => {
     //     )
     //   },
     // },
-    {
-      field: 'catalyst',
-      headerName: 'Catalyst',
-      editable: true,
-      minWidth: 225,
-      valueGetter: (params, params2) => {
-        // console.log('p1', params);
-        // console.log('p2', params2);
-        return params || ''
-      },
-      valueFormatter: (params) => {
-        console.log('params valueFormatter ', params)
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : ''
-      },
-      renderEditCell: (params, params2) => {
-        const { id, value } = params
-        // console.log('q1', params);
-        // console.log('q2', params2);
-        return (
-          <select
-            value={value || allProducts[0]?.id}
-            onChange={(event) => {
-              params.api.setEditCellValue({
-                id: params.id,
-                field: 'catalyst',
-                value: event.target.value,
-              })
-            }}
-            style={{
-              width: '100%',
-              padding: '5px',
-              border: 'none', // Removes border
-              outline: 'none', // Removes focus outline
-              background: 'transparent', // Keeps background clean
-            }}
-          >
-            {allProducts.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.displayName}
-              </option>
-            ))}
-          </select>
-        )
-      },
-    },
+
+
+
+
+    // {
+    //   field: 'catalyst',
+    //   headerName: 'Catalyst',
+    //   editable: true,
+    //   minWidth: 225,
+    //   valueGetter: (params, params2) => {
+    //     // console.log('p1', params);
+    //     // console.log('p2', params2);
+    //     return params || ''
+    //   },
+    //   valueFormatter: (params) => {
+    //     console.log('params valueFormatter ', params)
+    //     const product = allProducts.find((p) => p.id === params)
+    //     return product ? product.displayName : ''
+    //   },
+    //   renderEditCell: (params, params2) => {
+    //     const { id, value } = params
+    //     // console.log('q1', params);
+    //     // console.log('q2', params2);
+    //     return (
+    //       <select
+    //         value={value || allProducts[0]?.id}
+    //         onChange={(event) => {
+    //           params.api.setEditCellValue({
+    //             id: params.id,
+    //             field: 'catalyst',
+    //             value: event.target.value,
+    //           })
+    //         }}
+    //         style={{
+    //           width: '100%',
+    //           padding: '5px',
+    //           border: 'none', // Removes border
+    //           outline: 'none', // Removes focus outline
+    //           background: 'transparent', // Keeps background clean
+    //         }}
+    //       >
+    //         {allProducts.map((product) => (
+    //           <option key={product.id} value={product.id}>
+    //             {product.displayName}
+    //           </option>
+    //         ))}
+    //       </select>
+    //     )
+    //   },
+    // },
+
+
+    { field: 'catalyst', headerName: 'Catalyst', editable: true },
+
+
+
     { field: 'apr24', headerName: 'Apr-24', editable: true },
     { field: 'may24', headerName: 'May-24', editable: true },
     { field: 'jun24', headerName: 'Jun-24', editable: true },

@@ -183,7 +183,17 @@ const DataGridTable = ({
 
   const saveShutdownData = async (newRow) => {
     try {
-      var plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1'
+      // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
+
+
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+    
+      var plantId = plantId
+      // plantId = plantId;
 
       const shutdownDetails = {
         productId: newRow.product,
@@ -264,18 +274,18 @@ const DataGridTable = ({
         slowDownDetails,
         keycloak,
       )
-      console.log('Slowdown data Updated successfully:', response)
+      
       setSnackbarOpen(true)
       // setSnackbarMessage("Slowdown data Updated successfully !");
       setSnackbarData({
-        message: 'Slowdown data Updated successfully!',
+        message: 'Shutdown data Updated successfully!',
         severity: 'success',
       })
       // setSnackbarOpen(true);
       // setSnackbarData({ message: "Slowdown data Updated successfully!", severity: "success" });
       return response
     } catch (error) {
-      console.error('Error saving Slowdown data:', error)
+      console.error('Error saving Shutdown data:', error)
     }
   }
 
@@ -312,9 +322,66 @@ const DataGridTable = ({
     }
   }
 
+
+  const updateProductNormData = async (newRow) => {
+    try {
+      // var maintenanceId = newRow?.maintenanceId
+
+      const turnAroundDetails = {
+        id: newRow.id,
+        aopType: newRow.aopType,
+        aopYear: newRow.aopYear,
+        plantFkId: newRow.plantFkId,
+        normItem: newRow.normItem, // Corrected from `maintStartDateTime`
+        april: newRow.april,       // Ensure each month has correct values
+        may: newRow.may,
+        june: newRow.june,
+        july: newRow.july,
+        aug: newRow.aug,
+        sep: newRow.sep,
+        oct: newRow.oct,
+        nov: newRow.nov,
+        dec: newRow.dec,
+        jan: newRow.jan,
+        feb: newRow.feb,
+        march: newRow.march,
+        remark: newRow.remark // If remark is a separate field, keep it separately
+      };
+      
+
+      const response = await DataService.updateProductNormData(
+        turnAroundDetails,
+        keycloak,
+      )
+      console.log('Product Norm data Updated successfully:', response)
+      setSnackbarOpen(true)
+      // setSnackbarMessage("Product Norm data Updated successfully !");
+      setSnackbarData({
+        message: 'Product Norm data Updated successfully!',
+        severity: 'success',
+      })
+      // setSnackbarOpen(true);
+      // setSnackbarData({ message: "Product Norm data Updated successfully!", severity: "success" });
+      return response
+    } catch (error) {
+      console.error('Error Updating Product Norm data:', error)
+    }
+  }
+
+
   const saveSlowDownData = async (newRow) => {
     try {
-      var plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1'
+      // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
+      var plantId = ''
+
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+
+
       const slowDownDetails = {
         productId: newRow.product,
         discription: newRow.discription,
@@ -344,9 +411,19 @@ const DataGridTable = ({
     }
   }
 
+
   const saveTurnAroundData = async (newRow) => {
     try {
-      var plantId = 'B989E3EE-00C8-493C-9CA4-709D340FA5A1'
+      // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
+      var plantId = ''
+
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      
       const turnAroundDetails = {
         productId: newRow.product,
         discription: newRow.discription,
@@ -489,10 +566,50 @@ const DataGridTable = ({
 
         setRows(updatedRows)
 
-        if (newRow?.maintenanceId) {
+        if(newRow?.maintenanceId){
           updateTurnAroundData(newRow)
-        } else saveTurnAroundData(newRow)
+        }else
+        saveTurnAroundData(newRow)
 
+        onRowUpdate?.(updatedRow)
+        console.log('Updated Row inside processRowUpdate:', updatedRow)
+        setSelectedRows(updatedRow)
+
+        return updatedRow // Ensure function returns the updated row
+      }
+      if (title == 'Product Volume Data') {
+        console.log('Product Volume Data',newRow)
+        if (
+          !newRow.april ||
+          !newRow.may 
+        ) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Please Fill all Fields!',
+            severity: 'error',
+          })
+          setRowModesModel(() => ({
+            [newRow.id]: {
+              mode: GridRowModes.Edit,
+              fieldToFocus: 'april',
+            },
+          }))
+          return
+        }
+
+        const updatedRow = { ...newRow, isNew: false }
+        const updatedRows = rows.map((row) =>
+          row?.id === newRow?.id ? updatedRow : row,
+        )
+
+        setRows(updatedRows)
+
+        if(newRow?.maintenanceId){
+          updateProductNormData(newRow)
+        }else{
+        updateProductNormData(newRow)
+        // saveTurnAroundData(newRow)
+        }
         onRowUpdate?.(updatedRow)
         console.log('Updated Row inside processRowUpdate:', updatedRow)
         setSelectedRows(updatedRow)
@@ -546,8 +663,6 @@ const DataGridTable = ({
   // }
   const handleImportExport = () => {
     alert('File Import/Export feature coming soon!')
-    // alert('all api called')
-    // callAPIsSequentially()
   }
 
   // const filteredRows = rows.filter((row) => {
@@ -1279,6 +1394,8 @@ const DataGridTable = ({
           }))}
           columnVisibilityModel={{
             maintenanceId: false,
+              id: false, 
+              plantFkId: false, 
           }}
           rowHeight={35}
           processRowUpdate={processRowUpdate}
