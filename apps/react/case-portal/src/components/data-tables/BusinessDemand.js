@@ -67,6 +67,19 @@ const BusinessDemand = () => {
           item.Average || transformed[productKey].averageTPH
         transformed[productKey].remark =
           item.Remark || transformed[productKey].remark
+        const validValues = months
+          .map((month) => transformed[productKey][month])
+          .filter((value) => value !== null && value !== undefined)
+
+        const average =
+          validValues.length > 0
+            ? (
+                validValues.reduce((sum, val) => sum + val, 0) /
+                validValues.length
+              ).toFixed(2)
+            : 0
+
+        transformed[productKey].averageTPH = parseFloat(average)
       })
 
       return Object.values(transformed)
@@ -171,8 +184,30 @@ const BusinessDemand = () => {
     {
       field: 'averageTPH',
       headerName: 'Average TPH',
-      width: 150,
+      minWidth: 100,
+      maxWidth: 120,
       editable: false,
+      valueGetter: (params) => {
+        console.log('check--->', params)
+        // const existingAverage = params
+        // if (
+        //   existingAverage !== undefined &&
+        //   existingAverage !== null &&
+        //   existingAverage !== ''
+        // ) {
+        //   return existingAverage
+        // }
+
+        // const sum = params2?.months?.reduce((total, month) => {
+        //   // Ensure that the value is treated as a number (defaulting to 0 if not set)
+        //   return total + (Number(params2[month]) || 0)
+        // }, 0)
+        // // Calculate average and format to 2 decimals
+        // return (sum / params2?.months?.length).toFixed(2)
+      },
+      valueFormatter: (params, params2) => {
+        console.log(params, '------->', params2)
+      },
       renderHeader: () => (
         <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
           <div>Average</div>
@@ -188,7 +223,7 @@ const BusinessDemand = () => {
       <ASDataGrid
         columns={colDefs}
         rows={bdData}
-        title='Business Demand Data'
+        title='Product Demand'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}

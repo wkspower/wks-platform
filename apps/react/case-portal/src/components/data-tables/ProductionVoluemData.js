@@ -10,41 +10,45 @@ const ProductionvolumeData = () => {
   const [allProducts, setAllProducts] = useState([])
 
   useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const data = await DataService.getAOPData(keycloak)
-          const formattedData = data.map((item, index) => ({
-            ...item,
-            id: item.id,
-          }))
-          setProductNormData(formattedData)
-        } catch (error) {
-          console.error('Error fetching SlowDown data:', error)
-        }
+    const fetchData = async () => {
+      try {
+        const data = await DataService.getAOPData(keycloak)
+        const formattedData = data.map((item, index) => ({
+          ...item,
+          id: item.id,
+        }))
+        setProductNormData(formattedData)
+      } catch (error) {
+        console.error('Error fetching SlowDown data:', error)
       }
+    }
 
-      const getAllProducts = async () => {
-        try {
-          const data = await DataService.getAllProducts(keycloak);
-          const productList = data.map((product) => ({
-            id: product.id,
-            displayName: product.displayName
-          }));
-          setAllProducts(productList);
-        } catch (error) {
-          console.error('Error fetching product:', error);
-        } finally {
-        }
+    const getAllProducts = async () => {
+      try {
+        const data = await DataService.getAllProducts(keycloak)
+        const productList = data.map((product) => ({
+          id: product.id,
+          displayName: product.displayName,
+        }))
+        setAllProducts(productList)
+      } catch (error) {
+        console.error('Error fetching product:', error)
+      } finally {
       }
+    }
 
-      getAllProducts()
-      fetchData()
-    }, []
-  )
+    getAllProducts()
+    fetchData()
+  }, [])
 
   const productionColumns = [
     { field: 'id', headerName: 'ID' },
-    { field: 'aopCaseId', headerName: 'Case ID', minWidth: 120, editable: false },
+    {
+      field: 'aopCaseId',
+      headerName: 'Case ID',
+      minWidth: 120,
+      editable: false,
+    },
     { field: 'aopType', headerName: 'Type', minWidth: 80 },
     { field: 'aopYear', headerName: 'Year', minWidth: 80 },
     { field: 'plantFkId', headerName: 'Plant ID', minWidth: 80 },
@@ -61,17 +65,49 @@ const ProductionvolumeData = () => {
     { field: 'jan', headerName: 'Jan-25', editable: true },
     { field: 'feb', headerName: 'Feb-25', editable: true },
     { field: 'march', headerName: 'Mar-25', editable: true },
-    { field: 'aopStatus', headerName: 'Status', minWidth: 75, editable: false },
-  ];
-  
-  
+    {
+      field: 'averageTPH',
+      headerName: 'Average TPH',
+      minWidth: 100,
+      maxWidth: 120,
+      editable: false,
+      valueGetter: (params) => {
+        console.log('check--->', params)
+        // const existingAverage = params
+        // if (
+        //   existingAverage !== undefined &&
+        //   existingAverage !== null &&
+        //   existingAverage !== ''
+        // ) {
+        //   return existingAverage
+        // }
+
+        // const sum = params2?.months?.reduce((total, month) => {
+        //   // Ensure that the value is treated as a number (defaulting to 0 if not set)
+        //   return total + (Number(params2[month]) || 0)
+        // }, 0)
+        // // Calculate average and format to 2 decimals
+        // return (sum / params2?.months?.length).toFixed(2)
+      },
+      valueFormatter: (params, params2) => {
+        console.log(params, '------->', params2)
+      },
+      renderHeader: () => (
+        <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
+          <div>Average</div>
+          <div>TPH</div>
+        </div>
+      ),
+    },
+    { field: 'aopStatus', headerName: 'Remark', minWidth: 75, editable: false },
+  ]
 
   return (
     <div>
       <ASDataGrid
         columns={productionColumns}
         rows={productNormData}
-        title='Product Volume Data'
+        title='Product MCU Val'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}

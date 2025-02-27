@@ -223,17 +223,12 @@ const colDefs = [
   
 ]
 
-
-
-
-  
-
   return (
     <div>
       <ASDataGrid
         columns={colDefs}
         rows={slowDownData}
-        title='Slowdown Records'
+        title='Slowdown Plan'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}

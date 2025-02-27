@@ -140,31 +140,26 @@ const DataGridTable = ({
   // }, [rows]);
 
   const handleDeleteClick = async (id, params) => {
-    if(!(id?.maintenanceId) || (!(params?.row.maintenanceId))) return
     try {
-      var maintenanceId = id?.maintenanceId || params?.row.maintenanceId
-      //console.log('test', maintenanceId, id)
-      //console.log('test', params?.row.maintenanceId)
-      const response = await DataService.deleteSlowdownData(
-        maintenanceId,
-        keycloak,
-      )
-      //console.log('Slowdown data Updated successfully:', response)
-      setSnackbarOpen(true)
+      const maintenanceId = id?.maintenanceId || params?.row?.maintenanceId
+
+      // Define a mapping of titles to corresponding delete functions
+      const deleteFunctions = {
+        'Slowdown Plan': DataService.deleteSlowdownData,
+        'Shutdown Plan': DataService.deleteShutdownData,
+        'Turnaround Plan': DataService.deleteTurnAroundData,
+      }
+
+      // Check if title exists in deleteFunctions and execute the corresponding function
+      if (deleteFunctions[title]) {
+        return await deleteFunctions[title](maintenanceId, keycloak)
+      }
+
       setOpen1(true)
       setDeleteId(id)
-      // setSnackbarMessage("Slowdown data Updated successfully !");
-      setSnackbarData({
-        message: 'Slowdown data deleted successfully!',
-        severity: 'success',
-      })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Slowdown data Updated successfully!", severity: "success" });
-      return response
     } catch (error) {
-      console.error('Error saving Slowdown data:', error)
+      console.error(`Error deleting ${title} data:`, error)
     }
-    // setRows(rows.filter((row) => row.id !== id));
   }
 
   const handleCancelClick = (id) => () => {
@@ -695,6 +690,12 @@ const DataGridTable = ({
     onDeleteRow?.(deleteId)
     setDeleteId(null)
     setOpen1(false)
+    //now that snackbar will open
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Slowdown data deleted successfully!',
+      severity: 'success',
+    })
   }
 
   const handleAddRow1 = () => {
@@ -889,7 +890,7 @@ const DataGridTable = ({
                     key={`delete-${id}`}
                     icon={<DeleteIcon sx={{ color: jioColors.accentRed }} />}
                     label='Delete'
-                    onClick={handleDeleteClick(id)}
+                    onClick={() => handleDeleteClick(id, params)}
                     color='inherit'
                   />
                 ),
@@ -1329,24 +1330,18 @@ const DataGridTable = ({
         </Grid> */}
         <DataGrid
           rows={filteredRows}
-
-
-
-            columns={columns.map((col) => ({
-              ...col,
-              editable: col.field === 'product' ? true : col.editable,
-            }))}
-
-
-            columnVisibilityModel={{
-              maintenanceId: false, 
-              id: false, 
-              plantFkId: false, 
-            }}
-
-
-
-          
+          columns={columns.map((col) => ({
+            ...col,
+            editable: col.field === 'product' ? true : col.editable,
+          }))}
+          columnVisibilityModel={{
+            maintenanceId: false,
+            id: false,
+            plantFkId: false,
+            aopCaseId: false,
+            aopType: false,
+            aopYear: false,
+          }}
           rowHeight={35}
           processRowUpdate={processRowUpdate}
           onColumnResized={onColumnResized}

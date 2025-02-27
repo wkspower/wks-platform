@@ -1,0 +1,87 @@
+{
+  "Raw Material": [
+    {
+      "sep24": 24.0,
+      "Average": 2.0,
+      "oct24": 24.0,
+      "jun24": 24.0,
+      "may24": 24.0,
+      "TPH": "TPH",
+      "apr24": 24.0,
+      "Remark": "No remarks provided",
+      "jul24": 24.0,
+      "dec24": 24.0,
+      "NormParameterMonthlyTransactionId": "277FF0C0-61D8-4121-9C69-2F754775A201",
+      "nov24": 24.0,
+      "aug24": 24.0,
+      "category": "Raw Material",
+      "NormParametersId": "A5C84BA4-2C00-417C-86EC-CB0D1F613C65"
+    }
+  ],
+  "Cat Chem": [
+    {
+      "sep24": 75.0,
+      "Average": 5.83,
+      "oct24": 76.0,
+      "jun24": 72.0,
+      "feb25": 80.0,
+      "may24": 71.0,
+      "mar25": 81.0,
+      "TPH": "TPH",
+      "apr24": 70.0,
+      "Remark": "april",
+      "jul24": 73.0,
+      "NormParameterMonthlyTransactionId": "4C606352-CD7D-4780-AEB3-18B67E75F3A8",
+      "dec24": 78.0,
+      "nov24": 77.0,
+      "aug24": 74.0,
+      "jan25": 79.0,
+      "category": "Cat Chem",
+      "NormParametersId": "A0538116-245D-477E-A181-2D78F0411AB6"
+    }
+  ],
+  "Utility Consumption": [
+    {
+      "sep24": 63.0,
+      "Average": 4.83,
+      "oct24": 64.0,
+      "jun24": 60.0,
+      "feb25": 68.0,
+      "may24": 59.0,
+      "mar25": 69.0,
+      "TPH": "TPH",
+      "apr24": 58.0,
+      "Remark": "april",
+      "jul24": 61.0,
+      "NormParameterMonthlyTransactionId": "7F4E95A1-6DF8-4C68-A465-DC748DC6E524",
+      "dec24": 66.0,
+      "nov24": 65.0,
+      "aug24": 62.0,
+      "jan25": 67.0,
+      "category": "Utility Consumption",
+      "NormParametersId": "9B49BD06-9AC4-4123-B8F8-19822A0CCFFE"
+    }
+  ],
+  "By Products": [
+    {
+      "sep24": 51.0,
+      "Average": 3.83,
+      "oct24": 52.0,
+      "jun24": 48.0,
+      "feb25": 56.0,
+      "may24": 47.0,
+      "mar25": 57.0,
+      "TPH": "TPH",
+      "apr24": 46.0,
+      "Remark": "april",
+      "jul24": 49.0,
+      "NormParameterMonthlyTransactionId": "EC01C8DE-6AEA-4FDE-B765-F522492406E5",
+      "dec24": 54.0,
+      "nov24": 53.0,
+      "aug24": 50.0,
+      "jan25": 55.0,
+      "category": "By Products",
+      "NormParametersId": "A603D79F-8023-445C-8EFA-15178AD05F0D"
+    }
+  ]
+}

@@ -242,7 +242,7 @@ const ShutDown = () => {
       <ASDataGrid
         columns={colDefs}
         rows={shutdownData}
-        title='Shutdown Plan Data'
+        title='Shutdown Plan'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}

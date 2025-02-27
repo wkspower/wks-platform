@@ -62,13 +62,13 @@ public class NormParameterMonthlyTransactionController{
                 return ResponseEntity.ok(businessDemandDTO);
             }
 		  
-		  @PutMapping(value = "/editShutdownData/{plantMaintenanceTransactionId}")
+		  @PutMapping(value = "/editBusinessDemandData/{plantMaintenanceTransactionId}")
           public ResponseEntity<BusinessDemandDTO> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId, @RequestBody BusinessDemandDTO businessDemandDTO) {
               normParameterMonthlyTransactionService.editBusinessDemandData(plantMaintenanceTransactionId,businessDemandDTO);
               return ResponseEntity.ok(businessDemandDTO);
           }
 
-		  @DeleteMapping("/deleteShutdownData/{plantMaintenanceTransactionId}")
+		  @DeleteMapping("/deleteBusinessDemandData/{plantMaintenanceTransactionId}")
 		    public ResponseEntity<String> deletePlant(@PathVariable UUID plantMaintenanceTransactionId) {
 			  	normParameterMonthlyTransactionService.deleteBusinessDemandData(plantMaintenanceTransactionId);
 		        return ResponseEntity.ok("Plant with ID " + plantMaintenanceTransactionId + " deleted successfully");
