@@ -20,18 +20,21 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	                                    @Param("auditYear") Integer auditYear);
 	
 	@Modifying
-    @Transactional
-    @Query("UPDATE NormAttributeTransactions nat " +
-           "SET nat.attributeValue = :attributeValue " +
-           "WHERE nat.month = :month " +
-           "AND nat.auditYear = :auditYear " +
-           "AND nat.normParameterFKId = :normParameterFKId " +
-           "AND nat.catalystAttributeFKId = :catalystAttributeFKId")
-    void updateCatalystData(@Param("attributeValue") String attributeValue, 
-                            @Param("month") Integer month, 
-                            @Param("auditYear") Integer auditYear, 
-                            @Param("normParameterFKId") UUID normParameterFKId, 
-                            @Param("catalystAttributeFKId") UUID catalystAttributeFKId);
+	@Transactional
+	@Query("UPDATE NormAttributeTransactions nat " +
+	       "SET nat.attributeValue = :attributeValue, " +  // Updating attributeValue
+	       "    nat.remarks = :remarks " +  // Updating remarks
+	       "WHERE nat.month = :month " +
+	       "AND nat.auditYear = :auditYear " +
+	       "AND nat.normParameterFKId = :normParameterFKId " +
+	       "AND nat.catalystAttributeFKId = :catalystAttributeFKId")
+	void updateCatalystData(@Param("attributeValue") String attributeValue, 
+	                        @Param("remarks") String remarks,  // Added remarks parameter
+	                        @Param("month") Integer month, 
+	                        @Param("auditYear") Integer auditYear, 
+	                        @Param("normParameterFKId") UUID normParameterFKId, 
+	                        @Param("catalystAttributeFKId") UUID catalystAttributeFKId);
+
 	
 	@Modifying
 	@Transactional

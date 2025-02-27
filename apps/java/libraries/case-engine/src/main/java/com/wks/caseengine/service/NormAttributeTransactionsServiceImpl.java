@@ -2,6 +2,7 @@ package com.wks.caseengine.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -169,7 +170,7 @@ return "";
 			}	
 			UUID normParameterFKId=catalystAttributesDTO.getNormParameterFKId();
 			UUID catalystAttributeFKId=catalystAttributesDTO.getCatalystAttributeFKId();
-			normAttributeTransactionsRepository.updateCatalystData(attributeValue.toString(),month,auditYear,normParameterFKId,catalystAttributeFKId);
+			normAttributeTransactionsRepository.updateCatalystData(attributeValue.toString(),catalystAttributesDTO.getRemarks(),month,auditYear,normParameterFKId,catalystAttributeFKId);
 		}
 		
 		// TODO Auto-generated method stub
@@ -187,6 +188,10 @@ return "";
 			if(i<3) {
 				normAttributeTransactions.setAuditYear((catalystAttributesDTO.getYear()+1));
 			}
+			normAttributeTransactions.setCatalystAttributeFKId(catalystAttributesDTO.getCatalystAttributeFKId());
+			normAttributeTransactions.setCreatedOn(new Date());
+			normAttributeTransactions.setRemarks(catalystAttributesDTO.getRemarks());
+			normAttributeTransactions.setUserName("System");
 			normAttributeTransactionsRepository.save(normAttributeTransactions);
 			
 		}
