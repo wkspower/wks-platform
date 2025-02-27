@@ -11,11 +11,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-
+import com.wks.caseengine.dto.CatalystAttributesDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
+import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 
 import jakarta.persistence.EntityManager;
@@ -158,6 +157,93 @@ return "";
 		return normAttributeTransactionsDTO;
 	}
 	
+	@Override
+	public Boolean updateCatalystData(CatalystAttributesDTO catalystAttributesDTO) {
+		
+		for(int i=0;i<12;i++) {
+			Float attributeValue=getAttributeValue(catalystAttributesDTO,(i+1));
+			Integer month =i+1;		
+			Integer auditYear=catalystAttributesDTO.getYear();
+			if(i<3) {
+				auditYear=auditYear+1;
+			}	
+			UUID normParameterFKId=catalystAttributesDTO.getNormParameterFKId();
+			UUID catalystAttributeFKId=catalystAttributesDTO.getCatalystAttributeFKId();
+			normAttributeTransactionsRepository.updateCatalystData(attributeValue.toString(),month,auditYear,normParameterFKId,catalystAttributeFKId);
+		}
+		
+		// TODO Auto-generated method stub
+		return true;
+	}
 	
+	
+	@Override
+	public Boolean saveCatalystData(CatalystAttributesDTO catalystAttributesDTO) {
+		for(int i=0;i<12;i++) {
+			NormAttributeTransactions normAttributeTransactions= new NormAttributeTransactions();
+			normAttributeTransactions.setAttributeValue(getAttributeValue(catalystAttributesDTO,(i+1)).toString());
+			normAttributeTransactions.setMonth((i+1));
+			normAttributeTransactions.setAuditYear(catalystAttributesDTO.getYear());
+			if(i<3) {
+				normAttributeTransactions.setAuditYear((catalystAttributesDTO.getYear()+1));
+			}
+			normAttributeTransactionsRepository.save(normAttributeTransactions);
+			
+		}
+		
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Boolean deleteCatalystData(CatalystAttributesDTO catalystAttributesDTO) {
+		
+		for(int i=0;i<12;i++) {
+			Float attributeValue=getAttributeValue(catalystAttributesDTO,(i+1));
+			Integer month =i+1;		
+			Integer auditYear=catalystAttributesDTO.getYear();
+			if(i<3) {
+				auditYear=auditYear+1;
+			}	
+			UUID normParameterFKId=catalystAttributesDTO.getNormParameterFKId();
+			UUID catalystAttributeFKId=catalystAttributesDTO.getCatalystAttributeFKId();
+			normAttributeTransactionsRepository.deleteCatalystData(attributeValue.toString(),month,auditYear,normParameterFKId,catalystAttributeFKId);
+		}
+		
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	public Float getAttributeValue(CatalystAttributesDTO catalystAttributesDTO,Integer i) {
+		switch(i) {
+			case 1:
+				return catalystAttributesDTO.getJan();
+			case 2:
+				return catalystAttributesDTO.getFeb();
+			case 3:
+				return catalystAttributesDTO.getMarch();
+			case 4:
+				return catalystAttributesDTO.getApril();
+			case 5:
+				return catalystAttributesDTO.getMay();
+			case 6:
+				return catalystAttributesDTO.getJune();
+			case 7:
+				return catalystAttributesDTO.getJuly();
+			case 8:
+				return catalystAttributesDTO.getAug();
+			case 9:
+				return catalystAttributesDTO.getSep();
+			case 10:
+				return catalystAttributesDTO.getOct();
+			case 11:
+				return catalystAttributesDTO.getNov();
+			case 12:
+				return catalystAttributesDTO.getDec();
+		
+		}
+		return catalystAttributesDTO.getJan();
+	}
+
 
 }

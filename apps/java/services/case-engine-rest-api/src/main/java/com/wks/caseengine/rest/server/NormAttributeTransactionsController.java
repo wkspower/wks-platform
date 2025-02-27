@@ -1,10 +1,12 @@
 package com.wks.caseengine.rest.server;
+import com.wks.caseengine.dto.CatalystAttributesDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -31,5 +33,24 @@ public class NormAttributeTransactionsController {
 	public NormAttributeTransactionsDTO updateNormAttributeTransactions(@RequestBody NormAttributeTransactionsDTO normAttributeTransactionsDTO) {
 		return normAttributeTransactionsService.updateNormAttributeTransactions(normAttributeTransactionsDTO);
 	}
+	
+	@PutMapping(value="/updateCatalystData")
+	public Boolean updateCatalystData(CatalystAttributesDTO catalystAttributesDTO) {
+		return normAttributeTransactionsService.updateCatalystData(catalystAttributesDTO);
+	}
+	
+	@PostMapping(value="/saveCatalystData")
+	public Boolean saveCatalystData(CatalystAttributesDTO catalystAttributesDTO) {
+		normAttributeTransactionsService.saveCatalystData(catalystAttributesDTO);
+		return true;
+	}
+	
+	@DeleteMapping(value="/deleteCatalystData")
+	public Boolean deleteCatalystData(CatalystAttributesDTO catalystAttributesDTO) {
+		normAttributeTransactionsService.deleteCatalystData(catalystAttributesDTO);
+		return true;
+	}
+	
+	
 
 }
