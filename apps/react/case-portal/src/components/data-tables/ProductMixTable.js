@@ -24,7 +24,7 @@ const productionColumns = [
     width: 150,
     editable: true,
     renderEditCell: (params) => {
-      console.log(params)
+      // console.log(params)
       const { id } = params
       const isEditable = id > 10 // Enable only for rows beyond 10
 

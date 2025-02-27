@@ -6,8 +6,9 @@ import lombok.Data;
 
 import java.util.Date;
 import java.util.UUID;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -24,7 +25,9 @@ import java.time.LocalDateTime;
 public class NormAttributeTransactions {
 
     @Id
-    @Column(name = "Id", nullable = false)
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "Id", nullable = false, updatable = false)
     private UUID id;
 
     @Column(name = "AttributeName", length = 250)
@@ -59,7 +62,8 @@ public class NormAttributeTransactions {
 
     // If you want to avoid using the reserved keyword 'User' directly in Java,
     // you can rename the field and map it to the column "User".
-    @Column(name = "User", length = 255)
+
+    @Column(name = "`User`", length = 255)  // Use backticks to escape reserved keyword
     private String userName;
 
     @Column(name = "NormParameter_FK_Id")

@@ -313,7 +313,7 @@ const ProductionNorms = () => {
     const getAllProducts = async () => {
       try {
         const data = await DataService.getAllProducts(keycloak)
-        console.log('API Response:', data)
+        // console.log('API Response:', data)
 
         // Extract only displayName and id
         const productList = data.map((product) => ({
@@ -546,6 +546,7 @@ const ProductionNorms = () => {
           editButton: true,
           showUnit: true,
           saveWithRemark: true,
+          showCalculate: true,
         }}
       />
     </div>

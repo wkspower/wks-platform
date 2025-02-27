@@ -418,6 +418,72 @@ const DataGridTable = ({
     }
   }
 
+
+  const saveCatalystData = async (newRow) => {
+
+
+    console.log('new Row ',newRow);
+    
+
+
+    try {
+      var plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+
+
+
+      const turnAroundDetails = {
+
+
+        april: (newRow.apr24),       
+        may: (newRow.may24),
+        june: (newRow.jun24),
+        july: (newRow.jul24),
+        aug: (newRow.aug24),
+        sep: (newRow.sep24),
+        oct: (newRow.oct24),
+        nov: (newRow.nov24),
+        dec: (newRow.dec24),
+        jan: (newRow.jan25),
+        feb: (newRow.feb25),
+        march: (newRow.mar25),
+        TPH:'100',
+        attributeName: "Silver Ox",
+        normParameterFKId: "",
+        catalystAttributeFKId: "",
+        catalystId:'C6352800-C64A-4944-B490-5A60D1BCE285',
+        remarks: "123",  
+        avgTPH: "123",  
+        year: (2024)  
+
+
+
+    };
+    
+      const response = await DataService.saveCatalystData(
+        plantId,
+        turnAroundDetails,
+        keycloak,
+      )
+      //console.log('Catalyst data saved successfully:', response)
+      setSnackbarOpen(true)
+      // setSnackbarMessage("Catalyst data saved successfully !");
+      setSnackbarData({
+        message: 'Catalyst data saved successfully!',
+        severity: 'success',
+      })
+      // setSnackbarOpen(true);
+      // setSnackbarData({ message: "Catalyst data saved successfully!", severity: "success" });
+      return response
+    } catch (error) {
+      console.error('Error saving Catalyst data:', error)
+    }
+  }
   const saveTurnAroundData = async (newRow) => {
     try {
       // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
@@ -628,8 +694,45 @@ const DataGridTable = ({
 
         return updatedRow // Ensure function returns the updated row
       }
+      if (title == 'Catalyst Selectivity Data') {
+        
+        if (
+          !newRow.dec24 
+        ) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Please Fill all Fields!',
+            severity: 'error',
+          })
+          setRowModesModel(() => ({
+            [newRow.id]: {
+              mode: GridRowModes.Edit,
+              fieldToFocus: 'dec24',
+            },
+          }))
+          return
+        }
 
-      //production norms data
+        const updatedRow = { ...newRow, isNew: false }
+        const updatedRows = rows.map((row) =>
+          row?.id === newRow?.id ? updatedRow : row,
+        )
+
+        setRows(updatedRows)
+
+        // if(newRow?.id){
+        //   // updateCatalystData(newRow)
+        // }else
+        {
+        saveCatalystData(newRow)
+        // saveTurnAroundData(newRow)
+        }
+        onRowUpdate?.(updatedRow)
+        //console.log('Updated Row inside processRowUpdate:', updatedRow)
+        setSelectedRows(updatedRow)
+
+        return updatedRow // Ensure function returns the updated row
+      }
     },
     [rows, onRowUpdate],
   )
@@ -850,17 +953,19 @@ const DataGridTable = ({
     }))
   }, [initialColumns, resizedColumns])
 
-  const columns = useMemo(() => [
-    ...defaultColumns,
+
+
+  const columns = useMemo(
+    () => [
+      ...defaultColumns,
     ...(permissions?.showAction
-      ? [
-          {
-            field: 'actions',
-            type: 'actions',
-            headerName: 'Actions',
-            width: 180,
-            cellClassName: 'actions',
-            pinned: 'right',
+        ? [
+            {
+              field: 'actions',
+              type: 'actions',
+              headerName: 'Actions',
+              width: 180,
+              cellClassName: 'actions',
 
             getActions: (params) => {
               const { id, row } = params // Extract row data
@@ -1223,6 +1328,17 @@ const DataGridTable = ({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {permissions?.showCalculate && (
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={() => console.log("Calculate button clicked")} 
+              sx={{ backgroundColor: jioColors.darkTransparentBlue }}
+            >
+              CALCULATE
+            </Button>
+          )}
+
           {permissions?.showUnit && (
             <TextField
               select

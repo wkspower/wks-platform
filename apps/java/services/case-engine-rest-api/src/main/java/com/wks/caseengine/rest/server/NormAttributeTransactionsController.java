@@ -39,8 +39,8 @@ public class NormAttributeTransactionsController {
 		return normAttributeTransactionsService.updateCatalystData(catalystAttributesDTO);
 	}
 	
-	@PostMapping(value="/saveCatalystData")
-	public Boolean saveCatalystData(CatalystAttributesDTO catalystAttributesDTO) {
+	@PostMapping(value = "/saveCatalystData")
+	public Boolean saveCatalystData(@RequestBody CatalystAttributesDTO catalystAttributesDTO) {
 		normAttributeTransactionsService.saveCatalystData(catalystAttributesDTO);
 		return true;
 	}

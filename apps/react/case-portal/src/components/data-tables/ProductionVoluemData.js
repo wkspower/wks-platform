@@ -72,7 +72,7 @@ const ProductionvolumeData = () => {
       maxWidth: 120,
       editable: false,
       valueGetter: (params) => {
-        console.log('check--->', params)
+        // console.log('check--->', params)
         // const existingAverage = params
         // if (
         //   existingAverage !== undefined &&
@@ -90,7 +90,7 @@ const ProductionvolumeData = () => {
         // return (sum / params2?.months?.length).toFixed(2)
       },
       valueFormatter: (params, params2) => {
-        console.log(params, '------->', params2)
+        // console.log(params, '------->', params2)
       },
       renderHeader: () => (
         <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
@@ -119,6 +119,7 @@ const ProductionvolumeData = () => {
           editButton: true,
           showUnit: false,
           saveWithRemark: true,
+          showCalculate:true,
         }}
       />
     </div>

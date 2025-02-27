@@ -15,9 +15,14 @@ export const DataService = {
   getProductionNormsData,
   getConsumptionNormsData,
 
+  getAllCatalyst,
+
   saveShutdownData,
   saveSlowdownData,
   saveTurnAroundData,
+
+  saveCatalystData,
+
 
   updateSlowdownData,
   updateShutdownData,
@@ -496,6 +501,29 @@ async function saveTurnAroundData(plantId, turnAroundDetails, keycloak) {
   }
 }
 
+
+async function saveCatalystData(plantId, turnAroundDetails, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/saveCatalystData`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(turnAroundDetails),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
 export default saveShutdownData
 
 async function getYearlyData(keycloak, year) {
@@ -572,6 +600,24 @@ async function getAllProducts(keycloak) {
   }
 }
 
+async function getAllCatalyst(keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/getAllCatalystAttributes`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
 async function getShutDownPlantData(keycloak) {
   var maintenanceTypeName = 'Shutdown'
   var plantId = ''
@@ -583,7 +629,7 @@ async function getShutDownPlantData(keycloak) {
   }
 
   // plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
-  plantId = plantId
+  plantId = plantId;
 
   const url = `${process.env.REACT_APP_API_URL}/task/getShutDownPlanData?plantId=${plantId}&maintenanceTypeName=${maintenanceTypeName}`
 

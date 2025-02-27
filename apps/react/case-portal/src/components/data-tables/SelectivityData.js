@@ -10,6 +10,7 @@ const SelectivityData = () => {
   const keycloak = useSession()
   const [csData, setCsData] = useState([])
   const [allProducts, setAllProducts] = useState([])
+  const [allCatalyst, setAllCatalyst] = useState([])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,14 +43,84 @@ const SelectivityData = () => {
         // handleMenuClose();
       }
     }
+    const getAllCatalyst = async () => {
+
+      try {
+        const data = await DataService.getAllCatalyst(keycloak)
+
+        const productList = data.map((product) => {
+          console.log("Original ID:", product.id);
+          return {
+            id: product.id, // Should not change the case
+            displayName: product.displayName,
+          };
+        });
+        console.log("Mapped Product List:", productList);
+
+        setAllCatalyst(productList);
+        
+
+
+      } catch (error) {
+        console.error('Error fetching product:', error)
+      } finally {
+        // handleMenuClose();
+      }
+    }
     getAllProducts()
+    getAllCatalyst()
     fetchData()
   }, [])
   // Use catalyst options from the JSON file
   // const productOptions = catalystOptionsData.catalystOptions
 
   const productionColumns = [
-    { field: 'catalyst', headerName: 'Catalyst', editable: true },
+
+
+    {
+      field: 'catalystId',
+      headerName: 'Catalyst',
+      editable: true,
+      minWidth: 225,
+      valueGetter: (params , params2) => {
+        console.log('params ',params);
+        return params || ''; 
+      },
+      valueFormatter: (params) => {
+        const product = allCatalyst.find((p) => String(p.id).toUpperCase() === String(params));
+        return product ? product.displayName : '';
+      },
+      renderEditCell: (params , params2) => {
+        const { id, value } = params; 
+        return (
+          <select
+            value={value} 
+            onChange={(event) => {
+              params.api.setEditCellValue({
+                id: params.id,
+                field: 'catalystId',
+                value: event.target.value, 
+              });
+            }}
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none',  
+              outline: 'none', 
+              background: 'transparent', 
+            }}
+          >
+            {allCatalyst.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.displayName}
+              </option>
+            ))}
+          </select>
+        );
+      },
+    }, 
+
+
     { field: 'apr24', headerName: 'Apr-24', editable: true },
     { field: 'may24', headerName: 'May-24', editable: true },
     { field: 'jun24', headerName: 'Jun-24', editable: true },
