@@ -7,6 +7,7 @@ const initialState = {
   openComponent: 'buttons',
   drawerOpen: true,
   componentDrawerOpen: true,
+  sitePlantChange: false,
 }
 
 // ==============================|| SLICE - MENU ||============================== //
@@ -30,10 +31,18 @@ const menu = createSlice({
     openComponentDrawer(state, action) {
       state.componentDrawerOpen = action.payload.componentDrawerOpen
     },
+    setSitePlantChange(state, action) {
+      state.sitePlantChange = action.payload
+    },
   },
 })
 
 export default menu.reducer
 
-export const { activeItem, activeComponent, openDrawer, openComponentDrawer } =
-  menu.actions
+export const {
+  activeItem,
+  activeComponent,
+  openDrawer,
+  openComponentDrawer,
+  setSitePlantChange,
+} = menu.actions

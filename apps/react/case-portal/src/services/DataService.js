@@ -19,25 +19,23 @@ export const DataService = {
   saveSlowdownData,
   saveTurnAroundData,
 
-
   updateSlowdownData,
   updateShutdownData,
   updateTurnAroundData,
   updateProductNormData,
-  
+  updateBusinessDemandDataM,
+
   createCase,
   getTasksByBusinessKey,
   getProcessInstanceVariables,
   completeTask,
 
-
   getAOPData,
 
-
-  
   deleteSlowdownData,
   deleteShutdownData,
   deleteTurnAroundData,
+  deleteBusinessDemandData,
 }
 
 async function deleteSlowdownData(maintenanceId, keycloak) {
@@ -118,6 +116,56 @@ async function deleteTurnAroundData(maintenanceId, keycloak) {
     return Promise.reject(e)
   }
 }
+async function deleteBusinessDemandData(maintenanceId, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/deleteBusinessDemandData/${maintenanceId}`
+
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'DELETE',
+      headers,
+    })
+
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to delete data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+
+    return await resp.text() // Handle text response from the backend
+  } catch (e) {
+    console.error('Error deleting slowdown data:', e)
+    return Promise.reject(e)
+  }
+}
+async function updateBusinessDemandDataM(maintenanceId, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/editBusinessDemandData/${maintenanceId}`
+
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'UPDATE',
+      headers,
+    })
+
+    if (!resp.ok) {
+      throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
+    }
+
+    return await resp.text() // Handle text response from the backend
+  } catch (e) {
+    console.error('Error Editing Business data:', e)
+    return Promise.reject(e)
+  }
+}
 
 async function getProductById(keycloak, id) {
   const url = `${process.env.REACT_APP_API_URL}/task/productList`
@@ -137,7 +185,6 @@ async function getProductById(keycloak, id) {
   }
 }
 async function getBDData(keycloak) {
-
   var plantId = ''
 
   const storedPlant = localStorage.getItem('selectedPlant')
@@ -152,13 +199,13 @@ async function getBDData(keycloak) {
     const parsedSite = JSON.parse(storedSite)
     siteId = parsedSite.id
   }
-  const url = `${process.env.REACT_APP_API_URL}/task/getBusinessDemandData?year=2024&plantId=${plantId}&siteId=${siteId}`;
+  const url = `${process.env.REACT_APP_API_URL}/task/getBusinessDemandData?year=2024&plantId=${plantId}&siteId=${siteId}`
 
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
 
   try {
     const resp = await fetch(url, { method: 'GET', headers })
@@ -169,8 +216,6 @@ async function getBDData(keycloak) {
   }
 }
 async function getCatalystSelectivityData(keycloak) {
-
-
   var plantId = ''
 
   const storedPlant = localStorage.getItem('selectedPlant')
@@ -186,8 +231,7 @@ async function getCatalystSelectivityData(keycloak) {
     siteId = parsedSite.id
   }
 
-
-  const url = `${process.env.REACT_APP_API_URL}/task/getCatalystSelectivityData?year=2024&plantId=${plantId}&siteId=${siteId}`;
+  const url = `${process.env.REACT_APP_API_URL}/task/getCatalystSelectivityData?year=2024&plantId=${plantId}&siteId=${siteId}`
 
   const headers = {
     Accept: 'application/json',
@@ -204,7 +248,6 @@ async function getCatalystSelectivityData(keycloak) {
   }
 }
 async function getProductionNormsData(keycloak) {
-
   var plantId = ''
 
   const storedPlant = localStorage.getItem('selectedPlant')
@@ -219,7 +262,7 @@ async function getProductionNormsData(keycloak) {
     const parsedSite = JSON.parse(storedSite)
     siteId = parsedSite.id
   }
-  const url = `${process.env.REACT_APP_API_URL}/task/getProductionNormData?year=2024&plantId=${plantId}&siteId=${siteId}`;
+  const url = `${process.env.REACT_APP_API_URL}/task/getProductionNormData?year=2024&plantId=${plantId}&siteId=${siteId}`
 
   const headers = {
     Accept: 'application/json',
@@ -236,7 +279,6 @@ async function getProductionNormsData(keycloak) {
   }
 }
 async function getConsumptionNormsData(keycloak) {
-
   var plantId = ''
 
   const storedPlant = localStorage.getItem('selectedPlant')
@@ -252,8 +294,7 @@ async function getConsumptionNormsData(keycloak) {
     siteId = parsedSite.id
   }
 
-
-  const url = `${process.env.REACT_APP_API_URL}/task/getCosnumptionNormData?year=2024&plantId=${plantId}&siteId=${siteId}`;
+  const url = `${process.env.REACT_APP_API_URL}/task/getCosnumptionNormData?year=2024&plantId=${plantId}&siteId=${siteId}`
 
   const headers = {
     Accept: 'application/json',
@@ -371,41 +412,47 @@ async function updateShutdownData(maintenanceId, slowDownDetails, keycloak) {
   }
 }
 
-async function updateTurnAroundData(maintenanceId, turnAroundDetails, keycloak) {
-  const url = `${process.env.REACT_APP_API_URL}/task/editTurnaroundData/${maintenanceId}`; // Corrected endpoint
+async function updateTurnAroundData(
+  maintenanceId,
+  turnAroundDetails,
+  keycloak,
+) {
+  const url = `${process.env.REACT_APP_API_URL}/task/editTurnaroundData/${maintenanceId}` // Corrected endpoint
 
   const headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json",
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
 
   try {
     const resp = await fetch(url, {
-      method: "PUT", // Ensure it matches @PutMapping
+      method: 'PUT', // Ensure it matches @PutMapping
       headers,
       body: JSON.stringify(turnAroundDetails), // Updated variable name for clarity
-    });
+    })
 
     if (!resp.ok) {
-      throw new Error(`Failed to update data: ${resp.status} ${resp.statusText}`);
+      throw new Error(
+        `Failed to update data: ${resp.status} ${resp.statusText}`,
+      )
     }
 
-    return await resp.json(); // Ensure proper response handling
+    return await resp.json() // Ensure proper response handling
   } catch (e) {
-    console.error("Error updating turnaround data:", e);
-    return Promise.reject(e);
+    console.error('Error updating turnaround data:', e)
+    return Promise.reject(e)
   }
 }
 
 async function updateProductNormData(turnAroundDetails, keycloak) {
-  const url = `${process.env.REACT_APP_API_URL}/task/updateAOP`; // Corrected endpoint
+  const url = `${process.env.REACT_APP_API_URL}/task/updateAOP` // Corrected endpoint
 
   const headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json",
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
 
   try {
     const resp = await fetch(url, {
@@ -536,7 +583,7 @@ async function getShutDownPlantData(keycloak) {
   }
 
   // plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
-  plantId = plantId;
+  plantId = plantId
 
   const url = `${process.env.REACT_APP_API_URL}/task/getShutDownPlanData?plantId=${plantId}&maintenanceTypeName=${maintenanceTypeName}`
 
@@ -557,12 +604,11 @@ async function getShutDownPlantData(keycloak) {
 
 async function getSlowDownPlantData(keycloak) {
   var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
 
   const maintenanceTypeName = 'Slowdown' // Assuming the maintenance type is 'Slowdown'
 
@@ -591,11 +637,11 @@ async function getSlowDownPlantData(keycloak) {
 
 async function getAOPData(keycloak) {
   var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
 
   const url = `${process.env.REACT_APP_API_URL}/task/getAOP`
   const headers = {
@@ -616,18 +662,14 @@ async function getAOPData(keycloak) {
 async function getTAPlantData(keycloak) {
   // const plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D';
 
-
-
   var plantId = ''
 
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
 
-
-      
   // const plantId = '3E3FDF54-391D-4BAB-A78F-50EBCA9FBEA6'
   const maintenanceTypeName = 'TA_Plan' // Assuming the maintenance type is 'Shutdown'
 

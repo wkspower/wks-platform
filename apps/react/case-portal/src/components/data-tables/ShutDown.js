@@ -59,8 +59,6 @@ const ShutDown = () => {
         // durationInMins
         // product
 
-
-
         var plantId = ''
 
         const storedPlant = localStorage.getItem('selectedPlant')
@@ -68,7 +66,6 @@ const ShutDown = () => {
           const parsedPlant = JSON.parse(storedPlant)
           plantId = parsedPlant.id
         }
-
 
         const shutdownDetails = {
           product: 'Oxygen',
@@ -120,34 +117,34 @@ const ShutDown = () => {
       headerName: 'Product',
       editable: true,
       minWidth: 225,
-      valueGetter: (params , params2) => {
-        // console.log('p1', params); 
-        // console.log('p2', params2); 
-        return params || ''; 
+      valueGetter: (params, params2) => {
+        // console.log('p1', params);
+        // console.log('p2', params2);
+        return params || ''
       },
       valueFormatter: (params) => {
-        console.log('params valueFormatter ',params);
-        const product = allProducts.find((p) => p.id === params);
-        return product ? product.displayName : '';
+        console.log('params valueFormatter ', params)
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : ''
       },
-      renderEditCell: (params , params2) => {
-        const { id, value } = params; 
-        // console.log('q1', params); 
-        // console.log('q2', params2); 
+      renderEditCell: (params, params2) => {
+        const { id, value } = params
+        // console.log('q1', params);
+        // console.log('q2', params2);
         return (
           <select
-            value={value || allProducts[0]?.id} 
+            value={value || allProducts[0]?.id}
             onChange={(event) => {
               params.api.setEditCellValue({
                 id: params.id,
                 field: 'product',
-                value: event.target.value, 
-              });
+                value: event.target.value,
+              })
             }}
             style={{
               width: '100%',
               padding: '5px',
-              border: 'none',  // Removes border
+              border: 'none', // Removes border
               outline: 'none', // Removes focus outline
               background: 'transparent', // Keeps background clean
             }}
@@ -158,7 +155,7 @@ const ShutDown = () => {
               </option>
             ))}
           </select>
-        );
+        )
       },
     },
 
@@ -207,34 +204,7 @@ const ShutDown = () => {
       minWidth: 100,
       maxWidth: 150,
     },
-    // {
-    //   field: 'durationInHrs',
-    //   headerName: 'Duration (hrs)',
-    //   valueGetter: (params) => {
-    //     console.log('params:', params)
-    //     const { maintStartDateTime, maintEndDateTime } = params?.data || {}
-    //     if (!maintStartDateTime || !maintEndDateTime) return ''
-    //     const start = new Date(maintStartDateTime)
-    //     const end = new Date(maintEndDateTime)
-    //     const diff = (end - start) / (1000 * 60 * 60)
-    //     return diff?.toFixed(2)
-    //   },
-    //   editable: false,
-    //   minWidth: 100,
-    // },
-
-    // {
-    //   field: 'durationInMins',
-    //   headerName: 'Duration (hrs)',
-    //   editable: true,
-    //   type: 'number',
-    //   minWidth: 100,
-    //   maxWidth: 150,
-    //   renderCell: (params) => {
-    //     // const durationInHours = params.value ? (params.value / 60).toFixed(2) : "0.00";
-    //     return `${params.value}`
-    //   },
-    // },
+    { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
   ]
 
   return (

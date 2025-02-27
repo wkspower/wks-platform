@@ -20,6 +20,8 @@ import { useState, useEffect } from 'react'
 import sitesData from '../../../../assets/SitesData.json' // Adjust the import path
 import { DataService } from 'services/DataService'
 import { Typography } from '../../../../../node_modules/@mui/material/index'
+import { setSitePlantChange } from 'store/reducers/menu' // Import the action
+import { useDispatch } from 'react-redux'
 
 const HeaderContent = ({ keycloak }) => {
   const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
@@ -28,6 +30,7 @@ const HeaderContent = ({ keycloak }) => {
   const [sites, setSites] = useState([])
   const [plants, setPlants] = useState([])
   const [userSiteToPlants, setUserSiteToPlants] = useState([])
+  const dispatch = useDispatch() // Initialize Redux dispatch
 
   useEffect(() => {
     getPlantAndSite()
@@ -75,42 +78,42 @@ const HeaderContent = ({ keycloak }) => {
     try {
       const sitesData = await DataService.getAllSites(keycloak)
 
-      
-      
       // setSites(data)
       // setSelectedSite(data[0]?.name)
 
-      if(keycloak.idTokenParsed.plants){
-        const siteToPlants = {};
-  
-        const data = JSON.parse(keycloak.idTokenParsed.plants);
+      if (keycloak.idTokenParsed.plants) {
+        const siteToPlants = {}
+
+        const data = JSON.parse(keycloak.idTokenParsed.plants)
         // const data = keycloak.idTokenParsed.plants;
-  
-        data.forEach(obj => {
+
+        data.forEach((obj) => {
           Object.entries(obj).forEach(([site, plant]) => {
-              if (!siteToPlants[site]) {
-                  siteToPlants[site] = [];
-              }
-              // Ensure plant is stored as an array
-              if (!siteToPlants[site].includes(plant)) {
-                  siteToPlants[site].push(plant);
-              }
-          });
-        });
-  
-        if(siteToPlants){
-          setUserSiteToPlants(siteToPlants);
-          const sitesIds = Object.keys(siteToPlants);
-          const userSitesIds = sitesIds.map(id => id.toLowerCase())
+            if (!siteToPlants[site]) {
+              siteToPlants[site] = []
+            }
+            // Ensure plant is stored as an array
+            if (!siteToPlants[site].includes(plant)) {
+              siteToPlants[site].push(plant)
+            }
+          })
+        })
 
-          const userSites = sitesData.filter((site)=> userSitesIds.includes(site.id?.toLowerCase()));
+        if (siteToPlants) {
+          setUserSiteToPlants(siteToPlants)
+          const sitesIds = Object.keys(siteToPlants)
+          const userSitesIds = sitesIds.map((id) => id.toLowerCase())
 
-          if(userSites){
+          const userSites = sitesData.filter((site) =>
+            userSitesIds.includes(site.id?.toLowerCase()),
+          )
+
+          if (userSites) {
             setSites(userSites)
             setSelectedSite(userSites[0]?.name) // Default to first site
           }
         }
-      }else{
+      } else {
         setSites(sitesData) // Setting the entire site data
         setSelectedSite(sitesData[0]?.name) // Default to first site
       }
@@ -122,6 +125,9 @@ const HeaderContent = ({ keycloak }) => {
   }
 
   const handleSiteChange = (event) => {
+    dispatch(setSitePlantChange(true))
+    dispatch(setSitePlantChange({ sitePlantChange: true }))
+
     const selectedSiteName = event.target.value
     setSelectedSite(selectedSiteName)
 
@@ -145,6 +151,9 @@ const HeaderContent = ({ keycloak }) => {
   }
 
   const handleOptionChange = (event) => {
+    dispatch(setSitePlantChange(true))
+    dispatch(setSitePlantChange({ sitePlantChange: true }))
+
     const selectedPlantName = event.target.value
     setSelectedOption(selectedPlantName)
 

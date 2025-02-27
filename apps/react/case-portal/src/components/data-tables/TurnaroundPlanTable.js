@@ -28,7 +28,6 @@ const TurnaroundPlanTable = () => {
       }
     }
 
-
     const getAllProducts = async () => {
       try {
         const data = await DataService.getAllProducts(keycloak)
@@ -54,18 +53,11 @@ const TurnaroundPlanTable = () => {
   const colDefs = [
     {
       field: 'discription',
-      headerName: 'Turnaround Desc',
+      headerName: 'Activities',
       minWidth: 300,
       editable: true,
-      renderHeader: () => (
-        <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
-          Turnaround Desc
-        </div>
-      ),
-      flex: 3,
     },
 
-    
     {
       field: 'maintenanceId',
       headerName: 'maintenanceId',
@@ -73,41 +65,39 @@ const TurnaroundPlanTable = () => {
       hide: true,
     },
 
-    
-
     {
       field: 'product',
       headerName: 'Product',
       editable: true,
       minWidth: 225,
-      valueGetter: (params , params2) => {
-        // console.log('p1', params); 
-        // console.log('p2', params2); 
-        return params || ''; 
+      valueGetter: (params, params2) => {
+        // console.log('p1', params);
+        // console.log('p2', params2);
+        return params || ''
       },
       valueFormatter: (params) => {
-        console.log('params valueFormatter ',params);
-        const product = allProducts.find((p) => p.id === params);
-        return product ? product.displayName : '';
+        console.log('params valueFormatter ', params)
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : ''
       },
-      renderEditCell: (params , params2) => {
-        const { id, value } = params; 
-        // console.log('q1', params); 
-        // console.log('q2', params2); 
+      renderEditCell: (params, params2) => {
+        const { id, value } = params
+        // console.log('q1', params);
+        // console.log('q2', params2);
         return (
           <select
-            value={value || allProducts[0]?.id} 
+            value={value || allProducts[0]?.id}
             onChange={(event) => {
               params.api.setEditCellValue({
                 id: params.id,
                 field: 'product',
-                value: event.target.value, 
-              });
+                value: event.target.value,
+              })
             }}
             style={{
               width: '100%',
               padding: '5px',
-              border: 'none',  // Removes border
+              border: 'none', // Removes border
               outline: 'none', // Removes focus outline
               background: 'transparent', // Keeps background clean
             }}
@@ -118,7 +108,7 @@ const TurnaroundPlanTable = () => {
               </option>
             ))}
           </select>
-        );
+        )
       },
     },
 
@@ -158,11 +148,16 @@ const TurnaroundPlanTable = () => {
       editable: true,
       // type: 'number',
       minWidth: 100,
-      maxWidth: 150,
       renderCell: (params) => {
         // const durationInHours = params.value ? (params.value / 60).toFixed(2) : "0.00";
         return `${params.value}`
       },
+    },
+    {
+      field: 'period',
+      headerName: 'Periods (in months)',
+      editable: true,
+      minWidth: 120,
     },
 
     {
@@ -170,7 +165,6 @@ const TurnaroundPlanTable = () => {
       headerName: 'Remarks',
       editable: true,
       minWidth: 200,
-      maxWidth: 400,
     },
   ]
 

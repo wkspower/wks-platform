@@ -3,12 +3,14 @@ import { Autocomplete, TextField } from '@mui/material'
 import ASDataGrid from './ASDataGrid'
 import { useEffect, useState } from 'react'
 import { useSession } from 'SessionStoreContext'
+import { useSelector } from 'react-redux'
 
 const BusinessDemand = () => {
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
   const [bdData, setBDData] = useState([])
-
+  const menu = useSelector((state) => state.menu)
+  const { sitePlantChange } = menu
   useEffect(() => {
     function transformData(inputData) {
       const months = [
@@ -115,9 +117,13 @@ const BusinessDemand = () => {
         // handleMenuClose();
       }
     }
-    getAllProducts()
+
+    // Initial data fetch on mount or when selectedPlant changes
     fetchData()
-  }, [])
+    getAllProducts()
+    console.log('sitePlant--->', sitePlantChange)
+    console.log(sitePlantChange, 'changed plant or site')
+  }, [sitePlantChange, keycloak])
 
   const colDefs = [
     {
@@ -181,41 +187,25 @@ const BusinessDemand = () => {
     { field: 'jan25', headerName: 'Jan-25', editable: true },
     { field: 'feb25', headerName: 'Feb-25', editable: true },
     { field: 'mar25', headerName: 'Mar-25', editable: true },
+
     {
       field: 'averageTPH',
       headerName: 'Average TPH',
       minWidth: 100,
       maxWidth: 120,
       editable: false,
-      valueGetter: (params) => {
-        console.log('check--->', params)
-        // const existingAverage = params
-        // if (
-        //   existingAverage !== undefined &&
-        //   existingAverage !== null &&
-        //   existingAverage !== ''
-        // ) {
-        //   return existingAverage
-        // }
-
-        // const sum = params2?.months?.reduce((total, month) => {
-        //   // Ensure that the value is treated as a number (defaulting to 0 if not set)
-        //   return total + (Number(params2[month]) || 0)
-        // }, 0)
-        // // Calculate average and format to 2 decimals
-        // return (sum / params2?.months?.length).toFixed(2)
-      },
-      valueFormatter: (params, params2) => {
-        console.log(params, '------->', params2)
-      },
-      renderHeader: () => (
-        <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
-          <div>Average</div>
-          <div>TPH</div>
-        </div>
-      ),
     },
     { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
+    {
+      field: 'NormParametersId',
+      headerName: 'NormParametersId',
+      minWidth: 150,
+      editable: true,
+    },
+    {
+      field: 'NormParameterMonthlyTransactionId',
+      headerName: 'NormParameterMonthlyTransactionId',
+    },
   ]
 
   return (
