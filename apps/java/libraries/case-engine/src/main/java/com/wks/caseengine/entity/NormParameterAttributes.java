@@ -38,4 +38,6 @@ public class NormParameterAttributes {
 
     @Column(name = "NormParameter_FK_Id")
     private UUID normParameterFkId;
+
+    
 }

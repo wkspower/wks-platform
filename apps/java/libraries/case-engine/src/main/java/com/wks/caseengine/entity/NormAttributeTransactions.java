@@ -3,6 +3,8 @@ package com.wks.caseengine.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.Date;
 import java.util.UUID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -47,10 +49,10 @@ public class NormAttributeTransactions {
     private String remarks;
 
     @Column(name = "CreatedOn")
-    private LocalDateTime createdOn;
+    private Date createdOn;
 
     @Column(name = "ModifiedOn")
-    private LocalDateTime modifiedOn;
+    private Date modifiedOn;
 
     @Column(name = "AttributeValueVersion", length = 10)
     private String attributeValueVersion;

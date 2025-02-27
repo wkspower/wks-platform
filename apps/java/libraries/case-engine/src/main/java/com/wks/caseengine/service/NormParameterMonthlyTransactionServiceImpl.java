@@ -1,9 +1,14 @@
 package com.wks.caseengine.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wks.caseengine.dto.BusinessDemandDTO;
+import com.wks.caseengine.entity.NormAttributeTransactions;
+import com.wks.caseengine.entity.NormParameterAttributes;
+import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -12,10 +17,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class NormParameterMonthlyTransactionServiceImpl implements NormParameterMonthlyTransactionService{
+public class NormParameterMonthlyTransactionServiceImpl<NormParameterAttributesTransactions> implements NormParameterMonthlyTransactionService{
     
     
-    
+    @Autowired
+	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
+
+
     @PersistenceContext
     private EntityManager entityManager;
     
@@ -399,6 +407,45 @@ try{
 }
          
 return "";
+	}
+
+
+	@Override
+	public void saveBusinessDemandData(UUID plantId, BusinessDemandDTO businessDemandDTO) {
+		// TODO Auto-generated method stub
+        
+		
+        
+		createDTOMapping(businessDemandDTO, 1);
+
+
+	}
+
+
+	void createDTOMapping(BusinessDemandDTO businessDemandDTO, Integer month){
+		NormAttributeTransactions norm = new NormAttributeTransactions();
+		norm.setNormParameterFKId(UUID.fromString(businessDemandDTO.getNormParameterId()));
+		norm.setAuditYear(businessDemandDTO.getYear());
+		norm.setAttributeValue(businessDemandDTO.getMonthValue(month).toString());
+		norm.setCreatedOn(new Date());
+		norm.setAttributeValueVersion("V1");
+		norm.setModifiedOn(new Date());
+		norm.setMonth(4);
+        normAttributeTransactionsRepository.save(norm);
+
+	}
+
+	@Override
+	public void editBusinessDemandData(UUID plantMaintenanceTransactionId, BusinessDemandDTO businessDemandDTO) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void deleteBusinessDemandData(UUID plantMaintenanceTransactionId) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

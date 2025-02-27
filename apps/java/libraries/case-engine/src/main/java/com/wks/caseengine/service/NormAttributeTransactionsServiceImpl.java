@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -52,13 +53,14 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	            "        ca.CatalystName AS catalyst, " +
 	            "        FORMAT(nat.AOPMonth, 'MMM') + RIGHT(CAST(YEAR(nat.AOPMonth) AS VARCHAR), 2) AS MonthYear, " +
 	            "        CAST(nat.AttributeValue AS INT) AS AttributeValue, " +
-	            "        nat.Remarks " +
+	            "        nat.Remarks, " +
+				"        nat.CatalystAttribute_FK_Id as catalystId " +
 	            "    FROM [RIL.AOP2].[dbo].[NormAttributeTransactions] AS nat " +
 	            "    JOIN [RIL.AOP2].[dbo].[CatalystAttributes] AS ca " +
 	            "        ON nat.CatalystAttribute_FK_Id = ca.Id " +
 	            "    WHERE YEAR(nat.AOPMonth) = :year OR YEAR(nat.AOPMonth) = :nextYear " +
 	            ") " +
-	            "SELECT d.Id, d.catalyst, " + pivotColumns + ", d.Remarks AS remark " +
+	            "SELECT d.Id, d.catalyst, " + pivotColumns + ", d.Remarks AS remark, d.catalystId " +
 	            "FROM Data_CTE d " +
 	            "GROUP BY d.Id, d.catalyst, d.Remarks " +
 	            "ORDER BY d.Id";
@@ -76,12 +78,12 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	        Map<String, Object> map = new LinkedHashMap<>();
 	        map.put("id", row[0]);
 	        map.put("catalyst", row[1]);
-
-	        for (int i = 2; i < row.length - 1; i++) {
-	            map.put(columnNames.get(i - 2), row[i] != null ? row[i] : 0); // Default to 0 if null
+			map.put("catalystId", row[row.length - 1]);
+	        for (int i = 2; i < row.length - 2; i++) {
+	            map.put(columnNames.get(i - 2), row[i]);
 	        }
 
-	        map.put("remark", row[row.length - 1]);
+	        map.put("remark", row[row.length - 2]);
 
 	        responseList.add(map);
 	    }
@@ -94,13 +96,14 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 
             // Iterate through the columns and add non-null values
             for (String column : data.keySet()) {
-                if (column.equals("catalyst")) ;  // Skip the "Product" column
+				//if (column.equals("catalystId")) continue;  // Skip the "Product" column
                 Object value = data.get(column);
+				//System.out.println("value1 "+value);
                 if (value != null) {
+					//System.out.println("value2"+column+" "+value);
                     productData.put(column, value);
                 }
             }
-
             // Store the non-null grouped data by product
             groupedByProduct.put(product, productData);
         }
