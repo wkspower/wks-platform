@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wks.caseengine.dto.CatalystAttributesDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
@@ -62,7 +63,7 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	            ") " +
 	            "SELECT d.Id, d.catalyst, " + pivotColumns + ", d.Remarks AS remark, d.catalystId " +
 	            "FROM Data_CTE d " +
-	            "GROUP BY d.Id, d.catalyst, d.Remarks " +
+	            "GROUP BY d.Id, d.catalyst, d.Remarks, d.catalystId " +
 	            "ORDER BY d.Id";
 
 	    List<Object[]> results = entityManager.createNativeQuery(finalQuery)
