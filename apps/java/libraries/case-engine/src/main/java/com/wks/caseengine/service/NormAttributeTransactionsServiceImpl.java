@@ -55,15 +55,18 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	            "        FORMAT(nat.AOPMonth, 'MMM') + RIGHT(CAST(YEAR(nat.AOPMonth) AS VARCHAR), 2) AS MonthYear, " +
 	            "        CAST(nat.AttributeValue AS INT) AS AttributeValue, " +
 	            "        nat.Remarks, " +
-				"        nat.CatalystAttribute_FK_Id as catalystId " +
+				"        nat.CatalystAttribute_FK_Id as catalystId, " +
+				  
+										" nat.AttributeName as AttributeName, " + 
+										" nat.NormParameter_FK_Id as NormParameterFKId "+
 	            "    FROM [RIL.AOP2].[dbo].[NormAttributeTransactions] AS nat " +
 	            "    JOIN [RIL.AOP2].[dbo].[CatalystAttributes] AS ca " +
 	            "        ON nat.CatalystAttribute_FK_Id = ca.Id " +
 	            "    WHERE YEAR(nat.AOPMonth) = :year OR YEAR(nat.AOPMonth) = :nextYear " +
 	            ") " +
-	            "SELECT d.Id, d.catalyst, " + pivotColumns + ", d.Remarks AS remark, d.catalystId " +
+	            "SELECT d.Id, d.catalyst, " + pivotColumns + ", d.Remarks AS remark, d.catalystId,d.AttributeName,d.NormParameterFKId " +
 	            "FROM Data_CTE d " +
-	            "GROUP BY d.Id, d.catalyst, d.Remarks, d.catalystId " +
+	            "GROUP BY d.Id, d.catalyst, d.Remarks, d.catalystId, d.AttributeName,d.NormParameterFKId " +
 	            "ORDER BY d.Id";
 
 	    List<Object[]> results = entityManager.createNativeQuery(finalQuery)
@@ -79,12 +82,14 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	        Map<String, Object> map = new LinkedHashMap<>();
 	        map.put("id", row[0]);
 	        map.put("catalyst", row[1]);
-			map.put("catalystId", row[row.length - 1]);
-	        for (int i = 2; i < row.length - 2; i++) {
+			map.put("catalystId", row[row.length - 3]);
+			map.put("AttributeName", row[row.length - 2]);
+			map.put("NormParameterFKId", row[row.length - 1]);
+	        for (int i = 2; i < row.length - 4; i++) {
 	            map.put(columnNames.get(i - 2), row[i]);
 	        }
 
-	        map.put("remark", row[row.length - 2]);
+	        map.put("remark", row[row.length - 4]);
 
 	        responseList.add(map);
 	    }
