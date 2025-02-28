@@ -8,7 +8,8 @@ import java.util.Date;
 import java.util.UUID;
 
 import org.hibernate.annotations.GenericGenerator;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
