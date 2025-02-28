@@ -606,7 +606,7 @@ const DataGridTable = ({
         setSelectedRows(updatedRow)
         return updatedRow // Ensure function returns the updated row
       }
-      if (title == 'TA Plan') {
+      if (title == 'Turnaroud Plan') {
         //console.log('TA',newRow)
         if (
           !newRow.discription?.trim() ||
@@ -646,7 +646,7 @@ const DataGridTable = ({
 
         return updatedRow // Ensure function returns the updated row
       }
-      if (title == 'Product MCU Val' || title == 'Production Norms Data') {
+      if (title == 'Production Volume Data' || title == 'Production Norms Data') {
         if (
           !newRow.april ||
           !newRow.aug ||
@@ -694,7 +694,7 @@ const DataGridTable = ({
 
         return updatedRow // Ensure function returns the updated row
       }
-      if (title == 'Catalyst Selectivity Data') {
+      if (title == 'Configuration') {
         
         if (
           !newRow.dec24 
@@ -1071,7 +1071,7 @@ const DataGridTable = ({
   const handleCellClick = (params) => {}
 
   const handleCellClick1 = (params) => {
-    if (title == 'Product MCU Val') {
+    if (title == 'Production Volume Data') {
       if (nonEditableFields.includes(params.field)) return // Block non-editable fields
 
       if (params?.field === 'remark') {

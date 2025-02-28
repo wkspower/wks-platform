@@ -33,6 +33,7 @@ const HeaderContent = ({ keycloak }) => {
   const dispatch = useDispatch() // Initialize Redux dispatch
 
   useEffect(() => {
+    localStorage.setItem('year', '2024-2025');
     getPlantAndSite()
   }, [])
 
