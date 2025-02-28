@@ -174,8 +174,16 @@ return "";
 			if(i<3) {
 				auditYear=auditYear+1;
 			}	
-			UUID normParameterFKId=catalystAttributesDTO.getNormParameterFKId();
-			UUID catalystAttributeFKId=catalystAttributesDTO.getCatalystAttributeFKId();
+			UUID normParameterFKId=null;
+			UUID catalystAttributeFKId =null;
+			if(catalystAttributesDTO.getNormParameterFKId()!=null){
+				normParameterFKId=UUID.fromString(catalystAttributesDTO.getNormParameterFKId());
+			}
+			if(catalystAttributesDTO.getCatalystAttributeFKId()!=null){
+				 catalystAttributeFKId=UUID.fromString( catalystAttributesDTO.getCatalystAttributeFKId());
+			}
+			
+			
 			normAttributeTransactionsRepository.updateCatalystData(attributeValue.toString(),catalystAttributesDTO.getRemarks(),month,auditYear,normParameterFKId,catalystAttributeFKId);
 		}
 		
@@ -191,11 +199,13 @@ return "";
 			normAttributeTransactions.setAttributeValue(getAttributeValue(catalystAttributesDTO,(i+1)).toString());
 			normAttributeTransactions.setMonth((i+1));
 			normAttributeTransactions.setAuditYear(catalystAttributesDTO.getYear());
+			normAttributeTransactions.setAttributeName(catalystAttributesDTO.getAttributeName());
 			if(i<3) {
 				normAttributeTransactions.setAuditYear((catalystAttributesDTO.getYear()+1));
 			}
-			normAttributeTransactions.setCatalystAttributeFKId(catalystAttributesDTO.getCatalystAttributeFKId());
+			normAttributeTransactions.setCatalystAttributeFKId(catalystAttributesDTO.getCatalystAttributeFKId()!=null? UUID.fromString(catalystAttributesDTO.getCatalystAttributeFKId()) : null);
 			normAttributeTransactions.setCreatedOn(new Date());
+			normAttributeTransactions.setAttributeValueVersion("V1");
 			normAttributeTransactions.setRemarks(catalystAttributesDTO.getRemarks());
 			normAttributeTransactions.setUserName("System");
 			normAttributeTransactionsRepository.save(normAttributeTransactions);
@@ -216,8 +226,8 @@ return "";
 			if(i<3) {
 				auditYear=auditYear+1;
 			}	
-			UUID normParameterFKId=catalystAttributesDTO.getNormParameterFKId();
-			UUID catalystAttributeFKId=catalystAttributesDTO.getCatalystAttributeFKId();
+			UUID normParameterFKId= catalystAttributesDTO.getNormParameterFKId() !=null ? UUID.fromString(catalystAttributesDTO.getNormParameterFKId()) : null;
+			UUID catalystAttributeFKId=catalystAttributesDTO.getCatalystAttributeFKId() !=null ? UUID.fromString(catalystAttributesDTO.getCatalystAttributeFKId()) : null;; 
 			normAttributeTransactionsRepository.deleteCatalystData(attributeValue.toString(),month,auditYear,normParameterFKId,catalystAttributeFKId);
 		}
 		

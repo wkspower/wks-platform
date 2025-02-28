@@ -455,8 +455,8 @@ const DataGridTable = ({
         TPH:'100',
         attributeName: "Silver Ox",
         normParameterFKId: "",
-        catalystAttributeFKId: "",
-        catalystId:'C6352800-C64A-4944-B490-5A60D1BCE285',
+        catalystAttributeFKId: "C6352800-C64A-4944-B490-5A60D1BCE285",
+        catalystId:'',
         remarks: "123",  
         avgTPH: "123",  
         year: (2024)  

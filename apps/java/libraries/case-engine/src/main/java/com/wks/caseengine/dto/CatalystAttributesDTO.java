@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 public class CatalystAttributesDTO {
 	
     private String remarks;
-    private UUID catalystAttributeFKId;
+    private String catalystAttributeFKId;
     private String attributeName;
     private Float jan;
     private Float feb;
@@ -34,5 +34,5 @@ public class CatalystAttributesDTO {
     private Integer year;
     private Float TPH;
     private Float avgTPH;
-    private UUID normParameterFKId;
+    private String normParameterFKId;
 }

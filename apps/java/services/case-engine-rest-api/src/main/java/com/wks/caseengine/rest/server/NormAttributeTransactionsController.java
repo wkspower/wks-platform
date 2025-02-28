@@ -35,7 +35,7 @@ public class NormAttributeTransactionsController {
 	}
 	
 	@PutMapping(value="/updateCatalystData")
-	public Boolean updateCatalystData(CatalystAttributesDTO catalystAttributesDTO) {
+	public Boolean updateCatalystData(@RequestBody CatalystAttributesDTO catalystAttributesDTO) {
 		return normAttributeTransactionsService.updateCatalystData(catalystAttributesDTO);
 	}
 	
@@ -46,7 +46,7 @@ public class NormAttributeTransactionsController {
 	}
 	
 	@DeleteMapping(value="/deleteCatalystData")
-	public Boolean deleteCatalystData(CatalystAttributesDTO catalystAttributesDTO) {
+	public Boolean deleteCatalystData(@RequestBody CatalystAttributesDTO catalystAttributesDTO) {
 		normAttributeTransactionsService.deleteCatalystData(catalystAttributesDTO);
 		return true;
 	}

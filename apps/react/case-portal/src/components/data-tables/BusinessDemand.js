@@ -196,17 +196,8 @@ const BusinessDemand = () => {
       maxWidth: 120,
       editable: false,
     },
-    { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
-    {
-      field: 'NormParametersId',
-      headerName: 'NormParametersId',
-      minWidth: 150,
-      editable: true,
-    },
-    {
-      field: 'NormParameterMonthlyTransactionId',
-      headerName: 'NormParameterMonthlyTransactionId',
-    },
+    { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true }
+    
   ]
 
   return (
