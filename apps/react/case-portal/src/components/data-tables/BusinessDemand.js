@@ -186,52 +186,13 @@ const BusinessDemand = () => {
     { field: 'feb25', headerName: headerMap['feb'], editable: true },
     { field: 'mar25', headerName: headerMap['mar'], editable: true },
 
-
-    { field: 'Average', headerName: 'Average TPH', editable: true, 
-
-         renderHeader: () => (
-        <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
-          <div>Average</div>
-          <div>TPH</div>
-        </div>
-      ),
+    { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
+    {
+      field: 'NormParameterMonthlyTransactionId',
+      headerName: 'NormParameterMonthlyTransactionId',
+      minWidth: 150,
+      editable: false,
     },
-    // {
-    //   field: 'averageTPH',
-    //   headerName: 'Average TPH',
-    //   minWidth: 100,
-    //   maxWidth: 120,
-    //   editable: false,
-    //   valueGetter: (params) => {
-       
-    //     // console.log('check--->', params)
-    //     // const existingAverage = params
-    //     // if (
-    //     //   existingAverage !== undefined &&
-    //     //   existingAverage !== null &&
-    //     //   existingAverage !== ''
-    //     // ) {
-    //     //   return existingAverage
-    //     // }
-
-    //     // const sum = params2?.months?.reduce((total, month) => {
-    //     //   // Ensure that the value is treated as a number (defaulting to 0 if not set)
-    //     //   return total + (Number(params2[month]) || 0)
-    //     // }, 0)
-    //     // // Calculate average and format to 2 decimals
-    //     // return (sum / params2?.months?.length).toFixed(2)
-    //   },
-    //   valueFormatter: (params, params2) => {
-    //     console.log(params, '------->', params2)
-    //   },
-    //   renderHeader: () => (
-    //     <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
-    //       <div>Average</div>
-    //       <div>TPH</div>
-    //     </div>
-    //   ),
-    // },
-    { field: 'Remark', headerName: 'Remark', minWidth: 150, editable: true },
   ]
 
   return (

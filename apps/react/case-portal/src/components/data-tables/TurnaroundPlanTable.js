@@ -183,7 +183,7 @@ const TurnaroundPlanTable = () => {
           addButton: true,
           deleteButton: true,
           editButton: true,
-          showUnit: true,
+          showUnit: false,
           saveWithRemark: true,
         }}
       />

@@ -125,7 +125,7 @@ const DataGridTable = ({
   const handleSaveClick = (id, rowData) => {
     //console.log('Newly Added Row Data:', rowData)
     //console.log('selectedRows:', selectedRows)
-
+    handleOpenRemark()
     setRowModesModel((prev) => ({
       ...prev,
       [id]: { mode: GridRowModes.View },
@@ -344,27 +344,6 @@ const DataGridTable = ({
         feb: newRow.feb,
         march: newRow.march,
       }
-      // const productNormData2 = {
-      //   id: newRow.id,
-      //   aopType: newRow.aopType,
-      //   aopCaseId: newRow.aopCaseId,
-      //   aopStatus: newRow.aopStatus,
-      //   aopYear: newRow.aopYear,
-      //   plantFkId: newRow.plantFkId,
-      //   normItem: newRow.normItem,
-      //   april: newRow.april,
-      //   may: newRow.may,
-      //   june: newRow.june,
-      //   july: newRow.july,
-      //   aug: newRow.aug,
-      //   sep: newRow.sep,
-      //   oct: newRow.oct,
-      //   nov: newRow.nov,
-      //   dec: newRow.dec,
-      //   jan: newRow.jan,
-      //   feb: newRow.feb,
-      //   march: newRow.march,
-      // }
 
       const response = await DataService.updateProductNormData(
         productNormData,
@@ -418,13 +397,8 @@ const DataGridTable = ({
     }
   }
 
-
   const saveCatalystData = async (newRow) => {
-
-
-    console.log('new Row ',newRow);
-    
-
+    console.log('new Row ', newRow)
 
     try {
       var plantId = ''
@@ -433,9 +407,6 @@ const DataGridTable = ({
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-
-
-
 
       const turnAroundDetails = {
 
@@ -724,8 +695,8 @@ const DataGridTable = ({
         //   // updateCatalystData(newRow)
         // }else
         {
-        saveCatalystData(newRow)
-        // saveTurnAroundData(newRow)
+          saveCatalystData(newRow)
+          // saveTurnAroundData(newRow)
         }
         onRowUpdate?.(updatedRow)
         //console.log('Updated Row inside processRowUpdate:', updatedRow)
@@ -980,7 +951,7 @@ const DataGridTable = ({
                     key={`save-${id}`}
                     icon={<SaveIcon />}
                     label='Save'
-                    sx={{ color: 'primary.main' }}
+                    sx={{ color: 'primary.main', display: 'none' }}
                     onClick={() => handleSaveClick(id, params.row)} // Pass row data
                   />,
                   <GridActionsCellItem
@@ -1068,10 +1039,11 @@ const DataGridTable = ({
     'period',
   ]
 
-  const handleCellClick = (params) => {}
+  // const handleCellClick = (params) => {}
 
-  const handleCellClick1 = (params) => {
-    if (title == 'Production Volume Data') {
+  const handleCellClick = (params) => {
+    console.log(params)
+    if (title == 'Product MCU Val') {
       if (nonEditableFields.includes(params.field)) return // Block non-editable fields
 
       if (params?.field === 'remark') {
@@ -1329,13 +1301,45 @@ const DataGridTable = ({
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           {permissions?.showCalculate && (
-            <Button 
-              variant="contained" 
-              color="primary" 
-              onClick={() => console.log("Calculate button clicked")} 
-              sx={{ backgroundColor: jioColors.darkTransparentBlue }}
+            <Button
+              variant='contained'
+              sx={{
+                // marginTop: 2,
+                backgroundColor: jioColors.primaryBlue,
+                color: jioColors.background,
+                borderRadius: 1,
+                padding: '8px 24px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                '&:hover': {
+                  backgroundColor: '#143B6F',
+                  boxShadow: 'none',
+                },
+              }}
             >
               CALCULATE
+            </Button>
+          )}
+          {permissions?.showRefreshBtn && (
+            <Button
+              variant='contained'
+              sx={{
+                // marginTop: 2,
+                backgroundColor: jioColors.primaryBlue,
+                color: jioColors.background,
+                borderRadius: 1,
+                padding: '8px 24px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                '&:hover': {
+                  backgroundColor: '#143B6F',
+                  boxShadow: 'none',
+                },
+              }}
+            >
+              Refresh
             </Button>
           )}
 
@@ -1346,10 +1350,10 @@ const DataGridTable = ({
               onChange={(e) => setSelectedUnit(e.target.value)}
               sx={{ width: '150px', backgroundColor: jioColors.background }}
               variant='outlined'
-              label='Select Unit'
+              label='Select UOM'
             >
               <MenuItem value='' disabled>
-                Select Unit
+                Select UOM
               </MenuItem>
               {unitOptions.map((unit) => (
                 <MenuItem key={unit} value={unit}>
@@ -1359,6 +1363,8 @@ const DataGridTable = ({
             </TextField>
           )}
 
+          {/* commented for demo 4 March
+          
           <TextField
             variant='outlined'
             placeholder='Search...'
@@ -1377,7 +1383,7 @@ const DataGridTable = ({
                 </InputAdornment>
               ),
             }}
-          />
+          /> */}
           <IconButton
             aria-label='import'
             onClick={handleImportExport}
@@ -1469,12 +1475,13 @@ const DataGridTable = ({
             aopCaseId: false,
             aopType: false,
             aopYear: false,
-            NormParameterMonthlyTransactionId: true,
+            NormParameterMonthlyTransactionId: false,
+            NormParametersId: false,
           }}
           rowHeight={35}
           processRowUpdate={processRowUpdate}
           onColumnResized={onColumnResized}
-          // onCellClick={handleCellClick}
+          onCellClick={handleCellClick}
           onRowEditCommit={handleRowEditCommit}
           editMode='row'
           rowModesModel={rowModesModel}
@@ -1611,12 +1618,41 @@ const DataGridTable = ({
           }}
         />
       </Box>
+      <Box
+        sx={{
+          marginTop: 2,
+          display: 'flex',
+          gap: 2,
+        }}
+      >
+        {permissions.addButton && (
+          <Button
+            variant='contained'
+            sx={{
+              // marginTop: 2,
+              backgroundColor: jioColors.primaryBlue,
+              color: jioColors.background,
+              borderRadius: 1,
+              padding: '8px 24px',
+              textTransform: 'none',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              minWidth: 120, // Same width for consistency
+              '&:hover': {
+                backgroundColor: '#143B6F',
+                boxShadow: 'none',
+              },
+            }}
+            onClick={handleAddRow}
+          >
+            Add Item
+          </Button>
+        )}
 
-      {permissions.addButton && (
         <Button
           variant='contained'
           sx={{
-            marginTop: 2,
+            // marginTop: 2,
             backgroundColor: jioColors.primaryBlue,
             color: jioColors.background,
             borderRadius: 1,
@@ -1624,16 +1660,17 @@ const DataGridTable = ({
             textTransform: 'none',
             fontSize: '0.875rem',
             fontWeight: 500,
+            minWidth: 120, // Same width for consistency
             '&:hover': {
               backgroundColor: '#143B6F',
               boxShadow: 'none',
             },
           }}
-          onClick={handleAddRow}
+          // onClick={handleAddRow}
         >
-          Add Item
+          Save
         </Button>
-      )}
+      </Box>
 
       {/* <Notification
         open={snackbarOpen}

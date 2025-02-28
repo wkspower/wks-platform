@@ -18,7 +18,7 @@ const SelectivityData = () => {
         const data = await DataService.getCatalystSelectivityData(keycloak)
         var formattedData = []
         if (data) {
-           formattedData = data?.map((item, index) => ({
+          formattedData = data?.map((item, index) => ({
             ...item,
             id: index,
           }))
@@ -44,23 +44,19 @@ const SelectivityData = () => {
       }
     }
     const getAllCatalyst = async () => {
-
       try {
         const data = await DataService.getAllCatalyst(keycloak)
 
         const productList = data.map((product) => {
-          console.log("Original ID:", product.id);
+          console.log('Original ID:', product.id)
           return {
             id: product.id, // Should not change the case
             displayName: product.displayName,
-          };
-        });
-        console.log("Mapped Product List:", productList);
+          }
+        })
+        console.log('Mapped Product List:', productList)
 
-        setAllCatalyst(productList);
-        
-
-
+        setAllCatalyst(productList)
       } catch (error) {
         console.error('Error fetching product:', error)
       } finally {
@@ -75,52 +71,55 @@ const SelectivityData = () => {
   // const productOptions = catalystOptionsData.catalystOptions
 
   const productionColumns = [
-
+    // {
+    //   field: 'catalystId',
+    //   headerName: 'Catalyst',
+    //   editable: true,
+    //   minWidth: 225,
+    //   valueGetter: (params , params2) => {
+    //     console.log('params ',params);
+    //     return params || '';
+    //   },
+    //   valueFormatter: (params) => {
+    //     const product = allCatalyst.find((p) => String(p.id).toUpperCase() === String(params));
+    //     return product ? product.displayName : '';
+    //   },
+    //   renderEditCell: (params , params2) => {
+    //     const { id, value } = params;
+    //     return (
+    //       <select
+    //         value={value}
+    //         onChange={(event) => {
+    //           params.api.setEditCellValue({
+    //             id: params.id,
+    //             field: 'catalystId',
+    //             value: event.target.value,
+    //           });
+    //         }}
+    //         style={{
+    //           width: '100%',
+    //           padding: '5px',
+    //           border: 'none',
+    //           outline: 'none',
+    //           background: 'transparent',
+    //         }}
+    //       >
+    //         {allCatalyst.map((product) => (
+    //           <option key={product.id} value={product.id}>
+    //             {product.displayName}
+    //           </option>
+    //         ))}
+    //       </select>
+    //     );
+    //   },
+    // },
 
     {
-      field: 'catalystId',
-      headerName: 'Catalyst',
+      field: 'description',
+      headerName: 'Description',
       editable: true,
-      minWidth: 225,
-      valueGetter: (params , params2) => {
-        console.log('params ',params);
-        return params || ''; 
-      },
-      valueFormatter: (params) => {
-        const product = allCatalyst.find((p) => String(p.id).toUpperCase() === String(params));
-        return product ? product.displayName : '';
-      },
-      renderEditCell: (params , params2) => {
-        const { id, value } = params; 
-        return (
-          <select
-            value={value} 
-            onChange={(event) => {
-              params.api.setEditCellValue({
-                id: params.id,
-                field: 'catalystId',
-                value: event.target.value, 
-              });
-            }}
-            style={{
-              width: '100%',
-              padding: '5px',
-              border: 'none',  
-              outline: 'none', 
-              background: 'transparent', 
-            }}
-          >
-            {allCatalyst.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.displayName}
-              </option>
-            ))}
-          </select>
-        );
-      },
-    }, 
-
-
+      minWidth: 250,
+    },
     { field: 'apr24', headerName: 'Apr-24', editable: true },
     { field: 'may24', headerName: 'May-24', editable: true },
     { field: 'jun24', headerName: 'Jun-24', editable: true },
@@ -134,9 +133,7 @@ const SelectivityData = () => {
     { field: 'feb25', headerName: 'Feb-25', editable: true },
     { field: 'mar25', headerName: 'Mar-25', editable: true },
     { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
-    
   ]
-
 
   return (
     <div>

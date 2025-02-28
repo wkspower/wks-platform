@@ -81,7 +81,6 @@ const ProductionvolumeData = () => {
         // ) {
         //   return existingAverage
         // }
-
         // const sum = params2?.months?.reduce((total, month) => {
         //   // Ensure that the value is treated as a number (defaulting to 0 if not set)
         //   return total + (Number(params2[month]) || 0)
@@ -119,7 +118,7 @@ const ProductionvolumeData = () => {
           editButton: true,
           showUnit: false,
           saveWithRemark: true,
-          showCalculate:true,
+          showRefreshBtn: true,
         }}
       />
     </div>

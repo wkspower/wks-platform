@@ -27,6 +27,7 @@ const HeaderContent = ({ keycloak }) => {
   const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
   const [selectedOption, setSelectedOption] = useState('')
   const [selectedSite, setSelectedSite] = useState('')
+  const [selectedVertical, setSelectedVertical] = useState('Vertical A')
   const [sites, setSites] = useState([])
   const [plants, setPlants] = useState([])
   const [userSiteToPlants, setUserSiteToPlants] = useState([])
@@ -150,6 +151,9 @@ const HeaderContent = ({ keycloak }) => {
       )
     }
   }
+  const handleVerticalChange = (event) => {
+    setSelectedVertical(event.target.value)
+  }
 
   const handleOptionChange = (event) => {
     dispatch(setSitePlantChange(true))
@@ -177,11 +181,28 @@ const HeaderContent = ({ keycloak }) => {
 
   return (
     <>
-      {!matchesXs && <Search />}
-      {matchesXs && <Box sx={{ width: '100%', ml: 1 }} />}
+      {matchesXs && <Search />}
+      {!matchesXs && <Box sx={{ width: '100%', ml: 1 }} />}
 
       {/* Horizontal layout for Plant & Site */}
       <Stack direction='row' spacing={2} alignItems='center'>
+        {/* Vertical box */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant='body1' color='white'>
+            Vertical:
+          </Typography>
+          <FormControl sx={{ minWidth: 150 }}>
+            <Select
+              value={selectedVertical}
+              onChange={handleVerticalChange}
+              sx={{ color: 'white' }}
+            >
+              <MenuItem value='Vertical A'>Vertical A</MenuItem>
+              <MenuItem value='Vertical B'>Vertical B</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+
         {/* Site Dropdown */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant='body1' color='white'>
@@ -225,7 +246,7 @@ const HeaderContent = ({ keycloak }) => {
         </Box>
       </Stack>
 
-      {Config.NovuEnabled ? (
+      {/* {Config.NovuEnabled ? (
         <NovuProvider
           subscriberId={keycloak.idTokenParsed.email}
           applicationIdentifier={Config.NovuAppId}
@@ -238,7 +259,7 @@ const HeaderContent = ({ keycloak }) => {
         </NovuProvider>
       ) : (
         <Notification />
-      )}
+      )} */}
 
       {!matchesXs && <Profile keycloak={keycloak} />}
       {matchesXs && <MobileSection />}
