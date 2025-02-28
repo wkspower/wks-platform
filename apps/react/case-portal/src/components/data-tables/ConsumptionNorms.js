@@ -146,7 +146,7 @@ const NormalOpNormsScreen = () => {
         columns={productionColumns}
         rows={csDataTransformed}
         getRowId={(row) => row.id}
-        title="Consumption Norms"
+        title="Consumption AOP"
         paginationOptions={[100, 200, 300]}
         permissions={{
           showAction: true,

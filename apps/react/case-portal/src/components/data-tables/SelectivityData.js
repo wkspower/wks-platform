@@ -143,7 +143,7 @@ const SelectivityData = () => {
       <ASDataGrid
         columns={productionColumns}
         rows={csData}
-        title='Catalyst Selectivity Data'
+        title='Configuration'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}

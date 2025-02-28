@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+const headerMap = generateHeaderNames();
 
 const BusinessDemand = () => {
   const keycloak = useSession()
@@ -128,76 +129,109 @@ const BusinessDemand = () => {
 
   const colDefs = [
     {
-      field: 'product',
+      field: 'NormParametersId',
       headerName: 'Product',
       editable: true,
       minWidth: 225,
-      valueGetter: (params) => {
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : params
+      valueGetter: (params , params2) => {         
+        return params || ''; 
       },
-      renderEditCell: (params) => {
-        const { id } = params
-
+      valueFormatter: (params) => {
+        const product = allProducts.find((p) => p.id === params);
+        return product ? product.displayName : '';
+      },
+      renderEditCell: (params , params2) => {
+        const { id, value } = params; 
         return (
-          <Autocomplete
-            options={allProducts}
-            getOptionLabel={(option) => option.displayName}
-            value={
-              allProducts.find((product) => product.id === params.value) || null
-            }
-            disableClearable
-            onChange={(event, newValue) => {
+          <select
+            value={value || ""}
+            onChange={(event) => {
+              // console.log('event',event);
+              
               params.api.setEditCellValue({
                 id: params.id,
                 field: 'product',
-                value: newValue ? newValue.id : '',
-              })
+                value: event.target.value, 
+              });
             }}
-            onInputChange={(event, newInputValue) => {
-              if (event && event.type === 'keydown' && event.key === 'Enter') {
-                const selectedProduct = allProducts.find(
-                  (product) =>
-                    product.displayName.toLowerCase() ===
-                    newInputValue.toLowerCase(),
-                )
-                params.api.setEditCellValue({
-                  id: params.id,
-                  field: 'product',
-                  value: selectedProduct ? selectedProduct.id : '',
-                })
-              }
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none',  
+              outline: 'none', 
+              background: 'transparent', 
             }}
-            renderInput={(params) => (
-              <TextField {...params} variant='outlined' size='small' />
-            )}
-            fullWidth
-          />
-        )
+          >
+            {allProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.displayName}
+              </option>
+            ))}
+          </select>
+        );
       },
-    },
-    { field: 'apr24', headerName: 'Apr-24', editable: true },
-    { field: 'may24', headerName: 'May-24', editable: true },
-    { field: 'jun24', headerName: 'Jun-24', editable: true },
-    { field: 'jul24', headerName: 'Jul-24', editable: true },
-    { field: 'aug24', headerName: 'Aug-24', editable: true },
-    { field: 'sep24', headerName: 'Sep-24', editable: true },
-    { field: 'oct24', headerName: 'Oct-24', editable: true },
-    { field: 'nov24', headerName: 'Nov-24', editable: true },
-    { field: 'dec24', headerName: 'Dec-24', editable: true },
-    { field: 'jan25', headerName: 'Jan-25', editable: true },
-    { field: 'feb25', headerName: 'Feb-25', editable: true },
-    { field: 'mar25', headerName: 'Mar-25', editable: true },
+    }, 
 
-    {
-      field: 'averageTPH',
-      headerName: 'Average TPH',
-      minWidth: 100,
-      maxWidth: 120,
-      editable: false,
+
+    { field: 'apr24', headerName: headerMap['apr'], editable: true },
+    { field: 'may24', headerName: headerMap['may'], editable: true },
+    { field: 'jun24', headerName: headerMap['jun'], editable: true },
+    { field: 'jul24', headerName: headerMap['jul'], editable: true },
+    { field: 'aug24', headerName: headerMap['aug'], editable: true },
+    { field: 'sep24', headerName: headerMap['sep'], editable: true },
+    { field: 'oct24', headerName: headerMap['oct'], editable: true },
+    { field: 'nov24', headerName: headerMap['nov'], editable: true },
+    { field: 'dec24', headerName: headerMap['dec'], editable: true },
+    { field: 'jan25', headerName: headerMap['jan'], editable: true },
+    { field: 'feb25', headerName: headerMap['feb'], editable: true },
+    { field: 'mar25', headerName: headerMap['mar'], editable: true },
+
+
+    { field: 'Average', headerName: 'Average TPH', editable: true, 
+
+         renderHeader: () => (
+        <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
+          <div>Average</div>
+          <div>TPH</div>
+        </div>
+      ),
     },
-    { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true }
-    
+    // {
+    //   field: 'averageTPH',
+    //   headerName: 'Average TPH',
+    //   minWidth: 100,
+    //   maxWidth: 120,
+    //   editable: false,
+    //   valueGetter: (params) => {
+       
+    //     // console.log('check--->', params)
+    //     // const existingAverage = params
+    //     // if (
+    //     //   existingAverage !== undefined &&
+    //     //   existingAverage !== null &&
+    //     //   existingAverage !== ''
+    //     // ) {
+    //     //   return existingAverage
+    //     // }
+
+    //     // const sum = params2?.months?.reduce((total, month) => {
+    //     //   // Ensure that the value is treated as a number (defaulting to 0 if not set)
+    //     //   return total + (Number(params2[month]) || 0)
+    //     // }, 0)
+    //     // // Calculate average and format to 2 decimals
+    //     // return (sum / params2?.months?.length).toFixed(2)
+    //   },
+    //   valueFormatter: (params, params2) => {
+    //     console.log(params, '------->', params2)
+    //   },
+    //   renderHeader: () => (
+    //     <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
+    //       <div>Average</div>
+    //       <div>TPH</div>
+    //     </div>
+    //   ),
+    // },
+    { field: 'Remark', headerName: 'Remark', minWidth: 150, editable: true },
   ]
 
   return (
@@ -205,7 +239,7 @@ const BusinessDemand = () => {
       <ASDataGrid
         columns={colDefs}
         rows={bdData}
-        title='Product Demand'
+        title='Business Demand'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
