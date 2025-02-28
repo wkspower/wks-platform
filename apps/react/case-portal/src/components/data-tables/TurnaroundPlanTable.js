@@ -1,8 +1,4 @@
 import { DataService } from 'services/DataService'
-import {
-  Autocomplete,
-  TextField,
-} from '../../../node_modules/@mui/material/index'
 import ASDataGrid from './ASDataGrid'
 import dayjs from 'dayjs'
 import { useState, useEffect } from 'react'
@@ -11,6 +7,11 @@ import { useSession } from 'SessionStoreContext'
 const TurnaroundPlanTable = () => {
   const [TaData, setTaData] = useState([])
   const [allProducts, setAllProducts] = useState([])
+  // const [snackbarData, setSnackbarData] = useState({
+  //   message: '',
+  //   severity: 'info',
+  // })
+  // const [snackbarOpen, setSnackbarOpen] = useState(false)
   const keycloak = useSession()
 
   useEffect(() => {
@@ -167,7 +168,77 @@ const TurnaroundPlanTable = () => {
       minWidth: 200,
     },
   ]
+  // const saveTurnAroundData = async (newRow) => {
+  //   try {
+  //     // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
+  //     var plantId = ''
 
+  //     const storedPlant = localStorage.getItem('selectedPlant')
+  //     if (storedPlant) {
+  //       const parsedPlant = JSON.parse(storedPlant)
+  //       plantId = parsedPlant.id
+  //     }
+
+  //     const turnAroundDetails = {
+  //       productId: newRow.product,
+  //       discription: newRow.discription,
+  //       durationInMins: newRow.durationInMins,
+  //       maintEndDateTime: newRow.maintEndDateTime,
+  //       maintStartDateTime: newRow.maintStartDateTime,
+  //       remark: newRow.remark,
+  //       // rate: newRow.rate,
+  //     }
+  //     const response = await DataService.saveTurnAroundData(
+  //       plantId,
+  //       turnAroundDetails,
+  //       keycloak,
+  //     )
+  //     //console.log('Turnaround Plan data saved successfully:', response)
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage("Turnaround Plan data saved successfully !");
+  //     setSnackbarData({
+  //       message: 'Turnaround Plan data saved successfully!',
+  //       severity: 'success',
+  //     })
+  //     // setSnackbarOpen(true);
+  //     // setSnackbarData({ message: "Turnaround Plan data saved successfully!", severity: "success" });
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error saving Turnaround Plan data:', error)
+  //   }
+  // }
+  // const updateTurnAroundData = async (newRow) => {
+  //   try {
+  //     var maintenanceId = newRow?.maintenanceId
+
+  //     const turnAroundDetails = {
+  //       productId: newRow.product,
+  //       discription: newRow.discription,
+  //       durationInMins: newRow.durationInMins,
+  //       maintEndDateTime: newRow.maintEndDateTime,
+  //       maintStartDateTime: newRow.maintStartDateTime,
+  //       remark: newRow.remark,
+  //     }
+
+  //     const response = await DataService.updateTurnAroundData(
+  //       maintenanceId,
+  //       turnAroundDetails,
+  //       keycloak,
+  //     )
+  //     //console.log('TurnAround data Updated successfully:', response)
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage("TurnAround data Updated successfully !");
+  //     setSnackbarData({
+  //       message: 'TurnAround data Updated successfully!',
+  //       severity: 'success',
+  //     })
+  //     // setSnackbarOpen(true);
+  //     // setSnackbarData({ message: "TurnAround data Updated successfully!", severity: "success" });
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error Updating TurnAround data:', error)
+  //   }
+  // }
   return (
     <div>
       <ASDataGrid
@@ -178,6 +249,10 @@ const TurnaroundPlanTable = () => {
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
+        // saveTurnAroundData={saveTurnAroundData}
+        // updateTurnAroundData={updateTurnAroundData}
+        // snackbarOpen={snackbarOpen}
+        // snackbarData={snackbarData}
         permissions={{
           showAction: true,
           addButton: true,

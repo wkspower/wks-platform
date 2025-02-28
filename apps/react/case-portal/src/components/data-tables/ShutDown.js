@@ -1,8 +1,4 @@
 import { DataService } from 'services/DataService'
-import {
-  Autocomplete,
-  TextField,
-} from '../../../node_modules/@mui/material/index'
 import ASDataGrid from './ASDataGrid'
 import dayjs from 'dayjs'
 import { useState, useEffect } from 'react'
@@ -11,6 +7,11 @@ import { useSession } from 'SessionStoreContext'
 const ShutDown = () => {
   const [shutdownData, setShutdownData] = useState([])
   const [allProducts, setAllProducts] = useState([])
+  // const [snackbarData, setSnackbarData] = useState({
+  //   message: '',
+  //   severity: 'info',
+  // })
+  // const [snackbarOpen, setSnackbarOpen] = useState(false)
   const keycloak = useSession()
 
   useEffect(() => {
@@ -47,45 +48,45 @@ const ShutDown = () => {
       }
     }
 
-    const saveShutdownData = async () => {
-      try {
-        // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
-        // var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
-        // var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
+    // const saveShutdownData = async () => {
+    //   try {
+    //     // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
+    //     // var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
+    //     // var plantId = '7b7e0d7c-2666-43bb-847c-d78e144673de'
 
-        // discription
-        // maintStartDateTime
-        // maintEndDateTime
-        // durationInMins
-        // product
+    //     // discription
+    //     // maintStartDateTime
+    //     // maintEndDateTime
+    //     // durationInMins
+    //     // product
 
-        var plantId = ''
+    //     var plantId = ''
 
-        const storedPlant = localStorage.getItem('selectedPlant')
-        if (storedPlant) {
-          const parsedPlant = JSON.parse(storedPlant)
-          plantId = parsedPlant.id
-        }
+    //     const storedPlant = localStorage.getItem('selectedPlant')
+    //     if (storedPlant) {
+    //       const parsedPlant = JSON.parse(storedPlant)
+    //       plantId = parsedPlant.id
+    //     }
 
-        const shutdownDetails = {
-          product: 'Oxygen',
-          discription: '1 Shutdown maintenance',
-          durationInMins: 120,
-          maintEndDateTime: '2025-02-20T18:00:00Z',
-          maintStartDateTime: '2025-02-20T16:00:00Z',
-        }
+    //     const shutdownDetails = {
+    //       product: 'Oxygen',
+    //       discription: '1 Shutdown maintenance',
+    //       durationInMins: 120,
+    //       maintEndDateTime: '2025-02-20T18:00:00Z',
+    //       maintStartDateTime: '2025-02-20T16:00:00Z',
+    //     }
 
-        const response = await DataService.saveShutdownData(
-          plantId,
-          shutdownDetails,
-          keycloak,
-        )
-        console.log('Shutdown data saved successfully:', response)
-        return response
-      } catch (error) {
-        console.error('Error saving shutdown data:', error)
-      }
-    }
+    //     const response = await DataService.saveShutdownData(
+    //       plantId,
+    //       shutdownDetails,
+    //       keycloak,
+    //     )
+    //     console.log('Shutdown data saved successfully:', response)
+    //     return response
+    //   } catch (error) {
+    //     console.error('Error saving shutdown data:', error)
+    //   }
+    // }
 
     fetchData()
     // saveShutdownData()
@@ -207,6 +208,77 @@ const ShutDown = () => {
     { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
   ]
 
+  // const saveShutdownData = async (newRow) => {
+  //   try {
+  //     // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
+
+  //     const storedPlant = localStorage.getItem('selectedPlant')
+  //     if (storedPlant) {
+  //       const parsedPlant = JSON.parse(storedPlant)
+  //       plantId = parsedPlant.id
+  //     }
+
+  //     var plantId = plantId
+  //     // plantId = plantId;
+
+  //     const shutdownDetails = {
+  //       productId: newRow.product,
+  //       discription: newRow.discription,
+  //       durationInMins: newRow.durationInMins,
+  //       maintEndDateTime: newRow.maintEndDateTime,
+  //       maintStartDateTime: newRow.maintStartDateTime,
+  //     }
+
+  //     const response = await DataService.saveShutdownData(
+  //       plantId,
+  //       shutdownDetails,
+  //       keycloak,
+  //     )
+  //     //console.log('Shutdown data saved successfully:', response)
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage("Shutdown data saved successfully !");
+  //     setSnackbarData({
+  //       message: 'Shutdown data saved successfully!',
+  //       severity: 'success',
+  //     })
+  //     // setSnackbarOpen(true);
+  //     // setSnackbarData({ message: "Shutdown data saved successfully!", severity: "success" });
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error saving shutdown data:', error)
+  //   }
+  // }
+  // const updateShutdownData = async (newRow) => {
+  //   try {
+  //     var maintenanceId = newRow?.maintenanceId
+
+  //     const slowDownDetails = {
+  //       productId: newRow.product,
+  //       discription: newRow.discription,
+  //       durationInMins: newRow.durationInMins,
+  //       maintEndDateTime: newRow.maintEndDateTime,
+  //       maintStartDateTime: newRow.maintStartDateTime,
+  //     }
+
+  //     const response = await DataService.updateShutdownData(
+  //       maintenanceId,
+  //       slowDownDetails,
+  //       keycloak,
+  //     )
+
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage("Shutdown data Updated successfully !");
+  //     setSnackbarData({
+  //       message: 'Shutdown data Updated successfully!',
+  //       severity: 'success',
+  //     })
+  //     // setSnackbarOpen(true);
+  //     // setSnackbarData({ message: "Shutdown data Updated successfully!", severity: "success" });
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error saving Shutdown data:', error)
+  //   }
+  // }
   return (
     <div>
       <ASDataGrid
@@ -217,6 +289,10 @@ const ShutDown = () => {
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
+        // saveShutdownData={saveShutdownData}
+        // updateShutdownData={updateShutdownData}
+        // snackbarOpen={snackbarOpen}
+        // snackbarData={snackbarData}
         permissions={{
           showAction: true,
           addButton: true,

@@ -11,7 +11,11 @@ import { useSession } from 'SessionStoreContext'
 const SlowDown = () => {
   const [slowDownData, setSlowDownData] = useState([])
   const [allProducts, setAllProducts] = useState([])
-
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
+  })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
   const keycloak = useSession()
 
   useEffect(() => {
@@ -207,7 +211,75 @@ const SlowDown = () => {
       maxWidth: 400,
     },
   ]
+  // const saveSlowDownData = async (newRow) => {
+  //   try {
+  //     var plantId = ''
+  //     const storedPlant = localStorage.getItem('selectedPlant')
+  //     if (storedPlant) {
+  //       const parsedPlant = JSON.parse(storedPlant)
+  //       plantId = parsedPlant.id
+  //     }
+  //     const slowDownDetails = {
+  //       productId: newRow.product,
+  //       discription: newRow.discription,
+  //       durationInMins: newRow.durationInMins,
+  //       maintEndDateTime: newRow.maintEndDateTime,
+  //       maintStartDateTime: newRow.maintStartDateTime,
+  //       remark: newRow.remarks,
+  //       rate: newRow.rate,
+  //     }
+  //     const response = await DataService.saveSlowdownData(
+  //       plantId,
+  //       slowDownDetails,
+  //       keycloak,
+  //     )
+  //     //console.log('Slowdown data saved successfully:', response)
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage("Slowdown data saved successfully !");
+  //     setSnackbarData({
+  //       message: 'Slowdown data saved successfully!',
+  //       severity: 'success',
+  //     })
+  //     // setSnackbarOpen(true);
+  //     // setSnackbarData({ message: "Slowdown data saved successfully!", severity: "success" });
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error saving Slowdown data:', error)
+  //   }
+  // }
+  // const updateSlowdownData = async (newRow) => {
+  //   try {
+  //     var maintenanceId = newRow?.maintenanceId
 
+  //     const slowDownDetails = {
+  //       productId: newRow.product,
+  //       discription: newRow.discription,
+  //       durationInMins: newRow.durationInMins,
+  //       maintEndDateTime: newRow.maintEndDateTime,
+  //       maintStartDateTime: newRow.maintStartDateTime,
+  //       remark: newRow.remarks,
+  //       rate: newRow.rate,
+  //     }
+
+  //     const response = await DataService.updateSlowdownData(
+  //       maintenanceId,
+  //       slowDownDetails,
+  //       keycloak,
+  //     )
+  //     //console.log('Slowdown data Updated successfully:', response)
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage("Slowdown data Updated successfully !");
+  //     setSnackbarData({
+  //       message: 'Slowdown data Updated successfully!',
+  //       severity: 'success',
+  //     })
+  //     // setSnackbarOpen(true);
+  //     // setSnackbarData({ message: "Slowdown data Updated successfully!", severity: "success" });
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error saving Slowdown data:', error)
+  //   }
+  // }
   return (
     <div>
       <ASDataGrid
@@ -218,6 +290,10 @@ const SlowDown = () => {
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
+        // saveSlowDownData={saveSlowDownData}
+        // updateSlowdownData={updateSlowdownData}
+        // snackbarOpen={snackbarOpen}
+        // snackbarData={snackbarData}
         permissions={{
           showAction: true,
           addButton: true,

@@ -97,6 +97,7 @@ const DataGridTable = ({
     setSearchText(event.target.value)
   }
   const [rowModesModel, setRowModesModel] = useState({})
+  const [changedRowIds, setChangedRowIds] = useState([])
 
   const handleRowEditStop = (params, event) => {
     //console.log('handleRowEditStop', params)
@@ -108,12 +109,14 @@ const DataGridTable = ({
 
   const handleRowEditCommit = (id, event) => {
     const editedRow = rows.find((row) => row.id === id)
-    //console.log('Row Data After Editing:', editedRow)
+    console.log('Row Data After Editing:', editedRow)
+    // handleEditClick(id, event)
   }
 
   const handleEditClick = (id, row) => () => {
     //console.log('id',id)
     //console.log('row',row)
+//    setChangedRowIds(id)
     setIsUpdating(true)
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } })
   }
@@ -123,8 +126,17 @@ const DataGridTable = ({
   // };
 
   const handleSaveClick = (id, rowData) => {
+    if (!rowData.remarks) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Please Fill remark Fields!',
+        severity: 'error',
+      })
+      return
+    }
     //console.log('Newly Added Row Data:', rowData)
-    //console.log('selectedRows:', selectedRows)
+    console.log('selectedRows:', changedRowIds)
+    console.log(changedRowIds)
     handleOpenRemark()
     setRowModesModel((prev) => ({
       ...prev,
@@ -435,7 +447,7 @@ const DataGridTable = ({
 
 
     };
-    
+
       const response = await DataService.saveCatalystData(
         plantId,
         turnAroundDetails,
@@ -497,7 +509,6 @@ const DataGridTable = ({
 
   const processRowUpdate = useCallback(
     (newRow) => {
-      // //console.log('title is ',title);
       if (title == 'Shutdown Plan') {
         if (
           !newRow.discription?.trim() ||
@@ -617,7 +628,10 @@ const DataGridTable = ({
 
         return updatedRow // Ensure function returns the updated row
       }
-      if (title == 'Production Volume Data' || title == 'Production Norms Data') {
+      if (
+        title == 'Production Volume Data' ||
+        title == 'Production Norms Data'
+      ) {
         if (
           !newRow.april ||
           !newRow.aug ||
@@ -666,10 +680,7 @@ const DataGridTable = ({
         return updatedRow // Ensure function returns the updated row
       }
       if (title == 'Configuration') {
-        
-        if (
-          !newRow.dec24 
-        ) {
+        if (!newRow.dec24) {
           setSnackbarOpen(true)
           setSnackbarData({
             message: 'Please Fill all Fields!',
@@ -924,19 +935,16 @@ const DataGridTable = ({
     }))
   }, [initialColumns, resizedColumns])
 
-
-
-  const columns = useMemo(
-    () => [
-      ...defaultColumns,
+  const columns = useMemo(() => [
+    ...defaultColumns,
     ...(permissions?.showAction
-        ? [
-            {
-              field: 'actions',
-              type: 'actions',
-              headerName: 'Actions',
-              width: 180,
-              cellClassName: 'actions',
+      ? [
+          {
+            field: 'actions',
+            type: 'actions',
+            headerName: 'Actions',
+            width: 180,
+            cellClassName: 'actions',
 
             getActions: (params) => {
               const { id, row } = params // Extract row data
@@ -974,6 +982,7 @@ const DataGridTable = ({
                     className='textPrimary'
                     onClick={handleEditClick(id, row)}
                     color='inherit'
+                    sx={{ display: 'none' }}
                   />
                 ),
                 permissions?.deleteButton && (
@@ -1040,9 +1049,14 @@ const DataGridTable = ({
   ]
 
   // const handleCellClick = (params) => {}
+  useEffect(() => {
+    console.log('-->:', changedRowIds)
+    console.log('Length of changedRowIds:', changedRowIds.length)
+  }, [changedRowIds])
 
   const handleCellClick = (params) => {
     console.log(params)
+    setChangedRowIds(params?.row)
     if (title == 'Product MCU Val') {
       if (nonEditableFields.includes(params.field)) return // Block non-editable fields
 
