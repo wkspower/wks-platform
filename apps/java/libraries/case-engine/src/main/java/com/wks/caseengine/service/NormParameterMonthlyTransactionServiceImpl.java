@@ -453,7 +453,7 @@ return "";
 			if(i<3) {
 				auditYear=auditYear+1;
 			}	
-			UUID normParameterFKId=catalystAttributesDTO.getNormParameterFKId();
+			UUID normParameterFKId=UUID.fromString(catalystAttributesDTO.getNormParameterFKId());
 			normAttributeTransactionsRepository.deleteBusinessDemandData(attributeValue.toString(),month,auditYear,normParameterFKId);
 		}		
 		// TODO Auto-generated method stub
