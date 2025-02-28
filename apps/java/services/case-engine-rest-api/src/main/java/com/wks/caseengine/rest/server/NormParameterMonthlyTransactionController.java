@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.BusinessDemandDTO;
+import com.wks.caseengine.dto.CatalystAttributesDTO;
 import com.wks.caseengine.dto.BusinessDemandDTO;
 import com.wks.caseengine.service.NormParameterMonthlyTransactionService;
 
@@ -68,10 +69,9 @@ public class NormParameterMonthlyTransactionController{
               return ResponseEntity.ok(businessDemandDTO);
           }
 
-		  @DeleteMapping("/deleteBusinessDemandData/{plantMaintenanceTransactionId}")
-		    public ResponseEntity<String> deletePlant(@PathVariable UUID plantMaintenanceTransactionId) {
-			  	normParameterMonthlyTransactionService.deleteBusinessDemandData(plantMaintenanceTransactionId);
-		        return ResponseEntity.ok("Plant with ID " + plantMaintenanceTransactionId + " deleted successfully");
+		  @DeleteMapping("/deleteBusinessDemandData")
+		    public Boolean deletePlant(@RequestBody CatalystAttributesDTO catalystAttributesDTO) {
+			  return	normParameterMonthlyTransactionService.deleteBusinessDemandData(catalystAttributesDTO);
 		    }
 
 

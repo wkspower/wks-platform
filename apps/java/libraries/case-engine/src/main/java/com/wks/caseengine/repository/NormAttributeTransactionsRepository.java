@@ -49,5 +49,18 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	                        @Param("auditYear") Integer auditYear, 
 	                        @Param("normParameterFKId") UUID normParameterFKId, 
 	                        @Param("catalystAttributeFKId") UUID catalystAttributeFKId);
+	
+	@Modifying
+	@Transactional
+	@Query("DELETE FROM NormAttributeTransactions nat " +
+	       "WHERE nat.attributeValue = :attributeValue " +
+	       "AND nat.month = :month " +  // Added missing AND
+	       "AND nat.auditYear = :auditYear " +
+	       "AND nat.normParameterFKId = :normParameterFKId")
+	void deleteBusinessDemandData(@Param("attributeValue") String attributeValue, 
+	                        @Param("month") Integer month, 
+	                        @Param("auditYear") Integer auditYear, 
+	                        @Param("normParameterFKId") UUID normParameterFKId);
+
 
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.wks.caseengine.dto.BusinessDemandDTO;
+import com.wks.caseengine.dto.CatalystAttributesDTO;
 
 public interface NormParameterMonthlyTransactionService {
 	
@@ -18,7 +19,7 @@ public interface NormParameterMonthlyTransactionService {
 
     public void editBusinessDemandData(UUID plantMaintenanceTransactionId, BusinessDemandDTO businessDemandDTO);
 
-    public void deleteBusinessDemandData(UUID plantMaintenanceTransactionId);
+    public Boolean deleteBusinessDemandData(CatalystAttributesDTO catalystAttributesDTO);
 	
 
 }
