@@ -84,7 +84,10 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	        map.put("catalyst", row[1]);
 			map.put("catalystId", row[row.length - 3]);
 			map.put("AttributeName", row[row.length - 2]);
-			map.put("NormParameterFKId", row[row.length - 1]);
+			if(row[row.length - 1]!=null){
+				map.put("NormParameterFKId", row[row.length - 1].toString().toUpperCase());
+			}
+			
 	        for (int i = 2; i < row.length - 4; i++) {
 	            map.put(columnNames.get(i - 2), row[i]);
 	        }

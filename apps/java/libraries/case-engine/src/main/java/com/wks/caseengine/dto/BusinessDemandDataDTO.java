@@ -16,9 +16,9 @@ import lombok.NoArgsConstructor;
 @Data
 public class BusinessDemandDataDTO {
 	
-	private UUID id;
+	private String id;
     private String remark;
-    private UUID normParameterId;
+    private String normParameterId;
     private Float jan;
     private Float feb;
     private Float march;
@@ -32,7 +32,7 @@ public class BusinessDemandDataDTO {
     private Float nov;
     private Float dec;
     private String year;
-    private UUID plantId;
+    private String plantId;
     private Float avgTph;
 
 }

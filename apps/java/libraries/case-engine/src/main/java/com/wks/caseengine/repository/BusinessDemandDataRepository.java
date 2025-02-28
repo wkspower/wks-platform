@@ -8,7 +8,7 @@ import com.wks.caseengine.entity.BusinessDemand;
 @Repository
 public interface BusinessDemandDataRepository extends JpaRepository<BusinessDemand, UUID>{
 	
-	public List<BusinessDemand> findAllByPlantIdAndYear(String year,UUID plantId);
+	public List<BusinessDemand> findAllByYearAndPlantId(String year,UUID plantId);
 	
 	
 	

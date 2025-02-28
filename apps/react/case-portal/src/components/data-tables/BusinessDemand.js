@@ -14,87 +14,14 @@ const BusinessDemand = () => {
   const menu = useSelector((state) => state.menu)
   const { sitePlantChange } = menu
   useEffect(() => {
-    function transformData(inputData) {
-      const months = [
-        'apr24',
-        'may24',
-        'jun24',
-        'jul24',
-        'aug24',
-        'sep24',
-        'oct24',
-        'nov24',
-        'dec24',
-        'jan25',
-        'feb25',
-        'mar25',
-      ]
-
-      const transformed = {}
-
-      inputData.forEach((item) => {
-        const productKey = item.NormParametersId
-
-        if (!transformed[productKey]) {
-          transformed[productKey] = {
-            product: productKey,
-            apr24: item.apr24,
-            may24: item.may24,
-            jun24: item.jun24,
-            jul24: item.jul24,
-            aug24: item.aug24,
-            sep24: item.aug24,
-            oct24: item.oct24,
-            nov24: item.nov24,
-            dec24: item.dec24,
-            jan25: item.jan25,
-            feb25: item.feb25,
-            mar25: item.mar25,
-            averageTPH: item.TPH,
-            remark: item.Remark,
-          }
-        }
-
-        const monthKey = Object.keys(item).find((key) =>
-          key.match(/^[A-Za-z]{3}-\d{2}$/),
-        )
-
-        if (monthKey) {
-          const formattedMonth = monthKey
-            .toLowerCase()
-            .replace('-25', '25')
-            .replace('-24', '24')
-          transformed[productKey][formattedMonth] = item[monthKey]
-        }
-
-        transformed[productKey].averageTPH =
-          item.Average || transformed[productKey].averageTPH
-        transformed[productKey].remark =
-          item.Remark || transformed[productKey].remark
-        const validValues = months
-          .map((month) => transformed[productKey][month])
-          .filter((value) => value !== null && value !== undefined)
-
-        const average =
-          validValues.length > 0
-            ? (
-                validValues.reduce((sum, val) => sum + val, 0) /
-                validValues.length
-              ).toFixed(2)
-            : 0
-
-        transformed[productKey].averageTPH = parseFloat(average)
-      })
-
-      return Object.values(transformed)
-    }
+  
 
     const fetchData = async () => {
       try {
         const data = await DataService.getBDData(keycloak)
-        const transformedData = transformData(data)
+        
 
-        const formattedData = transformedData.map((item, index) => ({
+        const formattedData = data.map((item, index) => ({
           ...item,
           id: index,
         }))

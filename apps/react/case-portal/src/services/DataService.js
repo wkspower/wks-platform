@@ -204,7 +204,7 @@ async function getBDData(keycloak) {
     const parsedSite = JSON.parse(storedSite)
     siteId = parsedSite.id
   }
-  const url = `${process.env.REACT_APP_API_URL}/task/getBusinessDemandData?year=2024&plantId=${plantId}&siteId=${siteId}`
+  const url = `${process.env.REACT_APP_API_URL}/task/getBusinessDemandData?year=2024-25&plantId=${plantId}`
 
   const headers = {
     Accept: 'application/json',

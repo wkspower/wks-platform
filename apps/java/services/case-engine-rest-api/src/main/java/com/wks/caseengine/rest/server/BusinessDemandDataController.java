@@ -21,12 +21,12 @@ public class BusinessDemandDataController {
 	private BusinessDemandDataService businessDemandDataService;
 	
 	@GetMapping(value="/getBusinessDemandData")
-	public	List<BusinessDemandDataDTO> getBusinessDemandData(@RequestParam String year,@RequestParam UUID plantId){
+	public	List<BusinessDemandDataDTO> getBusinessDemandData(@RequestParam String year,@RequestParam String plantId){
 		return businessDemandDataService.getBusinessDemandData(year,plantId);	
 	}
 	
 	@PostMapping(value="/saveBusinessDemandData")
-	public BusinessDemandDataDTO saveBusinessDemandData(@RequestBody BusinessDemandDataDTO businessDemandDataDTO) {
+	public 	List<BusinessDemandDataDTO>  saveBusinessDemandData(@RequestBody List<BusinessDemandDataDTO> businessDemandDataDTO) {
 		return businessDemandDataService.saveBusinessDemandData(businessDemandDataDTO);
 	}
 

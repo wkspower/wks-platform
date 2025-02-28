@@ -1476,7 +1476,6 @@ const DataGridTable = ({
             aopType: false,
             aopYear: false,
             NormParameterMonthlyTransactionId: false,
-            NormParametersId: false,
           }}
           rowHeight={35}
           processRowUpdate={processRowUpdate}

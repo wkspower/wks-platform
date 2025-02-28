@@ -18,8 +18,8 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 	private BusinessDemandDataRepository businessDemandDataRepository;
 
 	@Override
-	public List<BusinessDemandDataDTO> getBusinessDemandData(String year,UUID plantId) {
-		List<BusinessDemand> businessDemandDataList= businessDemandDataRepository.findAllByPlantIdAndYear(year,plantId);
+	public List<BusinessDemandDataDTO> getBusinessDemandData(String year,String plantId) {
+		List<BusinessDemand> businessDemandDataList= businessDemandDataRepository.findAllByYearAndPlantId(year,UUID.fromString(plantId));
 		List<BusinessDemandDataDTO> businessDemandDataDTOList=new ArrayList<>();
 		for(BusinessDemand businessDemand:businessDemandDataList) {
 			BusinessDemandDataDTO businessDemandDataDTO =new BusinessDemandDataDTO();
@@ -28,16 +28,16 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 			businessDemandDataDTO.setAvgTph(businessDemand.getAvgTph());
 			businessDemandDataDTO.setDec(businessDemand.getDec());
 			businessDemandDataDTO.setFeb(businessDemand.getFeb());
-			businessDemandDataDTO.setId(businessDemand.getId());
+			businessDemandDataDTO.setId(businessDemand.getId().toString());
 			businessDemandDataDTO.setJan(businessDemand.getJan());
 			businessDemandDataDTO.setJuly(businessDemand.getJuly());
 			businessDemandDataDTO.setJune(businessDemand.getJune());
 			businessDemandDataDTO.setMarch(businessDemand.getMarch());
 			businessDemandDataDTO.setMay(businessDemand.getMay());
-			businessDemandDataDTO.setNormParameterId(businessDemand.getNormParameterId());
+			businessDemandDataDTO.setNormParameterId(businessDemand.getNormParameterId().toString());
 			businessDemandDataDTO.setNov(businessDemand.getNov());
 			businessDemandDataDTO.setOct(businessDemand.getOct());
-			businessDemandDataDTO.setPlantId(businessDemand.getPlantId());
+			businessDemandDataDTO.setPlantId(businessDemand.getPlantId().toString().toUpperCase());
 			businessDemandDataDTO.setRemark(businessDemand.getRemark());
 			businessDemandDataDTO.setSep(businessDemand.getSep());
 			businessDemandDataDTO.setYear(businessDemand.getYear());
@@ -47,30 +47,33 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 	}
 
 	@Override
-	public BusinessDemandDataDTO saveBusinessDemandData(BusinessDemandDataDTO businessDemandDataDTO) {
+	public List<BusinessDemandDataDTO> saveBusinessDemandData(List<BusinessDemandDataDTO> businessDemandDataDTOList) {
 		
-		BusinessDemand businessDemand =new BusinessDemand();
-		businessDemand.setApril(businessDemandDataDTO.getApril());
-		businessDemand.setAug(businessDemandDataDTO.getAug());
-		businessDemand.setAvgTph(businessDemandDataDTO.getAvgTph());
-		businessDemand.setDec(businessDemandDataDTO.getDec());
-		businessDemand.setFeb(businessDemandDataDTO.getFeb());
-		businessDemand.setId(businessDemandDataDTO.getId());
-		businessDemand.setJan(businessDemandDataDTO.getJan());
-		businessDemand.setJuly(businessDemandDataDTO.getJuly());
-		businessDemand.setJune(businessDemandDataDTO.getJune());
-		businessDemand.setMarch(businessDemandDataDTO.getMarch());
-		businessDemand.setMay(businessDemandDataDTO.getMay());
-		businessDemand.setNormParameterId(businessDemandDataDTO.getNormParameterId());
-		businessDemand.setNov(businessDemandDataDTO.getNov());
-		businessDemand.setOct(businessDemandDataDTO.getOct());
-		businessDemand.setPlantId(businessDemandDataDTO.getPlantId());
-		businessDemand.setRemark(businessDemandDataDTO.getRemark());
-		businessDemand.setSep(businessDemandDataDTO.getSep());
-		businessDemand.setYear(businessDemandDataDTO.getYear());
-		businessDemandDataRepository.save(businessDemand);
-		// TODO Auto-generated method stub
-		return businessDemandDataDTO;
+		for(BusinessDemandDataDTO businessDemandDataDTO: businessDemandDataDTOList){
+            BusinessDemand businessDemand =new BusinessDemand();
+
+			businessDemand.setApril(businessDemandDataDTO.getApril());
+			businessDemand.setAug(businessDemandDataDTO.getAug());
+			businessDemand.setAvgTph(businessDemandDataDTO.getAvgTph());
+			businessDemand.setDec(businessDemandDataDTO.getDec());
+			businessDemand.setFeb(businessDemandDataDTO.getFeb());
+			businessDemand.setId(UUID.fromString(businessDemandDataDTO.getId()));
+			businessDemand.setJan(businessDemandDataDTO.getJan());
+			businessDemand.setJuly(businessDemandDataDTO.getJuly());
+			businessDemand.setJune(businessDemandDataDTO.getJune());
+			businessDemand.setMarch(businessDemandDataDTO.getMarch());
+			businessDemand.setMay(businessDemandDataDTO.getMay());
+			businessDemand.setNormParameterId(UUID.fromString(businessDemandDataDTO.getNormParameterId()));
+			businessDemand.setNov(businessDemandDataDTO.getNov());
+			businessDemand.setOct(businessDemandDataDTO.getOct());
+			businessDemand.setPlantId(UUID.fromString(businessDemandDataDTO.getPlantId()));
+			businessDemand.setRemark(businessDemandDataDTO.getRemark());
+			businessDemand.setSep(businessDemandDataDTO.getSep());
+			businessDemand.setYear(businessDemandDataDTO.getYear());
+			businessDemandDataRepository.save(businessDemand);
+	   }
+				// TODO Auto-generated method stub
+		return businessDemandDataDTOList;
 	}
 
 }
