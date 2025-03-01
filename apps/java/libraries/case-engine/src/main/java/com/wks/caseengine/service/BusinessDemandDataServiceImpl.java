@@ -29,7 +29,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 
 	@Override
 	public List<BusinessDemandDataDTO> getBusinessDemandData(String year,String plantId) {
-		List<BusinessDemand> businessDemandDataList= businessDemandDataRepository.findAllByYearAndPlantIdAndIsDeletedFalse(year,UUID.fromString(plantId));
+		List<BusinessDemand> businessDemandDataList= businessDemandDataRepository.findAllByYearAndPlantIdAndIsDeletedFalseOrdered(year,UUID.fromString(plantId));
 		List<BusinessDemandDataDTO> businessDemandDataDTOList=new ArrayList<>();
 		for(BusinessDemand businessDemand:businessDemandDataList) {
 			BusinessDemandDataDTO businessDemandDataDTO =new BusinessDemandDataDTO();

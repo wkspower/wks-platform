@@ -46,5 +46,8 @@ public class NormParameters {
     
     @Column(name = "NormType_FK_Id")
     private UUID normTypeFKId;
+    
+    @Column(name="DisplayOrder")
+    private Integer displayOrder;
 }
 
