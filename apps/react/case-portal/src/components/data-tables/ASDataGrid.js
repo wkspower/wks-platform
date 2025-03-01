@@ -126,14 +126,14 @@ const DataGridTable = ({
   // };
 
   const handleSaveClick = (id, rowData) => {
-    if (!rowData.remarks) {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Please Fill remark Fields!',
-        severity: 'error',
-      })
-      return
-    }
+    // if (!rowData.remarks) {
+    //   setSnackbarOpen(true)
+    //   setSnackbarData({
+    //     message: 'Please Fill remark Fields!',
+    //     severity: 'error',
+    //   })
+    //   return
+    // }
     //console.log('Newly Added Row Data:', rowData)
     console.log('selectedRows:', changedRowIds)
     console.log(changedRowIds)
@@ -421,32 +421,27 @@ const DataGridTable = ({
       }
 
       const turnAroundDetails = {
-
-
-        april: (newRow.apr24),       
-        may: (newRow.may24),
-        june: (newRow.jun24),
-        july: (newRow.jul24),
-        aug: (newRow.aug24),
-        sep: (newRow.sep24),
-        oct: (newRow.oct24),
-        nov: (newRow.nov24),
-        dec: (newRow.dec24),
-        jan: (newRow.jan25),
-        feb: (newRow.feb25),
-        march: (newRow.mar25),
-        TPH:'100',
-        attributeName: "Silver Ox",
-        normParameterFKId: "",
-        catalystAttributeFKId: "C6352800-C64A-4944-B490-5A60D1BCE285",
-        catalystId:'',
-        remarks: "123",  
-        avgTPH: "123",  
-        year: (2024)  
-
-
-
-    };
+        april: newRow.apr24,
+        may: newRow.may24,
+        june: newRow.jun24,
+        july: newRow.jul24,
+        aug: newRow.aug24,
+        sep: newRow.sep24,
+        oct: newRow.oct24,
+        nov: newRow.nov24,
+        dec: newRow.dec24,
+        jan: newRow.jan25,
+        feb: newRow.feb25,
+        march: newRow.mar25,
+        TPH: '100',
+        attributeName: 'Silver Ox',
+        normParameterFKId: '',
+        catalystAttributeFKId: 'C6352800-C64A-4944-B490-5A60D1BCE285',
+        catalystId: '',
+        remarks: '123',
+        avgTPH: '123',
+        year: 2024,
+      }
 
       const response = await DataService.saveCatalystData(
         plantId,
@@ -465,6 +460,52 @@ const DataGridTable = ({
       return response
     } catch (error) {
       console.error('Error saving Catalyst data:', error)
+    }
+  }
+  const saveBusinessDemandData = async (newRow) => {
+    try {
+      var plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      const businnessData = [
+        {
+          april: newRow.april,
+          may: newRow.may,
+          june: newRow.june,
+          july: newRow.july,
+          aug: newRow.aug,
+          sep: newRow.sep,
+          oct: newRow.oct,
+          nov: newRow.nov,
+          dec: newRow.dec,
+          jan: newRow.jan,
+          feb: newRow.feb,
+          march: newRow.mar,
+          remark: newRow.remark,
+          avgTph: newRow.avgTph,
+          year: '2024-25',
+          plantId: plantId,
+          normParameterId: newRow.normParameterId,
+        },
+      ]
+
+      const response = await DataService.saveBusinessDemandData(
+        plantId,
+        businnessData,
+        keycloak,
+      )
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Business Demand data saved successfully!',
+        severity: 'success',
+      })
+      return response
+    } catch (error) {
+      console.error('Error saving Business Demand data:', error)
     }
   }
   const saveTurnAroundData = async (newRow) => {
@@ -715,6 +756,51 @@ const DataGridTable = ({
 
         return updatedRow // Ensure function returns the updated row
       }
+
+      if (title == 'Business Demand') {
+        if (
+          !newRow.april ||
+          !newRow.may ||
+          !newRow.june ||
+          !newRow.july ||
+          !newRow.aug ||
+          !newRow.sep ||
+          !newRow.oct ||
+          !newRow.nov ||
+          !newRow.dec ||
+          !newRow.jan ||
+          !newRow.feb ||
+          !newRow.march ||
+          !newRow.remark ||
+          !newRow.avgTph
+        ) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Please Fill all Fields!',
+            severity: 'error',
+          })
+          setRowModesModel(() => ({
+            [newRow.id]: {
+              mode: GridRowModes.Edit,
+              fieldToFocus: 'april',
+            },
+          }))
+          return
+        }
+
+        const updatedRow = { ...newRow, isNew: false }
+        const updatedRows = rows.map((row) =>
+          row?.id === newRow?.id ? updatedRow : row,
+        )
+
+        setRows(updatedRows)
+        {
+          saveBusinessDemandData(newRow)
+        }
+        onRowUpdate?.(updatedRow)
+        setSelectedRows(updatedRow)
+        return updatedRow
+      }
     },
     [rows, onRowUpdate],
   )
@@ -826,8 +912,8 @@ const DataGridTable = ({
       : 1
     const newRow = {
       id: newRowId,
-      isNew: true, // Mark row as new
-      ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])), // Empty values
+      isNew: true,
+      ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])),
     }
 
     setRows((prevRows) => [newRow, ...prevRows])
@@ -1490,6 +1576,8 @@ const DataGridTable = ({
             aopType: false,
             aopYear: false,
             NormParameterMonthlyTransactionId: false,
+            // NormParametersId: false,
+            idFromApi: false,
           }}
           rowHeight={35}
           processRowUpdate={processRowUpdate}
