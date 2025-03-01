@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.product.SiteAndPlantDTO;
-import com.wks.caseengine.service.NormParameterMonthlyTransactionService;
+//import com.wks.caseengine.service.NormParameterMonthlyTransactionService;
 import com.wks.caseengine.service.PlantService;
 
 @RestController
@@ -22,8 +22,8 @@ public class SiteAndPlantController {
 
     private final PlantService plantService;
     
-    @Autowired
-    private NormParameterMonthlyTransactionService normParameterMonthlyTransactionService;
+    // @Autowired
+    // private NormParameterMonthlyTransactionService normParameterMonthlyTransactionService;
 
     // Constructor injection
     public SiteAndPlantController(PlantService plantService) {

@@ -25,8 +25,8 @@ import com.wks.caseengine.service.NormParameterMonthlyTransactionService;
 //@RequestMapping("task")
 public class NormParameterMonthlyTransactionController{
 	
-	@Autowired
-	private NormParameterMonthlyTransactionService normParameterMonthlyTransactionService;
+	// @Autowired
+	// private NormParameterMonthlyTransactionService normParameterMonthlyTransactionService;
 	
 	/*
 	 * @GetMapping(value="/getBusinessDemandData") public String
