@@ -26,16 +26,7 @@ public class AOPServiceImpl implements  AOPService{
 		
 		for(AOP aOP: listAOP) {
 			AOPDTO aOPDTO = new AOPDTO();
-
-
-			
-
-
-			
 			aOPDTO.setId(aOP.getId().toString());
-
-
-
 			aOPDTO.setAopCaseId(aOP.getAopCaseId());
 			aOPDTO.setAopRemarks(aOP.getAopRemarks());
 			aOPDTO.setAopStatus(aOP.getAopStatus());

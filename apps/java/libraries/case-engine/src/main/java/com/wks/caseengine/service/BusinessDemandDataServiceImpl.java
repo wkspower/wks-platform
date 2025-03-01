@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.wks.caseengine.entity.AOP;
+import com.wks.caseengine.entity.AOPMCCalculatedData;
 import com.wks.caseengine.entity.BusinessDemand;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
+import com.wks.caseengine.repository.AOPMCCalculatedDataRepository;
+import com.wks.caseengine.repository.AOPRepository;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
 
 @Service
@@ -16,10 +20,16 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 	
 	@Autowired
 	private BusinessDemandDataRepository businessDemandDataRepository;
+	
+	@Autowired
+	private AOPMCCalculatedDataRepository aOPMCCalculatedDataRepository;
+	
+	@Autowired
+	private AOPRepository aOPRepository;
 
 	@Override
 	public List<BusinessDemandDataDTO> getBusinessDemandData(String year,String plantId) {
-		List<BusinessDemand> businessDemandDataList= businessDemandDataRepository.findAllByYearAndPlantId(year,UUID.fromString(plantId));
+		List<BusinessDemand> businessDemandDataList= businessDemandDataRepository.findAllByYearAndPlantIdAndIsDeletedFalse(year,UUID.fromString(plantId));
 		List<BusinessDemandDataDTO> businessDemandDataDTOList=new ArrayList<>();
 		for(BusinessDemand businessDemand:businessDemandDataList) {
 			BusinessDemandDataDTO businessDemandDataDTO =new BusinessDemandDataDTO();
@@ -41,13 +51,59 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 			businessDemandDataDTO.setRemark(businessDemand.getRemark());
 			businessDemandDataDTO.setSep(businessDemand.getSep());
 			businessDemandDataDTO.setYear(businessDemand.getYear());
+			businessDemandDataDTO.setPlantId(businessDemand.getPlantId().toString());
 			businessDemandDataDTOList.add(businessDemandDataDTO);
+			
 		}
 		return businessDemandDataDTOList;
 	}
 
 	@Override
 	public List<BusinessDemandDataDTO> saveBusinessDemandData(List<BusinessDemandDataDTO> businessDemandDataDTOList) {
+		
+		for(BusinessDemandDataDTO businessDemandDataDTO: businessDemandDataDTOList){
+            BusinessDemand businessDemand =new BusinessDemand();
+			businessDemand.setApril(businessDemandDataDTO.getApril());
+			businessDemand.setAug(businessDemandDataDTO.getAug());
+			businessDemand.setAvgTph(businessDemandDataDTO.getAvgTph());
+			businessDemand.setDec(businessDemandDataDTO.getDec());
+			businessDemand.setFeb(businessDemandDataDTO.getFeb());
+			if(businessDemandDataDTO.getId()!=null) {
+				businessDemand.setId(UUID.fromString(businessDemandDataDTO.getId()));
+			}
+			businessDemand.setJan(businessDemandDataDTO.getJan());
+			businessDemand.setJuly(businessDemandDataDTO.getJuly());
+			businessDemand.setJune(businessDemandDataDTO.getJune());
+			businessDemand.setMarch(businessDemandDataDTO.getMarch());
+			businessDemand.setMay(businessDemandDataDTO.getMay());
+			businessDemand.setNormParameterId(UUID.fromString(businessDemandDataDTO.getNormParameterId()));
+			businessDemand.setNov(businessDemandDataDTO.getNov());
+			businessDemand.setOct(businessDemandDataDTO.getOct());
+			businessDemand.setPlantId(UUID.fromString(businessDemandDataDTO.getPlantId()));
+			businessDemand.setRemark(businessDemandDataDTO.getRemark());
+			businessDemand.setSep(businessDemandDataDTO.getSep());
+			businessDemand.setYear(businessDemandDataDTO.getYear());
+			businessDemandDataRepository.save(businessDemand);
+			AOPMCCalculatedData aOPMCCalculatedData = new AOPMCCalculatedData();
+			aOPMCCalculatedData.setPlantFKId(UUID.fromString(businessDemandDataDTO.getPlantId()));
+			aOPMCCalculatedDataRepository.save(aOPMCCalculatedData);
+			AOP aOP = new AOP();
+			aOP.setPlantFkId(UUID.fromString(businessDemandDataDTO.getPlantId()));
+			String aOPCaseId=businessDemandDataDTO.getYear()+"AOP"+businessDemandDataDTO.getProductName()+"V1";
+			aOP.setAopCaseId(aOPCaseId);
+			aOP.setAopStatus("Draft");
+			aOP.setAopRemarks(" ");
+			aOP.setNormItem(businessDemandDataDTO.getProductName());
+			aOP.setAopType("Production");
+			aOPRepository.save(aOP);
+			
+	   }
+				// TODO Auto-generated method stub
+		return businessDemandDataDTOList;
+	}
+
+	@Override
+	public List<BusinessDemandDataDTO> editBusinessDemandData(List<BusinessDemandDataDTO> businessDemandDataDTOList) {
 		
 		for(BusinessDemandDataDTO businessDemandDataDTO: businessDemandDataDTOList){
             BusinessDemand businessDemand =new BusinessDemand();
@@ -80,8 +136,8 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 
 	@Override
 	public BusinessDemandDataDTO deleteBusinessDemandData(BusinessDemandDataDTO businessDemandDataDTO) {
-		BusinessDemand businessDemand=businessDemandDataRepository.findById(UUID.fromString(businessDemandDataDTO.getId())).get();
-		businessDemandDataRepository.delete(businessDemand);
+		businessDemandDataRepository.softDelete(UUID.fromString(businessDemandDataDTO.getId()));
+		
 		
 		// TODO Auto-generated method stub
 		return businessDemandDataDTO;
