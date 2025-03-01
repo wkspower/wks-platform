@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react'
-// import { DataGrid } from '@mui/x-data-grid'
+import * as React from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { DataGrid, GridCellEditStopReasons } from '@mui/x-data-grid'
 import {
   Button,
   TextField,
@@ -8,11 +9,13 @@ import {
   Box,
   InputAdornment,
 } from '@mui/material'
+
 import {
   GridRowModes,
-  // GridToolbarContainer,
-  // GridActionsCellItem,
+  GridToolbarContainer,
+  GridActionsCellItem,
   GridRowEditStopReasons,
+  useGridApiRef,
 } from '@mui/x-data-grid'
 // import MoreVertIcon from '@mui/icons-material/MoreVert'
 import SearchIcon from '@mui/icons-material/Search'
@@ -47,6 +50,7 @@ import {
   useGridApiRef,
   GridActionsCellItem,
   gridClasses,
+  GridCellEditStopReasons
 } from '@mui/x-data-grid'
 
 const jioColors = {
@@ -70,8 +74,7 @@ const DataGridTable = ({
   onRowUpdate,
   permissions,
 }) => {
-  const apiRef = useGridApiRef()
-  // const [selectedRows, setSelectedRows] = useState({})
+  const [selectedRows, setSelectedRows] = useState({})
   // const [snackbarMessage, setSnackbarMessage] = useState('')
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -79,8 +82,12 @@ const DataGridTable = ({
   })
   // const [rowModesModel, setRowModesModel] = useState({})
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const apiRef = useGridApiRef()
   const [isUpdating, setIsUpdating] = useState(false)
   const [openYearData, setOpenYearData] = useState(false)
+
+  const [isSaving, setIsSaving] = useState(false)
+
   const [yearData, setYearData] = useState('')
   const [resizedColumns, setResizedColumns] = useState({})
   const [open, setOpen] = useState(false)
@@ -121,7 +128,14 @@ const DataGridTable = ({
   }
 
   const handleRowEditCommit = (id, event) => {
+    console.log('Row Data After Editing:', event)
     const editedRow = rows.find((row) => row.id === id)
+    console.log('Row Data After Editing:', editedRow)
+    // handleEditClick(id, event)
+  }
+  const handleCellEditCommit = (id, event) => {
+    console.log('handleRowEditCommit:', event)
+    console.log('Row Data After Editing:', editedRow)
     // handleEditClick(id, event)
   }
 
@@ -148,9 +162,10 @@ const DataGridTable = ({
     //   return
     // }
     //console.log('Newly Added Row Data:', rowData)
-    // console.log('selectedRows:', changedRowIds)
-    // console.log(changedRowIds)
-    // handleOpenRemark()
+    console.log('selectedRows:', changedRowIds)
+    console.log(changedRowIds)
+
+    handleOpenRemark()
     setRowModesModel((prev) => ({
       ...prev,
       [id]: { mode: GridRowModes.View },
@@ -167,7 +182,7 @@ const DataGridTable = ({
         id?.maintenanceId ||
         params?.row?.maintenanceId ||
         params?.NormParameterMonthlyTransactionId
-      // console.log(maintenanceId, params, id)
+      console.log(maintenanceId, params, id)
       // Define a mapping of titles to corresponding delete functions
       const deleteFunctions = {
         'Slowdown Plan': DataService.deleteSlowdownData,
@@ -475,40 +490,38 @@ const DataGridTable = ({
       console.error('Error saving Catalyst data:', error)
     }
   }
-  const saveBusinessDemandData = async (newRow) => {
+  const saveBusinessDemandData = async (newRows) => {
     try {
-      var plantId = ''
+      let plantId = ''
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
 
-      const businnessData = [
-        {
-          april: newRow.april,
-          may: newRow.may,
-          june: newRow.june,
-          july: newRow.july,
-          aug: newRow.aug,
-          sep: newRow.sep,
-          oct: newRow.oct,
-          nov: newRow.nov,
-          dec: newRow.dec,
-          jan: newRow.jan,
-          feb: newRow.feb,
-          march: newRow.mar,
-          remark: newRow.remark,
-          avgTph: newRow.avgTph,
-          year: '2024-25',
-          plantId: plantId,
-          normParameterId: newRow.normParameterId,
-        },
-      ]
+      const businessData = newRows.map((row) => ({
+        april: row.april,
+        may: row.may,
+        june: row.june,
+        july: row.july,
+        aug: row.aug,
+        sep: row.sep,
+        oct: row.oct,
+        nov: row.nov,
+        dec: row.dec,
+        jan: row.jan,
+        feb: row.feb,
+        march: row.march,
+        remark: row.remark,
+        avgTph: row.avgTph,
+        year: '2024-25',
+        plantId: plantId,
+        normParameterId: row.normParameterId,
+      }))
 
       const response = await DataService.saveBusinessDemandData(
         plantId,
-        businnessData,
+        businessData, // Now sending an array of rows
         keycloak,
       )
       setSnackbarOpen(true)
@@ -561,7 +574,7 @@ const DataGridTable = ({
     }
   }
 
-  const processRowUpdate = useCallback(
+  const processRowUpdate1 = useCallback(
     (newRow) => {
       if (title == 'Shutdown Plan') {
         if (
@@ -770,53 +783,43 @@ const DataGridTable = ({
         return updatedRow // Ensure function returns the updated row
       }
 
-      if (title == 'Business Demand') {
-        if (
-          !newRow.april ||
-          !newRow.may ||
-          !newRow.june ||
-          !newRow.july ||
-          !newRow.aug ||
-          !newRow.sep ||
-          !newRow.oct ||
-          !newRow.nov ||
-          !newRow.dec ||
-          !newRow.jan ||
-          !newRow.feb ||
-          !newRow.march ||
-          !newRow.remark ||
-          !newRow.avgTph
-        ) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Please Fill all Fields!',
-            severity: 'error',
-          })
-          setRowModesModel(() => ({
-            [newRow.id]: {
-              mode: GridRowModes.Edit,
-              fieldToFocus: 'april',
-            },
-          }))
-          return
-        }
+      if (title === 'Business Demand') {
+        const updatedRows = newRow.map((row) => ({ ...row, isNew: false }))
+        const mergedRows = rows.map((row) => {
+          const updatedRow = updatedRows.find((newR) => newR.id === row.id)
+          return updatedRow || row
+        })
 
-        const updatedRow = { ...newRow, isNew: false }
-        const updatedRows = rows.map((row) =>
-          row?.id === newRow?.id ? updatedRow : row,
-        )
+        setRows(newRow)
+        saveBusinessDemandData(newRow) // Now sending the entire array
+        onRowUpdate?.(newRow)
+        setSelectedRows(newRow)
 
-        setRows(updatedRows)
-        {
-          saveBusinessDemandData(newRow)
-        }
-        onRowUpdate?.(updatedRow)
-        setSelectedRows(updatedRow)
-        return updatedRow
+        return newRow
       }
     },
     [rows, onRowUpdate],
   )
+
+  const saveChanges = React.useCallback(async () => {
+    console.log(
+      'Edited Data: ',
+      Object.values(unsavedChangesRef.current.unsavedRows),
+    )
+    try {
+      processRowUpdate1(Object.values(unsavedChangesRef.current.unsavedRows))
+      unsavedChangesRef.current = {
+        unsavedRows: {},
+        rowsBeforeChange: {},
+      }
+    } catch (error) {
+      // setIsSaving(false);
+    }
+  }, [apiRef])
+
+  // const handleUpdateClick = () => {
+  //   processRowUpdate()
+  // }
 
   useEffect(() => {
     setRows(initialRows)
@@ -831,6 +834,21 @@ const DataGridTable = ({
       }))
     }
   }
+
+  const processRowUpdate = React.useCallback((newRow, oldRow) => {
+    const rowId = newRow.id
+
+    // Store edited row data
+    unsavedChangesRef.current.unsavedRows[rowId] = newRow
+
+    // Keep track of original values before editing
+    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
+      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
+    }
+
+    setHasUnsavedRows(true)
+    return newRow
+  }, [])
 
   const handleOpenYearData = (params) => {
     if (params.row.product || product === '') {
@@ -1154,14 +1172,7 @@ const DataGridTable = ({
   }, [changedRowIds])
 
   const handleCellClick = (params) => {
-    console.log(params)
-    const updatedRowsss = apiRef.current.getRowWithUpdatedValues(
-      params?.id,
-      params?.field,
-    )
-
-    console.log(updatedRowsss)
-
+    // console.log(params)
     setChangedRowIds(params?.row)
     if (title == 'Production Volume Data') {
       if (nonEditableFields.includes(params.field)) return // Block non-editable fields
@@ -1584,6 +1595,7 @@ const DataGridTable = ({
           ))}
         </Grid> */}
         <DataGrid
+          apiRef={apiRef}
           rows={filteredRows}
           columns={columns.map((col) => ({
             ...col,
@@ -1602,18 +1614,24 @@ const DataGridTable = ({
           }}
           rowHeight={35}
           processRowUpdate={processRowUpdate}
-          apiRef={apiRef}
-          loading={isSaving}
-          experimentalFeatures={{ newEditingApi: true }}
           onColumnResized={onColumnResized}
           onCellClick={handleCellClick}
           onRowEditCommit={handleRowEditCommit}
+          onCellEditCommit={handleCellEditCommit}
+          experimentalFeatures={{ newEditingApi: true }}
           editMode='row'
           rowModesModel={rowModesModel}
           onRowModesModelChange={handleRowModesModelChange}
           onRowEditStop={handleRowEditStop}
           slotProps={{
             toolbar: { setRows, setRowModesModel },
+          }}
+          onCellEditStop={(params, event) => {
+            console.log('param in ', params)
+            if (params.reason === 'cellFocusOut') {
+              event.defaultMuiPrevented = true
+              console.log('param in ', params)
+            }
           }}
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? 'even-row' : 'odd-row'
@@ -1773,34 +1791,28 @@ const DataGridTable = ({
             Add Item
           </Button>
         )}
-        {permissions.saveBtn && (
-          <Button
-            variant='contained'
-            sx={{
-              // marginTop: 2,
-              backgroundColor: jioColors.primaryBlue,
-              color: jioColors.background,
-              borderRadius: 1,
-              padding: '8px 24px',
-              textTransform: 'none',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              minWidth: 120, // Same width for consistency
-              '&:hover': {
-                backgroundColor: '#143B6F',
-                boxShadow: 'none',
-              },
-            }}
-            // onClick={handleSaveClick} // Pass row data
-            // onClick={saveChanges}
-            loadingPosition='start'
-            // disabled={!hasUnsavedRows}
-            // loading={isSaving}
-            startIcon={<SaveIcon />}
-          >
-            Save
-          </Button>
-        )}
+
+        <Button
+          variant='contained'
+          sx={{
+            // marginTop: 2,
+            backgroundColor: jioColors.primaryBlue,
+            color: jioColors.background,
+            borderRadius: 1,
+            padding: '8px 24px',
+            textTransform: 'none',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            minWidth: 120, // Same width for consistency
+            '&:hover': {
+              backgroundColor: '#143B6F',
+              boxShadow: 'none',
+            },
+          }}
+          onClick={saveChanges}
+        >
+          Save
+        </Button>
       </Box>
       {/* <Notification
         open={snackbarOpen}
