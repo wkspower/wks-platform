@@ -18,32 +18,38 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 
 	@Override
 	public List<AOPMCCalculatedDataDTO> getAOPMCCalculatedData(String plantId, String year) {
-		
-		List<AOPMCCalculatedData> aOPMCCalculatedDataList=aOPMCCalculatedDataRepository.findAllByPlantIdAndYear(UUID.fromString(plantId),year);
-		List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
-		for(AOPMCCalculatedData aOPMCCalculatedData: aOPMCCalculatedDataList) {
-			AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO = new AOPMCCalculatedDataDTO();
-			aOPMCCalculatedDataDTO.setApril(aOPMCCalculatedData.getApril());
-			aOPMCCalculatedDataDTO.setAugust(aOPMCCalculatedData.getAugust());
-			aOPMCCalculatedDataDTO.setDecember(aOPMCCalculatedData.getDecember());
-			aOPMCCalculatedDataDTO.setFebruary(aOPMCCalculatedData.getFebruary());
-			aOPMCCalculatedDataDTO.setId(aOPMCCalculatedData.getId().toString());
-			aOPMCCalculatedDataDTO.setJanuary(aOPMCCalculatedData.getJanuary());
-			aOPMCCalculatedDataDTO.setJuly(aOPMCCalculatedData.getJuly());
-			aOPMCCalculatedDataDTO.setJune(aOPMCCalculatedData.getJune());
-			aOPMCCalculatedDataDTO.setMarch(aOPMCCalculatedData.getMarch());
-			aOPMCCalculatedDataDTO.setMaterial(aOPMCCalculatedData.getMaterial());
-			aOPMCCalculatedDataDTO.setMay(aOPMCCalculatedData.getMay());
-			aOPMCCalculatedDataDTO.setNovember(aOPMCCalculatedData.getNovember());
-			aOPMCCalculatedDataDTO.setOctober(aOPMCCalculatedData.getOctober());
-			aOPMCCalculatedDataDTO.setPlant(aOPMCCalculatedData.getPlant());
-			aOPMCCalculatedDataDTO.setSeptember(aOPMCCalculatedData.getSeptember());
-			aOPMCCalculatedDataDTO.setSite(aOPMCCalculatedData.getSite());
-			aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
-		}
-		// TODO Auto-generated method stub
-		return aOPMCCalculatedDataDTOList;
+	    List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
+	    List<Object[]> objList = aOPMCCalculatedDataRepository.findBusinessDemandWithAOPMC(UUID.fromString(plantId), year);
+
+	    for (Object[] obj : objList) {
+	        AOPMCCalculatedData aopData = (AOPMCCalculatedData) obj[0]; // First element (AOPMCCalculatedData)
+	        UUID bdNormParametersFKId = obj[1] != null ? UUID.fromString(obj[1].toString()) : null; // Second element (BDNormParametersFKId)
+
+	        AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO = new AOPMCCalculatedDataDTO();
+	        aOPMCCalculatedDataDTO.setApril(aopData.getApril());
+	        aOPMCCalculatedDataDTO.setAugust(aopData.getAugust());
+	        aOPMCCalculatedDataDTO.setDecember(aopData.getDecember());
+	        aOPMCCalculatedDataDTO.setFebruary(aopData.getFebruary());
+	        aOPMCCalculatedDataDTO.setId(aopData.getId().toString());
+	        aOPMCCalculatedDataDTO.setJanuary(aopData.getJanuary());
+	        aOPMCCalculatedDataDTO.setJuly(aopData.getJuly());
+	        aOPMCCalculatedDataDTO.setJune(aopData.getJune());
+	        aOPMCCalculatedDataDTO.setMarch(aopData.getMarch());
+	        aOPMCCalculatedDataDTO.setMaterial(aopData.getMaterial());
+	        aOPMCCalculatedDataDTO.setMay(aopData.getMay());
+	        aOPMCCalculatedDataDTO.setNovember(aopData.getNovember());
+	        aOPMCCalculatedDataDTO.setOctober(aopData.getOctober());
+	        aOPMCCalculatedDataDTO.setPlant(aopData.getPlant());
+	        aOPMCCalculatedDataDTO.setSeptember(aopData.getSeptember());
+	        aOPMCCalculatedDataDTO.setSite(aopData.getSite());
+
+	        // Set BDNormParametersFKId in DTO
+	        aOPMCCalculatedDataDTO.setBDNormParametersFKId(bdNormParametersFKId.toString());
+	        aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
+	    }
+	    return aOPMCCalculatedDataDTOList;
 	}
+
 
 	@Override
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList) {

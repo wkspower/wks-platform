@@ -70,4 +70,7 @@ public class AOPMCCalculatedData {
 
     @Column(name="Year")
     private String year;
+    
+    @Column(name="NormParameters_FK_Id")
+    private UUID normParametersFKId;
 }
