@@ -53,32 +53,39 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 			businessDemandDataDTO.setYear(businessDemand.getYear());
 			businessDemandDataDTO.setPlantId(businessDemand.getPlantId().toString());
 			businessDemandDataDTOList.add(businessDemandDataDTO);
-			
 		}
 		return businessDemandDataDTOList;
 	}
 
 	@Override
 	public List<BusinessDemandDataDTO> saveBusinessDemandData(List<BusinessDemandDataDTO> businessDemandDataDTOList) {
-		
-		for(BusinessDemandDataDTO businessDemandDataDTO: businessDemandDataDTOList){
-            BusinessDemand businessDemand =new BusinessDemand();
+		for (BusinessDemandDataDTO businessDemandDataDTO : businessDemandDataDTOList) {
+			BusinessDemand businessDemand = new BusinessDemand();
+	
 			businessDemand.setApril(businessDemandDataDTO.getApril());
 			businessDemand.setAug(businessDemandDataDTO.getAug());
 			businessDemand.setAvgTph(businessDemandDataDTO.getAvgTph());
 			businessDemand.setDec(businessDemandDataDTO.getDec());
 			businessDemand.setFeb(businessDemandDataDTO.getFeb());
-			if(businessDemandDataDTO.getId()!=null) {
+	
+			if (businessDemandDataDTO.getId() != null && !businessDemandDataDTO.getId().isEmpty()) {
 				businessDemand.setId(UUID.fromString(businessDemandDataDTO.getId()));
 			}
+	
 			businessDemand.setJan(businessDemandDataDTO.getJan());
 			businessDemand.setJuly(businessDemandDataDTO.getJuly());
 			businessDemand.setJune(businessDemandDataDTO.getJune());
 			businessDemand.setMarch(businessDemandDataDTO.getMarch());
 			businessDemand.setMay(businessDemandDataDTO.getMay());
-			businessDemand.setNormParameterId(UUID.fromString(businessDemandDataDTO.getNormParameterId()));
+	
+			if (businessDemandDataDTO.getNormParameterId() != null && !businessDemandDataDTO.getNormParameterId().isEmpty()) {
+				businessDemand.setNormParameterId(UUID.fromString(businessDemandDataDTO.getNormParameterId()));
+			}
+	
 			businessDemand.setNov(businessDemandDataDTO.getNov());
 			businessDemand.setOct(businessDemandDataDTO.getOct());
+	
+			if (businessDemandDataDTO.getPlantId() != null && !businessDemandDataDTO.getPlantId().isEmpty()) {
 			businessDemand.setPlantId(UUID.fromString(businessDemandDataDTO.getPlantId()));
 			businessDemand.setRemark(businessDemandDataDTO.getRemark());
 			businessDemand.setSep(businessDemandDataDTO.getSep());
@@ -98,8 +105,9 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 			aOPRepository.save(aOP);
 			
 	   }
-				// TODO Auto-generated method stub
+	}			// TODO Auto-generated method stub
 		return businessDemandDataDTOList;
+	
 	}
 
 	@Override
@@ -133,7 +141,6 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 				// TODO Auto-generated method stub
 		return businessDemandDataDTOList;
 	}
-
 	@Override
 	public BusinessDemandDataDTO deleteBusinessDemandData(BusinessDemandDataDTO businessDemandDataDTO) {
 		businessDemandDataRepository.softDelete(UUID.fromString(businessDemandDataDTO.getId()));

@@ -67,4 +67,7 @@ public class AOPMCCalculatedData {
     
     @Column(name="Plant_FK_Id")
     private UUID plantFKId;
+
+    @Column(name="Year")
+    private String year;
 }

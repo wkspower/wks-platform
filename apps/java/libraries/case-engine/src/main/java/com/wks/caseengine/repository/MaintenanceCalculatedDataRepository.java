@@ -13,7 +13,7 @@ import com.wks.caseengine.entity.MaintenanceCalculatedData;
 @Repository
 public interface MaintenanceCalculatedDataRepository extends JpaRepository<MaintenanceCalculatedData, UUID>{
 	
-	@Query("SELECT a FROM MaintenanceCalculatedData a WHERE a.plantId = :plantId AND a.year = :year")
+	@Query("SELECT a FROM MaintenanceCalculatedData a WHERE a.plantFKId = :plantId AND a.aopYear = :year")
 	 List<MaintenanceCalculatedData> findAllByPlantIdAndYear(@Param("plantId") UUID plantId, @Param("year") String year);
 
 }

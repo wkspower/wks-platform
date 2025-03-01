@@ -13,7 +13,7 @@ import com.wks.caseengine.entity.AOPMCCalculatedData;
 public interface AOPMCCalculatedDataRepository extends JpaRepository<AOPMCCalculatedData, UUID>{
 	
 	
-	 @Query("SELECT a FROM AOPMCCalculatedData a WHERE a.plantId = :plantId AND a.year = :year")
+	 @Query("SELECT a FROM AOPMCCalculatedData a WHERE a.plantFKId = :plantId AND a.year = :year")
 	 List<AOPMCCalculatedData> findAllByPlantIdAndYear(@Param("plantId") UUID plantId, @Param("year") String year);
 
 }
