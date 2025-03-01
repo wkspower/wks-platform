@@ -65,6 +65,6 @@ public interface NormParameterMonthlyTransactionRepository extends JpaRepository
 	        GROUP BY Product, :dynamicColumns
 	        ORDER BY Product
 	    """, nativeQuery = true)
-	    List<Map<String, Object>> getBusinessDemandData(@Param("year") int year, @Param("nextYear") int nextYear, @Param("dynamicColumns") String dynamicColumns);
+	    List<Map<String, Object>> getBusinessDemandData(@Param("year") String year, @Param("nextYear") String nextYear, @Param("dynamicColumns") String dynamicColumns);
 
 }

@@ -64,8 +64,8 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<Object[]> getMonthWiseDataByTypeAndYear(String type, int currentYear) {
-		List<Object[]> productMonthWiseData= productMonthWiseDataRepository.getMonthWiseDataByTypeAndYear(type,currentYear,currentYear+1);
+	public List<Object[]> getMonthWiseDataByTypeAndYear(String type, String currentYear) {
+		List<Object[]> productMonthWiseData= productMonthWiseDataRepository.getMonthWiseDataByTypeAndYear(type,currentYear);
 		
 		//List<ProductMonthWiseDataDTO> productMonthWiseDataDTOList = new ArrayList<>();
 		/*for(Object obj : productMonthWiseData) {
@@ -101,14 +101,14 @@ public class ProductServiceImpl implements ProductService {
 	// Service method to fetch products from NormParameters table
 	public List<Object[]> getAllProductsFromNormParameters() {
 		// String query = "SELECT Id, Name, DisplayName FROM [RIL.AOP].[dbo].[NormParameters]";
-		String query = "SELECT CAST(Id AS VARCHAR(36)), Name, DisplayName FROM [RIL.AOP].[dbo].[NormParameters]";
+		String query = "  SELECT CAST(Id AS VARCHAR(36)), Name, DisplayName FROM [dbo].[NormParameters] np where np.type='ProductionNorms'";
 		return entityManager.createNativeQuery(query).getResultList();
 	}
 
 
 
     public List<Object[]> getMonthlyDataForYear(int year) {
-        String query = "SELECT NormParameter_FK_Id, month, monthValue, Remarks FROM [RIL.AOP].[dbo].[NormParameterMonthlyTransaction] WHERE year = :year";
+        String query = "SELECT NormParameter_FK_Id, month, monthValue, Remarks FROM [dbo].[NormParameterMonthlyTransaction] WHERE year = :year";
         return entityManager.createNativeQuery(query).setParameter("year", year).getResultList();
     }
 

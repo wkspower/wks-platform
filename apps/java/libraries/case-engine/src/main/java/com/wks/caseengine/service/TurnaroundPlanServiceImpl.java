@@ -84,11 +84,11 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
         if(shutDownPlanDTO.getProductId()!=null) {
         	plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
         }
-        if(shutDownPlanDTO.getAudityear()==null) {
-        	plantMaintenanceTransaction.setAuditYear(2025);
-        }else {
+        // if(shutDownPlanDTO.getAudityear()==null) {
+        // 	plantMaintenanceTransaction.setAuditYear(2025);
+        // }else {
         	plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
-        }
+        //}
 		
 
 

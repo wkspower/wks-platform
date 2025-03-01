@@ -28,7 +28,7 @@ public class ProductMonthWiseData {
 	private String month;
 	
 	@Column(name="year")
-	private Long year;
+	private String year;
 	
 	@Column(name="month_value")
 	private Long monthValue;

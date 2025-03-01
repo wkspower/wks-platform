@@ -71,7 +71,4 @@ public class BusinessDemand {
     
     @Column(name = "AvgTPH")
     private Float avgTph;
-    
-    @Column(name = "IsDeleted", nullable = false)
-    private Boolean isDeleted = false;
 }

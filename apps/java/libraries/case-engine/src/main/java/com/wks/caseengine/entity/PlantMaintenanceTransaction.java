@@ -36,7 +36,7 @@ public class PlantMaintenanceTransaction {
     private Date maintForMonth;
     
     @Column(name = "AuditYear")
-    private Integer auditYear;
+    private String auditYear;
 
     @Column(name = "Rate")
     private Double rate;

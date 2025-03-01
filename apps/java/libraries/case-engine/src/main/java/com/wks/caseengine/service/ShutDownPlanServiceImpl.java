@@ -103,11 +103,11 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
         if(shutDownPlanDTO.getProductId()!=null) {
         	plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
         }
-        if(shutDownPlanDTO.getAudityear()==null) {
-        	plantMaintenanceTransaction.setAuditYear(2025);
-        }else {
+        // if(shutDownPlanDTO.getAudityear()==null) {
+        // 	plantMaintenanceTransaction.setAuditYear(2025);
+        // }else {
         	plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
-        }
+        //}
         
         plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
 		// TODO Auto-generated method stub

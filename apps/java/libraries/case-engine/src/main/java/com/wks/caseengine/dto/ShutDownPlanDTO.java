@@ -37,5 +37,5 @@ public class ShutDownPlanDTO {
 	private Double durationInDays;
 	private String product;
 	private UUID plantId;
-	private Integer audityear;
+	private String audityear;
 }

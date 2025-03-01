@@ -31,7 +31,7 @@ public class CatalystAttributesDTO {
     private Float oct;
     private Float nov;
     private Float dec;
-    private Integer year;
+    private String year;
     private Float TPH;
     private Float avgTPH;
     private String normParameterFKId;

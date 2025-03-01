@@ -47,7 +47,7 @@ public class NormAttributeTransactions {
     private LocalDate aopMonth;
 
     @Column(name = "AuditYear")
-    private Integer auditYear;
+    private String auditYear;
 
     @Column(name = "Remarks", length = 500)
     private String remarks;

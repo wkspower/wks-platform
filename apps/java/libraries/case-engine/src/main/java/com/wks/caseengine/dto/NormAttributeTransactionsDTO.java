@@ -20,6 +20,6 @@ public class NormAttributeTransactionsDTO {
 	private UUID normAttributeTransactionsId;
 	private Integer month;
 	private String attributeValue;
-	private Integer auditYear;
+	private String auditYear;
 	private UUID normParameterFKId;
 }

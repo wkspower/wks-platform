@@ -32,19 +32,19 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
 	
 	@Override
-	public String getCatalystSelectivityData(int year) {
+	public String getCatalystSelectivityData(String year) {
 	    // Generate dynamic pivot columns
 	    String monthQuery = "WITH Months AS (" +
 	            "    SELECT DISTINCT FORMAT(AOPMonth, 'MMM') + RIGHT(CAST(YEAR(AOPMonth) AS VARCHAR), 2) AS MonthYear " +
 	            "    FROM [RIL.AOP2].[dbo].[NormAttributeTransactions] " +
-	            "    WHERE YEAR(AOPMonth) = :year OR YEAR(AOPMonth) = :nextYear " +
+	            "    WHERE YEAR(AOPMonth) = :year " +
 	            ") " +
 	            "SELECT STRING_AGG('MAX(CASE WHEN MonthYear = ''' + MonthYear + ''' THEN AttributeValue END) AS [' + LOWER(MonthYear) + ']', ', ') " +
 	            "FROM Months";
 
 	    String pivotColumns = (String) entityManager.createNativeQuery(monthQuery)
 	            .setParameter("year", year)
-	            .setParameter("nextYear", year + 1)
+	            //.setParameter("nextYear", year + 1)
 	            .getSingleResult();
 
 	    // Construct final dynamic query
@@ -62,7 +62,7 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	            "    FROM [RIL.AOP2].[dbo].[NormAttributeTransactions] AS nat " +
 	            "    JOIN [RIL.AOP2].[dbo].[CatalystAttributes] AS ca " +
 	            "        ON nat.CatalystAttribute_FK_Id = ca.Id " +
-	            "    WHERE YEAR(nat.AOPMonth) = :year OR YEAR(nat.AOPMonth) = :nextYear " +
+	            "    WHERE YEAR(nat.AOPMonth) = :year" +
 	            ") " +
 	            "SELECT d.Id, d.catalyst, " + pivotColumns + ", d.Remarks AS remark, d.catalystId,d.AttributeName,d.NormParameterFKId " +
 	            "FROM Data_CTE d " +
@@ -71,7 +71,6 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 
 	    List<Object[]> results = entityManager.createNativeQuery(finalQuery)
 	            .setParameter("year", year)
-	            .setParameter("nextYear", year + 1)
 	            .getResultList();
 
 	    // Convert result list into structured JSON-like response
@@ -159,7 +158,7 @@ return "";
 		String attributeValue=normAttributeTransactionsDTO.getAttributeValue();
 		Integer month = normAttributeTransactionsDTO.getMonth();
 		UUID normParameterFKId=normAttributeTransactionsDTO.getNormParameterFKId();
-		Integer auditYear= normAttributeTransactionsDTO.getAuditYear();
+		String auditYear= normAttributeTransactionsDTO.getAuditYear();
 		
 		normAttributeTransactionsRepository.updateNormAttributeTransactions(attributeValue,month,normParameterFKId,auditYear);
 			
@@ -173,10 +172,10 @@ return "";
 		for(int i=0;i<12;i++) {
 			Float attributeValue=getAttributeValue(catalystAttributesDTO,(i+1));
 			Integer month =i+1;		
-			Integer auditYear=catalystAttributesDTO.getYear();
-			if(i<3) {
-				auditYear=auditYear+1;
-			}	
+			String auditYear=catalystAttributesDTO.getYear();
+			// if(i<3) {
+			// 	auditYear=auditYear+1;
+			// }	
 			UUID normParameterFKId=null;
 			UUID catalystAttributeFKId =null;
 			if(catalystAttributesDTO.getNormParameterFKId()!=null){
@@ -225,10 +224,10 @@ return "";
 		for(int i=0;i<12;i++) {
 			Float attributeValue=getAttributeValue(catalystAttributesDTO,(i+1));
 			Integer month =i+1;		
-			Integer auditYear=catalystAttributesDTO.getYear();
-			if(i<3) {
-				auditYear=auditYear+1;
-			}	
+			String auditYear=catalystAttributesDTO.getYear();
+			// if(i<3) {
+			// 	auditYear=auditYear+1;
+			// }	
 			UUID normParameterFKId= catalystAttributesDTO.getNormParameterFKId() !=null ? UUID.fromString(catalystAttributesDTO.getNormParameterFKId()) : null;
 			UUID catalystAttributeFKId=catalystAttributesDTO.getCatalystAttributeFKId() !=null ? UUID.fromString(catalystAttributesDTO.getCatalystAttributeFKId()) : null;; 
 			normAttributeTransactionsRepository.deleteCatalystData(attributeValue.toString(),month,auditYear,normParameterFKId,catalystAttributeFKId);

@@ -56,7 +56,7 @@ public class ProductController {
 	}
 	
 	@GetMapping(value = "/getMonthWiseData")
-	public ResponseEntity<List<ProductMonthWiseDataDTO>> getProductListByTypeAndYear(@RequestParam String type, @RequestParam int year) {
+	public ResponseEntity<List<ProductMonthWiseDataDTO>> getProductListByTypeAndYear(@RequestParam String type, @RequestParam String year) {
 		 List<Object[]> productMonthWiseDataList = productService.getMonthWiseDataByTypeAndYear(type,year);
 		 List<ProductMonthWiseDataDTO> productMonthWiseDataDTOList = new ArrayList<>();
 			for(Object obj : productMonthWiseDataList) {

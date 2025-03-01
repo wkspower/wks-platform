@@ -17,7 +17,7 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	int updateNormAttributeTransactions(@Param("attributeValue") String attributeValue,  
 	                                    @Param("month") Integer month,  
 	                                    @Param("normParameterFKId") UUID normParameterFKId,  
-	                                    @Param("auditYear") Integer auditYear);
+	                                    @Param("auditYear") String auditYear);
 	
 	@Modifying
 	@Transactional
@@ -31,7 +31,7 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	void updateCatalystData(@Param("attributeValue") String attributeValue, 
 	                        @Param("remarks") String remarks,  // Added remarks parameter
 	                        @Param("month") Integer month, 
-	                        @Param("auditYear") Integer auditYear, 
+	                        @Param("auditYear") String auditYear, 
 	                        @Param("normParameterFKId") UUID normParameterFKId, 
 	                        @Param("catalystAttributeFKId") UUID catalystAttributeFKId);
 
@@ -46,7 +46,7 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	       "AND nat.catalystAttributeFKId = :catalystAttributeFKId")
 	void deleteCatalystData(@Param("attributeValue") String attributeValue, 
 	                        @Param("month") Integer month, 
-	                        @Param("auditYear") Integer auditYear, 
+	                        @Param("auditYear") String auditYear, 
 	                        @Param("normParameterFKId") UUID normParameterFKId, 
 	                        @Param("catalystAttributeFKId") UUID catalystAttributeFKId);
 	
@@ -59,7 +59,7 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	       "AND nat.normParameterFKId = :normParameterFKId")
 	void deleteBusinessDemandData(@Param("attributeValue") String attributeValue, 
 	                        @Param("month") Integer month, 
-	                        @Param("auditYear") Integer auditYear, 
+	                        @Param("auditYear") String auditYear, 
 	                        @Param("normParameterFKId") UUID normParameterFKId);
 
 

@@ -50,7 +50,6 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	    return aOPMCCalculatedDataDTOList;
 	}
 
-
 	@Override
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList) {
 		for(AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO:aOPMCCalculatedDataDTOList) {
