@@ -44,14 +44,6 @@ import {
   FileDownload,
   FileUpload,
 } from '../../../node_modules/@mui/icons-material/index'
-// import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
-// import {
-//   DataGrid,
-//   useGridApiRef,
-//   GridActionsCellItem,
-//   gridClasses,
-//   GridCellEditStopReasons,
-// } from '@mui/x-data-grid'
 
 const jioColors = {
   primaryBlue: '#0F3CC9',
@@ -86,7 +78,7 @@ const DataGridTable = ({
   const [isUpdating, setIsUpdating] = useState(false)
   const [openYearData, setOpenYearData] = useState(false)
 
-  // const [isSaving, setIsSaving] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const [yearData, setYearData] = useState('')
   const [resizedColumns, setResizedColumns] = useState({})
@@ -113,8 +105,7 @@ const DataGridTable = ({
   }
   const [rowModesModel, setRowModesModel] = useState({})
   const [changedRowIds, setChangedRowIds] = useState([])
-  const [hasUnsavedRows, setHasUnsavedRows] = React.useState(false)
-  const [isSaving, setIsSaving] = React.useState(false)
+
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -518,6 +509,7 @@ const DataGridTable = ({
         year: '2024-25',
         plantId: plantId,
         normParameterId: row.normParameterId,
+        id: row.idFromApi,
       }))
 
       const response = await DataService.saveBusinessDemandData(
@@ -785,18 +777,59 @@ const DataGridTable = ({
       }
 
       if (title === 'Business Demand') {
+        const invalidRows = newRow.filter(
+          (row) =>
+            !row.april ||
+            !row.may ||
+            !row.june ||
+            !row.july ||
+            !row.aug ||
+            !row.sep ||
+            !row.oct ||
+            !row.nov ||
+            !row.dec ||
+            !row.jan ||
+            !row.feb ||
+            !row.march ||
+            !row.remark ||
+            !row.avgTph,
+        )
+
+        if (invalidRows.length > 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Please Fill all Fields!',
+            severity: 'error',
+          })
+
+          const rowModes = invalidRows.reduce((acc, row) => {
+            acc[row.id] = {
+              mode: GridRowModes.Edit,
+              fieldToFocus: 'april',
+            }
+            return acc
+          }, {})
+
+          setRowModesModel((prev) => ({
+            ...prev,
+            ...rowModes,
+          }))
+
+          return
+        }
+
         const updatedRows = newRow.map((row) => ({ ...row, isNew: false }))
         const mergedRows = rows.map((row) => {
           const updatedRow = updatedRows.find((newR) => newR.id === row.id)
           return updatedRow || row
         })
 
-        setRows(newRow)
-        saveBusinessDemandData(newRow) // Now sending the entire array
-        onRowUpdate?.(newRow)
-        setSelectedRows(newRow)
+        setRows(mergedRows)
+        saveBusinessDemandData(updatedRows) // Now sending the entire array
+        onRowUpdate?.(updatedRows)
+        setSelectedRows(updatedRows)
 
-        return newRow
+        return updatedRows
       }
     },
     [rows, onRowUpdate],
@@ -808,7 +841,11 @@ const DataGridTable = ({
       Object.values(unsavedChangesRef.current.unsavedRows),
     )
     try {
-      processRowUpdate1(Object.values(unsavedChangesRef.current.unsavedRows))
+      if (title === 'Business Demand') {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        saveBusinessDemandData(data)
+      }
+
       unsavedChangesRef.current = {
         unsavedRows: {},
         rowsBeforeChange: {},
@@ -840,7 +877,7 @@ const DataGridTable = ({
     const rowId = newRow.id
 
     // Store edited row data
-    unsavedChangesRef.current.unsavedRows[rowId] = newRow
+    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
     // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
@@ -1861,7 +1898,7 @@ const DataGridTable = ({
               },
             }}
             // onClick={handleSaveClick} // Pass row data
-            // onClick={saveChanges}
+            onClick={saveChanges}
             loadingPosition='start'
             // disabled={!hasUnsavedRows}
             // loading={isSaving}
