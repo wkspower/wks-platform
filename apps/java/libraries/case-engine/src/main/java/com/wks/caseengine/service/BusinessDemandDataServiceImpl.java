@@ -57,7 +57,9 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 			businessDemand.setAvgTph(businessDemandDataDTO.getAvgTph());
 			businessDemand.setDec(businessDemandDataDTO.getDec());
 			businessDemand.setFeb(businessDemandDataDTO.getFeb());
-			businessDemand.setId(UUID.fromString(businessDemandDataDTO.getId()));
+			if(businessDemandDataDTO.getId()!=null) {
+				businessDemand.setId(UUID.fromString(businessDemandDataDTO.getId()));
+			}
 			businessDemand.setJan(businessDemandDataDTO.getJan());
 			businessDemand.setJuly(businessDemandDataDTO.getJuly());
 			businessDemand.setJune(businessDemandDataDTO.getJune());
@@ -74,6 +76,15 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 	   }
 				// TODO Auto-generated method stub
 		return businessDemandDataDTOList;
+	}
+
+	@Override
+	public BusinessDemandDataDTO deleteBusinessDemandData(BusinessDemandDataDTO businessDemandDataDTO) {
+		BusinessDemand businessDemand=businessDemandDataRepository.findById(UUID.fromString(businessDemandDataDTO.getId())).get();
+		businessDemandDataRepository.delete(businessDemand);
+		
+		// TODO Auto-generated method stub
+		return businessDemandDataDTO;
 	}
 
 }

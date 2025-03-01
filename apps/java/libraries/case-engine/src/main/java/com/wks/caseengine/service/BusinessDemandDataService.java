@@ -7,5 +7,6 @@ import com.wks.caseengine.dto.BusinessDemandDataDTO;
 public interface BusinessDemandDataService {
 	public	List<BusinessDemandDataDTO> getBusinessDemandData(String year, String plantId);
 	public 	List<BusinessDemandDataDTO>  saveBusinessDemandData(List<BusinessDemandDataDTO> businessDemandDataDTO);
+	public 	BusinessDemandDataDTO  deleteBusinessDemandData(BusinessDemandDataDTO businessDemandDataDTO);
 
 }
