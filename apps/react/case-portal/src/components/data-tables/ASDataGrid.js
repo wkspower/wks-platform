@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect, useCallback } from 'react'
-import { DataGrid } from '@mui/x-data-grid'
+import React, { useState, useMemo, useEffect, useCallback } from 'react'
+// import { DataGrid } from '@mui/x-data-grid'
 import {
   Button,
   TextField,
@@ -10,8 +10,8 @@ import {
 } from '@mui/material'
 import {
   GridRowModes,
-  GridToolbarContainer,
-  GridActionsCellItem,
+  // GridToolbarContainer,
+  // GridActionsCellItem,
   GridRowEditStopReasons,
 } from '@mui/x-data-grid'
 // import MoreVertIcon from '@mui/icons-material/MoreVert'
@@ -41,6 +41,13 @@ import {
   FileDownload,
   FileUpload,
 } from '../../../node_modules/@mui/icons-material/index'
+// import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
+import {
+  DataGrid,
+  useGridApiRef,
+  GridActionsCellItem,
+  gridClasses,
+} from '@mui/x-data-grid'
 
 const jioColors = {
   primaryBlue: '#0F3CC9',
@@ -63,7 +70,8 @@ const DataGridTable = ({
   onRowUpdate,
   permissions,
 }) => {
-  const [selectedRows, setSelectedRows] = useState({})
+  const apiRef = useGridApiRef()
+  // const [selectedRows, setSelectedRows] = useState({})
   // const [snackbarMessage, setSnackbarMessage] = useState('')
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -98,7 +106,12 @@ const DataGridTable = ({
   }
   const [rowModesModel, setRowModesModel] = useState({})
   const [changedRowIds, setChangedRowIds] = useState([])
-
+  const [hasUnsavedRows, setHasUnsavedRows] = React.useState(false)
+  const [isSaving, setIsSaving] = React.useState(false)
+  const unsavedChangesRef = React.useRef({
+    unsavedRows: {},
+    rowsBeforeChange: {},
+  })
   const handleRowEditStop = (params, event) => {
     //console.log('handleRowEditStop', params)
 
@@ -109,14 +122,14 @@ const DataGridTable = ({
 
   const handleRowEditCommit = (id, event) => {
     const editedRow = rows.find((row) => row.id === id)
-    console.log('Row Data After Editing:', editedRow)
     // handleEditClick(id, event)
   }
 
   const handleEditClick = (id, row) => () => {
     //console.log('id',id)
     //console.log('row',row)
-//    setChangedRowIds(id)
+    //    setChangedRowIds(id)
+    // console.log(row)
     setIsUpdating(true)
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } })
   }
@@ -126,7 +139,7 @@ const DataGridTable = ({
   // };
 
   const handleSaveClick = (id, rowData) => {
-    // if (!rowData.remarks) {
+    // if (changedRowIds.remarks) {
     //   setSnackbarOpen(true)
     //   setSnackbarData({
     //     message: 'Please Fill remark Fields!',
@@ -135,9 +148,9 @@ const DataGridTable = ({
     //   return
     // }
     //console.log('Newly Added Row Data:', rowData)
-    console.log('selectedRows:', changedRowIds)
-    console.log(changedRowIds)
-    handleOpenRemark()
+    // console.log('selectedRows:', changedRowIds)
+    // console.log(changedRowIds)
+    // handleOpenRemark()
     setRowModesModel((prev) => ({
       ...prev,
       [id]: { mode: GridRowModes.View },
@@ -154,7 +167,7 @@ const DataGridTable = ({
         id?.maintenanceId ||
         params?.row?.maintenanceId ||
         params?.NormParameterMonthlyTransactionId
-      console.log(maintenanceId, params, id)
+      // console.log(maintenanceId, params, id)
       // Define a mapping of titles to corresponding delete functions
       const deleteFunctions = {
         'Slowdown Plan': DataService.deleteSlowdownData,
@@ -1142,8 +1155,15 @@ const DataGridTable = ({
 
   const handleCellClick = (params) => {
     console.log(params)
+    const updatedRowsss = apiRef.current.getRowWithUpdatedValues(
+      params?.id,
+      params?.field,
+    )
+
+    console.log(updatedRowsss)
+
     setChangedRowIds(params?.row)
-    if (title == 'Product MCU Val') {
+    if (title == 'Production Volume Data') {
       if (nonEditableFields.includes(params.field)) return // Block non-editable fields
 
       if (params?.field === 'remark') {
@@ -1317,6 +1337,7 @@ const DataGridTable = ({
 
   // Handle input changes
   const handleValueChange = (index, newValue) => {
+    // console.log(newValue)
     setDays((prevDays) =>
       prevDays.map((day, i) =>
         i === index ? { ...day, value: newValue } : day,
@@ -1581,6 +1602,9 @@ const DataGridTable = ({
           }}
           rowHeight={35}
           processRowUpdate={processRowUpdate}
+          apiRef={apiRef}
+          loading={isSaving}
+          experimentalFeatures={{ newEditingApi: true }}
           onColumnResized={onColumnResized}
           onCellClick={handleCellClick}
           onRowEditCommit={handleRowEditCommit}
@@ -1749,30 +1773,35 @@ const DataGridTable = ({
             Add Item
           </Button>
         )}
-
-        <Button
-          variant='contained'
-          sx={{
-            // marginTop: 2,
-            backgroundColor: jioColors.primaryBlue,
-            color: jioColors.background,
-            borderRadius: 1,
-            padding: '8px 24px',
-            textTransform: 'none',
-            fontSize: '0.875rem',
-            fontWeight: 500,
-            minWidth: 120, // Same width for consistency
-            '&:hover': {
-              backgroundColor: '#143B6F',
-              boxShadow: 'none',
-            },
-          }}
-          // onClick={handleAddRow}
-        >
-          Save
-        </Button>
+        {permissions.saveBtn && (
+          <Button
+            variant='contained'
+            sx={{
+              // marginTop: 2,
+              backgroundColor: jioColors.primaryBlue,
+              color: jioColors.background,
+              borderRadius: 1,
+              padding: '8px 24px',
+              textTransform: 'none',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              minWidth: 120, // Same width for consistency
+              '&:hover': {
+                backgroundColor: '#143B6F',
+                boxShadow: 'none',
+              },
+            }}
+            // onClick={handleSaveClick} // Pass row data
+            // onClick={saveChanges}
+            loadingPosition='start'
+            // disabled={!hasUnsavedRows}
+            // loading={isSaving}
+            startIcon={<SaveIcon />}
+          >
+            Save
+          </Button>
+        )}
       </Box>
-
       {/* <Notification
         open={snackbarOpen}
         message={snackbarMessage}

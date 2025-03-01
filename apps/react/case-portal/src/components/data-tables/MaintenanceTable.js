@@ -204,6 +204,7 @@ const MaintenanceTable = () => (
         editButton: false,
         showUnit: false,
         saveWithRemark: true,
+        saveBtn: false,
       }}
     />
   </div>

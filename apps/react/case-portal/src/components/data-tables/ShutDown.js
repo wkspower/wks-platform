@@ -300,6 +300,7 @@ const ShutDown = () => {
           editButton: true,
           showUnit: false,
           saveWithRemark: true,
+          saveBtn: true,
         }}
       />
     </div>

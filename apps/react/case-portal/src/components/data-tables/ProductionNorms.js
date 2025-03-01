@@ -197,6 +197,7 @@ const ProductionNorms = () => {
           showUnit: true,
           saveWithRemark: true,
           showCalculate: true,
+          saveBtn: true,
         }}
       />
     </div>

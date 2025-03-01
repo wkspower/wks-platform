@@ -293,6 +293,7 @@ const NormalOpNormsScreen = () => {
           editButton: true,
           showUnit: true,
           saveWithRemark: true,
+          saveBtn: true,
         }}
         getRowClassName={(params) =>
           params.row.groupHeader ? 'group-header-row' : ''

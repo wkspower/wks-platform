@@ -260,6 +260,7 @@ const TurnaroundPlanTable = () => {
           editButton: true,
           showUnit: false,
           saveWithRemark: true,
+          saveBtn: true,
         }}
       />
     </div>

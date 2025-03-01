@@ -86,6 +86,7 @@ const FeedStockAvailability = () => {
           editButton: true,
           showUnit: true,
           saveWithRemark: true,
+          saveBtn: true,
         }}
       />
     </div>

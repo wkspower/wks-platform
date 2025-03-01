@@ -301,6 +301,7 @@ const SlowDown = () => {
           editButton: true,
           showUnit: false,
           saveWithRemark: true,
+          saveBtn: true,
         }}
       />
     </div>

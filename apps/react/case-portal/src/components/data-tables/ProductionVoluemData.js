@@ -119,6 +119,7 @@ const ProductionvolumeData = () => {
           showUnit: false,
           saveWithRemark: true,
           showRefreshBtn: true,
+          saveBtn: true,
         }}
       />
     </div>
