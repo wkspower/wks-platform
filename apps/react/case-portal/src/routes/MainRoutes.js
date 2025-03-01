@@ -116,7 +116,7 @@ export const MainRoutes = (
         path: 'production-norms-plan',
         children: [
           {
-            path: 'product-mcu-val',
+            path: 'production-volume-data',
             element: <ProductionvolumeData />,
           },
           {
@@ -124,15 +124,15 @@ export const MainRoutes = (
             element: <MaintenanceTable />,
           },
           {
-            path: 'consumption-norms',
+            path: 'consumption-aop',
             element: <ConsumptionNorms />,
           },
           {
-            path: 'production-norms',
+            path: 'production-aop',
             element: <ProductionNorms />,
           },
           {
-            path: 'catalyst-selectivity',
+            path: 'configuration',
             element: <SelectivityData />,
           },
           {
@@ -144,7 +144,7 @@ export const MainRoutes = (
             element: <ShutdownNorms />,
           },
           {
-            path: 'product-demand',
+            path: 'business-demand',
             element: <BusinessDemand />,
           },
           {
@@ -156,11 +156,11 @@ export const MainRoutes = (
             element: <SlowDown />,
           },
           {
-            path: 'ta-plan',
+            path: 'turnaround-plan',
             element: <TurnaroundPlanTable />,
           },
           {
-            path: 'feed-stock',
+            path: 'feed-stock-availability',
             element: <FeedStockAvailability />,
           },
         ],

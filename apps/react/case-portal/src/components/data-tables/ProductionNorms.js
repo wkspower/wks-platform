@@ -184,7 +184,7 @@ const ProductionNorms = () => {
       <ASDataGrid
         columns={productionColumns}
         rows={csData}
-        title='Production Norms Data'
+        title='Production AOP'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useState, useMemo, useEffect, useCallback } from 'react'
-// import { DataGrid, GridCellEditStopReasons } from '@mui/x-data-grid'
+import { DataGrid, GridCellEditStopReasons } from '@mui/x-data-grid'
 import {
   Button,
   TextField,
@@ -188,8 +188,9 @@ const DataGridTable = ({
         'Slowdown Plan': DataService.deleteSlowdownData,
         'Shutdown Plan': DataService.deleteShutdownData,
         'TA Plan': DataService.deleteTurnAroundData,
-        'Product Demand': DataService.deleteBusinessDemandData,
-        'Catalyst Selectivity Data': DataService.deleteBusinessDemandData,
+        'Business Demand': DataService.deleteBusinessDemandData,
+
+        'Configuration': DataService.deleteBusinessDemandData,
         // 'Consumption Norms': DataService.deleteBusinessDemandData,
       }
 
@@ -1390,6 +1391,54 @@ const DataGridTable = ({
     })
   }, [rows, searchText, isFilterActive, columnFilters])
 
+  const handleRefresh = async (year) => {
+    try {
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      var plantId = plantId
+      const response = await DataService.handleRefresh(plantId, year, keycloak)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Data refresh successfully!',
+        severity: 'success',
+      })
+
+      return response
+    } catch (error) {
+      console.error('Error saving refresh data:', error)
+    }
+  }
+
+  const handleCalculate = async (year) => {
+    try {
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      var plantId = plantId
+      const response = await DataService.handleCalculate(
+        plantId,
+        year,
+        keycloak,
+      )
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Data refresh successfully!',
+        severity: 'success',
+      })
+
+      return response
+    } catch (error) {
+      console.error('Error saving refresh data:', error)
+    }
+  }
+
   return (
     <Box
       sx={{
@@ -1435,6 +1484,7 @@ const DataGridTable = ({
           {permissions?.showCalculate && (
             <Button
               variant='contained'
+              onClick={handleCalculate}
               sx={{
                 // marginTop: 2,
                 backgroundColor: jioColors.primaryBlue,
@@ -1456,6 +1506,7 @@ const DataGridTable = ({
           {permissions?.showRefreshBtn && (
             <Button
               variant='contained'
+              onClick={handleRefresh}
               sx={{
                 // marginTop: 2,
                 backgroundColor: jioColors.primaryBlue,
@@ -1791,28 +1842,33 @@ const DataGridTable = ({
             Add Item
           </Button>
         )}
-
-        <Button
-          variant='contained'
-          sx={{
-            // marginTop: 2,
-            backgroundColor: jioColors.primaryBlue,
-            color: jioColors.background,
-            borderRadius: 1,
-            padding: '8px 24px',
-            textTransform: 'none',
-            fontSize: '0.875rem',
-            fontWeight: 500,
-            minWidth: 120, // Same width for consistency
-            '&:hover': {
-              backgroundColor: '#143B6F',
-              boxShadow: 'none',
-            },
-          }}
-          onClick={saveChanges}
-        >
-          Save
-        </Button>
+        {permissions.saveBtn && (
+          <Button
+            variant='contained'
+            sx={{
+              // marginTop: 2,
+              backgroundColor: jioColors.primaryBlue,
+              color: jioColors.background,
+              borderRadius: 1,
+              padding: '8px 24px',
+              textTransform: 'none',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              minWidth: 120, // Same width for consistency
+              '&:hover': {
+                backgroundColor: '#143B6F',
+                boxShadow: 'none',
+              },
+            }}
+            // onClick={handleSaveClick} // Pass row data
+            // onClick={saveChanges}
+            loadingPosition='start'
+            // disabled={!hasUnsavedRows}
+            // loading={isSaving}
+          >
+            Save
+          </Button>
+        )}
       </Box>
       {/* <Notification
         open={snackbarOpen}

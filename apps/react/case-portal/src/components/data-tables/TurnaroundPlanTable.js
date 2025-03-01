@@ -244,7 +244,7 @@ const TurnaroundPlanTable = () => {
       <ASDataGrid
         columns={colDefs}
         rows={TaData}
-        title='Turnaroud Plan'
+        title='Turnaround Plan'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}

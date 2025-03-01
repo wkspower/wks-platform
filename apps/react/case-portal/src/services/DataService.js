@@ -42,8 +42,55 @@ export const DataService = {
   deleteShutdownData,
   deleteTurnAroundData,
   deleteBusinessDemandData,
+  handleRefresh,
+  handleCalculate,
 }
+async function handleRefresh(year, plantId, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/handleRefresh?year=${year}&plantId=${plantId}`
 
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to delete data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+    return await resp.text() // Handle text response from the backend
+  } catch (e) {
+    console.error('Error deleting slowdown data:', e)
+    return Promise.reject(e)
+  }
+}
+async function handleCalculate(year, plantId, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/handleCalculate?year=${year}&plantId=${plantId}`
+
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to delete data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+    return await resp.text() // Handle text response from the backend
+  } catch (e) {
+    console.error('Error deleting slowdown data:', e)
+    return Promise.reject(e)
+  }
+}
 async function deleteSlowdownData(maintenanceId, keycloak) {
   const url = `${process.env.REACT_APP_API_URL}/task/deleteSlowdownData/${maintenanceId}`
 
