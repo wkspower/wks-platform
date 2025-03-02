@@ -37,5 +37,7 @@ public class AOPDTO {
     private String aopYear;
     private String plantFkId;
     private Float avgTPH;
+    private String normParametersFKId;
+    private String bDNormParametersFKId;
 
 }

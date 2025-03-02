@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.ShutDownPlanDTO;
@@ -20,6 +21,10 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	
 	@Autowired
 	private ShutDownPlanRepository shutDownPlanRepository;
+	
+	 @Lazy  // Add this annotation here
+	@Autowired
+	private SlowdownPlanService slowdownPlanService;
 	
 	@Autowired
 	private PlantMaintenanceTransactionRepository plantMaintenanceTransactionRepository;
@@ -74,31 +79,15 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
         plantMaintenanceTransaction.setDiscription(
             shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
         );
-    
         plantMaintenanceTransaction.setDurationInMins(
             shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0
         );
-
-        
         plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
         plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
-        // Ensure required fields exist
-
-
 		plantMaintenanceTransaction.setUser("system"); 
         plantMaintenanceTransaction.setName("Default Name");
         plantMaintenanceTransaction.setVersion("V1");
         plantMaintenanceTransaction.setCreatedOn(new Date());
-
-
-
-		// plantMaintenanceTransaction.setName("Default Name"); 
-        // plantMaintenanceTransaction.setVersion("V1");
-		// plantMaintenanceTransaction.setUser("system"); 
-		// plantMaintenanceTransaction.setCreatedOn(new Date());
-
-
-
         plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
         if(shutDownPlanDTO.getProductId()!=null) {
         	plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
@@ -110,6 +99,11 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
         //}
         
         plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
+        for(int i=0;i<2;i++) {
+        	 slowdownPlanService.saveShutdownData(plantId, shutDownPlanDTO);
+        }
+       
+        
 		// TODO Auto-generated method stub
 		return shutDownPlanDTO;
 	}

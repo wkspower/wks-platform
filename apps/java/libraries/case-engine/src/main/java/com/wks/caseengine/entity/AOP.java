@@ -75,4 +75,7 @@ public class AOP {
 
     @Column(name = "AvgTPH")
     private Float avgTPH;
+    
+    @Column(name="NormParameters_FK_Id")
+    private UUID normParametersFKId;
 }

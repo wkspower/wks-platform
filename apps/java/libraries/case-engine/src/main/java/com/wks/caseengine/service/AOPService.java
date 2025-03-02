@@ -7,5 +7,6 @@ public interface AOPService {
 	
 	public List<AOPDTO> getAOP();
 	public AOPDTO updateAOP(AOPDTO aOPDTO);
+	public List<AOPDTO> getAOPData(String plantId, String year);
 
 }
