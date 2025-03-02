@@ -41,7 +41,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
             dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : 0); 
             dto.setProduct((String) result[6]);
             //FOR ID : pmt.Id
-            dto.setMaintenanceId(result[5] != null ? UUID.fromString(result[5].toString()) : null); 
+            dto.setId(result[5] != null ? result[5].toString() : null); 
             dtoList.add(dto);
         }
 		return dtoList;
@@ -74,7 +74,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	public List<ShutDownPlanDTO> saveShutdownPlantData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
 		UUID plantMaintenanceId=findIdByPlantIdAndMaintenanceTypeName(plantId,"Shutdown");
 		for(ShutDownPlanDTO shutDownPlanDTO:shutDownPlanDTOList) {
-	        PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
+			if(shutDownPlanDTO.getId()!=null){
+                PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
 	        plantMaintenanceTransaction.setId(UUID.randomUUID());
 	        // Set mandatory fields with default values if missing
 	        plantMaintenanceTransaction.setDiscription(
@@ -101,10 +102,21 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	        
 	        plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
 	        
-		} 
+		
 		for(int i=0;i<2;i++) {
        	 slowdownPlanService.saveShutdownData(plantId, shutDownPlanDTOList);
        }
+		}else{
+			Optional<PlantMaintenanceTransaction> plantMaintenance=	shutDownPlanRepository.findById(UUID.fromString(shutDownPlanDTO.getId()));
+			  PlantMaintenanceTransaction plantMaintenanceTransaction= plantMaintenance.get();
+			  plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+			  plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
+			  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+			  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+			  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());  
+			  plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
+		}
+	}    
 		// TODO Auto-generated method stub
 		return shutDownPlanDTOList;
 	}

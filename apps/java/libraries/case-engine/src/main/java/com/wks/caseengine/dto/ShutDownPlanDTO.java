@@ -26,7 +26,7 @@ public class ShutDownPlanDTO {
     private Integer durationInMins; 
     
 	//FOR ID : pmt.Id
-	private UUID maintenanceId; 
+	private String id; 
 	
 
 	private Double rate;
