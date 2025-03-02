@@ -7,13 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.wks.caseengine.entity.AOPMCCalculatedData;
 import com.wks.caseengine.entity.MaintenanceCalculatedData;
 
 @Repository
 public interface MaintenanceCalculatedDataRepository extends JpaRepository<MaintenanceCalculatedData, UUID>{
 	
-	@Query("SELECT a FROM MaintenanceCalculatedData a WHERE a.plantFKId = :plantId AND a.aopYear = :year")
+	@Query(value="SELECT * FROM MaintenanceCalculatedData a WHERE a.plant_FK_Id = :plantId AND a.aopYear = :year", nativeQuery=true)
 	 List<MaintenanceCalculatedData> findAllByPlantIdAndYear(@Param("plantId") UUID plantId, @Param("year") String year);
 
 }

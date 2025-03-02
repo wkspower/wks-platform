@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,9 +38,9 @@ public class BusinessDemandDataController {
 		return businessDemandDataService.saveBusinessDemandData(businessDemandDataDTO);	
 	}
 	
-	@DeleteMapping(value="/deleteBusinessDemandData")
-	public BusinessDemandDataDTO deleteBusinessDemandData(@RequestBody BusinessDemandDataDTO businessDemandDataDTO){
-		return businessDemandDataService.deleteBusinessDemandData(businessDemandDataDTO);	
+	@DeleteMapping(value="/deleteBusinessDemandData/{id}")
+	public BusinessDemandDataDTO deleteBusinessDemandData(@PathVariable UUID id){
+		return businessDemandDataService.deleteBusinessDemandData(id);	
 	}
 	
 	

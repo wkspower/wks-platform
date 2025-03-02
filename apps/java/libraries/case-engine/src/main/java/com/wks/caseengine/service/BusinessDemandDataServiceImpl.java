@@ -4,15 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.wks.caseengine.entity.AOP;
-import com.wks.caseengine.entity.AOPMCCalculatedData;
 import com.wks.caseengine.entity.BusinessDemand;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
-import com.wks.caseengine.repository.AOPMCCalculatedDataRepository;
-import com.wks.caseengine.repository.AOPRepository;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
 
 @Service
@@ -21,11 +17,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 	@Autowired
 	private BusinessDemandDataRepository businessDemandDataRepository;
 	
-	@Autowired
-	private AOPMCCalculatedDataRepository aOPMCCalculatedDataRepository;
 	
-	@Autowired
-	private AOPRepository aOPRepository;
 
 	@Override
 	public List<BusinessDemandDataDTO> getBusinessDemandData(String year,String plantId) {
@@ -132,13 +124,13 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 	}
 
 	@Override
-	public BusinessDemandDataDTO deleteBusinessDemandData(BusinessDemandDataDTO businessDemandDataDTO) {
+	public BusinessDemandDataDTO deleteBusinessDemandData(UUID id) {
 		//businessDemandDataRepository.softDelete(UUID.fromString(businessDemandDataDTO.getId()));
 		
 		BusinessDemand businessDemand = new BusinessDemand();
-		businessDemand.setId(businessDemand.getId());
+		businessDemand.setId(id);
 		businessDemandDataRepository.delete(businessDemand);
-		return businessDemandDataDTO;
+		return null;
 	}
 
 }
