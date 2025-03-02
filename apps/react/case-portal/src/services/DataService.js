@@ -144,7 +144,7 @@ async function deleteShutdownData(maintenanceId, keycloak) {
   }
 }
 async function deleteTurnAroundData(maintenanceId, keycloak) {
-  const url = `${process.env.REACT_APP_API_URL}/task/deleteTurnAroundData/${maintenanceId}`
+  const url = `${process.env.REACT_APP_API_URL}/task/deleteTurnaroundData/${maintenanceId}`
 
   const headers = {
     Accept: 'application/json',

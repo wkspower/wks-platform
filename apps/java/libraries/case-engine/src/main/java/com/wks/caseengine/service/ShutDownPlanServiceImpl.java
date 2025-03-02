@@ -72,55 +72,83 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 
 	@Override
 	public List<ShutDownPlanDTO> saveShutdownPlantData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
-		UUID plantMaintenanceId=findIdByPlantIdAndMaintenanceTypeName(plantId,"Shutdown");
-		for(ShutDownPlanDTO shutDownPlanDTO:shutDownPlanDTOList) {
-			if(shutDownPlanDTO.getId()!=null){
-                PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
-	        plantMaintenanceTransaction.setId(UUID.randomUUID());
-	        // Set mandatory fields with default values if missing
-	        plantMaintenanceTransaction.setDiscription(
-	            shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
-	        );
-	        plantMaintenanceTransaction.setDurationInMins(
-	            shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0
-	        );
-	        plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
-	        plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
-			plantMaintenanceTransaction.setUser("system"); 
-	        plantMaintenanceTransaction.setName("Default Name");
-	        plantMaintenanceTransaction.setVersion("V1");
-	        plantMaintenanceTransaction.setCreatedOn(new Date());
-	        plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
-	        if(shutDownPlanDTO.getProductId()!=null) {
-	        	plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
-	        }
-	        // if(shutDownPlanDTO.getAudityear()==null) {
-	        // 	plantMaintenanceTransaction.setAuditYear(2025);
-	        // }else {
-	        	plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
-	        //}
-	        
-	        plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
-	        
-		
-		for(int i=0;i<2;i++) {
-       	 slowdownPlanService.saveShutdownData(plantId, shutDownPlanDTOList);
-       }
-		}else{
-			Optional<PlantMaintenanceTransaction> plantMaintenance=	shutDownPlanRepository.findById(UUID.fromString(shutDownPlanDTO.getId()));
-			  PlantMaintenanceTransaction plantMaintenanceTransaction= plantMaintenance.get();
-			  plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-			  plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
-			  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
-			  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
-			  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());  
-			  plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
+		UUID plantMaintenanceId = findIdByPlantIdAndMaintenanceTypeName(plantId, "Shutdown");
+	
+		for (ShutDownPlanDTO shutDownPlanDTO : shutDownPlanDTOList) {
+			if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
+				// Creating a new record
+				PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
+				plantMaintenanceTransaction.setId(UUID.randomUUID());
+				
+				// Set mandatory fields with default values if missing
+				plantMaintenanceTransaction.setDiscription(
+					shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
+				);
+				plantMaintenanceTransaction.setDurationInMins(
+					shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0
+				);
+				plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+				plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+				plantMaintenanceTransaction.setUser("system");
+				plantMaintenanceTransaction.setName("Default Name");
+				plantMaintenanceTransaction.setVersion("V1");
+				plantMaintenanceTransaction.setCreatedOn(new Date());
+				plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
+	
+				if (shutDownPlanDTO.getProductId() != null) {
+					plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+				}
+	
+				plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
+	
+				// Save new record
+				plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
+	
+				// for (int i = 0; i < 2; i++) {
+
+				// 	List<ShutDownPlanDTO> list = new ArrayList<>();
+				// 	shutDownPlanDTO.setDiscription(shutDownPlanDTO.getDiscription());
+				// 	slowdownPlanService.saveShutdownData(plantId, shutDownPlanDTOList);
+				// }
+
+
+				List<ShutDownPlanDTO> list = new ArrayList<>();
+				shutDownPlanDTO.setDiscription(shutDownPlanDTO.getDiscription()+" Ramp Up");
+				list.add(shutDownPlanDTO);
+			slowdownPlanService.saveShutdownData(plantId, list);
+
+				List<ShutDownPlanDTO> list2 = new ArrayList<>();
+				shutDownPlanDTO.setDiscription(shutDownPlanDTO.getDiscription()+" Ramp Down");
+				list2.add(shutDownPlanDTO);
+			slowdownPlanService.saveShutdownData(plantId,list2);
+	
+			} else {
+				// Updating an existing record
+				try {
+					Optional<PlantMaintenanceTransaction> plantMaintenance = 
+						shutDownPlanRepository.findById(UUID.fromString(shutDownPlanDTO.getId()));
+	
+					if (plantMaintenance.isPresent()) {
+						PlantMaintenanceTransaction plantMaintenanceTransaction = plantMaintenance.get();
+						plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+						plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
+						plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+						plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+						plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+	
+						// Save updated record
+						plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
+					} else {
+						throw new RuntimeException("Record not found for ID: " + shutDownPlanDTO.getId());
+					}
+				} catch (IllegalArgumentException e) {
+					throw new RuntimeException("Invalid ID format: " + shutDownPlanDTO.getId(), e);
+				}
+			}
 		}
-	}    
-		// TODO Auto-generated method stub
 		return shutDownPlanDTOList;
 	}
-
+	
 	@Override
 	public List<ShutDownPlanDTO> editShutdownData(UUID plantMaintenanceTransactionId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
 		  for(ShutDownPlanDTO shutDownPlanDTO: shutDownPlanDTOList) {

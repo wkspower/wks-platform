@@ -58,7 +58,14 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 	public List<ShutDownPlanDTO> saveShutdownData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
 		UUID plantMaintenanceId=shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId,"Slowdown");
 		for(ShutDownPlanDTO shutDownPlanDTO:shutDownPlanDTOList) {
+
+			if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
+
+		
+
 			PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
+
+
 			plantMaintenanceTransaction.setId(UUID.randomUUID());
 			plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
 			plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
@@ -76,6 +83,25 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 	        }
 	        	plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
 			slowdownPlanRepository.save(plantMaintenanceTransaction);
+
+
+
+
+		}
+		else{
+
+			Optional<PlantMaintenanceTransaction> plantMaintenance=slowdownPlanRepository.findById(UUID.fromString(shutDownPlanDTO.getId()));
+		PlantMaintenanceTransaction plantMaintenanceTransaction=plantMaintenance.get();
+		plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+		  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+		  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+		  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+		  plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
+		  plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+      // Save entity
+		  slowdownPlanRepository.save(plantMaintenanceTransaction);
+
+		}
 		}
 		return shutDownPlanDTOList;
 		

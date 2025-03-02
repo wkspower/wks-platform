@@ -19,7 +19,11 @@ const TurnaroundPlanTable = () => {
       try {
         const data = await DataService.getTAPlantData(keycloak)
         const formattedData = data.map((item, index) => ({
+          // ...item,
+          // id: index,
+
           ...item,
+          idFromApi: item.id,
           id: index,
         }))
 

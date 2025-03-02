@@ -40,6 +40,7 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 			  dto.setDurationInHrs(durationInHrs);
 			  dto.setRemark((String)result[4]);
 			  dto.setProduct((String) result[6]);
+			  dto.setId((String) result[7]);
 			  long diffInMillis = dto.getMaintEndDateTime().getTime() - dto.getMaintStartDateTime().getTime();
 			  double diffInDays = diffInMillis / (1000.0 * 60 * 60 * 24);
 			  dto.setDurationInDays(diffInDays);
@@ -55,6 +56,10 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 	public List<ShutDownPlanDTO> saveTurnaroundPlanData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
 		UUID plantMaintenanceId=shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId,"TA_Plan");
 		for(ShutDownPlanDTO shutDownPlanDTO:shutDownPlanDTOList) {
+
+			if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
+
+
 			PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
 			plantMaintenanceTransaction.setId(UUID.randomUUID());
 			plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
@@ -72,6 +77,23 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 	        }
 	        	plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
 			turnaroundPlanRepository.save(plantMaintenanceTransaction);
+
+		}
+
+		else{
+
+			Optional<PlantMaintenanceTransaction> plantMaintenance=turnaroundPlanRepository.findById(UUID.fromString(shutDownPlanDTO.getId()));
+			PlantMaintenanceTransaction plantMaintenanceTransaction=plantMaintenance.get();
+			  plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+			  plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
+			  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+			  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+			  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+			  plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+			  turnaroundPlanRepository.save(plantMaintenanceTransaction);
+
+		}
+
 		}
 		// TODO Auto-generated method stub
 		return shutDownPlanDTOList;

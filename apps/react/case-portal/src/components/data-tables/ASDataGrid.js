@@ -168,33 +168,7 @@ const DataGridTable = ({
   // }, [rows]);
 
   const handleDeleteClick = async (id, params) => {
-    try {
-      const maintenanceId =
-        id?.maintenanceId ||
-        params?.row?.maintenanceId ||
-        params?.NormParameterMonthlyTransactionId
-      console.log(maintenanceId, params, id)
-      // Define a mapping of titles to corresponding delete functions
-      const deleteFunctions = {
-        'Slowdown Plan': DataService.deleteSlowdownData,
-        'Shutdown Plan': DataService.deleteShutdownData,
-        'TA Plan': DataService.deleteTurnAroundData,
-        'Business Demand': DataService.deleteBusinessDemandData,
-
-        'Configuration': DataService.deleteBusinessDemandData,
-        // 'Consumption Norms': DataService.deleteBusinessDemandData,
-      }
-
-      // Check if title exists in deleteFunctions and execute the corresponding function
-      if (deleteFunctions[title]) {
-        return await deleteFunctions[title](maintenanceId, keycloak)
-      }
-
-      setOpen1(true)
-      setDeleteId(id)
-    } catch (error) {
-      console.error(`Error deleting ${title} data:`, error)
-    }
+    deleteData(params.row.idFromApi || params.row.maintenanceId)
   }
 
   const handleCancelClick = (id) => () => {
@@ -215,7 +189,7 @@ const DataGridTable = ({
 
   const saveShutdownData = async (newRow) => {
     try {
-      // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
+      var plantId = ''
 
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
@@ -223,16 +197,17 @@ const DataGridTable = ({
         plantId = parsedPlant.id
       }
 
-      var plantId = plantId
       // plantId = plantId;
 
-      const shutdownDetails = {
-        productId: newRow.product,
-        discription: newRow.discription,
-        durationInMins: newRow.durationInMins,
-        maintEndDateTime: newRow.maintEndDateTime,
-        maintStartDateTime: newRow.maintStartDateTime,
-      }
+      const shutdownDetails = newRow.map((row) => ({
+        productId: row.product,
+        discription: row.discription,
+        durationInMins: row.durationInMins,
+        maintEndDateTime: row.maintEndDateTime,
+        maintStartDateTime: row.maintStartDateTime,
+        audityear: '2024-25',
+        id: row.maintenanceId || null,
+      }))
 
       const response = await DataService.saveShutdownData(
         plantId,
@@ -400,15 +375,17 @@ const DataGridTable = ({
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-      const slowDownDetails = {
-        productId: newRow.product,
-        discription: newRow.discription,
-        durationInMins: newRow.durationInMins,
-        maintEndDateTime: newRow.maintEndDateTime,
-        maintStartDateTime: newRow.maintStartDateTime,
-        remark: newRow.remarks,
-        rate: newRow.rate,
-      }
+      const slowDownDetails = newRow.map((row) => ({
+        productId: row.product,
+        discription: row.discription,
+        durationInMins: row.durationInMins,
+        maintEndDateTime: row.maintEndDateTime,
+        maintStartDateTime: row.maintStartDateTime,
+        remark: row.remarks,
+        rate: row.rate,
+        audityear: '2024-25',
+        id: row.maintenanceId || null,
+      }))
       const response = await DataService.saveSlowdownData(
         plantId,
         slowDownDetails,
@@ -538,15 +515,16 @@ const DataGridTable = ({
         plantId = parsedPlant.id
       }
 
-      const turnAroundDetails = {
-        productId: newRow.product,
-        discription: newRow.discription,
-        durationInMins: newRow.durationInMins,
-        maintEndDateTime: newRow.maintEndDateTime,
-        maintStartDateTime: newRow.maintStartDateTime,
-        remark: newRow.remark,
-        // rate: newRow.rate,
-      }
+      const turnAroundDetails = newRow.map((row) => ({
+        productId: row.product,
+        discription: row.discription,
+        durationInMins: row.durationInMins,
+        maintEndDateTime: row.maintEndDateTime,
+        maintStartDateTime: row.maintStartDateTime,
+        remark: row.remark,
+        audityear: '2024-25',
+        id: row.idFromApi || null,
+      }))
       const response = await DataService.saveTurnAroundData(
         plantId,
         turnAroundDetails,
@@ -845,6 +823,18 @@ const DataGridTable = ({
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
         saveBusinessDemandData(data)
       }
+      if (title === 'Shutdown Plan') {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        saveShutdownData(data)
+      }
+      if (title === 'Slowdown Plan') {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        saveSlowDownData(data)
+      }
+      if (title === 'Turnaround Plan') {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        saveTurnAroundData(data)
+      }
 
       unsavedChangesRef.current = {
         unsavedRows: {},
@@ -939,22 +929,105 @@ const DataGridTable = ({
 
   const handleDeleteRow = (id) => {
     setDeleteId(id)
-    setOpen1(true)
+    // setOpen1(true)
+  }
+
+  const deleteData = async (id) => {
+    if (title == 'Business Demand') {
+      try {
+        const data = await DataService.deleteBusinessDemandData(id, keycloak)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      }
+    }
+    if (title == 'Shutdown Plan') {
+      try {
+        const data = await DataService.deleteShutdownData(id, keycloak)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      }
+    }
+    if (title == 'Slowdown Plan') {
+      try {
+        const data = await DataService.deleteSlowdownData(id, keycloak)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      }
+    }
+    if (title == 'Turnaround Plan') {
+      try {
+        const data = await DataService.deleteTurnAroundData(id, keycloak)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      }
+    }
   }
 
   const deleteTheRecord = () => {
-    const updatedRows = rows.filter((row) => row?.id !== deleteId)
-    setRows(rows.filter((row) => row.id !== deleteId))
-    setRows(updatedRows)
-    onDeleteRow?.(deleteId)
-    setDeleteId(null)
-    setOpen1(false)
-    //now that snackbar will open
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Slowdown data deleted successfully!',
-      severity: 'success',
-    })
+    console.log(params)
+    return
+    if (title == 'Business Demand') {
+      deleteData(id, params)
+      const updatedRows = rows.filter((row) => row?.id !== deleteId)
+      setRows(rows.filter((row) => row.id !== deleteId))
+      setRows(updatedRows)
+      onDeleteRow?.(deleteId)
+      setDeleteId(null)
+      setOpen1(false)
+      //now that snackbar will open
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Business Demand deleted successfully!',
+        severity: 'success',
+      })
+    }
+
+    if (title == 'Shutdown Plan') {
+      deleteData(id, params)
+      const updatedRows = rows.filter((row) => row?.id !== deleteId)
+      setRows(rows.filter((row) => row.id !== deleteId))
+      setRows(updatedRows)
+      onDeleteRow?.(deleteId)
+      setDeleteId(null)
+      setOpen1(false)
+      //now that snackbar will open
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Shutdown Plan deleted successfully!',
+        severity: 'success',
+      })
+    }
+
+    if (title == 'Slowdown Plan') {
+      deleteData(id, params)
+      const updatedRows = rows.filter((row) => row?.id !== deleteId)
+      setRows(rows.filter((row) => row.id !== deleteId))
+      setRows(updatedRows)
+      onDeleteRow?.(deleteId)
+      setDeleteId(null)
+      setOpen1(false)
+      //now that snackbar will open
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Slowdown Plan deleted successfully!',
+        severity: 'success',
+      })
+    }
+    if (title == 'Turnaround Plan') {
+      deleteData(id, params)
+      const updatedRows = rows.filter((row) => row?.id !== deleteId)
+      setRows(rows.filter((row) => row.id !== deleteId))
+      setRows(updatedRows)
+      onDeleteRow?.(deleteId)
+      setDeleteId(null)
+      setOpen1(false)
+      //now that snackbar will open
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Turnaround Plan deleted successfully!',
+        severity: 'success',
+      })
+    }
   }
 
   const handleAddRow1 = () => {
