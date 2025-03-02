@@ -13,12 +13,12 @@ import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 public interface ShutDownPlanService {
 	
 	public List<ShutDownPlanDTO> findMaintenanceDetailsByPlantIdAndType(UUID plantId,String maintenanceTypeName);
-	public ShutDownPlanDTO saveShutdownPlantData(UUID plantId,ShutDownPlanDTO shutDownPlanDTO);
+	public List<ShutDownPlanDTO> saveShutdownPlantData(UUID plantId,List<ShutDownPlanDTO> shutDownPlanDTOList);
 	public UUID findPlantMaintenanceId(String productName);
 	public void saveShutdownData(PlantMaintenanceTransaction plantMaintenanceTransaction);
 	public UUID findIdByPlantIdAndMaintenanceTypeName(UUID plantId,String maintenanceTypeName);
 	public PlantMaintenanceTransaction editShutDownPlanData(UUID plantMaintenanceTransactionId);
 	public void deletePlanData(UUID plantMaintenanceTransactionId);
-	public ShutDownPlanDTO editShutdownData(UUID plantMaintenanceTransactionId, ShutDownPlanDTO shutDownPlanDTO);
+	public List<ShutDownPlanDTO> editShutdownData(UUID plantMaintenanceTransactionId, List<ShutDownPlanDTO> shutDownPlanDTOList);
 
 }

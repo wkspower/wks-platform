@@ -27,9 +27,9 @@ public class AOPController {
 	}
 	
 	@PutMapping(value="/updateAOP")
-	public AOPDTO updateAOP(@RequestBody AOPDTO aOPDTO) {
-		aOPService.updateAOP(aOPDTO);
-		return aOPDTO;
+	public List<AOPDTO> updateAOP(@RequestBody List<AOPDTO> aOPDTOList) {
+		aOPService.updateAOP(aOPDTOList);
+		return aOPDTOList;
 	}
 
 }

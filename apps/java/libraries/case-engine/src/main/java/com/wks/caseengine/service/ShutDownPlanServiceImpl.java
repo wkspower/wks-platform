@@ -22,7 +22,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	@Autowired
 	private ShutDownPlanRepository shutDownPlanRepository;
 	
-	 @Lazy  // Add this annotation here
+	@Lazy  // Add this annotation here
 	@Autowired
 	private SlowdownPlanService slowdownPlanService;
 	
@@ -71,55 +71,58 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	}
 
 	@Override
-	public ShutDownPlanDTO saveShutdownPlantData(UUID plantId, ShutDownPlanDTO shutDownPlanDTO) {
+	public List<ShutDownPlanDTO> saveShutdownPlantData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
 		UUID plantMaintenanceId=findIdByPlantIdAndMaintenanceTypeName(plantId,"Shutdown");
-        PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
-        plantMaintenanceTransaction.setId(UUID.randomUUID());
-        // Set mandatory fields with default values if missing
-        plantMaintenanceTransaction.setDiscription(
-            shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
-        );
-        plantMaintenanceTransaction.setDurationInMins(
-            shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0
-        );
-        plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
-        plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
-		plantMaintenanceTransaction.setUser("system"); 
-        plantMaintenanceTransaction.setName("Default Name");
-        plantMaintenanceTransaction.setVersion("V1");
-        plantMaintenanceTransaction.setCreatedOn(new Date());
-        plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
-        if(shutDownPlanDTO.getProductId()!=null) {
-        	plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
-        }
-        // if(shutDownPlanDTO.getAudityear()==null) {
-        // 	plantMaintenanceTransaction.setAuditYear(2025);
-        // }else {
-        	plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
-        //}
-        
-        plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
-        for(int i=0;i<2;i++) {
-        	 slowdownPlanService.saveShutdownData(plantId, shutDownPlanDTO);
-        }
-       
-        
+		for(ShutDownPlanDTO shutDownPlanDTO:shutDownPlanDTOList) {
+	        PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
+	        plantMaintenanceTransaction.setId(UUID.randomUUID());
+	        // Set mandatory fields with default values if missing
+	        plantMaintenanceTransaction.setDiscription(
+	            shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
+	        );
+	        plantMaintenanceTransaction.setDurationInMins(
+	            shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0
+	        );
+	        plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+	        plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+			plantMaintenanceTransaction.setUser("system"); 
+	        plantMaintenanceTransaction.setName("Default Name");
+	        plantMaintenanceTransaction.setVersion("V1");
+	        plantMaintenanceTransaction.setCreatedOn(new Date());
+	        plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
+	        if(shutDownPlanDTO.getProductId()!=null) {
+	        	plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+	        }
+	        // if(shutDownPlanDTO.getAudityear()==null) {
+	        // 	plantMaintenanceTransaction.setAuditYear(2025);
+	        // }else {
+	        	plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
+	        //}
+	        
+	        plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
+	        
+		} 
+		for(int i=0;i<2;i++) {
+       	 slowdownPlanService.saveShutdownData(plantId, shutDownPlanDTOList);
+       }
 		// TODO Auto-generated method stub
-		return shutDownPlanDTO;
+		return shutDownPlanDTOList;
 	}
 
 	@Override
-	public ShutDownPlanDTO editShutdownData(UUID plantMaintenanceTransactionId, ShutDownPlanDTO shutDownPlanDTO) {
-		Optional<PlantMaintenanceTransaction> plantMaintenance=	shutDownPlanRepository.findById(plantMaintenanceTransactionId);
-		  PlantMaintenanceTransaction plantMaintenanceTransaction= plantMaintenance.get();
-		  plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-		  plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
-		  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
-		  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
-		  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());  
-		  plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
+	public List<ShutDownPlanDTO> editShutdownData(UUID plantMaintenanceTransactionId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
+		  for(ShutDownPlanDTO shutDownPlanDTO: shutDownPlanDTOList) {
+			  Optional<PlantMaintenanceTransaction> plantMaintenance=	shutDownPlanRepository.findById(plantMaintenanceTransactionId);
+			  PlantMaintenanceTransaction plantMaintenanceTransaction= plantMaintenance.get();
+			  plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+			  plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
+			  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+			  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+			  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());  
+			  plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
+		  }
 		// TODO Auto-generated method stub
-		return shutDownPlanDTO;
+		return shutDownPlanDTOList;
 	}
 
 	@Override

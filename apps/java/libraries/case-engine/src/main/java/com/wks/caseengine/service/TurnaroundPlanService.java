@@ -8,7 +8,7 @@ public interface TurnaroundPlanService {
 	
 	
 	public List<ShutDownPlanDTO> findTurnaroundPlanDataByPlantIdAndType(UUID plantId,String maintenanceTypeName);
-	public ShutDownPlanDTO saveTurnaroundPlanData(UUID plantId,ShutDownPlanDTO shutDownPlanDTO);
-	public ShutDownPlanDTO editTurnaroundPlanData(UUID plantMaintenanceTransactionId, ShutDownPlanDTO shutDownPlanDTO);
+	public List<ShutDownPlanDTO> saveTurnaroundPlanData(UUID plantId,List<ShutDownPlanDTO> shutDownPlanDTOList);
+	public List<ShutDownPlanDTO> editTurnaroundPlanData(UUID plantMaintenanceTransactionId, List<ShutDownPlanDTO> shutDownPlanDTOList);
 
 }

@@ -6,7 +6,7 @@ import com.wks.caseengine.dto.AOPDTO;
 public interface AOPService {
 	
 	public List<AOPDTO> getAOP();
-	public AOPDTO updateAOP(AOPDTO aOPDTO);
+	public List<AOPDTO> updateAOP(List<AOPDTO> aOPDTOList);
 	public List<AOPDTO> getAOPData(String plantId, String year);
 
 }

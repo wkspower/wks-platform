@@ -44,15 +44,15 @@ public class ShutDownPlanController {
     }
 	
 		  @PostMapping(value = "/saveShutdownData/{plantId}")
-            public ResponseEntity<ShutDownPlanDTO> saveShutdownData(@PathVariable UUID plantId, @RequestBody ShutDownPlanDTO shutDownPlanDTO) {
-                shutDownPlanService.saveShutdownPlantData(plantId,shutDownPlanDTO);
-                return ResponseEntity.ok(shutDownPlanDTO);
+            public ResponseEntity<List<ShutDownPlanDTO>> saveShutdownData(@PathVariable UUID plantId, @RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
+                shutDownPlanService.saveShutdownPlantData(plantId,shutDownPlanDTOList);
+                return ResponseEntity.ok(shutDownPlanDTOList);
             }
 		  
 		  @PutMapping(value = "/editShutdownData/{plantMaintenanceTransactionId}")
-          public ResponseEntity<ShutDownPlanDTO> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId, @RequestBody ShutDownPlanDTO shutDownPlanDTO) {
-              shutDownPlanService.editShutdownData(plantMaintenanceTransactionId,shutDownPlanDTO);
-              return ResponseEntity.ok(shutDownPlanDTO);
+          public ResponseEntity<List<ShutDownPlanDTO>> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId, @RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
+              shutDownPlanService.editShutdownData(plantMaintenanceTransactionId,shutDownPlanDTOList);
+              return ResponseEntity.ok(shutDownPlanDTOList);
           }
 
 		  @DeleteMapping("/deleteShutdownData/{plantMaintenanceTransactionId}")

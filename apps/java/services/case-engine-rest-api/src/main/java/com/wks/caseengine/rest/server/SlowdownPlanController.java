@@ -45,17 +45,17 @@ public class SlowdownPlanController {
     }
 	
 	@PostMapping(value="/saveSlowdownData/{plantId}")
-	public ResponseEntity<ShutDownPlanDTO> saveShutdownData(@PathVariable UUID plantId,@RequestBody ShutDownPlanDTO shutDownPlanDTO){
-		slowdownPlanService.saveShutdownData(plantId,shutDownPlanDTO);
-				return ResponseEntity.ok(shutDownPlanDTO); 
+	public ResponseEntity<List<ShutDownPlanDTO>> saveShutdownData(@PathVariable UUID plantId,@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList){
+		slowdownPlanService.saveShutdownData(plantId,shutDownPlanDTOList);
+				return ResponseEntity.ok(shutDownPlanDTOList); 
 	}
 	
 	@PutMapping(value = "/editSlowdownData/{plantMaintenanceTransactionId}")
-    public ResponseEntity<ShutDownPlanDTO> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId, @RequestBody ShutDownPlanDTO shutDownPlanDTO) {
+    public ResponseEntity<List<ShutDownPlanDTO>> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId, @RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
         
-		slowdownPlanService.editShutdownData(plantMaintenanceTransactionId,shutDownPlanDTO);
+		slowdownPlanService.editShutdownData(plantMaintenanceTransactionId,shutDownPlanDTOList);
 		          
-        return ResponseEntity.ok(shutDownPlanDTO);
+        return ResponseEntity.ok(shutDownPlanDTOList);
     }
 	
 	@DeleteMapping("/deleteSlowdownData/{plantMaintenanceTransactionId}")

@@ -95,44 +95,32 @@ public class AOPServiceImpl implements  AOPService{
 	}
 
 	@Override
-	public AOPDTO updateAOP(AOPDTO aOPDTO) {
-
-
-		System.out.println(aOPDTO.getId());
-		System.out.println(UUID.fromString(aOPDTO.getId()));
-	
-		AOP aOP=aOPRepository.findById(UUID.fromString(aOPDTO.getId())).get();
-
-		// import java.util.UUID;
-
-		// aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFkId()));
-
-		aOP.setAopCaseId(aOPDTO.getAopCaseId());
-		aOP.setAopRemarks(aOPDTO.getAopRemarks());
-		aOP.setAopStatus(aOPDTO.getAopStatus());
-		aOP.setAopType(aOPDTO.getAopType());
-		aOP.setAopYear(aOPDTO.getAopYear());
-		aOP.setApril(aOPDTO.getApril());
-		aOP.setAug(aOPDTO.getAug());
-		aOP.setAvgTPH(aOPDTO.getAvgTPH());
-		aOP.setDec(aOPDTO.getDec());
-		aOP.setFeb(aOPDTO.getFeb());
-		aOP.setJan(aOPDTO.getJan());
-		aOP.setJuly(aOPDTO.getJuly());
-		aOP.setJune(aOPDTO.getJune());
-		aOP.setMarch(aOPDTO.getMarch());
-		aOP.setMay(aOPDTO.getMay());
-		aOP.setNormItem(aOPDTO.getNormItem());
-		aOP.setNov(aOPDTO.getNov());
-		aOP.setOct(aOPDTO.getOct());
-
-
-		aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFkId()));
-		
-		aOP.setSep(aOPDTO.getSep());
-		aOPRepository.save(aOP);
-		// TODO Auto-generated method stub
-		return aOPDTO;
+	public List<AOPDTO> updateAOP(List<AOPDTO> aOPDTOList) {
+		for(AOPDTO aOPDTO:aOPDTOList) {
+			AOP aOP=aOPRepository.findById(UUID.fromString(aOPDTO.getId())).get();
+			aOP.setAopCaseId(aOPDTO.getAopCaseId());
+			aOP.setAopRemarks(aOPDTO.getAopRemarks());
+			aOP.setAopStatus(aOPDTO.getAopStatus());
+			aOP.setAopType(aOPDTO.getAopType());
+			aOP.setAopYear(aOPDTO.getAopYear());
+			aOP.setApril(aOPDTO.getApril());
+			aOP.setAug(aOPDTO.getAug());
+			aOP.setAvgTPH(aOPDTO.getAvgTPH());
+			aOP.setDec(aOPDTO.getDec());
+			aOP.setFeb(aOPDTO.getFeb());
+			aOP.setJan(aOPDTO.getJan());
+			aOP.setJuly(aOPDTO.getJuly());
+			aOP.setJune(aOPDTO.getJune());
+			aOP.setMarch(aOPDTO.getMarch());
+			aOP.setMay(aOPDTO.getMay());
+			aOP.setNormItem(aOPDTO.getNormItem());
+			aOP.setNov(aOPDTO.getNov());
+			aOP.setOct(aOPDTO.getOct());
+			aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFkId()));
+			aOP.setSep(aOPDTO.getSep());
+			aOPRepository.save(aOP);
+		}
+		return aOPDTOList;
 	}
 
 }
