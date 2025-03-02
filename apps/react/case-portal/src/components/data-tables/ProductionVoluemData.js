@@ -1,13 +1,20 @@
-import { DataService } from 'services/DataService'
-import ASDataGrid from './ASDataGrid'
 import { useEffect, useState } from 'react'
+import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
+import ASDataGrid from './ASDataGrid'
+
+import { useSelector } from 'react-redux'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+const headerMap = generateHeaderNames()
 
 const ProductionvolumeData = () => {
   const keycloak = useSession()
   const [productNormData, setProductNormData] = useState([])
   const [slowDownData, setSlowDownData] = useState([])
   const [allProducts, setAllProducts] = useState([])
+
+  const menu = useSelector((state) => state.menu)
+  const { sitePlantChange } = menu
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,7 +46,7 @@ const ProductionvolumeData = () => {
 
     getAllProducts()
     fetchData()
-  }, [])
+  }, [sitePlantChange, keycloak])
 
   const productionColumns = [
     { field: 'id', headerName: 'ID' },
@@ -53,18 +60,22 @@ const ProductionvolumeData = () => {
     { field: 'aopYear', headerName: 'Year', minWidth: 80 },
     { field: 'plantFkId', headerName: 'Plant ID', minWidth: 80 },
     { field: 'normItem', headerName: 'Product', minWidth: 80, editable: false },
-    { field: 'april', headerName: 'Apr-24', editable: true },
-    { field: 'may', headerName: 'May-24', editable: true },
-    { field: 'june', headerName: 'Jun-24', editable: true },
-    { field: 'july', headerName: 'Jul-24', editable: true },
-    { field: 'aug', headerName: 'Aug-24', editable: true },
-    { field: 'sep', headerName: 'Sep-24', editable: true },
-    { field: 'oct', headerName: 'Oct-24', editable: true },
-    { field: 'nov', headerName: 'Nov-24', editable: true },
-    { field: 'dec', headerName: 'Dec-24', editable: true },
-    { field: 'jan', headerName: 'Jan-25', editable: true },
-    { field: 'feb', headerName: 'Feb-25', editable: true },
-    { field: 'march', headerName: 'Mar-25', editable: true },
+
+    { field: 'april', headerName: headerMap['apr'], editable: true },
+    { field: 'may', headerName: headerMap['may'], editable: true },
+    { field: 'june', headerName: headerMap['jun'], editable: true },
+    { field: 'july', headerName: headerMap['jul'], editable: true },
+
+    { field: 'aug', headerName: headerMap['aug'], editable: true },
+    { field: 'sep', headerName: headerMap['sep'], editable: true },
+    { field: 'oct', headerName: headerMap['oct'], editable: true },
+
+    { field: 'nov', headerName: headerMap['nov'], editable: true },
+    { field: 'dec', headerName: headerMap['dec'], editable: true },
+    { field: 'jan', headerName: headerMap['jan'], editable: true },
+    { field: 'feb', headerName: headerMap['feb'], editable: true },
+    { field: 'march', headerName: headerMap['mar'], editable: true },
+
     {
       field: 'averageTPH',
       headerName: 'Average TPH',

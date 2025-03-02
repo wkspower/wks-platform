@@ -40,7 +40,7 @@ const FeedStockAvailability = () => {
   const getAllProducts = async () => {
     try {
       const data = await DataService.getAllProducts(keycloak)
-      console.log('API Response:', data)
+      // console.log('API Response:', data)
       const products = data.map((item) => item.displayName || item.name || item)
       setProductOptions(products)
     } catch (error) {

@@ -37,6 +37,7 @@ export const DataService = {
   completeTask,
 
   getAOPData,
+  getAOPMCCalculatedData,
 
   deleteSlowdownData,
   deleteShutdownData,
@@ -756,6 +757,30 @@ async function getAOPData(keycloak) {
   }
 
   const url = `${process.env.REACT_APP_API_URL}/task/getAOP?plantId=${plantId}&year=2024-25`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getAOPMCCalculatedData(keycloak) {
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  const url = `${process.env.REACT_APP_API_URL}/task/getAOPMCCalculatedData?plantId=${plantId}&year=2024-25`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

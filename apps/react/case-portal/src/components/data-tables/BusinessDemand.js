@@ -47,8 +47,8 @@ const BusinessDemand = () => {
     // Initial data fetch on mount or when selectedPlant changes
     fetchData()
     getAllProducts()
-    console.log('sitePlant--->', sitePlantChange)
-    console.log(sitePlantChange, 'changed plant or site')
+    // console.log('sitePlant--->', sitePlantChange)
+    // console.log(sitePlantChange, 'changed plant or site')
   }, [sitePlantChange, keycloak])
 
   const colDefs = [

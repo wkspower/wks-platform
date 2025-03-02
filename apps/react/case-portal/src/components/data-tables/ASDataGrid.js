@@ -110,31 +110,24 @@ const DataGridTable = ({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
-  const handleRowEditStop = (params, event) => {
-    //console.log('handleRowEditStop', params)
 
+  const handleRowEditStop = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
       event.defaultMuiPrevented = true
     }
   }
 
   const handleRowEditCommit = (id, event) => {
-    console.log('Row Data After Editing:', event)
     const editedRow = rows.find((row) => row.id === id)
-    console.log('Row Data After Editing:', editedRow)
+
     // handleEditClick(id, event)
   }
   const handleCellEditCommit = (id, event) => {
-    console.log('handleRowEditCommit:', event)
-    console.log('Row Data After Editing:', editedRow)
     // handleEditClick(id, event)
   }
 
   const handleEditClick = (id, row) => () => {
-    //console.log('id',id)
-    //console.log('row',row)
     //    setChangedRowIds(id)
-    // console.log(row)
     setIsUpdating(true)
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } })
   }
@@ -144,7 +137,7 @@ const DataGridTable = ({
   // };
 
   const handleSaveClick = (id, rowData) => {
-    // if (changedRowIds.remarks) {
+    // if (!rowData.remarks) {
     //   setSnackbarOpen(true)
     //   setSnackbarData({
     //     message: 'Please Fill remark Fields!',
@@ -152,9 +145,6 @@ const DataGridTable = ({
     //   })
     //   return
     // }
-    //console.log('Newly Added Row Data:', rowData)
-    console.log('selectedRows:', changedRowIds)
-    console.log(changedRowIds)
 
     handleOpenRemark()
     setRowModesModel((prev) => ({
@@ -162,10 +152,6 @@ const DataGridTable = ({
       [id]: { mode: GridRowModes.View },
     }))
   }
-
-  // useEffect(() => {
-  //   //console.log("Updated Rows!!!!!!!!!!!!!!!!!!!!!!!:", rows);
-  // }, [rows]);
 
   const handleDeleteClick = async (id, params) => {
     deleteData(params.row.idFromApi || params.row.maintenanceId)
@@ -214,7 +200,7 @@ const DataGridTable = ({
         shutdownDetails,
         keycloak,
       )
-      //console.log('Shutdown data saved successfully:', response)
+
       setSnackbarOpen(true)
       // setSnackbarMessage("Shutdown data saved successfully !");
       setSnackbarData({
@@ -351,6 +337,27 @@ const DataGridTable = ({
         feb: newRow.feb,
         march: newRow.march,
       }
+      // const productNormData2 = {
+      //   id: newRow.id,
+      //   aopType: newRow.aopType,
+      //   aopCaseId: newRow.aopCaseId,
+      //   aopStatus: newRow.aopStatus,
+      //   aopYear: newRow.aopYear,
+      //   plantFkId: newRow.plantFkId,
+      //   normItem: newRow.normItem,
+      //   april: newRow.april,
+      //   may: newRow.may,
+      //   june: newRow.june,
+      //   july: newRow.july,
+      //   aug: newRow.aug,
+      //   sep: newRow.sep,
+      //   oct: newRow.oct,
+      //   nov: newRow.nov,
+      //   dec: newRow.dec,
+      //   jan: newRow.jan,
+      //   feb: newRow.feb,
+      //   march: newRow.march,
+      // }
 
       const response = await DataService.updateProductNormData(
         productNormData,
@@ -407,7 +414,7 @@ const DataGridTable = ({
   }
 
   const saveCatalystData = async (newRow) => {
-    console.log('new Row ', newRow)
+    // console.log('new Row ', newRow)
 
     try {
       var plantId = ''
@@ -494,21 +501,22 @@ const DataGridTable = ({
         businessData, // Now sending an array of rows
         keycloak,
       )
+
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Business Demand data saved successfully!',
         severity: 'success',
       })
+
       return response
     } catch (error) {
       console.error('Error saving Business Demand data:', error)
     }
   }
+
   const saveTurnAroundData = async (newRow) => {
     try {
-      // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
       var plantId = ''
-
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
@@ -530,15 +538,11 @@ const DataGridTable = ({
         turnAroundDetails,
         keycloak,
       )
-      //console.log('Turnaround Plan data saved successfully:', response)
       setSnackbarOpen(true)
-      // setSnackbarMessage("Turnaround Plan data saved successfully !");
       setSnackbarData({
         message: 'Turnaround Plan data saved successfully!',
         severity: 'success',
       })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Turnaround Plan data saved successfully!", severity: "success" });
       return response
     } catch (error) {
       console.error('Error saving Turnaround Plan data:', error)
@@ -739,16 +743,10 @@ const DataGridTable = ({
         )
 
         setRows(updatedRows)
-
-        // if(newRow?.id){
-        //   // updateCatalystData(newRow)
-        // }else
         {
           saveCatalystData(newRow)
-          // saveTurnAroundData(newRow)
         }
         onRowUpdate?.(updatedRow)
-        //console.log('Updated Row inside processRowUpdate:', updatedRow)
         setSelectedRows(updatedRow)
 
         return updatedRow // Ensure function returns the updated row
@@ -964,7 +962,7 @@ const DataGridTable = ({
   }
 
   const deleteTheRecord = () => {
-    console.log(params)
+    // console.log(params)
     return
     if (title == 'Business Demand') {
       deleteData(id, params)
@@ -1278,8 +1276,8 @@ const DataGridTable = ({
 
   // const handleCellClick = (params) => {}
   useEffect(() => {
-    console.log('-->:', changedRowIds)
-    console.log('Length of changedRowIds:', changedRowIds.length)
+    // console.log('-->:', changedRowIds)
+    // console.log('Length of changedRowIds:', changedRowIds.length)
   }, [changedRowIds])
 
   const handleCellClick = (params) => {
@@ -1420,7 +1418,7 @@ const DataGridTable = ({
 
       return
     }
-    //console.log('Submitted Data:', days)
+
     setOpen(false) // Close the modal
     if (permissions?.saveWithRemark) {
       // Update the row with the new data
@@ -1459,7 +1457,6 @@ const DataGridTable = ({
 
   // Handle input changes
   const handleValueChange = (index, newValue) => {
-    // console.log(newValue)
     setDays((prevDays) =>
       prevDays.map((day, i) =>
         i === index ? { ...day, value: newValue } : day,
@@ -1788,10 +1785,8 @@ const DataGridTable = ({
             toolbar: { setRows, setRowModesModel },
           }}
           onCellEditStop={(params, event) => {
-            console.log('param in ', params)
             if (params.reason === 'cellFocusOut') {
               event.defaultMuiPrevented = true
-              console.log('param in ', params)
             }
           }}
           getRowClassName={(params) =>
@@ -1980,6 +1975,7 @@ const DataGridTable = ({
           </Button>
         )}
       </Box>
+
       {/* <Notification
         open={snackbarOpen}
         message={snackbarMessage}
