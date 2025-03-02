@@ -19,7 +19,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	@Override
 	public List<MaintenanceCalculatedDataDTO> getMaintenanceCalculatedData(String plantId,  String year) {
-		List<MaintenanceCalculatedData> maintenanceCalculatedDataList= 	maintenanceCalculatedDataRepository.findAllByPlantIdAndYear(UUID.fromString(plantId),year);
+		List<MaintenanceCalculatedData> maintenanceCalculatedDataList= 	maintenanceCalculatedDataRepository.findAllByPlantFKIdAndAopYear(UUID.fromString(plantId),year);
 		List<MaintenanceCalculatedDataDTO> maintenanceCalculatedDataDTOList= new ArrayList<>();
 		for(MaintenanceCalculatedData maintenanceCalculatedData:maintenanceCalculatedDataList) {
 			MaintenanceCalculatedDataDTO maintenanceCalculatedDataDTO= new MaintenanceCalculatedDataDTO();

@@ -19,11 +19,9 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	@Override
 	public List<AOPMCCalculatedDataDTO> getAOPMCCalculatedData(String plantId, String year) {
 	    List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
-	    List<Object[]> objList = aOPMCCalculatedDataRepository.findBusinessDemandWithAOPMC(UUID.fromString(plantId), year);
+	    List<AOPMCCalculatedData> objList = aOPMCCalculatedDataRepository.findAllByYearAndPlantFKId(year, UUID.fromString(plantId));
 
-	    for (Object[] obj : objList) {
-	        AOPMCCalculatedData aopData = (AOPMCCalculatedData) obj[0]; // First element (AOPMCCalculatedData)
-	        UUID bdNormParametersFKId = obj[1] != null ? UUID.fromString(obj[1].toString()) : null; // Second element (BDNormParametersFKId)
+	    for (AOPMCCalculatedData aopData: objList) {
 
 	        AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO = new AOPMCCalculatedDataDTO();
 	        aOPMCCalculatedDataDTO.setApril(aopData.getApril());
@@ -42,11 +40,27 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	        aOPMCCalculatedDataDTO.setPlant(aopData.getPlant());
 	        aOPMCCalculatedDataDTO.setSeptember(aopData.getSeptember());
 	        aOPMCCalculatedDataDTO.setSite(aopData.getSite());
+			aOPMCCalculatedDataDTO.setNormParametersFKId(aopData.getNormParametersFKId()!=null?aopData.getNormParametersFKId().toString():null);
 
 	        // Set BDNormParametersFKId in DTO
-	        aOPMCCalculatedDataDTO.setBDNormParametersFKId(bdNormParametersFKId.toString());
+	        //aOPMCCalculatedDataDTO.setBDNormParametersFKId(bdNormParametersFKId.toString());
 	        aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
 	    }
+
+
+		List<Object[]> list = aOPMCCalculatedDataRepository.getDataBusinessAllData(plantId,year);
+int i=1;
+		for(Object[] obj :list){
+               
+			AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO = new AOPMCCalculatedDataDTO();
+
+			aOPMCCalculatedDataDTO.setNormParametersFKId(obj[0]!=null? obj[0].toString():null);
+			aOPMCCalculatedDataDTO.setId(i+"#");
+			aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
+i++;
+		}
+
+
 	    return aOPMCCalculatedDataDTOList;
 	}
 
@@ -58,7 +72,12 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			aOPMCCalculatedData.setAugust(aOPMCCalculatedDataDTO.getAugust());
 			aOPMCCalculatedData.setDecember(aOPMCCalculatedDataDTO.getDecember());
 			aOPMCCalculatedData.setFebruary(aOPMCCalculatedDataDTO.getFebruary());
-			aOPMCCalculatedData.setId(UUID.fromString(aOPMCCalculatedDataDTO.getId()));
+			if(aOPMCCalculatedDataDTO.getId()==null && aOPMCCalculatedDataDTO.getId().contains("#") ){
+				aOPMCCalculatedData.setId(null);
+			}else{
+				aOPMCCalculatedData.setId(UUID.fromString(aOPMCCalculatedDataDTO.getId()));
+			}
+			
 			aOPMCCalculatedData.setJanuary(aOPMCCalculatedDataDTO.getJanuary());
 			aOPMCCalculatedData.setJuly(aOPMCCalculatedDataDTO.getJuly());
 			aOPMCCalculatedData.setJune(aOPMCCalculatedDataDTO.getJune());

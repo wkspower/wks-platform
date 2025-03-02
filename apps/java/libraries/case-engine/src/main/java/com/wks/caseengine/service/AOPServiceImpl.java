@@ -7,9 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.AOPDTO;
-import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
 import com.wks.caseengine.entity.AOP;
-import com.wks.caseengine.entity.AOPMCCalculatedData;
 import com.wks.caseengine.repository.AOPRepository;
 
 import java.util.UUID;
@@ -59,11 +57,11 @@ public class AOPServiceImpl implements  AOPService{
 	@Override
 	public List<AOPDTO> getAOPData(String plantId, String year) {
 	    List<AOPDTO> aOPDTOList = new ArrayList<>();
-	    List<Object[]> objList = aOPRepository.findBusinessDemandWithAOP(UUID.fromString(plantId), year);
+	    List<AOP> objList = aOPRepository.findAllByAopYearAndPlantFkId(year, UUID.fromString(plantId));;
 
-	    for (Object[] obj : objList) {
-	        AOP aOPData = (AOP) obj[0]; // First element (AOPMCCalculatedData)
-	        UUID bdNormParametersFKId = obj[1] != null ? UUID.fromString(obj[1].toString()) : null; // Second element (BDNormParametersFKId)
+	    for (AOP aOPData : objList) {
+	       // AOP aOPData = (AOP) obj[0]; // First element (AOPMCCalculatedData)
+	       // UUID bdNormParametersFKId = obj[1] != null ? UUID.fromString(obj[1].toString()) : null; // Second element (BDNormParametersFKId)
 
 	        AOPDTO aOPDTO = new AOPDTO();
 	        aOPDTO.setId(aOPData.getId().toString());
@@ -88,16 +86,34 @@ public class AOPServiceImpl implements  AOPService{
 			aOPDTO.setPlantFkId(aOPData.getPlantFkId().toString());
 			aOPDTO.setSep(aOPData.getSep());
 	        // Set BDNormParametersFKId in DTO
-			aOPDTO.setBDNormParametersFKId(bdNormParametersFKId.toString());
+			//aOPDTO.setBDNormParametersFKId(bdNormParametersFKId.toString());
 			aOPDTOList.add(aOPDTO);
 	    }
+
+		List<Object[]> list = aOPRepository.getDataBusinessAllData(plantId,year);
+		int i=1;
+				for(Object[] obj :list){
+					   
+					AOPDTO aOPDTO = new AOPDTO();
+		
+					aOPDTO.setNormParametersFKId(obj[0]!=null? obj[0].toString():null);
+					aOPDTO.setId(i+"#");
+					aOPDTOList.add(aOPDTO);
+		i++;
+				}
+
 	    return aOPDTOList;
 	}
 
 	@Override
 	public List<AOPDTO> updateAOP(List<AOPDTO> aOPDTOList) {
 		for(AOPDTO aOPDTO:aOPDTOList) {
-			AOP aOP=aOPRepository.findById(UUID.fromString(aOPDTO.getId())).get();
+			AOP aOP= null;
+			if(aOPDTO.getId()==null || aOPDTO.getId().contains("#")){
+				aOP=new AOP();
+			}else{
+                aOP=aOPRepository.findById(UUID.fromString(aOPDTO.getId())).get();
+			}
 			aOP.setAopCaseId(aOPDTO.getAopCaseId());
 			aOP.setAopRemarks(aOPDTO.getAopRemarks());
 			aOP.setAopStatus(aOPDTO.getAopStatus());

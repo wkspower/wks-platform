@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.wks.caseengine.entity.AOPMCCalculatedData;
+import com.wks.caseengine.entity.BusinessDemand;
 
 @Repository
 public interface AOPMCCalculatedDataRepository extends JpaRepository<AOPMCCalculatedData, UUID>{
@@ -20,5 +21,13 @@ public interface AOPMCCalculatedDataRepository extends JpaRepository<AOPMCCalcul
             "AND a.NormParameters_FK_Id = b.NormParameters_FK_Id " +
             "WHERE b.Plant_FK_Id = :plantId and b.Year=:year", 
     nativeQuery = true)
-	List<Object[]> findBusinessDemandWithAOPMC(@Param("plantId") UUID plantId, @Param("year") String year);
+	List<Object[]> findBusinessDemandWithAOPMC(@Param("plantId") String plantId, @Param("year") String year);
+
+    public List<AOPMCCalculatedData> findAllByYearAndPlantFKId(String year,UUID plantId);
+
+
+@Query(value="select distinct [NormParameters_FK_Id] from BusinessDemand where Plant_FK_Id = :plantId and Year=:year "+
+  " and [NormParameters_FK_Id] not in (select [NormParameters_FK_Id] from [dbo].[AOPMCCalculatedData] where Plant_FK_Id= :plantId and [NormParameters_FK_Id] is not null and Year=:year) ", nativeQuery=true)
+  List<Object[]> getDataBusinessAllData(@Param("plantId") String plantId, @Param("year") String year);
+
 }

@@ -755,7 +755,7 @@ async function getAOPData(keycloak) {
     plantId = parsedPlant.id
   }
 
-  const url = `${process.env.REACT_APP_API_URL}/task/getAOP`
+  const url = `${process.env.REACT_APP_API_URL}/task/getAOP?plantId=${plantId}&year=2024-25`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

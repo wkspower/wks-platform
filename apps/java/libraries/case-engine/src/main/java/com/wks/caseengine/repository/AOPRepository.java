@@ -20,6 +20,15 @@ public interface AOPRepository extends JpaRepository<AOP, UUID>{
             "WHERE b.Plant_FK_Id = :plantId and b.Year=:year", 
     nativeQuery = true)
 	List<Object[]> findBusinessDemandWithAOP(@Param("plantId") UUID plantId, @Param("year") String year);
+
+
+
+    List<AOP> findAllByAopYearAndPlantFkId(String year, UUID fromString);
+
+
+    @Query(value="select distinct [NormParameters_FK_Id] from BusinessDemand where Plant_FK_Id = :plantId and Year=:year "+
+    " and [NormParameters_FK_Id] not in (select [NormParameters_FK_Id] from [dbo].[AOP] where Plant_FK_Id= :plantId and [NormParameters_FK_Id] is not null and Year=:year) ", nativeQuery=true)
+    List<Object[]> getDataBusinessAllData(@Param("plantId") String plantId, @Param("year") String year);
 	
 	
 

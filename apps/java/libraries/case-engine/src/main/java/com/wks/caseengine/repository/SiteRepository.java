@@ -2,13 +2,9 @@ package com.wks.caseengine.repository;
 
 import java.util.List;
 import java.util.UUID;
-
-
-
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import com.wks.caseengine.entity.Sites;
 
@@ -29,5 +25,6 @@ public interface SiteRepository extends JpaRepository<Sites, UUID>{
             "JOIN Plants p ON s.id = p.Site_FK_Id", 
 		    nativeQuery = true)
 		List<Object[]> getPlantAndSite();
+
 
 }
