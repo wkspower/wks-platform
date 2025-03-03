@@ -1,7 +1,9 @@
 import { useSession } from 'SessionStoreContext'
 import ASDataGrid from './ASDataGrid'
 import { DataService } from 'services/DataService'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useGridApiRef } from '@mui/x-data-grid'
 
 const productionColumns = [
   {
@@ -9,12 +11,6 @@ const productionColumns = [
     headerName: 'Feed Stock',
     width: 150,
     editable: true,
-    renderHeader: () => (
-      <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
-        <div>Feed</div>
-        <div>Stock</div>
-      </div>
-    ),
   },
   { field: 'apr24', headerName: 'Apr-24', width: 100, editable: true },
   { field: 'may24', headerName: 'May-24', width: 100, editable: true },
@@ -31,16 +27,75 @@ const productionColumns = [
 ]
 
 const FeedStockAvailability = () => {
-  const keycloak = useSession()
   const [productOptions, setProductOptions] = useState([])
   const [productionData, setProductionData] = useState([])
+  const menu = useSelector((state) => state.menu)
+  const { sitePlantChange } = menu
+  const [open1, setOpen1] = useState(false)
+  const [deleteId, setDeleteId] = useState(null)
+  const apiRef = useGridApiRef()
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
+  })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const unsavedChangesRef = React.useRef({
+    unsavedRows: {},
+    rowsBeforeChange: {},
+  })
+  const keycloak = useSession()
+  const processRowUpdate = React.useCallback((newRow, oldRow) => {
+    const rowId = newRow.id
+    console.log(newRow)
+    const start = new Date(newRow.maintStartDateTime)
+    const end = new Date(newRow.maintEndDateTime)
+    const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
+    // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
+
+    console.log(`Duration in minutes: ${durationInMins}`)
+
+    // Update the duration in newRow
+    newRow.durationInMins = durationInMins.toFixed(2)
+    // newRow.durationInMins = durationInMins
+    // setShutdownData((prevData) =>
+    //   prevData.map((row) => (row.id === rowId ? newRow : row)),
+    // )
+
+    // Store edited row data
+    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
+
+    // Keep track of original values before editing
+    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
+      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
+    }
+
+    // setHasUnsavedRows(true)
+    return newRow
+  }, [])
+  const saveChanges = React.useCallback(async () => {
+    console.log(
+      'Edited Data: ',
+      Object.values(unsavedChangesRef.current.unsavedRows),
+    )
+    try {
+      // var data = Object.values(unsavedChangesRef.current.unsavedRows)
+      // saveShutdownData(data)
+
+      unsavedChangesRef.current = {
+        unsavedRows: {},
+        rowsBeforeChange: {},
+      }
+    } catch (error) {
+      // setIsSaving(false);
+    }
+  }, [apiRef])
   useEffect(() => {
     getAllProducts()
   }, [])
   const getAllProducts = async () => {
     try {
       const data = await DataService.getAllProducts(keycloak)
-      // console.log('API Response:', data)
+      console.log('API Response:', data)
       const products = data.map((item) => item.displayName || item.name || item)
       setProductOptions(products)
     } catch (error) {
@@ -79,6 +134,19 @@ const FeedStockAvailability = () => {
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[10, 20, 30]}
+        processRowUpdate={processRowUpdate}
+        saveChanges={saveChanges}
+        snackbarData={snackbarData}
+        snackbarOpen={snackbarOpen}
+        apiRef={apiRef}
+        // deleteId={deleteId}
+        open1={open1}
+        // setDeleteId={setDeleteId}
+        setOpen1={setOpen1}
+        setSnackbarOpen={setSnackbarOpen}
+        setSnackbarData={setSnackbarData}
+        // handleDeleteClick={handleDeleteClick}
+        // fetchData={fetchData}
         permissions={{
           showAction: true,
           addButton: true,

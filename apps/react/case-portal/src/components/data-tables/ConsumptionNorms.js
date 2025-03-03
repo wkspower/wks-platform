@@ -1,114 +1,168 @@
 import { DataService } from 'services/DataService'
 import DataGridTable from './ASDataGrid'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import { useSelector } from 'react-redux'
+import { useGridApiRef } from '@mui/x-data-grid'
 
 const NormalOpNormsScreen = () => {
-  const keycloak = useSession();
-  const [csData, setCsData] = useState([]);
-  const [csDataTransformed, setCsDataTransformed] = useState([]);
-  const [allProducts, setAllProducts] = useState([]);
-  const headerMap = generateHeaderNames();
+  const keycloak = useSession()
+  const [csData, setCsData] = useState([])
+  const [csDataTransformed, setCsDataTransformed] = useState([])
+  const [allProducts, setAllProducts] = useState([])
+  const headerMap = generateHeaderNames()
+  const menu = useSelector((state) => state.menu)
+  const { sitePlantChange } = menu
+  const [open1, setOpen1] = useState(false)
+  const [deleteId, setDeleteId] = useState(null)
+  const apiRef = useGridApiRef()
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
+  })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const unsavedChangesRef = React.useRef({
+    unsavedRows: {},
+    rowsBeforeChange: {},
+  })
+  const processRowUpdate = React.useCallback((newRow, oldRow) => {
+    const rowId = newRow.id
+    console.log(newRow)
+    const start = new Date(newRow.maintStartDateTime)
+    const end = new Date(newRow.maintEndDateTime)
+    const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
+    // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await DataService.getConsumptionNormsData(keycloak);
-        setCsData(data);
+    console.log(`Duration in minutes: ${durationInMins}`)
 
-        let rowIndex = 1;
-        const groupedRows = [];
+    // Update the duration in newRow
+    newRow.durationInMins = durationInMins.toFixed(2)
+    // newRow.durationInMins = durationInMins
+    // setShutdownData((prevData) =>
+    //   prevData.map((row) => (row.id === rowId ? newRow : row)),
+    // )
 
-        Object.entries(data).forEach(([Particulars, rows], index) => {
-          groupedRows.push({
-            id: `group-${index}`,
-            Particulars: Particulars,
-          });
-          rows.forEach((row) => {
-            groupedRows.push({
-              ...row,
-              id: row.NormParameterMonthlyTransactionId || `row-${rowIndex++}`,
-            });
-          });
-        });
+    // Store edited row data
+    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
-        setCsDataTransformed(groupedRows);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+    // Keep track of original values before editing
+    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
+      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
+    }
+
+    // setHasUnsavedRows(true)
+    return newRow
+  }, [])
+  const saveChanges = React.useCallback(async () => {
+    console.log(
+      'Edited Data: ',
+      Object.values(unsavedChangesRef.current.unsavedRows),
+    )
+    try {
+      // var data = Object.values(unsavedChangesRef.current.unsavedRows)
+      // saveShutdownData(data)
+
+      unsavedChangesRef.current = {
+        unsavedRows: {},
+        rowsBeforeChange: {},
       }
-    };
+    } catch (error) {
+      // setIsSaving(false);
+    }
+  }, [apiRef])
+  const fetchData = async () => {
+    try {
+      const data = await DataService.getConsumptionNormsData(keycloak)
+      setCsData(data)
 
+      let rowIndex = 1
+      const groupedRows = []
+
+      Object.entries(data).forEach(([Particulars, rows], index) => {
+        groupedRows.push({
+          id: `group-${index}`,
+          Particulars: Particulars,
+        })
+        rows.forEach((row) => {
+          groupedRows.push({
+            ...row,
+            id: row.NormParameterMonthlyTransactionId || `row-${rowIndex++}`,
+          })
+        })
+      })
+
+      setCsDataTransformed(groupedRows)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    }
+  }
+  useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak);
+        const data = await DataService.getAllProducts(keycloak)
         const productList = data.map((product) => ({
           id: product.id,
           displayName: product.displayName,
-        }));
-        setAllProducts(productList);
+        }))
+        setAllProducts(productList)
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error('Error fetching products:', error)
       }
-    };
+    }
 
-    getAllProducts();
-    fetchData();
-  }, []);
+    getAllProducts()
+    fetchData()
+  }, [sitePlantChange, keycloak])
 
   const productionColumns = [
     {
-      field: "Particulars",
-      headerName: "Particulars",
+      field: 'Particulars',
+      headerName: 'Particulars',
       minWidth: 150,
       editable: false,
       renderCell: (params) => {
-        const isGroupRow = params.row.id.startsWith("group-");
+        const isGroupRow = params.row.id.startsWith('group-')
         return (
-          <span style={{ fontWeight: isGroupRow ? "bold" : "normal" }}>
+          <span style={{ fontWeight: isGroupRow ? 'bold' : 'normal' }}>
             {params.value}
           </span>
-        );
+        )
       },
     },
 
-    
-    
-    { field: "TPH", headerName: "Unit", width: 100, editable: false },
-
-
-
+    { field: 'TPH', headerName: 'Unit', width: 100, editable: false },
 
     {
       field: 'NormParametersId',
       headerName: 'Product Norm',
       editable: true,
       minWidth: 225,
-      valueGetter: (params , params2) => {
-        return params || ''; 
+      valueGetter: (params) => {
+        return params || ''
       },
       valueFormatter: (params) => {
-        const product = allProducts.find((p) => p.id === params);
-        return product ? product.displayName : '';
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : ''
       },
-      renderEditCell: (params , params2) => {
-        const { id, value } = params; 
+      renderEditCell: (params) => {
+        const { value } = params
         return (
           <select
-            value={value} 
+            value={value}
             onChange={(event) => {
               params.api.setEditCellValue({
                 id: params.id,
                 field: 'NormParametersId',
-                value: event.target.value, 
-              });
+                value: event.target.value,
+              })
             }}
             style={{
               width: '100%',
               padding: '5px',
-              border: 'none',  
-              outline: 'none', 
-              background: 'transparent', 
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
             }}
           >
             {allProducts.map((product) => (
@@ -117,9 +171,9 @@ const NormalOpNormsScreen = () => {
               </option>
             ))}
           </select>
-        );
+        )
       },
-    }, 
+    },
 
     { field: 'apr24', headerName: headerMap['apr'], editable: true },
     { field: 'may24', headerName: headerMap['may'], editable: true },
@@ -134,11 +188,8 @@ const NormalOpNormsScreen = () => {
     { field: 'feb25', headerName: headerMap['feb'], editable: true },
     { field: 'mar25', headerName: headerMap['mar'], editable: true },
 
-
-
-    { field: "remark", headerName: "Remark",  editable: true },
-  ];
-
+    { field: 'remark', headerName: 'Remark', editable: true },
+  ]
 
   return (
     <div>
@@ -146,8 +197,21 @@ const NormalOpNormsScreen = () => {
         columns={productionColumns}
         rows={csDataTransformed}
         getRowId={(row) => row.id}
-        title="Consumption AOP"
+        title='Consumption AOP'
         paginationOptions={[100, 200, 300]}
+        processRowUpdate={processRowUpdate}
+        saveChanges={saveChanges}
+        snackbarData={snackbarData}
+        snackbarOpen={snackbarOpen}
+        apiRef={apiRef}
+        // deleteId={deleteId}
+        open1={open1}
+        // setDeleteId={setDeleteId}
+        setOpen1={setOpen1}
+        setSnackbarOpen={setSnackbarOpen}
+        setSnackbarData={setSnackbarData}
+        // handleDeleteClick={handleDeleteClick}
+        fetchData={fetchData}
         permissions={{
           showAction: true,
           addButton: false,
@@ -158,8 +222,7 @@ const NormalOpNormsScreen = () => {
         }}
       />
     </div>
-  );
-};
-
+  )
+}
 
 export default NormalOpNormsScreen

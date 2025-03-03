@@ -63,33 +63,47 @@ const DataGridTable = ({
   title = 'Turnaround Plan Details',
   onAddRow,
   onDeleteRow,
-  onRowUpdate,
+  // onRowUpdate,
   permissions,
+  processRowUpdate,
+  saveChanges,
+  apiRef,
+  snackbarData,
+  snackbarOpen,
+  // updateTurnAroundData,
+  setSnackbarData,
+  setSnackbarOpen,
+  deleteId,
+  open1,
+  setDeleteId,
+  setOpen1,
+  handleDeleteClick,
+  fetchData,
 }) => {
-  const [selectedRows, setSelectedRows] = useState({})
+  // const [selectedRows, setSelectedRows] = useState({})
   // const [snackbarMessage, setSnackbarMessage] = useState('')
-  const [snackbarData, setSnackbarData] = useState({
-    message: '',
-    severity: 'info',
-  })
+  // const [snackbarData, setSnackbarData] = useState({
+  //   message: '',
+  //   severity: 'info',
+  // })
   // const [rowModesModel, setRowModesModel] = useState({})
-  const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const apiRef = useGridApiRef()
+  // const [snackbarOpen, setSnackbarOpen] = useState(false)
+  // const apiRef = useGridApiRef()
   const [isUpdating, setIsUpdating] = useState(false)
-  const [openYearData, setOpenYearData] = useState(false)
+  // const [openYearData, setOpenYearData] = useState(false)
 
   const [isSaving, setIsSaving] = useState(false)
 
-  const [yearData, setYearData] = useState('')
+  // const [yearData, setYearData] = useState('')
   const [resizedColumns, setResizedColumns] = useState({})
-  const [open, setOpen] = useState(false)
-  const [open1, setOpen1] = useState(false)
-  const [deleteId, setDeleteId] = useState(null)
+  // const [open, setOpen] = useState(false)
+  // const [open1, setOpen1] = useState(false)
+  // const [deleteId, setDeleteId] = useState(null)
   const [remark, setRemark] = useState('')
   const [product, setProduct] = useState('')
   const [openRemark, setOpenRemark] = useState(false)
   const keycloak = useSession()
-  const [days, setDays] = useState([])
+  // const [days, setDays] = useState([])
   const [rows, setRows] = useState(initialRows)
   const [searchText, setSearchText] = useState('')
   const [isFilterActive, setIsFilterActive] = useState(false)
@@ -106,28 +120,38 @@ const DataGridTable = ({
   const [rowModesModel, setRowModesModel] = useState({})
   const [changedRowIds, setChangedRowIds] = useState([])
 
-  const unsavedChangesRef = React.useRef({
-    unsavedRows: {},
-    rowsBeforeChange: {},
-  })
-
+  // const unsavedChangesRef = React.useRef({
+  //   unsavedRows: {},
+  //   rowsBeforeChange: {},
+  // })
   const handleRowEditStop = (params, event) => {
+    //console.log('handleRowEditStop', params)
+
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
       event.defaultMuiPrevented = true
     }
   }
 
   const handleRowEditCommit = (id, event) => {
+    console.log('Row Data After Editing:', event)
     const editedRow = rows.find((row) => row.id === id)
-
+    console.log('Row Data After Editing:', editedRow)
     // handleEditClick(id, event)
   }
-  const handleCellEditCommit = (id, event) => {
-    // handleEditClick(id, event)
+  const handleCellEditCommit = (params) => {
+    console.log('--->', params)
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === params.id ? { ...row, [params.field]: params.value } : row,
+      ),
+    )
   }
 
   const handleEditClick = (id, row) => () => {
+    //console.log('id',id)
+    //console.log('row',row)
     //    setChangedRowIds(id)
+    // console.log(row)
     setIsUpdating(true)
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } })
   }
@@ -137,7 +161,7 @@ const DataGridTable = ({
   // };
 
   const handleSaveClick = (id, rowData) => {
-    // if (!rowData.remarks) {
+    // if (changedRowIds.remarks) {
     //   setSnackbarOpen(true)
     //   setSnackbarData({
     //     message: 'Please Fill remark Fields!',
@@ -145,6 +169,9 @@ const DataGridTable = ({
     //   })
     //   return
     // }
+    //console.log('Newly Added Row Data:', rowData)
+    console.log('selectedRows:', changedRowIds)
+    console.log(changedRowIds)
 
     handleOpenRemark()
     setRowModesModel((prev) => ({
@@ -153,9 +180,39 @@ const DataGridTable = ({
     }))
   }
 
-  const handleDeleteClick = async (id, params) => {
-    deleteData(params.row.idFromApi || params.row.maintenanceId)
-  }
+  // useEffect(() => {
+  //   //console.log("Updated Rows!!!!!!!!!!!!!!!!!!!!!!!:", rows);
+  // }, [rows]);
+
+  // const handleDeleteClick = async (id, params) => {
+  //   try {
+  //     const maintenanceId =
+  //       id?.maintenanceId ||
+  //       params?.row?.idFromApi ||
+  //       params?.row?.maintenanceId ||
+  //       params?.NormParameterMonthlyTransactionId
+  //     console.log(maintenanceId, params, id)
+  //     // Define a mapping of titles to corresponding delete functions
+  //     const deleteFunctions = {
+  //       'Slowdown Plan': DataService.deleteSlowdownData,
+  //       'Shutdown Plan': DataService.deleteShutdownData,
+  //       'TA Plan': DataService.deleteTurnAroundData,
+  //       'Business Demand': DataService.deleteBusinessDemandData,
+  //       // Configuration: DataService.deleteBusinessDemandData,
+  //       // 'Consumption Norms': DataService.deleteBusinessDemandData,
+  //     }
+
+  //     // Check if title exists in deleteFunctions and execute the corresponding function
+  //     if (deleteFunctions[title]) {
+  //       return await deleteFunctions[title](maintenanceId, keycloak)
+  //     }
+
+  //     setOpen1(true)
+  //     setDeleteId(id)
+  //   } catch (error) {
+  //     console.error(`Error deleting ${title} data:`, error)
+  //   }
+  // }
 
   const handleCancelClick = (id) => () => {
     setRowModesModel({
@@ -173,682 +230,666 @@ const DataGridTable = ({
     setRowModesModel(newRowModesModel)
   }
 
-  const saveShutdownData = async (newRow) => {
-    try {
-      var plantId = ''
+  // const saveShutdownData = async (newRow) => {
+  //   try {
+  //     // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
 
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
+  //     const storedPlant = localStorage.getItem('selectedPlant')
+  //     if (storedPlant) {
+  //       const parsedPlant = JSON.parse(storedPlant)
+  //       plantId = parsedPlant.id
+  //     }
 
-      // plantId = plantId;
+  //     var plantId = plantId
+  //     // plantId = plantId;
 
-      const shutdownDetails = newRow.map((row) => ({
-        productId: row.product,
-        discription: row.discription,
-        durationInMins: row.durationInMins,
-        maintEndDateTime: row.maintEndDateTime,
-        maintStartDateTime: row.maintStartDateTime,
-        audityear: '2024-25',
-        id: row.maintenanceId || null,
-      }))
+  //     const shutdownDetails = {
+  //       productId: newRow.product,
+  //       discription: newRow.discription,
+  //       durationInMins: newRow.durationInMins,
+  //       maintEndDateTime: newRow.maintEndDateTime,
+  //       maintStartDateTime: newRow.maintStartDateTime,
+  //     }
 
-      const response = await DataService.saveShutdownData(
-        plantId,
-        shutdownDetails,
-        keycloak,
-      )
+  //     const response = await DataService.saveShutdownData(
+  //       plantId,
+  //       shutdownDetails,
+  //       keycloak,
+  //     )
+  //     //console.log('Shutdown data saved successfully:', response)
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage("Shutdown data saved successfully !");
+  //     setSnackbarData({
+  //       message: 'Shutdown data saved successfully!',
+  //       severity: 'success',
+  //     })
+  //     // setSnackbarOpen(true);
+  //     // setSnackbarData({ message: "Shutdown data saved successfully!", severity: "success" });
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error saving shutdown data:', error)
+  //   }
+  // }
 
-      setSnackbarOpen(true)
-      // setSnackbarMessage("Shutdown data saved successfully !");
-      setSnackbarData({
-        message: 'Shutdown data saved successfully!',
-        severity: 'success',
-      })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Shutdown data saved successfully!", severity: "success" });
-      return response
-    } catch (error) {
-      console.error('Error saving shutdown data:', error)
-    }
-  }
+  // const updateSlowdownData = async (newRow) => {
+  //   try {
+  //     var maintenanceId = newRow?.maintenanceId
 
-  const updateSlowdownData = async (newRow) => {
-    try {
-      var maintenanceId = newRow?.maintenanceId
+  //     const slowDownDetails = {
+  //       productId: newRow.product,
+  //       discription: newRow.discription,
+  //       durationInMins: newRow.durationInMins,
+  //       maintEndDateTime: newRow.maintEndDateTime,
+  //       maintStartDateTime: newRow.maintStartDateTime,
+  //       remark: newRow.remarks,
+  //       rate: newRow.rate,
+  //     }
 
-      const slowDownDetails = {
-        productId: newRow.product,
-        discription: newRow.discription,
-        durationInMins: newRow.durationInMins,
-        maintEndDateTime: newRow.maintEndDateTime,
-        maintStartDateTime: newRow.maintStartDateTime,
-        remark: newRow.remarks,
-        rate: newRow.rate,
-      }
+  //     const response = await DataService.updateSlowdownData(
+  //       maintenanceId,
+  //       slowDownDetails,
+  //       keycloak,
+  //     )
+  //     //console.log('Slowdown data Updated successfully:', response)
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage("Slowdown data Updated successfully !");
+  //     setSnackbarData({
+  //       message: 'Slowdown data Updated successfully!',
+  //       severity: 'success',
+  //     })
+  //     // setSnackbarOpen(true);
+  //     // setSnackbarData({ message: "Slowdown data Updated successfully!", severity: "success" });
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error saving Slowdown data:', error)
+  //   }
+  // }
 
-      const response = await DataService.updateSlowdownData(
-        maintenanceId,
-        slowDownDetails,
-        keycloak,
-      )
-      //console.log('Slowdown data Updated successfully:', response)
-      setSnackbarOpen(true)
-      // setSnackbarMessage("Slowdown data Updated successfully !");
-      setSnackbarData({
-        message: 'Slowdown data Updated successfully!',
-        severity: 'success',
-      })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Slowdown data Updated successfully!", severity: "success" });
-      return response
-    } catch (error) {
-      console.error('Error saving Slowdown data:', error)
-    }
-  }
+  // const updateShutdownData = async (newRow) => {
+  //   try {
+  //     var maintenanceId = newRow?.maintenanceId
 
-  const updateShutdownData = async (newRow) => {
-    try {
-      var maintenanceId = newRow?.maintenanceId
+  //     const slowDownDetails = {
+  //       productId: newRow.product,
+  //       discription: newRow.discription,
+  //       durationInMins: newRow.durationInMins,
+  //       maintEndDateTime: newRow.maintEndDateTime,
+  //       maintStartDateTime: newRow.maintStartDateTime,
+  //     }
 
-      const slowDownDetails = {
-        productId: newRow.product,
-        discription: newRow.discription,
-        durationInMins: newRow.durationInMins,
-        maintEndDateTime: newRow.maintEndDateTime,
-        maintStartDateTime: newRow.maintStartDateTime,
-      }
+  //     const response = await DataService.updateShutdownData(
+  //       maintenanceId,
+  //       slowDownDetails,
+  //       keycloak,
+  //     )
 
-      const response = await DataService.updateShutdownData(
-        maintenanceId,
-        slowDownDetails,
-        keycloak,
-      )
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage("Shutdown data Updated successfully !");
+  //     setSnackbarData({
+  //       message: 'Shutdown data Updated successfully!',
+  //       severity: 'success',
+  //     })
+  //     // setSnackbarOpen(true);
+  //     // setSnackbarData({ message: "Shutdown data Updated successfully!", severity: "success" });
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error saving Shutdown data:', error)
+  //   }
+  // }
 
-      setSnackbarOpen(true)
-      // setSnackbarMessage("Shutdown data Updated successfully !");
-      setSnackbarData({
-        message: 'Shutdown data Updated successfully!',
-        severity: 'success',
-      })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Shutdown data Updated successfully!", severity: "success" });
-      return response
-    } catch (error) {
-      console.error('Error saving Shutdown data:', error)
-    }
-  }
+  // const updateTurnAroundData = async (newRow) => {
+  //   try {
+  //     var maintenanceId = newRow?.maintenanceId
 
-  const updateTurnAroundData = async (newRow) => {
-    try {
-      var maintenanceId = newRow?.maintenanceId
+  //     const turnAroundDetails = {
+  //       productId: newRow.product,
+  //       discription: newRow.discription,
+  //       durationInMins: newRow.durationInMins,
+  //       maintEndDateTime: newRow.maintEndDateTime,
+  //       maintStartDateTime: newRow.maintStartDateTime,
+  //       remark: newRow.remark,
+  //     }
 
-      const turnAroundDetails = {
-        productId: newRow.product,
-        discription: newRow.discription,
-        durationInMins: newRow.durationInMins,
-        maintEndDateTime: newRow.maintEndDateTime,
-        maintStartDateTime: newRow.maintStartDateTime,
-        remark: newRow.remark,
-      }
+  //     const response = await DataService.updateTurnAroundData(
+  //       maintenanceId,
+  //       turnAroundDetails,
+  //       keycloak,
+  //     )
+  //     //console.log('TurnAround data Updated successfully:', response)
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage("TurnAround data Updated successfully !");
+  //     setSnackbarData({
+  //       message: 'TurnAround data Updated successfully!',
+  //       severity: 'success',
+  //     })
+  //     // setSnackbarOpen(true);
+  //     // setSnackbarData({ message: "TurnAround data Updated successfully!", severity: "success" });
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error Updating TurnAround data:', error)
+  //   }
+  // }
 
-      const response = await DataService.updateTurnAroundData(
-        maintenanceId,
-        turnAroundDetails,
-        keycloak,
-      )
-      //console.log('TurnAround data Updated successfully:', response)
-      setSnackbarOpen(true)
-      // setSnackbarMessage("TurnAround data Updated successfully !");
-      setSnackbarData({
-        message: 'TurnAround data Updated successfully!',
-        severity: 'success',
-      })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "TurnAround data Updated successfully!", severity: "success" });
-      return response
-    } catch (error) {
-      console.error('Error Updating TurnAround data:', error)
-    }
-  }
+  // const updateProductNormData = async (newRow) => {
+  //   try {
+  //     const productNormData = {
+  //       id: newRow.id,
+  //       aopType: newRow.aopType,
+  //       aopCaseId: newRow.aopCaseId,
+  //       aopStatus: newRow.aopStatus,
+  //       aopYear: newRow.aopYear,
+  //       plantFkId: newRow.plantFkId,
+  //       normItem: newRow.normItem,
+  //       april: newRow.april,
+  //       may: newRow.may,
+  //       june: newRow.june,
+  //       july: newRow.july,
+  //       aug: newRow.aug,
+  //       sep: newRow.sep,
+  //       oct: newRow.oct,
+  //       nov: newRow.nov,
+  //       dec: newRow.dec,
+  //       jan: newRow.jan,
+  //       feb: newRow.feb,
+  //       march: newRow.march,
+  //     }
 
-  const updateProductNormData = async (newRow) => {
-    try {
-      const productNormData = {
-        id: newRow.id,
-        aopType: newRow.aopType,
-        aopCaseId: newRow.aopCaseId,
-        aopStatus: newRow.aopStatus,
-        aopYear: newRow.aopYear,
-        plantFkId: newRow.plantFkId,
-        normItem: newRow.normItem,
-        april: newRow.april,
-        may: newRow.may,
-        june: newRow.june,
-        july: newRow.july,
-        aug: newRow.aug,
-        sep: newRow.sep,
-        oct: newRow.oct,
-        nov: newRow.nov,
-        dec: newRow.dec,
-        jan: newRow.jan,
-        feb: newRow.feb,
-        march: newRow.march,
-      }
-      // const productNormData2 = {
-      //   id: newRow.id,
-      //   aopType: newRow.aopType,
-      //   aopCaseId: newRow.aopCaseId,
-      //   aopStatus: newRow.aopStatus,
-      //   aopYear: newRow.aopYear,
-      //   plantFkId: newRow.plantFkId,
-      //   normItem: newRow.normItem,
-      //   april: newRow.april,
-      //   may: newRow.may,
-      //   june: newRow.june,
-      //   july: newRow.july,
-      //   aug: newRow.aug,
-      //   sep: newRow.sep,
-      //   oct: newRow.oct,
-      //   nov: newRow.nov,
-      //   dec: newRow.dec,
-      //   jan: newRow.jan,
-      //   feb: newRow.feb,
-      //   march: newRow.march,
-      // }
+  //     const response = await DataService.updateProductNormData(
+  //       productNormData,
+  //       keycloak,
+  //     )
+  //     setSnackbarOpen(true)
+  //     setSnackbarData({
+  //       message: 'Product Volume data updated successfully !',
+  //       severity: 'success',
+  //     })
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error Updating Product Volume data:', error)
+  //   }
+  // }
 
-      const response = await DataService.updateProductNormData(
-        productNormData,
-        keycloak,
-      )
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Product Volume data updated successfully !',
-        severity: 'success',
-      })
-      return response
-    } catch (error) {
-      console.error('Error Updating Product Volume data:', error)
-    }
-  }
+  // const saveSlowDownData = async (newRow) => {
+  //   try {
+  //     var plantId = ''
+  //     const storedPlant = localStorage.getItem('selectedPlant')
+  //     if (storedPlant) {
+  //       const parsedPlant = JSON.parse(storedPlant)
+  //       plantId = parsedPlant.id
+  //     }
+  //     const slowDownDetails = {
+  //       productId: newRow.product,
+  //       discription: newRow.discription,
+  //       durationInMins: newRow.durationInMins,
+  //       maintEndDateTime: newRow.maintEndDateTime,
+  //       maintStartDateTime: newRow.maintStartDateTime,
+  //       remark: newRow.remarks,
+  //       rate: newRow.rate,
+  //     }
+  //     const response = await DataService.saveSlowdownData(
+  //       plantId,
+  //       slowDownDetails,
+  //       keycloak,
+  //     )
+  //     //console.log('Slowdown data saved successfully:', response)
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage("Slowdown data saved successfully !");
+  //     setSnackbarData({
+  //       message: 'Slowdown data saved successfully!',
+  //       severity: 'success',
+  //     })
+  //     // setSnackbarOpen(true);
+  //     // setSnackbarData({ message: "Slowdown data saved successfully!", severity: "success" });
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error saving Slowdown data:', error)
+  //   }
+  // }
 
-  const saveSlowDownData = async (newRow) => {
-    try {
-      var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      const slowDownDetails = newRow.map((row) => ({
-        productId: row.product,
-        discription: row.discription,
-        durationInMins: row.durationInMins,
-        maintEndDateTime: row.maintEndDateTime,
-        maintStartDateTime: row.maintStartDateTime,
-        remark: row.remarks,
-        rate: row.rate,
-        audityear: '2024-25',
-        id: row.maintenanceId || null,
-      }))
-      const response = await DataService.saveSlowdownData(
-        plantId,
-        slowDownDetails,
-        keycloak,
-      )
-      //console.log('Slowdown data saved successfully:', response)
-      setSnackbarOpen(true)
-      // setSnackbarMessage("Slowdown data saved successfully !");
-      setSnackbarData({
-        message: 'Slowdown data saved successfully!',
-        severity: 'success',
-      })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Slowdown data saved successfully!", severity: "success" });
-      return response
-    } catch (error) {
-      console.error('Error saving Slowdown data:', error)
-    }
-  }
+  // const saveCatalystData = async (newRow) => {
+  //   console.log('new Row ', newRow)
 
-  const saveCatalystData = async (newRow) => {
-    // console.log('new Row ', newRow)
+  //   try {
+  //     var plantId = ''
+  //     const storedPlant = localStorage.getItem('selectedPlant')
+  //     if (storedPlant) {
+  //       const parsedPlant = JSON.parse(storedPlant)
+  //       plantId = parsedPlant.id
+  //     }
 
-    try {
-      var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
+  //     const turnAroundDetails = {
+  //       april: newRow.apr24,
+  //       may: newRow.may24,
+  //       june: newRow.jun24,
+  //       july: newRow.jul24,
+  //       aug: newRow.aug24,
+  //       sep: newRow.sep24,
+  //       oct: newRow.oct24,
+  //       nov: newRow.nov24,
+  //       dec: newRow.dec24,
+  //       jan: newRow.jan25,
+  //       feb: newRow.feb25,
+  //       march: newRow.mar25,
+  //       TPH: '100',
+  //       attributeName: 'Silver Ox',
+  //       normParameterFKId: '',
+  //       catalystAttributeFKId: 'C6352800-C64A-4944-B490-5A60D1BCE285',
+  //       catalystId: '',
+  //       remarks: '123',
+  //       avgTPH: '123',
+  //       year: 2024,
+  //     }
 
-      const turnAroundDetails = {
-        april: newRow.apr24,
-        may: newRow.may24,
-        june: newRow.jun24,
-        july: newRow.jul24,
-        aug: newRow.aug24,
-        sep: newRow.sep24,
-        oct: newRow.oct24,
-        nov: newRow.nov24,
-        dec: newRow.dec24,
-        jan: newRow.jan25,
-        feb: newRow.feb25,
-        march: newRow.mar25,
-        TPH: '100',
-        attributeName: 'Silver Ox',
-        normParameterFKId: '',
-        catalystAttributeFKId: 'C6352800-C64A-4944-B490-5A60D1BCE285',
-        catalystId: '',
-        remarks: '123',
-        avgTPH: '123',
-        year: 2024,
-      }
+  //     const response = await DataService.saveCatalystData(
+  //       plantId,
+  //       turnAroundDetails,
+  //       keycloak,
+  //     )
+  //     //console.log('Catalyst data saved successfully:', response)
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage("Catalyst data saved successfully !");
+  //     setSnackbarData({
+  //       message: 'Catalyst data saved successfully!',
+  //       severity: 'success',
+  //     })
+  //     // setSnackbarOpen(true);
+  //     // setSnackbarData({ message: "Catalyst data saved successfully!", severity: "success" });
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error saving Catalyst data:', error)
+  //   }
+  // }
+  //imp code for update
+  // const saveBusinessDemandData = async (newRows) => {
+  //   try {
+  //     let plantId = ''
+  //     const storedPlant = localStorage.getItem('selectedPlant')
+  //     if (storedPlant) {
+  //       const parsedPlant = JSON.parse(storedPlant)
+  //       plantId = parsedPlant.id
+  //     }
 
-      const response = await DataService.saveCatalystData(
-        plantId,
-        turnAroundDetails,
-        keycloak,
-      )
-      //console.log('Catalyst data saved successfully:', response)
-      setSnackbarOpen(true)
-      // setSnackbarMessage("Catalyst data saved successfully !");
-      setSnackbarData({
-        message: 'Catalyst data saved successfully!',
-        severity: 'success',
-      })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Catalyst data saved successfully!", severity: "success" });
-      return response
-    } catch (error) {
-      console.error('Error saving Catalyst data:', error)
-    }
-  }
-  const saveBusinessDemandData = async (newRows) => {
-    try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
+  //     const businessData = newRows.map((row) => ({
+  //       april: row.april,
+  //       may: row.may,
+  //       june: row.june,
+  //       july: row.july,
+  //       aug: row.aug,
+  //       sep: row.sep,
+  //       oct: row.oct,
+  //       nov: row.nov,
+  //       dec: row.dec,
+  //       jan: row.jan,
+  //       feb: row.feb,
+  //       march: row.march,
+  //       remark: row.remark,
+  //       avgTph: row.avgTph,
+  //       year: '2024-25',
+  //       plantId: plantId,
+  //       normParameterId: row.normParameterId,
+  //       id: row.idFromApi,
+  //     }))
 
-      const businessData = newRows.map((row) => ({
-        april: row.april,
-        may: row.may,
-        june: row.june,
-        july: row.july,
-        aug: row.aug,
-        sep: row.sep,
-        oct: row.oct,
-        nov: row.nov,
-        dec: row.dec,
-        jan: row.jan,
-        feb: row.feb,
-        march: row.march,
-        remark: row.remark,
-        avgTph: row.avgTph,
-        year: '2024-25',
-        plantId: plantId,
-        normParameterId: row.normParameterId,
-        id: row.idFromApi,
-      }))
+  //     const response = await DataService.saveBusinessDemandData(
+  //       plantId,
+  //       businessData, // Now sending an array of rows
+  //       keycloak,
+  //     )
+  //     setSnackbarOpen(true)
+  //     setSnackbarData({
+  //       message: 'Business Demand data saved successfully!',
+  //       severity: 'success',
+  //     })
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error saving Business Demand data:', error)
+  //   }
+  // }
+  // const saveTurnAroundData = async (newRow) => {
+  //   try {
+  //     // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
+  //     var plantId = ''
 
-      const response = await DataService.saveBusinessDemandData(
-        plantId,
-        businessData, // Now sending an array of rows
-        keycloak,
-      )
+  //     const storedPlant = localStorage.getItem('selectedPlant')
+  //     if (storedPlant) {
+  //       const parsedPlant = JSON.parse(storedPlant)
+  //       plantId = parsedPlant.id
+  //     }
 
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Business Demand data saved successfully!',
-        severity: 'success',
-      })
+  //     const turnAroundDetails = {
+  //       productId: newRow.product,
+  //       discription: newRow.discription,
+  //       durationInMins: newRow.durationInMins,
+  //       maintEndDateTime: newRow.maintEndDateTime,
+  //       maintStartDateTime: newRow.maintStartDateTime,
+  //       remark: newRow.remark,
+  //       // rate: newRow.rate,
+  //     }
+  //     const response = await DataService.saveTurnAroundData(
+  //       plantId,
+  //       turnAroundDetails,
+  //       keycloak,
+  //     )
+  //     //console.log('Turnaround Plan data saved successfully:', response)
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage("Turnaround Plan data saved successfully !");
+  //     setSnackbarData({
+  //       message: 'Turnaround Plan data saved successfully!',
+  //       severity: 'success',
+  //     })
+  //     // setSnackbarOpen(true);
+  //     // setSnackbarData({ message: "Turnaround Plan data saved successfully!", severity: "success" });
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error saving Turnaround Plan data:', error)
+  //   }
+  // }
 
-      return response
-    } catch (error) {
-      console.error('Error saving Business Demand data:', error)
-    }
-  }
+  // const processRowUpdate1 = useCallback(
+  //   (newRow) => {
+  //     if (title == 'Shutdown Plan') {
+  //       if (
+  //         !newRow.discription?.trim() ||
+  //         !newRow.product?.trim() ||
+  //         !newRow.maintStartDateTime ||
+  //         !newRow.maintEndDateTime
+  //       ) {
+  //         setSnackbarOpen(true)
+  //         setSnackbarData({
+  //           message: 'Please Fill all Fields!',
+  //           severity: 'error',
+  //         })
+  //         setRowModesModel(() => ({
+  //           [newRow.id]: {
+  //             mode: GridRowModes.Edit,
+  //             fieldToFocus: 'discription',
+  //           },
+  //         }))
+  //         return
+  //       }
 
-  const saveTurnAroundData = async (newRow) => {
-    try {
-      var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
+  //       const updatedRow = { ...newRow, isNew: false }
+  //       const updatedRows = rows.map((row) =>
+  //         row?.id === newRow?.id ? updatedRow : row,
+  //       )
 
-      const turnAroundDetails = newRow.map((row) => ({
-        productId: row.product,
-        discription: row.discription,
-        durationInMins: row.durationInMins,
-        maintEndDateTime: row.maintEndDateTime,
-        maintStartDateTime: row.maintStartDateTime,
-        remark: row.remark,
-        audityear: '2024-25',
-        id: row.idFromApi || null,
-      }))
-      const response = await DataService.saveTurnAroundData(
-        plantId,
-        turnAroundDetails,
-        keycloak,
-      )
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Turnaround Plan data saved successfully!',
-        severity: 'success',
-      })
-      return response
-    } catch (error) {
-      console.error('Error saving Turnaround Plan data:', error)
-    }
-  }
+  //       setRows(updatedRows)
 
-  const processRowUpdate1 = useCallback(
-    (newRow) => {
-      if (title == 'Shutdown Plan') {
-        if (
-          !newRow.discription?.trim() ||
-          !newRow.product?.trim() ||
-          !newRow.maintStartDateTime ||
-          !newRow.maintEndDateTime
-        ) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Please Fill all Fields!',
-            severity: 'error',
-          })
-          setRowModesModel(() => ({
-            [newRow.id]: {
-              mode: GridRowModes.Edit,
-              fieldToFocus: 'discription',
-            },
-          }))
-          return
-        }
+  //       if (newRow?.maintenanceId) {
+  //         updateShutdownData(newRow)
+  //       } else {
+  //         saveShutdownData(newRow)
+  //       }
 
-        const updatedRow = { ...newRow, isNew: false }
-        const updatedRows = rows.map((row) =>
-          row?.id === newRow?.id ? updatedRow : row,
-        )
+  //       onRowUpdate?.(updatedRow)
+  //       //console.log('Updated Row inside processRowUpdate:', updatedRow)
+  //       setSelectedRows(updatedRow)
 
-        setRows(updatedRows)
+  //       return updatedRow // Ensure function returns the updated row
+  //     }
+  //     if (title == 'Slowdown Plan') {
+  //       if (
+  //         !newRow.discription?.trim() ||
+  //         !newRow.product?.trim() ||
+  //         !newRow.maintStartDateTime ||
+  //         !newRow.maintEndDateTime ||
+  //         !newRow.remarks ||
+  //         !newRow.rate
+  //       ) {
+  //         setSnackbarOpen(true)
+  //         setSnackbarData({
+  //           message: 'Please Fill all Fields!',
+  //           severity: 'error',
+  //         })
+  //         setRowModesModel(() => ({
+  //           [newRow.id]: {
+  //             mode: GridRowModes.Edit,
+  //             fieldToFocus: 'discription',
+  //           },
+  //         }))
+  //         return
+  //       }
 
-        if (newRow?.maintenanceId) {
-          updateShutdownData(newRow)
-        } else {
-          saveShutdownData(newRow)
-        }
+  //       const updatedRow = { ...newRow, isNew: false }
+  //       const updatedRows = rows.map((row) =>
+  //         row?.id === newRow?.id ? updatedRow : row,
+  //       )
 
-        onRowUpdate?.(updatedRow)
-        //console.log('Updated Row inside processRowUpdate:', updatedRow)
-        setSelectedRows(updatedRow)
+  //       setRows(updatedRows)
 
-        return updatedRow // Ensure function returns the updated row
-      }
-      if (title == 'Slowdown Plan') {
-        if (
-          !newRow.discription?.trim() ||
-          !newRow.product?.trim() ||
-          !newRow.maintStartDateTime ||
-          !newRow.maintEndDateTime ||
-          !newRow.remarks ||
-          !newRow.rate
-        ) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Please Fill all Fields!',
-            severity: 'error',
-          })
-          setRowModesModel(() => ({
-            [newRow.id]: {
-              mode: GridRowModes.Edit,
-              fieldToFocus: 'discription',
-            },
-          }))
-          return
-        }
+  //       if (newRow?.maintenanceId) {
+  //         updateSlowdownData(newRow)
+  //       } else {
+  //         saveSlowDownData(newRow)
+  //       }
+  //       onRowUpdate?.(updatedRow)
+  //       setSelectedRows(updatedRow)
+  //       return updatedRow // Ensure function returns the updated row
+  //     }
+  //     if (title == 'Turnaroud Plan') {
+  //       //console.log('TA',newRow)
+  //       if (
+  //         !newRow.discription?.trim() ||
+  //         !newRow.product?.trim() ||
+  //         !newRow.maintStartDateTime ||
+  //         !newRow.maintEndDateTime ||
+  //         !newRow.durationInMins ||
+  //         !newRow.remark
+  //       ) {
+  //         setSnackbarOpen(true)
+  //         setSnackbarData({
+  //           message: 'Please Fill all Fields!',
+  //           severity: 'error',
+  //         })
+  //         setRowModesModel(() => ({
+  //           [newRow.id]: {
+  //             mode: GridRowModes.Edit,
+  //             fieldToFocus: 'discription',
+  //           },
+  //         }))
+  //         return
+  //       }
 
-        const updatedRow = { ...newRow, isNew: false }
-        const updatedRows = rows.map((row) =>
-          row?.id === newRow?.id ? updatedRow : row,
-        )
+  //       const updatedRow = { ...newRow, isNew: false }
+  //       const updatedRows = rows.map((row) =>
+  //         row?.id === newRow?.id ? updatedRow : row,
+  //       )
 
-        setRows(updatedRows)
+  //       setRows(updatedRows)
 
-        if (newRow?.maintenanceId) {
-          updateSlowdownData(newRow)
-        } else {
-          saveSlowDownData(newRow)
-        }
-        onRowUpdate?.(updatedRow)
-        setSelectedRows(updatedRow)
-        return updatedRow // Ensure function returns the updated row
-      }
-      if (title == 'Turnaroud Plan') {
-        //console.log('TA',newRow)
-        if (
-          !newRow.discription?.trim() ||
-          !newRow.product?.trim() ||
-          !newRow.maintStartDateTime ||
-          !newRow.maintEndDateTime ||
-          !newRow.durationInMins ||
-          !newRow.remark
-        ) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Please Fill all Fields!',
-            severity: 'error',
-          })
-          setRowModesModel(() => ({
-            [newRow.id]: {
-              mode: GridRowModes.Edit,
-              fieldToFocus: 'discription',
-            },
-          }))
-          return
-        }
+  //       if (newRow?.maintenanceId) {
+  //         updateTurnAroundData(newRow)
+  //       } else saveTurnAroundData(newRow)
 
-        const updatedRow = { ...newRow, isNew: false }
-        const updatedRows = rows.map((row) =>
-          row?.id === newRow?.id ? updatedRow : row,
-        )
+  //       onRowUpdate?.(updatedRow)
+  //       setSelectedRows(updatedRow)
 
-        setRows(updatedRows)
+  //       return updatedRow // Ensure function returns the updated row
+  //     }
+  //     if (
+  //       title == 'Production Volume Data' ||
+  //       title == 'Production Norms Data'
+  //     ) {
+  //       if (
+  //         !newRow.april ||
+  //         !newRow.aug ||
+  //         !newRow.dec ||
+  //         !newRow.feb ||
+  //         !newRow.jan ||
+  //         !newRow.july ||
+  //         !newRow.june ||
+  //         !newRow.march ||
+  //         !newRow.may ||
+  //         !newRow.nov ||
+  //         !newRow.oct ||
+  //         !newRow.sep
+  //       ) {
+  //         setSnackbarOpen(true)
+  //         setSnackbarData({
+  //           message: 'Please Fill all Fields!',
+  //           severity: 'error',
+  //         })
+  //         setRowModesModel(() => ({
+  //           [newRow.id]: {
+  //             mode: GridRowModes.Edit,
+  //             fieldToFocus: 'april',
+  //           },
+  //         }))
+  //         return
+  //       }
 
-        if (newRow?.maintenanceId) {
-          updateTurnAroundData(newRow)
-        } else saveTurnAroundData(newRow)
+  //       const updatedRow = { ...newRow, isNew: false }
+  //       const updatedRows = rows.map((row) =>
+  //         row?.id === newRow?.id ? updatedRow : row,
+  //       )
 
-        onRowUpdate?.(updatedRow)
-        setSelectedRows(updatedRow)
+  //       setRows(updatedRows)
 
-        return updatedRow // Ensure function returns the updated row
-      }
-      if (
-        title == 'Production Volume Data' ||
-        title == 'Production Norms Data'
-      ) {
-        if (
-          !newRow.april ||
-          !newRow.aug ||
-          !newRow.dec ||
-          !newRow.feb ||
-          !newRow.jan ||
-          !newRow.july ||
-          !newRow.june ||
-          !newRow.march ||
-          !newRow.may ||
-          !newRow.nov ||
-          !newRow.oct ||
-          !newRow.sep
-        ) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Please Fill all Fields!',
-            severity: 'error',
-          })
-          setRowModesModel(() => ({
-            [newRow.id]: {
-              mode: GridRowModes.Edit,
-              fieldToFocus: 'april',
-            },
-          }))
-          return
-        }
+  //       if (newRow?.maintenanceId) {
+  //         updateProductNormData(newRow)
+  //       } else {
+  //         updateProductNormData(newRow)
+  //         // saveTurnAroundData(newRow)
+  //       }
+  //       onRowUpdate?.(updatedRow)
+  //       //console.log('Updated Row inside processRowUpdate:', updatedRow)
+  //       setSelectedRows(updatedRow)
 
-        const updatedRow = { ...newRow, isNew: false }
-        const updatedRows = rows.map((row) =>
-          row?.id === newRow?.id ? updatedRow : row,
-        )
+  //       return updatedRow // Ensure function returns the updated row
+  //     }
+  //     if (title == 'Configuration') {
+  //       if (!newRow.dec24) {
+  //         setSnackbarOpen(true)
+  //         setSnackbarData({
+  //           message: 'Please Fill all Fields!',
+  //           severity: 'error',
+  //         })
+  //         setRowModesModel(() => ({
+  //           [newRow.id]: {
+  //             mode: GridRowModes.Edit,
+  //             fieldToFocus: 'dec24',
+  //           },
+  //         }))
+  //         return
+  //       }
 
-        setRows(updatedRows)
+  //       const updatedRow = { ...newRow, isNew: false }
+  //       const updatedRows = rows.map((row) =>
+  //         row?.id === newRow?.id ? updatedRow : row,
+  //       )
 
-        if (newRow?.maintenanceId) {
-          updateProductNormData(newRow)
-        } else {
-          updateProductNormData(newRow)
-          // saveTurnAroundData(newRow)
-        }
-        onRowUpdate?.(updatedRow)
-        //console.log('Updated Row inside processRowUpdate:', updatedRow)
-        setSelectedRows(updatedRow)
+  //       setRows(updatedRows)
 
-        return updatedRow // Ensure function returns the updated row
-      }
-      if (title == 'Configuration') {
-        if (!newRow.dec24) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Please Fill all Fields!',
-            severity: 'error',
-          })
-          setRowModesModel(() => ({
-            [newRow.id]: {
-              mode: GridRowModes.Edit,
-              fieldToFocus: 'dec24',
-            },
-          }))
-          return
-        }
+  //       // if(newRow?.id){
+  //       //   // updateCatalystData(newRow)
+  //       // }else
+  //       {
+  //         saveCatalystData(newRow)
+  //         // saveTurnAroundData(newRow)
+  //       }
+  //       onRowUpdate?.(updatedRow)
+  //       //console.log('Updated Row inside processRowUpdate:', updatedRow)
+  //       setSelectedRows(updatedRow)
 
-        const updatedRow = { ...newRow, isNew: false }
-        const updatedRows = rows.map((row) =>
-          row?.id === newRow?.id ? updatedRow : row,
-        )
+  //       return updatedRow // Ensure function returns the updated row
+  //     }
 
-        setRows(updatedRows)
-        {
-          saveCatalystData(newRow)
-        }
-        onRowUpdate?.(updatedRow)
-        setSelectedRows(updatedRow)
+  //     if (title === 'Business Demand') {
+  //       const invalidRows = newRow.filter(
+  //         (row) =>
+  //           !row.april ||
+  //           !row.may ||
+  //           !row.june ||
+  //           !row.july ||
+  //           !row.aug ||
+  //           !row.sep ||
+  //           !row.oct ||
+  //           !row.nov ||
+  //           !row.dec ||
+  //           !row.jan ||
+  //           !row.feb ||
+  //           !row.march ||
+  //           !row.remark ||
+  //           !row.avgTph,
+  //       )
 
-        return updatedRow // Ensure function returns the updated row
-      }
+  //       if (invalidRows.length > 0) {
+  //         setSnackbarOpen(true)
+  //         setSnackbarData({
+  //           message: 'Please Fill all Fields!',
+  //           severity: 'error',
+  //         })
 
-      if (title === 'Business Demand') {
-        const invalidRows = newRow.filter(
-          (row) =>
-            !row.april ||
-            !row.may ||
-            !row.june ||
-            !row.july ||
-            !row.aug ||
-            !row.sep ||
-            !row.oct ||
-            !row.nov ||
-            !row.dec ||
-            !row.jan ||
-            !row.feb ||
-            !row.march ||
-            !row.remark ||
-            !row.avgTph,
-        )
+  //         const rowModes = invalidRows.reduce((acc, row) => {
+  //           acc[row.id] = {
+  //             mode: GridRowModes.Edit,
+  //             fieldToFocus: 'april',
+  //           }
+  //           return acc
+  //         }, {})
 
-        if (invalidRows.length > 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Please Fill all Fields!',
-            severity: 'error',
-          })
+  //         setRowModesModel((prev) => ({
+  //           ...prev,
+  //           ...rowModes,
+  //         }))
 
-          const rowModes = invalidRows.reduce((acc, row) => {
-            acc[row.id] = {
-              mode: GridRowModes.Edit,
-              fieldToFocus: 'april',
-            }
-            return acc
-          }, {})
+  //         return
+  //       }
 
-          setRowModesModel((prev) => ({
-            ...prev,
-            ...rowModes,
-          }))
+  //       const updatedRows = newRow.map((row) => ({ ...row, isNew: false }))
+  //       const mergedRows = rows.map((row) => {
+  //         const updatedRow = updatedRows.find((newR) => newR.id === row.id)
+  //         return updatedRow || row
+  //       })
 
-          return
-        }
+  //       setRows(mergedRows)
+  //       saveBusinessDemandData(updatedRows) // Now sending the entire array
+  //       onRowUpdate?.(updatedRows)
+  //       setSelectedRows(updatedRows)
 
-        const updatedRows = newRow.map((row) => ({ ...row, isNew: false }))
-        const mergedRows = rows.map((row) => {
-          const updatedRow = updatedRows.find((newR) => newR.id === row.id)
-          return updatedRow || row
-        })
+  //       return updatedRows
+  //     }
+  //   },
+  //   [rows, onRowUpdate],
+  // )
 
-        setRows(mergedRows)
-        saveBusinessDemandData(updatedRows) // Now sending the entire array
-        onRowUpdate?.(updatedRows)
-        setSelectedRows(updatedRows)
-
-        return updatedRows
-      }
-    },
-    [rows, onRowUpdate],
-  )
-
-  const saveChanges = React.useCallback(async () => {
-    console.log(
-      'Edited Data: ',
-      Object.values(unsavedChangesRef.current.unsavedRows),
-    )
-    try {
-      if (title === 'Business Demand') {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        saveBusinessDemandData(data)
-      }
-      if (title === 'Shutdown Plan') {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        saveShutdownData(data)
-      }
-      if (title === 'Slowdown Plan') {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        saveSlowDownData(data)
-      }
-      if (title === 'Turnaround Plan') {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        saveTurnAroundData(data)
-      }
-
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
-      }
-    } catch (error) {
-      // setIsSaving(false);
-    }
-  }, [apiRef])
+  // const saveChanges = React.useCallback(async () => {
+  //   console.log(
+  //     'Edited Data: ',
+  //     Object.values(unsavedChangesRef.current.unsavedRows),
+  //   )
+  //   try {
+  //     if (title === 'Business Demand') {
+  //       var data = Object.values(unsavedChangesRef.current.unsavedRows)
+  //       saveBusinessDemandData(data)
+  //     }
+  //     // if (title === 'Shutdown Plan') {
+  //     //   var shutdowndata = Object.values(unsavedChangesRef.current.unsavedRows)
+  //     //   saveShutdownData(shutdowndata)
+  //     // }
+  //     unsavedChangesRef.current = {
+  //       unsavedRows: {},
+  //       rowsBeforeChange: {},
+  //     }
+  //   } catch (error) {
+  //     // setIsSaving(false);
+  //   }
+  // }, [apiRef])
 
   // const handleUpdateClick = () => {
   //   processRowUpdate()
   // }
 
+  //-------------temp cmment to check new row save issue
+  // useEffect(() => {
+  //   setRows(initialRows)
+  // }, [initialRows])
   useEffect(() => {
-    setRows(initialRows)
+    setRows((prevRows) => {
+      // Keep newly added rows and merge with initialRows
+      const newRows = prevRows.filter((row) => row.isNew) // Preserve new rows
+      return [...newRows, ...initialRows] // Merge with DB rows
+    })
   }, [initialRows])
 
   const onColumnResized = (params) => {
@@ -861,44 +902,95 @@ const DataGridTable = ({
     }
   }
 
-  const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    const rowId = newRow.id
+  // const processRowUpdate = React.useCallback((newRow, oldRow) => {
+  //   const rowId = newRow.id
+  //   console.log(newRow)
+  //   const start = new Date(newRow.maintStartDateTime)
+  //   const end = new Date(newRow.maintEndDateTime)
+  //   const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
+  //   // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
 
-    // Store edited row data
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
+  //   console.log(`Duration in minutes: ${durationInMins}`)
 
-    // Keep track of original values before editing
-    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-    }
+  //   // Update the duration in newRow
+  //   newRow.durationInMins = durationInMins.toFixed(2)
+  //   // newRow.durationInMins = durationInMins
+  //   setShutdownData((prevData) =>
+  //     prevData.map((row) => (row.id === rowId ? newRow : row)),
+  //   )
+  //   setSlowDownData((prevData) =>
+  //     prevData.map((row) => (row.id === rowId ? newRow : row)),
+  //   )
+  //   setTaData((prevData) =>
+  //     prevData.map((row) => (row.id === rowId ? newRow : row)),
+  //   )
 
-    setHasUnsavedRows(true)
-    return newRow
-  }, [])
+  //   // Extract numeric values from month fields
+  //   const months = [
+  //     'jan',
+  //     'feb',
+  //     'march',
+  //     'april',
+  //     'may',
+  //     'june',
+  //     'july',
+  //     'aug',
+  //     'sep',
+  //     'oct',
+  //     'nov',
+  //     'dec',
+  //   ]
+  //   const values = months
+  //     .map((month) => Number(newRow[month])) // Convert to number
+  //     .filter((value) => !isNaN(value)) // Filter out NaN values
 
-  const handleOpenYearData = (params) => {
-    if (params.row.product || product === '') {
-      setSnackbarOpen(true)
-      // setSnackbarMessage('Select a Product First!')
-      setSnackbarData({
-        message: 'Select a Product First !',
-        severity: 'error',
-      })
-      return
-    }
-    setOpenYearData(false)
-    // setOpenYearData(true)
-  }
+  //   console.log(values)
+  //   // Calculate new average TPH
+  //   const newAvgTph =
+  //     values.length > 0
+  //       ? values.reduce((sum, val) => sum + val, 0) / values.length
+  //       : 0
+  //   console.log(newAvgTph)
+  //   // Update the avgTph value
+  //   newRow.avgTph = newAvgTph
+  //   setCsData((prevData) =>
+  //     prevData.map((row) => (row.id === rowId ? newRow : row)),
+  //   )
+  //   // Store edited row data
+  //   unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
-  const handleCloseYearData = () => {
-    setOpenYearData(false)
-    setYearData('')
-  }
+  //   // Keep track of original values before editing
+  //   if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
+  //     unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
+  //   }
 
-  const addYearData = () => {
-    //console.log("Year's Data:", yearData)
-    handleCloseYearData()
-  }
+  //   setHasUnsavedRows(true)
+  //   return newRow
+  // }, [])
+
+  // const handleOpenYearData = (params) => {
+  //   if (params.row.product || product === '') {
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage('Select a Product First!')
+  //     setSnackbarData({
+  //       message: 'Select a Product First !',
+  //       severity: 'error',
+  //     })
+  //     return
+  //   }
+  //   setOpenYearData(false)
+  //   // setOpenYearData(true)
+  // }
+
+  // const handleCloseYearData = () => {
+  //   setOpenYearData(false)
+  //   setYearData('')
+  // }
+
+  // const addYearData = () => {
+  //   //console.log("Year's Data:", yearData)
+  //   handleCloseYearData()
+  // }
 
   // const handleFilterClick = () => {
   //   setIsFilterActive(!isFilterActive)
@@ -925,126 +1017,73 @@ const DataGridTable = ({
   //   setSelectedRow(null)
   // }
 
-  const handleDeleteRow = (id) => {
-    setDeleteId(id)
-    // setOpen1(true)
-  }
+  // const handleDeleteRow = (id) => {
+  //   setDeleteId(id)
+  //   setOpen1(true)
+  // }
+  //tempo===================commented to check delete issue
+  // const deleteTheRecord = () => {
+  //   const updatedRows = rows.filter((row) => row?.id !== deleteId)
+  //   setRows(rows.filter((row) => row.id !== deleteId))
+  //   setRows(updatedRows)
+  //   onDeleteRow?.(deleteId)
+  //   setDeleteId(null)
+  //   setOpen1(false)
+  //   //now that snackbar will open
+  //   setSnackbarOpen(true)
+  //   setSnackbarData({
+  //     message: 'Slowdown data deleted successfully!',
+  //     severity: 'success',
+  //   })
+  // }
+  const deleteTheRecord = async () => {
+    try {
+      if (!deleteId) return
 
-  const deleteData = async (id) => {
-    if (title == 'Business Demand') {
-      try {
-        const data = await DataService.deleteBusinessDemandData(id, keycloak)
-      } catch (error) {
-        console.error('Error fetching data:', error)
-      }
-    }
-    if (title == 'Shutdown Plan') {
-      try {
-        const data = await DataService.deleteShutdownData(id, keycloak)
-      } catch (error) {
-        console.error('Error fetching data:', error)
-      }
-    }
-    if (title == 'Slowdown Plan') {
-      try {
-        const data = await DataService.deleteSlowdownData(id, keycloak)
-      } catch (error) {
-        console.error('Error fetching data:', error)
-      }
-    }
-    if (title == 'Turnaround Plan') {
-      try {
-        const data = await DataService.deleteTurnAroundData(id, keycloak)
-      } catch (error) {
-        console.error('Error fetching data:', error)
-      }
-    }
-  }
+      // Perform API delete only after confirmation
+      await DataService.deleteBusinessDemandData(deleteId, keycloak)
 
-  const deleteTheRecord = () => {
-    // console.log(params)
-    return
-    if (title == 'Business Demand') {
-      deleteData(id, params)
-      const updatedRows = rows.filter((row) => row?.id !== deleteId)
-      setRows(rows.filter((row) => row.id !== deleteId))
-      setRows(updatedRows)
+      // Remove row from UI after successful delete
+      setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+
+      // Notify parent component
       onDeleteRow?.(deleteId)
+
+      // Reset state
       setDeleteId(null)
       setOpen1(false)
-      //now that snackbar will open
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Business Demand deleted successfully!',
-        severity: 'success',
-      })
-    }
 
-    if (title == 'Shutdown Plan') {
-      deleteData(id, params)
-      const updatedRows = rows.filter((row) => row?.id !== deleteId)
-      setRows(rows.filter((row) => row.id !== deleteId))
-      setRows(updatedRows)
-      onDeleteRow?.(deleteId)
-      setDeleteId(null)
-      setOpen1(false)
-      //now that snackbar will open
+      // Show success message
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Shutdown Plan deleted successfully!',
+        message: 'Slowdown data deleted successfully!',
         severity: 'success',
       })
-    }
 
-    if (title == 'Slowdown Plan') {
-      deleteData(id, params)
-      const updatedRows = rows.filter((row) => row?.id !== deleteId)
-      setRows(rows.filter((row) => row.id !== deleteId))
-      setRows(updatedRows)
-      onDeleteRow?.(deleteId)
-      setDeleteId(null)
-      setOpen1(false)
-      //now that snackbar will open
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Slowdown Plan deleted successfully!',
-        severity: 'success',
-      })
-    }
-    if (title == 'Turnaround Plan') {
-      deleteData(id, params)
-      const updatedRows = rows.filter((row) => row?.id !== deleteId)
-      setRows(rows.filter((row) => row.id !== deleteId))
-      setRows(updatedRows)
-      onDeleteRow?.(deleteId)
-      setDeleteId(null)
-      setOpen1(false)
-      //now that snackbar will open
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Turnaround Plan deleted successfully!',
-        severity: 'success',
-      })
+      // Refresh data
+      fetchData()
+    } catch (error) {
+      console.error('Error deleting Business data:', error)
     }
   }
 
-  const handleAddRow1 = () => {
-    const newRowId = rows.length
-      ? Math.max(...rows.map((row) => row.id)) + 1
-      : 1
-    const newRow = {
-      id: newRowId,
-      isNew: true, // Mark row as new
-      ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])), // Empty values
-    }
-    setRows((prevRows) => [...prevRows, newRow])
-    onAddRow?.(newRow)
-    setProduct('')
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
-    }))
-  }
+  // const handleAddRow1 = () => {
+  //   const newRowId = rows.length
+  //     ? Math.max(...rows.map((row) => row.id)) + 1
+  //     : 1
+  //   const newRow = {
+  //     id: newRowId,
+  //     isNew: true, // Mark row as new
+  //     ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])), // Empty values
+  //   }
+  //   setRows((prevRows) => [...prevRows, newRow])
+  //   onAddRow?.(newRow)
+  //   setProduct('')
+  //   setRowModesModel((oldModel) => ({
+  //     ...oldModel,
+  //     [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
+  //   }))
+  // }
 
   const handleAddRow = () => {
     const newRowId = rows.length
@@ -1064,95 +1103,27 @@ const DataGridTable = ({
       [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
     }))
   }
-
-  const dummyApiCall = async (id) => {
-    try {
-      const data = await DataService.getProductById(keycloak, id)
-      //console.log('API Response:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
+  const handleKeyDown = (event, rowId) => {
+    if (event.key === 'Enter') {
+      event.preventDefault() // Prevent default Enter behavior (exiting edit mode)
+      setRowModesModel((oldModel) => ({
+        ...oldModel,
+        [rowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
+      }))
     }
   }
 
-  const getYearlyData = async (year) => {
-    try {
-      const data = await DataService.getYearlyData(keycloak, year)
-      //console.log('API getYearlyData:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
+  // const handleSaveRow = (id) => {
+  //   const updatedRows = rows.map((row) =>
+  //     row.id === id ? { ...row, isNew: false } : row,
+  //   )
+  //   setRows(updatedRows)
+  // }
 
-  const getPlantAndSite = async () => {
-    try {
-      const data = await DataService.getAllSites(keycloak)
-      //console.log('API Response:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
-
-  const getShutDownPlantData = async () => {
-    try {
-      const data = await DataService.getShutDownPlantData(keycloak)
-      //console.log('API Response:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
-
-  const getSlowDownPlantData = async () => {
-    try {
-      const data = await DataService.getSlowDownPlantData(keycloak)
-      //console.log('API Response:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
-
-  const getTAPlantData = async () => {
-    try {
-      const data = await DataService.getTAPlantData(keycloak)
-      //console.log('API Response:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
-
-  const getAllProducts = async () => {
-    try {
-      const data = await DataService.getAllProducts(keycloak)
-      //console.log('API Response:', data)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
-
-  const handleSaveRow = (id) => {
-    const updatedRows = rows.map((row) =>
-      row.id === id ? { ...row, isNew: false } : row,
-    )
-    setRows(updatedRows)
-  }
-
-  const handleCancelRow = (id) => {
-    const updatedRows = rows.filter((row) => row.id !== id)
-    setRows(updatedRows)
-  }
+  // const handleCancelRow = (id) => {
+  //   const updatedRows = rows.filter((row) => row.id !== id)
+  //   setRows(updatedRows)
+  // }
 
   const defaultColumns = useMemo(() => {
     return initialColumns.map((col) => ({
@@ -1271,14 +1242,15 @@ const DataGridTable = ({
     'taFrom',
     'activities',
     'durationHrs',
+    'durationInMins',
     'period',
   ]
 
   // const handleCellClick = (params) => {}
-  useEffect(() => {
-    // console.log('-->:', changedRowIds)
-    // console.log('Length of changedRowIds:', changedRowIds.length)
-  }, [changedRowIds])
+  // useEffect(() => {
+  //   console.log('-->:', changedRowIds)
+  //   console.log('Length of changedRowIds:', changedRowIds.length)
+  // }, [changedRowIds])
 
   const handleCellClick = (params) => {
     // console.log(params)
@@ -1406,38 +1378,38 @@ const DataGridTable = ({
   //   setDays(getDaysInMonth())
   // }, [])
 
-  const handleSubmit = () => {
-    const isEmpty = days.some((day) => day.value === '' || day.value === null)
-    if (isEmpty) {
-      setSnackbarOpen(true)
-      // setSnackbarMessage('Add data for all fields!')
-      setSnackbarData({
-        message: 'Add data for all fields!',
-        severity: 'error',
-      })
+  // const handleSubmit = () => {
+  //   const isEmpty = days.some((day) => day.value === '' || day.value === null)
+  //   if (isEmpty) {
+  //     setSnackbarOpen(true)
+  //     // setSnackbarMessage('Add data for all fields!')
+  //     setSnackbarData({
+  //       message: 'Add data for all fields!',
+  //       severity: 'error',
+  //     })
 
-      return
-    }
-
-    setOpen(false) // Close the modal
-    if (permissions?.saveWithRemark) {
-      // Update the row with the new data
-      setOpenRemark(true)
-      setRows((prevRows) =>
-        prevRows.map((row) =>
-          row.id === selectedRowId ? { ...row, ...days } : row,
-        ),
-      )
-    }
-  }
+  //     return
+  //   }
+  //   //console.log('Submitted Data:', days)
+  //   setOpen(false) // Close the modal
+  //   if (permissions?.saveWithRemark) {
+  //     // Update the row with the new data
+  //     setOpenRemark(true)
+  //     setRows((prevRows) =>
+  //       prevRows.map((row) =>
+  //         row.id === selectedRowId ? { ...row, ...days } : row,
+  //       ),
+  //     )
+  //   }
+  // }
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false)
   }
 
-  const handleCancel = () => {
-    setOpen(false) // Just close the modal
-  }
+  // const handleCancel = () => {
+  //   setOpen(false) // Just close the modal
+  // }
 
   // useEffect(() => {
   //   const getDaysInMonth = () => {
@@ -1455,23 +1427,24 @@ const DataGridTable = ({
   //   setDays(getDaysInMonth())
   // }, [])
 
-  // Handle input changes
-  const handleValueChange = (index, newValue) => {
-    setDays((prevDays) =>
-      prevDays.map((day, i) =>
-        i === index ? { ...day, value: newValue } : day,
-      ),
-    )
-  }
+  // // Handle input changes
+  // const handleValueChange = (index, newValue) => {
+  //   // console.log(newValue)
+  //   setDays((prevDays) =>
+  //     prevDays.map((day, i) =>
+  //       i === index ? { ...day, value: newValue } : day,
+  //     ),
+  //   )
+  // }
   const [columnFilters, setColumnFilters] = useState({})
 
   // Update the filter state for each column
-  const handleFilterChange = (field, value) => {
-    setColumnFilters((prevFilters) => ({
-      ...prevFilters,
-      [field]: value,
-    }))
-  }
+  // const handleFilterChange = (field, value) => {
+  //   setColumnFilters((prevFilters) => ({
+  //     ...prevFilters,
+  //     [field]: value,
+  //   }))
+  // }
 
   // Combine all filters: global search, duration filter, and column filters
   const filteredRows = useMemo(() => {
@@ -1775,7 +1748,8 @@ const DataGridTable = ({
           onColumnResized={onColumnResized}
           onCellClick={handleCellClick}
           onRowEditCommit={handleRowEditCommit}
-          onCellEditCommit={handleCellEditCommit}
+          onCellEditCommit={(params) => handleCellEditCommit(params)} // Real-time updates
+          onCellKeyDown={(params, event) => handleKeyDown(event, params.id)}
           experimentalFeatures={{ newEditingApi: true }}
           editMode='row'
           rowModesModel={rowModesModel}
@@ -1785,8 +1759,10 @@ const DataGridTable = ({
             toolbar: { setRows, setRowModesModel },
           }}
           onCellEditStop={(params, event) => {
+            console.log('param in ', params)
             if (params.reason === 'cellFocusOut') {
               event.defaultMuiPrevented = true
+              console.log('param in ', params)
             }
           }}
           getRowClassName={(params) =>
@@ -1975,7 +1951,6 @@ const DataGridTable = ({
           </Button>
         )}
       </Box>
-
       {/* <Notification
         open={snackbarOpen}
         message={snackbarMessage}
@@ -2031,168 +2006,6 @@ const DataGridTable = ({
         <DialogActions>
           <Button onClick={handleCloseRemark}>Cancel</Button>
           <Button onClick={addRemark}>Add</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={openYearData} onClose={handleCloseYearData}>
-        <DialogTitle>Add Months Data</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin='dense'
-            id='yearData'
-            label="Months's Data"
-            type='text'
-            fullWidth
-            variant='outlined'
-            sx={{ width: '100%', minWidth: '400px' }}
-            value={yearData}
-            onChange={(e) => setYearData(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseYearData}>Cancel</Button>
-          <Button onClick={addYearData}>Add</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={open} onClose={handleCancel} maxWidth='lg' fullWidth>
-        <DialogTitle>
-          <Typography variant='h6'>
-            Day wise monthly Data for Financial Year 2024-2025
-          </Typography>
-        </DialogTitle>
-
-        <DialogContent>
-          <Box sx={{ maxHeight: '80vh', overflowX: 'auto', padding: '10px' }}>
-            <Table>
-              <TableHead>
-                {/* First row: Days 1 to 11 */}
-                <TableRow>
-                  {days.slice(0, 11).map((day, index) => (
-                    <TableCell
-                      key={index}
-                      sx={{
-                        textAlign: 'left',
-                        fontWeight: 'bold',
-                        padding: '6px',
-                      }}
-                    >
-                      {day.date}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {/* Values for Days 1 to 11 */}
-                <TableRow>
-                  {days.slice(0, 11).map((day, index) => (
-                    <TableCell
-                      key={index}
-                      sx={{ textAlign: 'left', padding: '6px' }}
-                    >
-                      <TextField
-                        type='number'
-                        value={day.value}
-                        onChange={(e) =>
-                          handleValueChange(index, e.target.value)
-                        }
-                        size='small'
-                        sx={{ width: '85px', marginTop: '2px' }}
-                        error={!day.value}
-                      />
-                    </TableCell>
-                  ))}
-                </TableRow>
-
-                {/* Second row: Days 12 to 22 */}
-                <TableRow>
-                  {days.slice(11, 22).map((day, index) => (
-                    <TableCell
-                      key={index}
-                      sx={{
-                        textAlign: 'left',
-                        fontWeight: 'bold',
-                        padding: '6px',
-                      }}
-                    >
-                      {day.date}
-                    </TableCell>
-                  ))}
-                </TableRow>
-
-                <TableRow>
-                  {days.slice(11, 22).map((day, index) => (
-                    <TableCell
-                      key={index}
-                      sx={{ textAlign: 'left', padding: '6px' }}
-                    >
-                      <TextField
-                        type='number'
-                        value={day.value}
-                        onChange={(e) =>
-                          handleValueChange(index + 11, e.target.value)
-                        }
-                        size='small'
-                        sx={{ width: '85px', marginTop: '2px' }}
-                        error={!day.value}
-                      />
-                    </TableCell>
-                  ))}
-                </TableRow>
-
-                {/* Third row: Days 23 to 30 */}
-                <TableRow>
-                  {days.slice(22, 31).map((day, index) => (
-                    <TableCell
-                      key={index}
-                      sx={{
-                        textAlign: 'left',
-                        fontWeight: 'bold',
-                        padding: '6px',
-                      }}
-                    >
-                      {day.date}
-                    </TableCell>
-                  ))}
-                </TableRow>
-
-                <TableRow>
-                  {days.slice(22, 31).map((day, index) => (
-                    <TableCell
-                      key={index}
-                      sx={{ textAlign: 'left', padding: '6px' }}
-                    >
-                      <TextField
-                        type='number'
-                        value={day.value}
-                        onChange={(e) =>
-                          handleValueChange(index + 22, e.target.value)
-                        }
-                        size='small'
-                        sx={{ width: '85px', marginTop: '2px' }}
-                        error={!day.value}
-                      />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableBody>
-            </Table>
-          </Box>
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={handleCancel} variant='outlined' sx={{ mr: 2 }}>
-            Discard
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            variant='contained'
-            sx={{ backgroundColor: jioColors?.headerBg, color: 'white' }}
-          >
-            Save
-          </Button>
         </DialogActions>
       </Dialog>
     </Box>

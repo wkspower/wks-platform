@@ -1,4 +1,8 @@
+import { useSession } from 'SessionStoreContext'
 import DataGridTable from '../ASDataGrid'
+import React, { useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useGridApiRef } from '@mui/x-data-grid'
 
 // Define columns as usual
 const productionColumns = [
@@ -233,49 +237,109 @@ const productionData = [
   },
 ]
 
-// Create groups by inserting a row with a groupHeader property
-const rawMaterialsData = productionData.slice(0, 2) // 2 rows for Raw Materials
-const byProductsData = productionData.slice(2, 5) // 3 rows for By Products
-const calChemData = productionData.slice(5, 9) // 1 row for Cal-chem
-
-const groupedRows = [
-  { id: 'group-raw', groupHeader: 'Raw Materials' },
-  ...rawMaterialsData,
-  { id: 'group-by', groupHeader: 'By Products' },
-  ...byProductsData,
-  { id: 'group-cal', groupHeader: 'Cat-chem' },
-  ...calChemData,
-]
-
-// Custom render function for cells
-const groupRenderCell = (params) => {
-  if (params.row.groupHeader) {
-    // In the first column show the group title
-    if (params.field === 'srNo') {
-      return (
-        <span
-          style={{
-            fontWeight: 'bold',
-            padding: '4px 8px',
-          }}
-        >
-          {params.row.groupHeader}
-        </span>
-      )
-    }
-    // For other columns, render empty
-    return ''
-  }
-  return params.value
-}
-
-// Enhance columns to use the custom render function
-const enhancedColumns = productionColumns.map((col) => ({
-  ...col,
-  renderCell: groupRenderCell,
-}))
-
 const NormalOpNormsScreen = () => {
+  const menu = useSelector((state) => state.menu)
+  const { sitePlantChange } = menu
+  const [open1, setOpen1] = useState(false)
+  const [deleteId, setDeleteId] = useState(null)
+  const apiRef = useGridApiRef()
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
+  })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const unsavedChangesRef = React.useRef({
+    unsavedRows: {},
+    rowsBeforeChange: {},
+  })
+  const keycloak = useSession()
+  const processRowUpdate = React.useCallback((newRow, oldRow) => {
+    const rowId = newRow.id
+    console.log(newRow)
+    const start = new Date(newRow.maintStartDateTime)
+    const end = new Date(newRow.maintEndDateTime)
+    const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
+    // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
+
+    console.log(`Duration in minutes: ${durationInMins}`)
+
+    // Update the duration in newRow
+    newRow.durationInMins = durationInMins.toFixed(2)
+    // newRow.durationInMins = durationInMins
+    // setShutdownData((prevData) =>
+    //   prevData.map((row) => (row.id === rowId ? newRow : row)),
+    // )
+
+    // Store edited row data
+    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
+
+    // Keep track of original values before editing
+    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
+      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
+    }
+
+    // setHasUnsavedRows(true)
+    return newRow
+  }, [])
+  const saveChanges = React.useCallback(async () => {
+    console.log(
+      'Edited Data: ',
+      Object.values(unsavedChangesRef.current.unsavedRows),
+    )
+    try {
+      // var data = Object.values(unsavedChangesRef.current.unsavedRows)
+      // saveShutdownData(data)
+
+      unsavedChangesRef.current = {
+        unsavedRows: {},
+        rowsBeforeChange: {},
+      }
+    } catch (error) {
+      // setIsSaving(false);
+    }
+  }, [apiRef])
+  // Create groups by inserting a row with a groupHeader property
+  const rawMaterialsData = productionData.slice(0, 2) // 2 rows for Raw Materials
+  const byProductsData = productionData.slice(2, 5) // 3 rows for By Products
+  const calChemData = productionData.slice(5, 9) // 1 row for Cal-chem
+
+  const groupedRows = [
+    { id: 'group-raw', groupHeader: 'Raw Materials' },
+    ...rawMaterialsData,
+    { id: 'group-by', groupHeader: 'By Products' },
+    ...byProductsData,
+    { id: 'group-cal', groupHeader: 'Cat-chem' },
+    ...calChemData,
+  ]
+
+  // Custom render function for cells
+  const groupRenderCell = (params) => {
+    if (params.row.groupHeader) {
+      // In the first column show the group title
+      if (params.field === 'srNo') {
+        return (
+          <span
+            style={{
+              fontWeight: 'bold',
+              padding: '4px 8px',
+            }}
+          >
+            {params.row.groupHeader}
+          </span>
+        )
+      }
+      // For other columns, render empty
+      return ''
+    }
+    return params.value
+  }
+
+  // Enhance columns to use the custom render function
+  const enhancedColumns = productionColumns.map((col) => ({
+    ...col,
+    renderCell: groupRenderCell,
+  }))
+
   return (
     <div>
       <DataGridTable
@@ -286,6 +350,19 @@ const NormalOpNormsScreen = () => {
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
+        processRowUpdate={processRowUpdate}
+        saveChanges={saveChanges}
+        snackbarData={snackbarData}
+        snackbarOpen={snackbarOpen}
+        apiRef={apiRef}
+        // deleteId={deleteId}
+        open1={open1}
+        // setDeleteId={setDeleteId}
+        setOpen1={setOpen1}
+        setSnackbarOpen={setSnackbarOpen}
+        setSnackbarData={setSnackbarData}
+        // handleDeleteClick={handleDeleteClick}
+        // fetchData={fetchData}
         permissions={{
           showAction: true,
           addButton: false,
