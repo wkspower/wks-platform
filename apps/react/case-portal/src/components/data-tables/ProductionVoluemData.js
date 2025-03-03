@@ -10,9 +10,10 @@ const headerMap = generateHeaderNames()
 const ProductionvolumeData = () => {
   const keycloak = useSession()
   const [productNormData, setProductNormData] = useState([])
-  const [slowDownData, setSlowDownData] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
+  const menu = useSelector((state) => state.menu)
+  const { sitePlantChange } = menu
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -104,7 +105,7 @@ const ProductionvolumeData = () => {
     console.log(newAvgTph)
     // Update the avgTph value
     newRow.avgTph = newAvgTph
-    setProductVolumeData((prevData) =>
+    setProductNormData((prevData) =>
       prevData.map((row) => (row.id === rowId ? newRow : row)),
     )
 
@@ -163,7 +164,6 @@ const ProductionvolumeData = () => {
         setAllProducts(productList)
       } catch (error) {
         console.error('Error fetching product:', error)
-      } finally {
       }
     }
 

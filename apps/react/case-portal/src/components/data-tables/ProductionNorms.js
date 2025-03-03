@@ -13,6 +13,8 @@ const ProductionNorms = () => {
   const [csData, setCsData] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
+  const menu = useSelector((state) => state.menu)
+  const { sitePlantChange } = menu
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',

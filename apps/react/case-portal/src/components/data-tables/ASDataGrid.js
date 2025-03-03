@@ -96,19 +96,20 @@ const DataGridTable = ({
 
   // const [yearData, setYearData] = useState('')
   const [resizedColumns, setResizedColumns] = useState({})
-  // const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false)
   // const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
   const [remark, setRemark] = useState('')
   const [product, setProduct] = useState('')
   const [openRemark, setOpenRemark] = useState(false)
   const keycloak = useSession()
-  // const [days, setDays] = useState([])
+  const [days, setDays] = useState([])
   const [rows, setRows] = useState(initialRows)
   const [searchText, setSearchText] = useState('')
   const [isFilterActive, setIsFilterActive] = useState(false)
   const [selectedRowId, setSelectedRowId] = useState(null) // Store selected row ID
-  const unitOptions = ['In percentage (%)', 'Absolute number']
+  const unitOptions = ['TPD', 'TPH']
+  // const unitOptions = ['In percentage (%)', 'Absolute number']
   const [selectedUnit, setSelectedUnit] = useState()
   // const [localEditState, setLocalEditState] = useState(null); // Local edit state for validation errors
   const handleOpenRemark = () => setOpenRemark(true)
@@ -1254,108 +1255,111 @@ const DataGridTable = ({
 
   const handleCellClick = (params) => {
     // console.log(params)
-    setChangedRowIds(params?.row)
-    if (title == 'Production Volume Data') {
-      if (nonEditableFields.includes(params.field)) return // Block non-editable fields
+    // setChangedRowIds(params?.row)
+    // if (title == 'Production Volume Data') {
+    // if (nonEditableFields.includes(params.field)) return // Block non-editable fields
 
-      if (params?.field === 'remark') {
-        setRemark(params?.value || '')
-        setSelectedRowId(params.id)
-        handleOpenRemark()
-      } else if (monthFields.has(params.field)) {
-        // Allow editing only if value exists
-        if (params.value !== '' && params.value !== null) {
-          setOpen(false)
-          // setOpen(true)
-        }
-      }
+    if (params?.field === 'remark') {
+      setRemark(params?.value || '')
+      setSelectedRowId(params.id)
+      handleOpenRemark()
     }
+    // else if (monthFields.has(params.field)) {
+    //   // Allow editing only if value exists
+    //   if (params.value !== '' && params.value !== null) {
+    //     setOpen(false)
+    //     // setOpen(true)
+    //   }
+    // }
+    // }
 
-    if (
-      params.row.product === '' &&
-      nonEditableFields.includes(params.field) &&
-      monthFields.has(params.field)
-    ) {
-      // setSnackbarOpen(true)
-      // setSnackbarMessage('Select a Product First!')
-      // return
-    } else {
-      setProduct(params.row.product)
-    }
+    // if (
+    //   params.row.product === '' &&
+    //   nonEditableFields.includes(params.field) &&
+    //   monthFields.has(params.field)
+    // ) {
+    //   // setSnackbarOpen(true)
+    //   // setSnackbarMessage('Select a Product First!')
+    //   // return
+    // } else {
+    //   setProduct(params.row.product)
+    // }
 
     if (params?.field === 'remark') {
       setRemark(params?.value || '') // Auto-fetch the params value
       setSelectedRowId(params.id)
       handleOpenRemark()
-    } else {
-      if (monthFields.has(params.field)) {
-        if (params.value == '') {
-          handleOpenYearData(params) // Open popup only for month fields with no value
-          return
-        }
-      }
-
-      // If not a month field, just return
-      if (nonEditableFields.includes(params.field)) return
-
-      // Handle editable fields
-      if (
-        params.isEditable &&
-        !nonEditableFields.includes(params.field) &&
-        params.value !== null &&
-        params.value !== undefined
-      ) {
-        const field = params.field
-        const monthAbbr = field.substring(0, 3).toLowerCase()
-        const yearShort = field.substring(3)
-        const year = 2000 + parseInt(yearShort, 10)
-
-        const monthMap = {
-          jan: 0,
-          feb: 1,
-          mar: 2,
-          apr: 3,
-          may: 4,
-          jun: 5,
-          jul: 6,
-          aug: 7,
-          sep: 8,
-          oct: 9,
-          nov: 10,
-          dec: 11,
-        }
-        const month = monthMap[monthAbbr]
-
-        if (month === undefined) {
-          console.error('Invalid month abbreviation:', monthAbbr)
-          return
-        }
-
-        //console.log('params-params', params)
-
-        // Calculate days in the selected month
-        const totalDays = new Date(year, month + 1, 0).getDate()
-        const perDayValue = (params.value / totalDays).toFixed(2) // Keep 2 decimal places
-
-        const daysArray = Array.from({ length: totalDays }, (_, index) => {
-          const date = new Date(year, month, index + 1)
-          const day = String(date.getDate()).padStart(2, '0')
-          const monthName = date.toLocaleString('en-GB', { month: 'short' })
-          const yearShort = date.getFullYear().toString().slice(-2)
-
-          const formattedDate = `${day}-${monthName}-${yearShort}`
-
-          return {
-            date: formattedDate,
-            value: parseFloat(perDayValue), // Convert back to number with 2 decimals
-          }
-        })
-
-        setDays(daysArray)
-        setOpen(false)
-        // setOpen(true)
-      }
     }
+
+    // else {
+    //   // if (monthFields.has(params.field)) {
+    //   //   if (params.value == '') {
+    //   //     handleOpenYearData(params) // Open popup only for month fields with no value
+    //   //     return
+    //   //   }
+    //   // }
+
+    //   // If not a month field, just return
+    //   // if (nonEditableFields.includes(params.field)) return
+
+    //   // Handle editable fields
+    //   // if (
+    //   //   params.isEditable &&
+    //   //   !nonEditableFields.includes(params.field) &&
+    //   //   params.value !== null &&
+    //   //   params.value !== undefined
+    //   // ) {
+    //   //   const field = params.field
+    //   //   const monthAbbr = field.substring(0, 3).toLowerCase()
+    //   //   const yearShort = field.substring(3)
+    //   //   const year = 2000 + parseInt(yearShort, 10)
+
+    //   //   const monthMap = {
+    //   //     jan: 0,
+    //   //     feb: 1,
+    //   //     mar: 2,
+    //   //     apr: 3,
+    //   //     may: 4,
+    //   //     jun: 5,
+    //   //     jul: 6,
+    //   //     aug: 7,
+    //   //     sep: 8,
+    //   //     oct: 9,
+    //   //     nov: 10,
+    //   //     dec: 11,
+    //   //   }
+    //   //   const month = monthMap[monthAbbr]
+
+    //   //   if (month === undefined) {
+    //   //     console.error('Invalid month abbreviation:', monthAbbr)
+    //   //     return
+    //   //   }
+
+    //     //console.log('params-params', params)
+
+    //     // Calculate days in the selected month
+    //     // const totalDays = new Date(year, month + 1, 0).getDate()
+    //     // const perDayValue = (params.value / totalDays).toFixed(2) // Keep 2 decimal places
+
+    //     // const daysArray = Array.from({ length: totalDays }, (_, index) => {
+    //     //   const date = new Date(year, month, index + 1)
+    //     //   const day = String(date.getDate()).padStart(2, '0')
+    //     //   const monthName = date.toLocaleString('en-GB', { month: 'short' })
+    //     //   const yearShort = date.getFullYear().toString().slice(-2)
+
+    //     //   const formattedDate = `${day}-${monthName}-${yearShort}`
+
+    //     //   return {
+    //     //     date: formattedDate,
+    //     //     value: parseFloat(perDayValue), // Convert back to number with 2 decimals
+    //     //   }
+    //     // })
+
+    //     // setDays(daysArray)
+    //     setOpen(false)
+    //     // setOpen(true)
+    //   // }
+    // }
   }
 
   // useEffect(() => {
