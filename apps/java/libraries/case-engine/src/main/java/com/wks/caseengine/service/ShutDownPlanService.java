@@ -3,10 +3,7 @@ package com.wks.caseengine.service;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-
+import com.wks.caseengine.dto.MonthWiseDataDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 
@@ -20,5 +17,6 @@ public interface ShutDownPlanService {
 	public PlantMaintenanceTransaction editShutDownPlanData(UUID plantMaintenanceTransactionId);
 	public void deletePlanData(UUID plantMaintenanceTransactionId);
 	public List<ShutDownPlanDTO> editShutdownData(UUID plantMaintenanceTransactionId, List<ShutDownPlanDTO> shutDownPlanDTOList);
+	public List<MonthWiseDataDTO> getMonthlyShutdownHours(String auditYear,  UUID plantId);
 
 }

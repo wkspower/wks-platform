@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import com.wks.caseengine.dto.MonthWiseDataDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
@@ -169,6 +170,20 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	public PlantMaintenanceTransaction editShutDownPlanData(UUID plantMaintenanceTransactionId) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public List<MonthWiseDataDTO> getMonthlyShutdownHours(String auditYear, UUID plantId) {
+		List<MonthWiseDataDTO> monthWiseDataDTOList=new ArrayList<>();
+		List<Object[]> results= shutDownPlanRepository.getMonthlyShutdownHours(auditYear,plantId);
+		for (Object[] obj : results) {
+			MonthWiseDataDTO monthWiseDataDTO=new MonthWiseDataDTO();
+			monthWiseDataDTO.setMonthYear(obj[0].toString());
+			monthWiseDataDTO.setProduct(obj[1].toString());
+			monthWiseDataDTO.setTotalHours(Double.parseDouble(obj[2].toString()));
+			monthWiseDataDTOList.add(monthWiseDataDTO);
+		}
+		return monthWiseDataDTOList;
 	}
 
 }

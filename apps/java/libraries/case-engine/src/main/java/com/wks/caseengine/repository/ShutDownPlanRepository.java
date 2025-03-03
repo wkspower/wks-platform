@@ -43,4 +43,22 @@ public interface ShutDownPlanRepository extends JpaRepository<PlantMaintenanceTr
     nativeQuery = true)
 	UUID findIdByPlantIdAndMaintenanceTypeName(@Param("plantFkId") UUID plantFkId, 
 	                                                   @Param("maintenanceTypeName") String maintenanceTypeName);
+    
+    @Query(value = """
+    	    SELECT 
+    	        FORMAT(t.MaintStartDateTime, 'MMM-yyyy') AS monthYear, 
+    	        p.MaintenanceText AS product, 
+    	        SUM(t.DurationInMins) / 60.0 AS totalHours 
+    	    FROM PlantMaintenanceTransaction t
+    	    JOIN PlantMaintenance p ON t.PlantMaintenance_FK_Id = p.Id
+    	    JOIN MaintenanceTypes m ON p.MaintenanceType_FK_Id = m.Id
+    	    WHERE 
+    	        m.Name = 'Shutdown' 
+    	        AND t.AuditYear = :auditYear 
+    	        AND p.Plant_FK_Id = :plantId 
+    	    GROUP BY FORMAT(t.MaintStartDateTime, 'MMM-yyyy'), p.MaintenanceText
+    	    ORDER BY monthYear, product
+    	""", nativeQuery = true)
+    	List<Object[]> getMonthlyShutdownHours(@Param("auditYear") String auditYear, @Param("plantId") UUID plantId);
+
 }
