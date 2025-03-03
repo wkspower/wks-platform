@@ -176,39 +176,7 @@ const SlowDown = () => {
       }
     }
 
-    // const saveShutdownData = async () => {
-    //   try {
-    //     // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D';
-    //     var plantId = ''
-
-    //     const storedPlant = localStorage.getItem('selectedPlant')
-    //     if (storedPlant) {
-    //       const parsedPlant = JSON.parse(storedPlant)
-    //       plantId = parsedPlant.id
-    //     }
-
-    //     const shutdownDetails = {
-    //       product: 'Oxygen',
-    //       discription: '1 Shutdown maintenance',
-    //       durationInMins: 120,
-    //       maintEndDateTime: '2025-02-20T18:00:00Z',
-    //       maintStartDateTime: '2025-02-20T16:00:00Z',
-    //     }
-
-    //     const response = await DataService.saveShutdownData(
-    //       plantId,
-    //       shutdownDetails,
-    //       keycloak,
-    //     )
-    //     console.log('Shutdown data saved successfully:', response)
-    //     return response
-    //   } catch (error) {
-    //     console.error('Error saving shutdown data:', error)
-    //   }
-    // }
-
     fetchData()
-    // saveShutdownData()
     getAllProducts()
   }, [sitePlantChange, keycloak])
   const handleDeleteClick = async (id, params) => {
@@ -332,18 +300,17 @@ const SlowDown = () => {
       field: 'durationInMins',
       headerName: 'Duration (hrs)',
       editable: false,
-      // type: "number",
       minWidth: 100,
-      maxWidth: 150,
     },
 
     {
       field: 'rate',
       headerName: 'Rate',
       editable: true,
-      type: 'number',
       minWidth: 100,
-      maxWidth: 150,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
     },
 
     {
@@ -351,7 +318,6 @@ const SlowDown = () => {
       headerName: 'Remarks',
       editable: true,
       minWidth: 200,
-      maxWidth: 400,
     },
   ]
 

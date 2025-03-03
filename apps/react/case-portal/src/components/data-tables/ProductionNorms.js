@@ -49,15 +49,17 @@ const ProductionNorms = () => {
       .map((month) => Number(newRow[month])) // Convert to number
       .filter((value) => !isNaN(value)) // Filter out NaN values
 
-    console.log(values)
-    // Calculate new average TPH
+    // Calculate new average TPH and format it to 2 decimal places
     const newAvgTph =
       values.length > 0
-        ? values.reduce((sum, val) => sum + val, 0) / values.length
-        : 0
+        ? (values.reduce((sum, val) => sum + val, 0) / values.length).toFixed(2) // Format to 2 decimal places
+        : '0.00' // Ensure consistent format
+
     console.log(newAvgTph)
+
     // Update the avgTph value
-    newRow.avgTph = newAvgTph
+    newRow.avgTph = parseFloat(newAvgTph) // Ensure it's still a number
+
     setCsData((prevData) =>
       prevData.map((row) => (row.id === rowId ? newRow : row)),
     )

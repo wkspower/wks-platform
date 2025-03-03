@@ -205,7 +205,6 @@ const ShutDown = () => {
     }
 
     fetchData()
-    // saveShutdownData()
     getAllProducts()
   }, [sitePlantChange, keycloak])
 
