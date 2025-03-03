@@ -68,15 +68,16 @@ const TurnaroundPlanTable = () => {
         plantId = parsedPlant.id
       }
 
-      const turnAroundDetails = {
-        productId: newRow.product,
-        discription: newRow.discription,
-        durationInMins: newRow.durationInMins,
-        maintEndDateTime: newRow.maintEndDateTime,
-        maintStartDateTime: newRow.maintStartDateTime,
-        remark: newRow.remark,
-        // rate: newRow.rate,
-      }
+      const turnAroundDetails = newRow.map((row) => ({
+        productId: row.product,
+        discription: row.discription,
+        durationInMins: row.durationInMins,
+        maintEndDateTime: row.maintEndDateTime,
+        maintStartDateTime: row.maintStartDateTime,
+        remark: row.remark,
+        audityear: '2024-25',
+        id: row.idFromApi || null,
+      }))
       const response = await DataService.saveTurnAroundData(
         plantId,
         turnAroundDetails,
@@ -158,7 +159,7 @@ const TurnaroundPlanTable = () => {
     const getAllProducts = async () => {
       try {
         const data = await DataService.getAllProducts(keycloak)
-        console.log('API Response:', data)
+        // console.log('API Response:', data)
 
         // Extract only displayName and id
         const productList = data.map((product) => ({
@@ -203,7 +204,8 @@ const TurnaroundPlanTable = () => {
         return params || ''
       },
       valueFormatter: (params) => {
-        console.log('params valueFormatter ', params)
+        // console.log('params valueFormatter ', params)
+
         const product = allProducts.find((p) => p.id === params)
         return product ? product.displayName : ''
       },
@@ -346,6 +348,18 @@ const TurnaroundPlanTable = () => {
       fetchData()
     }
   }
+
+  const handleRowEditStop = (params, event) => {
+    setRowModesModel({
+      ...rowModesModel,
+      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+    })
+  }
+
+  const onProcessRowUpdateError = React.useCallback((error) => {
+    console.log(error)
+  }, [])
+
   return (
     <div>
       <ASDataGrid
@@ -370,6 +384,19 @@ const TurnaroundPlanTable = () => {
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
         handleDeleteClick={handleDeleteClick}
+        onRowEditStop={handleRowEditStop}
+        onProcessRowUpdateError={onProcessRowUpdateError}
+        experimentalFeatures={{ newEditingApi: true }}
+        onCellEditStop={(params, event) => {
+          event.defaultMuiPrevented = true
+          if (
+            params.reason === 'cellFocusOut' ||
+            params.reason === 'escapeKeyDown'
+          ) {
+            const updatedRow = { ...params.row, [params.field]: params.value }
+            processRowUpdate(updatedRow, params.row)
+          }
+        }}
         permissions={{
           showAction: true,
           addButton: true,

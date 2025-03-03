@@ -24,6 +24,7 @@ export const DataService = {
   saveCatalystData,
 
   saveBusinessDemandData,
+  editAOPMCCalculatedData,
 
   updateSlowdownData,
   updateShutdownData,
@@ -581,6 +582,28 @@ async function saveBusinessDemandData(plantId, turnAroundDetails, keycloak) {
   try {
     const resp = await fetch(url, {
       method: 'POST',
+      headers,
+      body: JSON.stringify(turnAroundDetails),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function editAOPMCCalculatedData(plantId, turnAroundDetails, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/editAOPMCCalculatedData`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'PUT',
       headers,
       body: JSON.stringify(turnAroundDetails),
     })

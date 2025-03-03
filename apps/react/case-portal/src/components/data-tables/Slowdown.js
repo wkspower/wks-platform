@@ -61,15 +61,17 @@ const SlowDown = () => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-      const slowDownDetails = {
-        productId: newRow.product,
-        discription: newRow.discription,
-        durationInMins: newRow.durationInMins,
-        maintEndDateTime: newRow.maintEndDateTime,
-        maintStartDateTime: newRow.maintStartDateTime,
-        remark: newRow.remarks,
-        rate: newRow.rate,
-      }
+      const slowDownDetails = newRow.map((row) => ({
+        productId: row.product,
+        discription: row.discription,
+        durationInMins: row.durationInMins,
+        maintEndDateTime: row.maintEndDateTime,
+        maintStartDateTime: row.maintStartDateTime,
+        remark: row.remarks,
+        rate: row.rate,
+        audityear: '2024-25',
+        id: row.idFromApi || null,
+      }))
       const response = await DataService.saveSlowdownData(
         plantId,
         slowDownDetails,
@@ -148,7 +150,7 @@ const SlowDown = () => {
       const data = await DataService.getSlowDownPlantData(keycloak)
       const formattedData = data.map((item, index) => ({
         ...item,
-        // id: item?.maintenanceId,
+        idFromApi: item?.id,
         id: index,
       }))
       setSlowDownData(formattedData)
@@ -321,6 +323,17 @@ const SlowDown = () => {
     },
   ]
 
+  const handleRowEditStop = (params, event) => {
+    setRowModesModel({
+      ...rowModesModel,
+      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+    })
+  }
+
+  const onProcessRowUpdateError = React.useCallback((error) => {
+    console.log(error)
+  }, [])
+
   return (
     <div>
       <ASDataGrid
@@ -345,6 +358,19 @@ const SlowDown = () => {
         open1={open1}
         handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
+        onRowEditStop={handleRowEditStop}
+        onProcessRowUpdateError={onProcessRowUpdateError}
+        experimentalFeatures={{ newEditingApi: true }}
+        onCellEditStop={(params, event) => {
+          event.defaultMuiPrevented = true
+          if (
+            params.reason === 'cellFocusOut' ||
+            params.reason === 'escapeKeyDown'
+          ) {
+            const updatedRow = { ...params.row, [params.field]: params.value }
+            processRowUpdate(updatedRow, params.row)
+          }
+        }}
         permissions={{
           showAction: true,
           addButton: true,

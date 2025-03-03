@@ -1,6 +1,6 @@
 export const generateHeaderNames = () => {
-    const yearRange = localStorage.getItem("year"); // Example: "2024-2025"
-    // const yearRange = '2025-2026';
+  // const yearRange = localStorage.getItem("year"); // Example: "2024-2025"
+  const yearRange = '2025-2026'
     if (!yearRange) {
         console.error("YEAR not found in localStorage");
         return {};

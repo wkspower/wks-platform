@@ -125,13 +125,27 @@ const DataGridTable = ({
   //   unsavedRows: {},
   //   rowsBeforeChange: {},
   // })
-  const handleRowEditStop = (params, event) => {
-    //console.log('handleRowEditStop', params)
 
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true
-    }
-  }
+  // const handleRowEditStop = (params, event) => {
+  //   // if (event) {
+  //   //   event.defaultMuiPrevented = true
+  //   // }
+
+  //   // setRowModesModel((prevModel) => ({
+  //   //   ...prevModel,
+  //   //   [params.id]: { mode: 'view' },
+  //   // }))
+
+  //   // setRowModesModel({
+  //   //   ...rowModesModel,
+  //   //   [params.id]: { mode: GridRowModes.View },
+  //   // })
+
+  //   setRowModesModel({
+  //     ...rowModesModel,
+  //     [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+  //   })
+  // }
 
   const handleRowEditCommit = (id, event) => {
     console.log('Row Data After Editing:', event)
@@ -139,13 +153,10 @@ const DataGridTable = ({
     console.log('Row Data After Editing:', editedRow)
     // handleEditClick(id, event)
   }
-  const handleCellEditCommit = (params) => {
-    console.log('--->', params)
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === params.id ? { ...row, [params.field]: params.value } : row,
-      ),
-    )
+  const handleCellEditCommit = (id, event) => {
+    // handleEditClick(id, event)
+    console.log('handleCellEditCommit id', id)
+    console.log('handleCellEditCommit event', event)
   }
 
   const handleEditClick = (id, row) => () => {
@@ -886,12 +897,15 @@ const DataGridTable = ({
   //   setRows(initialRows)
   // }, [initialRows])
   useEffect(() => {
-    setRows((prevRows) => {
-      // Keep newly added rows and merge with initialRows
-      const newRows = prevRows.filter((row) => row.isNew) // Preserve new rows
-      return [...newRows, ...initialRows] // Merge with DB rows
-    })
+    setRows(initialRows)
   }, [initialRows])
+  // useEffect(() => {
+  //   setRows((prevRows) => {
+  //     // Keep newly added rows and merge with initialRows
+  //     const newRows = prevRows.filter((row) => row.isNew) // Preserve new rows
+  //     return [...newRows, ...initialRows] // Merge with DB rows
+  //   })
+  // }, [initialRows])
 
   const onColumnResized = (params) => {
     if (params.column) {
@@ -902,6 +916,10 @@ const DataGridTable = ({
       }))
     }
   }
+
+  const onProcessRowUpdateError = React.useCallback((error) => {
+    console.log(error)
+  }, [])
 
   // const processRowUpdate = React.useCallback((newRow, oldRow) => {
   //   const rowId = newRow.id
@@ -1731,30 +1749,37 @@ const DataGridTable = ({
             aopCaseId: false,
             aopType: false,
             aopYear: false,
+            avgTph: false,
             NormParameterMonthlyTransactionId: false,
             // NormParametersId: false,
             idFromApi: false,
           }}
           rowHeight={35}
           processRowUpdate={processRowUpdate}
+          onProcessRowUpdateError={onProcessRowUpdateError}
           onColumnResized={onColumnResized}
           onCellClick={handleCellClick}
           onRowEditCommit={handleRowEditCommit}
           onCellEditCommit={(params) => handleCellEditCommit(params)} // Real-time updates
-          onCellKeyDown={(params, event) => handleKeyDown(event, params.id)}
           experimentalFeatures={{ newEditingApi: true }}
           editMode='row'
           rowModesModel={rowModesModel}
           onRowModesModelChange={handleRowModesModelChange}
-          onRowEditStop={handleRowEditStop}
+          // onRowEditStop={handleRowEditStop}
           slotProps={{
             toolbar: { setRows, setRowModesModel },
           }}
           onCellEditStop={(params, event) => {
-            console.log('param in ', params)
-            if (params.reason === 'cellFocusOut') {
-              event.defaultMuiPrevented = true
-              console.log('param in ', params)
+            // Always prevent default edit stop behavior
+            event.defaultMuiPrevented = true
+
+            // But still capture the updated value and save it
+            if (
+              params.reason === 'cellFocusOut' ||
+              params.reason === 'escapeKeyDown'
+            ) {
+              const updatedRow = { ...params.row, [params.field]: params.value }
+              processRowUpdate(updatedRow, params.row)
             }
           }}
           getRowClassName={(params) =>

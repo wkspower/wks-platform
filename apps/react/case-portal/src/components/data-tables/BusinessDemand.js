@@ -284,7 +284,6 @@ const BusinessDemand = () => {
   }, [apiRef])
   const saveBusinessDemandData = async (newRows) => {
     try {
-      console.log('saveBusiness API Called')
       let plantId = ''
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
@@ -293,24 +292,24 @@ const BusinessDemand = () => {
       }
 
       const businessData = newRows.map((row) => ({
-        april: row.april,
-        may: row.may,
-        june: row.june,
-        july: row.july,
-        aug: row.aug,
-        sep: row.sep,
-        oct: row.oct,
-        nov: row.nov,
-        dec: row.dec,
-        jan: row.jan,
-        feb: row.feb,
-        march: row.march,
+        april: row.april || null,
+        may: row.may || null,
+        june: row.june || null,
+        july: row.july || null,
+        aug: row.aug || null,
+        sep: row.sep || null,
+        oct: row.oct || null,
+        nov: row.nov || null,
+        dec: row.dec || null,
+        jan: row.jan || null,
+        feb: row.feb || null,
+        march: row.march || null,
         remark: row.remark,
-        avgTph: row.avgTph,
+        avgTph: row.avgTph || null,
         year: '2024-25',
         plantId: plantId,
         normParameterId: row.normParameterId,
-        id: row.idFromApi,
+        id: row.idFromApi || null,
       }))
 
       const response = await DataService.saveBusinessDemandData(
@@ -354,6 +353,17 @@ const BusinessDemand = () => {
     }
   }
 
+  const handleRowEditStop = (params, event) => {
+    setRowModesModel({
+      ...rowModesModel,
+      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+    })
+  }
+
+  const onProcessRowUpdateError = React.useCallback((error) => {
+    console.log(error)
+  }, [])
+
   return (
     <div>
       <ASDataGrid
@@ -370,6 +380,7 @@ const BusinessDemand = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
+        onRowEditStop={handleRowEditStop}
         apiRef={apiRef}
         deleteId={deleteId}
         setDeleteId={setDeleteId}
@@ -377,6 +388,7 @@ const BusinessDemand = () => {
         open1={open1}
         handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
+        onProcessRowUpdateError={onProcessRowUpdateError}
         permissions={{
           showAction: true,
           addButton: true,

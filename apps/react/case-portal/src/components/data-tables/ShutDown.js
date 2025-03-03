@@ -73,7 +73,7 @@ const ShutDown = () => {
   }, [apiRef])
   const saveShutdownData = async (newRow) => {
     try {
-      // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
+      var plantId = ''
 
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
@@ -81,18 +81,18 @@ const ShutDown = () => {
         plantId = parsedPlant.id
       }
 
-      var plantId = plantId
       // plantId = plantId;
-      console.log(newRow)
-      const shutdownDetails = {
-        id: newRow.id,
-        productId: newRow.product,
-        discription: newRow.discription,
-        durationInMins: newRow.durationInMins,
-        maintEndDateTime: newRow.maintEndDateTime,
-        maintStartDateTime: newRow.maintStartDateTime,
-        remark: newRow.remark, // Added missing 'remark' field
-      }
+
+      const shutdownDetails = newRow.map((row) => ({
+        productId: row.product,
+        discription: row.discription,
+        durationInMins: row.durationInMins,
+        maintEndDateTime: row.maintEndDateTime,
+        maintStartDateTime: row.maintStartDateTime,
+        audityear: '2024-25',
+        id: row.idFromApi || null,
+        remark: row.remark || 'null',
+      }))
 
       const response = await DataService.saveShutdownData(
         plantId,
@@ -176,7 +176,7 @@ const ShutDown = () => {
       const data = await DataService.getShutDownPlantData(keycloak)
       const formattedData = data.map((item, index) => ({
         ...item,
-        // id: item?.maintenanceId,
+        idFromApi: item?.id,
         id: index,
       }))
       setShutdownData(formattedData)
@@ -313,6 +313,17 @@ const ShutDown = () => {
     { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
   ]
 
+  const handleRowEditStop = (params, event) => {
+    setRowModesModel({
+      ...rowModesModel,
+      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+    })
+  }
+
+  const onProcessRowUpdateError = React.useCallback((error) => {
+    console.log(error)
+  }, [])
+
   return (
     <div>
       <ASDataGrid
@@ -337,6 +348,19 @@ const ShutDown = () => {
         setSnackbarData={setSnackbarData}
         handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
+        onRowEditStop={handleRowEditStop}
+        onProcessRowUpdateError={onProcessRowUpdateError}
+        experimentalFeatures={{ newEditingApi: true }}
+        onCellEditStop={(params, event) => {
+          event.defaultMuiPrevented = true
+          if (
+            params.reason === 'cellFocusOut' ||
+            params.reason === 'escapeKeyDown'
+          ) {
+            const updatedRow = { ...params.row, [params.field]: params.value }
+            processRowUpdate(updatedRow, params.row)
+          }
+        }}
         permissions={{
           showAction: true,
           addButton: true,
