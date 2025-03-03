@@ -1475,23 +1475,11 @@ const DataGridTable = ({
     })
   }, [rows, searchText, isFilterActive, columnFilters])
 
-  const handleRefresh = async (year) => {
+  const handleRefresh = async () => {
     try {
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
+      fetchData()
 
-      var plantId = plantId
-      const response = await DataService.handleRefresh(plantId, year, keycloak)
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Data refresh successfully!',
-        severity: 'success',
-      })
-
-      return response
+     
     } catch (error) {
       console.error('Error saving refresh data:', error)
     }

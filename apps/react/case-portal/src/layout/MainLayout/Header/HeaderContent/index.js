@@ -17,7 +17,6 @@ import Search from './Search'
 import Config from 'consts/index'
 import Notification from './Notification'
 import { useState, useEffect } from 'react'
-import sitesData from '../../../../assets/SitesData.json' // Adjust the import path
 import { DataService } from 'services/DataService'
 import { Typography } from '../../../../../node_modules/@mui/material/index'
 import { setSitePlantChange } from 'store/reducers/menu' // Import the action
@@ -27,158 +26,263 @@ const HeaderContent = ({ keycloak }) => {
   const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
   const [selectedOption, setSelectedOption] = useState('')
   const [selectedSite, setSelectedSite] = useState('')
-  const [selectedVertical, setSelectedVertical] = useState('Vertical A')
+  const [selectedVertical, setSelectedVertical] = useState('')
   const [sites, setSites] = useState([])
+  const [allSites, setAllSites] = useState([])
   const [plants, setPlants] = useState([])
+  const [allPlants, setAllPlants] = useState([])
+  const [verticals, setVerticals] = useState([])
   const [userSiteToPlants, setUserSiteToPlants] = useState([])
   const dispatch = useDispatch() // Initialize Redux dispatch
 
   useEffect(() => {
-    localStorage.setItem('year', '2024-2025');
+    localStorage.setItem('year', '2024-2025')
     getPlantAndSite()
   }, [])
 
-  useEffect(() => {
-    if (sites.length > 0 && selectedSite) {
-      const site = sites.find((s) => s.name === selectedSite)
-      if (site) {
-        setPlants(site.plants)
-        setSelectedOption(site.plants[0]?.name || '')
+  const getPlantAndSite = async () => {
+    try {
+      // Assuming DataService.getAllSites returns an object with { sites, plants, verticals }
+      const response = await DataService.getAllSites(keycloak)
+      // Set plants, sites, and verticals from the response
+      setPlants(response.plants)
+      setAllPlants(response.plants)
+      setSites(response.sites)
+      setAllSites(response.sites)
+      setVerticals(response.verticals)
 
-        localStorage.setItem(
-          'selectedSite',
-          JSON.stringify({
-            id: site.id,
-            name: site.name,
-          }),
+      // Set default selections using the first plant in the list
+      if (response?.plants && response.plants?.length > 0) {
+        const defaultPlant = response.plants[0]
+        setSelectedOption(defaultPlant.name)
+        const defaultSite = response.sites.find(
+          (site) => site.id === defaultPlant.siteFkId,
         )
-
-        if (site.plants.length > 0) {
+        if (defaultSite) {
+          setSelectedSite(defaultSite.name)
           localStorage.setItem(
-            'selectedPlant',
+            'selectedSite',
+            JSON.stringify({ id: defaultSite.id, name: defaultSite.name }),
+          )
+        }
+        const defaultVertical = response.verticals.find(
+          (vertical) => vertical.id === defaultPlant.verticalFKId,
+        )
+        console.log(defaultVertical)
+        if (defaultVertical) {
+          setSelectedVertical(defaultVertical.name)
+          localStorage.setItem(
+            'selectedVertical',
             JSON.stringify({
-              id: site.plants[0].id,
-              name: site.plants[0].name,
-              displayName: site.plants[0].displayName,
+              id: defaultVertical.id,
+              name: defaultVertical.name,
             }),
           )
         }
-      }
-    }
-  }, [sites, selectedSite])
-
-  useEffect(() => {
-    // Update plant options based on selected site
-    const site = sites.find((s) => s.name === selectedSite)
-    if (site) {
-      setPlants(site.plants)
-      setSelectedOption(site.plants[0]?.name) // Default to first plant
-    }
-  }, [selectedSite, sites])
-
-  const getPlantAndSite = async () => {
-    try {
-      const sitesData = await DataService.getAllSites(keycloak)
-
-      // setSites(data)
-      // setSelectedSite(data[0]?.name)
-
-      if (keycloak.idTokenParsed.plants) {
-        const siteToPlants = {}
-
-        const data = JSON.parse(keycloak.idTokenParsed.plants)
-        // const data = keycloak.idTokenParsed.plants;
-
-        data.forEach((obj) => {
-          Object.entries(obj).forEach(([site, plant]) => {
-            if (!siteToPlants[site]) {
-              siteToPlants[site] = []
-            }
-            // Ensure plant is stored as an array
-            if (!siteToPlants[site].includes(plant)) {
-              siteToPlants[site].push(plant)
-            }
-          })
-        })
-
-        if (siteToPlants) {
-          setUserSiteToPlants(siteToPlants)
-          const sitesIds = Object.keys(siteToPlants)
-          const userSitesIds = sitesIds.map((id) => id.toLowerCase())
-
-          const userSites = sitesData.filter((site) =>
-            userSitesIds.includes(site.id?.toLowerCase()),
-          )
-
-          if (userSites) {
-            setSites(userSites)
-            setSelectedSite(userSites[0]?.name) // Default to first site
-          }
-        }
-      } else {
-        setSites(sitesData) // Setting the entire site data
-        setSelectedSite(sitesData[0]?.name) // Default to first site
+        localStorage.setItem(
+          'selectedPlant',
+          JSON.stringify({
+            id: defaultPlant.id,
+            name: defaultPlant.name,
+            displayName: defaultPlant.displayName,
+          }),
+        )
       }
     } catch (error) {
       console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
     }
   }
 
+  // Handle site change (if user manually changes site)
   const handleSiteChange = (event) => {
-    dispatch(setSitePlantChange(true))
-    dispatch(setSitePlantChange({ sitePlantChange: true }))
-
+    // dispatch(setSitePlantChange({ sitePlantChange: true }))
     const selectedSiteName = event.target.value
     setSelectedSite(selectedSiteName)
 
     const selectedSiteData = sites.find(
       (site) => site.name === selectedSiteName,
     )
-
     if (selectedSiteData) {
-      setPlants(selectedSiteData.plants)
-      setSelectedOption(selectedSiteData?.plants[0]?.name || '') // Default to first plant
-
-      // Update local storage
+      // Optionally, update plants based on the selected site
+      const updatedPlants = plants.filter(
+        (plant) => plant.siteFkId === selectedSiteData.id,
+      )
+      // If you want to restrict plant choices to those of the site:
+      setPlants(updatedPlants)
+      setSelectedOption(updatedPlants[0]?.name || '')
       localStorage.setItem(
         'selectedSite',
         JSON.stringify({
-          id: selectedSiteData.id, // Assuming site has an 'id' field
+          id: selectedSiteData.id,
           name: selectedSiteData.name,
         }),
       )
     }
   }
-  const handleVerticalChange = (event) => {
-    setSelectedVertical(event.target.value)
-  }
 
+  // Handle plant change: update selected plant AND update site and vertical accordingly.
   const handleOptionChange = (event) => {
-    dispatch(setSitePlantChange(true))
     dispatch(setSitePlantChange({ sitePlantChange: true }))
-
     const selectedPlantName = event.target.value
     setSelectedOption(selectedPlantName)
 
+    // Find the selected plant in the plants array
     const selectedPlantData = plants.find(
       (plant) => plant.name === selectedPlantName,
     )
-
     if (selectedPlantData) {
-      // Update local storage
+      // Update local storage for the plant
       localStorage.setItem(
         'selectedPlant',
         JSON.stringify({
-          id: selectedPlantData.id, // Assuming plant has an 'id' field
+          id: selectedPlantData.id,
           name: selectedPlantData.name,
           displayName: selectedPlantData.displayName,
         }),
       )
+
+      // Update site based on the selected plant's siteFkId
+      const relatedSite = allSites.find(
+        (site) => site.id === selectedPlantData.siteFkId,
+      )
+      if (relatedSite) {
+        setSelectedSite(relatedSite.name)
+        setSites(relatedSite)
+        localStorage.setItem(
+          'selectedSite',
+          JSON.stringify({ id: relatedSite.id, name: relatedSite.name }),
+        )
+      }
+
+      // Update vertical based on the selected plant's verticalFKId
+      const relatedVertical = verticals.find(
+        (vertical) => vertical.id === selectedPlantData.verticalFKId,
+      )
+      if (relatedVertical) {
+        setSelectedVertical(relatedVertical.name)
+        localStorage.setItem(
+          'selectedVertical',
+          JSON.stringify({
+            id: relatedVertical.id,
+            name: relatedVertical.name,
+          }),
+        )
+      }
+
+      const checkVertical = verticals.find(
+        (vertical) => vertical.name === selectedVertical,
+      )
+      if (checkVertical) {
+        console.log(checkVertical)
+      }
     }
   }
 
+  const handleVerticalChange = (event) => {
+    dispatch(setSitePlantChange({ sitePlantChange: true }))
+
+    const verticalName = event.target.value
+    setSelectedVertical(verticalName)
+    console.log(verticalName)
+    // Update plants based on the selected vertical
+    const updatedPlants = allPlants.filter(
+      (plant) =>
+        plant.verticalFKId ===
+        verticals.find((v) => v.name === verticalName)?.id,
+    )
+    console.log(updatedPlants)
+
+    // const showSite = allSites.find(
+    //   (site) => site.siteFkId === updatedPlants?.siteFkId,
+    // )
+    const siteIds = updatedPlants.map((plant) => plant.siteFkId)
+    const showSite = allSites.filter((site) => siteIds.includes(site.id))
+    console.log(showSite)
+    // console.log(showSite)
+
+    if (updatedPlants?.length > 0) {
+      setSelectedOption(updatedPlants[0]?.name)
+      setPlants(updatedPlants)
+      setSelectedSite(showSite?.displayName || showSite[0]?.displayName)
+      setSites(showSite)
+      localStorage.setItem(
+        'selectedPlant',
+        JSON.stringify({
+          id: updatedPlants[0].id,
+          name: updatedPlants[0].name,
+          displayName: updatedPlants[0].displayName,
+        }),
+      )
+    }
+
+    //available sites only
+  }
+  // Update plants when vertical changes
+  useEffect(() => {
+    if (!selectedVertical) return // Avoid unnecessary execution
+
+    // Find Vertical ID
+    const verticalData = verticals.find((v) => v.name === selectedVertical)
+    if (!verticalData) return
+
+    // Filter plants belonging to selected vertical
+    const updatedPlants = allPlants.filter(
+      (plant) => plant.verticalFKId === verticalData.id,
+    )
+
+    if (updatedPlants.length > 0) {
+      setPlants(updatedPlants)
+      setSelectedOption(updatedPlants[0].name) // Select the first plant
+
+      // Store selected plant in localStorage
+      localStorage.setItem(
+        'selectedPlant',
+        JSON.stringify({
+          id: updatedPlants[0].id,
+          name: updatedPlants[0].name,
+          displayName: updatedPlants[0].displayName,
+        }),
+      )
+    } else {
+      setPlants([])
+      setSelectedOption('') // Reset selection
+    }
+  }, [selectedVertical, allPlants])
+
+  // Update sites when plant changes
+  useEffect(() => {
+    if (!selectedOption) return // Avoid unnecessary execution
+
+    // Find the selected plant object
+    const selectedPlantData = plants.find(
+      (plant) => plant.name === selectedOption,
+    )
+    if (!selectedPlantData) return
+
+    console.log(selectedPlantData)
+    // Filter sites based on selected plant's siteFkId
+    const relatedSite = allSites.find(
+      (site) => site.id === selectedPlantData.siteFkId,
+    )
+    console.log(relatedSite)
+    if (relatedSite) {
+      setSelectedSite(relatedSite.name)
+      setSites([relatedSite]) // Only show the related site
+
+      localStorage.setItem(
+        'selectedSite',
+        JSON.stringify({
+          id: relatedSite.id,
+          name: relatedSite.name,
+        }),
+      )
+    } else {
+      setSites([])
+      setSelectedSite('') // Reset selection
+    }
+  }, [selectedOption, plants, allSites])
+
+  console.log(plants, verticals, sites)
   return (
     <>
       {matchesXs && <Search />}
@@ -186,7 +290,6 @@ const HeaderContent = ({ keycloak }) => {
 
       {/* Horizontal layout for Plant & Site */}
       <Stack direction='row' spacing={2} alignItems='center'>
-        {/* Vertical box */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant='body1' color='white'>
             Vertical:
@@ -197,13 +300,15 @@ const HeaderContent = ({ keycloak }) => {
               onChange={handleVerticalChange}
               sx={{ color: 'white' }}
             >
-              <MenuItem value='Vertical A'>Vertical A</MenuItem>
-              <MenuItem value='Vertical B'>Vertical B</MenuItem>
+              {verticals?.map((vertical) => (
+                <MenuItem key={vertical.id} value={vertical.name}>
+                  {vertical?.displayName}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Box>
 
-        {/* Site Dropdown */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant='body1' color='white'>
             Site:
@@ -213,18 +318,18 @@ const HeaderContent = ({ keycloak }) => {
               value={selectedSite}
               onChange={handleSiteChange}
               sx={{ color: 'white' }}
-              disabled={sites.length <= 1} // Disable if only 1 site
+              disabled={sites?.length <= 1} // Disable if only 1 site
             >
-              {sites.map((site, index) => (
-                <MenuItem key={index} value={site.name}>
-                  {site.name}
-                </MenuItem>
-              ))}
+              {Array.isArray(sites) &&
+                sites.map((site, index) => (
+                  <MenuItem key={index} value={site.name}>
+                    {site?.name}
+                  </MenuItem>
+                ))}
             </Select>
           </FormControl>
         </Box>
 
-        {/* Plant Dropdown */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant='body1' color='white'>
             Plant:
@@ -234,11 +339,11 @@ const HeaderContent = ({ keycloak }) => {
               value={selectedOption}
               onChange={handleOptionChange}
               sx={{ color: 'white' }}
-              disabled={plants.length <= 1} // Disable if only 1 plant
+              disabled={plants?.length <= 1} // Disable if only 1 plant
             >
-              {plants.map((plant, index) => (
+              {plants?.map((plant, index) => (
                 <MenuItem key={index} value={plant.name}>
-                  {plant.displayName}
+                  {plant?.displayName}
                 </MenuItem>
               ))}
             </Select>

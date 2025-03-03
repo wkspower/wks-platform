@@ -632,7 +632,8 @@ async function getYearWiseProduct(keycloak, id) {
 }
 
 async function getAllSites(keycloak) {
-  const url = `${process.env.REACT_APP_API_URL}/task/getPlantAndSite`
+  const url = `${process.env.REACT_APP_API_URL}/task/getPlantsAndSidesAndVerticals`
+  // const url = `${process.env.REACT_APP_API_URL}/task/getPlantAndSite`
 
   const headers = {
     Accept: 'application/json',

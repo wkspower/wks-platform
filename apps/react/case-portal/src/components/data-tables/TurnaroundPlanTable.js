@@ -252,6 +252,23 @@ const TurnaroundPlanTable = () => {
           : null
         return parsedDate
       },
+      // renderEditCell: (params) => {
+      //   const currentYear = new Date().getFullYear();
+
+      //   // Define the financial year range (April to March)
+      //   const startOfFinancialYear = new Date(currentYear, 3, 1); // April 1st
+      //   const endOfFinancialYear = new Date(currentYear + 1, 2, 31); // March 31st next year
+
+      //   return (
+      //     <DatePicker
+      //       value={params.value ? dayjs(params.value) : null}
+      //       onChange={(newValue) => params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue })}
+      //       minDate={dayjs(startOfFinancialYear)}
+      //       maxDate={dayjs(endOfFinancialYear)}
+      //       format="MMM D, YYYY, h:mm:ss A"
+      //     />
+      //   );
+      // }
     },
 
     {
