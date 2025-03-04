@@ -25,6 +25,29 @@ const ProductionvolumeData = () => {
     rowsBeforeChange: {},
   })
 
+  const findAvg = (value, row) => {
+    const months = [
+      'april',
+      'may',
+      'june',
+      'july',
+      'august',
+      'september',
+      'october',
+      'november',
+      'december',
+      'january',
+      'february',
+      'march',
+    ]
+
+    const values = months.map((month) => row[month] || 0)
+    const sum = values.reduce((acc, val) => acc + val, 0)
+    const avg = (sum / values.length).toFixed(2)
+
+    return avg === '0.00' ? null : avg
+  }
+
   const editAOPMCCalculatedData = async (newRows) => {
     try {
       let plantId = ''
@@ -64,6 +87,8 @@ const ProductionvolumeData = () => {
         material: 'EOE',
         normParametersFKId: row.normParametersFKId,
         id: row.idFromApi || null,
+
+        avgTPH: findAvg('1', row) || null,
       }))
 
       const response = await DataService.editAOPMCCalculatedData(
@@ -73,13 +98,13 @@ const ProductionvolumeData = () => {
       )
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Production AOP Saved Successfully!',
+        message: 'Production Vol Data Saved Successfully!',
         severity: 'success',
       })
       // fetchData()
       return response
     } catch (error) {
-      console.error('Error saving Production AOP:', error)
+      console.error('Error saving Production Vol Data:', error)
     } finally {
       fetchData()
     }
@@ -87,41 +112,6 @@ const ProductionvolumeData = () => {
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    console.log(newRow)
-
-    // Extract numeric values from month fields
-    const months = [
-      'jan',
-      'feb',
-      'march',
-      'april',
-      'may',
-      'june',
-      'july',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-    ]
-    const values = months
-      .map((month) => Number(newRow[month])) // Convert to number
-      .filter((value) => !isNaN(value)) // Filter out NaN values
-
-    // Calculate new average TPH and format it to 2 decimal places
-    const newAvgTph =
-      values.length > 0
-        ? (values.reduce((sum, val) => sum + val, 0) / values.length).toFixed(2) // Format to 2 decimal places
-        : '0.00' // Ensure consistent format
-
-    // console.log(newAvgTph)
-
-    // Update the avgTph value
-    newRow.avgTph = parseFloat(newAvgTph) // Ensure it's still a number
-
-    setProductNormData((prevData) =>
-      prevData.map((row) => (row.id === rowId ? newRow : row)),
-    )
 
     // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
@@ -364,7 +354,14 @@ const ProductionvolumeData = () => {
       align: 'left',
       headerAlign: 'left',
     },
-    { field: 'avgTph', headerName: 'AVG TPH', minWidth: 150, editable: false },
+
+    {
+      field: 'avgTph',
+      headerName: 'AVG',
+      minWidth: 150,
+      editable: false,
+      valueGetter: findAvg,
+    },
 
     { field: 'aopStatus', headerName: 'Remark', minWidth: 75, editable: true },
   ]

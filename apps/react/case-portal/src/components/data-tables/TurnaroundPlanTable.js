@@ -27,25 +27,6 @@ const TurnaroundPlanTable = () => {
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    console.log(newRow)
-    // const start = new Date(newRow.maintStartDateTime)
-    // const end = new Date(newRow.maintEndDateTime)
-    // const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
-    // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
-
-    // console.log(`Duration in minutes: ${durationInMins}`)
-
-    // Update the duration in newRow
-    // newRow.durationInMins = durationInMins.toFixed(2)
-    // newRow.durationInMins = durationInMins
-
-    // setTaData((prevData) =>
-    //   prevData.map((row) => (row.id === rowId ? newRow : row)),
-    // )
-
-    // Extract numeric values from month fields
-
-    // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
     // Keep track of original values before editing
@@ -285,6 +266,8 @@ const TurnaroundPlanTable = () => {
       editable: false,
       type: 'number',
       minWidth: 100,
+      align: 'left',
+      headerAlign: 'left',
       valueGetter: findDuration,
     },
     {

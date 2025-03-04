@@ -142,13 +142,13 @@ const FeedStockAvailability = () => {
   const keycloak = useSession()
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    console.log(newRow)
+    // console.log(newRow)
     const start = new Date(newRow.maintStartDateTime)
     const end = new Date(newRow.maintEndDateTime)
     const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
     // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
 
-    console.log(`Duration in minutes: ${durationInMins}`)
+    // console.log(`Duration in minutes: ${durationInMins}`)
 
     // Update the duration in newRow
     newRow.durationInMins = durationInMins.toFixed(2)
@@ -191,7 +191,7 @@ const FeedStockAvailability = () => {
   const getAllProducts = async () => {
     try {
       const data = await DataService.getAllProducts(keycloak)
-      console.log('API Response:', data)
+      // console.log('API Response:', data)
       const products = data.map((item) => item.displayName || item.name || item)
       setProductOptions(products)
     } catch (error) {

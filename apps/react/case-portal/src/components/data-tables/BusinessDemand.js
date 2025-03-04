@@ -57,12 +57,8 @@ const BusinessDemand = () => {
         // handleMenuClose();
       }
     }
-
-    // Initial data fetch on mount or when selectedPlant changes
     fetchData()
     getAllProducts()
-    console.log('sitePlant--->', sitePlantChange)
-    console.log(sitePlantChange, 'changed plant or site')
   }, [sitePlantChange, keycloak])
 
   const colDefs = [
@@ -216,40 +212,6 @@ const BusinessDemand = () => {
   ]
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    console.log(newRow)
-
-    // Extract numeric values from month fields
-    const months = [
-      'jan',
-      'feb',
-      'march',
-      'april',
-      'may',
-      'june',
-      'july',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-    ]
-    const values = months
-      .map((month) => Number(newRow[month])) // Convert to number
-      .filter((value) => !isNaN(value)) // Filter out NaN values
-
-    console.log(values)
-    // Calculate new average TPH
-    const newAvgTph =
-      values.length > 0
-        ? values.reduce((sum, val) => sum + val, 0) / values.length
-        : 0
-    console.log(newAvgTph)
-    // Update the avgTph value
-    newRow.avgTph = newAvgTph
-    setBDData((prevData) =>
-      prevData.map((row) => (row.id === rowId ? newRow : row)),
-    )
-
     // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
     // onRowUpdate.updatedRow(unsavedChangesRef.current.unsavedRows)

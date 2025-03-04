@@ -26,23 +26,6 @@ const ShutDown = () => {
   const keycloak = useSession()
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    // console.log(newRow)
-    // const start = new Date(newRow.maintStartDateTime)
-    // const end = new Date(newRow.maintEndDateTime)
-    // const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
-    // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
-
-    // console.log(`Duration in minutes: ${durationInMins}`)
-
-    // Update the duration in newRow
-    // newRow.durationInMins = durationInMins.toFixed(2)
-    // newRow.durationInMins = durationInMins
-
-
-    setShutdownData((prevData) =>
-      prevData.map((row) => (row.id === rowId ? newRow : row)),
-    )
-
     // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
@@ -76,7 +59,7 @@ const ShutDown = () => {
 
   const saveShutdownData = async (newRow) => {
     try {
-      var plantId = ''
+      let plantId = ''
 
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
@@ -160,7 +143,7 @@ const ShutDown = () => {
         params?.row?.maintenanceId ||
         params?.NormParameterMonthlyTransactionId
 
-      console.log(maintenanceId, params, id)
+      // console.log(maintenanceId, params, id)
 
       // Ensure UI state updates before the deletion process
       setOpen1(true)
@@ -338,6 +321,9 @@ const ShutDown = () => {
       headerName: 'Duration (hrs)',
       editable: false,
       minWidth: 100,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
       valueGetter: findDuration,
     },
     { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },

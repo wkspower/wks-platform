@@ -55,6 +55,7 @@ const DataGridTable = ({
   setOpen1,
   handleDeleteClick,
   fetchData,
+  handleUnitChange,
 }) => {
   const [isUpdating, setIsUpdating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -285,26 +286,20 @@ const DataGridTable = ({
     setRemark('')
   }
 
-
   const addRemark = () => {
-  const updatedRow = filteredRows.find((row) => row.id === selectedRowId)
-  if (updatedRow) {
-    const updatedData = { ...updatedRow, remark }
-    processRowUpdate(updatedData) // Pass updated row to the parent
+    const updatedRow = filteredRows.find((row) => row.id === selectedRowId)
+    if (updatedRow) {
+      const updatedData = { ...updatedRow, remark }
+      processRowUpdate(updatedData) // Pass updated row to the parent
+    }
+    setOpenRemark(false)
+    setRemark('')
   }
-  setOpenRemark(false)
-  setRemark('')
-}
-
 
   const handleCellClick = (params) => {
-    if (params?.field === 'remark' || params?.field === 'aopRemarks') {
-      setRemark(params?.value || '')
-      setSelectedRowId(params.id)
-      handleOpenRemark()
-    }
-    // if (params?.field === 'remark') {
-    //   setRemark(params?.value || '') // Auto-fetch the params value
+    //UNCOMMENT IT FOR REMARK POP UP
+    // if (params?.field === 'remark' || params?.field === 'aopRemarks') {
+    //   setRemark(params?.value || '')
     //   setSelectedRowId(params.id)
     //   handleOpenRemark()
     // }
@@ -464,8 +459,11 @@ const DataGridTable = ({
           {permissions?.showUnit && (
             <TextField
               select
-              value={selectedUnit}
-              onChange={(e) => setSelectedUnit(e.target.value)}
+              value={selectedUnit || permissions?.UOM || ''}
+              onChange={(e) => {
+                setSelectedUnit(e.target.value)
+                handleUnitChange(e.target.value)
+              }}
               sx={{ width: '150px', backgroundColor: jioColors.background }}
               variant='outlined'
               label='Select UOM'

@@ -20,6 +20,7 @@ const ProductionNorms = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [selectedUnit, setSelectedUnit] = useState('TPH')
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -58,6 +59,7 @@ const ProductionNorms = () => {
   const updateProductNormData = async (newRow) => {
     try {
       let plantId = ''
+      const isTPH = selectedUnit === 'TPH'
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
@@ -73,18 +75,20 @@ const ProductionNorms = () => {
         normParametersFKId: row.normParametersFKId,
         // normItem: getProductName('1', row.normParametersFKId) || null,
         normItem: 'EOE',
-        april: row.april || null,
-        may: row.may || null,
-        june: row.june || null,
-        july: row.july || null,
-        aug: row.aug || null,
-        sep: row.sep || null,
-        oct: row.oct || null,
-        nov: row.nov || null,
-        dec: row.dec || null,
-        jan: row.jan || null,
-        feb: row.feb || null,
-        march: row.march || null,
+
+        april: isTPH && row.april ? row.april * 24 : row.april || null,
+        may: isTPH && row.may ? row.may * 24 : row.may || null,
+        june: isTPH && row.june ? row.june * 24 : row.june || null,
+        july: isTPH && row.july ? row.july * 24 : row.july || null,
+        aug: isTPH && row.aug ? row.aug * 24 : row.aug || null,
+        sep: isTPH && row.sep ? row.sep * 24 : row.sep || null,
+        oct: isTPH && row.oct ? row.oct * 24 : row.oct || null,
+        nov: isTPH && row.nov ? row.nov * 24 : row.nov || null,
+        dec: isTPH && row.dec ? row.dec * 24 : row.dec || null,
+        jan: isTPH && row.jan ? row.jan * 24 : row.jan || null,
+        feb: isTPH && row.feb ? row.feb * 24 : row.feb || null,
+        march: isTPH && row.march ? row.march * 24 : row.march || null,
+
         avgTPH: findAvg('1', row) || null,
 
         aopRemarks: row.aopRemarks || 'remarks',
@@ -109,15 +113,30 @@ const ProductionNorms = () => {
   const fetchData = async () => {
     try {
       const data = await DataService.getAOPData(keycloak)
+      const formattedData = data.map((item, index) => {
+        const isTPH = selectedUnit === 'TPH'
+        return {
+          ...item,
+          idFromApi: item.id,
+          normParametersFKId: item?.normParametersFKId?.toLowerCase(),
+          id: index,
+          ...(isTPH && {
+            jan: item.jan ? item.jan / 24 : item.jan,
+            feb: item.feb ? item.feb / 24 : item.feb,
+            march: item.march ? item.march / 24 : item.march,
+            april: item.april ? item.april / 24 : item.april,
+            may: item.may ? item.may / 24 : item.may,
+            june: item.june ? item.june / 24 : item.june,
+            july: item.july ? item.july / 24 : item.july,
+            aug: item.aug ? item.aug / 24 : item.aug,
+            sep: item.sep ? item.sep / 24 : item.sep,
+            oct: item.oct ? item.oct / 24 : item.oct,
+            nov: item.nov ? item.nov / 24 : item.nov,
+            dec: item.dec ? item.dec / 24 : item.dec,
+          }),
+        }
+      })
 
-      // const data = await DataService.getProductionNormsData(keycloak)
-      // console.log(data)
-      const formattedData = data.map((item, index) => ({
-        ...item,
-        idFromApi: item.id,
-        normParametersFKId: item?.normParametersFKId.toLowerCase(),
-        id: index,
-      }))
       setCsData(formattedData)
     } catch (error) {
       console.error('Error fetching Production AOP data:', error)
@@ -160,9 +179,12 @@ const ProductionNorms = () => {
       'feb',
       'march',
     ]
+
     const values = months.map((month) => row[month] || 0)
     const sum = values.reduce((acc, val) => acc + val, 0)
-    return (sum / values.length).toFixed(2)
+    const avg = (sum / values.length).toFixed(2)
+
+    return avg === '0.00' ? null : avg
   }
 
   useEffect(() => {
@@ -184,7 +206,7 @@ const ProductionNorms = () => {
 
     fetchData()
     getAllProducts()
-  }, [sitePlantChange, keycloak])
+  }, [sitePlantChange, keycloak, selectedUnit])
 
   const productionColumns = [
     { field: 'idFromApi', headerName: 'ID' },
@@ -350,7 +372,7 @@ const ProductionNorms = () => {
     },
     {
       field: 'averageTPH',
-      headerName: 'AVG TPH',
+      headerName: 'AVG',
       minWidth: 150,
       editable: false,
       valueGetter: findAvg,
@@ -359,7 +381,7 @@ const ProductionNorms = () => {
       field: 'aopRemarks',
       headerName: 'Remark',
       minWidth: 75,
-      editable: false,
+      editable: true,
     },
     { field: 'aopStatus', headerName: 'aopStatus', editable: false },
   ]
@@ -374,6 +396,11 @@ const ProductionNorms = () => {
   const onProcessRowUpdateError = React.useCallback((error) => {
     console.log(error)
   }, [])
+
+  const handleUnitChange = (unit) => {
+    console.log('Selected unit:', unit)
+    setSelectedUnit(unit)
+  }
 
   return (
     <div>
@@ -401,6 +428,7 @@ const ProductionNorms = () => {
         // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
         onProcessRowUpdateError={onProcessRowUpdateError}
+        handleUnitChange={handleUnitChange}
         permissions={{
           showAction: true,
           addButton: false,
@@ -410,6 +438,7 @@ const ProductionNorms = () => {
           saveWithRemark: true,
           showCalculate: true,
           saveBtn: true,
+          UOM: 'TPH',
         }}
       />
     </div>

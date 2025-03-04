@@ -247,7 +247,7 @@ const SlowDown = () => {
         params?.row?.maintenanceId ||
         params?.NormParameterMonthlyTransactionId
 
-      console.log(maintenanceId, params, id)
+      // console.log(maintenanceId, params, id)
 
       // Ensure UI state updates before the deletion process
       setOpen1(true)
@@ -292,7 +292,7 @@ const SlowDown = () => {
         return params || ''
       },
       valueFormatter: (params) => {
-        console.log('params valueFormatter ', params)
+        // console.log('params valueFormatter ', params)
         const product = allProducts.find((p) => p.id === params)
         return product ? product.displayName : ''
       },
@@ -361,6 +361,9 @@ const SlowDown = () => {
       headerName: 'Duration (hrs)',
       editable: false,
       minWidth: 100,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
       valueGetter: findDuration,
     },
 

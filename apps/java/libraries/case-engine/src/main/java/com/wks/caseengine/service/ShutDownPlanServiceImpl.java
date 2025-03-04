@@ -119,15 +119,19 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 				// 	slowdownPlanService.saveShutdownData(plantId, shutDownPlanDTOList);
 				// }
 
+				String description = shutDownPlanDTO.getDiscription();
 
 				List<ShutDownPlanDTO> list = new ArrayList<>();
-				shutDownPlanDTO.setDiscription(shutDownPlanDTO.getDiscription()+" Ramp Up");
+				shutDownPlanDTO.setDiscription(description+" Ramp Up");
 				list.add(shutDownPlanDTO);
 			slowdownPlanService.saveShutdownData(plantId, list);
 
 				List<ShutDownPlanDTO> list2 = new ArrayList<>();
-				shutDownPlanDTO.setDiscription(shutDownPlanDTO.getDiscription()+" Ramp Down");
+				//String description = shutDownPlanDTO.getDiscription()+" Ramp Up";
+				shutDownPlanDTO.setDiscription(description+" Ramp Down");
 				list2.add(shutDownPlanDTO);
+
+
 			slowdownPlanService.saveShutdownData(plantId,list2);
 	
 			} else {
