@@ -130,6 +130,7 @@ const ProductionvolumeData = () => {
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
+
     return newRow
   }, [])
 
@@ -139,6 +140,7 @@ const ProductionvolumeData = () => {
       Object.values(unsavedChangesRef.current.unsavedRows),
     )
     try {
+      // if (title === 'Business Demand') {
       var data = Object.values(unsavedChangesRef.current.unsavedRows)
       editAOPMCCalculatedData(data)
       unsavedChangesRef.current = {
@@ -211,63 +213,101 @@ const ProductionvolumeData = () => {
 
     // normParametersFKId
     {
-      field: 'normParametersFKId',
-      headerName: 'Product',
-      editable: false,
-      minWidth: 225,
-      valueGetter: (params) => {
-        return params || ''
-      },
-      valueFormatter: (params) => {
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : ''
-      },
-      renderEditCell: (params) => {
-        const { value } = params
-        return (
-          <select
-            value={value || ''}
-            onChange={(event) => {
-              params.api.setEditCellValue({
-                id: params.id,
-                field: 'normParametersFKId',
-                value: event.target.value,
-              })
-            }}
-            style={{
-              width: '100%',
-              padding: '5px',
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-            }}
-          >
-            {allProducts.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.displayName}
-              </option>
-            ))}
-          </select>
-        )
-      },
+      field: 'april',
+      headerName: headerMap['apr'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
     },
-
-    // { field: 'plant', headerName: 'Plant', editable: false },
-    // { field: 'site', headerName: 'Site', editable: false },
-
-    { field: 'april', headerName: headerMap['apr'], editable: true },
-    { field: 'may', headerName: headerMap['may'], editable: true },
-    { field: 'june', headerName: headerMap['jun'], editable: true },
-    { field: 'july', headerName: headerMap['jul'], editable: true },
-
-    { field: 'august', headerName: headerMap['aug'], editable: true },
-    { field: 'september', headerName: headerMap['sep'], editable: true },
-    { field: 'october', headerName: headerMap['oct'], editable: true },
-    { field: 'november', headerName: headerMap['nov'], editable: true },
-    { field: 'december', headerName: headerMap['dec'], editable: true },
-    { field: 'january', headerName: headerMap['jan'], editable: true },
-    { field: 'february', headerName: headerMap['feb'], editable: true },
-    { field: 'march', headerName: headerMap['mar'], editable: true },
+    {
+      field: 'may',
+      headerName: headerMap['may'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'june',
+      headerName: headerMap['jun'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'july',
+      headerName: headerMap['jul'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'aug',
+      headerName: headerMap['aug'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'sep',
+      headerName: headerMap['sep'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'oct',
+      headerName: headerMap['oct'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'nov',
+      headerName: headerMap['nov'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'dec',
+      headerName: headerMap['dec'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'jan',
+      headerName: headerMap['jan'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'feb',
+      headerName: headerMap['feb'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'march',
+      headerName: headerMap['mar'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
     { field: 'avgTph', headerName: 'AVG TPH', minWidth: 150, editable: false },
     { field: 'aopStatus', headerName: 'Remark', minWidth: 75, editable: false },
   ]
