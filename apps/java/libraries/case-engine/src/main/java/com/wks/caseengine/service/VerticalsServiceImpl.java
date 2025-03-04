@@ -47,15 +47,15 @@ public class VerticalsServiceImpl implements VerticalsService{
 	                                p.DisplayName AS PlantDisplayName,
 	                                p.IsActive,
 	                                p.DisplayOrder
-	                            FROM [RIL.AOP2].[dbo].[Plants] p
+	                            FROM Plants p
 	                            WHERE p.Site_FK_Id = s.Id
 	                            FOR JSON PATH
 	                        ) AS Plants
-	                    FROM [RIL.AOP2].[dbo].[Sites] s
-	                    WHERE s.Id IN (SELECT DISTINCT p.Site_FK_Id FROM [RIL.AOP2].[dbo].[Plants] p WHERE p.Vertical_FK_Id = v.Id)
+	                    FROM Sites s
+	                    WHERE s.Id IN (SELECT DISTINCT p.Site_FK_Id FROM Plants p WHERE p.Vertical_FK_Id = v.Id)
 	                    FOR JSON PATH
 	                ) AS Sites
-	            FROM [RIL.AOP2].[dbo].[Verticals] v
+	            FROM Verticals v
 	            FOR JSON PATH, ROOT('Verticals');
 	        """;
 
