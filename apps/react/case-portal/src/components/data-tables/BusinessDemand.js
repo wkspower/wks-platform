@@ -96,6 +96,10 @@ const BusinessDemand = () => {
               background: 'transparent',
             }}
           >
+            {/* Disabled first option */}
+            <option value='' disabled>
+              Select
+            </option>
             {allProducts.map((product) => (
               <option key={product.id} value={product.id}>
                 {product.displayName}
@@ -292,28 +296,6 @@ const BusinessDemand = () => {
       fetchData()
     }
   }
-  const handleDeleteClick = async (id, params) => {
-    try {
-      const maintenanceId =
-        id?.maintenanceId ||
-        params?.row?.idFromApi ||
-        params?.row?.maintenanceId ||
-        params?.NormParameterMonthlyTransactionId
-
-      console.log(maintenanceId, params, id)
-
-      // Ensure UI state updates before the deletion process
-      setOpen1(true)
-      setDeleteId(maintenanceId)
-
-      // Perform the delete operation
-      // return await DataService.deleteBusinessDemandData(maintenanceId, keycloak)
-    } catch (error) {
-      console.error(`Error deleting Business data:`, error)
-    } finally {
-      // fetchData()
-    }
-  }
 
   const handleRowEditStop = (params, event) => {
     setRowModesModel({
@@ -348,7 +330,7 @@ const BusinessDemand = () => {
         setDeleteId={setDeleteId}
         setOpen1={setOpen1}
         open1={open1}
-        handleDeleteClick={handleDeleteClick}
+        // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
         onProcessRowUpdateError={onProcessRowUpdateError}
         permissions={{

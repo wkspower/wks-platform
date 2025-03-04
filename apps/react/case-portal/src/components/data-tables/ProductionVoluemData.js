@@ -238,6 +238,10 @@ const ProductionvolumeData = () => {
               background: 'transparent',
             }}
           >
+            {/* Disabled first option */}
+            <option value='' disabled>
+              Select
+            </option>
             {allProducts.map((product) => (
               <option key={product.id} value={product.id}>
                 {product.displayName}

@@ -261,7 +261,7 @@ const ShutDown = () => {
         // console.log('q2', params2);
         return (
           <select
-            value={value || allProducts[0]?.id}
+            value={value || ''}
             onChange={(event) => {
               params.api.setEditCellValue({
                 id: params.id,
@@ -277,6 +277,10 @@ const ShutDown = () => {
               background: 'transparent', // Keeps background clean
             }}
           >
+            {/* Disabled first option */}
+            <option value='' disabled>
+              Select
+            </option>
             {allProducts.map((product) => (
               <option key={product.id} value={product.id}>
                 {product.displayName}
@@ -362,7 +366,7 @@ const ShutDown = () => {
         setOpen1={setOpen1}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        handleDeleteClick={handleDeleteClick}
+        // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
         onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}

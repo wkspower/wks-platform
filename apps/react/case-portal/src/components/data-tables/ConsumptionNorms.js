@@ -133,7 +133,7 @@ const NormalOpNormsScreen = () => {
         const { value } = params
         return (
           <select
-            value={value}
+            value={value || ''}
             onChange={(event) => {
               params.api.setEditCellValue({
                 id: params.id,

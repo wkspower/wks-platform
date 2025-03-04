@@ -63,6 +63,12 @@ const TurnaroundPlanTable = () => {
         turnAroundDetails,
         keycloak,
       )
+
+      if (!response.ok) {
+        const errorData = await response.json() // Get the actual error message
+        throw new Error(errorData.errorMessage || 'Failed to save data')
+      }
+
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Turnaround Plan data Saved Successfully!',
@@ -71,6 +77,12 @@ const TurnaroundPlanTable = () => {
       return response
     } catch (error) {
       console.error('Error saving Turnaround Plan data:', error)
+
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: error.message, // Show exact error message from API
+        severity: 'error',
+      })
     } finally {
       fetchData()
     }
@@ -94,24 +106,6 @@ const TurnaroundPlanTable = () => {
     }
   }, [apiRef])
 
-  const handleDeleteClick = async (id, params) => {
-    try {
-      const maintenanceId =
-        id?.maintenanceId ||
-        params?.row?.idFromApi ||
-        params?.row?.maintenanceId ||
-        params?.NormParameterMonthlyTransactionId
-      setOpen1(true)
-      setDeleteId(id)
-
-      // Perform the delete operation
-      return await DataService.deleteTurnAroundData(maintenanceId, keycloak)
-    } catch (error) {
-      console.error(`Error deleting Business data:`, error)
-    } finally {
-      fetchData()
-    }
-  }
   const fetchData = async () => {
     try {
       const data = await DataService.getTAPlantData(keycloak)
@@ -204,7 +198,7 @@ const TurnaroundPlanTable = () => {
 
         return (
           <select
-            value={value || allProducts[0]?.id}
+            value={value || ''}
             onChange={(event) => {
               params.api.setEditCellValue({
                 id: params.id,
@@ -220,6 +214,10 @@ const TurnaroundPlanTable = () => {
               background: 'transparent', // Keeps background clean
             }}
           >
+            {/* Disabled first option */}
+            <option value='' disabled>
+              Select
+            </option>
             {allProducts.map((product) => (
               <option key={product.id} value={product.id}>
                 {product.displayName}
@@ -350,7 +348,7 @@ const TurnaroundPlanTable = () => {
         setOpen1={setOpen1}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        handleDeleteClick={handleDeleteClick}
+        // handleDeleteClick={handleDeleteClick}
         onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
         experimentalFeatures={{ newEditingApi: true }}

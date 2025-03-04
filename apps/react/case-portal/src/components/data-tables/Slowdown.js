@@ -266,7 +266,7 @@ const SlowDown = () => {
     {
       field: 'discription',
       headerName: 'Slowdown Desc',
-      minWidth: 200,
+      minWidth: 250,
       editable: true,
       renderHeader: () => (
         <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
@@ -300,7 +300,7 @@ const SlowDown = () => {
         const { value } = params
         return (
           <select
-            value={value || allProducts[0]?.id}
+            value={value || ''}
             onChange={(event) => {
               params.api.setEditCellValue({
                 id: params.id,
@@ -316,6 +316,10 @@ const SlowDown = () => {
               background: 'transparent',
             }}
           >
+            {/* Disabled first option */}
+            <option value='' disabled>
+              Select
+            </option>
             {allProducts.map((product) => (
               <option key={product.id} value={product.id}>
                 {product.displayName}
@@ -418,7 +422,7 @@ const SlowDown = () => {
         setDeleteId={setDeleteId}
         setOpen1={setOpen1}
         open1={open1}
-        handleDeleteClick={handleDeleteClick}
+        // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
         onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}

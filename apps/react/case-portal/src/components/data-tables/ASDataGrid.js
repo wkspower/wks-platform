@@ -49,11 +49,6 @@ const DataGridTable = ({
   snackbarOpen,
   setSnackbarData,
   setSnackbarOpen,
-  deleteId,
-  open1,
-  setDeleteId,
-  setOpen1,
-  handleDeleteClick,
   fetchData,
   handleUnitChange,
 }) => {
@@ -72,6 +67,8 @@ const DataGridTable = ({
   const [selectedRowId, setSelectedRowId] = useState(null)
   const unitOptions = ['TPD', 'TPH']
   const [selectedUnit, setSelectedUnit] = useState()
+  const [open1, setOpen1] = useState(false)
+  const [deleteId, setDeleteId] = useState(false)
   const handleOpenRemark = () => setOpenRemark(true)
   const handleCloseRemark = () => setOpenRemark(false)
   const handleClose1 = () => setOpen1(false)
@@ -147,14 +144,26 @@ const DataGridTable = ({
   const deleteTheRecord = async () => {
     try {
       if (!deleteId) return
-      await DataService.deleteBusinessDemandData(deleteId, keycloak)
+      if (title == 'Business Demand') {
+        await DataService.deleteBusinessDemandData(deleteId, keycloak)
+      }
+      if (title == 'Shutdown Plan') {
+        await DataService.deleteShutdownData(deleteId, keycloak)
+      }
+      if (title == 'Slowdown Plan') {
+        await DataService.deleteSlowdownData(deleteId, keycloak)
+      }
+      if (title == 'Turnaround Plan') {
+        await DataService.deleteTurnAroundData(deleteId, keycloak)
+      }
+
       setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
       onDeleteRow?.(deleteId)
       setDeleteId(null)
       setOpen1(false)
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Slowdown data deleted successfully!',
+        message: `${title} deleted successfully!`,
         severity: 'success',
       })
       fetchData()
@@ -189,6 +198,16 @@ const DataGridTable = ({
         [rowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
       }))
     }
+  }
+
+  const handleDeleteClick = async (id, params) => {
+    const maintenanceId =
+      id?.maintenanceId ||
+      params?.row?.idFromApi ||
+      params?.row?.maintenanceId ||
+      params?.NormParameterMonthlyTransactionId
+    setOpen1(true)
+    setDeleteId(maintenanceId)
   }
 
   const defaultColumns = useMemo(() => {
