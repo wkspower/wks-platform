@@ -34,10 +34,10 @@ public class SlowdownPlanController {
 	private ShutDownPlanService shutDownPlanService;
 	
 	@GetMapping(value = "/getSlowDownPlanData")
-    public ResponseEntity<List<SlowDownPlanDTO>> findSlowdownDetailsByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName) {
+    public ResponseEntity<List<SlowDownPlanDTO>> findSlowdownDetailsByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName, @RequestParam String year) {
 		List<SlowDownPlanDTO> listOfSite=null;
 		try {
-			listOfSite = slowdownPlanService.findSlowdownDetailsByPlantIdAndType(plantId,maintenanceTypeName);
+			listOfSite = slowdownPlanService.findSlowdownDetailsByPlantIdAndType(plantId,maintenanceTypeName,year);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

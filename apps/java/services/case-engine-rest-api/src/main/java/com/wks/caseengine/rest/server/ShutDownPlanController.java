@@ -28,13 +28,13 @@ public class ShutDownPlanController {
 	private ShutDownPlanService shutDownPlanService;
 	
 	@GetMapping(value = "/getShutDownPlanData")
-    public ResponseEntity<List<ShutDownPlanDTO>> findMaintenanceDetailsByPlantIdAndType( @RequestParam String plantId, @RequestParam String maintenanceTypeName){
+    public ResponseEntity<List<ShutDownPlanDTO>> findMaintenanceDetailsByPlantIdAndType( @RequestParam String plantId, @RequestParam String maintenanceTypeName, @RequestParam String year){
             
 		List<ShutDownPlanDTO> shutDownPlanDTOList=null;
          try {
             // Convert String to UUID
             UUID plantUuid = UUID.fromString(plantId); 
-            shutDownPlanDTOList = shutDownPlanService.findMaintenanceDetailsByPlantIdAndType(plantUuid, maintenanceTypeName);
+            shutDownPlanDTOList = shutDownPlanService.findMaintenanceDetailsByPlantIdAndType(plantUuid, maintenanceTypeName,year);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null); 
         } catch (Exception e) {

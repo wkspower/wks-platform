@@ -33,11 +33,11 @@ public class TurnaroundPlanController {
 	private TurnaroundPlanService turnaroundPlanService;
 	
 	@GetMapping(value = "/getTurnaroundPlanData")
-    public ResponseEntity<List<ShutDownPlanDTO>> findTurnaroundPlanDataByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName) {
+    public ResponseEntity<List<ShutDownPlanDTO>> findTurnaroundPlanDataByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName,@RequestParam String year) {
 		
 		List<ShutDownPlanDTO> listOfSite=null;
 		try {
-			listOfSite = turnaroundPlanService.findTurnaroundPlanDataByPlantIdAndType(plantId,maintenanceTypeName);
+			listOfSite = turnaroundPlanService.findTurnaroundPlanDataByPlantIdAndType(plantId,maintenanceTypeName,year);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

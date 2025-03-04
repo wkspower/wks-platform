@@ -7,7 +7,7 @@ import com.wks.caseengine.dto.ShutDownPlanDTO;
 public interface TurnaroundPlanService {
 	
 	
-	public List<ShutDownPlanDTO> findTurnaroundPlanDataByPlantIdAndType(UUID plantId,String maintenanceTypeName);
+	public List<ShutDownPlanDTO> findTurnaroundPlanDataByPlantIdAndType(UUID plantId,String maintenanceTypeName, String year);
 	public List<ShutDownPlanDTO> saveTurnaroundPlanData(UUID plantId,List<ShutDownPlanDTO> shutDownPlanDTOList);
 	public List<ShutDownPlanDTO> editTurnaroundPlanData(UUID plantMaintenanceTransactionId, List<ShutDownPlanDTO> shutDownPlanDTOList);
 

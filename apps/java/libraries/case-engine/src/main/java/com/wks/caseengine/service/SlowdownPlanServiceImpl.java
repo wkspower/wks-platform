@@ -24,11 +24,11 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 	private ShutDownPlanService shutDownPlanService;
 
 	@Override
-	public List<SlowDownPlanDTO> findSlowdownDetailsByPlantIdAndType(UUID plantId, String maintenanceTypeName) {
+	public List<SlowDownPlanDTO> findSlowdownDetailsByPlantIdAndType(UUID plantId, String maintenanceTypeName,String year) {
 		
 		List<Object[]> listOfSite=null;
 		try {
-			listOfSite =slowdownPlanRepository.findSlowdownPlanDetailsByPlantIdAndType(maintenanceTypeName);
+			listOfSite =slowdownPlanRepository.findSlowdownPlanDetailsByPlantIdAndType(maintenanceTypeName,plantId.toString(),year);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -45,7 +45,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 			dto.setRemarks(result[5] != null ? result[5].toString() : null); // Extract Remarks
 			dto.setProduct(result[8] != null ? result[8].toString() : null);
 			dto.setMaintenanceId(result[7] != null ? UUID.fromString(result[7].toString()) : null);
-			dto.setDisplayOrder(result[9] != null ? Integer.parseInt(result[9].toString()) : null);
 	
 			dtoList.add(dto);
 		}

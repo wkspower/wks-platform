@@ -31,9 +31,9 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	private PlantMaintenanceTransactionRepository plantMaintenanceTransactionRepository;
 
 	@Override
-	public List<ShutDownPlanDTO> findMaintenanceDetailsByPlantIdAndType(UUID plantId,String maintenanceTypeName) {
+	public List<ShutDownPlanDTO> findMaintenanceDetailsByPlantIdAndType(UUID plantId,String maintenanceTypeName, String year) {
 		List<ShutDownPlanDTO> dtoList = new ArrayList<>();
-		List<Object[]> listOfSite=	shutDownPlanRepository.findMaintenanceDetailsByPlantIdAndType(maintenanceTypeName);
+		List<Object[]> listOfSite=	shutDownPlanRepository.findMaintenanceDetailsByPlantIdAndType(maintenanceTypeName, plantId.toString(), year);
 		for (Object[] result : listOfSite) {
             ShutDownPlanDTO dto = new ShutDownPlanDTO();
             dto.setDiscription((String) result[0]);
@@ -48,7 +48,6 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 			}else{
 				dto.setRemark(null);
 			}
-			dto.setDisplayOrder(result[8] != null ? Integer.parseInt(result[8].toString()) : null); 
             dtoList.add(dto);
         }
 		return dtoList;

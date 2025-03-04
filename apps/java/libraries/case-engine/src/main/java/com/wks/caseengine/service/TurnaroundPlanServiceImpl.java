@@ -25,10 +25,10 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 	
 
 	@Override
-	public List<ShutDownPlanDTO> findTurnaroundPlanDataByPlantIdAndType(UUID plantId, String maintenanceTypeName) {
+	public List<ShutDownPlanDTO> findTurnaroundPlanDataByPlantIdAndType(UUID plantId, String maintenanceTypeName,String year) {
 		List<Object[]> listOfSite=null;
 		List<ShutDownPlanDTO> dtoList = new ArrayList<>();
-		 listOfSite=turnaroundPlanRepository.findTurnaroundPlanDetailsByPlantIdAndType(maintenanceTypeName);
+		 listOfSite=turnaroundPlanRepository.findTurnaroundPlanDetailsByPlantIdAndType(maintenanceTypeName,plantId.toString(), year);
 		  for (Object[] result : listOfSite) { 
 			  ShutDownPlanDTO dto = new  ShutDownPlanDTO();
 			  dto.setDiscription((String) result[0]); 
@@ -44,7 +44,6 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 			  long diffInMillis = dto.getMaintEndDateTime().getTime() - dto.getMaintStartDateTime().getTime();
 			  double diffInDays = diffInMillis / (1000.0 * 60 * 60 * 24);
 			  dto.setDurationInDays(diffInDays);
-			  dto.setDisplayOrder(result[8] != null ? Integer.parseInt(result[8].toString()) : null); 
 			  dtoList.add(dto); 
 		}
 		// TODO Auto-generated method stub
