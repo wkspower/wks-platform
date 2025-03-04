@@ -26,17 +26,19 @@ const ShutDown = () => {
   const keycloak = useSession()
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    console.log(newRow)
-    const start = new Date(newRow.maintStartDateTime)
-    const end = new Date(newRow.maintEndDateTime)
-    const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
+    // console.log(newRow)
+    // const start = new Date(newRow.maintStartDateTime)
+    // const end = new Date(newRow.maintEndDateTime)
+    // const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
     // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
 
-    console.log(`Duration in minutes: ${durationInMins}`)
+    // console.log(`Duration in minutes: ${durationInMins}`)
 
     // Update the duration in newRow
-    newRow.durationInMins = durationInMins.toFixed(2)
+    // newRow.durationInMins = durationInMins.toFixed(2)
     // newRow.durationInMins = durationInMins
+
+
     setShutdownData((prevData) =>
       prevData.map((row) => (row.id === rowId ? newRow : row)),
     )
@@ -71,6 +73,7 @@ const ShutDown = () => {
       // setIsSaving(false);
     }
   }, [apiRef])
+
   const saveShutdownData = async (newRow) => {
     try {
       var plantId = ''
@@ -86,7 +89,7 @@ const ShutDown = () => {
       const shutdownDetails = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
-        durationInMins: row.durationInMins,
+        durationInMins: parseFloat(findDuration('1', row)),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
         audityear: '2024-25',
@@ -99,15 +102,15 @@ const ShutDown = () => {
         shutdownDetails,
         keycloak,
       )
-      //console.log('Shutdown data saved successfully:', response)
+
       setSnackbarOpen(true)
-      // setSnackbarMessage("Shutdown data saved successfully !");
+      // setSnackbarMessage("Shutdown data Saved Successfully !");
       setSnackbarData({
-        message: 'Shutdown data saved successfully!',
+        message: 'Shutdown data Saved Successfully!',
         severity: 'success',
       })
       // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Shutdown data saved successfully!", severity: "success" });
+      // setSnackbarData({ message: "Shutdown data Saved Successfully!", severity: "success" });
       return response
     } catch (error) {
       console.error('Error saving shutdown data:', error)
@@ -188,7 +191,7 @@ const ShutDown = () => {
     const getAllProducts = async () => {
       try {
         const data = await DataService.getAllProducts(keycloak)
-        console.log('API Response:', data)
+        // console.log('API Response:', data)
 
         // Extract only displayName and id
         const productList = data.map((product) => ({
@@ -205,8 +208,34 @@ const ShutDown = () => {
     }
 
     fetchData()
+    // saveShutdownData()
     getAllProducts()
   }, [sitePlantChange, keycloak])
+
+  const findDuration = (value, row) => {
+    if (row && row.maintStartDateTime && row.maintEndDateTime) {
+      const start = new Date(row.maintStartDateTime)
+      const end = new Date(row.maintEndDateTime)
+
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        // Check if dates are valid
+        const durationInMs = end - start
+
+        // Calculate duration in hours and minutes
+        const durationInHours = Math.floor(durationInMs / (1000 * 60 * 60))
+        const remainingMs = durationInMs % (1000 * 60 * 60)
+        const durationInMinutes = Math.floor(remainingMs / (1000 * 60))
+
+        // Format the duration as "HH:MM"
+        const formattedDuration = `${String(durationInHours).padStart(2, '0')}:${String(durationInMinutes).padStart(2, '0')}`
+        return formattedDuration
+      } else {
+        return '' // Or handle invalid dates as needed
+      }
+    } else {
+      return '' // Or handle missing dates as needed
+    }
+  }
 
   const colDefs = [
     {
@@ -239,7 +268,7 @@ const ShutDown = () => {
         return params || ''
       },
       valueFormatter: (params) => {
-        console.log('params valueFormatter ', params)
+        // console.log('params valueFormatter ', params)
         const product = allProducts.find((p) => p.id === params)
         return product ? product.displayName : ''
       },
@@ -309,6 +338,7 @@ const ShutDown = () => {
       headerName: 'Duration (hrs)',
       editable: false,
       minWidth: 100,
+      valueGetter: findDuration,
     },
     { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
   ]

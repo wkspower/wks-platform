@@ -319,7 +319,7 @@ const BusinessDemand = () => {
       )
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Business Demand data saved successfully!',
+        message: 'Business Demand data Saved Successfully!',
         severity: 'success',
       })
       // fetchData()

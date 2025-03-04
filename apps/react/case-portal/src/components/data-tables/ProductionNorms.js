@@ -28,101 +28,13 @@ const ProductionNorms = () => {
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    console.log(newRow)
-
-    // Extract numeric values from month fields
-    const months = [
-      'jan',
-      'feb',
-      'march',
-      'april',
-      'may',
-      'june',
-      'july',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-    ]
-    const values = months
-      .map((month) => Number(newRow[month])) // Convert to number
-      .filter((value) => !isNaN(value)) // Filter out NaN values
-
-    // Calculate new average TPH and format it to 2 decimal places
-    const newAvgTph =
-      values.length > 0
-        ? (values.reduce((sum, val) => sum + val, 0) / values.length).toFixed(2) // Format to 2 decimal places
-        : '0.00' // Ensure consistent format
-
-    console.log(newAvgTph)
-
-    // Update the avgTph value
-    newRow.avgTph = parseFloat(newAvgTph) // Ensure it's still a number
-
-    setCsData((prevData) =>
-      prevData.map((row) => (row.id === rowId ? newRow : row)),
-    )
-
-    // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    // onRowUpdate.updatedRow(unsavedChangesRef.current.unsavedRows)
-    console.log(unsavedChangesRef.current.unsavedRows)
-
-    // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
-
     return newRow
   }, [])
-  const saveBusinessDemandData = async (newRows) => {
-    try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
 
-      const businessData = newRows.map((row) => ({
-        april: row.april,
-        may: row.may,
-        june: row.june,
-        july: row.july,
-        aug: row.aug,
-        sep: row.sep,
-        oct: row.oct,
-        nov: row.nov,
-        dec: row.dec,
-        jan: row.jan,
-        feb: row.feb,
-        march: row.march,
-        remark: row.remark,
-        avgTph: row.avgTph,
-        year: '2024-25',
-        plantId: plantId,
-        normParameterId: row.normParameterId,
-        id: row.idFromApi,
-      }))
-
-      const response = await DataService.saveBusinessDemandData(
-        plantId,
-        businessData, // Now sending an array of rows
-        keycloak,
-      )
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Business Demand data saved successfully!',
-        severity: 'success',
-      })
-      return response
-    } catch (error) {
-      console.error('Error saving Business Demand data:', error)
-    } finally {
-      fetchData()
-    }
-  }
   const saveChanges = React.useCallback(async () => {
     console.log(
       'Edited Data: ',
@@ -131,7 +43,7 @@ const ProductionNorms = () => {
     try {
       // if (title === 'Business Demand') {
       var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      saveBusinessDemandData(data)
+      updateProductNormData(data)
       // }
 
       unsavedChangesRef.current = {
@@ -142,29 +54,43 @@ const ProductionNorms = () => {
       // setIsSaving(false);
     }
   }, [apiRef])
+
   const updateProductNormData = async (newRow) => {
     try {
-      const productNormData = {
-        id: newRow.id,
-        aopType: newRow.aopType,
-        aopCaseId: newRow.aopCaseId,
-        aopStatus: newRow.aopStatus,
-        aopYear: newRow.aopYear,
-        plantFkId: newRow.plantFkId,
-        normItem: newRow.normItem,
-        april: newRow.april,
-        may: newRow.may,
-        june: newRow.june,
-        july: newRow.july,
-        aug: newRow.aug,
-        sep: newRow.sep,
-        oct: newRow.oct,
-        nov: newRow.nov,
-        dec: newRow.dec,
-        jan: newRow.jan,
-        feb: newRow.feb,
-        march: newRow.march,
+      let plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
       }
+
+      const productNormData = newRow.map((row) => ({
+        aopType: row.aopType || 'production',
+        aopCaseId: row.aopCaseId || null,
+        aopStatus: row.aopStatus || null,
+        aopYear: '2024-25',
+        plantFkId: plantId,
+        normParametersFKId: row.normParametersFKId,
+        // normItem: getProductName('1', row.normParametersFKId) || null,
+        normItem: 'EOE',
+        april: row.april || null,
+        may: row.may || null,
+        june: row.june || null,
+        july: row.july || null,
+        aug: row.aug || null,
+        sep: row.sep || null,
+        oct: row.oct || null,
+        nov: row.nov || null,
+        dec: row.dec || null,
+        jan: row.jan || null,
+        feb: row.feb || null,
+        march: row.march || null,
+        avgTPH: findAvg('1', row) || null,
+
+        aopRemarks: row.aopRemarks || 'remarks',
+
+        id: row.idFromApi || null,
+      }))
 
       const response = await DataService.updateProductNormData(
         productNormData,
@@ -172,40 +98,82 @@ const ProductionNorms = () => {
       )
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Product Volume data updated successfully !',
+        message: 'Production AOP Saved Successfully !',
         severity: 'success',
       })
       return response
     } catch (error) {
-      console.error('Error Updating Product Volume data:', error)
+      console.error('Error Saving Production AOP:', error)
     }
   }
   const fetchData = async () => {
     try {
-      const data = await DataService.getAOPMCCalculatedData(keycloak)
+      const data = await DataService.getAOPData(keycloak)
+
       // const data = await DataService.getProductionNormsData(keycloak)
-      console.log(data)
-      const formattedData = data.map((item) => ({
+      // console.log(data)
+      const formattedData = data.map((item, index) => ({
         ...item,
-        id: item.id,
+        idFromApi: item.id,
+        normParametersFKId: item?.normParametersFKId.toLowerCase(),
+        id: index,
       }))
       setCsData(formattedData)
     } catch (error) {
       console.error('Error fetching Production AOP data:', error)
     }
   }
+
+  const getProductName = async (value, row) => {
+    if (!row || !row.normParametersFKId) {
+      return ''
+    }
+
+    let product
+    if (allProducts && allProducts.length > 0) {
+      product = allProducts.find((p) => p.id === row.normParametersFKId)
+    } else {
+      try {
+        const data = await DataService.getAllProducts(keycloak)
+        product = data.find((p) => p.id === row.normParametersFKId)
+      } catch (error) {
+        console.error('Error fetching products:', error)
+        return ''
+      }
+    }
+
+    return product ? product.name : ''
+  }
+
+  const findAvg = (value, row) => {
+    const months = [
+      'april',
+      'may',
+      'june',
+      'july',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+      'jan',
+      'feb',
+      'march',
+    ]
+    const values = months.map((month) => row[month] || 0)
+    const sum = values.reduce((acc, val) => acc + val, 0)
+    return (sum / values.length).toFixed(2)
+  }
+
   useEffect(() => {
     const getAllProducts = async () => {
       try {
         const data = await DataService.getAllProducts(keycloak)
-        // console.log('API Response:', data)
-
-        // Extract only displayName and id
         const productList = data.map((product) => ({
-          id: product.id,
+          id: product.id.toLowerCase(),
           displayName: product.displayName,
+          name: product.name,
         }))
-
         setAllProducts(productList)
       } catch (error) {
         console.error('Error fetching product:', error)
@@ -219,17 +187,68 @@ const ProductionNorms = () => {
   }, [sitePlantChange, keycloak])
 
   const productionColumns = [
-    { field: 'id', headerName: 'ID' },
+    { field: 'idFromApi', headerName: 'ID' },
     {
       field: 'aopCaseId',
       headerName: 'Case ID',
       minWidth: 120,
       editable: false,
     },
+    { field: 'aopType', headerName: 'Type', minWidth: 80 },
 
-    { field: 'material', headerName: 'Material', editable: false },
-    { field: 'plant', headerName: 'Plant', editable: false },
-    { field: 'site', headerName: 'Site', editable: false },
+    { field: 'aopYear', headerName: 'Year', minWidth: 80 },
+
+    { field: 'plantFkId', headerName: 'Plant ID', minWidth: 80 },
+
+    // normParametersFKId
+    {
+      field: 'normParametersFKId',
+      headerName: 'Product',
+      editable: false,
+      minWidth: 225,
+      valueGetter: (params) => {
+        return params || ''
+      },
+      valueFormatter: (params) => {
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : ''
+      },
+      renderEditCell: (params) => {
+        const { value } = params
+        return (
+          <select
+            value={value || ''}
+            onChange={(event) => {
+              params.api.setEditCellValue({
+                id: params.id,
+                field: 'normParametersFKId',
+                value: event.target.value,
+              })
+            }}
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+            }}
+          >
+            {allProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.displayName}
+              </option>
+            ))}
+          </select>
+        )
+      },
+    },
+
+    // {
+    //   field: 'productNameHide',
+    //   headerName: 'Product Name',
+    //   width: 200,
+    //   valueGetter: getProductName,
+    // },
 
     {
       field: 'april',
@@ -263,8 +282,9 @@ const ProductionNorms = () => {
       align: 'left',
       headerAlign: 'left',
     },
+
     {
-      field: 'august',
+      field: 'aug',
       headerName: headerMap['aug'],
       editable: true,
       type: 'number',
@@ -272,7 +292,7 @@ const ProductionNorms = () => {
       headerAlign: 'left',
     },
     {
-      field: 'september',
+      field: 'sep',
       headerName: headerMap['sep'],
       editable: true,
       type: 'number',
@@ -280,15 +300,16 @@ const ProductionNorms = () => {
       headerAlign: 'left',
     },
     {
-      field: 'october',
+      field: 'oct',
       headerName: headerMap['oct'],
       editable: true,
       type: 'number',
       align: 'left',
       headerAlign: 'left',
     },
+
     {
-      field: 'november',
+      field: 'nov',
       headerName: headerMap['nov'],
       editable: true,
       type: 'number',
@@ -296,7 +317,7 @@ const ProductionNorms = () => {
       headerAlign: 'left',
     },
     {
-      field: 'december',
+      field: 'dec',
       headerName: headerMap['dec'],
       editable: true,
       type: 'number',
@@ -304,7 +325,7 @@ const ProductionNorms = () => {
       headerAlign: 'left',
     },
     {
-      field: 'january',
+      field: 'jan',
       headerName: headerMap['jan'],
       editable: true,
       type: 'number',
@@ -312,7 +333,7 @@ const ProductionNorms = () => {
       headerAlign: 'left',
     },
     {
-      field: 'february',
+      field: 'feb',
       headerName: headerMap['feb'],
       editable: true,
       type: 'number',
@@ -327,8 +348,20 @@ const ProductionNorms = () => {
       align: 'left',
       headerAlign: 'left',
     },
-    { field: 'avgTph', headerName: 'AVG TPH', minWidth: 150, editable: false },
-    { field: 'aopStatus', headerName: 'Remark', minWidth: 75, editable: false },
+    {
+      field: 'averageTPH',
+      headerName: 'AVG TPH',
+      minWidth: 150,
+      editable: false,
+      valueGetter: findAvg,
+    },
+    {
+      field: 'aopRemarks',
+      headerName: 'Remark',
+      minWidth: 75,
+      editable: false,
+    },
+    { field: 'aopStatus', headerName: 'aopStatus', editable: false },
   ]
 
   const handleRowEditStop = (params, event) => {

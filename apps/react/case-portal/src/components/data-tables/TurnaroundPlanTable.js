@@ -1,10 +1,10 @@
-import { DataService } from 'services/DataService'
-import ASDataGrid from './ASDataGrid'
 import dayjs from 'dayjs'
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
-import { useSelector } from 'react-redux'
+import ASDataGrid from './ASDataGrid'
 
 const TurnaroundPlanTable = () => {
   const menu = useSelector((state) => state.menu)
@@ -28,20 +28,20 @@ const TurnaroundPlanTable = () => {
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     console.log(newRow)
-    const start = new Date(newRow.maintStartDateTime)
-    const end = new Date(newRow.maintEndDateTime)
-    const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
+    // const start = new Date(newRow.maintStartDateTime)
+    // const end = new Date(newRow.maintEndDateTime)
+    // const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
     // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
 
-    console.log(`Duration in minutes: ${durationInMins}`)
+    // console.log(`Duration in minutes: ${durationInMins}`)
 
     // Update the duration in newRow
-    newRow.durationInMins = durationInMins.toFixed(2)
+    // newRow.durationInMins = durationInMins.toFixed(2)
     // newRow.durationInMins = durationInMins
 
-    setTaData((prevData) =>
-      prevData.map((row) => (row.id === rowId ? newRow : row)),
-    )
+    // setTaData((prevData) =>
+    //   prevData.map((row) => (row.id === rowId ? newRow : row)),
+    // )
 
     // Extract numeric values from month fields
 
@@ -59,9 +59,7 @@ const TurnaroundPlanTable = () => {
 
   const saveTurnAroundData = async (newRow) => {
     try {
-      // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
       var plantId = ''
-
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
@@ -71,7 +69,8 @@ const TurnaroundPlanTable = () => {
       const turnAroundDetails = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
-        durationInMins: row.durationInMins,
+        // durationInMins: findDuration('1', row),
+        durationInMins: parseFloat(findDuration('1', row)),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
         remark: row.remark,
@@ -83,15 +82,11 @@ const TurnaroundPlanTable = () => {
         turnAroundDetails,
         keycloak,
       )
-      //console.log('Turnaround Plan data saved successfully:', response)
       setSnackbarOpen(true)
-      // setSnackbarMessage("Turnaround Plan data saved successfully !");
       setSnackbarData({
-        message: 'Turnaround Plan data saved successfully!',
+        message: 'Turnaround Plan data Saved Successfully!',
         severity: 'success',
       })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Turnaround Plan data saved successfully!", severity: "success" });
       return response
     } catch (error) {
       console.error('Error saving Turnaround Plan data:', error)
@@ -99,6 +94,7 @@ const TurnaroundPlanTable = () => {
       fetchData()
     }
   }
+
   const saveChanges = React.useCallback(async () => {
     console.log(
       'Edited Data: ',
@@ -116,6 +112,7 @@ const TurnaroundPlanTable = () => {
       // setIsSaving(false);
     }
   }, [apiRef])
+
   const handleDeleteClick = async (id, params) => {
     try {
       const maintenanceId =
@@ -123,10 +120,6 @@ const TurnaroundPlanTable = () => {
         params?.row?.idFromApi ||
         params?.row?.maintenanceId ||
         params?.NormParameterMonthlyTransactionId
-
-      console.log(maintenanceId, params, id)
-
-      // Ensure UI state updates before the deletion process
       setOpen1(true)
       setDeleteId(id)
 
@@ -142,9 +135,6 @@ const TurnaroundPlanTable = () => {
     try {
       const data = await DataService.getTAPlantData(keycloak)
       const formattedData = data.map((item, index) => ({
-        // ...item,
-        // id: index,
-
         ...item,
         idFromApi: item.id,
         id: index,
@@ -159,9 +149,7 @@ const TurnaroundPlanTable = () => {
     const getAllProducts = async () => {
       try {
         const data = await DataService.getAllProducts(keycloak)
-        // console.log('API Response:', data)
 
-        // Extract only displayName and id
         const productList = data.map((product) => ({
           id: product.id,
           displayName: product.displayName,
@@ -177,6 +165,31 @@ const TurnaroundPlanTable = () => {
     fetchData()
     getAllProducts()
   }, [sitePlantChange, keycloak])
+
+  const findDuration = (value, row) => {
+    if (row && row.maintStartDateTime && row.maintEndDateTime) {
+      const start = new Date(row.maintStartDateTime)
+      const end = new Date(row.maintEndDateTime)
+
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        // Check if dates are valid
+        const durationInMs = end - start
+
+        // Calculate duration in hours and minutes
+        const durationInHours = Math.floor(durationInMs / (1000 * 60 * 60))
+        const remainingMs = durationInMs % (1000 * 60 * 60)
+        const durationInMinutes = Math.floor(remainingMs / (1000 * 60))
+
+        // Format the duration as "HH:MM"
+        const formattedDuration = `${String(durationInHours).padStart(2, '0')}:${String(durationInMinutes).padStart(2, '0')}`
+        return formattedDuration
+      } else {
+        return '' // Or handle invalid dates as needed
+      }
+    } else {
+      return '' // Or handle missing dates as needed
+    }
+  }
 
   const colDefs = [
     {
@@ -199,20 +212,15 @@ const TurnaroundPlanTable = () => {
       editable: true,
       minWidth: 225,
       valueGetter: (params) => {
-        // console.log('p1', params);
-        // console.log('p2', params2);
         return params || ''
       },
       valueFormatter: (params) => {
-        // console.log('params valueFormatter ', params)
-
         const product = allProducts.find((p) => p.id === params)
         return product ? product.displayName : ''
       },
       renderEditCell: (params) => {
         const { value } = params
-        // console.log('q1', params);
-        // console.log('q2', params2);
+
         return (
           <select
             value={value || allProducts[0]?.id}
@@ -254,23 +262,6 @@ const TurnaroundPlanTable = () => {
           : null
         return parsedDate
       },
-      // renderEditCell: (params) => {
-      //   const currentYear = new Date().getFullYear();
-
-      //   // Define the financial year range (April to March)
-      //   const startOfFinancialYear = new Date(currentYear, 3, 1); // April 1st
-      //   const endOfFinancialYear = new Date(currentYear + 1, 2, 31); // March 31st next year
-
-      //   return (
-      //     <DatePicker
-      //       value={params.value ? dayjs(params.value) : null}
-      //       onChange={(newValue) => params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue })}
-      //       minDate={dayjs(startOfFinancialYear)}
-      //       maxDate={dayjs(endOfFinancialYear)}
-      //       format="MMM D, YYYY, h:mm:ss A"
-      //     />
-      //   );
-      // }
     },
 
     {
@@ -292,12 +283,9 @@ const TurnaroundPlanTable = () => {
       field: 'durationInMins',
       headerName: 'Duration (hrs)',
       editable: false,
-      // type: 'number',
+      type: 'number',
       minWidth: 100,
-      // renderCell: (params) => {
-      //   // const durationInHours = params.value ? (params.value / 60).toFixed(2) : "0.00";
-      //   return `${params.value}`
-      // },
+      valueGetter: findDuration,
     },
     {
       field: 'period',
@@ -332,15 +320,11 @@ const TurnaroundPlanTable = () => {
         turnAroundDetails,
         keycloak,
       )
-      //console.log('TurnAround data Updated successfully:', response)
       setSnackbarOpen(true)
-      // setSnackbarMessage("TurnAround data Updated successfully !");
       setSnackbarData({
         message: 'TurnAround data Updated successfully!',
         severity: 'success',
       })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "TurnAround data Updated successfully!", severity: "success" });
       return response
     } catch (error) {
       console.error('Error Updating TurnAround data:', error)

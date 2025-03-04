@@ -26,21 +26,21 @@ const SlowDown = () => {
   })
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    console.log(newRow)
-    const start = new Date(newRow.maintStartDateTime)
-    const end = new Date(newRow.maintEndDateTime)
-    const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
-    // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
+    // console.log(newRow)
+    // const start = new Date(newRow.maintStartDateTime)
+    // const end = new Date(newRow.maintEndDateTime)
+    // const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
+    // // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
 
-    console.log(`Duration in minutes: ${durationInMins}`)
+    // console.log(`Duration in minutes: ${durationInMins}`)
 
-    // Update the duration in newRow
-    newRow.durationInMins = durationInMins.toFixed(2)
-    // newRow.durationInMins = durationInMins
+    // // Update the duration in newRow
+    // newRow.durationInMins = durationInMins.toFixed(2)
+    // // newRow.durationInMins = durationInMins
 
-    setSlowDownData((prevData) =>
-      prevData.map((row) => (row.id === rowId ? newRow : row)),
-    )
+    // setSlowDownData((prevData) =>
+    //   prevData.map((row) => (row.id === rowId ? newRow : row)),
+    // )
     // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
@@ -64,7 +64,7 @@ const SlowDown = () => {
       const slowDownDetails = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
-        durationInMins: row.durationInMins,
+        durationInMins: parseFloat(findDuration('1', row)),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
         remark: row.remarks,
@@ -77,15 +77,15 @@ const SlowDown = () => {
         slowDownDetails,
         keycloak,
       )
-      //console.log('Slowdown data saved successfully:', response)
+      //console.log('Slowdown data Saved Successfully:', response)
       setSnackbarOpen(true)
-      // setSnackbarMessage("Slowdown data saved successfully !");
+      // setSnackbarMessage("Slowdown data Saved Successfully !");
       setSnackbarData({
-        message: 'Slowdown data saved successfully!',
+        message: 'Slowdown data Saved Successfully!',
         severity: 'success',
       })
       // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Slowdown data saved successfully!", severity: "success" });
+      // setSnackbarData({ message: "Slowdown data Saved Successfully!", severity: "success" });
       return response
     } catch (error) {
       console.error('Error saving Slowdown data:', error)
@@ -150,7 +150,7 @@ const SlowDown = () => {
       const data = await DataService.getSlowDownPlantData(keycloak)
       const formattedData = data.map((item, index) => ({
         ...item,
-        idFromApi: item?.id,
+        idFromApi: item?.maintenanceId,
         id: index,
       }))
       setSlowDownData(formattedData)
@@ -178,9 +178,67 @@ const SlowDown = () => {
       }
     }
 
+    // const saveShutdownData = async () => {
+    //   try {
+    //     // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D';
+    //     var plantId = ''
+
+    //     const storedPlant = localStorage.getItem('selectedPlant')
+    //     if (storedPlant) {
+    //       const parsedPlant = JSON.parse(storedPlant)
+    //       plantId = parsedPlant.id
+    //     }
+
+    //     const shutdownDetails = {
+    //       product: 'Oxygen',
+    //       discription: '1 Shutdown maintenance',
+    //       durationInMins: 120,
+    //       maintEndDateTime: '2025-02-20T18:00:00Z',
+    //       maintStartDateTime: '2025-02-20T16:00:00Z',
+    //     }
+
+    //     const response = await DataService.saveShutdownData(
+    //       plantId,
+    //       shutdownDetails,
+    //       keycloak,
+    //     )
+    //     console.log('Shutdown data Saved Successfully:', response)
+    //     return response
+    //   } catch (error) {
+    //     console.error('Error saving shutdown data:', error)
+    //   }
+    // }
+
     fetchData()
+    // saveShutdownData()
     getAllProducts()
   }, [sitePlantChange, keycloak])
+
+  const findDuration = (value, row) => {
+    if (row && row.maintStartDateTime && row.maintEndDateTime) {
+      const start = new Date(row.maintStartDateTime)
+      const end = new Date(row.maintEndDateTime)
+
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        // Check if dates are valid
+        const durationInMs = end - start
+
+        // Calculate duration in hours and minutes
+        const durationInHours = Math.floor(durationInMs / (1000 * 60 * 60))
+        const remainingMs = durationInMs % (1000 * 60 * 60)
+        const durationInMinutes = Math.floor(remainingMs / (1000 * 60))
+
+        // Format the duration as "HH:MM"
+        const formattedDuration = `${String(durationInHours).padStart(2, '0')}:${String(durationInMinutes).padStart(2, '0')}`
+        return formattedDuration
+      } else {
+        return '' // Or handle invalid dates as needed
+      }
+    } else {
+      return '' // Or handle missing dates as needed
+    }
+  }
+
   const handleDeleteClick = async (id, params) => {
     try {
       const maintenanceId =
@@ -303,6 +361,7 @@ const SlowDown = () => {
       headerName: 'Duration (hrs)',
       editable: false,
       minWidth: 100,
+      valueGetter: findDuration,
     },
 
     {

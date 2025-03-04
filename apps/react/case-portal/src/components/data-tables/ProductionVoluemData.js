@@ -61,8 +61,7 @@ const ProductionvolumeData = () => {
         plant: plantId,
         plantFKId: plantId,
         site: siteId,
-        material: getProductNameById(row.normParametersFKId),
-
+        material: 'EOE',
         normParametersFKId: row.normParametersFKId,
         id: row.idFromApi || null,
       }))
@@ -74,17 +73,18 @@ const ProductionvolumeData = () => {
       )
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Business Demand data saved successfully!',
+        message: 'Production AOP Saved Successfully!',
         severity: 'success',
       })
       // fetchData()
       return response
     } catch (error) {
-      console.error('Error saving Business Demand data:', error)
+      console.error('Error saving Production AOP:', error)
     } finally {
       fetchData()
     }
   }
+
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     console.log(newRow)
@@ -130,7 +130,6 @@ const ProductionvolumeData = () => {
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
-
     return newRow
   }, [])
 
@@ -140,7 +139,6 @@ const ProductionvolumeData = () => {
       Object.values(unsavedChangesRef.current.unsavedRows),
     )
     try {
-      // if (title === 'Business Demand') {
       var data = Object.values(unsavedChangesRef.current.unsavedRows)
       editAOPMCCalculatedData(data)
       unsavedChangesRef.current = {
@@ -151,21 +149,6 @@ const ProductionvolumeData = () => {
       // setIsSaving(false);
     }
   }, [apiRef])
-
-  const getProductNameById = (productId) => {
-    const lowerCaseProductId = productId?.toLowerCase()
-
-    const foundProduct = allProducts.find(
-      (p) => p.id.toLowerCase() === lowerCaseProductId,
-    )
-
-    if (foundProduct) {
-      return foundProduct.name
-    } else {
-      console.warn(`Product with ID "${productId}" not found.`)
-      return 'EOE'
-    }
-  }
 
   const fetchData = async () => {
     try {
@@ -186,7 +169,7 @@ const ProductionvolumeData = () => {
       try {
         const data = await DataService.getAllProducts(keycloak)
         const productList = data.map((product) => ({
-          id: product.id.toLowerCase(), // Convert id to lowercase
+          id: product.id.toLowerCase(),
           displayName: product.displayName,
           name: product.name,
         }))
@@ -202,6 +185,27 @@ const ProductionvolumeData = () => {
     fetchData()
   }, [sitePlantChange, keycloak])
 
+  const getProductName = async (value, row) => {
+    if (!row || !row.normParametersFKId) {
+      return ''
+    }
+
+    let product
+    if (allProducts && allProducts.length > 0) {
+      product = allProducts.find((p) => p.id === row.normParametersFKId)
+    } else {
+      try {
+        const data = await DataService.getAllProducts(keycloak)
+        product = data.find((p) => p.id === row.normParametersFKId)
+      } catch (error) {
+        console.error('Error fetching products:', error)
+        return ''
+      }
+    }
+
+    return product ? product.name : ''
+  }
+
   const productionColumns = [
     { field: 'idFromApi', headerName: 'ID' },
     {
@@ -212,6 +216,57 @@ const ProductionvolumeData = () => {
     },
 
     // normParametersFKId
+    {
+      field: 'normParametersFKId',
+      headerName: 'Product',
+      editable: false,
+      minWidth: 225,
+      valueGetter: (params) => {
+        return params || ''
+      },
+      valueFormatter: (params) => {
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : ''
+      },
+      renderEditCell: (params) => {
+        const { value } = params
+        return (
+          <select
+            value={value || ''}
+            onChange={(event) => {
+              params.api.setEditCellValue({
+                id: params.id,
+                field: 'normParametersFKId',
+                value: event.target.value,
+              })
+            }}
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+            }}
+          >
+            {allProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.displayName}
+              </option>
+            ))}
+          </select>
+        )
+      },
+    },
+
+    // { field: 'plant', headerName: 'Plant', editable: false },
+    // { field: 'site', headerName: 'Site', editable: false },
+
+    // {
+    //   field: 'productNameHide',
+    //   headerName: 'Product Name',
+    //   valueGetter: getProductName,
+    // },
+
     {
       field: 'april',
       headerName: headerMap['apr'],
@@ -244,8 +299,9 @@ const ProductionvolumeData = () => {
       align: 'left',
       headerAlign: 'left',
     },
+
     {
-      field: 'aug',
+      field: 'august',
       headerName: headerMap['aug'],
       editable: true,
       type: 'number',
@@ -253,7 +309,7 @@ const ProductionvolumeData = () => {
       headerAlign: 'left',
     },
     {
-      field: 'sep',
+      field: 'september',
       headerName: headerMap['sep'],
       editable: true,
       type: 'number',
@@ -261,7 +317,7 @@ const ProductionvolumeData = () => {
       headerAlign: 'left',
     },
     {
-      field: 'oct',
+      field: 'october',
       headerName: headerMap['oct'],
       editable: true,
       type: 'number',
@@ -269,7 +325,7 @@ const ProductionvolumeData = () => {
       headerAlign: 'left',
     },
     {
-      field: 'nov',
+      field: 'november',
       headerName: headerMap['nov'],
       editable: true,
       type: 'number',
@@ -277,7 +333,7 @@ const ProductionvolumeData = () => {
       headerAlign: 'left',
     },
     {
-      field: 'dec',
+      field: 'december',
       headerName: headerMap['dec'],
       editable: true,
       type: 'number',
@@ -285,7 +341,7 @@ const ProductionvolumeData = () => {
       headerAlign: 'left',
     },
     {
-      field: 'jan',
+      field: 'january',
       headerName: headerMap['jan'],
       editable: true,
       type: 'number',
@@ -293,7 +349,7 @@ const ProductionvolumeData = () => {
       headerAlign: 'left',
     },
     {
-      field: 'feb',
+      field: 'february',
       headerName: headerMap['feb'],
       editable: true,
       type: 'number',
@@ -309,7 +365,8 @@ const ProductionvolumeData = () => {
       headerAlign: 'left',
     },
     { field: 'avgTph', headerName: 'AVG TPH', minWidth: 150, editable: false },
-    { field: 'aopStatus', headerName: 'Remark', minWidth: 75, editable: false },
+
+    { field: 'aopStatus', headerName: 'Remark', minWidth: 75, editable: true },
   ]
 
   const handleRowEditStop = (params, event) => {

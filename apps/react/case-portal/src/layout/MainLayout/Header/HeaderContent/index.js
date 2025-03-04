@@ -250,7 +250,7 @@ const HeaderContent = ({ keycloak }) => {
     }
   }, [selectedOption, allPlants, allSites])
 
-  console.log(plants, verticals, sites)
+  // console.log(plants, verticals, sites)
 
   return (
     <>

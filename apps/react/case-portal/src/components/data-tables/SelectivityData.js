@@ -112,15 +112,15 @@ const SelectivityData = () => {
         turnAroundDetails,
         keycloak,
       )
-      //console.log('Catalyst data saved successfully:', response)
+      //console.log('Catalyst data Saved Successfully:', response)
       setSnackbarOpen(true)
-      // setSnackbarMessage("Catalyst data saved successfully !");
+      // setSnackbarMessage("Catalyst data Saved Successfully !");
       setSnackbarData({
-        message: 'Catalyst data saved successfully!',
+        message: 'Catalyst data Saved Successfully!',
         severity: 'success',
       })
       // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Catalyst data saved successfully!", severity: "success" });
+      // setSnackbarData({ message: "Catalyst data Saved Successfully!", severity: "success" });
       return response
     } catch (error) {
       console.error('Error saving Catalyst data:', error)
