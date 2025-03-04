@@ -37,15 +37,11 @@ public class VerticalsController {
 	}
 	
 	@GetMapping(value="/getPlantsAndSidesAndVerticals")
-	public Map<String, Object> getPlantsAndSites(@RequestParam("verticalId") String verticalId) {
-		List<PlantsDTO> plants= plantsService.getAllPlants(); // Call service to get data
-		List<SitesDTO>  sites=siteService.getSites();
-		List<VerticalsDTO> verticals= verticalsService.getAllVerticals();
-        HashMap<String,Object> map=new HashMap<>();
-        map.put("plants", plants);
-        map.put("sites", sites);
-        map.put("verticals", verticals);  
-        return map;
+	public String getPlantsAndSites(@RequestParam("verticalId") String verticalId) {
+		
+		String verticals= verticalsService.getAllVerticalsAndPlantsAndSites();
+       
+        return verticals;
     }
 
 }

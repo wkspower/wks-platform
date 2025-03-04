@@ -8,5 +8,7 @@ import com.wks.caseengine.dto.VerticalsDTO;
 public interface VerticalsService {
 	
 	public List<VerticalsDTO> getAllVerticals();
+	
+	public String getAllVerticalsAndPlantsAndSites();
 
 }
