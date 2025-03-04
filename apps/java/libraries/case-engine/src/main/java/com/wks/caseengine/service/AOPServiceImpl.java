@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.AOPDTO;
+import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
 import com.wks.caseengine.entity.AOP;
+import com.wks.caseengine.entity.AOPMCCalculatedData;
 import com.wks.caseengine.repository.AOPRepository;
 
 import java.util.UUID;
@@ -85,6 +87,10 @@ public class AOPServiceImpl implements  AOPService{
 			aOPDTO.setOct(aOPData.getOct());
 			aOPDTO.setPlantFkId(aOPData.getPlantFkId().toString());
 			aOPDTO.setSep(aOPData.getSep());
+
+			aOPDTO.setPlantFkId(aOPData.getPlantFkId()!=null ? aOPData.getPlantFkId().toString():null);
+			aOPDTO.setNormParametersFKId(aOPData.getNormParametersFKId()!=null ?aOPData.getNormParametersFKId().toString():null);
+
 	        // Set BDNormParametersFKId in DTO
 			//aOPDTO.setBDNormParametersFKId(bdNormParametersFKId.toString());
 			aOPDTOList.add(aOPDTO);
@@ -111,12 +117,20 @@ public class AOPServiceImpl implements  AOPService{
 			AOP aOP= null;
 			if(aOPDTO.getId()==null || aOPDTO.getId().contains("#")){
 				aOP=new AOP();
+				String caseId = aOPDTO.getAopYear() + "-AOP-"+aOPDTO.getNormItem()+"-V1";
+				aOP.setAopStatus("draft");
+				aOP.setAopType("production");
+			    aOP.setAopCaseId(caseId);
 			}else{
                 aOP=aOPRepository.findById(UUID.fromString(aOPDTO.getId())).get();
+			    aOP.setAopCaseId(aOPDTO.getAopCaseId());
+				aOP.setAopStatus(aOPDTO.getAopStatus());
+				aOP.setAopType(aOPDTO.getAopType());
 			}
-			aOP.setAopCaseId(aOPDTO.getAopCaseId());
 			aOP.setAopRemarks(aOPDTO.getAopRemarks());
-			aOP.setAopStatus(aOPDTO.getAopStatus());
+
+			
+
 			aOP.setAopType(aOPDTO.getAopType());
 			aOP.setAopYear(aOPDTO.getAopYear());
 			aOP.setApril(aOPDTO.getApril());
@@ -134,6 +148,10 @@ public class AOPServiceImpl implements  AOPService{
 			aOP.setOct(aOPDTO.getOct());
 			aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFkId()));
 			aOP.setSep(aOPDTO.getSep());
+
+			aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFkId()));
+			aOP.setAopYear(aOPDTO.getAopYear());
+			aOP.setNormParametersFKId(UUID.fromString(aOPDTO.getNormParametersFKId()));
 			aOPRepository.save(aOP);
 		}
 		return aOPDTOList;

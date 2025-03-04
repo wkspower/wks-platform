@@ -72,7 +72,7 @@ i++;
 			aOPMCCalculatedData.setAugust(aOPMCCalculatedDataDTO.getAugust());
 			aOPMCCalculatedData.setDecember(aOPMCCalculatedDataDTO.getDecember());
 			aOPMCCalculatedData.setFebruary(aOPMCCalculatedDataDTO.getFebruary());
-			if(aOPMCCalculatedDataDTO.getId()==null && aOPMCCalculatedDataDTO.getId().contains("#") ){
+			if(aOPMCCalculatedDataDTO.getId()==null || aOPMCCalculatedDataDTO.getId().contains("#") ){
 				aOPMCCalculatedData.setId(null);
 			}else{
 				aOPMCCalculatedData.setId(UUID.fromString(aOPMCCalculatedDataDTO.getId()));
@@ -89,6 +89,13 @@ i++;
 			aOPMCCalculatedData.setPlant(aOPMCCalculatedDataDTO.getPlant());
 			aOPMCCalculatedData.setSeptember(aOPMCCalculatedDataDTO.getSeptember());
 			aOPMCCalculatedData.setSite(aOPMCCalculatedDataDTO.getSite());
+
+
+			aOPMCCalculatedData.setPlantFKId(UUID.fromString(aOPMCCalculatedDataDTO.getPlantFKId()));
+			aOPMCCalculatedData.setYear(aOPMCCalculatedDataDTO.getYear());
+			aOPMCCalculatedData.setNormParametersFKId(UUID.fromString(aOPMCCalculatedDataDTO.getNormParametersFKId()));
+
+			
 			aOPMCCalculatedDataRepository.save(aOPMCCalculatedData);
 		}
 		// TODO Auto-generated method stub

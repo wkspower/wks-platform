@@ -18,7 +18,7 @@ public interface ShutDownPlanRepository extends JpaRepository<PlantMaintenanceTr
             "pm.DurationInMins, " +
             "pmt.MaintenanceText, " +
             "pm.Id, " +
-            "np.Id " +
+            "np.Id, pm.remarks " +
             "FROM PlantMaintenanceTransaction pm " +
             "JOIN PlantMaintenance pmt ON pm.PlantMaintenance_FK_Id = pmt.Id " +
             "JOIN MaintenanceTypes mt ON pmt.MaintenanceType_FK_Id = mt.Id " +

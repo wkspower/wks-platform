@@ -43,6 +43,11 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
             dto.setProduct((String) result[6]);
             //FOR ID : pmt.Id
             dto.setId(result[5] != null ? result[5].toString() : null); 
+			if((String) result[7]!=null){
+				dto.setRemark((String) result[7]);
+			}else{
+				dto.setRemark(null);
+			}
             dtoList.add(dto);
         }
 		return dtoList;
@@ -95,6 +100,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 				plantMaintenanceTransaction.setVersion("V1");
 				plantMaintenanceTransaction.setCreatedOn(new Date());
 				plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
+
+				plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 	
 				if (shutDownPlanDTO.getProductId() != null) {
 					plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
@@ -131,6 +138,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	
 					if (plantMaintenance.isPresent()) {
 						PlantMaintenanceTransaction plantMaintenanceTransaction = plantMaintenance.get();
+						plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 						plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
 						plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
 						plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
