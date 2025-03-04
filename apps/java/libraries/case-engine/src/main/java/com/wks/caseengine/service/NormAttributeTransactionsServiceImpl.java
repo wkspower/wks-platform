@@ -43,7 +43,7 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
                             WHEN 8 THEN 'Aug' WHEN 9 THEN 'Sep' WHEN 10 THEN 'Oct' WHEN 11 THEN 'Nov' 
                             WHEN 12 THEN 'Dec' WHEN 1 THEN 'Jan' WHEN 2 THEN 'Feb' WHEN 3 THEN 'Mar' 
                         END + RIGHT(AuditYear, 2) AS MonthYear 
-                    FROM [RIL.AOP2].[dbo].[NormAttributeTransactions] 
+                    FROM NormAttributeTransactions 
                     WHERE AuditYear = :auditYear
                 )
                 SELECT STRING_AGG(
@@ -73,8 +73,8 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
                         nat.CatalystAttribute_FK_Id AS catalystId, 
                         nat.AttributeName AS AttributeName, 
                         nat.NormParameter_FK_Id AS NormParameterFKId 
-                    FROM [RIL.AOP2].[dbo].[NormAttributeTransactions] AS nat 
-                    JOIN [RIL.AOP2].[dbo].[CatalystAttributes] AS ca 
+                    FROM NormAttributeTransactions AS nat 
+                    JOIN CatalystAttributes AS ca 
                         ON nat.CatalystAttribute_FK_Id = ca.Id 
                     WHERE nat.AuditYear = :auditYear
                 )
