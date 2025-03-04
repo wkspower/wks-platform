@@ -26,8 +26,8 @@ public interface AOPMCCalculatedDataRepository extends JpaRepository<AOPMCCalcul
     public List<AOPMCCalculatedData> findAllByYearAndPlantFKId(String year,UUID plantId);
 
 
-@Query(value="select distinct NormParameters_FK_Id from BusinessDemand where Plant_FK_Id = :plantId and Year=:year "+
-  " and NormParameters_FK_Id not in (select NormParameters_FK_Id from AOPMCCalculatedData where Plant_FK_Id= :plantId and NormParameters_FK_Id is not null and Year=:year) ", nativeQuery=true)
+@Query(value="select distinct [NormParameters_FK_Id] from BusinessDemand where Plant_FK_Id = :plantId and Year=:year "+
+  " and [NormParameters_FK_Id] not in (select [NormParameters_FK_Id] from [dbo].[AOPMCCalculatedData] where Plant_FK_Id= :plantId and [NormParameters_FK_Id] is not null and Year=:year) ", nativeQuery=true)
   List<Object[]> getDataBusinessAllData(@Param("plantId") String plantId, @Param("year") String year);
 
 }
