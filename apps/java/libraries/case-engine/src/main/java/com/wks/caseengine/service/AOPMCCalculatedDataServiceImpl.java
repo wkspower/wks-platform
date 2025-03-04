@@ -19,45 +19,42 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	@Override
 	public List<AOPMCCalculatedDataDTO> getAOPMCCalculatedData(String plantId, String year) {
 	    List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
-	    List<AOPMCCalculatedData> objList = aOPMCCalculatedDataRepository.findAllByYearAndPlantFKId(year, UUID.fromString(plantId));
-
-	    for (AOPMCCalculatedData aopData: objList) {
-
-	        AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO = new AOPMCCalculatedDataDTO();
-	        aOPMCCalculatedDataDTO.setApril(aopData.getApril());
-	        aOPMCCalculatedDataDTO.setAugust(aopData.getAugust());
-	        aOPMCCalculatedDataDTO.setDecember(aopData.getDecember());
-	        aOPMCCalculatedDataDTO.setFebruary(aopData.getFebruary());
-	        aOPMCCalculatedDataDTO.setId(aopData.getId().toString());
-	        aOPMCCalculatedDataDTO.setJanuary(aopData.getJanuary());
-	        aOPMCCalculatedDataDTO.setJuly(aopData.getJuly());
-	        aOPMCCalculatedDataDTO.setJune(aopData.getJune());
-	        aOPMCCalculatedDataDTO.setMarch(aopData.getMarch());
-	        aOPMCCalculatedDataDTO.setMaterial(aopData.getMaterial());
-	        aOPMCCalculatedDataDTO.setMay(aopData.getMay());
-	        aOPMCCalculatedDataDTO.setNovember(aopData.getNovember());
-	        aOPMCCalculatedDataDTO.setOctober(aopData.getOctober());
-	        aOPMCCalculatedDataDTO.setPlant(aopData.getPlant());
-	        aOPMCCalculatedDataDTO.setSeptember(aopData.getSeptember());
-	        aOPMCCalculatedDataDTO.setSite(aopData.getSite());
-			aOPMCCalculatedDataDTO.setNormParametersFKId(aopData.getNormParametersFKId()!=null?aopData.getNormParametersFKId().toString():null);
-
-	        // Set BDNormParametersFKId in DTO
-	        //aOPMCCalculatedDataDTO.setBDNormParametersFKId(bdNormParametersFKId.toString());
-	        aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
+	    List<Object[]> obj= aOPMCCalculatedDataRepository.findByYearAndPlantFkId(year, UUID.fromString(plantId));
+	    for (Object[] row : obj) {
+	    	AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO = new AOPMCCalculatedDataDTO();
+	    	aOPMCCalculatedDataDTO.setSite(row[0] != null ? row[0].toString() : null);
+	    	aOPMCCalculatedDataDTO.setPlant(row[1] != null ? row[1].toString() : null);
+	    	aOPMCCalculatedDataDTO.setMaterial(row[2] != null ? row[2].toString() : null);
+	    	aOPMCCalculatedDataDTO.setJanuary(row[3] != null ? Float.parseFloat(row[3].toString()) : null);
+	    	aOPMCCalculatedDataDTO.setFebruary(row[4] != null ? Float.parseFloat(row[4].toString()) : null);
+	    	aOPMCCalculatedDataDTO.setMarch(row[5] != null ? Float.parseFloat(row[5].toString()) : null);
+	    	aOPMCCalculatedDataDTO.setApril(row[6] != null ? Float.parseFloat(row[6].toString()) : null);
+	    	aOPMCCalculatedDataDTO.setMay(row[7] != null ? Float.parseFloat(row[7].toString()) : null);
+	    	aOPMCCalculatedDataDTO.setJune(row[8] != null ? Float.parseFloat(row[8].toString()) : null);
+	    	aOPMCCalculatedDataDTO.setJuly(row[9] != null ? Float.parseFloat(row[9].toString()) : null);
+	    	aOPMCCalculatedDataDTO.setAugust(row[10] != null ? Float.parseFloat(row[10].toString()) : null);
+	    	aOPMCCalculatedDataDTO.setSeptember(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
+	    	aOPMCCalculatedDataDTO.setOctober(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
+	    	aOPMCCalculatedDataDTO.setNovember(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
+	    	aOPMCCalculatedDataDTO.setDecember(row[14] != null ? Float.parseFloat(row[14].toString()) : null); 
+	    	aOPMCCalculatedDataDTO.setPlantFKId(row[15] != null ? row[15].toString() : null);
+	    	aOPMCCalculatedDataDTO.setId(row[16] != null ? row[16].toString() : null);
+	    	aOPMCCalculatedDataDTO.setYear(row[17] != null ? row[17].toString() : null);
+	    	aOPMCCalculatedDataDTO.setNormParametersFKId(row[18] != null ? row[18].toString() : null);
+	    	aOPMCCalculatedDataDTO.setDisplayOrder(row[19] != null ? Integer.parseInt(row[19].toString()) : null);
+	    	aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
 	    }
 
-
 		List<Object[]> list = aOPMCCalculatedDataRepository.getDataBusinessAllData(plantId,year);
-int i=1;
-		for(Object[] obj :list){
+		int i=1;
+		for(Object[] obj1 :list){
                
 			AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO = new AOPMCCalculatedDataDTO();
 
-			aOPMCCalculatedDataDTO.setNormParametersFKId(obj[0]!=null? obj[0].toString():null);
+			aOPMCCalculatedDataDTO.setNormParametersFKId(obj1[0]!=null? obj1[0].toString():null);
 			aOPMCCalculatedDataDTO.setId(i+"#");
 			aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
-i++;
+			i++;
 		}
 
 

@@ -59,50 +59,42 @@ public class AOPServiceImpl implements  AOPService{
 	@Override
 	public List<AOPDTO> getAOPData(String plantId, String year) {
 	    List<AOPDTO> aOPDTOList = new ArrayList<>();
-	    List<AOP> objList = aOPRepository.findAllByAopYearAndPlantFkId(year, UUID.fromString(plantId));;
-
-	    for (AOP aOPData : objList) {
-	       // AOP aOPData = (AOP) obj[0]; // First element (AOPMCCalculatedData)
-	       // UUID bdNormParametersFKId = obj[1] != null ? UUID.fromString(obj[1].toString()) : null; // Second element (BDNormParametersFKId)
-
-	        AOPDTO aOPDTO = new AOPDTO();
-	        aOPDTO.setId(aOPData.getId().toString());
-			aOPDTO.setAopCaseId(aOPData.getAopCaseId());
-			aOPDTO.setAopRemarks(aOPData.getAopRemarks());
-			aOPDTO.setAopStatus(aOPData.getAopStatus());
-			aOPDTO.setAopType(aOPData.getAopType());
-			aOPDTO.setAopYear(aOPData.getAopYear());
-			aOPDTO.setApril(aOPData.getApril());
-			aOPDTO.setAug(aOPData.getAug());
-			aOPDTO.setAvgTPH(aOPData.getAvgTPH());
-			aOPDTO.setDec(aOPData.getDec());
-			aOPDTO.setFeb(aOPData.getFeb());
-			aOPDTO.setJan(aOPData.getJan());
-			aOPDTO.setJuly(aOPData.getJuly());
-			aOPDTO.setJune(aOPData.getJune());
-			aOPDTO.setMarch(aOPData.getMarch());
-			aOPDTO.setMay(aOPData.getMay());
-			aOPDTO.setNormItem(aOPData.getNormItem());
-			aOPDTO.setNov(aOPData.getNov());
-			aOPDTO.setOct(aOPData.getOct());
-			aOPDTO.setPlantFkId(aOPData.getPlantFkId().toString());
-			aOPDTO.setSep(aOPData.getSep());
-
-			aOPDTO.setPlantFkId(aOPData.getPlantFkId()!=null ? aOPData.getPlantFkId().toString():null);
-			aOPDTO.setNormParametersFKId(aOPData.getNormParametersFKId()!=null ?aOPData.getNormParametersFKId().toString():null);
-
-	        // Set BDNormParametersFKId in DTO
-			//aOPDTO.setBDNormParametersFKId(bdNormParametersFKId.toString());
-			aOPDTOList.add(aOPDTO);
+	    List<Object[]> obj= aOPRepository.findByAOPYearAndPlantFkId(year, UUID.fromString(plantId));
+	    for (Object[] row : obj) {
+	    	AOPDTO aOPDTO = new AOPDTO();
+	        aOPDTO.setId(row[0].toString());
+			aOPDTO.setAopCaseId(row[1] != null ? row[1].toString() : null);
+			aOPDTO.setAopStatus(row[2] != null ? row[2].toString() : null);
+			aOPDTO.setAopRemarks(row[3] != null ? row[3].toString() : null);
+			aOPDTO.setNormItem(row[4] != null ? row[4].toString() : null);
+			aOPDTO.setAopType(row[5] != null ? row[5].toString() : null);
+			aOPDTO.setJan(row[6] != null ? Float.parseFloat(row[6].toString()) : null);
+			aOPDTO.setFeb(row[7] != null ? Float.parseFloat(row[7].toString()) : null);
+			aOPDTO.setMarch(row[8] != null ? Float.parseFloat(row[8].toString()) : null);
+			aOPDTO.setApril(row[9] != null ? Float.parseFloat(row[9].toString()) : null);
+			aOPDTO.setMay(row[10] != null ? Float.parseFloat(row[10].toString()) : null);
+			aOPDTO.setJune(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
+			aOPDTO.setJuly(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
+			aOPDTO.setAug(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
+			aOPDTO.setSep(row[14] != null ? Float.parseFloat(row[14].toString()) : null);
+			aOPDTO.setOct(row[15] != null ? Float.parseFloat(row[15].toString()) : null);
+			aOPDTO.setNov(row[16] != null ? Float.parseFloat(row[16].toString()) : null);
+			aOPDTO.setDec(row[17] != null ? Float.parseFloat(row[17].toString()) : null);    
+			aOPDTO.setAopYear(row[18] != null ? row[18].toString() : null);
+			aOPDTO.setPlantFkId(row[19] != null ? row[19].toString() : null);
+			aOPDTO.setAvgTPH(row[20] != null ? Float.parseFloat(row[20].toString()) : null);
+			aOPDTO.setNormParametersFKId(row[21] != null ? row[21].toString() : null);
+			aOPDTO.setDisplayOrder(row[22] != null ? Integer.parseInt(row[22].toString()) : null);
+			aOPDTOList.add(aOPDTO);			
 	    }
 
 		List<Object[]> list = aOPRepository.getDataBusinessAllData(plantId,year);
 		int i=1;
-				for(Object[] obj :list){
+				for(Object[] obj1 :list){
 					   
 					AOPDTO aOPDTO = new AOPDTO();
 		
-					aOPDTO.setNormParametersFKId(obj[0]!=null? obj[0].toString():null);
+					aOPDTO.setNormParametersFKId(obj1[0]!=null? obj1[0].toString():null);
 					aOPDTO.setId(i+"#");
 					aOPDTOList.add(aOPDTO);
 		i++;

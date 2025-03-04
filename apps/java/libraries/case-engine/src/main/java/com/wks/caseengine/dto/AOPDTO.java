@@ -39,5 +39,6 @@ public class AOPDTO {
     private Float avgTPH;
     private String normParametersFKId;
     private String bDNormParametersFKId;
+    private Integer displayOrder;
 
 }

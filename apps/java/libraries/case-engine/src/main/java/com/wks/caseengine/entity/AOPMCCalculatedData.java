@@ -30,40 +30,40 @@ public class AOPMCCalculatedData {
     private String material;
     
     @Column(name = "April")
-    private Double april;
+    private Float april;
     
     @Column(name = "May")
-    private Double may;
+    private Float may;
     
     @Column(name = "June")
-    private Double june;
+    private Float june;
     
     @Column(name = "July")
-    private Double july;
+    private Float july;
     
     @Column(name = "August")
-    private Double august;
+    private Float august;
     
     @Column(name = "September")
-    private Double september;
+    private Float september;
     
     @Column(name = "October")
-    private Double october;
+    private Float october;
     
     @Column(name = "November")
-    private Double november;
+    private Float november;
     
     @Column(name = "December")
-    private Double december;
+    private Float december;
     
     @Column(name = "January")
-    private Double january;
+    private Float january;
     
     @Column(name = "February")
-    private Double february;
+    private Float february;
     
     @Column(name = "March")
-    private Double march;
+    private Float march;
     
     @Column(name="Plant_FK_Id")
     private UUID plantFKId;

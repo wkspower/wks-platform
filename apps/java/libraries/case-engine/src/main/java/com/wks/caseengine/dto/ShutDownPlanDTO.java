@@ -38,4 +38,5 @@ public class ShutDownPlanDTO {
 	private String product;
 	private UUID plantId;
 	private String audityear;
+	private Integer displayOrder;
 }
