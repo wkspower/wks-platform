@@ -75,7 +75,7 @@ const ShutDown = () => {
         durationInMins: parseFloat(findDuration('1', row)),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
-        audityear: '2024-25',
+        audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
         remark: row.remark || 'null',
       }))
@@ -300,7 +300,7 @@ const ShutDown = () => {
       valueGetter: (params) => {
         const value = params
         const parsedDate = value
-          ? dayjs(value, 'MMM D, YYYY, h:mm:ss A').toDate()
+          ? dayjs(value, 'D MMM, YYYY, h:mm:ss A').toDate()
           : null
         return parsedDate
       },
@@ -315,7 +315,7 @@ const ShutDown = () => {
       valueGetter: (params) => {
         const value = params
         const parsedDate = value
-          ? dayjs(value, 'MMM D, YYYY, h:mm:ss A').toDate()
+          ? dayjs(value, 'D MMM, YYYY, h:mm:ss A').toDate()
           : null
         return parsedDate
       },

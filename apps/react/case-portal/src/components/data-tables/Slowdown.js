@@ -69,7 +69,7 @@ const SlowDown = () => {
         maintStartDateTime: row.maintStartDateTime,
         remark: row.remarks,
         rate: row.rate,
-        audityear: '2024-25',
+        audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
       }))
       const response = await DataService.saveSlowdownData(
@@ -148,6 +148,19 @@ const SlowDown = () => {
   const fetchData = async () => {
     try {
       const data = await DataService.getSlowDownPlantData(keycloak)
+
+      // const data = [
+      //   {
+      //     discription: 'MEG slowdown',
+      //     maintStartDateTime: null,
+      //     maintEndDateTime: null,
+      //     durationInMins: null,
+      //     rate: 20,
+      //     remarks: 'MEG slowdown',
+      //     product: '92E0AF06-9535-4B93-8998-E56A71354393',
+      //     maintenanceId: 'f79675e1-2973-4844-90ff-6894b4b6bd72',
+      //   },
+      // ]
       const formattedData = data.map((item, index) => ({
         ...item,
         idFromApi: item?.maintenanceId,
@@ -339,7 +352,7 @@ const SlowDown = () => {
       valueGetter: (params) => {
         const value = params
         const parsedDate = value
-          ? dayjs(value, 'MMM D, YYYY, h:mm:ss A').toDate()
+          ? dayjs(value, 'D MMM, YYYY, h:mm:ss A').toDate()
           : null
         return parsedDate
       },
@@ -354,7 +367,7 @@ const SlowDown = () => {
       valueGetter: (params) => {
         const value = params
         const parsedDate = value
-          ? dayjs(value, 'MMM D, YYYY, h:mm:ss A').toDate()
+          ? dayjs(value, 'D MMM, YYYY, h:mm:ss A').toDate()
           : null
         return parsedDate
       },

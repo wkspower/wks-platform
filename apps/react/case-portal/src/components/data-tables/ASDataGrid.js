@@ -70,6 +70,7 @@ const DataGridTable = ({
   const [selectedUnit, setSelectedUnit] = useState()
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(false)
+  const [deleteIdTemp, setDeleteIdTemp] = useState(false)
   const handleOpenRemark = () => setOpenRemark(true)
   const handleCloseRemark = () => setOpenRemark(false)
   const handleClose1 = () => setOpen1(false)
@@ -144,23 +145,30 @@ const DataGridTable = ({
 
   const deleteTheRecord = async () => {
     try {
-      if (!deleteId) return
-      if (title == 'Business Demand') {
-        await DataService.deleteBusinessDemandData(deleteId, keycloak)
-      }
-      if (title == 'Shutdown Plan') {
-        await DataService.deleteShutdownData(deleteId, keycloak)
-      }
-      if (title == 'Slowdown Plan') {
-        await DataService.deleteSlowdownData(deleteId, keycloak)
-      }
-      if (title == 'Turnaround Plan') {
-        await DataService.deleteTurnAroundData(deleteId, keycloak)
+      if (deleteId) {
+        if (title == 'Business Demand') {
+          await DataService.deleteBusinessDemandData(deleteId, keycloak)
+        }
+        if (title == 'Shutdown Plan') {
+          await DataService.deleteShutdownData(deleteId, keycloak)
+        }
+        if (title == 'Slowdown Plan') {
+          await DataService.deleteSlowdownData(deleteId, keycloak)
+        }
+        if (title == 'Turnaround Plan') {
+          await DataService.deleteTurnAroundData(deleteId, keycloak)
+        }
+
+        setRows((prevRows) =>
+          prevRows.filter((row) => row.id !== deleteId || deleteIdTemp),
+        )
+        onDeleteRow?.(deleteId || deleteIdTemp)
+      } else {
+        handleCancelClick(deleteIdTemp)
       }
 
-      setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
-      onDeleteRow?.(deleteId)
       setDeleteId(null)
+      setDeleteIdTemp(null)
       setOpen1(false)
       setSnackbarOpen(true)
       setSnackbarData({
@@ -209,6 +217,7 @@ const DataGridTable = ({
       params?.NormParameterMonthlyTransactionId
     setOpen1(true)
     setDeleteId(maintenanceId)
+    setDeleteIdTemp(id)
   }
 
   const defaultColumns = useMemo(() => {
@@ -593,6 +602,7 @@ const DataGridTable = ({
             // NormParametersId: false,
             aopStatus: false,
             idFromApi: false,
+            period: false,
           }}
           rowHeight={35}
           processRowUpdate={processRowUpdate}

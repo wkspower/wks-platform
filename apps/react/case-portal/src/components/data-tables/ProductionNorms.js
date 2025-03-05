@@ -63,7 +63,7 @@ const ProductionNorms = () => {
   const updateProductNormData = async (newRow) => {
     try {
       let plantId = ''
-      const isTPH = selectedUnit === 'TPH'
+      const isTPH = selectedUnit != 'TPH'
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
@@ -74,7 +74,7 @@ const ProductionNorms = () => {
         aopType: row.aopType || 'production',
         aopCaseId: row.aopCaseId || null,
         aopStatus: row.aopStatus || null,
-        aopYear: '2024-25',
+        aopYear: localStorage.getItem('year'),
         plantFkId: plantId,
         normParametersFKId: row.normParametersFKId,
         // normItem: getProductName('1', row.normParametersFKId) || null,
@@ -125,13 +125,7 @@ const ProductionNorms = () => {
       }
 
       var plantId = plantId
-      const data = await DataService.handleCalculate(
-        plantId,
-        year,
-        keycloak,
-      )
-
-
+      const data = await DataService.handleCalculate(plantId, year, keycloak)
 
       const formattedData = data.map((item, index) => {
         const isTPH = selectedUnit != 'TPH'

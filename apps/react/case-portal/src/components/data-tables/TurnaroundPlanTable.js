@@ -50,12 +50,11 @@ const TurnaroundPlanTable = () => {
       const turnAroundDetails = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
-        // durationInMins: findDuration('1', row),
         durationInMins: parseFloat(findDuration('1', row)),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
         remark: row.remark,
-        audityear: '2024-25',
+        audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
       }))
       const response = await DataService.saveTurnAroundData(
@@ -237,7 +236,7 @@ const TurnaroundPlanTable = () => {
       valueGetter: (params) => {
         const value = params
         const parsedDate = value
-          ? dayjs(value, 'MMM D, YYYY, h:mm:ss A').toDate()
+          ? dayjs(value, 'D MMM, YYYY, h:mm:ss A').toDate()
           : null
         return parsedDate
       },
@@ -252,7 +251,7 @@ const TurnaroundPlanTable = () => {
       valueGetter: (params) => {
         const value = params
         const parsedDate = value
-          ? dayjs(value, 'MMM D, YYYY, h:mm:ss A').toDate()
+          ? dayjs(value, 'D MMM, YYYY, h:mm:ss A').toDate()
           : null
         return parsedDate
       },

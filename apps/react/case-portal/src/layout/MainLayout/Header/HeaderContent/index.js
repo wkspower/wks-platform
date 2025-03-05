@@ -20,16 +20,18 @@ const HeaderContent = ({ keycloak }) => {
   const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
   const [selectedOption, setSelectedOption] = useState('')
   const [selectedSite, setSelectedSite] = useState('')
+  const [selectedYear, setSelectedYear] = useState('')
   const [selectedVertical, setSelectedVertical] = useState('')
   const [sites, setSites] = useState([])
   const [allSites, setAllSites] = useState([])
   const [plants, setPlants] = useState([])
   const [allPlants, setAllPlants] = useState([])
   const [verticals, setVerticals] = useState([])
+
   const dispatch = useDispatch()
 
   useEffect(() => {
-    localStorage.setItem('year', '2024-2025')
+    localStorage.setItem('year', '2025-26')
     getPlantAndSite()
   }, [])
 
@@ -187,6 +189,8 @@ const HeaderContent = ({ keycloak }) => {
     }
   }
 
+  const handleYearChange = (event) => {}
+
   const handleVerticalChange = (event) => {
     dispatch(setSitePlantChange({ sitePlantChange: true }))
     const verticalName = event.target.value
@@ -258,7 +262,22 @@ const HeaderContent = ({ keycloak }) => {
       {!matchesXs && <Box sx={{ width: '100%', ml: 1 }} />}
 
       {/* Horizontal layout for Plant & Site */}
+
       <Stack direction='row' spacing={2} alignItems='center'>
+        {/* Current Year Dropdown */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant='body1' color='white'>
+            Year:
+          </Typography>
+          <Typography
+            variant='body1'
+            color='white'
+            sx={{ whiteSpace: 'nowrap' }}
+          >
+            2025-26
+          </Typography>
+        </Box>
+
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant='body1' color='white'>
             Vertical:

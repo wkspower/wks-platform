@@ -80,7 +80,7 @@ const ProductionvolumeData = () => {
         march: row.march || null,
 
         aopStatus: row.aopStatus || 'draft',
-        year: '2024-25',
+        year: localStorage.getItem('year'),
         plant: plantId,
         plantFKId: plantId,
         site: siteId,

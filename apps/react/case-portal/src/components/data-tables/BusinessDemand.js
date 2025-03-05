@@ -80,8 +80,6 @@ const BusinessDemand = () => {
           <select
             value={value || ''}
             onChange={(event) => {
-              // console.log('event',event);
-
               params.api.setEditCellValue({
                 id: params.id,
                 field: 'normParameterId',
@@ -214,6 +212,7 @@ const BusinessDemand = () => {
       headerName: 'idFromApi',
     },
   ]
+
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     // Store edited row data
@@ -248,6 +247,7 @@ const BusinessDemand = () => {
       // setIsSaving(false);
     }
   }, [apiRef])
+
   const saveBusinessDemandData = async (newRows) => {
     try {
       let plantId = ''
@@ -272,7 +272,7 @@ const BusinessDemand = () => {
         march: row.march || null,
         remark: row.remark,
         avgTph: row.avgTph || null,
-        year: '2024-25',
+        year: localStorage.getItem('year'),
         plantId: plantId,
         normParameterId: row.normParameterId,
         id: row.idFromApi || null,
