@@ -38,9 +38,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 		for (Object[] result : listOfSite) {
 			SlowDownPlanDTO dto = new SlowDownPlanDTO();
 			dto.setDiscription((String) result[0]);
-			dto.setMaintStartDateTime((Date) result[1]);
-			dto.setMaintEndDateTime((Date) result[2]);
-			dto.setDurationInMins(result[3] != null ? ((Number) result[3]).longValue() : 0L);
+			dto.setMaintStartDateTime(result[1]!=null? (Date) result[1] :null);
+			dto.setMaintEndDateTime(result[2]!=null ?(Date) result[2] :null);
+			dto.setDurationInMins(result[3] != null ? ((Number) result[3]).longValue() : null);
 			dto.setRate(result[4] != null ? ((Number) result[4]).doubleValue() : null); // Extract Rate
 			dto.setRemarks(result[5] != null ? result[5].toString() : null); // Extract Remarks
 			dto.setProduct(result[8] != null ? result[8].toString() : null);
@@ -72,7 +72,10 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 			plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 			plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 			plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
-			plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
+			if(shutDownPlanDTO.getMaintStartDateTime()!=null){
+				plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
+			}
+			
 			plantMaintenanceTransaction.setCreatedOn(new Date());
 			plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
 			plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
@@ -93,7 +96,10 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 		  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 		  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 		  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
-		  plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
+		  if(shutDownPlanDTO.getMaintStartDateTime()!=null){
+			plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
+		  }
+		  
 		  plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
 		  plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
       // Save entity
@@ -116,7 +122,10 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 		  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 		  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 		  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
-		  plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
+		  
+		  if(shutDownPlanDTO.getMaintStartDateTime()!=null){
+			plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
+		  }
 		  plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
 		  plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
       // Save entity

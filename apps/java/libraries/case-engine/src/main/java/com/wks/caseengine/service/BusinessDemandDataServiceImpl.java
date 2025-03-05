@@ -1,10 +1,13 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
 import com.wks.caseengine.entity.BusinessDemand;
+import com.wks.caseengine.entity.NormParameters;
+import com.wks.caseengine.entity.Product;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

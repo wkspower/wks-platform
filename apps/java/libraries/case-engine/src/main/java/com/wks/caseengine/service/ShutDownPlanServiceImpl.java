@@ -39,7 +39,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
             dto.setDiscription((String) result[0]);
             dto.setMaintStartDateTime((Date) result[1]);
             dto.setMaintEndDateTime((Date) result[2]);
-            dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : 0); 
+            dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null); 
             dto.setProduct((String) result[6]);
             //FOR ID : pmt.Id
             dto.setId(result[5] != null ? result[5].toString() : null); 
@@ -124,6 +124,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 
 				List<ShutDownPlanDTO> list = new ArrayList<>();
 				shutDownPlanDTO.setDurationInMins(null);
+				shutDownPlanDTO.setMaintStartDateTime(null);
+				shutDownPlanDTO.setMaintEndDateTime(null);
 				shutDownPlanDTO.setDiscription(description+" Ramp Up");
 				list.add(shutDownPlanDTO);
 			    slowdownPlanService.saveShutdownData(plantId, list);

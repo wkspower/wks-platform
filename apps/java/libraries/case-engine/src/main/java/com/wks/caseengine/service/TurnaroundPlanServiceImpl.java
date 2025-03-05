@@ -35,7 +35,7 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 			  dto.setMaintStartDateTime((Date)result[1]);
 			  dto.setMaintEndDateTime((Date) result[2]);
 			  // dto.setDurationInMins((Integer) result[3]); // Duration in minutes
-			  dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : 0); 
+			  dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null); 
 			  double durationInHrs = ((Integer) result[3]) / 60.0;
 			  dto.setDurationInHrs(durationInHrs);
 			  dto.setRemark((String)result[4]);
