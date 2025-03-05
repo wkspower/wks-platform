@@ -32,8 +32,7 @@ public class PlantMaintenanceTransaction {
     private Integer durationInMins;
 
     @Column(name = "MaintForMonth")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date maintForMonth;
+    private Integer maintForMonth;
     
     @Column(name = "AuditYear")
     private String auditYear;

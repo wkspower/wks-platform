@@ -66,6 +66,7 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 			plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
 			plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 			plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+			plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
 			plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
 			plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 			plantMaintenanceTransaction.setUser("system"); 
@@ -87,6 +88,7 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 			  plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
 			  plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
 			  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+			  plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
 			  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 			  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
 			  plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
@@ -109,6 +111,7 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 			  plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
 			  plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
 			  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+			  plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
 			  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 			  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
 			  plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());

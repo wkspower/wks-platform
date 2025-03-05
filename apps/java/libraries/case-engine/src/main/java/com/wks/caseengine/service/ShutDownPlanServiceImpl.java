@@ -95,6 +95,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 				);
 				plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 				plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+				plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
 				plantMaintenanceTransaction.setUser("system");
 				plantMaintenanceTransaction.setName("Default Name");
 				plantMaintenanceTransaction.setVersion("V1");
@@ -124,14 +125,12 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 				List<ShutDownPlanDTO> list = new ArrayList<>();
 				shutDownPlanDTO.setDiscription(description+" Ramp Up");
 				list.add(shutDownPlanDTO);
-			slowdownPlanService.saveShutdownData(plantId, list);
+			    slowdownPlanService.saveShutdownData(plantId, list);
 
 				List<ShutDownPlanDTO> list2 = new ArrayList<>();
 				//String description = shutDownPlanDTO.getDiscription()+" Ramp Up";
 				shutDownPlanDTO.setDiscription(description+" Ramp Down");
 				list2.add(shutDownPlanDTO);
-
-
 			slowdownPlanService.saveShutdownData(plantId,list2);
 	
 			} else {
@@ -145,6 +144,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 						plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 						plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
 						plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
+						plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
 						plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 						plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 						plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
