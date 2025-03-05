@@ -32,4 +32,11 @@ public class AOPController {
 		return aOPDTOList;
 	}
 
+    @GetMapping(value="/calculateData")
+	public ResponseEntity<List<AOPDTO>> calculateData(@RequestParam String plantId,@RequestParam String year){
+		 List<AOPDTO> aOPList= aOPService.calculateData(plantId,year);
+		 return ResponseEntity.ok(aOPList);
+	}
+
+
 }

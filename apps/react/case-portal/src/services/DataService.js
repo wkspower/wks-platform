@@ -70,8 +70,8 @@ async function handleRefresh(year, plantId, keycloak) {
     return Promise.reject(e)
   }
 }
-async function handleCalculate(year, plantId, keycloak) {
-  const url = `${process.env.REACT_APP_API_URL}/task/handleCalculate?year=${year}&plantId=${plantId}`
+async function handleCalculate( plantId,year, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/calculateData?year=2024-25&plantId=${plantId}`
 
   const headers = {
     Accept: 'application/json',
@@ -363,7 +363,6 @@ async function getConsumptionNormsData(keycloak) {
     return await Promise.reject(e)
   }
 }
-
 async function saveShutdownData(plantId, shutdownDetails, keycloak) {
   const url = `${process.env.REACT_APP_API_URL}/task/saveShutdownData/${plantId}`
 

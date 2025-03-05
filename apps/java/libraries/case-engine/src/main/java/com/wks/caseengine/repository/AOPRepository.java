@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.wks.caseengine.entity.AOP;
+import org.springframework.data.jpa.repository.query.Procedure;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface AOPRepository extends JpaRepository<AOP, UUID>{
@@ -22,26 +24,38 @@ public interface AOPRepository extends JpaRepository<AOP, UUID>{
 	List<Object[]> findBusinessDemandWithAOP(@Param("plantId") UUID plantId, @Param("year") String year);
 
 
-	@Query(value = """
-	        SELECT AOP.Id, AOP.AOPCaseId, AOP.AOPStatus, AOP.AOPRemarks, AOP.NormItem, 
-	               AOP.AOPType, AOP.Jan, AOP.Feb, AOP.March, AOP.April, AOP.May, AOP.June, 
-	               AOP.July, AOP.Aug, AOP.Sep, AOP.Oct, AOP.Nov, AOP.Dec, AOP.AOPYear, 
-	               AOP.Plant_FK_Id, AOP.AvgTPH, AOP.NormParameters_FK_Id, NP.DiplayOrder
-	        FROM AOP AOP
-	        JOIN NormParameters NP 
-	        ON AOP.NormParameters_FK_Id = NP.Id 
-	        WHERE AOP.AOPYear = :aopYear 
-	        AND AOP.Plant_FK_Id = :plantFkId 
-	        ORDER BY NP.DiplayOrder
-	        """, nativeQuery = true)
-	    List<Object[]> findByAOPYearAndPlantFkId(@Param("aopYear") String aopYear, @Param("plantFkId") UUID plantFkId);
-	
+
     List<AOP> findAllByAopYearAndPlantFkId(String year, UUID fromString);
 
 
-    @Query(value="select distinct NormParameters_FK_Id from BusinessDemand where Plant_FK_Id = :plantId and Year=:year "+
-    " and NormParameters_FK_Id not in (select NormParameters_FK_Id from AOP where Plant_FK_Id= :plantId and NormParameters_FK_Id is not null and Year=:year) ", nativeQuery=true)
+    @Query(value="select distinct [NormParameters_FK_Id] from BusinessDemand where Plant_FK_Id = :plantId and Year=:year "+
+    " and [NormParameters_FK_Id] not in (select [NormParameters_FK_Id] from [dbo].[AOP] where Plant_FK_Id= :plantId and [NormParameters_FK_Id] is not null and Year=:year) ", nativeQuery=true)
     List<Object[]> getDataBusinessAllData(@Param("plantId") String plantId, @Param("year") String year);
+
+
+    
+
+
+    // Assuming the stored procedure is named 'getEmployeeDetails'
+    @Procedure(name = "HMD_MaintenanceCalculation")
+    String getEmployeeDetails(Integer employeeId);
+
+
+    @Procedure(name = "getData")
+    String getData();
+
+    @Transactional
+    @Query(value = "EXEC getData @plantName = :plantName", nativeQuery = true)
+    List<Object[]>  getData(@Param("plantName") String plantName);
+
+
+    
+
+    @Transactional
+    @Query(value = "EXEC HMD_MaintenanceCalculation @plantName = :plantName,@siteName=:siteName,@verticalName=:verticalName,@aopYear=:aopYear ", nativeQuery = true)
+    List<Object[]>  HMD_MaintenanceCalculation(@Param("plantName") String plantName, @Param("siteName") String siteName,
+    @Param("verticalName") String verticalName,@Param("aopYear") String aopYear );
+
 	
 	
 

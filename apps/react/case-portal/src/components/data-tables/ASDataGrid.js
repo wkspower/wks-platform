@@ -51,6 +51,7 @@ const DataGridTable = ({
   setSnackbarOpen,
   fetchData,
   handleUnitChange,
+  handleCalculate
 }) => {
   const [isUpdating, setIsUpdating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -362,31 +363,7 @@ const DataGridTable = ({
     }
   }
 
-  const handleCalculate = async (year) => {
-    try {
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
-      var plantId = plantId
-      const response = await DataService.handleCalculate(
-        plantId,
-        year,
-        keycloak,
-      )
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Data refresh successfully!',
-        severity: 'success',
-      })
-
-      return response
-    } catch (error) {
-      console.error('Error saving refresh data:', error)
-    }
-  }
+ 
 
   return (
     <Box
@@ -628,6 +605,7 @@ const DataGridTable = ({
           editMode='row'
           rowModesModel={rowModesModel}
           onRowModesModelChange={handleRowModesModelChange}
+          handleCalculate={handleCalculate}
           // onRowEditStop={handleRowEditStop}
           slotProps={{
             toolbar: { setRows, setRowModesModel },
