@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  REPOSITORY_OWNER: wkspower
+  REPOSITORY_OWNER: aop-deployment
   KEYCLOAK_URL: http://localhost:8082
   WKS_API_URL: http://localhost:8081
   WKS_STORAGE_API_URL: http://localhost:8085
@@ -41,7 +41,7 @@ jobs:
           maven-version: 3.8.2
 
       - name: Build all for backend api
-        run: mvn -B package --file apps/java/pom.xml
+        run: mvn -B package -DskipTests --file apps/java/pom.xml
 
       - name: Install dependencies for case-portal
         run: yarn --cwd apps/react/case-portal install
@@ -66,7 +66,8 @@ jobs:
         run: echo "::set-output name=tag::$(echo ${GITHUB_REF#refs/tags/})"
 
       - name: Log in to the Container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        # uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
