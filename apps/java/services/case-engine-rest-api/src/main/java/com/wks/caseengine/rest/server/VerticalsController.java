@@ -37,9 +37,9 @@ public class VerticalsController {
 	}
 	
 	@GetMapping(value="/getPlantsAndSidesAndVerticals")
-	public String getPlantsAndSites(@RequestParam("verticalId") String verticalId) {
+	public List<VerticalsDTO> getPlantsAndSites(@RequestParam("verticalId") String verticalId) {
 		
-		String verticals= verticalsService.getAllVerticalsAndPlantsAndSites();
+		List<VerticalsDTO> verticals= verticalsService.getAllVerticalsAndPlantsAndSites();
        
         return verticals;
     }

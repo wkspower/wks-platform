@@ -26,11 +26,11 @@ public class PlantsServiceImpl implements PlantsService{
 			PlantsDTO plantsDTO=new PlantsDTO();
 			plantsDTO.setDisplayName(Plants.getDisplayName());
 			plantsDTO.setDisplayOrder(Plants.getDisplayOrder());
-			plantsDTO.setId(Plants.getId());
+			plantsDTO.setId(Plants.getId().toString());
 			plantsDTO.setIsActive(Plants.getIsActive());
 			plantsDTO.setName(Plants.getName());
-			plantsDTO.setSiteFkId(Plants.getSiteFkId());
-			plantsDTO.setVerticalFKId(Plants.getVerticalFKId());
+			plantsDTO.setSiteFkId(Plants.getSiteFkId().toString());
+			plantsDTO.setVerticalFKId(Plants.getVerticalFKId().toString());
 			plantsDTOList.add(plantsDTO);
 		}
 		// TODO Auto-generated method stub
