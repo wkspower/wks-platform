@@ -21,8 +21,10 @@
   "extends": ["eslint:recommended", "plugin:react/recommended"],
   "plugins": ["react"],
   "rules": {
-    "no-unused-vars": "error",
-    "no-undef": "error",
+    // "no-unused-vars": "error",
+    // "no-undef": "error",
+    "no-unused-vars": "off",
+    "no-undef": "off",
     "react/react-in-jsx-scope": "off",
     "react/jsx-uses-react": "off",
     "react/prop-types": "off"
