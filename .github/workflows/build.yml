@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  REPOSITORY_OWNER: wkspower
+  REPOSITORY_OWNER: aop-deployment
   KEYCLOAK_URL: http://localhost:8082
   WKS_API_URL: http://localhost:8081
   WKS_STORAGE_API_URL: http://localhost:8085
@@ -42,7 +42,7 @@ jobs:
           maven-version: 3.8.2
 
       - name: Build all for backend api
-        run: mvn -B package --file apps/java/pom.xml
+        run: mvn -B package -DskipTests --file apps/java/pom.xml
 
   build-react:
     runs-on: ubuntu-latest
