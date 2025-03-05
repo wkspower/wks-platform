@@ -25,6 +25,7 @@
     // "no-undef": "error",
     "no-unused-vars": "off",
     "no-undef": "off",
+    "no-self-assign": "off",
     "react/react-in-jsx-scope": "off",
     "react/jsx-uses-react": "off",
     "react/prop-types": "off"
