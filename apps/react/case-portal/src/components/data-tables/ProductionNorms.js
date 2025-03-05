@@ -110,11 +110,69 @@ const ProductionNorms = () => {
       console.error('Error Saving Production AOP:', error)
     }
   }
+
+
+  const handleCalculate = async (year) => {
+    try {
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      var plantId = plantId
+      const data = await DataService.handleCalculate(
+        plantId,
+        year,
+        keycloak,
+      )
+
+
+
+      const formattedData = data.map((item, index) => {
+        const isTPH = selectedUnit != 'TPH'
+        return {
+          ...item,
+          idFromApi: item.id,
+          normParametersFKId: item?.normParametersFKId?.toLowerCase(),
+          id: index,
+          ...(isTPH && {
+            jan: item.jan ? item.jan / 24 : item.jan,
+            feb: item.feb ? item.feb / 24 : item.feb,
+            march: item.march ? item.march / 24 : item.march,
+            april: item.april ? item.april / 24 : item.april,
+            may: item.may ? item.may / 24 : item.may,
+            june: item.june ? item.june / 24 : item.june,
+            july: item.july ? item.july / 24 : item.july,
+            aug: item.aug ? item.aug / 24 : item.aug,
+            sep: item.sep ? item.sep / 24 : item.sep,
+            oct: item.oct ? item.oct / 24 : item.oct,
+            nov: item.nov ? item.nov / 24 : item.nov,
+            dec: item.dec ? item.dec / 24 : item.dec,
+          }),
+        }
+      })
+
+      setCsData(formattedData)
+      
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Data refresh successfully!',
+        severity: 'success',
+      })
+
+      return data
+    } catch (error) {
+      console.error('Error saving refresh data:', error)
+    }
+  }
+
+
   const fetchData = async () => {
     try {
       const data = await DataService.getAOPData(keycloak)
       const formattedData = data.map((item, index) => {
-        const isTPH = selectedUnit === 'TPH'
+        const isTPH = selectedUnit != 'TPH'
         return {
           ...item,
           idFromApi: item.id,
