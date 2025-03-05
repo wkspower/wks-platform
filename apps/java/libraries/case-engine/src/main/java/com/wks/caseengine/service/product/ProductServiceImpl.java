@@ -101,12 +101,14 @@ public class ProductServiceImpl implements ProductService {
 	// Service method to fetch products from NormParameters table
 	public List<Object[]> getAllProductsFromNormParameters() {
 		// String query = "SELECT Id, Name, DisplayName FROM [RIL.AOP].[dbo].[NormParameters]";
-		String query = "SELECT CAST(Id AS VARCHAR(36)) as NormParameterId, Name, DisplayName FROM NormParameters np where np.type='ProductionNorms'  order by DiplayOrder";
+		String query = "  SELECT CAST(Id AS VARCHAR(36)), Name, DisplayName FROM [dbo].[NormParameters] np where np.type='ProductionNorms'";
 		return entityManager.createNativeQuery(query).getResultList();
 	}
 
-	public List<Object[]> getMonthlyDataForYear(int year) {
-        String query = "SELECT NormParameter_FK_Id, month, monthValue, Remarks FROM NormParameterMonthlyTransaction WHERE year = :year";
+
+
+    public List<Object[]> getMonthlyDataForYear(int year) {
+        String query = "SELECT NormParameter_FK_Id, month, monthValue, Remarks FROM [dbo].[NormParameterMonthlyTransaction] WHERE year = :year";
         return entityManager.createNativeQuery(query).setParameter("year", year).getResultList();
     }
 

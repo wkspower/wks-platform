@@ -36,6 +36,10 @@ const ProductionNorms = () => {
     return newRow
   }, [])
 
+
+
+ 
+
   const saveChanges = React.useCallback(async () => {
     console.log(
       'Edited Data: ',
@@ -482,6 +486,7 @@ const ProductionNorms = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
+        handleCalculate={handleCalculate}
         apiRef={apiRef}
         // deleteId={deleteId}
         // setDeleteId={setDeleteId}

@@ -123,6 +123,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 				String description = shutDownPlanDTO.getDiscription();
 
 				List<ShutDownPlanDTO> list = new ArrayList<>();
+				shutDownPlanDTO.setDurationInMins(null);
 				shutDownPlanDTO.setDiscription(description+" Ramp Up");
 				list.add(shutDownPlanDTO);
 			    slowdownPlanService.saveShutdownData(plantId, list);
@@ -130,6 +131,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 				List<ShutDownPlanDTO> list2 = new ArrayList<>();
 				//String description = shutDownPlanDTO.getDiscription()+" Ramp Up";
 				shutDownPlanDTO.setDiscription(description+" Ramp Down");
+				shutDownPlanDTO.setDurationInMins(null);
 				list2.add(shutDownPlanDTO);
 			slowdownPlanService.saveShutdownData(plantId,list2);
 	

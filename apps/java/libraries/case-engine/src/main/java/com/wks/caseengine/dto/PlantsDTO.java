@@ -15,17 +15,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class PlantsDTO {
-	    private String id;
+	    private UUID id;
 	    private String name;
 	    private String displayName;
-	    private String siteFkId;
-	    private String verticalFKId;
+	    private UUID siteFkId;
+	    private UUID verticalFKId;
 	    private Boolean isActive;
 	    private Integer displayOrder;
-	    @Override
-	    public String toString() {
-	        return "PlantsDTO(id=" + id + ", name=" + name + ", displayName=" + displayName + 
-	               ", siteFkId=" + siteFkId + ", verticalFKId=" + verticalFKId + 
-	               ", isActive=" + isActive + ", displayOrder=" + displayOrder + ")";
-	    }
 }

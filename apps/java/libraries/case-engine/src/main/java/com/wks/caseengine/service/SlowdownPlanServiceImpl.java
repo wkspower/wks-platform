@@ -63,7 +63,12 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 			PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
 			plantMaintenanceTransaction.setId(UUID.randomUUID());
 			plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-			plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
+			if(shutDownPlanDTO.getDurationInMins()!=null){
+				plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
+			}else{
+				plantMaintenanceTransaction.setDurationInMins(null);
+			}
+			
 			plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 			plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 			plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);

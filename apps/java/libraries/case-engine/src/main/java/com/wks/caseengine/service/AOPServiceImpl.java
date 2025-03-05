@@ -109,17 +109,17 @@ public class AOPServiceImpl implements  AOPService{
 			aOPDTOList.add(aOPDTO);
 	    }
 
-		List<Object[]> list = aOPRepository.getDataBusinessAllData(plantId,year);
-		int i=1;
-				for(Object[] obj :list){
+		// List<Object[]> list = aOPRepository.getDataBusinessAllData(plantId,year);
+		// int i=1;
+		// 		for(Object[] obj :list){
 					   
-					AOPDTO aOPDTO = new AOPDTO();
+		// 			AOPDTO aOPDTO = new AOPDTO();
 		
-					aOPDTO.setNormParametersFKId(obj[0]!=null? obj[0].toString():null);
-					aOPDTO.setId(i+"#");
-					aOPDTOList.add(aOPDTO);
-		i++;
-				}
+		// 			aOPDTO.setNormParametersFKId(obj[0]!=null? obj[0].toString():null);
+		// 			aOPDTO.setId(i+"#");
+		// 			aOPDTOList.add(aOPDTO);
+		// i++;
+		// 		}
 
 	    return aOPDTOList;
 	}
