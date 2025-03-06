@@ -1,10 +1,11 @@
-package com.wks.caseengine.service;
+// package com.wks.caseengine.service;
 
-import java.util.List;
-import com.wks.caseengine.entity.NormParameters;
+// import java.util.List;
 
-public interface NormParametersService {
+// import com.wks.caseengine.entity.NormParameters;
+
+// public interface NormParametersService   {
 	
-	public List<NormParameters> findAllByType(String type);
+// 	public List<NormParameters> findAllByType(String type);
 
-}
+// }

@@ -22,8 +22,8 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 	@Autowired
 	private BusinessDemandDataRepository businessDemandDataRepository;
 	
-	@Autowired
-	private NormParametersService normParametersService;
+	// @Autowired
+	// private NormParametersService normParametersService;
 	
 
 	@Override
@@ -53,13 +53,13 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 			businessDemandDataDTO.setPlantId(businessDemand.getPlantId().toString());
 			businessDemandDataDTOList.add(businessDemandDataDTO);
 		}
-		List<NormParameters> normParametersList=normParametersService.findAllByType("ProductionNorms");
-		// Create a Map of normParameterId -> displayOrder
-        Map<UUID, Integer> displayOrderMap = normParametersList.stream()
-                .collect(Collectors.toMap(NormParameters::getId, NormParameters::getDisplayOrder));
+		// List<NormParameters> normParametersList=normParametersService.findAllByType("ProductionNorms");
+		// // Create a Map of normParameterId -> displayOrder
+        // Map<UUID, Integer> displayOrderMap = normParametersList.stream()
+        //         .collect(Collectors.toMap(NormParameters::getId, NormParameters::getDisplayOrder));
 
-        // Sort businessDemandList based on displayOrder
-        businessDemandDataDTOList.sort(Comparator.comparing(dto -> displayOrderMap.getOrDefault(dto.getNormParameterId(), Integer.MAX_VALUE)));
+        // // Sort businessDemandList based on displayOrder
+        // businessDemandDataDTOList.sort(Comparator.comparing(dto -> displayOrderMap.getOrDefault(dto.getNormParameterId(), Integer.MAX_VALUE)));
 
         return businessDemandDataDTOList;
 	}
