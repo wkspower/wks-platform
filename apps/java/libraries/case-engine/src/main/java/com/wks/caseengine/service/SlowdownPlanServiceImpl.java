@@ -24,7 +24,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 	private ShutDownPlanService shutDownPlanService;
 
 	@Override
-	public List<SlowDownPlanDTO> findSlowdownDetailsByPlantIdAndType(UUID plantId, String maintenanceTypeName,String year) {
+	public List<ShutDownPlanDTO> findSlowdownDetailsByPlantIdAndType(UUID plantId, String maintenanceTypeName,String year) {
 		
 		List<Object[]> listOfSite=null;
 		try {
@@ -33,18 +33,18 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 			e.printStackTrace();
 		}
 		
-		List<SlowDownPlanDTO> dtoList = new ArrayList<>();
+		List<ShutDownPlanDTO> dtoList = new ArrayList<>();
 		
 		for (Object[] result : listOfSite) {
-			SlowDownPlanDTO dto = new SlowDownPlanDTO();
+			ShutDownPlanDTO dto = new ShutDownPlanDTO();
 			dto.setDiscription((String) result[0]);
 			dto.setMaintStartDateTime(result[1]!=null? (Date) result[1] :null);
 			dto.setMaintEndDateTime(result[2]!=null ?(Date) result[2] :null);
-			dto.setDurationInMins(result[3] != null ? ((Number) result[3]).longValue() : null);
+			dto.setDurationInHrs(result[3] != null ? ((Number) result[4]).doubleValue() : null);
 			dto.setRate(result[4] != null ? ((Number) result[4]).doubleValue() : null); // Extract Rate
-			dto.setRemarks(result[5] != null ? result[5].toString() : null); // Extract Remarks
-			dto.setProduct(result[8] != null ? result[8].toString() : null);
-			dto.setMaintenanceId(result[7] != null ? UUID.fromString(result[7].toString()) : null);
+			dto.setRemark(result[5] != null ? result[5].toString() : null); // Extract Remarks
+			dto.setProduct(result[6] != null ? result[6].toString() : null);
+			dto.setProductId(result[8] != null ? UUID.fromString(result[8].toString()) : null);
 	
 			dtoList.add(dto);
 		}
@@ -63,10 +63,10 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 			PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
 			plantMaintenanceTransaction.setId(UUID.randomUUID());
 			plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-			if(shutDownPlanDTO.getDurationInMins()!=null){
-				plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
+			if(shutDownPlanDTO.getDurationInHrs()!=null){
+				plantMaintenanceTransaction.setDurationInHrs(shutDownPlanDTO.getDurationInHrs());
 			}else{
-				plantMaintenanceTransaction.setDurationInMins(null);
+				plantMaintenanceTransaction.setDurationInHrs(0d);
 			}
 			
 			plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());

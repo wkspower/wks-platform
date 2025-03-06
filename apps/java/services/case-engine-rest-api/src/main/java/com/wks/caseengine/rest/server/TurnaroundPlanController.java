@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
-import com.wks.caseengine.dto.SlowDownPlanDTO;
-import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.service.ShutDownPlanService;
 import com.wks.caseengine.service.TurnaroundPlanService;
 import org.springframework.web.bind.annotation.RequestBody;
