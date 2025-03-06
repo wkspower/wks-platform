@@ -5,11 +5,16 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.wks.caseengine.dto.PlantsDTO;
+import com.wks.caseengine.dto.SitesDTO;
 import com.wks.caseengine.dto.VerticalsDTO;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.repository.VerticalsRepository;
@@ -23,46 +28,22 @@ public class VerticalsServiceImpl implements VerticalsService{
 	@PersistenceContext
     private EntityManager entityManager;
 
-	@Override
-	public String getAllVerticalsAndPlantsAndSites() {
-	
-		String sql = """
-	            SELECT 
-	                v.Id AS VerticalId,
-	                v.Name AS VerticalName,
-	                v.DisplayName AS VerticalDisplayName,
-	                v.IsActive,
-	                v.DisplayOrder,
-	                (
-	                    SELECT 
-	                        s.Id AS SiteId,
-	                        s.Name AS SiteName,
-	                        s.DisplayName AS SiteDisplayName,
-	                        s.IsActive,
-	                        s.DisplayOrder,
-	                        (
-	                            SELECT 
-	                                p.Id AS PlantId,
-	                                p.Name AS PlantName,
-	                                p.DisplayName AS PlantDisplayName,
-	                                p.IsActive,
-	                                p.DisplayOrder
-	                            FROM Plants p
-	                            WHERE p.Site_FK_Id = s.Id
-	                            FOR JSON PATH
-	                        ) AS Plants
-	                    FROM Sites s
-	                    WHERE s.Id IN (SELECT DISTINCT p.Site_FK_Id FROM Plants p WHERE p.Vertical_FK_Id = v.Id)
-	                    FOR JSON PATH
-	                ) AS Sites
-	            FROM Verticals v
-	            FOR JSON PATH, ROOT('Verticals');
-	        """;
-
-	        Query query = entityManager.createNativeQuery(sql);
-	        return (String) query.getSingleResult(); // JSON output
-	}
-
+	/*
+	 * @Override public List<Object[]> getAllVerticalsAndPlantsAndSites() { String
+	 * sql = """ SELECT v.Id AS VerticalId, v.Name AS VerticalName, v.DisplayName AS
+	 * VerticalDisplayName, v.IsActive AS VerticalIsActive, v.DisplayOrder AS
+	 * VerticalDisplayOrder, s.Id AS SiteId, s.Name AS SiteName, s.DisplayName AS
+	 * SiteDisplayName, s.IsActive AS SiteIsActive, s.DisplayOrder AS
+	 * SiteDisplayOrder, p.Id AS PlantId, p.Name AS PlantName, p.DisplayName AS
+	 * PlantDisplayName, p.IsActive AS PlantIsActive, p.DisplayOrder AS
+	 * PlantDisplayOrder FROM Verticals v LEFT JOIN Sites s ON s.Id IN ( SELECT
+	 * DISTINCT p.Site_FK_Id FROM Plants p WHERE p.Vertical_FK_Id = v.Id ) LEFT JOIN
+	 * Plants p ON p.Site_FK_Id = s.Id AND p.Vertical_FK_Id = v.Id ORDER BY
+	 * v.DisplayOrder, s.DisplayOrder, p.DisplayOrder; """;
+	 * 
+	 * Query query = entityManager.createNativeQuery(sql); return
+	 * query.getResultList(); // Returning tabular format as List<Object[]> }
+	 */
 	@Override
 	public List<VerticalsDTO> getAllVerticals() {
 		List<Verticals> verticalsList= verticalsRepository.findAll();
@@ -82,5 +63,56 @@ public class VerticalsServiceImpl implements VerticalsService{
 		return verticalsDTOList;
 	}
 
+	@Override
+	public List<VerticalsDTO> getHierarchyData() {
+	    List<Object[]> results = verticalsRepository.getHierarchyData();
+	    Map<String, VerticalsDTO> verticalMap = new HashMap<>();
+
+	    for (Object[] row : results) {
+	        String verticalId = row[0].toString();
+	        String verticalName = row[1].toString();
+	        String siteId = row[2] != null ? row[2].toString() : null;
+	        String siteName = row[3] != null ? row[3].toString() : null;
+	        String plantId = row[4] != null ? row[4].toString() : null;
+	        String plantName = row[5] != null ? row[5].toString() : null;
+
+	        // Fetch or create VerticalDTO
+	        VerticalsDTO verticalDTO = verticalMap.computeIfAbsent(verticalId, id -> {
+	            VerticalsDTO v = new VerticalsDTO();
+	            v.setId(id);
+	            v.setName(verticalName);
+	            v.setSites(new ArrayList<>());
+	            return v;
+	        });
+
+	        if (siteId != null) {
+	            SitesDTO siteDTO = verticalDTO.getSites().stream()
+	                .filter(s -> s.getId().equals(siteId))
+	                .findFirst()
+	                .orElseGet(() -> {
+	                    SitesDTO s = new SitesDTO();
+	                    s.setId(siteId);
+	                    s.setName(siteName);
+	                    s.setPlants(new ArrayList<>());
+	                    verticalDTO.getSites().add(s);
+	                    return s;
+	                });
+
+	            if (plantId != null) {
+	                PlantsDTO plantDTO = new PlantsDTO();
+	                plantDTO.setId(plantId);
+	                plantDTO.setName(plantName);
+	                siteDTO.getPlants().add(plantDTO);
+	            }
+	        }
+	    }
+
+	    // **Sort sites by the number of plants in descending order**
+	    for (VerticalsDTO vertical : verticalMap.values()) {
+	        vertical.getSites().sort((s1, s2) -> Integer.compare(s2.getPlants().size(), s1.getPlants().size()));
+	    }
+
+	    return new ArrayList<>(verticalMap.values());
+	}
 
 }

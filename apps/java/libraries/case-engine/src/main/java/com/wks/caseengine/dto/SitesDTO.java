@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
 @Configuration
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,10 +18,18 @@ import lombok.NoArgsConstructor;
 @Data
 public class SitesDTO {
 	
-	private UUID id;
+	private String id;
     private String name;
     private String displayName;
     private Boolean isActive;
     private Integer displayOrder;
+    private List<PlantsDTO> plants = new ArrayList<>(); // Add plants list
+
+    @Override
+    public String toString() {
+        return "SitesDTO(id=" + id + ", name=" + name + ", displayName=" + displayName + 
+               ", isActive=" + isActive + ", displayOrder=" + displayOrder + 
+               ", plants=" + plants + ")";
+    }
 
 }

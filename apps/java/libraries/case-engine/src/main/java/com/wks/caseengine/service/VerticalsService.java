@@ -9,6 +9,6 @@ public interface VerticalsService {
 	
 	public List<VerticalsDTO> getAllVerticals();
 	
-	public String getAllVerticalsAndPlantsAndSites();
+	public List<VerticalsDTO> getHierarchyData();
 
 }

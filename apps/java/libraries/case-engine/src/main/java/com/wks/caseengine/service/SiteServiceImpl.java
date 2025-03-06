@@ -43,7 +43,7 @@ public class SiteServiceImpl implements SiteService{
 			SitesDTO sitesDTO=new SitesDTO();
 			sitesDTO.setDisplayName(sites.getDisplayName());
 			sitesDTO.setDisplayOrder(sites.getDisplayOrder());
-			sitesDTO.setId(sites.getId());
+			sitesDTO.setId(sites.getId().toString());
 			sitesDTO.setIsActive(sites.getIsActive());
 			sitesDTO.setName(sites.getName());
 			sitesDTOList.add(sitesDTO);
