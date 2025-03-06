@@ -1,69 +1,31 @@
 {
   "verticals": [
     {
-      "id": "5cc84a47-9717-4142-8e66-b60ebe0cf703",
       "name": "MEG",
-      "displayName": "MEG",
       "sites": [
         {
-          "id": "f0f4e75e-3c44-4fb4-ba7a-2b8227847134",
           "name": "HMD",
-          "displayName": "HMD",
           "plants": [
-            {
-              "id": "a4212e62-2bac-4a38-9dab-2c9066a9da7d",
-              "name": "MEG",
-              "displayName": "MEG",
-              "isActive": true,
-              "displayOrder": 1
-            },
-            {
-              "id": "f0d52188-a656-475d-a675-4b3639f3eea9",
-              "name": "MEG2",
-              "displayName": "MEG2",
-              "isActive": true
-            },
-            {
-              "id": "aacdbe12-c5f6-4b79-9c88-751169815b42",
-              "name": "MEG1",
-              "displayName": "MEG1",
-              "isActive": true,
-              "displayOrder": 3
-            }
+            { "id": "aacdbe12-c5f6-4b79-9c88-751169815b42", "name": "MEG1" },
+            { "id": "f0d52188-a656-475d-a675-4b3639f3eea9", "name": "MEG2" },
+            { "id": "a4212e62-2bac-4a38-9dab-2b8227847134", "name": "MEG3" }
           ]
         },
         {
-          "id": "e2e9d24c-80df-40b4-a278-4c4d60742bce",
           "name": "DMD",
-          "displayName": "DMD",
           "plants": [
-            {
-              "id": "c5102765-e0a1-4cc6-b7a0-4f937b91eb6d",
-              "name": "EOEG",
-              "displayName": "EOEG",
-              "isActive": true,
-              "displayOrder": 2
-            }
+            { "id": "c5102765-e0a1-4cc6-b7a0-4f937b91eb6d", "name": "EOEG" }
           ]
         }
       ]
     },
     {
-      "id": "bf5d7508-96eb-496e-beb0-4828cb1a1b11",
       "name": "PE",
-      "displayName": "PE",
       "sites": [
         {
-          "id": "f0f4e75e-3c44-4fb4-ba7a-2b8227847134",
-          "name": "HMD",
-          "displayName": "HMD",
+          "name": "CG",
           "plants": [
-            {
-              "id": "b8f9bda6-30c0-4ddd-a7ce-fc0f43f279d9",
-              "name": "MEG3",
-              "displayName": "MEG3",
-              "isActive": true
-            }
+            { "id": "b8f9bda6-30c0-4ddd-a7ce-fc0f43f279d9", "name": "MEG" }
           ]
         }
       ]
