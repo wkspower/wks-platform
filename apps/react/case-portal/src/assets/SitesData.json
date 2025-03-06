@@ -1,34 +1,52 @@
-{
-  "verticals": [
-    {
-      "name": "MEG",
-      "sites": [
-        {
-          "name": "HMD",
-          "plants": [
-            { "id": "aacdbe12-c5f6-4b79-9c88-751169815b42", "name": "MEG1" },
-            { "id": "f0d52188-a656-475d-a675-4b3639f3eea9", "name": "MEG2" },
-            { "id": "a4212e62-2bac-4a38-9dab-2b8227847134", "name": "MEG3" }
-          ]
-        },
-        {
-          "name": "DMD",
-          "plants": [
-            { "id": "c5102765-e0a1-4cc6-b7a0-4f937b91eb6d", "name": "EOEG" }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "PE",
-      "sites": [
-        {
-          "name": "CG",
-          "plants": [
-            { "id": "b8f9bda6-30c0-4ddd-a7ce-fc0f43f279d9", "name": "MEG" }
-          ]
-        }
-      ]
-    }
-  ]
-}
+[
+  {
+    "id": "5CC84A47-9717-4142-8E66-B60EBE0CF703",
+    "name": "MEG",
+    "sites": [
+      {
+        "id": "F0F4E75E-3C44-4FB4-BA7A-2B8227847134",
+        "name": "HMD",
+        "plants": [
+          {
+            "id": "A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D",
+            "name": "MEG"
+          },
+          {
+            "id": "AACDBE12-C5F6-4B79-9C88-751169815B42",
+            "name": "MEG 1"
+          },
+          {
+            "id": "F0D52188-A656-475D-A675-4B3639F3EEA9",
+            "name": "MEG 2"
+          }
+        ]
+      },
+      {
+        "id": "E2E9D24C-80DF-40B4-A278-4C4D60742BCE",
+        "name": "DMD",
+        "plants": [
+          {
+            "id": "C5102765-E0A1-4CC6-B7A0-4F937B91EB6D",
+            "name": "EOEG"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "BF5D7508-96EB-496E-BEB0-4828CB1A1B11",
+    "name": "PE",
+    "sites": [
+      {
+        "id": "F0F4E75E-3C44-4FB4-BA7A-2B8227847134",
+        "name": "HMD",
+        "plants": [
+          {
+            "id": "B8F9BDA6-30C0-4DDD-A7CE-FC0F43F279D9",
+            "name": "MEG 3"
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -62,9 +62,19 @@ const TurnaroundPlanTable = () => {
         turnAroundDetails,
         keycloak,
       )
+      console.log(response)
+      // if (response.ok && response.length < 0) {
+      //   const errorData = await response.json() // Get the actual error message
+      //   throw new Error(errorData.errorMessage || 'Failed to save data')
+      // }
+      // Check if response is empty or not defined
+      if (!response || (Array.isArray(response) && response.length === 0)) {
+        throw new Error('Failed to save data: No data returned')
+      }
 
-      if (!response.ok) {
-        const errorData = await response.json() // Get the actual error message
+      // Optionally, if response has an 'ok' flag:
+      if (response.ok === false) {
+        const errorData = await response.json()
         throw new Error(errorData.errorMessage || 'Failed to save data')
       }
 
