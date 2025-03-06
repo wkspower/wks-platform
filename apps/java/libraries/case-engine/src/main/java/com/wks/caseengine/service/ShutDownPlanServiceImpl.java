@@ -40,6 +40,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
             dto.setMaintStartDateTime((Date) result[1]);
             dto.setMaintEndDateTime((Date) result[2]);
             dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null); 
+			double durationInHrs = ((Integer) result[3]) / 60.0;
+			dto.setDurationInHrs(durationInHrs);
             dto.setProduct((String) result[6]);
             //FOR ID : pmt.Id
             dto.setId(result[5] != null ? result[5].toString() : null); 
@@ -91,8 +93,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 					shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
 				);
 
-				if(shutDownPlanDTO.getDurationInHrs()!=null){
-					plantMaintenanceTransaction.setDurationInHrs(shutDownPlanDTO.getDurationInHrs());
+				if(shutDownPlanDTO.getDurationInMins()!=null){
+					plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins() * 60);
 				}else{
 					plantMaintenanceTransaction.setDurationInHrs(0d);
 				}
@@ -153,8 +155,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 						PlantMaintenanceTransaction plantMaintenanceTransaction = plantMaintenance.get();
 						plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 						plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-						if(shutDownPlanDTO.getDurationInHrs()!=null){
-							plantMaintenanceTransaction.setDurationInHrs(shutDownPlanDTO.getDurationInHrs());
+						if(shutDownPlanDTO.getDurationInMins()!=null){
+							plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins() * 60);
 						}else{
 							plantMaintenanceTransaction.setDurationInHrs(0d);
 						}

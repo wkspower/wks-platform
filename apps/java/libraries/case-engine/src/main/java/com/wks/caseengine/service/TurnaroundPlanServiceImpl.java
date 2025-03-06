@@ -43,7 +43,7 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 			  dto.setId((String) result[7]);
 			  long diffInMillis = dto.getMaintEndDateTime().getTime() - dto.getMaintStartDateTime().getTime();
 			  double diffInDays = diffInMillis / (1000.0 * 60 * 60 * 24);
-			  dto.setDurationInDays(diffInDays);
+			 // dto.setDurationInDays(diffInDays);
 			  dtoList.add(dto); 
 		}
 		// TODO Auto-generated method stub
@@ -60,19 +60,28 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 			if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
 
 
-			PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
-			plantMaintenanceTransaction.setId(UUID.randomUUID());
-			plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-			plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
-			plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
-			plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
-			plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
-			plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
-			plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
-			plantMaintenanceTransaction.setUser("system"); 
-	        plantMaintenanceTransaction.setName("Default Name");
-	        plantMaintenanceTransaction.setVersion("V1");
-	        plantMaintenanceTransaction.setCreatedOn(new Date());
+				PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
+				plantMaintenanceTransaction.setId(UUID.randomUUID());
+				plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+				if(shutDownPlanDTO.getDurationInMins()!=null){
+					plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins() * 60);
+				}else{
+					plantMaintenanceTransaction.setDurationInHrs(0d);
+				}
+				
+				plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+				plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+				plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
+				if(shutDownPlanDTO.getMaintStartDateTime()!=null){
+					plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
+				}
+				
+				plantMaintenanceTransaction.setCreatedOn(new Date());
+				plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
+				plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+				plantMaintenanceTransaction.setName("Default Name"); 
+				plantMaintenanceTransaction.setVersion("V1");
+				plantMaintenanceTransaction.setUser("system"); 
 	        if(shutDownPlanDTO.getProductId()!=null) {
 	        	plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
 	        }

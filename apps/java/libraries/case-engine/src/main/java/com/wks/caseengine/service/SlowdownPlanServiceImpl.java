@@ -40,7 +40,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 			dto.setDiscription((String) result[0]);
 			dto.setMaintStartDateTime(result[1]!=null? (Date) result[1] :null);
 			dto.setMaintEndDateTime(result[2]!=null ?(Date) result[2] :null);
-			dto.setDurationInHrs(result[3] != null ? ((Number) result[4]).doubleValue() : null);
+			dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null); 
+			double durationInHrs = ((Integer) result[3]) / 60.0;
+			dto.setDurationInHrs(durationInHrs);
 			dto.setRate(result[4] != null ? ((Number) result[4]).doubleValue() : null); // Extract Rate
 			dto.setRemark(result[5] != null ? result[5].toString() : null); // Extract Remarks
 			dto.setProduct(result[6] != null ? result[6].toString() : null);
@@ -63,8 +65,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 			PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
 			plantMaintenanceTransaction.setId(UUID.randomUUID());
 			plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-			if(shutDownPlanDTO.getDurationInHrs()!=null){
-				plantMaintenanceTransaction.setDurationInHrs(shutDownPlanDTO.getDurationInHrs());
+			if(shutDownPlanDTO.getDurationInMins()!=null){
+				plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins() * 60);
 			}else{
 				plantMaintenanceTransaction.setDurationInHrs(0d);
 			}
@@ -91,19 +93,41 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 		else{
 
 			Optional<PlantMaintenanceTransaction> plantMaintenance=slowdownPlanRepository.findById(UUID.fromString(shutDownPlanDTO.getId()));
-		PlantMaintenanceTransaction plantMaintenanceTransaction=plantMaintenance.get();
-		plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-		  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
-		  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
-		  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
-		  if(shutDownPlanDTO.getMaintStartDateTime()!=null){
+			PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
+			plantMaintenanceTransaction.setId(UUID.randomUUID());
+			
+			// Set mandatory fields with default values if missing
+			plantMaintenanceTransaction.setDiscription(
+				shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
+			);
+
+			if(shutDownPlanDTO.getDurationInMins()!=null){
+				plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins() * 60);
+			}else{
+				plantMaintenanceTransaction.setDurationInHrs(0d);
+			}
+			//plantMaintenanceTransaction.setDurationInMins(
+			//	shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0
+			//);
+			plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+			plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 			plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
-		  }
-		  
-		  plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
-		  plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
-      // Save entity
-		  slowdownPlanRepository.save(plantMaintenanceTransaction);
+			plantMaintenanceTransaction.setUser("system");
+			plantMaintenanceTransaction.setName("Default Name");
+			plantMaintenanceTransaction.setVersion("V1");
+			plantMaintenanceTransaction.setCreatedOn(new Date());
+			plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
+
+			plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+
+			if (shutDownPlanDTO.getProductId() != null) {
+				plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+			}
+
+			plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
+
+			// Save new record
+			slowdownPlanRepository.save(plantMaintenanceTransaction);
 
 		}
 		}
