@@ -72,7 +72,7 @@ const ShutDown = () => {
       const shutdownDetails = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
-        durationInMins: parseFloat(findDuration('1', row)),
+        durationInHrs: parseFloat(findDuration('1', row)),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
         audityear: localStorage.getItem('year'),
@@ -109,7 +109,7 @@ const ShutDown = () => {
       const slowDownDetails = {
         productId: newRow.product,
         discription: newRow.discription,
-        durationInMins: newRow.durationInMins,
+        durationInHrs: newRow.durationInHrs,
         maintEndDateTime: newRow.maintEndDateTime,
         maintStartDateTime: newRow.maintStartDateTime,
       }
@@ -321,7 +321,7 @@ const ShutDown = () => {
       },
     },
     {
-      field: 'durationInMins',
+      field: 'durationInHrs',
       headerName: 'Duration (hrs)',
       editable: false,
       minWidth: 100,

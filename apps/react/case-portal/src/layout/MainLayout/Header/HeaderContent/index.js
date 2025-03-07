@@ -261,7 +261,7 @@ const HeaderContent = ({ keycloak }) => {
               value={selectedSite || ''}
               onChange={handleSiteChange}
               sx={{ color: 'white' }}
-              disabled={sites.length <= 1}
+              // disabled={sites.length <= 1}
             >
               {sites.map((site, index) => (
                 <MenuItem key={index} value={site}>
@@ -282,7 +282,7 @@ const HeaderContent = ({ keycloak }) => {
               value={selectedPlant || ''}
               onChange={handlePlantChange}
               sx={{ color: 'white' }}
-              disabled={plants.length <= 1}
+              // disabled={plants.length <= 1}
             >
               {plants.map((plant, index) => (
                 <MenuItem key={index} value={plant.name}>

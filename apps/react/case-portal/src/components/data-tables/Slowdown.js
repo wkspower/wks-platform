@@ -64,7 +64,8 @@ const SlowDown = () => {
       const slowDownDetails = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
-        durationInMins: parseFloat(findDuration('1', row)),
+        // durationInHrs: parseFloat(findDuration('1', row)),
+        durationInHrs: parseFloat(row.durationInHrs),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
         remark: row.remarks,
@@ -117,7 +118,7 @@ const SlowDown = () => {
       const slowDownDetails = {
         productId: newRow.product,
         discription: newRow.discription,
-        durationInMins: newRow.durationInMins,
+        durationInHrs: newRow.durationInHrs,
         maintEndDateTime: newRow.maintEndDateTime,
         maintStartDateTime: newRow.maintStartDateTime,
         remark: newRow.remarks,
@@ -163,7 +164,7 @@ const SlowDown = () => {
       // ]
       const formattedData = data.map((item, index) => ({
         ...item,
-        idFromApi: item?.maintenanceId,
+        idFromApi: item?.maintenanceId || item?.id,
         id: index,
       }))
       setSlowDownData(formattedData)
@@ -374,14 +375,14 @@ const SlowDown = () => {
     },
 
     {
-      field: 'durationInMins',
+      field: 'durationInHrs',
       headerName: 'Duration (hrs)',
-      editable: false,
+      editable: true,
       minWidth: 100,
       type: 'number',
       align: 'left',
       headerAlign: 'left',
-      valueGetter: findDuration,
+      // valueGetter: findDuration,
     },
 
     {

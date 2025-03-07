@@ -178,7 +178,8 @@ public class AOPServiceImpl implements  AOPService{
 		
 
 		List<Object[]> maintainsData =aOPRepository.CheckIfMaintainanceDataExists(plantId,year);
-		if(maintainsData!=null && maintainsData.size()>0){
+		// if(maintainsData!=null && maintainsData.size()>0){
+		if(1==1){
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();

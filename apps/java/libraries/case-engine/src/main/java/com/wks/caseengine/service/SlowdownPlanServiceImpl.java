@@ -41,11 +41,16 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 			dto.setMaintStartDateTime(result[1]!=null? (Date) result[1] :null);
 			dto.setMaintEndDateTime(result[2]!=null ?(Date) result[2] :null);
 			dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null); 
-			double durationInHrs = ((Integer) result[3]) / 60.0;
-			dto.setDurationInHrs(durationInHrs);
+			if(result[3]!=null){
+				double durationInHrs = ((Integer) result[3]) / 60.0;
+				dto.setDurationInHrs(durationInHrs);
+			}
 			dto.setRate(result[4] != null ? ((Number) result[4]).doubleValue() : null); // Extract Rate
 			dto.setRemark(result[5] != null ? result[5].toString() : null); // Extract Remarks
 			dto.setProduct(result[6] != null ? result[6].toString() : null);
+
+			dto.setId(result[7] != null ?(result[7].toString()) : null);
+
 			dto.setProductId(result[8] != null ? UUID.fromString(result[8].toString()) : null);
 	
 			dtoList.add(dto);

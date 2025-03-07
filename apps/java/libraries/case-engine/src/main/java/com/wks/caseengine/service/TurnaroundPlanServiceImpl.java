@@ -36,8 +36,10 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 			  dto.setMaintEndDateTime((Date) result[2]);
 			  // dto.setDurationInMins((Integer) result[3]); // Duration in minutes
 			  dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null); 
-			  double durationInHrs = ((Integer) result[3]) / 60.0;
-			  dto.setDurationInHrs(durationInHrs);
+			  if(result[3]!=null){
+				double durationInHrs = ((Integer) result[3]) / 60.0;
+				dto.setDurationInHrs(durationInHrs);
+			}
 			  dto.setRemark((String)result[4]);
 			  dto.setProduct((String) result[6]);
 			  dto.setId((String) result[7]);
@@ -93,15 +95,41 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 		else{
 
 			Optional<PlantMaintenanceTransaction> plantMaintenance=turnaroundPlanRepository.findById(UUID.fromString(shutDownPlanDTO.getId()));
-			PlantMaintenanceTransaction plantMaintenanceTransaction=plantMaintenance.get();
-			  plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-			  plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
-			  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
-			  plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
-			  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
-			  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
-			  plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
-			  turnaroundPlanRepository.save(plantMaintenanceTransaction);
+			PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
+			plantMaintenanceTransaction.setId(UUID.randomUUID());
+			
+			// Set mandatory fields with default values if missing
+			plantMaintenanceTransaction.setDiscription(
+				shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
+			);
+
+			if(shutDownPlanDTO.getDurationInMins()!=null){
+				plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins() * 60);
+			}else{
+				plantMaintenanceTransaction.setDurationInHrs(0d);
+			}
+			//plantMaintenanceTransaction.setDurationInMins(
+			//	shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0
+			//);
+			plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+			plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+			plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
+			plantMaintenanceTransaction.setUser("system");
+			plantMaintenanceTransaction.setName("Default Name");
+			plantMaintenanceTransaction.setVersion("V1");
+			plantMaintenanceTransaction.setCreatedOn(new Date());
+			plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
+
+			plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+
+			if (shutDownPlanDTO.getProductId() != null) {
+				plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+			}
+
+			plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
+
+			// Save new record
+			turnaroundPlanRepository.save(plantMaintenanceTransaction);
 
 		}
 

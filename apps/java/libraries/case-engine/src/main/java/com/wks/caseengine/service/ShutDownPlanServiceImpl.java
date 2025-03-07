@@ -40,8 +40,10 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
             dto.setMaintStartDateTime((Date) result[1]);
             dto.setMaintEndDateTime((Date) result[2]);
             dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null); 
-			double durationInHrs = ((Integer) result[3]) / 60.0;
-			dto.setDurationInHrs(durationInHrs);
+			if(result[3]!=null){
+				double durationInHrs = ((Integer) result[3]) / 60.0;
+				dto.setDurationInHrs(durationInHrs);
+			}
             dto.setProduct((String) result[6]);
             //FOR ID : pmt.Id
             dto.setId(result[5] != null ? result[5].toString() : null); 
