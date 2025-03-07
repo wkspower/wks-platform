@@ -218,7 +218,9 @@ const BusinessDemand = () => {
     // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
     // onRowUpdate.updatedRow(unsavedChangesRef.current.unsavedRows)
-    console.log(unsavedChangesRef.current.unsavedRows)
+    if (unsavedChangesRef.current.unsavedRows) {
+      setBDData(oldRow?.map((row) => (row.id === newRow.id ? newRow : row)))
+    }
 
     // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
