@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
+import { GridRowModes } from '@mui/x-data-grid'
 
 const ShutDown = () => {
   const menu = useSelector((state) => state.menu)
@@ -18,6 +19,7 @@ const ShutDown = () => {
     message: '',
     severity: 'info',
   })
+  const [rowModesModel, setRowModesModel] = useState({})
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -28,7 +30,11 @@ const ShutDown = () => {
     const rowId = newRow.id
     // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-
+    if (unsavedChangesRef.current.unsavedRows) {
+      setShutdownData(
+        oldRow?.map((row) => (row.id === newRow.id ? newRow : row)),
+      )
+    }
     // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
@@ -42,19 +48,21 @@ const ShutDown = () => {
       'Edited Data: ',
       Object.values(unsavedChangesRef.current.unsavedRows),
     )
-    try {
-      // if (title === 'Business Demand') {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      saveShutdownData(data)
-      // }
+    setTimeout(async () => {
+      try {
+        // if (title === 'Business Demand') {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        saveShutdownData(data)
+        // }
 
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } catch (error) {
+        // setIsSaving(false);
       }
-    } catch (error) {
-      // setIsSaving(false);
-    }
+    }, 1000) // Delay of 1 seconds
   }, [apiRef])
 
   const saveShutdownData = async (newRow) => {
@@ -72,7 +80,8 @@ const ShutDown = () => {
       const shutdownDetails = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
-        durationInHrs: parseFloat(findDuration('1', row)),
+        durationInHrs: parseFloat(row.durationInHrs),
+        // durationInHrs: parseFloat(findDuration('1', row)),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
         audityear: localStorage.getItem('year'),
@@ -251,13 +260,14 @@ const ShutDown = () => {
         return params || ''
       },
       valueFormatter: (params) => {
-        // console.log('params valueFormatter ', params)
+        console.log('params valueFormatter ', params)
         const product = allProducts.find((p) => p.id === params)
+        console.log(product)
         return product ? product.displayName : ''
       },
       renderEditCell: (params) => {
         const { value } = params
-        // console.log('q1', params);
+        console.log('q1', params)
         // console.log('q2', params2);
         return (
           <select
@@ -328,6 +338,7 @@ const ShutDown = () => {
       type: 'number',
       align: 'left',
       headerAlign: 'left',
+      // valueGetter: (params) => params?.durationInHrs || 0,
       valueGetter: findDuration,
     },
     { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
@@ -370,6 +381,8 @@ const ShutDown = () => {
         fetchData={fetchData}
         onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
+        setRowModesModel={setRowModesModel}
+        rowModesModel={rowModesModel}
         experimentalFeatures={{ newEditingApi: true }}
         onCellEditStop={(params, event) => {
           event.defaultMuiPrevented = true

@@ -5,6 +5,7 @@ import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import ASDataGrid from './ASDataGrid'
+import { GridRowModes } from '@mui/x-data-grid'
 
 const TurnaroundPlanTable = () => {
   const menu = useSelector((state) => state.menu)
@@ -19,6 +20,8 @@ const TurnaroundPlanTable = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [rowModesModel, setRowModesModel] = useState({})
+
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -28,7 +31,9 @@ const TurnaroundPlanTable = () => {
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-
+    if (unsavedChangesRef.current.unsavedRows) {
+      setTaData(oldRow?.map((row) => (row.id === newRow.id ? newRow : row)))
+    }
     // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
@@ -46,11 +51,12 @@ const TurnaroundPlanTable = () => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-
+      console.log(newRow)
       const turnAroundDetails = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
-        durationInMins: parseFloat(findDuration('1', row)),
+        // durationInMins: parseFloat(findDuration('1', row)),
+        durationInHrs: parseFloat(row.durationInHrs),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
         remark: row.remark,
@@ -102,17 +108,19 @@ const TurnaroundPlanTable = () => {
       'Edited Data: ',
       Object.values(unsavedChangesRef.current.unsavedRows),
     )
-    try {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      saveTurnAroundData(data)
+    setTimeout(async () => {
+      try {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        saveTurnAroundData(data)
 
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } catch (error) {
+        // setIsSaving(false);
       }
-    } catch (error) {
-      // setIsSaving(false);
-    }
+    }, 1000) // Delay of 1 seconds
   }, [apiRef])
 
   const fetchData = async () => {
@@ -360,6 +368,8 @@ const TurnaroundPlanTable = () => {
         // handleDeleteClick={handleDeleteClick}
         onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
+        setRowModesModel={setRowModesModel}
+        rowModesModel={rowModesModel}
         experimentalFeatures={{ newEditingApi: true }}
         onCellEditStop={(params, event) => {
           event.defaultMuiPrevented = true

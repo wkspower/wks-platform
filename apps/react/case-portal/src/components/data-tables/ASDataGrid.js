@@ -52,6 +52,9 @@ const DataGridTable = ({
   fetchData,
   handleUnitChange,
   handleCalculate,
+  onProcessRowUpdateError,
+  setRowModesModel,
+  rowModesModel,
 }) => {
   const [isUpdating, setIsUpdating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -74,11 +77,11 @@ const DataGridTable = ({
   const handleOpenRemark = () => setOpenRemark(true)
   const handleCloseRemark = () => setOpenRemark(false)
   const handleClose1 = () => setOpen1(false)
-  const handleSearchChange = (event) => {
-    setSearchText(event.target.value)
-  }
-  const [rowModesModel, setRowModesModel] = useState({})
-  const [changedRowIds, setChangedRowIds] = useState([])
+  // const handleSearchChange = (event) => {
+  //   setSearchText(event.target.value)
+  // }
+  // const [rowModesModel, setRowModesModel] = useState({})
+  // const [changedRowIds, setChangedRowIds] = useState([])
 
   const handleRowEditCommit = (id, event) => {
     const editedRow = rows.find((row) => row.id === id)
@@ -135,9 +138,9 @@ const DataGridTable = ({
     }
   }
 
-  const onProcessRowUpdateError = React.useCallback((error) => {
-    console.log(error)
-  }, [])
+  // const onProcessRowUpdateError = React.useCallback((error) => {
+  //   console.log(error)
+  // }, [])
 
   const handleImportExport = () => {
     alert('File Import/Export feature coming soon!')
@@ -372,8 +375,6 @@ const DataGridTable = ({
     }
   }
 
- 
-
   return (
     <Box
       sx={{
@@ -505,8 +506,6 @@ const DataGridTable = ({
               ),
             }}
           /> */}
-          
-          
 
           {/* <IconButton
             aria-label='import'

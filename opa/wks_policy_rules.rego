@@ -4,25 +4,26 @@ import future.keywords
 
 default allow = false
 
-has_client_role := {
-      'plant_manager',
-  'operation_head',
-  'maintenance_head',
-  'cts_head',
-  'ces_head',
-  'safety_head',
-  'pci_head',
-  'mmc_head',
-  'sor_head',
-  'technology_vertical_head',
-  'engineering_head',
-  'business_head',
-  'site_head',
-  'gms_head',
+has_client_role = {
+    "plant_manager",
+    "operation_head",
+    "maintenance_head",
+    "cts_head",
+    "ces_head",
+    "safety_head",
+    "pci_head",
+    "mmc_head",
+    "sor_head",
+    "technology_vertical_head",
+    "engineering_head",
+    "business_head",
+    "site_head",
+    "gms_head",
     "client_case", 
     "client_task", 
     "client_record"
 }
+
 
 has_manager_role := {
     "mgmt_form", 

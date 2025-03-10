@@ -3,6 +3,9 @@ import DataGridTable from '../ASDataGrid'
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
+import { GridRowModes } from '@mui/x-data-grid'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+const headerMap = generateHeaderNames()
 
 const shutdownNormsColumns = [
   {
@@ -12,20 +15,114 @@ const shutdownNormsColumns = [
     maxWidth: 70,
     editable: false,
   },
-  { field: 'particular', headerName: 'Particular', width: 200, editable: true },
+  { field: 'particular', headerName: 'Particular', width: 150, editable: true },
   {
     field: 'unit',
     headerName: 'Unit',
     minWidth: 50,
-    maxWidth: 70,
     editable: true,
   },
   {
     field: 'norms',
     headerName: 'Norms',
     minWidth: 50,
-    maxWidth: 70,
     editable: true,
+  },
+  {
+    field: 'april',
+    headerName: headerMap['apr'],
+    editable: true,
+    type: 'number',
+    align: 'left',
+    headerAlign: 'left',
+  },
+  {
+    field: 'may',
+    headerName: headerMap['may'],
+    editable: true,
+    type: 'number',
+    align: 'left',
+    headerAlign: 'left',
+  },
+  {
+    field: 'june',
+    headerName: headerMap['jun'],
+    editable: true,
+    type: 'number',
+    align: 'left',
+    headerAlign: 'left',
+  },
+  {
+    field: 'july',
+    headerName: headerMap['jul'],
+    editable: true,
+    type: 'number',
+    align: 'left',
+    headerAlign: 'left',
+  },
+  {
+    field: 'aug',
+    headerName: headerMap['aug'],
+    editable: true,
+    type: 'number',
+    align: 'left',
+    headerAlign: 'left',
+  },
+  {
+    field: 'sep',
+    headerName: headerMap['sep'],
+    editable: true,
+    type: 'number',
+    align: 'left',
+    headerAlign: 'left',
+  },
+  {
+    field: 'oct',
+    headerName: headerMap['oct'],
+    editable: true,
+    type: 'number',
+    align: 'left',
+    headerAlign: 'left',
+  },
+  {
+    field: 'nov',
+    headerName: headerMap['nov'],
+    editable: true,
+    type: 'number',
+    align: 'left',
+    headerAlign: 'left',
+  },
+  {
+    field: 'dec',
+    headerName: headerMap['dec'],
+    editable: true,
+    type: 'number',
+    align: 'left',
+    headerAlign: 'left',
+  },
+  {
+    field: 'jan',
+    headerName: headerMap['jan'],
+    editable: true,
+    type: 'number',
+    align: 'left',
+    headerAlign: 'left',
+  },
+  {
+    field: 'feb',
+    headerName: headerMap['feb'],
+    editable: true,
+    type: 'number',
+    align: 'left',
+    headerAlign: 'left',
+  },
+  {
+    field: 'march',
+    headerName: headerMap['mar'],
+    editable: true,
+    type: 'number',
+    align: 'left',
+    headerAlign: 'left',
   },
 ]
 
@@ -52,6 +149,7 @@ const ShutdownNorms = () => {
     message: '',
     severity: 'info',
   })
+  const [rowModesModel, setRowModesModel] = useState({})
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -91,18 +189,29 @@ const ShutdownNorms = () => {
       'Edited Data: ',
       Object.values(unsavedChangesRef.current.unsavedRows),
     )
-    try {
-      // var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      // saveShutdownData(data)
+    setTimeout(async () => {
+      try {
+        // var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        // saveShutdownData(data)
 
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } catch (error) {
+        // setIsSaving(false);
       }
-    } catch (error) {
-      // setIsSaving(false);
-    }
+    }, 1000) // Delay of 2 seconds
   }, [apiRef])
+  const onProcessRowUpdateError = React.useCallback((error) => {
+    console.log(error)
+  }, [])
+  const handleRowEditStop = (params, event) => {
+    setRowModesModel({
+      ...rowModesModel,
+      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+    })
+  }
   return (
     <div>
       <DataGridTable
@@ -126,6 +235,10 @@ const ShutdownNorms = () => {
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
         // fetchData={fetchData}
+        onRowEditStop={handleRowEditStop}
+        onProcessRowUpdateError={onProcessRowUpdateError}
+        setRowModesModel={setRowModesModel}
+        rowModesModel={rowModesModel}
         permissions={{
           showAction: true,
           addButton: false,

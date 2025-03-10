@@ -5,6 +5,7 @@ import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useGridApiRef } from '@mui/x-data-grid'
+import { GridRowModes } from '@mui/x-data-grid'
 const headerMap = generateHeaderNames()
 
 const BusinessDemand = () => {
@@ -21,7 +22,7 @@ const BusinessDemand = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-
+  const [rowModesModel, setRowModesModel] = useState({})
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -47,7 +48,8 @@ const BusinessDemand = () => {
       try {
         const data = await DataService.getAllProducts(keycloak)
         const productList = data.map((product) => ({
-          id: product.id.toLowerCase(), // Convert id to lowercase
+          id: product.id, // Convert id to lowercase
+          // id: product.id.toLowerCase(), // Convert id to lowercase
           displayName: product.displayName,
         }))
         setAllProducts(productList)
@@ -68,9 +70,11 @@ const BusinessDemand = () => {
       editable: true,
       minWidth: 225,
       valueGetter: (params) => {
+        console.log(params, 'checkproducts')
         return params || ''
       },
       valueFormatter: (params) => {
+        console.log(allProducts)
         const product = allProducts.find((p) => p.id === params)
         return product ? product.displayName : ''
       },
@@ -230,24 +234,44 @@ const BusinessDemand = () => {
     return newRow
   }, [])
 
+  // const saveChanges = React.useCallback(async () => {
+  //   console.log(
+  //     'Edited Data: ',
+  //     Object.values(unsavedChangesRef.current.unsavedRows),
+  //   )
+  //   try {
+  //     // if (title === 'Business Demand') {
+  //     var data = Object.values(unsavedChangesRef.current.unsavedRows)
+  //     saveBusinessDemandData(data)
+  //     // }
+
+  //     unsavedChangesRef.current = {
+  //       unsavedRows: {},
+  //       rowsBeforeChange: {},
+  //     }
+  //   } catch (error) {
+  //     // setIsSaving(false);
+  //   }
+  // }, [apiRef])
   const saveChanges = React.useCallback(async () => {
     console.log(
       'Edited Data: ',
       Object.values(unsavedChangesRef.current.unsavedRows),
     )
-    try {
-      // if (title === 'Business Demand') {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      saveBusinessDemandData(data)
-      // }
 
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
+    setTimeout(async () => {
+      try {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        await saveBusinessDemandData(data)
+
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } catch (error) {
+        console.error('Error saving data:', error)
       }
-    } catch (error) {
-      // setIsSaving(false);
-    }
+    }, 1000) // Delay of 2 seconds
   }, [apiRef])
 
   const saveBusinessDemandData = async (newRows) => {
@@ -279,19 +303,26 @@ const BusinessDemand = () => {
         normParameterId: row.normParameterId,
         id: row.idFromApi || null,
       }))
-
-      const response = await DataService.saveBusinessDemandData(
-        plantId,
-        businessData, // Now sending an array of rows
-        keycloak,
-      )
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Business Demand data Saved Successfully!',
-        severity: 'success',
-      })
-      // fetchData()
-      return response
+      if (businessData.plantId.length() > 0) {
+        const response = await DataService.saveBusinessDemandData(
+          plantId,
+          businessData, // Now sending an array of rows
+          keycloak,
+        )
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Business Demand data Saved Successfully!',
+          severity: 'success',
+        })
+        // fetchData()
+        return response
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Business Demand data not saved!',
+          severity: 'error',
+        })
+      }
     } catch (error) {
       console.error('Error saving Business Demand data:', error)
     } finally {
@@ -335,6 +366,8 @@ const BusinessDemand = () => {
         // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
         onProcessRowUpdateError={onProcessRowUpdateError}
+        setRowModesModel={setRowModesModel}
+        rowModesModel={rowModesModel}
         permissions={{
           showAction: true,
           addButton: true,

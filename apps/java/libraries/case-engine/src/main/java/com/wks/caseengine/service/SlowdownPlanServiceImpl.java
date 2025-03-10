@@ -36,25 +36,28 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 		List<ShutDownPlanDTO> dtoList = new ArrayList<>();
 		
 		for (Object[] result : listOfSite) {
-			ShutDownPlanDTO dto = new ShutDownPlanDTO();
-			dto.setDiscription((String) result[0]);
-			dto.setMaintStartDateTime(result[1]!=null? (Date) result[1] :null);
-			dto.setMaintEndDateTime(result[2]!=null ?(Date) result[2] :null);
-			dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null); 
+            ShutDownPlanDTO dto = new ShutDownPlanDTO();
+            dto.setDiscription((String) result[0]);
+            dto.setMaintStartDateTime((Date) result[1]);
+            dto.setMaintEndDateTime((Date) result[2]);
+            dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null); 
 			if(result[3]!=null){
 				double durationInHrs = ((Integer) result[3]) / 60.0;
 				dto.setDurationInHrs(durationInHrs);
 			}
-			dto.setRate(result[4] != null ? ((Number) result[4]).doubleValue() : null); // Extract Rate
-			dto.setRemark(result[5] != null ? result[5].toString() : null); // Extract Remarks
-			dto.setProduct(result[6] != null ? result[6].toString() : null);
+            dto.setProduct((String) result[6]);
+            //FOR ID : pmt.Id
+            dto.setId(result[5] != null ? result[5].toString() : null); 
+			if((String) result[7]!=null){
+				dto.setRemark((String) result[7]);
+			}else{
+				dto.setRemark(null);
+			}
+			dto.setDisplayOrder(result[8] != null ? ((Integer) result[8]) : null); 
+			dto.setRate(result[9] != null ? ((Number) result[9]).doubleValue() : null); // Extract Rate
 
-			dto.setId(result[7] != null ?(result[7].toString()) : null);
-
-			dto.setProductId(result[8] != null ? UUID.fromString(result[8].toString()) : null);
-			dto.setDisplayOrder(result[9] != null ? ((Integer) result[9]) : null); 
-			dtoList.add(dto);
-		}
+            dtoList.add(dto);
+        }
 		// TODO Auto-generated method stub
 		return dtoList;
 	}
@@ -70,10 +73,10 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 			PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
 			plantMaintenanceTransaction.setId(UUID.randomUUID());
 			plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-			if(shutDownPlanDTO.getDurationInMins()!=null){
-				plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins() * 60);
-			}else{
-				plantMaintenanceTransaction.setDurationInHrs(0d);
+			if (shutDownPlanDTO.getDurationInHrs() != null) {
+				plantMaintenanceTransaction.setDurationInMins((int) (shutDownPlanDTO.getDurationInHrs() * 60));
+			} else {
+				plantMaintenanceTransaction.setDurationInMins(0);
 			}
 			
 			plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
@@ -106,10 +109,10 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 				shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
 			);
 
-			if(shutDownPlanDTO.getDurationInMins()!=null){
-				plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins() * 60);
-			}else{
-				plantMaintenanceTransaction.setDurationInHrs(0d);
+			if (shutDownPlanDTO.getDurationInHrs() != null) {
+				plantMaintenanceTransaction.setDurationInMins((int) (shutDownPlanDTO.getDurationInHrs() * 60));
+			} else {
+				plantMaintenanceTransaction.setDurationInMins(0);
 			}
 			//plantMaintenanceTransaction.setDurationInMins(
 			//	shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0
@@ -122,6 +125,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 			plantMaintenanceTransaction.setVersion("V1");
 			plantMaintenanceTransaction.setCreatedOn(new Date());
 			plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
+			plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
 
 			plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 

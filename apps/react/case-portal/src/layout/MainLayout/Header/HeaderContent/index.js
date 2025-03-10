@@ -14,6 +14,7 @@ import Search from './Search'
 import { useDispatch } from 'react-redux'
 import { setSitePlantChange } from 'store/reducers/menu'
 import { DataService } from 'services/DataService'
+import siteData from '../../../../assets/sitesData.json'
 
 const HeaderContent = ({ keycloak }) => {
   const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
@@ -49,6 +50,7 @@ const HeaderContent = ({ keycloak }) => {
 
   const getPlantAndSite = async () => {
     try {
+      // const response = siteData
       const response = await DataService.getAllSites(keycloak)
       if (response) {
         setVerticals(response)
@@ -232,7 +234,7 @@ const HeaderContent = ({ keycloak }) => {
 
   // Sync selected site when plant changes.
   useEffect(() => {
-    console.log('test--->', keycloak.idTokenParsed.plants)
+    // console.log('test--->', keycloak.idTokenParsed.plants)
     const { allowedPlantIds } = getAllowedFilter()
     if (!selectedPlant || !allPlants) return
     const selectedPlantData = allPlants.find(
@@ -277,11 +279,12 @@ const HeaderContent = ({ keycloak }) => {
               onChange={handleVerticalChange}
               sx={{ color: 'white' }}
             >
-              {verticals.map((vertical, index) => (
-                <MenuItem key={index} value={vertical.name}>
-                  {vertical.name}
-                </MenuItem>
-              ))}
+              {Array.isArray(verticals) &&
+                verticals.map((vertical, index) => (
+                  <MenuItem key={index} value={vertical.name}>
+                    {vertical.name}
+                  </MenuItem>
+                ))}
             </Select>
           </FormControl>
         </Box>

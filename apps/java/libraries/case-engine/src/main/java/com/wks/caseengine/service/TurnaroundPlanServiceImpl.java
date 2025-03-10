@@ -29,26 +29,29 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 		List<Object[]> listOfSite=null;
 		List<ShutDownPlanDTO> dtoList = new ArrayList<>();
 		 listOfSite=turnaroundPlanRepository.findTurnaroundPlanDetailsByPlantIdAndType(maintenanceTypeName,plantId.toString(), year);
-		  for (Object[] result : listOfSite) { 
-			  ShutDownPlanDTO dto = new  ShutDownPlanDTO();
-			  dto.setDiscription((String) result[0]); 
-			  dto.setMaintStartDateTime((Date)result[1]);
-			  dto.setMaintEndDateTime((Date) result[2]);
-			  // dto.setDurationInMins((Integer) result[3]); // Duration in minutes
-			  dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null); 
-			  if(result[3]!=null){
+		 for (Object[] result : listOfSite) {
+            ShutDownPlanDTO dto = new ShutDownPlanDTO();
+            dto.setDiscription((String) result[0]);
+            dto.setMaintStartDateTime((Date) result[1]);
+            dto.setMaintEndDateTime((Date) result[2]);
+            dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null); 
+			if(result[3]!=null){
 				double durationInHrs = ((Integer) result[3]) / 60.0;
 				dto.setDurationInHrs(durationInHrs);
 			}
-			  dto.setRemark((String)result[4]);
-			  dto.setProduct((String) result[6]);
-			  dto.setId((String) result[7]);
-			  long diffInMillis = dto.getMaintEndDateTime().getTime() - dto.getMaintStartDateTime().getTime();
-			  double diffInDays = diffInMillis / (1000.0 * 60 * 60 * 24);
-			 // dto.setDurationInDays(diffInDays);
-			  dto.setDisplayOrder(result[8] != null ? ((Integer) result[8]) : null); 
-			  dtoList.add(dto); 
-		}
+            dto.setProduct((String) result[6]);
+            //FOR ID : pmt.Id
+            dto.setId(result[5] != null ? result[5].toString() : null); 
+			if((String) result[7]!=null){
+				dto.setRemark((String) result[7]);
+			}else{
+				dto.setRemark(null);
+			}
+			dto.setDisplayOrder(result[8] != null ? ((Integer) result[8]) : null); 
+			//dto.setRate(result[9] != null ? ((Number) result[4]).doubleValue() : null); // Extract Rate
+
+            dtoList.add(dto);
+        }
 		// TODO Auto-generated method stub
 		return dtoList;
 	}
@@ -66,10 +69,10 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 				PlantMaintenanceTransaction plantMaintenanceTransaction=new PlantMaintenanceTransaction();
 				plantMaintenanceTransaction.setId(UUID.randomUUID());
 				plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-				if(shutDownPlanDTO.getDurationInMins()!=null){
-					plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins() * 60);
-				}else{
-					plantMaintenanceTransaction.setDurationInHrs(0d);
+				if (shutDownPlanDTO.getDurationInHrs() != null) {
+				    plantMaintenanceTransaction.setDurationInMins((int) (shutDownPlanDTO.getDurationInHrs() * 60));
+				} else {
+				    plantMaintenanceTransaction.setDurationInMins(0);
 				}
 				
 				plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
@@ -104,10 +107,10 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 				shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
 			);
 
-			if(shutDownPlanDTO.getDurationInMins()!=null){
-				plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins() * 60);
-			}else{
-				plantMaintenanceTransaction.setDurationInHrs(0d);
+			if (shutDownPlanDTO.getDurationInHrs() != null) {
+				plantMaintenanceTransaction.setDurationInMins((int) (shutDownPlanDTO.getDurationInHrs() * 60));
+			} else {
+				plantMaintenanceTransaction.setDurationInMins(0);
 			}
 			//plantMaintenanceTransaction.setDurationInMins(
 			//	shutDownPlanDTO.getDurationInMins() != null ? shutDownPlanDTO.getDurationInMins().intValue() : 0

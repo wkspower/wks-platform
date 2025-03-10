@@ -17,10 +17,9 @@ public interface TurnaroundPlanRepository extends JpaRepository<PlantMaintenance
             "pm.MaintStartDateTime, " +
             "pm.MaintEndDateTime, " +
             "pm.DurationInMins, " +
-            "pm.Remarks, " +
             "pmt.MaintenanceText, " +
-            "np.Id, " +
-            "pm.Id, np.DiplayOrder "+ 
+            "pm.Id, " +
+            "np.Id, pm.Remarks, np.DiplayOrder " +
             "FROM PlantMaintenanceTransaction pm " +
             "JOIN PlantMaintenance pmt ON pm.PlantMaintenance_FK_Id = pmt.Id " +
             "JOIN MaintenanceTypes mt ON pmt.MaintenanceType_FK_Id = mt.Id " +

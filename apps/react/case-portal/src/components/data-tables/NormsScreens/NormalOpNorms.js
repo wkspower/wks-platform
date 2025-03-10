@@ -3,7 +3,7 @@ import DataGridTable from '../ASDataGrid'
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
-
+import { GridRowModes } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 const headerMap = generateHeaderNames()
 
@@ -336,6 +336,7 @@ const NormalOpNormsScreen = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [rowModesModel, setRowModesModel] = useState({})
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -374,17 +375,19 @@ const NormalOpNormsScreen = () => {
       'Edited Data: ',
       Object.values(unsavedChangesRef.current.unsavedRows),
     )
-    try {
-      // var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      // saveShutdownData(data)
+    setTimeout(async () => {
+      try {
+        // var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        // saveShutdownData(data)
 
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } catch (error) {
+        // setIsSaving(false);
       }
-    } catch (error) {
-      // setIsSaving(false);
-    }
+    }, 1000) // Delay of 2 seconds
   }, [apiRef])
   // Create groups by inserting a row with a groupHeader property
   const rawMaterialsData = productionData.slice(0, 2) // 2 rows for Raw Materials
@@ -428,6 +431,17 @@ const NormalOpNormsScreen = () => {
     renderCell: groupRenderCell,
   }))
 
+  const onProcessRowUpdateError = React.useCallback((error) => {
+    console.log(error)
+  }, [])
+
+  const handleRowEditStop = (params, event) => {
+    setRowModesModel({
+      ...rowModesModel,
+      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+    })
+  }
+
   return (
     <div>
       <DataGridTable
@@ -451,14 +465,19 @@ const NormalOpNormsScreen = () => {
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
         // fetchData={fetchData}
+        onRowEditStop={handleRowEditStop}
+        onProcessRowUpdateError={onProcessRowUpdateError}
+        setRowModesModel={setRowModesModel}
+        rowModesModel={rowModesModel}
         permissions={{
           showAction: true,
           addButton: false,
           deleteButton: false,
           editButton: true,
-          showUnit: true,
+          showUnit: false,
           saveWithRemark: true,
           saveBtn: true,
+          showCalculate: true,
         }}
         getRowClassName={(params) =>
           params.row.groupHeader ? 'group-header-row' : ''

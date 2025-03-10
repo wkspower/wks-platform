@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import { useSelector } from 'react-redux'
+import { GridRowModes } from '@mui/x-data-grid'
 
 const SlowDown = () => {
   const menu = useSelector((state) => state.menu)
@@ -19,6 +20,8 @@ const SlowDown = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [rowModesModel, setRowModesModel] = useState({})
+
   const keycloak = useSession()
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -43,7 +46,11 @@ const SlowDown = () => {
     // )
     // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-
+    if (unsavedChangesRef.current.unsavedRows) {
+      setSlowDownData(
+        oldRow?.map((row) => (row.id === newRow.id ? newRow : row)),
+      )
+    }
     // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
@@ -99,17 +106,19 @@ const SlowDown = () => {
       'Edited Data: ',
       Object.values(unsavedChangesRef.current.unsavedRows),
     )
-    try {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      saveSlowDownData(data)
+    setTimeout(async () => {
+      try {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        saveSlowDownData(data)
 
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } catch (error) {
+        // setIsSaving(false);
       }
-    } catch (error) {
-      // setIsSaving(false);
-    }
+    }, 1000) // Delay of 2 seconds
   }, [apiRef])
   const updateSlowdownData = async (newRow) => {
     try {
@@ -306,12 +315,13 @@ const SlowDown = () => {
         return params || ''
       },
       valueFormatter: (params) => {
-        // console.log('params valueFormatter ', params)
+        console.log('params valueFormatter ', params)
         const product = allProducts.find((p) => p.id === params)
         return product ? product.displayName : ''
       },
       renderEditCell: (params) => {
         const { value } = params
+        console.log('q1', params)
         return (
           <select
             value={value || ''}
@@ -383,6 +393,7 @@ const SlowDown = () => {
       align: 'left',
       headerAlign: 'left',
       // valueGetter: findDuration,
+      valueGetter: (params) => params?.durationInHrs || 0,
     },
 
     {
@@ -440,6 +451,8 @@ const SlowDown = () => {
         fetchData={fetchData}
         onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
+        setRowModesModel={setRowModesModel}
+        rowModesModel={rowModesModel}
         experimentalFeatures={{ newEditingApi: true }}
         onCellEditStop={(params, event) => {
           event.defaultMuiPrevented = true

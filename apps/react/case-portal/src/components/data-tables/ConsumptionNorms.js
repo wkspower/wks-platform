@@ -26,10 +26,17 @@ const NormalOpNormsScreen = () => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+  const [rowModesModel, setRowModesModel] = useState({})
+
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
+    if (unsavedChangesRef.current.unsavedRows) {
+      setCsDataTransformed(
+        oldRow?.map((row) => (row.id === newRow.id ? newRow : row)),
+      )
+    }
     // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
@@ -43,17 +50,19 @@ const NormalOpNormsScreen = () => {
       'Edited Data: ',
       Object.values(unsavedChangesRef.current.unsavedRows),
     )
-    try {
-      // var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      // saveShutdownData(data)
+    setTimeout(async () => {
+      try {
+        // var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        // saveShutdownData(data)
 
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } catch (error) {
+        // setIsSaving(false);
       }
-    } catch (error) {
-      // setIsSaving(false);
-    }
+    }, 1000) // Delay of 2 seconds
   }, [apiRef])
   const fetchData = async () => {
     try {
@@ -258,6 +267,15 @@ const NormalOpNormsScreen = () => {
 
     { field: 'remark', headerName: 'Remark', editable: true },
   ]
+  const onProcessRowUpdateError = React.useCallback((error) => {
+    console.log(error)
+  }, [])
+  const handleRowEditStop = (params, event) => {
+    setRowModesModel({
+      ...rowModesModel,
+      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+    })
+  }
 
   return (
     <div>
@@ -280,6 +298,10 @@ const NormalOpNormsScreen = () => {
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
+        onRowEditStop={handleRowEditStop}
+        onProcessRowUpdateError={onProcessRowUpdateError}
+        setRowModesModel={setRowModesModel}
+        rowModesModel={rowModesModel}
         permissions={{
           showAction: true,
           addButton: false,

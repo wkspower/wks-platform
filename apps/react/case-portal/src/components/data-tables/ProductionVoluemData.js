@@ -6,6 +6,7 @@ import { useGridApiRef } from '@mui/x-data-grid'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 const headerMap = generateHeaderNames()
+import { GridRowModes } from '@mui/x-data-grid'
 
 const ProductionvolumeData = () => {
   const keycloak = useSession()
@@ -19,6 +20,7 @@ const ProductionvolumeData = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [rowModesModel, setRowModesModel] = useState({})
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -115,7 +117,11 @@ const ProductionvolumeData = () => {
 
     // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-
+    if (unsavedChangesRef.current.unsavedRows) {
+      setProductNormData(
+        oldRow?.map((row) => (row.id === newRow.id ? newRow : row)),
+      )
+    }
     // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
@@ -128,16 +134,18 @@ const ProductionvolumeData = () => {
       'Edited Data: ',
       Object.values(unsavedChangesRef.current.unsavedRows),
     )
-    try {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      editAOPMCCalculatedData(data)
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
+    setTimeout(async () => {
+      try {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        editAOPMCCalculatedData(data)
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } catch (error) {
+        // setIsSaving(false);
       }
-    } catch (error) {
-      // setIsSaving(false);
-    }
+    }, 1000) // Delay of 2 seconds
   }, [apiRef])
 
   const fetchData = async () => {
@@ -406,6 +414,8 @@ const ProductionvolumeData = () => {
         fetchData={fetchData}
         onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
+        setRowModesModel={setRowModesModel}
+        rowModesModel={rowModesModel}
         experimentalFeatures={{ newEditingApi: true }}
         onCellEditStop={(params, event) => {
           event.defaultMuiPrevented = true

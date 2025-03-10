@@ -6,6 +6,7 @@ import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 // Import the catalyst options from the JSON file
 // import catalystOptionsData from '../../assets/Catalyst.json'
 import { useSelector } from 'react-redux'
+import { GridRowModes } from '@mui/x-data-grid'
 
 const SelectivityData = () => {
   const menu = useSelector((state) => state.menu)
@@ -22,6 +23,7 @@ const SelectivityData = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [rowModesModel, setRowModesModel] = useState({})
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -59,19 +61,21 @@ const SelectivityData = () => {
       'Edited Data: ',
       Object.values(unsavedChangesRef.current.unsavedRows),
     )
-    try {
-      // if (title === 'Business Demand') {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      saveCatalystData(data)
-      // }
+    setTimeout(async () => {
+      try {
+        // if (title === 'Business Demand') {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        saveCatalystData(data)
+        // }
 
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } catch (error) {
+        // setIsSaving(false);
       }
-    } catch (error) {
-      // setIsSaving(false);
-    }
+    }, 1000) // Delay of 2 seconds
   }, [apiRef])
   const saveCatalystData = async (newRow) => {
     console.log('new Row ', newRow)
@@ -356,7 +360,15 @@ const SelectivityData = () => {
 
     { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
   ]
-
+  const onProcessRowUpdateError = React.useCallback((error) => {
+    console.log(error)
+  }, [])
+  const handleRowEditStop = (params, event) => {
+    setRowModesModel({
+      ...rowModesModel,
+      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+    })
+  }
   return (
     <div>
       <ASDataGrid
@@ -380,12 +392,16 @@ const SelectivityData = () => {
         deleteId={deleteId}
         open1={open1}
         handleDeleteClick={handleDeleteClick}
+        onRowEditStop={handleRowEditStop}
+        onProcessRowUpdateError={onProcessRowUpdateError}
+        setRowModesModel={setRowModesModel}
+        rowModesModel={rowModesModel}
         permissions={{
           showAction: true,
           addButton: true,
           deleteButton: true,
           editButton: true,
-          showUnit: true,
+          showUnit: false,
           saveWithRemark: true,
           saveBtn: true,
         }}

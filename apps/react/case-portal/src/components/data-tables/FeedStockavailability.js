@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 const headerMap = generateHeaderNames()
+import { GridRowModes } from '@mui/x-data-grid'
 
 const productionColumns = [
   {
@@ -130,6 +131,8 @@ const FeedStockAvailability = () => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+  const [rowModesModel, setRowModesModel] = useState({})
+
   const keycloak = useSession()
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
@@ -164,17 +167,19 @@ const FeedStockAvailability = () => {
       'Edited Data: ',
       Object.values(unsavedChangesRef.current.unsavedRows),
     )
-    try {
-      // var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      // saveShutdownData(data)
+    setTimeout(async () => {
+      try {
+        // var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        // saveShutdownData(data)
 
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } catch (error) {
+        // setIsSaving(false);
       }
-    } catch (error) {
-      // setIsSaving(false);
-    }
+    }, 1000) // Delay of 2 seconds
   }, [apiRef])
   useEffect(() => {
     getAllProducts()
@@ -211,6 +216,15 @@ const FeedStockAvailability = () => {
     }
   }, [productOptions])
 
+  const onProcessRowUpdateError = React.useCallback((error) => {
+    console.log(error)
+  }, [])
+  const handleRowEditStop = (params, event) => {
+    setRowModesModel({
+      ...rowModesModel,
+      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+    })
+  }
   return (
     <div>
       <ASDataGrid
@@ -234,6 +248,10 @@ const FeedStockAvailability = () => {
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
         // fetchData={fetchData}
+        onRowEditStop={handleRowEditStop}
+        onProcessRowUpdateError={onProcessRowUpdateError}
+        setRowModesModel={setRowModesModel}
+        rowModesModel={rowModesModel}
         permissions={{
           showAction: true,
           addButton: true,

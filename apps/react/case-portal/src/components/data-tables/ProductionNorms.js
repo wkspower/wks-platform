@@ -8,6 +8,8 @@ const headerMap = generateHeaderNames()
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
+import { GridRowModes } from '@mui/x-data-grid'
+
 const ProductionNorms = () => {
   const keycloak = useSession()
   const [csData, setCsData] = useState([])
@@ -21,6 +23,7 @@ const ProductionNorms = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('TPH')
+  const [rowModesModel, setRowModesModel] = useState({})
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -30,34 +33,53 @@ const ProductionNorms = () => {
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
+    if (unsavedChangesRef.current.unsavedRows) {
+      setCsData(oldRow?.map((row) => (row.id === newRow.id ? newRow : row)))
+    }
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
     return newRow
   }, [])
 
+  // const saveChanges = React.useCallback(async () => {
+  //   console.log(
+  //     'Edited Data: ',
+  //     Object.values(unsavedChangesRef.current.unsavedRows),
+  //   )
+  //   try {
+  //     // if (title === 'Business Demand') {
+  //     var data = Object.values(unsavedChangesRef.current.unsavedRows)
+  //     updateProductNormData(data)
+  //     // }
 
-
- 
-
+  //     unsavedChangesRef.current = {
+  //       unsavedRows: {},
+  //       rowsBeforeChange: {},
+  //     }
+  //   } catch (error) {
+  //     // setIsSaving(false);
+  //   }
+  // }, [apiRef])
   const saveChanges = React.useCallback(async () => {
-    console.log(
-      'Edited Data: ',
-      Object.values(unsavedChangesRef.current.unsavedRows),
-    )
-    try {
-      // if (title === 'Business Demand') {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      updateProductNormData(data)
-      // }
-
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
+    setTimeout(() => {
+      try {
+        // setIsSaving(true)
+        const allRows = Array.from(apiRef.current.getRowModels().values())
+        const updatedRows = allRows.map(
+          (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
+        )
+        updateProductNormData(updatedRows)
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+        // setHasUnsavedRows(false)
+        // setIsSaving(false)
+      } catch (error) {
+        // setIsSaving(false)
       }
-    } catch (error) {
-      // setIsSaving(false);
-    }
+    }, 1000)
   }, [apiRef])
 
   const updateProductNormData = async (newRow) => {
@@ -115,7 +137,6 @@ const ProductionNorms = () => {
     }
   }
 
-
   const handleCalculate = async (year) => {
     try {
       const storedPlant = localStorage.getItem('selectedPlant')
@@ -152,7 +173,7 @@ const ProductionNorms = () => {
       })
 
       setCsData(formattedData)
-      
+
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Data refresh successfully!',
@@ -164,7 +185,6 @@ const ProductionNorms = () => {
       console.error('Error saving refresh data:', error)
     }
   }
-
 
   const fetchData = async () => {
     try {
@@ -489,6 +509,8 @@ const ProductionNorms = () => {
         // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
         onProcessRowUpdateError={onProcessRowUpdateError}
+        setRowModesModel={setRowModesModel}
+        rowModesModel={rowModesModel}
         handleUnitChange={handleUnitChange}
         permissions={{
           showAction: true,
