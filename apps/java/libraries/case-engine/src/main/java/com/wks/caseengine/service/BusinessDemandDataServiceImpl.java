@@ -22,45 +22,39 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 	@Autowired
 	private BusinessDemandDataRepository businessDemandDataRepository;
 	
-	// @Autowired
-	// private NormParametersService normParametersService;
+	 @Autowired
+	 private NormParametersService normParametersService;
 	
 
 	@Override
 	public List<BusinessDemandDataDTO> getBusinessDemandData(String year,String plantId) {
-		List<BusinessDemand> businessDemandDataList= businessDemandDataRepository.findAllByYearAndPlantId(year,UUID.fromString(plantId));
+		List<Object[]> obj = businessDemandDataRepository.findByYearAndPlantFkId(year, UUID.fromString(plantId));
 		List<BusinessDemandDataDTO> businessDemandDataDTOList=new ArrayList<>();
-		for(BusinessDemand businessDemand:businessDemandDataList) {
-			BusinessDemandDataDTO businessDemandDataDTO =new BusinessDemandDataDTO();
-			businessDemandDataDTO.setApril(businessDemand.getApril());
-			businessDemandDataDTO.setAug(businessDemand.getAug());
-			businessDemandDataDTO.setAvgTph(businessDemand.getAvgTph());
-			businessDemandDataDTO.setDec(businessDemand.getDec());
-			businessDemandDataDTO.setFeb(businessDemand.getFeb());
-			businessDemandDataDTO.setId(businessDemand.getId().toString());
-			businessDemandDataDTO.setJan(businessDemand.getJan());
-			businessDemandDataDTO.setJuly(businessDemand.getJuly());
-			businessDemandDataDTO.setJune(businessDemand.getJune());
-			businessDemandDataDTO.setMarch(businessDemand.getMarch());
-			businessDemandDataDTO.setMay(businessDemand.getMay());
-			businessDemandDataDTO.setNormParameterId(businessDemand.getNormParameterId().toString());
-			businessDemandDataDTO.setNov(businessDemand.getNov());
-			businessDemandDataDTO.setOct(businessDemand.getOct());
-			businessDemandDataDTO.setPlantId(businessDemand.getPlantId().toString().toUpperCase());
-			businessDemandDataDTO.setRemark(businessDemand.getRemark());
-			businessDemandDataDTO.setSep(businessDemand.getSep());
-			businessDemandDataDTO.setYear(businessDemand.getYear());
-			businessDemandDataDTO.setPlantId(businessDemand.getPlantId().toString());
-			businessDemandDataDTOList.add(businessDemandDataDTO);
-		}
-		// List<NormParameters> normParametersList=normParametersService.findAllByType("ProductionNorms");
-		// // Create a Map of normParameterId -> displayOrder
-        // Map<UUID, Integer> displayOrderMap = normParametersList.stream()
-        //         .collect(Collectors.toMap(NormParameters::getId, NormParameters::getDisplayOrder));
-
-        // // Sort businessDemandList based on displayOrder
-        // businessDemandDataDTOList.sort(Comparator.comparing(dto -> displayOrderMap.getOrDefault(dto.getNormParameterId(), Integer.MAX_VALUE)));
-
+		for (Object[] row : obj) {
+ 		    BusinessDemandDataDTO businessDemandDataDTO = new BusinessDemandDataDTO();
+ 		    
+ 		    businessDemandDataDTO.setId(row[0].toString());
+ 		    businessDemandDataDTO.setRemark(row[1] != null ? row[1].toString() : null);
+ 		    businessDemandDataDTO.setJan(row[2] != null ? Float.parseFloat(row[2].toString()) : null);
+ 		    businessDemandDataDTO.setFeb(row[3] != null ? Float.parseFloat(row[3].toString()) : null);
+ 		    businessDemandDataDTO.setMarch(row[4] != null ? Float.parseFloat(row[4].toString()) : null);
+ 		    businessDemandDataDTO.setApril(row[5] != null ? Float.parseFloat(row[5].toString()) : null);
+ 		    businessDemandDataDTO.setMay(row[6] != null ? Float.parseFloat(row[6].toString()) : null);
+ 		    businessDemandDataDTO.setJune(row[7] != null ? Float.parseFloat(row[7].toString()) : null);
+ 		    businessDemandDataDTO.setJuly(row[8] != null ? Float.parseFloat(row[8].toString()) : null);
+ 		    businessDemandDataDTO.setAug(row[9] != null ? Float.parseFloat(row[9].toString()) : null);
+ 		    businessDemandDataDTO.setSep(row[10] != null ? Float.parseFloat(row[10].toString()) : null);
+ 		    businessDemandDataDTO.setOct(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
+ 		    businessDemandDataDTO.setNov(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
+ 		    businessDemandDataDTO.setDec(row[13] != null ? Float.parseFloat(row[13].toString()) : null);    
+ 		    businessDemandDataDTO.setYear(row[14].toString());
+ 		    businessDemandDataDTO.setPlantId(row[15] != null ? row[15].toString().toUpperCase() : null);
+ 		    businessDemandDataDTO.setNormParameterId(row[16] != null ? row[16].toString() : null);
+ 		    businessDemandDataDTO.setAvgTph(row[17] != null ? Float.parseFloat(row[17].toString()) : null);
+ 		    businessDemandDataDTO.setDisplayOrder(row[18] != null ? Integer.parseInt(row[18].toString()) : null);
+ 		    businessDemandDataDTOList.add(businessDemandDataDTO);
+ 		}		 
+		 
         return businessDemandDataDTOList;
 	}
 

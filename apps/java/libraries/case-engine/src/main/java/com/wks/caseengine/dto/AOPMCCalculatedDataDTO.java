@@ -33,5 +33,5 @@ public class AOPMCCalculatedDataDTO {
     private String year;
     private String normParametersFKId;
     private String bDNormParametersFKId;
-
+    private Integer displayOrder;
 }

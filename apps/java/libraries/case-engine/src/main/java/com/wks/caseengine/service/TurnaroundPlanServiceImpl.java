@@ -46,6 +46,7 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 			  long diffInMillis = dto.getMaintEndDateTime().getTime() - dto.getMaintStartDateTime().getTime();
 			  double diffInDays = diffInMillis / (1000.0 * 60 * 60 * 24);
 			 // dto.setDurationInDays(diffInDays);
+			  dto.setDisplayOrder(result[8] != null ? ((Integer) result[8]) : null); 
 			  dtoList.add(dto); 
 		}
 		// TODO Auto-generated method stub

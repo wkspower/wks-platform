@@ -26,7 +26,20 @@ public interface AOPRepository extends JpaRepository<AOP, UUID>{
 
 
     List<AOP> findAllByAopYearAndPlantFkId(String year, UUID fromString);
-
+    
+    @Query(value = """
+ 	        SELECT AOP.Id, AOP.AOPCaseId, AOP.AOPStatus, AOP.AOPRemarks, AOP.NormItem, 
+ 	               AOP.AOPType, AOP.Jan, AOP.Feb, AOP.March, AOP.April, AOP.May, AOP.June, 
+ 	               AOP.July, AOP.Aug, AOP.Sep, AOP.Oct, AOP.Nov, AOP.Dec, AOP.AOPYear, 
+ 	               AOP.Plant_FK_Id, AOP.AvgTPH, AOP.NormParameters_FK_Id, NP.DiplayOrder
+ 	        FROM AOP AOP
+ 	        JOIN NormParameters NP 
+ 	        ON AOP.NormParameters_FK_Id = NP.Id 
+ 	        WHERE AOP.AOPYear = :aopYear 
+ 	        AND AOP.Plant_FK_Id = :plantFkId 
+ 	        ORDER BY NP.DiplayOrder
+ 	        """, nativeQuery = true)
+ 	    List<Object[]> findByAOPYearAndPlantFkId(@Param("aopYear") String aopYear, @Param("plantFkId") UUID plantFkId);
 
     
  @Query(value="SELECT *" + 

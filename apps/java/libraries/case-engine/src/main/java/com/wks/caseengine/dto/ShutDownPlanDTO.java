@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import org.springframework.context.annotation.Configuration;
 
+import com.wks.caseengine.entity.Plants;
 
 @Configuration
 @NoArgsConstructor
@@ -33,8 +34,9 @@ public class ShutDownPlanDTO {
 	private UUID productId;
 	private String maintenanceTypeName;
 	private Double durationInHrs;
-	//private Double durationInDays;
+	private Double durationInDays;
 	private String product;
 	private UUID plantId;
 	private String audityear;
+	private Integer displayOrder;
 }

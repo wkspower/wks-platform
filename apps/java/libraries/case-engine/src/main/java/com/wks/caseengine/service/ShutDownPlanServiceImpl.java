@@ -52,6 +52,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 			}else{
 				dto.setRemark(null);
 			}
+			dto.setDisplayOrder(result[8] != null ? ((Integer) result[8]) : null); 
             dtoList.add(dto);
         }
 		return dtoList;

@@ -52,7 +52,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 			dto.setId(result[7] != null ?(result[7].toString()) : null);
 
 			dto.setProductId(result[8] != null ? UUID.fromString(result[8].toString()) : null);
-	
+			dto.setDisplayOrder(result[9] != null ? ((Integer) result[9]) : null); 
 			dtoList.add(dto);
 		}
 		// TODO Auto-generated method stub

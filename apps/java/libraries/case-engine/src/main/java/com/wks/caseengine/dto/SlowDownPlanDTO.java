@@ -27,6 +27,6 @@ public class SlowDownPlanDTO {
     private String remarks; // Added field for Remarks
     private String product;
     private UUID maintenanceId;
-
+    private Integer displayOrder;
     }
 

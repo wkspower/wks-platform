@@ -45,9 +45,10 @@ public class NormParameters {
     private UUID plantFkId;
     
     @Column(name = "NormType_FK_Id")
-    private UUID normTypeFKId;
+    private Integer normTypeFKId;
     
-    @Column(name="DisplayOrder")
+    @Column(name = "DiplayOrder")
     private Integer displayOrder;
+
 }
 
