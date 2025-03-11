@@ -3,7 +3,7 @@ import ASDataGrid from './ASDataGrid'
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
-import { GridRowModes } from '@mui/x-data-grid'
+
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 const headerMap = generateHeaderNames()
 
@@ -286,13 +286,13 @@ const MaintenanceTable = () => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
+
+  const [rows, setRows] = useState(productionData)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [rowModesModel, setRowModesModel] = useState({})
-
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -301,9 +301,7 @@ const MaintenanceTable = () => {
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    if (unsavedChangesRef.current.unsavedRows) {
-      // set(oldRow?.map((row) => (row.id === newRow.id ? newRow : row)))
-    }
+
     // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
@@ -331,20 +329,12 @@ const MaintenanceTable = () => {
       }
     }, 1000) // Delay of 2 seconds
   }, [apiRef])
-  const onProcessRowUpdateError = React.useCallback((error) => {
-    console.log(error)
-  }, [])
-  const handleRowEditStop = (params, event) => {
-    setRowModesModel({
-      ...rowModesModel,
-      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
-    })
-  }
   return (
     <div>
       <ASDataGrid
+        setRows={setRows}
         columns={productionColumns}
-        rows={productionData}
+        rows={rows}
         title='Maintenance Details'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
@@ -363,10 +353,6 @@ const MaintenanceTable = () => {
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
         // fetchData={fetchData}
-        onRowEditStop={handleRowEditStop}
-        onProcessRowUpdateError={onProcessRowUpdateError}
-        setRowModesModel={setRowModesModel}
-        rowModesModel={rowModesModel}
         permissions={{
           showAction: false,
           addButton: false,

@@ -6,7 +6,6 @@ import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 const headerMap = generateHeaderNames()
-import { GridRowModes } from '@mui/x-data-grid'
 
 const productionColumns = [
   {
@@ -122,6 +121,7 @@ const FeedStockAvailability = () => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
+  const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -131,35 +131,22 @@ const FeedStockAvailability = () => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
-  const [rowModesModel, setRowModesModel] = useState({})
-
   const keycloak = useSession()
+
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    // console.log(newRow)
-    const start = new Date(newRow.maintStartDateTime)
-    const end = new Date(newRow.maintEndDateTime)
-    const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
-    // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
-
-    // console.log(`Duration in minutes: ${durationInMins}`)
-
-    // Update the duration in newRow
-    newRow.durationInMins = durationInMins.toFixed(2)
-    // newRow.durationInMins = durationInMins
-    // setShutdownData((prevData) =>
-    //   prevData.map((row) => (row.id === rowId ? newRow : row)),
-    // )
-
-    // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
-    // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
 
-    // setHasUnsavedRows(true)
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === newRow.id ? { ...newRow, isNew: false } : row,
+      ),
+    )
+
     return newRow
   }, [])
   const saveChanges = React.useCallback(async () => {
@@ -216,20 +203,12 @@ const FeedStockAvailability = () => {
     }
   }, [productOptions])
 
-  const onProcessRowUpdateError = React.useCallback((error) => {
-    console.log(error)
-  }, [])
-  const handleRowEditStop = (params, event) => {
-    setRowModesModel({
-      ...rowModesModel,
-      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
-    })
-  }
   return (
     <div>
       <ASDataGrid
         columns={productionColumns}
-        rows={productionData}
+        rows={rows}
+        setRows={setRows}
         title='Feed Stock Availability'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
@@ -248,10 +227,6 @@ const FeedStockAvailability = () => {
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
         // fetchData={fetchData}
-        onRowEditStop={handleRowEditStop}
-        onProcessRowUpdateError={onProcessRowUpdateError}
-        setRowModesModel={setRowModesModel}
-        rowModesModel={rowModesModel}
         permissions={{
           showAction: true,
           addButton: true,

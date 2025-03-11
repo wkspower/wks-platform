@@ -6,7 +6,6 @@ import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 // Import the catalyst options from the JSON file
 // import catalystOptionsData from '../../assets/Catalyst.json'
 import { useSelector } from 'react-redux'
-import { GridRowModes } from '@mui/x-data-grid'
 
 const SelectivityData = () => {
   const menu = useSelector((state) => state.menu)
@@ -18,50 +17,42 @@ const SelectivityData = () => {
   const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
+
+  const [rows, setRows] = useState()
+
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [rowModesModel, setRowModesModel] = useState({})
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    console.log(newRow)
-    const start = new Date(newRow.maintStartDateTime)
-    const end = new Date(newRow.maintEndDateTime)
-    const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
-    // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
-
-    console.log(`Duration in minutes: ${durationInMins}`)
-
-    // Update the duration in newRow
-    newRow.durationInMins = durationInMins.toFixed(2)
-    // newRow.durationInMins = durationInMins
-    setCsData((prevData) =>
-      prevData.map((row) => (row.id === rowId ? newRow : row)),
-    )
-
-    // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
-    // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
 
-    // setHasUnsavedRows(true)
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === newRow.id ? { ...newRow, isNew: false } : row,
+      ),
+    )
+
     return newRow
   }, [])
+
   const saveChanges = React.useCallback(async () => {
-    console.log(
-      'Edited Data: ',
-      Object.values(unsavedChangesRef.current.unsavedRows),
-    )
-    setTimeout(async () => {
+    setTimeout(() => {
+      // console.log(
+      //   'Edited Data: ',
+      //   Object.values(unsavedChangesRef.current.unsavedRows),
+      // )
       try {
         // if (title === 'Business Demand') {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
@@ -75,7 +66,7 @@ const SelectivityData = () => {
       } catch (error) {
         // setIsSaving(false);
       }
-    }, 1000) // Delay of 2 seconds
+    }, 1000)
   }, [apiRef])
   const saveCatalystData = async (newRow) => {
     console.log('new Row ', newRow)
@@ -165,6 +156,7 @@ const SelectivityData = () => {
         }))
       }
       setCsData(formattedData)
+      setRows(formattedData)
     } catch (error) {
       console.error('Error fetching Turnaround data:', error)
     }
@@ -360,20 +352,13 @@ const SelectivityData = () => {
 
     { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
   ]
-  const onProcessRowUpdateError = React.useCallback((error) => {
-    console.log(error)
-  }, [])
-  const handleRowEditStop = (params, event) => {
-    setRowModesModel({
-      ...rowModesModel,
-      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
-    })
-  }
+
   return (
     <div>
       <ASDataGrid
         columns={productionColumns}
-        rows={csData}
+        rows={rows}
+        setRows={setRows}
         title='Configuration'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
@@ -392,10 +377,6 @@ const SelectivityData = () => {
         deleteId={deleteId}
         open1={open1}
         handleDeleteClick={handleDeleteClick}
-        onRowEditStop={handleRowEditStop}
-        onProcessRowUpdateError={onProcessRowUpdateError}
-        setRowModesModel={setRowModesModel}
-        rowModesModel={rowModesModel}
         permissions={{
           showAction: true,
           addButton: true,

@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import { useSelector } from 'react-redux'
-import { GridRowModes } from '@mui/x-data-grid'
 
 const SlowDown = () => {
   const menu = useSelector((state) => state.menu)
@@ -15,13 +14,12 @@ const SlowDown = () => {
   const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
+  const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [rowModesModel, setRowModesModel] = useState({})
-
   const keycloak = useSession()
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -29,32 +27,19 @@ const SlowDown = () => {
   })
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    // console.log(newRow)
-    // const start = new Date(newRow.maintStartDateTime)
-    // const end = new Date(newRow.maintEndDateTime)
-    // const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
-    // // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
 
-    // console.log(`Duration in minutes: ${durationInMins}`)
-
-    // // Update the duration in newRow
-    // newRow.durationInMins = durationInMins.toFixed(2)
-    // // newRow.durationInMins = durationInMins
-
-    // setSlowDownData((prevData) =>
-    //   prevData.map((row) => (row.id === rowId ? newRow : row)),
-    // )
-    // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    if (unsavedChangesRef.current.unsavedRows) {
-      setSlowDownData(
-        oldRow?.map((row) => (row.id === newRow.id ? newRow : row)),
-      )
-    }
+
     // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
+
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === newRow.id ? { ...newRow, isNew: false } : row,
+      ),
+    )
 
     // setHasUnsavedRows(true)
     return newRow
@@ -164,7 +149,7 @@ const SlowDown = () => {
       //     discription: 'MEG slowdown',
       //     maintStartDateTime: null,
       //     maintEndDateTime: null,
-      //     durationInMins: null,
+      //     durationInHrs: null,
       //     rate: 20,
       //     remarks: 'MEG slowdown',
       //     product: '92E0AF06-9535-4B93-8998-E56A71354393',
@@ -177,6 +162,7 @@ const SlowDown = () => {
         id: index,
       }))
       setSlowDownData(formattedData)
+      setRows(formattedData)
     } catch (error) {
       console.error('Error fetching SlowDown data:', error)
     }
@@ -215,7 +201,7 @@ const SlowDown = () => {
     //     const shutdownDetails = {
     //       product: 'Oxygen',
     //       discription: '1 Shutdown maintenance',
-    //       durationInMins: 120,
+    //       durationInHrs: 120,
     //       maintEndDateTime: '2025-02-20T18:00:00Z',
     //       maintStartDateTime: '2025-02-20T16:00:00Z',
     //     }
@@ -315,13 +301,12 @@ const SlowDown = () => {
         return params || ''
       },
       valueFormatter: (params) => {
-        console.log('params valueFormatter ', params)
+        // console.log('params valueFormatter ', params)
         const product = allProducts.find((p) => p.id === params)
         return product ? product.displayName : ''
       },
       renderEditCell: (params) => {
         const { value } = params
-        console.log('q1', params)
         return (
           <select
             value={value || ''}
@@ -393,7 +378,6 @@ const SlowDown = () => {
       align: 'left',
       headerAlign: 'left',
       // valueGetter: findDuration,
-      valueGetter: (params) => params?.durationInHrs || 0,
     },
 
     {
@@ -428,8 +412,9 @@ const SlowDown = () => {
   return (
     <div>
       <ASDataGrid
+        setRows={setRows}
         columns={colDefs}
-        rows={slowDownData}
+        rows={rows}
         title='Slowdown Plan'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
@@ -451,19 +436,7 @@ const SlowDown = () => {
         fetchData={fetchData}
         onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
-        setRowModesModel={setRowModesModel}
-        rowModesModel={rowModesModel}
         experimentalFeatures={{ newEditingApi: true }}
-        onCellEditStop={(params, event) => {
-          event.defaultMuiPrevented = true
-          if (
-            params.reason === 'cellFocusOut' ||
-            params.reason === 'escapeKeyDown'
-          ) {
-            const updatedRow = { ...params.row, [params.field]: params.value }
-            processRowUpdate(updatedRow, params.row)
-          }
-        }}
         permissions={{
           showAction: true,
           addButton: true,

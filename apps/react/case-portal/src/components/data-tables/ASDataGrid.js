@@ -1,22 +1,32 @@
-import { Box, Button, IconButton, TextField, Typography } from '@mui/material'
-import { DataGrid } from '@mui/x-data-grid'
+import {
+  Box,
+  Button,
+  IconButton,
+  TextField,
+  Typography,
+  Grid,
+} from '@mui/material'
+import { DataGrid, GridToolbar } from '@mui/x-data-grid'
 import * as React from 'react'
 import { useEffect, useMemo, useState } from 'react'
+import CancelIcon from '@mui/icons-material/Close'
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
+import SaveIcon from '@mui/icons-material/Save'
 
-import { GridActionsCellItem, GridRowModes } from '@mui/x-data-grid'
-import { DataService } from 'services/DataService'
-import { useSession } from 'SessionStoreContext'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
-import { MenuItem } from '../../../node_modules/@mui/material/index'
+import { GridActionsCellItem, GridRowModes } from '@mui/x-data-grid'
 import Notification from 'components/Utilities/Notification'
-import CancelIcon from '@mui/icons-material/Close'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
-import SaveIcon from '@mui/icons-material/Save'
+import { DataService } from 'services/DataService'
+import { useSession } from 'SessionStoreContext'
+import { MenuItem } from '../../../node_modules/@mui/material/index'
+import { InputAdornment } from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search'
+import Chip from '@mui/material/Chip'
 
 import {
   FileDownload,
@@ -37,7 +47,7 @@ const jioColors = {
 
 const DataGridTable = ({
   columns: initialColumns = [],
-  rows: initialRows = [],
+  // rows: initialRows = [],
   title = 'Turnaround Plan Details',
   onAddRow,
   onDeleteRow,
@@ -52,10 +62,11 @@ const DataGridTable = ({
   fetchData,
   handleUnitChange,
   handleCalculate,
-  onProcessRowUpdateError,
-  setRowModesModel,
-  rowModesModel,
+  //handleRowViewMode,
+  setRows,
+  rows,
 }) => {
+  const [tempHide, setTempHide] = useState(true)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [resizedColumns, setResizedColumns] = useState({})
@@ -65,7 +76,7 @@ const DataGridTable = ({
   const [openRemark, setOpenRemark] = useState(false)
   const keycloak = useSession()
   const [days, setDays] = useState([])
-  const [rows, setRows] = useState(initialRows)
+  // const [rows, setRows] = useState(initialRows)
   const [searchText, setSearchText] = useState('')
   const [isFilterActive, setIsFilterActive] = useState(false)
   const [selectedRowId, setSelectedRowId] = useState(null)
@@ -77,11 +88,12 @@ const DataGridTable = ({
   const handleOpenRemark = () => setOpenRemark(true)
   const handleCloseRemark = () => setOpenRemark(false)
   const handleClose1 = () => setOpen1(false)
-  // const handleSearchChange = (event) => {
-  //   setSearchText(event.target.value)
-  // }
-  // const [rowModesModel, setRowModesModel] = useState({})
-  // const [changedRowIds, setChangedRowIds] = useState([])
+  const handleSearchChange = (event) => {
+    setSearchText(event.target.value)
+  }
+  const [rowModesModel, setRowModesModel] = useState({})
+  const [changedRowIds, setChangedRowIds] = useState([])
+  const [columnFilters, setColumnFilters] = useState({})
 
   const handleRowEditCommit = (id, event) => {
     const editedRow = rows.find((row) => row.id === id)
@@ -118,8 +130,8 @@ const DataGridTable = ({
   }
 
   useEffect(() => {
-    setRows(initialRows)
-  }, [initialRows])
+    if (rows) setRows(rows) 
+  }, [rows, setRows])
   // useEffect(() => {
   //   setRows((prevRows) => {
   //     // Keep newly added rows and merge with initialRows
@@ -138,9 +150,9 @@ const DataGridTable = ({
     }
   }
 
-  // const onProcessRowUpdateError = React.useCallback((error) => {
-  //   console.log(error)
-  // }, [])
+  const onProcessRowUpdateError = React.useCallback((error) => {
+    console.log(error)
+  }, [])
 
   const handleImportExport = () => {
     alert('File Import/Export feature coming soon!')
@@ -202,14 +214,49 @@ const DataGridTable = ({
       [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
     }))
   }
-  const handleKeyDown = (event, rowId) => {
-    if (event.key === 'Enter') {
-      event.preventDefault() // Prevent default Enter behavior (exiting edit mode)
-      setRowModesModel((oldModel) => ({
-        ...oldModel,
-        [rowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
-      }))
+
+  const handleAddRow2 = () => {
+    const newRowId = rows.length
+      ? Math.max(...rows.map((row) => Number(row.id) || 0)) + 1
+      : 1
+
+    console.log('New Row ID:', newRowId) // Debugging log
+
+    const newRow = {
+      id: newRowId.toString(), // Ensure ID is a string if needed
+      isNew: true,
+      ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])),
     }
+
+    // rows.forEach((row) => {
+    //   if (rowModesModel[row.id]?.mode === GridRowModes.Edit) {
+    //     apiRef.current?.stopRowEditMode({ id: row.id })
+    //   }
+    // })
+
+    setRows((prevRows) => [...prevRows, newRow])
+
+    onAddRow?.(newRow)
+    setProduct('')
+
+    setRowModesModel((oldModel) => ({
+      ...oldModel,
+      [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'normParameterId' },
+    }))
+  }
+
+  const handleAddRow1 = () => {
+    const id = rows.length // Define id before using it
+
+    setRows((oldRows) => [
+      ...oldRows,
+      { id, jan: '', feb: '', march: '', isNew: true }, // Preserve oldRows and add new row
+    ])
+
+    setRowModesModel((oldModel) => ({
+      ...oldModel,
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'normParameterId' },
+    }))
   }
 
   const handleDeleteClick = async (id, params) => {
@@ -341,9 +388,9 @@ const DataGridTable = ({
     setSnackbarOpen(false)
   }
 
-  const [columnFilters, setColumnFilters] = useState({})
-
   const filteredRows = useMemo(() => {
+    if (!Array.isArray(rows)) return [] // ? Ensure rows is always an array
+
     return rows.filter((row) => {
       // Global search across all fields
       const matchesSearch = Object.values(row).some((value) =>
@@ -410,12 +457,29 @@ const DataGridTable = ({
       <Box
         sx={{
           display: 'flex',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
           alignItems: 'center',
           marginTop: 2,
           marginBottom: 1,
         }}
       >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {permissions?.UnitToShow && (
+            <Chip
+              label={permissions.UnitToShow}
+              variant='outlined'
+              sx={{
+                borderRadius: 1,
+                padding: '8px 24px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                height: '40px',
+              }}
+            />
+          )}
+        </Box>
+
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           {permissions?.showCalculate && (
             <Button
@@ -439,7 +503,8 @@ const DataGridTable = ({
               CALCULATE
             </Button>
           )}
-          {permissions?.showRefreshBtn && (
+
+          {permissions?.showRefreshBtn && !tempHide && (
             <Button
               variant='contained'
               onClick={handleRefresh}
@@ -462,7 +527,7 @@ const DataGridTable = ({
             </Button>
           )}
 
-          {permissions?.showUnit && (
+          {permissions?.showUnit && !tempHide && (
             <TextField
               select
               value={selectedUnit || permissions?.UOM || ''}
@@ -485,107 +550,100 @@ const DataGridTable = ({
             </TextField>
           )}
 
-          {/* commented for demo 4 March
-          
-          <TextField
-            variant='outlined'
-            placeholder='Search...'
-            value={searchText}
-            onChange={handleSearchChange}
-            sx={{
-              width: '300px',
-              borderRadius: 1,
-              backgroundColor: jioColors.background,
-              color: '#8A9BC2',
-            }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position='start'>
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          /> */}
-
-          {/* <IconButton
-            aria-label='import'
-            onClick={handleImportExport}
-            sx={{
-              border: `1px solid ${jioColors.border}`,
-              borderRadius: 1,
-              padding: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
-              color: 'inherit',
-              width: '150px',
-              '&:hover': {
-                backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF', // Removes hover effect
-              },
-            }}
-          >
-            <FileDownload
-              sx={{ color: '#2A3ACD' }}
-              // sx={{ color: isFilterActive ? jioColors.background : 'inherit' }}
+          {!tempHide && (
+            <TextField
+              variant='outlined'
+              placeholder='Search...'
+              value={searchText}
+              onChange={handleSearchChange}
+              sx={{
+                width: '300px',
+                borderRadius: 1,
+                backgroundColor: jioColors.background,
+                color: '#8A9BC2',
+              }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position='start'>
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
             />
-            <span
-              style={{
-                fontSize: '0.875rem',
-                color: '#2A3ACD',
+          )}
+
+          {!tempHide && (
+            <IconButton
+              aria-label='import'
+              onClick={handleImportExport}
+              sx={{
+                border: `1px solid ${jioColors.border}`,
+                borderRadius: 1,
+                padding: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
+                color: 'inherit',
+                width: '150px',
+                '&:hover': {
+                  backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
+                },
               }}
             >
-              Import
-            </span>
-          </IconButton> */}
+              <FileDownload sx={{ color: '#2A3ACD' }} />
+              <span style={{ fontSize: '0.875rem', color: '#2A3ACD' }}>
+                Import
+              </span>
+            </IconButton>
+          )}
 
-          {/* <IconButton
-            aria-label='export'
-            onClick={handleImportExport}
-            sx={{
-              border: `1px solid ${jioColors.border}`,
-              borderRadius: 1,
-              padding: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
-              color: 'inherit',
-              width: '150px',
-              '&:hover': {
-                backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF', // Removes hover effect
-              },
-            }}
-          >
-            <FileUpload
-              sx={{ color: '#2A3ACD' }}
-              // sx={{ color: isFilterActive ? jioColors.background : 'inherit' }}
-            />
-            <span
-              style={{
-                fontSize: '0.875rem',
-                color: '#2A3ACD',
+          {!tempHide && (
+            <IconButton
+              aria-label='export'
+              onClick={handleImportExport}
+              sx={{
+                border: `1px solid ${jioColors.border}`,
+                borderRadius: 1,
+                padding: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
+                color: 'inherit',
+                width: '150px',
+                '&:hover': {
+                  backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
+                },
               }}
             >
-              Export
-            </span>
-          </IconButton> */}
+              <FileUpload sx={{ color: '#2A3ACD' }} />
+              <span style={{ fontSize: '0.875rem', color: '#2A3ACD' }}>
+                Export
+              </span>
+            </IconButton>
+          )}
         </Box>
       </Box>
 
       <Box sx={{ height: 'calc(100% - 150px)', width: '100%' }}>
-        {/* <Grid container spacing={2}>
-          {columns.map((col) => (
-            <Grid item xs key={col.field}>
-              <TextField
-                placeholder={`Filter ${col.headerName}`}
-                variant='outlined'
-                size='small'
-                onChange={(e) => handleFilterChange(col.field, e.target.value)}
-              />
-            </Grid>
-          ))}
-        </Grid> */}
+        {/* {!tempHide && (
+          <Grid container spacing={2}>
+            {columns.map((col) => (
+              <Grid item xs key={col.field}>
+                <TextField
+                  placeholder={`Filter ${col.headerName}`}
+                  variant='outlined'
+                  size='small'
+                  // onChange={(e) =>
+                  //   handleFilterChange(col.field, e.target.value)
+                  // }
+                />
+              </Grid>
+            ))}
+          </Grid>
+        )} */}
+
         <DataGrid
           apiRef={apiRef}
           rows={filteredRows}
@@ -608,10 +666,18 @@ const DataGridTable = ({
             period: false,
           }}
           rowHeight={35}
+          loading={isSaving}
           processRowUpdate={processRowUpdate}
           onProcessRowUpdateError={onProcessRowUpdateError}
           onColumnResized={onColumnResized}
           onCellClick={handleCellClick}
+          //Added Single Click EDIT for the ROW
+          // onCellClick={(params) => {
+          //   setRowModesModel({
+          //     ...rowModesModel,
+          //     [params.id]: { mode: GridRowModes.Edit },
+          //   })
+          // }}
           onRowEditCommit={handleRowEditCommit}
           onCellEditCommit={(params) => handleCellEditCommit(params)} // Real-time updates
           experimentalFeatures={{ newEditingApi: true }}
@@ -619,22 +685,12 @@ const DataGridTable = ({
           rowModesModel={rowModesModel}
           onRowModesModelChange={handleRowModesModelChange}
           handleCalculate={handleCalculate}
-          // onRowEditStop={handleRowEditStop}
           slotProps={{
-            toolbar: { setRows, setRowModesModel },
-          }}
-          onCellEditStop={(params, event) => {
-            // Always prevent default edit stop behavior
-            event.defaultMuiPrevented = true
-
-            // But still capture the updated value and save it
-            if (
-              params.reason === 'cellFocusOut' ||
-              params.reason === 'escapeKeyDown'
-            ) {
-              const updatedRow = { ...params.row, [params.field]: params.value }
-              processRowUpdate(updatedRow, params.row)
-            }
+            toolbar: { setRows, setRowModesModel, GridToolbar },
+            loadingOverlay: {
+              variant: 'linear-progress',
+              noRowsVariant: 'linear-progress',
+            },
           }}
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? 'even-row' : 'odd-row'

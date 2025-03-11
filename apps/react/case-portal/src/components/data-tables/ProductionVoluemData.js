@@ -6,7 +6,6 @@ import { useGridApiRef } from '@mui/x-data-grid'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 const headerMap = generateHeaderNames()
-import { GridRowModes } from '@mui/x-data-grid'
 
 const ProductionvolumeData = () => {
   const keycloak = useSession()
@@ -15,12 +14,12 @@ const ProductionvolumeData = () => {
   const apiRef = useGridApiRef()
   const menu = useSelector((state) => state.menu)
   const { sitePlantChange } = menu
+  const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [rowModesModel, setRowModesModel] = useState({})
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -117,24 +116,26 @@ const ProductionvolumeData = () => {
 
     // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    if (unsavedChangesRef.current.unsavedRows) {
-      setProductNormData(
-        oldRow?.map((row) => (row.id === newRow.id ? newRow : row)),
-      )
-    }
+
     // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
+
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === newRow.id ? { ...newRow, isNew: false } : row,
+      ),
+    )
     return newRow
   }, [])
 
   const saveChanges = React.useCallback(async () => {
-    console.log(
-      'Edited Data: ',
-      Object.values(unsavedChangesRef.current.unsavedRows),
-    )
-    setTimeout(async () => {
+    setTimeout(() => {
+      // console.log(
+      //   'Edited Data: ',
+      //   Object.values(unsavedChangesRef.current.unsavedRows),
+      // )
       try {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
         editAOPMCCalculatedData(data)
@@ -145,7 +146,7 @@ const ProductionvolumeData = () => {
       } catch (error) {
         // setIsSaving(false);
       }
-    }, 1000) // Delay of 2 seconds
+    }, 1000)
   }, [apiRef])
 
   const fetchData = async () => {
@@ -158,6 +159,7 @@ const ProductionvolumeData = () => {
         id: index,
       }))
       setProductNormData(formattedData)
+      setRows(formattedData)
     } catch (error) {
       console.error('Error fetching data:', error)
     }
@@ -392,6 +394,7 @@ const ProductionvolumeData = () => {
   return (
     <div>
       <ASDataGrid
+        setRows={setRows}
         columns={productionColumns}
         rows={productNormData}
         title='Production Volume Data'
@@ -414,19 +417,7 @@ const ProductionvolumeData = () => {
         fetchData={fetchData}
         onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
-        setRowModesModel={setRowModesModel}
-        rowModesModel={rowModesModel}
         experimentalFeatures={{ newEditingApi: true }}
-        onCellEditStop={(params, event) => {
-          event.defaultMuiPrevented = true
-          if (
-            params.reason === 'cellFocusOut' ||
-            params.reason === 'escapeKeyDown'
-          ) {
-            const updatedRow = { ...params.row, [params.field]: params.value }
-            processRowUpdate(updatedRow, params.row)
-          }
-        }}
         permissions={{
           showAction: true,
           addButton: false,

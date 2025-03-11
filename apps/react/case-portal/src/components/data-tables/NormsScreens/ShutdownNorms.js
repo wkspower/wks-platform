@@ -145,11 +145,11 @@ const ShutdownNorms = () => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
+  const [rows, setRows] = useState(shutdownNormsData)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
-  const [rowModesModel, setRowModesModel] = useState({})
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -158,30 +158,18 @@ const ShutdownNorms = () => {
   const keycloak = useSession()
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    // console.log(newRow)
-    const start = new Date(newRow.maintStartDateTime)
-    const end = new Date(newRow.maintEndDateTime)
-    const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
-    // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
-
-    // console.log(`Duration in minutes: ${durationInMins}`)
-
-    // Update the duration in newRow
-    newRow.durationInMins = durationInMins.toFixed(2)
-    // newRow.durationInMins = durationInMins
-    // setShutdownData((prevData) =>
-    //   prevData.map((row) => (row.id === rowId ? newRow : row)),
-    // )
-
-    // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
-    // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
 
-    // setHasUnsavedRows(true)
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === newRow.id ? { ...newRow, isNew: false } : row,
+      ),
+    )
+
     return newRow
   }, [])
   const saveChanges = React.useCallback(async () => {
@@ -194,29 +182,21 @@ const ShutdownNorms = () => {
         // var data = Object.values(unsavedChangesRef.current.unsavedRows)
         // saveShutdownData(data)
 
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
-      } catch (error) {
-        // setIsSaving(false);
+      unsavedChangesRef.current = {
+        unsavedRows: {},
+        rowsBeforeChange: {},
       }
+    } catch (error) {
+      // setIsSaving(false);
+    }
     }, 1000) // Delay of 2 seconds
   }, [apiRef])
-  const onProcessRowUpdateError = React.useCallback((error) => {
-    console.log(error)
-  }, [])
-  const handleRowEditStop = (params, event) => {
-    setRowModesModel({
-      ...rowModesModel,
-      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
-    })
-  }
   return (
     <div>
       <DataGridTable
         columns={shutdownNormsColumns}
-        rows={shutdownNormsData}
+        rows={rows}
+        setRows={setRows}
         title='Shutdown Norms'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
@@ -235,10 +215,6 @@ const ShutdownNorms = () => {
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
         // fetchData={fetchData}
-        onRowEditStop={handleRowEditStop}
-        onProcessRowUpdateError={onProcessRowUpdateError}
-        setRowModesModel={setRowModesModel}
-        rowModesModel={rowModesModel}
         permissions={{
           showAction: true,
           addButton: false,

@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
-import { GridRowModes } from '@mui/x-data-grid'
 
 const ShutDown = () => {
   const menu = useSelector((state) => state.menu)
@@ -15,54 +14,45 @@ const ShutDown = () => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
+  const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
-  const [rowModesModel, setRowModesModel] = useState({})
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+
   const keycloak = useSession()
+
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    if (unsavedChangesRef.current.unsavedRows) {
-      setShutdownData(
-        oldRow?.map((row) => (row.id === newRow.id ? newRow : row)),
-      )
-    }
-    // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
 
-    // setHasUnsavedRows(true)
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === newRow.id ? { ...newRow, isNew: false } : row,
+      ),
+    )
     return newRow
   }, [])
+
   const saveChanges = React.useCallback(async () => {
-    console.log(
-      'Edited Data: ',
-      Object.values(unsavedChangesRef.current.unsavedRows),
-    )
-    setTimeout(async () => {
+    setTimeout(() => {
       try {
-        // if (title === 'Business Demand') {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
         saveShutdownData(data)
-        // }
-
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},
         }
-      } catch (error) {
-        // setIsSaving(false);
-      }
-    }, 1000) // Delay of 1 seconds
+      } catch (error) {}
+    }, 1000)
   }, [apiRef])
 
   const saveShutdownData = async (newRow) => {
@@ -75,13 +65,10 @@ const ShutDown = () => {
         plantId = parsedPlant.id
       }
 
-      // plantId = plantId;
-
       const shutdownDetails = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
-        durationInHrs: parseFloat(row.durationInHrs),
-        // durationInHrs: parseFloat(findDuration('1', row)),
+        durationInHrs: parseFloat(findDuration('1', row)),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
         audityear: localStorage.getItem('year'),
@@ -151,14 +138,8 @@ const ShutDown = () => {
         params?.row?.idFromApi ||
         params?.row?.maintenanceId ||
         params?.NormParameterMonthlyTransactionId
-
-      // console.log(maintenanceId, params, id)
-
-      // Ensure UI state updates before the deletion process
       setOpen1(true)
       setDeleteId(id)
-
-      // Perform the delete operation
       return await DataService.deleteShutdownData(maintenanceId, keycloak)
     } catch (error) {
       console.error(`Error deleting Shutdown data:`, error)
@@ -175,6 +156,7 @@ const ShutDown = () => {
         id: index,
       }))
       setShutdownData(formattedData)
+      setRows(formattedData)
     } catch (error) {
       console.error('Error fetching Shutdown data:', error)
     }
@@ -183,11 +165,9 @@ const ShutDown = () => {
     const getAllProducts = async () => {
       try {
         const data = await DataService.getAllProducts(keycloak)
-        // console.log('API Response:', data)
-
-        // Extract only displayName and id
         const productList = data.map((product) => ({
-          id: product.id,
+          // id: product.id.toLowerCase(), // Convert id to lowercase
+          id: product.id, // Convert id to lowercase
           displayName: product.displayName,
         }))
 
@@ -260,14 +240,13 @@ const ShutDown = () => {
         return params || ''
       },
       valueFormatter: (params) => {
-        console.log('params valueFormatter ', params)
+        // console.log('params valueFormatter ', params)
         const product = allProducts.find((p) => p.id === params)
-        console.log(product)
         return product ? product.displayName : ''
       },
       renderEditCell: (params) => {
         const { value } = params
-        console.log('q1', params)
+        // console.log('q1', params);
         // console.log('q2', params2);
         return (
           <select
@@ -358,8 +337,9 @@ const ShutDown = () => {
   return (
     <div>
       <ASDataGrid
+        setRows={setRows}
         columns={colDefs}
-        rows={shutdownData}
+        rows={rows}
         title='Shutdown Plan'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
@@ -381,19 +361,7 @@ const ShutDown = () => {
         fetchData={fetchData}
         onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
-        setRowModesModel={setRowModesModel}
-        rowModesModel={rowModesModel}
         experimentalFeatures={{ newEditingApi: true }}
-        onCellEditStop={(params, event) => {
-          event.defaultMuiPrevented = true
-          if (
-            params.reason === 'cellFocusOut' ||
-            params.reason === 'escapeKeyDown'
-          ) {
-            const updatedRow = { ...params.row, [params.field]: params.value }
-            processRowUpdate(updatedRow, params.row)
-          }
-        }}
         permissions={{
           showAction: true,
           addButton: true,

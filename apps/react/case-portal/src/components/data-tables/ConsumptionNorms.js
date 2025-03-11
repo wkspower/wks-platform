@@ -17,6 +17,7 @@ const NormalOpNormsScreen = () => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
+  const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -26,17 +27,10 @@ const NormalOpNormsScreen = () => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
-  const [rowModesModel, setRowModesModel] = useState({})
-
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
-    if (unsavedChangesRef.current.unsavedRows) {
-      setCsDataTransformed(
-        oldRow?.map((row) => (row.id === newRow.id ? newRow : row)),
-      )
-    }
     // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
@@ -86,6 +80,7 @@ const NormalOpNormsScreen = () => {
       })
 
       setCsDataTransformed(groupedRows)
+      setRows(groupedRows)
     } catch (error) {
       console.error('Error fetching data:', error)
     }
@@ -267,21 +262,13 @@ const NormalOpNormsScreen = () => {
 
     { field: 'remark', headerName: 'Remark', editable: true },
   ]
-  const onProcessRowUpdateError = React.useCallback((error) => {
-    console.log(error)
-  }, [])
-  const handleRowEditStop = (params, event) => {
-    setRowModesModel({
-      ...rowModesModel,
-      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
-    })
-  }
 
   return (
     <div>
       <DataGridTable
         columns={productionColumns}
-        rows={csDataTransformed}
+        rows={rows}
+        setRows={setRows}
         getRowId={(row) => row.id}
         title='Consumption AOP'
         paginationOptions={[100, 200, 300]}
@@ -298,10 +285,6 @@ const NormalOpNormsScreen = () => {
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
-        onRowEditStop={handleRowEditStop}
-        onProcessRowUpdateError={onProcessRowUpdateError}
-        setRowModesModel={setRowModesModel}
-        rowModesModel={rowModesModel}
         permissions={{
           showAction: true,
           addButton: false,

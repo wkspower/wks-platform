@@ -8,8 +8,7 @@ const headerMap = generateHeaderNames()
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
-import { GridRowModes } from '@mui/x-data-grid'
-
+import NumericCellEditor from 'utils/NumericCellEditor'
 const ProductionNorms = () => {
   const keycloak = useSession()
   const [csData, setCsData] = useState([])
@@ -23,7 +22,7 @@ const ProductionNorms = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('TPH')
-  const [rowModesModel, setRowModesModel] = useState({})
+  const [rows, setRows] = useState()
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -33,34 +32,32 @@ const ProductionNorms = () => {
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    if (unsavedChangesRef.current.unsavedRows) {
-      setCsData(oldRow?.map((row) => (row.id === newRow.id ? newRow : row)))
-    }
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
+
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === newRow.id ? { ...newRow, isNew: false } : row,
+      ),
+    )
+
     return newRow
   }, [])
 
-  // const saveChanges = React.useCallback(async () => {
-  //   console.log(
-  //     'Edited Data: ',
-  //     Object.values(unsavedChangesRef.current.unsavedRows),
-  //   )
-  //   try {
-  //     // if (title === 'Business Demand') {
-  //     var data = Object.values(unsavedChangesRef.current.unsavedRows)
-  //     updateProductNormData(data)
-  //     // }
+  const saveChanges_DoNotDelete = React.useCallback(async () => {
+    setTimeout(() => {
+      try {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        updateProductNormData(data)
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } catch (error) {}
+    }, 1000)
+  }, [apiRef])
 
-  //     unsavedChangesRef.current = {
-  //       unsavedRows: {},
-  //       rowsBeforeChange: {},
-  //     }
-  //   } catch (error) {
-  //     // setIsSaving(false);
-  //   }
-  // }, [apiRef])
   const saveChanges = React.useCallback(async () => {
     setTimeout(() => {
       try {
@@ -74,7 +71,7 @@ const ProductionNorms = () => {
           unsavedRows: {},
           rowsBeforeChange: {},
         }
-        // setHasUnsavedRows(false)
+        setHasUnsavedRows(false)
         // setIsSaving(false)
       } catch (error) {
         // setIsSaving(false)
@@ -115,7 +112,8 @@ const ProductionNorms = () => {
         feb: isTPH && row.feb ? row.feb * 24 : row.feb || null,
         march: isTPH && row.march ? row.march * 24 : row.march || null,
 
-        avgTPH: findAvg('1', row) || null,
+        // avgTPH: findAvg('1', row) || null,
+        avgTPH: findSum('1', row) || null,
 
         aopRemarks: row.aopRemarks || 'remarks',
 
@@ -214,6 +212,7 @@ const ProductionNorms = () => {
       })
 
       setCsData(formattedData)
+      setRows(formattedData)
     } catch (error) {
       console.error('Error fetching Production AOP data:', error)
     }
@@ -263,6 +262,29 @@ const ProductionNorms = () => {
     return avg === '0.00' ? null : avg
   }
 
+  const findSum = (value, row) => {
+    const months = [
+      'april',
+      'may',
+      'june',
+      'july',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+      'jan',
+      'feb',
+      'march',
+    ]
+
+    const values = months.map((month) => row[month] || 0)
+    const sum = values.reduce((acc, val) => acc + val, 0)
+
+    const total = sum.toFixed(2)
+    return total === '0.00' ? null : total
+  }
+
   useEffect(() => {
     const getAllProducts = async () => {
       try {
@@ -303,7 +325,7 @@ const ProductionNorms = () => {
       field: 'normParametersFKId',
       headerName: 'Product',
       editable: false,
-      minWidth: 225,
+      minWidth: 125,
       valueGetter: (params) => {
         return params || ''
       },
@@ -452,10 +474,11 @@ const ProductionNorms = () => {
     },
     {
       field: 'averageTPH',
-      headerName: 'AVG',
+      headerName: 'TOTAL',
       minWidth: 150,
       editable: false,
-      valueGetter: findAvg,
+      // valueGetter: findAvg,
+      valueGetter: findSum,
     },
     {
       field: 'aopRemarks',
@@ -486,7 +509,8 @@ const ProductionNorms = () => {
     <div>
       <ASDataGrid
         columns={productionColumns}
-        rows={csData}
+        rows={rows}
+        setRows={setRows}
         title='Production AOP'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
@@ -502,15 +526,8 @@ const ProductionNorms = () => {
         setSnackbarData={setSnackbarData}
         handleCalculate={handleCalculate}
         apiRef={apiRef}
-        // deleteId={deleteId}
-        // setDeleteId={setDeleteId}
-        // setOpen1={setOpen1}
-        // open1={open1}
-        // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
         onProcessRowUpdateError={onProcessRowUpdateError}
-        setRowModesModel={setRowModesModel}
-        rowModesModel={rowModesModel}
         handleUnitChange={handleUnitChange}
         permissions={{
           showAction: true,
@@ -522,6 +539,7 @@ const ProductionNorms = () => {
           showCalculate: true,
           saveBtn: true,
           UOM: 'TPH',
+          UnitToShow: 'Values/Ton',
         }}
       />
     </div>

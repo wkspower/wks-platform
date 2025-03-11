@@ -331,12 +331,12 @@ const NormalOpNormsScreen = () => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
+  const [rows, setRows] = useState(productionData)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [rowModesModel, setRowModesModel] = useState({})
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -344,38 +344,27 @@ const NormalOpNormsScreen = () => {
   const keycloak = useSession()
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    // console.log(newRow)
-    const start = new Date(newRow.maintStartDateTime)
-    const end = new Date(newRow.maintEndDateTime)
-    const durationInMins = Math.floor((end - start) / (1000 * 60 * 60)) // Convert ms to Hrs
-    // const durationInMins = Math.floor((end - start) / (1000 * 60)) // Convert ms to minutes
-
-    // console.log(`Duration in minutes: ${durationInMins}`)
-
-    // Update the duration in newRow
-    newRow.durationInMins = durationInMins.toFixed(2)
-    // newRow.durationInMins = durationInMins
-    // setShutdownData((prevData) =>
-    //   prevData.map((row) => (row.id === rowId ? newRow : row)),
-    // )
-
-    // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
-    // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
 
-    // setHasUnsavedRows(true)
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === newRow.id ? { ...newRow, isNew: false } : row,
+      ),
+    )
+
     return newRow
   }, [])
+
   const saveChanges = React.useCallback(async () => {
-    console.log(
-      'Edited Data: ',
-      Object.values(unsavedChangesRef.current.unsavedRows),
-    )
-    setTimeout(async () => {
+    setTimeout(() => {
+      console.log(
+        'Edited Data: ',
+        Object.values(unsavedChangesRef.current.unsavedRows),
+      )
       try {
         // var data = Object.values(unsavedChangesRef.current.unsavedRows)
         // saveShutdownData(data)
@@ -387,7 +376,7 @@ const NormalOpNormsScreen = () => {
       } catch (error) {
         // setIsSaving(false);
       }
-    }, 1000) // Delay of 2 seconds
+    }, 1000)
   }, [apiRef])
   // Create groups by inserting a row with a groupHeader property
   const rawMaterialsData = productionData.slice(0, 2) // 2 rows for Raw Materials
@@ -431,21 +420,11 @@ const NormalOpNormsScreen = () => {
     renderCell: groupRenderCell,
   }))
 
-  const onProcessRowUpdateError = React.useCallback((error) => {
-    console.log(error)
-  }, [])
-
-  const handleRowEditStop = (params, event) => {
-    setRowModesModel({
-      ...rowModesModel,
-      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
-    })
-  }
-
   return (
     <div>
       <DataGridTable
         columns={enhancedColumns}
+        setRows={setRows}
         rows={groupedRows}
         title='Normal Operations Norms'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
@@ -465,10 +444,6 @@ const NormalOpNormsScreen = () => {
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
         // fetchData={fetchData}
-        onRowEditStop={handleRowEditStop}
-        onProcessRowUpdateError={onProcessRowUpdateError}
-        setRowModesModel={setRowModesModel}
-        rowModesModel={rowModesModel}
         permissions={{
           showAction: true,
           addButton: false,

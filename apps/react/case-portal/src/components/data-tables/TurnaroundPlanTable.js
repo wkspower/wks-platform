@@ -5,7 +5,6 @@ import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import ASDataGrid from './ASDataGrid'
-import { GridRowModes } from '@mui/x-data-grid'
 
 const TurnaroundPlanTable = () => {
   const menu = useSelector((state) => state.menu)
@@ -15,13 +14,12 @@ const TurnaroundPlanTable = () => {
   const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
+  const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [rowModesModel, setRowModesModel] = useState({})
-
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -31,13 +29,17 @@ const TurnaroundPlanTable = () => {
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    if (unsavedChangesRef.current.unsavedRows) {
-      setTaData(oldRow?.map((row) => (row.id === newRow.id ? newRow : row)))
-    }
+
     // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
+
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === newRow.id ? { ...newRow, isNew: false } : row,
+      ),
+    )
 
     // setHasUnsavedRows(true)
     return newRow
@@ -51,7 +53,7 @@ const TurnaroundPlanTable = () => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-      console.log(newRow)
+
       const turnAroundDetails = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
@@ -63,6 +65,7 @@ const TurnaroundPlanTable = () => {
         audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
       }))
+
       const response = await DataService.saveTurnAroundData(
         plantId,
         turnAroundDetails,
@@ -133,6 +136,7 @@ const TurnaroundPlanTable = () => {
       }))
 
       setTaData(formattedData)
+      setRows(formattedData)
     } catch (error) {
       console.error('Error fetching Turnaround data:', error)
     }
@@ -345,8 +349,9 @@ const TurnaroundPlanTable = () => {
   return (
     <div>
       <ASDataGrid
+        setRows={setRows}
         columns={colDefs}
-        rows={TaData}
+        rows={rows}
         title='Turnaround Plan'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
@@ -368,19 +373,7 @@ const TurnaroundPlanTable = () => {
         // handleDeleteClick={handleDeleteClick}
         onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
-        setRowModesModel={setRowModesModel}
-        rowModesModel={rowModesModel}
         experimentalFeatures={{ newEditingApi: true }}
-        onCellEditStop={(params, event) => {
-          event.defaultMuiPrevented = true
-          if (
-            params.reason === 'cellFocusOut' ||
-            params.reason === 'escapeKeyDown'
-          ) {
-            const updatedRow = { ...params.row, [params.field]: params.value }
-            processRowUpdate(updatedRow, params.row)
-          }
-        }}
         permissions={{
           showAction: true,
           addButton: true,

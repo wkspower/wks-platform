@@ -5,7 +5,6 @@ import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useGridApiRef } from '@mui/x-data-grid'
-import { GridRowModes } from '@mui/x-data-grid'
 const headerMap = generateHeaderNames()
 
 const BusinessDemand = () => {
@@ -17,12 +16,13 @@ const BusinessDemand = () => {
   const menu = useSelector((state) => state.menu)
   const { sitePlantChange } = menu
   const apiRef = useGridApiRef()
+  const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [rowModesModel, setRowModesModel] = useState({})
+
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -38,6 +38,7 @@ const BusinessDemand = () => {
         id: index,
       }))
       setBDData(formattedData)
+      setRows(formattedData)
     } catch (error) {
       console.error('Error fetching Turnaround data:', error)
     }
@@ -70,11 +71,9 @@ const BusinessDemand = () => {
       editable: true,
       minWidth: 225,
       valueGetter: (params) => {
-        console.log(params, 'checkproducts')
         return params || ''
       },
       valueFormatter: (params) => {
-        console.log(allProducts)
         const product = allProducts.find((p) => p.id === params)
         return product ? product.displayName : ''
       },
@@ -219,59 +218,37 @@ const BusinessDemand = () => {
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-    // Store edited row data
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    // onRowUpdate.updatedRow(unsavedChangesRef.current.unsavedRows)
-    if (unsavedChangesRef.current.unsavedRows) {
-      setBDData(oldRow?.map((row) => (row.id === newRow.id ? newRow : row)))
-    }
 
     // Keep track of original values before editing
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
 
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === newRow.id ? { ...newRow, isNew: false } : row,
+      ),
+    )
+
     return newRow
   }, [])
 
-  // const saveChanges = React.useCallback(async () => {
-  //   console.log(
-  //     'Edited Data: ',
-  //     Object.values(unsavedChangesRef.current.unsavedRows),
-  //   )
-  //   try {
-  //     // if (title === 'Business Demand') {
-  //     var data = Object.values(unsavedChangesRef.current.unsavedRows)
-  //     saveBusinessDemandData(data)
-  //     // }
-
-  //     unsavedChangesRef.current = {
-  //       unsavedRows: {},
-  //       rowsBeforeChange: {},
-  //     }
-  //   } catch (error) {
-  //     // setIsSaving(false);
-  //   }
-  // }, [apiRef])
   const saveChanges = React.useCallback(async () => {
-    console.log(
-      'Edited Data: ',
-      Object.values(unsavedChangesRef.current.unsavedRows),
-    )
-
-    setTimeout(async () => {
+    setTimeout(() => {
       try {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        await saveBusinessDemandData(data)
-
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
+        if (data.length == 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
         }
-      } catch (error) {
-        console.error('Error saving data:', error)
-      }
-    }, 1000) // Delay of 2 seconds
+        saveBusinessDemandData(data)
+      } catch (error) {}
+    }, 1000)
   }, [apiRef])
 
   const saveBusinessDemandData = async (newRows) => {
@@ -296,7 +273,7 @@ const BusinessDemand = () => {
         jan: row.jan || null,
         feb: row.feb || null,
         march: row.march || null,
-        remark: row.remark,
+        remark: row.remark || null,
         avgTph: row.avgTph || null,
         year: localStorage.getItem('year'),
         plantId: plantId,
@@ -344,8 +321,9 @@ const BusinessDemand = () => {
   return (
     <div>
       <ASDataGrid
+        setRows={setRows}
         columns={colDefs}
-        rows={bdData}
+        rows={rows}
         title='Business Demand'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
@@ -366,8 +344,6 @@ const BusinessDemand = () => {
         // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
         onProcessRowUpdateError={onProcessRowUpdateError}
-        setRowModesModel={setRowModesModel}
-        rowModesModel={rowModesModel}
         permissions={{
           showAction: true,
           addButton: true,
