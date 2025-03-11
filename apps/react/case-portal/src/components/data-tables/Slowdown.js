@@ -60,7 +60,7 @@ const SlowDown = () => {
         durationInHrs: parseFloat(row.durationInHrs),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
-        remark: row.remarks,
+        remark: row.remark,
         rate: row.rate,
         audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
@@ -115,7 +115,7 @@ const SlowDown = () => {
         durationInHrs: newRow.durationInHrs,
         maintEndDateTime: newRow.maintEndDateTime,
         maintStartDateTime: newRow.maintStartDateTime,
-        remark: newRow.remarks,
+        remark: newRow.remark,
         rate: newRow.rate,
       }
 
@@ -391,7 +391,7 @@ const SlowDown = () => {
     },
 
     {
-      field: 'remarks',
+      field: 'remark',
       headerName: 'Remarks',
       editable: true,
       minWidth: 200,
