@@ -247,6 +247,10 @@ const BusinessDemand = () => {
           return
         }
         saveBusinessDemandData(data)
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
       } catch (error) {}
     }, 1000)
   }, [apiRef])

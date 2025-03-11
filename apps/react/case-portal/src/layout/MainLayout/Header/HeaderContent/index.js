@@ -28,6 +28,7 @@ const HeaderContent = ({ keycloak }) => {
   const [plants, setPlants] = useState([])
   const [allPlants, setAllPlants] = useState([])
   const dispatch = useDispatch()
+  const [year, setYear] = useState('')
 
   // Helper: Extract allowed site IDs and allowed plant IDs from Keycloak token
   const getAllowedFilter = () => {
@@ -148,7 +149,9 @@ const HeaderContent = ({ keycloak }) => {
   }
 
   useEffect(() => {
-    localStorage.setItem('year', '2025-26')
+    const year = '2025-26'
+    localStorage.setItem('year', year)
+    setYear(year)
     getPlantAndSite()
   }, [])
 
@@ -268,6 +271,16 @@ const HeaderContent = ({ keycloak }) => {
       {matchesXs && <Search />}
       {!matchesXs && <Box sx={{ width: '100%', ml: 1 }} />}
       <Stack direction='row' spacing={2} alignItems='center'>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography
+            variant='body1'
+            color='white'
+            sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}
+          >
+            Year: {year}
+          </Typography>
+        </Box>
+
         {/* Vertical Selector */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant='body1' color='white'>
