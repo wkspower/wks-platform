@@ -280,7 +280,7 @@ const BusinessDemand = () => {
         normParameterId: row.normParameterId,
         id: row.idFromApi || null,
       }))
-      if (businessData.plantId.length() > 0) {
+      if (businessData.length > 0) {
         const response = await DataService.saveBusinessDemandData(
           plantId,
           businessData, // Now sending an array of rows

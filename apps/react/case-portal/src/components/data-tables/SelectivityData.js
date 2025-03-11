@@ -69,7 +69,7 @@ const SelectivityData = () => {
     }, 1000)
   }, [apiRef])
   const saveCatalystData = async (newRow) => {
-    console.log('new Row ', newRow)
+    // console.log('new Row ', newRow)
 
     try {
       var plantId = ''
@@ -131,7 +131,7 @@ const SelectivityData = () => {
         params?.row?.maintenanceId ||
         params?.NormParameterMonthlyTransactionId
 
-      console.log(maintenanceId, params, id)
+      // console.log(maintenanceId, params, id)
 
       // Ensure UI state updates before the deletion process
       setOpen1(true)
@@ -181,13 +181,13 @@ const SelectivityData = () => {
         const data = await DataService.getAllCatalyst(keycloak)
 
         const productList = data.map((product) => {
-          console.log('Original ID:', product.id)
+          // console.log('Original ID:', product.id)
           return {
             id: product.id, // Should not change the case
             displayName: product.displayName,
           }
         })
-        console.log('Mapped Product List:', productList)
+        // console.log('Mapped Product List:', productList)
 
         setAllCatalyst(productList)
       } catch (error) {
