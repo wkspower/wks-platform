@@ -182,13 +182,13 @@ const ShutdownNorms = () => {
         // var data = Object.values(unsavedChangesRef.current.unsavedRows)
         // saveShutdownData(data)
 
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } catch (error) {
+        // setIsSaving(false);
       }
-    } catch (error) {
-      // setIsSaving(false);
-    }
     }, 1000) // Delay of 2 seconds
   }, [apiRef])
   return (
@@ -221,7 +221,7 @@ const ShutdownNorms = () => {
           deleteButton: false,
           editButton: true,
           showUnit: true,
-          saveWithRemark: true,
+          saveWithRemark: false,
           saveBtn: true,
         }}
       />

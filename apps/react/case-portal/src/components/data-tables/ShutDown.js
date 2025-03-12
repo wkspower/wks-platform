@@ -20,13 +20,22 @@ const ShutDown = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  // States for the Remark Dialog
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
 
   const keycloak = useSession()
-
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remark || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
@@ -229,56 +238,56 @@ const ShutDown = () => {
       hide: true,
     },
 
-    {
-      field: 'product',
-      headerName: 'Product',
-      editable: true,
-      minWidth: 225,
-      valueGetter: (params) => {
-        // console.log('p1', params);
-        // console.log('p2', params2);
-        return params || ''
-      },
-      valueFormatter: (params) => {
-        // console.log('params valueFormatter ', params)
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : ''
-      },
-      renderEditCell: (params) => {
-        const { value } = params
-        // console.log('q1', params);
-        // console.log('q2', params2);
-        return (
-          <select
-            value={value || ''}
-            onChange={(event) => {
-              params.api.setEditCellValue({
-                id: params.id,
-                field: 'product',
-                value: event.target.value,
-              })
-            }}
-            style={{
-              width: '100%',
-              padding: '5px',
-              border: 'none', // Removes border
-              outline: 'none', // Removes focus outline
-              background: 'transparent', // Keeps background clean
-            }}
-          >
-            {/* Disabled first option */}
-            <option value='' disabled>
-              Select
-            </option>
-            {allProducts.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.displayName}
-              </option>
-            ))}
-          </select>
-        )
-      },
-    },
+    // {
+    //   field: 'product',
+    //   headerName: 'Product',
+    //   editable: true,
+    //   minWidth: 225,
+    //   valueGetter: (params) => {
+    //     // console.log('p1', params);
+    //     // console.log('p2', params2);
+    //     return params || ''
+    //   },
+    //   valueFormatter: (params) => {
+    //     // console.log('params valueFormatter ', params)
+    //     const product = allProducts.find((p) => p.id === params)
+    //     return product ? product.displayName : ''
+    //   },
+    //   renderEditCell: (params) => {
+    //     const { value } = params
+    //     // console.log('q1', params);
+    //     // console.log('q2', params2);
+    //     return (
+    //       <select
+    //         value={value || ''}
+    //         onChange={(event) => {
+    //           params.api.setEditCellValue({
+    //             id: params.id,
+    //             field: 'product',
+    //             value: event.target.value,
+    //           })
+    //         }}
+    //         style={{
+    //           width: '100%',
+    //           padding: '5px',
+    //           border: 'none', // Removes border
+    //           outline: 'none', // Removes focus outline
+    //           background: 'transparent', // Keeps background clean
+    //         }}
+    //       >
+    //         {/* Disabled first option */}
+    //         <option value='' disabled>
+    //           Select
+    //         </option>
+    //         {allProducts.map((product) => (
+    //           <option key={product.id} value={product.id}>
+    //             {product.displayName}
+    //           </option>
+    //         ))}
+    //       </select>
+    //     )
+    //   },
+    // },
 
     {
       field: 'maintStartDateTime',
@@ -320,15 +329,33 @@ const ShutDown = () => {
       // valueGetter: (params) => params?.durationInHrs || 0,
       valueGetter: findDuration,
     },
-    { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
+    {
+      field: 'remark',
+      headerName: 'Remark',
+      minWidth: 150,
+      editable: true,
+      renderCell: (params) => {
+        return (
+          <div
+            style={{
+              cursor: 'pointer',
+              color: params.value ? 'inherit' : 'gray',
+            }}
+            onClick={() => handleRemarkCellClick(params.row)}
+          >
+            {params.value || 'Click to add remark'}
+          </div>
+        )
+      },
+    },
   ]
 
-  const handleRowEditStop = (params, event) => {
-    setRowModesModel({
-      ...rowModesModel,
-      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
-    })
-  }
+  // const handleRowEditStop = (params, event) => {
+  //   setRowModesModel({
+  //     ...rowModesModel,
+  //     [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+  //   })
+  // }
 
   const onProcessRowUpdateError = React.useCallback((error) => {
     console.log(error)
@@ -340,7 +367,7 @@ const ShutDown = () => {
         setRows={setRows}
         columns={colDefs}
         rows={rows}
-        title='Shutdown Plan'
+        title='Shutdown/Turnaround Plan'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
@@ -359,9 +386,15 @@ const ShutDown = () => {
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
-        onRowEditStop={handleRowEditStop}
+        // onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
         experimentalFeatures={{ newEditingApi: true }}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        unsavedChangesRef={unsavedChangesRef}
         permissions={{
           showAction: true,
           addButton: true,

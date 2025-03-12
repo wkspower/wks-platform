@@ -5,6 +5,15 @@ import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useGridApiRef } from '@mui/x-data-grid'
+// import {
+//   Dialog,
+//   DialogTitle,
+//   DialogContent,
+//   DialogActions,
+//   TextField,
+//   Button,
+// } from '@mui/material'
+
 const headerMap = generateHeaderNames()
 
 const BusinessDemand = () => {
@@ -22,6 +31,10 @@ const BusinessDemand = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  // States for the Remark Dialog
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -31,7 +44,6 @@ const BusinessDemand = () => {
   const fetchData = async () => {
     try {
       const data = await DataService.getBDData(keycloak)
-
       const formattedData = data.map((item, index) => ({
         ...item,
         idFromApi: item.id,
@@ -63,6 +75,13 @@ const BusinessDemand = () => {
     fetchData()
     getAllProducts()
   }, [sitePlantChange, keycloak])
+
+  const handleRemarkCellClick = (row, newRow) => {
+    console.log(row, newRow)
+    setCurrentRemark(row.remark || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
 
   const colDefs = [
     {
@@ -209,7 +228,26 @@ const BusinessDemand = () => {
     },
 
     // { field: 'avgTph', headerName: 'AVG TPH', minWidth: 150, editable: true },
-    { field: 'remark', headerName: 'Remark', minWidth: 150, editable: true },
+    {
+      field: 'remark',
+      headerName: 'Remark',
+      minWidth: 150,
+      editable: true,
+      renderCell: (params) => {
+        // console.log(params)
+        return (
+          <div
+            style={{
+              cursor: 'pointer',
+              color: params.value ? 'inherit' : 'gray',
+            }}
+            onClick={() => handleRemarkCellClick(params.row)}
+          >
+            {params.value || 'Click to add remark'}
+          </div>
+        )
+      },
+    },
     {
       field: 'idFromApi',
       headerName: 'idFromApi',
@@ -217,6 +255,7 @@ const BusinessDemand = () => {
   ]
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
+    console.log(newRow)
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
@@ -311,12 +350,12 @@ const BusinessDemand = () => {
     }
   }
 
-  const handleRowEditStop = (params, event) => {
-    setRowModesModel({
-      ...rowModesModel,
-      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
-    })
-  }
+  // const handleRowEditStop = (params, event) => {
+  //   setRowModesModel({
+  //     ...rowModesModel,
+  //     [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+  //   })
+  // }
 
   const onProcessRowUpdateError = React.useCallback((error) => {
     console.log(error)
@@ -339,7 +378,7 @@ const BusinessDemand = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        onRowEditStop={handleRowEditStop}
+        // onRowEditStop={handleRowEditStop}
         apiRef={apiRef}
         deleteId={deleteId}
         setDeleteId={setDeleteId}
@@ -348,6 +387,14 @@ const BusinessDemand = () => {
         // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
         onProcessRowUpdateError={onProcessRowUpdateError}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={setCurrentRowId}
+        unsavedChangesRef={unsavedChangesRef}
+        handleRemarkCellClick={handleRemarkCellClick}
         permissions={{
           showAction: true,
           addButton: true,

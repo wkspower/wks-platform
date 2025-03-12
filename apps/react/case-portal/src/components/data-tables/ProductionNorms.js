@@ -23,12 +23,20 @@ const ProductionNorms = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('TPH')
   const [rows, setRows] = useState()
+  // States for the Remark Dialog
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
-
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remark || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
@@ -71,7 +79,7 @@ const ProductionNorms = () => {
           unsavedRows: {},
           rowsBeforeChange: {},
         }
-        setHasUnsavedRows(false)
+        // setHasUnsavedRows(false)
         // setIsSaving(false)
       } catch (error) {
         // setIsSaving(false)
@@ -114,9 +122,7 @@ const ProductionNorms = () => {
 
         // avgTPH: findAvg('1', row) || null,
         avgTPH: findSum('1', row) || null,
-
         aopRemarks: row.aopRemarks || 'remarks',
-
         id: row.idFromApi || null,
       }))
 
@@ -239,28 +245,28 @@ const ProductionNorms = () => {
     return product ? product.name : ''
   }
 
-  const findAvg = (value, row) => {
-    const months = [
-      'april',
-      'may',
-      'june',
-      'july',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-      'jan',
-      'feb',
-      'march',
-    ]
+  // const findAvg = (value, row) => {
+  //   const months = [
+  //     'april',
+  //     'may',
+  //     'june',
+  //     'july',
+  //     'aug',
+  //     'sep',
+  //     'oct',
+  //     'nov',
+  //     'dec',
+  //     'jan',
+  //     'feb',
+  //     'march',
+  //   ]
 
-    const values = months.map((month) => row[month] || 0)
-    const sum = values.reduce((acc, val) => acc + val, 0)
-    const avg = (sum / values.length).toFixed(2)
+  //   const values = months.map((month) => row[month] || 0)
+  //   const sum = values.reduce((acc, val) => acc + val, 0)
+  //   const avg = (sum / values.length).toFixed(2)
 
-    return avg === '0.00' ? null : avg
-  }
+  //   return avg === '0.00' ? null : avg
+  // }
 
   const findSum = (value, row) => {
     const months = [
@@ -474,8 +480,8 @@ const ProductionNorms = () => {
     },
     {
       field: 'averageTPH',
-      headerName: 'TOTAL',
-      minWidth: 150,
+      headerName: 'Total',
+      // minWidth: 150,
       editable: false,
       // valueGetter: findAvg,
       valueGetter: findSum,
@@ -483,18 +489,32 @@ const ProductionNorms = () => {
     {
       field: 'aopRemarks',
       headerName: 'Remark',
-      minWidth: 75,
+      minWidth: 175,
       editable: true,
+      renderCell: (params) => {
+        // console.log(params)
+        return (
+          <div
+            style={{
+              cursor: 'pointer',
+              color: params.value ? 'inherit' : 'gray',
+            }}
+            onClick={() => handleRemarkCellClick(params.row)}
+          >
+            {params.value || 'Click to add remark'}
+          </div>
+        )
+      },
     },
     { field: 'aopStatus', headerName: 'aopStatus', editable: false },
   ]
 
-  const handleRowEditStop = (params, event) => {
-    setRowModesModel({
-      ...rowModesModel,
-      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
-    })
-  }
+  // const handleRowEditStop = (params, event) => {
+  //   setRowModesModel({
+  //     ...rowModesModel,
+  //     [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+  //   })
+  // }
 
   const onProcessRowUpdateError = React.useCallback((error) => {
     console.log(error)
@@ -518,7 +538,7 @@ const ProductionNorms = () => {
         paginationOptions={[100, 200, 300]}
         updateProductNormData={updateProductNormData}
         processRowUpdate={processRowUpdate}
-        onRowEditStop={handleRowEditStop}
+        // onRowEditStop={handleRowEditStop}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
@@ -529,6 +549,12 @@ const ProductionNorms = () => {
         fetchData={fetchData}
         onProcessRowUpdateError={onProcessRowUpdateError}
         handleUnitChange={handleUnitChange}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        unsavedChangesRef={unsavedChangesRef}
         permissions={{
           showAction: true,
           addButton: false,
@@ -538,8 +564,8 @@ const ProductionNorms = () => {
           saveWithRemark: true,
           showCalculate: true,
           saveBtn: true,
-          UOM: 'TPH',
-          UnitToShow: 'Values/Ton',
+          UOM: 'Ton',
+          UnitToShow: true,
         }}
       />
     </div>

@@ -233,7 +233,7 @@ const FeedStockAvailability = () => {
           deleteButton: true,
           editButton: true,
           showUnit: true,
-          saveWithRemark: true,
+          saveWithRemark: false,
           saveBtn: true,
         }}
       />

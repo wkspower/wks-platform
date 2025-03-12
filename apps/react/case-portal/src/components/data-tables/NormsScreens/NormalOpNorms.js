@@ -8,128 +8,6 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 const headerMap = generateHeaderNames()
 
 // Define columns as usual
-const productionColumns = [
-  {
-    field: 'srNo',
-    headerName: 'Sr. No',
-    minWidth: 210,
-    maxWidth: 200,
-    editable: false,
-    flex: 2,
-  },
-  {
-    field: 'particulars',
-    headerName: 'Particulars',
-    minWidth: 150,
-    maxWidth: 160,
-    editable: true,
-  },
-  { field: 'unit', headerName: 'Unit', width: 100, editable: true },
-  {
-    field: 'april',
-    headerName: headerMap['apr'],
-    editable: true,
-    type: 'number',
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'may',
-    headerName: headerMap['may'],
-    editable: true,
-    type: 'number',
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'june',
-    headerName: headerMap['jun'],
-    editable: true,
-    type: 'number',
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'july',
-    headerName: headerMap['jul'],
-    editable: true,
-    type: 'number',
-    align: 'left',
-    headerAlign: 'left',
-  },
-
-  {
-    field: 'august',
-    headerName: headerMap['aug'],
-    editable: true,
-    type: 'number',
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'september',
-    headerName: headerMap['sep'],
-    editable: true,
-    type: 'number',
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'october',
-    headerName: headerMap['oct'],
-    editable: true,
-    type: 'number',
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'november',
-    headerName: headerMap['nov'],
-    editable: true,
-    type: 'number',
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'december',
-    headerName: headerMap['dec'],
-    editable: true,
-    type: 'number',
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'january',
-    headerName: headerMap['jan'],
-    editable: true,
-    type: 'number',
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'february',
-    headerName: headerMap['feb'],
-    editable: true,
-    type: 'number',
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'march',
-    headerName: headerMap['mar'],
-    editable: true,
-    type: 'number',
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'remark',
-    headerName: 'Remark',
-    minWidth: 180,
-    maxWidth: 200,
-    editable: true,
-  },
-]
 
 // Sample production data (10 rows)
 const productionData = [
@@ -329,7 +207,6 @@ const NormalOpNormsScreen = () => {
   const menu = useSelector((state) => state.menu)
   const { sitePlantChange } = menu
   const [open1, setOpen1] = useState(false)
-  const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState(productionData)
   const [snackbarData, setSnackbarData] = useState({
@@ -337,11 +214,156 @@ const NormalOpNormsScreen = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  // States for the Remark Dialog
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
   const keycloak = useSession()
+  const productionColumns = [
+    {
+      field: 'srNo',
+      headerName: 'Sr. No',
+      minWidth: 210,
+      maxWidth: 200,
+      editable: false,
+      flex: 2,
+    },
+    {
+      field: 'particulars',
+      headerName: 'Particulars',
+      minWidth: 150,
+      maxWidth: 160,
+      editable: true,
+    },
+    { field: 'unit', headerName: 'Unit', width: 100, editable: true },
+    {
+      field: 'april',
+      headerName: headerMap['apr'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'may',
+      headerName: headerMap['may'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'june',
+      headerName: headerMap['jun'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'july',
+      headerName: headerMap['jul'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+
+    {
+      field: 'august',
+      headerName: headerMap['aug'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'september',
+      headerName: headerMap['sep'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'october',
+      headerName: headerMap['oct'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'november',
+      headerName: headerMap['nov'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'december',
+      headerName: headerMap['dec'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'january',
+      headerName: headerMap['jan'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'february',
+      headerName: headerMap['feb'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'march',
+      headerName: headerMap['mar'],
+      editable: true,
+      type: 'number',
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'remark',
+      headerName: 'Remark',
+      minWidth: 180,
+      maxWidth: 200,
+      editable: true,
+      renderCell: (params) => {
+        return (
+          <div
+            style={{
+              cursor: 'pointer',
+              color: params.value ? 'inherit' : 'gray',
+            }}
+            onClick={() => handleRemarkCellClick(params.row)}
+          >
+            {params.value || 'Click to add remark'}
+          </div>
+        )
+      },
+    },
+  ]
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remark || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
@@ -444,6 +466,12 @@ const NormalOpNormsScreen = () => {
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
         // fetchData={fetchData}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        unsavedChangesRef={unsavedChangesRef}
         permissions={{
           showAction: true,
           addButton: false,
@@ -452,7 +480,7 @@ const NormalOpNormsScreen = () => {
           showUnit: false,
           saveWithRemark: true,
           saveBtn: true,
-          showCalculate: true,
+          showCalculate: false,
         }}
         getRowClassName={(params) =>
           params.row.groupHeader ? 'group-header-row' : ''

@@ -65,6 +65,14 @@ const DataGridTable = ({
   //handleRowViewMode,
   setRows,
   rows,
+  remarkDialogOpen,
+  setRemarkDialogOpen,
+  currentRemark,
+  setCurrentRemark,
+  setCurrentRowId,
+  currentRowId,
+  unsavedChangesRef,
+  handleRemarkCellClick,
 }) => {
   const [tempHide, setTempHide] = useState(true)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -81,6 +89,7 @@ const DataGridTable = ({
   const [isFilterActive, setIsFilterActive] = useState(false)
   const [selectedRowId, setSelectedRowId] = useState(null)
   const unitOptions = ['TPD', 'TPH']
+  const unitOptions2 = ['Ton', 'KT']
   const [selectedUnit, setSelectedUnit] = useState()
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(false)
@@ -130,7 +139,7 @@ const DataGridTable = ({
   }
 
   useEffect(() => {
-    if (rows) setRows(rows) 
+    if (rows) setRows(rows)
   }, [rows, setRows])
   // useEffect(() => {
   //   setRows((prevRows) => {
@@ -164,7 +173,7 @@ const DataGridTable = ({
         if (title == 'Business Demand') {
           await DataService.deleteBusinessDemandData(deleteId, keycloak)
         }
-        if (title == 'Shutdown Plan') {
+        if (title == 'Shutdown/Turnaround Plan') {
           await DataService.deleteShutdownData(deleteId, keycloak)
         }
         if (title == 'Slowdown Plan') {
@@ -374,13 +383,48 @@ const DataGridTable = ({
     setOpenRemark(false)
     setRemark('')
   }
+  // // Save the remark and update the row
+  // const handleRemarkSave = () => {
+  //   setRows((prevRows) =>
+  //     prevRows.map((row) =>
+  //       row.id === currentRowId ? { ...row, remark: currentRemark } : row,
+  //     ),
+  //   )
+  //   unsavedChangesRef.current.unsavedRows[currentRowId] = {
+  //     ...rows.find((row) => row.id === currentRowId),
+  //     remark: currentRemark,
+  //   }
+  //   setRemarkDialogOpen(false)
+  // }
+  const handleRemarkSave = () => {
+    setRows((prevRows) => {
+      const updatedRows = prevRows.map((row) => {
+        if (row.id === currentRowId) {
+          // If the row already has 'aopRemarks', update it; otherwise, update 'remark'
+          const keyToUpdate = 'aopRemarks' in row ? 'aopRemarks' : 'remark'
+          return { ...row, [keyToUpdate]: currentRemark }
+        }
+        return row
+      })
+      // Update unsavedChangesRef using the updated rows
+      const updatedRow = updatedRows.find((row) => row.id === currentRowId)
+      unsavedChangesRef.current.unsavedRows[currentRowId] = updatedRow
+      return updatedRows
+    })
+    setRemarkDialogOpen(false)
+  }
 
   const handleCellClick = (params) => {
     //UNCOMMENT IT FOR REMARK POP UP
     // if (params?.field === 'remark' || params?.field === 'aopRemarks') {
-    //   setRemark(params?.value || '')
-    //   setSelectedRowId(params.id)
-    //   handleOpenRemark()
+    console.log(params)
+    //   //   // setRemark(params?.value || '')
+    //   //   // setSelectedRowId(params.id)
+    //   //   // handleOpenRemark()
+    //   // setCurrentRemark(params?.value || '')
+    //   // setCurrentRowId(params?.id)
+    //   // setRemarkDialogOpen(true)
+    //   handleRemarkCellClick(params.row)
     // }
   }
 
@@ -464,7 +508,7 @@ const DataGridTable = ({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {permissions?.UnitToShow && (
+          {permissions?.UnitToShow && !tempHide && (
             <Chip
               label={permissions.UnitToShow}
               variant='outlined'
@@ -527,7 +571,7 @@ const DataGridTable = ({
             </Button>
           )}
 
-          {permissions?.showUnit && !tempHide && (
+          {permissions?.showUnit && (
             <TextField
               select
               value={selectedUnit || permissions?.UOM || ''}
@@ -542,11 +586,13 @@ const DataGridTable = ({
               <MenuItem value='' disabled>
                 Select UOM
               </MenuItem>
-              {unitOptions.map((unit) => (
-                <MenuItem key={unit} value={unit}>
-                  {unit}
-                </MenuItem>
-              ))}
+              {(permissions?.UnitToShow ? unitOptions2 : unitOptions).map(
+                (unit) => (
+                  <MenuItem key={unit} value={unit}>
+                    {unit}
+                  </MenuItem>
+                ),
+              )}
             </TextField>
           )}
 
@@ -906,7 +952,11 @@ const DataGridTable = ({
         </DialogActions>
       </Dialog>
 
-      <Dialog open={openRemark} onClose={handleCloseRemark}>
+      <Dialog
+        open={remarkDialogOpen}
+        onClose={() => setRemarkDialogOpen(false)}
+      >
+        {/* <Dialog open={openRemark} onClose={handleCloseRemark}> */}
         <DialogTitle>Add Remark</DialogTitle>
         <DialogContent>
           <TextField
@@ -918,21 +968,28 @@ const DataGridTable = ({
             fullWidth
             variant='outlined'
             sx={{ width: '100%', minWidth: '400px' }}
-            value={remark}
-            onChange={(e) => {
-              setRemark(e.target.value)
-              // setRowModesModel((prev) => ({
-              //   ...prev,
-              //   [id]: { mode: GridRowModes.View },
-              // }))
-            }}
+            value={currentRemark || ''}
+            // value={remark}
+            onChange={(e) => setCurrentRemark(e.target.value)}
             multiline
             rows={4}
+            //     onChange={(e) => {
+            //   setRemark(e.target.value)
+            //   // setRowModesModel((prev) => ({
+            //   //   ...prev,
+            //   //   [id]: { mode: GridRowModes.View },
+            //   // }))
+            // }}
+            // multiline
+            // rows={4}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseRemark}>Cancel</Button>
-          <Button onClick={addRemark}>Add</Button>
+          <Button onClick={() => setRemarkDialogOpen(false)}>Cancel</Button>
+          {/* <Button onClick={handleCloseRemark}>Cancel</Button> */}
+          <Button onClick={handleRemarkSave} disabled={!currentRemark?.trim()}>
+            Add
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

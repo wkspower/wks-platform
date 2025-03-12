@@ -155,10 +155,10 @@ export const MainRoutes = (
             path: 'slowdown-plan',
             element: <SlowDown />,
           },
-          {
-            path: 'turnaround-plan',
-            element: <TurnaroundPlanTable />,
-          },
+          // {
+          //   path: 'turnaround-plan',
+          //   element: <TurnaroundPlanTable />,
+          // },
           {
             path: 'feed-stock-availability',
             element: <FeedStockAvailability />,

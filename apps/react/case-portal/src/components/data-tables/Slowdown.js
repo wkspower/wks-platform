@@ -21,10 +21,20 @@ const SlowDown = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const keycloak = useSession()
+  // States for the Remark Dialog
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remark || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
 
@@ -60,7 +70,7 @@ const SlowDown = () => {
         durationInHrs: parseFloat(row.durationInHrs),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
-        remark: row.remark,
+        remark: row.remarks,
         rate: row.rate,
         audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
@@ -115,7 +125,7 @@ const SlowDown = () => {
         durationInHrs: newRow.durationInHrs,
         maintEndDateTime: newRow.maintEndDateTime,
         maintStartDateTime: newRow.maintStartDateTime,
-        remark: newRow.remark,
+        remark: newRow.remarks,
         rate: newRow.rate,
       }
 
@@ -395,15 +405,28 @@ const SlowDown = () => {
       headerName: 'Remarks',
       editable: true,
       minWidth: 200,
+      renderCell: (params) => {
+        return (
+          <div
+            style={{
+              cursor: 'pointer',
+              color: params.value ? 'inherit' : 'gray',
+            }}
+            onClick={() => handleRemarkCellClick(params.row)}
+          >
+            {params.value || 'Click to add remark'}
+          </div>
+        )
+      },
     },
   ]
 
-  const handleRowEditStop = (params, event) => {
-    setRowModesModel({
-      ...rowModesModel,
-      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
-    })
-  }
+  // const handleRowEditStop = (params, event) => {
+  //   setRowModesModel({
+  //     ...rowModesModel,
+  //     [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+  //   })
+  // }
 
   const onProcessRowUpdateError = React.useCallback((error) => {
     console.log(error)
@@ -434,9 +457,15 @@ const SlowDown = () => {
         open1={open1}
         // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
-        onRowEditStop={handleRowEditStop}
+        // onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
         experimentalFeatures={{ newEditingApi: true }}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        unsavedChangesRef={unsavedChangesRef}
         permissions={{
           showAction: true,
           addButton: true,

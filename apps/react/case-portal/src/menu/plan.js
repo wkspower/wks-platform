@@ -86,14 +86,14 @@ const plan = {
           icon: icons.IconTrendingDown,
           breadcrumbs: true,
         },
-        {
-          id: 'ta-plan',
-          title: i18n.t('menu.taPlan'),
-          type: 'item',
-          url: '/production-norms-plan/turnaround-plan',
-          icon: icons.IconTools,
-          breadcrumbs: true,
-        },
+        // {
+        //   id: 'ta-plan',
+        //   title: i18n.t('menu.taPlan'),
+        //   type: 'item',
+        //   url: '/production-norms-plan/turnaround-plan',
+        //   icon: icons.IconTools,
+        //   breadcrumbs: true,
+        // },
         {
           id: 'maintenance-details',
           title: i18n.t('menu.maintenanceDetails'),

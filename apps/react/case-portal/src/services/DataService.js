@@ -282,15 +282,16 @@ async function getCatalystSelectivityData(keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  var siteId = ''
+  var siteId = 'F0F4E75E-3C44-4FB4-BA7A-2B8227847134'
 
-  const storedSite = localStorage.getItem('selectedSite')
-  if (storedSite) {
-    const parsedSite = JSON.parse(storedSite)
-    siteId = parsedSite.id
-  }
+  // const storedSite = localStorage.getItem('selectedSite')
+  // if (storedSite) {
+  //   const parsedSite = JSON.parse(storedSite)
+  //   siteId = parsedSite.id
+  // }
+  var year = localStorage.getItem('year')
 
-  const url = `${process.env.REACT_APP_API_URL}/task/getCatalystSelectivityData?year=2024&plantId=${plantId}&siteId=${siteId}`
+  const url = `${process.env.REACT_APP_API_URL}/task/getCatalystSelectivityData?year=${year}&plantId=${plantId}&siteId=${siteId}`
 
   const headers = {
     Accept: 'application/json',
