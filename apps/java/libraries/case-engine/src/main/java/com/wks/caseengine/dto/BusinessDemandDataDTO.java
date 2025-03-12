@@ -36,4 +36,7 @@ public class BusinessDemandDataDTO {
     private Float avgTph;
     private String productName;
     private Integer displayOrder;
+    private String normTypeId;
+    private String normName;
+
 }
