@@ -77,7 +77,7 @@ const BusinessDemand = () => {
   }, [sitePlantChange, keycloak])
 
   const handleRemarkCellClick = (row, newRow) => {
-    console.log(row, newRow)
+    // console.log(row, newRow)
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
@@ -137,6 +137,16 @@ const BusinessDemand = () => {
       type: 'number',
       align: 'left',
       headerAlign: 'left',
+
+      sx: {
+        '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button':
+          {
+            display: 'none',
+          },
+        '& input[type=number]': {
+          MozAppearance: 'textfield',
+        },
+      },
     },
     {
       field: 'may',
@@ -403,6 +413,8 @@ const BusinessDemand = () => {
           showUnit: false,
           saveWithRemark: true,
           saveBtn: true,
+          // units: ["TON", "KILOTON"],
+          units: ['TPH', 'TPD'],
         }}
       />
     </div>

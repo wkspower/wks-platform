@@ -233,6 +233,7 @@ const FeedStockAvailability = () => {
           deleteButton: true,
           editButton: true,
           showUnit: true,
+          units: ['TPH', 'TPD'],
           saveWithRemark: false,
           saveBtn: true,
         }}

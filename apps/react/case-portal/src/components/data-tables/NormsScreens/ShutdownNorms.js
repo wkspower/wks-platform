@@ -221,6 +221,7 @@ const ShutdownNorms = () => {
           deleteButton: false,
           editButton: true,
           showUnit: true,
+          units: ['TPH', 'TPD'],
           saveWithRemark: false,
           saveBtn: true,
         }}
