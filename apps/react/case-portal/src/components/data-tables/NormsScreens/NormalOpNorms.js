@@ -207,6 +207,7 @@ const NormalOpNormsScreen = () => {
   const menu = useSelector((state) => state.menu)
   const { sitePlantChange } = menu
   const [open1, setOpen1] = useState(false)
+  const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState(productionData)
   const [snackbarData, setSnackbarData] = useState({

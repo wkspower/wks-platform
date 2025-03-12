@@ -20,6 +20,8 @@ const ProductionvolumeData = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [selectedUnit, setSelectedUnit] = useState('TPH')
+
   // States for the Remark Dialog
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -62,6 +64,7 @@ const ProductionvolumeData = () => {
   const editAOPMCCalculatedData = async (newRows) => {
     try {
       let plantId = ''
+      const isTPH = selectedUnit == 'TPD'
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
@@ -77,18 +80,22 @@ const ProductionvolumeData = () => {
       }
 
       const aopmccCalculatedData = newRows.map((row) => ({
-        april: row.april || null,
-        may: row.may || null,
-        june: row.june || null,
-        july: row.july || null,
-        august: row.august || null,
-        september: row.september || null,
-        october: row.october || null,
-        november: row.november || null,
-        december: row.december || null,
-        january: row.january || null,
-        february: row.february || null,
-        march: row.march || null,
+        april: isTPH && row.april ? row.april * 24 : row.april || null,
+        may: isTPH && row.may ? row.may * 24 : row.may || null,
+        june: isTPH && row.june ? row.june * 24 : row.june || null,
+        july: isTPH && row.july ? row.july * 24 : row.july || null,
+        august: isTPH && row.august ? row.august * 24 : row.august || null,
+        september:
+          isTPH && row.september ? row.september * 24 : row.september || null,
+        october: isTPH && row.october ? row.october * 24 : row.october || null,
+        november:
+          isTPH && row.november ? row.november * 24 : row.november || null,
+        december:
+          isTPH && row.december ? row.december * 24 : row.december || null,
+        january: isTPH && row.january ? row.january * 24 : row.january || null,
+        february:
+          isTPH && row.february ? row.february * 24 : row.february || null,
+        march: isTPH && row.march ? row.march * 24 : row.march || null,
 
         aopStatus: row.aopStatus || 'draft',
         year: localStorage.getItem('year'),
@@ -142,10 +149,6 @@ const ProductionvolumeData = () => {
 
   const saveChanges = React.useCallback(async () => {
     setTimeout(() => {
-      // console.log(
-      //   'Edited Data: ',
-      //   Object.values(unsavedChangesRef.current.unsavedRows),
-      // )
       try {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
         editAOPMCCalculatedData(data)
@@ -157,17 +160,53 @@ const ProductionvolumeData = () => {
         // setIsSaving(false);
       }
     }, 1000)
-  }, [apiRef])
+  }, [apiRef, selectedUnit])
 
   const fetchData = async () => {
     try {
       const data = await DataService.getAOPMCCalculatedData(keycloak)
-      const formattedData = data.map((item, index) => ({
-        ...item,
-        idFromApi: item?.id,
-        normParametersFKId: item?.normParametersFKId.toLowerCase(),
-        id: index,
-      }))
+      const formattedData = data.map((item, index) => {
+        const isTPD = selectedUnit == 'TPD'
+        return {
+          ...item,
+          idFromApi: item?.id,
+          normParametersFKId: item?.normParametersFKId.toLowerCase(),
+          id: index,
+
+          ...(isTPD && {
+            april: item.april
+              ? (item.april / 24).toFixed(2)
+              : item.april || null,
+            may: item.may ? (item.may / 24).toFixed(2) : item.may || null,
+            june: item.june ? (item.june / 24).toFixed(2) : item.june || null,
+            july: item.july ? (item.july / 24).toFixed(2) : item.july || null,
+            august: item.august
+              ? (item.august / 24).toFixed(2)
+              : item.august || null,
+            september: item.september
+              ? (item.september / 24).toFixed(2)
+              : item.september || null,
+            october: item.october
+              ? (item.october / 24).toFixed(2)
+              : item.october || null,
+            november: item.november
+              ? (item.november / 24).toFixed(2)
+              : item.november || null,
+            december: item.december
+              ? (item.december / 24).toFixed(2)
+              : item.december || null,
+            january: item.january
+              ? (item.january / 24).toFixed(2)
+              : item.january || null,
+            february: item.february
+              ? (item.february / 24).toFixed(2)
+              : item.february || null,
+            march: item.march
+              ? (item.march / 24).toFixed(2)
+              : item.march || null,
+          }),
+        }
+      })
       setProductNormData(formattedData)
       setRows(formattedData)
     } catch (error) {
@@ -193,7 +232,7 @@ const ProductionvolumeData = () => {
 
     getAllProducts()
     fetchData()
-  }, [sitePlantChange, keycloak])
+  }, [sitePlantChange, keycloak, selectedUnit])
 
   const getProductName = async (value, row) => {
     if (!row || !row.normParametersFKId) {
@@ -419,6 +458,10 @@ const ProductionvolumeData = () => {
     console.log(error)
   }, [])
 
+  const handleUnitChange = (unit) => {
+    setSelectedUnit(unit)
+  }
+
   return (
     <div>
       <ASDataGrid
@@ -445,6 +488,7 @@ const ProductionvolumeData = () => {
         fetchData={fetchData}
         // onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
+        handleUnitChange={handleUnitChange}
         experimentalFeatures={{ newEditingApi: true }}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}
@@ -461,6 +505,7 @@ const ProductionvolumeData = () => {
           saveWithRemark: true,
           showRefreshBtn: true,
           saveBtn: true,
+          units: ['TPH', 'TPD'],
         }}
       />
     </div>

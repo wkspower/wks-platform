@@ -21,9 +21,11 @@ const ProductionNorms = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [selectedUnit, setSelectedUnit] = useState('TPH')
-  const [rows, setRows] = useState()
-  // States for the Remark Dialog
+  const [selectedUnit, setSelectedUnit] = useState('Ton') // Initialize with a default value
+
+  const [rows, setRows] = useState([])
+  const [isSaving, setIsSaving] = useState(false)
+    // States for the Remark Dialog
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -79,18 +81,15 @@ const ProductionNorms = () => {
           unsavedRows: {},
           rowsBeforeChange: {},
         }
-        // setHasUnsavedRows(false)
-        // setIsSaving(false)
-      } catch (error) {
-        // setIsSaving(false)
-      }
+        setHasUnsavedRows(false)
+      } catch (error) {}
     }, 1000)
-  }, [apiRef])
+  }, [apiRef, selectedUnit])
 
   const updateProductNormData = async (newRow) => {
     try {
       let plantId = ''
-      const isTPH = selectedUnit != 'TPH'
+      const isKiloTon = selectedUnit != 'Ton'
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
@@ -107,22 +106,24 @@ const ProductionNorms = () => {
         // normItem: getProductName('1', row.normParametersFKId) || null,
         normItem: 'EOE',
 
-        april: isTPH && row.april ? row.april * 24 : row.april || null,
-        may: isTPH && row.may ? row.may * 24 : row.may || null,
-        june: isTPH && row.june ? row.june * 24 : row.june || null,
-        july: isTPH && row.july ? row.july * 24 : row.july || null,
-        aug: isTPH && row.aug ? row.aug * 24 : row.aug || null,
-        sep: isTPH && row.sep ? row.sep * 24 : row.sep || null,
-        oct: isTPH && row.oct ? row.oct * 24 : row.oct || null,
-        nov: isTPH && row.nov ? row.nov * 24 : row.nov || null,
-        dec: isTPH && row.dec ? row.dec * 24 : row.dec || null,
-        jan: isTPH && row.jan ? row.jan * 24 : row.jan || null,
-        feb: isTPH && row.feb ? row.feb * 24 : row.feb || null,
-        march: isTPH && row.march ? row.march * 24 : row.march || null,
+        april: isKiloTon && row.april ? row.april * 1000 : row.april || null,
+        may: isKiloTon && row.may ? row.may * 1000 : row.may || null,
+        june: isKiloTon && row.june ? row.june * 1000 : row.june || null,
+        july: isKiloTon && row.july ? row.july * 1000 : row.july || null,
+        aug: isKiloTon && row.aug ? row.aug * 1000 : row.aug || null,
+        sep: isKiloTon && row.sep ? row.sep * 1000 : row.sep || null,
+        oct: isKiloTon && row.oct ? row.oct * 1000 : row.oct || null,
+        nov: isKiloTon && row.nov ? row.nov * 1000 : row.nov || null,
+        dec: isKiloTon && row.dec ? row.dec * 1000 : row.dec || null,
+        jan: isKiloTon && row.jan ? row.jan * 1000 : row.jan || null,
+        feb: isKiloTon && row.feb ? row.feb * 1000 : row.feb || null,
+        march: isKiloTon && row.march ? row.march * 1000 : row.march || null,
 
         // avgTPH: findAvg('1', row) || null,
         avgTPH: findSum('1', row) || null,
+
         aopRemarks: row.aopRemarks || 'remarks',
+
         id: row.idFromApi || null,
       }))
 
@@ -153,25 +154,25 @@ const ProductionNorms = () => {
       const data = await DataService.handleCalculate(plantId, year, keycloak)
 
       const formattedData = data.map((item, index) => {
-        const isTPH = selectedUnit != 'TPH'
+        const isKiloTon = selectedUnit != 'Ton'
         return {
           ...item,
           idFromApi: item.id,
           normParametersFKId: item?.normParametersFKId?.toLowerCase(),
           id: index,
-          ...(isTPH && {
-            jan: item.jan ? item.jan / 24 : item.jan,
-            feb: item.feb ? item.feb / 24 : item.feb,
-            march: item.march ? item.march / 24 : item.march,
-            april: item.april ? item.april / 24 : item.april,
-            may: item.may ? item.may / 24 : item.may,
-            june: item.june ? item.june / 24 : item.june,
-            july: item.july ? item.july / 24 : item.july,
-            aug: item.aug ? item.aug / 24 : item.aug,
-            sep: item.sep ? item.sep / 24 : item.sep,
-            oct: item.oct ? item.oct / 24 : item.oct,
-            nov: item.nov ? item.nov / 24 : item.nov,
-            dec: item.dec ? item.dec / 24 : item.dec,
+          ...(isKiloTon && {
+            jan: item.jan ? item.jan / 1000 : item.jan,
+            feb: item.feb ? item.feb / 1000 : item.feb,
+            march: item.march ? item.march / 1000 : item.march,
+            april: item.april ? item.april / 1000 : item.april,
+            may: item.may ? item.may / 1000 : item.may,
+            june: item.june ? item.june / 1000 : item.june,
+            july: item.july ? item.july / 1000 : item.july,
+            aug: item.aug ? item.aug / 1000 : item.aug,
+            sep: item.sep ? item.sep / 1000 : item.sep,
+            oct: item.oct ? item.oct / 1000 : item.oct,
+            nov: item.nov ? item.nov / 1000 : item.nov,
+            dec: item.dec ? item.dec / 1000 : item.dec,
           }),
         }
       })
@@ -192,35 +193,37 @@ const ProductionNorms = () => {
 
   const fetchData = async () => {
     try {
+      setIsSaving(true)
       const data = await DataService.getAOPData(keycloak)
       const formattedData = data.map((item, index) => {
-        const isTPH = selectedUnit != 'TPH'
+        const isKiloTon = selectedUnit !== 'Ton'
         return {
           ...item,
           idFromApi: item.id,
           normParametersFKId: item?.normParametersFKId?.toLowerCase(),
           id: index,
-          ...(isTPH && {
-            jan: item.jan ? item.jan / 24 : item.jan,
-            feb: item.feb ? item.feb / 24 : item.feb,
-            march: item.march ? item.march / 24 : item.march,
-            april: item.april ? item.april / 24 : item.april,
-            may: item.may ? item.may / 24 : item.may,
-            june: item.june ? item.june / 24 : item.june,
-            july: item.july ? item.july / 24 : item.july,
-            aug: item.aug ? item.aug / 24 : item.aug,
-            sep: item.sep ? item.sep / 24 : item.sep,
-            oct: item.oct ? item.oct / 24 : item.oct,
-            nov: item.nov ? item.nov / 24 : item.nov,
-            dec: item.dec ? item.dec / 24 : item.dec,
+          ...(isKiloTon && {
+            jan: item.jan ? item.jan / 1000 : item.jan,
+            feb: item.feb ? item.feb / 1000 : item.feb,
+            march: item.march ? item.march / 1000 : item.march,
+            april: item.april ? item.april / 1000 : item.april,
+            may: item.may ? item.may / 1000 : item.may,
+            june: item.june ? item.june / 1000 : item.june,
+            july: item.july ? item.july / 1000 : item.july,
+            aug: item.aug ? item.aug / 1000 : item.aug,
+            sep: item.sep ? item.sep / 1000 : item.sep,
+            oct: item.oct ? item.oct / 1000 : item.oct,
+            nov: item.nov ? item.nov / 1000 : item.nov,
+            dec: item.dec ? item.dec / 1000 : item.dec,
           }),
         }
       })
-
       setCsData(formattedData)
       setRows(formattedData)
     } catch (error) {
       console.error('Error fetching Production AOP data:', error)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -245,28 +248,28 @@ const ProductionNorms = () => {
     return product ? product.name : ''
   }
 
-  // const findAvg = (value, row) => {
-  //   const months = [
-  //     'april',
-  //     'may',
-  //     'june',
-  //     'july',
-  //     'aug',
-  //     'sep',
-  //     'oct',
-  //     'nov',
-  //     'dec',
-  //     'jan',
-  //     'feb',
-  //     'march',
-  //   ]
+  const findAvg = (value, row) => {
+    const months = [
+      'april',
+      'may',
+      'june',
+      'july',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+      'jan',
+      'feb',
+      'march',
+    ]
 
-  //   const values = months.map((month) => row[month] || 0)
-  //   const sum = values.reduce((acc, val) => acc + val, 0)
-  //   const avg = (sum / values.length).toFixed(2)
+    const values = months.map((month) => row[month] || 0)
+    const sum = values.reduce((acc, val) => acc + val, 0)
+    const avg = (sum / values.length).toFixed(2)
 
-  //   return avg === '0.00' ? null : avg
-  // }
+    return avg === '0.00' ? null : avg
+  }
 
   const findSum = (value, row) => {
     const months = [
@@ -285,7 +288,7 @@ const ProductionNorms = () => {
     ]
 
     const values = months.map((month) => row[month] || 0)
-    const sum = values.reduce((acc, val) => acc + val, 0)
+    var sum = values.reduce((acc, val) => acc + val, 0)
 
     const total = sum.toFixed(2)
     return total === '0.00' ? null : total
@@ -304,7 +307,7 @@ const ProductionNorms = () => {
       } catch (error) {
         console.error('Error fetching product:', error)
       } finally {
-        // handleMenuClose();
+        setIsSaving(false) // Reset loading state when API call finishes
       }
     }
 
@@ -331,7 +334,7 @@ const ProductionNorms = () => {
       field: 'normParametersFKId',
       headerName: 'Product',
       editable: false,
-      minWidth: 125,
+      minWidth: 100,
       valueGetter: (params) => {
         return params || ''
       },
@@ -481,7 +484,7 @@ const ProductionNorms = () => {
     {
       field: 'averageTPH',
       headerName: 'Total',
-      // minWidth: 150,
+      minWidth: 100,
       editable: false,
       // valueGetter: findAvg,
       valueGetter: findSum,
@@ -489,7 +492,7 @@ const ProductionNorms = () => {
     {
       field: 'aopRemarks',
       headerName: 'Remark',
-      minWidth: 175,
+      minWidth: 150,
       editable: true,
       renderCell: (params) => {
         // console.log(params)
@@ -521,7 +524,6 @@ const ProductionNorms = () => {
   }, [])
 
   const handleUnitChange = (unit) => {
-    console.log('Selected unit:', unit)
     setSelectedUnit(unit)
   }
 
@@ -564,9 +566,11 @@ const ProductionNorms = () => {
           saveWithRemark: true,
           showCalculate: true,
           saveBtn: true,
-          UOM: 'Ton',
-          UnitToShow: true,
+          // UOM: 'Ton',
+          units: ['Ton', 'Kilo Ton'],
+          // UnitToShow: 'Values/Ton',
         }}
+        loading={isSaving}
       />
     </div>
   )

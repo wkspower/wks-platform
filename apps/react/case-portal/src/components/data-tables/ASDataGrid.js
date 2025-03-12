@@ -65,6 +65,7 @@ const DataGridTable = ({
   //handleRowViewMode,
   setRows,
   rows,
+  loading,
   remarkDialogOpen,
   setRemarkDialogOpen,
   currentRemark,
@@ -73,6 +74,7 @@ const DataGridTable = ({
   currentRowId,
   unsavedChangesRef,
   handleRemarkCellClick,
+  units,
 }) => {
   const [tempHide, setTempHide] = useState(true)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -88,15 +90,18 @@ const DataGridTable = ({
   const [searchText, setSearchText] = useState('')
   const [isFilterActive, setIsFilterActive] = useState(false)
   const [selectedRowId, setSelectedRowId] = useState(null)
-  const unitOptions = ['TPD', 'TPH']
-  const unitOptions2 = ['Ton', 'KT']
+  // const unitOptions = ['TPH', 'TPD']
+  // const unitOptionsForAop = ['Ton', 'Kilo Ton']
   const [selectedUnit, setSelectedUnit] = useState()
-  const [open1, setOpen1] = useState(false)
+  const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
+  const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
   const [deleteId, setDeleteId] = useState(false)
   const [deleteIdTemp, setDeleteIdTemp] = useState(false)
   const handleOpenRemark = () => setOpenRemark(true)
   const handleCloseRemark = () => setOpenRemark(false)
-  const handleClose1 = () => setOpen1(false)
+  const closeDeleteDialogeBox = () => setOpenDeleteDialogeBox(false)
+  const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
+
   const handleSearchChange = (event) => {
     setSearchText(event.target.value)
   }
@@ -193,7 +198,7 @@ const DataGridTable = ({
 
       setDeleteId(null)
       setDeleteIdTemp(null)
-      setOpen1(false)
+      setOpenDeleteDialogeBox(false)
       setSnackbarOpen(true)
       setSnackbarData({
         message: `${title} deleted successfully!`,
@@ -203,6 +208,14 @@ const DataGridTable = ({
     } catch (error) {
       console.error('Error deleting Business data:', error)
     }
+  }
+
+  const saveConfirmation = async () => {
+    saveChanges()
+    setOpenSaveDialogeBox(false)
+  }
+  const saveModalOpen = async () => {
+    setOpenSaveDialogeBox(true)
   }
 
   const handleAddRow = () => {
@@ -274,7 +287,7 @@ const DataGridTable = ({
       params?.row?.idFromApi ||
       params?.row?.maintenanceId ||
       params?.NormParameterMonthlyTransactionId
-    setOpen1(true)
+    setOpenDeleteDialogeBox(true)
     setDeleteId(maintenanceId)
     setDeleteIdTemp(id)
   }
@@ -508,7 +521,7 @@ const DataGridTable = ({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {permissions?.UnitToShow && !tempHide && (
+          {permissions?.UnitToShow && (
             <Chip
               label={permissions.UnitToShow}
               variant='outlined'
@@ -574,7 +587,7 @@ const DataGridTable = ({
           {permissions?.showUnit && (
             <TextField
               select
-              value={selectedUnit || permissions?.UOM || ''}
+              value={selectedUnit || permissions?.units?.[0]}
               onChange={(e) => {
                 setSelectedUnit(e.target.value)
                 handleUnitChange(e.target.value)
@@ -586,13 +599,13 @@ const DataGridTable = ({
               <MenuItem value='' disabled>
                 Select UOM
               </MenuItem>
-              {(permissions?.UnitToShow ? unitOptions2 : unitOptions).map(
-                (unit) => (
-                  <MenuItem key={unit} value={unit}>
-                    {unit}
-                  </MenuItem>
-                ),
-              )}
+
+              {/* Render the correct unit options dynamically */}
+              {(permissions?.units).map((unit) => (
+                <MenuItem key={unit} value={unit}>
+                  {unit}
+                </MenuItem>
+              ))}
             </TextField>
           )}
 
@@ -691,6 +704,7 @@ const DataGridTable = ({
         )} */}
 
         <DataGrid
+          loading={loading}
           apiRef={apiRef}
           rows={filteredRows}
           columns={columns.map((col) => ({
@@ -712,7 +726,6 @@ const DataGridTable = ({
             period: false,
           }}
           rowHeight={35}
-          loading={isSaving}
           processRowUpdate={processRowUpdate}
           onProcessRowUpdateError={onProcessRowUpdateError}
           onColumnResized={onColumnResized}
@@ -735,7 +748,7 @@ const DataGridTable = ({
             toolbar: { setRows, setRowModesModel, GridToolbar },
             loadingOverlay: {
               variant: 'linear-progress',
-              noRowsVariant: 'linear-progress',
+              noRowsVariant: 'skeleton',
             },
           }}
           getRowClassName={(params) =>
@@ -914,8 +927,7 @@ const DataGridTable = ({
                 boxShadow: 'none',
               },
             }}
-            // onClick={handleSaveClick} // Pass row data
-            onClick={saveChanges}
+            onClick={saveModalOpen}
             loadingPosition='start'
             // disabled={!hasUnsavedRows}
             // loading={isSaving}
@@ -933,8 +945,8 @@ const DataGridTable = ({
       />
 
       <Dialog
-        open={open1}
-        onClose={handleClose1}
+        open={openDeleteDialogeBox}
+        onClose={closeDeleteDialogeBox}
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
       >
@@ -945,7 +957,7 @@ const DataGridTable = ({
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose1}>Cancel</Button>
+          <Button onClick={closeDeleteDialogeBox}>Cancel</Button>
           <Button onClick={deleteTheRecord} autoFocus>
             Delete
           </Button>
@@ -953,10 +965,31 @@ const DataGridTable = ({
       </Dialog>
 
       <Dialog
+        open={openSaveDialogeBox}
+        onClose={closeSaveDialogeBox}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      >
+        <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>
+            Are you sure you want to save these changes?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeSaveDialogeBox}>Cancel</Button>
+          <Button onClick={saveConfirmation} autoFocus>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+      
+      
+
+      <Dialog
         open={remarkDialogOpen}
         onClose={() => setRemarkDialogOpen(false)}
       >
-        {/* <Dialog open={openRemark} onClose={handleCloseRemark}> */}
         <DialogTitle>Add Remark</DialogTitle>
         <DialogContent>
           <TextField
