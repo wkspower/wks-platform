@@ -222,7 +222,7 @@ const ShutDown = () => {
     {
       field: 'discription',
       headerName: 'Shutdown Desc',
-      minWidth: 325,
+      minWidth: 125,
       editable: true,
       renderHeader: () => (
         <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
@@ -332,7 +332,7 @@ const ShutDown = () => {
     {
       field: 'remark',
       headerName: 'Remark',
-      minWidth: 150,
+      minWidth: 250,
       editable: true,
       renderCell: (params) => {
         return (

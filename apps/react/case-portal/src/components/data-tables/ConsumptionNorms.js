@@ -18,6 +18,7 @@ const NormalOpNormsScreen = () => {
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
+  const [selectedUnit, setSelectedUnit] = useState('TPH')
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -27,6 +28,81 @@ const NormalOpNormsScreen = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+
+  const hardcodedData = [
+    {
+      id: 'group-0',
+      Particulars: 'Equipment A',
+    },
+    {
+      NormParameterMonthlyTransactionId: '1',
+      NormParametersId: '92E0AF06-9535-4B93-8998-E56A71354393',
+      april: 5,
+      march: 6,
+      june: 7,
+      july: 8,
+      august: 9,
+      september: 10,
+      october: 11,
+      november: 12,
+      december: 13,
+      january: 14,
+      february: 15,
+      march: 16,
+    },
+    {
+      NormParameterMonthlyTransactionId: '2',
+      NormParametersId: '00DC05B1-9607-470E-A159-62497E0123E2',
+      april: 3,
+      march: 4,
+      june: 5,
+      july: 6,
+      august: 7,
+      september: 8,
+      october: 9,
+      november: 10,
+      december: 11,
+      january: 12,
+      february: 13,
+      march: 14,
+    },
+    {
+      id: 'group-1',
+      Particulars: 'Equipment B',
+    },
+    {
+      NormParameterMonthlyTransactionId: '3',
+      NormParametersId: 'A061E050-0281-421F-81C1-B136CE2ED3F3',
+      april: 2,
+      march: 3,
+      june: 4,
+      july: 5,
+      august: 6,
+      september: 7,
+      october: 8,
+      november: 9,
+      december: 10,
+      january: 11,
+      february: 12,
+      march: 13,
+    },
+    {
+      NormParameterMonthlyTransactionId: '4',
+      NormParametersId: '00DC05B1-9607-470E-A159-62497E0123E2',
+      april: 1,
+      march: 2,
+      june: 3,
+      july: 4,
+      august: 5,
+      september: 6,
+      october: 7,
+      november: 8,
+      december: 9,
+      january: 10,
+      february: 11,
+      march: 12,
+    },
+  ]
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -49,16 +125,79 @@ const NormalOpNormsScreen = () => {
     // setHasUnsavedRows(true)
     return newRow
   }, [])
+
+  const saveEditedData = async (newRows) => {
+    try {
+      let plantId = ''
+      const isTPH = selectedUnit == 'TPD'
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      let siteId = ''
+
+      const storedSite = localStorage.getItem('selectedSite')
+      if (storedSite) {
+        const parsedSite = JSON.parse(storedSite)
+        siteId = parsedSite.id
+      }
+
+      const aopmccCalculatedData = newRows.map((row) => ({
+        april: isTPH && row.april ? row.april * 24 : row.april || null,
+        may: isTPH && row.may ? row.may * 24 : row.may || null,
+        june: isTPH && row.june ? row.june * 24 : row.june || null,
+        july: isTPH && row.july ? row.july * 24 : row.july || null,
+        august: isTPH && row.august ? row.august * 24 : row.august || null,
+        september:
+          isTPH && row.september ? row.september * 24 : row.september || null,
+        october: isTPH && row.october ? row.october * 24 : row.october || null,
+        november:
+          isTPH && row.november ? row.november * 24 : row.november || null,
+        december:
+          isTPH && row.december ? row.december * 24 : row.december || null,
+        january: isTPH && row.january ? row.january * 24 : row.january || null,
+        february:
+          isTPH && row.february ? row.february * 24 : row.february || null,
+        march: isTPH && row.march ? row.march * 24 : row.march || null,
+
+        aopStatus: row.aopStatus || 'draft',
+        year: localStorage.getItem('year'),
+        plant: plantId,
+        plantFKId: plantId,
+        site: siteId,
+        material: 'EOE',
+        normParametersFKId: row.normParametersFKId,
+        id: row.idFromApi || null,
+        avgTPH: findAvg('1', row) || null,
+      }))
+
+      // const response = await DataService.editAOPMCCalculatedData(
+      //   plantId,
+      //   aopmccCalculatedData,
+      //   keycloak,
+      // )
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Shutdown Norms Data Saved Successfully!',
+        severity: 'success',
+      })
+      // fetchData()
+      return response
+    } catch (error) {
+      console.error('Error saving Shutdown Norms Data:', error)
+    } finally {
+      fetchData()
+    }
+  }
+
   const saveChanges = React.useCallback(async () => {
-    console.log(
-      'Edited Data: ',
-      Object.values(unsavedChangesRef.current.unsavedRows),
-    )
     setTimeout(async () => {
       try {
-        // var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        // saveShutdownData(data)
-
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        console.log('data', data)
+        saveEditedData(data)
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},
@@ -66,27 +205,67 @@ const NormalOpNormsScreen = () => {
       } catch (error) {
         // setIsSaving(false);
       }
-    }, 1000) // Delay of 2 seconds
-  }, [apiRef])
+    }, 1000)
+  }, [apiRef, selectedUnit])
+
   const fetchData = async () => {
     try {
-      const data = await DataService.getConsumptionNormsData(keycloak)
+      // const data = await DataService.getConsumptionNormsData(keycloak)
+      const data = hardcodedData
       setCsData(data)
 
       let rowIndex = 1
       const groupedRows = []
+      const isTPD = selectedUnit === 'TPD'
 
-      Object.entries(data).forEach(([Particulars, rows], index) => {
-        groupedRows.push({
-          id: `group-${index}`,
-          Particulars: Particulars,
-        })
-        rows.forEach((row) => {
+      // Iterate through the data
+      data.forEach((item, index) => {
+        if (item.Particulars) {
+          // If it's a group row (has 'Particulars' field)
           groupedRows.push({
-            ...row,
-            id: row.NormParameterMonthlyTransactionId || `row-${rowIndex++}`,
+            id: `group-${index}`,
+            Particulars: item.Particulars,
           })
-        })
+        } else {
+          // Apply month division logic if selectedUnit is 'TPD'
+          const formattedItem = {
+            ...item,
+            id: item.NormParameterMonthlyTransactionId || `row-${rowIndex++}`,
+            ...(isTPD && {
+              april: item.april
+                ? (item.april / 24).toFixed(2)
+                : item.april || null,
+              may: item.may ? (item.may / 24).toFixed(2) : item.may || null,
+              june: item.june ? (item.june / 24).toFixed(2) : item.june || null,
+              july: item.july ? (item.july / 24).toFixed(2) : item.july || null,
+              august: item.august
+                ? (item.august / 24).toFixed(2)
+                : item.august || null,
+              september: item.september
+                ? (item.september / 24).toFixed(2)
+                : item.september || null,
+              october: item.october
+                ? (item.october / 24).toFixed(2)
+                : item.october || null,
+              november: item.november
+                ? (item.november / 24).toFixed(2)
+                : item.november || null,
+              december: item.december
+                ? (item.december / 24).toFixed(2)
+                : item.december || null,
+              january: item.january
+                ? (item.january / 24).toFixed(2)
+                : item.january || null,
+              february: item.february
+                ? (item.february / 24).toFixed(2)
+                : item.february || null,
+              march: item.march
+                ? (item.march / 24).toFixed(2)
+                : item.march || null,
+            }),
+          }
+          groupedRows.push(formattedItem)
+        }
       })
 
       setCsDataTransformed(groupedRows)
@@ -111,7 +290,7 @@ const NormalOpNormsScreen = () => {
 
     getAllProducts()
     fetchData()
-  }, [sitePlantChange, keycloak])
+  }, [sitePlantChange, keycloak, selectedUnit])
 
   const productionColumns = [
     {
@@ -129,13 +308,13 @@ const NormalOpNormsScreen = () => {
       },
     },
 
-    { field: 'TPH', headerName: 'Unit', width: 100, editable: false },
+    // { field: 'TPH', headerName: 'Unit', width: 100, editable: false },
 
     {
       field: 'NormParametersId',
       headerName: 'Product Norm',
       editable: true,
-      minWidth: 225,
+      minWidth: 125,
       valueGetter: (params) => {
         return params || ''
       },
@@ -174,7 +353,7 @@ const NormalOpNormsScreen = () => {
     },
 
     {
-      field: 'apr24',
+      field: 'april',
       headerName: headerMap['apr'],
       editable: true,
       type: 'number',
@@ -182,7 +361,7 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
     },
     {
-      field: 'may24',
+      field: 'may',
       headerName: headerMap['may'],
       editable: true,
       type: 'number',
@@ -190,7 +369,7 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
     },
     {
-      field: 'jun24',
+      field: 'june',
       headerName: headerMap['jun'],
       editable: true,
       type: 'number',
@@ -198,7 +377,7 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
     },
     {
-      field: 'jul24',
+      field: 'july',
       headerName: headerMap['jul'],
       editable: true,
       type: 'number',
@@ -206,7 +385,7 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
     },
     {
-      field: 'aug24',
+      field: 'august',
       headerName: headerMap['aug'],
       editable: true,
       type: 'number',
@@ -214,7 +393,7 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
     },
     {
-      field: 'sep24',
+      field: 'september',
       headerName: headerMap['sep'],
       editable: true,
       type: 'number',
@@ -222,7 +401,7 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
     },
     {
-      field: 'oct24',
+      field: 'october',
       headerName: headerMap['oct'],
       editable: true,
       type: 'number',
@@ -230,7 +409,7 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
     },
     {
-      field: 'nov24',
+      field: 'november',
       headerName: headerMap['nov'],
       editable: true,
       type: 'number',
@@ -238,7 +417,7 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
     },
     {
-      field: 'dec24',
+      field: 'december',
       headerName: headerMap['dec'],
       editable: true,
       type: 'number',
@@ -246,7 +425,7 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
     },
     {
-      field: 'jan25',
+      field: 'january',
       headerName: headerMap['jan'],
       editable: true,
       type: 'number',
@@ -254,7 +433,7 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
     },
     {
-      field: 'feb25',
+      field: 'february',
       headerName: headerMap['feb'],
       editable: true,
       type: 'number',
@@ -262,7 +441,7 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
     },
     {
-      field: 'mar25',
+      field: 'march',
       headerName: headerMap['mar'],
       editable: true,
       type: 'number',
@@ -274,6 +453,7 @@ const NormalOpNormsScreen = () => {
       field: 'remark',
       headerName: 'Remark',
       editable: true,
+      minWidth: 225,
       renderCell: (params) => {
         return (
           <div
@@ -289,6 +469,14 @@ const NormalOpNormsScreen = () => {
       },
     },
   ]
+
+  const onProcessRowUpdateError = React.useCallback((error) => {
+    console.log(error)
+  }, [])
+
+  const handleUnitChange = (unit) => {
+    setSelectedUnit(unit)
+  }
 
   return (
     <div>
@@ -312,6 +500,8 @@ const NormalOpNormsScreen = () => {
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
+        onProcessRowUpdateError={onProcessRowUpdateError}
+        handleUnitChange={handleUnitChange}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}
         currentRemark={currentRemark}

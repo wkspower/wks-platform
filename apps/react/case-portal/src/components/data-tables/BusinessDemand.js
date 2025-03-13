@@ -5,6 +5,7 @@ import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useGridApiRef } from '@mui/x-data-grid'
+import Tooltip from '@mui/material/Tooltip'
 // import {
 //   Dialog,
 //   DialogTitle,
@@ -44,15 +45,35 @@ const BusinessDemand = () => {
   const fetchData = async () => {
     try {
       const data = await DataService.getBDData(keycloak)
-      const formattedData = data.map((item, index) => ({
-        ...item,
-        idFromApi: item.id,
-        id: index,
-      }))
-      setBDData(formattedData)
-      setRows(formattedData)
+      const groupedRows = []
+      const groups = new Map()
+      let groupId = 0
+
+      data.forEach((item) => {
+        const groupKey = item.normName
+
+        if (!groups.has(groupKey)) {
+          groups.set(groupKey, [])
+          groupedRows.push({
+            id: groupId++,
+            Particulars: groupKey,
+            isGroupHeader: true,
+          })
+        }
+        const formattedItem = {
+          ...item,
+          idFromApi: item.id,
+          id: groupId++,
+        }
+
+        groups.get(groupKey).push(formattedItem)
+        groupedRows.push(formattedItem)
+      })
+
+      setBDData(groupedRows)
+      setRows(groupedRows)
     } catch (error) {
-      console.error('Error fetching Turnaround data:', error)
+      console.error('Error fetching Business Demand data:', error)
     }
   }
 
@@ -85,10 +106,17 @@ const BusinessDemand = () => {
 
   const colDefs = [
     {
+      field: 'Particulars',
+      headerName: 'Type',
+      minWidth: 125,
+      groupable: true,
+      renderCell: (params) => <strong>{params.value}</strong>,
+    },
+    {
       field: 'normParameterId',
       headerName: 'Product',
       editable: true,
-      minWidth: 225,
+      minWidth: 125,
       valueGetter: (params) => {
         return params || ''
       },
@@ -243,20 +271,23 @@ const BusinessDemand = () => {
       headerName: 'Remark',
       minWidth: 150,
       editable: true,
-      renderCell: (params) => {
-        // console.log(params)
-        return (
+      renderCell: (params) => (
+        <Tooltip title={params.value || ''} arrow>
           <div
             style={{
               cursor: 'pointer',
               color: params.value ? 'inherit' : 'gray',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: 140,
             }}
             onClick={() => handleRemarkCellClick(params.row)}
           >
-            {params.value || 'Click to add remark'}
+            {params.value}
           </div>
-        )
-      },
+        </Tooltip>
+      ),
     },
     {
       field: 'idFromApi',

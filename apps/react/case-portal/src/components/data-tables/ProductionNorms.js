@@ -35,7 +35,7 @@ const ProductionNorms = () => {
     rowsBeforeChange: {},
   })
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remark || '')
+    setCurrentRemark(row.remark || row.aopRemarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -334,7 +334,7 @@ const ProductionNorms = () => {
       field: 'normParametersFKId',
       headerName: 'Product',
       editable: false,
-      minWidth: 100,
+      minWidth: 125,
       valueGetter: (params) => {
         return params || ''
       },

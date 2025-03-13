@@ -229,16 +229,14 @@ const NormalOpNormsScreen = () => {
     {
       field: 'srNo',
       headerName: 'Sr. No',
-      minWidth: 210,
-      maxWidth: 200,
+      minWidth: 125,
       editable: false,
       flex: 2,
     },
     {
       field: 'particulars',
       headerName: 'Particulars',
-      minWidth: 150,
-      maxWidth: 160,
+      minWidth: 125,
       editable: true,
     },
     { field: 'unit', headerName: 'Unit', width: 100, editable: true },
@@ -401,6 +399,7 @@ const NormalOpNormsScreen = () => {
       }
     }, 1000)
   }, [apiRef])
+
   // Create groups by inserting a row with a groupHeader property
   const rawMaterialsData = productionData.slice(0, 2) // 2 rows for Raw Materials
   const byProductsData = productionData.slice(2, 5) // 3 rows for By Products

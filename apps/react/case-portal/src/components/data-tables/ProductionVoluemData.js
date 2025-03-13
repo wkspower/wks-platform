@@ -32,7 +32,6 @@ const ProductionvolumeData = () => {
     rowsBeforeChange: {},
   })
   const handleRemarkCellClick = (row) => {
-    console.log(row)
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
@@ -269,7 +268,7 @@ const ProductionvolumeData = () => {
       field: 'normParametersFKId',
       headerName: 'Product',
       editable: false,
-      minWidth: 225,
+      minWidth: 125,
       valueGetter: (params) => {
         return params || ''
       },

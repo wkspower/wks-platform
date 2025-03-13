@@ -306,7 +306,7 @@ const SlowDown = () => {
       field: 'product',
       headerName: 'Product',
       editable: true,
-      minWidth: 225,
+      minWidth: 125,
       valueGetter: (params) => {
         return params || ''
       },

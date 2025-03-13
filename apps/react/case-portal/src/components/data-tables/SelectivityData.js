@@ -267,6 +267,14 @@ const SelectivityData = () => {
       minWidth: 250,
     },
     {
+      field: 'UOM',
+      headerName: 'UOM',
+      editable: true,
+      align: 'left',
+      headerAlign: 'left',
+      // valueGetter: convertUnits,
+    },
+    {
       field: 'april',
       headerName: headerMap['apr'],
       editable: true,

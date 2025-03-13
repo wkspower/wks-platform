@@ -312,6 +312,13 @@ const DataGridTable = ({
 
             getActions: (params) => {
               const { id, row } = params
+
+          
+
+              if (row.isGroupHeader) {
+                return []
+              }
+
               const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
               if (isInEditMode) {
                 return [
