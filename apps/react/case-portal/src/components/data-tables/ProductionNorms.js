@@ -8,7 +8,9 @@ const headerMap = generateHeaderNames()
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
+
 import NumericCellEditor from 'utils/NumericCellEditor'
+import NumericInputOnly from 'utils/NumericInputOnly'
 const ProductionNorms = () => {
   const keycloak = useSession()
   const [csData, setCsData] = useState([])
@@ -21,11 +23,11 @@ const ProductionNorms = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [selectedUnit, setSelectedUnit] = useState('Ton') // Initialize with a default value
+  const [selectedUnit, setSelectedUnit] = useState('Ton')
 
   const [rows, setRows] = useState([])
   const [isSaving, setIsSaving] = useState(false)
-    // States for the Remark Dialog
+  // States for the Remark Dialog
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -105,7 +107,6 @@ const ProductionNorms = () => {
         normParametersFKId: row.normParametersFKId,
         // normItem: getProductName('1', row.normParametersFKId) || null,
         normItem: 'EOE',
-
         april: isKiloTon && row.april ? row.april * 1000 : row.april || null,
         may: isKiloTon && row.may ? row.may * 1000 : row.may || null,
         june: isKiloTon && row.june ? row.june * 1000 : row.june || null,
@@ -118,12 +119,9 @@ const ProductionNorms = () => {
         jan: isKiloTon && row.jan ? row.jan * 1000 : row.jan || null,
         feb: isKiloTon && row.feb ? row.feb * 1000 : row.feb || null,
         march: isKiloTon && row.march ? row.march * 1000 : row.march || null,
-
         // avgTPH: findAvg('1', row) || null,
         avgTPH: findSum('1', row) || null,
-
         aopRemarks: row.aopRemarks || 'remarks',
-
         id: row.idFromApi || null,
       }))
 
@@ -178,7 +176,6 @@ const ProductionNorms = () => {
       })
 
       setCsData(formattedData)
-
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Data refresh successfully!',
@@ -287,8 +284,8 @@ const ProductionNorms = () => {
       'march',
     ]
 
-    const values = months.map((month) => row[month] || 0)
-    var sum = values.reduce((acc, val) => acc + val, 0)
+    const values = months.map((month) => Number(row[month]) || 0)
+    const sum = values.reduce((acc, val) => acc + val, 0)
 
     const total = sum.toFixed(2)
     return total === '0.00' ? null : total
@@ -387,15 +384,17 @@ const ProductionNorms = () => {
       field: 'april',
       headerName: headerMap['apr'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
+      // valueGetter: convertUnits,
     },
+
     {
       field: 'may',
       headerName: headerMap['may'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -403,7 +402,7 @@ const ProductionNorms = () => {
       field: 'june',
       headerName: headerMap['jun'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -411,24 +410,41 @@ const ProductionNorms = () => {
       field: 'july',
       headerName: headerMap['jul'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
-
     {
       field: 'aug',
       headerName: headerMap['aug'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
+
+    // {
+    //   field: 'aug',
+    //   headerName: headerMap['aug'],
+    //   editable: true,
+    //   align: 'left',
+    //   headerAlign: 'left',
+    //   renderEditCell: (params) => {
+    //     return (
+    //       <NumericCellEditor
+    //         value={params.value}
+    //         api={params.api}
+    //         field={params.field}
+    //       />
+    //     )
+    //   },
+    // },
+
     {
       field: 'sep',
       headerName: headerMap['sep'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -436,7 +452,7 @@ const ProductionNorms = () => {
       field: 'oct',
       headerName: headerMap['oct'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -445,7 +461,7 @@ const ProductionNorms = () => {
       field: 'nov',
       headerName: headerMap['nov'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -453,7 +469,7 @@ const ProductionNorms = () => {
       field: 'dec',
       headerName: headerMap['dec'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -461,7 +477,7 @@ const ProductionNorms = () => {
       field: 'jan',
       headerName: headerMap['jan'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -469,7 +485,7 @@ const ProductionNorms = () => {
       field: 'feb',
       headerName: headerMap['feb'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -477,7 +493,7 @@ const ProductionNorms = () => {
       field: 'march',
       headerName: headerMap['mar'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },

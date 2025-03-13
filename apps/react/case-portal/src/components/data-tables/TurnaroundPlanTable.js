@@ -5,6 +5,7 @@ import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import ASDataGrid from './ASDataGrid'
+import NumericInputOnly from 'utils/NumericInputOnly'
 
 const TurnaroundPlanTable = () => {
   const menu = useSelector((state) => state.menu)
@@ -283,12 +284,14 @@ const TurnaroundPlanTable = () => {
       field: 'durationInMins',
       headerName: 'Duration (hrs)',
       editable: false,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       minWidth: 100,
       align: 'left',
       headerAlign: 'left',
       valueGetter: findDuration,
     },
+
+    //HIDDEN FILLED SUGGESTED FROM HW
     {
       field: 'period',
       headerName: 'Periods (in months)',

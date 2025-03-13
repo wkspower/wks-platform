@@ -5,6 +5,7 @@ import { useSession } from 'SessionStoreContext'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
+import NumericInputOnly from 'utils/NumericInputOnly'
 
 const NormalOpNormsScreen = () => {
   const keycloak = useSession()
@@ -108,11 +109,13 @@ const NormalOpNormsScreen = () => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
+
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
@@ -274,6 +277,7 @@ const NormalOpNormsScreen = () => {
       console.error('Error fetching data:', error)
     }
   }
+
   useEffect(() => {
     const getAllProducts = async () => {
       try {
@@ -356,7 +360,7 @@ const NormalOpNormsScreen = () => {
       field: 'april',
       headerName: headerMap['apr'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -364,7 +368,7 @@ const NormalOpNormsScreen = () => {
       field: 'may',
       headerName: headerMap['may'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -372,7 +376,7 @@ const NormalOpNormsScreen = () => {
       field: 'june',
       headerName: headerMap['jun'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -380,7 +384,7 @@ const NormalOpNormsScreen = () => {
       field: 'july',
       headerName: headerMap['jul'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -388,7 +392,7 @@ const NormalOpNormsScreen = () => {
       field: 'august',
       headerName: headerMap['aug'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -396,7 +400,7 @@ const NormalOpNormsScreen = () => {
       field: 'september',
       headerName: headerMap['sep'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -404,7 +408,7 @@ const NormalOpNormsScreen = () => {
       field: 'october',
       headerName: headerMap['oct'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -412,7 +416,7 @@ const NormalOpNormsScreen = () => {
       field: 'november',
       headerName: headerMap['nov'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -420,7 +424,7 @@ const NormalOpNormsScreen = () => {
       field: 'december',
       headerName: headerMap['dec'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -428,7 +432,7 @@ const NormalOpNormsScreen = () => {
       field: 'january',
       headerName: headerMap['jan'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -436,7 +440,7 @@ const NormalOpNormsScreen = () => {
       field: 'february',
       headerName: headerMap['feb'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -444,7 +448,7 @@ const NormalOpNormsScreen = () => {
       field: 'march',
       headerName: headerMap['mar'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },

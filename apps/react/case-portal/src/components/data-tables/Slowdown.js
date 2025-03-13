@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import { useSelector } from 'react-redux'
+import NumericInputOnly from 'utils/NumericInputOnly'
 
 const SlowDown = () => {
   const menu = useSelector((state) => state.menu)
@@ -70,7 +71,7 @@ const SlowDown = () => {
         durationInHrs: parseFloat(row.durationInHrs),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
-        remark: row.remarks,
+        remark: row.remark,
         rate: row.rate,
         audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
@@ -96,6 +97,7 @@ const SlowDown = () => {
       fetchData()
     }
   }
+
   const saveChanges = React.useCallback(async () => {
     console.log(
       'Edited Data: ',
@@ -115,6 +117,7 @@ const SlowDown = () => {
       }
     }, 1000) // Delay of 2 seconds
   }, [apiRef])
+
   const updateSlowdownData = async (newRow) => {
     try {
       var maintenanceId = newRow?.maintenanceId
@@ -150,6 +153,7 @@ const SlowDown = () => {
       fetchData()
     }
   }
+
   const fetchData = async () => {
     try {
       const data = await DataService.getSlowDownPlantData(keycloak)
@@ -177,6 +181,7 @@ const SlowDown = () => {
       console.error('Error fetching SlowDown data:', error)
     }
   }
+
   useEffect(() => {
     const getAllProducts = async () => {
       try {
@@ -383,8 +388,8 @@ const SlowDown = () => {
       field: 'durationInHrs',
       headerName: 'Duration (hrs)',
       editable: true,
-      minWidth: 100,
-      type: 'number',
+      minWidth: 75,
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       // valueGetter: findDuration,
@@ -394,8 +399,8 @@ const SlowDown = () => {
       field: 'rate',
       headerName: 'Rate',
       editable: true,
-      minWidth: 100,
-      type: 'number',
+      minWidth: 75,
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -404,7 +409,7 @@ const SlowDown = () => {
       field: 'remark',
       headerName: 'Remarks',
       editable: true,
-      minWidth: 200,
+      minWidth: 250,
       renderCell: (params) => {
         return (
           <div

@@ -6,6 +6,10 @@ import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useGridApiRef } from '@mui/x-data-grid'
 import Tooltip from '@mui/material/Tooltip'
+
+import { GridEditInputCell, GridEditInputCellProps } from '@mui/x-data-grid'
+import NumericInputOnly from 'utils/NumericInputOnly'
+
 // import {
 //   Dialog,
 //   DialogTitle,
@@ -50,7 +54,7 @@ const BusinessDemand = () => {
       let groupId = 0
 
       data.forEach((item) => {
-        const groupKey = item.normName
+        const groupKey = item.normParameterTypeDisplayName
 
         if (!groups.has(groupKey)) {
           groups.set(groupKey, [])
@@ -162,33 +166,24 @@ const BusinessDemand = () => {
       field: 'april',
       headerName: headerMap['apr'],
       editable: true,
-      type: 'number',
       align: 'left',
       headerAlign: 'left',
-
-      sx: {
-        '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button':
-          {
-            display: 'none',
-          },
-        '& input[type=number]': {
-          MozAppearance: 'textfield',
-        },
-      },
+      renderEditCell: NumericInputOnly,
     },
     {
       field: 'may',
       headerName: headerMap['may'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
+      renderEditCell: NumericInputOnly,
     },
     {
       field: 'june',
       headerName: headerMap['jun'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -196,7 +191,7 @@ const BusinessDemand = () => {
       field: 'july',
       headerName: headerMap['jul'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -204,7 +199,7 @@ const BusinessDemand = () => {
       field: 'aug',
       headerName: headerMap['aug'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -212,7 +207,7 @@ const BusinessDemand = () => {
       field: 'sep',
       headerName: headerMap['sep'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -220,7 +215,7 @@ const BusinessDemand = () => {
       field: 'oct',
       headerName: headerMap['oct'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -228,7 +223,7 @@ const BusinessDemand = () => {
       field: 'nov',
       headerName: headerMap['nov'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -236,7 +231,7 @@ const BusinessDemand = () => {
       field: 'dec',
       headerName: headerMap['dec'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -244,7 +239,7 @@ const BusinessDemand = () => {
       field: 'jan',
       headerName: headerMap['jan'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -252,7 +247,7 @@ const BusinessDemand = () => {
       field: 'feb',
       headerName: headerMap['feb'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -260,7 +255,7 @@ const BusinessDemand = () => {
       field: 'march',
       headerName: headerMap['mar'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -367,7 +362,7 @@ const BusinessDemand = () => {
       if (businessData.length > 0) {
         const response = await DataService.saveBusinessDemandData(
           plantId,
-          businessData, // Now sending an array of rows
+          businessData,
           keycloak,
         )
         setSnackbarOpen(true)

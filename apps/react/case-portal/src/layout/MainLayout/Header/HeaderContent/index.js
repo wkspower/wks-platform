@@ -51,7 +51,6 @@ const HeaderContent = ({ keycloak }) => {
 
   const getPlantAndSite = async () => {
     try {
-      // const response = siteData
       const response = await DataService.getAllSites(keycloak)
       if (response) {
         setVerticals(response)
@@ -156,6 +155,7 @@ const HeaderContent = ({ keycloak }) => {
   }, [])
 
   const handleSiteChange = (event) => {
+    dispatch(setSitePlantChange({ sitePlantChange: true }))
     const siteName = event.target.value
     setSelectedSite(siteName)
     const { allowedPlantIds } = getAllowedFilter()
@@ -169,6 +169,15 @@ const HeaderContent = ({ keycloak }) => {
     if (filteredPlants.length > 0) {
       setPlants(filteredPlants)
       setSelectedPlant(filteredPlants[0].name)
+
+      localStorage.setItem(
+        'selectedPlant',
+        JSON.stringify({
+          id: filteredPlants[0].id,
+          name: filteredPlants[0].name,
+        }),
+      )
+
       localStorage.setItem('selectedSite', JSON.stringify({ name: siteName }))
     }
   }

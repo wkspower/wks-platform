@@ -7,6 +7,7 @@ import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 // import catalystOptionsData from '../../assets/Catalyst.json'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import NumericInputOnly from 'utils/NumericInputOnly'
 
 const headerMap = generateHeaderNames()
 
@@ -278,7 +279,7 @@ const SelectivityData = () => {
       field: 'april',
       headerName: headerMap['apr'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       // valueGetter: convertUnits,
@@ -288,7 +289,7 @@ const SelectivityData = () => {
       field: 'may',
       headerName: headerMap['may'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -296,7 +297,7 @@ const SelectivityData = () => {
       field: 'june',
       headerName: headerMap['jun'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -304,7 +305,7 @@ const SelectivityData = () => {
       field: 'july',
       headerName: headerMap['jul'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -312,15 +313,33 @@ const SelectivityData = () => {
       field: 'aug',
       headerName: headerMap['aug'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
+
+    // {
+    //   field: 'aug',
+    //   headerName: headerMap['aug'],
+    //   editable: true,
+    //   align: 'left',
+    //   headerAlign: 'left',
+    //   renderEditCell: (params) => {
+    //     return (
+    //       <NumericCellEditor
+    //         value={params.value}
+    //         api={params.api}
+    //         field={params.field}
+    //       />
+    //     )
+    //   },
+    // },
+
     {
       field: 'sep',
       headerName: headerMap['sep'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -328,7 +347,7 @@ const SelectivityData = () => {
       field: 'oct',
       headerName: headerMap['oct'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -337,7 +356,7 @@ const SelectivityData = () => {
       field: 'nov',
       headerName: headerMap['nov'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -345,7 +364,7 @@ const SelectivityData = () => {
       field: 'dec',
       headerName: headerMap['dec'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -353,7 +372,7 @@ const SelectivityData = () => {
       field: 'jan',
       headerName: headerMap['jan'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -361,7 +380,7 @@ const SelectivityData = () => {
       field: 'feb',
       headerName: headerMap['feb'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -369,7 +388,7 @@ const SelectivityData = () => {
       field: 'march',
       headerName: headerMap['mar'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },

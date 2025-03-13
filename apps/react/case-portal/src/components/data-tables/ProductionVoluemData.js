@@ -5,6 +5,7 @@ import ASDataGrid from './ASDataGrid'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import NumericInputOnly from 'utils/NumericInputOnly'
 const headerMap = generateHeaderNames()
 
 const ProductionvolumeData = () => {
@@ -104,7 +105,6 @@ const ProductionvolumeData = () => {
         material: 'EOE',
         normParametersFKId: row.normParametersFKId,
         id: row.idFromApi || null,
-
         avgTPH: findAvg('1', row) || null,
       }))
 
@@ -212,6 +212,7 @@ const ProductionvolumeData = () => {
       console.error('Error fetching data:', error)
     }
   }
+
   useEffect(() => {
     const getAllProducts = async () => {
       try {
@@ -323,7 +324,7 @@ const ProductionvolumeData = () => {
       field: 'april',
       headerName: headerMap['apr'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -331,7 +332,7 @@ const ProductionvolumeData = () => {
       field: 'may',
       headerName: headerMap['may'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -339,7 +340,7 @@ const ProductionvolumeData = () => {
       field: 'june',
       headerName: headerMap['jun'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -347,7 +348,7 @@ const ProductionvolumeData = () => {
       field: 'july',
       headerName: headerMap['jul'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -356,7 +357,7 @@ const ProductionvolumeData = () => {
       field: 'august',
       headerName: headerMap['aug'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -364,7 +365,7 @@ const ProductionvolumeData = () => {
       field: 'september',
       headerName: headerMap['sep'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -372,7 +373,7 @@ const ProductionvolumeData = () => {
       field: 'october',
       headerName: headerMap['oct'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -380,7 +381,7 @@ const ProductionvolumeData = () => {
       field: 'november',
       headerName: headerMap['nov'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -388,7 +389,7 @@ const ProductionvolumeData = () => {
       field: 'december',
       headerName: headerMap['dec'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -396,7 +397,7 @@ const ProductionvolumeData = () => {
       field: 'january',
       headerName: headerMap['jan'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -404,7 +405,7 @@ const ProductionvolumeData = () => {
       field: 'february',
       headerName: headerMap['feb'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
@@ -412,7 +413,7 @@ const ProductionvolumeData = () => {
       field: 'march',
       headerName: headerMap['mar'],
       editable: true,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },

@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
+import NumericInputOnly from 'utils/NumericInputOnly'
 
 const ShutDown = () => {
   const menu = useSelector((state) => state.menu)
@@ -242,7 +243,7 @@ const ShutDown = () => {
     //   field: 'product',
     //   headerName: 'Product',
     //   editable: true,
-    //   minWidth: 225,
+    //   minWidth: 125,
     //   valueGetter: (params) => {
     //     // console.log('p1', params);
     //     // console.log('p2', params2);
@@ -323,7 +324,7 @@ const ShutDown = () => {
       headerName: 'Duration (hrs)',
       editable: false,
       minWidth: 100,
-      type: 'number',
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       // valueGetter: (params) => params?.durationInHrs || 0,
