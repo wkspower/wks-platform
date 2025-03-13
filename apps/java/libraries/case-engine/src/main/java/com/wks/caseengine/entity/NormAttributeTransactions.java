@@ -75,5 +75,8 @@ public class NormAttributeTransactions {
     
     @Column(name="Month")
     private Integer month;
+    
+    @Column(name = "Plant_FK_Id")
+    private UUID plantFKId;
 
 }

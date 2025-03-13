@@ -102,7 +102,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 
 			Optional<PlantMaintenanceTransaction> plantMaintenance=slowdownPlanRepository.findById(UUID.fromString(shutDownPlanDTO.getId()));
 			PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
-			plantMaintenanceTransaction.setId(UUID.randomUUID());
+			plantMaintenanceTransaction.setId(UUID.fromString(shutDownPlanDTO.getId()));
 			
 			// Set mandatory fields with default values if missing
 			plantMaintenanceTransaction.setDiscription(

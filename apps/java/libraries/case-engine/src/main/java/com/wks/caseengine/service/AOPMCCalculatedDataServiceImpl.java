@@ -19,11 +19,6 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	
 	@Autowired
 	private AOPMCCalculatedDataRepository aOPMCCalculatedDataRepository;
-	
-	@Autowired
-	private NormParametersService normParametersService;
-	
-	
 
 	@Override
 	public List<AOPMCCalculatedDataDTO> getAOPMCCalculatedData(String plantId, String year) {
@@ -53,6 +48,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
  	    	aOPMCCalculatedDataDTO.setYear(row[17] != null ? row[17].toString() : null);
  	    	aOPMCCalculatedDataDTO.setNormParametersFKId(row[18] != null ? row[18].toString() : null);
  	    	aOPMCCalculatedDataDTO.setDisplayOrder(row[19] != null ? Integer.parseInt(row[19].toString()) : null);
+ 	    	aOPMCCalculatedDataDTO.setRemark(row[20] != null ? row[20].toString() : null);
  	    	aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
  	    }
 	    
@@ -99,7 +95,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			aOPMCCalculatedData.setSeptember(aOPMCCalculatedDataDTO.getSeptember());
 			aOPMCCalculatedData.setSite(aOPMCCalculatedDataDTO.getSite());
 
-
+			aOPMCCalculatedData.setRemark(aOPMCCalculatedDataDTO.getRemark());
 			aOPMCCalculatedData.setPlantFKId(UUID.fromString(aOPMCCalculatedDataDTO.getPlantFKId()));
 			aOPMCCalculatedData.setYear(aOPMCCalculatedDataDTO.getYear());
 			aOPMCCalculatedData.setNormParametersFKId(UUID.fromString(aOPMCCalculatedDataDTO.getNormParametersFKId()));

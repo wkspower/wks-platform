@@ -95,10 +95,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 				plantMaintenanceTransaction.setDiscription(
 					shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription() : "Default Description"
 				);
-System.out.println(shutDownPlanDTO.getDurationInHrs());
-System.out.println(shutDownPlanDTO.getDurationInHrs());
-System.out.println(shutDownPlanDTO.getDurationInHrs());
-System.out.println(shutDownPlanDTO.getDurationInHrs()+"Pavan");
+
 				if (shutDownPlanDTO.getDurationInHrs() != null) {
 				    plantMaintenanceTransaction.setDurationInMins((int) (shutDownPlanDTO.getDurationInHrs() * 60));
 				} else {
@@ -139,18 +136,27 @@ System.out.println(shutDownPlanDTO.getDurationInHrs()+"Pavan");
 
 				List<ShutDownPlanDTO> list = new ArrayList<>();
 				shutDownPlanDTO.setDurationInMins(0);
-				//shutDownPlanDTO.setMaintStartDateTime(null);
-				//shutDownPlanDTO.setMaintEndDateTime(null);
 				shutDownPlanDTO.setDiscription(description+" Ramp Up");
 				list.add(shutDownPlanDTO);
 			    slowdownPlanService.saveShutdownData(plantId, list);
 
 				List<ShutDownPlanDTO> list2 = new ArrayList<>();
-				//String description = shutDownPlanDTO.getDiscription()+" Ramp Up";
 				shutDownPlanDTO.setDiscription(description+" Ramp Down");
 				shutDownPlanDTO.setDurationInMins(0);
 				list2.add(shutDownPlanDTO);
 			    slowdownPlanService.saveShutdownData(plantId,list2);
+			    
+			    List<ShutDownPlanDTO> list3 = new ArrayList<>();
+				shutDownPlanDTO.setDiscription(description+" Ramp Down");
+				shutDownPlanDTO.setDurationInMins(0);
+				list3.add(shutDownPlanDTO);
+			    slowdownPlanService.saveShutdownData(plantId,list3);
+			    
+			    List<ShutDownPlanDTO> list4 = new ArrayList<>();
+				shutDownPlanDTO.setDiscription(description+" Ramp Down");
+				shutDownPlanDTO.setDurationInMins(0);
+				list4.add(shutDownPlanDTO);
+			    slowdownPlanService.saveShutdownData(plantId,list4);
 	
 			} else {
 				// Updating an existing record
@@ -168,10 +174,7 @@ System.out.println(shutDownPlanDTO.getDurationInHrs()+"Pavan");
 						// }else{
 						// 	plantMaintenanceTransaction.setDurationInHrs(0d);
 						// }
-						System.out.println(shutDownPlanDTO.getDurationInHrs());
-System.out.println(shutDownPlanDTO.getDurationInHrs());
-System.out.println(shutDownPlanDTO.getDurationInHrs());
-System.out.println(shutDownPlanDTO.getDurationInHrs()+"Pavan");
+						
 				if (shutDownPlanDTO.getDurationInHrs() != null) {
 				    plantMaintenanceTransaction.setDurationInMins((int) (shutDownPlanDTO.getDurationInHrs() * 60));
 				} else {

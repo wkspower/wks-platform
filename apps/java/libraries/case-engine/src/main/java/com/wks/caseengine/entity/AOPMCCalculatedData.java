@@ -73,4 +73,7 @@ public class AOPMCCalculatedData {
     
     @Column(name="NormParameters_FK_Id")
     private UUID normParametersFKId;
+    
+    @Column(name="Remark")
+    private String remark;
 }

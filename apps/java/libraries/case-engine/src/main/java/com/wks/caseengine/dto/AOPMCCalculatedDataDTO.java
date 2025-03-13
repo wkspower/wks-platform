@@ -34,4 +34,5 @@ public class AOPMCCalculatedDataDTO {
     private String normParametersFKId;
     private String bDNormParametersFKId;
     private Integer displayOrder;
+    private String remark;
 }

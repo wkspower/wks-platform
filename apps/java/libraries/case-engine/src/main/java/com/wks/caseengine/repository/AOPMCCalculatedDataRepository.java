@@ -29,7 +29,7 @@ public interface AOPMCCalculatedDataRepository extends JpaRepository<AOPMCCalcul
  		    SELECT AMC.Site, AMC.Plant, AMC.Material, AMC.January, AMC.February, AMC.March, AMC.April, AMC.May, AMC.June, AMC.July, 
  		           AMC.August, AMC.September, AMC.October, AMC.November, AMC.December, 
  		            AMC.Plant_FK_Id, AMC.Id, AMC.Year, AMC.NormParameters_FK_Id, 
- 		           NP.DiplayOrder 
+ 		           NP.DiplayOrder, AMC.Remark
  		    FROM AOPMCCalculatedData AMC 
  		    JOIN NormParameters NP 
  		    ON AMC.NormParameters_FK_Id = NP.Id 
