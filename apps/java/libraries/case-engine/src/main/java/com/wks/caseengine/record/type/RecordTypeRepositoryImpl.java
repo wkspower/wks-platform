@@ -18,6 +18,8 @@ import org.bson.BsonObjectId;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -29,6 +31,8 @@ import com.wks.caseengine.db.EngineMongoDataConnection;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 @Component
+@Profile("mongo")
+@Primary
 public class RecordTypeRepositoryImpl implements RecordTypeRepository {
 
 	@Autowired

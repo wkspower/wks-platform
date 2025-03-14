@@ -1,7 +1,24 @@
 version: '3.7'
 name: wks-platform
 services:
+    camunda:
+        image: ${CAMUNDA_DOCKER_IMAGE}:${CAMUNDA7_VERSION}
+        command: ./camunda.sh --rest --webapps
+        ports:
+            - 8080:8080
+        healthcheck:
+            test: curl --fail http://localhost:8080/engine-rest/version || exit 1
+            interval: 10s
+            retries: 3
+            start_period: 5s
+            timeout: 10s
+        depends_on:
+            mongodb:
+                condition: service_healthy
+
     minio:
+        profiles:
+            - servers
         image: quay.io/minio/minio
         command: server /data --console-address ":9090"
         healthcheck:
@@ -19,6 +36,8 @@ services:
             - minio:/data:rw
 
     mongodb:
+        profiles:
+            - servers
         image: mongo:6.0.14
         ports:
             - 27017:27017
@@ -32,6 +51,8 @@ services:
             - mongo:/data/db:rw
 
     opa:
+        profiles:
+            - servers
         image: openpolicyagent/opa:edge-static
         ports:
             - 8181:8181        
@@ -43,6 +64,8 @@ services:
             - ./opa:/etc/rules:ro
 
     keycloak:
+        profiles:
+            - servers
         image: quay.io/keycloak/keycloak:20.0.3
         command: start-dev
         environment:
@@ -60,23 +83,23 @@ services:
         volumes:
             - keycloak:/opt/keycloak/data/
 
-    storage-api:
-        build:
-            context: apps/java/services/storage-api
-        ports:
-            - 8085:8085
-        links:
-            - minio
+    postgres:
+        profiles:
+            - servers
+        image: postgres:11
         environment:
-            - OPA_URL=${OPA_URL}
-            - KEYCLOAK_URL=${KEYCLOAK_URL}
-            - MINIO_HOST_INTERNAL=${MINIO_HOST_INTERNAL}
-            - MINIO_HOST_EXTERNAL=${MINIO_HOST_EXTERNAL}
-            - MINIO_ROOT_USER=${MINIO_ROOT_USER}
-            - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-        depends_on:
-            minio:
-                condition: service_healthy
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+        healthcheck:
+            test: pg_isready -U postgres -d postgres
+            interval: 5s
+            timeout: 3s
+            retries: 3
+        ports:
+            - 5432:5432
+        volumes: 
+            - postgres:/var/lib/postgresql/data:rw
+            - ./configs/postgres:/docker-entrypoint-initdb.d
 
 volumes:
     mongo:
@@ -84,4 +107,6 @@ volumes:
     minio:
         driver: local
     keycloak:
-        driver: local                
+        driver: local
+    postgres:
+        driver: local        

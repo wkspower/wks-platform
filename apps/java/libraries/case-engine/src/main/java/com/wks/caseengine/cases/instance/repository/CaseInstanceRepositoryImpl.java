@@ -22,6 +22,8 @@ import java.util.List;
 import org.bson.BsonObjectId;
 import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
@@ -38,16 +40,18 @@ import com.wks.caseengine.pagination.CursorPagination;
 import com.wks.caseengine.pagination.PageResult;
 import com.wks.caseengine.pagination.mongo.MongoCursorPagination;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
-import com.wks.caseengine.repository.Paginator;
+import com.wks.caseengine.repository.MongoPaginator;
 
 @Component
+@Profile("mongo")
+@Primary
 public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 
 	@Autowired
 	private EngineMongoDataConnection connection;
 
 	@Autowired
-	private Paginator paginator;
+	private MongoPaginator paginator;
 
 	@Override
 	public List<CaseInstance> find() {

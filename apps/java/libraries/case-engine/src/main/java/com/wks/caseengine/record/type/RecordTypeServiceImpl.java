@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.command.CommandExecutor;
 import com.wks.caseengine.record.type.command.CreateRecordTypeCmd;
@@ -30,6 +31,7 @@ public class RecordTypeServiceImpl implements RecordTypeService {
 	private CommandExecutor commandExecutor;
 
 	@Override
+	@Transactional
 	public void save(RecordType recordType){
 		commandExecutor.execute(new CreateRecordTypeCmd(recordType));
 	}
@@ -45,11 +47,13 @@ public class RecordTypeServiceImpl implements RecordTypeService {
 	}
 
 	@Override
+	@Transactional
 	public void delete(String id){
 		commandExecutor.execute(new DeleteRecordTypeCmd(id));
 	}
 
 	@Override
+	@Transactional
 	public void update(final String id, final RecordType recordType) {
 		commandExecutor.execute(new UpdateRecordTypeCmd(id, recordType));
 	}

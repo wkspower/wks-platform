@@ -52,3 +52,5 @@ case.engine.email-to-case-outbound-process: email-to-case-outbound
 
 case.engine.actuator.enabled: true
 case.engine.swagger.enabled: true
+
+database.type: mongo

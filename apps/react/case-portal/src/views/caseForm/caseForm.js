@@ -85,6 +85,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
   }
 
   const getCaseInfo = (aCase) => {
+    debugger
     CaseService.getCaseDefinitionsById(keycloak, aCase.caseDefinitionId)
       .then((data) => {
         setCaseDef(data)

@@ -63,7 +63,7 @@ export const RecordList = ({ recordTypeId }) => {
         console.log(err.message)
       })
 
-    RecordService.getRecordById(keycloak, recordTypeId)
+      RecordService.getRecordById(keycloak, recordTypeId)
       .then((data) => {
         setRecords(data)
       })
@@ -95,7 +95,9 @@ export const RecordList = ({ recordTypeId }) => {
             columns={columns}
             pageSize={10}
             rowsPerPageOptions={[10]}
-            getRowId={(row) => row._id.$oid}
+            // FIXME: we are need to change  
+            // getRowId={(row) => row._id.$oid} 
+            getRowId={(row) => row.id}
           />
         </Box>
       </MainCard>

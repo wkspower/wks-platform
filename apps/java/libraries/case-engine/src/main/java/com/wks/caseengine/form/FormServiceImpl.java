@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.command.CommandExecutor;
 import com.wks.caseengine.form.command.CreateFormCmd;
@@ -30,6 +31,7 @@ public class FormServiceImpl implements FormService {
 	private CommandExecutor commandExecutor;
 
 	@Override
+	@Transactional
 	public void save(Form form) {
 		commandExecutor.execute(new CreateFormCmd(form));
 	}
@@ -45,11 +47,13 @@ public class FormServiceImpl implements FormService {
 	}
 
 	@Override
+	@Transactional
 	public void delete(String formKey) {
 		commandExecutor.execute(new DeleteFormCmd(formKey));
 	}
 
 	@Override
+	@Transactional
 	public void update(final String formKey, final Form form) {
 		commandExecutor.execute(new UpdateFormCmd(formKey, form));
 	}

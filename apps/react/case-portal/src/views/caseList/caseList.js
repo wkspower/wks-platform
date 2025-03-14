@@ -154,6 +154,7 @@ export const CaseList = ({ status, caseDefId }) => {
             setOpenCaseForm(true)
           }
 
+
           return (
             <Button onClick={onClick}>
               {t('pages.caselist.datagrid.action.details')}

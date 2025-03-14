@@ -14,6 +14,7 @@ package com.wks.caseengine.db;
 import org.bson.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
+@ConditionalOnProperty(name = "database.type", havingValue = "mongo")
 public class EngineMongoDataConnectionImpl implements EngineMongoDataConnection {
 
 	@Autowired
