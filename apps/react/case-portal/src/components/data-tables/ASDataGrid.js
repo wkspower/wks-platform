@@ -1,19 +1,17 @@
-import {
-  Box,
-  Button,
-  IconButton,
-  TextField,
-  Typography,
-  Grid,
-} from '@mui/material'
-import { DataGrid, GridToolbar } from '@mui/x-data-grid'
-import * as React from 'react'
-import { useEffect, useMemo, useState } from 'react'
 import CancelIcon from '@mui/icons-material/Close'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import SaveIcon from '@mui/icons-material/Save'
+import { Box, Button, IconButton, TextField, Typography } from '@mui/material'
+import { DataGrid, GridToolbar } from '@mui/x-data-grid'
+import * as React from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
+import SearchIcon from '@mui/icons-material/Search'
+import { InputAdornment } from '@mui/material'
+import Backdrop from '@mui/material/Backdrop'
+import Chip from '@mui/material/Chip'
+import CircularProgress from '@mui/material/CircularProgress'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
@@ -24,11 +22,6 @@ import Notification from 'components/Utilities/Notification'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { MenuItem } from '../../../node_modules/@mui/material/index'
-import { InputAdornment } from '@mui/material'
-import SearchIcon from '@mui/icons-material/Search'
-import Chip from '@mui/material/Chip'
-import Backdrop from '@mui/material/Backdrop'
-import CircularProgress from '@mui/material/CircularProgress'
 
 import {
   FileDownload,
@@ -47,23 +40,8 @@ const jioColors = {
   darkTransparentBlue: 'rgba(127, 147, 206, 0.8)',
 }
 
-// var key1 = [
-//   {
-//     'F0F4E75E-3C44-4FB4-BA7A-2B8227847134': [
-//       'AACDBE12-C5F6-4B79-9C88-751169815B42',
-//       'F0D52188-A656-475D-A675-4B3639F3EEA9',
-//     ],
-//   },
-//   {
-//     'E2E9D24C-80DF-40B4-A278-4C4D60742BCE': [
-//       'C5102765-E0A1-4CC6-B7A0-4F937B91EB6D',
-//     ],
-//   },
-// ]
-
 const DataGridTable = ({
   columns: initialColumns = [],
-  // rows: initialRows = [],
   title = 'Turnaround Plan Details',
   onAddRow,
   onDeleteRow,
@@ -78,7 +56,6 @@ const DataGridTable = ({
   fetchData,
   handleUnitChange,
   handleCalculate,
-  //handleRowViewMode,
   setRows,
   rows,
   loading,
@@ -102,12 +79,9 @@ const DataGridTable = ({
   const [openRemark, setOpenRemark] = useState(false)
   const keycloak = useSession()
   const [days, setDays] = useState([])
-  // const [rows, setRows] = useState(initialRows)
   const [searchText, setSearchText] = useState('')
   const [isFilterActive, setIsFilterActive] = useState(false)
   const [selectedRowId, setSelectedRowId] = useState(null)
-  // const unitOptions = ['TPH', 'TPD']
-  // const unitOptionsForAop = ['Ton', 'Kilo Ton']
   const [selectedUnit, setSelectedUnit] = useState()
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
@@ -117,7 +91,6 @@ const DataGridTable = ({
   const handleCloseRemark = () => setOpenRemark(false)
   const closeDeleteDialogeBox = () => setOpenDeleteDialogeBox(false)
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
-
   const handleSearchChange = (event) => {
     setSearchText(event.target.value)
   }
@@ -163,14 +136,6 @@ const DataGridTable = ({
   useEffect(() => {
     if (rows) setRows(rows)
   }, [rows, setRows])
-
-  // useEffect(() => {
-  //   setRows((prevRows) => {
-  //     // Keep newly added rows and merge with initialRows
-  //     const newRows = prevRows.filter((row) => row.isNew) // Preserve new rows
-  //     return [...newRows, ...initialRows] // Merge with DB rows
-  //   })
-  // }, [initialRows])
 
   const onColumnResized = (params) => {
     if (params.column) {
@@ -255,50 +220,6 @@ const DataGridTable = ({
     setRowModesModel((oldModel) => ({
       ...oldModel,
       [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
-    }))
-  }
-
-  const handleAddRow2 = () => {
-    const newRowId = rows.length
-      ? Math.max(...rows.map((row) => Number(row.id) || 0)) + 1
-      : 1
-
-    // console.log('New Row ID:', newRowId) // Debugging log
-
-    const newRow = {
-      id: newRowId.toString(), // Ensure ID is a string if needed
-      isNew: true,
-      ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])),
-    }
-
-    // rows.forEach((row) => {
-    //   if (rowModesModel[row.id]?.mode === GridRowModes.Edit) {
-    //     apiRef.current?.stopRowEditMode({ id: row.id })
-    //   }
-    // })
-
-    setRows((prevRows) => [...prevRows, newRow])
-
-    onAddRow?.(newRow)
-    setProduct('')
-
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'normParameterId' },
-    }))
-  }
-
-  const handleAddRow1 = () => {
-    const id = rows.length // Define id before using it
-
-    setRows((oldRows) => [
-      ...oldRows,
-      { id, jan: '', feb: '', march: '', isNew: true }, // Preserve oldRows and add new row
-    ])
-
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'normParameterId' },
     }))
   }
 
@@ -390,64 +311,15 @@ const DataGridTable = ({
       : []), // If no permissions, hide the Actions column
   ])
 
-  const addRemark1 = () => {
-    // setRows((prevRows) =>
-    //   prevRows.map((row) =>
-    //     row.id === selectedRowId ? { ...row, remark } : row,
-    //   ),
-    // )
-
-    // setOpenRemark(false)
-    // setRemark('')
-
-    const updatedRow = filteredRows.find((row) => row.id === selectedRowId)
-    if (updatedRow) {
-      setRows((prevRows) =>
-        prevRows.map((row) =>
-          row.id === selectedRowId ? { ...row, remark } : row,
-        ),
-      )
-      processRowUpdate({ ...updatedRow, remark: remark })
-    }
-    setOpenRemark(false)
-    setRemark('')
-  }
-
-  const addRemark = () => {
-    const updatedRow = filteredRows.find((row) => row.id === selectedRowId)
-    if (updatedRow) {
-      const updatedData = { ...updatedRow, remark }
-      processRowUpdate(updatedData) // Pass updated row to the parent
-    }
-    setOpenRemark(false)
-    setRemark('')
-  }
-  // // Save the remark and update the row
-  // const handleRemarkSave = () => {
-  //   setRows((prevRows) =>
-  //     prevRows.map((row) =>
-  //       row.id === currentRowId ? { ...row, remark: currentRemark } : row,
-  //     ),
-  //   )
-  //   unsavedChangesRef.current.unsavedRows[currentRowId] = {
-  //     ...rows.find((row) => row.id === currentRowId),
-  //     remark: currentRemark,
-  //   }
-  //   setRemarkDialogOpen(false)
-  // }
   const handleRemarkSave = () => {
     setRows((prevRows) => {
       const updatedRows = prevRows.map((row) => {
         if (row.id === currentRowId) {
-          // If the row already has 'aopRemarks', update it; otherwise, update 'remark'
-          // const keyToUpdate = 'aopRemarks' in row ? 'aopRemarks' : 'remark'
           const keyToUpdate = 'aopRemarks' in row ? 'aopRemarks' : 'remark'
-
           return { ...row, [keyToUpdate]: currentRemark }
         }
         return row
       })
-      // Update unsavedChangesRef using the updated rows
       const updatedRow = updatedRows.find((row) => row.id === currentRowId)
       unsavedChangesRef.current.unsavedRows[currentRowId] = updatedRow
       return updatedRows
@@ -455,19 +327,7 @@ const DataGridTable = ({
     setRemarkDialogOpen(false)
   }
 
-  const handleCellClick = (params) => {
-    //UNCOMMENT IT FOR REMARK POP UP
-    // if (params?.field === 'remark' || params?.field === 'aopRemarks') {
-    // console.log(params)
-    //   //   // setRemark(params?.value || '')
-    //   //   // setSelectedRowId(params.id)
-    //   //   // handleOpenRemark()
-    //   // setCurrentRemark(params?.value || '')
-    //   // setCurrentRowId(params?.id)
-    //   // setRemarkDialogOpen(true)
-    //   handleRemarkCellClick(params.row)
-    // }
-  }
+  const handleCellClick = (params) => {}
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false)

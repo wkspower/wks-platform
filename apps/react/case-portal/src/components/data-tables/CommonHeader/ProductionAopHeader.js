@@ -13,10 +13,12 @@ const getEnhancedColDefs = ({
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const enhancedColDefs = productionColDefs.map((col) => {
-    // For the normParametersFKId column, adjust headerName based on vertical
+    let updatedCol = { ...col }
+
+    // For the normParametersFKId column, change the header based on vertical:
     if (col.field === 'normParametersFKId') {
-      return {
-        ...col,
+      updatedCol = {
+        ...updatedCol,
         headerName: lowerVertName === 'meg' ? 'Product' : 'Grade Name',
         valueGetter: (params) => params || '',
         valueFormatter: (params) => {
@@ -59,8 +61,8 @@ const getEnhancedColDefs = ({
 
     // For the remark column, add a custom renderCell.
     if (col.field === 'aopRemarks') {
-      return {
-        ...col,
+      updatedCol = {
+        ...updatedCol,
         renderCell: (params) => (
           <div
             style={{
@@ -75,22 +77,20 @@ const getEnhancedColDefs = ({
       }
     }
 
-    // Optionally, use headerMap for additional header overrides if provided.
-    if (headerMap && headerMap[col.headerName]) {
-      return {
-        ...col,
+    // For the "Total" column, use findSum to compute the value.
+    if (col.field === 'averageTPH') {
+      updatedCol.valueGetter = findSum
+    }
+
+    // Optionally, override headerName using headerMap if provided.
+    if (headerMap && headerMap[col.headerName] !== undefined) {
+      updatedCol = {
+        ...updatedCol,
         headerName: headerMap[col.headerName],
       }
     }
 
-    if (col.field === 'averageTPH') {
-      return {
-        ...col,
-        valueGetter: (params) => findSum(params.row),
-      }
-    }
-    // For other columns, return as is.
-    return col
+    return updatedCol
   })
 
   return enhancedColDefs
