@@ -46,6 +46,7 @@ export const DataService = {
   deleteBusinessDemandData,
   handleRefresh,
   handleCalculate,
+  getNormalOperationNormsData,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -259,6 +260,35 @@ async function getBDData(keycloak) {
     siteId = parsedSite.id
   }
   const url = `${process.env.REACT_APP_API_URL}/task/getBusinessDemandData?year=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getNormalOperationNormsData(keycloak) {
+  var year = localStorage.getItem('year')
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+  var siteId = ''
+  const storedSite = localStorage.getItem('selectedSite')
+  if (storedSite) {
+    const parsedSite = JSON.parse(storedSite)
+    siteId = parsedSite.id
+  }
+  const url = `${process.env.REACT_APP_API_URL}/task/getNormalOperationNormsData?year=${year}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -682,8 +712,8 @@ async function getAllSites(keycloak) {
   }
 }
 
-async function getAllProducts(keycloak) {
-  const url = `${process.env.REACT_APP_API_URL}/task/getAllProducts`
+async function getAllProducts(keycloak, type) {
+  const url = `${process.env.REACT_APP_API_URL}/task/getAllProducts?normParameterTypeName=${type}`
 
   const headers = {
     Accept: 'application/json',
@@ -730,6 +760,7 @@ async function getShutDownPlantData(keycloak) {
   }
 
   // plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
+  plantId = plantId
 
   const url = `${process.env.REACT_APP_API_URL}/task/getShutDownPlanData?plantId=${plantId}&maintenanceTypeName=${maintenanceTypeName}&year=${year}`
 

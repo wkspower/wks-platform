@@ -27,6 +27,8 @@ import { MenuItem } from '../../../node_modules/@mui/material/index'
 import { InputAdornment } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import Chip from '@mui/material/Chip'
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
 
 import {
   FileDownload,
@@ -44,6 +46,20 @@ const jioColors = {
   border: '#D0D0D0',
   darkTransparentBlue: 'rgba(127, 147, 206, 0.8)',
 }
+
+// var key1 = [
+//   {
+//     'F0F4E75E-3C44-4FB4-BA7A-2B8227847134': [
+//       'AACDBE12-C5F6-4B79-9C88-751169815B42',
+//       'F0D52188-A656-475D-A675-4B3639F3EEA9',
+//     ],
+//   },
+//   {
+//     'E2E9D24C-80DF-40B4-A278-4C4D60742BCE': [
+//       'C5102765-E0A1-4CC6-B7A0-4F937B91EB6D',
+//     ],
+//   },
+// ]
 
 const DataGridTable = ({
   columns: initialColumns = [],
@@ -112,6 +128,7 @@ const DataGridTable = ({
   const handleRowEditCommit = (id, event) => {
     const editedRow = rows.find((row) => row.id === id)
   }
+
   const handleCellEditCommit = (id, event) => {}
 
   const handleEditClick = (id, row) => () => {
@@ -146,6 +163,7 @@ const DataGridTable = ({
   useEffect(() => {
     if (rows) setRows(rows)
   }, [rows, setRows])
+
   // useEffect(() => {
   //   setRows((prevRows) => {
   //     // Keep newly added rows and merge with initialRows
@@ -178,13 +196,13 @@ const DataGridTable = ({
         if (title == 'Business Demand') {
           await DataService.deleteBusinessDemandData(deleteId, keycloak)
         }
-        if (title == 'Shutdown/Turnaround Plan') {
+        if (title == 'Shutdown/Turnaround Activities') {
           await DataService.deleteShutdownData(deleteId, keycloak)
         }
-        if (title == 'Slowdown Plan') {
+        if (title == 'Slowdown Activities') {
           await DataService.deleteSlowdownData(deleteId, keycloak)
         }
-        if (title == 'Turnaround Plan') {
+        if (title == 'Turnaround Activities') {
           await DataService.deleteTurnAroundData(deleteId, keycloak)
         }
 
@@ -200,10 +218,12 @@ const DataGridTable = ({
       setDeleteIdTemp(null)
       setOpenDeleteDialogeBox(false)
       setSnackbarOpen(true)
+
       setSnackbarData({
         message: `${title} deleted successfully!`,
         severity: 'success',
       })
+
       fetchData()
     } catch (error) {
       console.error('Error deleting Business data:', error)
@@ -214,6 +234,7 @@ const DataGridTable = ({
     saveChanges()
     setOpenSaveDialogeBox(false)
   }
+
   const saveModalOpen = async () => {
     setOpenSaveDialogeBox(true)
   }
@@ -419,7 +440,9 @@ const DataGridTable = ({
       const updatedRows = prevRows.map((row) => {
         if (row.id === currentRowId) {
           // If the row already has 'aopRemarks', update it; otherwise, update 'remark'
+          // const keyToUpdate = 'aopRemarks' in row ? 'aopRemarks' : 'remark'
           const keyToUpdate = 'aopRemarks' in row ? 'aopRemarks' : 'remark'
+
           return { ...row, [keyToUpdate]: currentRemark }
         }
         return row
@@ -705,6 +728,14 @@ const DataGridTable = ({
             ))}
           </Grid>
         )} */}
+
+        {/* Backdrop inside child component */}
+        <Backdrop
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={loading}
+        >
+          <CircularProgress color='inherit' />
+        </Backdrop>
 
         <DataGrid
           loading={loading}

@@ -19,7 +19,7 @@
     "field": "april",
     "headerName": 4,
     "editable": true,
-    "type": "number",
+
     "align": "left",
     "headerAlign": "left"
   },
@@ -27,7 +27,7 @@
     "field": "may",
     "headerName": 5,
     "editable": true,
-    "type": "number",
+
     "align": "left",
     "headerAlign": "left"
   },
@@ -35,7 +35,7 @@
     "field": "june",
     "headerName": 6,
     "editable": true,
-    "type": "number",
+
     "align": "left",
     "headerAlign": "left"
   },
@@ -43,7 +43,7 @@
     "field": "july",
     "headerName": 7,
     "editable": true,
-    "type": "number",
+
     "align": "left",
     "headerAlign": "left"
   },
@@ -51,7 +51,7 @@
     "field": "august",
     "headerName": 8,
     "editable": true,
-    "type": "number",
+
     "align": "left",
     "headerAlign": "left"
   },
@@ -59,7 +59,7 @@
     "field": "september",
     "headerName": 9,
     "editable": true,
-    "type": "number",
+
     "align": "left",
     "headerAlign": "left"
   },
@@ -67,7 +67,7 @@
     "field": "october",
     "headerName": 10,
     "editable": true,
-    "type": "number",
+
     "align": "left",
     "headerAlign": "left"
   },
@@ -75,7 +75,7 @@
     "field": "november",
     "headerName": 11,
     "editable": true,
-    "type": "number",
+
     "align": "left",
     "headerAlign": "left"
   },
@@ -83,7 +83,7 @@
     "field": "december",
     "headerName": 12,
     "editable": true,
-    "type": "number",
+
     "align": "left",
     "headerAlign": "left"
   },
@@ -91,7 +91,7 @@
     "field": "january",
     "headerName": 1,
     "editable": true,
-    "type": "number",
+
     "align": "left",
     "headerAlign": "left"
   },
@@ -99,7 +99,7 @@
     "field": "february",
     "headerName": 2,
     "editable": true,
-    "type": "number",
+
     "align": "left",
     "headerAlign": "left"
   },
@@ -107,7 +107,7 @@
     "field": "march",
     "headerName": 3,
     "editable": true,
-    "type": "number",
+
     "align": "left",
     "headerAlign": "left"
   },

@@ -199,7 +199,7 @@ const SelectivityData = () => {
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak)
+        const data = await DataService.getAllProducts(keycloak, 'Consumption')
         const productList = data.map((product) => ({
           id: product.id,
           displayName: product.displayName,

@@ -5,7 +5,7 @@ const getEnhancedColDefs = ({
   allProducts,
   headerMap,
   handleRemarkCellClick,
-  // findSum,
+  findSum,
 }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange } = dataGridStore
@@ -83,6 +83,12 @@ const getEnhancedColDefs = ({
       }
     }
 
+    if (col.field === 'averageTPH') {
+      return {
+        ...col,
+        valueGetter: (params) => findSum(params.row),
+      }
+    }
     // For other columns, return as is.
     return col
   })

@@ -35,8 +35,7 @@ const ProductionvolumeData = () => {
     rowsBeforeChange: {},
   })
   const handleRemarkCellClick = (row) => {
-    console.log(row)
-    setCurrentRemark(row.remark || '')
+    setCurrentRemark(row.remark || row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -108,8 +107,9 @@ const ProductionvolumeData = () => {
         material: 'EOE',
         normParametersFKId: row.normParametersFKId,
         id: row.idFromApi || null,
-
         avgTPH: findAvg('1', row) || null,
+        remark: row.remark,
+        remarks: row.remark,
       }))
 
       const response = await DataService.editAOPMCCalculatedData(
@@ -233,10 +233,11 @@ const ProductionvolumeData = () => {
       console.error('Error fetching data:', error)
     }
   }
+
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak)
+        const data = await DataService.getAllProducts(keycloak, 'Production')
         const productList = data.map((product) => ({
           id: product.id.toLowerCase(),
           displayName: product.displayName,
@@ -264,7 +265,7 @@ const ProductionvolumeData = () => {
       product = allProducts.find((p) => p.id === row.normParametersFKId)
     } else {
       try {
-        const data = await DataService.getAllProducts(keycloak)
+        const data = await DataService.getAllProducts(keycloak, 'Production')
         product = data.find((p) => p.id === row.normParametersFKId)
       } catch (error) {
         console.error('Error fetching products:', error)

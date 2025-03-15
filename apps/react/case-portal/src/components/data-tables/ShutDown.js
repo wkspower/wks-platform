@@ -199,7 +199,7 @@ const ShutDown = () => {
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak)
+        const data = await DataService.getAllProducts(keycloak, 'Production')
         const productList = data.map((product) => ({
           // id: product.id.toLowerCase(), // Convert id to lowercase
           id: product.id, // Convert id to lowercase
@@ -248,7 +248,7 @@ const ShutDown = () => {
     {
       field: 'discription',
       headerName: 'Shutdown Desc',
-      minWidth: 325,
+      minWidth: 125,
       editable: true,
       renderHeader: () => (
         <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
@@ -264,56 +264,56 @@ const ShutDown = () => {
       hide: true,
     },
 
-    // {
-    //   field: 'product',
-    //   headerName: 'Product',
-    //   editable: true,
-    //   minWidth: 225,
-    //   valueGetter: (params) => {
-    //     // console.log('p1', params);
-    //     // console.log('p2', params2);
-    //     return params || ''
-    //   },
-    //   valueFormatter: (params) => {
-    //     // console.log('params valueFormatter ', params)
-    //     const product = allProducts.find((p) => p.id === params)
-    //     return product ? product.displayName : ''
-    //   },
-    //   renderEditCell: (params) => {
-    //     const { value } = params
-    //     // console.log('q1', params);
-    //     // console.log('q2', params2);
-    //     return (
-    //       <select
-    //         value={value || ''}
-    //         onChange={(event) => {
-    //           params.api.setEditCellValue({
-    //             id: params.id,
-    //             field: 'product',
-    //             value: event.target.value,
-    //           })
-    //         }}
-    //         style={{
-    //           width: '100%',
-    //           padding: '5px',
-    //           border: 'none', // Removes border
-    //           outline: 'none', // Removes focus outline
-    //           background: 'transparent', // Keeps background clean
-    //         }}
-    //       >
-    //         {/* Disabled first option */}
-    //         <option value='' disabled>
-    //           Select
-    //         </option>
-    //         {allProducts.map((product) => (
-    //           <option key={product.id} value={product.id}>
-    //             {product.displayName}
-    //           </option>
-    //         ))}
-    //       </select>
-    //     )
-    //   },
-    // },
+    {
+      field: 'product',
+      headerName: 'Product',
+      editable: true,
+      minWidth: 125,
+      valueGetter: (params) => {
+        // console.log('p1', params);
+        // console.log('p2', params2);
+        return params || ''
+      },
+      valueFormatter: (params) => {
+        // console.log('params valueFormatter ', params)
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : ''
+      },
+      renderEditCell: (params) => {
+        const { value } = params
+        // console.log('q1', params);
+        // console.log('q2', params2);
+        return (
+          <select
+            value={value || ''}
+            onChange={(event) => {
+              params.api.setEditCellValue({
+                id: params.id,
+                field: 'product',
+                value: event.target.value,
+              })
+            }}
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none', // Removes border
+              outline: 'none', // Removes focus outline
+              background: 'transparent', // Keeps background clean
+            }}
+          >
+            {/* Disabled first option */}
+            <option value='' disabled>
+              Select
+            </option>
+            {allProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.displayName}
+              </option>
+            ))}
+          </select>
+        )
+      },
+    },
 
     {
       field: 'maintStartDateTime',

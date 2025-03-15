@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import NumericInputOnly from 'utils/NumericInputOnly'
 import getEnhancedColDefs from './CommonHeader/feedstockHeaders'
 const headerMap = generateHeaderNames()
 
@@ -201,7 +202,7 @@ const FeedStockAvailability = () => {
   }, [])
   const getAllProducts = async () => {
     try {
-      const data = await DataService.getAllProducts(keycloak)
+      const data = await DataService.getAllProducts(keycloak, 'Consumption')
       // console.log('API Response:', data)
       const products = data.map((item) => item.displayName || item.name || item)
       setProductOptions(products)

@@ -5,6 +5,10 @@ import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useGridApiRef } from '@mui/x-data-grid'
+import Tooltip from '@mui/material/Tooltip'
+
+import { GridEditInputCell, GridEditInputCellProps } from '@mui/x-data-grid'
+import NumericInputOnly from 'utils/NumericInputOnly'
 import vertical_meg_coldefs_bd from '../../assets/vertical_meg_coldefs_bd.json'
 import vertical_pe_coldefs_bd from '../../assets/vertical_pe_coldefs_bd.json'
 import getEnhancedColDefs from './CommonHeader/index'
@@ -26,6 +30,7 @@ const BusinessDemand = () => {
   const [bdData, setBDData] = useState([])
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
+  const menu = useSelector((state) => state.menu)
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange } = dataGridStore
   const apiRef = useGridApiRef()
@@ -48,15 +53,35 @@ const BusinessDemand = () => {
   const fetchData = async () => {
     try {
       const data = await DataService.getBDData(keycloak)
-      const formattedData = data.map((item, index) => ({
-        ...item,
-        idFromApi: item.id,
-        id: index,
-      }))
-      setBDData(formattedData)
-      setRows(formattedData)
+      const groupedRows = []
+      const groups = new Map()
+      let groupId = 0
+
+      data.forEach((item) => {
+        const groupKey = item.normParameterTypeDisplayName
+
+        if (!groups.has(groupKey)) {
+          groups.set(groupKey, [])
+          groupedRows.push({
+            id: groupId++,
+            Particulars: groupKey,
+            isGroupHeader: true,
+          })
+        }
+        const formattedItem = {
+          ...item,
+          idFromApi: item.id,
+          id: groupId++,
+        }
+
+        groups.get(groupKey).push(formattedItem)
+        groupedRows.push(formattedItem)
+      })
+
+      setBDData(groupedRows)
+      setRows(groupedRows)
     } catch (error) {
-      console.error('Error fetching Turnaround data:', error)
+      console.error('Error fetching Business Demand data:', error)
     }
   }
   // const vertName = verticalChange?.verticalChange?.selectedVertical
@@ -80,7 +105,7 @@ const BusinessDemand = () => {
 
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak)
+        const data = await DataService.getAllProducts(keycloak, 'Production')
         const productList = data.map((product) => ({
           id: product.id, // Convert id to lowercase
           // id: product.id.toLowerCase(), // Convert id to lowercase
@@ -95,7 +120,6 @@ const BusinessDemand = () => {
     }
     fetchData()
     getAllProducts()
-    // getPlantAndSite()
   }, [sitePlantChange, keycloak])
 
   const handleRemarkCellClick = (row, newRow) => {
@@ -105,193 +129,12 @@ const BusinessDemand = () => {
     setRemarkDialogOpen(true)
   }
 
-  // const colDefs = [
-  //   {
-  //     field: 'normParameterId',
-  //     headerName: 'Product',
-  //     editable: true,
-  //     minWidth: 100,
-  //     valueGetter: (params) => {
-  //       return params || ''
-  //     },
-  //     valueFormatter: (params) => {
-  //       const product = allProducts.find((p) => p.id === params)
-  //       return product ? product.displayName : ''
-  //     },
-  //     renderEditCell: (params) => {
-  //       const { value } = params
-  //       return (
-  //         <select
-  //           value={value || ''}
-  //           onChange={(event) => {
-  //             params.api.setEditCellValue({
-  //               id: params.id,
-  //               field: 'normParameterId',
-  //               value: event.target.value,
-  //             })
-  //           }}
-  //           style={{
-  //             width: '100%',
-  //             padding: '5px',
-  //             border: 'none',
-  //             outline: 'none',
-  //             background: 'transparent',
-  //           }}
-  //         >
-  //           {/* Disabled first option */}
-  //           <option value='' disabled>
-  //             Select
-  //           </option>
-  //           {allProducts.map((product) => (
-  //             <option key={product.id} value={product.id}>
-  //               {product.displayName}
-  //             </option>
-  //           ))}
-  //         </select>
-  //       )
-  //     },
-  //   },
-
-  //   {
-  //     field: 'april',
-  //     headerName: headerMap['apr'],
-  //     editable: true,
-  //     type: 'number',
-  //     align: 'left',
-  //     headerAlign: 'left',
-
-  //     sx: {
-  //       '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button':
-  //         {
-  //           display: 'none',
-  //         },
-  //       '& input[type=number]': {
-  //         MozAppearance: 'textfield',
-  //       },
-  //     },
-  //   },
-  //   {
-  //     field: 'may',
-  //     headerName: headerMap['may'],
-  //     editable: true,
-  //     type: 'number',
-  //     align: 'left',
-  //     headerAlign: 'left',
-  //   },
-  //   {
-  //     field: 'june',
-  //     headerName: headerMap['jun'],
-  //     editable: true,
-  //     type: 'number',
-  //     align: 'left',
-  //     headerAlign: 'left',
-  //   },
-  //   {
-  //     field: 'july',
-  //     headerName: headerMap['jul'],
-  //     editable: true,
-  //     type: 'number',
-  //     align: 'left',
-  //     headerAlign: 'left',
-  //   },
-  //   {
-  //     field: 'aug',
-  //     headerName: headerMap['aug'],
-  //     editable: true,
-  //     type: 'number',
-  //     align: 'left',
-  //     headerAlign: 'left',
-  //   },
-  //   {
-  //     field: 'sep',
-  //     headerName: headerMap['sep'],
-  //     editable: true,
-  //     type: 'number',
-  //     align: 'left',
-  //     headerAlign: 'left',
-  //   },
-  //   {
-  //     field: 'oct',
-  //     headerName: headerMap['oct'],
-  //     editable: true,
-  //     type: 'number',
-  //     align: 'left',
-  //     headerAlign: 'left',
-  //   },
-  //   {
-  //     field: 'nov',
-  //     headerName: headerMap['nov'],
-  //     editable: true,
-  //     type: 'number',
-  //     align: 'left',
-  //     headerAlign: 'left',
-  //   },
-  //   {
-  //     field: 'dec',
-  //     headerName: headerMap['dec'],
-  //     editable: true,
-  //     type: 'number',
-  //     align: 'left',
-  //     headerAlign: 'left',
-  //   },
-  //   {
-  //     field: 'jan',
-  //     headerName: headerMap['jan'],
-  //     editable: true,
-  //     type: 'number',
-  //     align: 'left',
-  //     headerAlign: 'left',
-  //   },
-  //   {
-  //     field: 'feb',
-  //     headerName: headerMap['feb'],
-  //     editable: true,
-  //     type: 'number',
-  //     align: 'left',
-  //     headerAlign: 'left',
-  //   },
-  //   {
-  //     field: 'march',
-  //     headerName: headerMap['mar'],
-  //     editable: true,
-  //     type: 'number',
-  //     align: 'left',
-  //     headerAlign: 'left',
-  //   },
-
-  //   // { field: 'avgTph', headerName: 'AVG TPH', minWidth: 150, editable: true },
-  //   {
-  //     field: 'remark',
-  //     headerName: 'Remark',
-  //     minWidth: 200,
-  //     editable: true,
-  //     renderCell: (params) => {
-  //       // console.log(params)
-  //       return (
-  //         <div
-  //           style={{
-  //             cursor: 'pointer',
-  //             color: params.value ? 'inherit' : 'gray',
-  //           }}
-  //           onClick={() => handleRemarkCellClick(params.row)}
-  //         >
-  //           {params.value || 'Click to add remark'}
-  //         </div>
-  //       )
-  //     },
-  //   },
-  //   {
-  //     field: 'idFromApi',
-  //     headerName: 'idFromApi',
-  //   },
-  // ]
   const colDefs = getEnhancedColDefs({
     allProducts,
     headerMap,
     handleRemarkCellClick,
   })
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    // console.log(newRow)
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
@@ -375,7 +218,7 @@ const BusinessDemand = () => {
       if (businessData.length > 0) {
         const response = await DataService.saveBusinessDemandData(
           plantId,
-          businessData, // Now sending an array of rows
+          businessData,
           keycloak,
         )
         setSnackbarOpen(true)

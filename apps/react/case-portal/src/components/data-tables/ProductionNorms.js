@@ -8,7 +8,9 @@ const headerMap = generateHeaderNames()
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
+
 import NumericCellEditor from 'utils/NumericCellEditor'
+import NumericInputOnly from 'utils/NumericInputOnly'
 import getEnhancedColDefs from './CommonHeader/ProductionAopHeader'
 const ProductionNorms = () => {
   const keycloak = useSession()
@@ -24,7 +26,7 @@ const ProductionNorms = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [selectedUnit, setSelectedUnit] = useState('Ton') // Initialize with a default value
+  const [selectedUnit, setSelectedUnit] = useState('Ton')
 
   const [rows, setRows] = useState([])
   const [isSaving, setIsSaving] = useState(false)
@@ -38,7 +40,7 @@ const ProductionNorms = () => {
     rowsBeforeChange: {},
   })
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remark || '')
+    setCurrentRemark(row.remark || row.aopRemarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -131,7 +133,6 @@ const ProductionNorms = () => {
         normParametersFKId: row.normParametersFKId,
         // normItem: getProductName('1', row.normParametersFKId) || null,
         normItem: 'EOE',
-
         april: isKiloTon && row.april ? row.april * 1000 : row.april || null,
         may: isKiloTon && row.may ? row.may * 1000 : row.may || null,
         june: isKiloTon && row.june ? row.june * 1000 : row.june || null,
@@ -144,12 +145,9 @@ const ProductionNorms = () => {
         jan: isKiloTon && row.jan ? row.jan * 1000 : row.jan || null,
         feb: isKiloTon && row.feb ? row.feb * 1000 : row.feb || null,
         march: isKiloTon && row.march ? row.march * 1000 : row.march || null,
-
         // avgTPH: findAvg('1', row) || null,
         avgTPH: findSum('1', row) || null,
-
         aopRemarks: row.aopRemarks || 'remarks',
-
         id: row.idFromApi || null,
       }))
 
@@ -204,7 +202,6 @@ const ProductionNorms = () => {
       })
 
       setCsData(formattedData)
-
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Data refresh successfully!',
@@ -263,7 +260,7 @@ const ProductionNorms = () => {
       product = allProducts.find((p) => p.id === row.normParametersFKId)
     } else {
       try {
-        const data = await DataService.getAllProducts(keycloak)
+        const data = await DataService.getAllProducts(keycloak, 'Production')
         product = data.find((p) => p.id === row.normParametersFKId)
       } catch (error) {
         console.error('Error fetching products:', error)
@@ -272,6 +269,29 @@ const ProductionNorms = () => {
     }
 
     return product ? product.name : ''
+  }
+
+  const findAvg = (value, row) => {
+    const months = [
+      'april',
+      'may',
+      'june',
+      'july',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+      'jan',
+      'feb',
+      'march',
+    ]
+
+    const values = months.map((month) => row[month] || 0)
+    const sum = values.reduce((acc, val) => acc + val, 0)
+    const avg = (sum / values.length).toFixed(2)
+
+    return avg === '0.00' ? null : avg
   }
 
   const findSum = (value, row) => {
@@ -290,8 +310,8 @@ const ProductionNorms = () => {
       'march',
     ]
 
-    const values = months.map((month) => row[month] || 0)
-    var sum = values.reduce((acc, val) => acc + val, 0)
+    const values = months.map((month) => Number(row[month]) || 0)
+    const sum = values.reduce((acc, val) => acc + val, 0)
 
     const total = sum.toFixed(2)
     return total === '0.00' ? null : total
@@ -300,7 +320,7 @@ const ProductionNorms = () => {
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak)
+        const data = await DataService.getAllProducts(keycloak, 'Production')
         const productList = data.map((product) => ({
           id: product.id.toLowerCase(),
           displayName: product.displayName,
@@ -519,6 +539,7 @@ const ProductionNorms = () => {
     allProducts,
     headerMap,
     handleRemarkCellClick,
+    findSum,
   })
 
   const onProcessRowUpdateError = React.useCallback((error) => {

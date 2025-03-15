@@ -153,8 +153,7 @@ const TurnaroundPlanTable = () => {
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak)
-
+        const data = await DataService.getAllProducts(keycloak, 'Production')
         const productList = data.map((product) => ({
           id: product.id,
           displayName: product.displayName,
@@ -215,7 +214,7 @@ const TurnaroundPlanTable = () => {
       field: 'product',
       headerName: 'Product',
       editable: true,
-      minWidth: 225,
+      minWidth: 125,
       valueGetter: (params) => {
         return params || ''
       },
@@ -298,6 +297,8 @@ const TurnaroundPlanTable = () => {
       headerAlign: 'left',
       valueGetter: findDuration,
     },
+
+    //HIDDEN FILLED SUGGESTED FROM HW
     {
       field: 'period',
       headerName: 'Periods (in months)',

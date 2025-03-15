@@ -7,6 +7,9 @@ import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import { useSelector } from 'react-redux'
 import NumericInputOnly from 'utils/NumericInputOnly'
 
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
+
 const SlowDown = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange } = dataGridStore
@@ -19,6 +22,7 @@ const SlowDown = () => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const [rows, setRows] = useState()
+  const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -74,7 +78,7 @@ const SlowDown = () => {
         durationInHrs: parseFloat(row.durationInHrs),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
-        remark: row.remarks,
+        remark: row.remark,
         rate: row.rate,
         audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
@@ -101,10 +105,11 @@ const SlowDown = () => {
     }
   }
   const saveChanges = React.useCallback(async () => {
-    // console.log(
-    //   'Edited Data: ',
-    //   Object.values(unsavedChangesRef.current.unsavedRows),
-    // )
+    console.log(
+      'Edited Data: ',
+      Object.values(unsavedChangesRef.current.unsavedRows),
+    )
+    setLoading(true)
     setTimeout(async () => {
       try {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
@@ -140,6 +145,7 @@ const SlowDown = () => {
       }
     }, 1000) // Delay of 2 seconds
   }, [apiRef])
+
   const updateSlowdownData = async (newRow) => {
     try {
       var maintenanceId = newRow?.maintenanceId
@@ -175,7 +181,9 @@ const SlowDown = () => {
       fetchData()
     }
   }
+
   const fetchData = async () => {
+    setLoading(true)
     try {
       const data = await DataService.getSlowDownPlantData(keycloak)
 
@@ -198,14 +206,16 @@ const SlowDown = () => {
       }))
       setSlowDownData(formattedData)
       setRows(formattedData)
+      setLoading(false) // Hide loading
     } catch (error) {
       console.error('Error fetching SlowDown data:', error)
     }
   }
+
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak)
+        const data = await DataService.getAllProducts(keycloak, 'Production')
         // console.log('API Response:', data);
 
         // Extract only displayName and id
@@ -331,7 +341,7 @@ const SlowDown = () => {
       field: 'product',
       headerName: 'Product',
       editable: true,
-      minWidth: 225,
+      minWidth: 125,
       valueGetter: (params) => {
         return params || ''
       },
@@ -408,7 +418,7 @@ const SlowDown = () => {
       field: 'durationInHrs',
       headerName: 'Duration (hrs)',
       editable: true,
-      minWidth: 100,
+      minWidth: 75,
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
@@ -419,7 +429,7 @@ const SlowDown = () => {
       field: 'rate',
       headerName: 'Rate',
       editable: true,
-      minWidth: 100,
+      minWidth: 75,
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
@@ -429,7 +439,7 @@ const SlowDown = () => {
       field: 'remark',
       headerName: 'Remarks',
       editable: true,
-      minWidth: 200,
+      minWidth: 250,
       renderCell: (params) => {
         return (
           <div
@@ -459,6 +469,13 @@ const SlowDown = () => {
 
   return (
     <div>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
+
       <ASDataGrid
         setRows={setRows}
         columns={colDefs}
@@ -480,6 +497,7 @@ const SlowDown = () => {
         setDeleteId={setDeleteId}
         setOpen1={setOpen1}
         open1={open1}
+        // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
         // onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}

@@ -1,6 +1,7 @@
 import { useSelector } from 'react-redux'
 import vertical_meg_coldefs_bd from '../../../assets/vertical_meg_coldefs_bd.json'
 import vertical_pe_coldefs_bd from '../../../assets/vertical_pe_coldefs_bd.json'
+import NumericInputOnly from 'utils/NumericInputOnly'
 
 const getEnhancedColDefs = ({
   allProducts,
@@ -76,6 +77,7 @@ const getEnhancedColDefs = ({
     if (headerMap && headerMap[col.headerName]) {
       return {
         ...col,
+        renderEditCell: NumericInputOnly,
         headerName: headerMap[col.headerName],
       }
     }

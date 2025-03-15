@@ -1,216 +1,24 @@
-import { useSession } from 'SessionStoreContext'
-import DataGridTable from '../ASDataGrid'
-import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
+import Tooltip from '@mui/material/Tooltip'
 import { useGridApiRef } from '@mui/x-data-grid'
-import { GridRowModes } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { DataService } from 'services/DataService'
+import { useSession } from 'SessionStoreContext'
 import NumericInputOnly from 'utils/NumericInputOnly'
+import DataGridTable from '../ASDataGrid'
 const headerMap = generateHeaderNames()
 
-// Define columns as usual
-
-// Sample production data (10 rows)
-const productionData = [
-  {
-    id: 1,
-    srNo: 1,
-    particulars: 'Material A',
-    unit: 'Kg',
-    april: 50,
-    may: 60,
-    june: 55,
-    july: 70,
-    august: 65,
-    september: 75,
-    october: 80,
-    november: 85,
-    december: 90,
-    janurary: 95,
-    february: 85,
-    march: 100,
-    remark: 'Stock Updated',
-  },
-  {
-    id: 2,
-    srNo: 2,
-    particulars: 'Material B',
-    unit: 'Litre',
-    april: 30,
-    may: 40,
-    june: 35,
-    july: 45,
-    august: 50,
-    september: 55,
-    october: 60,
-    november: 65,
-    december: 70,
-    janurary: 75,
-    february: 65,
-    march: 80,
-    remark: 'Reorder Needed',
-  },
-  {
-    id: 3,
-    srNo: 3,
-    particulars: 'Material C',
-    unit: 'Pcs',
-    april: 100,
-    may: 120,
-    june: 110,
-    july: 130,
-    august: 125,
-    september: 135,
-    october: 140,
-    november: 145,
-    december: 150,
-    janurary: 155,
-    february: 145,
-    march: 160,
-    remark: 'Sufficient Stock',
-  },
-  {
-    id: 4,
-    srNo: 4,
-    particulars: 'Material D',
-    unit: 'Kg',
-    april: 20,
-    may: 25,
-    june: 30,
-    july: 35,
-    august: 30,
-    september: 40,
-    october: 45,
-    november: 50,
-    december: 55,
-    janurary: 60,
-    february: 50,
-    march: 65,
-    remark: 'Check Expiry',
-  },
-  {
-    id: 5,
-    srNo: 5,
-    particulars: 'Material E',
-    unit: 'Box',
-    april: 5,
-    may: 10,
-    june: 15,
-    july: 20,
-    august: 25,
-    september: 30,
-    october: 35,
-    november: 40,
-    december: 45,
-    janurary: 50,
-    february: 40,
-    march: 55,
-    remark: 'New Shipment Arrived',
-  },
-  {
-    id: 6,
-    srNo: 6,
-    particulars: 'Material F',
-    unit: 'Tonne',
-    april: 15,
-    may: 20,
-    june: 18,
-    july: 25,
-    august: 22,
-    september: 28,
-    october: 30,
-    november: 32,
-    december: 35,
-    janurary: 38,
-    february: 34,
-    march: 40,
-    remark: 'Monitor Usage',
-  },
-  {
-    id: 7,
-    srNo: 7,
-    particulars: 'Material G',
-    unit: 'Meter',
-    april: 200,
-    may: 220,
-    june: 210,
-    july: 250,
-    august: 230,
-    september: 270,
-    october: 280,
-    november: 290,
-    december: 300,
-    janurary: 310,
-    february: 290,
-    march: 320,
-    remark: 'Stable Supply',
-  },
-  {
-    id: 8,
-    srNo: 8,
-    particulars: 'Material H',
-    unit: 'Kg',
-    april: 12,
-    may: 18,
-    june: 16,
-    july: 20,
-    august: 22,
-    september: 24,
-    october: 26,
-    november: 28,
-    december: 30,
-    janurary: 32,
-    february: 28,
-    march: 35,
-    remark: 'Low Demand',
-  },
-  {
-    id: 9,
-    srNo: 9,
-    particulars: 'Material I',
-    unit: 'Litre',
-    april: 55,
-    may: 60,
-    june: 58,
-    july: 70,
-    august: 68,
-    september: 75,
-    october: 80,
-    november: 85,
-    december: 90,
-    janurary: 95,
-    february: 88,
-    march: 100,
-    remark: 'Reorder Soon',
-  },
-  {
-    id: 10,
-    srNo: 10,
-    particulars: 'Material J',
-    unit: 'Box',
-    april: 8,
-    may: 12,
-    june: 10,
-    july: 15,
-    august: 14,
-    september: 18,
-    october: 20,
-    november: 22,
-    december: 24,
-    janurary: 26,
-    february: 23,
-    march: 28,
-    remark: 'New Variant Available',
-  },
-]
-
 const NormalOpNormsScreen = () => {
-  const menu = useSelector((state) => state.dataGridStore)
+  const [allProducts, setAllProducts] = useState([])
+  const [bdData, setBDData] = useState([])
+
+  const menu = useSelector((state) => state.menu)
   const { sitePlantChange } = menu
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
-  const [rows, setRows] = useState(productionData)
+  const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -226,20 +34,83 @@ const NormalOpNormsScreen = () => {
     rowsBeforeChange: {},
   })
   const keycloak = useSession()
-  const productionColumns = [
+
+  const fetchData = async () => {
+    try {
+      const data = await DataService.getNormalOperationNormsData(keycloak)
+      const groupedRows = []
+      const groups = new Map()
+      let groupId = 0
+
+      data.forEach((item) => {
+        const groupKey = item.normParameterTypeDisplayName || 'By Products'
+
+        // const groupKey = ''
+        // if (item.id < 4)
+        //   groupKey = item.normParameterTypeDisplayName || 'By Products'
+        // if (item.id < 8 && item.id > 4)
+        //   groupKey = item.normParameterTypeDisplayName || 'Cat Chem'
+        // if (item.id < 12 && item.id > 8)
+        //   groupKey = item.normParameterTypeDisplayName || 'Consumption'
+        // if (item.id < 16 && item.id > 12)
+        //   groupKey = item.normParameterTypeDisplayName || 'Production'
+        // if (item.id > 16)
+        //   groupKey = item.normParameterTypeDisplayName || 'Grade'
+
+        if (!groups.has(groupKey)) {
+          groups.set(groupKey, [])
+          groupedRows.push({
+            id: groupId++,
+            Particulars: groupKey,
+            isGroupHeader: true,
+          })
+        }
+        const formattedItem = {
+          ...item,
+          idFromApi: item.id,
+          id: groupId++,
+        }
+
+        groups.get(groupKey).push(formattedItem)
+        groupedRows.push(formattedItem)
+      })
+
+      setBDData(groupedRows)
+      setRows(groupedRows)
+    } catch (error) {
+      console.error('Error fetching Business Demand data:', error)
+    }
+  }
+
+  useEffect(() => {
+    const getAllProducts = async () => {
+      try {
+        const data = await DataService.getAllProducts(keycloak, 'Consumption')
+        const productList = data.map((product) => ({
+          id: product.id, // Convert id to lowercase
+          // id: product.id.toLowerCase(), // Convert id to lowercase
+          displayName: product.displayName,
+        }))
+        setAllProducts(productList)
+      } catch (error) {
+        console.error('Error fetching product:', error)
+      } finally {
+        // handleMenuClose();
+      }
+    }
+    fetchData()
+    getAllProducts()
+  }, [sitePlantChange, keycloak])
+
+  const colDefs = [
     {
-      field: 'srNo',
-      headerName: 'Sr. No',
+      field: 'Particulars',
+      headerName: 'Type',
       minWidth: 125,
-      editable: false,
-      flex: 2,
+      groupable: true,
+      renderCell: (params) => <strong>{params.value}</strong>,
     },
-    {
-      field: 'particulars',
-      headerName: 'Particulars',
-      minWidth: 125,
-      editable: true,
-    },
+
     { field: 'unit', headerName: 'Unit', width: 100, editable: true },
     {
       field: 'april',
@@ -341,24 +212,32 @@ const NormalOpNormsScreen = () => {
     {
       field: 'remark',
       headerName: 'Remark',
-      minWidth: 180,
-      maxWidth: 200,
+      minWidth: 150,
       editable: true,
-      renderCell: (params) => {
-        return (
+      renderCell: (params) => (
+        <Tooltip title={params.value || ''} arrow>
           <div
             style={{
               cursor: 'pointer',
               color: params.value ? 'inherit' : 'gray',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: 140,
             }}
             onClick={() => handleRemarkCellClick(params.row)}
           >
-            {params.value || 'Click to add remark'}
+            {params.value}
           </div>
-        )
-      },
+        </Tooltip>
+      ),
+    },
+    {
+      field: 'idFromApi',
+      headerName: 'idFromApi',
     },
   ]
+
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
@@ -383,72 +262,91 @@ const NormalOpNormsScreen = () => {
 
   const saveChanges = React.useCallback(async () => {
     setTimeout(() => {
-      console.log(
-        'Edited Data: ',
-        Object.values(unsavedChangesRef.current.unsavedRows),
-      )
       try {
-        // var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        // saveShutdownData(data)
-
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        if (data.length == 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
+        }
+        // saveBusinessDemandData(data)
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},
         }
-      } catch (error) {
-        // setIsSaving(false);
-      }
+      } catch (error) {}
     }, 1000)
   }, [apiRef])
 
-  // Create groups by inserting a row with a groupHeader property
-  const rawMaterialsData = productionData.slice(0, 2) // 2 rows for Raw Materials
-  const byProductsData = productionData.slice(2, 5) // 3 rows for By Products
-  const calChemData = productionData.slice(5, 9) // 1 row for Cal-chem
-
-  const groupedRows = [
-    { id: 'group-raw', groupHeader: 'Raw Materials' },
-    ...rawMaterialsData,
-    { id: 'group-by', groupHeader: 'By Products' },
-    ...byProductsData,
-    { id: 'group-cal', groupHeader: 'Cat-chem' },
-    ...calChemData,
-  ]
-
-  // Custom render function for cells
-  const groupRenderCell = (params) => {
-    if (params.row.groupHeader) {
-      // In the first column show the group title
-      if (params.field === 'srNo') {
-        return (
-          <span
-            style={{
-              fontWeight: 'bold',
-              padding: '4px 8px',
-            }}
-          >
-            {params.row.groupHeader}
-          </span>
-        )
+  const saveBusinessDemandData = async (newRows) => {
+    try {
+      let plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
       }
-      // For other columns, render empty
-      return ''
+
+      const businessData = newRows.map((row) => ({
+        april: row.april || null,
+        may: row.may || null,
+        june: row.june || null,
+        july: row.july || null,
+        aug: row.aug || null,
+        sep: row.sep || null,
+        oct: row.oct || null,
+        nov: row.nov || null,
+        dec: row.dec || null,
+        jan: row.jan || null,
+        feb: row.feb || null,
+        march: row.march || null,
+        remark: row.remark || null,
+        avgTph: row.avgTph || null,
+        year: localStorage.getItem('year'),
+        plantId: plantId,
+        normParameterId: row.normParameterId,
+        id: row.idFromApi || null,
+      }))
+      if (businessData.length > 0) {
+        const response = await DataService.saveBusinessDemandData(
+          plantId,
+          businessData,
+          keycloak,
+        )
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Business Demand data Saved Successfully!',
+          severity: 'success',
+        })
+        // fetchData()
+        return response
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Business Demand data not saved!',
+          severity: 'error',
+        })
+      }
+    } catch (error) {
+      console.error('Error saving Business Demand data:', error)
+    } finally {
+      fetchData()
     }
-    return params.value
   }
 
-  // Enhance columns to use the custom render function
-  const enhancedColumns = productionColumns.map((col) => ({
-    ...col,
-    renderCell: groupRenderCell,
-  }))
+  const onProcessRowUpdateError = React.useCallback((error) => {
+    console.log(error)
+  }, [])
 
   return (
     <div>
       <DataGridTable
-        columns={enhancedColumns}
+        columns={colDefs}
         setRows={setRows}
-        rows={groupedRows}
+        rows={rows}
         title='Normal Operations Norms'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
@@ -466,7 +364,8 @@ const NormalOpNormsScreen = () => {
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
-        // fetchData={fetchData}
+        onProcessRowUpdateError={onProcessRowUpdateError}
+        fetchData={fetchData}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}
         currentRemark={currentRemark}
@@ -482,18 +381,6 @@ const NormalOpNormsScreen = () => {
           saveWithRemark: true,
           saveBtn: true,
           showCalculate: false,
-        }}
-        getRowClassName={(params) =>
-          params.row.groupHeader ? 'group-header-row' : ''
-        }
-        sx={{
-          '& .group-header-row .MuiDataGrid-cell': {
-            borderRight: 'none !important',
-          },
-          '& .MuiDataGrid-row.MuiDataGrid-row--firstVisible:nth-child(even) .MuiDataGrid-cell':
-            {
-              borderRight: 'none !important',
-            },
         }}
       />
     </div>
