@@ -39,5 +39,8 @@ public class MCUNormsValueDTO {
     private Date modifiedOn;
     private String mcuVersion;
     private String updatedBy;
+    private String normParameterTypeId;
+    private String normParameterTypeName;
+    private String normParameterTypeDisplayName;
 }
 

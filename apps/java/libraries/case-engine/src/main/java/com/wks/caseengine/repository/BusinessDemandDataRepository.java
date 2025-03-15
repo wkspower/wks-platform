@@ -20,7 +20,7 @@ public interface BusinessDemandDataRepository extends JpaRepository<BusinessDema
     BusinessDemand BD JOIN NormParameters NP ON BD.NormParameters_FK_Id = NP.Id
     JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id
 	WHERE BD.Year = :year AND BD.Plant_FK_Id = :plantFkId 
-    ORDER BY NPT.Id, NP.DiplayOrder;
+    ORDER BY NPT.Id, NP.DiplayOrder
  	        """, nativeQuery = true)
  	    List<Object[]> findByYearAndPlantFkId(@Param("year") String year, @Param("plantFkId") UUID plantFkId);
 	

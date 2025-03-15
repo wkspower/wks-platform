@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,39 +70,47 @@ public class VerticalsServiceImpl implements VerticalsService{
 	    Map<String, VerticalsDTO> verticalMap = new HashMap<>();
 
 	    for (Object[] row : results) {
+	        // Extracting values from the result set
 	        String verticalId = row[0].toString();
 	        String verticalName = row[1].toString();
-	        String siteId = row[2] != null ? row[2].toString() : null;
-	        String siteName = row[3] != null ? row[3].toString() : null;
-	        String plantId = row[4] != null ? row[4].toString() : null;
-	        String plantName = row[5] != null ? row[5].toString() : null;
+	        String verticalDisplayName = row[2] != null ? row[2].toString() : null;
+	        String siteId = row[3] != null ? row[3].toString() : null;
+	        String siteName = row[4] != null ? row[4].toString() : null;
+	        String siteDisplayName = row[5] != null ? row[5].toString() : null;
+	        String plantId = row[6] != null ? row[6].toString() : null;
+	        String plantName = row[7] != null ? row[7].toString() : null;
+	        String plantDisplayName = row[8] != null ? row[8].toString() : null;
 
 	        // Fetch or create VerticalDTO
 	        VerticalsDTO verticalDTO = verticalMap.computeIfAbsent(verticalId, id -> {
 	            VerticalsDTO v = new VerticalsDTO();
 	            v.setId(id);
 	            v.setName(verticalName);
+	            v.setDisplayName(verticalDisplayName);
 	            v.setSites(new ArrayList<>());
 	            return v;
 	        });
 
+	        // Use a map for faster site lookup inside each vertical
+	        Map<String, SitesDTO> siteMap = verticalDTO.getSites().stream()
+	                .collect(Collectors.toMap(SitesDTO::getId, s -> s, (s1, s2) -> s1));
+
 	        if (siteId != null) {
-	            SitesDTO siteDTO = verticalDTO.getSites().stream()
-	                .filter(s -> s.getId().equals(siteId))
-	                .findFirst()
-	                .orElseGet(() -> {
-	                    SitesDTO s = new SitesDTO();
-	                    s.setId(siteId);
-	                    s.setName(siteName);
-	                    s.setPlants(new ArrayList<>());
-	                    verticalDTO.getSites().add(s);
-	                    return s;
-	                });
+	            SitesDTO siteDTO = siteMap.computeIfAbsent(siteId, id -> {
+	                SitesDTO s = new SitesDTO();
+	                s.setId(siteId);
+	                s.setName(siteName);
+	                s.setDisplayName(siteDisplayName);
+	                s.setPlants(new ArrayList<>());
+	                verticalDTO.getSites().add(s);
+	                return s;
+	            });
 
 	            if (plantId != null) {
 	                PlantsDTO plantDTO = new PlantsDTO();
 	                plantDTO.setId(plantId);
 	                plantDTO.setName(plantName);
+	                plantDTO.setDisplayName(plantDisplayName);
 	                siteDTO.getPlants().add(plantDTO);
 	            }
 	        }
