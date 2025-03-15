@@ -8,8 +8,11 @@ import { useSelector } from 'react-redux'
 import NumericInputOnly from 'utils/NumericInputOnly'
 
 const SlowDown = () => {
-  const menu = useSelector((state) => state.menu)
-  const { sitePlantChange } = menu
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { sitePlantChange, verticalChange } = dataGridStore
+  const vertName = verticalChange?.verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
+
   const [slowDownData, setSlowDownData] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
@@ -71,7 +74,7 @@ const SlowDown = () => {
         durationInHrs: parseFloat(row.durationInHrs),
         maintEndDateTime: row.maintEndDateTime,
         maintStartDateTime: row.maintStartDateTime,
-        remark: row.remark,
+        remark: row.remarks,
         rate: row.rate,
         audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
@@ -97,15 +100,35 @@ const SlowDown = () => {
       fetchData()
     }
   }
-
   const saveChanges = React.useCallback(async () => {
-    console.log(
-      'Edited Data: ',
-      Object.values(unsavedChangesRef.current.unsavedRows),
-    )
+    // console.log(
+    //   'Edited Data: ',
+    //   Object.values(unsavedChangesRef.current.unsavedRows),
+    // )
     setTimeout(async () => {
       try {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        if (data.length == 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
+        }
+        // Validate that both normParameterId and remark are not empty
+        const invalidRows = data.filter(
+          (row) => !row.product.trim() || !row.remark.trim(),
+        )
+
+        if (invalidRows.length > 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Please fill required fields: Product and Remark.',
+            severity: 'error',
+          })
+          return
+        }
         saveSlowDownData(data)
 
         unsavedChangesRef.current = {
@@ -117,7 +140,6 @@ const SlowDown = () => {
       }
     }, 1000) // Delay of 2 seconds
   }, [apiRef])
-
   const updateSlowdownData = async (newRow) => {
     try {
       var maintenanceId = newRow?.maintenanceId
@@ -153,7 +175,6 @@ const SlowDown = () => {
       fetchData()
     }
   }
-
   const fetchData = async () => {
     try {
       const data = await DataService.getSlowDownPlantData(keycloak)
@@ -181,7 +202,6 @@ const SlowDown = () => {
       console.error('Error fetching SlowDown data:', error)
     }
   }
-
   useEffect(() => {
     const getAllProducts = async () => {
       try {
@@ -311,7 +331,7 @@ const SlowDown = () => {
       field: 'product',
       headerName: 'Product',
       editable: true,
-      minWidth: 125,
+      minWidth: 225,
       valueGetter: (params) => {
         return params || ''
       },
@@ -388,7 +408,7 @@ const SlowDown = () => {
       field: 'durationInHrs',
       headerName: 'Duration (hrs)',
       editable: true,
-      minWidth: 75,
+      minWidth: 100,
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
@@ -399,7 +419,7 @@ const SlowDown = () => {
       field: 'rate',
       headerName: 'Rate',
       editable: true,
-      minWidth: 75,
+      minWidth: 100,
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
@@ -409,7 +429,7 @@ const SlowDown = () => {
       field: 'remark',
       headerName: 'Remarks',
       editable: true,
-      minWidth: 250,
+      minWidth: 200,
       renderCell: (params) => {
         return (
           <div
@@ -443,7 +463,7 @@ const SlowDown = () => {
         setRows={setRows}
         columns={colDefs}
         rows={rows}
-        title='Slowdown Plan'
+        title={'Slowdown Activities'}
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
@@ -460,7 +480,6 @@ const SlowDown = () => {
         setDeleteId={setDeleteId}
         setOpen1={setOpen1}
         open1={open1}
-        // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
         // onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}

@@ -31,7 +31,7 @@ export const generateHeaderNames = () => {
 
   months.forEach((month, index) => {
     const year = index >= 3 ? startYear : endYear // Apr-Dec → startYear, Jan-Mar → endYear
-    headerMap[month] =
+    headerMap[index + 1] =
       `${month.charAt(0).toUpperCase() + month.slice(1)}-${year % 100}`
   })
 

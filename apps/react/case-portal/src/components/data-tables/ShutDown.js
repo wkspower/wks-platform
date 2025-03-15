@@ -8,8 +8,10 @@ import { useGridApiRef } from '@mui/x-data-grid'
 import NumericInputOnly from 'utils/NumericInputOnly'
 
 const ShutDown = () => {
-  const menu = useSelector((state) => state.menu)
-  const { sitePlantChange } = menu
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { sitePlantChange, verticalChange } = dataGridStore
+  const vertName = verticalChange?.verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [shutdownData, setShutdownData] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const [open1, setOpen1] = useState(false)
@@ -56,6 +58,29 @@ const ShutDown = () => {
     setTimeout(() => {
       try {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        if (data.length == 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
+        }
+        // Validate that both normParameterId and remark are not empty
+        const invalidRows = data.filter(
+          (row) =>
+            // !row.normParameterId.trim() ||
+            !row.remark.trim(),
+        )
+
+        if (invalidRows.length > 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Please fill required fields: Remark.',
+            severity: 'error',
+          })
+          return
+        }
         saveShutdownData(data)
         unsavedChangesRef.current = {
           unsavedRows: {},
@@ -223,7 +248,7 @@ const ShutDown = () => {
     {
       field: 'discription',
       headerName: 'Shutdown Desc',
-      minWidth: 125,
+      minWidth: 325,
       editable: true,
       renderHeader: () => (
         <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
@@ -243,7 +268,7 @@ const ShutDown = () => {
     //   field: 'product',
     //   headerName: 'Product',
     //   editable: true,
-    //   minWidth: 125,
+    //   minWidth: 225,
     //   valueGetter: (params) => {
     //     // console.log('p1', params);
     //     // console.log('p2', params2);
@@ -368,7 +393,11 @@ const ShutDown = () => {
         setRows={setRows}
         columns={colDefs}
         rows={rows}
-        title='Shutdown/Turnaround Plan'
+        title={
+          lowerVertName === 'meg'
+            ? 'Shutdown/Turnaround Activities'
+            : 'Shutdown Activities'
+        }
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}

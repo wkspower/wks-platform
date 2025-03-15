@@ -7,7 +7,8 @@ const initialState = {
   openComponent: 'buttons',
   drawerOpen: true,
   componentDrawerOpen: true,
-  sitePlantChange: false,
+  // sitePlantChange: false,
+  // verticalChange: {},
 }
 
 // ==============================|| SLICE - MENU ||============================== //
@@ -31,9 +32,12 @@ const menu = createSlice({
     openComponentDrawer(state, action) {
       state.componentDrawerOpen = action.payload.componentDrawerOpen
     },
-    setSitePlantChange(state, action) {
-      state.sitePlantChange = action.payload
-    },
+    // setSitePlantChange(state, action) {
+    //   state.sitePlantChange = action.payload
+    // },
+    // setVerticalChange(state, action) {
+    //   state.verticalChange = action.payload
+    // },
   },
 })
 
@@ -44,5 +48,6 @@ export const {
   activeComponent,
   openDrawer,
   openComponentDrawer,
-  setSitePlantChange,
+  // setSitePlantChange,
+  // setVerticalChange,
 } = menu.actions

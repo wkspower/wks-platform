@@ -7,10 +7,13 @@ import menuItemsDefs from './menu'
 import { RegisterInjectUserSession, RegisteOptions } from './plugins'
 import { accountStore, sessionStore } from './store'
 import './App.css'
+import { useSelector } from 'react-redux'
 
 const ScrollTop = lazy(() => import('./components/ScrollTop'))
 
 const App = () => {
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { verticalChange, sitePlantChange } = dataGridStore
   const [keycloak, setKeycloak] = useState({})
   const [authenticated, setAuthenticated] = useState(null)
   // const [recordsTypes, setRecordsTypes] = useState([])
@@ -65,42 +68,90 @@ const App = () => {
     }
   }
 
+  useEffect(() => {
+    if (keycloak) {
+      buildMenuItems(keycloak)
+    }
+  }, [verticalChange, sitePlantChange, keycloak])
+
   async function buildMenuItems(keycloak) {
     const menu = {
       items: [...menuItemsDefs.items],
     }
 
-    // await RecordService?.getAllRecordTypes(keycloak).then((data) => {
-    //   setRecordsTypes(data)
+    // Get the selected vertical
+    const selectedVertical = verticalChange?.verticalChange?.selectedVertical
 
-    //   data.forEach((element) => {
-    //     menu.items[2].children
-    //       .filter((menu) => menu.id === 'record-list')[0]
-    //       .children.push({
-    //         id: element.id,
-    //         title: element.id,
-    //         type: 'item',
-    //         url: '/record-list/' + element.id,
-    //         breadcrumbs: true,
-    //       })
-    //   })
-    // })
+    const alternateMapping = {
+      PE: {
+        'product-demand': 'Business Demand',
+        'product-mcu-val': 'Production Volume Data',
+        'shutdown-plan': 'Shutdown Activities',
+        'slowdown-plan': 'Slowdown Activities',
+        'ta-plan': 'Turnaround Activities',
+        'production-norms': 'Production AOP',
+      },
+      MEG: {
+        'product-demand': 'Business Demand',
+        'product-mcu-val': 'Production Volume Data',
+        'shutdown-plan': 'Shutdown Activities',
+        'slowdown-plan': 'Slowdown Activities',
+        'ta-plan': ' Turnaround Activities', // but we are hiding in meg
+        'production-norms': 'Production AOP',
+      },
+      // ... add more vertical mappings if needed.
+    }
 
-    // await CaseService.getCaseDefinitions(keycloak).then((data) => {
-    //   setCasesDefinitions(data)
-    //   data.forEach((element) => {
-    //     menu.items[2].children
-    //       .filter((menu) => menu.id === 'case-list')[0]
-    //       .children.push({
-    //         id: element.id,
-    //         title: element.name,
-    //         type: 'item',
-    //         url: '/case-list/' + element.id,
-    //         breadcrumbs: true,
-    //       })
-    //   })
-    // })
+    if (selectedVertical === 'MEG') {
+      // If vertical is MEG, hide the ta-plan item.
+      menu.items = menu.items.map((item) => {
+        if (item.id === 'utilities') {
+          return {
+            ...item,
+            children: item.children.map((group) => {
+              if (group.id === 'production-norms-plan') {
+                return {
+                  ...group,
+                  children: group.children.filter(
+                    (child) => child.id !== 'ta-plan',
+                  ),
+                }
+              }
+              return group
+            }),
+          }
+        }
+        return item
+      })
+    } else if (selectedVertical && alternateMapping[selectedVertical]) {
+      // For non-MEG verticals with a defined alternate mapping, update the titles.
+      const mapping = alternateMapping[selectedVertical]
+      menu.items = menu.items.map((item) => {
+        if (item.id === 'utilities') {
+          return {
+            ...item,
+            children: item.children.map((group) => {
+              if (group.id === 'production-norms-plan') {
+                return {
+                  ...group,
+                  children: group.children.map((child) => {
+                    // If an alternate title exists for this child's id, update the title.
+                    if (mapping[child.id]) {
+                      return { ...child, title: mapping[child.id] }
+                    }
+                    return child
+                  }),
+                }
+              }
+              return group
+            }),
+          }
+        }
+        return item
+      })
+    }
 
+    // Additional modifications (e.g., manager check)
     if (!accountStore.isManagerUser(keycloak)) {
       delete menu.items[3]
     }

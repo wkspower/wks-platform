@@ -8,8 +8,8 @@ import ASDataGrid from './ASDataGrid'
 import NumericInputOnly from 'utils/NumericInputOnly'
 
 const TurnaroundPlanTable = () => {
-  const menu = useSelector((state) => state.menu)
-  const { sitePlantChange } = menu
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { sitePlantChange } = dataGridStore
   const [TaData, setTaData] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
@@ -21,12 +21,20 @@ const TurnaroundPlanTable = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  // States for the Remark Dialog
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
   const keycloak = useSession()
-
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remark || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
@@ -207,7 +215,7 @@ const TurnaroundPlanTable = () => {
       field: 'product',
       headerName: 'Product',
       editable: true,
-      minWidth: 125,
+      minWidth: 225,
       valueGetter: (params) => {
         return params || ''
       },
@@ -290,8 +298,6 @@ const TurnaroundPlanTable = () => {
       headerAlign: 'left',
       valueGetter: findDuration,
     },
-
-    //HIDDEN FILLED SUGGESTED FROM HW
     {
       field: 'period',
       headerName: 'Periods (in months)',
@@ -304,6 +310,19 @@ const TurnaroundPlanTable = () => {
       headerName: 'Remarks',
       editable: true,
       minWidth: 200,
+      renderCell: (params) => {
+        return (
+          <div
+            style={{
+              cursor: 'pointer',
+              color: params.value ? 'inherit' : 'gray',
+            }}
+            onClick={() => handleRemarkCellClick(params.row)}
+          >
+            {params.value || 'Click to add remark'}
+          </div>
+        )
+      },
     },
   ]
 
@@ -338,12 +357,12 @@ const TurnaroundPlanTable = () => {
     }
   }
 
-  const handleRowEditStop = (params, event) => {
-    setRowModesModel({
-      ...rowModesModel,
-      [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
-    })
-  }
+  // const handleRowEditStop = (params, event) => {
+  //   setRowModesModel({
+  //     ...rowModesModel,
+  //     [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
+  //   })
+  // }
 
   const onProcessRowUpdateError = React.useCallback((error) => {
     console.log(error)
@@ -355,7 +374,7 @@ const TurnaroundPlanTable = () => {
         setRows={setRows}
         columns={colDefs}
         rows={rows}
-        title='Turnaround Plan'
+        title='Turnaround Activities'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
@@ -374,9 +393,15 @@ const TurnaroundPlanTable = () => {
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
-        onRowEditStop={handleRowEditStop}
+        // onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
         experimentalFeatures={{ newEditingApi: true }}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        unsavedChangesRef={unsavedChangesRef}
         permissions={{
           showAction: true,
           addButton: true,

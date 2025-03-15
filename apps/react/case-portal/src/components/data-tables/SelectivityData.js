@@ -12,8 +12,8 @@ import NumericInputOnly from 'utils/NumericInputOnly'
 const headerMap = generateHeaderNames()
 
 const SelectivityData = () => {
-  const menu = useSelector((state) => state.menu)
-  const { sitePlantChange } = menu
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { sitePlantChange } = dataGridStore
   const keycloak = useSession()
   const [csData, setCsData] = useState([])
   const [allProducts, setAllProducts] = useState([])
@@ -70,6 +70,27 @@ const SelectivityData = () => {
       try {
         // if (title === 'Business Demand') {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        // Validation: Check if there are any rows to save
+        if (data.length === 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
+        }
+
+        // Validate that both normParameterId and remark are not empty
+        const invalidRows = data.filter((row) => !row.remark.trim())
+
+        if (invalidRows.length > 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Please fill required fields: Remark.',
+            severity: 'error',
+          })
+          return
+        }
         saveCatalystData(data)
         // }
 
@@ -277,7 +298,7 @@ const SelectivityData = () => {
     },
     {
       field: 'april',
-      headerName: headerMap['apr'],
+      headerName: headerMap[4],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -287,7 +308,7 @@ const SelectivityData = () => {
 
     {
       field: 'may',
-      headerName: headerMap['may'],
+      headerName: headerMap[5],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -295,7 +316,7 @@ const SelectivityData = () => {
     },
     {
       field: 'june',
-      headerName: headerMap['jun'],
+      headerName: headerMap[6],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -303,7 +324,7 @@ const SelectivityData = () => {
     },
     {
       field: 'july',
-      headerName: headerMap['jul'],
+      headerName: headerMap[7],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -311,33 +332,15 @@ const SelectivityData = () => {
     },
     {
       field: 'aug',
-      headerName: headerMap['aug'],
+      headerName: headerMap[8],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
     },
-
-    // {
-    //   field: 'aug',
-    //   headerName: headerMap['aug'],
-    //   editable: true,
-    //   align: 'left',
-    //   headerAlign: 'left',
-    //   renderEditCell: (params) => {
-    //     return (
-    //       <NumericCellEditor
-    //         value={params.value}
-    //         api={params.api}
-    //         field={params.field}
-    //       />
-    //     )
-    //   },
-    // },
-
     {
       field: 'sep',
-      headerName: headerMap['sep'],
+      headerName: headerMap[9],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -345,7 +348,7 @@ const SelectivityData = () => {
     },
     {
       field: 'oct',
-      headerName: headerMap['oct'],
+      headerName: headerMap[10],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -354,7 +357,7 @@ const SelectivityData = () => {
 
     {
       field: 'nov',
-      headerName: headerMap['nov'],
+      headerName: headerMap[11],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -362,7 +365,7 @@ const SelectivityData = () => {
     },
     {
       field: 'dec',
-      headerName: headerMap['dec'],
+      headerName: headerMap[12],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -370,7 +373,7 @@ const SelectivityData = () => {
     },
     {
       field: 'jan',
-      headerName: headerMap['jan'],
+      headerName: headerMap[1],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -378,7 +381,7 @@ const SelectivityData = () => {
     },
     {
       field: 'feb',
-      headerName: headerMap['feb'],
+      headerName: headerMap[2],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -386,7 +389,7 @@ const SelectivityData = () => {
     },
     {
       field: 'march',
-      headerName: headerMap['mar'],
+      headerName: headerMap[3],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',

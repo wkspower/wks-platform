@@ -5,118 +5,118 @@ import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
 
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import NumericInputOnly from 'utils/NumericInputOnly'
+import getEnhancedColDefs from './CommonHeader/MaintainaceDetails_header'
 const headerMap = generateHeaderNames()
 
-const productionColumns = [
-  {
-    field: 'description',
-    headerName: 'Description ( in Hrs )',
-    editable: true,
-    minWidth: 250,
-    maxWidth: 300,
-  },
+// const productionColumns = [
+//   {
+//     field: 'description',
+//     headerName: 'Description ( in Hrs )',
+//     editable: true,
+//     minWidth: 250,
+//     maxWidth: 300,
+//   },
 
-  {
-    field: 'april',
-    headerName: headerMap['apr'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'may',
-    headerName: headerMap['may'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'june',
-    headerName: headerMap['jun'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'july',
-    headerName: headerMap['jul'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
+//   {
+//     field: 'april',
+//     headerName: headerMap[4],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'may',
+//     headerName: headerMap[5],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'june',
+//     headerName: headerMap[6],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'july',
+//     headerName: headerMap[7],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
 
-  {
-    field: 'august',
-    headerName: headerMap['aug'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'september',
-    headerName: headerMap['sep'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'october',
-    headerName: headerMap['oct'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'november',
-    headerName: headerMap['nov'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'december',
-    headerName: headerMap['dec'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'january',
-    headerName: headerMap['jan'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'february',
-    headerName: headerMap['feb'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'march',
-    headerName: headerMap['mar'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
+//   {
+//     field: 'august',
+//     headerName: headerMap[8],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'september',
+//     headerName: headerMap[9],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'october',
+//     headerName: headerMap[10],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'november',
+//     headerName: headerMap[11],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'december',
+//     headerName: headerMap[12],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'january',
+//     headerName: headerMap[1],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'february',
+//     headerName: headerMap[2],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'march',
+//     headerName: headerMap[3],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
 
-  // { field: 'remark', headerName: 'Remark', minWidth : 150, editable: true },
-]
+//   // { field: 'remark', headerName: 'Remark', minWidth : 150, editable: true },
+// ]
 
 const productionData = [
   {
@@ -282,8 +282,8 @@ const productionData = [
 ]
 
 const MaintenanceTable = () => {
-  const menu = useSelector((state) => state.menu)
-  const { sitePlantChange } = menu
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { sitePlantChange } = dataGridStore
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
@@ -330,6 +330,12 @@ const MaintenanceTable = () => {
       }
     }, 1000) // Delay of 2 seconds
   }, [apiRef])
+
+  const productionColumns = getEnhancedColDefs({
+    // allProducts,
+    headerMap,
+    // handleRemarkCellClick,
+  })
   return (
     <div>
       <ASDataGrid

@@ -5,120 +5,120 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import NumericInputOnly from 'utils/NumericInputOnly'
+import getEnhancedColDefs from './CommonHeader/feedstockHeaders'
 const headerMap = generateHeaderNames()
 
-const productionColumns = [
-  {
-    field: 'stock',
-    headerName: 'Feed Stock',
-    width: 150,
-    editable: true,
-  },
-  {
-    field: 'april',
-    headerName: headerMap['apr'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'may',
-    headerName: headerMap['may'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'june',
-    headerName: headerMap['jun'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'july',
-    headerName: headerMap['jul'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
+// const productionColumns = [
+//   {
+//     field: 'stock',
+//     headerName: 'Feed Stock',
+//     width: 150,
+//     editable: true,
+//   },
+//   {
+//     field: 'april',
+//     headerName: headerMap['apr'],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'may',
+//     headerName: headerMap['may'],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'june',
+//     headerName: headerMap['jun'],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'july',
+//     headerName: headerMap['jul'],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
 
-  {
-    field: 'august',
-    headerName: headerMap['aug'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'september',
-    headerName: headerMap['sep'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'october',
-    headerName: headerMap['oct'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'november',
-    headerName: headerMap['nov'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'december',
-    headerName: headerMap['dec'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'january',
-    headerName: headerMap['jan'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'february',
-    headerName: headerMap['feb'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'march',
-    headerName: headerMap['mar'],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-]
+//   {
+//     field: 'august',
+//     headerName: headerMap['aug'],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'september',
+//     headerName: headerMap['sep'],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'october',
+//     headerName: headerMap['oct'],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'november',
+//     headerName: headerMap['nov'],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'december',
+//     headerName: headerMap['dec'],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'january',
+//     headerName: headerMap['jan'],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'february',
+//     headerName: headerMap['feb'],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+//   {
+//     field: 'march',
+//     headerName: headerMap['mar'],
+//     editable: true,
+//     type: 'number',
+//     align: 'left',
+//     headerAlign: 'left',
+//   },
+// ]
 
 const FeedStockAvailability = () => {
   const [productOptions, setProductOptions] = useState([])
   const [productionData, setProductionData] = useState([])
-  const menu = useSelector((state) => state.menu)
-  const { sitePlantChange } = menu
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { sitePlantChange } = dataGridStore
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
@@ -133,6 +133,11 @@ const FeedStockAvailability = () => {
     rowsBeforeChange: {},
   })
   const keycloak = useSession()
+
+  const productionColumns = getEnhancedColDefs({
+    // allProducts,
+    headerMap,
+  })
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
@@ -151,15 +156,37 @@ const FeedStockAvailability = () => {
     return newRow
   }, [])
   const saveChanges = React.useCallback(async () => {
-    console.log(
-      'Edited Data: ',
-      Object.values(unsavedChangesRef.current.unsavedRows),
-    )
+    // console.log(
+    //   'Edited Data: ',
+    //   Object.values(unsavedChangesRef.current.unsavedRows),
+    // )
     setTimeout(async () => {
       try {
         // var data = Object.values(unsavedChangesRef.current.unsavedRows)
         // saveShutdownData(data)
+        //  // Validation: Check if there are any rows to save
+        //  if (data.length === 0) {
+        //   setSnackbarOpen(true)
+        //   setSnackbarData({
+        //     message: 'No Records to Save!',
+        //     severity: 'info',
+        //   })
+        //   return
+        // }
 
+        // // Validate that both normParameterId and remark are not empty
+        // const invalidRows = data.filter(
+        //   (row) => !row.normParametersFKId.trim() || !row.remark.trim(),
+        // )
+
+        // if (invalidRows.length > 0) {
+        //   setSnackbarOpen(true)
+        //   setSnackbarData({
+        //     message: 'Please fill required fields: Product and Remark.',
+        //     severity: 'error',
+        //   })
+        //   return
+        // }
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},

@@ -45,20 +45,6 @@ const jioColors = {
   darkTransparentBlue: 'rgba(127, 147, 206, 0.8)',
 }
 
-// var key1 = [
-//   {
-//     'F0F4E75E-3C44-4FB4-BA7A-2B8227847134': [
-//       'AACDBE12-C5F6-4B79-9C88-751169815B42',
-//       'F0D52188-A656-475D-A675-4B3639F3EEA9',
-//     ],
-//   },
-//   {
-//     'E2E9D24C-80DF-40B4-A278-4C4D60742BCE': [
-//       'C5102765-E0A1-4CC6-B7A0-4F937B91EB6D',
-//     ],
-//   },
-// ]
-
 const DataGridTable = ({
   columns: initialColumns = [],
   // rows: initialRows = [],
@@ -126,7 +112,6 @@ const DataGridTable = ({
   const handleRowEditCommit = (id, event) => {
     const editedRow = rows.find((row) => row.id === id)
   }
-
   const handleCellEditCommit = (id, event) => {}
 
   const handleEditClick = (id, row) => () => {
@@ -161,7 +146,6 @@ const DataGridTable = ({
   useEffect(() => {
     if (rows) setRows(rows)
   }, [rows, setRows])
-
   // useEffect(() => {
   //   setRows((prevRows) => {
   //     // Keep newly added rows and merge with initialRows
@@ -216,12 +200,10 @@ const DataGridTable = ({
       setDeleteIdTemp(null)
       setOpenDeleteDialogeBox(false)
       setSnackbarOpen(true)
-
       setSnackbarData({
         message: `${title} deleted successfully!`,
         severity: 'success',
       })
-
       fetchData()
     } catch (error) {
       console.error('Error deleting Business data:', error)
@@ -260,7 +242,7 @@ const DataGridTable = ({
       ? Math.max(...rows.map((row) => Number(row.id) || 0)) + 1
       : 1
 
-    console.log('New Row ID:', newRowId) // Debugging log
+    // console.log('New Row ID:', newRowId) // Debugging log
 
     const newRow = {
       id: newRowId.toString(), // Ensure ID is a string if needed
@@ -453,7 +435,7 @@ const DataGridTable = ({
   const handleCellClick = (params) => {
     //UNCOMMENT IT FOR REMARK POP UP
     // if (params?.field === 'remark' || params?.field === 'aopRemarks') {
-    console.log(params)
+    // console.log(params)
     //   //   // setRemark(params?.value || '')
     //   //   // setSelectedRowId(params.id)
     //   //   // handleOpenRemark()

@@ -8,22 +8,23 @@ const headerMap = generateHeaderNames()
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
-
 import NumericCellEditor from 'utils/NumericCellEditor'
-import NumericInputOnly from 'utils/NumericInputOnly'
+import getEnhancedColDefs from './CommonHeader/ProductionAopHeader'
 const ProductionNorms = () => {
   const keycloak = useSession()
   const [csData, setCsData] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
-  const menu = useSelector((state) => state.menu)
-  const { sitePlantChange } = menu
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { sitePlantChange, verticalChange } = dataGridStore
+  const vertName = verticalChange?.verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [selectedUnit, setSelectedUnit] = useState('Ton')
+  const [selectedUnit, setSelectedUnit] = useState('Ton') // Initialize with a default value
 
   const [rows, setRows] = useState([])
   const [isSaving, setIsSaving] = useState(false)
@@ -37,7 +38,7 @@ const ProductionNorms = () => {
     rowsBeforeChange: {},
   })
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remark || row.aopRemarks || '')
+    setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -78,12 +79,35 @@ const ProductionNorms = () => {
         const updatedRows = allRows.map(
           (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
         )
+        // Validation: Check if there are any rows to save
+        if (updatedRows.length === 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
+        }
+
+        // Validate that both normParameterId and remark are not empty
+        const invalidRows = updatedRows.filter(
+          (row) => !row.normParametersFKId.trim() || !row.remark.trim(),
+        )
+
+        if (invalidRows.length > 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Please fill required fields: Product and Remark.',
+            severity: 'error',
+          })
+          return
+        }
         updateProductNormData(updatedRows)
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},
         }
-        setHasUnsavedRows(false)
+        // setHasUnsavedRows(false)
       } catch (error) {}
     }, 1000)
   }, [apiRef, selectedUnit])
@@ -107,6 +131,7 @@ const ProductionNorms = () => {
         normParametersFKId: row.normParametersFKId,
         // normItem: getProductName('1', row.normParametersFKId) || null,
         normItem: 'EOE',
+
         april: isKiloTon && row.april ? row.april * 1000 : row.april || null,
         may: isKiloTon && row.may ? row.may * 1000 : row.may || null,
         june: isKiloTon && row.june ? row.june * 1000 : row.june || null,
@@ -119,9 +144,12 @@ const ProductionNorms = () => {
         jan: isKiloTon && row.jan ? row.jan * 1000 : row.jan || null,
         feb: isKiloTon && row.feb ? row.feb * 1000 : row.feb || null,
         march: isKiloTon && row.march ? row.march * 1000 : row.march || null,
+
         // avgTPH: findAvg('1', row) || null,
         avgTPH: findSum('1', row) || null,
+
         aopRemarks: row.aopRemarks || 'remarks',
+
         id: row.idFromApi || null,
       }))
 
@@ -176,6 +204,7 @@ const ProductionNorms = () => {
       })
 
       setCsData(formattedData)
+
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Data refresh successfully!',
@@ -245,29 +274,6 @@ const ProductionNorms = () => {
     return product ? product.name : ''
   }
 
-  const findAvg = (value, row) => {
-    const months = [
-      'april',
-      'may',
-      'june',
-      'july',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-      'jan',
-      'feb',
-      'march',
-    ]
-
-    const values = months.map((month) => row[month] || 0)
-    const sum = values.reduce((acc, val) => acc + val, 0)
-    const avg = (sum / values.length).toFixed(2)
-
-    return avg === '0.00' ? null : avg
-  }
-
   const findSum = (value, row) => {
     const months = [
       'april',
@@ -284,8 +290,8 @@ const ProductionNorms = () => {
       'march',
     ]
 
-    const values = months.map((month) => Number(row[month]) || 0)
-    const sum = values.reduce((acc, val) => acc + val, 0)
+    const values = months.map((month) => row[month] || 0)
+    var sum = values.reduce((acc, val) => acc + val, 0)
 
     const total = sum.toFixed(2)
     return total === '0.00' ? null : total
@@ -312,228 +318,208 @@ const ProductionNorms = () => {
     getAllProducts()
   }, [sitePlantChange, keycloak, selectedUnit])
 
-  const productionColumns = [
-    { field: 'idFromApi', headerName: 'ID' },
-    {
-      field: 'aopCaseId',
-      headerName: 'Case ID',
-      minWidth: 120,
-      editable: false,
-    },
-    { field: 'aopType', headerName: 'Type', minWidth: 80 },
+  // const productionColumns = [
+  //   { field: 'idFromApi', headerName: 'ID' },
+  //   {
+  //     field: 'aopCaseId',
+  //     headerName: 'Case ID',
+  //     minWidth: 120,
+  //     editable: false,
+  //   },
+  //   { field: 'aopType', headerName: 'Type', minWidth: 80 },
 
-    { field: 'aopYear', headerName: 'Year', minWidth: 80 },
+  //   { field: 'aopYear', headerName: 'Year', minWidth: 80 },
 
-    { field: 'plantFkId', headerName: 'Plant ID', minWidth: 80 },
+  //   { field: 'plantFkId', headerName: 'Plant ID', minWidth: 80 },
 
-    // normParametersFKId
-    {
-      field: 'normParametersFKId',
-      headerName: 'Product',
-      editable: false,
-      minWidth: 125,
-      valueGetter: (params) => {
-        return params || ''
-      },
-      valueFormatter: (params) => {
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : ''
-      },
-      renderEditCell: (params) => {
-        const { value } = params
-        return (
-          <select
-            value={value || ''}
-            onChange={(event) => {
-              params.api.setEditCellValue({
-                id: params.id,
-                field: 'normParametersFKId',
-                value: event.target.value,
-              })
-            }}
-            style={{
-              width: '100%',
-              padding: '5px',
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-            }}
-          >
-            {/* Disabled first option */}
-            <option value='' disabled>
-              Select
-            </option>
-            {allProducts.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.displayName}
-              </option>
-            ))}
-          </select>
-        )
-      },
-    },
+  //   // normParametersFKId
+  //   {
+  //     field: 'normParametersFKId',
+  //     headerName: lowerVertName === 'meg' ? 'Product' : 'Grade Name',
+  //     editable: false,
+  //     minWidth: 125,
+  //     valueGetter: (params) => {
+  //       return params || ''
+  //     },
+  //     valueFormatter: (params) => {
+  //       const product = allProducts.find((p) => p.id === params)
+  //       return product ? product.displayName : ''
+  //     },
+  //     renderEditCell: (params) => {
+  //       const { value } = params
+  //       return (
+  //         <select
+  //           value={value || ''}
+  //           onChange={(event) => {
+  //             params.api.setEditCellValue({
+  //               id: params.id,
+  //               field: 'normParametersFKId',
+  //               value: event.target.value,
+  //             })
+  //           }}
+  //           style={{
+  //             width: '100%',
+  //             padding: '5px',
+  //             border: 'none',
+  //             outline: 'none',
+  //             background: 'transparent',
+  //           }}
+  //         >
+  //           {/* Disabled first option */}
+  //           <option value='' disabled>
+  //             Select
+  //           </option>
+  //           {allProducts.map((product) => (
+  //             <option key={product.id} value={product.id}>
+  //               {product.displayName}
+  //             </option>
+  //           ))}
+  //         </select>
+  //       )
+  //     },
+  //   },
 
-    // {
-    //   field: 'productNameHide',
-    //   headerName: 'Product Name',
-    //   width: 200,
-    //   valueGetter: getProductName,
-    // },
+  //   // {
+  //   //   field: 'productNameHide',
+  //   //   headerName: 'Product Name',
+  //   //   width: 200,
+  //   //   valueGetter: getProductName,
+  //   // },
 
-    {
-      field: 'april',
-      headerName: headerMap['apr'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-      // valueGetter: convertUnits,
-    },
+  //   {
+  //     field: 'april',
+  //     headerName: headerMap[4],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'may',
+  //     headerName: headerMap[5],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'june',
+  //     headerName: headerMap[6],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'july',
+  //     headerName: headerMap[7],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
 
-    {
-      field: 'may',
-      headerName: headerMap['may'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'june',
-      headerName: headerMap['jun'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'july',
-      headerName: headerMap['jul'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'aug',
-      headerName: headerMap['aug'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
+  //   {
+  //     field: 'aug',
+  //     headerName: headerMap[8],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'sep',
+  //     headerName: headerMap[9],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'oct',
+  //     headerName: headerMap[10],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
 
-    // {
-    //   field: 'aug',
-    //   headerName: headerMap['aug'],
-    //   editable: true,
-    //   align: 'left',
-    //   headerAlign: 'left',
-    //   renderEditCell: (params) => {
-    //     return (
-    //       <NumericCellEditor
-    //         value={params.value}
-    //         api={params.api}
-    //         field={params.field}
-    //       />
-    //     )
-    //   },
-    // },
+  //   {
+  //     field: 'nov',
+  //     headerName: headerMap[11],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'dec',
+  //     headerName: headerMap[12],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'jan',
+  //     headerName: headerMap[1],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'feb',
+  //     headerName: headerMap[2],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'march',
+  //     headerName: headerMap[3],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'averageTPH',
+  //     headerName: 'Total',
+  //     // minWidth: 150,
+  //     editable: false,
+  //     // valueGetter: findAvg,
+  //     valueGetter: findSum,
+  //   },
+  //   {
+  //     field: 'aopRemarks',
+  //     headerName: 'Remark',
+  //     minWidth: 175,
+  //     editable: true,
+  //     renderCell: (params) => {
+  //       // console.log(params)
+  //       return (
+  //         <div
+  //           style={{
+  //             cursor: 'pointer',
+  //             color: params.value ? 'inherit' : 'gray',
+  //           }}
+  //           onClick={() => handleRemarkCellClick(params.row)}
+  //         >
+  //           {params.value || 'Click to add remark'}
+  //         </div>
+  //       )
+  //     },
+  //   },
+  //   { field: 'aopStatus', headerName: 'aopStatus', editable: false },
+  // ]
 
-    {
-      field: 'sep',
-      headerName: headerMap['sep'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'oct',
-      headerName: headerMap['oct'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-
-    {
-      field: 'nov',
-      headerName: headerMap['nov'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'dec',
-      headerName: headerMap['dec'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'jan',
-      headerName: headerMap['jan'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'feb',
-      headerName: headerMap['feb'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'march',
-      headerName: headerMap['mar'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'averageTPH',
-      headerName: 'Total',
-      minWidth: 100,
-      editable: false,
-      // valueGetter: findAvg,
-      valueGetter: findSum,
-    },
-    {
-      field: 'aopRemarks',
-      headerName: 'Remark',
-      minWidth: 150,
-      editable: true,
-      renderCell: (params) => {
-        // console.log(params)
-        return (
-          <div
-            style={{
-              cursor: 'pointer',
-              color: params.value ? 'inherit' : 'gray',
-            }}
-            onClick={() => handleRemarkCellClick(params.row)}
-          >
-            {params.value || 'Click to add remark'}
-          </div>
-        )
-      },
-    },
-    { field: 'aopStatus', headerName: 'aopStatus', editable: false },
-  ]
-
-  // const handleRowEditStop = (params, event) => {
-  //   setRowModesModel({
-  //     ...rowModesModel,
-  //     [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
-  //   })
-  // }
+  const productionColumns = getEnhancedColDefs({
+    allProducts,
+    headerMap,
+    handleRemarkCellClick,
+  })
 
   const onProcessRowUpdateError = React.useCallback((error) => {
     console.log(error)
@@ -549,7 +535,8 @@ const ProductionNorms = () => {
         columns={productionColumns}
         rows={rows}
         setRows={setRows}
-        title='Production AOP'
+        title={'Production AOP'}
+        // title={lowerVertName === 'meg' ? 'Production AOP' : 'Budget Production'}
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}

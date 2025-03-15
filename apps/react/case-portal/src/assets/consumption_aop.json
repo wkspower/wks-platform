@@ -1,0 +1,121 @@
+[
+  {
+    "field": "Particulars",
+    "headerName": "Particulars",
+    "minWidth": 150,
+    "editable": false
+  },
+  {
+    "field": "TPH",
+    "headerName": "Unit",
+    "width": 100,
+    "editable": false
+  },
+  {
+    "field": "NormParametersId",
+    "headerName": "Product Norm/Spec",
+    "editable": true,
+    "minWidth": 225
+  },
+  {
+    "field": "apr24",
+    "headerName": 4,
+    "editable": true,
+    "type": "number",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "may24",
+    "headerName": 5,
+    "editable": true,
+    "type": "number",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "jun24",
+    "headerName": 6,
+    "editable": true,
+    "type": "number",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "jul24",
+    "headerName": 7,
+    "editable": true,
+    "type": "number",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "aug24",
+    "headerName": 8,
+    "editable": true,
+    "type": "number",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "sep24",
+    "headerName": 9,
+    "editable": true,
+    "type": "number",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "oct24",
+    "headerName": 10,
+    "editable": true,
+    "type": "number",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "nov24",
+    "headerName": 11,
+    "editable": true,
+    "type": "number",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "dec24",
+    "headerName": 12,
+    "editable": true,
+    "type": "number",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "jan25",
+    "headerName": 1,
+    "editable": true,
+    "type": "number",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "feb25",
+    "headerName": 2,
+    "editable": true,
+    "type": "number",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "mar25",
+    "headerName": 3,
+    "editable": true,
+    "type": "number",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "remark",
+    "headerName": "Remark",
+    "editable": true
+  }
+]

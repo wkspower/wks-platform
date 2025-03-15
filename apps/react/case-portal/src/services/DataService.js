@@ -730,7 +730,6 @@ async function getShutDownPlantData(keycloak) {
   }
 
   // plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
-  plantId = plantId
 
   const url = `${process.env.REACT_APP_API_URL}/task/getShutDownPlanData?plantId=${plantId}&maintenanceTypeName=${maintenanceTypeName}&year=${year}`
 

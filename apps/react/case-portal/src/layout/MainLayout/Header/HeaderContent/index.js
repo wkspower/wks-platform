@@ -12,9 +12,12 @@ import MobileSection from './MobileSection'
 import Profile from './Profile'
 import Search from './Search'
 import { useDispatch } from 'react-redux'
-import { setSitePlantChange } from 'store/reducers/menu'
+import {
+  setSitePlantChange,
+  setVerticalChange,
+} from 'store/reducers/dataGridStore'
 import { DataService } from 'services/DataService'
-import siteData from '../../../../assets/sitesData.json'
+// import siteData from '../../../../assets/sitesData.json'
 
 const HeaderContent = ({ keycloak }) => {
   const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
@@ -83,6 +86,11 @@ const HeaderContent = ({ keycloak }) => {
           }
         })
 
+        dispatch(
+          setVerticalChange({
+            verticalChange: { selectedPlant, selectedSite, selectedVertical },
+          }),
+        )
         setAllSites(sitesData)
         setAllPlants(plantsData)
 
@@ -256,8 +264,14 @@ const HeaderContent = ({ keycloak }) => {
     if (!selectedPlantData) return
     setSelectedSite(selectedPlantData.siteName)
     localStorage.setItem(
-      'selectedSite',
-      JSON.stringify({ name: selectedPlantData.siteName }),
+      'selectedVertical',
+      JSON.stringify({ name: selectedVertical }),
+      // JSON.stringify({ name: selectedPlantData.siteName }),
+    )
+    dispatch(
+      setVerticalChange({
+        verticalChange: { selectedPlant, selectedSite, selectedVertical },
+      }),
     )
   }, [selectedPlant, allPlants])
 
@@ -273,6 +287,11 @@ const HeaderContent = ({ keycloak }) => {
     const siteAvailable = allowedSites.map((site) => site.name)
     setSites(siteAvailable)
     setSelectedSite(siteAvailable[0] || '')
+    dispatch(
+      setVerticalChange({
+        verticalChange: { selectedPlant, selectedSite, selectedVertical },
+      }),
+    )
   }, [verticals, selectedVertical])
 
   return (

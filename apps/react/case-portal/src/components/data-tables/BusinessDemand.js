@@ -5,10 +5,9 @@ import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useGridApiRef } from '@mui/x-data-grid'
-import Tooltip from '@mui/material/Tooltip'
-
-import { GridEditInputCell, GridEditInputCellProps } from '@mui/x-data-grid'
-import NumericInputOnly from 'utils/NumericInputOnly'
+import vertical_meg_coldefs_bd from '../../assets/vertical_meg_coldefs_bd.json'
+import vertical_pe_coldefs_bd from '../../assets/vertical_pe_coldefs_bd.json'
+import getEnhancedColDefs from './CommonHeader/index'
 
 // import {
 //   Dialog,
@@ -27,8 +26,8 @@ const BusinessDemand = () => {
   const [bdData, setBDData] = useState([])
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
-  const menu = useSelector((state) => state.menu)
-  const { sitePlantChange } = menu
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { sitePlantChange, verticalChange } = dataGridStore
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
@@ -49,39 +48,36 @@ const BusinessDemand = () => {
   const fetchData = async () => {
     try {
       const data = await DataService.getBDData(keycloak)
-      const groupedRows = []
-      const groups = new Map()
-      let groupId = 0
-
-      data.forEach((item) => {
-        const groupKey = item.normParameterTypeDisplayName
-
-        if (!groups.has(groupKey)) {
-          groups.set(groupKey, [])
-          groupedRows.push({
-            id: groupId++,
-            Particulars: groupKey,
-            isGroupHeader: true,
-          })
-        }
-        const formattedItem = {
-          ...item,
-          idFromApi: item.id,
-          id: groupId++,
-        }
-
-        groups.get(groupKey).push(formattedItem)
-        groupedRows.push(formattedItem)
-      })
-
-      setBDData(groupedRows)
-      setRows(groupedRows)
+      const formattedData = data.map((item, index) => ({
+        ...item,
+        idFromApi: item.id,
+        id: index,
+      }))
+      setBDData(formattedData)
+      setRows(formattedData)
     } catch (error) {
-      console.error('Error fetching Business Demand data:', error)
+      console.error('Error fetching Turnaround data:', error)
     }
   }
-
+  // const vertName = verticalChange?.verticalChange?.selectedVertical
+  // const lowerVertName = vertName?.toLowerCase() || 'meg'
   useEffect(() => {
+    // const data =
+    //   lowerVertName === 'meg' ? vertical_meg_coldefs_bd : vertical_pe_coldefs_bd
+    // fetch(`/vertical_${lowerVertName}_coldefs_bd.json`)
+    //   .then((res) => {
+    //     if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`)
+    //     return res.json()
+    //   })
+    //   .then((data) => {
+    //     setColDef(data)
+    //     // Set the fetched data to state
+    //     console.log(data) // Log the fetched data
+    //   })
+    //   .catch((error) => {
+    //     console.error('Error fetching data:', error)
+    //   })
+
     const getAllProducts = async () => {
       try {
         const data = await DataService.getAllProducts(keycloak)
@@ -99,6 +95,7 @@ const BusinessDemand = () => {
     }
     fetchData()
     getAllProducts()
+    // getPlantAndSite()
   }, [sitePlantChange, keycloak])
 
   const handleRemarkCellClick = (row, newRow) => {
@@ -108,190 +105,193 @@ const BusinessDemand = () => {
     setRemarkDialogOpen(true)
   }
 
-  const colDefs = [
-    {
-      field: 'Particulars',
-      headerName: 'Type',
-      minWidth: 125,
-      groupable: true,
-      renderCell: (params) => <strong>{params.value}</strong>,
-    },
-    {
-      field: 'normParameterId',
-      headerName: 'Product',
-      editable: true,
-      minWidth: 125,
-      valueGetter: (params) => {
-        return params || ''
-      },
-      valueFormatter: (params) => {
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : ''
-      },
-      renderEditCell: (params) => {
-        const { value } = params
-        return (
-          <select
-            value={value || ''}
-            onChange={(event) => {
-              params.api.setEditCellValue({
-                id: params.id,
-                field: 'normParameterId',
-                value: event.target.value,
-              })
-            }}
-            style={{
-              width: '100%',
-              padding: '5px',
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-            }}
-          >
-            {/* Disabled first option */}
-            <option value='' disabled>
-              Select
-            </option>
-            {allProducts.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.displayName}
-              </option>
-            ))}
-          </select>
-        )
-      },
-    },
+  // const colDefs = [
+  //   {
+  //     field: 'normParameterId',
+  //     headerName: 'Product',
+  //     editable: true,
+  //     minWidth: 100,
+  //     valueGetter: (params) => {
+  //       return params || ''
+  //     },
+  //     valueFormatter: (params) => {
+  //       const product = allProducts.find((p) => p.id === params)
+  //       return product ? product.displayName : ''
+  //     },
+  //     renderEditCell: (params) => {
+  //       const { value } = params
+  //       return (
+  //         <select
+  //           value={value || ''}
+  //           onChange={(event) => {
+  //             params.api.setEditCellValue({
+  //               id: params.id,
+  //               field: 'normParameterId',
+  //               value: event.target.value,
+  //             })
+  //           }}
+  //           style={{
+  //             width: '100%',
+  //             padding: '5px',
+  //             border: 'none',
+  //             outline: 'none',
+  //             background: 'transparent',
+  //           }}
+  //         >
+  //           {/* Disabled first option */}
+  //           <option value='' disabled>
+  //             Select
+  //           </option>
+  //           {allProducts.map((product) => (
+  //             <option key={product.id} value={product.id}>
+  //               {product.displayName}
+  //             </option>
+  //           ))}
+  //         </select>
+  //       )
+  //     },
+  //   },
 
-    {
-      field: 'april',
-      headerName: headerMap['apr'],
-      editable: true,
-      align: 'left',
-      headerAlign: 'left',
-      renderEditCell: NumericInputOnly,
-    },
-    {
-      field: 'may',
-      headerName: headerMap['may'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-      renderEditCell: NumericInputOnly,
-    },
-    {
-      field: 'june',
-      headerName: headerMap['jun'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'july',
-      headerName: headerMap['jul'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'aug',
-      headerName: headerMap['aug'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'sep',
-      headerName: headerMap['sep'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'oct',
-      headerName: headerMap['oct'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'nov',
-      headerName: headerMap['nov'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'dec',
-      headerName: headerMap['dec'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'jan',
-      headerName: headerMap['jan'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'feb',
-      headerName: headerMap['feb'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'march',
-      headerName: headerMap['mar'],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
+  //   {
+  //     field: 'april',
+  //     headerName: headerMap['apr'],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
 
-    // { field: 'avgTph', headerName: 'AVG TPH', minWidth: 150, editable: true },
-    {
-      field: 'remark',
-      headerName: 'Remark',
-      minWidth: 150,
-      editable: true,
-      renderCell: (params) => (
-        <Tooltip title={params.value || ''} arrow>
-          <div
-            style={{
-              cursor: 'pointer',
-              color: params.value ? 'inherit' : 'gray',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              maxWidth: 140,
-            }}
-            onClick={() => handleRemarkCellClick(params.row)}
-          >
-            {params.value}
-          </div>
-        </Tooltip>
-      ),
-    },
-    {
-      field: 'idFromApi',
-      headerName: 'idFromApi',
-    },
-  ]
+  //     sx: {
+  //       '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button':
+  //         {
+  //           display: 'none',
+  //         },
+  //       '& input[type=number]': {
+  //         MozAppearance: 'textfield',
+  //       },
+  //     },
+  //   },
+  //   {
+  //     field: 'may',
+  //     headerName: headerMap['may'],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'june',
+  //     headerName: headerMap['jun'],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'july',
+  //     headerName: headerMap['jul'],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'aug',
+  //     headerName: headerMap['aug'],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'sep',
+  //     headerName: headerMap['sep'],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'oct',
+  //     headerName: headerMap['oct'],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'nov',
+  //     headerName: headerMap['nov'],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'dec',
+  //     headerName: headerMap['dec'],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'jan',
+  //     headerName: headerMap['jan'],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'feb',
+  //     headerName: headerMap['feb'],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
+  //   {
+  //     field: 'march',
+  //     headerName: headerMap['mar'],
+  //     editable: true,
+  //     type: 'number',
+  //     align: 'left',
+  //     headerAlign: 'left',
+  //   },
 
+  //   // { field: 'avgTph', headerName: 'AVG TPH', minWidth: 150, editable: true },
+  //   {
+  //     field: 'remark',
+  //     headerName: 'Remark',
+  //     minWidth: 200,
+  //     editable: true,
+  //     renderCell: (params) => {
+  //       // console.log(params)
+  //       return (
+  //         <div
+  //           style={{
+  //             cursor: 'pointer',
+  //             color: params.value ? 'inherit' : 'gray',
+  //           }}
+  //           onClick={() => handleRemarkCellClick(params.row)}
+  //         >
+  //           {params.value || 'Click to add remark'}
+  //         </div>
+  //       )
+  //     },
+  //   },
+  //   {
+  //     field: 'idFromApi',
+  //     headerName: 'idFromApi',
+  //   },
+  // ]
+  const colDefs = getEnhancedColDefs({
+    allProducts,
+    headerMap,
+    handleRemarkCellClick,
+  })
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    console.log(newRow)
+    // console.log(newRow)
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
@@ -318,6 +318,19 @@ const BusinessDemand = () => {
           setSnackbarData({
             message: 'No Records to Save!',
             severity: 'info',
+          })
+          return
+        }
+        // Validate that both normParameterId and remark are not empty
+        const invalidRows = data.filter(
+          (row) => !row.normParameterId.trim() || !row.remark.trim(),
+        )
+
+        if (invalidRows.length > 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Please fill required fields: Product and Remark.',
+            severity: 'error',
           })
           return
         }
@@ -362,7 +375,7 @@ const BusinessDemand = () => {
       if (businessData.length > 0) {
         const response = await DataService.saveBusinessDemandData(
           plantId,
-          businessData,
+          businessData, // Now sending an array of rows
           keycloak,
         )
         setSnackbarOpen(true)
@@ -399,9 +412,17 @@ const BusinessDemand = () => {
 
   return (
     <div>
+      {/* <div>
+        {`Plant: ${verticalChange?.verticalChange?.selectedPlant}, Site: ${verticalChange?.verticalChange?.selectedSite}, Vertical: ${verticalChange?.verticalChange?.selectedVertical}`}
+      </div> */}
       <ASDataGrid
         setRows={setRows}
-        columns={colDefs}
+        columns={
+          colDefs
+          // lowerVertName === 'meg'
+          //   ? vertical_meg_coldefs_bd
+          //   : vertical_pe_coldefs_bd
+        }
         rows={rows}
         title='Business Demand'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
@@ -414,13 +435,11 @@ const BusinessDemand = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        // onRowEditStop={handleRowEditStop}
         apiRef={apiRef}
         deleteId={deleteId}
         setDeleteId={setDeleteId}
         setOpen1={setOpen1}
         open1={open1}
-        // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
         onProcessRowUpdateError={onProcessRowUpdateError}
         remarkDialogOpen={remarkDialogOpen}
@@ -439,7 +458,6 @@ const BusinessDemand = () => {
           showUnit: false,
           saveWithRemark: true,
           saveBtn: true,
-          // units: ["TON", "KILOTON"],
           units: ['TPH', 'TPD'],
         }}
       />

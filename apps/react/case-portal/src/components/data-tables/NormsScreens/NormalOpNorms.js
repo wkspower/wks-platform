@@ -205,7 +205,7 @@ const productionData = [
 ]
 
 const NormalOpNormsScreen = () => {
-  const menu = useSelector((state) => state.menu)
+  const menu = useSelector((state) => state.dataGridStore)
   const { sitePlantChange } = menu
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
@@ -243,7 +243,7 @@ const NormalOpNormsScreen = () => {
     { field: 'unit', headerName: 'Unit', width: 100, editable: true },
     {
       field: 'april',
-      headerName: headerMap['apr'],
+      headerName: headerMap[4],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -251,7 +251,7 @@ const NormalOpNormsScreen = () => {
     },
     {
       field: 'may',
-      headerName: headerMap['may'],
+      headerName: headerMap[5],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -259,7 +259,7 @@ const NormalOpNormsScreen = () => {
     },
     {
       field: 'june',
-      headerName: headerMap['jun'],
+      headerName: headerMap[6],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -267,7 +267,7 @@ const NormalOpNormsScreen = () => {
     },
     {
       field: 'july',
-      headerName: headerMap['jul'],
+      headerName: headerMap[7],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -276,7 +276,7 @@ const NormalOpNormsScreen = () => {
 
     {
       field: 'august',
-      headerName: headerMap['aug'],
+      headerName: headerMap[8],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -284,7 +284,7 @@ const NormalOpNormsScreen = () => {
     },
     {
       field: 'september',
-      headerName: headerMap['sep'],
+      headerName: headerMap[9],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -292,7 +292,7 @@ const NormalOpNormsScreen = () => {
     },
     {
       field: 'october',
-      headerName: headerMap['oct'],
+      headerName: headerMap[10],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -300,7 +300,7 @@ const NormalOpNormsScreen = () => {
     },
     {
       field: 'november',
-      headerName: headerMap['nov'],
+      headerName: headerMap[11],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -308,7 +308,7 @@ const NormalOpNormsScreen = () => {
     },
     {
       field: 'december',
-      headerName: headerMap['dec'],
+      headerName: headerMap[12],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -316,7 +316,7 @@ const NormalOpNormsScreen = () => {
     },
     {
       field: 'january',
-      headerName: headerMap['jan'],
+      headerName: headerMap[1],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -324,7 +324,7 @@ const NormalOpNormsScreen = () => {
     },
     {
       field: 'february',
-      headerName: headerMap['feb'],
+      headerName: headerMap[2],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
@@ -332,7 +332,7 @@ const NormalOpNormsScreen = () => {
     },
     {
       field: 'march',
-      headerName: headerMap['mar'],
+      headerName: headerMap[3],
       editable: true,
       renderEditCell: NumericInputOnly,
       align: 'left',
