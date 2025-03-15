@@ -215,7 +215,10 @@ const SlowDown = () => {
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak, 'Production')
+        const data = await DataService.getAllProducts(
+          keycloak,
+          lowerVertName === 'meg' ? 'Production' : 'Grade',
+        )
         // console.log('API Response:', data);
 
         // Extract only displayName and id
@@ -339,7 +342,7 @@ const SlowDown = () => {
 
     {
       field: 'product',
-      headerName: 'Product',
+      headerName: lowerVertName === 'meg' ? 'Product' : 'Grade Name',
       editable: true,
       minWidth: 125,
       valueGetter: (params) => {

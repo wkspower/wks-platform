@@ -63,11 +63,11 @@ const DataGridTable = ({
   setRemarkDialogOpen,
   currentRemark,
   setCurrentRemark,
-  setCurrentRowId,
+  // setCurrentRowId,
   currentRowId,
   unsavedChangesRef,
-  handleRemarkCellClick,
-  units,
+  // handleRemarkCellClick,
+  // units,
 }) => {
   const [tempHide, setTempHide] = useState(true)
   const [isUpdating, setIsUpdating] = useState(false)

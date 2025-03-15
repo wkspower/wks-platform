@@ -260,7 +260,10 @@ const ProductionNorms = () => {
       product = allProducts.find((p) => p.id === row.normParametersFKId)
     } else {
       try {
-        const data = await DataService.getAllProducts(keycloak, 'Production')
+        const data = await DataService.getAllProducts(
+          keycloak,
+          lowerVertName === 'meg' ? 'Production' : 'Grade',
+        )
         product = data.find((p) => p.id === row.normParametersFKId)
       } catch (error) {
         console.error('Error fetching products:', error)
@@ -320,7 +323,10 @@ const ProductionNorms = () => {
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak, 'Production')
+        const data = await DataService.getAllProducts(
+          keycloak,
+          lowerVertName === 'meg' ? 'Production' : 'Grade',
+        )
         const productList = data.map((product) => ({
           id: product.id.toLowerCase(),
           displayName: product.displayName,

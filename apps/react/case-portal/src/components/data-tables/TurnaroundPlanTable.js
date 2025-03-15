@@ -9,7 +9,10 @@ import NumericInputOnly from 'utils/NumericInputOnly'
 
 const TurnaroundPlanTable = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange } = dataGridStore
+  const { sitePlantChange, verticalChange } = dataGridStore
+  const vertName = verticalChange?.verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
+
   const [TaData, setTaData] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
@@ -153,7 +156,10 @@ const TurnaroundPlanTable = () => {
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak, 'Production')
+        const data = await DataService.getAllProducts(
+          keycloak,
+          lowerVertName === 'meg' ? 'Production' : 'Grade',
+        )
         const productList = data.map((product) => ({
           id: product.id,
           displayName: product.displayName,
@@ -212,7 +218,7 @@ const TurnaroundPlanTable = () => {
 
     {
       field: 'product',
-      headerName: 'Product',
+      headerName: 'Grade Name',
       editable: true,
       minWidth: 125,
       valueGetter: (params) => {

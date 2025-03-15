@@ -237,7 +237,10 @@ const ProductionvolumeData = () => {
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak, 'Production')
+        const data = await DataService.getAllProducts(
+          keycloak,
+          lowerVertName === 'meg' ? 'Production' : 'Grade',
+        )
         const productList = data.map((product) => ({
           id: product.id.toLowerCase(),
           displayName: product.displayName,
@@ -493,7 +496,7 @@ const ProductionvolumeData = () => {
       <ASDataGrid
         setRows={setRows}
         columns={productionColumns}
-        rows={productNormData}
+        rows={rows}
         title='Production Volume Data'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}

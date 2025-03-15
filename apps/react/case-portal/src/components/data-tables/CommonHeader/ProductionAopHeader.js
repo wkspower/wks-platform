@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux'
-import productionColDefs from '../../../assets/production_aop.json' // adjust path as needed
+import productionColDefs from '../../../assets/production_aop.json' // Adjust path as needed
 
 const getEnhancedColDefs = ({
   allProducts,

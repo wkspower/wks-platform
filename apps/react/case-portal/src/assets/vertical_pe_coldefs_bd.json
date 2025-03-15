@@ -1,5 +1,11 @@
 [
   {
+    "field": "Particulars",
+    "headerName": "Type",
+    "minWidth": 125,
+    "groupable": true
+  },
+  {
     "field": "normParameterId",
     "headerName": "Grade Name",
     "editable": true,

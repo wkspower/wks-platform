@@ -5,12 +5,12 @@ import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useGridApiRef } from '@mui/x-data-grid'
-import Tooltip from '@mui/material/Tooltip'
+// import Tooltip from '@mui/material/Tooltip'
 
-import { GridEditInputCell, GridEditInputCellProps } from '@mui/x-data-grid'
-import NumericInputOnly from 'utils/NumericInputOnly'
-import vertical_meg_coldefs_bd from '../../assets/vertical_meg_coldefs_bd.json'
-import vertical_pe_coldefs_bd from '../../assets/vertical_pe_coldefs_bd.json'
+// import { GridEditInputCell, GridEditInputCellProps } from '@mui/x-data-grid'
+// import NumericInputOnly from 'utils/NumericInputOnly'
+// import vertical_meg_coldefs_bd from '../../assets/vertical_meg_coldefs_bd.json'
+// import vertical_pe_coldefs_bd from '../../assets/vertical_pe_coldefs_bd.json'
 import getEnhancedColDefs from './CommonHeader/index'
 
 // import {
@@ -30,9 +30,10 @@ const BusinessDemand = () => {
   const [bdData, setBDData] = useState([])
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
-  const menu = useSelector((state) => state.menu)
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange } = dataGridStore
+  const vertName = verticalChange?.verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
@@ -84,28 +85,14 @@ const BusinessDemand = () => {
       console.error('Error fetching Business Demand data:', error)
     }
   }
-  // const vertName = verticalChange?.verticalChange?.selectedVertical
-  // const lowerVertName = vertName?.toLowerCase() || 'meg'
-  useEffect(() => {
-    // const data =
-    //   lowerVertName === 'meg' ? vertical_meg_coldefs_bd : vertical_pe_coldefs_bd
-    // fetch(`/vertical_${lowerVertName}_coldefs_bd.json`)
-    //   .then((res) => {
-    //     if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`)
-    //     return res.json()
-    //   })
-    //   .then((data) => {
-    //     setColDef(data)
-    //     // Set the fetched data to state
-    //     console.log(data) // Log the fetched data
-    //   })
-    //   .catch((error) => {
-    //     console.error('Error fetching data:', error)
-    //   })
 
+  useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak, 'Production')
+        const data = await DataService.getAllProducts(
+          keycloak,
+          lowerVertName === 'meg' ? 'Production' : 'Grade',
+        )
         const productList = data.map((product) => ({
           id: product.id, // Convert id to lowercase
           // id: product.id.toLowerCase(), // Convert id to lowercase

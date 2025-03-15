@@ -199,7 +199,10 @@ const ShutDown = () => {
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak, 'Production')
+        const data = await DataService.getAllProducts(
+          keycloak,
+          lowerVertName === 'meg' ? 'Production' : 'Grade',
+        )
         const productList = data.map((product) => ({
           // id: product.id.toLowerCase(), // Convert id to lowercase
           id: product.id, // Convert id to lowercase
@@ -266,7 +269,7 @@ const ShutDown = () => {
 
     {
       field: 'product',
-      headerName: 'Product',
+      headerName: lowerVertName === 'meg' ? 'Product' : 'Grade Name',
       editable: true,
       minWidth: 125,
       valueGetter: (params) => {
