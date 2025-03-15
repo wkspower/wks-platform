@@ -8,11 +8,9 @@ import { useSession } from 'SessionStoreContext'
 import NumericInputOnly from 'utils/NumericInputOnly'
 import DataGridTable from '../ASDataGrid'
 const headerMap = generateHeaderNames()
-
 const NormalOpNormsScreen = () => {
   const [allProducts, setAllProducts] = useState([])
   const [bdData, setBDData] = useState([])
-
   const menu = useSelector((state) => state.menu)
   const { sitePlantChange } = menu
   const [open1, setOpen1] = useState(false)
@@ -24,7 +22,6 @@ const NormalOpNormsScreen = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  // States for the Remark Dialog
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -34,7 +31,6 @@ const NormalOpNormsScreen = () => {
     rowsBeforeChange: {},
   })
   const keycloak = useSession()
-
   const fetchData = async () => {
     try {
       const data = await DataService.getNormalOperationNormsData(keycloak)
@@ -44,18 +40,6 @@ const NormalOpNormsScreen = () => {
 
       data.forEach((item) => {
         const groupKey = item.normParameterTypeDisplayName || 'By Products'
-
-        // const groupKey = ''
-        // if (item.id < 4)
-        //   groupKey = item.normParameterTypeDisplayName || 'By Products'
-        // if (item.id < 8 && item.id > 4)
-        //   groupKey = item.normParameterTypeDisplayName || 'Cat Chem'
-        // if (item.id < 12 && item.id > 8)
-        //   groupKey = item.normParameterTypeDisplayName || 'Consumption'
-        // if (item.id < 16 && item.id > 12)
-        //   groupKey = item.normParameterTypeDisplayName || 'Production'
-        // if (item.id > 16)
-        //   groupKey = item.normParameterTypeDisplayName || 'Grade'
 
         if (!groups.has(groupKey)) {
           groups.set(groupKey, [])
@@ -87,8 +71,7 @@ const NormalOpNormsScreen = () => {
       try {
         const data = await DataService.getAllProducts(keycloak, 'Consumption')
         const productList = data.map((product) => ({
-          id: product.id, // Convert id to lowercase
-          // id: product.id.toLowerCase(), // Convert id to lowercase
+          id: product.id,
           displayName: product.displayName,
         }))
         setAllProducts(productList)
@@ -243,6 +226,7 @@ const NormalOpNormsScreen = () => {
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
+
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
@@ -272,7 +256,8 @@ const NormalOpNormsScreen = () => {
           })
           return
         }
-        // saveBusinessDemandData(data)
+
+        saveNormalOperationNormsData(data)
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},
@@ -281,7 +266,7 @@ const NormalOpNormsScreen = () => {
     }, 1000)
   }, [apiRef])
 
-  const saveBusinessDemandData = async (newRows) => {
+  const saveNormalOperationNormsData = async (newRows) => {
     try {
       let plantId = ''
       const storedPlant = localStorage.getItem('selectedPlant')
@@ -295,30 +280,34 @@ const NormalOpNormsScreen = () => {
         may: row.may || null,
         june: row.june || null,
         july: row.july || null,
-        aug: row.aug || null,
-        sep: row.sep || null,
-        oct: row.oct || null,
-        nov: row.nov || null,
-        dec: row.dec || null,
-        jan: row.jan || null,
-        feb: row.feb || null,
+        august: row.august || null,
+        september: row.september || null,
+        october: row.october || null,
+        november: row.november || null,
+        december: row.december || null,
+        january: row.january || null,
+        february: row.february || null,
         march: row.march || null,
-        remark: row.remark || null,
-        avgTph: row.avgTph || null,
-        year: localStorage.getItem('year'),
+        remark: row.remark || 'test',
+        financialYear: localStorage.getItem('year'),
         plantId: plantId,
         normParameterId: row.normParameterId,
         id: row.idFromApi || null,
+        materialFkId: row.materialFkId || null,
+        mcuVersion: row.mcuVersion || null,
+        plantFkId: row.plantFkId || null,
+        siteFkId: row.siteFkId || null,
+        verticalFkId: row.verticalFkId || null,
       }))
       if (businessData.length > 0) {
-        const response = await DataService.saveBusinessDemandData(
+        const response = await DataService.saveNormalOperationNormsData(
           plantId,
           businessData,
           keycloak,
         )
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Business Demand data Saved Successfully!',
+          message: `Saved Successfully!`,
           severity: 'success',
         })
         // fetchData()
@@ -326,12 +315,12 @@ const NormalOpNormsScreen = () => {
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Business Demand data not saved!',
+          message: `not saved!`,
           severity: 'error',
         })
       }
     } catch (error) {
-      console.error('Error saving Business Demand data:', error)
+      console.error(`Error saving data`, error)
     } finally {
       fetchData()
     }
@@ -357,13 +346,10 @@ const NormalOpNormsScreen = () => {
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         apiRef={apiRef}
-        // deleteId={deleteId}
         open1={open1}
-        // setDeleteId={setDeleteId}
         setOpen1={setOpen1}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        // handleDeleteClick={handleDeleteClick}
         onProcessRowUpdateError={onProcessRowUpdateError}
         fetchData={fetchData}
         remarkDialogOpen={remarkDialogOpen}
@@ -372,6 +358,7 @@ const NormalOpNormsScreen = () => {
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
+        handleRemarkCellClick={handleRemarkCellClick}
         permissions={{
           showAction: true,
           addButton: false,
