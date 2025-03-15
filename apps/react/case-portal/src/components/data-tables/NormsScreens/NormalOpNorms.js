@@ -298,6 +298,7 @@ const NormalOpNormsScreen = () => {
         plantFkId: row.plantFkId || null,
         siteFkId: row.siteFkId || null,
         verticalFkId: row.verticalFkId || null,
+        unit: row.unit || null,
       }))
       if (businessData.length > 0) {
         const response = await DataService.saveNormalOperationNormsData(
