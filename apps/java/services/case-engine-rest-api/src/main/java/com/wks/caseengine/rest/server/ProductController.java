@@ -77,8 +77,8 @@ public class ProductController {
 
 
 	@GetMapping(value = "/getAllProducts")
-	public ResponseEntity<List<ProductDTO>> getAllProducts() {
-		List<Object[]> productList = productService.getAllProductsFromNormParameters();
+	public ResponseEntity<List<ProductDTO>> getAllProducts(@RequestParam  String normParameterTypeName) {
+		List<Object[]> productList = productService.getAllProductsFromNormParameters(normParameterTypeName);
 		List<ProductDTO> productDTOList = new ArrayList<>();
 	
 		for (Object[] obj : productList) {
@@ -105,7 +105,7 @@ public class ProductController {
 
 	@GetMapping("/yearly-data")
 	public ResponseEntity<List<ProductYearlyDataDTO>> getProductYearlyData(@RequestParam int year) {
-		List<Object[]> products = productService.getAllProductsFromNormParameters();
+		List<Object[]> products = productService.getAllProductsFromNormParameters(null);
 		List<Object[]> monthlyData = productService.getMonthlyDataForYear(year);
 		Map<String, ProductYearlyDataDTO> productDataMap = new HashMap<>();
 	
