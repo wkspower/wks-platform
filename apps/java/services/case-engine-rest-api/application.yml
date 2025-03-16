@@ -54,7 +54,7 @@ case.engine.actuator.enabled: true
 case.engine.swagger.enabled: true
 
 # database drive options: mongo or jpa
-database.type: jpa
+database.type: mongo
 
 # h2
 # spring:
@@ -84,28 +84,28 @@ database.type: jpa
 #        mode: always
 
 # postgres
-spring:
-  datasource:
-    jdbcUrl: jdbc:postgresql://localhost:5432/wks
-    driver-class-name: org.postgresql.Driver
-    username: wks
-    password: wks00
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      idle-timeout: 30000
-      connection-timeout: 30000
-      max-lifetime: 1800000
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    defer-datasource-initialization: true
-    properties:
-      hibernate:
-        format_sql: true
-  sql:
-    init:
-      schema-locations: classpath:schema-postgresql.sql
-      mode: always
+# spring:
+#   datasource:
+#     jdbcUrl: jdbc:postgresql://localhost:5432/wks
+#     driver-class-name: org.postgresql.Driver
+#     username: wks
+#     password: wks00
+#     hikari:
+#       maximum-pool-size: 10
+#       minimum-idle: 2
+#       idle-timeout: 30000
+#       connection-timeout: 30000
+#       max-lifetime: 1800000
+#   jpa:
+#     database-platform: org.hibernate.dialect.PostgreSQLDialect
+#     hibernate:
+#       ddl-auto: update
+#     show-sql: true
+#     defer-datasource-initialization: true
+#     properties:
+#       hibernate:
+#         format_sql: true
+#   sql:
+#     init:
+#       schema-locations: classpath:schema-postgresql.sql
+#       mode: always
