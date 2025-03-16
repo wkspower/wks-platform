@@ -300,7 +300,7 @@ const NormalOpNormsScreen = () => {
         siteFkId: row.siteFkId || null,
         verticalFkId: row.verticalFkId || null,
         unit: row.unit || null,
-        normParameterTypeId: row.normParameterTypeId || null,
+        normParameterTypeFkId: row.normParameterTypeFkId || null,
       }))
       if (businessData.length > 0) {
         // console.log(title)
