@@ -1,27 +1,11 @@
-import { DataService } from 'services/DataService'
-import ASDataGrid from './ASDataGrid'
-import React, { useEffect, useState } from 'react'
-import { useSession } from 'SessionStoreContext'
-import { useSelector } from 'react-redux'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useGridApiRef } from '@mui/x-data-grid'
-// import Tooltip from '@mui/material/Tooltip'
-
-// import { GridEditInputCell, GridEditInputCellProps } from '@mui/x-data-grid'
-// import NumericInputOnly from 'utils/NumericInputOnly'
-// import vertical_meg_coldefs_bd from '../../assets/vertical_meg_coldefs_bd.json'
-// import vertical_pe_coldefs_bd from '../../assets/vertical_pe_coldefs_bd.json'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { DataService } from 'services/DataService'
+import { useSession } from 'SessionStoreContext'
+import ASDataGrid from './ASDataGrid'
 import getEnhancedColDefs from './CommonHeader/index'
-
-// import {
-//   Dialog,
-//   DialogTitle,
-//   DialogContent,
-//   DialogActions,
-//   TextField,
-//   Button,
-// } from '@mui/material'
-
 const headerMap = generateHeaderNames()
 
 const BusinessDemand = () => {
@@ -59,7 +43,7 @@ const BusinessDemand = () => {
       let groupId = 0
 
       data.forEach((item) => {
-        const groupKey = item.normParameterTypeDisplayName
+        const groupKey = item.normParameterTypeDisplayName || 'Group'
 
         if (!groups.has(groupKey)) {
           groups.set(groupKey, [])

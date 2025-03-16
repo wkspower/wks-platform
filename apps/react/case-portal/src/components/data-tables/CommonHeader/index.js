@@ -73,12 +73,17 @@ const getEnhancedColDefs = ({
         ),
       }
     }
-    // If headerMap is provided and the column header exists in it, override the headerName
     if (headerMap && headerMap[col.headerName]) {
       return {
         ...col,
         renderEditCell: NumericInputOnly,
         headerName: headerMap[col.headerName],
+      }
+    }
+    if (col.field === 'Particulars') {
+      return {
+        ...col,
+        renderCell: (params) => <strong>{params.value}</strong>,
       }
     }
     return col

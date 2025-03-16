@@ -89,7 +89,7 @@ const NormalOpNormsScreen = () => {
     {
       field: 'Particulars',
       headerName: 'Type',
-      minWidth: 125,
+      minWidth: 140,
       groupable: true,
       renderCell: (params) => <strong>{params.value}</strong>,
     },
@@ -288,7 +288,8 @@ const NormalOpNormsScreen = () => {
         january: row.january || null,
         february: row.february || null,
         march: row.march || null,
-        remark: row.remark || 'test',
+        remark: row.remark,
+        remarks: row.remark,
         financialYear: localStorage.getItem('year'),
         plantId: plantId,
         normParameterId: row.normParameterId,
@@ -299,8 +300,11 @@ const NormalOpNormsScreen = () => {
         siteFkId: row.siteFkId || null,
         verticalFkId: row.verticalFkId || null,
         unit: row.unit || null,
+        normParameterTypeId: row.normParameterTypeId || null,
       }))
       if (businessData.length > 0) {
+        // console.log(title)
+
         const response = await DataService.saveNormalOperationNormsData(
           plantId,
           businessData,
@@ -308,7 +312,7 @@ const NormalOpNormsScreen = () => {
         )
         setSnackbarOpen(true)
         setSnackbarData({
-          message: `Saved Successfully!`,
+          message: `Normal Operations Norms Saved Successfully!`,
           severity: 'success',
         })
         // fetchData()
@@ -316,12 +320,12 @@ const NormalOpNormsScreen = () => {
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: `not saved!`,
+          message: `Normal Operations Norms not saved!`,
           severity: 'error',
         })
       }
     } catch (error) {
-      console.error(`Error saving data`, error)
+      console.error(`Error saving Normal Operations Norms`, error)
     } finally {
       fetchData()
     }
