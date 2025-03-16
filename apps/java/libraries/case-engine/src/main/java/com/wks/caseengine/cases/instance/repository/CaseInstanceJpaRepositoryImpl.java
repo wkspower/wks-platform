@@ -7,7 +7,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +30,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
 @Component
-@Profile("jpa")
+@ConditionalOnProperty(name = "database.type", havingValue = "jpa", matchIfMissing = false)
 public class CaseInstanceJpaRepositoryImpl implements CaseInstanceRepository {
 
 	@PersistenceContext

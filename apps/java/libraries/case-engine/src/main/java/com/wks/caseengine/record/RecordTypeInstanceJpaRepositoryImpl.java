@@ -17,7 +17,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +30,7 @@ import jakarta.persistence.PersistenceContext;
 
 @Repository
 @Transactional
-@Profile("jpa")
+@ConditionalOnProperty(name = "database.type", havingValue = "jpa", matchIfMissing = false)
 public class RecordTypeInstanceJpaRepositoryImpl implements RecordRepository {
 
 	 @PersistenceContext

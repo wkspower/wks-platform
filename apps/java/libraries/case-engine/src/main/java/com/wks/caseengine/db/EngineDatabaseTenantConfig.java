@@ -31,7 +31,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 
 @Configuration
-@ConditionalOnProperty(name = "database.type", havingValue = "postgres")
+@ConditionalOnProperty(name = "database.type", havingValue = "jpa", matchIfMissing = false)
 @EnableJpaRepositories(
     basePackages = {
         "com.wks.caseengine.cases.definition.repository",

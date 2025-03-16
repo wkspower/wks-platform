@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-@ConditionalOnProperty(name = "database.type", havingValue = "mongo")
+@ConditionalOnProperty(name = "database.type", havingValue = "mongo", matchIfMissing = false)
 public class EngineMongoDataConnectionImpl implements EngineMongoDataConnection {
 
 	@Autowired

@@ -1,4 +1,4 @@
-CREATE TABLE case_definition (
+CREATE TABLE IF NOT EXISTS  case_definition (
     uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id text UNIQUE NOT NULL,
     name TEXT NOT NULL,
@@ -10,19 +10,19 @@ CREATE TABLE case_definition (
     kanban_config TEXT
 );
 
-CREATE TABLE record_type (
+CREATE TABLE IF NOT EXISTS  record_type (
     uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id TEXT UNIQUE NOT NULL,
     fields TEXT NOT NULL
 );
 
-CREATE TABLE record_type_instance (
+CREATE TABLE IF NOT EXISTS  record_type_instance (
     uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     record_type_id TEXT NOT NULL,
     content TEXT NOT NULL
 );
 
-CREATE TABLE form (
+CREATE TABLE IF NOT EXISTS  form (
     uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     form_key TEXT UNIQUE NOT NULL,
     title TEXT,
@@ -30,14 +30,14 @@ CREATE TABLE form (
     structure TEXT NOT NULL
 );
 
-CREATE TABLE queue (
+CREATE TABLE IF NOT EXISTS  queue (
     uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
     description TEXT
 );
 
-CREATE TABLE case_instance (
+CREATE TABLE IF NOT EXISTS  case_instance (
     uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     business_key TEXT UNIQUE NOT NULL,
     queue_id TEXT,
@@ -50,7 +50,7 @@ CREATE TABLE case_instance (
     owner TEXT
 );
 
-CREATE TABLE case_email (
+CREATE TABLE IF NOT EXISTS  case_email (
     uid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     case_instance_business_key VARCHAR(255) NOT NULL,
     subject VARCHAR(255),

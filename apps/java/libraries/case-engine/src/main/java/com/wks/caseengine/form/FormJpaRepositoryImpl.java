@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import com.wks.caseengine.entity.FormEntity;
@@ -14,7 +14,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 @Repository
-@Profile("jpa")
+@ConditionalOnProperty(name = "database.type", havingValue = "jpa", matchIfMissing = false)
 public class FormJpaRepositoryImpl implements FormRepository {
 
 	@PersistenceContext

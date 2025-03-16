@@ -3,7 +3,7 @@ package com.wks.caseengine.record.type;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import com.wks.caseengine.entity.RecordTypeEntity;
@@ -14,7 +14,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
 @Repository
-@Profile("jpa")
+@ConditionalOnProperty(name = "database.type", havingValue = "jpa", matchIfMissing = false)
 public class RecordTypeJpaRepositoryImpl implements RecordTypeRepository {
 
 	@PersistenceContext

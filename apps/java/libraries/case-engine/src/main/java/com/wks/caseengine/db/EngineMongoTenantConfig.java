@@ -12,6 +12,7 @@
 package com.wks.caseengine.db;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.bson.UuidRepresentation;
 import org.bson.codecs.configuration.CodecRegistries;
@@ -38,7 +39,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
 @Configuration
-@ConditionalOnProperty(name = "database.type", havingValue = "mongo")
+@ConditionalOnProperty(name = "database.type", havingValue = "mongo", matchIfMissing = false)
 public class EngineMongoTenantConfig {
 
 	@Autowired
@@ -54,6 +55,11 @@ public class EngineMongoTenantConfig {
 	public MongoMappingContext mongoMappingContext() {
 		return new MongoMappingContext();
 	}
+	
+	@Bean
+    public MongoCustomConversions mongoCustomConversions() {
+        return new MongoCustomConversions(Collections.emptyList());
+    }	
 
 	@Bean
 	public MappingMongoConverter mappingMongoConverter(MongoDatabaseFactory factory, MongoMappingContext context,

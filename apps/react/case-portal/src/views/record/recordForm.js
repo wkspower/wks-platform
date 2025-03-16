@@ -46,8 +46,7 @@ export const RecordForm = ({ open, recordType, record, handleClose, mode }) => {
       RecordService.updateRecord(
         keycloak,
         recordType.id,
-        record.id,
-        // record._id.$oid,
+        record._id?.$oid ?? row.id,
         formData.data,
       )
         .then(() => {

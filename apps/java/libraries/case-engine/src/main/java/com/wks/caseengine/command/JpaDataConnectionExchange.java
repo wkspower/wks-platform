@@ -1,6 +1,6 @@
 package com.wks.caseengine.command;
 
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,7 +11,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 @Component
-@Profile("jpa")
+@ConditionalOnProperty(name = "database.type", havingValue = "jpa", matchIfMissing = false)
 public class JpaDataConnectionExchange implements DataConnectionExchange {
 
 	  @PersistenceContext

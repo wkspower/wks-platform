@@ -95,9 +95,10 @@ export const RecordList = ({ recordTypeId }) => {
             columns={columns}
             pageSize={10}
             rowsPerPageOptions={[10]}
-            // FIXME: we are need to change  
-            // getRowId={(row) => row._id.$oid} 
-            getRowId={(row) => row.id}
+            getRowId={(row) => {
+              console.log(row._id?.$oid ?? row.id)
+              return row._id?.$oid ?? row.id;
+            }}
           />
         </Box>
       </MainCard>

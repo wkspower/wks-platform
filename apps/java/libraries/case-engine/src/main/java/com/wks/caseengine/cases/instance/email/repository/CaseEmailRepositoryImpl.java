@@ -19,6 +19,7 @@ import org.bson.BsonObjectId;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -36,9 +37,9 @@ import com.wks.caseengine.pagination.PageResult;
 import com.wks.caseengine.pagination.mongo.MongoCursorPagination;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
-@Component
-@Profile("mongo")
 @Primary
+@Component
+@ConditionalOnProperty(name = "database.type", havingValue = "mongo", matchIfMissing = false)
 public class CaseEmailRepositoryImpl implements CaseEmailRepository {
 
 	@Autowired

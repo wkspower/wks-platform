@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -16,9 +16,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.wks.caseengine.db.EngineMongoDataConnection;
 
-@Component
 @Primary
-@Profile("mongo")
+@Component
+@ConditionalOnProperty(name = "database.type", havingValue = "mongo", matchIfMissing = false)
 public class MongoDataConnectionExchange implements DataConnectionExchange {
 
 	@Autowired

@@ -30,7 +30,7 @@ import com.wks.api.security.context.SecurityContextTenantHolder;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@ConditionalOnProperty(name = "database.type", havingValue = "mongo")
+@ConditionalOnProperty(name = "database.type", havingValue = "mongo", matchIfMissing = false)
 public class EngineMongoDatabaseFactory extends SimpleMongoClientDatabaseFactory {
 
 	@Autowired
