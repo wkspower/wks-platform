@@ -82,10 +82,22 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			mCUNormsValue.setJanuary(mCUNormsValueDTO.getJanuary());
 			mCUNormsValue.setFebruary(mCUNormsValueDTO.getFebruary());
 			mCUNormsValue.setMarch(mCUNormsValueDTO.getMarch());
-			mCUNormsValue.setSiteFkId(UUID.fromString(mCUNormsValueDTO.getSiteFkId()));
-			mCUNormsValue.setPlantFkId(UUID.fromString(mCUNormsValueDTO.getPlantFkId()));
-			mCUNormsValue.setVerticalFkId(UUID.fromString(mCUNormsValueDTO.getVerticalFkId()));
-			mCUNormsValue.setMaterialFkId(UUID.fromString(mCUNormsValueDTO.getMaterialFkId()));
+			if(mCUNormsValueDTO.getSiteFkId()!=null) {
+				mCUNormsValue.setSiteFkId(UUID.fromString(mCUNormsValueDTO.getSiteFkId()));
+			}
+			if(mCUNormsValueDTO.getPlantFkId()!=null) {
+				mCUNormsValue.setPlantFkId(UUID.fromString(mCUNormsValueDTO.getPlantFkId()));
+			}
+			if(mCUNormsValueDTO.getVerticalFkId()!=null) {
+				mCUNormsValue.setVerticalFkId(UUID.fromString(mCUNormsValueDTO.getVerticalFkId()));
+			}
+			if(mCUNormsValueDTO.getMaterialFkId()!=null) {
+				mCUNormsValue.setMaterialFkId(UUID.fromString(mCUNormsValueDTO.getMaterialFkId()));
+			}
+			if(mCUNormsValueDTO.getNormParameterTypeId()!=null) {
+				mCUNormsValue.setNormParameterTypeFkId(UUID.fromString(mCUNormsValueDTO.getNormParameterTypeId()));
+			}
+			
 			mCUNormsValue.setFinancialYear(mCUNormsValueDTO.getFinancialYear());
 			mCUNormsValue.setRemarks(mCUNormsValueDTO.getRemarks());
 			mCUNormsValue.setMcuVersion("V1");

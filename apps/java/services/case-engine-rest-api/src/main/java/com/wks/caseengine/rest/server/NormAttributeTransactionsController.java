@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.service.ConfigurationService;
 import com.wks.caseengine.service.NormAttributeTransactionsService;
 ///
 @RestController
@@ -24,9 +25,18 @@ public class NormAttributeTransactionsController {
 	@Autowired
 	private NormAttributeTransactionsService normAttributeTransactionsService;
 	
+	@Autowired
+	private ConfigurationService configurationService;
+	
 	@GetMapping(value="/getCatalystSelectivityData")
-	public	String getCatalystSelectivityData(@RequestParam String year,@RequestParam UUID plantId,@RequestParam UUID siteId){	
-		return normAttributeTransactionsService.getCatalystSelectivityData(year);
+	public	String getCatalystSelectivityData(@RequestParam String year,@RequestParam UUID plantId,@RequestParam UUID siteId){
+		try {
+			System.out.println("result for configuration"+configurationService.getConfigurationData(year,plantId));
+			return normAttributeTransactionsService.getCatalystSelectivityData(year,plantId);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	@PutMapping(value="/updateNormAttributeTransactions")

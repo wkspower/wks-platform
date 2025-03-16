@@ -26,7 +26,12 @@ public class NormalOperationNormsController {
 	
 	@PostMapping(value="/saveNormalOperationNormsData")
 	public List<MCUNormsValueDTO> getNormalOperationNormsData(@RequestBody List<MCUNormsValueDTO> mCUNormsValueDTOList){
-		return	normalOperationNormsService.saveNormalOperationNormsData(mCUNormsValueDTOList);
+		try {
+			return	normalOperationNormsService.saveNormalOperationNormsData(mCUNormsValueDTOList);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }
