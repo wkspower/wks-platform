@@ -99,17 +99,36 @@ public class ProductServiceImpl implements ProductService {
 
 
 	public List<Object[]> getAllProductsFromNormParameters(String normParameterTypeName) {
-	    String query = """
+		if (normParameterTypeName == null) {
+		    System.out.println("normParameterTypeName is actual null");
+		} else if ("null".equals(normParameterTypeName)) {
+			normParameterTypeName = null;
+		    System.out.println("normParameterTypeName is the string 'null'");
+		} else {
+		    System.out.println("normParameterTypeName: " + normParameterTypeName);
+		}
+
+	    StringBuilder queryBuilder = new StringBuilder("""
 	        SELECT CAST(np.Id AS VARCHAR(36)) as NormParameterId, np.Name, np.DisplayName 
 	        FROM NormParameters np
 	        JOIN NormParameterType npt ON np.NormParameterType_FK_Id = npt.Id
-	        WHERE npt.Name = :normParameterTypeName
-	        ORDER BY np.DiplayOrder
-	    """;
-	    return entityManager.createNativeQuery(query)
-	                        .setParameter("normParameterTypeName", normParameterTypeName)
-	                        .getResultList();
+	    """);
+
+	    if (normParameterTypeName != null) {
+	        queryBuilder.append(" WHERE npt.Name = :normParameterTypeName");
+	    }
+	    queryBuilder.append(" ORDER BY np.DiplayOrder");
+
+	    Query query = entityManager.createNativeQuery(queryBuilder.toString());
+	    System.out.println("queryBuilder"+queryBuilder);
+	    if (normParameterTypeName != null) {
+	        query.setParameter("normParameterTypeName", normParameterTypeName);
+	    }
+	    List<Object[]> list= query.getResultList();
+	    System.out.println("list.size()"+list.size());
+	    return list;
 	}
+
 
 	public List<Object[]> getMonthlyDataForYear(int year) {
         String query = "SELECT NormParameter_FK_Id, month, monthValue, Remarks FROM NormParameterMonthlyTransaction WHERE year = :year";

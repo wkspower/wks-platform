@@ -7,21 +7,22 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.wks.caseengine.dto.MCUNormsValueDTO;
 import com.wks.caseengine.entity.MCUNormsValue;
-import com.wks.caseengine.repository.NormalOperationNormsRepository;
+import com.wks.caseengine.repository.ShutdownNormsRepository;
 
 @Service
-public class NormalOperationNormsServiceImpl implements NormalOperationNormsService{
+public class ShutdownNormsServiceImpl implements ShutdownNormsService{
 	
 	@Autowired
-	private NormalOperationNormsRepository normalOperationNormsRepository;
-
+	private ShutdownNormsRepository shutdownNormsRepository;
+	
 	@Override
-	public List<MCUNormsValueDTO> getNormalOperationNormsData(String year, String plantId) {
-		List<Object[]> obj = normalOperationNormsRepository.findByYearAndPlantFkId(year, UUID.fromString(plantId));
+	public List<MCUNormsValueDTO> getShutdownNormsData(String year, String plantId) {
+		List<Object[]> obj = shutdownNormsRepository.findByYearAndPlantFkId(year, UUID.fromString(plantId));
 		List<MCUNormsValueDTO> mCUNormsValueDTOList = new ArrayList<>();
-
+		System.out.println("obj.size()"+obj.size());
 		for (Object[] row : obj) {
 		    MCUNormsValueDTO mCUNormsValueDTO = new MCUNormsValueDTO();
 		    mCUNormsValueDTO.setId(row[0].toString());
@@ -30,18 +31,18 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		    mCUNormsValueDTO.setVerticalFkId(row[3].toString());
 		    mCUNormsValueDTO.setMaterialFkId(row[4].toString());
 		    
-		    mCUNormsValueDTO.setApril(row[5] != null ? Float.parseFloat(row[5].toString()) : null);
-		    mCUNormsValueDTO.setMay(row[6] != null ? Float.parseFloat(row[6].toString()) : null);
-		    mCUNormsValueDTO.setJune(row[7] != null ? Float.parseFloat(row[7].toString()) : null);
-		    mCUNormsValueDTO.setJuly(row[8] != null ? Float.parseFloat(row[8].toString()) : null);
-		    mCUNormsValueDTO.setAugust(row[9] != null ? Float.parseFloat(row[9].toString()) : null);
-		    mCUNormsValueDTO.setSeptember(row[10] != null ? Float.parseFloat(row[10].toString()) : null);
-		    mCUNormsValueDTO.setOctober(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
-		    mCUNormsValueDTO.setNovember(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
-		    mCUNormsValueDTO.setDecember(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
-		    mCUNormsValueDTO.setJanuary(row[14] != null ? Float.parseFloat(row[14].toString()) : null);
-		    mCUNormsValueDTO.setFebruary(row[15] != null ? Float.parseFloat(row[15].toString()) : null);
-		    mCUNormsValueDTO.setMarch(row[16] != null ? Float.parseFloat(row[16].toString()) : null);
+		    mCUNormsValueDTO.setApril(0.0F);
+		    mCUNormsValueDTO.setMay(0.0F);
+		    mCUNormsValueDTO.setJune(0.0F);
+		    mCUNormsValueDTO.setJuly(0.0F);
+		    mCUNormsValueDTO.setAugust(0.0F);
+		    mCUNormsValueDTO.setSeptember(0.0F);
+		    mCUNormsValueDTO.setOctober(0.0F);
+		    mCUNormsValueDTO.setNovember(0.0F);
+		    mCUNormsValueDTO.setDecember(0.0F);
+		    mCUNormsValueDTO.setJanuary(0.0F);
+		    mCUNormsValueDTO.setFebruary(0.0F);
+		    mCUNormsValueDTO.setMarch(0.0F);
 		    
 		    mCUNormsValueDTO.setFinancialYear(row[17].toString());
 		    mCUNormsValueDTO.setRemarks(row[18] != null ? row[18].toString() : " ");
@@ -58,9 +59,8 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 		return mCUNormsValueDTOList;
 	}
-
 	@Override
-	public List<MCUNormsValueDTO> saveNormalOperationNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList) {
+	public List<MCUNormsValueDTO> saveShutdownNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList) {
 		
 		for(MCUNormsValueDTO mCUNormsValueDTO:mCUNormsValueDTOList) {
 			MCUNormsValue mCUNormsValue= new MCUNormsValue();
@@ -104,10 +104,11 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			mCUNormsValue.setUpdatedBy("System");
 			
 			System.out.println("Data Saved Succussfully");
-			normalOperationNormsRepository.save(mCUNormsValue);
+			shutdownNormsRepository.save(mCUNormsValue);
 		}
 		// TODO Auto-generated method stub
 		return mCUNormsValueDTOList;
 	}
+
 
 }

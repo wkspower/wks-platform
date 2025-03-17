@@ -9,25 +9,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.wks.caseengine.dto.MCUNormsValueDTO;
-import com.wks.caseengine.service.NormalOperationNormsService;
+import com.wks.caseengine.service.ShutdownNormsService;
 
 @RestController
 @RequestMapping("task")
-public class NormalOperationNormsController {
+public class ShutdownNormsController {
 	
 	@Autowired
-	private NormalOperationNormsService normalOperationNormsService;
+	private ShutdownNormsService shutdownNormsService;
 	
-	@GetMapping(value="/getNormalOperationNormsData")
-	public List<MCUNormsValueDTO> getNormalOperationNormsData(@RequestParam String year,@RequestParam String plantId){
-		return	normalOperationNormsService.getNormalOperationNormsData(year, plantId);
+	@GetMapping(value="/getShutdownNormsData")
+	public List<MCUNormsValueDTO> getShutdownNormsData(@RequestParam String year,@RequestParam String plantId){
+		return	shutdownNormsService.getShutdownNormsData(year, plantId);
 	}
 	
-	@PostMapping(value="/saveNormalOperationNormsData")
-	public List<MCUNormsValueDTO> saveNormalOperationNormsData(@RequestBody List<MCUNormsValueDTO> mCUNormsValueDTOList){
+	@PostMapping(value="/saveShutdownNormsData")
+	public List<MCUNormsValueDTO> saveShutdownNormsData(@RequestBody List<MCUNormsValueDTO> mCUNormsValueDTOList){
 		try {
-			return	normalOperationNormsService.saveNormalOperationNormsData(mCUNormsValueDTOList);
+			return	shutdownNormsService.saveShutdownNormsData(mCUNormsValueDTOList);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
