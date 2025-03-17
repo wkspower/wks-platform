@@ -193,7 +193,7 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
     },
     {
-      field: 'remark',
+      field: 'remarks',
       headerName: 'Remark',
       minWidth: 150,
       editable: true,
@@ -222,7 +222,7 @@ const NormalOpNormsScreen = () => {
   ]
 
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remark || '')
+    setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -288,8 +288,8 @@ const NormalOpNormsScreen = () => {
         january: row.january || null,
         february: row.february || null,
         march: row.march || null,
-        remark: row.remark,
-        remarks: row.remark,
+        remark: row.remarks,
+        remarks: row.remarks,
         financialYear: localStorage.getItem('year'),
         plantId: plantId,
         normParameterId: row.normParameterId,
@@ -300,7 +300,7 @@ const NormalOpNormsScreen = () => {
         siteFkId: row.siteFkId || null,
         verticalFkId: row.verticalFkId || null,
         unit: row.unit || null,
-        normParameterTypeFkId: row.normParameterTypeFkId || null,
+        normParameterTypeId: row.normParameterTypeId || null,
       }))
       if (businessData.length > 0) {
         // console.log(title)
@@ -365,7 +365,7 @@ const NormalOpNormsScreen = () => {
         unsavedChangesRef={unsavedChangesRef}
         handleRemarkCellClick={handleRemarkCellClick}
         permissions={{
-          showAction: true,
+          showAction: false,
           addButton: false,
           deleteButton: false,
           editButton: true,

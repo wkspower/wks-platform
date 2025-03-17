@@ -315,7 +315,12 @@ const DataGridTable = ({
     setRows((prevRows) => {
       const updatedRows = prevRows.map((row) => {
         if (row.id === currentRowId) {
-          const keyToUpdate = 'aopRemarks' in row ? 'aopRemarks' : 'remark'
+          const keyToUpdate =
+            ('aopRemarks' || 'remarks') in row
+              ? 'aopRemarks' || 'remarks'
+              : 'remark'
+          // const keyToUpdate =
+          //   'aopRemark' || 'aopRemarks' || 'remark' || 'remarks'
           return { ...row, [keyToUpdate]: currentRemark }
         }
         return row

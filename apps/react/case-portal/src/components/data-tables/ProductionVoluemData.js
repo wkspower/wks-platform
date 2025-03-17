@@ -517,6 +517,7 @@ const ProductionvolumeData = () => {
         fetchData={fetchData}
         // onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
+        handleRemarkCellClick={handleRemarkCellClick}
         handleUnitChange={handleUnitChange}
         experimentalFeatures={{ newEditingApi: true }}
         remarkDialogOpen={remarkDialogOpen}
