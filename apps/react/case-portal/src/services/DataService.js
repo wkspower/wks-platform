@@ -47,6 +47,7 @@ export const DataService = {
   handleRefresh,
   handleCalculate,
   getNormalOperationNormsData,
+  getShutdownNormsData,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -289,6 +290,35 @@ async function getNormalOperationNormsData(keycloak) {
     // siteId = parsedSite.id
   }
   const url = `${process.env.REACT_APP_API_URL}/task/getNormalOperationNormsData?year=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getShutdownNormsData(keycloak) {
+  var year = localStorage.getItem('year')
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+  // var siteId = ''
+  const storedSite = localStorage.getItem('selectedSite')
+  if (storedSite) {
+    // const parsedSite = JSON.parse(storedSite)
+    // siteId = parsedSite.id
+  }
+  const url = `${process.env.REACT_APP_API_URL}/task/getShutdownNormsData?year=${year}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

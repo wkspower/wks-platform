@@ -1,339 +1,18 @@
-import React, { useState, useEffect } from 'react'
-import DataGridTable from '../ASDataGrid'
-import { useSession } from 'SessionStoreContext'
-import { useSelector } from 'react-redux'
+import Tooltip from '@mui/material/Tooltip'
 import { useGridApiRef } from '@mui/x-data-grid'
+import { useSession } from 'SessionStoreContext'
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import DataGridTable from '../ASDataGrid'
 // import { GridRowModes } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { DataService } from 'services/DataService'
 import NumericInputOnly from 'utils/NumericInputOnly'
 const headerMap = generateHeaderNames()
 
-const shutdownNormsColumns = [
-  {
-    field: 'srNo',
-    headerName: 'Sr. No',
-    minWidth: 50,
-    maxWidth: 70,
-    editable: false,
-  },
-  { field: 'particular', headerName: 'Particular', width: 150, editable: true },
-  {
-    field: 'unit',
-    headerName: 'Unit',
-    minWidth: 50,
-    editable: true,
-  },
-  {
-    field: 'norms',
-    headerName: 'Norms',
-    minWidth: 50,
-    editable: true,
-  },
-  {
-    field: 'april',
-    headerName: headerMap[4],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'may',
-    headerName: headerMap[5],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'june',
-    headerName: headerMap[6],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'july',
-    headerName: headerMap[7],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'aug',
-    headerName: headerMap[8],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'sep',
-    headerName: headerMap[9],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'oct',
-    headerName: headerMap[10],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'nov',
-    headerName: headerMap[11],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'dec',
-    headerName: headerMap[12],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'jan',
-    headerName: headerMap[1],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'feb',
-    headerName: headerMap[2],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-  {
-    field: 'march',
-    headerName: headerMap[3],
-    editable: true,
-    renderEditCell: NumericInputOnly,
-    align: 'left',
-    headerAlign: 'left',
-  },
-]
-
-const shutdownNormsData = [
-  {
-    id: 1,
-    srNo: 1,
-    normParametersFKId: '1020',
-    particular: 'Equipment A',
-    unit: 'Hours',
-    norms: 10,
-    april: 5,
-    may: 6,
-    june: 7,
-    july: 8,
-    august: 9,
-    september: 10,
-    october: 11,
-    november: 12,
-    december: 13,
-    january: 14,
-    february: 15,
-    march: 16,
-  },
-  {
-    id: 2,
-    srNo: 2,
-    normParametersFKId: '1030',
-    particular: 'Equipment B',
-    unit: 'Days',
-    norms: 2,
-    april: 1,
-    may: 1,
-    june: 2,
-    july: 2,
-    august: 3,
-    september: 3,
-    october: 4,
-    november: 4,
-    december: 5,
-    january: 5,
-    february: 6,
-    march: 6,
-  },
-  {
-    id: 3,
-    srNo: 3,
-    normParametersFKId: '1040',
-    particular: 'Material C',
-    unit: 'Kg',
-    norms: 50,
-    april: 25,
-    may: 26,
-    june: 27,
-    july: 28,
-    august: 29,
-    september: 30,
-    october: 31,
-    november: 32,
-    december: 33,
-    january: 34,
-    february: 35,
-    march: 36,
-  },
-  {
-    id: 4,
-    srNo: 4,
-    normParametersFKId: '1050',
-    particular: 'Tool D',
-    unit: 'Pcs',
-    norms: 5,
-    april: 2,
-    may: 3,
-    june: 3,
-    july: 4,
-    august: 4,
-    september: 5,
-    october: 5,
-    november: 6,
-    december: 6,
-    january: 7,
-    february: 7,
-    march: 8,
-  },
-  {
-    id: 5,
-    srNo: 5,
-    normParametersFKId: '1060',
-    particular: 'Machine E',
-    unit: 'Hours',
-    norms: 20,
-    april: 10,
-    may: 12,
-    june: 14,
-    july: 16,
-    august: 18,
-    september: 20,
-    october: 22,
-    november: 24,
-    december: 26,
-    january: 28,
-    february: 30,
-    march: 32,
-  },
-  {
-    id: 6,
-    srNo: 6,
-    normParametersFKId: '1070',
-    particular: 'Component F',
-    unit: 'Litres',
-    norms: 15,
-    april: 7,
-    may: 8,
-    june: 9,
-    july: 10,
-    august: 11,
-    september: 12,
-    october: 13,
-    november: 14,
-    december: 15,
-    january: 16,
-    february: 17,
-    march: 18,
-  },
-  {
-    id: 7,
-    srNo: 7,
-    normParametersFKId: '1080',
-    particular: 'System G',
-    unit: 'Units',
-    norms: 3,
-    april: 1,
-    may: 2,
-    june: 2,
-    july: 3,
-    august: 3,
-    september: 4,
-    october: 4,
-    november: 5,
-    december: 5,
-    january: 6,
-    february: 6,
-    march: 7,
-  },
-  {
-    id: 8,
-    srNo: 8,
-    normParametersFKId: '1090',
-    particular: 'Gear H',
-    unit: 'Sets',
-    norms: 8,
-    april: 4,
-    may: 5,
-    june: 5,
-    july: 6,
-    august: 6,
-    september: 7,
-    october: 7,
-    november: 8,
-    december: 8,
-    january: 9,
-    february: 9,
-    march: 10,
-  },
-  {
-    id: 9,
-    srNo: 9,
-    normParametersFKId: '1110',
-    particular: 'Pump I',
-    unit: 'Hours',
-    norms: 12,
-    april: 6,
-    may: 7,
-    june: 8,
-    july: 9,
-    august: 10,
-    september: 11,
-    october: 12,
-    november: 13,
-    december: 14,
-    january: 15,
-    february: 16,
-    march: 17,
-  },
-  {
-    id: 10,
-    srNo: 10,
-    normParametersFKId: '12320',
-    particular: 'Sensor J',
-    unit: 'Pcs',
-    norms: 6,
-    april: 3,
-    may: 4,
-    june: 4,
-    july: 5,
-    august: 5,
-    september: 6,
-    october: 6,
-    november: 7,
-    december: 7,
-    january: 8,
-    february: 8,
-    march: 9,
-  },
-]
-
 const ShutdownNorms = () => {
   const menu = useSelector((state) => state.dataGridStore)
-  // const [allProducts, setAllProducts] = useState([])
+  const [allProducts, setAllProducts] = useState([])
   const { sitePlantChange } = menu
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
@@ -346,11 +25,258 @@ const ShutdownNorms = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('TPH')
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
   const keycloak = useSession()
+
+  const saveChanges = React.useCallback(async () => {
+    setTimeout(() => {
+      try {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        if (data.length == 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
+        }
+
+        saveNormalOperationNormsData(data)
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } catch (error) {
+        /* empty */
+      }
+    }, 1000)
+  }, [apiRef, selectedUnit])
+
+  useEffect(() => {
+    const getAllProducts = async () => {
+      try {
+        const data = await DataService.getAllProducts(keycloak, null)
+        const productList = data.map((product) => ({
+          id: product.id,
+          displayName: product.displayName,
+        }))
+        setAllProducts(productList)
+      } catch (error) {
+        console.error('Error fetching product:', error)
+      } finally {
+        // handleMenuClose();
+      }
+    }
+    fetchData()
+    getAllProducts()
+  }, [sitePlantChange, keycloak, selectedUnit])
+
+  const formatValueToThreeDecimals = (params) =>
+    params ? parseFloat(params).toFixed(3) : ''
+
+  const colDefs = [
+    {
+      field: 'Particulars',
+      headerName: 'Type',
+      minWidth: 140,
+      groupable: true,
+      renderCell: (params) => <strong>{params.value}</strong>,
+    },
+    {
+      field: 'materialFkId',
+      headerName: 'Particular',
+      minWidth: 140,
+      valueGetter: (params) => params || '',
+      valueFormatter: (params) => {
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : ''
+      },
+      renderEditCell: (params) => {
+        const { value, id, api } = params
+        return (
+          <select
+            value={value || ''}
+            onChange={(event) => {
+              api.setEditCellValue({
+                id,
+                field: 'materialFkId',
+                value: event.target.value,
+              })
+            }}
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+            }}
+          >
+            <option value='' disabled>
+              Select
+            </option>
+            {allProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.displayName}
+              </option>
+            ))}
+          </select>
+        )
+      },
+    },
+
+    { field: 'unit', headerName: 'Unit', width: 100, editable: true },
+
+    {
+      field: 'april',
+      headerName: headerMap[4],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
+    },
+    {
+      field: 'may',
+      headerName: headerMap[5],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
+    },
+    {
+      field: 'june',
+      headerName: headerMap[6],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
+    },
+    {
+      field: 'july',
+      headerName: headerMap[7],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
+    },
+
+    {
+      field: 'august',
+      headerName: headerMap[8],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
+    },
+    {
+      field: 'september',
+      headerName: headerMap[9],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
+    },
+    {
+      field: 'october',
+      headerName: headerMap[10],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
+    },
+    {
+      field: 'november',
+      headerName: headerMap[11],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
+    },
+    {
+      field: 'december',
+      headerName: headerMap[12],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
+    },
+    {
+      field: 'january',
+      headerName: headerMap[1],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
+    },
+    {
+      field: 'february',
+      headerName: headerMap[2],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
+    },
+    {
+      field: 'march',
+      headerName: headerMap[3],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
+    },
+    {
+      field: 'remarks',
+      headerName: 'Remark',
+      minWidth: 150,
+      editable: true,
+      renderCell: (params) => (
+        <Tooltip title={params.value || ''} arrow>
+          <div
+            style={{
+              cursor: 'pointer',
+              color: params.value ? 'inherit' : 'gray',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: 140,
+            }}
+            onClick={() => handleRemarkCellClick(params.row)}
+          >
+            {params.value}
+          </div>
+        </Tooltip>
+      ),
+    },
+    {
+      field: 'idFromApi',
+      headerName: 'idFromApi',
+    },
+  ]
+
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
@@ -368,61 +294,17 @@ const ShutdownNorms = () => {
     return newRow
   }, [])
 
-  const saveChanges = React.useCallback(async () => {
-    setTimeout(() => {
-      try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        editAOPMCCalculatedData(data)
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
-      } catch (error) {
-        // setIsSaving(false);
-      }
-    }, 1000)
-  }, [apiRef, selectedUnit])
-
-  useEffect(() => {
-    // const getAllProducts = async () => {
-    //   try {
-    //     const data = await DataService.getAllProducts(keycloak, 'Consumption')
-    //     const productList = data.map((product) => ({
-    //       id: product.id.toLowerCase(),
-    //       displayName: product.displayName,
-    //       name: product.name,
-    //     }))
-    //     // setAllProducts(productList)
-    //   } catch (error) {
-    //     console.error('Error fetching product:', error)
-    //   } finally {
-    //     // handleMenuClose();
-    //   }
-    // }
-
-    // getAllProducts()
-    fetchData()
-  }, [sitePlantChange, keycloak, selectedUnit])
-
-  const editAOPMCCalculatedData = async (newRows) => {
+  const saveNormalOperationNormsData = async (newRows) => {
     try {
       let plantId = ''
-      const isTPH = selectedUnit == 'TPD'
       const storedPlant = localStorage.getItem('selectedPlant')
+      const isTPH = selectedUnit == 'TPD'
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
 
-      let siteId = ''
-
-      const storedSite = localStorage.getItem('selectedSite')
-      if (storedSite) {
-        const parsedSite = JSON.parse(storedSite)
-        siteId = parsedSite.id
-      }
-
-      const aopmccCalculatedData = newRows.map((row) => ({
+      const businessData = newRows.map((row) => ({
         april: isTPH && row.april ? row.april * 24 : row.april || null,
         may: isTPH && row.may ? row.may * 24 : row.may || null,
         june: isTPH && row.june ? row.june * 24 : row.june || null,
@@ -439,32 +321,44 @@ const ShutdownNorms = () => {
         february:
           isTPH && row.february ? row.february * 24 : row.february || null,
         march: isTPH && row.march ? row.march * 24 : row.march || null,
-
-        aopStatus: row.aopStatus || 'draft',
-        year: localStorage.getItem('year'),
-        plant: plantId,
-        plantFKId: plantId,
-        site: siteId,
-        material: 'EOE',
-        normParametersFKId: row.normParametersFKId,
+        remark: row.remarks,
+        remarks: row.remarks,
+        financialYear: localStorage.getItem('year'),
+        plantId: plantId,
+        normParameterId: row.normParameterId,
         id: row.idFromApi || null,
-        // avgTPH: findAvg('1', row) || null,
+        materialFkId: row.materialFkId || null,
+        mcuVersion: row.mcuVersion || null,
+        plantFkId: row.plantFkId || null,
+        siteFkId: row.siteFkId || null,
+        verticalFkId: row.verticalFkId || null,
+        unit: row.unit || null,
+        normParameterTypeId: row.normParameterTypeId || null,
       }))
+      if (businessData.length > 0) {
+        // console.log(title)
 
-      const response = await DataService.editAOPMCCalculatedData(
-        plantId,
-        aopmccCalculatedData,
-        keycloak,
-      )
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Shutdown Norms Data Saved Successfully!',
-        severity: 'success',
-      })
-      // fetchData()
-      return response
+        const response = await DataService.saveNormalOperationNormsData(
+          plantId,
+          businessData,
+          keycloak,
+        )
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: `Normal Operations Norms Saved Successfully!`,
+          severity: 'success',
+        })
+        // fetchData()
+        return response
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: `Normal Operations Norms not saved!`,
+          severity: 'error',
+        })
+      }
     } catch (error) {
-      console.error('Error saving Shutdown Norms Data:', error)
+      console.error(`Error saving Normal Operations Norms`, error)
     } finally {
       fetchData()
     }
@@ -472,16 +366,29 @@ const ShutdownNorms = () => {
 
   const fetchData = async () => {
     try {
-      // const data = await DataService.getAOPMCCalculatedData(keycloak)
-      const data = shutdownNormsData
+      const data = await DataService.getShutdownNormsData(keycloak)
+      const groupedRows = []
+      const groups = new Map()
+      let groupId = 0
+      const isTPD = selectedUnit == 'TPD'
 
-      const formattedData = data.map((item, index) => {
-        const isTPD = selectedUnit == 'TPD'
-        return {
+      data.forEach((item) => {
+        const groupKey = item.normParameterTypeDisplayName || 'By Products'
+
+        if (!groups.has(groupKey)) {
+          groups.set(groupKey, [])
+          groupedRows.push({
+            id: groupId++,
+            Particulars: groupKey,
+            isGroupHeader: true,
+          })
+        }
+
+        const formattedItem = {
           ...item,
-          idFromApi: item?.id,
-          normParametersFKId: item?.normParametersFKId,
-          id: index,
+          idFromApi: item.id,
+          id: groupId++,
+          normParametersFKId: item?.normParametersFKId.toLowerCase(),
 
           ...(isTPD && {
             april: item.april
@@ -516,48 +423,56 @@ const ShutdownNorms = () => {
               : item.march || null,
           }),
         }
+
+        groups.get(groupKey).push(formattedItem)
+        groupedRows.push(formattedItem)
       })
-      setProductNormData(formattedData)
-      setRows(formattedData)
+
+      // setBDData(groupedRows);
+      setRows(groupedRows)
     } catch (error) {
-      console.error('Error fetching data:', error)
+      console.error('Error fetching Business Demand data:', error)
     }
+  }
+
+  const handleUnitChange = (unit) => {
+    setSelectedUnit(unit)
   }
 
   const onProcessRowUpdateError = React.useCallback((error) => {
     console.log(error)
   }, [])
 
-  const handleUnitChange = (unit) => {
-    setSelectedUnit(unit)
-  }
-
   return (
     <div>
       <DataGridTable
-        columns={shutdownNormsColumns}
-        rows={productNormData || rows}
-        setRows={setRows}
         title='Shutdown Norms'
+        columns={colDefs}
+        setRows={setRows}
+        rows={rows}
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
         processRowUpdate={processRowUpdate}
+        handleUnitChange={handleUnitChange}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         apiRef={apiRef}
-        // deleteId={deleteId}
         open1={open1}
-        // setDeleteId={setDeleteId}
         setOpen1={setOpen1}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        // handleDeleteClick={handleDeleteClick}
-        fetchData={fetchData}
         onProcessRowUpdateError={onProcessRowUpdateError}
-        handleUnitChange={handleUnitChange}
+        fetchData={fetchData}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        unsavedChangesRef={unsavedChangesRef}
+        handleRemarkCellClick={handleRemarkCellClick}
         permissions={{
           showAction: true,
           addButton: false,
