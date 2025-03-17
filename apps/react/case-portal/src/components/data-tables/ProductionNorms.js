@@ -9,12 +9,12 @@ import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
 
-import NumericCellEditor from 'utils/NumericCellEditor'
-import NumericInputOnly from 'utils/NumericInputOnly'
+// import NumericCellEditor from 'utils/NumericCellEditor'
+// import NumericInputOnly from 'utils/NumericInputOnly'
 import getEnhancedColDefs from './CommonHeader/ProductionAopHeader'
 const ProductionNorms = () => {
   const keycloak = useSession()
-  const [csData, setCsData] = useState([])
+  // const [csData, setCsData] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -60,18 +60,18 @@ const ProductionNorms = () => {
     return newRow
   }, [])
 
-  const saveChanges_DoNotDelete = React.useCallback(async () => {
-    setTimeout(() => {
-      try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        updateProductNormData(data)
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
-      } catch (error) {}
-    }, 1000)
-  }, [apiRef])
+  // const saveChanges_DoNotDelete = React.useCallback(async () => {
+  //   setTimeout(() => {
+  //     try {
+  //       var data = Object.values(unsavedChangesRef.current.unsavedRows)
+  //       updateProductNormData(data)
+  //       unsavedChangesRef.current = {
+  //         unsavedRows: {},
+  //         rowsBeforeChange: {},
+  //       }
+  //     } catch (error) {}
+  //   }, 1000)
+  // }, [apiRef])
 
   const saveChanges = React.useCallback(async () => {
     setTimeout(() => {
@@ -110,7 +110,9 @@ const ProductionNorms = () => {
           rowsBeforeChange: {},
         }
         // setHasUnsavedRows(false)
-      } catch (error) {}
+      } catch (error) {
+        console.log('Error saving changes:', error)
+      }
     }, 1000)
   }, [apiRef, selectedUnit])
 
@@ -177,31 +179,32 @@ const ProductionNorms = () => {
       var plantId = plantId
       const data = await DataService.handleCalculate(plantId, year, keycloak)
 
-      const formattedData = data.map((item, index) => {
-        const isKiloTon = selectedUnit != 'Ton'
-        return {
-          ...item,
-          idFromApi: item.id,
-          normParametersFKId: item?.normParametersFKId?.toLowerCase(),
-          id: index,
-          ...(isKiloTon && {
-            jan: item.jan ? item.jan / 1000 : item.jan,
-            feb: item.feb ? item.feb / 1000 : item.feb,
-            march: item.march ? item.march / 1000 : item.march,
-            april: item.april ? item.april / 1000 : item.april,
-            may: item.may ? item.may / 1000 : item.may,
-            june: item.june ? item.june / 1000 : item.june,
-            july: item.july ? item.july / 1000 : item.july,
-            aug: item.aug ? item.aug / 1000 : item.aug,
-            sep: item.sep ? item.sep / 1000 : item.sep,
-            oct: item.oct ? item.oct / 1000 : item.oct,
-            nov: item.nov ? item.nov / 1000 : item.nov,
-            dec: item.dec ? item.dec / 1000 : item.dec,
-          }),
-        }
-      })
+      // const formattedData = data.map((item, index) => {
+      //   const isKiloTon = selectedUnit != 'Ton'
+      //   return {
+      //     ...item,
+      //     idFromApi: item.id,
+      //     normParametersFKId: item?.normParametersFKId?.toLowerCase(),
+      //     id: index,
+      //     ...(isKiloTon && {
+      //       jan: item.jan ? item.jan / 1000 : item.jan,
+      //       feb: item.feb ? item.feb / 1000 : item.feb,
+      //       march: item.march ? item.march / 1000 : item.march,
+      //       april: item.april ? item.april / 1000 : item.april,
+      //       may: item.may ? item.may / 1000 : item.may,
+      //       june: item.june ? item.june / 1000 : item.june,
+      //       july: item.july ? item.july / 1000 : item.july,
+      //       aug: item.aug ? item.aug / 1000 : item.aug,
+      //       sep: item.sep ? item.sep / 1000 : item.sep,
+      //       oct: item.oct ? item.oct / 1000 : item.oct,
+      //       nov: item.nov ? item.nov / 1000 : item.nov,
+      //       dec: item.dec ? item.dec / 1000 : item.dec,
+      //     }),
+      //   }
+      // })
 
-      setCsData(formattedData)
+      // setCsData(formattedData)
+      // setRows(formattedData)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Data refresh successfully!',
@@ -241,7 +244,7 @@ const ProductionNorms = () => {
           }),
         }
       })
-      setCsData(formattedData)
+      // setCsData(formattedData)
       setRows(formattedData)
     } catch (error) {
       console.error('Error fetching Production AOP data:', error)
@@ -250,52 +253,52 @@ const ProductionNorms = () => {
     }
   }
 
-  const getProductName = async (value, row) => {
-    if (!row || !row.normParametersFKId) {
-      return ''
-    }
+  // const getProductName = async (value, row) => {
+  //   if (!row || !row.normParametersFKId) {
+  //     return ''
+  //   }
 
-    let product
-    if (allProducts && allProducts.length > 0) {
-      product = allProducts.find((p) => p.id === row.normParametersFKId)
-    } else {
-      try {
-        const data = await DataService.getAllProducts(
-          keycloak,
-          lowerVertName === 'meg' ? 'Production' : 'Grade',
-        )
-        product = data.find((p) => p.id === row.normParametersFKId)
-      } catch (error) {
-        console.error('Error fetching products:', error)
-        return ''
-      }
-    }
+  //   let product
+  //   if (allProducts && allProducts.length > 0) {
+  //     product = allProducts.find((p) => p.id === row.normParametersFKId)
+  //   } else {
+  //     try {
+  //       const data = await DataService.getAllProducts(
+  //         keycloak,
+  //         lowerVertName === 'meg' ? 'Production' : 'Grade',
+  //       )
+  //       product = data.find((p) => p.id === row.normParametersFKId)
+  //     } catch (error) {
+  //       console.error('Error fetching products:', error)
+  //       return ''
+  //     }
+  //   }
 
-    return product ? product.name : ''
-  }
+  //   return product ? product.name : ''
+  // }
 
-  const findAvg = (value, row) => {
-    const months = [
-      'april',
-      'may',
-      'june',
-      'july',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-      'jan',
-      'feb',
-      'march',
-    ]
+  // const findAvg = (value, row) => {
+  //   const months = [
+  //     'april',
+  //     'may',
+  //     'june',
+  //     'july',
+  //     'aug',
+  //     'sep',
+  //     'oct',
+  //     'nov',
+  //     'dec',
+  //     'jan',
+  //     'feb',
+  //     'march',
+  //   ]
 
-    const values = months.map((month) => row[month] || 0)
-    const sum = values.reduce((acc, val) => acc + val, 0)
-    const avg = (sum / values.length).toFixed(2)
+  //   const values = months.map((month) => row[month] || 0)
+  //   const sum = values.reduce((acc, val) => acc + val, 0)
+  //   const avg = (sum / values.length).toFixed(2)
 
-    return avg === '0.00' ? null : avg
-  }
+  //   return avg === '0.00' ? null : avg
+  // }
 
   const findSum = (value, row) => {
     const months = [

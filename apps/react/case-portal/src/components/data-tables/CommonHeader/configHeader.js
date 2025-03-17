@@ -1,4 +1,4 @@
-;[
+[
   {
     field: 'description',
     headerName: 'Description',

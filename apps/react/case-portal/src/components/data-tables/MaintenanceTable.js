@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import ASDataGrid from './ASDataGrid'
-import { useSession } from 'SessionStoreContext'
-import { useSelector } from 'react-redux'
+// import { useSession } from 'SessionStoreContext'
+// import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
 
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import NumericInputOnly from 'utils/NumericInputOnly'
+// import NumericInputOnly from 'utils/NumericInputOnly'
 import getEnhancedColDefs from './CommonHeader/MaintainaceDetails_header'
 const headerMap = generateHeaderNames()
 
@@ -283,10 +283,10 @@ const productionData = [
 ]
 
 const MaintenanceTable = () => {
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange } = dataGridStore
+  // const dataGridStore = useSelector((state) => state.dataGridStore)
+  // const { sitePlantChange } = dataGridStore
   const [open1, setOpen1] = useState(false)
-  const [deleteId, setDeleteId] = useState(null)
+  // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
 
   const [rows, setRows] = useState(productionData)
@@ -299,7 +299,7 @@ const MaintenanceTable = () => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
-  const keycloak = useSession()
+  // const keycloak = useSession()
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow

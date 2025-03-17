@@ -9,14 +9,14 @@ import getEnhancedColDefs from './CommonHeader/consumptionHeader'
 
 const NormalOpNormsScreen = () => {
   const keycloak = useSession()
-  const [csData, setCsData] = useState([])
-  const [csDataTransformed, setCsDataTransformed] = useState([])
+  // const [csData, setCsData] = useState([])
+  // const [csDataTransformed, setCsDataTransformed] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const headerMap = generateHeaderNames()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange } = dataGridStore
   const [open1, setOpen1] = useState(false)
-  const [deleteId, setDeleteId] = useState(null)
+  // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
   const [selectedUnit, setSelectedUnit] = useState('TPH')
@@ -40,7 +40,7 @@ const NormalOpNormsScreen = () => {
       NormParameterMonthlyTransactionId: '1',
       NormParametersId: '92E0AF06-9535-4B93-8998-E56A71354393',
       april: 5,
-      march: 6,
+      may: 6,
       june: 7,
       july: 8,
       august: 9,
@@ -56,7 +56,7 @@ const NormalOpNormsScreen = () => {
       NormParameterMonthlyTransactionId: '2',
       NormParametersId: '00DC05B1-9607-470E-A159-62497E0123E2',
       april: 3,
-      march: 4,
+      may: 4,
       june: 5,
       july: 6,
       august: 7,
@@ -76,7 +76,7 @@ const NormalOpNormsScreen = () => {
       NormParameterMonthlyTransactionId: '3',
       NormParametersId: 'A061E050-0281-421F-81C1-B136CE2ED3F3',
       april: 2,
-      march: 3,
+      may: 3,
       june: 4,
       july: 5,
       august: 6,
@@ -92,7 +92,7 @@ const NormalOpNormsScreen = () => {
       NormParameterMonthlyTransactionId: '4',
       NormParametersId: '00DC05B1-9607-470E-A159-62497E0123E2',
       april: 1,
-      march: 2,
+      may: 2,
       june: 3,
       july: 4,
       august: 5,
@@ -128,52 +128,52 @@ const NormalOpNormsScreen = () => {
     return newRow
   }, [])
 
-  const saveEditedData = async (newRows) => {
+  const saveEditedData = async () => {
     try {
-      let plantId = ''
-      const isTPH = selectedUnit == 'TPD'
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
+      // let plantId = ''
+      // const isTPH = selectedUnit == 'TPD'
+      // const storedPlant = localStorage.getItem('selectedPlant')
+      // if (storedPlant) {
+      //   // const parsedPlant = JSON.parse(storedPlant)
+      //   // plantId = parsedPlant.id
+      // }
 
-      let siteId = ''
+      // let siteId = ''
 
       const storedSite = localStorage.getItem('selectedSite')
       if (storedSite) {
-        const parsedSite = JSON.parse(storedSite)
-        siteId = parsedSite.id
+        // const parsedSite = JSON.parse(storedSite)
+        // siteId = parsedSite.id
       }
 
-      const aopmccCalculatedData = newRows.map((row) => ({
-        april: isTPH && row.april ? row.april * 24 : row.april || null,
-        may: isTPH && row.may ? row.may * 24 : row.may || null,
-        june: isTPH && row.june ? row.june * 24 : row.june || null,
-        july: isTPH && row.july ? row.july * 24 : row.july || null,
-        august: isTPH && row.august ? row.august * 24 : row.august || null,
-        september:
-          isTPH && row.september ? row.september * 24 : row.september || null,
-        october: isTPH && row.october ? row.october * 24 : row.october || null,
-        november:
-          isTPH && row.november ? row.november * 24 : row.november || null,
-        december:
-          isTPH && row.december ? row.december * 24 : row.december || null,
-        january: isTPH && row.january ? row.january * 24 : row.january || null,
-        february:
-          isTPH && row.february ? row.february * 24 : row.february || null,
-        march: isTPH && row.march ? row.march * 24 : row.march || null,
+      // const aopmccCalculatedData = newRows.map((row) => ({
+      //   april: isTPH && row.april ? row.april * 24 : row.april || null,
+      //   may: isTPH && row.may ? row.may * 24 : row.may || null,
+      //   june: isTPH && row.june ? row.june * 24 : row.june || null,
+      //   july: isTPH && row.july ? row.july * 24 : row.july || null,
+      //   august: isTPH && row.august ? row.august * 24 : row.august || null,
+      //   september:
+      //     isTPH && row.september ? row.september * 24 : row.september || null,
+      //   october: isTPH && row.october ? row.october * 24 : row.october || null,
+      //   november:
+      //     isTPH && row.november ? row.november * 24 : row.november || null,
+      //   december:
+      //     isTPH && row.december ? row.december * 24 : row.december || null,
+      //   january: isTPH && row.january ? row.january * 24 : row.january || null,
+      //   february:
+      //     isTPH && row.february ? row.february * 24 : row.february || null,
+      //   march: isTPH && row.march ? row.march * 24 : row.march || null,
 
-        aopStatus: row.aopStatus || 'draft',
-        year: localStorage.getItem('year'),
-        plant: plantId,
-        plantFKId: plantId,
-        site: siteId,
-        material: 'EOE',
-        normParametersFKId: row.normParametersFKId,
-        id: row.idFromApi || null,
-        avgTPH: findAvg('1', row) || null,
-      }))
+      //   aopStatus: row.aopStatus || 'draft',
+      //   year: localStorage.getItem('year'),
+      //   plant: plantId,
+      //   plantFKId: plantId,
+      //   site: siteId,
+      //   material: 'EOE',
+      //   normParametersFKId: row.normParametersFKId,
+      //   id: row.idFromApi || null,
+      //   avgTPH: findAvg('1', row) || null,
+      // }))
 
       // const response = await DataService.editAOPMCCalculatedData(
       //   plantId,
@@ -186,7 +186,7 @@ const NormalOpNormsScreen = () => {
         severity: 'success',
       })
       // fetchData()
-      return response
+      // return response
     } catch (error) {
       console.error('Error saving Shutdown Norms Data:', error)
     } finally {
@@ -214,7 +214,7 @@ const NormalOpNormsScreen = () => {
     try {
       // const data = await DataService.getConsumptionNormsData(keycloak)
       const data = hardcodedData
-      setCsData(data)
+      // setCsData(data)
 
       let rowIndex = 1
       const groupedRows = []
@@ -270,7 +270,7 @@ const NormalOpNormsScreen = () => {
         }
       })
 
-      setCsDataTransformed(groupedRows)
+      // setCsDataTransformed(groupedRows)
       setRows(groupedRows)
     } catch (error) {
       console.error('Error fetching data:', error)

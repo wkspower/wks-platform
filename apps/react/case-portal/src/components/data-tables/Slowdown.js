@@ -16,7 +16,7 @@ const SlowDown = () => {
   const vertName = verticalChange?.verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
-  const [slowDownData, setSlowDownData] = useState([])
+  // const [slowDownData, setSlowDownData] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
@@ -187,24 +187,12 @@ const SlowDown = () => {
     try {
       const data = await DataService.getSlowDownPlantData(keycloak)
 
-      // const data = [
-      //   {
-      //     discription: 'MEG slowdown',
-      //     maintStartDateTime: null,
-      //     maintEndDateTime: null,
-      //     durationInHrs: null,
-      //     rate: 20,
-      //     remarks: 'MEG slowdown',
-      //     product: '92E0AF06-9535-4B93-8998-E56A71354393',
-      //     maintenanceId: 'f79675e1-2973-4844-90ff-6894b4b6bd72',
-      //   },
-      // ]
       const formattedData = data.map((item, index) => ({
         ...item,
         idFromApi: item?.maintenanceId || item?.id,
         id: index,
       }))
-      setSlowDownData(formattedData)
+      // setSlowDownData(formattedData)
       setRows(formattedData)
       setLoading(false) // Hide loading
     } catch (error) {
@@ -271,53 +259,53 @@ const SlowDown = () => {
     getAllProducts()
   }, [sitePlantChange, keycloak, verticalChange, lowerVertName])
 
-  const findDuration = (value, row) => {
-    if (row && row.maintStartDateTime && row.maintEndDateTime) {
-      const start = new Date(row.maintStartDateTime)
-      const end = new Date(row.maintEndDateTime)
+  // const findDuration = (value, row) => {
+  //   if (row && row.maintStartDateTime && row.maintEndDateTime) {
+  //     const start = new Date(row.maintStartDateTime)
+  //     const end = new Date(row.maintEndDateTime)
 
-      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-        // Check if dates are valid
-        const durationInMs = end - start
+  //     if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+  //       // Check if dates are valid
+  //       const durationInMs = end - start
 
-        // Calculate duration in hours and minutes
-        const durationInHours = Math.floor(durationInMs / (1000 * 60 * 60))
-        const remainingMs = durationInMs % (1000 * 60 * 60)
-        const durationInMinutes = Math.floor(remainingMs / (1000 * 60))
+  //       // Calculate duration in hours and minutes
+  //       const durationInHours = Math.floor(durationInMs / (1000 * 60 * 60))
+  //       const remainingMs = durationInMs % (1000 * 60 * 60)
+  //       const durationInMinutes = Math.floor(remainingMs / (1000 * 60))
 
-        // Format the duration as "HH:MM"
-        const formattedDuration = `${String(durationInHours).padStart(2, '0')}:${String(durationInMinutes).padStart(2, '0')}`
-        return formattedDuration
-      } else {
-        return '' // Or handle invalid dates as needed
-      }
-    } else {
-      return '' // Or handle missing dates as needed
-    }
-  }
+  //       // Format the duration as "HH:MM"
+  //       const formattedDuration = `${String(durationInHours).padStart(2, '0')}:${String(durationInMinutes).padStart(2, '0')}`
+  //       return formattedDuration
+  //     } else {
+  //       return '' // Or handle invalid dates as needed
+  //     }
+  //   } else {
+  //     return '' // Or handle missing dates as needed
+  //   }
+  // }
 
-  const handleDeleteClick = async (id, params) => {
-    try {
-      const maintenanceId =
-        id?.maintenanceId ||
-        params?.row?.idFromApi ||
-        params?.row?.maintenanceId ||
-        params?.NormParameterMonthlyTransactionId
+  // const handleDeleteClick = async (id, params) => {
+  //   try {
+  //     const maintenanceId =
+  //       id?.maintenanceId ||
+  //       params?.row?.idFromApi ||
+  //       params?.row?.maintenanceId ||
+  //       params?.NormParameterMonthlyTransactionId
 
-      // console.log(maintenanceId, params, id)
+  //     // console.log(maintenanceId, params, id)
 
-      // Ensure UI state updates before the deletion process
-      setOpen1(true)
-      setDeleteId(id)
+  //     // Ensure UI state updates before the deletion process
+  //     setOpen1(true)
+  //     setDeleteId(id)
 
-      // Perform the delete operation
-      return await DataService.deleteSlowdownData(maintenanceId, keycloak)
-    } catch (error) {
-      console.error(`Error deleting Slowdown data:`, error)
-    } finally {
-      fetchData()
-    }
-  }
+  //     // Perform the delete operation
+  //     return await DataService.deleteSlowdownData(maintenanceId, keycloak)
+  //   } catch (error) {
+  //     console.error(`Error deleting Slowdown data:`, error)
+  //   } finally {
+  //     fetchData()
+  //   }
+  // }
 
   const colDefs = [
     {

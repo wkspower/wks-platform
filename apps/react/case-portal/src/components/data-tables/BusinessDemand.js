@@ -11,7 +11,7 @@ const headerMap = generateHeaderNames()
 const BusinessDemand = () => {
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
-  const [bdData, setBDData] = useState([])
+  // const [bdData, setBDData] = useState([])
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -63,7 +63,7 @@ const BusinessDemand = () => {
         groupedRows.push(formattedItem)
       })
 
-      setBDData(groupedRows)
+      // setBDData(groupedRows)
       setRows(groupedRows)
     } catch (error) {
       console.error('Error fetching Business Demand data:', error)
@@ -93,7 +93,7 @@ const BusinessDemand = () => {
     getAllProducts()
   }, [sitePlantChange, keycloak, verticalChange, lowerVertName])
 
-  const handleRemarkCellClick = (row, newRow) => {
+  const handleRemarkCellClick = (row) => {
     // console.log(row, newRow)
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
@@ -153,7 +153,9 @@ const BusinessDemand = () => {
           unsavedRows: {},
           rowsBeforeChange: {},
         }
-      } catch (error) {}
+      } catch (error) {
+        console.logk('Error saving changes:', error)
+      }
     }, 1000)
   }, [apiRef])
 

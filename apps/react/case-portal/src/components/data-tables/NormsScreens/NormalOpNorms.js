@@ -9,12 +9,12 @@ import NumericInputOnly from 'utils/NumericInputOnly'
 import DataGridTable from '../ASDataGrid'
 const headerMap = generateHeaderNames()
 const NormalOpNormsScreen = () => {
-  const [allProducts, setAllProducts] = useState([])
-  const [bdData, setBDData] = useState([])
+  // const [allProducts, setAllProducts] = useState([])
+  // const [bdData, setBDData] = useState([])
   const menu = useSelector((state) => state.menu)
   const { sitePlantChange } = menu
   const [open1, setOpen1] = useState(false)
-  const [deleteId, setDeleteId] = useState(null)
+  // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
@@ -59,7 +59,7 @@ const NormalOpNormsScreen = () => {
         groupedRows.push(formattedItem)
       })
 
-      setBDData(groupedRows)
+      // setBDData(groupedRows)
       setRows(groupedRows)
     } catch (error) {
       console.error('Error fetching Business Demand data:', error)
@@ -67,22 +67,22 @@ const NormalOpNormsScreen = () => {
   }
 
   useEffect(() => {
-    const getAllProducts = async () => {
-      try {
-        const data = await DataService.getAllProducts(keycloak, null)
-        const productList = data.map((product) => ({
-          id: product.id,
-          displayName: product.displayName,
-        }))
-        setAllProducts(productList)
-      } catch (error) {
-        console.error('Error fetching product:', error)
-      } finally {
-        // handleMenuClose();
-      }
-    }
+    // const getAllProducts = async () => {
+    //   try {
+    //     const data = await DataService.getAllProducts(keycloak, 'Consumption')
+    //     const productList = data.map((product) => ({
+    //       id: product.id,
+    //       displayName: product.displayName,
+    //     }))
+    //     // setAllProducts(productList)
+    //   } catch (error) {
+    //     console.error('Error fetching product:', error)
+    //   } finally {
+    //     // handleMenuClose();
+    //   }
+    // }
     fetchData()
-    getAllProducts()
+    // getAllProducts()
   }, [sitePlantChange, keycloak])
 
   const colDefs = [
@@ -303,7 +303,9 @@ const NormalOpNormsScreen = () => {
           unsavedRows: {},
           rowsBeforeChange: {},
         }
-      } catch (error) {}
+      } catch (error) {
+        console.error('Error saving changes:', error)
+      }
     }, 1000)
   }, [apiRef])
 

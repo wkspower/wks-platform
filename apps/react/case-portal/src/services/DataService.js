@@ -1,5 +1,4 @@
-import { json, nop } from './request'
-import Config from 'consts/index'
+import { json } from './request'
 
 export const DataService = {
   getProductById,
@@ -229,7 +228,7 @@ async function updateBusinessDemandDataM(maintenanceId, keycloak) {
   }
 }
 
-async function getProductById(keycloak, id) {
+async function getProductById(keycloak) {
   const url = `${process.env.REACT_APP_API_URL}/task/productList`
 
   const headers = {
@@ -254,12 +253,12 @@ async function getBDData(keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  var siteId = ''
-  const storedSite = localStorage.getItem('selectedSite')
-  if (storedSite) {
-    const parsedSite = JSON.parse(storedSite)
-    siteId = parsedSite.id
-  }
+  // var siteId = ''
+  // const storedSite = localStorage.getItem('selectedSite')
+  // if (storedSite) {
+  //   const parsedSite = JSON.parse(storedSite)
+  //   // siteId = parsedSite.id
+  // }
   const url = `${process.env.REACT_APP_API_URL}/task/getBusinessDemandData?year=${year}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
@@ -283,11 +282,11 @@ async function getNormalOperationNormsData(keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  var siteId = ''
+  // var siteId = ''
   const storedSite = localStorage.getItem('selectedSite')
   if (storedSite) {
-    const parsedSite = JSON.parse(storedSite)
-    siteId = parsedSite.id
+    // const parsedSite = JSON.parse(storedSite)
+    // siteId = parsedSite.id
   }
   const url = `${process.env.REACT_APP_API_URL}/task/getNormalOperationNormsData?year=${year}&plantId=${plantId}`
   const headers = {
@@ -700,7 +699,7 @@ async function getYearlyData(keycloak, year) {
   }
 }
 
-async function getYearWiseProduct(keycloak, id) {
+async function getYearWiseProduct(keycloak) {
   var type = 'Business Demand Data'
   var year = '2025'
   const url = `${process.env.REACT_APP_API_URL}/task/getMonthWiseData?type=${type}&year=${year}`
@@ -787,7 +786,7 @@ async function getShutDownPlantData(keycloak) {
   }
 
   // plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
-  plantId = plantId
+  // plantId = plantId
 
   const url = `${process.env.REACT_APP_API_URL}/task/getShutDownPlanData?plantId=${plantId}&maintenanceTypeName=${maintenanceTypeName}&year=${year}`
 
@@ -928,23 +927,23 @@ async function getTAPlantData(keycloak) {
   }
 }
 
-async function getMonthWiseData(keycloak) {
-  const url = `${process.env.REACT_APP_API_URL}/getMonthWiseData`
+// async function getMonthWiseData(keycloak) {
+//   const url = `${process.env.REACT_APP_API_URL}/getMonthWiseData`
 
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
+//   const headers = {
+//     Accept: 'application/json',
+//     'Content-Type': 'application/json',
+//     Authorization: `Bearer ${keycloak.token}`,
+//   }
 
-  try {
-    const resp = await fetch(url, { method: 'GET', headers })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
+//   try {
+//     const resp = await fetch(url, { method: 'GET', headers })
+//     return json(keycloak, resp)
+//   } catch (e) {
+//     console.log(e)
+//     return await Promise.reject(e)
+//   }
+// }
 
 // New API function: Create a case
 async function createCase(keycloak, caseData) {

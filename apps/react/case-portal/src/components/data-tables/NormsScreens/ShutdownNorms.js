@@ -3,7 +3,7 @@ import DataGridTable from '../ASDataGrid'
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
-import { GridRowModes } from '@mui/x-data-grid'
+// import { GridRowModes } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { DataService } from 'services/DataService'
 import NumericInputOnly from 'utils/NumericInputOnly'
@@ -333,10 +333,10 @@ const shutdownNormsData = [
 
 const ShutdownNorms = () => {
   const menu = useSelector((state) => state.dataGridStore)
-  const [allProducts, setAllProducts] = useState([])
+  // const [allProducts, setAllProducts] = useState([])
   const { sitePlantChange } = menu
   const [open1, setOpen1] = useState(false)
-  const [deleteId, setDeleteId] = useState(null)
+  // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState([])
   const [productNormData, setProductNormData] = useState([])
@@ -384,23 +384,23 @@ const ShutdownNorms = () => {
   }, [apiRef, selectedUnit])
 
   useEffect(() => {
-    const getAllProducts = async () => {
-      try {
-        const data = await DataService.getAllProducts(keycloak, 'Consumption')
-        const productList = data.map((product) => ({
-          id: product.id.toLowerCase(),
-          displayName: product.displayName,
-          name: product.name,
-        }))
-        setAllProducts(productList)
-      } catch (error) {
-        console.error('Error fetching product:', error)
-      } finally {
-        // handleMenuClose();
-      }
-    }
+    // const getAllProducts = async () => {
+    //   try {
+    //     const data = await DataService.getAllProducts(keycloak, 'Consumption')
+    //     const productList = data.map((product) => ({
+    //       id: product.id.toLowerCase(),
+    //       displayName: product.displayName,
+    //       name: product.name,
+    //     }))
+    //     // setAllProducts(productList)
+    //   } catch (error) {
+    //     console.error('Error fetching product:', error)
+    //   } finally {
+    //     // handleMenuClose();
+    //   }
+    // }
 
-    getAllProducts()
+    // getAllProducts()
     fetchData()
   }, [sitePlantChange, keycloak, selectedUnit])
 
@@ -448,14 +448,14 @@ const ShutdownNorms = () => {
         material: 'EOE',
         normParametersFKId: row.normParametersFKId,
         id: row.idFromApi || null,
-        avgTPH: findAvg('1', row) || null,
+        // avgTPH: findAvg('1', row) || null,
       }))
 
-      // const response = await DataService.editAOPMCCalculatedData(
-      //   plantId,
-      //   aopmccCalculatedData,
-      //   keycloak,
-      // )
+      const response = await DataService.editAOPMCCalculatedData(
+        plantId,
+        aopmccCalculatedData,
+        keycloak,
+      )
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Shutdown Norms Data Saved Successfully!',
@@ -536,7 +536,7 @@ const ShutdownNorms = () => {
     <div>
       <DataGridTable
         columns={shutdownNormsColumns}
-        rows={productNormData}
+        rows={productNormData || rows}
         setRows={setRows}
         title='Shutdown Norms'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}

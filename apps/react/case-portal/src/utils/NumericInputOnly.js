@@ -1,4 +1,3 @@
-import React from 'react'
 import { GridEditInputCell } from '@mui/x-data-grid'
 
 function NumericInputOnly(props) {

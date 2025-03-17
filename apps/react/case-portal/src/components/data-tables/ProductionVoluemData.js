@@ -10,7 +10,7 @@ const headerMap = generateHeaderNames()
 
 const ProductionvolumeData = () => {
   const keycloak = useSession()
-  const [productNormData, setProductNormData] = useState([])
+  // const [productNormData, setProductNormData] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -227,7 +227,7 @@ const ProductionvolumeData = () => {
           }),
         }
       })
-      setProductNormData(formattedData)
+      // setProductNormData(formattedData)
       setRows(formattedData)
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -258,26 +258,26 @@ const ProductionvolumeData = () => {
     fetchData()
   }, [sitePlantChange, keycloak, selectedUnit, verticalChange, lowerVertName])
 
-  const getProductName = async (value, row) => {
-    if (!row || !row.normParametersFKId) {
-      return ''
-    }
+  // const getProductName = async (value, row) => {
+  //   if (!row || !row.normParametersFKId) {
+  //     return ''
+  //   }
 
-    let product
-    if (allProducts && allProducts.length > 0) {
-      product = allProducts.find((p) => p.id === row.normParametersFKId)
-    } else {
-      try {
-        const data = await DataService.getAllProducts(keycloak, 'Production')
-        product = data.find((p) => p.id === row.normParametersFKId)
-      } catch (error) {
-        console.error('Error fetching products:', error)
-        return ''
-      }
-    }
+  //   let product
+  //   if (allProducts && allProducts.length > 0) {
+  //     product = allProducts.find((p) => p.id === row.normParametersFKId)
+  //   } else {
+  //     try {
+  //       const data = await DataService.getAllProducts(keycloak, 'Production')
+  //       product = data.find((p) => p.id === row.normParametersFKId)
+  //     } catch (error) {
+  //       console.error('Error fetching products:', error)
+  //       return ''
+  //     }
+  //   }
 
-    return product ? product.name : ''
-  }
+  //   return product ? product.name : ''
+  // }
 
   // const productionColumns = [
   //   { field: 'idFromApi', headerName: 'ID' },
@@ -517,7 +517,6 @@ const ProductionvolumeData = () => {
         fetchData={fetchData}
         // onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
-        handleRemarkCellClick={handleRemarkCellClick}
         handleUnitChange={handleUnitChange}
         experimentalFeatures={{ newEditingApi: true }}
         remarkDialogOpen={remarkDialogOpen}

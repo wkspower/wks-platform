@@ -69,48 +69,49 @@ const DataGridTable = ({
   // handleRemarkCellClick,
   // units,
 }) => {
-  const [tempHide, setTempHide] = useState(true)
-  const [isUpdating, setIsUpdating] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  // const [tempHide, setTempHide] = useState(true)
+  // const [isUpdating, setIsUpdating] = useState(false)
+  // const [isSaving, setIsSaving] = useState(false)
   const [resizedColumns, setResizedColumns] = useState({})
-  const [open, setOpen] = useState(false)
-  const [remark, setRemark] = useState('')
-  const [product, setProduct] = useState('')
-  const [openRemark, setOpenRemark] = useState(false)
+  // const [open, setOpen] = useState(false)
+  // const [remark, setRemark] = useState('')
+  // const [product, setProduct] = useState('')
+  // const [openRemark, setOpenRemark] = useState(false)
   const keycloak = useSession()
-  const [days, setDays] = useState([])
+  // const [days, setDays] = useState([])
   const [searchText, setSearchText] = useState('')
-  const [isFilterActive, setIsFilterActive] = useState(false)
-  const [selectedRowId, setSelectedRowId] = useState(null)
+  const isFilterActive = false
+  // const [selectedRowId, setSelectedRowId] = useState(null)
   const [selectedUnit, setSelectedUnit] = useState()
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
   const [deleteId, setDeleteId] = useState(false)
   const [deleteIdTemp, setDeleteIdTemp] = useState(false)
-  const handleOpenRemark = () => setOpenRemark(true)
-  const handleCloseRemark = () => setOpenRemark(false)
+  // const handleOpenRemark = () => setOpenRemark(true)
+  // const handleCloseRemark = () => setOpenRemark(false)
   const closeDeleteDialogeBox = () => setOpenDeleteDialogeBox(false)
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
   const handleSearchChange = (event) => {
     setSearchText(event.target.value)
   }
   const [rowModesModel, setRowModesModel] = useState({})
-  const [changedRowIds, setChangedRowIds] = useState([])
-  const [columnFilters, setColumnFilters] = useState({})
+  // const [changedRowIds, setChangedRowIds] = useState([])
+  // const [columnFilters, setColumnFilters] = useState({})
+  const columnFilters = {}
 
-  const handleRowEditCommit = (id, event) => {
-    const editedRow = rows.find((row) => row.id === id)
-  }
+  // const handleRowEditCommit = (id, event) => {
+  //   const editedRow = rows.find((row) => row.id === id)
+  // }
 
-  const handleCellEditCommit = (id, event) => {}
+  // const handleCellEditCommit = (id, event) => {}
 
-  const handleEditClick = (id, row) => () => {
-    setIsUpdating(true)
+  const handleEditClick = (id) => () => {
+    // setIsUpdating(true)
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } })
   }
 
-  const handleSaveClick = (id, rowData) => {
-    handleOpenRemark()
+  const handleSaveClick = (id) => {
+    // handleOpenRemark()
     setRowModesModel((prev) => ({
       ...prev,
       [id]: { mode: GridRowModes.View },
@@ -216,7 +217,7 @@ const DataGridTable = ({
 
     setRows((prevRows) => [newRow, ...prevRows])
     onAddRow?.(newRow)
-    setProduct('')
+    // setProduct('')
     setRowModesModel((oldModel) => ({
       ...oldModel,
       [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
@@ -333,10 +334,11 @@ const DataGridTable = ({
 
       return updatedRows
     })
+
     setRemarkDialogOpen(false)
   }
 
-  const handleCellClick = (params) => {}
+  // const handleCellClick = (params) => {}
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false)
@@ -457,7 +459,7 @@ const DataGridTable = ({
             </Button>
           )}
 
-          {permissions?.showRefreshBtn && !tempHide && (
+          {permissions?.showRefreshBtn && false && (
             <Button
               variant='contained'
               onClick={handleRefresh}
@@ -496,7 +498,7 @@ const DataGridTable = ({
               </MenuItem>
 
               {/* Render the correct unit options dynamically */}
-              {(permissions?.units).map((unit) => (
+              {permissions?.units.map((unit) => (
                 <MenuItem key={unit} value={unit}>
                   {unit}
                 </MenuItem>
@@ -504,7 +506,7 @@ const DataGridTable = ({
             </TextField>
           )}
 
-          {!tempHide && (
+          {false && (
             <TextField
               variant='outlined'
               placeholder='Search...'
@@ -526,7 +528,7 @@ const DataGridTable = ({
             />
           )}
 
-          {!tempHide && (
+          {false && (
             <IconButton
               aria-label='import'
               onClick={handleImportExport}
@@ -552,7 +554,7 @@ const DataGridTable = ({
             </IconButton>
           )}
 
-          {!tempHide && (
+          {false && (
             <IconButton
               aria-label='export'
               onClick={handleImportExport}
@@ -632,7 +634,7 @@ const DataGridTable = ({
           processRowUpdate={processRowUpdate}
           onProcessRowUpdateError={onProcessRowUpdateError}
           onColumnResized={onColumnResized}
-          onCellClick={handleCellClick}
+          // onCellClick={handleCellClick}
           //Added Single Click EDIT for the ROW
           // onCellClick={(params) => {
           //   setRowModesModel({
@@ -640,8 +642,8 @@ const DataGridTable = ({
           //     [params.id]: { mode: GridRowModes.Edit },
           //   })
           // }}
-          onRowEditCommit={handleRowEditCommit}
-          onCellEditCommit={(params) => handleCellEditCommit(params)} // Real-time updates
+          // onRowEditCommit={handleRowEditCommit}
+          // onCellEditCommit={(params) => handleCellEditCommit(params)} // Real-time updates
           experimentalFeatures={{ newEditingApi: true }}
           editMode='row'
           rowModesModel={rowModesModel}

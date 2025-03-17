@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Box,
   useMediaQuery,
@@ -26,8 +26,8 @@ const HeaderContent = ({ keycloak }) => {
   const [selectedVertical, setSelectedVertical] = useState('')
   const [verticals, setVerticals] = useState([])
   const [sites, setSites] = useState([])
-  const [allSites, setAllSites] = useState([])
-  const [userSites, setUserSites] = useState([])
+  // const [allSites, setAllSites] = useState([])
+  // const [userSites, setUserSites] = useState([])
   const [plants, setPlants] = useState([])
   const [allPlants, setAllPlants] = useState([])
   const dispatch = useDispatch()
@@ -57,7 +57,7 @@ const HeaderContent = ({ keycloak }) => {
       const response = await DataService.getAllSites(keycloak)
       if (response) {
         setVerticals(response)
-        setUserSites(keycloak.idTokenParsed.plants)
+        // setUserSites(keycloak.idTokenParsed.plants)
 
         // Flatten verticals into sites and plants arrays.
         const sitesData = []
@@ -91,7 +91,7 @@ const HeaderContent = ({ keycloak }) => {
             verticalChange: { selectedPlant, selectedSite, selectedVertical },
           }),
         )
-        setAllSites(sitesData)
+        // setAllSites(sitesData)
         setAllPlants(plantsData)
 
         // Get allowed filter arrays.
@@ -103,9 +103,9 @@ const HeaderContent = ({ keycloak }) => {
         )
 
         // Filter sites based on allowed site IDs.
-        const filteredSitesData = sitesData.filter((site) =>
-          allowedSiteIds.includes(site.id),
-        )
+        // const filteredSitesData = sitesData.filter((site) =>
+        //   allowedSiteIds.includes(site.id),
+        // )
 
         // Set default selections based on the first available allowed plant.
         if (filteredPlantsData.length > 0) {

@@ -68,7 +68,7 @@ const getEnhancedColDefs = ({
             }}
             onClick={() => handleRemarkCellClick(params.row)}
           >
-            {params.value}
+            {params.value || 'Click to add remark'}
           </div>
         ),
       }

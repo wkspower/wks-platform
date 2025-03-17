@@ -13,7 +13,7 @@ const TurnaroundPlanTable = () => {
   const vertName = verticalChange?.verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
-  const [TaData, setTaData] = useState([])
+  // const [TaData, setTaData] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
@@ -147,7 +147,7 @@ const TurnaroundPlanTable = () => {
         id: index,
       }))
 
-      setTaData(formattedData)
+      // setTaData(formattedData)
       setRows(formattedData)
     } catch (error) {
       console.error('Error fetching Turnaround data:', error)
