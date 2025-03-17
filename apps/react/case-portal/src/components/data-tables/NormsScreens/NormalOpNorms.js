@@ -69,7 +69,7 @@ const NormalOpNormsScreen = () => {
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak, 'Consumption')
+        const data = await DataService.getAllProducts(keycloak, null)
         const productList = data.map((product) => ({
           id: product.id,
           displayName: product.displayName,
@@ -92,6 +92,47 @@ const NormalOpNormsScreen = () => {
       minWidth: 140,
       groupable: true,
       renderCell: (params) => <strong>{params.value}</strong>,
+    },
+    {
+      field: 'materialFkId',
+      headerName: 'Particular',
+      minWidth: 140,
+      valueGetter: (params) => params || '',
+      valueFormatter: (params) => {
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : ''
+      },
+      renderEditCell: (params) => {
+        const { value, id, api } = params
+        return (
+          <select
+            value={value || ''}
+            onChange={(event) => {
+              api.setEditCellValue({
+                id,
+                field: 'materialFkId',
+                value: event.target.value,
+              })
+            }}
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+            }}
+          >
+            <option value='' disabled>
+              Select
+            </option>
+            {allProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.displayName}
+              </option>
+            ))}
+          </select>
+        )
+      },
     },
 
     { field: 'unit', headerName: 'Unit', width: 100, editable: true },

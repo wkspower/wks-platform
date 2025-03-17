@@ -313,20 +313,24 @@ const DataGridTable = ({
 
   const handleRemarkSave = () => {
     setRows((prevRows) => {
+      let updatedRow = null
+
       const updatedRows = prevRows.map((row) => {
         if (row.id === currentRowId) {
           const keyToUpdate =
-            ('aopRemarks' || 'remarks') in row
-              ? 'aopRemarks' || 'remarks'
-              : 'remark'
-          // const keyToUpdate =
-          //   'aopRemark' || 'aopRemarks' || 'remark' || 'remarks'
-          return { ...row, [keyToUpdate]: currentRemark }
+            ['aopRemarks', 'remarks', 'remark'].find((key) => key in row) ||
+            'remark' // Default to 'remark' if none exist
+
+          updatedRow = { ...row, [keyToUpdate]: currentRemark }
+          return updatedRow
         }
         return row
       })
-      const updatedRow = updatedRows.find((row) => row.id === currentRowId)
-      unsavedChangesRef.current.unsavedRows[currentRowId] = updatedRow
+
+      if (updatedRow) {
+        unsavedChangesRef.current.unsavedRows[currentRowId] = updatedRow
+      }
+
       return updatedRows
     })
     setRemarkDialogOpen(false)
