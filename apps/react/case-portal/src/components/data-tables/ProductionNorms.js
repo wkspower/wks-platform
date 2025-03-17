@@ -320,6 +320,7 @@ const ProductionNorms = () => {
     return total === '0.00' ? null : total
   }
 
+  // console.log(lowerVertName)
   useEffect(() => {
     const getAllProducts = async () => {
       try {
@@ -342,7 +343,7 @@ const ProductionNorms = () => {
 
     fetchData()
     getAllProducts()
-  }, [sitePlantChange, keycloak, selectedUnit])
+  }, [sitePlantChange, keycloak, selectedUnit, verticalChange, lowerVertName])
 
   const productionColumns = getEnhancedColDefs({
     allProducts,

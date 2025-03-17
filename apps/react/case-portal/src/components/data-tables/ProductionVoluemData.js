@@ -256,7 +256,7 @@ const ProductionvolumeData = () => {
 
     getAllProducts()
     fetchData()
-  }, [sitePlantChange, keycloak, selectedUnit])
+  }, [sitePlantChange, keycloak, selectedUnit, verticalChange, lowerVertName])
 
   const getProductName = async (value, row) => {
     if (!row || !row.normParametersFKId) {
@@ -517,7 +517,6 @@ const ProductionvolumeData = () => {
         fetchData={fetchData}
         // onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
-        handleRemarkCellClick={handleRemarkCellClick}
         handleUnitChange={handleUnitChange}
         experimentalFeatures={{ newEditingApi: true }}
         remarkDialogOpen={remarkDialogOpen}
