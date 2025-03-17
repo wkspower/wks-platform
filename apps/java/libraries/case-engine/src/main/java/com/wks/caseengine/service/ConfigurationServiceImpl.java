@@ -1,6 +1,7 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,135 +18,121 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-
+import com.wks.caseengine.dto.ConfigurationDataDTO;
 @Service
 public class ConfigurationServiceImpl implements ConfigurationService{
 	
 	@PersistenceContext
     private EntityManager entityManager;
 
-	public String getConfigurationData(String year, UUID plantFKId) {
+	public List<Map<String, Object>> getConfigurationData(String year, UUID plantFKId) {
 	    try {
-	        // Step 1: Generate dynamic pivot column names
-	        String pivotColumnsQuery = """
-	            WITH Months AS (
-	                SELECT DISTINCT 
-	                    CASE Month 
-	                        WHEN 4 THEN 'Apr' WHEN 5 THEN 'May' WHEN 6 THEN 'Jun' WHEN 7 THEN 'Jul' 
-	                        WHEN 8 THEN 'Aug' WHEN 9 THEN 'Sep' WHEN 10 THEN 'Oct' WHEN 11 THEN 'Nov' 
-	                        WHEN 12 THEN 'Dec' WHEN 1 THEN 'Jan' WHEN 2 THEN 'Feb' WHEN 3 THEN 'Mar' 
-	                    END + RIGHT(AuditYear, 2) AS MonthYear 
-	                FROM NormAttributeTransactions 
-	                WHERE AuditYear = :auditYear AND Plant_FK_Id = :plantFKId
-	            )
-	            SELECT STRING_AGG(
-	                'MAX(CASE WHEN MonthYear = ''' + MonthYear + ''' THEN AttributeValue END) AS [' + LOWER(MonthYear) + ']',
-	                ', '
-	            ) AS ColumnsList 
-	            FROM Months
-	        """;
+	    	String pivotColumnsQuery = """
+	    		    WITH ParsedYear AS (
+	    		        SELECT 
+	    		            LEFT(:auditYear, CHARINDEX('-', :auditYear) - 1) AS StartYear,
+	    		            RIGHT(:auditYear, LEN(:auditYear) - CHARINDEX('-', :auditYear)) AS EndYear
+	    		    ),
+	    		    Months AS (
+	    		        SELECT DISTINCT 
+	    		            CASE 
+	    		                WHEN Month BETWEEN 4 AND 12 THEN 
+	    		                    CASE Month 
+	    		                        WHEN 4 THEN 'Apr' WHEN 5 THEN 'May' WHEN 6 THEN 'Jun' WHEN 7 THEN 'Jul' 
+	    		                        WHEN 8 THEN 'Aug' WHEN 9 THEN 'Sep' WHEN 10 THEN 'Oct' WHEN 11 THEN 'Nov' 
+	    		                        WHEN 12 THEN 'Dec' 
+	    		                    END + RIGHT(StartYear, 2)  -- Use last 2 digits of StartYear for Apr-Dec
+	    		                ELSE 
+	    		                    CASE Month 
+	    		                        WHEN 1 THEN 'Jan' WHEN 2 THEN 'Feb' WHEN 3 THEN 'Mar' 
+	    		                    END + RIGHT(EndYear, 2)  -- Use last 2 digits of EndYear for Jan-Mar
+	    		            END AS MonthYear 
+	    		        FROM NormAttributeTransactions, ParsedYear
+	    		        WHERE AuditYear = :auditYear AND Plant_FK_Id = :plantFKId
+	    		    )
+	    		    SELECT COALESCE(STRING_AGG(
+	    		        'MAX(CASE WHEN MonthYear = ''' + MonthYear + ''' THEN AttributeValue END) AS [' + LOWER(MonthYear) + ']',
+	    		        ', '
+	    		    ), 'NULL AS NoData') AS ColumnsList 
+	    		    FROM Months
+	    		""";
 
-	        String pivotColumns = (String) entityManager.createNativeQuery(pivotColumnsQuery)
-	                .setParameter("auditYear", year)
-	                .setParameter("plantFKId", plantFKId)
-	                .getSingleResult();
+	    		String pivotColumns = (String) entityManager.createNativeQuery(pivotColumnsQuery)
+	    		        .setParameter("auditYear", year)
+	    		        .setParameter("plantFKId", plantFKId)
+	    		        .getSingleResult();
 
-	        if (pivotColumns == null || pivotColumns.isBlank()) {
-	            pivotColumns = "NULL AS NoData";
-	        }
+	    		if (pivotColumns == null || pivotColumns.isBlank()) {
+	    		    pivotColumns = "NULL AS NoData";
+	    		}
 
-	        // Step 2: Construct the final dynamic SQL query
-	        String finalQuery = """
-	            WITH Data_CTE AS (
-	                SELECT 
-	                    nat.Id, 
-	                    ca.CatalystName AS catalyst, 
-	                    CASE nat.Month 
-	                        WHEN 4 THEN 'Apr' WHEN 5 THEN 'May' WHEN 6 THEN 'Jun' WHEN 7 THEN 'Jul' 
-	                        WHEN 8 THEN 'Aug' WHEN 9 THEN 'Sep' WHEN 10 THEN 'Oct' WHEN 11 THEN 'Nov' 
-	                        WHEN 12 THEN 'Dec' WHEN 1 THEN 'Jan' WHEN 2 THEN 'Feb' WHEN 3 THEN 'Mar' 
-	                    END + RIGHT(nat.AuditYear, 2) AS MonthYear,
-	                    TRY_CAST(nat.AttributeValue AS FLOAT) AS AttributeValue,
-	                    nat.Remarks, 
-	                    nat.CatalystAttribute_FK_Id AS catalystId,  
-	                    nat.NormParameter_FK_Id AS NormParameterFKId 
-	                FROM NormAttributeTransactions AS nat 
-	                JOIN CatalystAttributes AS ca 
-	                    ON nat.CatalystAttribute_FK_Id = ca.Id 
-	                WHERE nat.AuditYear = :auditYear AND nat.Plant_FK_Id = :plantFKId
-	            )
-	            SELECT d.Id, d.catalyst, """ + pivotColumns + """ 
-	                   ,d.Remarks AS remark, d.catalystId, d.NormParameterFKId
-	            FROM Data_CTE d
-	            GROUP BY d.Id, d.catalyst, d.Remarks, d.catalystId, d.NormParameterFKId
-	            ORDER BY d.Id
-	        """;
+	    		String finalQuery = """
+	    		    WITH ParsedYear AS (
+	    		        SELECT 
+	    		            LEFT(:auditYear, CHARINDEX('-', :auditYear) - 1) AS StartYear,
+	    		            RIGHT(:auditYear, LEN(:auditYear) - CHARINDEX('-', :auditYear)) AS EndYear
+	    		    ),
+	    		    Data_CTE AS (
+	    		        SELECT 
+	    		            nat.Id, 
+	    		            ca.CatalystName AS catalyst, 
+	    		            CASE 
+	    		                WHEN nat.Month BETWEEN 4 AND 12 THEN 
+	    		                    CASE nat.Month 
+	    		                        WHEN 4 THEN 'Apr' WHEN 5 THEN 'May' WHEN 6 THEN 'Jun' WHEN 7 THEN 'Jul' 
+	    		                        WHEN 8 THEN 'Aug' WHEN 9 THEN 'Sep' WHEN 10 THEN 'Oct' WHEN 11 THEN 'Nov' 
+	    		                        WHEN 12 THEN 'Dec' 
+	    		                    END + RIGHT(StartYear, 2)  -- First part for Apr to Dec
+	    		                ELSE 
+	    		                    CASE nat.Month 
+	    		                        WHEN 1 THEN 'Jan' WHEN 2 THEN 'Feb' WHEN 3 THEN 'Mar' 
+	    		                    END + RIGHT(EndYear, 2)  -- Second part for Jan to Mar
+	    		            END AS MonthYear,
+	    		            TRY_CAST(nat.AttributeValue AS FLOAT) AS AttributeValue,
+	    		            nat.Remarks, 
+	    		            nat.CatalystAttribute_FK_Id AS catalystId,  
+	    		            nat.NormParameter_FK_Id AS NormParameterFKId 
+	    		        FROM NormAttributeTransactions AS nat 
+	    		        JOIN CatalystAttributes AS ca 
+	    		            ON nat.CatalystAttribute_FK_Id = ca.Id, ParsedYear
+	    		        WHERE nat.AuditYear = :auditYear AND nat.Plant_FK_Id = :plantFKId
+	    		    )
+	    		    SELECT d.Id, d.catalyst, """ + pivotColumns + """ 
+	    		           ,d.Remarks AS remark, d.catalystId, d.NormParameterFKId
+	    		    FROM Data_CTE d
+	    		    GROUP BY d.Id, d.catalyst, d.Remarks, d.catalystId, d.NormParameterFKId
+	    		    ORDER BY d.Id
+	    		""";
 
-	        // Step 3: Execute query
-	        List<Object[]> results = entityManager.createNativeQuery(finalQuery)
-	                .setParameter("auditYear", year)
-	                .setParameter("plantFKId", plantFKId)
-	                .getResultList();
+	    		List<Object[]> results = entityManager.createNativeQuery(finalQuery)
+	    		        .setParameter("auditYear", year)
+	    		        .setParameter("plantFKId", plantFKId)
+	    		        .getResultList();
 
-	        // Step 4: Convert result list into structured JSON-like response
 	        List<Map<String, Object>> responseList = new ArrayList<>();
 	        List<String> columnNames = getColumnNames(pivotColumns);
-	        if(results.size()>0) {
-	        	 System.out.println("results"+results.size());
-	        }else {
-	        	 System.out.println("results is empty");
-	        }
-	       
+
 	        for (Object[] row : results) {
 	            Map<String, Object> map = new LinkedHashMap<>();
 	            map.put("id", row[0]);
 	            map.put("catalyst", row[1]);
-	            map.put("catalystId", row[row.length - 2]);
-
-	            if (row[row.length - 1] != null) {
-	                map.put("NormParameterFKId", row[row.length - 1].toString().toUpperCase());
+	            for (String column : columnNames) {
+	                map.put(column, null);
 	            }
-
 	            for (int i = 2; i < row.length - 3; i++) {
 	                map.put(columnNames.get(i - 2), row[i]);
 	            }
-
 	            map.put("remark", row[row.length - 3]);
+	            map.put("catalystId", row[row.length - 2]);
+	            map.put("NormParameterFKId", row[row.length - 1] != null ? row[row.length - 1].toString().toUpperCase() : null);
 	            responseList.add(map);
 	        }
 
-	        // Step 5: Group data by catalyst
-	        Map<String, Map<String, Object>> groupedByProduct = new HashMap<>();
-	        List<Map<String, Object>> output = new ArrayList<>();
-	        if(responseList.size()>0) {
-	        	 System.out.println("responseList"+results.size());
-	        }else {
-	        	 System.out.println("responseList is empty");
-	        }
-	        for (Map<String, Object> data : responseList) {
-	            String product = (String) data.get("catalyst");
-	            Map<String, Object> productData = groupedByProduct.getOrDefault(product, new HashMap<>());
-
-	            for (String column : data.keySet()) {
-	                Object value = data.get(column);
-	                if (value != null) {
-	                    productData.put(column, value);
-	                }
-	            }
-
-	            groupedByProduct.put(product, productData);
-	        }
-	        System.out.println("groupedByProduct.values()"+groupedByProduct.values());
-	        // Convert grouped data to a list
-	        output.addAll(groupedByProduct.values());
-
-	        // Step 6: Convert result to JSON
-	        ObjectMapper objectMapper = new ObjectMapper();
-	        return objectMapper.writeValueAsString(output);
+	        return responseList;
 
 	    } catch (Exception e) {
 	        e.printStackTrace();
-	        return "{}";
+	        return Collections.emptyList();
 	    }
 	}
 
@@ -164,5 +151,6 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	    }
 	    return columnNames;
 	}
-
+	
+	
 }

@@ -10,7 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.ShutDownPlanDTO;
+import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
+import com.wks.caseengine.repository.PlantMaintenanceRepository;
+import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
 import com.wks.caseengine.repository.TurnaroundPlanRepository;
 
 @Service
@@ -22,7 +25,11 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 	@Autowired
 	private ShutDownPlanService shutDownPlanService;
 
+	@Autowired
+	private PlantMaintenanceRepository plantMaintenanceRepository;
 	
+	@Autowired
+	private PlantMaintenanceTransactionRepository plantMaintenanceTransactionRepository;
 
 	@Override
 	public List<ShutDownPlanDTO> findTurnaroundPlanDataByPlantIdAndType(UUID plantId, String maintenanceTypeName,String year) {
@@ -61,6 +68,16 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 	@Override
 	public List<ShutDownPlanDTO> saveTurnaroundPlanData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
 		UUID plantMaintenanceId=shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId,"TA_Plan");
+		if(plantMaintenanceId==null) {
+			UUID maintenanceTypesId =plantMaintenanceTransactionRepository.findIdByName("TA_Plan");
+			PlantMaintenance plantMaintenance=new PlantMaintenance();
+			plantMaintenance.setMaintenanceText("TA_Plan");
+			plantMaintenance.setIsDefault(true);
+			plantMaintenance.setPlantFkId(plantId);
+			plantMaintenance.setMaintenanceTypeFkId(maintenanceTypesId);
+			plantMaintenanceRepository.save(plantMaintenance);
+			plantMaintenanceId = shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId, "TA_Plan");
+		}
 		for(ShutDownPlanDTO shutDownPlanDTO:shutDownPlanDTOList) {
 
 			if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {

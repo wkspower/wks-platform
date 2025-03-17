@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.MonthWiseDataDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
+import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
+import com.wks.caseengine.repository.PlantMaintenanceRepository;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
 import com.wks.caseengine.repository.ShutDownPlanRepository;
 
@@ -26,6 +28,9 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	@Lazy  // Add this annotation here
 	@Autowired
 	private SlowdownPlanService slowdownPlanService;
+	
+	@Autowired
+	private PlantMaintenanceRepository plantMaintenanceRepository;
 	
 	@Autowired
 	private PlantMaintenanceTransactionRepository plantMaintenanceTransactionRepository;
@@ -83,7 +88,18 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 
 	@Override
 	public List<ShutDownPlanDTO> saveShutdownPlantData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
+		
 		UUID plantMaintenanceId = findIdByPlantIdAndMaintenanceTypeName(plantId, "Shutdown");
+		if(plantMaintenanceId==null) {
+			UUID maintenanceTypesId =plantMaintenanceTransactionRepository.findIdByName("Shutdown");
+			PlantMaintenance plantMaintenance=new PlantMaintenance();
+			plantMaintenance.setMaintenanceText("Shutdown");
+			plantMaintenance.setIsDefault(true);
+			plantMaintenance.setPlantFkId(plantId);
+			plantMaintenance.setMaintenanceTypeFkId(maintenanceTypesId);
+			plantMaintenanceRepository.save(plantMaintenance);
+			plantMaintenanceId = findIdByPlantIdAndMaintenanceTypeName(plantId, "Shutdown");
+		}
 	
 		for (ShutDownPlanDTO shutDownPlanDTO : shutDownPlanDTOList) {
 			if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
@@ -137,23 +153,27 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 				List<ShutDownPlanDTO> list = new ArrayList<>();
 				shutDownPlanDTO.setDurationInMins(0);
 				shutDownPlanDTO.setDiscription(description+" Ramp Up");
+				shutDownPlanDTO.setProductId(UUID.fromString("008C87D5-8FFA-4615-A008-12592A4E7AAF"));
 				list.add(shutDownPlanDTO);
 			    slowdownPlanService.saveShutdownData(plantId, list);
 
 				List<ShutDownPlanDTO> list2 = new ArrayList<>();
 				shutDownPlanDTO.setDiscription(description+" Ramp Down");
+				shutDownPlanDTO.setProductId(UUID.fromString("008C87D5-8FFA-4615-A008-12592A4E7AAF"));
 				shutDownPlanDTO.setDurationInMins(0);
 				list2.add(shutDownPlanDTO);
 			    slowdownPlanService.saveShutdownData(plantId,list2);
 			    
 			    List<ShutDownPlanDTO> list3 = new ArrayList<>();
 				shutDownPlanDTO.setDiscription(description+" Ramp Down");
+				shutDownPlanDTO.setProductId(UUID.fromString("0AF602D7-FA83-49CB-AD78-3C2AF2943B2C"));
 				shutDownPlanDTO.setDurationInMins(0);
 				list3.add(shutDownPlanDTO);
 			    slowdownPlanService.saveShutdownData(plantId,list3);
 			    
 			    List<ShutDownPlanDTO> list4 = new ArrayList<>();
-				shutDownPlanDTO.setDiscription(description+" Ramp Down");
+				shutDownPlanDTO.setDiscription(description+" Ramp Up");
+				shutDownPlanDTO.setProductId(UUID.fromString("0AF602D7-FA83-49CB-AD78-3C2AF2943B2C"));
 				shutDownPlanDTO.setDurationInMins(0);
 				list4.add(shutDownPlanDTO);
 			    slowdownPlanService.saveShutdownData(plantId,list4);
