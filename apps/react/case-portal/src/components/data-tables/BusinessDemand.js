@@ -91,7 +91,7 @@ const BusinessDemand = () => {
     }
     fetchData()
     getAllProducts()
-  }, [sitePlantChange, keycloak])
+  }, [sitePlantChange, keycloak, verticalChange, lowerVertName])
 
   const handleRemarkCellClick = (row, newRow) => {
     // console.log(row, newRow)

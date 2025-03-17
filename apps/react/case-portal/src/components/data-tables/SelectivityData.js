@@ -8,7 +8,6 @@ import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import NumericInputOnly from 'utils/NumericInputOnly'
-import getEnhancedColDefs from './CommonHeader/index'
 
 const headerMap = generateHeaderNames()
 
@@ -239,7 +238,7 @@ const SelectivityData = () => {
   // Use catalyst options from the JSON file
   // const productOptions = catalystOptionsData.catalystOptions
 
-  const productionColumns1 = [
+  const productionColumns = [
     // {
     //   field: 'catalystId',
     //   headerName: 'Catalyst',
@@ -418,16 +417,10 @@ const SelectivityData = () => {
     },
   ]
 
-  // const productionColumns = getEnhancedColDefs({
-  //   allProducts,
-  //   headerMap,
-  //   handleRemarkCellClick,
-  // })
-
   return (
     <div>
       <ASDataGrid
-        columns={productionColumns1}
+        columns={productionColumns}
         rows={rows}
         setRows={setRows}
         title='Configuration'

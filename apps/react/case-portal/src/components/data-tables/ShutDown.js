@@ -220,7 +220,7 @@ const ShutDown = () => {
     fetchData()
     // saveShutdownData()
     getAllProducts()
-  }, [sitePlantChange, keycloak])
+  }, [sitePlantChange, keycloak, verticalChange, lowerVertName])
 
   const findDuration = (value, row) => {
     if (row && row.maintStartDateTime && row.maintEndDateTime) {
@@ -267,56 +267,56 @@ const ShutDown = () => {
       hide: true,
     },
 
-    {
-      field: 'product',
-      headerName: lowerVertName === 'meg' ? 'Product' : 'Grade Name',
-      editable: true,
-      minWidth: 125,
-      valueGetter: (params) => {
-        // console.log('p1', params);
-        // console.log('p2', params2);
-        return params || ''
-      },
-      valueFormatter: (params) => {
-        // console.log('params valueFormatter ', params)
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : ''
-      },
-      renderEditCell: (params) => {
-        const { value } = params
-        // console.log('q1', params);
-        // console.log('q2', params2);
-        return (
-          <select
-            value={value || ''}
-            onChange={(event) => {
-              params.api.setEditCellValue({
-                id: params.id,
-                field: 'product',
-                value: event.target.value,
-              })
-            }}
-            style={{
-              width: '100%',
-              padding: '5px',
-              border: 'none', // Removes border
-              outline: 'none', // Removes focus outline
-              background: 'transparent', // Keeps background clean
-            }}
-          >
-            {/* Disabled first option */}
-            <option value='' disabled>
-              Select
-            </option>
-            {allProducts.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.displayName}
-              </option>
-            ))}
-          </select>
-        )
-      },
-    },
+    // {
+    //   field: 'product',
+    //   headerName: lowerVertName === 'meg' ? 'Product' : 'Grade Name',
+    //   editable: true,
+    //   minWidth: 125,
+    //   valueGetter: (params) => {
+    //     // console.log('p1', params);
+    //     // console.log('p2', params2);
+    //     return params || ''
+    //   },
+    //   valueFormatter: (params) => {
+    //     // console.log('params valueFormatter ', params)
+    //     const product = allProducts.find((p) => p.id === params)
+    //     return product ? product.displayName : ''
+    //   },
+    //   renderEditCell: (params) => {
+    //     const { value } = params
+    //     // console.log('q1', params);
+    //     // console.log('q2', params2);
+    //     return (
+    //       <select
+    //         value={value || ''}
+    //         onChange={(event) => {
+    //           params.api.setEditCellValue({
+    //             id: params.id,
+    //             field: 'product',
+    //             value: event.target.value,
+    //           })
+    //         }}
+    //         style={{
+    //           width: '100%',
+    //           padding: '5px',
+    //           border: 'none', // Removes border
+    //           outline: 'none', // Removes focus outline
+    //           background: 'transparent', // Keeps background clean
+    //         }}
+    //       >
+    //         {/* Disabled first option */}
+    //         <option value='' disabled>
+    //           Select
+    //         </option>
+    //         {allProducts.map((product) => (
+    //           <option key={product.id} value={product.id}>
+    //             {product.displayName}
+    //           </option>
+    //         ))}
+    //       </select>
+    //     )
+    //   },
+    // },
 
     {
       field: 'maintStartDateTime',

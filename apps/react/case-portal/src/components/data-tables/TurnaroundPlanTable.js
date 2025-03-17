@@ -174,7 +174,7 @@ const TurnaroundPlanTable = () => {
     }
     fetchData()
     getAllProducts()
-  }, [sitePlantChange, keycloak])
+  }, [sitePlantChange, keycloak, verticalChange, lowerVertName])
 
   const findDuration = (value, row) => {
     if (row && row.maintStartDateTime && row.maintEndDateTime) {
