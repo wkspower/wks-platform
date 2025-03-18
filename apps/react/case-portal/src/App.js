@@ -2,7 +2,7 @@ import { useEffect, useState, lazy, Suspense } from 'react'
 import { ThemeRoutes } from './routes'
 import ThemeCustomization from './themes'
 import { SessionStoreProvider } from './SessionStoreContext'
-import { CaseService, RecordService } from 'services'
+import { CaseService, RecordService , MenuEventService} from 'services'
 import menuItemsDefs from './menu'
 import { RegisterInjectUserSession, RegisteOptions } from './plugins'
 import { accountStore, sessionStore } from './store'
@@ -30,7 +30,15 @@ const App = () => {
       RegisteOptions(keycloak)
       forceLogoutIfUserNoMinimalRoleForSystem(keycloak)
       registerExtensionModulesFormio()
-    })
+
+      const unsubscribe = MenuEventService.subscribeToMenuUpdates(() => {
+        buildMenuItems(keycloak);
+      });
+
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
+    })    
 
     keycloak.onAuthRefreshError = () => {
       window.location.reload()
@@ -88,9 +96,16 @@ const App = () => {
       items: [...menuItemsDefs.items],
     }
 
+    if (menu.items[0].children) {
+      const recordListMenu = menu.items[0].children.find(menu => menu.id === 'record-list');
+      if (recordListMenu) {
+        recordListMenu.children = []; 
+      }
+    }
+
     await RecordService.getAllRecordTypes(keycloak).then((data) => {
       setRecordsTypes(data)
-
+  
       data.forEach((element) => {
         menu.items[0].children
           .filter((menu) => menu.id === 'record-list')[0]
@@ -103,6 +118,13 @@ const App = () => {
           })
       })
     })
+
+    if (menu.items[0].children) {
+      const caseListMenu = menu.items[0].children.find(menu => menu.id === 'case-list');
+      if (caseListMenu) {
+        caseListMenu.children = []; 
+      }
+    }
 
     await CaseService.getCaseDefinitions(keycloak).then((data) => {
       setCasesDefinitions(data)
