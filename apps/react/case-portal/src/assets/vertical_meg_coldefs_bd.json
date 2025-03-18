@@ -8,7 +8,7 @@
   },
   {
     "field": "normParameterId",
-    "headerName": "Product",
+    "headerName": "Particulars",
     "editable": true,
     "minWidth": 100
   },

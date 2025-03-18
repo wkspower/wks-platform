@@ -278,16 +278,9 @@ const NormalOpNormsScreen = () => {
   }
 
   useEffect(() => {
-    // const storedPlant = localStorage.getItem('selectedPlant')
-    // const parsedPlant = JSON.parse(storedPlant)
-
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(
-          // (plantId = parsedPlant.id),
-          keycloak,
-          'Consumption',
-        )
+        const data = await DataService.getAllProducts(keycloak, 'Consumption')
         const productList = data.map((product) => ({
           id: product.id,
           displayName: product.displayName,

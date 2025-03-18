@@ -26,6 +26,13 @@ const getEnhancedColDefs = ({
         },
         renderEditCell: (params) => {
           const { value, id, api } = params
+
+          const existingValues = new Set(
+            [...api.getRowModels().values()]
+              .filter((row) => row.id !== id)
+              .map((row) => row.normParameterId),
+          )
+
           return (
             <select
               value={value || ''}
@@ -47,11 +54,13 @@ const getEnhancedColDefs = ({
               <option value='' disabled>
                 Select
               </option>
-              {allProducts.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.displayName}
-                </option>
-              ))}
+              {allProducts
+                .filter((product) => !existingValues.has(product.id))
+                .map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.displayName}
+                  </option>
+                ))}
             </select>
           )
         },

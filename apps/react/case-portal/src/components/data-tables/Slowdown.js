@@ -334,19 +334,23 @@ const SlowDown = () => {
 
     {
       field: 'product',
-      headerName: lowerVertName === 'meg' ? 'Product' : 'Grade Name',
+      headerName: 'Particulars',
       editable: true,
       minWidth: 125,
-      valueGetter: (params) => {
-        return params || ''
-      },
+      valueGetter: (params) => params || '',
       valueFormatter: (params) => {
-        // console.log('params valueFormatter ', params)
         const product = allProducts.find((p) => p.id === params)
         return product ? product.displayName : ''
       },
       renderEditCell: (params) => {
-        const { value } = params
+        const { value, id, api } = params
+
+        const existingValues = new Set(
+          [...api.getRowModels().values()]
+            .filter((row) => row.id !== id)
+            .map((row) => row.product),
+        )
+
         return (
           <select
             value={value || ''}
@@ -365,15 +369,19 @@ const SlowDown = () => {
               background: 'transparent',
             }}
           >
-            {/* Disabled first option */}
             <option value='' disabled>
               Select
             </option>
-            {allProducts.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.displayName}
-              </option>
-            ))}
+            {allProducts
+              .filter(
+                (product) =>
+                  product.id === value || !existingValues.has(product.id),
+              ) // Ensure selected value is included
+              .map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.displayName}
+                </option>
+              ))}
           </select>
         )
       },

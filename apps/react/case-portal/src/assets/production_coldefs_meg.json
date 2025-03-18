@@ -11,7 +11,7 @@
   },
   {
     "field": "normParametersFKId",
-    "headerName": "Product",
+    "headerName": "Particulars",
     "editable": false,
     "minWidth": 225
   },

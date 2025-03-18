@@ -1,7 +1,7 @@
 [
   {
     "field": "normParameterId",
-    "headerName": "Grade Name",
+    "headerName": "Particular",
     "editable": true,
     "minWidth": 100
   },
