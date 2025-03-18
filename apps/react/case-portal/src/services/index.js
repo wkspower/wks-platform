@@ -10,7 +10,7 @@ import { RecordTypeService } from './RecordTypeService'
 import { FileService } from './FileService'
 import { DeploymentService } from './DeploymentService'
 import { VariableService } from './VariableService'
-import { MenuEventService } from './MenuEventService';
+import { MenuEventService } from './MenuEventService'
 
 export {
   NotificationService,
@@ -25,5 +25,5 @@ export {
   FileService,
   DeploymentService,
   VariableService,
-  MenuEventService
+  MenuEventService,
 }

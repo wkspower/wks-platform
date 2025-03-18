@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography'
 import { FormBuilder } from '@formio/react'
 import { TextField } from '@mui/material'
 import MainCard from 'components/MainCard'
-import { RecordTypeService, MenuEventService} from 'services'
+import { RecordTypeService, MenuEventService } from 'services'
 import { useSession } from 'SessionStoreContext'
 import { StorageService } from 'plugins/storage'
 
@@ -32,8 +32,8 @@ export const RecordTypeForm = ({
     if (recordType.mode && recordType.mode === 'new') {
       RecordTypeService.create(keycloak, recordType)
         .then(() => {
-          MenuEventService.triggerMenuUpdate();
-          handleClose();
+          MenuEventService.triggerMenuUpdate()
+          handleClose()
         })
         .catch((err) => {
           console.log(err.message)
@@ -41,8 +41,8 @@ export const RecordTypeForm = ({
     } else {
       RecordTypeService.update(keycloak, recordType.id, recordType)
         .then(() => {
-          MenuEventService.triggerMenuUpdate();
-          handleClose();
+          MenuEventService.triggerMenuUpdate()
+          handleClose()
         })
         .catch((err) => {
           console.log(err.message)
@@ -53,8 +53,8 @@ export const RecordTypeForm = ({
   const deleteRecordType = () => {
     RecordTypeService.remove(keycloak, recordType.id)
       .then(() => {
-        MenuEventService.triggerMenuUpdate();
-        handleClose();
+        MenuEventService.triggerMenuUpdate()
+        handleClose()
       })
       .catch((err) => {
         console.log(err.message)

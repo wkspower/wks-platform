@@ -74,8 +74,8 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
     if (caseDef.status && caseDef.status === 'new') {
       CaseDefService.create(keycloak, caseDef)
         .then(() => {
-          MenuEventService.triggerMenuUpdate();
-          handleClose();
+          MenuEventService.triggerMenuUpdate()
+          handleClose()
         })
         .catch((err) => {
           console.log(err.message)
@@ -83,8 +83,8 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
     } else {
       CaseDefService.update(keycloak, caseDef.id, caseDef)
         .then(() => {
-          MenuEventService.triggerMenuUpdate();
-          handleClose();
+          MenuEventService.triggerMenuUpdate()
+          handleClose()
         })
         .catch((err) => {
           console.log(err.message)
@@ -95,14 +95,14 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
   const handleDelete = () => {
     CaseDefService.remove(keycloak, caseDef.id)
       .then(() => {
-        MenuEventService.triggerMenuUpdate();
-        handleClose();
+        MenuEventService.triggerMenuUpdate()
+        handleClose()
       })
       .catch((err) => {
         console.log(err.message)
       })
   }
-  
+
   return (
     <div>
       <Dialog
