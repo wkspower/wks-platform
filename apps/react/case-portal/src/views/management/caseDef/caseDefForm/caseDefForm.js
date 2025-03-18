@@ -17,7 +17,7 @@ import { CaseDefFormStages } from './caseDefFormStages'
 import { CaseDefGeneralForm } from './caseDefGeneralForm'
 import { CaseDefFormForm } from './caseDefFormForm'
 import { CaseKanbanForm } from './caseDefKanban'
-import { CaseDefService } from 'services'
+import { CaseDefService, MenuEventService } from 'services'
 import { useSession } from 'SessionStoreContext'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -73,13 +73,19 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
   const handleSave = () => {
     if (caseDef.status && caseDef.status === 'new') {
       CaseDefService.create(keycloak, caseDef)
-        .then(() => handleClose())
+        .then(() => {
+          MenuEventService.triggerMenuUpdate();
+          handleClose();
+        })
         .catch((err) => {
           console.log(err.message)
         })
     } else {
       CaseDefService.update(keycloak, caseDef.id, caseDef)
-        .then(() => handleClose())
+        .then(() => {
+          MenuEventService.triggerMenuUpdate();
+          handleClose();
+        })
         .catch((err) => {
           console.log(err.message)
         })
@@ -88,12 +94,15 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
 
   const handleDelete = () => {
     CaseDefService.remove(keycloak, caseDef.id)
-      .then(() => handleClose())
+      .then(() => {
+        MenuEventService.triggerMenuUpdate();
+        handleClose();
+      })
       .catch((err) => {
         console.log(err.message)
       })
   }
-
+  
   return (
     <div>
       <Dialog

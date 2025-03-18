@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography'
 import { FormBuilder } from '@formio/react'
 import { TextField } from '@mui/material'
 import MainCard from 'components/MainCard'
-import { RecordTypeService, MenuEventService } from 'services'
+import { RecordTypeService, MenuEventService} from 'services'
 import { useSession } from 'SessionStoreContext'
 import { StorageService } from 'plugins/storage'
 
