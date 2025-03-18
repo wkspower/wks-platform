@@ -21,7 +21,7 @@ public class ConfigurationController {
 	private ConfigurationService configurationService;
 	
 	@GetMapping(value="/getConfigurationData")
-	public List<Map<String, Object>> getConfigurationData(@RequestParam String year,@RequestParam UUID plantFKId) {
+	public String getConfigurationData(@RequestParam String year,@RequestParam UUID plantFKId) {
 		return configurationService.getConfigurationData(year,plantFKId);
 	}
 

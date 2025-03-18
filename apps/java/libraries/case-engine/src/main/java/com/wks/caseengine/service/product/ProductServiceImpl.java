@@ -12,6 +12,8 @@
 package com.wks.caseengine.service.product;
 
 import java.util.List;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.wks.caseengine.product.repository.ProductMonthWiseDataRepository;
@@ -98,36 +100,33 @@ public class ProductServiceImpl implements ProductService {
 	}*/
 
 
-	public List<Object[]> getAllProductsFromNormParameters(String normParameterTypeName) {
-		if (normParameterTypeName == null) {
-		    System.out.println("normParameterTypeName is actual null");
-		} else if ("null".equals(normParameterTypeName)) {
-			normParameterTypeName = null;
-		    System.out.println("normParameterTypeName is the string 'null'");
-		} else {
-		    System.out.println("normParameterTypeName: " + normParameterTypeName);
-		}
+	public List<Object[]> getAllProductsFromNormParameters(String normParameterTypeName, UUID plantId) {
+	    if ("null".equals(normParameterTypeName)) {
+	        normParameterTypeName = null;
+	        System.out.println("normParameterTypeName is the string 'null'");
+	    }
 
 	    StringBuilder queryBuilder = new StringBuilder("""
 	        SELECT CAST(np.Id AS VARCHAR(36)) as NormParameterId, np.Name, np.DisplayName 
 	        FROM NormParameters np
 	        JOIN NormParameterType npt ON np.NormParameterType_FK_Id = npt.Id
+	        WHERE np.Plant_FK_Id = :plantId
 	    """);
 
 	    if (normParameterTypeName != null) {
-	        queryBuilder.append(" WHERE npt.Name = :normParameterTypeName");
+	        queryBuilder.append(" AND npt.Name = :normParameterTypeName");
 	    }
 	    queryBuilder.append(" ORDER BY np.DiplayOrder");
 
 	    Query query = entityManager.createNativeQuery(queryBuilder.toString());
-	    System.out.println("queryBuilder"+queryBuilder);
+	    query.setParameter("plantId", plantId);
 	    if (normParameterTypeName != null) {
 	        query.setParameter("normParameterTypeName", normParameterTypeName);
 	    }
-	    List<Object[]> list= query.getResultList();
-	    System.out.println("list.size()"+list.size());
-	    return list;
+
+	    return query.getResultList();
 	}
+
 
 
 	public List<Object[]> getMonthlyDataForYear(int year) {

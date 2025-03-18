@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
+import java.util.UUID;
 import java.util.HashMap;
 import org.springframework.http.HttpStatus;
 
@@ -77,8 +78,8 @@ public class ProductController {
 
 
 	@GetMapping(value = "/getAllProducts")
-	public ResponseEntity<List<ProductDTO>> getAllProducts(@RequestParam  String normParameterTypeName) {
-		List<Object[]> productList = productService.getAllProductsFromNormParameters(normParameterTypeName);
+	public ResponseEntity<List<ProductDTO>> getAllProducts(@RequestParam  String normParameterTypeName,@RequestParam String plantId) {
+		List<Object[]> productList = productService.getAllProductsFromNormParameters(normParameterTypeName, UUID.fromString(plantId));
 		List<ProductDTO> productDTOList = new ArrayList<>();
 	
 		for (Object[] obj : productList) {
@@ -105,7 +106,7 @@ public class ProductController {
 
 	@GetMapping("/yearly-data")
 	public ResponseEntity<List<ProductYearlyDataDTO>> getProductYearlyData(@RequestParam int year) {
-		List<Object[]> products = productService.getAllProductsFromNormParameters(null);
+		List<Object[]> products = productService.getAllProductsFromNormParameters(null,null);
 		List<Object[]> monthlyData = productService.getMonthlyDataForYear(year);
 		Map<String, ProductYearlyDataDTO> productDataMap = new HashMap<>();
 	

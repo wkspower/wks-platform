@@ -8,6 +8,6 @@ import java.util.UUID;
 
 public interface ConfigurationService {
 	
-	public List<Map<String, Object>> getConfigurationData(String year,UUID plantFKId);
+	public String getConfigurationData(String year, UUID plantFKId);
 
 }

@@ -39,4 +39,5 @@ public class ShutDownPlanDTO {
 	private UUID plantId;
 	private String audityear;
 	private Integer displayOrder;
+	private String verticalName;
 }
