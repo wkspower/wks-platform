@@ -42,28 +42,33 @@ const BusinessDemand = () => {
       const groups = new Map()
       let groupId = 0
 
-      data.forEach((item) => {
-        const groupKey = item.normParameterTypeDisplayName || 'Group'
+      console.log('lowerVertName', lowerVertName)
 
-        if (!groups.has(groupKey)) {
-          groups.set(groupKey, [])
-          groupedRows.push({
-            id: groupId++,
-            Particulars: groupKey,
-            isGroupHeader: true,
-          })
-        }
+      data.forEach((item) => {
         const formattedItem = {
           ...item,
           idFromApi: item.id,
           id: groupId++,
         }
 
-        groups.get(groupKey).push(formattedItem)
+        if (lowerVertName !== 'pe') {
+          const groupKey = item.normParameterTypeDisplayName
+
+          if (!groups.has(groupKey)) {
+            groups.set(groupKey, [])
+            groupedRows.push({
+              id: groupId++,
+              Particulars: groupKey,
+              isGroupHeader: true,
+            })
+          }
+
+          groups.get(groupKey).push(formattedItem)
+        }
+
         groupedRows.push(formattedItem)
       })
 
-      // setBDData(groupedRows)
       setRows(groupedRows)
     } catch (error) {
       console.error('Error fetching Business Demand data:', error)
