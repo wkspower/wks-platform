@@ -91,8 +91,8 @@ const ShutdownNorms = () => {
     },
     {
       field: 'materialFkId',
-      headerName: 'Particular',
-      minWidth: 160,
+      headerName: 'Particulars',
+      minWidth: 140,
       editable: true,
       valueGetter: (params) => params || '',
       valueFormatter: (params) => {

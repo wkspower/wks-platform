@@ -222,7 +222,7 @@ const TurnaroundPlanTable = () => {
 
     {
       field: 'product',
-      headerName: 'Grade Name',
+      headerName: 'Particulars',
       editable: true,
       minWidth: 125,
       valueGetter: (params) => {

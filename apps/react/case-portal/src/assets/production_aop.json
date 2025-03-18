@@ -11,7 +11,7 @@
   { "field": "plantFkId", "headerName": "Plant ID", "minWidth": 80 },
   {
     "field": "normParametersFKId",
-    "headerName": "Product/Grade",
+    "headerName": "Particulars/Grade",
     "editable": false,
     "minWidth": 125
   },

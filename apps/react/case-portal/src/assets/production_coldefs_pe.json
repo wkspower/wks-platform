@@ -11,7 +11,7 @@
   },
   {
     "field": "normParametersFKId",
-    "headerName": "Grade Name",
+    "headerName": "Particulars",
     "editable": false,
     "minWidth": 225
   },

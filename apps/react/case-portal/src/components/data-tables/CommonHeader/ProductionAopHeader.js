@@ -19,7 +19,7 @@ const getEnhancedColDefs = ({
     if (col.field === 'normParametersFKId') {
       updatedCol = {
         ...updatedCol,
-        headerName: lowerVertName === 'meg' ? 'Product' : 'Grade Name',
+        headerName: 'Particulars',
         valueGetter: (params) => params || '',
         valueFormatter: (params) => {
           const product = allProducts.find((p) => p.id === params)

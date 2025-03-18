@@ -1,7 +1,7 @@
 [
   {
     "field": "Particulars",
-    "headerName": "Particulars",
+    "headerName": "Type",
     "minWidth": 150,
     "editable": false
   },
@@ -13,7 +13,7 @@
   },
   {
     "field": "NormParametersId",
-    "headerName": "Product Norm/Spec",
+    "headerName": "Particulars Norm/Spec",
     "editable": true,
     "minWidth": 225
   },

@@ -98,7 +98,7 @@ const NormalOpNormsScreen = () => {
     },
     {
       field: 'materialFkId',
-      headerName: 'Particular',
+      headerName: 'Particulars',
       minWidth: 140,
       valueGetter: (params) => params || '',
       valueFormatter: (params) => {

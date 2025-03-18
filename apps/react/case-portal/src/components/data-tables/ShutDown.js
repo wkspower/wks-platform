@@ -272,7 +272,7 @@ const ShutDown = () => {
 
     // {
     //   field: 'product',
-    //   headerName: lowerVertName === 'meg' ? 'Product' : 'Grade Name',
+    //   headerName: lowerVertName === 'meg' ? 'Product' : 'Particular',
     //   editable: true,
     //   minWidth: 125,
     //   valueGetter: (params) => {
@@ -399,11 +399,7 @@ const ShutDown = () => {
         setRows={setRows}
         columns={colDefs}
         rows={rows}
-        title={
-          lowerVertName === 'meg'
-            ? 'Shutdown/Turnaround Activities'
-            : 'Shutdown Activities'
-        }
+        title={'Shutdown/Turnaround Activities'}
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}

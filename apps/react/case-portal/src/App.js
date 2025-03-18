@@ -102,7 +102,8 @@ const App = () => {
       // ... add more vertical mappings if needed.
     }
 
-    if (selectedVertical === 'MEG') {
+    // eslint-disable-next-line no-constant-condition
+    if (true) {
       // If vertical is MEG, hide the ta-plan item.
       menu.items = menu.items.map((item) => {
         if (item.id === 'utilities') {

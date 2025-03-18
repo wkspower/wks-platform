@@ -1,7 +1,7 @@
 [
   {
     "field": "normParameterId",
-    "headerName": "Particular",
+    "headerName": "Particulars",
     "editable": true,
     "minWidth": 100
   },
