@@ -42,7 +42,7 @@ const BusinessDemand = () => {
       const groups = new Map()
       let groupId = 0
 
-  //    console.log('lowerVertName', lowerVertName)
+      //    console.log('lowerVertName', lowerVertName)
 
       data.forEach((item) => {
         const formattedItem = {
