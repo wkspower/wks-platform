@@ -325,13 +325,13 @@ const ProductionNorms = () => {
 
   // console.log(lowerVertName)
   useEffect(() => {
-   const storedPlant = localStorage.getItem('selectedPlant')
-         const parsedPlant = JSON.parse(storedPlant)
-       
-       const getAllProducts = async () => {
-         try {
-           const data = await DataService.getAllProducts(
-             plantId= parsedPlant.id,
+    // const storedPlant = localStorage.getItem('selectedPlant')
+    // const parsedPlant = JSON.parse(storedPlant)
+
+    const getAllProducts = async () => {
+      try {
+        const data = await DataService.getAllProducts(
+          //   (plantId = parsedPlant.id),
           keycloak,
           lowerVertName === 'meg' ? 'Production' : 'Grade',
         )

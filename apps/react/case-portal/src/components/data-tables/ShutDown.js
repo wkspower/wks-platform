@@ -117,7 +117,7 @@ const ShutDown = () => {
         plantId,
         shutdownDetails,
         keycloak,
-        // verticalName 
+        // verticalName
       )
 
       setSnackbarOpen(true)

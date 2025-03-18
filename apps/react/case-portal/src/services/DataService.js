@@ -771,8 +771,7 @@ async function getAllSites(keycloak) {
 async function getAllProducts(keycloak, type) {
   const storedPlant = localStorage.getItem('selectedPlant')
   const parsedPlant = JSON.parse(storedPlant)
-  const plantId = parsedPlant.id
-  const url = `${process.env.REACT_APP_API_URL}/task/getAllProducts?normParameterTypeName=${type}?plantId=${plantId}`
+  const url = `${process.env.REACT_APP_API_URL}/task/getAllProducts?normParameterTypeName=${type}&plantId=${parsedPlant.id}`
 
   const headers = {
     Accept: 'application/json',
