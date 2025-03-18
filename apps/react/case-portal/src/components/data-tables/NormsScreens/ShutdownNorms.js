@@ -48,7 +48,7 @@ const ShutdownNorms = () => {
           return
         }
 
-        saveNormalOperationNormsData(data)
+        saveShutDownNormsData(data)
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},
@@ -60,18 +60,11 @@ const ShutdownNorms = () => {
   }, [apiRef, selectedUnit])
 
   useEffect(() => {
-    // const storedPlant = localStorage.getItem('selectedPlant')
-    // const parsedPlant = JSON.parse(storedPlant)
-
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(
-          // (plantId = parsedPlant.id),
-          keycloak,
-          null,
-        )
+        const data = await DataService.getAllProducts(keycloak, null)
         const productList = data.map((product) => ({
-          id: product.id,
+          id: product.id.toLowerCase(),
           displayName: product.displayName,
         }))
         setAllProducts(productList)
@@ -99,7 +92,8 @@ const ShutdownNorms = () => {
     {
       field: 'materialFkId',
       headerName: 'Particular',
-      minWidth: 140,
+      minWidth: 160,
+      editable: true,
       valueGetter: (params) => params || '',
       valueFormatter: (params) => {
         const product = allProducts.find((p) => p.id === params)
@@ -301,7 +295,7 @@ const ShutdownNorms = () => {
     return newRow
   }, [])
 
-  const saveNormalOperationNormsData = async (newRows) => {
+  const saveShutDownNormsData = async (newRows) => {
     try {
       let plantId = ''
       const storedPlant = localStorage.getItem('selectedPlant')
@@ -345,14 +339,14 @@ const ShutdownNorms = () => {
       if (businessData.length > 0) {
         // console.log(title)
 
-        const response = await DataService.saveNormalOperationNormsData(
+        const response = await DataService.saveShutDownNormsData(
           plantId,
           businessData,
           keycloak,
         )
         setSnackbarOpen(true)
         setSnackbarData({
-          message: `Normal Operations Norms Saved Successfully!`,
+          message: `Shutdown Norms Saved Successfully!`,
           severity: 'success',
         })
         // fetchData()
@@ -360,12 +354,12 @@ const ShutdownNorms = () => {
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: `Normal Operations Norms not saved!`,
+          message: `Shutdown Norms not saved!`,
           severity: 'error',
         })
       }
     } catch (error) {
-      console.error(`Error saving Normal Operations Norms`, error)
+      console.error(`Error saving Shutdown Norms`, error)
     } finally {
       fetchData()
     }
@@ -395,7 +389,7 @@ const ShutdownNorms = () => {
           ...item,
           idFromApi: item.id,
           id: groupId++,
-          normParametersFKId: item?.normParametersFKId.toLowerCase(),
+          materialFkId: item?.materialFkId.toLowerCase(),
 
           ...(isTPD && {
             april: item.april
