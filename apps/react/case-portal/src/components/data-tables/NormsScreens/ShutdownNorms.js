@@ -60,9 +60,13 @@ const ShutdownNorms = () => {
   }, [apiRef, selectedUnit])
 
   useEffect(() => {
-    const getAllProducts = async () => {
-      try {
-        const data = await DataService.getAllProducts(keycloak, null)
+  const storedPlant = localStorage.getItem('selectedPlant')
+        const parsedPlant = JSON.parse(storedPlant)
+      
+      const getAllProducts = async () => {
+        try {
+          const data = await DataService.getAllProducts(
+            plantId= parsedPlant.id,keycloak, null)
         const productList = data.map((product) => ({
           id: product.id,
           displayName: product.displayName,

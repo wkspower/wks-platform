@@ -112,11 +112,12 @@ const ShutDown = () => {
         id: row.idFromApi || null,
         remark: row.remark || 'null',
       }))
-
+      // const verticalName= lowerVertName
       const response = await DataService.saveShutdownData(
         plantId,
         shutdownDetails,
         keycloak,
+        // verticalName 
       )
 
       setSnackbarOpen(true)
