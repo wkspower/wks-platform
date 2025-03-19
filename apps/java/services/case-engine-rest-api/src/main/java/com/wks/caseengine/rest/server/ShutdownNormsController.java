@@ -25,14 +25,9 @@ public class ShutdownNormsController {
 		return	shutdownNormsService.getShutdownNormsData(year, plantId);
 	}
 	
-	@PostMapping(value="/saveShutdownNormsData")
+	@PostMapping(value="/saveShutdownNormsDataNew")
 	public List<MCUNormsValueDTO> saveShutdownNormsData(@RequestBody List<MCUNormsValueDTO> mCUNormsValueDTOList){
-		try {
-			return	shutdownNormsService.saveShutdownNormsData(mCUNormsValueDTOList);
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+		return	shutdownNormsService.saveShutdownNormsData(mCUNormsValueDTOList);
 	}
 
 }

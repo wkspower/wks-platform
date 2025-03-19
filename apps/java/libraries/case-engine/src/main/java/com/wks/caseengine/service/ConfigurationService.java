@@ -4,10 +4,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.wks.caseengine.dto.ConfigurationDTO;
+
 
 
 public interface ConfigurationService {
 	
 	public String getConfigurationData(String year, UUID plantFKId);
+	public String saveConfigurationData( String year, UUID plantFKId, List<ConfigurationDTO> configurationDTOList);
 
 }

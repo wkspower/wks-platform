@@ -6,10 +6,13 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.ConfigurationDataDTO;
 import com.wks.caseengine.service.ConfigurationService;
 
@@ -23,6 +26,12 @@ public class ConfigurationController {
 	@GetMapping(value="/getConfigurationData")
 	public String getConfigurationData(@RequestParam String year,@RequestParam UUID plantFKId) {
 		return configurationService.getConfigurationData(year,plantFKId);
+	}
+	
+	@PostMapping(value="/saveConfigurationData")
+	public String saveConfigurationData(@RequestParam String year,@RequestParam UUID plantFKId,@RequestBody List<ConfigurationDTO> configurationDTOList) {
+		configurationService.saveConfigurationData(year,plantFKId,configurationDTOList);
+		return null;
 	}
 
 }

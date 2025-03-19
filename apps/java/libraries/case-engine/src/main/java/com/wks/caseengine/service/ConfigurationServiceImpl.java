@@ -3,6 +3,7 @@ package com.wks.caseengine.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.regex.Matcher;
@@ -19,12 +21,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+
+import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.ConfigurationDataDTO;
+import com.wks.caseengine.entity.NormAttributeTransactions;
+import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 @Service
 public class ConfigurationServiceImpl implements ConfigurationService{
 	
 	@PersistenceContext
     private EntityManager entityManager;
+	
+	@Autowired
+	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
 
 	public String getConfigurationData(String year, UUID plantFKId) {
 	    try {
@@ -71,9 +80,8 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	                    np.Id AS NormParameterFKId 
 	                FROM NormParameters AS np
 	                JOIN NormParameterType npt ON np.NormParameterType_FK_Id = npt.Id
-	                LEFT JOIN NormAttributeTransactions AS nat ON np.Id = nat.NormParameter_FK_Id 
-	                    AND nat.AuditYear = :auditYear AND nat.Plant_FK_Id = :plantFKId
-	                WHERE npt.Name = 'Configuration'
+	                LEFT JOIN NormAttributeTransactions AS nat ON np.Id = nat.NormParameter_FK_Id   
+	                WHERE npt.Name = 'Configuration' AND nat.AuditYear = :auditYear AND nat.Plant_FK_Id = :plantFKId AND np.Plant_FK_Id = :plantFKId
 	            )
 	            SELECT d.Id, """ + pivotColumns + """ 
 	                   ,d.Remarks AS remark, d.NormParameterFKId
@@ -169,6 +177,64 @@ public class ConfigurationServiceImpl implements ConfigurationService{
  	        }
  	    }
  	    return columnNames;
- 	}	
+ 	}
+
+	@Override
+	public String saveConfigurationData( String year, UUID plantFKId,List<ConfigurationDTO> configurationDTOList) {
+		
+		for(ConfigurationDTO configurationDTO:configurationDTOList) {
+			for(int i=0;i<12;i++) {
+				NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+	 			Float attributeValue=getAttributeValue(configurationDTO,(i+1));
+	 			normAttributeTransactions.setAttributeValue(attributeValue.toString());
+	 			normAttributeTransactions.setMonth(i+1);	
+	 			normAttributeTransactions.setAuditYear(year);
+	 			normAttributeTransactions.setCreatedOn(new Date());
+	 			normAttributeTransactions.setAttributeValueVersion("V1");
+	 			normAttributeTransactions.setUserName("System");
+	 			UUID normParameterFKId=UUID.fromString(configurationDTO.getNormParameterFKId());
+	 			normAttributeTransactions.setNormParameterFKId(normParameterFKId);
+	 			normAttributeTransactions.setPlantFKId(plantFKId);
+	 			normAttributeTransactions.setRemarks(configurationDTO.getRemark());
+	 			normAttributeTransactionsRepository.save(normAttributeTransactions);
+	 		}	
+		}
+		
+		
+		// TODO Auto-generated method stub
+		return null;
+	}	
+	
+	public Float getAttributeValue(ConfigurationDTO configurationDTO,Integer i) {
+ 		switch(i) {
+ 			case 1:
+ 				return configurationDTO.getJan();
+ 			case 2:
+ 				return configurationDTO.getFeb();
+ 			case 3:
+ 				return configurationDTO.getMar();
+ 			case 4:
+ 				return configurationDTO.getApr();
+ 			case 5:
+ 				return configurationDTO.getMay();
+ 			case 6:
+ 				return configurationDTO.getJun();
+ 			case 7:
+ 				return configurationDTO.getJul();
+ 			case 8:
+ 				return configurationDTO.getAug();
+ 			case 9:
+ 				return configurationDTO.getSep();
+ 			case 10:
+ 				return configurationDTO.getOct();
+ 			case 11:
+ 				return configurationDTO.getNov();
+ 			case 12:
+ 				return configurationDTO.getDec();
+		
+ 		}
+ 		return configurationDTO.getJan();
+ 	}
+
 	
 }

@@ -34,8 +34,13 @@ public class AOPController {
 
     @GetMapping(value="/calculateData")
 	public ResponseEntity<List<AOPDTO>> calculateData(@RequestParam String plantId,@RequestParam String year){
-		 List<AOPDTO> aOPList= aOPService.calculateData(plantId,year);
-		 return ResponseEntity.ok(aOPList);
+    	try {
+    		 List<AOPDTO> aOPList= aOPService.calculateData(plantId,year);
+    		 return ResponseEntity.ok(aOPList);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
+		return null;
 	}
 
 
