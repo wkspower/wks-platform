@@ -81,3 +81,16 @@ CREATE TABLE case_email (
     outbound BOOLEAN,
     status VARCHAR(50)
 );
+
+CREATE TABLE tenant_database (
+    uid UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    jdbc_url TEXT NOT NULL,
+    jdbc_user_name VARCHAR(255) NOT NULL,
+    jdbc_password VARCHAR(255) NOT NULL,
+    pool_size INT NOT NULL,
+    min_idle INT NOT NULL,
+    idle_timeout BIGINT NOT NULL,
+    connection_timeout BIGINT NOT NULL,
+    max_life_time BIGINT NOT NULL
+);
