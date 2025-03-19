@@ -26,24 +26,16 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 
 import jakarta.persistence.EntityManagerFactory;
 
 @Configuration
 @ConditionalOnProperty(name = "database.type", havingValue = "jpa", matchIfMissing = false)
-@EnableJpaRepositories(
-    basePackages = {
-        "com.wks.caseengine.cases.definition.repository",
-        "com.wks.caseengine.cases.instance.email.repository",
-        "com.wks.caseengine.cases.instance.repository",
-        "com.wks.caseengine.form",
-        "com.wks.caseengine.queue",
-        "com.wks.caseengine.record",
-        "com.wks.caseengine.record.type"
-    }
-)
-@EntityScan(basePackages = "com.wks.caseengine.entity") 
+@EnableJpaRepositories(basePackages = { "com.wks.caseengine.cases.definition.repository",
+		"com.wks.caseengine.cases.instance.email.repository", "com.wks.caseengine.cases.instance.repository",
+		"com.wks.caseengine.form", "com.wks.caseengine.queue", "com.wks.caseengine.record",
+		"com.wks.caseengine.record.type" })
+@EntityScan(basePackages = "com.wks.caseengine.entity")
 @EnableTransactionManagement
 public class EngineDatabaseTenantConfig {
 
@@ -54,23 +46,18 @@ public class EngineDatabaseTenantConfig {
 	}
 
 	@Bean
-	public DataSource dataSource(HikariConfig hikariConfig) {
-		return new HikariDataSource(hikariConfig);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+		LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+		em.setDataSource(dataSource);
+		em.setPackagesToScan("com.wks.caseengine.entity");
+		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+		em.setJpaVendorAdapter(vendorAdapter);
+		return em;
 	}
 
 	@Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
-        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(dataSource);
-        em.setPackagesToScan("com.wks.caseengine.entity");
-        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        em.setJpaVendorAdapter(vendorAdapter);
-        return em;
-    }
+	public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
+		return new JpaTransactionManager(emf);
+	}
 
-    @Bean
-    public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
-        return new JpaTransactionManager(emf);
-    }
-    
 }
