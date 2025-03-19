@@ -1,6 +1,7 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -40,8 +41,8 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	                WHERE AuditYear = :auditYear AND Plant_FK_Id = :plantFKId
 	            )
 	            SELECT STRING_AGG(
-	                'MAX(CASE WHEN MonthYear = ''' + MonthYear + ''' THEN AttributeValue END) AS [' + LOWER(MonthYear) + ']',
-	                ', '
+	                'MAX(CASE WHEN MonthYear = ''' + MonthYear + ''' THEN AttributeValue END) AS [' + LOWER(MonthYear) + ']'
+	                , ', '
 	            ) AS ColumnsList 
 	            FROM Months
 	        """;
@@ -59,7 +60,7 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	        String finalQuery = """
 	            WITH Data_CTE AS (
 	                SELECT 
-	                    nat.Id,  
+	                    np.Id,  
 	                    CASE nat.Month 
 	                        WHEN 4 THEN 'Apr' WHEN 5 THEN 'May' WHEN 6 THEN 'Jun' WHEN 7 THEN 'Jul' 
 	                        WHEN 8 THEN 'Aug' WHEN 9 THEN 'Sep' WHEN 10 THEN 'Oct' WHEN 11 THEN 'Nov' 
@@ -67,12 +68,12 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	                    END AS MonthYear,
 	                    TRY_CAST(nat.AttributeValue AS FLOAT) AS AttributeValue,
 	                    nat.Remarks, 
-	                    nat.NormParameter_FK_Id AS NormParameterFKId 
-	                FROM NormAttributeTransactions AS nat 
-	                JOIN NormParameters AS np 
-	                    ON nat.NormParameter_FK_Id = np.Id
-	                JOIN NormParameterType NPT ON np.NormParameterType_FK_Id = NPT.id 
-	                WHERE nat.AuditYear = :auditYear AND nat.Plant_FK_Id = :plantFKId AND NPT.Name = 'Configuration'
+	                    np.Id AS NormParameterFKId 
+	                FROM NormParameters AS np
+	                JOIN NormParameterType npt ON np.NormParameterType_FK_Id = npt.Id
+	                LEFT JOIN NormAttributeTransactions AS nat ON np.Id = nat.NormParameter_FK_Id 
+	                    AND nat.AuditYear = :auditYear AND nat.Plant_FK_Id = :plantFKId
+	                WHERE npt.Name = 'Configuration'
 	            )
 	            SELECT d.Id, """ + pivotColumns + """ 
 	                   ,d.Remarks AS remark, d.NormParameterFKId
@@ -90,18 +91,22 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	        // Step 4: Convert result list into structured JSON-like response
 	        List<Map<String, Object>> responseList = new ArrayList<>();
 	        List<String> columnNames = getColumnNames(pivotColumns);
-	        if (results.size() > 0) {
-	            System.out.println("results" + results.size());
-	        } else {
-	            System.out.println("results is empty");
-	        }
+	        List<String> allMonths = Arrays.asList("apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec", "jan", "feb", "mar");
 
 	        for (Object[] row : results) {
 	            Map<String, Object> map = new LinkedHashMap<>();
-	            map.put("id", row[0]);
+	            map.put("id", row[0].toString().toUpperCase());
 
+	            // Initialize all months to null
+	            for (String month : allMonths) {
+	                map.put(month, null);
+	            }
+
+	            // Fill month values if present
 	            for (int i = 1; i < row.length - 2; i++) {
-	                map.put(columnNames.get(i - 1), row[i]);
+	                if (row[i] != null) {
+	                    map.put(columnNames.get(i - 1), row[i]);
+	                }
 	            }
 
 	            map.put("remark", row[row.length - 2]);
@@ -115,27 +120,27 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	        // Step 5: Group data by NormParameterFKId
 	        Map<String, Map<String, Object>> groupedByNormParameter = new HashMap<>();
 	        List<Map<String, Object>> output = new ArrayList<>();
-
-	        if (responseList.size() > 0) {
-	            System.out.println("responseList" + responseList.size());
-	        } else {
-	            System.out.println("responseList is empty");
-	        }
-
+	       
 	        for (Map<String, Object> data : responseList) {
 	            String normParameterFKId = (String) data.get("NormParameterFKId");
 	            Map<String, Object> normParameterData = groupedByNormParameter.getOrDefault(normParameterFKId, new HashMap<>());
 
-	            for (String column : data.keySet()) {
+	            // Ensure all months are added even if null
+	            for (String month : allMonths) {
+	                normParameterData.putIfAbsent(month, null);
+	            }
+
+	            for (String column : allMonths) {
 	                Object value = data.get(column);
 	                if (value != null) {
 	                    normParameterData.put(column, value);
 	                }
 	            }
-
+	            normParameterData.put("NormParameterFKId", normParameterFKId);
+	            normParameterData.put("id", data.get("id"));
+	            normParameterData.put("remark", data.get("remark"));
 	            groupedByNormParameter.put(normParameterFKId, normParameterData);
 	        }
-	        System.out.println("groupedByNormParameter.values()" + groupedByNormParameter.values());
 
 	        // Convert grouped data to a list
 	        output.addAll(groupedByNormParameter.values());
