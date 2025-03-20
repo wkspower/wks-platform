@@ -3,6 +3,7 @@ import production_coldefs_meg from '../../../assets/production_coldefs_meg.json'
 import { useSelector } from 'react-redux'
 import Tooltip from '@mui/material/Tooltip'
 import { truncateRemarks } from 'utils/remarksUtils'
+import NumericInputOnly from 'utils/NumericInputOnly'
 
 const getEnhancedProductionColDefs = ({
   allProducts,
@@ -69,6 +70,14 @@ const getEnhancedProductionColDefs = ({
 
     if (col.field === 'avgTph') {
       updatedCol.valueGetter = findAvg
+    }
+
+    if (headerMap && headerMap[col.headerName]) {
+      return {
+        ...col,
+        renderEditCell: NumericInputOnly,
+        headerName: headerMap[col.headerName],
+      }
     }
 
     if (col.field === 'remark') {

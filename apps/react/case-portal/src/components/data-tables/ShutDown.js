@@ -10,6 +10,7 @@ import Tooltip from '@mui/material/Tooltip'
 import { truncateRemarks } from 'utils/remarksUtils'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
+import { validateFields } from 'utils/validationUtils'
 
 const ShutDown = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -60,41 +61,41 @@ const ShutDown = () => {
   }, [])
 
   const saveChanges = React.useCallback(async () => {
-    setTimeout(() => {
-      try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        if (data.length == 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          return
-        }
-        // Validate that both normParameterId and remark are not empty
-        const invalidRows = data.filter(
-          (row) =>
-            // !row.normParameterId.trim() ||
-            !row.remark.trim(),
-        )
-
-        if (invalidRows.length > 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Please fill required fields: Remark.',
-            severity: 'error',
-          })
-          return
-        }
-        saveShutdownData(data)
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
-      } catch (error) {
-        console.log('Error saving changes:', error)
+    try {
+      var data = Object.values(unsavedChangesRef.current.unsavedRows)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
       }
-    }, 1000)
+
+      const requiredFields = [
+        'maintStartDateTime',
+        'maintEndDateTime',
+        'discription',
+        'remark',
+      ]
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        return
+      }
+
+      saveShutdownData(data)
+      unsavedChangesRef.current = {
+        unsavedRows: {},
+        rowsBeforeChange: {},
+      }
+    } catch (error) {
+      console.log('Error saving changes:', error)
+    }
   }, [apiRef])
 
   const saveShutdownData = async (newRow) => {

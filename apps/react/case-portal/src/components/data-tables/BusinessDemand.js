@@ -9,6 +9,7 @@ import getEnhancedColDefs from './CommonHeader/index'
 const headerMap = generateHeaderNames()
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
+import { validateFields } from 'utils/validationUtils'
 
 const BusinessDemand = () => {
   const keycloak = useSession()
@@ -141,42 +142,35 @@ const BusinessDemand = () => {
   }, [])
 
   const saveChanges = React.useCallback(async () => {
-    // setLoading(true)
-    setTimeout(() => {
-      try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        if (data.length == 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          return
-        }
-        // Validate that both normParameterId and remark are not empty
-        const invalidRows = data.filter(
-          (row) => !row.normParameterId.trim() || !row.remark.trim(),
-        )
-
-        if (invalidRows.length > 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Please fill required fields: Product and Remark.',
-            severity: 'error',
-          })
-          return
-        }
-        saveBusinessDemandData(data)
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
-        // setLoading(true)
-      } catch (error) {
-        console.log('Error saving changes:', error)
-        // setLoading(true)
+    try {
+      var data = Object.values(unsavedChangesRef.current.unsavedRows)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
       }
-    }, 1000)
+
+      const requiredFields = ['normParameterId', 'remark']
+
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        return
+      }
+      saveBusinessDemandData(data)
+
+      // setLoading(true)
+    } catch (error) {
+      console.log('Error saving changes:', error)
+      // setLoading(true)
+    }
   }, [apiRef])
 
   const saveBusinessDemandData = async (newRows) => {
@@ -208,30 +202,40 @@ const BusinessDemand = () => {
         normParameterId: row.normParameterId,
         id: row.idFromApi || null,
       }))
+
       if (businessData.length > 0) {
         const response = await DataService.saveBusinessDemandData(
           plantId,
           businessData,
           keycloak,
         )
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Business Demand data Saved Successfully!',
-          severity: 'success',
-        })
-        // fetchData()
-        return response
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Business Demand data not saved!',
-          severity: 'error',
-        })
+
+        // console.log(response)
+
+        if (response.status == 200) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Business Demand data Saved Successfully!',
+            severity: 'success',
+          })
+          unsavedChangesRef.current = {
+            unsavedRows: {},
+            rowsBeforeChange: {},
+          }
+        } else {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Error saving Business Demand data!',
+            severity: 'error',
+          })
+        }
       }
-    } catch (error) {
-      console.error('Error saving Business Demand data:', error)
-    } finally {
       fetchData()
+      return response
+    } catch (error) {
+      console.error('Error saving Business Demand data!', error)
+    } finally {
+      // fetchData()
     }
   }
 

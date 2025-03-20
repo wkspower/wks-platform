@@ -7,7 +7,7 @@
   },
   {
     "field": "TPH",
-    "headerName": "Unit",
+    "headerName": "UOM",
     "width": 100,
     "editable": false
   },

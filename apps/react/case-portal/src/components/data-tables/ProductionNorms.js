@@ -62,60 +62,37 @@ const ProductionNorms = () => {
     return newRow
   }, [])
 
-  // const saveChanges_DoNotDelete = React.useCallback(async () => {
-  //   setTimeout(() => {
-  //     try {
-  //       var data = Object.values(unsavedChangesRef.current.unsavedRows)
-  //       updateProductNormData(data)
-  //       unsavedChangesRef.current = {
-  //         unsavedRows: {},
-  //         rowsBeforeChange: {},
-  //       }
-  //     } catch (error) {}
-  //   }, 1000)
-  // }, [apiRef])
-
   const saveChanges = React.useCallback(async () => {
-    setTimeout(() => {
-      try {
-        // setIsSaving(true)
-        const allRows = Array.from(apiRef.current.getRowModels().values())
-        const updatedRows = allRows.map(
-          (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
-        )
-        // Validation: Check if there are any rows to save
-        if (updatedRows.length === 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          return
-        }
-
-        // Validate that both normParameterId and remark are not empty
-        const invalidRows = updatedRows.filter(
-          (row) => !row.normParametersFKId.trim() || !row.aopRemarks.trim(),
-        )
-
-        if (invalidRows.length > 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Please fill required fields: Product and Remark.',
-            severity: 'error',
-          })
-          return
-        }
-        updateProductNormData(updatedRows)
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
-        // setHasUnsavedRows(false)
-      } catch (error) {
-        console.log('Error saving changes:', error)
+    try {
+      const allRows = Array.from(apiRef.current.getRowModels().values())
+      const updatedRows = allRows.map(
+        (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
+      )
+      if (updatedRows.length === 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
       }
-    }, 1000)
+
+      const invalidRows = updatedRows.filter(
+        (row) => !row.normParametersFKId.trim() || !row.aopRemarks.trim(),
+      )
+
+      if (invalidRows.length > 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Please fill required fields: Product and Remark.',
+          severity: 'error',
+        })
+        return
+      }
+      updateProductNormData(updatedRows)
+    } catch (error) {
+      console.log('Error saving changes:', error)
+    }
   }, [apiRef, selectedUnit])
 
   const updateProductNormData = async (newRow) => {
@@ -159,12 +136,25 @@ const ProductionNorms = () => {
         productNormData,
         keycloak,
       )
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Production AOP Saved Successfully !',
-        severity: 'success',
-      })
-      return response
+
+      if (response.status === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Production AOP Saved Successfully !',
+          severity: 'success',
+        })
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+        fetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Falied!',
+          severity: 'error',
+        })
+      }
     } catch (error) {
       console.error('Error Saving Production AOP:', error)
     }
@@ -181,37 +171,46 @@ const ProductionNorms = () => {
       var plantId = plantId
       const data = await DataService.handleCalculate(plantId, year, keycloak)
 
-      // const formattedData = data.map((item, index) => {
-      //   const isKiloTon = selectedUnit != 'Ton'
-      //   return {
-      //     ...item,
-      //     idFromApi: item.id,
-      //     normParametersFKId: item?.normParametersFKId?.toLowerCase(),
-      //     id: index,
-      //     ...(isKiloTon && {
-      //       jan: item.jan ? item.jan / 1000 : item.jan,
-      //       feb: item.feb ? item.feb / 1000 : item.feb,
-      //       march: item.march ? item.march / 1000 : item.march,
-      //       april: item.april ? item.april / 1000 : item.april,
-      //       may: item.may ? item.may / 1000 : item.may,
-      //       june: item.june ? item.june / 1000 : item.june,
-      //       july: item.july ? item.july / 1000 : item.july,
-      //       aug: item.aug ? item.aug / 1000 : item.aug,
-      //       sep: item.sep ? item.sep / 1000 : item.sep,
-      //       oct: item.oct ? item.oct / 1000 : item.oct,
-      //       nov: item.nov ? item.nov / 1000 : item.nov,
-      //       dec: item.dec ? item.dec / 1000 : item.dec,
-      //     }),
-      //   }
-      // })
+      if (data.status === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data refreshed successfully!',
+          severity: 'success',
+        })
 
-      // setCsData(formattedData)
-      // setRows(formattedData)
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Data refresh successfully!',
-        severity: 'success',
-      })
+        const formattedData = data.map((item, index) => {
+          const isKiloTon = selectedUnit != 'Ton'
+          return {
+            ...item,
+            idFromApi: item.id,
+            normParametersFKId: item?.normParametersFKId?.toLowerCase(),
+            id: index,
+            ...(isKiloTon && {
+              jan: item.jan ? item.jan / 1000 : item.jan,
+              feb: item.feb ? item.feb / 1000 : item.feb,
+              march: item.march ? item.march / 1000 : item.march,
+              april: item.april ? item.april / 1000 : item.april,
+              may: item.may ? item.may / 1000 : item.may,
+              june: item.june ? item.june / 1000 : item.june,
+              july: item.july ? item.july / 1000 : item.july,
+              aug: item.aug ? item.aug / 1000 : item.aug,
+              sep: item.sep ? item.sep / 1000 : item.sep,
+              oct: item.oct ? item.oct / 1000 : item.oct,
+              nov: item.nov ? item.nov / 1000 : item.nov,
+              dec: item.dec ? item.dec / 1000 : item.dec,
+            }),
+          }
+        })
+
+        setCsData(formattedData)
+        setRows(formattedData)
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refresh Falied!',
+          severity: 'error',
+        })
+      }
 
       return data
     } catch (error) {
@@ -221,10 +220,10 @@ const ProductionNorms = () => {
 
   const fetchData = async () => {
     try {
-      // setIsSaving(true)
       setLoading(true)
       const data = await DataService.getAOPData(keycloak)
       // const data1 = data1.slice(0, 3)
+      // if (data.status === 200) {
       const formattedData = data.map((item, index) => {
         const isKiloTon = selectedUnit !== 'Ton'
         return {
@@ -248,14 +247,20 @@ const ProductionNorms = () => {
           }),
         }
       })
-      // setCsData(formattedData)
       setRows(formattedData)
       setLoading(false) // Hide loading
+      // }
+      // else {
+      //   setSnackbarOpen(true)
+      //   setSnackbarData({
+      //     message: 'Error fetching Production AOP data!',
+      //     severity: 'error',
+      //   })
+      // }
     } catch (error) {
       console.error('Error fetching Production AOP data:', error)
     } finally {
-      setIsSaving(false)
-      setLoading(false) // Hide loading
+      setLoading(false)
     }
   }
 

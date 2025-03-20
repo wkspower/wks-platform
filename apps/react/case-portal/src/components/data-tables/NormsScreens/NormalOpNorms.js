@@ -11,6 +11,7 @@ import DataGridTable from '../ASDataGrid'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
+import { validateFields } from 'utils/validationUtils'
 
 const headerMap = generateHeaderNames()
 const NormalOpNormsScreen = () => {
@@ -121,7 +122,7 @@ const NormalOpNormsScreen = () => {
             value={value || ''}
             onChange={(event) => {
               api.setEditCellValue({
-                id,
+                id: params.id,
                 field: 'materialFkId',
                 value: event.target.value,
               })
@@ -322,27 +323,32 @@ const NormalOpNormsScreen = () => {
   }, [])
 
   const saveChanges = React.useCallback(async () => {
-    setTimeout(() => {
-      try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        if (data.length == 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          return
-        }
-
-        saveNormalOperationNormsData(data)
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
-      } catch (error) {
-        /* empty */
+    try {
+      var data = Object.values(unsavedChangesRef.current.unsavedRows)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
       }
-    }, 1000)
+
+      const requiredFields = ['materialFkId', 'remarks']
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        return
+      }
+
+      saveNormalOperationNormsData(data)
+    } catch (error) {
+      /* empty */
+    }
   }, [apiRef])
 
   const saveNormalOperationNormsData = async (newRows) => {
@@ -389,24 +395,31 @@ const NormalOpNormsScreen = () => {
           businessData,
           keycloak,
         )
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: `Normal Operations Norms Saved Successfully!`,
-          severity: 'success',
-        })
-        // fetchData()
+
+        if (response.status === 200) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: `Normal Operations Norms Saved Successfully!`,
+            severity: 'success',
+          })
+          unsavedChangesRef.current = {
+            unsavedRows: {},
+            rowsBeforeChange: {},
+          }
+          fetchData()
+        } else {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: `Normal Operations Norms not saved!`,
+            severity: 'error',
+          })
+        }
         return response
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: `Normal Operations Norms not saved!`,
-          severity: 'error',
-        })
       }
     } catch (error) {
       console.error(`Error saving Normal Operations Norms`, error)
     } finally {
-      fetchData()
+      // fetchData()
     }
   }
 
@@ -416,6 +429,47 @@ const NormalOpNormsScreen = () => {
 
   const isCellEditable = (params) => {
     return !params.row.Particulars
+  }
+
+  const handleCalculate = async (year) => {
+    try {
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      var plantId = plantId
+      const data = await DataService.handleCalculateNormalOpsNorms(
+        plantId,
+        year,
+        keycloak,
+      )
+
+      if (data.status === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data refreshed successfully!',
+          severity: 'success',
+        })
+        fetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refresh Falied!',
+          severity: 'error',
+        })
+      }
+
+      return data
+    } catch (error) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: error.message || 'An error occurred',
+        severity: 'error',
+      })
+      console.error('Error!', error)
+    }
   }
 
   return (
@@ -439,6 +493,7 @@ const NormalOpNormsScreen = () => {
         saveChanges={saveChanges}
         isCellEditable={isCellEditable}
         snackbarData={snackbarData}
+        handleCalculate={handleCalculate}
         snackbarOpen={snackbarOpen}
         apiRef={apiRef}
         open1={open1}
@@ -462,7 +517,7 @@ const NormalOpNormsScreen = () => {
           showUnit: false,
           saveWithRemark: true,
           saveBtn: true,
-          showCalculate: false,
+          showCalculate: true,
         }}
       />
     </div>

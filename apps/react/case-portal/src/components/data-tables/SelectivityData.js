@@ -15,6 +15,7 @@ const headerMap = generateHeaderNames()
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
+import { validateFields } from 'utils/validationUtils'
 
 const SelectivityData = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -71,47 +72,34 @@ const SelectivityData = () => {
   }, [])
 
   const saveChanges = React.useCallback(async () => {
-    setTimeout(() => {
-      // console.log(
-      //   'Edited Data: ',
-      //   Object.values(unsavedChangesRef.current.unsavedRows),
-      // )
-      try {
-        // if (title === 'Business Demand') {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        // Validation: Check if there are any rows to save
-        if (data.length === 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          return
-        }
-
-        // Validate that both normParameterId and remark are not empty
-        const invalidRows = data.filter((row) => !row.remark.trim())
-
-        // if (invalidRows.length > 0) {
-        //   setSnackbarOpen(true)
-        //   setSnackbarData({
-        //     message: 'Please fill required fields: Remark.',
-        //     severity: 'error',
-        //   })
-        //   return
-        // }
-        saveCatalystData(data)
-        // }
-
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
-      } catch (error) {
-        // setIsSaving(false);
+    try {
+      var data = Object.values(unsavedChangesRef.current.unsavedRows)
+      if (data.length === 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
       }
-    }, 1000)
+
+      const requiredFields = ['remark']
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        return
+      }
+
+      saveCatalystData(data)
+    } catch (error) {
+      // Handle error if necessary
+    }
   }, [apiRef])
+
   const saveCatalystData = async (newRow) => {
     try {
       var plantId = ''
@@ -136,37 +124,43 @@ const SelectivityData = () => {
         mar: row.mar,
         UOM: '',
         year: '2025-26',
-        // TPH: '100',
-        // attributeName: 'Silver Ox',
         normParameterFKId: row.NormParameterFKId,
-        // catalystAttributeFKId: 'C6352800-C64A-4944-B490-5A60D1BCE285',
-        // catalystId: '',
         remarks: row.remark,
-        // avgTPH: '123',
-        // year: 2024,
       }))
-      // if (businessData.length > 0) {
+
       const response = await DataService.saveCatalystData(
         plantId,
         turnAroundDetails,
         keycloak,
       )
-      //console.log('Catalyst data Saved Successfully:', response)
-      setSnackbarOpen(true)
-      // setSnackbarMessage("Catalyst data Saved Successfully !");
-      setSnackbarData({
-        message: 'Configuration data Saved Successfully!',
-        severity: 'success',
-      })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Catalyst data Saved Successfully!", severity: "success" });
+
+      if (response.status === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Configuration data Saved Successfully!',
+          severity: 'success',
+        })
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+        fetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Falied!',
+          severity: 'error',
+        })
+      }
+
       return response
     } catch (error) {
       console.error('Error saving Configuration data:', error)
     } finally {
-      fetchData()
+      // fetchData()
     }
   }
+
   const handleDeleteClick = async (id, params) => {
     try {
       const maintenanceId =
@@ -235,8 +229,8 @@ const SelectivityData = () => {
     {
       field: 'NormParameterFKId',
       headerName: 'Particulars',
-      // editable: true,
-      minWidth: 125,
+      editable: true,
+      minWidth: 140,
       valueGetter: (params) => params || '',
       valueFormatter: (params) => {
         const product = allProducts.find((p) => p.id === params)
@@ -248,16 +242,16 @@ const SelectivityData = () => {
         const existingValues = new Set(
           [...api.getRowModels().values()]
             .filter((row) => row.id !== id)
-            .map((row) => row.product),
+            .map((row) => row.NormParameterFKId),
         )
 
         return (
           <select
             value={value || ''}
             onChange={(event) => {
-              params.api.setEditCellValue({
+              api.setEditCellValue({
                 id: params.id,
-                field: 'product',
+                field: 'NormParameterFKId',
                 value: event.target.value,
               })
             }}
@@ -273,10 +267,7 @@ const SelectivityData = () => {
               Select
             </option>
             {allProducts
-              .filter(
-                (product) =>
-                  product.id === value || !existingValues.has(product.id),
-              ) // Ensure selected value is included
+              .filter((product) => !existingValues.has(product.id))
               .map((product) => (
                 <option key={product.id} value={product.id}>
                   {product.displayName}
@@ -296,7 +287,7 @@ const SelectivityData = () => {
     {
       field: 'UOM',
       headerName: 'UOM',
-      editable: true,
+      editable: false,
       align: 'left',
       headerAlign: 'left',
       // valueGetter: convertUnits,

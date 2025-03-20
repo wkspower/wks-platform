@@ -11,6 +11,7 @@ import Tooltip from '@mui/material/Tooltip'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { truncateRemarks } from 'utils/remarksUtils'
+import { validateFields } from 'utils/validationUtils'
 
 const SlowDown = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -108,41 +109,45 @@ const SlowDown = () => {
     }
   }
   const saveChanges = React.useCallback(async () => {
-    // setLoading(true)
-    setTimeout(async () => {
-      try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        if (data.length == 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          return
-        }
-        // Validate that both normParameterId and remark are not empty
-        const invalidRows = data.filter(
-          (row) => !row.product.trim() || !row.remark.trim(),
-        )
-
-        // if (invalidRows.length > 0) {
-        //   setSnackbarOpen(true)
-        //   setSnackbarData({
-        //     message: 'Please fill required fields: Product and Remark.',
-        //     severity: 'error',
-        //   })
-        //   return
-        // }
-        saveSlowDownData(data)
-
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
-      } catch (error) {
-        // setIsSaving(false);
+    try {
+      var data = Object.values(unsavedChangesRef.current.unsavedRows)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
       }
-    }, 1000) // Delay of 2 seconds
+
+      const requiredFields = [
+        'maintStartDateTime',
+        'maintEndDateTime',
+        'discription',
+        'remark',
+        'rate',
+        'durationInHrs',
+        'product',
+      ]
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        return
+      }
+
+      saveSlowDownData(data)
+
+      unsavedChangesRef.current = {
+        unsavedRows: {},
+        rowsBeforeChange: {},
+      }
+    } catch (error) {
+      // setIsSaving(false);
+    }
   }, [apiRef])
 
   const updateSlowdownData = async (newRow) => {
