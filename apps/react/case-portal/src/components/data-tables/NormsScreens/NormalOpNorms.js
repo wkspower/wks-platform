@@ -8,6 +8,10 @@ import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import NumericInputOnly from 'utils/NumericInputOnly'
 import DataGridTable from '../ASDataGrid'
+
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
+
 const headerMap = generateHeaderNames()
 const NormalOpNormsScreen = () => {
   const [allProducts, setAllProducts] = useState([])
@@ -26,6 +30,7 @@ const NormalOpNormsScreen = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -33,6 +38,7 @@ const NormalOpNormsScreen = () => {
   })
   const keycloak = useSession()
   const fetchData = async () => {
+    setLoading(true)
     try {
       const data = await DataService.getNormalOperationNormsData(keycloak)
       const groupedRows = []
@@ -62,7 +68,9 @@ const NormalOpNormsScreen = () => {
 
       // setBDData(groupedRows)
       setRows(groupedRows)
+      setLoading(false)
     } catch (error) {
+      setLoading(false)
       console.error('Error fetching Business Demand data:', error)
     }
   }
@@ -283,6 +291,7 @@ const NormalOpNormsScreen = () => {
         )
       },
     },
+
     {
       field: 'idFromApi',
       headerName: 'idFromApi',
@@ -411,6 +420,12 @@ const NormalOpNormsScreen = () => {
 
   return (
     <div>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
       <DataGridTable
         title='Normal Operations Norms'
         columns={colDefs}

@@ -8,6 +8,8 @@ import { useGridApiRef } from '@mui/x-data-grid'
 import NumericInputOnly from 'utils/NumericInputOnly'
 import Tooltip from '@mui/material/Tooltip'
 import { truncateRemarks } from 'utils/remarksUtils'
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
 
 const ShutDown = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -20,6 +22,7 @@ const ShutDown = () => {
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
+  const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -189,6 +192,7 @@ const ShutDown = () => {
   // }
   const fetchData = async () => {
     try {
+      setLoading(true)
       const data = await DataService.getShutDownPlantData(keycloak)
       const formattedData = data.map((item, index) => ({
         ...item,
@@ -197,8 +201,10 @@ const ShutDown = () => {
       }))
       // setShutdownData(formattedData)
       setRows(formattedData)
+      setLoading(false)
     } catch (error) {
       console.error('Error fetching Shutdown data:', error)
+      setLoading(false)
     }
   }
   useEffect(() => {
@@ -269,7 +275,7 @@ const ShutDown = () => {
 
     // {
     //   field: 'product',
-    //   headerName: lowerVertName === 'meg' ? 'Product' : 'Particular',
+    //   headerName: lowerVertName === 'meg' ? 'Product' : 'Grade Name',
     //   editable: true,
     //   minWidth: 125,
     //   valueGetter: (params) => {
@@ -401,6 +407,13 @@ const ShutDown = () => {
 
   return (
     <div>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
+
       <ASDataGrid
         setRows={setRows}
         columns={colDefs}

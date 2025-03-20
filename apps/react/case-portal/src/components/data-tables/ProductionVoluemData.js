@@ -188,6 +188,7 @@ const ProductionvolumeData = () => {
 
   const fetchData = async () => {
     try {
+      setLoading(true)
       const data = await DataService.getAOPMCCalculatedData(keycloak)
       // const data1 = data.slice(0, 3)
       const formattedData = data.map((item, index) => {
@@ -234,8 +235,10 @@ const ProductionvolumeData = () => {
       })
       // setProductNormData(formattedData)
       setRows(formattedData)
+      setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)
+      setLoading(false)
     }
   }
 

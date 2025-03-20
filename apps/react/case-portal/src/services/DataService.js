@@ -619,7 +619,7 @@ async function saveTurnAroundData(plantId, turnAroundDetails, keycloak) {
 }
 
 async function saveCatalystData(plantId, turnAroundDetails, keycloak) {
-  const url = `${process.env.REACT_APP_API_URL}/task/saveConfigurationData`
+  const url = `${process.env.REACT_APP_API_URL}/task/saveConfigurationData?year=2025-26&plantFKId=${plantId}`
 
   const headers = {
     Accept: 'application/json',

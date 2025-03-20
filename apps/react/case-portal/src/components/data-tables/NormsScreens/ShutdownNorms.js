@@ -1,4 +1,5 @@
 import Tooltip from '@mui/material/Tooltip'
+
 import { useGridApiRef } from '@mui/x-data-grid'
 import { useSession } from 'SessionStoreContext'
 import React, { useEffect, useState } from 'react'
@@ -11,7 +12,11 @@ import NumericInputOnly from 'utils/NumericInputOnly'
 import { truncateRemarks } from 'utils/remarksUtils'
 const headerMap = generateHeaderNames()
 
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
+
 const ShutdownNorms = () => {
+  const [loading, setLoading] = useState(false)
   const menu = useSelector((state) => state.dataGridStore)
   const [allProducts, setAllProducts] = useState([])
   const { sitePlantChange } = menu
@@ -377,6 +382,7 @@ const ShutdownNorms = () => {
 
   const fetchData = async () => {
     try {
+      setLoading(true)
       const data = await DataService.getShutdownNormsData(keycloak)
       const groupedRows = []
       const groups = new Map()
@@ -441,7 +447,9 @@ const ShutdownNorms = () => {
 
       // setBDData(groupedRows);
       setRows(groupedRows)
+      setLoading(false)
     } catch (error) {
+      setLoading(false)
       console.error('Error fetching Business Demand data:', error)
     }
   }
@@ -456,6 +464,12 @@ const ShutdownNorms = () => {
 
   return (
     <div>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
       <DataGridTable
         isCellEditable={isCellEditable}
         title='Shutdown Norms'

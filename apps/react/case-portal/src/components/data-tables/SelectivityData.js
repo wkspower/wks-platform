@@ -13,6 +13,9 @@ import { truncateRemarks } from 'utils/remarksUtils'
 
 const headerMap = generateHeaderNames()
 
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
+
 const SelectivityData = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange } = dataGridStore
@@ -20,6 +23,9 @@ const SelectivityData = () => {
   // const [csData, setCsData] = useState([])
   // const [allProducts, setAllProducts] = useState([])
   // const [allCatalyst, setAllCatalyst] = useState([])
+
+  const [loading, setLoading] = useState(false)
+
   const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
@@ -107,8 +113,6 @@ const SelectivityData = () => {
     }, 1000)
   }, [apiRef])
   const saveCatalystData = async (newRow) => {
-    // console.log('new Row ', newRow)
-
     try {
       var plantId = ''
       const storedPlant = localStorage.getItem('selectedPlant')
@@ -131,6 +135,7 @@ const SelectivityData = () => {
         feb: row.feb,
         mar: row.mar,
         UOM: '',
+        year: '2025-26',
         // TPH: '100',
         // attributeName: 'Silver Ox',
         normParameterFKId: row.NormParameterFKId,
@@ -185,6 +190,7 @@ const SelectivityData = () => {
     }
   }
   const fetchData = async () => {
+    setLoading(true)
     try {
       const data = await DataService.getCatalystSelectivityData(keycloak)
       var formattedData = []
@@ -196,8 +202,10 @@ const SelectivityData = () => {
       }
       // setCsData(formattedData)
       setRows(formattedData)
+      setLoading(false)
     } catch (error) {
       console.error('Error fetching Turnaround data:', error)
+      setLoading(false)
     }
   }
   useEffect(() => {
@@ -425,6 +433,12 @@ const SelectivityData = () => {
 
   return (
     <div>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
       <ASDataGrid
         columns={productionColumns}
         rows={rows}

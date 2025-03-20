@@ -40,6 +40,7 @@ const SlowDown = () => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
@@ -107,7 +108,7 @@ const SlowDown = () => {
     }
   }
   const saveChanges = React.useCallback(async () => {
-    setLoading(true)
+    // setLoading(true)
     setTimeout(async () => {
       try {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
@@ -200,13 +201,9 @@ const SlowDown = () => {
   }
 
   useEffect(() => {
-    // const storedPlant = localStorage.getItem('selectedPlant')
-    // const parsedPlant = JSON.parse(storedPlant)
-
     const getAllProducts = async () => {
       try {
         const data = await DataService.getAllProducts(
-          // (plantId = parsedPlant.id),
           keycloak,
           lowerVertName === 'meg' ? 'Production' : 'Grade',
         )

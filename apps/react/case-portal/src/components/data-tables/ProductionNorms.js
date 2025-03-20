@@ -8,7 +8,8 @@ const headerMap = generateHeaderNames()
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
-
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
 // import NumericCellEditor from 'utils/NumericCellEditor'
 // import NumericInputOnly from 'utils/NumericInputOnly'
 import getEnhancedColDefs from './CommonHeader/ProductionAopHeader'
@@ -21,6 +22,7 @@ const ProductionNorms = () => {
   const { sitePlantChange, verticalChange } = dataGridStore
   const vertName = verticalChange?.verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -219,7 +221,8 @@ const ProductionNorms = () => {
 
   const fetchData = async () => {
     try {
-      setIsSaving(true)
+      // setIsSaving(true)
+      setLoading(true)
       const data = await DataService.getAOPData(keycloak)
       // const data1 = data1.slice(0, 3)
       const formattedData = data.map((item, index) => {
@@ -247,10 +250,12 @@ const ProductionNorms = () => {
       })
       // setCsData(formattedData)
       setRows(formattedData)
+      setLoading(false) // Hide loading
     } catch (error) {
       console.error('Error fetching Production AOP data:', error)
     } finally {
       setIsSaving(false)
+      setLoading(false) // Hide loading
     }
   }
 
@@ -365,6 +370,13 @@ const ProductionNorms = () => {
 
   return (
     <div>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
+
       <ASDataGrid
         columns={productionColumns}
         rows={rows}

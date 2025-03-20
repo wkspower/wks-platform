@@ -9,11 +9,16 @@ import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import ASDataGrid from './ASDataGrid'
 import NumericInputOnly from 'utils/NumericInputOnly'
 
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
+
 const TurnaroundPlanTable = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange } = dataGridStore
   const vertName = verticalChange?.verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
+
+  const [loading, setLoading] = useState(false)
 
   // const [TaData, setTaData] = useState([])
   const [allProducts, setAllProducts] = useState([])
@@ -142,6 +147,7 @@ const TurnaroundPlanTable = () => {
 
   const fetchData = async () => {
     try {
+      setLoading(true)
       const data = await DataService.getTAPlantData(keycloak)
       const formattedData = data.map((item, index) => ({
         ...item,
@@ -151,18 +157,16 @@ const TurnaroundPlanTable = () => {
 
       // setTaData(formattedData)
       setRows(formattedData)
+      setLoading(false)
     } catch (error) {
       console.error('Error fetching Turnaround data:', error)
+      setLoading(false)
     }
   }
   useEffect(() => {
-    // const storedPlant = localStorage.getItem('selectedPlant')
-    // const parsedPlant = JSON.parse(storedPlant)
-
     const getAllProducts = async () => {
       try {
         const data = await DataService.getAllProducts(
-          // (plantId = parsedPlant.id),
           keycloak,
           lowerVertName === 'meg' ? 'Production' : 'Grade',
         )
@@ -392,6 +396,12 @@ const TurnaroundPlanTable = () => {
 
   return (
     <div>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
       <ASDataGrid
         setRows={setRows}
         columns={colDefs}

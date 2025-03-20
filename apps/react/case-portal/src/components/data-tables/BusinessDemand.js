@@ -46,7 +46,7 @@ const BusinessDemand = () => {
       const groups = new Map()
       let groupId = 0
 
-      //    console.log('lowerVertName', lowerVertName)
+      // console.log('lowerVertName', lowerVertName)
 
       data.forEach((item) => {
         const formattedItem = {
@@ -121,6 +121,7 @@ const BusinessDemand = () => {
     headerMap,
     handleRemarkCellClick,
   })
+
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
@@ -140,7 +141,7 @@ const BusinessDemand = () => {
   }, [])
 
   const saveChanges = React.useCallback(async () => {
-    setLoading(true)
+    // setLoading(true)
     setTimeout(() => {
       try {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
@@ -170,8 +171,10 @@ const BusinessDemand = () => {
           unsavedRows: {},
           rowsBeforeChange: {},
         }
+        // setLoading(true)
       } catch (error) {
-        console.logk('Error saving changes:', error)
+        console.log('Error saving changes:', error)
+        // setLoading(true)
       }
     }, 1000)
   }, [apiRef])
