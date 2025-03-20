@@ -1,5 +1,7 @@
 import { useSelector } from 'react-redux'
 import productionColDefs from '../../../assets/production_aop.json' // Adjust path as needed
+import Tooltip from '@mui/material/Tooltip'
+import { truncateRemarks } from 'utils/remarksUtils'
 
 const getEnhancedColDefs = ({
   allProducts,
@@ -63,17 +65,28 @@ const getEnhancedColDefs = ({
     if (col.field === 'aopRemarks') {
       updatedCol = {
         ...updatedCol,
-        renderCell: (params) => (
-          <div
-            style={{
-              cursor: 'pointer',
-              color: params.value ? 'inherit' : 'gray',
-            }}
-            onClick={() => handleRemarkCellClick(params.row)}
-          >
-            {params.value || 'Click to add remark'}
-          </div>
-        ),
+        renderCell: (params) => {
+          const displayText = truncateRemarks(params.value)
+          const isEditable = !params.row.Particulars
+
+          return (
+            <Tooltip title={params.value || ''} arrow>
+              <div
+                style={{
+                  cursor: 'pointer',
+                  color: params.value ? 'inherit' : 'gray',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: 140,
+                }}
+                onClick={() => handleRemarkCellClick(params.row)}
+              >
+                {displayText || (isEditable ? 'Click to add remark' : '')}
+              </div>
+            </Tooltip>
+          )
+        },
       }
     }
 

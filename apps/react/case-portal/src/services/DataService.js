@@ -352,7 +352,7 @@ async function getCatalystSelectivityData(keycloak) {
   // }
   var year = localStorage.getItem('year')
 
-  const url = `${process.env.REACT_APP_API_URL}/task/getCatalystSelectivityData?year=${year}&plantId=${plantId}&siteId=${siteId}`
+  const url = `${process.env.REACT_APP_API_URL}/task/getConfigurationData?year=${year}&plantFKId=${plantId}`
 
   const headers = {
     Accept: 'application/json',
@@ -619,7 +619,7 @@ async function saveTurnAroundData(plantId, turnAroundDetails, keycloak) {
 }
 
 async function saveCatalystData(plantId, turnAroundDetails, keycloak) {
-  const url = `${process.env.REACT_APP_API_URL}/task/saveCatalystData`
+  const url = `${process.env.REACT_APP_API_URL}/task/saveConfigurationData`
 
   const headers = {
     Accept: 'application/json',

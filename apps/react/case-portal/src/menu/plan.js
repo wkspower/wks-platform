@@ -18,6 +18,11 @@ import {
   IconFile, // General file icon
   IconFileText, // For textual reports
   IconCalendarCog,
+  IconFilter,
+  IconSwitch,
+  IconBarrierBlock,
+  IconChartHistogram,
+  IconPackages,
 } from '@tabler/icons-react'
 // import { useSelector } from 'react-redux'
 import i18n from '../i18n'
@@ -41,7 +46,13 @@ const icons = {
   IconFile,
   IconFileText,
   IconCalendarCog,
+  IconFilter,
+  IconSwitch,
+  IconBarrierBlock,
+  IconChartHistogram,
+  IconPackages,
 }
+
 const plan = {
   id: 'utilities',
   title: '',
@@ -74,7 +85,7 @@ const plan = {
           title: i18n.t('menu.shutdownPlan'),
           type: 'item',
           url: '/production-norms-plan/shutdown-plan',
-          icon: icons.IconPower,
+          icon: icons.IconSwitch,
           breadcrumbs: true,
         },
         {
@@ -118,7 +129,7 @@ const plan = {
           title: i18n.t('menu.catalystSelectivity'),
           type: 'item',
           url: '/production-norms-plan/configuration',
-          icon: icons.IconDatabase,
+          icon: icons.IconFilter,
           breadcrumbs: true,
         },
         {
@@ -126,7 +137,7 @@ const plan = {
           title: i18n.t('menu.normalOpNorms'),
           type: 'item',
           url: '/production-norms-plan/normal-op-norms',
-          icon: icons.IconDatabase,
+          icon: icons.IconBarrierBlock,
           breadcrumbs: true,
         },
         {
@@ -134,7 +145,7 @@ const plan = {
           title: i18n.t('menu.shutdownNorms'),
           type: 'item',
           url: '/production-norms-plan/shutdown-norms',
-          icon: icons.IconDatabase,
+          icon: icons.IconPower,
           breadcrumbs: true,
         },
 
@@ -143,7 +154,7 @@ const plan = {
           title: i18n.t('menu.consumptionNorms'),
           type: 'item',
           url: '/production-norms-plan/consumption-aop',
-          icon: icons.IconDatabase,
+          icon: icons.IconChartHistogram,
           breadcrumbs: true,
         },
         {
@@ -151,7 +162,7 @@ const plan = {
           title: i18n.t('menu.feedStock'),
           type: 'item',
           url: '/production-norms-plan/feed-stock-availability',
-          icon: icons.IconDatabase,
+          icon: icons.IconPackages,
           breadcrumbs: true,
         },
       ],

@@ -7,6 +7,8 @@ import { useSession } from 'SessionStoreContext'
 import ASDataGrid from './ASDataGrid'
 import getEnhancedColDefs from './CommonHeader/index'
 const headerMap = generateHeaderNames()
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
 
 const BusinessDemand = () => {
   const keycloak = useSession()
@@ -25,6 +27,7 @@ const BusinessDemand = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
   // States for the Remark Dialog
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -36,6 +39,7 @@ const BusinessDemand = () => {
   })
 
   const fetchData = async () => {
+    setLoading(true)
     try {
       const data = await DataService.getBDData(keycloak)
       const groupedRows = []
@@ -70,21 +74,20 @@ const BusinessDemand = () => {
       })
 
       setRows(groupedRows)
+      setLoading(false) // Hide loading
     } catch (error) {
       console.error('Error fetching Business Demand data:', error)
+      setLoading(false) // Hide loading
     }
   }
 
   useEffect(() => {
-    // const storedPlant = localStorage.getItem('selectedPlant')
-    // const parsedPlant = JSON.parse(storedPlant)
-
     const getAllProducts = async () => {
       try {
         const data = await DataService.getAllProducts(
-          // (plantId = parsedPlant.id),
           keycloak,
-          lowerVertName === 'meg' ? 'Production' : 'Grade',
+          // lowerVertName === 'meg' ? 'Production' : 'Grade',
+          null,
         )
         const productList = data.map((product) => ({
           id: product.id, // Convert id to lowercase
@@ -107,6 +110,10 @@ const BusinessDemand = () => {
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
+  }
+
+  const isCellEditable = (params) => {
+    return !params.row.Particulars
   }
 
   const colDefs = getEnhancedColDefs({
@@ -133,6 +140,7 @@ const BusinessDemand = () => {
   }, [])
 
   const saveChanges = React.useCallback(async () => {
+    setLoading(true)
     setTimeout(() => {
       try {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
@@ -240,6 +248,14 @@ const BusinessDemand = () => {
       {/* <div>
         {`Plant: ${verticalChange?.verticalChange?.selectedPlant}, Site: ${verticalChange?.verticalChange?.selectedSite}, Vertical: ${verticalChange?.verticalChange?.selectedVertical}`}
       </div> */}
+
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
+
       <ASDataGrid
         setRows={setRows}
         columns={
@@ -249,6 +265,7 @@ const BusinessDemand = () => {
           //   : vertical_pe_coldefs_bd
         }
         rows={rows}
+        isCellEditable={isCellEditable}
         title='Business Demand'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}

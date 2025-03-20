@@ -185,6 +185,7 @@ const ProductionvolumeData = () => {
   const fetchData = async () => {
     try {
       const data = await DataService.getAOPMCCalculatedData(keycloak)
+      const data1 = data1.slice(0, 3)
       const formattedData = data.map((item, index) => {
         const isTPD = selectedUnit == 'TPD'
         return {
@@ -235,15 +236,12 @@ const ProductionvolumeData = () => {
   }
 
   useEffect(() => {
-    // const storedPlant = localStorage.getItem('selectedPlant')
-    // const parsedPlant = JSON.parse(storedPlant)
-
     const getAllProducts = async () => {
       try {
         const data = await DataService.getAllProducts(
-          // (plantId = parsedPlant.id),
           keycloak,
-          lowerVertName === 'meg' ? 'Production' : 'Grade',
+          // lowerVertName === 'meg' ? 'Production' : 'Grade',
+          null,
         )
         const productList = data.map((product) => ({
           id: product.id.toLowerCase(),

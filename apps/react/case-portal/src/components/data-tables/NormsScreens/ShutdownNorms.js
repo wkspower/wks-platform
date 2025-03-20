@@ -8,6 +8,7 @@ import DataGridTable from '../ASDataGrid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { DataService } from 'services/DataService'
 import NumericInputOnly from 'utils/NumericInputOnly'
+import { truncateRemarks } from 'utils/remarksUtils'
 const headerMap = generateHeaderNames()
 
 const ShutdownNorms = () => {
@@ -81,6 +82,10 @@ const ShutdownNorms = () => {
   const formatValueToThreeDecimals = (params) =>
     params ? parseFloat(params).toFixed(3) : ''
 
+  const isCellEditable = (params) => {
+    return !params.row.Particulars
+  }
+
   const colDefs = [
     {
       field: 'Particulars',
@@ -92,7 +97,7 @@ const ShutdownNorms = () => {
     {
       field: 'materialFkId',
       headerName: 'Particulars',
-      minWidth: 140,
+      minWidth: 160,
       editable: true,
       valueGetter: (params) => params || '',
       valueFormatter: (params) => {
@@ -132,7 +137,7 @@ const ShutdownNorms = () => {
       },
     },
 
-    { field: 'unit', headerName: 'Unit', width: 100, editable: true },
+    { field: 'unit', headerName: 'UOM', width: 100, editable: true },
 
     {
       field: 'april',
@@ -248,23 +253,28 @@ const ShutdownNorms = () => {
       headerName: 'Remark',
       minWidth: 150,
       editable: true,
-      renderCell: (params) => (
-        <Tooltip title={params.value || ''} arrow>
-          <div
-            style={{
-              cursor: 'pointer',
-              color: params.value ? 'inherit' : 'gray',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              maxWidth: 140,
-            }}
-            onClick={() => handleRemarkCellClick(params.row)}
-          >
-            {params.value}
-          </div>
-        </Tooltip>
-      ),
+      renderCell: (params) => {
+        const displayText = truncateRemarks(params.value)
+        const isEditable = !params.row.Particulars
+
+        return (
+          <Tooltip title={params.value || ''} arrow>
+            <div
+              style={{
+                cursor: 'pointer',
+                color: params.value ? 'inherit' : 'gray',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: 140,
+              }}
+              onClick={() => handleRemarkCellClick(params.row)}
+            >
+              {displayText || (isEditable ? 'Click to add remark' : '')}
+            </div>
+          </Tooltip>
+        )
+      },
     },
     {
       field: 'idFromApi',
@@ -447,6 +457,7 @@ const ShutdownNorms = () => {
   return (
     <div>
       <DataGridTable
+        isCellEditable={isCellEditable}
         title='Shutdown Norms'
         columns={colDefs}
         setRows={setRows}
@@ -479,7 +490,7 @@ const ShutdownNorms = () => {
           addButton: false,
           deleteButton: false,
           editButton: true,
-          showUnit: true,
+          showUnit: false,
           units: ['TPH', 'TPD'],
           saveWithRemark: false,
           saveBtn: true,

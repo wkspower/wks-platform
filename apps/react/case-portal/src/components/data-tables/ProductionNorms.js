@@ -221,6 +221,7 @@ const ProductionNorms = () => {
     try {
       setIsSaving(true)
       const data = await DataService.getAOPData(keycloak)
+      const data1 = data1.slice(0, 3)
       const formattedData = data.map((item, index) => {
         const isKiloTon = selectedUnit !== 'Ton'
         return {
@@ -323,15 +324,10 @@ const ProductionNorms = () => {
     return total === '0.00' ? null : total
   }
 
-  // console.log(lowerVertName)
   useEffect(() => {
-    // const storedPlant = localStorage.getItem('selectedPlant')
-    // const parsedPlant = JSON.parse(storedPlant)
-
     const getAllProducts = async () => {
       try {
         const data = await DataService.getAllProducts(
-          //   (plantId = parsedPlant.id),
           keycloak,
           lowerVertName === 'meg' ? 'Production' : 'Grade',
         )

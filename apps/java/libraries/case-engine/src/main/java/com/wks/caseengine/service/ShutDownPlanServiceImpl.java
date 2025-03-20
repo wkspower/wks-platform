@@ -149,7 +149,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 				// }
 
 				String description = shutDownPlanDTO.getDiscription();
-				if(shutDownPlanDTO.getVerticalName().equalsIgnoreCase("MEG")) {
+				// if(shutDownPlanDTO.getVerticalName().equalsIgnoreCase("MEG")) {
 					List<ShutDownPlanDTO> list = new ArrayList<>();
 					shutDownPlanDTO.setDurationInMins(0);
 					shutDownPlanDTO.setDiscription(description+" Ramp Up");
@@ -178,7 +178,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 					list4.add(shutDownPlanDTO);
 				    slowdownPlanService.saveShutdownData(plantId,list4);
 
-				}
+				// }
 			} else {
 				// Updating an existing record
 

@@ -1,4 +1,5 @@
 import Tooltip from '@mui/material/Tooltip'
+import { truncateRemarks } from 'utils/remarksUtils'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import React, { useEffect, useState } from 'react'
@@ -39,7 +40,7 @@ const NormalOpNormsScreen = () => {
       let groupId = 0
 
       data.forEach((item) => {
-        const groupKey = item.normParameterTypeDisplayName || 'By Products'
+        const groupKey = item.normParameterTypeDisplayName
 
         if (!groups.has(groupKey)) {
           groups.set(groupKey, [])
@@ -138,7 +139,12 @@ const NormalOpNormsScreen = () => {
       },
     },
 
-    { field: 'unit', headerName: 'Unit', width: 100, editable: true },
+    {
+      field: 'unit',
+      headerName: 'UOM',
+      width: 100,
+      editable: false,
+    },
 
     {
       field: 'april',
@@ -254,23 +260,28 @@ const NormalOpNormsScreen = () => {
       headerName: 'Remark',
       minWidth: 150,
       editable: true,
-      renderCell: (params) => (
-        <Tooltip title={params.value || ''} arrow>
-          <div
-            style={{
-              cursor: 'pointer',
-              color: params.value ? 'inherit' : 'gray',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              maxWidth: 140,
-            }}
-            onClick={() => handleRemarkCellClick(params.row)}
-          >
-            {params.value}
-          </div>
-        </Tooltip>
-      ),
+      renderCell: (params) => {
+        const displayText = truncateRemarks(params.value)
+        const isEditable = !params.row.Particulars
+
+        return (
+          <Tooltip title={params.value || ''} arrow>
+            <div
+              style={{
+                cursor: 'pointer',
+                color: params.value ? 'inherit' : 'gray',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: 140,
+              }}
+              onClick={() => handleRemarkCellClick(params.row)}
+            >
+              {displayText || (isEditable ? 'Click to add remark' : '')}
+            </div>
+          </Tooltip>
+        )
+      },
     },
     {
       field: 'idFromApi',
@@ -394,6 +405,10 @@ const NormalOpNormsScreen = () => {
     console.log(error)
   }, [])
 
+  const isCellEditable = (params) => {
+    return !params.row.Particulars
+  }
+
   return (
     <div>
       <DataGridTable
@@ -407,6 +422,7 @@ const NormalOpNormsScreen = () => {
         paginationOptions={[100, 200, 300]}
         processRowUpdate={processRowUpdate}
         saveChanges={saveChanges}
+        isCellEditable={isCellEditable}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         apiRef={apiRef}

@@ -1,5 +1,6 @@
 import CancelIcon from '@mui/icons-material/Close'
-import DeleteIcon from '@mui/icons-material/Delete'
+// import DeleteIcon from '@mui/icons-material/Delete'
+import DeleteIcon from '@mui/icons-material/DeleteOutlined'
 import EditIcon from '@mui/icons-material/Edit'
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, IconButton, TextField, Typography } from '@mui/material'
@@ -47,6 +48,7 @@ const DataGridTable = ({
   onDeleteRow,
   permissions,
   processRowUpdate,
+  isCellEditable,
   saveChanges,
   apiRef,
   snackbarData,
@@ -285,7 +287,8 @@ const DataGridTable = ({
                 permissions?.editButton && (
                   <GridActionsCellItem
                     key={`edit-${id}`}
-                    icon={<EditIcon sx={{ color: jioColors.primaryBlue }} />}
+                    // icon={<EditIcon sx={{ color: jioColors.primaryBlue }} />}
+                    icon={<EditIcon />}
                     label='Edit'
                     className='textPrimary'
                     onClick={handleEditClick(id, row)}
@@ -296,7 +299,8 @@ const DataGridTable = ({
                 permissions?.deleteButton && (
                   <GridActionsCellItem
                     key={`delete-${id}`}
-                    icon={<DeleteIcon sx={{ color: jioColors.accentRed }} />}
+                    // icon={<DeleteIcon sx={{ color: jioColors.accentRed }} />}
+                    icon={<DeleteIcon />}
                     label='Delete'
                     onClick={() => handleDeleteClick(id, params)}
                     color='inherit'
@@ -625,7 +629,6 @@ const DataGridTable = ({
             aopYear: false,
             avgTph: false,
             NormParameterMonthlyTransactionId: false,
-            // NormParametersId: false,
             aopStatus: false,
             idFromApi: false,
             period: false,
@@ -634,16 +637,7 @@ const DataGridTable = ({
           processRowUpdate={processRowUpdate}
           onProcessRowUpdateError={onProcessRowUpdateError}
           onColumnResized={onColumnResized}
-          // onCellClick={handleCellClick}
-          //Added Single Click EDIT for the ROW
-          // onCellClick={(params) => {
-          //   setRowModesModel({
-          //     ...rowModesModel,
-          //     [params.id]: { mode: GridRowModes.Edit },
-          //   })
-          // }}
-          // onRowEditCommit={handleRowEditCommit}
-          // onCellEditCommit={(params) => handleCellEditCommit(params)} // Real-time updates
+          isCellEditable={isCellEditable}
           experimentalFeatures={{ newEditingApi: true }}
           editMode='row'
           rowModesModel={rowModesModel}
@@ -656,9 +650,13 @@ const DataGridTable = ({
               noRowsVariant: 'skeleton',
             },
           }}
-          getRowClassName={(params) =>
-            params.indexRelativeToCurrentPage % 2 === 0 ? 'even-row' : 'odd-row'
-          }
+          getRowClassName={(params) => {
+            return params.row.Particulars
+              ? 'no-border-row'
+              : params.indexRelativeToCurrentPage % 2 === 0
+                ? 'even-row'
+                : 'odd-row'
+          }}
           sx={{
             borderRadius: '0px',
             border: `1px solid ${jioColors.border}`,
@@ -713,8 +711,12 @@ const DataGridTable = ({
               right: 0,
               top: '50%',
               transform: 'translateY(-50%)',
-              height: '60%', // Adjust this percentage as needed for the "short" border
+              height: '60%',
               borderRight: `1px solid ${jioColors.border}`,
+            },
+            //Do not remove this prop (for Grouped row it can be usefull !!!!!)
+            '& .MuiDataGrid-row.no-border-row .MuiDataGrid-cell:after': {
+              borderRight: 'none !important',
             },
 
             // Apply a similar pseudo-element for header cells
@@ -741,10 +743,12 @@ const DataGridTable = ({
               // borderRight: `1px solid ${jioColors.border}`,
               // backgroundColor: jioColors.headerBg,
               // color: '#FFFFFF',
+
               backgroundColor: '#FAFAFC',
               color: '#3E4E75',
               fontSize: '0.8rem',
-              fontWeight: 600,
+              // fontWeight: 600,
+              fontWeight: 'bold',
               borderBottom: `2px solid ${'#DAE0EF'}`,
               borderTopLeftRadius: '0px',
               borderTopRightRadius: '0px',
@@ -781,6 +785,9 @@ const DataGridTable = ({
             // '& .MuiDataGrid-cell.last-column-cell': {
             //   paddingRight: '16px',
             // },
+            '& .MuiDataGrid-columnHeaderTitle': {
+              fontWeight: 'bold', // Ensure column titles are bold
+            },
           }}
         />
       </Box>

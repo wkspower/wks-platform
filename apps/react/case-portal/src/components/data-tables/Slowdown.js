@@ -6,9 +6,11 @@ import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import { useSelector } from 'react-redux'
 import NumericInputOnly from 'utils/NumericInputOnly'
+import Tooltip from '@mui/material/Tooltip'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
+import { truncateRemarks } from 'utils/remarksUtils'
 
 const SlowDown = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -105,10 +107,6 @@ const SlowDown = () => {
     }
   }
   const saveChanges = React.useCallback(async () => {
-    console.log(
-      'Edited Data: ',
-      Object.values(unsavedChangesRef.current.unsavedRows),
-    )
     setLoading(true)
     setTimeout(async () => {
       try {
@@ -126,14 +124,14 @@ const SlowDown = () => {
           (row) => !row.product.trim() || !row.remark.trim(),
         )
 
-        if (invalidRows.length > 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Please fill required fields: Product and Remark.',
-            severity: 'error',
-          })
-          return
-        }
+        // if (invalidRows.length > 0) {
+        //   setSnackbarOpen(true)
+        //   setSnackbarData({
+        //     message: 'Please fill required fields: Product and Remark.',
+        //     severity: 'error',
+        //   })
+        //   return
+        // }
         saveSlowDownData(data)
 
         unsavedChangesRef.current = {
@@ -197,6 +195,7 @@ const SlowDown = () => {
       setLoading(false) // Hide loading
     } catch (error) {
       console.error('Error fetching SlowDown data:', error)
+      setLoading(false) // Hide loading
     }
   }
 
@@ -317,11 +316,6 @@ const SlowDown = () => {
       headerName: 'Slowdown Desc',
       minWidth: 250,
       editable: true,
-      renderHeader: () => (
-        <div style={{ textAlign: 'center', fontWeight: 'normal' }}>
-          Slowdown Desc
-        </div>
-      ),
       flex: 3,
     },
 
@@ -444,16 +438,25 @@ const SlowDown = () => {
       editable: true,
       minWidth: 250,
       renderCell: (params) => {
+        const displayText = truncateRemarks(params.value)
+        const isEditable = !params.row.Particulars
+
         return (
-          <div
-            style={{
-              cursor: 'pointer',
-              color: params.value ? 'inherit' : 'gray',
-            }}
-            onClick={() => handleRemarkCellClick(params.row)}
-          >
-            {params.value || 'Click to add remark'}
-          </div>
+          <Tooltip title={params.value || ''} arrow>
+            <div
+              style={{
+                cursor: 'pointer',
+                color: params.value ? 'inherit' : 'gray',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: 140,
+              }}
+              onClick={() => handleRemarkCellClick(params.row)}
+            >
+              {displayText || (isEditable ? 'Click to add remark' : '')}
+            </div>
+          </Tooltip>
         )
       },
     },

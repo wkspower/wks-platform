@@ -83,7 +83,7 @@ const Profile = ({ keycloak }) => {
           p: 0.25,
           bgcolor: open ? iconBackColorOpen : 'transparent',
           borderRadius: 1,
-          '&:hover': { bgcolor: 'secondary.lighter' },
+          '&:hover': { bgcolor: '#3f93dc' },
         }}
         aria-label='open profile'
         ref={anchorRef}
@@ -97,7 +97,10 @@ const Profile = ({ keycloak }) => {
             src={avatar2}
             sx={{ width: 32, height: 32 }}
           />
-          <Typography variant='subtitle1'>
+          <Typography
+            variant='subtitle1'
+            sx={{ color: 'white', fontWeight: 'normal' }}
+          >
             {keycloak.idTokenParsed.given_name}
           </Typography>
         </Stack>
