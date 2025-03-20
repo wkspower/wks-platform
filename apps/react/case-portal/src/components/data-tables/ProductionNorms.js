@@ -221,7 +221,7 @@ const ProductionNorms = () => {
     try {
       setIsSaving(true)
       const data = await DataService.getAOPData(keycloak)
-      const data1 = data1.slice(0, 3)
+      // const data1 = data1.slice(0, 3)
       const formattedData = data.map((item, index) => {
         const isKiloTon = selectedUnit !== 'Ton'
         return {

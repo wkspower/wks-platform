@@ -8,6 +8,9 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import getEnhancedProductionColDefs from './CommonHeader/ProductionVolumeHeader'
 const headerMap = generateHeaderNames()
 
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
+
 const ProductionvolumeData = () => {
   const keycloak = useSession()
   // const [productNormData, setProductNormData] = useState([])
@@ -24,6 +27,7 @@ const ProductionvolumeData = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('TPH')
+  const [loading, setLoading] = useState(false)
 
   // States for the Remark Dialog
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
@@ -185,7 +189,7 @@ const ProductionvolumeData = () => {
   const fetchData = async () => {
     try {
       const data = await DataService.getAOPMCCalculatedData(keycloak)
-      const data1 = data1.slice(0, 3)
+      // const data1 = data.slice(0, 3)
       const formattedData = data.map((item, index) => {
         const isTPD = selectedUnit == 'TPD'
         return {
@@ -495,6 +499,12 @@ const ProductionvolumeData = () => {
 
   return (
     <div>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
       <ASDataGrid
         setRows={setRows}
         columns={productionColumns}
