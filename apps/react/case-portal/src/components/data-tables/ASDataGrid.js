@@ -607,7 +607,7 @@ const DataGridTable = ({
         {/* Backdrop inside child component */}
         <Backdrop
           sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={loading}
+          open={!!loading}
         >
           <CircularProgress color='inherit' />
         </Backdrop>
@@ -841,7 +841,8 @@ const DataGridTable = ({
               },
             }}
             onClick={saveModalOpen}
-            loadingPosition='start'
+            loading={loading} // Use the loading prop to trigger loading state
+            loadingPosition='start' // Use loadingPosition to control where the spinner appears
           >
             Save
           </Button>
@@ -896,7 +897,7 @@ const DataGridTable = ({
       </Dialog>
 
       <Dialog
-        open={remarkDialogOpen}
+        open={!!remarkDialogOpen}
         onClose={() => setRemarkDialogOpen(false)}
       >
         <DialogTitle>Add Remark</DialogTitle>

@@ -8,6 +8,8 @@ export const validateFields = (data, requiredFields) => {
     rate: 'Rate',
     durationInHrs: 'Duration',
     product: 'Particular',
+    normParametersFKId: 'Particular',
+    aopRemarks: 'Remark',
   }
 
   const invalidRows = data.filter((row) =>

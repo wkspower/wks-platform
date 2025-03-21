@@ -110,22 +110,23 @@ const SelectivityData = () => {
       }
 
       const turnAroundDetails = newRow.map((row) => ({
-        apr: row.apr,
-        may: row.may,
-        jun: row.jun,
-        jul: row.jul,
-        aug: row.aug,
-        sep: row.sep,
-        oct: row.oct,
-        nov: row.nov,
-        dec: row.dec,
-        jan: row.jan,
-        feb: row.feb,
-        mar: row.mar,
+        apr: row.apr || null,
+        may: row.may || null,
+        jun: row.jun || null,
+        jul: row.jul || null,
+        aug: row.aug || null,
+        sep: row.sep || null,
+        oct: row.oct || null,
+        nov: row.nov || null,
+        dec: row.dec || null,
+        jan: row.jan || null,
+        feb: row.feb || null,
+        mar: row.mar || null,
         UOM: '',
-        year: '2025-26',
+        year: localStorage.getItem('year'),
         normParameterFKId: row.NormParameterFKId,
         remarks: row.remark,
+        id: row.idFromApi || null,
       }))
 
       const response = await DataService.saveCatalystData(
@@ -191,6 +192,7 @@ const SelectivityData = () => {
       if (data) {
         formattedData = data?.map((item, index) => ({
           ...item,
+          idFromApi: item.id,
           id: index,
         }))
       }
@@ -426,7 +428,7 @@ const SelectivityData = () => {
     <div>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
+        open={!!loading}
       >
         <CircularProgress color='inherit' />
       </Backdrop>

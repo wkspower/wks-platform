@@ -14,6 +14,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
 
 const headerMap = generateHeaderNames()
+
 const NormalOpNormsScreen = () => {
   const [allProducts, setAllProducts] = useState([])
   // const [bdData, setBDData] = useState([])
@@ -388,8 +389,6 @@ const NormalOpNormsScreen = () => {
         normParameterTypeId: row.normParameterTypeId || null,
       }))
       if (businessData.length > 0) {
-        // console.log(title)
-
         const response = await DataService.saveNormalOperationNormsData(
           plantId,
           businessData,
@@ -476,7 +475,7 @@ const NormalOpNormsScreen = () => {
     <div>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
+        open={!!loading}
       >
         <CircularProgress color='inherit' />
       </Backdrop>
