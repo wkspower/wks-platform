@@ -68,11 +68,17 @@ const App = () => {
     }
   }
 
-  useEffect(() => {
-    if (keycloak) {
-      buildMenuItems(keycloak)
-    }
-  }, [verticalChange, sitePlantChange, keycloak])
+  // useEffect(() => {
+  //   if (keycloak) {
+  //     buildMenuItems(keycloak)
+  //   }
+  // }, [verticalChange, sitePlantChange, keycloak])
+
+  // useEffect(() => {
+  //   if (keycloak) {
+  //     buildMenuItems(keycloak)
+  //   }
+  // }, [verticalChange, sitePlantChange, keycloak])
 
   async function buildMenuItems(keycloak) {
     const menu = {

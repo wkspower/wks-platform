@@ -376,7 +376,8 @@ async function getCatalystSelectivityData(keycloak) {
   // }
   var year = localStorage.getItem('year')
 
-  const url = `${Config.CaseEngineUrl}/task/getCatalystSelectivityData?year=${year}&plantId=${plantId}&siteId=${siteId}`
+  //const url = `${process.env.REACT_APP_API_URL}/task/getConfigurationData?year=${year}&plantFKId=${plantId}`
+  const url = `${process.env.REACT_APP_API_URL}/task/getCatalystSelectivityData?year=${year}&plantId=${plantId}&siteId=${siteId}`
 
   const headers = {
     Accept: 'application/json',
@@ -710,6 +711,9 @@ async function saveNormalOperationNormsData(
   }
 }
 
+async function saveShutDownNormsData(plantId, turnAroundDetails, keycloak) {
+  const url = `${process.env.REACT_APP_API_URL}/task/saveShutDownNormsData`
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -813,7 +817,7 @@ async function getAllSites(keycloak) {
 async function getAllProducts(keycloak, type) {
   const storedPlant = localStorage.getItem('selectedPlant')
   const parsedPlant = JSON.parse(storedPlant)
-  const url = `${Config.CaseEngineUrl}/task/getAllProducts?normParameterTypeName=${type}`
+  const url = `${Config.CaseEngineUrl}/task/getAllProducts?normParameterTypeName=${type}&plantId=${parsedPlant.id}`
 
   const headers = {
     Accept: 'application/json',

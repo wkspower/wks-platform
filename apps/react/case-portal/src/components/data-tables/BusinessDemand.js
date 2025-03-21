@@ -203,33 +203,33 @@ const BusinessDemand = () => {
         id: row.idFromApi || null,
       }))
 
-      if (businessData.length > 0) {
-        const response = await DataService.saveBusinessDemandData(
-          plantId,
-          businessData,
-          keycloak,
-        )
+      // if (businessData.length > 0) {
+      const response = await DataService.saveBusinessDemandData(
+        plantId,
+        businessData,
+        keycloak,
+      )
 
-        // console.log(response)
+      // console.log(response)
 
-        if (response.status == 200) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Business Demand data Saved Successfully!',
-            severity: 'success',
-          })
-          unsavedChangesRef.current = {
-            unsavedRows: {},
-            rowsBeforeChange: {},
-          }
-        } else {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Error saving Business Demand data!',
-            severity: 'error',
-          })
-        }
+      // if (response.status == 200) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Business Demand data Saved Successfully!',
+        severity: 'success',
+      })
+      unsavedChangesRef.current = {
+        unsavedRows: {},
+        rowsBeforeChange: {},
       }
+      // } else {
+      //   setSnackbarOpen(true)
+      //   setSnackbarData({
+      //     message: 'Error saving Business Demand data!',
+      //     severity: 'error',
+      //   })
+      // }
+      // }
       fetchData()
       return response
     } catch (error) {
