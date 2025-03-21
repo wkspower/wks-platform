@@ -9,3 +9,4 @@ dist
 public/**/*.min.js
 public/**/*.min.css
 public/**/*.css
+public/**/**/**/*.js
