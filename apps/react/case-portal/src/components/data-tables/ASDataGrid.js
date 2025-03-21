@@ -20,7 +20,6 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { GridActionsCellItem, GridRowModes } from '@mui/x-data-grid'
 import Notification from 'components/Utilities/Notification'
-import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { MenuItem } from '../../../node_modules/@mui/material/index'
 
@@ -68,6 +67,7 @@ const DataGridTable = ({
   // setCurrentRowId,
   currentRowId,
   unsavedChangesRef,
+  deleteRowData,
   // handleRemarkCellClick,
   // units,
 }) => {
@@ -75,11 +75,13 @@ const DataGridTable = ({
   // const [isUpdating, setIsUpdating] = useState(false)
   // const [isSaving, setIsSaving] = useState(false)
   const [resizedColumns, setResizedColumns] = useState({})
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false)
+
   // const [open, setOpen] = useState(false)
   // const [remark, setRemark] = useState('')
   // const [product, setProduct] = useState('')
   // const [openRemark, setOpenRemark] = useState(false)
-  const keycloak = useSession()
+  // const keycloak = useSession()
   // const [days, setDays] = useState([])
   const [searchText, setSearchText] = useState('')
   const isFilterActive = false
@@ -87,8 +89,9 @@ const DataGridTable = ({
   const [selectedUnit, setSelectedUnit] = useState()
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
-  const [deleteId, setDeleteId] = useState(false)
-  const [deleteIdTemp, setDeleteIdTemp] = useState(false)
+  // const [deleteId, setDeleteId] = useState(false)
+  // const [deleteIdTemp, setDeleteIdTemp] = useState(false)
+  const [paramsForDelete, setParamsForDelete] = useState([])
   // const handleOpenRemark = () => setOpenRemark(true)
   // const handleCloseRemark = () => setOpenRemark(false)
   const closeDeleteDialogeBox = () => setOpenDeleteDialogeBox(false)
@@ -159,43 +162,8 @@ const DataGridTable = ({
   }
 
   const deleteTheRecord = async () => {
-    try {
-      if (deleteId) {
-        if (title == 'Business Demand') {
-          await DataService.deleteBusinessDemandData(deleteId, keycloak)
-        }
-        if (title == 'Shutdown/Turnaround Activities') {
-          await DataService.deleteShutdownData(deleteId, keycloak)
-        }
-        if (title == 'Slowdown Activities') {
-          await DataService.deleteSlowdownData(deleteId, keycloak)
-        }
-        if (title == 'Turnaround Activities') {
-          await DataService.deleteTurnAroundData(deleteId, keycloak)
-        }
-
-        setRows((prevRows) =>
-          prevRows.filter((row) => row.id !== deleteId || deleteIdTemp),
-        )
-        onDeleteRow?.(deleteId || deleteIdTemp)
-      } else {
-        handleCancelClick(deleteIdTemp)
-      }
-
-      setDeleteId(null)
-      setDeleteIdTemp(null)
-      setOpenDeleteDialogeBox(false)
-      setSnackbarOpen(true)
-
-      setSnackbarData({
-        message: `${title} deleted successfully!`,
-        severity: 'success',
-      })
-
-      fetchData()
-    } catch (error) {
-      console.error('Error deleting Business data:', error)
-    }
+    deleteRowData(paramsForDelete)
+    setOpenDeleteDialogeBox(false)
   }
 
   const saveConfirmation = async () => {
@@ -204,10 +172,16 @@ const DataGridTable = ({
   }
 
   const saveModalOpen = async () => {
+    setIsButtonDisabled(true)
     setOpenSaveDialogeBox(true)
+    setTimeout(() => {
+      setIsButtonDisabled(false)
+    }, 500)
   }
 
   const handleAddRow = () => {
+    if (isButtonDisabled) return
+    setIsButtonDisabled(true)
     const newRowId = rows.length
       ? Math.max(...rows.map((row) => row.id)) + 1
       : 1
@@ -224,17 +198,14 @@ const DataGridTable = ({
       ...oldModel,
       [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
     }))
+    setTimeout(() => {
+      setIsButtonDisabled(false)
+    }, 500)
   }
 
   const handleDeleteClick = async (id, params) => {
-    const maintenanceId =
-      id?.maintenanceId ||
-      params?.row?.idFromApi ||
-      params?.row?.maintenanceId ||
-      params?.NormParameterMonthlyTransactionId
+    setParamsForDelete(params)
     setOpenDeleteDialogeBox(true)
-    setDeleteId(maintenanceId)
-    setDeleteIdTemp(id)
   }
 
   const defaultColumns = useMemo(() => {
@@ -381,6 +352,13 @@ const DataGridTable = ({
       console.error('Error saving refresh data:', error)
     }
   }
+  const handleCalculateBtn = async () => {
+    setIsButtonDisabled(true)
+    handleCalculate()
+    setTimeout(() => {
+      setIsButtonDisabled(false)
+    }, 500)
+  }
 
   return (
     <Box
@@ -444,7 +422,8 @@ const DataGridTable = ({
           {permissions?.showCalculate && (
             <Button
               variant='contained'
-              onClick={handleCalculate}
+              onClick={handleCalculateBtn}
+              disabled={isButtonDisabled}
               sx={{
                 backgroundColor: jioColors.primaryBlue,
                 color: jioColors.background,
@@ -453,13 +432,19 @@ const DataGridTable = ({
                 textTransform: 'none',
                 fontSize: '0.875rem',
                 fontWeight: 500,
+
                 '&:hover': {
                   backgroundColor: '#143B6F',
                   boxShadow: 'none',
                 },
+                '&.Mui-disabled': {
+                  backgroundColor: jioColors.primaryBlue,
+                  color: jioColors.background,
+                  opacity: 0.7,
+                },
               }}
             >
-              CALCULATE
+              Calculate
             </Button>
           )}
 
@@ -643,6 +628,7 @@ const DataGridTable = ({
           rowModesModel={rowModesModel}
           onRowModesModelChange={handleRowModesModelChange}
           handleCalculate={handleCalculate}
+          deleteRowData={deleteRowData}
           slotProps={{
             toolbar: { setRows, setRowModesModel, GridToolbar },
             loadingOverlay: {
@@ -816,8 +802,14 @@ const DataGridTable = ({
                 backgroundColor: '#143B6F',
                 boxShadow: 'none',
               },
+              '&.Mui-disabled': {
+                backgroundColor: jioColors.primaryBlue,
+                color: jioColors.background,
+                opacity: 0.7,
+              },
             }}
             onClick={handleAddRow}
+            disabled={isButtonDisabled}
           >
             Add Item
           </Button>
@@ -839,8 +831,14 @@ const DataGridTable = ({
                 backgroundColor: '#143B6F',
                 boxShadow: 'none',
               },
+              '&.Mui-disabled': {
+                backgroundColor: jioColors.primaryBlue,
+                color: jioColors.background,
+                opacity: 0.7,
+              },
             }}
             onClick={saveModalOpen}
+            disabled={isButtonDisabled}
             loading={loading} // Use the loading prop to trigger loading state
             loadingPosition='start' // Use loadingPosition to control where the spinner appears
           >

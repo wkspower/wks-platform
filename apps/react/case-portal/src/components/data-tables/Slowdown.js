@@ -289,29 +289,6 @@ const SlowDown = () => {
   //   }
   // }
 
-  // const handleDeleteClick = async (id, params) => {
-  //   try {
-  //     const maintenanceId =
-  //       id?.maintenanceId ||
-  //       params?.row?.idFromApi ||
-  //       params?.row?.maintenanceId ||
-  //       params?.NormParameterMonthlyTransactionId
-
-  //     // console.log(maintenanceId, params, id)
-
-  //     // Ensure UI state updates before the deletion process
-  //     setOpen1(true)
-  //     setDeleteId(id)
-
-  //     // Perform the delete operation
-  //     return await DataService.deleteSlowdownData(maintenanceId, keycloak)
-  //   } catch (error) {
-  //     console.error(`Error deleting Slowdown data:`, error)
-  //   } finally {
-  //     fetchData()
-  //   }
-  // }
-
   const colDefs = [
     {
       field: 'discription',
@@ -475,6 +452,30 @@ const SlowDown = () => {
     console.log(error)
   }, [])
 
+  const deleteRowData = async (paramsForDelete) => {
+    try {
+      const { idFromApi, id } = paramsForDelete.row
+      const deleteId = id
+
+      if (!idFromApi) {
+        setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+      }
+
+      if (idFromApi) {
+        await DataService.deleteSlowdownData(idFromApi, keycloak)
+        setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Record Deleted successfully!',
+          severity: 'success',
+        })
+        fetchData()
+      }
+    } catch (error) {
+      console.error('Error deleting Record!', error)
+    }
+  }
+
   return (
     <div>
       <Backdrop
@@ -516,6 +517,7 @@ const SlowDown = () => {
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
+        deleteRowData={deleteRowData}
         permissions={{
           showAction: true,
           addButton: true,

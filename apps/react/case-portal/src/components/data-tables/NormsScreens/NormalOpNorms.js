@@ -430,14 +430,14 @@ const NormalOpNormsScreen = () => {
     return !params.row.Particulars
   }
 
-  const handleCalculate = async (year) => {
+  const handleCalculate = async () => {
     try {
       const storedPlant = localStorage.getItem('selectedPlant')
+      const year = localStorage.getItem('year')
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-
       var plantId = plantId
       const data = await DataService.handleCalculateNormalOpsNorms(
         plantId,

@@ -463,7 +463,7 @@ const SelectivityData = () => {
         permissions={{
           showAction: true,
           addButton: true,
-          deleteButton: true,
+          deleteButton: false,
           editButton: true,
           showUnit: false,
           saveWithRemark: true,

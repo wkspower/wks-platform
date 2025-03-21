@@ -126,24 +126,18 @@ const TurnaroundPlanTable = () => {
   }
 
   const saveChanges = React.useCallback(async () => {
-    console.log(
-      'Edited Data: ',
-      Object.values(unsavedChangesRef.current.unsavedRows),
-    )
-    setTimeout(async () => {
-      try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        saveTurnAroundData(data)
+    try {
+      var data = Object.values(unsavedChangesRef.current.unsavedRows)
+      saveTurnAroundData(data)
 
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
-      } catch (error) {
-        // setIsSaving(false);
+      unsavedChangesRef.current = {
+        unsavedRows: {},
+        rowsBeforeChange: {},
       }
-    }, 1000) // Delay of 1 seconds
-  }, [apiRef])
+    } catch (error) {
+      // setIsSaving(false);
+    }
+  }, 1000) // Delay of 1 seconds
 
   const fetchData = async () => {
     try {
@@ -394,6 +388,30 @@ const TurnaroundPlanTable = () => {
     console.log(error)
   }, [])
 
+  const deleteRowData = async (paramsForDelete) => {
+    try {
+      const { idFromApi, id } = paramsForDelete.row
+      const deleteId = id
+
+      if (!idFromApi) {
+        setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+      }
+
+      if (idFromApi) {
+        await DataService.deleteTurnAroundData(idFromApi, keycloak)
+        setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Record Deleted successfully!',
+          severity: 'success',
+        })
+        fetchData()
+      }
+    } catch (error) {
+      console.error('Error deleting Record!', error)
+    }
+  }
+
   return (
     <div>
       <Backdrop
@@ -434,6 +452,7 @@ const TurnaroundPlanTable = () => {
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
+        deleteRowData={deleteRowData}
         permissions={{
           showAction: true,
           addButton: true,

@@ -195,19 +195,17 @@ const NormalOpNormsScreen = () => {
   }
 
   const saveChanges = React.useCallback(async () => {
-    setTimeout(async () => {
-      try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        console.log('data', data)
-        saveEditedData(data)
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
-      } catch (error) {
-        // setIsSaving(false);
+    try {
+      var data = Object.values(unsavedChangesRef.current.unsavedRows)
+
+      saveEditedData(data)
+      unsavedChangesRef.current = {
+        unsavedRows: {},
+        rowsBeforeChange: {},
       }
-    }, 1000)
+    } catch (error) {
+      // setIsSaving(false);
+    }
   }, [apiRef, selectedUnit])
 
   const fetchData = async () => {

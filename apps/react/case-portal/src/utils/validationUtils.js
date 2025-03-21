@@ -15,8 +15,8 @@ export const validateFields = (data, requiredFields) => {
   const invalidRows = data.filter((row) =>
     requiredFields.some((field) => {
       const value = row[field]
-      if (value === undefined || value === null) return true // Missing values
-      if (typeof value === 'string' && value.trim() === '') return true // Empty string
+      if (value === undefined || value === null) return true
+      if (typeof value === 'string' && value.trim() === '') return true
       return false
     }),
   )
@@ -37,12 +37,14 @@ export const validateFields = (data, requiredFields) => {
 
         return missingFieldsMessage.join(', ')
       })
-      .filter((msg) => msg !== '') // Remove empty messages
+      .filter((msg) => msg !== '')
       .join(', ')
 
-    return missingFields
-      ? `Please fill in the required fields: ${missingFields}`
-      : ''
+    if (missingFields) {
+      const uniqueFields = [...new Set(missingFields.split(', '))].join(', ')
+      return `Please fill in the required fields: ${uniqueFields}`
+    }
+    return ''
   }
 
   return ''

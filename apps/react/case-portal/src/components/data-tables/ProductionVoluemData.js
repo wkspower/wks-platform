@@ -150,40 +150,38 @@ const ProductionvolumeData = () => {
   }, [])
 
   const saveChanges = React.useCallback(async () => {
-    setTimeout(() => {
-      try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        if (data.length == 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          return
-        }
-        // Validate that both normParameterId and remark are not empty
-        const invalidRows = data.filter(
-          (row) => !row.normParametersFKId.trim(),
-          // (row) => !row.normParametersFKId.trim() || !row.remark.trim(),
-        )
-
-        if (invalidRows.length > 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Please fill required fields: Product and Remark.',
-            severity: 'error',
-          })
-          return
-        }
-        editAOPMCCalculatedData(data)
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
-      } catch (error) {
-        // setIsSaving(false);
+    try {
+      var data = Object.values(unsavedChangesRef.current.unsavedRows)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
       }
-    }, 1000)
+      // Validate that both normParameterId and remark are not empty
+      const invalidRows = data.filter(
+        (row) => !row.normParametersFKId.trim(),
+        // (row) => !row.normParametersFKId.trim() || !row.remark.trim(),
+      )
+
+      if (invalidRows.length > 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Please fill required fields: Product and Remark.',
+          severity: 'error',
+        })
+        return
+      }
+      editAOPMCCalculatedData(data)
+      unsavedChangesRef.current = {
+        unsavedRows: {},
+        rowsBeforeChange: {},
+      }
+    } catch (error) {
+      // setIsSaving(false);
+    }
   }, [apiRef, selectedUnit])
 
   const fetchData = async () => {

@@ -160,8 +160,9 @@ const ProductionNorms = () => {
     }
   }
 
-  const handleCalculate = async (year) => {
+  const handleCalculate = async () => {
     try {
+      const year = localStorage.getItem('year')
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
