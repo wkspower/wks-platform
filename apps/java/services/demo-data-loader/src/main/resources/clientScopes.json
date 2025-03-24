@@ -518,5 +518,30 @@
     }
 	        }
 	      ]
+	  },
+    {
+      "name": "verticals",
+      "description": "Associated Vertical and Link details",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "verticals",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "verticals",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "verticals",
+            "jsonType.label": "String"
 	    }
+        }
+      ]
+    }
  ]
