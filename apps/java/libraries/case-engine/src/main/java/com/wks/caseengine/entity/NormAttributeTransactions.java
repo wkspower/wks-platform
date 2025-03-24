@@ -31,17 +31,17 @@ public class NormAttributeTransactions {
     @Column(name = "Id", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "AttributeName", length = 250)
-    private String attributeName;
+    // @Column(name = "AttributeName", length = 250)
+    // private String attributeName;
 
     @Column(name = "AttributeValue", length = 250)
     private String attributeValue;
 
-    @Column(name = "AttributeLable", length = 250)
-    private String attributeLable;
+    // @Column(name = "AttributeLable", length = 250)
+    // private String attributeLable;
 
-    @Column(name = "AttributeValueLable", length = 250)
-    private String attributeValueLable;
+    // @Column(name = "AttributeValueLable", length = 250)
+    // private String attributeValueLable;
 
     @Column(name = "AOPMonth")
     private String aopMonth;
