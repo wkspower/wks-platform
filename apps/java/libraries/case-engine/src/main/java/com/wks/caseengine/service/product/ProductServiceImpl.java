@@ -111,7 +111,7 @@ public class ProductServiceImpl implements ProductService {
 	        SELECT CAST(np.Id AS VARCHAR(36)) as NormParameterId, np.Name, np.DisplayName 
 	        FROM NormParameters np
 	        JOIN NormTypes nt ON np.NormType_FK_Id = nt.Id
-	        WHERE np.Plant_FK_Id = :plantId
+	        WHERE np.Plant_FK_Id = :plantId AND np.NormParameterType_FK_Id IS NOT NULL
 	    """);
 
 	    if (normParameterTypeName != null) {
