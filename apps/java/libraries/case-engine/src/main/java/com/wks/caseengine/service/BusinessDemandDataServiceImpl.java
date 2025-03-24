@@ -11,6 +11,8 @@ import com.wks.caseengine.entity.Product;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
 import java.util.*;
@@ -29,6 +31,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 	@Override
 	public List<BusinessDemandDataDTO> getBusinessDemandData(String year,String plantId) {
 		List<Object[]> obj = businessDemandDataRepository.findByYearAndPlantFkId(year, UUID.fromString(plantId));
+		System.out.println("obj"+obj);
 		List<BusinessDemandDataDTO> businessDemandDataDTOList = new ArrayList<>();
 
 		for (Object[] row : obj) {
@@ -59,6 +62,19 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 
 		    businessDemandDataDTOList.add(businessDemandDataDTO);
 		}
+		
+		List<Object[]> list = businessDemandDataRepository.getAllBusinessDemandData(plantId);
+ 		int i=1;
+ 		for(Object[] obj1 :list){
+            System.out.println("obj1"+obj1);
+ 			BusinessDemandDataDTO businessDemandDataDTO = new BusinessDemandDataDTO();
+
+ 			businessDemandDataDTO.setNormParameterId(obj1[0]!=null? obj1[0].toString():null);
+ 			businessDemandDataDTO.setId(i+"#");
+ 			businessDemandDataDTOList.add(businessDemandDataDTO);
+ 			i++;
+ 		}
+
 		 
         return businessDemandDataDTOList;
 	}
@@ -74,7 +90,9 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 			businessDemand.setDec(businessDemandDataDTO.getDec());
 			businessDemand.setFeb(businessDemandDataDTO.getFeb());
 	
-			if (businessDemandDataDTO.getId() != null && !businessDemandDataDTO.getId().isEmpty()) {
+			if(businessDemandDataDTO.getId()==null || businessDemandDataDTO.getId().contains("#") ){
+				businessDemand.setId(null);
+			}else {
 				businessDemand.setId(UUID.fromString(businessDemandDataDTO.getId()));
 			}
 	

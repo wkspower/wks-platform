@@ -44,7 +44,7 @@ public class NormAttributeTransactions {
     private String attributeValueLable;
 
     @Column(name = "AOPMonth")
-    private LocalDate aopMonth;
+    private String aopMonth;
 
     @Column(name = "AuditYear")
     private String auditYear;
@@ -70,11 +70,11 @@ public class NormAttributeTransactions {
     @Column(name = "NormParameter_FK_Id")
     private UUID normParameterFKId;
 
-    @Column(name = "CatalystAttribute_FK_Id")
-    private UUID catalystAttributeFKId;
+    //@Column(name = "CatalystAttribute_FK_Id")
+    //private UUID catalystAttributeFKId;
     
-    @Column(name="Month")
-    private Integer month;
+    //@Column(name="Month")
+    //private Integer month;
     
     @Column(name = "Plant_FK_Id")
     private UUID plantFKId;

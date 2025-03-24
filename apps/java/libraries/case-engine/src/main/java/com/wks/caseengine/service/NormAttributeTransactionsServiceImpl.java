@@ -204,7 +204,7 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 			}
 			
 			
-			normAttributeTransactionsRepository.updateCatalystData(attributeValue.toString(),catalystAttributesDTO.getRemarks(),month,auditYear,normParameterFKId,catalystAttributeFKId);
+			normAttributeTransactionsRepository.updateCatalystData(attributeValue.toString(),catalystAttributesDTO.getRemarks(),month,auditYear,normParameterFKId);
 		}
 		
 		// TODO Auto-generated method stub
@@ -214,16 +214,16 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	
 	@Override
 	public Boolean saveCatalystData(CatalystAttributesDTO catalystAttributesDTO) {
-		for(int i=0;i<12;i++) {
+		for(Integer i=1;i<12;i++) {
 			NormAttributeTransactions normAttributeTransactions= new NormAttributeTransactions();
 			normAttributeTransactions.setAttributeValue(getAttributeValue(catalystAttributesDTO,(i+1)).toString());
-			normAttributeTransactions.setMonth((i+1));
+			normAttributeTransactions.setAopMonth((i).toString());
 			normAttributeTransactions.setAuditYear(catalystAttributesDTO.getYear());
 			normAttributeTransactions.setAttributeName(catalystAttributesDTO.getAttributeName());
 			if(i<3) {
 				normAttributeTransactions.setAuditYear((catalystAttributesDTO.getYear()+1));
 			}
-			normAttributeTransactions.setCatalystAttributeFKId(catalystAttributesDTO.getCatalystAttributeFKId()!=null? UUID.fromString(catalystAttributesDTO.getCatalystAttributeFKId()) : null);
+			//normAttributeTransactions.setCatalystAttributeFKId(catalystAttributesDTO.getCatalystAttributeFKId()!=null? UUID.fromString(catalystAttributesDTO.getCatalystAttributeFKId()) : null);
 			normAttributeTransactions.setCreatedOn(new Date());
 			normAttributeTransactions.setAttributeValueVersion("V1");
 			normAttributeTransactions.setRemarks(catalystAttributesDTO.getRemarks());
@@ -248,7 +248,7 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 			// }	
 			UUID normParameterFKId= catalystAttributesDTO.getNormParameterFKId() !=null ? UUID.fromString(catalystAttributesDTO.getNormParameterFKId()) : null;
 			UUID catalystAttributeFKId=catalystAttributesDTO.getCatalystAttributeFKId() !=null ? UUID.fromString(catalystAttributesDTO.getCatalystAttributeFKId()) : null;; 
-			normAttributeTransactionsRepository.deleteCatalystData(attributeValue.toString(),month,auditYear,normParameterFKId,catalystAttributeFKId);
+			normAttributeTransactionsRepository.deleteCatalystData(attributeValue.toString(),month,auditYear,normParameterFKId);
 		}
 		
 		// TODO Auto-generated method stub

@@ -101,6 +101,7 @@ public class ProductServiceImpl implements ProductService {
 
 
 	public List<Object[]> getAllProductsFromNormParameters(String normParameterTypeName, UUID plantId) {
+		System.out.println("normParameterTypeName"+normParameterTypeName);
 	    if ("null".equals(normParameterTypeName)) {
 	        normParameterTypeName = null;
 	        System.out.println("normParameterTypeName is the string 'null'");
@@ -109,14 +110,14 @@ public class ProductServiceImpl implements ProductService {
 	    StringBuilder queryBuilder = new StringBuilder("""
 	        SELECT CAST(np.Id AS VARCHAR(36)) as NormParameterId, np.Name, np.DisplayName 
 	        FROM NormParameters np
-	        JOIN NormParameterType npt ON np.NormParameterType_FK_Id = npt.Id
+	        JOIN NormTypes nt ON np.NormType_FK_Id = nt.Id
 	        WHERE np.Plant_FK_Id = :plantId
 	    """);
 
 	    if (normParameterTypeName != null) {
-	        queryBuilder.append(" AND npt.Name = :normParameterTypeName");
+	        queryBuilder.append(" AND nt.NormName = :normParameterTypeName");
 	    }
-	    queryBuilder.append(" ORDER BY np.DiplayOrder");
+	    queryBuilder.append(" ORDER BY np.DisplayOrder");
 
 	    Query query = entityManager.createNativeQuery(queryBuilder.toString());
 	    query.setParameter("plantId", plantId);

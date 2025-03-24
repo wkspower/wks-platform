@@ -28,4 +28,7 @@ public class Sites {
 
     @Column(name = "DisplayOrder")
     private Integer displayOrder;
+    
+    @Column(name="SourceName")
+    private String sourceName;
 }

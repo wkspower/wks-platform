@@ -31,13 +31,13 @@ public interface AOPRepository extends JpaRepository<AOP, UUID>{
  	        SELECT AOP.Id, AOP.AOPCaseId, AOP.AOPStatus, AOP.AOPRemarks, AOP.NormItem, 
  	               AOP.AOPType, AOP.Jan, AOP.Feb, AOP.March, AOP.April, AOP.May, AOP.June, 
  	               AOP.July, AOP.Aug, AOP.Sep, AOP.Oct, AOP.Nov, AOP.Dec, AOP.AOPYear, 
- 	               AOP.Plant_FK_Id, AOP.AvgTPH, AOP.NormParameters_FK_Id, NP.DiplayOrder
+ 	               AOP.Plant_FK_Id, AOP.AvgTPH, AOP.NormParameters_FK_Id, NP.DisplayOrder
  	        FROM AOP AOP
  	        JOIN NormParameters NP 
  	        ON AOP.NormParameters_FK_Id = NP.Id 
  	        WHERE AOP.AOPYear = :aopYear 
  	        AND AOP.Plant_FK_Id = :plantFkId 
- 	        ORDER BY NP.DiplayOrder
+ 	        ORDER BY NP.DisplayOrder
  	        """, nativeQuery = true)
  	    List<Object[]> findByAOPYearAndPlantFkId(@Param("aopYear") String aopYear, @Param("plantFkId") UUID plantFkId);
 
@@ -50,16 +50,22 @@ public interface AOPRepository extends JpaRepository<AOP, UUID>{
 
 
 
+    @Query(value = "SELECT DISTINCT NP.Id " +
+            "FROM NormParameters NP " +
+            "JOIN NormTypes NT ON NT.Id = NP.NormType_FK_Id " +
+            "WHERE NP.Plant_FK_Id = :plantId " +
+            "  AND NT.NormName = 'Production' " +
+            "  AND NP.NormParameterType_FK_Id IS NOT NULL " +
+            "  AND NP.Id NOT IN (" +
+            "    SELECT AOP.NormParameters_FK_Id " +
+            "    FROM AOP AOP " +
+            "    WHERE AOP.Plant_FK_Id = :plantId AND AOP.AOPYear=:year " +
+            "      AND AOP.NormParameters_FK_Id IS NOT NULL" +
+            ")",
+    nativeQuery = true)
+List<Object[]> getDataBusinessAllData(@Param("plantId") String plantId,@Param("year") String year);
 
-
-    @Query(value="select distinct [NormParameters_FK_Id] from BusinessDemand where Plant_FK_Id = :plantId and Year=:year "+
-    " and [NormParameters_FK_Id] not in (select [NormParameters_FK_Id] from [dbo].[AOP] where Plant_FK_Id= :plantId and [NormParameters_FK_Id] is not null and Year=:year) ", nativeQuery=true)
-    List<Object[]> getDataBusinessAllData(@Param("plantId") String plantId, @Param("year") String year);
-
-
-    
-
-
+ 
     // Assuming the stored procedure is named 'getEmployeeDetails'
     @Procedure(name = "HMD_MaintenanceCalculation")
     String getEmployeeDetails(Integer employeeId);

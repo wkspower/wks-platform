@@ -47,7 +47,7 @@ public class NormParameters {
     @Column(name = "NormType_FK_Id")
     private Integer normTypeFKId;
     
-    @Column(name = "DiplayOrder")
+    @Column(name = "DisplayOrder")
     private Integer displayOrder;
 
 }

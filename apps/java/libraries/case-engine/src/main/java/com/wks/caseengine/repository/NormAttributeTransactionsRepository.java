@@ -16,7 +16,7 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	
 	@Modifying
 	@Query("UPDATE NormAttributeTransactions nat SET nat.attributeValue = :attributeValue " +
-	       "WHERE nat.month = :month AND nat.normParameterFKId = :normParameterFKId AND nat.auditYear = :auditYear")
+	       "WHERE nat.aopMonth = :month AND nat.normParameterFKId = :normParameterFKId AND nat.auditYear = :auditYear")
 	int updateNormAttributeTransactions(@Param("attributeValue") String attributeValue,  
 	                                    @Param("month") Integer month,  
 	                                    @Param("normParameterFKId") UUID normParameterFKId,  
@@ -27,37 +27,33 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	@Query("UPDATE NormAttributeTransactions nat " +
 	       "SET nat.attributeValue = :attributeValue, " +  // Updating attributeValue
 	       "    nat.remarks = :remarks " +  // Updating remarks
-	       "WHERE nat.month = :month " +
+	       "WHERE nat.aopMonth = :month " +
 	       "AND nat.auditYear = :auditYear " +
-	       "AND nat.normParameterFKId = :normParameterFKId " +
-	       "AND nat.catalystAttributeFKId = :catalystAttributeFKId")
+	       "AND nat.normParameterFKId = :normParameterFKId ")
 	void updateCatalystData(@Param("attributeValue") String attributeValue, 
 	                        @Param("remarks") String remarks,  // Added remarks parameter
 	                        @Param("month") Integer month, 
 	                        @Param("auditYear") String auditYear, 
-	                        @Param("normParameterFKId") UUID normParameterFKId, 
-	                        @Param("catalystAttributeFKId") UUID catalystAttributeFKId);
+	                        @Param("normParameterFKId") UUID normParameterFKId);
 
 	
 	@Modifying
 	@Transactional
 	@Query("DELETE FROM NormAttributeTransactions nat " +
 	       "WHERE nat.attributeValue = :attributeValue " +
-	       "AND nat.month = :month " +  // Added missing AND
+	       "AND nat.aopMonth = :month " +  // Added missing AND
 	       "AND nat.auditYear = :auditYear " +
-	       "AND nat.normParameterFKId = :normParameterFKId " +
-	       "AND nat.catalystAttributeFKId = :catalystAttributeFKId")
+	       "AND nat.normParameterFKId = :normParameterFKId ")
 	void deleteCatalystData(@Param("attributeValue") String attributeValue, 
 	                        @Param("month") Integer month, 
 	                        @Param("auditYear") String auditYear, 
-	                        @Param("normParameterFKId") UUID normParameterFKId, 
-	                        @Param("catalystAttributeFKId") UUID catalystAttributeFKId);
+	                        @Param("normParameterFKId") UUID normParameterFKId);
 	
 	@Modifying
 	@Transactional
 	@Query("DELETE FROM NormAttributeTransactions nat " +
 	       "WHERE nat.attributeValue = :attributeValue " +
-	       "AND nat.month = :month " +  // Added missing AND
+	       "AND nat.aopMonth = :month " +  // Added missing AND
 	       "AND nat.auditYear = :auditYear " +
 	       "AND nat.normParameterFKId = :normParameterFKId")
 	void deleteBusinessDemandData(@Param("attributeValue") String attributeValue, 
@@ -70,18 +66,18 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 							@Query(value = """
 			           SELECT
 			    NP.Id AS NormParameter_FK_Id,
-			    MAX(CASE WHEN NAT.Month = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan,
-			    MAX(CASE WHEN NAT.Month = '2' THEN NAT.AttributeValue ELSE NULL END) AS Feb,
-			    MAX(CASE WHEN NAT.Month = '3' THEN NAT.AttributeValue ELSE NULL END) AS Mar,
-			    MAX(CASE WHEN NAT.Month = '4' THEN NAT.AttributeValue ELSE NULL END) AS Apr,
-			    MAX(CASE WHEN NAT.Month = '5' THEN NAT.AttributeValue ELSE NULL END) AS May,
-			    MAX(CASE WHEN NAT.Month = '6' THEN NAT.AttributeValue ELSE NULL END) AS Jun,
-			    MAX(CASE WHEN NAT.Month = '7' THEN NAT.AttributeValue ELSE NULL END) AS Jul,
-			    MAX(CASE WHEN NAT.Month = '8' THEN NAT.AttributeValue ELSE NULL END) AS Aug,
-			    MAX(CASE WHEN NAT.Month = '9' THEN NAT.AttributeValue ELSE NULL END) AS Sep,
-			    MAX(CASE WHEN NAT.Month = '10' THEN NAT.AttributeValue ELSE NULL END) AS Oct,
-			    MAX(CASE WHEN NAT.Month = '11' THEN NAT.AttributeValue ELSE NULL END) AS Nov,
-			    MAX(CASE WHEN NAT.Month = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec,
+			    MAX(CASE WHEN NAT.AOPMonth = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan,
+			    MAX(CASE WHEN NAT.AOPMonth = '2' THEN NAT.AttributeValue ELSE NULL END) AS Feb,
+			    MAX(CASE WHEN NAT.AOPMonth = '3' THEN NAT.AttributeValue ELSE NULL END) AS Mar,
+			    MAX(CASE WHEN NAT.AOPMonth = '4' THEN NAT.AttributeValue ELSE NULL END) AS Apr,
+			    MAX(CASE WHEN NAT.AOPMonth = '5' THEN NAT.AttributeValue ELSE NULL END) AS May,
+			    MAX(CASE WHEN NAT.AOPMonth = '6' THEN NAT.AttributeValue ELSE NULL END) AS Jun,
+			    MAX(CASE WHEN NAT.AOPMonth = '7' THEN NAT.AttributeValue ELSE NULL END) AS Jul,
+			    MAX(CASE WHEN NAT.AOPMonth = '8' THEN NAT.AttributeValue ELSE NULL END) AS Aug,
+			    MAX(CASE WHEN NAT.AOPMonth = '9' THEN NAT.AttributeValue ELSE NULL END) AS Sep,
+			    MAX(CASE WHEN NAT.AOPMonth = '10' THEN NAT.AttributeValue ELSE NULL END) AS Oct,
+			    MAX(CASE WHEN NAT.AOPMonth = '11' THEN NAT.AttributeValue ELSE NULL END) AS Nov,
+			    MAX(CASE WHEN NAT.AOPMonth = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec,
 			    MAX(NAT.Remarks) AS Remarks ,
 			    MAX(NAT.Id) AS NormAttributeTransaction_Id,
 			    MAX(NAT.AuditYear) AS AuditYear
@@ -97,7 +93,8 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	List<Object[]> findByYearAndPlantFkId(@Param("year") String year,@Param("plantFKId")UUID plantFKId);
 	
 	
-	  Optional<NormAttributeTransactions> findByNormParameterFKIdAndMonthAndAuditYear(UUID normParameterFKId, Integer month, String auditYear);
+	Optional<NormAttributeTransactions> findByNormParameterFKIdAndAopMonthAndAuditYear(UUID normParameterFKId, String aopMonth, String auditYear);
+
 
 
 }

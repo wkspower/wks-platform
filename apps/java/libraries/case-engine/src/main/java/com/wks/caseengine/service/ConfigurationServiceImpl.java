@@ -97,13 +97,13 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 			 UUID normParameterFKId = UUID.fromString(configurationDTO.getNormParameterFKId());
  
 			
-			 for (int i = 1; i <= 12; i++) {
+			 for (Integer i = 1; i <= 12; i++) {
 				 Float attributeValue = getAttributeValue(configurationDTO, i);
  
 				
 				 Optional<NormAttributeTransactions> existingRecord = 
-					 normAttributeTransactionsRepository.findByNormParameterFKIdAndMonthAndAuditYear(
-						 normParameterFKId, i, year
+					 normAttributeTransactionsRepository.findByNormParameterFKIdAndAopMonthAndAuditYear(
+						 normParameterFKId, i.toString(), year
 					 );
  
 				 NormAttributeTransactions normAttributeTransactions;
@@ -120,7 +120,7 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 					 normAttributeTransactions.setAttributeValueVersion("V1");
 					 normAttributeTransactions.setUserName("System");
 					 normAttributeTransactions.setNormParameterFKId(normParameterFKId);
-					 normAttributeTransactions.setMonth(i);
+					 normAttributeTransactions.setAopMonth(i.toString());		
 					 normAttributeTransactions.setAuditYear(configurationDTO.getAuditYear());
 				 }
  

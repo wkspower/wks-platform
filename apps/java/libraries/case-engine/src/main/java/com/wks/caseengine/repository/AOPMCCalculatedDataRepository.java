@@ -29,18 +29,33 @@ public interface AOPMCCalculatedDataRepository extends JpaRepository<AOPMCCalcul
  		    SELECT AMC.Site, AMC.Plant, AMC.Material, AMC.January, AMC.February, AMC.March, AMC.April, AMC.May, AMC.June, AMC.July, 
  		           AMC.August, AMC.September, AMC.October, AMC.November, AMC.December, 
  		            AMC.Plant_FK_Id, AMC.Id, AMC.Year, AMC.NormParameters_FK_Id, 
- 		           NP.DiplayOrder, AMC.Remark
+ 		           NP.DisplayOrder, AMC.Remark
  		    FROM AOPMCCalculatedData AMC 
  		    JOIN NormParameters NP 
  		    ON AMC.NormParameters_FK_Id = NP.Id 
  		    WHERE AMC.Year = :year AND AMC.Plant_FK_Id = :plantFkId 
- 		    ORDER BY NP.DiplayOrder
+ 		    ORDER BY NP.DisplayOrder
  		    """, nativeQuery = true)
  		List<Object[]> findByYearAndPlantFkId(@Param("year") String year, @Param("plantFkId") UUID plantFkId);
  		
- 		@Query(value="select distinct NormParameters_FK_Id from BusinessDemand where Plant_FK_Id = :plantId and Year=:year "+
- 			   " and NormParameters_FK_Id not in (select NormParameters_FK_Id from AOPMCCalculatedData where Plant_FK_Id= :plantId and NormParameters_FK_Id is not null and Year=:year) ", nativeQuery=true)
- 			   List<Object[]> getDataBusinessAllData(@Param("plantId") String plantId, @Param("year") String year);
+ 		@Query(value = "SELECT DISTINCT NP.Id " +
+                "FROM NormParameters NP " +
+                "JOIN NormTypes NT ON NT.Id = NP.NormType_FK_Id " +
+                "WHERE NP.Plant_FK_Id = :plantId " +
+                "  AND NT.NormName = 'Production' " +
+                "  AND NP.NormParameterType_FK_Id IS NOT NULL " +
+                "  AND NP.Id NOT IN (" +
+                "    SELECT AOP.NormParameters_FK_Id " +
+                "    FROM AOPMCCalculatedData AOP " +
+                "    WHERE AOP.Plant_FK_Id = :plantId AND AOP.Year=:year " +
+                "      AND AOP.NormParameters_FK_Id IS NOT NULL" +
+                ")",
+        nativeQuery = true)
+ List<Object[]> getDataBusinessAllData(@Param("plantId") String plantId,@Param("year") String year);
+
+ 			   
+ 			  
+
  			 
 
 }

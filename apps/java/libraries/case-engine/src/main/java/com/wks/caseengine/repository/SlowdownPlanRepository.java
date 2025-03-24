@@ -19,14 +19,14 @@ public interface SlowdownPlanRepository extends JpaRepository<PlantMaintenanceTr
             "pm.DurationInMins, " +
             "pmt.MaintenanceText, " +
             "pm.Id, " +
-            "np.Id, pm.Remarks, np.DiplayOrder, pm.Rate " +
+            "np.Id, pm.Remarks, np.DisplayOrder, pm.Rate " +
             "FROM PlantMaintenanceTransaction pm " +
             "JOIN PlantMaintenance pmt ON pm.PlantMaintenance_FK_Id = pmt.Id " +
             "JOIN MaintenanceTypes mt ON pmt.MaintenanceType_FK_Id = mt.Id " +
             "LEFT JOIN NormParameters np ON pm.NormParameter_FK_Id = np.Id " +
             "WHERE mt.Name = :maintenanceTypeName "  +
             "and pmt.Plant_FK_Id = :plantId " +
-			"and AuditYear = :year order by np.DiplayOrder",
+			"and AuditYear = :year order by np.DisplayOrder",
             nativeQuery = true)
 	List<Object[]> findSlowdownPlanDetailsByPlantIdAndType( 
         @Param("maintenanceTypeName") String maintenanceTypeName, @Param("plantId") String plantId,  @Param("year") String year);
