@@ -217,7 +217,7 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 		for(Integer i=1;i<12;i++) {
 			NormAttributeTransactions normAttributeTransactions= new NormAttributeTransactions();
 			normAttributeTransactions.setAttributeValue(getAttributeValue(catalystAttributesDTO,(i+1)).toString());
-			normAttributeTransactions.setAopMonth((i).toString());
+			normAttributeTransactions.setAopMonth((i));
 			normAttributeTransactions.setAuditYear(catalystAttributesDTO.getYear());
 			// normAttributeTransactions.setAttributeName(catalystAttributesDTO.getAttributeName());
 			if(i<3) {

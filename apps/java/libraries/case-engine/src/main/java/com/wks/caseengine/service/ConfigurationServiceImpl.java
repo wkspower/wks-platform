@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.regex.Matcher;
 
@@ -91,19 +93,20 @@ public class ConfigurationServiceImpl implements ConfigurationService{
  	    return columnNames;
  	}
 
+	 @Transactional(propagation = Propagation.REQUIRES_NEW)
 	 @Override
 	 public String saveConfigurationData(String year, List<ConfigurationDTO> configurationDTOList) {
 		 for (ConfigurationDTO configurationDTO : configurationDTOList) {
 			 UUID normParameterFKId = UUID.fromString(configurationDTO.getNormParameterFKId());
  
 			
-			 for (Integer i = 1; i <= 12; i++) {
+			 for (int i = 1; i <= 12; i++) {
 				 Float attributeValue = getAttributeValue(configurationDTO, i);
  
 				
 				 Optional<NormAttributeTransactions> existingRecord = 
-					 normAttributeTransactionsRepository.findByNormParameterFKIdAndAopMonthAndAuditYear(
-						 normParameterFKId, i.toString(), year
+					 normAttributeTransactionsRepository.findByNormParameterFKIdAndAOPMonthAndAuditYear(
+						 normParameterFKId, i, year
 					 );
  
 				 NormAttributeTransactions normAttributeTransactions;
@@ -115,13 +118,15 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 				 } else {
 				  
 					 normAttributeTransactions = new NormAttributeTransactions();
-					 normAttributeTransactions.setId(UUID.randomUUID());
+ //	                normAttributeTransactions.setId(UUID.randomUUID());
 					 normAttributeTransactions.setCreatedOn(new Date());
 					 normAttributeTransactions.setAttributeValueVersion("V1");
 					 normAttributeTransactions.setUserName("System");
 					 normAttributeTransactions.setNormParameterFKId(normParameterFKId);
-					 normAttributeTransactions.setAopMonth(i.toString());		
+					 normAttributeTransactions.setAopMonth(i);
 					 normAttributeTransactions.setAuditYear(configurationDTO.getAuditYear());
+					 normAttributeTransactions.setAuditYear(year);
+					 
 				 }
  
 			 
