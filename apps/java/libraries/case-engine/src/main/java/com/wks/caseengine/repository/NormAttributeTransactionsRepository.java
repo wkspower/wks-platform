@@ -1,5 +1,8 @@
 package com.wks.caseengine.repository;
 import com.wks.caseengine.entity.NormAttributeTransactions;
+
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,6 +64,40 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	                        @Param("month") Integer month, 
 	                        @Param("auditYear") String auditYear, 
 	                        @Param("normParameterFKId") UUID normParameterFKId);
+
+
+
+							@Query(value = """
+			           SELECT
+			    NP.Id AS NormParameter_FK_Id,
+			    MAX(CASE WHEN NAT.Month = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan,
+			    MAX(CASE WHEN NAT.Month = '2' THEN NAT.AttributeValue ELSE NULL END) AS Feb,
+			    MAX(CASE WHEN NAT.Month = '3' THEN NAT.AttributeValue ELSE NULL END) AS Mar,
+			    MAX(CASE WHEN NAT.Month = '4' THEN NAT.AttributeValue ELSE NULL END) AS Apr,
+			    MAX(CASE WHEN NAT.Month = '5' THEN NAT.AttributeValue ELSE NULL END) AS May,
+			    MAX(CASE WHEN NAT.Month = '6' THEN NAT.AttributeValue ELSE NULL END) AS Jun,
+			    MAX(CASE WHEN NAT.Month = '7' THEN NAT.AttributeValue ELSE NULL END) AS Jul,
+			    MAX(CASE WHEN NAT.Month = '8' THEN NAT.AttributeValue ELSE NULL END) AS Aug,
+			    MAX(CASE WHEN NAT.Month = '9' THEN NAT.AttributeValue ELSE NULL END) AS Sep,
+			    MAX(CASE WHEN NAT.Month = '10' THEN NAT.AttributeValue ELSE NULL END) AS Oct,
+			    MAX(CASE WHEN NAT.Month = '11' THEN NAT.AttributeValue ELSE NULL END) AS Nov,
+			    MAX(CASE WHEN NAT.Month = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec,
+			    MAX(NAT.Remarks) AS Remarks ,
+			    MAX(NAT.Id) AS NormAttributeTransaction_Id,
+			    MAX(NAT.AuditYear) AS AuditYear
+			FROM NormParameters NP
+			JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id
+			LEFT JOIN NormAttributeTransactions NAT
+			    ON NAT.NormParameter_FK_Id = NP.Id
+			    AND NAT.AuditYear = :year
+			WHERE NPT.Name = 'Configuration'  AND NP.Plant_FK_Id = :plantFKId
+			GROUP BY NP.Id
+			ORDER BY NP.Id;
+			 """, nativeQuery = true)
+	List<Object[]> findByYearAndPlantFkId(@Param("year") String year,@Param("plantFKId")UUID plantFKId);
+	
+	
+	  Optional<NormAttributeTransactions> findByNormParameterFKIdAndMonthAndAuditYear(UUID normParameterFKId, Integer month, String auditYear);
 
 
 }

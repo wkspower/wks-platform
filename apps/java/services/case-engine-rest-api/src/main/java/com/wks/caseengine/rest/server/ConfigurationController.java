@@ -24,13 +24,13 @@ public class ConfigurationController {
 	private ConfigurationService configurationService;
 	
 	@GetMapping(value="/getConfigurationData")
-	public String getConfigurationData(@RequestParam String year,@RequestParam UUID plantFKId) {
+	public List<ConfigurationDTO> getConfigurationData(@RequestParam String year,@RequestParam UUID plantFKId) {
 		return configurationService.getConfigurationData(year,plantFKId);
 	}
 	
 	@PostMapping(value="/saveConfigurationData")
-	public String saveConfigurationData(@RequestParam String year,@RequestParam UUID plantFKId,@RequestBody List<ConfigurationDTO> configurationDTOList) {
-		configurationService.saveConfigurationData(year,plantFKId,configurationDTOList);
+	public String saveConfigurationData(@RequestParam String year, @RequestBody List<ConfigurationDTO> configurationDTOList) {
+		configurationService.saveConfigurationData(year,configurationDTOList);
 		return null;
 	}
 

@@ -13,7 +13,7 @@ import com.wks.caseengine.dto.ConfigurationDTO;
 
 public interface ConfigurationService {
 	
-	public String getConfigurationData(String year, UUID plantFKId);
-	public String saveConfigurationData( String year, UUID plantFKId, List<ConfigurationDTO> configurationDTOList);
+	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId);
+    public String saveConfigurationData( String year,  List<ConfigurationDTO> configurationDTOList);
 
 }
