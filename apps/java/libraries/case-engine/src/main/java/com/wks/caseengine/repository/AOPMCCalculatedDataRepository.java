@@ -48,20 +48,33 @@ WHERE MCU.FinancialYear = :year AND MCU.Plant_FK_Id= :plantFkId
 	    """, nativeQuery = true)
 	List<Object[]> findByYearAndPlantFkId(@Param("year") String year, @Param("plantFkId") UUID plantFkId);
  		
- 		@Query(value = "SELECT DISTINCT NP.Id " +
-                "FROM NormParameters NP " +
-                "JOIN NormTypes NT ON NT.Id = NP.NormType_FK_Id " +
-                "WHERE NP.Plant_FK_Id = :plantId " +
-                "  AND NT.NormName = 'Production' " +
-                "  AND NP.NormParameterType_FK_Id IS NOT NULL " +
-                "  AND NP.Id NOT IN (" +
-                "    SELECT AOP.NormParameters_FK_Id " +
-                "    FROM AOPMCCalculatedData AOP " +
-                "    WHERE AOP.Plant_FK_Id = :plantId AND AOP.Year=:year " +
-                "      AND AOP.NormParameters_FK_Id IS NOT NULL" +
-                ")",
+@Query(value = "SELECT TOP (1000) [Id]
+      ,[Site_FK_Id]
+      ,[Plant_FK_Id]
+      ,[Vertical_FK_Id]
+      ,[Material_FK_Id]
+      ,[April]
+      ,[May]
+      ,[June]
+      ,[July]
+      ,[August]
+      ,[September]
+      ,[October]
+      ,[November]
+      ,[December]
+      ,[January]
+      ,[February]
+      ,[March]
+      ,[FinancialYear]
+      ,[Remarks]
+      ,[CreatedOn]
+      ,[ModifiedOn]
+      ,[MCUVersion]
+      ,[UpdatedBy]
+  FROM [RIL.AOP4].[dbo].[vwAOPMCValues] where PLANT_FK_ID= :plantId and FinancialYear= :year;
+",
         nativeQuery = true)
- List<Object[]> getDataBusinessAllData(@Param("plantId") String plantId,@Param("year") String year);
+ List<Object[]> getDataMCUValuesAllData(@Param("plantId") String plantId,@Param("year") String year);
 
  			   
  			  
