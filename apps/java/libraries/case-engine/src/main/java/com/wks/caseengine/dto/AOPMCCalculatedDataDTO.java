@@ -1,5 +1,6 @@
 package com.wks.caseengine.dto;
 
+import java.util.Date;
 import org.springframework.context.annotation.Configuration;
 
 import lombok.AllArgsConstructor;

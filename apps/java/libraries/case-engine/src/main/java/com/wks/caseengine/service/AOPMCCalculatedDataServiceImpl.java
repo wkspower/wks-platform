@@ -24,7 +24,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	public List<AOPMCCalculatedDataDTO> getAOPMCCalculatedData(String plantId, String year) {
 	    
 		//  List<Object[]> obj= aOPMCCalculatedDataRepository.findByYearAndPlantFkId(year, UUID.fromString(plantId));
-		List<Object[]> obj= aOPMCCalculatedDataRepository.getDataMCUValuesAllData(year, UUID.fromString(plantId));
+		List<Object[]> obj= aOPMCCalculatedDataRepository.getDataMCUValuesAllData(year, plantId);
 	    List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
 
 	    for (Object[] row : obj) {
