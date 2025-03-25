@@ -48,7 +48,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
  	    	aOPMCCalculatedDataDTO.setMarch(row[15] != null ? Float.parseFloat(row[15].toString()) : null);
  	    	aOPMCCalculatedDataDTO.setFinancialYear(row[16] != null ? row[16].toString() : null);
  	    	// aOPMCCalculatedDataDTO.setDisplayOrder(row[19] != null ? Integer.parseInt(row[19].toString()) : null);
- 	    	aOPMCCalculatedDataDTO.setRemark(row[17] != null ? row[17].toString() : null);
+ 	    	aOPMCCalculatedDataDTO.setRemarks(row[17] != null ? row[17].toString() : null);
  	    	aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
  	    }
 	    
