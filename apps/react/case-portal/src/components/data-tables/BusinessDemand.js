@@ -91,11 +91,20 @@ const BusinessDemand = () => {
           // lowerVertName === 'meg' ? 'Production' : 'Grade',
           null,
         )
-        const productList = data.map((product) => ({
-          id: product.id, // Convert id to lowercase
-          // id: product.id.toLowerCase(), // Convert id to lowercase
-          displayName: product.displayName,
-        }))
+        const allowedIds = [
+          '4D8E17F6-D6CB-407E-8C9C-4BEDBC422C57',
+          '00DC05B1-9607-470E-A159-62497E0123E2',
+          'A061E050-0281-421F-81C1-B136CE2ED3F3',
+          '92E0AF06-9535-4B93-8998-E56A71354393',
+        ]
+
+        const productList = data
+          .filter((product) => allowedIds.includes(product.id))
+          .map((product) => ({
+            id: product.id,
+            displayName: product.displayName,
+          }))
+
         setAllProducts(productList)
       } catch (error) {
         console.error('Error fetching product:', error)
@@ -180,6 +189,20 @@ const BusinessDemand = () => {
         plantId = parsedPlant.id
       }
 
+      let siteId = ''
+      const storedSite = localStorage.getItem('selectedSite')
+      if (storedSite) {
+        const parsedSite = JSON.parse(storedSite)
+        siteId = parsedSite.id
+      }
+
+      let verticalId = localStorage.getItem('verticalId')
+      // const storedVertical = localStorage.getItem('selectedSite')
+      // if (storedVertical) {
+      //   const parsedVertical = JSON.parse(storedVertical)
+      //   verticalId = parsedVertical.id
+      // }
+
       const businessData = newRows.map((row) => ({
         april: row.april || null,
         may: row.may || null,
@@ -197,6 +220,8 @@ const BusinessDemand = () => {
         avgTph: row.avgTph || null,
         year: localStorage.getItem('year'),
         plantId: plantId,
+        siteFKId: siteId,
+        verticalFKId: verticalId,
         normParameterId: row.normParameterId,
         id: row.idFromApi || null,
       }))

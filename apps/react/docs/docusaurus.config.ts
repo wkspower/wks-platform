@@ -31,7 +31,8 @@ const config: Config = {
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
           breadcrumbs: false,
-          editUrl: "https://github.com/wkspower/wks-platform/tree/develop/apps/react/docs/",
+          editUrl:
+            "https://github.com/wkspower/wks-platform/tree/develop/apps/react/docs/",
         },
         theme: {
           customCss: "./src/css/custom.css",

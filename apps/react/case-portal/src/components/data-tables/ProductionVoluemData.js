@@ -103,17 +103,18 @@ const ProductionvolumeData = () => {
           isTPH && row.february ? row.february * 24 : row.february || null,
         march: isTPH && row.march ? row.march * 24 : row.march || null,
 
-        aopStatus: row.aopStatus || 'draft',
-        year: localStorage.getItem('year'),
-        plant: plantId,
-        plantFKId: plantId,
-        site: siteId,
-        material: 'EOE',
-        normParametersFKId: row.normParametersFKId,
+        // aopStatus: row.aopStatus || 'draft',
+        financialYear: row.financialYear,
+        // plant: plantId,
+        plantFKId: row.plantFKId || plantId,
+        siteFKId: row.siteFKId || siteId,
+        // material: 'EOE',
+        materialFKId: row.normParametersFKId,
+        verticalFKId: localStorage.getItem('verticalId'),
         id: row.idFromApi || null,
         avgTPH: findAvg('1', row) || null,
-        remark: row.remark,
-        remarks: row.remark,
+        remark: row.remarks,
+        remarks: row.remarks,
       }))
 
       const response = await DataService.editAOPMCCalculatedData(
@@ -188,13 +189,13 @@ const ProductionvolumeData = () => {
     try {
       setLoading(true)
       const data = await DataService.getAOPMCCalculatedData(keycloak)
-      // const data1 = data.slice(0, 3)
+      // const data = data1.slice(0, 3)
       const formattedData = data.map((item, index) => {
         const isTPD = selectedUnit == 'TPD'
         return {
           ...item,
           idFromApi: item?.id,
-          normParametersFKId: item?.normParametersFKId.toLowerCase(),
+          normParametersFKId: item?.materialFKId.toLowerCase(),
           id: index,
 
           ...(isTPD && {

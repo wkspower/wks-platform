@@ -74,10 +74,14 @@ const HeaderContent = ({ keycloak }) => {
               sitesData.push(siteWithVertical)
               if (site.plants && site.plants.length) {
                 site.plants.forEach((plant) => {
+                  //console.log('plant', plant)
+
                   plantsData.push({
                     id: plant.id,
                     name: plant.name,
                     siteName: site.name,
+                    siteId: site.id,
+                    verticalId: vertical.id,
                     verticalName: vertical.name,
                   })
                 })
@@ -136,17 +140,27 @@ const HeaderContent = ({ keycloak }) => {
           )
           setPlants(finalFilteredPlants)
 
+          // console.log('defaultPlant', defaultPlant)
+          // console.log('defaultPlant.verticalId', defaultPlant.verticalId)
+          localStorage.setItem('verticalId', defaultPlant.verticalId)
+
           localStorage.setItem(
             'selectedPlant',
             JSON.stringify({ id: defaultPlant.id, name: defaultPlant.name }),
           )
           localStorage.setItem(
             'selectedSite',
-            JSON.stringify({ name: defaultPlant.siteName }),
+            JSON.stringify({
+              id: defaultPlant.siteId,
+              name: defaultPlant.siteName,
+            }),
           )
           localStorage.setItem(
             'selectedVertical',
-            JSON.stringify({ name: defaultPlant.verticalName }),
+            JSON.stringify({
+              id: defaultPlant.verticalId,
+              name: defaultPlant.verticalName,
+            }),
           )
         }
       }
