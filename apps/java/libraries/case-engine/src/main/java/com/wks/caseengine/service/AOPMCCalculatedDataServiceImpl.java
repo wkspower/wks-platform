@@ -28,9 +28,9 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 
 	    for (Object[] row : obj) {
  	    	AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO = new AOPMCCalculatedDataDTO();
- 	    	aOPMCCalculatedDataDTO.setSite(row[0] != null ? row[0].toString() : null);
- 	    	aOPMCCalculatedDataDTO.setPlant(row[1] != null ? row[1].toString() : null);
- 	    	aOPMCCalculatedDataDTO.setMaterial(row[2] != null ? row[2].toString() : null);
+ 	    	aOPMCCalculatedDataDTO.setSiteFKID(row[0] != null ? row[0].toString() : null);
+ 	    	aOPMCCalculatedDataDTO.setPlantFKID(row[1] != null ? row[1].toString() : null);
+ 	    	aOPMCCalculatedDataDTO.setMaterialFKID(row[2] != null ? row[2].toString() : null);
  	    	aOPMCCalculatedDataDTO.setJanuary(row[3] != null ? Float.parseFloat(row[3].toString()) : null);
  	    	aOPMCCalculatedDataDTO.setFebruary(row[4] != null ? Float.parseFloat(row[4].toString()) : null);
  	    	aOPMCCalculatedDataDTO.setMarch(row[5] != null ? Float.parseFloat(row[5].toString()) : null);
@@ -44,11 +44,10 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
  	    	aOPMCCalculatedDataDTO.setNovember(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
  	    	aOPMCCalculatedDataDTO.setDecember(row[14] != null ? Float.parseFloat(row[14].toString()) : null); 
  	    	// aOPMCCalculatedDataDTO.setPlantFKId(row[15] != null ? row[15].toString() : null);
- 	    	aOPMCCalculatedDataDTO.setId(row[16] != null ? row[16].toString() : null);
- 	    	aOPMCCalculatedDataDTO.setYear(row[17] != null ? row[17].toString() : null);
- 	    	aOPMCCalculatedDataDTO.setNormParametersFKId(row[18] != null ? row[18].toString() : null);
+ 	    	aOPMCCalculatedDataDTO.setId(row[15] != null ? row[15].toString() : null);
+ 	    	aOPMCCalculatedDataDTO.setFinancialYear(row[16] != null ? row[16].toString() : null);
  	    	// aOPMCCalculatedDataDTO.setDisplayOrder(row[19] != null ? Integer.parseInt(row[19].toString()) : null);
- 	    	aOPMCCalculatedDataDTO.setRemark(row[20] != null ? row[20].toString() : null);
+ 	    	aOPMCCalculatedDataDTO.setRemark(row[17] != null ? row[17].toString() : null);
  	    	aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
  	    }
 	    

@@ -42,7 +42,7 @@ public interface AOPMCCalculatedDataRepository extends JpaRepository<AOPMCCalcul
      @Query(value = """
 	    SELECT MCU.Site_FK_Id,MCU.Plant_FK_Id,MCU.Material_FK_Id,
 MCU.January,MCU.February,MCU.March,MCU.April,MCU.May,MCU.June,MCU.July,MCU.August,MCU.September,
-MCU.October,MCU.November,MCU.December,MCU.Id,MCU.FinancialYear,MCU.Material_FK_Id,MCU.Remarks
+MCU.October,MCU.November,MCU.December,MCU.Id,MCU.FinancialYear,MCU.Remarks
  FROM MCUValue MCU JOIN NormParameters NP ON MCU.Material_FK_Id = NP.Id 
 WHERE MCU.FinancialYear = :year AND MCU.Plant_FK_Id= :plantFkId
 	    """, nativeQuery = true)
