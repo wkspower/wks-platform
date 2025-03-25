@@ -123,8 +123,8 @@ const SelectivityData = () => {
         feb: row.feb || null,
         mar: row.mar || null,
         UOM: '',
-        year: localStorage.getItem('year'),
-        normParameterFKId: row.NormParameterFKId,
+        auditYear: localStorage.getItem('year'),
+        normParameterFKId: row.normParameterFKId,
         remarks: row.remark,
         id: row.idFromApi || null,
       }))
@@ -229,7 +229,7 @@ const SelectivityData = () => {
 
   const productionColumns = [
     {
-      field: 'NormParameterFKId',
+      field: 'normParameterFKId',
       headerName: 'Particulars',
       editable: true,
       minWidth: 140,
@@ -244,7 +244,7 @@ const SelectivityData = () => {
         const existingValues = new Set(
           [...api.getRowModels().values()]
             .filter((row) => row.id !== id)
-            .map((row) => row.NormParameterFKId),
+            .map((row) => row.normParameterFKId),
         )
 
         return (
@@ -253,7 +253,7 @@ const SelectivityData = () => {
             onChange={(event) => {
               api.setEditCellValue({
                 id: params.id,
-                field: 'NormParameterFKId',
+                field: 'normParameterFKId',
                 value: event.target.value,
               })
             }}

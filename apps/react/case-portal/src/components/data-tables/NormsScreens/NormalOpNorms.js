@@ -18,8 +18,8 @@ const headerMap = generateHeaderNames()
 const NormalOpNormsScreen = () => {
   const [allProducts, setAllProducts] = useState([])
   // const [bdData, setBDData] = useState([])
-  const menu = useSelector((state) => state.menu)
-  const { sitePlantChange } = menu
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  // const { sitePlantChange } = menu
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
@@ -33,6 +33,9 @@ const NormalOpNormsScreen = () => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [loading, setLoading] = useState(false)
+  const { sitePlantChange, verticalChange } = dataGridStore
+  const vertName = verticalChange?.verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -94,7 +97,7 @@ const NormalOpNormsScreen = () => {
     }
     fetchData()
     getAllProducts()
-  }, [sitePlantChange, keycloak])
+  }, [sitePlantChange, keycloak, verticalChange, lowerVertName])
 
   const formatValueToThreeDecimals = (params) =>
     params ? parseFloat(params).toFixed(3) : ''
@@ -109,7 +112,8 @@ const NormalOpNormsScreen = () => {
     },
     {
       field: 'materialFkId',
-      headerName: 'Particulars',
+      // headerName: 'Particulars',
+      headerName: lowerVertName === 'meg' ? 'Particulars' : 'Particulars',
       minWidth: 140,
       valueGetter: (params) => params || '',
       valueFormatter: (params) => {

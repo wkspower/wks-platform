@@ -482,6 +482,9 @@ const NormalOpNormsScreen = () => {
   const handleUnitChange = (unit) => {
     setSelectedUnit(unit)
   }
+  const handleCalculate = async () => {
+    fetchData()
+  }
 
   return (
     <div>
@@ -504,6 +507,7 @@ const NormalOpNormsScreen = () => {
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
+        handleCalculate={handleCalculate}
         fetchData={fetchData}
         onProcessRowUpdateError={onProcessRowUpdateError}
         handleUnitChange={handleUnitChange}

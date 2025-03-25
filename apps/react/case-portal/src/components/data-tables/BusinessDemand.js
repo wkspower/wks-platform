@@ -15,6 +15,7 @@ const BusinessDemand = () => {
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
   // const [bdData, setBDData] = useState([])
+  //test
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const dataGridStore = useSelector((state) => state.dataGridStore)
