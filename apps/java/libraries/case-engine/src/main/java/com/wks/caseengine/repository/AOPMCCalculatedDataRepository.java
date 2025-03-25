@@ -48,7 +48,7 @@ WHERE MCU.FinancialYear = :year AND MCU.Plant_FK_Id= :plantFkId
 	    """, nativeQuery = true)
 	List<Object[]> findByYearAndPlantFkId(@Param("year") String year, @Param("plantFkId") UUID plantFkId);
  		
-	@Query(value = "SELECT TOP (1000) [Id], [Site_FK_Id], [Plant_FK_Id], [Material_FK_Id], [April], [May], [June], [July], [August], [September], [October], [November], [December], [January], [February], [March], [FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [MCUVersion], [UpdatedBy] FROM [dbo].[vwAOPMCValues] WHERE PLANT_FK_ID = :plantId AND FinancialYear = :year;",
+	@Query(value = "SELECT TOP (1000) [Id], [Site_FK_Id], [Plant_FK_Id], [Material_FK_Id], [April], [May], [June], [July], [August], [September], [October], [November], [December], [January], [February], [March], [FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [MCUVersion], [UpdatedBy] FROM [dbo].[vwAOPMCValues] WHERE PLANT_FK_ID = :plantId AND FinancialYear = :year",
         nativeQuery = true)
 	List<Object[]> getDataMCUValuesAllData(@Param("year") String year, @Param("plantId") String plantId);
 
