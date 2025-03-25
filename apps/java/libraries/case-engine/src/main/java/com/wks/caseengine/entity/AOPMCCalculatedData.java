@@ -73,8 +73,8 @@ public class AOPMCCalculatedData {
     private String financialYear;
     
     
-    @Column(name="Remark")
-    private String remark;
+    @Column(name="Remarks")
+    private String remarks;
     @Column(name="CreatedOn")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdOn;

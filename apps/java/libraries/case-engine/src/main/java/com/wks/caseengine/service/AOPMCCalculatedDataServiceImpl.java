@@ -97,7 +97,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			aOPMCCalculatedData.setDecember(aOPMCCalculatedDataDTO.getDecember());			aOPMCCalculatedData.setJanuary(aOPMCCalculatedDataDTO.getJanuary());
 
 			aOPMCCalculatedData.setFinancialYear(aOPMCCalculatedDataDTO.getFinancialYear());
-			aOPMCCalculatedData.setRemark(aOPMCCalculatedDataDTO.getRemark());
+			aOPMCCalculatedData.setRemarks(aOPMCCalculatedDataDTO.getRemarks());
 
 			
 			aOPMCCalculatedDataRepository.save(aOPMCCalculatedData);

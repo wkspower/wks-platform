@@ -28,7 +28,7 @@ public class AOPMCCalculatedDataDTO {
     private Float february;
     private Float march;
     private Integer displayOrder;
-    private String remark;
+    private String remarks;
     private String plantFKId;
     private String siteFKId;
     private String verticalFKId;
