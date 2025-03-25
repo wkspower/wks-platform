@@ -70,6 +70,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
  			BusinessDemandDataDTO businessDemandDataDTO = new BusinessDemandDataDTO();
 
  			businessDemandDataDTO.setNormParameterId(obj1[0]!=null? obj1[0].toString():null);
+ 			businessDemandDataDTO.setNormParameterTypeDisplayName(obj1[1]!=null? obj1[1].toString():null);
  			businessDemandDataDTO.setId(i+"#");
  			businessDemandDataDTOList.add(businessDemandDataDTO);
  			i++;
