@@ -71,4 +71,10 @@ public class BusinessDemand {
     
     @Column(name = "AvgTPH")
     private Float avgTph;
+    
+    @Column(name="Site_FK_Id")
+    private UUID siteFKId;
+    
+    @Column(name="Vertical_FK_Id")
+    private UUID verticalFKId;
 }

@@ -115,9 +115,14 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 			businessDemand.setRemark(businessDemandDataDTO.getRemark());
 			businessDemand.setSep(businessDemandDataDTO.getSep());
 			businessDemand.setYear(businessDemandDataDTO.getYear());
+			if(businessDemandDataDTO.getSiteFKId()!=null) {
+				businessDemand.setSiteFKId(UUID.fromString(businessDemandDataDTO.getSiteFKId()));
+			}
+			if(businessDemandDataDTO.getVerticalFKId()!=null) {
+				businessDemand.setVerticalFKId(UUID.fromString(businessDemandDataDTO.getVerticalFKId()));
+			}
+			
 			businessDemandDataRepository.save(businessDemand);
-			
-			
 	   }
 	}			// TODO Auto-generated method stub
 		return businessDemandDataDTOList;

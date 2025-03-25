@@ -42,5 +42,7 @@ public class BusinessDemandDataDTO {
     private String normParameterTypeId;
     private String normParameterTypeDisplayName;
     private String normParameterTypeName;
+    private String siteFKId;
+    private String verticalFKId;
 
 }
