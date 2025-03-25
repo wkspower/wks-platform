@@ -25,9 +25,10 @@ public interface BusinessDemandDataRepository extends JpaRepository<BusinessDema
  	    List<Object[]> findByYearAndPlantFkId(@Param("year") String year, @Param("plantFkId") UUID plantFkId);
 	
  	   @Query(value = """
- 			    SELECT DISTINCT NP.Id 
+ 			    SELECT DISTINCT NP.Id, NPT.DisplayName
  			    FROM NormParameters NP 
- 			    JOIN NormTypes NT ON NT.Id = NP.NormType_FK_Id 
+ 			    JOIN NormTypes NT ON NT.Id = NP.NormType_FK_Id
+ 			    JOIN NormParameterType NPT ON NPT.Id=NP.NormParameterType_FK_Id 
  			    WHERE NP.Plant_FK_Id = :plantId 
  			      AND NT.NormName = 'Production'
  			      AND NP.NormParameterType_FK_Id IS NOT NULL
