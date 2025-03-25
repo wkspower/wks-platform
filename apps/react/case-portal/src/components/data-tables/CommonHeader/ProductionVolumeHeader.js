@@ -80,7 +80,7 @@ const getEnhancedProductionColDefs = ({
       }
     }
 
-    if (col.field === 'remark') {
+    if (col.field === 'remarks') {
       updatedCol.renderCell = (params) => {
         const displayText = truncateRemarks(params.value)
         const isEditable = !params.row.Particulars
