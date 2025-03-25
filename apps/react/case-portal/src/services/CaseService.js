@@ -14,6 +14,33 @@ export const CaseService = {
   addComment,
   updateComment,
   deleteComment,
+  pollForCase
+}
+
+async function pollForCase(keycloak, businessKey, maxAttempts = 1200, interval = 5000) {
+  let attempts = 0;
+  
+  return new Promise((resolve, reject) => {
+    const checkCase = async () => {
+      if (attempts >= maxAttempts) {
+        return reject(new Error('Max polling attempts reached'));
+      }
+      
+      try {
+        const caseData = await getCaseById(keycloak, businessKey);
+        if (caseData && caseData.businessKey === businessKey) {
+          return resolve(caseData);
+        }
+        attempts++;
+        setTimeout(checkCase, interval);
+      } catch (error) {
+        attempts++;
+        setTimeout(checkCase, interval);
+      }
+    };
+    
+    checkCase();
+  });
 }
 
 async function getAllByStatus(keycloak, status, limit) {
@@ -273,6 +300,8 @@ function mapperToCase(resp) {
     hasPrevious: paging.hasPrevious,
     hasNext: paging.hasNext,
   }
+
+ 
 
   return Promise.resolve({ data: toCase, paging: toPaging })
 }

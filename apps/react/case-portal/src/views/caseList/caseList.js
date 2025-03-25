@@ -67,6 +67,17 @@ export const CaseList = ({ status, caseDefId }) => {
     hasPrevious: false,
     hasNext: false,
   })
+  const [pollingRef, setPollingRef] = useState(null)
+
+
+  useEffect(() => {
+    return () => {
+      // Clean up any ongoing polling when component unmounts
+      if (pollingRef) {
+        clearTimeout(pollingRef);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (Config.WebsocketsEnabled) {
@@ -109,6 +120,52 @@ export const CaseList = ({ status, caseDefId }) => {
       setCaseDefs(resp)
     })
   }, [])
+
+  useEffect(() => {
+    if (lastCreatedCase && lastCreatedCase.businessKey) {
+      // Clean up any previous polling
+      if (pollingRef) {
+        clearTimeout(pollingRef);
+      }
+      
+      // Start polling for this specific case
+      let attempts = 0;
+      const maxAttempts = 12; // 1 minute (12 * 5 seconds)
+      
+      const checkCase = () => {
+        if (attempts >= maxAttempts) {
+          console.warn("Max polling attempts reached for case:", lastCreatedCase.businessKey);
+          return;
+        }
+        
+        CaseService.getCaseById(keycloak, lastCreatedCase.businessKey)
+          .then(newCase => {
+            if (newCase && newCase.businessKey === lastCreatedCase.businessKey) {
+              // When the case is found, add it to the cases array
+              const newCaseWithStatus = {
+                ...newCase,
+                statusDescription: mapStatusDescription(newCase.status),
+                createdAt: newCase.attributes?.find(attr => attr.name === 'createdAt')?.value || ''
+              };
+              
+              setCases(prevCases => [newCaseWithStatus, ...prevCases]);
+            } else {
+              attempts++;
+              const timeoutId = setTimeout(checkCase, 5000);
+              setPollingRef(timeoutId);
+            }
+          })
+          .catch(error => {
+            console.error("Error polling for case:", error);
+            attempts++;
+            const timeoutId = setTimeout(checkCase, 5000);
+            setPollingRef(timeoutId);
+          });
+      };
+      
+      checkCase();
+    }
+  }, [lastCreatedCase]);
 
   const makeColumns = () => {
     return [
@@ -179,9 +236,21 @@ export const CaseList = ({ status, caseDefId }) => {
   }
 
   const handleCloseNewCaseForm = () => {
-    setOpenNewCaseForm(false)
-    setSnackOpen(true)
-  }
+    setOpenNewCaseForm(false);
+    setSnackOpen(true);
+    
+   
+  };
+
+  const mapStatusDescription = (status) => {
+    const mapper = {
+      WIP_CASE_STATUS: t('general.case.status.wip'),
+      CLOSED_CASE_STATUS: t('general.case.status.closed'),
+      ARCHIVED_CASE_STATUS: t('general.case.status.archived'),
+    };
+
+    return mapper[status] || '-';
+  };
 
   const handleNewCaseAction = () => {
     setLastCreatedCase(null)
