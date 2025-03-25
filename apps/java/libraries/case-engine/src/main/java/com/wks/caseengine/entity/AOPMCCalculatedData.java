@@ -1,5 +1,6 @@
 package com.wks.caseengine.entity;
 
+import java.util.Date;
 import java.util.UUID;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -21,15 +22,15 @@ public class AOPMCCalculatedData {
     private UUID id;
     
     @Column(name = "Site_FK_ID")
-    private UUID siteFKID;
+    private UUID siteFKId;
     
     @Column(name = "Plant_FK_ID")
-    private UUID plantFKID;
+    private UUID plantFKId;
     @Column(name = "Vertical_FK_ID")
-    private UUID VerticalFKID;
+    private UUID verticalFKId;
     
     @Column(name = "Material_FK_ID")
-    private UUID materialFKID;
+    private UUID materialFKId;
     
     @Column(name = "April")
     private Float april;

@@ -30,11 +30,11 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	    for (Object[] row : obj) {
  	    	AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO = new AOPMCCalculatedDataDTO();
 			aOPMCCalculatedDataDTO.setId(row[0] != null ? row[0].toString() : null);
- 	    	aOPMCCalculatedDataDTO.setSiteFKID(row[1] != null ? row[1].toString() : null);
- 	    	aOPMCCalculatedDataDTO.setPlantFKID(row[2] != null ? row[2].toString() : null);
- 	    	aOPMCCalculatedDataDTO.setMaterialFKID(row[3] != null ? row[3].toString() : null);
+ 	    	aOPMCCalculatedDataDTO.setSiteFKId(row[1] != null ? row[1].toString() : null);
+ 	    	aOPMCCalculatedDataDTO.setPlantFKId(row[2] != null ? row[2].toString() : null);
+ 	    	aOPMCCalculatedDataDTO.setMaterialFKId(row[3] != null ? row[3].toString() : null);
  	    	aOPMCCalculatedDataDTO.setApril(row[4] != null ? Float.parseFloat(row[4].toString()) : null);
- 	    	aOPMCCalculatedDataDTO.setMay(row[4] != null ? Float.parseFloat(row[5].toString()) : null);
+ 	    	aOPMCCalculatedDataDTO.setMay(row[5] != null ? Float.parseFloat(row[5].toString()) : null);
  	    	aOPMCCalculatedDataDTO.setJune(row[6] != null ? Float.parseFloat(row[6].toString()) : null);
  	    	aOPMCCalculatedDataDTO.setJuly(row[7] != null ? Float.parseFloat(row[7].toString()) : null);
  	    	aOPMCCalculatedDataDTO.setAugust(row[8] != null ? Float.parseFloat(row[8].toString()) : null);

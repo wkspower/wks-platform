@@ -30,8 +30,9 @@ public class AOPMCCalculatedDataDTO {
     private Integer displayOrder;
     private String remark;
     private String plantFKId;
-    private String verticalFKID;
-    private String materialFKID;
+    private String siteFKId;
+    private String verticalFKId;
+	private String materialFKId;
     private String financialYear;
     private Date createdOn;
     private Date modifiedOn;
