@@ -23,7 +23,7 @@ public interface AOPMCCalculatedDataRepository extends JpaRepository<AOPMCCalcul
     nativeQuery = true)
 	List<Object[]> findBusinessDemandWithAOPMC(@Param("plantId") String plantId, @Param("year") String year);
 
-    public List<AOPMCCalculatedData> findAllByYearAndPlantFKId(String year,UUID plantId);
+//    public List<AOPMCCalculatedData> findAllByYearAndPlantFKId(String year,UUID plantId);
 
     // @Query(value = """
  	// 	    SELECT AMC.Site, AMC.Plant, AMC.Material, AMC.January, AMC.February, AMC.March, AMC.April, AMC.May, AMC.June, AMC.July, 
