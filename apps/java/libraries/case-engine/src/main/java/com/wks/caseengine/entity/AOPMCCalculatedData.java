@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "AOPMCCalculatedData")
+@Table(name = "MCUValue")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,14 +20,16 @@ public class AOPMCCalculatedData {
     @Column(name = "Id", nullable = false, updatable = false)
     private UUID id;
     
-    @Column(name = "Site")
-    private String site;
+    @Column(name = "Site_FK_ID")
+    private UUID siteFKID;
     
-    @Column(name = "Plant")
-    private String plant;
+    @Column(name = "Plant_FK_ID")
+    private UUID plantFKID;
+    @Column(name = "Vertical_FK_ID")
+    private UUID VerticalFKID;
     
-    @Column(name = "Material")
-    private String material;
+    @Column(name = "Material_FK_ID")
+    private UUID materialFKID;
     
     @Column(name = "April")
     private Float april;
@@ -65,15 +67,21 @@ public class AOPMCCalculatedData {
     @Column(name = "March")
     private Float march;
     
-    @Column(name="Plant_FK_Id")
-    private UUID plantFKId;
 
-    @Column(name="Year")
-    private String year;
+    @Column(name="FinancialYear")
+    private String financialYear;
     
-    @Column(name="NormParameters_FK_Id")
-    private UUID normParametersFKId;
     
     @Column(name="Remark")
     private String remark;
+    @Column(name="CreatedOn")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdOn;
+    @Column(name="ModifiedOn")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date modifiedOn;
+    @Column(name="MCUVersion")
+    private String mcuVersion;
+    @Column(name="UpdatedBy")
+    private String updatedBy;
 }
