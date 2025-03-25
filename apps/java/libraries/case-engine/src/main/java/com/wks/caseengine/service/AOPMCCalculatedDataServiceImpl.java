@@ -43,11 +43,11 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
  	    	aOPMCCalculatedDataDTO.setOctober(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
  	    	aOPMCCalculatedDataDTO.setNovember(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
  	    	aOPMCCalculatedDataDTO.setDecember(row[14] != null ? Float.parseFloat(row[14].toString()) : null); 
- 	    	aOPMCCalculatedDataDTO.setPlantFKId(row[15] != null ? row[15].toString() : null);
+ 	    	// aOPMCCalculatedDataDTO.setPlantFKId(row[15] != null ? row[15].toString() : null);
  	    	aOPMCCalculatedDataDTO.setId(row[16] != null ? row[16].toString() : null);
  	    	aOPMCCalculatedDataDTO.setYear(row[17] != null ? row[17].toString() : null);
  	    	aOPMCCalculatedDataDTO.setNormParametersFKId(row[18] != null ? row[18].toString() : null);
- 	    	aOPMCCalculatedDataDTO.setDisplayOrder(row[19] != null ? Integer.parseInt(row[19].toString()) : null);
+ 	    	// aOPMCCalculatedDataDTO.setDisplayOrder(row[19] != null ? Integer.parseInt(row[19].toString()) : null);
  	    	aOPMCCalculatedDataDTO.setRemark(row[20] != null ? row[20].toString() : null);
  	    	aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
  	    }
