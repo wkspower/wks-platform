@@ -165,7 +165,7 @@ public class AOPServiceImpl implements  AOPService{
 
 			aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFkId()));
 			aOP.setAopYear(aOPDTO.getAopYear());
-			aOP.setNormParametersFKId(UUID.fromString(aOPDTO.getMaterialFKId()));
+			aOP.setMaterialFKId(UUID.fromString(aOPDTO.getMaterialFKId()));
 			aOPRepository.save(aOP);
 		}
 		return aOPDTOList;
@@ -198,7 +198,7 @@ public class AOPServiceImpl implements  AOPService{
 						aopDto.setPlantFkId(aop.getPlantFkId()!=null? aop.getPlantFkId().toString():null);
                         aopDto.setAopStatus(aop.getAopStatus());
 						aopDto.setAopYear(aop.getAopYear());
-						aopDto.setNormParametersFKId(aop.getMaterialFKId()!=null? aop.getMaterialFKId().toString() :null);
+						aopDto.setMaterialFKId(aop.getMaterialFKId()!=null? aop.getMaterialFKId().toString() :null);
 						aopDto.setJan(obj[3]!=null? (Float.parseFloat(obj[3].toString())) : null);
 						aopDto.setFeb(obj[4]!=null? (Float.parseFloat(obj[4].toString())) : null);
 						aopDto.setMarch(obj[5]!=null?(Float.parseFloat(obj[5].toString())) : null);
