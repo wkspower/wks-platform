@@ -16,7 +16,7 @@ import { validateFields } from 'utils/validationUtils'
 const SlowDown = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange } = dataGridStore
-  const vertName = verticalChange?.verticalChange?.selectedVertical
+  const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   // const [slowDownData, setSlowDownData] = useState([])

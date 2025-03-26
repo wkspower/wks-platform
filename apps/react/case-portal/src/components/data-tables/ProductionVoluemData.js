@@ -18,7 +18,7 @@ const ProductionvolumeData = () => {
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange } = dataGridStore
-  const vertName = verticalChange?.verticalChange?.selectedVertical
+  const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
@@ -39,7 +39,7 @@ const ProductionvolumeData = () => {
     rowsBeforeChange: {},
   })
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remark || row.remarks || '')
+    setCurrentRemark(row.remarks ?? row.remark ?? '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }

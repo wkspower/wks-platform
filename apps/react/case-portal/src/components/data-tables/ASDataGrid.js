@@ -293,9 +293,10 @@ const DataGridTable = ({
 
       const updatedRows = prevRows.map((row) => {
         if (row.id === currentRowId) {
-          const keyToUpdate =
-            ['aopRemarks', 'remarks', 'remark'].find((key) => key in row) ||
-            'remark' // Default to 'remark' if none exist
+          const keysToUpdate = ['aopRemarks', 'remarks', 'remark'].filter(
+            (key) => key in row,
+          )
+          const keyToUpdate = keysToUpdate[0] || 'remark'
 
           updatedRow = { ...row, [keyToUpdate]: currentRemark }
           return updatedRow

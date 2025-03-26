@@ -13,7 +13,7 @@ const getEnhancedProductionColDefs = ({
 }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange } = dataGridStore
-  const vertName = verticalChange?.verticalChange?.selectedVertical
+  const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   return (
     lowerVertName === 'meg' ? production_coldefs_meg : production_coldefs_pe

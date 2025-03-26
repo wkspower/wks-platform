@@ -68,97 +68,57 @@ const App = () => {
     }
   }
 
-  // useEffect(() => {
-  //   if (keycloak) {
-  //     buildMenuItems(keycloak)
-  //   }
-  // }, [verticalChange, sitePlantChange, keycloak])
-
-  // useEffect(() => {
-  //   if (keycloak) {
-  //     buildMenuItems(keycloak)
-  //   }
-  // }, [verticalChange, sitePlantChange, keycloak])
+  useEffect(() => {
+    if (keycloak) {
+      buildMenuItems(keycloak)
+    }
+    // console.log(verticalChange)
+  }, [verticalChange, keycloak])
 
   async function buildMenuItems(keycloak) {
+    const rawAllowedVerticals =
+      JSON.parse(keycloak?.idTokenParsed?.verticals) || []
+
+    const allowedVerticalsMapping = rawAllowedVerticals.reduce((acc, obj) => {
+      return { ...acc, ...obj }
+    }, {})
+
+    // console.log(allowedVerticalsMapping)
+    // console.log(verticalChange)
+
+    const selectedVertical = verticalChange?.selectedVertical?.toLowerCase()
+
+    const allowedChildIds =
+      (selectedVertical && allowedVerticalsMapping[selectedVertical]) || []
+    // console.log(allowedChildIds)
+
     const menu = {
       items: [...menuItemsDefs.items],
     }
 
-    // Get the selected vertical
-    const selectedVertical = verticalChange?.verticalChange?.selectedVertical
-
-    const alternateMapping = {
-      PE: {
-        'product-demand': 'Business Demand',
-        'product-mcu-val': 'Production Volume Data',
-        'shutdown-plan': 'Shutdown Activities',
-        'slowdown-plan': 'Slowdown Activities',
-        'ta-plan': 'Turnaround Activities',
-        'production-norms': 'Production AOP',
-      },
-      MEG: {
-        'product-demand': 'Business Demand',
-        'product-mcu-val': 'Production Volume Data',
-        'shutdown-plan': 'Shutdown Activities',
-        'slowdown-plan': 'Slowdown Activities',
-        'ta-plan': ' Turnaround Activities', // but we are hiding in meg
-        'production-norms': 'Production AOP',
-      },
-      // ... add more vertical mappings if needed.
-    }
-
-    // eslint-disable-next-line no-constant-condition
-    if (true) {
-      // If vertical is MEG, hide the ta-plan item.
-      menu.items = menu.items.map((item) => {
-        if (item.id === 'utilities') {
-          return {
-            ...item,
-            children: item.children.map((group) => {
-              if (group.id === 'production-norms-plan') {
-                return {
-                  ...group,
-                  children: group.children.filter(
-                    (child) => child.id !== 'ta-plan',
-                  ),
-                }
+    // If allowedChildIds is empty, all children are rendered.
+    menu.items = menu.items.map((item) => {
+      if (item.id === 'utilities') {
+        return {
+          ...item,
+          children: item.children.map((group) => {
+            if (group.id === 'production-norms-plan') {
+              return {
+                ...group,
+                children: group.children.filter((child) =>
+                  allowedChildIds.length > 0
+                    ? allowedChildIds.includes(child.id)
+                    : true,
+                ),
               }
-              return group
-            }),
-          }
+            }
+            return group
+          }),
         }
-        return item
-      })
-    } else if (selectedVertical && alternateMapping[selectedVertical]) {
-      // For non-MEG verticals with a defined alternate mapping, update the titles.
-      const mapping = alternateMapping[selectedVertical]
-      menu.items = menu.items.map((item) => {
-        if (item.id === 'utilities') {
-          return {
-            ...item,
-            children: item.children.map((group) => {
-              if (group.id === 'production-norms-plan') {
-                return {
-                  ...group,
-                  children: group.children.map((child) => {
-                    // If an alternate title exists for this child's id, update the title.
-                    if (mapping[child.id]) {
-                      return { ...child, title: mapping[child.id] }
-                    }
-                    return child
-                  }),
-                }
-              }
-              return group
-            }),
-          }
-        }
-        return item
-      })
-    }
+      }
+      return item
+    })
 
-    // Additional modifications (e.g., manager check)
     if (!accountStore.isManagerUser(keycloak)) {
       delete menu.items[3]
     }

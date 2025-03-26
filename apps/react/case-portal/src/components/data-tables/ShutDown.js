@@ -15,7 +15,7 @@ import { validateFields } from 'utils/validationUtils'
 const ShutDown = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange } = dataGridStore
-  const vertName = verticalChange?.verticalChange?.selectedVertical
+  const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   // const [shutdownData, setShutdownData] = useState([])
   // const [allProducts, setAllProducts] = useState([])

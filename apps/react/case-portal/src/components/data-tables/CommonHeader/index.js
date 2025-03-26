@@ -12,7 +12,7 @@ const getEnhancedColDefs = ({
 }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange } = dataGridStore
-  const vertName = verticalChange?.verticalChange?.selectedVertical
+  const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const enhancedColDefs = (

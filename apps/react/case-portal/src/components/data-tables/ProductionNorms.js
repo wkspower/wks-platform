@@ -21,7 +21,7 @@ const ProductionNorms = () => {
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange } = dataGridStore
-  const vertName = verticalChange?.verticalChange?.selectedVertical
+  const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
