@@ -228,66 +228,10 @@ const SlowDown = () => {
       }
     }
 
-    // const saveShutdownData = async () => {
-    //   try {
-    //     // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D';
-    //     var plantId = ''
-
-    //     const storedPlant = localStorage.getItem('selectedPlant')
-    //     if (storedPlant) {
-    //       const parsedPlant = JSON.parse(storedPlant)
-    //       plantId = parsedPlant.id
-    //     }
-
-    //     const shutdownDetails = {
-    //       product: 'Oxygen',
-    //       discription: '1 Shutdown maintenance',
-    //       durationInHrs: 120,
-    //       maintEndDateTime: '2025-02-20T18:00:00Z',
-    //       maintStartDateTime: '2025-02-20T16:00:00Z',
-    //     }
-
-    //     const response = await DataService.saveShutdownData(
-    //       plantId,
-    //       shutdownDetails,
-    //       keycloak,
-    //     )
-    //     console.log('Shutdown data Saved Successfully:', response)
-    //     return response
-    //   } catch (error) {
-    //     console.error('Error saving shutdown data:', error)
-    //   }
-    // }
-
     fetchData()
     // saveShutdownData()
     getAllProducts()
-  }, [sitePlantChange, keycloak, verticalChange, lowerVertName])
-
-  // const findDuration = (value, row) => {
-  //   if (row && row.maintStartDateTime && row.maintEndDateTime) {
-  //     const start = new Date(row.maintStartDateTime)
-  //     const end = new Date(row.maintEndDateTime)
-
-  //     if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-  //       // Check if dates are valid
-  //       const durationInMs = end - start
-
-  //       // Calculate duration in hours and minutes
-  //       const durationInHours = Math.floor(durationInMs / (1000 * 60 * 60))
-  //       const remainingMs = durationInMs % (1000 * 60 * 60)
-  //       const durationInMinutes = Math.floor(remainingMs / (1000 * 60))
-
-  //       // Format the duration as "HH:MM"
-  //       const formattedDuration = `${String(durationInHours).padStart(2, '0')}:${String(durationInMinutes).padStart(2, '0')}`
-  //       return formattedDuration
-  //     } else {
-  //       return '' // Or handle invalid dates as needed
-  //     }
-  //   } else {
-  //     return '' // Or handle missing dates as needed
-  //   }
-  // }
+  }, [sitePlantChange, keycloak, lowerVertName])
 
   const colDefs = [
     {

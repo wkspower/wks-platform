@@ -357,7 +357,7 @@ const ProductionNorms = () => {
 
     fetchData()
     getAllProducts()
-  }, [sitePlantChange, keycloak, selectedUnit, verticalChange, lowerVertName])
+  }, [sitePlantChange, keycloak, selectedUnit, lowerVertName])
 
   const productionColumns = getEnhancedColDefs({
     allProducts,

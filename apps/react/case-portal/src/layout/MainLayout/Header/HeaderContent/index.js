@@ -179,7 +179,7 @@ const HeaderContent = ({ keycloak }) => {
   }, [])
 
   const handleSiteChange = (event) => {
-    // dispatch(setSitePlantChange({ sitePlantChange: true }))
+    dispatch(setSitePlantChange({ sitePlantChange: true }))
     const siteName = event.target.value
     setSelectedSite(siteName)
     const { allowedPlantIds } = getAllowedFilter()

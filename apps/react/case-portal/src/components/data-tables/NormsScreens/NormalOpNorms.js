@@ -97,7 +97,7 @@ const NormalOpNormsScreen = () => {
     }
     fetchData()
     getAllProducts()
-  }, [sitePlantChange, keycloak, verticalChange, lowerVertName])
+  }, [sitePlantChange, keycloak, lowerVertName])
 
   const formatValueToThreeDecimals = (params) =>
     params ? parseFloat(params).toFixed(3) : ''
