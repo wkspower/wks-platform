@@ -81,10 +81,16 @@ List<Object[]> getDataBusinessAllData(@Param("plantId") String plantId,@Param("y
 
     
 
+    // @Transactional
+    // @Query(value = "EXEC HMD_MaintenanceCalculation @plantName = :plantName,@siteName=:siteName,@verticalName=:verticalName,@aopYear=:aopYear ", nativeQuery = true)
+    // List<Object[]>  HMD_MaintenanceCalculation(@Param("plantName") String plantName, @Param("siteName") String siteName,
+    // @Param("verticalName") String verticalName,@Param("aopYear") String aopYear );
+
+
     @Transactional
-    @Query(value = "EXEC HMD_MaintenanceCalculation @plantName = :plantName,@siteName=:siteName,@verticalName=:verticalName,@aopYear=:aopYear ", nativeQuery = true)
-    List<Object[]>  HMD_MaintenanceCalculation(@Param("plantName") String plantName, @Param("siteName") String siteName,
-    @Param("verticalName") String verticalName,@Param("aopYear") String aopYear );
+    @Query(value = "EXEC HMD_MaintenanceCalculation @plantId = :plantId,@siteId=:siteId,@verticalId=:verticalId,@aopYear=:aopYear ", nativeQuery = true)
+    List<Object[]>  HMD_MaintenanceCalculation(@Param("plantId") String plantName, @Param("siteId") String siteName,
+    @Param("verticalId") String verticalName,@Param("aopYear") String aopYear);
 
 	
 	

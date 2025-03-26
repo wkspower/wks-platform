@@ -24,9 +24,8 @@ public interface BusinessDemandDataRepository extends JpaRepository<BusinessDema
  	        """, nativeQuery = true)
  	    List<Object[]> findByYearAndPlantFkId(@Param("year") String year, @Param("plantFkId") UUID plantFkId);
 	
- 	   @Query(value = """
- 			    SELECT [Id],[DisplayName] FROM [dbo].[vwScrnMEGBusinessDemand] """, nativeQuery = true)
- 			List<Object[]> getAllBusinessDemandData(@Param("plantId") String plantId);
-
+		 @Query(value = """
+			SELECT [Id], [DisplayName] , [PLANT_FK_ID] FROM [dbo].[vwScrnMEGBusinessDemand] WHERE [PLANT_FK_ID]= :plantId """, nativeQuery = true)
+List<Object[]> getAllBusinessDemandData(@Param("plantId") String plantId);
 
 }

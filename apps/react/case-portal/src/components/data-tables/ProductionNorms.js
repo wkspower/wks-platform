@@ -111,7 +111,7 @@ const ProductionNorms = () => {
         aopStatus: row.aopStatus || null,
         aopYear: localStorage.getItem('year'),
         plantFkId: plantId,
-        normParametersFKId: row.normParametersFKId,
+        materialFKId: row.normParametersFKId,
         // normItem: getProductName('1', row.normParametersFKId) || null,
         // normItem: 'EOE',
         april: isKiloTon && row.april ? row.april * 1000 : row.april || null,
@@ -222,8 +222,23 @@ const ProductionNorms = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const data = await DataService.getAOPData(keycloak)
-      // const data1 = data1.slice(0, 3)
+
+      const data1 = await DataService.getAOPData(keycloak)
+
+      const data2 = data1
+        .map((product) => ({
+          ...product,
+          normParametersFKId: product.materialFKId,
+          ...(product.materialFKId !== undefined
+            ? { materialFKId: undefined }
+            : {}),
+        }))
+        .map(({ materialFKId, ...rest }) => rest)
+
+      // console.log(data)
+
+      const data = data2.slice(0, 3)
+
       // if (data.status === 200) {
       const formattedData = data.map((item, index) => {
         const isKiloTon = selectedUnit !== 'Ton'

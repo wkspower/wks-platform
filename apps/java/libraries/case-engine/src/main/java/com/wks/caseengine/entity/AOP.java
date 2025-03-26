@@ -25,8 +25,8 @@ public class AOP {
     @Column(name = "AOPRemarks", length = 500)
     private String aopRemarks;
 
-    @Column(name = "NormItem", length = 255)
-    private String normItem;
+    // @Column(name = "NormItem", length = 255)
+    // private String normItem;
 
     @Column(name = "AOPType", length = 255)
     private String aopType;
