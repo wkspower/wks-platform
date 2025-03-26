@@ -715,7 +715,7 @@ async function saveNormalOperationNormsData(
 }
 
 async function saveShutDownNormsData(plantId, turnAroundDetails, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/saveShutDownNormsData`
+  const url = `${Config.CaseEngineUrl}/task/saveShutdownNormsDataNew`
 
   const headers = {
     Accept: 'application/json',

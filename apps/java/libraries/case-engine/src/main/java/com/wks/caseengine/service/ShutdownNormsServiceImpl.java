@@ -3,6 +3,7 @@ package com.wks.caseengine.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,31 +21,30 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService{
 	
 	@Override
 	public List<MCUNormsValueDTO> getShutdownNormsData(String year, String plantId) {
-		List<Object[]> obj = shutdownNormsRepository.findByYearAndPlantFkId(year, UUID.fromString(plantId));
-		List<MCUNormsValueDTO> mCUNormsValueDTOList = new ArrayList<>();
-		System.out.println("obj.size()"+obj.size());
-		for (Object[] row : obj) {
+		List<Object[]> objList = shutdownNormsRepository.findByYearAndPlantFkId(year, UUID.fromString(plantId));
+		System.out.println("obj.size(): " + objList.size());
+		List<MCUNormsValueDTO> mcuNormsValueDTOList = new ArrayList<>();
+		for (Object[] row : objList) {
 		    MCUNormsValueDTO mCUNormsValueDTO = new MCUNormsValueDTO();
-		    mCUNormsValueDTO.setId(row[0].toString());
-		    mCUNormsValueDTO.setSiteFkId(row[1].toString());
-		    mCUNormsValueDTO.setPlantFkId(row[2].toString());
-		    mCUNormsValueDTO.setVerticalFkId(row[3].toString());
-		    mCUNormsValueDTO.setMaterialFkId(row[4].toString());
+		    mCUNormsValueDTO.setId(row[0] != null ? row[0].toString() : null);
+		    mCUNormsValueDTO.setSiteFkId(row[1] != null ? row[1].toString() : null);
+		    mCUNormsValueDTO.setPlantFkId(row[2] != null ? row[2].toString() : null);
+		    mCUNormsValueDTO.setVerticalFkId(row[3] != null ? row[3].toString() : null);
+		    mCUNormsValueDTO.setMaterialFkId(row[4] != null ? row[4].toString() : null);
+		    mCUNormsValueDTO.setApril(row[5] != null ? Float.parseFloat(row[5].toString()) : null);
+		    mCUNormsValueDTO.setMay(row[6] != null ? Float.parseFloat(row[6].toString()) : null);
+		    mCUNormsValueDTO.setJune(row[7] != null ? Float.parseFloat(row[7].toString()) : null);
+		    mCUNormsValueDTO.setJuly(row[8] != null ? Float.parseFloat(row[8].toString()) : null);
+		    mCUNormsValueDTO.setAugust(row[9] != null ? Float.parseFloat(row[9].toString()) : null);
+		    mCUNormsValueDTO.setSeptember(row[10] != null ? Float.parseFloat(row[11].toString()) : null);
+		    mCUNormsValueDTO.setOctober(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
+		    mCUNormsValueDTO.setNovember(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
+		    mCUNormsValueDTO.setDecember(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
+		    mCUNormsValueDTO.setJanuary(row[14] != null ? Float.parseFloat(row[14].toString()) : null);
+		    mCUNormsValueDTO.setFebruary(row[15] != null ? Float.parseFloat(row[15].toString()) : null);
+		    mCUNormsValueDTO.setMarch(row[16] != null ? Float.parseFloat(row[16].toString()) : null);
 		    
-		    mCUNormsValueDTO.setApril(0.0F);
-		    mCUNormsValueDTO.setMay(0.0F);
-		    mCUNormsValueDTO.setJune(0.0F);
-		    mCUNormsValueDTO.setJuly(0.0F);
-		    mCUNormsValueDTO.setAugust(0.0F);
-		    mCUNormsValueDTO.setSeptember(0.0F);
-		    mCUNormsValueDTO.setOctober(0.0F);
-		    mCUNormsValueDTO.setNovember(0.0F);
-		    mCUNormsValueDTO.setDecember(0.0F);
-		    mCUNormsValueDTO.setJanuary(0.0F);
-		    mCUNormsValueDTO.setFebruary(0.0F);
-		    mCUNormsValueDTO.setMarch(0.0F);
-		    
-		    mCUNormsValueDTO.setFinancialYear(row[17].toString());
+		    mCUNormsValueDTO.setFinancialYear(row[17] != null ? row[17].toString() : null);
 		    mCUNormsValueDTO.setRemarks(row[18] != null ? row[18].toString() : " ");
 		    mCUNormsValueDTO.setCreatedOn(row[19] != null ? (Date) row[19] : null);
 		    mCUNormsValueDTO.setModifiedOn(row[20] != null ? (Date) row[20] : null);
@@ -54,34 +54,34 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService{
 		    mCUNormsValueDTO.setNormParameterTypeName(row[24] != null ? row[24].toString() : null);
 		    mCUNormsValueDTO.setNormParameterTypeDisplayName(row[25] != null ? row[25].toString() : null);
 
-		    mCUNormsValueDTOList.add(mCUNormsValueDTO);
+		    mcuNormsValueDTOList.add(mCUNormsValueDTO);
 		}
 
-		return mCUNormsValueDTOList;
+		return mcuNormsValueDTOList;
 	}
 	@Override
 	public List<MCUNormsValueDTO> saveShutdownNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList) {
 		
 		for(MCUNormsValueDTO mCUNormsValueDTO:mCUNormsValueDTOList) {
 			MCUNormsValue mCUNormsValue= new MCUNormsValue();
-			if(mCUNormsValueDTO.getId()!=null || !mCUNormsValueDTO.getId().isEmpty()) {
+			if(mCUNormsValueDTO.getId()!=null && !mCUNormsValueDTO.getId().isEmpty()) {
 				mCUNormsValue.setId(UUID.fromString(mCUNormsValueDTO.getId()));
 				mCUNormsValue.setModifiedOn(new Date());
 			}else {
 				mCUNormsValue.setCreatedOn(new Date());
 			}
-			mCUNormsValue.setApril(mCUNormsValueDTO.getApril());
-			mCUNormsValue.setMay(mCUNormsValueDTO.getMay());
-			mCUNormsValue.setJune(mCUNormsValueDTO.getJune());
-			mCUNormsValue.setJuly(mCUNormsValueDTO.getJuly());
-			mCUNormsValue.setAugust(mCUNormsValueDTO.getAugust());
-			mCUNormsValue.setSeptember(mCUNormsValueDTO.getSeptember());
-			mCUNormsValue.setOctober(mCUNormsValueDTO.getOctober());
-			mCUNormsValue.setNovember(mCUNormsValueDTO.getNovember());
-			mCUNormsValue.setDecember(mCUNormsValueDTO.getDecember());
-			mCUNormsValue.setJanuary(mCUNormsValueDTO.getJanuary());
-			mCUNormsValue.setFebruary(mCUNormsValueDTO.getFebruary());
-			mCUNormsValue.setMarch(mCUNormsValueDTO.getMarch());
+			mCUNormsValue.setApril(Optional.ofNullable(mCUNormsValueDTO.getApril()).orElse(0.0));
+			mCUNormsValue.setMay(Optional.ofNullable(mCUNormsValueDTO.getMay()).orElse(0.0));
+			mCUNormsValue.setJune(Optional.ofNullable(mCUNormsValueDTO.getJune()).orElse(0.0));
+			mCUNormsValue.setJuly(Optional.ofNullable(mCUNormsValueDTO.getJuly()).orElse(0.0));
+			mCUNormsValue.setAugust(Optional.ofNullable(mCUNormsValueDTO.getAugust()).orElse(0.0));
+			mCUNormsValue.setSeptember(Optional.ofNullable(mCUNormsValueDTO.getSeptember()).orElse(0.0));
+			mCUNormsValue.setOctober(Optional.ofNullable(mCUNormsValueDTO.getOctober()).orElse(0.0));
+			mCUNormsValue.setNovember(Optional.ofNullable(mCUNormsValueDTO.getNovember()).orElse(0.0));
+			mCUNormsValue.setDecember(Optional.ofNullable(mCUNormsValueDTO.getDecember()).orElse(0.0));
+			mCUNormsValue.setJanuary(Optional.ofNullable(mCUNormsValueDTO.getJanuary()).orElse(0.0));
+			mCUNormsValue.setFebruary(Optional.ofNullable(mCUNormsValueDTO.getFebruary()).orElse(0.0));
+			mCUNormsValue.setMarch(Optional.ofNullable(mCUNormsValueDTO.getMarch()).orElse(0.0));
 			if(mCUNormsValueDTO.getSiteFkId()!=null) {
 				mCUNormsValue.setSiteFkId(UUID.fromString(mCUNormsValueDTO.getSiteFkId()));
 			}

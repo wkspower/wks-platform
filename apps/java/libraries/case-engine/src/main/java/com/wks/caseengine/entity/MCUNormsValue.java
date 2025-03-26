@@ -9,7 +9,7 @@ import java.util.UUID;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
-@Table(name = "MCUNormsValue")
+@Table(name = "ShutdownNormsValue")
 @Getter
 @Setter
 @NoArgsConstructor

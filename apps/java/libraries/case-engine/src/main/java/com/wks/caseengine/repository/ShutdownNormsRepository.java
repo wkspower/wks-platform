@@ -13,13 +13,36 @@ import com.wks.caseengine.entity.MCUNormsValue;
 public interface ShutdownNormsRepository extends JpaRepository<MCUNormsValue,UUID>{
 	
 	@Query(value = """
-		    SELECT MNV.Id, MNV.Site_FK_Id, MNV.Plant_FK_Id, MNV.Vertical_FK_Id, MNV.Material_FK_Id, MNV.April, MNV.May, MNV.June, MNV.July, MNV.August,  
-		           MNV.September, MNV.October, MNV.November, MNV.December, MNV.January, MNV.February, MNV.March, MNV.FinancialYear, MNV.Remarks, 
-		           MNV.CreatedOn, MNV.ModifiedOn, MNV.MCUVersion, MNV.UpdatedBy,NPT.Id AS NormParameterTypeId,
-			NPT.Name AS NormParameterTypeName,
-    NPT.DisplayName AS NormParameterTypeDisplayName
-		    FROM MCUNormsValue MNV JOIN NormParameterType NPT ON MNV.NormParameterType_FK_Id = NPT.Id
-		    WHERE MNV.FinancialYear = :year AND MNV.Plant_FK_Id = :plantId AND NPT.Name != 'RawMaterial' ORDER BY NPT.Id
+		    SELECT TOP (1000) [Id]
+      ,[Site_FK_Id]
+      ,[Plant_FK_Id]
+      ,[Vertical_FK_Id]
+      ,[Material_FK_Id]
+      ,[April]
+      ,[May]
+      ,[June]
+      ,[July]
+      ,[August]
+      ,[September]
+      ,[October]
+      ,[November]
+      ,[December]
+      ,[January]
+      ,[February]
+      ,[March]
+      ,[FinancialYear]
+      ,[Remarks]
+      ,[CreatedOn]
+      ,[ModifiedOn]
+      ,[MCUVersion]
+      ,[UpdatedBy]
+      ,[NormParameterTypeId]
+      ,[NormParameterTypeName]
+      ,[NormParameterTypeDisplayName]
+      ,[NormTypeDisplayOrder]
+      ,[MaterialDisplayOrder]
+  FROM [dbo].[vwScrnShutdownNorms]
+		    WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL)
 		    """, nativeQuery = true)
 		List<Object[]> findByYearAndPlantFkId(@Param("year") String year, @Param("plantId") UUID plantId);
 

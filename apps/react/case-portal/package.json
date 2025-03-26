@@ -48,7 +48,7 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "start": "echo 'Starting development server...' && webpack serve --mode=development --port 3003 --host 0.0.0.0",
+    "start": "echo 'Starting development server...' && webpack serve --mode=development --port 3001 --host 0.0.0.0",
     "build": "echo 'Running ESLint...' && eslint . --ignore-pattern '*.min.js' && echo 'Checking code formatting...' && prettier --check \"**/*.{js,jsx,json,css,scss,md}\" && echo 'Building for production...' && webpack --mode=production",
     "lint:fix": "echo 'Fixing linting issues...' && eslint --fix .",
     "lint:check": "echo 'Checking for linting issues...' && eslint .",

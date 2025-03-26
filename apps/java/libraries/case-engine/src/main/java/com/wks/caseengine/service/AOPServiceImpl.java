@@ -184,8 +184,8 @@ public class AOPServiceImpl implements  AOPService{
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		//    List<Object[]> list =aOPRepository.HMD_MaintenanceCalculation(plant.getName(),site.getName(),vertical.getName(), year);
-		List<Object[]> list =aOPRepository.HMD_MaintenanceCalculation(plant.getId().toString(),site.getId().toString(),vertical.getId().toString(),year);
-
+			List<Object[]> list = aOPRepository.HMD_MaintenanceCalculation(plant.getId().toString(),
+					site.getId().toString(), vertical.getId().toString(), year);
 						System.out.println("list"+list);
 						System.out.println("listTo String"+list.toString());
 		   
@@ -195,25 +195,25 @@ public class AOPServiceImpl implements  AOPService{
 		   System.out.println("objList String"+objList.toString());
 
 
-            for(AOP aop:objList){
+//            for(AOP aop:objList){
 				for(Object[] obj :list){
 
-					System.out.println("aop"+aop.toString());
+//				System.out.println("aop" + aop.toString());
 					System.out.println("obj"+obj.toString());
-					// System.out.println("listTo String"+list.toString());
+				System.out.println("obj[0].toString()" + obj[0].toString());
 
 
-					if(aop.getMaterialFKId().toString().equalsIgnoreCase(obj[0].toString()))	{
+//				if (aop.getMaterialFKId().toString().equalsIgnoreCase(obj[0].toString())) {
 						System.out.println("obj[0]"+obj[0]);
 						AOPDTO aopDto = new AOPDTO();
-						aopDto.setAopCaseId(aop.getAopCaseId());
-						aopDto.setAopRemarks(aop.getAopRemarks());
-						aopDto.setId(aop.getId().toString());
+					aopDto.setAopCaseId("");
+					aopDto.setAopRemarks("");
+					aopDto.setId("");
                         // aopDto.setNormItem(aop.getNormItem());
-						aopDto.setPlantFkId(aop.getPlantFkId()!=null? aop.getPlantFkId().toString():null);
-                        aopDto.setAopStatus(aop.getAopStatus());
-						aopDto.setAopYear(aop.getAopYear());
-						aopDto.setMaterialFKId(aop.getMaterialFKId()!=null? aop.getMaterialFKId().toString() :null);
+					aopDto.setPlantFkId(plantId);
+					aopDto.setAopStatus("Draft");
+					aopDto.setAopYear(year);
+					aopDto.setMaterialFKId(obj[0] != null ? (obj[0].toString()) : null);
 						aopDto.setJan(obj[3]!=null? (Float.parseFloat(obj[3].toString())) : null);
 						aopDto.setFeb(obj[4]!=null? (Float.parseFloat(obj[4].toString())) : null);
 						aopDto.setMarch(obj[5]!=null?(Float.parseFloat(obj[5].toString())) : null);
@@ -229,11 +229,11 @@ public class AOPServiceImpl implements  AOPService{
 						dtoList.add(aopDto);
 						//aOP.setAvgTPH(obj[14]!=null? (Float.parseFloat(obj[14].toString())) : null);
 					}			
-				}	
+//			}
 			}
-		}else{
-          dtoList =  getAOPData(plantId,year);
-		}
+//		else {
+//			dtoList = getAOPData(plantId, year);
+//		}
 		return dtoList;
 	}
 
