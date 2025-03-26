@@ -58,7 +58,7 @@ export const CaseList = ({ status, caseDefId }) => {
   const keycloak = useSession()
   const [caseDefs, setCaseDefs] = useState([])
   const [fetching, setFetching] = useState(false)
-  const [pollingRef, setPollingRef] = useState(null)
+  const [pollingRef] = useState(null)
 
   useEffect(() => {
     return () => {
@@ -68,7 +68,7 @@ export const CaseList = ({ status, caseDefId }) => {
     }
   }, [])
 
-  useEffect(() => {
+  useEffect(() => { 
     if (Config.WebsocketsEnabled) {
       const websocketUrl = Config.WebsocketUrl
       const topic = Config.WebsocketsTopicCaseCreated
