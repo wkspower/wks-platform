@@ -88,7 +88,7 @@ List<Object[]> getDataBusinessAllData(@Param("plantId") String plantId,@Param("y
 
 
     @Transactional
-    @Query(value = "EXEC HMD_MaintenanceCalculation @plantId = :plantId,@siteId=:siteId,@verticalId=:verticalId,@aopYear=:aopYear ", nativeQuery = true)
+    @Query(value = "EXEC MEG_HMD_MaintenanceCalculation @plantId = :plantId,@siteId=:siteId,@verticalId=:verticalId,@aopYear=:aopYear ", nativeQuery = true)
     List<Object[]>  HMD_MaintenanceCalculation(@Param("plantId") String plantName, @Param("siteId") String siteName,
     @Param("verticalId") String verticalName,@Param("aopYear") String aopYear);
 
