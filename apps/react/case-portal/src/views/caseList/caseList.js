@@ -72,15 +72,14 @@ export const CaseList = ({ status, caseDefId }) => {
 
   useEffect(() => {
     return () => {
-      // Clean up any ongoing polling when component unmounts
-      if (pollingRef) {
+        if (pollingRef) {
         clearTimeout(pollingRef);
       }
     };
   }, []);
 
   useEffect(() => {
-    if (Config.WebsocketsEnabled) {
+   /* if (Config.WebsocketsEnabled) {
       const websocketUrl = Config.WebsocketUrl
       const topic = Config.WebsocketsTopicCaseCreated
       const ws = new WebSocket(`${websocketUrl}/${topic}`)
@@ -96,10 +95,10 @@ export const CaseList = ({ status, caseDefId }) => {
           setFilter,
         )
       }
-      return () => {
+      return () => { 
         ws.close() // Close WebSocket connection when component unmounts
       }
-    }
+    }*/
   }, [])
 
   useEffect(() => {
@@ -123,47 +122,25 @@ export const CaseList = ({ status, caseDefId }) => {
 
   useEffect(() => {
     if (lastCreatedCase && lastCreatedCase.businessKey) {
-      // Clean up any previous polling
       if (pollingRef) {
         clearTimeout(pollingRef);
       }
       
-      // Start polling for this specific case
-      let attempts = 0;
-      const maxAttempts = 12; // 1 minute (12 * 5 seconds)
-      
-      const checkCase = () => {
-        if (attempts >= maxAttempts) {
-          console.warn("Max polling attempts reached for case:", lastCreatedCase.businessKey);
-          return;
-        }
+     
+      CaseService.pollForCase(keycloak, lastCreatedCase.businessKey)
+        .then(newCase => {
         
-        CaseService.getCaseById(keycloak, lastCreatedCase.businessKey)
-          .then(newCase => {
-            if (newCase && newCase.businessKey === lastCreatedCase.businessKey) {
-              // When the case is found, add it to the cases array
-              const newCaseWithStatus = {
-                ...newCase,
-                statusDescription: mapStatusDescription(newCase.status),
-                createdAt: newCase.attributes?.find(attr => attr.name === 'createdAt')?.value || ''
-              };
-              
-              setCases(prevCases => [newCaseWithStatus, ...prevCases]);
-            } else {
-              attempts++;
-              const timeoutId = setTimeout(checkCase, 5000);
-              setPollingRef(timeoutId);
-            }
-          })
-          .catch(error => {
-            console.error("Error polling for case:", error);
-            attempts++;
-            const timeoutId = setTimeout(checkCase, 5000);
-            setPollingRef(timeoutId);
-          });
-      };
-      
-      checkCase();
+          const newCaseWithStatus = {
+            ...newCase,
+            statusDescription: mapStatusDescription(newCase.status),
+            createdAt: newCase.attributes?.find(attr => attr.name === 'createdAt')?.value || ''
+          };
+          
+          setCases(prevCases => [newCaseWithStatus, ...prevCases]);
+        })
+        .catch(error => {
+          console.warn("Max polling attempts reached or error polling for case:", lastCreatedCase.businessKey);
+        });
     }
   }, [lastCreatedCase]);
 

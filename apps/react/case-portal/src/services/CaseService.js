@@ -17,7 +17,7 @@ export const CaseService = {
   pollForCase
 }
 
-async function pollForCase(keycloak, businessKey, maxAttempts = 1200, interval = 5000) {
+async function pollForCase(keycloak, businessKey, maxAttempts = 1000, interval = 5000) {
   let attempts = 0;
   
   return new Promise((resolve, reject) => {
