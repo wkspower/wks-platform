@@ -399,7 +399,8 @@ const NormalOpNormsScreen = () => {
           keycloak,
         )
 
-        if (response.status === 200) {
+        // if (response.status === 200) {
+        if (response) {
           setSnackbarOpen(true)
           setSnackbarData({
             message: `Normal Operations Norms Saved Successfully!`,

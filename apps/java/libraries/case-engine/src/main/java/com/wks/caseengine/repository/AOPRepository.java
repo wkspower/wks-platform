@@ -28,13 +28,13 @@ public interface AOPRepository extends JpaRepository<AOP, UUID>{
     List<AOP> findAllByAopYearAndPlantFkId(String year, UUID fromString);
     
     @Query(value = """
- 	        SELECT AOP.Id, AOP.AOPCaseId, AOP.AOPStatus, AOP.AOPRemarks, AOP.NormItem, 
+ 	        SELECT AOP.Id, AOP.AOPCaseId, AOP.AOPStatus, AOP.AOPRemarks, AOP.AOPStatus, 
  	               AOP.AOPType, AOP.Jan, AOP.Feb, AOP.March, AOP.April, AOP.May, AOP.June, 
  	               AOP.July, AOP.Aug, AOP.Sep, AOP.Oct, AOP.Nov, AOP.Dec, AOP.AOPYear, 
- 	               AOP.Plant_FK_Id, AOP.AvgTPH, AOP.Meterial_FK_Id, NP.DisplayOrder
+ 	               AOP.Plant_FK_Id, AOP.AvgTPH, AOP.Material_FK_Id, NP.DisplayOrder
  	        FROM AOP AOP
  	        JOIN NormParameters NP 
- 	        ON AOP.Meterial_FK_Id = NP.Id 
+ 	        ON AOP.Material_FK_Id = NP.Id 
  	        WHERE AOP.AOPYear = :aopYear 
  	        AND AOP.Plant_FK_Id = :plantFkId 
  	        ORDER BY NP.DisplayOrder
@@ -57,10 +57,10 @@ public interface AOPRepository extends JpaRepository<AOP, UUID>{
             "  AND NT.NormName = 'Production' " +
             "  AND NP.NormParameterType_FK_Id IS NOT NULL " +
             "  AND NP.Id NOT IN (" +
-            "    SELECT AOP.Meterial_FK_Id " +
+            "    SELECT AOP.Material_FK_Id " +
             "    FROM AOP AOP " +
             "    WHERE AOP.Plant_FK_Id = :plantId AND AOP.AOPYear=:year " +
-            "      AND AOP.Meterial_FK_Id IS NOT NULL" +
+            "      AND AOP.Material_FK_Id IS NOT NULL" +
             ")",
     nativeQuery = true)
 List<Object[]> getDataBusinessAllData(@Param("plantId") String plantId,@Param("year") String year);

@@ -113,7 +113,7 @@ const ProductionNorms = () => {
         plantFkId: plantId,
         normParametersFKId: row.normParametersFKId,
         // normItem: getProductName('1', row.normParametersFKId) || null,
-        normItem: 'EOE',
+        // normItem: 'EOE',
         april: isKiloTon && row.april ? row.april * 1000 : row.april || null,
         may: isKiloTon && row.may ? row.may * 1000 : row.may || null,
         june: isKiloTon && row.june ? row.june * 1000 : row.june || null,

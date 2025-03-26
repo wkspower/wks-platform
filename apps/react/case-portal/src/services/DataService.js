@@ -100,7 +100,7 @@ async function handleCalculate(plantId, year, keycloak) {
 }
 async function handleCalculateNormalOpsNorms(plantId, year, keycloak) {
   const year1 = localStorage.getItem('year')
-  const url = `${process.env.REACT_APP_API_URL}/task/handleCalculateNormalOpsNorms?year=${year1}&plantId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/handleCalculateNormalOpsNorms?year=${year1}&plantId=${plantId}`
 
   const headers = {
     Accept: 'application/json',
@@ -377,7 +377,7 @@ async function getCatalystSelectivityData(keycloak) {
   var year = localStorage.getItem('year')
 
   //const url = `${process.env.REACT_APP_API_URL}/task/getConfigurationData?year=${year}&plantFKId=${plantId}`
-  const url = `${process.env.REACT_APP_API_URL}/task/getConfigurationData?year=${year}&plantFKId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/getConfigurationData?year=${year}&plantFKId=${plantId}`
 
   const headers = {
     Accept: 'application/json',
@@ -694,11 +694,13 @@ async function saveNormalOperationNormsData(
   keycloak,
 ) {
   const url = `${Config.CaseEngineUrl}/task/saveNormalOperationNormsData`
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
   }
+
   try {
     const resp = await fetch(url, {
       method: 'POST',
@@ -713,7 +715,7 @@ async function saveNormalOperationNormsData(
 }
 
 async function saveShutDownNormsData(plantId, turnAroundDetails, keycloak) {
-  const url = `${process.env.REACT_APP_API_URL}/task/saveShutDownNormsData`
+  const url = `${Config.CaseEngineUrl}/task/saveShutDownNormsData`
 
   const headers = {
     Accept: 'application/json',
@@ -733,6 +735,8 @@ async function saveShutDownNormsData(plantId, turnAroundDetails, keycloak) {
     return await Promise.reject(e)
   }
 }
+
+// Config.CaseEngineUrl
 
 async function editAOPMCCalculatedData(plantId, turnAroundDetails, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/editAOPMCCalculatedData`
