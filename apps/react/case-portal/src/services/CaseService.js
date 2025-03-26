@@ -14,35 +14,39 @@ export const CaseService = {
   addComment,
   updateComment,
   deleteComment,
-  pollForCase
+  pollForCase,
 }
 
-async function pollForCase(keycloak, businessKey, maxAttempts = 1000, interval = 5000) {
-  let attempts = 0;
-  
+async function pollForCase(
+  keycloak,
+  businessKey,
+  maxAttempts = 15,
+  interval = 10000,
+) {
+  let attempts = 0
+
   return new Promise((resolve, reject) => {
     const checkCase = async () => {
       if (attempts >= maxAttempts) {
-        return reject(new Error('Max polling attempts reached'));
+        return reject()
       }
-      
-      try {
-        const caseData = await getCaseById(keycloak, businessKey);
-        if (caseData && caseData.businessKey === businessKey) {
-          return resolve(caseData);
-        }
-        attempts++;
-        setTimeout(checkCase, interval);
-      } catch (error) {
-        attempts++;
-        setTimeout(checkCase, interval);
-      }
-    };
-    
-    checkCase();
-  });
-}
 
+      try {
+        const caseData = await getCaseById(keycloak, businessKey)
+        if (caseData && caseData.businessKey === businessKey) {
+          return resolve(caseData)
+        }
+        attempts++
+        setTimeout(checkCase, interval)
+      } catch (e) {
+        attempts++
+        setTimeout(checkCase, interval)
+      }
+    }
+
+    checkCase()
+  })
+}
 async function getAllByStatus(keycloak, status, limit) {
   if (!status) {
     return Promise.resolve([])
@@ -300,8 +304,6 @@ function mapperToCase(resp) {
     hasPrevious: paging.hasPrevious,
     hasNext: paging.hasNext,
   }
-
- 
 
   return Promise.resolve({ data: toCase, paging: toPaging })
 }

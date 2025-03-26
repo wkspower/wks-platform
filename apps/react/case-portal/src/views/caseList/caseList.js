@@ -58,28 +58,18 @@ export const CaseList = ({ status, caseDefId }) => {
   const keycloak = useSession()
   const [caseDefs, setCaseDefs] = useState([])
   const [fetching, setFetching] = useState(false)
-  const [filter, setFilter] = useState({
-    sort: '',
-    limit: 10,
-    after: '',
-    before: '',
-    cursors: {},
-    hasPrevious: false,
-    hasNext: false,
-  })
   const [pollingRef, setPollingRef] = useState(null)
-
 
   useEffect(() => {
     return () => {
-        if (pollingRef) {
-        clearTimeout(pollingRef);
+      if (pollingRef) {
+        clearTimeout(pollingRef)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   useEffect(() => {
-   /* if (Config.WebsocketsEnabled) {
+    if (Config.WebsocketsEnabled) {
       const websocketUrl = Config.WebsocketUrl
       const topic = Config.WebsocketsTopicCaseCreated
       const ws = new WebSocket(`${websocketUrl}/${topic}`)
@@ -95,10 +85,10 @@ export const CaseList = ({ status, caseDefId }) => {
           setFilter,
         )
       }
-      return () => { 
+      return () => {
         ws.close() // Close WebSocket connection when component unmounts
       }
-    }*/
+    }
   }, [])
 
   useEffect(() => {
@@ -121,28 +111,40 @@ export const CaseList = ({ status, caseDefId }) => {
   }, [])
 
   useEffect(() => {
-    if (lastCreatedCase && lastCreatedCase.businessKey) {
+    if (
+      !Config.WebsocketsEnabled &&
+      lastCreatedCase &&
+      lastCreatedCase.businessKey
+    ) {
       if (pollingRef) {
-        clearTimeout(pollingRef);
+        clearTimeout(pollingRef)
       }
-      
-     
-      CaseService.pollForCase(keycloak, lastCreatedCase.businessKey)
-        .then(newCase => {
-        
+
+      CaseService.pollForCase(keycloak, lastCreatedCase.businessKey).then(
+        (newCase) => {
           const newCaseWithStatus = {
             ...newCase,
             statusDescription: mapStatusDescription(newCase.status),
-            createdAt: newCase.attributes?.find(attr => attr.name === 'createdAt')?.value || ''
-          };
-          
-          setCases(prevCases => [newCaseWithStatus, ...prevCases]);
-        })
-        .catch(error => {
-          console.warn("Max polling attempts reached or error polling for case:", lastCreatedCase.businessKey);
-        });
+            createdAt:
+              newCase.attributes?.find((attr) => attr.name === 'createdAt')
+                ?.value || '',
+          }
+
+          setCases((prevCases) => [newCaseWithStatus, ...prevCases])
+        },
+      )
     }
-  }, [lastCreatedCase]);
+  }, [lastCreatedCase])
+
+  const [filter, setFilter] = useState({
+    sort: '',
+    limit: 10,
+    after: '',
+    before: '',
+    cursors: {},
+    hasPrevious: false,
+    hasNext: false,
+  })
 
   const makeColumns = () => {
     return [
@@ -213,21 +215,19 @@ export const CaseList = ({ status, caseDefId }) => {
   }
 
   const handleCloseNewCaseForm = () => {
-    setOpenNewCaseForm(false);
-    setSnackOpen(true);
-    
-   
-  };
+    setOpenNewCaseForm(false)
+    setSnackOpen(true)
+  }
 
   const mapStatusDescription = (status) => {
     const mapper = {
       WIP_CASE_STATUS: t('general.case.status.wip'),
       CLOSED_CASE_STATUS: t('general.case.status.closed'),
       ARCHIVED_CASE_STATUS: t('general.case.status.archived'),
-    };
+    }
 
-    return mapper[status] || '-';
-  };
+    return mapper[status] || '-'
+  }
 
   const handleNewCaseAction = () => {
     setLastCreatedCase(null)
@@ -528,6 +528,7 @@ export const CaseList = ({ status, caseDefId }) => {
     </div>
   )
 }
+
 function fetchCases(
   setFetching,
   keycloak,
