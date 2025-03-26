@@ -121,8 +121,9 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 			if(businessDemandDataDTO.getVerticalFKId()!=null) {
 				businessDemand.setVerticalFKId(UUID.fromString(businessDemandDataDTO.getVerticalFKId()));
 			}
-			
 			businessDemandDataRepository.save(businessDemand);
+			
+			
 	   }
 	}			// TODO Auto-generated method stub
 		return businessDemandDataDTOList;

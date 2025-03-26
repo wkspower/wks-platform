@@ -24,6 +24,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	public List<AOPMCCalculatedDataDTO> getAOPMCCalculatedData(String plantId, String year) {
 	    
 		//  List<Object[]> obj= aOPMCCalculatedDataRepository.findByYearAndPlantFkId(year, UUID.fromString(plantId));
+				 
 		List<Object[]> obj= aOPMCCalculatedDataRepository.getDataMCUValuesAllData(year, plantId);
 	    List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
 
@@ -44,10 +45,8 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
  	    	aOPMCCalculatedDataDTO.setDecember(row[12] != null ? Float.parseFloat(row[12].toString()) : null); 
 			aOPMCCalculatedDataDTO.setJanuary(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
  	    	aOPMCCalculatedDataDTO.setFebruary(row[14] != null ? Float.parseFloat(row[14].toString()) : null);
- 	    	// aOPMCCalculatedDataDTO.setPlantFKId(row[15] != null ? row[15].toString() : null);
  	    	aOPMCCalculatedDataDTO.setMarch(row[15] != null ? Float.parseFloat(row[15].toString()) : null);
  	    	aOPMCCalculatedDataDTO.setFinancialYear(row[16] != null ? row[16].toString() : null);
- 	    	// aOPMCCalculatedDataDTO.setDisplayOrder(row[19] != null ? Integer.parseInt(row[19].toString()) : null);
  	    	aOPMCCalculatedDataDTO.setRemarks(row[17] != null ? row[17].toString() : null);
  	    	aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
  	    }
@@ -83,6 +82,11 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			aOPMCCalculatedData.setVerticalFKId(UUID.fromString(aOPMCCalculatedDataDTO.getVerticalFKId()));
 			aOPMCCalculatedData.setMaterialFKId(UUID.fromString(aOPMCCalculatedDataDTO.getMaterialFKId()));
 			
+//			aOPMCCalculatedData.setPlantFKId(aOPMCCalculatedDataDTO.getPlantFKId());
+//			aOPMCCalculatedData.setSiteFKId(aOPMCCalculatedDataDTO.getSiteFKId());
+//			aOPMCCalculatedData.setVerticalFKId(aOPMCCalculatedDataDTO.getVerticalFKId());
+//			aOPMCCalculatedData.setMaterialFKId(aOPMCCalculatedDataDTO.getMaterialFKId());
+			
 			aOPMCCalculatedData.setJanuary(aOPMCCalculatedDataDTO.getJanuary());
 			aOPMCCalculatedData.setFebruary(aOPMCCalculatedDataDTO.getFebruary());
 			aOPMCCalculatedData.setMarch(aOPMCCalculatedDataDTO.getMarch());
@@ -99,7 +103,6 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			aOPMCCalculatedData.setFinancialYear(aOPMCCalculatedDataDTO.getFinancialYear());
 			aOPMCCalculatedData.setRemarks(aOPMCCalculatedDataDTO.getRemarks());
 
-			
 			aOPMCCalculatedDataRepository.save(aOPMCCalculatedData);
 		}
 		// TODO Auto-generated method stub

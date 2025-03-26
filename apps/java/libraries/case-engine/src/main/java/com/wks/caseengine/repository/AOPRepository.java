@@ -57,10 +57,10 @@ public interface AOPRepository extends JpaRepository<AOP, UUID>{
             "  AND NT.NormName = 'Production' " +
             "  AND NP.NormParameterType_FK_Id IS NOT NULL " +
             "  AND NP.Id NOT IN (" +
-            "    SELECT AOP.NormParameters_FK_Id " +
+            "    SELECT AOP.Meterial_FK_Id " +
             "    FROM AOP AOP " +
             "    WHERE AOP.Plant_FK_Id = :plantId AND AOP.AOPYear=:year " +
-            "      AND AOP.NormParameters_FK_Id IS NOT NULL" +
+            "      AND AOP.Meterial_FK_Id IS NOT NULL" +
             ")",
     nativeQuery = true)
 List<Object[]> getDataBusinessAllData(@Param("plantId") String plantId,@Param("year") String year);

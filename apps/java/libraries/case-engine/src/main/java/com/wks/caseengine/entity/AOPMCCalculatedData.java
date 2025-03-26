@@ -26,6 +26,7 @@ public class AOPMCCalculatedData {
     
     @Column(name = "Plant_FK_ID")
     private UUID plantFKId;
+
     @Column(name = "Vertical_FK_ID")
     private UUID verticalFKId;
     
@@ -67,22 +68,24 @@ public class AOPMCCalculatedData {
     
     @Column(name = "March")
     private Float march;
-    
 
     @Column(name="FinancialYear")
     private String financialYear;
     
-    
     @Column(name="Remarks")
     private String remarks;
+
     @Column(name="CreatedOn")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdOn;
+
     @Column(name="ModifiedOn")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedOn;
+
     @Column(name="MCUVersion")
     private String mcuVersion;
+
     @Column(name="UpdatedBy")
     private String updatedBy;
 }

@@ -105,7 +105,7 @@ public class AOPServiceImpl implements  AOPService{
  			aOPDTO.setAopYear(row[18] != null ? row[18].toString() : null);
  			aOPDTO.setPlantFkId(row[19] != null ? row[19].toString() : null);
  			aOPDTO.setAvgTPH(row[20] != null ? Float.parseFloat(row[20].toString()) : null);
- 			aOPDTO.setNormParametersFKId(row[21] != null ? row[21].toString() : null);
+ 			aOPDTO.setMaterialFKId(row[21] != null ? row[21].toString() : null);
  			aOPDTO.setDisplayOrder(row[22] != null ? Integer.parseInt(row[22].toString()) : null);
  			aOPDTOList.add(aOPDTO);			
  	    }
@@ -116,7 +116,7 @@ public class AOPServiceImpl implements  AOPService{
 					   
 		 			AOPDTO aOPDTO = new AOPDTO();
 		
-					aOPDTO.setNormParametersFKId(obj1[0]!=null? obj1[0].toString():null);
+					aOPDTO.setMaterialFKId(obj1[0]!=null? obj1[0].toString():null);
 		 			aOPDTO.setId(i+"#");
 		 			aOPDTOList.add(aOPDTO);
 		 i++;
@@ -165,7 +165,7 @@ public class AOPServiceImpl implements  AOPService{
 
 			aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFkId()));
 			aOP.setAopYear(aOPDTO.getAopYear());
-			aOP.setNormParametersFKId(UUID.fromString(aOPDTO.getNormParametersFKId()));
+			aOP.setNormParametersFKId(UUID.fromString(aOPDTO.getMaterialFKId()));
 			aOPRepository.save(aOP);
 		}
 		return aOPDTOList;
@@ -188,7 +188,7 @@ public class AOPServiceImpl implements  AOPService{
 		   List<AOP> objList = aOPRepository.findAllByAopYearAndPlantFkId(year, UUID.fromString(plantId));;
             for(AOP aop:objList){
 				for(Object[] obj :list){
-					if(aop.getNormParametersFKId().toString().equalsIgnoreCase(obj[0].toString()))	{
+					if(aop.getMaterialFKId().toString().equalsIgnoreCase(obj[0].toString()))	{
 						System.out.println("obj[0]"+obj[0]);
 						AOPDTO aopDto = new AOPDTO();
 						aopDto.setAopCaseId(aop.getAopCaseId());
@@ -198,7 +198,7 @@ public class AOPServiceImpl implements  AOPService{
 						aopDto.setPlantFkId(aop.getPlantFkId()!=null? aop.getPlantFkId().toString():null);
                         aopDto.setAopStatus(aop.getAopStatus());
 						aopDto.setAopYear(aop.getAopYear());
-						aopDto.setNormParametersFKId(aop.getNormParametersFKId()!=null? aop.getNormParametersFKId().toString() :null);
+						aopDto.setNormParametersFKId(aop.getMaterialFKId()!=null? aop.getMaterialFKId().toString() :null);
 						aopDto.setJan(obj[3]!=null? (Float.parseFloat(obj[3].toString())) : null);
 						aopDto.setFeb(obj[4]!=null? (Float.parseFloat(obj[4].toString())) : null);
 						aopDto.setMarch(obj[5]!=null?(Float.parseFloat(obj[5].toString())) : null);
