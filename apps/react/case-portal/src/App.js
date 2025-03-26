@@ -76,8 +76,19 @@ const App = () => {
   }, [verticalChange, keycloak])
 
   async function buildMenuItems(keycloak) {
-    const rawAllowedVerticals =
-      JSON.parse(keycloak?.idTokenParsed?.verticals) || []
+    let rawAllowedVerticals = []
+    const verticals = keycloak?.idTokenParsed?.verticals
+
+    if (verticals) {
+      try {
+        rawAllowedVerticals = JSON.parse(verticals)
+      } catch (error) {
+        console.error('Error parsing verticals JSON:', error)
+        rawAllowedVerticals = []
+      }
+    } else {
+      console.warn('No verticals found in idTokenParsed')
+    }
 
     const allowedVerticalsMapping = rawAllowedVerticals.reduce((acc, obj) => {
       return { ...acc, ...obj }
@@ -87,16 +98,14 @@ const App = () => {
     // console.log(verticalChange)
 
     const selectedVertical = verticalChange?.selectedVertical?.toLowerCase()
-
     const allowedChildIds =
       (selectedVertical && allowedVerticalsMapping[selectedVertical]) || []
-    // console.log(allowedChildIds)
 
+    // Build the menu based on allowed verticals
     const menu = {
       items: [...menuItemsDefs.items],
     }
 
-    // If allowedChildIds is empty, all children are rendered.
     menu.items = menu.items.map((item) => {
       if (item.id === 'utilities') {
         return {
@@ -119,7 +128,14 @@ const App = () => {
       return item
     })
 
-    if (!accountStore.isManagerUser(keycloak)) {
+    // Safely determine if the user is a manager.
+    // If keycloak.hasRealmRole is not a function, default to false.
+    const isManagerUser =
+      typeof keycloak.hasRealmRole === 'function'
+        ? keycloak.hasRealmRole('manager')
+        : false
+
+    if (!isManagerUser) {
       delete menu.items[3]
     }
 

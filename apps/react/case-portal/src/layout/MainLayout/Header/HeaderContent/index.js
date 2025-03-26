@@ -305,7 +305,7 @@ const HeaderContent = ({ keycloak }) => {
     const siteAvailable = allowedSites.map((site) => site.name)
     setSites(siteAvailable)
     setSelectedSite(siteAvailable[0] || '')
-  //  console.log(selectedVertical)
+    //  console.log(selectedVertical)
     dispatch(
       setVerticalChange({
         selectedPlant,
