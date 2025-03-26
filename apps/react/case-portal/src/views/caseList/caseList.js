@@ -68,7 +68,7 @@ export const CaseList = ({ status, caseDefId }) => {
     }
   }, [])
 
-  useEffect(() => { 
+  useEffect(() => {
     if (Config.WebsocketsEnabled) {
       const websocketUrl = Config.WebsocketUrl
       const topic = Config.WebsocketsTopicCaseCreated
