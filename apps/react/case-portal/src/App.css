@@ -80,3 +80,7 @@ header {
   /* -ms-flex-direction: row-reverse; */
   flex-direction: row;
 }
+
+.css-1imnto4-MuiPaper-root-MuiCard-root {
+  margin-bottom: 0px;
+}

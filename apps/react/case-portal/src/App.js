@@ -69,7 +69,7 @@ const App = () => {
   }
 
   useEffect(() => {
-    if (keycloak) {
+    if (keycloak && verticalChange) {
       buildMenuItems(keycloak)
     }
     // console.log(verticalChange)
@@ -87,7 +87,7 @@ const App = () => {
         rawAllowedVerticals = []
       }
     } else {
-      console.warn('No verticals found in idTokenParsed')
+      // console.log('No verticals found in idTokenParsed')
     }
 
     const allowedVerticalsMapping = rawAllowedVerticals.reduce((acc, obj) => {
