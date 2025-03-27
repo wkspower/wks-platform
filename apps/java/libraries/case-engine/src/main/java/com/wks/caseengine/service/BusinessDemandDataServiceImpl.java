@@ -37,7 +37,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 		for (Object[] row : obj) {
 		    BusinessDemandDataDTO businessDemandDataDTO = new BusinessDemandDataDTO();
 
-		    businessDemandDataDTO.setId(row[0].toString());
+		    businessDemandDataDTO.setId(row[0] != null ? row[0].toString() : null);
 		    businessDemandDataDTO.setRemark(row[1] != null ? row[1].toString() : null);
 		    businessDemandDataDTO.setJan(row[2] != null ? Float.parseFloat(row[2].toString()) : null);
 		    businessDemandDataDTO.setFeb(row[3] != null ? Float.parseFloat(row[3].toString()) : null);
@@ -51,7 +51,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 		    businessDemandDataDTO.setOct(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
 		    businessDemandDataDTO.setNov(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
 		    businessDemandDataDTO.setDec(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
-		    businessDemandDataDTO.setYear(row[14].toString());
+		    businessDemandDataDTO.setYear(row[13] != null ? row[14].toString() : null);
 		    businessDemandDataDTO.setPlantId(row[15] != null ? row[15].toString().toUpperCase() : null);
 		    businessDemandDataDTO.setNormParameterId(row[16] != null ? row[16].toString() : null);
 		    businessDemandDataDTO.setAvgTph(row[17] != null ? Float.parseFloat(row[17].toString()) : null);
@@ -63,18 +63,18 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 		    businessDemandDataDTOList.add(businessDemandDataDTO);
 		}
 		
-		List<Object[]> list = businessDemandDataRepository.getAllBusinessDemandData(plantId);
- 		int i=1;
- 		for(Object[] obj1 :list){
-            System.out.println("obj1"+obj1);
- 			BusinessDemandDataDTO businessDemandDataDTO = new BusinessDemandDataDTO();
+//		List<Object[]> list = businessDemandDataRepository.getAllBusinessDemandData(plantId);
+// 		int i=1;
+// 		for(Object[] obj1 :list){
+//            System.out.println("obj1"+obj1);
+// 			BusinessDemandDataDTO businessDemandDataDTO = new BusinessDemandDataDTO();
 
- 			businessDemandDataDTO.setNormParameterId(obj1[0]!=null? obj1[0].toString():null);
- 			businessDemandDataDTO.setNormParameterTypeDisplayName(obj1[1]!=null? obj1[1].toString():null);
- 			businessDemandDataDTO.setId(i+"#");
- 			businessDemandDataDTOList.add(businessDemandDataDTO);
- 			i++;
- 		}
+// 			businessDemandDataDTO.setNormParameterId(obj1[0]!=null? obj1[0].toString():null);
+// 			businessDemandDataDTO.setNormParameterTypeDisplayName(obj1[1]!=null? obj1[1].toString():null);
+// 			businessDemandDataDTO.setId(i+"#");
+// 			businessDemandDataDTOList.add(businessDemandDataDTO);
+// 			i++;
+// 		}
 
 		 
         return businessDemandDataDTOList;

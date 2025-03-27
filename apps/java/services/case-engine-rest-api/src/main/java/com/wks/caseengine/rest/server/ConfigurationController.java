@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.ConfigurationDTO;
-import com.wks.caseengine.dto.ConfigurationDataDTO;
 import com.wks.caseengine.service.ConfigurationService;
 
 @RestController

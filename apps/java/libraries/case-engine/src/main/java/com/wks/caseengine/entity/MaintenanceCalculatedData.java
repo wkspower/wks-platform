@@ -27,15 +27,21 @@ public class MaintenanceCalculatedData {
     
     @Column(name = "NonShoutdownHrs")
     private Integer nonShoutdownHrs;
+    @Column(name = "EOE_AvgSlowdownLoadPVT")
+    private Float eoeAvgSlowdownLoadPVT;
     
-    @Column(name = "AvgSlowdownLoadPVT")
-    private Float avgSlowdownLoadPVT;
+    @Column(name = "EO_AvgSlowdownLoadPVT")
+    private Float eoAvgSlowdownLoadPVT;
     
-    @Column(name = "SlowdownLoadReduction")
-    private Float slowdownLoadReduction;
+    @Column(name = "EOE_SlowdownLoadReduction")
+    private Float eoeSlowdownLoadReduction;
+    @Column(name = "EO_SlowdownLoadReduction")
+    private Float eoSlowdownLoadReduction;
     
-    @Column(name = "EffectiveOperatingHrs")
-    private Integer effectiveOperatingHrs;
+    @Column(name = "EOE_EffectiveOperatingHrs")
+    private Integer eoeEffectiveOperatingHrs;
+    @Column(name = "EO_EffectiveOperatingHrs")
+    private Integer eoEffectiveOperatingHrs;
     
     @Column(name = "MonthNo")
     private Integer monthNo;
