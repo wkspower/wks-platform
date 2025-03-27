@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.wks.caseengine.entity.AOPConsumptionNorm;
 
 @Repository
-public interface AOPConsumptionNormServiceRepository extends JpaRepository{
+public interface AOPConsumptionNormRepository extends JpaRepository<AOPConsumptionNorm,UUID>{
 	
 	@Query(value = "SELECT * FROM AOPConsumptionNorm WHERE Plant_FK_Id = :plantFkId AND AOPYear = :aopYear", nativeQuery = true)
     List<AOPConsumptionNorm> findByPlantFkIdAndAopYear(@Param("plantFkId") UUID plantFkId, @Param("aopYear") String aopYear);

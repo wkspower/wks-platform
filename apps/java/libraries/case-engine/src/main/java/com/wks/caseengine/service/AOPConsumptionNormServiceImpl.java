@@ -9,17 +9,18 @@ import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.AOPConsumptionNormDTO;
 import com.wks.caseengine.entity.AOPConsumptionNorm;
-import com.wks.caseengine.repository.AOPConsumptionNormServiceRepository;
+import com.wks.caseengine.repository.AOPConsumptionNormRepository;
+
 
 @Service
 public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService {
 	
 	@Autowired
-	private AOPConsumptionNormServiceRepository aOPConsumptionNormServiceRepository;
+	private AOPConsumptionNormRepository aOPConsumptionNormRepository;
 
 	@Override
 	public List<AOPConsumptionNormDTO> getAOPConsumptionNorm(String plantId, String year) {
-		List<AOPConsumptionNorm> aOPConsumptionNormList =aOPConsumptionNormServiceRepository.findByPlantFkIdAndAopYear(UUID.fromString(plantId),year);
+		List<AOPConsumptionNorm> aOPConsumptionNormList =aOPConsumptionNormRepository.findByPlantFkIdAndAopYear(UUID.fromString(plantId),year);
 		List<AOPConsumptionNormDTO>  aOPConsumptionNormDTOList=new ArrayList<>();
 		for(AOPConsumptionNorm aOPConsumptionNorm:aOPConsumptionNormList) {
 			AOPConsumptionNormDTO aOPConsumptionNormDTO=new AOPConsumptionNormDTO();

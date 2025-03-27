@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.AOPConsumptionNormDTO;
-import com.wks.caseengine.repository.AOPConsumptionNormServiceRepository;
 import com.wks.caseengine.service.AOPConsumptionNormService;
 
 @RestController
