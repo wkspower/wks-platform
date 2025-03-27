@@ -98,6 +98,14 @@ const ShutDown = () => {
     }
   }, [apiRef])
 
+  function addTimeOffset(dateTime) {
+    if (!dateTime) return null
+    const date = new Date(dateTime)
+    date.setUTCHours(date.getUTCHours() + 5)
+    date.setUTCMinutes(date.getUTCMinutes() + 30)
+    return date
+  }
+
   const saveShutdownData = async (newRow) => {
     try {
       let plantId = ''
@@ -112,8 +120,8 @@ const ShutDown = () => {
         productId: row.product,
         discription: row.discription,
         durationInHrs: parseFloat(findDuration('1', row)),
-        maintEndDateTime: row.maintEndDateTime,
-        maintStartDateTime: row.maintStartDateTime,
+        maintEndDateTime: addTimeOffset(row.maintEndDateTime),
+        maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
         remark: row.remark || 'null',
@@ -338,6 +346,9 @@ const ShutDown = () => {
           : null
         return parsedDate
       },
+      valueFormatter: (params) => {
+        return params ? dayjs(params).format('DD/MM/YYYY, h:mm:ss A') : ''
+      },
     },
 
     {
@@ -352,6 +363,9 @@ const ShutDown = () => {
           ? dayjs(value, 'D MMM, YYYY, h:mm:ss A').toDate()
           : null
         return parsedDate
+      },
+      valueFormatter: (params) => {
+        return params ? dayjs(params).format('DD/MM/YYYY, h:mm:ss A') : ''
       },
     },
     {

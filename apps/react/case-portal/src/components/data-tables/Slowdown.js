@@ -67,6 +67,14 @@ const SlowDown = () => {
     return newRow
   }, [])
 
+  function addTimeOffset(dateTime) {
+    if (!dateTime) return null
+    const date = new Date(dateTime)
+    date.setUTCHours(date.getUTCHours() + 5)
+    date.setUTCMinutes(date.getUTCMinutes() + 30)
+    return date
+  }
+
   const saveSlowDownData = async (newRow) => {
     try {
       var plantId = ''
@@ -80,8 +88,8 @@ const SlowDown = () => {
         discription: row.discription,
         // durationInHrs: parseFloat(findDuration('1', row)),
         durationInHrs: parseFloat(row.durationInHrs),
-        maintEndDateTime: row.maintEndDateTime,
-        maintStartDateTime: row.maintStartDateTime,
+        maintEndDateTime: addTimeOffset(row.maintEndDateTime),
+        maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         remark: row.remark,
         rate: row.rate,
         audityear: localStorage.getItem('year'),
@@ -317,6 +325,9 @@ const SlowDown = () => {
           : null
         return parsedDate
       },
+      valueFormatter: (params) => {
+        return params ? dayjs(params).format('DD/MM/YYYY, h:mm:ss A') : ''
+      },
     },
 
     {
@@ -331,6 +342,9 @@ const SlowDown = () => {
           ? dayjs(value, 'D MMM, YYYY, h:mm:ss A').toDate()
           : null
         return parsedDate
+      },
+      valueFormatter: (params) => {
+        return params ? dayjs(params).format('DD/MM/YYYY, h:mm:ss A') : ''
       },
     },
 

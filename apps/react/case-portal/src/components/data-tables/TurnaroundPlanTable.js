@@ -64,6 +64,14 @@ const TurnaroundPlanTable = () => {
     return newRow
   }, [])
 
+  function addTimeOffset(dateTime) {
+    if (!dateTime) return null
+    const date = new Date(dateTime)
+    date.setUTCHours(date.getUTCHours() + 5)
+    date.setUTCMinutes(date.getUTCMinutes() + 30)
+    return date
+  }
+
   const saveTurnAroundData = async (newRow) => {
     try {
       var plantId = ''
@@ -78,8 +86,8 @@ const TurnaroundPlanTable = () => {
         discription: row.discription,
         // durationInMins: parseFloat(findDuration('1', row)),
         durationInHrs: parseFloat(row.durationInHrs),
-        maintEndDateTime: row.maintEndDateTime,
-        maintStartDateTime: row.maintStartDateTime,
+        maintEndDateTime: addTimeOffset(row.maintEndDateTime),
+        maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         remark: row.remark,
         audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
@@ -280,6 +288,9 @@ const TurnaroundPlanTable = () => {
           : null
         return parsedDate
       },
+      valueFormatter: (params) => {
+        return params ? dayjs(params).format('DD/MM/YYYY, h:mm:ss A') : ''
+      },
     },
 
     {
@@ -294,6 +305,9 @@ const TurnaroundPlanTable = () => {
           ? dayjs(value, 'D MMM, YYYY, h:mm:ss A').toDate()
           : null
         return parsedDate
+      },
+      valueFormatter: (params) => {
+        return params ? dayjs(params).format('DD/MM/YYYY, h:mm:ss A') : ''
       },
     },
 
