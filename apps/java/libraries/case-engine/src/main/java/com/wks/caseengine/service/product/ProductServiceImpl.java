@@ -101,27 +101,38 @@ public class ProductServiceImpl implements ProductService {
 
 
 	public List<Object[]> getAllProductsFromNormParameters(String normParameterTypeName, UUID plantId) {
-		System.out.println("normParameterTypeName"+normParameterTypeName);
+	    System.out.println("normParameterTypeName: " + normParameterTypeName);
+
+	    // Convert "null" string to actual null (if needed)
 	    if ("null".equals(normParameterTypeName)) {
 	        normParameterTypeName = null;
 	        System.out.println("normParameterTypeName is the string 'null'");
 	    }
 
-	    StringBuilder queryBuilder = new StringBuilder("""
-	        SELECT CAST(np.Id AS VARCHAR(36)) as NormParameterId, np.Name, np.DisplayName 
-	        FROM NormParameters np
-	        JOIN NormTypes nt ON np.NormType_FK_Id = nt.Id
-	        WHERE np.Plant_FK_Id = :plantId AND np.NormParameterType_FK_Id IS NOT NULL
-	    """);
+	    // Start query construction
+	    StringBuilder queryBuilder = new StringBuilder(
+	        "SELECT CAST(np.Id AS VARCHAR(36)) as NormParameterId, np.Name, np.DisplayName " +
+	        "FROM NormParameters np "
+	    );
 
-	    if (normParameterTypeName != null) {
-	        queryBuilder.append(" AND nt.NormName = :normParameterTypeName");
+	    // If filtering by norm type, join with NormTypes
+	    if (!"All".equals(normParameterTypeName)) {
+	        queryBuilder.append("JOIN NormTypes nt ON np.NormType_FK_Id = nt.Id ")
+	                    .append("WHERE np.Plant_FK_Id = :plantId AND np.NormParameterType_FK_Id IS NOT NULL ");
+	        if (normParameterTypeName != null) {
+	            queryBuilder.append("AND nt.NormName = :normParameterTypeName ");
+	        }
+	    } else {
+	        queryBuilder.append("WHERE np.Plant_FK_Id = :plantId ");
 	    }
-	    queryBuilder.append(" ORDER BY np.DisplayOrder");
 
+	    // Append ordering clause
+	    queryBuilder.append("ORDER BY np.DisplayOrder");
+
+	    // Create and set parameters in the query
 	    Query query = entityManager.createNativeQuery(queryBuilder.toString());
 	    query.setParameter("plantId", plantId);
-	    if (normParameterTypeName != null) {
+	    if (!"All".equals(normParameterTypeName) && normParameterTypeName != null) {
 	        query.setParameter("normParameterTypeName", normParameterTypeName);
 	    }
 

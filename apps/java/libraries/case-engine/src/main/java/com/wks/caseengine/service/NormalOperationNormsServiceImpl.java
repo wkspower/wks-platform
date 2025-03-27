@@ -112,7 +112,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	@Override
-	public List<Object[]> calculateExpressionConsumptionNorms(String year) {
+	public int calculateExpressionConsumptionNorms(String year) {
 		return normalOperationNormsRepository.calculateExpressionConsumptionNorms(year);
 	}
 

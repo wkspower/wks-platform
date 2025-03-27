@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -25,8 +26,9 @@ public interface NormalOperationNormsRepository extends JpaRepository<MCUNormsVa
 		    """, nativeQuery = true)
 		List<Object[]> findByYearAndPlantFkId(@Param("year") String year, @Param("plantId") UUID plantId);
 		
+		@Modifying
 		@Transactional
 		@Query(value = "EXEC MEG_HMD_CalculateExpressionConsumptionNorms :finYear", nativeQuery = true)
-		List<Object[]> calculateExpressionConsumptionNorms(@Param("finYear") String finYear);
+		int calculateExpressionConsumptionNorms(@Param("finYear") String finYear);
 
 }
