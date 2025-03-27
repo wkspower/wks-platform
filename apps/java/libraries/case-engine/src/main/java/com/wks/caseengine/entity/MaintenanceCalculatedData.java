@@ -23,16 +23,16 @@ public class MaintenanceCalculatedData {
     private Integer runningHoursInMonth;
     
     @Column(name = "ShoutdownHrs")
-    private Integer shoutdownHrs;
+    private Float shoutdownHrs;
     
     @Column(name = "NonShoutdownHrs")
     private Integer nonShoutdownHrs;
     
     @Column(name = "AvgSlowdownLoadPVT")
-    private Double avgSlowdownLoadPVT;
+    private Float avgSlowdownLoadPVT;
     
     @Column(name = "SlowdownLoadReduction")
-    private Integer slowdownLoadReduction;
+    private Float slowdownLoadReduction;
     
     @Column(name = "EffectiveOperatingHrs")
     private Integer effectiveOperatingHrs;

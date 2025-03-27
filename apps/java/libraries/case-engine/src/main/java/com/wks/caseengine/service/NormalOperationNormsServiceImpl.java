@@ -110,4 +110,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		return mCUNormsValueDTOList;
 	}
 
+	@Override
+	public List<Object[]> calculateExpressionConsumptionNorms(String year) {
+		return normalOperationNormsRepository.calculateExpressionConsumptionNorms(year);
+	}
+
 }
