@@ -110,8 +110,10 @@ const ProductionNorms = () => {
         aopCaseId: row.aopCaseId || null,
         aopStatus: row.aopStatus || null,
         aopYear: localStorage.getItem('year'),
-        plantFkId: plantId,
+        plantFKId: plantId,
         materialFKId: row.normParametersFKId,
+        siteFKId: JSON.parse(localStorage.getItem('selectedSite')).id,
+        verticalFKId: localStorage.getItem('verticalId'),
         // normItem: getProductName('1', row.normParametersFKId) || null,
         // normItem: 'EOE',
         april: isKiloTon && row.april ? row.april * 1000 : row.april || null,
@@ -137,7 +139,8 @@ const ProductionNorms = () => {
         keycloak,
       )
 
-      if (response.status === 200) {
+      // if (response.status === 200) {
+      if(response){
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Production AOP Saved Successfully !',
@@ -184,7 +187,7 @@ const ProductionNorms = () => {
           return {
             ...item,
             idFromApi: item.id,
-            normParametersFKId: item?.normParametersFKId?.toLowerCase(),
+            normParametersFKId: item?.normParametersFKId?.toLowerCase() || item?.materialFKId?.toLowerCase(),
             id: index,
             ...(isKiloTon && {
               jan: item.jan ? item.jan / 1000 : item.jan,

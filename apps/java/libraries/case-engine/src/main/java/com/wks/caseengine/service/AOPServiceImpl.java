@@ -68,7 +68,7 @@ public class AOPServiceImpl implements  AOPService{
 			// aOPDTO.setNormItem(aOP.getNormItem());
 			aOPDTO.setNov(aOP.getNov());
 			aOPDTO.setOct(aOP.getOct());
-			aOPDTO.setPlantFkId(aOP.getPlantFkId().toString());
+			aOPDTO.setPlantFKId(aOP.getPlantFkId().toString());
 			aOPDTO.setSep(aOP.getSep());
 			aOPList.add(aOPDTO);
 		}
@@ -103,7 +103,7 @@ public class AOPServiceImpl implements  AOPService{
  			aOPDTO.setNov(row[16] != null ? Float.parseFloat(row[16].toString()) : null);
  			aOPDTO.setDec(row[17] != null ? Float.parseFloat(row[17].toString()) : null);    
  			aOPDTO.setAopYear(row[18] != null ? row[18].toString() : null);
- 			aOPDTO.setPlantFkId(row[19] != null ? row[19].toString() : null);
+			aOPDTO.setPlantFKId(row[19] != null ? row[19].toString() : null);
  			aOPDTO.setAvgTPH(row[20] != null ? Float.parseFloat(row[20].toString()) : null);
  			aOPDTO.setMaterialFKId(row[21] != null ? row[21].toString() : null);
  			aOPDTO.setDisplayOrder(row[22] != null ? Integer.parseInt(row[22].toString()) : null);
@@ -160,10 +160,11 @@ public class AOPServiceImpl implements  AOPService{
 			// aOP.setNormItem(aOPDTO.getNormItem());
 			aOP.setNov(aOPDTO.getNov());
 			aOP.setOct(aOPDTO.getOct());
-			aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFkId()));
+			aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFKId()));
 			aOP.setSep(aOPDTO.getSep());
 
-			aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFkId()));
+			aOP.setSiteFkId(UUID.fromString(aOPDTO.getSiteFKId()));
+			aOP.setVerticalFkId(UUID.fromString(aOPDTO.getVerticalFKId()));
 			aOP.setAopYear(aOPDTO.getAopYear());
 			aOP.setMaterialFKId(UUID.fromString(aOPDTO.getMaterialFKId()));
 			aOPRepository.save(aOP);
@@ -210,7 +211,7 @@ public class AOPServiceImpl implements  AOPService{
 					aopDto.setAopRemarks("");
 					aopDto.setId("");
                         // aopDto.setNormItem(aop.getNormItem());
-					aopDto.setPlantFkId(plantId);
+					aopDto.setPlantFKId(plantId);
 					aopDto.setAopStatus("Draft");
 					aopDto.setAopYear(year);
 					aopDto.setMaterialFKId(obj[0] != null ? (obj[0].toString()) : null);

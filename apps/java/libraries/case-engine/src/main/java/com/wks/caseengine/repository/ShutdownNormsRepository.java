@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import com.wks.caseengine.entity.MCUNormsValue;
+import com.wks.caseengine.entity.ShutdownNormsValue;
 
 @Repository
-public interface ShutdownNormsRepository extends JpaRepository<MCUNormsValue,UUID>{
+public interface ShutdownNormsRepository extends JpaRepository<ShutdownNormsValue,UUID>{
 	
 	@Query(value = """
 		    SELECT TOP (1000) [Id]

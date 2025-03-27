@@ -78,4 +78,8 @@ public class AOP {
     
     @Column(name="Material_FK_Id")
     private UUID MaterialFKId;
+    @Column(name = "Site_FK_Id", nullable = false)
+    private UUID siteFkId;
+    @Column(name = "Vertical_FK_Id", nullable = false)
+    private UUID verticalFkId;
 }

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.wks.caseengine.dto.MCUNormsValueDTO;
+import com.wks.caseengine.dto.ShutdownNormsValueDTO;
 import com.wks.caseengine.service.ShutdownNormsService;
 
 @RestController
@@ -20,14 +20,14 @@ public class ShutdownNormsController {
 	@Autowired
 	private ShutdownNormsService shutdownNormsService;
 	
-	@GetMapping(value="/getShutdownNormsData")
-	public List<MCUNormsValueDTO> getShutdownNormsData(@RequestParam String year,@RequestParam String plantId){
+	@GetMapping(value="/shutdownNorms")
+	public List<ShutdownNormsValueDTO> getShutdownNormsData(@RequestParam String year,@RequestParam String plantId){
 		return	shutdownNormsService.getShutdownNormsData(year, plantId);
 	}
 	
-	@PostMapping(value="/saveShutdownNormsDataNew")
-	public List<MCUNormsValueDTO> saveShutdownNormsData(@RequestBody List<MCUNormsValueDTO> mCUNormsValueDTOList){
-		return	shutdownNormsService.saveShutdownNormsData(mCUNormsValueDTOList);
+	@PostMapping(value="/shutdownNorms")
+	public List<ShutdownNormsValueDTO> saveShutdownNormsData(@RequestBody List<ShutdownNormsValueDTO> shutdownNormsValueDTOList){
+		return	shutdownNormsService.saveShutdownNormsData(shutdownNormsValueDTOList);
 	}
 
 }

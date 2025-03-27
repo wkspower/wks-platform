@@ -35,9 +35,11 @@ public class AOPDTO {
     private Float nov;
     private Float dec;
     private String aopYear;
-    private String plantFkId;
+    private String plantFKId;
     private Float avgTPH;
     private String materialFKId;
     private String bDNormParametersFKId;
     private Integer displayOrder;
+    private String siteFKId;
+    private String verticalFKId;
 }
