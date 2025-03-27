@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.wks.caseengine.entity.MCUNormsValue;
 
 @Repository
@@ -22,6 +24,9 @@ public interface NormalOperationNormsRepository extends JpaRepository<MCUNormsVa
 		    WHERE MNV.FinancialYear = :year AND MNV.Plant_FK_Id = :plantId ORDER BY NPT.Id
 		    """, nativeQuery = true)
 		List<Object[]> findByYearAndPlantFkId(@Param("year") String year, @Param("plantId") UUID plantId);
-
+		
+		@Transactional
+		@Query(value = "EXEC MEG_HMD_CalculateExpressionConsumptionNorms :finYear", nativeQuery = true)
+		List<Object[]> calculateExpressionConsumptionNorms(@Param("finYear") String finYear);
 
 }

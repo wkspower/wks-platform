@@ -63,8 +63,9 @@ public class NormAttributeTransactions {
     // If you want to avoid using the reserved keyword 'User' directly in Java,
     // you can rename the field and map it to the column "User".
 
-    @Column(name = "User", length = 255)  // Use backticks to escape reserved keyword
+    @Column(name = "[User]")
     private String userName;
+
 
     @Column(name = "NormParameter_FK_Id")
     private UUID normParameterFKId;
@@ -75,7 +76,7 @@ public class NormAttributeTransactions {
 //    @Column(name="Month")
 //    private Integer month;
     
-    @Column(name = "Plant_FK_Id")
-    private UUID plantFKId;
+   // @Column(name = "Plant_FK_Id")
+   // private UUID plantFKId;
 
 }

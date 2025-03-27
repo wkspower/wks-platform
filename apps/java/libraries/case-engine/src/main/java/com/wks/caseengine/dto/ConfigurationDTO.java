@@ -28,7 +28,7 @@ public class ConfigurationDTO {
     private Float oct;
     private Float nov;
     private Float dec;
-    private String remark;
+    private String remarks;
     private String auditYear;
 
 }

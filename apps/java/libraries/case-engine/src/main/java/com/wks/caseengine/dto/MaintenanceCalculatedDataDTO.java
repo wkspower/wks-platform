@@ -14,10 +14,10 @@ import org.springframework.context.annotation.Configuration;
 public class MaintenanceCalculatedDataDTO {
     private String id;
     private Integer runningHoursInMonth;
-    private Integer shoutdownHrs;
+    private Float shoutdownHrs;
     private Integer nonShoutdownHrs;
-    private Double avgSlowdownLoadPVT;
-    private Integer slowdownLoadReduction;
+    private Float avgSlowdownLoadPVT;
+    private Float slowdownLoadReduction;
     private Integer effectiveOperatingHrs;
     private Integer monthNo;
     private String aopYear;

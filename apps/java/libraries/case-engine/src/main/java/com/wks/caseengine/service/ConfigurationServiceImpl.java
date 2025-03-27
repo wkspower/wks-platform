@@ -63,7 +63,7 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 			configurationDTO.setOct((row[10] != null && !row[10].toString().trim().isEmpty()) ? Float.parseFloat(row[10].toString()) : null);
 			configurationDTO.setNov((row[11] != null && !row[11].toString().trim().isEmpty()) ? Float.parseFloat(row[11].toString()) : null);
 			configurationDTO.setDec((row[12] != null && !row[12].toString().trim().isEmpty()) ? Float.parseFloat(row[12].toString()) : null);
-			configurationDTO.setRemark((row[13] != null ? row[13].toString() : "" ));
+			configurationDTO.setRemarks((row[13] != null ? row[13].toString() : "" ));
 			configurationDTO.setId(row[14] != null ? row[14].toString() : i+"#");
 			configurationDTO.setAuditYear(row[15] != null ? row[15].toString() : "" );
 			
@@ -131,7 +131,7 @@ public class ConfigurationServiceImpl implements ConfigurationService{
  
 			 
 				 normAttributeTransactions.setAttributeValue(attributeValue != null ? attributeValue.toString() : "0.0");
-				 normAttributeTransactions.setRemarks(configurationDTO.getRemark());
+				 normAttributeTransactions.setRemarks(configurationDTO.getRemarks());
  
 				
 				 normAttributeTransactionsRepository.save(normAttributeTransactions);
