@@ -49,7 +49,7 @@ const SelectivityData = () => {
     rowsBeforeChange: {},
   })
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remark || '')
+    setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -83,7 +83,7 @@ const SelectivityData = () => {
         return
       }
 
-      const requiredFields = ['remark']
+      const requiredFields = ['remarks']
       const validationMessage = validateFields(data, requiredFields)
       if (validationMessage) {
         setSnackbarOpen(true)
@@ -101,6 +101,8 @@ const SelectivityData = () => {
   }, [apiRef])
 
   const saveCatalystData = async (newRow) => {
+    setLoading(true)
+
     try {
       var plantId = ''
       const storedPlant = localStorage.getItem('selectedPlant')
@@ -125,7 +127,7 @@ const SelectivityData = () => {
         UOM: '',
         auditYear: localStorage.getItem('year'),
         normParameterFKId: row.normParameterFKId,
-        remarks: row.remark,
+        remarks: row.remarks,
         id: row.idFromApi || null,
       }))
 
@@ -135,7 +137,7 @@ const SelectivityData = () => {
         keycloak,
       )
 
-      if (response.status === 200) {
+      if (response) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Configuration data Saved Successfully!',
@@ -145,6 +147,8 @@ const SelectivityData = () => {
           unsavedRows: {},
           rowsBeforeChange: {},
         }
+        setLoading(false)
+
         fetchData()
       } else {
         setSnackbarOpen(true)
@@ -157,8 +161,10 @@ const SelectivityData = () => {
       return response
     } catch (error) {
       console.error('Error saving Configuration data:', error)
+      setLoading(false)
     } finally {
       // fetchData()
+      setLoading(false)
     }
   }
 
@@ -231,8 +237,8 @@ const SelectivityData = () => {
     {
       field: 'normParameterFKId',
       headerName: 'Particulars',
-      editable: true,
-      minWidth: 140,
+      editable: false,
+      minWidth: 160,
       valueGetter: (params) => params || '',
       valueFormatter: (params) => {
         const product = allProducts.find((p) => p.id === params)
@@ -395,7 +401,7 @@ const SelectivityData = () => {
     },
 
     {
-      field: 'remark',
+      field: 'remarks',
       headerName: 'Remark',
       minWidth: 150,
       editable: true,

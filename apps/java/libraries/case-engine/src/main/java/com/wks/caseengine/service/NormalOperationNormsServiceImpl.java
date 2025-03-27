@@ -3,6 +3,7 @@ package com.wks.caseengine.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,18 +71,18 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			}else {
 				mCUNormsValue.setCreatedOn(new Date());
 			}
-			mCUNormsValue.setApril(mCUNormsValueDTO.getApril());
-			mCUNormsValue.setMay(mCUNormsValueDTO.getMay());
-			mCUNormsValue.setJune(mCUNormsValueDTO.getJune());
-			mCUNormsValue.setJuly(mCUNormsValueDTO.getJuly());
-			mCUNormsValue.setAugust(mCUNormsValueDTO.getAugust());
-			mCUNormsValue.setSeptember(mCUNormsValueDTO.getSeptember());
-			mCUNormsValue.setOctober(mCUNormsValueDTO.getOctober());
-			mCUNormsValue.setNovember(mCUNormsValueDTO.getNovember());
-			mCUNormsValue.setDecember(mCUNormsValueDTO.getDecember());
-			mCUNormsValue.setJanuary(mCUNormsValueDTO.getJanuary());
-			mCUNormsValue.setFebruary(mCUNormsValueDTO.getFebruary());
-			mCUNormsValue.setMarch(mCUNormsValueDTO.getMarch());
+			mCUNormsValue.setApril(Optional.ofNullable(mCUNormsValueDTO.getApril()).orElse(0.0f));
+			mCUNormsValue.setMay(Optional.ofNullable(mCUNormsValueDTO.getMay()).orElse(0.0f));
+			mCUNormsValue.setJune(Optional.ofNullable(mCUNormsValueDTO.getJune()).orElse(0.0f));
+			mCUNormsValue.setJuly(Optional.ofNullable(mCUNormsValueDTO.getJuly()).orElse(0.0f));
+			mCUNormsValue.setAugust(Optional.ofNullable(mCUNormsValueDTO.getAugust()).orElse(0.0f));
+			mCUNormsValue.setSeptember(Optional.ofNullable(mCUNormsValueDTO.getSeptember()).orElse(0.0f));
+			mCUNormsValue.setOctober(Optional.ofNullable(mCUNormsValueDTO.getOctober()).orElse(0.0f));
+			mCUNormsValue.setNovember(Optional.ofNullable(mCUNormsValueDTO.getNovember()).orElse(0.0f));
+			mCUNormsValue.setDecember(Optional.ofNullable(mCUNormsValueDTO.getDecember()).orElse(0.0f));
+			mCUNormsValue.setJanuary(Optional.ofNullable(mCUNormsValueDTO.getJanuary()).orElse(0.0f));
+			mCUNormsValue.setFebruary(Optional.ofNullable(mCUNormsValueDTO.getFebruary()).orElse(0.0f));
+			mCUNormsValue.setMarch(Optional.ofNullable(mCUNormsValueDTO.getMarch()).orElse(0.0f));
 			if(mCUNormsValueDTO.getSiteFkId()!=null) {
 				mCUNormsValue.setSiteFkId(UUID.fromString(mCUNormsValueDTO.getSiteFkId()));
 			}

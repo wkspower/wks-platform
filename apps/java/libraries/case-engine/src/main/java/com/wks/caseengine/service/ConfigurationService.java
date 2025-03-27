@@ -14,6 +14,6 @@ import com.wks.caseengine.dto.ConfigurationDTO;
 public interface ConfigurationService {
 	
 	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId);
-    public String saveConfigurationData( String year,  List<ConfigurationDTO> configurationDTOList);
+    public List<ConfigurationDTO> saveConfigurationData( String year,  List<ConfigurationDTO> configurationDTOList);
 
 }

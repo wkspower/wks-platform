@@ -6,7 +6,16 @@ const Logo = () => {
 
   return (
     <>
-      <img src={logo} alt='WKS Power' />
+      <img
+        src={logo}
+        alt='Digital AOP'
+        style={{
+          width: '50%',
+          marginLeft: '25%',
+          marginRight: '40%',
+          marginTop: '5%',
+        }}
+      />
 
       <svg
         width='118'

@@ -95,7 +95,7 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 
 	 @Transactional(propagation = Propagation.REQUIRES_NEW)
 	 @Override
-	 public String saveConfigurationData(String year, List<ConfigurationDTO> configurationDTOList) {
+	 public List<ConfigurationDTO> saveConfigurationData(String year, List<ConfigurationDTO> configurationDTOList) {
 		 for (ConfigurationDTO configurationDTO : configurationDTOList) {
 			 UUID normParameterFKId = UUID.fromString(configurationDTO.getNormParameterFKId());
  
@@ -137,7 +137,7 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 				 normAttributeTransactionsRepository.save(normAttributeTransactions);
 			 }
 		 }
-		 return "Configuration Data Saved/Updated Successfully";
+		 return configurationDTOList;
 	 }
  
 	 

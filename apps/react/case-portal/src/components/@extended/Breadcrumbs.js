@@ -87,9 +87,10 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
             alignItems='flex-start'
             spacing={1}
           >
-            <Grid item>
+            <Grid item sx={{ ml: 1.5 }}>
               <MuiBreadcrumbs aria-label='breadcrumb'>
-                <Typography
+                {/* HIDE HOME OPTION FROM Navigators MENU */}
+                {/* <Typography
                   component={Link}
                   to='/home'
                   color='textSecondary'
@@ -97,7 +98,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                   sx={{ textDecoration: 'none' }}
                 >
                   Home
-                </Typography>
+                </Typography> */}
                 {mainContent}
                 {itemContent}
               </MuiBreadcrumbs>

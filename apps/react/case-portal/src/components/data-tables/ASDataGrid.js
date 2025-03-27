@@ -217,7 +217,7 @@ const DataGridTable = ({
 
   const columns = useMemo(() => [
     ...defaultColumns,
-    ...(permissions?.showAction
+    ...(permissions?.showAction && permissions?.deleteButton
       ? [
           {
             field: 'actions',
@@ -373,7 +373,7 @@ const DataGridTable = ({
         borderBottom: 'none',
       }}
     >
-      <Box
+      {/* <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -391,7 +391,7 @@ const DataGridTable = ({
         >
           {title}
         </Typography>
-      </Box>
+      </Box> */}
 
       <Box
         sx={{

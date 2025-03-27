@@ -164,6 +164,7 @@ const ProductionNorms = () => {
   }
 
   const handleCalculate = async () => {
+    setLoading(true)
     try {
       const year = localStorage.getItem('year')
       const storedPlant = localStorage.getItem('selectedPlant')
@@ -181,13 +182,16 @@ const ProductionNorms = () => {
           message: 'Data refreshed successfully!',
           severity: 'success',
         })
+        // setLoading(false)
 
         const formattedData = data.map((item, index) => {
           const isKiloTon = selectedUnit != 'Ton'
           return {
             ...item,
             idFromApi: item.id,
-            normParametersFKId: item?.normParametersFKId?.toLowerCase() || item?.materialFKId?.toLowerCase(),
+            normParametersFKId:
+              item?.normParametersFKId?.toLowerCase() ||
+              item?.materialFKId?.toLowerCase(),
             id: index,
             ...(isKiloTon && {
               jan: item.jan ? item.jan / 1000 : item.jan,
@@ -208,12 +212,14 @@ const ProductionNorms = () => {
 
         // setCsData(formattedData)
         setRows(formattedData)
+        setLoading(false)
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data Refresh Falied!',
           severity: 'error',
         })
+        setLoading(false)
       }
 
       return data
@@ -228,7 +234,7 @@ const ProductionNorms = () => {
 
       const data1 = await DataService.getAOPData(keycloak)
 
-      const data2 = data1
+      var data = data1
         .map((product) => ({
           ...product,
           normParametersFKId: product.materialFKId,
@@ -240,7 +246,7 @@ const ProductionNorms = () => {
 
       // console.log(data)
 
-      const data = data2.slice(0, 3)
+      data = data.slice(0, 3)
 
       // if (data.status === 200) {
       const formattedData = data.map((item, index) => {

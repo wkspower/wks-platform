@@ -114,7 +114,7 @@ const NormalOpNormsScreen = () => {
       field: 'materialFkId',
       // headerName: 'Particulars',
       headerName: lowerVertName === 'meg' ? 'Particulars' : 'Particulars',
-      minWidth: 140,
+      minWidth: 160,
       valueGetter: (params) => params || '',
       valueFormatter: (params) => {
         const product = allProducts.find((p) => p.id === params)
