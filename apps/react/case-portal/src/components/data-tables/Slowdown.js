@@ -220,17 +220,22 @@ const SlowDown = () => {
           keycloak,
           lowerVertName === 'meg' ? 'Production' : 'Grade',
         )
-        // console.log('API Response:', data);
-
-        // Extract only displayName and id
-        const productList = data
-          .filter((product) =>
-            ['EO', 'EOE', 'MEG'].includes(product.displayName),
-          ) // Filter relevant products
-          .map((product) => ({
+        var productList = []
+        if (lowerVertName === 'meg') {
+          productList = data
+            .filter((product) =>
+              ['EO', 'EOE', 'MEG'].includes(product.displayName),
+            )
+            .map((product) => ({
+              id: product.id,
+              displayName: product.displayName,
+            }))
+        } else {
+          productList = data.map((product) => ({
             id: product.id,
             displayName: product.displayName,
           }))
+        }
 
         setAllProducts(productList)
       } catch (error) {

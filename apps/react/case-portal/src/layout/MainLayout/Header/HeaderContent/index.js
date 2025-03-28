@@ -17,6 +17,7 @@ import {
   setVerticalChange,
 } from 'store/reducers/dataGridStore'
 import { DataService } from 'services/DataService'
+import honLogo from 'assets/images/hon.svg'
 // import siteData from '../../../../assets/sitesData.json'
 
 const HeaderContent = ({ keycloak }) => {
@@ -317,6 +318,20 @@ const HeaderContent = ({ keycloak }) => {
 
   return (
     <>
+      <Box sx={{ ml: 3, mt: 1 }}>
+        {' '}
+        <img
+          src={honLogo}
+          alt='Digital AOP'
+          style={{
+            width: '164px',
+            height: 'auto',
+            objectFit: 'contain',
+            display: 'block',
+          }}
+        />
+      </Box>
+
       {matchesXs && <Search />}
       {!matchesXs && <Box sx={{ width: '100%', ml: 1 }} />}
       <Stack direction='row' spacing={2} alignItems='center'>

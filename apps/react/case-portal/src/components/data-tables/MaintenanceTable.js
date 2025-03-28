@@ -102,7 +102,7 @@ const MaintenanceTable = () => {
       minWidth: 250,
     },
     {
-      field: 'apr',
+      field: 'April',
       headerName: headerMap[4],
       align: 'left',
       headerAlign: 'left',
@@ -110,42 +110,42 @@ const MaintenanceTable = () => {
     },
 
     {
-      field: 'may',
+      field: 'May',
       headerName: headerMap[5],
 
       align: 'left',
       headerAlign: 'left',
     },
     {
-      field: 'jun',
+      field: 'June',
       headerName: headerMap[6],
 
       align: 'left',
       headerAlign: 'left',
     },
     {
-      field: 'jul',
+      field: 'July',
       headerName: headerMap[7],
 
       align: 'left',
       headerAlign: 'left',
     },
     {
-      field: 'aug',
+      field: 'Aug',
       headerName: headerMap[8],
 
       align: 'left',
       headerAlign: 'left',
     },
     {
-      field: 'sep',
+      field: 'Sep',
       headerName: headerMap[9],
 
       align: 'left',
       headerAlign: 'left',
     },
     {
-      field: 'oct',
+      field: 'Oct',
       headerName: headerMap[10],
 
       align: 'left',
@@ -153,35 +153,35 @@ const MaintenanceTable = () => {
     },
 
     {
-      field: 'nov',
+      field: 'Nov',
       headerName: headerMap[11],
 
       align: 'left',
       headerAlign: 'left',
     },
     {
-      field: 'dec',
+      field: 'Dec',
       headerName: headerMap[12],
 
       align: 'left',
       headerAlign: 'left',
     },
     {
-      field: 'jan',
+      field: 'Jan',
       headerName: headerMap[1],
 
       align: 'left',
       headerAlign: 'left',
     },
     {
-      field: 'feb',
+      field: 'Feb',
       headerName: headerMap[2],
 
       align: 'left',
       headerAlign: 'left',
     },
     {
-      field: 'mar',
+      field: 'Mar',
       headerName: headerMap[3],
       align: 'left',
       headerAlign: 'left',
