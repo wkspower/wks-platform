@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.wks.caseengine.entity.AOP;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
+
 @Repository
 public interface AOPRepository extends JpaRepository<AOP, UUID>{
 	
@@ -92,17 +92,7 @@ List<Object[]> getDataBusinessAllData(@Param("plantId") String plantId,@Param("y
     List<Object[]>  HMD_MaintenanceCalculation(@Param("plantId") String plantName, @Param("siteId") String siteName,
     @Param("verticalId") String verticalName,@Param("aopYear") String aopYear);
 
-    @Query(value = "SELECT TOP 1 Id FROM AOP " +
-            "WHERE Site_FK_Id = :siteId " +
-            "AND Vertical_FK_Id = :verticalId " +
-            "AND Material_FK_Id = :materialId " +
-            "AND Plant_FK_Id = :plantId " +
-            "AND AOPYear = :aopYear", nativeQuery = true)
-    Optional<UUID> findAopIdByFilters(@Param("siteId") UUID siteId,
-                               @Param("verticalId") UUID verticalId,
-                               @Param("materialId") UUID materialId,
-                               @Param("plantId") UUID plantId,
-                               @Param("aopYear") String aopYear);
+	
 	
 
 }
