@@ -468,7 +468,7 @@ const SelectivityData = () => {
         unsavedChangesRef={unsavedChangesRef}
         permissions={{
           showAction: true,
-          addButton: true,
+          addButton: false,
           deleteButton: false,
           editButton: true,
           showUnit: false,

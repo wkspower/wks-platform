@@ -158,17 +158,50 @@ const NormalOpNormsScreen = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      var data = await DataService.getConsumptionNormsData(keycloak)
-      var formattedData = []
-      if (data) {
-        formattedData = data?.map((item, index) => ({
+      var data1 = await DataService.getConsumptionNormsData(keycloak)
+
+      const customOrder = [
+        'Raw Material',
+        'By Products',
+        'Cat Chem',
+        'Utility Consumption',
+        'Configuration',
+      ]
+
+      const data = data1.sort(
+        (a, b) =>
+          customOrder.indexOf(a.normParameterTypeDisplayName) -
+          customOrder.indexOf(b.normParameterTypeDisplayName),
+      )
+
+      const groupedRows = []
+      const groups = new Map()
+      let groupId = 0
+
+      data.forEach((item) => {
+        const groupKey = item.normParameterTypeDisplayName
+
+        if (!groups.has(groupKey)) {
+          groups.set(groupKey, [])
+          groupedRows.push({
+            id: groupId++,
+            Particulars: groupKey,
+            isGroupHeader: true,
+          })
+        }
+        const formattedItem = {
           ...item,
           idFromApi: item.id,
-          NormParametersId: item.materialFkId,
-          id: index,
-        }))
-      }
-      setRows(formattedData)
+          NormParametersId: item.materialFkId.toLowerCase(),
+          id: groupId++,
+        }
+
+        groups.get(groupKey).push(formattedItem)
+        groupedRows.push(formattedItem)
+      })
+
+      // setBDData(groupedRows)
+      setRows(groupedRows)
       setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)

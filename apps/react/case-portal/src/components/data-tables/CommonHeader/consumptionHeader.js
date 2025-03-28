@@ -95,6 +95,12 @@ const getEnhancedColDefs = ({
         valueFormatter: formatValueToThreeDecimals,
       }
     }
+    if (col.field === 'Particulars') {
+      return {
+        ...col,
+        renderCell: (params) => <strong>{params.value}</strong>,
+      }
+    }
     return col
   })
   return enhancedColDefs

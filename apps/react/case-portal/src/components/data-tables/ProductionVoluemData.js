@@ -86,22 +86,22 @@ const ProductionvolumeData = () => {
       }
 
       const aopmccCalculatedData = newRows.map((row) => ({
-        april: isTPH && row.april ? row.april * 24 : row.april || null,
-        may: isTPH && row.may ? row.may * 24 : row.may || null,
-        june: isTPH && row.june ? row.june * 24 : row.june || null,
-        july: isTPH && row.july ? row.july * 24 : row.july || null,
-        august: isTPH && row.august ? row.august * 24 : row.august || null,
+        april: isTPH && row.april ? row.april / 24 : row.april || null,
+        may: isTPH && row.may ? row.may / 24 : row.may || null,
+        june: isTPH && row.june ? row.june / 24 : row.june || null,
+        july: isTPH && row.july ? row.july / 24 : row.july || null,
+        august: isTPH && row.august ? row.august / 24 : row.august || null,
         september:
-          isTPH && row.september ? row.september * 24 : row.september || null,
-        october: isTPH && row.october ? row.october * 24 : row.october || null,
+          isTPH && row.september ? row.september / 24 : row.september || null,
+        october: isTPH && row.october ? row.october / 24 : row.october || null,
         november:
-          isTPH && row.november ? row.november * 24 : row.november || null,
+          isTPH && row.november ? row.november / 24 : row.november || null,
         december:
-          isTPH && row.december ? row.december * 24 : row.december || null,
-        january: isTPH && row.january ? row.january * 24 : row.january || null,
+          isTPH && row.december ? row.december / 24 : row.december || null,
+        january: isTPH && row.january ? row.january / 24 : row.january || null,
         february:
-          isTPH && row.february ? row.february * 24 : row.february || null,
-        march: isTPH && row.march ? row.march * 24 : row.march || null,
+          isTPH && row.february ? row.february / 24 : row.february || null,
+        march: isTPH && row.march ? row.march / 24 : row.march || null,
 
         // aopStatus: row.aopStatus || 'draft',
         financialYear: row.financialYear,
@@ -191,43 +191,43 @@ const ProductionvolumeData = () => {
       const data = await DataService.getAOPMCCalculatedData(keycloak)
       // const data = data1.slice(0, 3)
       const formattedData = data.map((item, index) => {
-        const isTPD = selectedUnit == 'TPD'
+        const isTPH = selectedUnit == 'TPD'
         return {
           ...item,
           idFromApi: item?.id,
           normParametersFKId: item?.materialFKId.toLowerCase(),
           id: index,
 
-          ...(isTPD && {
+          ...(isTPH && {
             april: item.april
-              ? (item.april / 24).toFixed(2)
+              ? (item.april * 24).toFixed(2)
               : item.april || null,
-            may: item.may ? (item.may / 24).toFixed(2) : item.may || null,
-            june: item.june ? (item.june / 24).toFixed(2) : item.june || null,
-            july: item.july ? (item.july / 24).toFixed(2) : item.july || null,
+            may: item.may ? (item.may * 24).toFixed(2) : item.may || null,
+            june: item.june ? (item.june * 24).toFixed(2) : item.june || null,
+            july: item.july ? (item.july * 24).toFixed(2) : item.july || null,
             august: item.august
-              ? (item.august / 24).toFixed(2)
+              ? (item.august * 24).toFixed(2)
               : item.august || null,
             september: item.september
-              ? (item.september / 24).toFixed(2)
+              ? (item.september * 24).toFixed(2)
               : item.september || null,
             october: item.october
-              ? (item.october / 24).toFixed(2)
+              ? (item.october * 24).toFixed(2)
               : item.october || null,
             november: item.november
-              ? (item.november / 24).toFixed(2)
+              ? (item.november * 24).toFixed(2)
               : item.november || null,
             december: item.december
-              ? (item.december / 24).toFixed(2)
+              ? (item.december * 24).toFixed(2)
               : item.december || null,
             january: item.january
-              ? (item.january / 24).toFixed(2)
+              ? (item.january * 24).toFixed(2)
               : item.january || null,
             february: item.february
-              ? (item.february / 24).toFixed(2)
+              ? (item.february * 24).toFixed(2)
               : item.february || null,
             march: item.march
-              ? (item.march / 24).toFixed(2)
+              ? (item.march * 24).toFixed(2)
               : item.march || null,
           }),
         }

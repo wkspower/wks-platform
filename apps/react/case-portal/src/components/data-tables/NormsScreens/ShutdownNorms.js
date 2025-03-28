@@ -381,7 +381,22 @@ const ShutdownNorms = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const data = await DataService.getShutdownNormsData(keycloak)
+      const data1 = await DataService.getShutdownNormsData(keycloak)
+
+      const customOrder = [
+        'Raw Material',
+        'By Products',
+        'Cat Chem',
+        'Utility Consumption',
+        'Configuration',
+      ]
+
+      const data = data1.sort(
+        (a, b) =>
+          customOrder.indexOf(a.normParameterTypeDisplayName) -
+          customOrder.indexOf(b.normParameterTypeDisplayName),
+      )
+
       const groupedRows = []
       const groups = new Map()
       let groupId = 0
