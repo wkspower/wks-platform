@@ -99,12 +99,20 @@ const BusinessDemand = () => {
           '92E0AF06-9535-4B93-8998-E56A71354393',
         ]
 
-        const productList = data
-          .filter((product) => allowedIds.includes(product.id))
-          .map((product) => ({
+        var productList = []
+        if (lowerVertName === 'meg') {
+          productList = data
+            .filter((product) => allowedIds.includes(product.id))
+            .map((product) => ({
+              id: product.id,
+              displayName: product.displayName,
+            }))
+        } else {
+          productList = data.map((product) => ({
             id: product.id,
             displayName: product.displayName,
           }))
+        }
 
         setAllProducts(productList)
       } catch (error) {

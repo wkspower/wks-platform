@@ -370,7 +370,7 @@ const DataGridTable = ({
         borderBottom: 'none',
       }}
     >
-      {(permissions?.allAction ?? true) && (
+      {/* {(permissions?.allAction ?? true) && ( */}
       {/* <Box
         sx={{
           display: 'flex',
@@ -390,7 +390,7 @@ const DataGridTable = ({
           {title}
         </Typography>
       </Box> */}
-      )}
+      {/* )} */}
       {(permissions?.allAction ?? true) && (
         <Box
           sx={{
