@@ -96,8 +96,8 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 	}
 
 	@Override
-	public void calculateExpressionConsumptionNorms(String year) {
-		 aOPConsumptionNormRepository.calculateExpressionConsumptionNorms(year);
+	public int calculateExpressionConsumptionNorms(String year) {
+		return aOPConsumptionNormRepository.calculateExpressionConsumptionNorms(year);
 	}
 
 }
