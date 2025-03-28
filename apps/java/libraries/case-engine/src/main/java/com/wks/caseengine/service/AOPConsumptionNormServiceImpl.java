@@ -20,35 +20,39 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 
 	@Override
 	public List<AOPConsumptionNormDTO> getAOPConsumptionNorm(String plantId, String year) {
-		List<AOPConsumptionNorm> aOPConsumptionNormList =aOPConsumptionNormRepository.findByPlantFkIdAndAopYear(UUID.fromString(plantId),year);
-		List<AOPConsumptionNormDTO>  aOPConsumptionNormDTOList=new ArrayList<>();
-		for(AOPConsumptionNorm aOPConsumptionNorm:aOPConsumptionNormList) {
-			AOPConsumptionNormDTO aOPConsumptionNormDTO=new AOPConsumptionNormDTO();
-			aOPConsumptionNormDTO.setAopCaseId(aOPConsumptionNorm.getAopCaseId());
-			aOPConsumptionNormDTO.setAopRemarks(aOPConsumptionNorm.getAopRemarks());
-			aOPConsumptionNormDTO.setAopStatus(aOPConsumptionNorm.getAopStatus());
-			aOPConsumptionNormDTO.setAopYear(aOPConsumptionNorm.getAopYear());
-			 aOPConsumptionNormDTO.setJan(aOPConsumptionNorm.getJan());
-		        aOPConsumptionNormDTO.setFeb(aOPConsumptionNorm.getFeb());
-		        aOPConsumptionNormDTO.setMarch(aOPConsumptionNorm.getMarch());
-		        aOPConsumptionNormDTO.setApril(aOPConsumptionNorm.getApril());
-		        aOPConsumptionNormDTO.setMay(aOPConsumptionNorm.getMay());
-		        aOPConsumptionNormDTO.setJune(aOPConsumptionNorm.getJune());
-		        aOPConsumptionNormDTO.setJuly(aOPConsumptionNorm.getJuly());
-		        aOPConsumptionNormDTO.setAug(aOPConsumptionNorm.getAug());
-		        aOPConsumptionNormDTO.setSep(aOPConsumptionNorm.getSep());
-		        aOPConsumptionNormDTO.setOct(aOPConsumptionNorm.getOct());
-		        aOPConsumptionNormDTO.setNov(aOPConsumptionNorm.getNov());
-		        aOPConsumptionNormDTO.setDec(aOPConsumptionNorm.getDec());
-		        aOPConsumptionNormDTO.setId(aOPConsumptionNorm.getId().toString());
-		        aOPConsumptionNormDTO.setSiteFkId(aOPConsumptionNorm.getSiteFkId().toString());
-		        aOPConsumptionNormDTO.setVerticalFkId(aOPConsumptionNorm.getVerticalFkId().toString());
-		        aOPConsumptionNormDTO.setMaterialFkId(aOPConsumptionNorm.getMaterialFkId().toString());
-		        aOPConsumptionNormDTO.setPlantFkId(aOPConsumptionNorm.getPlantFkId().toString());
-		        aOPConsumptionNormDTOList.add(aOPConsumptionNormDTO);
-		}
-		return aOPConsumptionNormDTOList;
-		
+	    List<Object[]> resultList = aOPConsumptionNormRepository.findByPlantFkIdAndAopYear(UUID.fromString(plantId), year);
+	    List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList = new ArrayList<>();
+
+	    for (Object[] row : resultList) {
+	        AOPConsumptionNormDTO dto = new AOPConsumptionNormDTO();
+	        
+	        dto.setId(row[0] != null ? row[0].toString() : null);
+	        dto.setSiteFkId(row[1] != null ? row[1].toString() : null);
+	        dto.setVerticalFkId(row[2] != null ? row[2].toString() : null);
+	        dto.setAopCaseId(row[3] != null ? row[3].toString() : null);
+	        dto.setAopStatus(row[4] != null ? row[4].toString() : null);
+	        dto.setAopRemarks(row[5] != null ? row[5].toString() : null);
+	        dto.setMaterialFkId(row[6] != null ? row[6].toString() : null);
+	        dto.setJan(row[7] != null ? Float.valueOf(row[7].toString()) : null);
+	        dto.setFeb(row[8] != null ? Float.valueOf(row[8].toString()) : null);
+	        dto.setMarch(row[9] != null ? Float.valueOf(row[9].toString()) : null);
+	        dto.setApril(row[10] != null ? Float.valueOf(row[10].toString()) : null);
+	        dto.setMay(row[11] != null ? Float.valueOf(row[11].toString()) : null);
+	        dto.setJune(row[12] != null ? Float.valueOf(row[12].toString()) : null);
+	        dto.setJuly(row[13] != null ? Float.valueOf(row[13].toString()) : null);
+	        dto.setAug(row[14] != null ? Float.valueOf(row[14].toString()) : null);
+	        dto.setSep(row[15] != null ? Float.valueOf(row[15].toString()) : null);
+	        dto.setOct(row[16] != null ? Float.valueOf(row[16].toString()) : null);
+	        dto.setNov(row[17] != null ? Float.valueOf(row[17].toString()) : null);
+	        dto.setDec(row[18] != null ? Float.valueOf(row[18].toString()) : null);
+	        dto.setAopYear(row[19] != null ? row[19].toString() : null);
+	        dto.setPlantFkId(row[20] != null ? row[20].toString() : null);
+	        dto.setNormParameterTypeDisplayName(row[21] != null ? row[21].toString() : null);
+
+	        aOPConsumptionNormDTOList.add(dto);
+	    }
+
+	    return aOPConsumptionNormDTOList;
 	}
 
 	@Override

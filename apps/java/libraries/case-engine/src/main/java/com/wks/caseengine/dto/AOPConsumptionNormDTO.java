@@ -35,5 +35,6 @@ public class AOPConsumptionNormDTO {
     private Float dec;
     private String aopYear;
     private String plantFkId;
+    private String normParameterTypeDisplayName;
 
 }
