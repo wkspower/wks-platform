@@ -365,7 +365,7 @@ const DataGridTable = ({
         width: '100%',
         padding: 1,
         backgroundColor: '#F2F3F8',
-        // backgroundColor: '#fff',
+        // backgroundColor: '#000',
         borderRadius: 0,
         borderBottom: 'none',
       }}
