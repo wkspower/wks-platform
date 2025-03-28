@@ -244,10 +244,10 @@ const ProductionvolumeData = () => {
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(
+        const data = await DataService.getAllProductsAll(
           keycloak,
           // lowerVertName === 'meg' ? 'Production' : 'Grade',
-          null,
+          'All',
         )
         const productList = data.map((product) => ({
           id: product.id.toLowerCase(),

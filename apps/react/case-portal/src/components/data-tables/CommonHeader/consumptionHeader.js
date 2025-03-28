@@ -2,6 +2,7 @@ import { useSelector } from 'react-redux'
 import productionColDefs from '../../../assets/consumption_aop.json'
 import Tooltip from '@mui/material/Tooltip'
 import { truncateRemarks } from 'utils/remarksUtils'
+import NumericInputOnly from 'utils/NumericInputOnly'
 
 const getEnhancedColDefs = ({
   allProducts,
@@ -13,12 +14,14 @@ const getEnhancedColDefs = ({
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
+  const formatValueToThreeDecimals = (params) =>
+    params ? parseFloat(params).toFixed(3) : ''
+
   const enhancedColDefs = productionColDefs.map((col) => {
-    // For the product/grade column, override headerName based on vertical:
     if (col.field === 'NormParametersId') {
       return {
         ...col,
-        headerName: lowerVertName === 'meg' ? 'Product Norm' : 'Spec',
+        headerName: lowerVertName === 'meg' ? 'Particulars' : 'Particulars',
         valueGetter: (params) => params || '',
         valueFormatter: (params) => {
           const product = allProducts.find((p) => p.id === params)
@@ -57,8 +60,7 @@ const getEnhancedColDefs = ({
         },
       }
     }
-    // For the remark column, add custom renderCell.
-    if (col.field === 'remark') {
+    if (col.field === 'aopRemarks') {
       return {
         ...col,
         renderCell: (params) => {
@@ -74,7 +76,7 @@ const getEnhancedColDefs = ({
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
-                  maxWidth: 140,
+                  maxWidth: 200,
                 }}
                 onClick={() => handleRemarkCellClick(params.row)}
               >
@@ -85,27 +87,12 @@ const getEnhancedColDefs = ({
         },
       }
     }
-    // For month columns, override headerName using headerMap if available.
-    // Month columns in JSON have headerName as a number.
-    const monthFields = [
-      'apr24',
-      'may24',
-      'jun24',
-      'jul24',
-      'aug24',
-      'sep24',
-      'oct24',
-      'nov24',
-      'dec24',
-      'jan25',
-      'feb25',
-      'mar25',
-    ]
-    if (monthFields.includes(col.field)) {
-      const key = col.headerName // This is a number.
-      return {
+    if (headerMap && headerMap[col.headerName] !== undefined) {
+      col = {
         ...col,
-        headerName: headerMap && headerMap[key] ? headerMap[key] : key,
+        headerName: headerMap[col.headerName],
+        renderEditCell: NumericInputOnly,
+        valueFormatter: formatValueToThreeDecimals,
       }
     }
     return col

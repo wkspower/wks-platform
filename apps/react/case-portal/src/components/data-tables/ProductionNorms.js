@@ -5,15 +5,15 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import ASDataGrid from './ASDataGrid'
 const headerMap = generateHeaderNames()
 
-import { useSession } from 'SessionStoreContext'
-import { useSelector } from 'react-redux'
-import { useGridApiRef } from '@mui/x-data-grid'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
+import { useGridApiRef } from '@mui/x-data-grid'
+import { useSession } from 'SessionStoreContext'
+import { useSelector } from 'react-redux'
 // import NumericCellEditor from 'utils/NumericCellEditor'
 // import NumericInputOnly from 'utils/NumericInputOnly'
-import getEnhancedColDefs from './CommonHeader/ProductionAopHeader'
 import { validateFields } from 'utils/validationUtils'
+import getEnhancedColDefs from './CommonHeader/ProductionAopHeader'
 const ProductionNorms = () => {
   const keycloak = useSession()
   // const [csData, setCsData] = useState([])
@@ -139,8 +139,7 @@ const ProductionNorms = () => {
         keycloak,
       )
 
-      // if (response.status === 200) {
-      if(response){
+      if (response) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Production AOP Saved Successfully !',
@@ -246,7 +245,7 @@ const ProductionNorms = () => {
 
       // console.log(data)
 
-      data = data.slice(0, 3)
+      // data = data.slice(0, 3)
 
       // if (data.status === 200) {
       const formattedData = data.map((item, index) => {
@@ -362,9 +361,9 @@ const ProductionNorms = () => {
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(
+        const data = await DataService.getAllProductsAll(
           keycloak,
-          lowerVertName === 'meg' ? 'Production' : 'Grade',
+          lowerVertName === 'meg' ? 'All' : 'All',
         )
         const productList = data.map((product) => ({
           id: product.id.toLowerCase(),

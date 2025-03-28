@@ -1,24 +1,18 @@
 [
   {
-    "field": "Particulars",
-    "headerName": "Type",
-    "minWidth": 150,
-    "editable": false
-  },
-  {
-    "field": "TPH",
-    "headerName": "UOM",
-    "width": 100,
-    "editable": false
-  },
-  {
     "field": "NormParametersId",
-    "headerName": "Particulars Norm/Spec",
-    "editable": true,
-    "minWidth": 225
+    "headerName": "Particulars",
+    "minWidth": 225,
+    "editable": false
   },
   {
-    "field": "apr24",
+    "field": "uom",
+    "headerName": "UOM",
+    "minWidth": 50,
+    "editable": false
+  },
+  {
+    "field": "april",
     "headerName": 4,
     "editable": true,
 
@@ -26,7 +20,7 @@
     "headerAlign": "left"
   },
   {
-    "field": "may24",
+    "field": "may",
     "headerName": 5,
     "editable": true,
 
@@ -34,7 +28,7 @@
     "headerAlign": "left"
   },
   {
-    "field": "jun24",
+    "field": "june",
     "headerName": 6,
     "editable": true,
 
@@ -42,7 +36,7 @@
     "headerAlign": "left"
   },
   {
-    "field": "jul24",
+    "field": "july",
     "headerName": 7,
     "editable": true,
 
@@ -50,7 +44,7 @@
     "headerAlign": "left"
   },
   {
-    "field": "aug24",
+    "field": "aug",
     "headerName": 8,
     "editable": true,
 
@@ -58,7 +52,7 @@
     "headerAlign": "left"
   },
   {
-    "field": "sep24",
+    "field": "sep",
     "headerName": 9,
     "editable": true,
 
@@ -66,7 +60,7 @@
     "headerAlign": "left"
   },
   {
-    "field": "oct24",
+    "field": "oct",
     "headerName": 10,
     "editable": true,
 
@@ -74,7 +68,7 @@
     "headerAlign": "left"
   },
   {
-    "field": "nov24",
+    "field": "nov",
     "headerName": 11,
     "editable": true,
 
@@ -82,7 +76,7 @@
     "headerAlign": "left"
   },
   {
-    "field": "dec24",
+    "field": "dec",
     "headerName": 12,
     "editable": true,
 
@@ -90,7 +84,7 @@
     "headerAlign": "left"
   },
   {
-    "field": "jan25",
+    "field": "jan",
     "headerName": 1,
     "editable": true,
 
@@ -98,7 +92,7 @@
     "headerAlign": "left"
   },
   {
-    "field": "feb25",
+    "field": "feb",
     "headerName": 2,
     "editable": true,
 
@@ -106,7 +100,7 @@
     "headerAlign": "left"
   },
   {
-    "field": "mar25",
+    "field": "march",
     "headerName": 3,
     "editable": true,
 
@@ -114,8 +108,9 @@
     "headerAlign": "left"
   },
   {
-    "field": "remark",
+    "field": "aopRemarks",
     "headerName": "Remark",
-    "editable": true
+    "editable": true,
+    "minWidth": 100
   }
 ]

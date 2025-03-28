@@ -11,6 +11,9 @@ const getEnhancedProductionColDefs = ({
   handleRemarkCellClick,
   findAvg,
 }) => {
+  const formatValueToThreeDecimals = (params) =>
+    params ? parseFloat(params).toFixed(3) : ''
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
@@ -76,6 +79,8 @@ const getEnhancedProductionColDefs = ({
       return {
         ...col,
         renderEditCell: NumericInputOnly,
+        valueFormatter: formatValueToThreeDecimals,
+
         headerName: headerMap[col.headerName],
       }
     }

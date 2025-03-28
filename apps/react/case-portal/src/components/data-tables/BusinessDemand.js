@@ -43,7 +43,15 @@ const BusinessDemand = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const data = await DataService.getBDData(keycloak)
+      const data1 = await DataService.getBDData(keycloak)
+
+      const data = data1.sort((a, b) =>
+        b.normParameterTypeDisplayName.localeCompare(
+          a.normParameterTypeDisplayName,
+        ),
+      )
+      // console.log(sortedData)
+
       const groupedRows = []
       const groups = new Map()
       let groupId = 0
@@ -99,20 +107,12 @@ const BusinessDemand = () => {
           '92E0AF06-9535-4B93-8998-E56A71354393',
         ]
 
-        var productList = []
-        if (lowerVertName === 'meg') {
-          productList = data
-            .filter((product) => allowedIds.includes(product.id))
-            .map((product) => ({
-              id: product.id,
-              displayName: product.displayName,
-            }))
-        } else {
-          productList = data.map((product) => ({
+        const productList = data
+          // .filter((product) => allowedIds.includes(product.id))
+          .map((product) => ({
             id: product.id,
             displayName: product.displayName,
           }))
-        }
 
         setAllProducts(productList)
       } catch (error) {

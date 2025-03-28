@@ -206,7 +206,7 @@ const SelectivityData = () => {
       setRows(formattedData)
       setLoading(false)
     } catch (error) {
-      console.error('Error fetching Turnaround data:', error)
+      console.error('Error fetching  data:', error)
       setLoading(false)
     }
   }

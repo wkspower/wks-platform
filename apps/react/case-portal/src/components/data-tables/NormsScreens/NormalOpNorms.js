@@ -450,7 +450,7 @@ const NormalOpNormsScreen = () => {
         keycloak,
       )
 
-      if (data.status === 200) {
+      if (data == 0) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data refreshed successfully!',

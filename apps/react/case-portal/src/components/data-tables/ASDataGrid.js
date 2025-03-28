@@ -7,7 +7,6 @@ import { Box, Button, IconButton, TextField, Typography } from '@mui/material'
 import { DataGrid, GridToolbar } from '@mui/x-data-grid'
 import * as React from 'react'
 import { useEffect, useMemo, useState } from 'react'
-
 import SearchIcon from '@mui/icons-material/Search'
 import { InputAdornment } from '@mui/material'
 import Backdrop from '@mui/material/Backdrop'
@@ -29,7 +28,8 @@ import {
 } from '../../../node_modules/@mui/icons-material/index'
 
 const jioColors = {
-  primaryBlue: '#0F3CC9',
+  primaryBlue: '#387ec3',
+  // primaryBlue: 'red',
   accentRed: '#E31C3D',
   background: '#FFFFFF',
   headerBg: '#0F3CC9',
@@ -42,31 +42,34 @@ const jioColors = {
 
 const DataGridTable = ({
   columns: initialColumns = [],
-  title = '',
-  onAddRow = () => {},
-  onDeleteRow = () => {},
-  permissions = {},
-  processRowUpdate = (row) => row,
-  isCellEditable = () => false,
-  saveChanges = () => {},
-  apiRef = null,
-  snackbarData = { message: '', severity: 'info' },
-  snackbarOpen = false,
-  setSnackbarData = () => {},
-  setSnackbarOpen = () => {},
-  fetchData = () => {},
-  handleUnitChange = () => {},
-  handleCalculate = () => {},
-  setRows = () => {},
-  rows = [],
-  loading = false,
-  remarkDialogOpen = false,
-  setRemarkDialogOpen = () => {},
-  currentRemark = '',
-  setCurrentRemark = () => {},
-  currentRowId = null,
-  unsavedChangesRef = { current: { unsavedRows: {}, rowsBeforeChange: {} } },
-  deleteRowData = () => {},
+  title = 'Turnaround Plan Details',
+  onAddRow,
+  onDeleteRow,
+  permissions,
+  processRowUpdate,
+  isCellEditable,
+  saveChanges,
+  apiRef,
+  snackbarData,
+  snackbarOpen,
+  setSnackbarData,
+  setSnackbarOpen,
+  fetchData,
+  handleUnitChange,
+  handleCalculate,
+  setRows,
+  rows,
+  loading,
+  remarkDialogOpen,
+  setRemarkDialogOpen,
+  currentRemark,
+  setCurrentRemark,
+  // setCurrentRowId,
+  currentRowId,
+  unsavedChangesRef,
+  deleteRowData,
+  // handleRemarkCellClick,
+  // units,
 }) => {
   // const [tempHide, setTempHide] = useState(true)
   // const [isUpdating, setIsUpdating] = useState(false)
@@ -350,6 +353,7 @@ const DataGridTable = ({
       console.error('Error saving refresh data:', error)
     }
   }
+
   const handleCalculateBtn = async () => {
     setIsButtonDisabled(true)
     handleCalculate()
@@ -365,12 +369,11 @@ const DataGridTable = ({
         width: '100%',
         padding: 1,
         backgroundColor: '#F2F3F8',
-        // backgroundColor: '#000',
+        // backgroundColor: '#fff',
         borderRadius: 0,
         borderBottom: 'none',
       }}
     >
-      {/* {(permissions?.allAction ?? true) && ( */}
       {/* <Box
         sx={{
           display: 'flex',
@@ -390,188 +393,215 @@ const DataGridTable = ({
           {title}
         </Typography>
       </Box> */}
-      {/* )} */}
-      {(permissions?.allAction ?? true) && (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginTop: 2,
-            marginBottom: 1,
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {permissions?.UnitToShow && (
-              <Chip
-                label={permissions.UnitToShow}
-                variant='outlined'
-                sx={{
-                  borderRadius: 1,
-                  padding: '8px 24px',
-                  textTransform: 'none',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  height: '40px',
-                }}
-              />
-            )}
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {permissions?.showCalculate && (
-              <Button
-                variant='contained'
-                onClick={handleCalculateBtn}
-                disabled={isButtonDisabled}
-                sx={{
-                  backgroundColor: jioColors.primaryBlue,
-                  color: jioColors.background,
-                  borderRadius: 1,
-                  padding: '8px 24px',
-                  textTransform: 'none',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
 
-                  '&:hover': {
-                    backgroundColor: '#143B6F',
-                    boxShadow: 'none',
-                  },
-                  '&.Mui-disabled': {
-                    backgroundColor: jioColors.primaryBlue,
-                    color: jioColors.background,
-                    opacity: 0.7,
-                  },
-                }}
-              >
-                Calculate
-              </Button>
-            )}
-
-            {permissions?.showRefreshBtn && false && (
-              <Button
-                variant='contained'
-                onClick={handleRefresh}
-                sx={{
-                  backgroundColor: jioColors.primaryBlue,
-                  color: jioColors.background,
-                  borderRadius: 1,
-                  padding: '8px 24px',
-                  textTransform: 'none',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  '&:hover': {
-                    backgroundColor: '#143B6F',
-                    boxShadow: 'none',
-                  },
-                }}
-              >
-                Refresh
-              </Button>
-            )}
-
-            {permissions?.showUnit && (
-              <TextField
-                select
-                value={selectedUnit || permissions?.units?.[0]}
-                onChange={(e) => {
-                  setSelectedUnit(e.target.value)
-                  handleUnitChange(e.target.value)
-                }}
-                sx={{ width: '150px', backgroundColor: jioColors.background }}
-                variant='outlined'
-                label='Select UOM'
-              >
-                <MenuItem value='' disabled>
-                  Select UOM
-                </MenuItem>
-
-                {/* Render the correct unit options dynamically */}
-                {permissions?.units.map((unit) => (
-                  <MenuItem key={unit} value={unit}>
-                    {unit}
-                  </MenuItem>
-                ))}
-              </TextField>
-            )}
-
-            {false && (
-              <TextField
-                variant='outlined'
-                placeholder='Search...'
-                value={searchText}
-                onChange={handleSearchChange}
-                sx={{
-                  width: '300px',
-                  borderRadius: 1,
-                  backgroundColor: jioColors.background,
-                  color: '#8A9BC2',
-                }}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position='start'>
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            )}
-
-            {false && (
-              <IconButton
-                aria-label='import'
-                onClick={handleImportExport}
-                sx={{
-                  border: `1px solid ${jioColors.border}`,
-                  borderRadius: 1,
-                  padding: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
-                  color: 'inherit',
-                  width: '150px',
-                  '&:hover': {
-                    backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
-                  },
-                }}
-              >
-                <FileDownload sx={{ color: '#2A3ACD' }} />
-                <span style={{ fontSize: '0.875rem', color: '#2A3ACD' }}>
-                  Import
-                </span>
-              </IconButton>
-            )}
-
-            {false && (
-              <IconButton
-                aria-label='export'
-                onClick={handleImportExport}
-                sx={{
-                  border: `1px solid ${jioColors.border}`,
-                  borderRadius: 1,
-                  padding: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
-                  color: 'inherit',
-                  width: '150px',
-                  '&:hover': {
-                    backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
-                  },
-                }}
-              >
-                <FileUpload sx={{ color: '#2A3ACD' }} />
-                <span style={{ fontSize: '0.875rem', color: '#2A3ACD' }}>
-                  Export
-                </span>
-              </IconButton>
-            )}
-          </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: 2,
+          marginBottom: 1,
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {permissions?.UnitToShow && (
+            <Chip
+              label={permissions.UnitToShow}
+              variant='outlined'
+              sx={{
+                borderRadius: 1,
+                padding: '8px 24px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                height: '40px',
+              }}
+            />
+          )}
         </Box>
-      )}
 
-      <Box sx={{ height: 'calc(100% - 120px)', width: '100%' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {permissions?.showCalculate && (
+            <Button
+              variant='contained'
+              onClick={handleCalculateBtn}
+              disabled={isButtonDisabled}
+              sx={{
+                backgroundColor: jioColors.primaryBlue,
+                color: jioColors.background,
+                borderRadius: 1,
+                padding: '8px 24px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+
+                '&:hover': {
+                  backgroundColor: '#143B6F',
+                  boxShadow: 'none',
+                },
+                '&.Mui-disabled': {
+                  backgroundColor: jioColors.primaryBlue,
+                  color: jioColors.background,
+                  opacity: 0.7,
+                },
+              }}
+            >
+              Calculate
+            </Button>
+          )}
+          {permissions?.showRefresh && (
+            <Button
+              variant='contained'
+              onClick={handleCalculateBtn}
+              disabled={isButtonDisabled}
+              sx={{
+                backgroundColor: jioColors.primaryBlue,
+                color: jioColors.background,
+                borderRadius: 1,
+                padding: '8px 24px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+
+                '&:hover': {
+                  backgroundColor: '#143B6F',
+                  boxShadow: 'none',
+                },
+                '&.Mui-disabled': {
+                  backgroundColor: jioColors.primaryBlue,
+                  color: jioColors.background,
+                  opacity: 0.7,
+                },
+              }}
+            >
+              Refresh
+            </Button>
+          )}
+
+          {permissions?.showRefreshBtn && false && (
+            <Button
+              variant='contained'
+              onClick={handleRefresh}
+              sx={{
+                backgroundColor: jioColors.primaryBlue,
+                color: jioColors.background,
+                borderRadius: 1,
+                padding: '8px 24px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                '&:hover': {
+                  backgroundColor: '#143B6F',
+                  boxShadow: 'none',
+                },
+              }}
+            >
+              Refresh
+            </Button>
+          )}
+
+          {permissions?.showUnit && (
+            <TextField
+              select
+              value={selectedUnit || permissions?.units?.[0]}
+              onChange={(e) => {
+                setSelectedUnit(e.target.value)
+                handleUnitChange(e.target.value)
+              }}
+              sx={{ width: '150px', backgroundColor: jioColors.background }}
+              variant='outlined'
+              label='Select UOM'
+            >
+              <MenuItem value='' disabled>
+                Select UOM
+              </MenuItem>
+
+              {/* Render the correct unit options dynamically */}
+              {permissions?.units.map((unit) => (
+                <MenuItem key={unit} value={unit}>
+                  {unit}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
+
+          {false && (
+            <TextField
+              variant='outlined'
+              placeholder='Search...'
+              value={searchText}
+              onChange={handleSearchChange}
+              sx={{
+                width: '300px',
+                borderRadius: 1,
+                backgroundColor: jioColors.background,
+                color: '#8A9BC2',
+              }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position='start'>
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          )}
+
+          {false && (
+            <IconButton
+              aria-label='import'
+              onClick={handleImportExport}
+              sx={{
+                border: `1px solid ${jioColors.border}`,
+                borderRadius: 1,
+                padding: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
+                color: 'inherit',
+                width: '150px',
+                '&:hover': {
+                  backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
+                },
+              }}
+            >
+              <FileDownload sx={{ color: '#2A3ACD' }} />
+              <span style={{ fontSize: '0.875rem', color: '#2A3ACD' }}>
+                Import
+              </span>
+            </IconButton>
+          )}
+
+          {false && (
+            <IconButton
+              aria-label='export'
+              onClick={handleImportExport}
+              sx={{
+                border: `1px solid ${jioColors.border}`,
+                borderRadius: 1,
+                padding: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
+                color: 'inherit',
+                width: '150px',
+                '&:hover': {
+                  backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
+                },
+              }}
+            >
+              <FileUpload sx={{ color: '#2A3ACD' }} />
+              <span style={{ fontSize: '0.875rem', color: '#2A3ACD' }}>
+                Export
+              </span>
+            </IconButton>
+          )}
+        </Box>
+      </Box>
+
+      <Box sx={{ height: 'calc(100% - 150px)', width: '100%' }}>
         {/* {!tempHide && (
           <Grid container spacing={2}>
             {columns.map((col) => (
@@ -589,6 +619,7 @@ const DataGridTable = ({
           </Grid>
         )} */}
 
+        {/* Backdrop inside child component */}
         <Backdrop
           sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
           open={!!loading}
@@ -776,84 +807,83 @@ const DataGridTable = ({
           }}
         />
       </Box>
-      {(permissions?.allAction ?? true) && (
-        <Box
-          sx={{
-            marginTop: 2,
-            display: 'flex',
-            gap: 2,
-          }}
-        >
-          {permissions.addButton && (
-            <Button
-              variant='contained'
-              sx={{
-                // marginTop: 2,
-                backgroundColor: jioColors.primaryBlue,
-                color: jioColors.background,
-                borderRadius: 1,
-                padding: '8px 24px',
-                textTransform: 'none',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                minWidth: 120,
-                '&:hover': {
-                  backgroundColor: '#143B6F',
-                  boxShadow: 'none',
-                },
-                '&.Mui-disabled': {
-                  backgroundColor: jioColors.primaryBlue,
-                  color: jioColors.background,
-                  opacity: 0.7,
-                },
-              }}
-              onClick={handleAddRow}
-              disabled={isButtonDisabled}
-            >
-              Add Item
-            </Button>
-          )}
 
-          {permissions.saveBtn && (
-            <Button
-              variant='contained'
-              sx={{
+      <Box
+        sx={{
+          marginTop: 2,
+          display: 'flex',
+          gap: 2,
+        }}
+      >
+        {permissions.addButton && (
+          <Button
+            variant='contained'
+            sx={{
+              // marginTop: 2,
+              backgroundColor: jioColors.primaryBlue,
+              color: jioColors.background,
+              borderRadius: 1,
+              padding: '8px 24px',
+              textTransform: 'none',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              minWidth: 120,
+              '&:hover': {
+                backgroundColor: '#143B6F',
+                boxShadow: 'none',
+              },
+              '&.Mui-disabled': {
                 backgroundColor: jioColors.primaryBlue,
                 color: jioColors.background,
-                borderRadius: 1,
-                padding: '8px 24px',
-                textTransform: 'none',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                minWidth: 120,
-                '&:hover': {
-                  backgroundColor: '#143B6F',
-                  boxShadow: 'none',
-                },
-                '&.Mui-disabled': {
-                  backgroundColor: jioColors.primaryBlue,
-                  color: jioColors.background,
-                  opacity: 0.7,
-                },
-              }}
-              onClick={saveModalOpen}
-              disabled={isButtonDisabled}
-              loading={loading} // Use the loading prop to trigger loading state
-              loadingposition='start' // Use loadingPosition to control where the spinner appears
-            >
-              Save
-            </Button>
-          )}
-        </Box>
-      )}
-      {(permissions?.allAction ?? true) && (
-        <Notification
-          open={snackbarOpen}
-          message={snackbarData?.message || ''}
-          severity={snackbarData?.severity || 'info'}
-          onClose={() => setSnackbarOpen(false)}
-        />
-      )}
+                opacity: 0.7,
+              },
+            }}
+            onClick={handleAddRow}
+            disabled={isButtonDisabled}
+          >
+            Add Item
+          </Button>
+        )}
+
+        {permissions.saveBtn && (
+          <Button
+            variant='contained'
+            sx={{
+              backgroundColor: jioColors.primaryBlue,
+              color: jioColors.background,
+              borderRadius: 1,
+              padding: '8px 24px',
+              textTransform: 'none',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              minWidth: 120,
+              '&:hover': {
+                backgroundColor: '#143B6F',
+                boxShadow: 'none',
+              },
+              '&.Mui-disabled': {
+                backgroundColor: jioColors.primaryBlue,
+                color: jioColors.background,
+                opacity: 0.7,
+              },
+            }}
+            onClick={saveModalOpen}
+            disabled={isButtonDisabled}
+            loading={loading} // Use the loading prop to trigger loading state
+            loadingPosition='start' // Use loadingPosition to control where the spinner appears
+          >
+            Save
+          </Button>
+        )}
+      </Box>
+
+      <Notification
+        open={snackbarOpen}
+        message={snackbarData.message}
+        severity={snackbarData.severity}
+        onClose={handleCloseSnackbar}
+      />
+
       <Dialog
         open={openDeleteDialogeBox}
         onClose={closeDeleteDialogeBox}
@@ -914,15 +944,6 @@ const DataGridTable = ({
             onChange={(e) => setCurrentRemark(e.target.value)}
             multiline
             rows={8}
-            //     onChange={(e) => {
-            //   setRemark(e.target.value)
-            //   // setRowModesModel((prev) => ({
-            //   //   ...prev,
-            //   //   [id]: { mode: GridRowModes.View },
-            //   // }))
-            // }}
-            // multiline
-            // rows={4}
           />
         </DialogContent>
         <DialogActions>

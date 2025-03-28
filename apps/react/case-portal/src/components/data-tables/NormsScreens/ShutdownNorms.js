@@ -101,7 +101,7 @@ const ShutdownNorms = () => {
       field: 'materialFkId',
       headerName: 'Particulars',
       minWidth: 160,
-      editable: true,
+      editable: false,
       valueGetter: (params) => params || '',
       valueFormatter: (params) => {
         const product = allProducts.find((p) => p.id === params)
