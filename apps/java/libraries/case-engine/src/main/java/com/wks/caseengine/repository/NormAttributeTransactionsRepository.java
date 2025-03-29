@@ -79,7 +79,8 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 			 MAX(CASE WHEN NAT.AOPMonth = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec,
 			 MAX(NAT.Remarks) AS Remarks ,
 			 MAX(NAT.Id) AS NormAttributeTransaction_Id,
-			 MAX(NAT.AuditYear) AS AuditYear
+			 MAX(NAT.AuditYear) AS AuditYear,
+			 MAX(NP.UOM) AS UOM
 			FROM NormParameters NP
 			JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id
 			LEFT JOIN NormAttributeTransactions NAT

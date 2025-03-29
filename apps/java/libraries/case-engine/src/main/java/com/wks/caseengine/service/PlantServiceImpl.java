@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.rest.entity.Plant;
 import com.wks.caseengine.rest.entity.Site;
@@ -21,6 +23,9 @@ public class PlantServiceImpl implements PlantService {
 	
 	@Autowired
 	private SiteRepository siteRepository;
+	
+	@Autowired
+	 private PlantsRepository plantsRepository;
 
 	@PersistenceContext(unitName = "db1")
 	private EntityManager entityManager;
@@ -51,6 +56,8 @@ public class PlantServiceImpl implements PlantService {
 		 * searchResults = query.getResultList();
 		 */				return searchResults;
 	}
+
+	
 
 }
 

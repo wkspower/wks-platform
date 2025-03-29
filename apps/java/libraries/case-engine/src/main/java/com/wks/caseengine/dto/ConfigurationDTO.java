@@ -30,5 +30,6 @@ public class ConfigurationDTO {
     private Float dec;
     private String remarks;
     private String auditYear;
+    private String UOM;
 
 }

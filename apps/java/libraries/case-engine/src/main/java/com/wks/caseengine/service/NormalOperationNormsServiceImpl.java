@@ -53,7 +53,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		    mCUNormsValueDTO.setNormParameterTypeId(row[23] != null ? row[23].toString() : null);
 		    mCUNormsValueDTO.setNormParameterTypeName(row[24] != null ? row[24].toString() : null);
 		    mCUNormsValueDTO.setNormParameterTypeDisplayName(row[25] != null ? row[25].toString() : null);
-
+		    mCUNormsValueDTO.setUOM(row[26] != null ? row[26].toString() : null);
 		    mCUNormsValueDTOList.add(mCUNormsValueDTO);
 		}
 

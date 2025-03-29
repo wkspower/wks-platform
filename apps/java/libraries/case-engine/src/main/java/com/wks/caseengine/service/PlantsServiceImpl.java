@@ -36,5 +36,10 @@ public class PlantsServiceImpl implements PlantsService{
 		// TODO Auto-generated method stub
 		return plantsDTOList;
 	}
+	@Override
+	public String findVerticalNameByPlantId(UUID plantId) {
+		return plantsRepository.findVerticalNameByPlantId(plantId);
+		// TODO Auto-generated method stub
+	}
 
 }

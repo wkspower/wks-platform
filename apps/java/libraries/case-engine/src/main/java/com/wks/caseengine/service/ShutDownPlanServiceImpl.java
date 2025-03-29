@@ -34,6 +34,9 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	
 	@Autowired
 	private PlantMaintenanceTransactionRepository plantMaintenanceTransactionRepository;
+	
+	@Autowired
+	private PlantsService plantsService;
 
 	@Override
 	public List<ShutDownPlanDTO> findMaintenanceDetailsByPlantIdAndType(UUID plantId,String maintenanceTypeName, String year) {
@@ -147,9 +150,10 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 				// 	shutDownPlanDTO.setDiscription(shutDownPlanDTO.getDiscription());
 				// 	slowdownPlanService.saveShutdownData(plantId, shutDownPlanDTOList);
 				// }
-
+				String verticalName=plantsService.findVerticalNameByPlantId(plantId);
+				System.out.println("verticalName"+verticalName);
 				String description = shutDownPlanDTO.getDiscription();
-				// if(shutDownPlanDTO.getVerticalName().equalsIgnoreCase("MEG")) {
+				 if(verticalName.equalsIgnoreCase("MEG")) {
 					List<ShutDownPlanDTO> list = new ArrayList<>();
 					shutDownPlanDTO.setDurationInHrs(0.00);
 					shutDownPlanDTO.setDurationInMins(0);
@@ -182,7 +186,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 					list4.add(shutDownPlanDTO);
 				    slowdownPlanService.saveShutdownData(plantId,list4);
 
-				// }
+				 }
 			} else {
 				// Updating an existing record
 

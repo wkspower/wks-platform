@@ -59,7 +59,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 		    businessDemandDataDTO.setNormParameterTypeId(row[19] != null ? row[19].toString() : null);
 		    businessDemandDataDTO.setNormParameterTypeName(row[20] != null ? row[20].toString() : null);
 		    businessDemandDataDTO.setNormParameterTypeDisplayName(row[21] != null ? row[21].toString() : null);
-
+		    
 		    businessDemandDataDTOList.add(businessDemandDataDTO);
 		}
 		

@@ -22,5 +22,8 @@ public class NormParameterType {
 
     @Column(name = "IsActive")
     private Boolean isActive;
+    
+    @Column(name = "DisplayOrder")
+    private Integer displayOrder;
 
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -129,22 +130,41 @@ public class AOPServiceImpl implements  AOPService{
 	public List<AOPDTO> updateAOP(List<AOPDTO> aOPDTOList) {
 		for(AOPDTO aOPDTO:aOPDTOList) {
 			AOP aOP= null;
-			if(aOPDTO.getId()==null || aOPDTO.getId().contains("#")){
+			if(aOPDTO.getId()==null) {
+				UUID Site=null;
+				UUID Vertical=null;
+				UUID Material=null;
+				UUID Plant=null;
+				if(aOPDTO.getSiteFKId()!=null) {
+					Site=UUID.fromString(aOPDTO.getSiteFKId());
+				}
+				if(aOPDTO.getVerticalFKId()!=null) {
+					Vertical=UUID.fromString(aOPDTO.getVerticalFKId());
+				}
+				if(aOPDTO.getMaterialFKId()!=null) {
+					Material=UUID.fromString(aOPDTO.getMaterialFKId());
+				}
+				if(aOPDTO.getPlantFKId()!=null) {
+					Plant=UUID.fromString(aOPDTO.getPlantFKId());
+				}
+				Optional<UUID> Id=aOPRepository.findAopIdByFilters(Site,Vertical,Material,Plant,aOPDTO.getAopYear());
 				aOP=new AOP();
+				if(Id!=null && !Id.isEmpty()) {
+					aOP.setId(Id.get());
+				}
+				
 				String caseId = aOPDTO.getAopYear() + "-AOP-"+aOPDTO.getNormItem()+"-V1";
 				aOP.setAopStatus("draft");
 				aOP.setAopType("production");
 			    aOP.setAopCaseId(caseId);
-			}else{
+			}
+			else{
                 aOP=aOPRepository.findById(UUID.fromString(aOPDTO.getId())).get();
 			    aOP.setAopCaseId(aOPDTO.getAopCaseId());
 				aOP.setAopStatus(aOPDTO.getAopStatus());
 				aOP.setAopType(aOPDTO.getAopType());
 			}
 			aOP.setAopRemarks(aOPDTO.getAopRemarks());
-
-			
-
 			aOP.setAopType(aOPDTO.getAopType());
 			aOP.setAopYear(aOPDTO.getAopYear());
 			aOP.setApril(aOPDTO.getApril());

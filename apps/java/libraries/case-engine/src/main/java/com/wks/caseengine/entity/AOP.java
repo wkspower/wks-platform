@@ -3,6 +3,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -24,9 +25,6 @@ public class AOP {
 
     @Column(name = "AOPRemarks", length = 500)
     private String aopRemarks;
-
-    // @Column(name = "NormItem", length = 255)
-    // private String normItem;
 
     @Column(name = "AOPType", length = 255)
     private String aopType;
@@ -78,8 +76,24 @@ public class AOP {
     
     @Column(name="Material_FK_Id")
     private UUID MaterialFKId;
+    
     @Column(name = "Site_FK_Id", nullable = false)
     private UUID siteFkId;
+
     @Column(name = "Vertical_FK_Id", nullable = false)
     private UUID verticalFkId;
+    
+    @Column(name = "CreatedOn")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdOn;
+
+    @Column(name = "ModifiedOn")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date modifiedOn;
+
+    @Column(name = "AOPVersion")
+    private String aopVersion;
+
+    @Column(name = "UpdatedBy")
+    private String updatedBy;
 }

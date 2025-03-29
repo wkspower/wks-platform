@@ -19,14 +19,15 @@ public interface TurnaroundPlanRepository extends JpaRepository<PlantMaintenance
             "pm.DurationInMins, " +
             "pmt.MaintenanceText, " +
             "pm.Id, " +
-            "np.Id, pm.Remarks, np.DisplayOrder " +
+            "np.Id, pm.Remarks, NPT.DisplayOrder " +
             "FROM PlantMaintenanceTransaction pm " +
             "JOIN PlantMaintenance pmt ON pm.PlantMaintenance_FK_Id = pmt.Id " +
             "JOIN MaintenanceTypes mt ON pmt.MaintenanceType_FK_Id = mt.Id " +
             "LEFT JOIN NormParameters np ON pm.NormParameter_FK_Id = np.Id " +
+            "LEFT JOIN NormParameterType NPT ON NPT.Id=np.NormParameterType_FK_Id "+
             "WHERE mt.Name = :maintenanceTypeName "  +
             "and pmt.Plant_FK_Id = :plantId " +
-			"and AuditYear = :year order by np.DisplayOrder",
+			"and AuditYear = :year order by NPT.DisplayOrder",
             nativeQuery = true)
 	List<Object[]> findTurnaroundPlanDetailsByPlantIdAndType( 
         @Param("maintenanceTypeName") String maintenanceTypeName, @Param("plantId") String plantId,  @Param("year") String year);

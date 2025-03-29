@@ -66,6 +66,7 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 			configurationDTO.setRemarks((row[13] != null ? row[13].toString() : "" ));
 			configurationDTO.setId(row[14] != null ? row[14].toString() : i+"#");
 			configurationDTO.setAuditYear(row[15] != null ? row[15].toString() : "" );
+			configurationDTO.setUOM(row[16] != null ? row[16].toString() : "" );
 			
 			
 			configurationDTOList.add(configurationDTO);

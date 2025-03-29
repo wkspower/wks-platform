@@ -48,6 +48,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 	        dto.setAopYear(row[19] != null ? row[19].toString() : null);
 	        dto.setPlantFkId(row[20] != null ? row[20].toString() : null);
 	        dto.setNormParameterTypeDisplayName(row[21] != null ? row[21].toString() : null);
+	        dto.setUOM(row[22] != null ? row[22].toString() : null);
 
 	        aOPConsumptionNormDTOList.add(dto);
 	    }

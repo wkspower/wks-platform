@@ -37,12 +37,12 @@ public interface AOPConsumptionNormRepository extends JpaRepository<AOPConsumpti
 		        acn.Dec,
 		        acn.AOPYear,
 		        acn.Plant_FK_Id,
-		        npt.DisplayName AS NormParameterType_DisplayName
+		        npt.DisplayName AS NormParameterType_DisplayName,np.UOM
 		    FROM AOPConsumptionNorm acn
 		    JOIN NormParameters np ON acn.Material_FK_Id = np.Id
 		    JOIN NormParameterType npt ON np.NormParameterType_FK_Id = npt.Id
 		    WHERE acn.Plant_FK_Id = :plantFkId 
-		    AND acn.AOPYear = :aopYear
+		    AND acn.AOPYear = :aopYear ORDER BY npt.DisplayOrder
 		    """, nativeQuery = true)
 		List<Object[]> findByPlantFkIdAndAopYear(@Param("plantFkId") UUID plantFkId, @Param("aopYear") String aopYear);
 

@@ -13,6 +13,11 @@ import com.wks.caseengine.entity.Plants;
 @Repository
 public interface PlantsRepository extends JpaRepository<Plants, UUID>{
 	
+	@Query(value = "SELECT v.Name FROM Plants p " +
+            "JOIN Verticals v ON p.Vertical_FK_Id = v.Id " +
+            "WHERE p.Id = :plantId", nativeQuery = true)
+		String findVerticalNameByPlantId(@Param("plantId") UUID plantId);
+	
 	
 	
 
