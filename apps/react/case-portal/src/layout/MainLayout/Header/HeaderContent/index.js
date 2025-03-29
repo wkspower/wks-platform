@@ -202,8 +202,12 @@ const HeaderContent = ({ keycloak }) => {
           name: filteredPlants[0].name,
         }),
       )
-
+      console.log(filteredPlants, 'filteredPlants')
       localStorage.setItem('selectedSite', JSON.stringify({ name: siteName }))
+      localStorage.setItem(
+        'selectedSiteId',
+        JSON.stringify({ id: filteredPlants[0].siteId }),
+      )
     }
   }
 
@@ -258,6 +262,7 @@ const HeaderContent = ({ keycloak }) => {
             name: filteredPlants[0].name,
           }),
         )
+        console.log(siteAvailable)
         localStorage.setItem(
           'selectedSite',
           JSON.stringify({ name: siteAvailable[0] }),
@@ -285,6 +290,7 @@ const HeaderContent = ({ keycloak }) => {
       JSON.stringify({ name: selectedVertical }),
       // JSON.stringify({ name: selectedPlantData.siteName }),
     )
+
     dispatch(
       setVerticalChange({
         selectedPlant,
@@ -303,10 +309,22 @@ const HeaderContent = ({ keycloak }) => {
     const allowedSites = verticalData.sites.filter((site) =>
       allowedSiteIds.includes(site.id),
     )
-    const siteAvailable = allowedSites.map((site) => site.name)
-    setSites(siteAvailable)
-    setSelectedSite(siteAvailable[0] || '')
+    // console.log(allowedSites)
+    const siteAvailable = allowedSites.map((site) => ({
+      name: site.name,
+      id: site.id,
+    }))
+
+    // console.log(siteAvailable)
+    // console.log(siteAvailable[0]?.name)
+    // console.log(siteAvailable?.map((n) => n.name))
+    setSites(siteAvailable?.map((n) => n.name))
+    setSelectedSite(siteAvailable[0]?.name || '')
     //  console.log(selectedVertical)
+    localStorage.setItem(
+      'selectedSiteId',
+      JSON.stringify({ id: siteAvailable[0].id }),
+    )
     dispatch(
       setVerticalChange({
         selectedPlant,

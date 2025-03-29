@@ -162,20 +162,56 @@ const ProductionvolumeData = () => {
         return
       }
       // Validate that both normParameterId and remark are not empty
-      const invalidRows = data.filter(
-        (row) => !row.normParametersFKId.trim(),
-        // (row) => !row.normParametersFKId.trim() || !row.remark.trim(),
-      )
+      // const invalidRows = data.filter(
+      //   (row) => !row.normParametersFKId.trim(),
+      //   // (row) => !row.normParametersFKId.trim() || !row.remark.trim(),
+      // )
+      const requiredMonths = [
+        'april',
+        'may',
+        'june',
+        'july',
+        'august',
+        'september',
+        'october',
+        'november',
+        'december',
+        'january',
+        'february',
+        'march',
+      ]
+
+      const invalidRows = data.filter((row) => {
+        const hasProduct =
+          row.normParametersFKId && row.normParametersFKId.trim() !== ''
+
+        const hasRemark = row.remarks && row.remarks.trim() !== ''
+        const hasValidMonth = requiredMonths.some((month) => {
+          let value = row[month]
+          if (value === 0) {
+            value = null
+          }
+          return value !== null && value !== ''
+        })
+
+        console.log(
+          `Row ID ${row.id}: hasProduct=${hasProduct}, hasRemark=${hasRemark}, hasValidMonth=${hasValidMonth}`,
+        )
+
+        return !(hasProduct && hasRemark && hasValidMonth)
+      })
 
       if (invalidRows.length > 0) {
-        setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Please fill required fields: Product and Remark.',
+          message:
+            'Please fill required fields: Product, Remark, and at least one month data.',
           severity: 'error',
         })
+        setSnackbarOpen(true)
+        console.log('Invalid rows:', invalidRows)
         return
       }
-      editAOPMCCalculatedData(data)
+      await editAOPMCCalculatedData(data)
       unsavedChangesRef.current = {
         unsavedRows: {},
         rowsBeforeChange: {},

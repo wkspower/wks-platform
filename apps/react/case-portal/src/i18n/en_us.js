@@ -54,7 +54,7 @@ const defs = {
     contributionReport: 'Contribution Report', // New addition
     previousFYAOPResult: 'Previous FY AOP Result', // New addition
     matBalSheet: 'MAT Bal Sheet', // New addition
-    workflow: 'Workflow', // New addition
+    workflow: 'AOP Approval Flow', // New addition
   },
   pages: {
     dashboard: {
@@ -210,7 +210,7 @@ const defs = {
         contributionReport: 'Contribution Report', // New addition
         previousFYAOPResult: 'Previous FY AOP Result', // New addition
         matBalSheet: 'MAT Bal Sheet', // New addition
-        workflow: 'Workflow', // New addition
+        workflow: 'AOP Approval Flow', // New addition
       },
     },
   },

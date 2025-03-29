@@ -74,7 +74,30 @@ const SlowDown = () => {
     date.setUTCMinutes(date.getUTCMinutes() + 30)
     return date
   }
+  const findDuration = (value, row) => {
+    if (row && row.maintStartDateTime && row.maintEndDateTime) {
+      const start = new Date(row.maintStartDateTime)
+      const end = new Date(row.maintEndDateTime)
 
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        // Check if dates are valid
+        const durationInMs = end - start
+
+        // Calculate duration in hours and minutes
+        const durationInHours = Math.floor(durationInMs / (1000 * 60 * 60))
+        const remainingMs = durationInMs % (1000 * 60 * 60)
+        const durationInMinutes = Math.floor(remainingMs / (1000 * 60))
+
+        // Format the duration as "HH:MM"
+        const formattedDuration = `${String(durationInHours).padStart(2, '0')}:${String(durationInMinutes).padStart(2, '0')}`
+        return formattedDuration
+      } else {
+        return '' // Or handle invalid dates as needed
+      }
+    } else {
+      return '' // Or handle missing dates as needed
+    }
+  }
   const saveSlowDownData = async (newRow) => {
     try {
       var plantId = ''
@@ -86,8 +109,11 @@ const SlowDown = () => {
       const slowDownDetails = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
-        // durationInHrs: parseFloat(findDuration('1', row)),
-        durationInHrs: parseFloat(row.durationInHrs),
+        durationInHrs:
+          lowerVertName === 'meg'
+            ? parseFloat(row.durationInHrs)
+            : parseFloat(findDuration('1', row)),
+        // durationInHrs: parseFloat(row.durationInHrs),
         maintEndDateTime: addTimeOffset(row.maintEndDateTime),
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         remark: row.remark,
@@ -245,37 +271,6 @@ const SlowDown = () => {
       }
     }
 
-    // const saveShutdownData = async () => {
-    //   try {
-    //     // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D';
-    //     var plantId = ''
-
-    //     const storedPlant = localStorage.getItem('selectedPlant')
-    //     if (storedPlant) {
-    //       const parsedPlant = JSON.parse(storedPlant)
-    //       plantId = parsedPlant.id
-    //     }
-
-    //     const shutdownDetails = {
-    //       product: 'Oxygen',
-    //       discription: '1 Shutdown maintenance',
-    //       durationInHrs: 120,
-    //       maintEndDateTime: '2025-02-20T18:00:00Z',
-    //       maintStartDateTime: '2025-02-20T16:00:00Z',
-    //     }
-
-    //     const response = await DataService.saveShutdownData(
-    //       plantId,
-    //       shutdownDetails,
-    //       keycloak,
-    //     )
-    //     console.log('Shutdown data Saved Successfully:', response)
-    //     return response
-    //   } catch (error) {
-    //     console.error('Error saving shutdown data:', error)
-    //   }
-    // }
-
     fetchData()
     // saveShutdownData()
     getAllProducts()
@@ -391,12 +386,12 @@ const SlowDown = () => {
     {
       field: 'durationInHrs',
       headerName: 'Duration (hrs)',
-      editable: true,
+      editable: false,
       minWidth: 75,
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
-      // valueGetter: findDuration,
+      ...(lowerVertName !== 'meg' && { valueGetter: findDuration }), // Apply valueGetter only if loververt is not 'meg'
     },
 
     {
@@ -413,7 +408,7 @@ const SlowDown = () => {
       field: 'remark',
       headerName: 'Remarks',
       editable: true,
-      minWidth: 250,
+      minWidth: 180,
       renderCell: (params) => {
         const displayText = truncateRemarks(params.value)
         const isEditable = !params.row.Particulars

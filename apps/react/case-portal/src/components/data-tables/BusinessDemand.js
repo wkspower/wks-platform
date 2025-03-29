@@ -100,12 +100,17 @@ const BusinessDemand = () => {
           // lowerVertName === 'meg' ? 'Production' : 'Grade',
           null,
         )
+        const allowedIds = [
+          '4D8E17F6-D6CB-407E-8C9C-4BEDBC422C57',
+          '00DC05B1-9607-470E-A159-62497E0123E2',
+          'A061E050-0281-421F-81C1-B136CE2ED3F3',
+          '92E0AF06-9535-4B93-8998-E56A71354393',
+        ]
+
         var productList = []
         if (lowerVertName === 'meg') {
           productList = data
-            .filter((product) =>
-              ['EO', 'EOE', 'MEG', 'CO2'].includes(product.displayName),
-            )
+            .filter((product) => allowedIds.includes(product.id))
             .map((product) => ({
               id: product.id,
               displayName: product.displayName,
@@ -202,7 +207,7 @@ const BusinessDemand = () => {
       }
 
       let siteId = ''
-      const storedSite = localStorage.getItem('selectedSite')
+      const storedSite = localStorage.getItem('selectedSiteId')
       if (storedSite) {
         const parsedSite = JSON.parse(storedSite)
         siteId = parsedSite.id
@@ -214,7 +219,7 @@ const BusinessDemand = () => {
       //   const parsedVertical = JSON.parse(storedVertical)
       //   verticalId = parsedVertical.id
       // }
-
+      // console.log(siteId)
       const businessData = newRows.map((row) => ({
         april: row.april || null,
         may: row.may || null,
