@@ -110,9 +110,10 @@ const SlowDown = () => {
         productId: row.product,
         discription: row.discription,
         durationInHrs:
-          lowerVertName === 'meg'
-            ? parseFloat(row.durationInHrs)
-            : parseFloat(findDuration('1', row)),
+          // lowerVertName === 'meg'
+          //   ? parseFloat(row.durationInHrs)
+          // :
+          parseFloat(findDuration('1', row)),
         // durationInHrs: parseFloat(row.durationInHrs),
         maintEndDateTime: addTimeOffset(row.maintEndDateTime),
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
@@ -160,7 +161,6 @@ const SlowDown = () => {
         'discription',
         'remark',
         'rate',
-        'durationInHrs',
         'product',
       ]
       const validationMessage = validateFields(data, requiredFields)
@@ -391,7 +391,7 @@ const SlowDown = () => {
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
-      ...(lowerVertName !== 'meg' && { valueGetter: findDuration }), // Apply valueGetter only if loververt is not 'meg'
+      valueGetter: findDuration,
     },
 
     {

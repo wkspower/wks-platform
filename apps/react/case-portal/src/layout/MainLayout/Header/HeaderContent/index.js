@@ -235,6 +235,9 @@ const HeaderContent = ({ keycloak }) => {
     const verticalName = event.target.value
     setSelectedVertical(verticalName)
     const verticalData = verticals.find((v) => v.name === verticalName)
+    // console.log(verticalData)
+    localStorage.setItem('verticalId', verticalData?.id)
+
     if (verticalData) {
       const { allowedSiteIds, allowedPlantIds } = getAllowedFilter()
       // Filter the vertical's sites using allowed site IDs.
@@ -262,7 +265,7 @@ const HeaderContent = ({ keycloak }) => {
             name: filteredPlants[0].name,
           }),
         )
-        console.log(siteAvailable)
+        // console.log(siteAvailable)
         localStorage.setItem(
           'selectedSite',
           JSON.stringify({ name: siteAvailable[0] }),

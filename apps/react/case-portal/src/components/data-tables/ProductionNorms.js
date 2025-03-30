@@ -69,6 +69,7 @@ const ProductionNorms = () => {
       const updatedRows = allRows.map(
         (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
       )
+    //  console.log(updatedRows)
       if (updatedRows.length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -78,22 +79,22 @@ const ProductionNorms = () => {
         return
       }
 
-      const requiredFields = ['aopRemarks']
+      // const requiredFields = ['aopRemarks']
 
-      const validationMessage = validateFields(allRows, requiredFields)
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationMessage,
-          severity: 'error',
-        })
-        return
-      }
+      // const validationMessage = validateFields(allRows, requiredFields)
+      // if (validationMessage) {
+      //   setSnackbarOpen(true)
+      //   setSnackbarData({
+      //     message: validationMessage,
+      //     severity: 'error',
+      //   })
+      //   return
+      // }
       updateProductNormData(updatedRows)
     } catch (error) {
       console.log('Error saving changes:', error)
     }
-  }, [apiRef, selectedUnit])
+  }, [apiRef])
 
   const updateProductNormData = async (newRow) => {
     try {
@@ -104,7 +105,7 @@ const ProductionNorms = () => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-
+    //  console.log(newRow)
       const productNormData = newRow.map((row) => ({
         aopType: row.aopType || 'production',
         aopCaseId: row.aopCaseId || null,
