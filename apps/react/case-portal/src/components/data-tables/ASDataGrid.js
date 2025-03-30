@@ -293,8 +293,9 @@ const DataGridTable = ({
           const keysToUpdate = ['aopRemarks', 'remarks', 'remark'].filter(
             (key) => key in row,
           )
+//          console.log(keysToUpdate)
           const keyToUpdate = keysToUpdate[0] || 'remark'
-
+//          console.log([keyToUpdate])
           updatedRow = { ...row, [keyToUpdate]: currentRemark }
           return updatedRow
         }
