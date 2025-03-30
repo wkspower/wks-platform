@@ -41,8 +41,9 @@ public interface ShutdownNormsRepository extends JpaRepository<ShutdownNormsValu
       ,[NormParameterTypeDisplayName]
       ,[NormTypeDisplayOrder]
       ,[MaterialDisplayOrder]
+      ,[UOM]
   FROM [dbo].[vwScrnShutdownNorms]
-		    WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL)
+		    WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL) ORDER BY NormTypeDisplayOrder
 		    """, nativeQuery = true)
 		List<Object[]> findByYearAndPlantFkId(@Param("year") String year, @Param("plantId") UUID plantId);
 

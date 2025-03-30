@@ -23,7 +23,7 @@ public interface NormalOperationNormsRepository extends JpaRepository<MCUNormsVa
     NPT.DisplayName AS NormParameterTypeDisplayName, NP.UOM
 		    FROM MCUNormsValue MNV JOIN NormParameterType NPT ON MNV.NormParameterType_FK_Id = NPT.Id
 		    JOIN NormParameters NP ON NP.Id=MNV.Material_FK_Id
-		    WHERE MNV.FinancialYear = :year AND MNV.Plant_FK_Id = :plantId ORDER BY NPT.Id,NPT.DisplayOrder
+		    WHERE MNV.FinancialYear = :year AND MNV.Plant_FK_Id = :plantId ORDER BY NPT.DisplayOrder
 		    """, nativeQuery = true)
 		List<Object[]> findByYearAndPlantFkId(@Param("year") String year, @Param("plantId") UUID plantId);
 		

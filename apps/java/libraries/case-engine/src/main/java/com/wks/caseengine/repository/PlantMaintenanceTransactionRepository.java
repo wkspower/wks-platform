@@ -15,4 +15,7 @@ public interface PlantMaintenanceTransactionRepository extends JpaRepository<Pla
 	
 	@Query(value = "SELECT Id FROM MaintenanceTypes WHERE Name = :name", nativeQuery = true)
     UUID findIdByName(@Param("name") String name);
+	
+	 @Query(value = "SELECT Id FROM NormParameters WHERE Name = :name AND Plant_FK_Id = :plantFkId", nativeQuery = true)
+	    UUID findIdByNameAndPlantFkId(@Param("name") String name, @Param("plantFkId") UUID plantFkId);
 }

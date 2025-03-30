@@ -42,5 +42,6 @@ public class ShutdownNormsValueDTO {
     private String normParameterTypeId;
     private String normParameterTypeName;
     private String normParameterTypeDisplayName;
+    private String UOM;
 }
 

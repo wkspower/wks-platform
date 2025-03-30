@@ -9,5 +9,6 @@ public interface AOPService {
 	public List<AOPDTO> updateAOP(List<AOPDTO> aOPDTOList);
 	public List<AOPDTO> getAOPData(String plantId, String year);
     public List<AOPDTO> calculateData(String plantId, String year);
+	List<Object[]> executeDynamicMaintenanceCalculation(String verticalName, String plantId, String siteId, String verticalId, String aopYear);
 
 }

@@ -54,7 +54,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService{
 			shutdownNormsValueDTO.setNormParameterTypeId(row[23] != null ? row[23].toString() : null);
 			shutdownNormsValueDTO.setNormParameterTypeName(row[24] != null ? row[24].toString() : null);
 			shutdownNormsValueDTO.setNormParameterTypeDisplayName(row[25] != null ? row[25].toString() : null);
-
+			shutdownNormsValueDTO.setUOM(row[26] != null ? row[26].toString() : null);
 			shutdownNormsValueDTOList.add(shutdownNormsValueDTO);
 		}
 

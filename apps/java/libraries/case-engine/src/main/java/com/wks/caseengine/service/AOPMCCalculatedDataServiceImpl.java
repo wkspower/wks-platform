@@ -48,22 +48,9 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
  	    	aOPMCCalculatedDataDTO.setMarch(row[15] != null ? Float.parseFloat(row[15].toString()) : null);
  	    	aOPMCCalculatedDataDTO.setFinancialYear(row[16] != null ? row[16].toString() : null);
  	    	aOPMCCalculatedDataDTO.setRemarks(row[17] != null ? row[17].toString() : null);
+ 	    	aOPMCCalculatedDataDTO.setVerticalFKId(row[22] != null ? row[22].toString() : null);
  	    	aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
  	    }
-	    
-	   
- 		// List<Object[]> list = aOPMCCalculatedDataRepository.getDataBusinessAllData(plantId,year);
- 		// int i=1;
- 		// for(Object[] obj1 :list){
-               
- 		// 	AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO = new AOPMCCalculatedDataDTO();
-
- 		// 	aOPMCCalculatedDataDTO.setNormParametersFKId(obj1[0]!=null? obj1[0].toString():null);
- 		// 	aOPMCCalculatedDataDTO.setId(i+"#");
- 		// 	aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
- 		// 	i++;
- 		// }
-
 
 	    return aOPMCCalculatedDataDTOList;
 	}
@@ -98,7 +85,8 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			aOPMCCalculatedData.setSeptember(aOPMCCalculatedDataDTO.getSeptember());
 			aOPMCCalculatedData.setOctober(aOPMCCalculatedDataDTO.getOctober());
 			aOPMCCalculatedData.setNovember(aOPMCCalculatedDataDTO.getNovember());
-			aOPMCCalculatedData.setDecember(aOPMCCalculatedDataDTO.getDecember());			aOPMCCalculatedData.setJanuary(aOPMCCalculatedDataDTO.getJanuary());
+			aOPMCCalculatedData.setDecember(aOPMCCalculatedDataDTO.getDecember());			
+			aOPMCCalculatedData.setJanuary(aOPMCCalculatedDataDTO.getJanuary());
 
 			aOPMCCalculatedData.setFinancialYear(aOPMCCalculatedDataDTO.getFinancialYear());
 			aOPMCCalculatedData.setRemarks(aOPMCCalculatedDataDTO.getRemarks());

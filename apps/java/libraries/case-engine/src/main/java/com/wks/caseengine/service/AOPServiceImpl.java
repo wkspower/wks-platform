@@ -23,9 +23,12 @@ import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.rest.entity.Vertical;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
 import java.util.UUID;
 import java.util.stream.Collectors;
-
+import jakarta.persistence.Query;
 @Service
 public class AOPServiceImpl implements  AOPService{
 	
@@ -40,7 +43,9 @@ public class AOPServiceImpl implements  AOPService{
 	
 	@Autowired
 	private NormParametersService normParametersService;
-
+	
+	@PersistenceContext
+    private EntityManager entityManager;
 	
 	@Override
 	public List<AOPDTO> getAOP() {
@@ -204,8 +209,9 @@ public class AOPServiceImpl implements  AOPService{
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String verticalName=plantsRepository.findVerticalNameByPlantId(plant.getId());
 		//    List<Object[]> list =aOPRepository.HMD_MaintenanceCalculation(plant.getName(),site.getName(),vertical.getName(), year);
-			List<Object[]> list = aOPRepository.HMD_MaintenanceCalculation(plant.getId().toString(),
+			List<Object[]> list = executeDynamicMaintenanceCalculation(verticalName,plant.getId().toString(),
 					site.getId().toString(), vertical.getId().toString(), year);
 						System.out.println("list"+list);
 						System.out.println("listTo String"+list.toString());
@@ -258,7 +264,29 @@ public class AOPServiceImpl implements  AOPService{
 		return dtoList;
 	}
 
+	
 
+	 @Override
+	    public List<Object[]> executeDynamicMaintenanceCalculation(
+	        String verticalName, String plantId, String siteId, String verticalId, String aopYear) {
+	        
+	        // Construct dynamic stored procedure name
+	        String procedureName = verticalName + "_HMD_MaintenanceCalculation";
+
+	        // Create a native query to execute the stored procedure
+	        String sql = "EXEC " + procedureName + 
+	                     " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @aopYear = :aopYear";
+	        
+	        Query query = entityManager.createNativeQuery(sql);
+	        
+	        // Set parameters
+	        query.setParameter("plantId", plantId);
+	        query.setParameter("siteId", siteId);
+	        query.setParameter("verticalId", verticalId);
+	        query.setParameter("aopYear", aopYear);
+
+	        return query.getResultList();
+	    }
 	
 
 }

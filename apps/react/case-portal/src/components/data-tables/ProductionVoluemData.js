@@ -110,7 +110,7 @@ const ProductionvolumeData = () => {
         siteFKId: row.siteFKId || siteId,
         // material: 'EOE',
         materialFKId: row.normParametersFKId,
-        verticalFKId: localStorage.getItem('verticalId'),
+        verticalFKId: row.verticalFKId,
         id: row.idFromApi || null,
         avgTPH: findAvg('1', row) || null,
         remark: row.remarks,
