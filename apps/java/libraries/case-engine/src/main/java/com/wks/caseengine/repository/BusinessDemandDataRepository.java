@@ -47,7 +47,7 @@ public interface BusinessDemandDataRepository extends JpaRepository<BusinessDema
 		    WHERE 
 		        (Year = :year OR Year IS NULL) 
 		        AND Plant_FK_Id = :plantFkId
-		    ORDER BY NormTypeDisplayOrder """, 
+		    ORDER BY NormTypeDisplayOrder,MaterialDisplayOrder """, 
 		    nativeQuery = true
 		)
  	    List<Object[]> findByYearAndPlantFkId(@Param("year") String year, @Param("plantFkId") UUID plantFkId);
