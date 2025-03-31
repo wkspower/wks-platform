@@ -137,7 +137,17 @@ public class AOPServiceImpl implements  AOPService{
 	@Override
 	public List<AOPDTO> updateAOP(List<AOPDTO> aOPDTOList) {
 		for(AOPDTO aOPDTO:aOPDTOList) {
+			
 			AOP aOP= null;
+			Plants plant=null;
+			Sites site=null;
+			Verticals vertical=null;
+			if(aOPDTO.getSiteFKId()==null || aOPDTO.getVerticalFKId()==null) {
+				 plant = plantsRepository.findById(UUID.fromString(aOPDTO.getPlantFKId())).get();
+				 site = siteRepository.findById(plant.getSiteFkId()).get();
+				 vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			}
+
 			if(aOPDTO.getId()==null) {
 				UUID Site=null;
 				UUID Vertical=null;
@@ -145,8 +155,12 @@ public class AOPServiceImpl implements  AOPService{
 				UUID Plant=null;
 				if(aOPDTO.getSiteFKId()!=null) {
 					Site=UUID.fromString(aOPDTO.getSiteFKId());
+				}else {
+					Site=UUID.fromString(aOPDTO.getSiteFKId());
 				}
 				if(aOPDTO.getVerticalFKId()!=null) {
+					Vertical=UUID.fromString(aOPDTO.getVerticalFKId());
+				}else {
 					Vertical=UUID.fromString(aOPDTO.getVerticalFKId());
 				}
 				if(aOPDTO.getMaterialFKId()!=null) {
@@ -195,15 +209,7 @@ public class AOPServiceImpl implements  AOPService{
 			// aOP.setNormItem(aOPDTO.getNormItem());
 			aOP.setNov(aOPDTO.getNov());
 			aOP.setOct(aOPDTO.getOct());
-			Plants plant=null;
-			Sites site=null;
-			Verticals vertical=null;
-			if(aOPDTO.getSiteFKId()==null || aOPDTO.getVerticalFKId()==null) {
-				 plant = plantsRepository.findById(UUID.fromString(aOPDTO.getPlantFKId())).get();
-				 site = siteRepository.findById(plant.getSiteFkId()).get();
-				 vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			}
-			
+						
 			if(aOPDTO.getSiteFKId()!=null) {
 				aOP.setSiteFkId(UUID.fromString(aOPDTO.getSiteFKId()));
 			}else {
