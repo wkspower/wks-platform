@@ -452,6 +452,7 @@ const NormalOpNormsScreen = () => {
   }
 
   const handleCalculate = async () => {
+    setLoading(true)
     try {
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
@@ -472,13 +473,16 @@ const NormalOpNormsScreen = () => {
           message: 'Data refreshed successfully!',
           severity: 'success',
         })
+        setLoading(false)
         fetchData()
       } else {
         setSnackbarOpen(true)
+
         setSnackbarData({
           message: 'Data Refresh Falied!',
           severity: 'error',
         })
+        setLoading(false)
       }
 
       return data
@@ -488,6 +492,7 @@ const NormalOpNormsScreen = () => {
         message: error.message || 'An error occurred',
         severity: 'error',
       })
+      setLoading(false)
       console.error('Error!', error)
     }
   }

@@ -418,6 +418,7 @@ const ShutdownNorms = () => {
           ...item,
           idFromApi: item.id,
           id: groupId++,
+          remarks: item?.remarks?.trim() || null,
           materialFkId: item?.materialFkId.toLowerCase(),
 
           ...(isTPD && {
