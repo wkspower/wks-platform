@@ -23,7 +23,7 @@ export const validateFields = (data, requiredFields) => {
 
   if (invalidRows.length > 0) {
     const missingFields = invalidRows
-      .map((row, index) => {
+      .map((row) => {
         const missingFieldsMessage = []
         requiredFields.forEach((field) => {
           const value = row[field]

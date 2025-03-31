@@ -1,0 +1,53 @@
+[
+  {
+    "field": "discription",
+    "headerName": "Slowdown Desc",
+    "minWidth": 250,
+    "editable": true,
+    "flex": 3
+  },
+  {
+    "field": "maintenanceId",
+    "headerName": "maintenanceId",
+    "editable": false,
+    "hide": true
+  },
+  {
+    "field": "product",
+    "headerName": "Particulars",
+    "editable": true,
+    "minWidth": 125
+  },
+  {
+    "field": "maintStartDateTime",
+    "headerName": "SD- From",
+    "type": "dateTime",
+    "minWidth": 200,
+    "editable": true
+  },
+  {
+    "field": "maintEndDateTime",
+    "headerName": "SD- To",
+    "type": "dateTime",
+    "minWidth": 200,
+    "editable": true
+  },
+  {
+    "field": "durationInHrs",
+    "headerName": "Duration (hrs)",
+    "editable": false,
+    "minWidth": 75
+  },
+  {
+    "field": "rate",
+    "headerName": "Rate",
+    "editable": true,
+    "minWidth": 75
+  },
+  {
+    "field": "remark",
+    "headerName": "Remarks",
+    "editable": true,
+    "minWidth": 180
+  }
+]

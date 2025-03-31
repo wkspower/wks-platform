@@ -12,7 +12,7 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
 
-const ShutDown = () => {
+const ShutDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
@@ -436,13 +436,13 @@ const ShutDown = () => {
         unsavedChangesRef={unsavedChangesRef}
         deleteRowData={deleteRowData}
         permissions={{
-          showAction: true,
-          addButton: true,
-          deleteButton: true,
-          editButton: true,
-          showUnit: false,
-          saveWithRemark: true,
-          saveBtn: true,
+          showAction: permissions?.showAction ?? true,
+          addButton: permissions?.addButton ?? true,
+          deleteButton: permissions?.deleteButton ?? true,
+          editButton: permissions?.editButton ?? true,
+          showUnit: permissions?.showUnit ?? false,
+          saveWithRemark: permissions?.saveWithRemark ?? true,
+          saveBtn: permissions?.saveBtn ?? true,
         }}
       />
     </div>

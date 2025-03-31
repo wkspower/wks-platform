@@ -477,7 +477,6 @@ const NormalOpNormsScreen = () => {
         fetchData()
       } else {
         setSnackbarOpen(true)
-
         setSnackbarData({
           message: 'Data Refresh Falied!',
           severity: 'error',

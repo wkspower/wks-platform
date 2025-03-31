@@ -14,7 +14,7 @@ import { useSelector } from 'react-redux'
 // import NumericInputOnly from 'utils/NumericInputOnly'
 import { validateFields } from 'utils/validationUtils'
 import getEnhancedColDefs from './CommonHeader/ProductionAopHeader'
-const ProductionNorms = () => {
+const ProductionNorms = ({ permissions }) => {
   const keycloak = useSession()
   // const [csData, setCsData] = useState([])
   const [allProducts, setAllProducts] = useState([])
@@ -118,7 +118,7 @@ const ProductionNorms = () => {
         aopYear: localStorage.getItem('year'),
         plantFKId: plantId,
         materialFKId: row.normParametersFKId,
-        siteFKId: siteID,
+        siteFKId: JSON.parse(localStorage.getItem('selectedSiteId')).id,
         verticalFKId: localStorage.getItem('verticalId'),
         // normItem: getProductName('1', row.normParametersFKId) || null,
         // normItem: 'EOE',
@@ -144,14 +144,20 @@ const ProductionNorms = () => {
         productNormData,
         keycloak,
       )
-
+      if (!response) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Error Saving Production AOP !',
+          severity: 'error',
+        })
+      }
+      console.log(response, 'response--->')
       if (response) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Production AOP Saved Successfully !',
           severity: 'success',
         })
-        setLoading(false)
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},
@@ -167,6 +173,12 @@ const ProductionNorms = () => {
       }
     } catch (error) {
       console.error('Error Saving Production AOP:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Error Saving Production AOP!',
+        severity: 'error',
+      })
+    } finally {
       setLoading(false)
     }
   }
@@ -445,14 +457,14 @@ const ProductionNorms = () => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         permissions={{
-          showAction: true,
-          addButton: false,
-          deleteButton: false,
-          editButton: true,
-          showUnit: true,
-          saveWithRemark: true,
-          showCalculate: true,
-          saveBtn: true,
+          showAction: permissions?.showAction ?? true,
+          addButton: permissions?.addButton ?? false,
+          deleteButton: permissions?.deleteButton ?? false,
+          editButton: permissions?.editButton ?? true,
+          showUnit: permissions?.showUnit ?? true,
+          saveWithRemark: permissions?.saveWithRemark ?? true,
+          showCalculate: permissions?.showCalculate ?? true,
+          saveBtn: permissions?.saveBtn ?? true,
           // UOM: 'Ton',
           units: ['Ton', 'Kilo Ton'],
           // UnitToShow: 'Values/Ton',

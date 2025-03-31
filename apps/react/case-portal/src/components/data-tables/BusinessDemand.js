@@ -11,7 +11,7 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
 
-const BusinessDemand = () => {
+const BusinessDemand = ({ permissions }) => {
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
   // const [bdData, setBDData] = useState([])
@@ -194,8 +194,12 @@ const BusinessDemand = () => {
         plantId = parsedPlant.id
       }
 
-      let siteID =
-        JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+      let siteId = ''
+      const storedSite = localStorage.getItem('selectedSiteId')
+      if (storedSite) {
+        const parsedSite = JSON.parse(storedSite)
+        siteId = parsedSite.id
+      }
 
       let verticalId = localStorage.getItem('verticalId')
 
@@ -216,7 +220,7 @@ const BusinessDemand = () => {
         avgTph: row.avgTph || null,
         year: localStorage.getItem('year'),
         plantId: plantId,
-        siteFKId: siteID,
+        siteFKId: siteId,
         verticalFKId: verticalId,
         normParameterId: row.normParameterId,
         id: row.idFromApi || null,
@@ -329,13 +333,13 @@ const BusinessDemand = () => {
         handleRemarkCellClick={handleRemarkCellClick}
         deleteRowData={deleteRowData}
         permissions={{
-          showAction: true,
-          addButton: true,
-          deleteButton: true,
-          editButton: true,
-          showUnit: false,
-          saveWithRemark: true,
-          saveBtn: true,
+          showAction: permissions?.showAction ?? true,
+          addButton: permissions?.addButton ?? true,
+          deleteButton: permissions?.deleteButton ?? true,
+          editButton: permissions?.editButton ?? true,
+          showUnit: permissions?.showUnit ?? false,
+          saveWithRemark: permissions?.saveWithRemark ?? true,
+          saveBtn: permissions?.saveBtn ?? true,
           units: ['TPH', 'TPD'],
         }}
       />

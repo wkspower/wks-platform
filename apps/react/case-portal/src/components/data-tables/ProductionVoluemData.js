@@ -11,7 +11,7 @@ const headerMap = generateHeaderNames()
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 
-const ProductionvolumeData = () => {
+const ProductionvolumeData = ({ permissions }) => {
   const keycloak = useSession()
   // const [productNormData, setProductNormData] = useState([])
   const [allProducts, setAllProducts] = useState([])
@@ -353,14 +353,14 @@ const ProductionvolumeData = () => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         permissions={{
-          showAction: true,
-          addButton: false,
-          deleteButton: false,
-          editButton: true,
-          showUnit: true,
-          saveWithRemark: true,
-          showRefreshBtn: true,
-          saveBtn: true,
+          showAction: permissions?.showAction ?? true,
+          addButton: permissions?.addButton ?? false,
+          deleteButton: permissions?.deleteButton ?? false,
+          editButton: permissions?.editButton ?? true,
+          showUnit: permissions?.showUnit ?? true,
+          saveWithRemark: permissions?.saveWithRemark ?? true,
+          showRefreshBtn: permissions?.showRefreshBtn ?? true,
+          saveBtn: permissions?.saveBtn ?? true,
           units: ['TPH', 'TPD'],
         }}
       />
