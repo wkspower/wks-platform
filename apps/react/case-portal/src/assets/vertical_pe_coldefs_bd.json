@@ -1,5 +1,12 @@
 [
   {
+    "field": "Particulars",
+    "headerName": "Type",
+    "minWidth": 125,
+    "groupable": true,
+    "headerClass": "bold-header"
+  },
+  {
     "field": "normParameterId",
     "headerName": "Particulars",
     "editable": true,

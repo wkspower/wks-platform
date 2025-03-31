@@ -17,7 +17,10 @@ import {
   setVerticalChange,
 } from 'store/reducers/dataGridStore'
 import { DataService } from 'services/DataService'
-import honLogo from 'assets/images/hon.svg'
+
+import honLogo from 'assets/images/hon_white.png' //WHITE COLOR
+// import honLogo from 'assets/images/hon.svg' //RED COLOR
+
 // import siteData from '../../../../assets/sitesData.json'
 
 const HeaderContent = ({ keycloak }) => {

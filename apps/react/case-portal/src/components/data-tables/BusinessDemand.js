@@ -43,7 +43,17 @@ const BusinessDemand = ({ permissions }) => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const data = await DataService.getBDData(keycloak)
+      var data = await DataService.getBDData(keycloak)
+
+      if (lowerVertName !== 'pe') {
+        data = data.sort((a, b) =>
+          b.normParameterTypeDisplayName.localeCompare(
+            a.normParameterTypeDisplayName,
+          ),
+        )
+      }
+
+      // console.log(sortedData)
 
       const groupedRows = []
       const groups = new Map()
@@ -58,20 +68,20 @@ const BusinessDemand = ({ permissions }) => {
           id: groupId++,
         }
 
-        if (lowerVertName !== 'pe') {
-          const groupKey = item.normParameterTypeDisplayName
+        // if (lowerVertName !== 'pe') {
+        const groupKey = item.normParameterTypeDisplayName
 
-          if (!groups.has(groupKey)) {
-            groups.set(groupKey, [])
-            groupedRows.push({
-              id: groupId++,
-              Particulars: groupKey,
-              isGroupHeader: true,
-            })
-          }
-
-          groups.get(groupKey).push(formattedItem)
+        if (!groups.has(groupKey)) {
+          groups.set(groupKey, [])
+          groupedRows.push({
+            id: groupId++,
+            Particulars: groupKey,
+            isGroupHeader: true,
+          })
         }
+
+        groups.get(groupKey).push(formattedItem)
+        // }
 
         groupedRows.push(formattedItem)
       })

@@ -160,6 +160,7 @@ const SlowDown = ({ permissions }) => {
         'discription',
         'remark',
         'rate',
+        'durationInHrs',
         'product',
       ]
       const validationMessage = validateFields(data, requiredFields)

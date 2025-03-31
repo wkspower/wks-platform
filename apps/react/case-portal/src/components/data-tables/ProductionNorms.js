@@ -144,20 +144,14 @@ const ProductionNorms = ({ permissions }) => {
         productNormData,
         keycloak,
       )
-      if (!response) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Error Saving Production AOP !',
-          severity: 'error',
-        })
-      }
-      console.log(response, 'response--->')
+
       if (response) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Production AOP Saved Successfully !',
           severity: 'success',
         })
+        setLoading(false)
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},

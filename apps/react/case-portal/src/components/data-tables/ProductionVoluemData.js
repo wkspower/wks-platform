@@ -189,9 +189,9 @@ const ProductionvolumeData = ({ permissions }) => {
           return value !== null && value !== ''
         })
 
-        console.log(
-          `Row ID ${row.id}: hasProduct=${hasProduct}, hasRemark=${hasRemark}, hasValidMonth=${hasValidMonth}`,
-        )
+        // console.log(
+        //   `Row ID ${row.id}: hasProduct=${hasProduct}, hasRemark=${hasRemark}, hasValidMonth=${hasValidMonth}`,
+        // )
 
         return !(hasProduct && hasRemark && hasValidMonth)
       })
@@ -199,7 +199,7 @@ const ProductionvolumeData = ({ permissions }) => {
       if (invalidRows.length > 0) {
         setSnackbarData({
           message:
-            'Please fill required fields: Product, Remark, and at least one month data.',
+            'Please fill required fields: Product, Remark, and Months Values.',
           severity: 'error',
         })
         setSnackbarOpen(true)
