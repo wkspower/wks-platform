@@ -79,17 +79,18 @@ const ProductionNorms = () => {
         return
       }
 
-      // const requiredFields = ['aopRemarks']
+      const requiredFields = ['aopRemarks']
 
-      // const validationMessage = validateFields(allRows, requiredFields)
-      // if (validationMessage) {
-      //   setSnackbarOpen(true)
-      //   setSnackbarData({
-      //     message: validationMessage,
-      //     severity: 'error',
-      //   })
-      //   return
-      // }
+      const validationMessage = validateFields(allRows, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        return
+      }
+
       updateProductNormData(updatedRows)
     } catch (error) {
       console.log('Error saving changes:', error)
