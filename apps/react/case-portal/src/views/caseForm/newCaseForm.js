@@ -51,7 +51,6 @@ export const NewCaseForm = ({
   }, [open, caseDefId])
 
   const onSave = () => {
-    debugger
     const caseAttributes = []
     Object.keys(formData.data).forEach((key) => {
       caseAttributes.push({
