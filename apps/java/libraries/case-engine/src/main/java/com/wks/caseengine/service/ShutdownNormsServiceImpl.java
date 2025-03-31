@@ -37,7 +37,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService{
 			shutdownNormsValueDTO.setJune(row[7] != null ? Float.parseFloat(row[7].toString()) : null);
 			shutdownNormsValueDTO.setJuly(row[8] != null ? Float.parseFloat(row[8].toString()) : null);
 			shutdownNormsValueDTO.setAugust(row[9] != null ? Float.parseFloat(row[9].toString()) : null);
-			shutdownNormsValueDTO.setSeptember(row[10] != null ? Float.parseFloat(row[11].toString()) : null);
+			shutdownNormsValueDTO.setSeptember(row[10] != null ? Float.parseFloat(row[10].toString()) : null); 
 			shutdownNormsValueDTO.setOctober(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
 			shutdownNormsValueDTO.setNovember(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
 			shutdownNormsValueDTO.setDecember(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
@@ -54,7 +54,14 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService{
 			shutdownNormsValueDTO.setNormParameterTypeId(row[23] != null ? row[23].toString() : null);
 			shutdownNormsValueDTO.setNormParameterTypeName(row[24] != null ? row[24].toString() : null);
 			shutdownNormsValueDTO.setNormParameterTypeDisplayName(row[25] != null ? row[25].toString() : null);
-			shutdownNormsValueDTO.setUOM(row[26] != null ? row[26].toString() : null);
+			
+			
+			// shutdownNormsValueDTO.setNormTypeDisplayOrder(row[26] != null ? row[26].toString() : null);
+			// shutdownNormsValueDTO.setMaterialDisplayOrder(row[27] != null ? row[27].toString() : null);
+			
+			
+			shutdownNormsValueDTO.setUOM(row[28] != null ? row[28].toString() : null);
+		
 			shutdownNormsValueDTOList.add(shutdownNormsValueDTO);
 		}
 

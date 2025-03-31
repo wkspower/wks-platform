@@ -28,16 +28,16 @@ public interface AOPRepository extends JpaRepository<AOP, UUID>{
     List<AOP> findAllByAopYearAndPlantFkId(String year, UUID fromString);
     
     @Query(value = """
- 	        SELECT AOP.Id, AOP.AOPCaseId, AOP.AOPStatus, AOP.AOPRemarks, AOP.AOPStatus, 
- 	               AOP.AOPType, AOP.Jan, AOP.Feb, AOP.March, AOP.April, AOP.May, AOP.June, 
- 	               AOP.July, AOP.Aug, AOP.Sep, AOP.Oct, AOP.Nov, AOP.Dec, AOP.AOPYear, 
- 	               AOP.Plant_FK_Id, AOP.AvgTPH, AOP.Material_FK_Id, NP.DisplayOrder
- 	        FROM AOP AOP
- 	        JOIN NormParameters NP 
- 	        ON AOP.Material_FK_Id = NP.Id 
- 	        WHERE AOP.AOPYear = :aopYear 
- 	        AND AOP.Plant_FK_Id = :plantFkId 
- 	        ORDER BY NP.DisplayOrder
+ 	       SELECT AOP.Id, AOP.AOPCaseId, AOP.AOPStatus, AOP.AOPRemarks, 
+		       AOP.AOPType, AOP.Jan, AOP.Feb, AOP.March, AOP.April, AOP.May, AOP.June, 
+		       AOP.July, AOP.Aug, AOP.Sep, AOP.Oct, AOP.Nov, AOP.Dec, AOP.AOPYear, 
+		       AOP.Plant_FK_Id, AOP.AvgTPH, AOP.Material_FK_Id, NP.DisplayOrder
+		FROM AOP AOP
+		JOIN NormParameters NP ON AOP.Material_FK_Id = NP.Id
+		JOIN NormParameterType NPT ON NPT.Id = NP.NormParameterType_FK_Id
+		WHERE AOP.AOPYear = :aopYear 
+		AND AOP.Plant_FK_Id = :plantFkId 
+		ORDER BY NP.DisplayOrder;
  	        """, nativeQuery = true)
  	    List<Object[]> findByAOPYearAndPlantFkId(@Param("aopYear") String aopYear, @Param("plantFkId") UUID plantFkId);
 

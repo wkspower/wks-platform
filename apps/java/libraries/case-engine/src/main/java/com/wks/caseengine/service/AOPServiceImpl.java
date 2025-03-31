@@ -86,51 +86,54 @@ public class AOPServiceImpl implements  AOPService{
 	@Override
 	public List<AOPDTO> getAOPData(String plantId, String year) {
 	    List<AOPDTO> aOPDTOList = new ArrayList<>();
-	    List<Object[]> obj= aOPRepository.findByAOPYearAndPlantFkId(year, UUID.fromString(plantId));
+	    List<Object[]> obj = aOPRepository.findByAOPYearAndPlantFkId(year, UUID.fromString(plantId));
 
 	    for (Object[] row : obj) {
- 	    	AOPDTO aOPDTO = new AOPDTO();
- 	        aOPDTO.setId(row[0].toString());
- 			aOPDTO.setAopCaseId(row[1] != null ? row[1].toString() : null);
- 			aOPDTO.setAopStatus(row[2] != null ? row[2].toString() : null);
- 			aOPDTO.setAopRemarks(row[3] != null ? row[3].toString() : null);
- 			aOPDTO.setNormItem(row[4] != null ? row[4].toString() : null);
- 			aOPDTO.setAopType(row[5] != null ? row[5].toString() : null);
- 			aOPDTO.setJan(row[6] != null ? Float.parseFloat(row[6].toString()) : null);
- 			aOPDTO.setFeb(row[7] != null ? Float.parseFloat(row[7].toString()) : null);
- 			aOPDTO.setMarch(row[8] != null ? Float.parseFloat(row[8].toString()) : null);
- 			aOPDTO.setApril(row[9] != null ? Float.parseFloat(row[9].toString()) : null);
- 			aOPDTO.setMay(row[10] != null ? Float.parseFloat(row[10].toString()) : null);
- 			aOPDTO.setJune(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
- 			aOPDTO.setJuly(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
- 			aOPDTO.setAug(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
- 			aOPDTO.setSep(row[14] != null ? Float.parseFloat(row[14].toString()) : null);
- 			aOPDTO.setOct(row[15] != null ? Float.parseFloat(row[15].toString()) : null);
- 			aOPDTO.setNov(row[16] != null ? Float.parseFloat(row[16].toString()) : null);
- 			aOPDTO.setDec(row[17] != null ? Float.parseFloat(row[17].toString()) : null);    
- 			aOPDTO.setAopYear(row[18] != null ? row[18].toString() : null);
-			aOPDTO.setPlantFKId(row[19] != null ? row[19].toString() : null);
- 			aOPDTO.setAvgTPH(row[20] != null ? Float.parseFloat(row[20].toString()) : null);
- 			aOPDTO.setMaterialFKId(row[21] != null ? row[21].toString() : null);
- 			aOPDTO.setDisplayOrder(row[22] != null ? Integer.parseInt(row[22].toString()) : null);
- 			aOPDTOList.add(aOPDTO);			
- 	    }
- 	   
-		 List<Object[]> list = aOPRepository.getDataBusinessAllData(plantId,year);
-		 int i=1;
-		 		for(Object[] obj1 :list){
-					   
-		 			AOPDTO aOPDTO = new AOPDTO();
-		
-					aOPDTO.setMaterialFKId(obj1[0]!=null? obj1[0].toString():null);
-		 			aOPDTO.setId(i+"#");
-		 			aOPDTOList.add(aOPDTO);
-		 i++;
-		 		}
+	        AOPDTO aOPDTO = new AOPDTO();
+
+	        aOPDTO.setId(row[0] != null ? row[0].toString() : null);
+	        aOPDTO.setAopCaseId(row[1] != null ? row[1].toString() : null);
+	        aOPDTO.setAopStatus(row[2] != null ? row[2].toString() : null);
+	        aOPDTO.setAopRemarks(row[3] != null ? row[3].toString() : null);
+	        aOPDTO.setAopType(row[4] != null ? row[4].toString() : null);
+
+	        // Directly parsing float values
+	        aOPDTO.setJan(row[5] != null ? Float.valueOf(row[5].toString()) : null);
+	        aOPDTO.setFeb(row[6] != null ? Float.valueOf(row[6].toString()) : null);
+	        aOPDTO.setMarch(row[7] != null ? Float.valueOf(row[7].toString()) : null);
+	        aOPDTO.setApril(row[8] != null ? Float.valueOf(row[8].toString()) : null);
+	        aOPDTO.setMay(row[9] != null ? Float.valueOf(row[9].toString()) : null);
+	        aOPDTO.setJune(row[10] != null ? Float.valueOf(row[10].toString()) : null);
+	        aOPDTO.setJuly(row[11] != null ? Float.valueOf(row[11].toString()) : null);
+	        aOPDTO.setAug(row[12] != null ? Float.valueOf(row[12].toString()) : null);
+	        aOPDTO.setSep(row[13] != null ? Float.valueOf(row[13].toString()) : null);
+	        aOPDTO.setOct(row[14] != null ? Float.valueOf(row[14].toString()) : null);
+	        aOPDTO.setNov(row[15] != null ? Float.valueOf(row[15].toString()) : null);
+	        aOPDTO.setDec(row[16] != null ? Float.valueOf(row[16].toString()) : null);
+
+	        aOPDTO.setAopYear(row[17] != null ? row[17].toString() : null);
+	        aOPDTO.setPlantFKId(row[18] != null ? row[18].toString() : null);
+	        aOPDTO.setAvgTPH(row[19] != null ? Float.valueOf(row[19].toString()) : null);
+	        aOPDTO.setMaterialFKId(row[20] != null ? row[20].toString() : null);
+
+	        // Directly parsing integer value
+	        aOPDTO.setDisplayOrder(row[21] != null ? Integer.valueOf(row[21].toString()) : null);
+
+	        aOPDTOList.add(aOPDTO);
+	    }
+
+	    // Additional Data Fetching & Mapping
+		/*
+		 * List<Object[]> list = aOPRepository.getDataBusinessAllData(plantId, year);
+		 * int i = 1; for (Object[] obj1 : list) { AOPDTO aOPDTO = new AOPDTO();
+		 * aOPDTO.setMaterialFKId(obj1[0] != null ? obj1[0].toString() : null);
+		 * aOPDTO.setId(i + "#"); aOPDTOList.add(aOPDTO); i++; }
+		 */
 
 	    return aOPDTOList;
 	}
 
+	
 	@Override
 	public List<AOPDTO> updateAOP(List<AOPDTO> aOPDTOList) {
 		for(AOPDTO aOPDTO:aOPDTOList) {
@@ -158,10 +161,17 @@ public class AOPServiceImpl implements  AOPService{
 					aOP.setId(Id.get());
 				}
 				
-				String caseId = aOPDTO.getAopYear() + "-AOP-"+aOPDTO.getNormItem()+"-V1";
+				String caseId = aOPDTO.getAopYear() + "-AOP-"+"-V1";
 				aOP.setAopStatus("draft");
 				aOP.setAopType("production");
 			    aOP.setAopCaseId(caseId);
+			}else if(aOPDTO.getId().contains("#")) {
+				aOP=new AOP();
+				 aOP.setId(null);
+				 String caseId = aOPDTO.getAopYear() + "-AOP-"+"-V1";
+					aOP.setAopStatus("draft");
+					aOP.setAopType("production");
+				    aOP.setAopCaseId(caseId);
 			}
 			else{
                 aOP=aOPRepository.findById(UUID.fromString(aOPDTO.getId())).get();
@@ -185,13 +195,34 @@ public class AOPServiceImpl implements  AOPService{
 			// aOP.setNormItem(aOPDTO.getNormItem());
 			aOP.setNov(aOPDTO.getNov());
 			aOP.setOct(aOPDTO.getOct());
-			aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFKId()));
+			Plants plant=null;
+			Sites site=null;
+			Verticals vertical=null;
+			if(aOPDTO.getSiteFKId()==null || aOPDTO.getVerticalFKId()==null) {
+				 plant = plantsRepository.findById(UUID.fromString(aOPDTO.getPlantFKId())).get();
+				 site = siteRepository.findById(plant.getSiteFkId()).get();
+				 vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			}
+			
+			if(aOPDTO.getSiteFKId()!=null) {
+				aOP.setSiteFkId(UUID.fromString(aOPDTO.getSiteFKId()));
+			}else {
+				aOP.setSiteFkId(site.getId());
+			}
+			if(aOPDTO.getVerticalFKId()!=null) {
+				aOP.setVerticalFkId(UUID.fromString(aOPDTO.getVerticalFKId()));
+			}else {
+				aOP.setVerticalFkId(vertical.getId());
+			}
+			if(aOPDTO.getMaterialFKId()!=null) {
+				aOP.setMaterialFKId(UUID.fromString(aOPDTO.getMaterialFKId()));
+			}
+			if(aOPDTO.getPlantFKId()!=null) {
+				aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFKId()));
+			}
+			
 			aOP.setSep(aOPDTO.getSep());
-
-			aOP.setSiteFkId(UUID.fromString(aOPDTO.getSiteFKId()));
-			aOP.setVerticalFkId(UUID.fromString(aOPDTO.getVerticalFKId()));
-			aOP.setAopYear(aOPDTO.getAopYear());
-			aOP.setMaterialFKId(UUID.fromString(aOPDTO.getMaterialFKId()));
+			aOP.setAopYear(aOPDTO.getAopYear());			
 			aOPRepository.save(aOP);
 		}
 		return aOPDTOList;
@@ -241,6 +272,7 @@ public class AOPServiceImpl implements  AOPService{
 					aopDto.setAopStatus("Draft");
 					aopDto.setAopYear(year);
 					aopDto.setMaterialFKId(obj[0] != null ? (obj[0].toString()) : null);
+					aopDto.setSiteFKId(site.getId().toString());					
 						aopDto.setJan(obj[3]!=null? (Float.parseFloat(obj[3].toString())) : null);
 						aopDto.setFeb(obj[4]!=null? (Float.parseFloat(obj[4].toString())) : null);
 						aopDto.setMarch(obj[5]!=null?(Float.parseFloat(obj[5].toString())) : null);
