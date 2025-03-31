@@ -232,6 +232,7 @@ const ProductionvolumeData = () => {
           ...item,
           idFromApi: item?.id,
           normParametersFKId: item?.materialFKId.toLowerCase(),
+          remarks: item?.remarks?.trim() || null,
           id: index,
 
           ...(isTPH && {

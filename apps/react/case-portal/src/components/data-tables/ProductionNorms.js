@@ -94,7 +94,7 @@ const ProductionNorms = () => {
     } catch (error) {
       console.log('Error saving changes:', error)
     }
-  }, [apiRef])
+  }, [apiRef, selectedUnit])
 
   const updateProductNormData = async (newRow) => {
     try {

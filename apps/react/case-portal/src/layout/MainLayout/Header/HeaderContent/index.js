@@ -202,7 +202,7 @@ const HeaderContent = ({ keycloak }) => {
           name: filteredPlants[0].name,
         }),
       )
-      console.log(filteredPlants, 'filteredPlants')
+
       localStorage.setItem('selectedSite', JSON.stringify({ name: siteName }))
       localStorage.setItem(
         'selectedSiteId',

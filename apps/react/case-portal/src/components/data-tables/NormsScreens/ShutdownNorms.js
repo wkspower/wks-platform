@@ -140,7 +140,7 @@ const ShutdownNorms = () => {
       },
     },
 
-    { field: 'unit', headerName: 'UOM', width: 100, editable: true },
+    { field: 'UOM', headerName: 'UOM', width: 100, editable: false },
 
     {
       field: 'april',
@@ -381,21 +381,21 @@ const ShutdownNorms = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const data1 = await DataService.getShutdownNormsData(keycloak)
+      const data = await DataService.getShutdownNormsData(keycloak)
 
-      const customOrder = [
-        'Raw Material',
-        'By Products',
-        'Cat Chem',
-        'Utility Consumption',
-        'Configuration',
-      ]
+      // const customOrder = [
+      //   'Raw Material',
+      //   'By Products',
+      //   'Cat Chem',
+      //   'Utility Consumption',
+      //   'Configuration',
+      // ]
 
-      const data = data1.sort(
-        (a, b) =>
-          customOrder.indexOf(a.normParameterTypeDisplayName) -
-          customOrder.indexOf(b.normParameterTypeDisplayName),
-      )
+      // const data = data1.sort(
+      //   (a, b) =>
+      //     customOrder.indexOf(a.normParameterTypeDisplayName) -
+      //     customOrder.indexOf(b.normParameterTypeDisplayName),
+      // )
 
       const groupedRows = []
       const groups = new Map()

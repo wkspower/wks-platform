@@ -158,21 +158,21 @@ const NormalOpNormsScreen = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      var data1 = await DataService.getConsumptionNormsData(keycloak)
+      var data = await DataService.getConsumptionNormsData(keycloak)
 
-      const customOrder = [
-        'Raw Material',
-        'By Products',
-        'Cat Chem',
-        'Utility Consumption',
-        'Configuration',
-      ]
+      // const customOrder = [
+      //   'Raw Material',
+      //   'By Products',
+      //   'Cat Chem',
+      //   'Utility Consumption',
+      //   'Configuration',
+      // ]
 
-      const data = data1.sort(
-        (a, b) =>
-          customOrder.indexOf(a.normParameterTypeDisplayName) -
-          customOrder.indexOf(b.normParameterTypeDisplayName),
-      )
+      // const data = data1.sort(
+      //   (a, b) =>
+      //     customOrder.indexOf(a.normParameterTypeDisplayName) -
+      //     customOrder.indexOf(b.normParameterTypeDisplayName),
+      // )
 
       const groupedRows = []
       const groups = new Map()
