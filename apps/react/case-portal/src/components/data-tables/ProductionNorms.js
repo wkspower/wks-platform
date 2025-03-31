@@ -97,6 +97,7 @@ const ProductionNorms = () => {
   }, [apiRef, selectedUnit])
 
   const updateProductNormData = async (newRow) => {
+    setLoading(true)
     try {
       let plantId = ''
       const isKiloTon = selectedUnit != 'Ton'
@@ -105,7 +106,10 @@ const ProductionNorms = () => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-    //  console.log(newRow)
+
+      let siteID =
+        JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+
       const productNormData = newRow.map((row) => ({
         aopType: row.aopType || 'production',
         aopCaseId: row.aopCaseId || null,
@@ -113,7 +117,7 @@ const ProductionNorms = () => {
         aopYear: localStorage.getItem('year'),
         plantFKId: plantId,
         materialFKId: row.normParametersFKId,
-        siteFKId: JSON.parse(localStorage.getItem('selectedSite')).id,
+        siteFKId: siteID,
         verticalFKId: localStorage.getItem('verticalId'),
         // normItem: getProductName('1', row.normParametersFKId) || null,
         // normItem: 'EOE',
@@ -146,6 +150,7 @@ const ProductionNorms = () => {
           message: 'Production AOP Saved Successfully !',
           severity: 'success',
         })
+        setLoading(false)
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},
@@ -157,9 +162,11 @@ const ProductionNorms = () => {
           message: 'Data Saved Falied!',
           severity: 'error',
         })
+        setLoading(false)
       }
     } catch (error) {
       console.error('Error Saving Production AOP:', error)
+      setLoading(false)
     }
   }
 

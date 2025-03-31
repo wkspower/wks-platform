@@ -336,12 +336,7 @@ async function getBDData(keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  // var siteId = ''
-  // const storedSite = localStorage.getItem('selectedSite')
-  // if (storedSite) {
-  //   const parsedSite = JSON.parse(storedSite)
-  //   // siteId = parsedSite.id
-  // }
+
   const url = `${Config.CaseEngineUrl}/task/getBusinessDemandData?year=${year}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
@@ -365,12 +360,7 @@ async function getMaintenanceData(keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  // var siteId = ''
-  // const storedSite = localStorage.getItem('selectedSite')
-  // if (storedSite) {
-  //   const parsedSite = JSON.parse(storedSite)
-  //   // siteId = parsedSite.id
-  // }
+
   const url = `${Config.CaseEngineUrl}/task/getMaintenanceCalculatedData?year=${year}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
@@ -394,12 +384,10 @@ async function getNormalOperationNormsData(keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  // var siteId = ''
-  const storedSite = localStorage.getItem('selectedSite')
-  if (storedSite) {
-    // const parsedSite = JSON.parse(storedSite)
-    // siteId = parsedSite.id
-  }
+
+  let siteID =
+    JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+
   const url = `${Config.CaseEngineUrl}/task/normalOperationNorms?year=${year}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
@@ -423,12 +411,10 @@ async function getShutdownNormsData(keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  // var siteId = ''
-  const storedSite = localStorage.getItem('selectedSite')
-  if (storedSite) {
-    // const parsedSite = JSON.parse(storedSite)
-    // siteId = parsedSite.id
-  }
+
+  let siteID =
+    JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+
   const url = `${Config.CaseEngineUrl}/task/shutdownNorms?year=${year}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
@@ -453,13 +439,10 @@ async function getCatalystSelectivityData(keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  var siteId = 'F0F4E75E-3C44-4FB4-BA7A-2B8227847134'
 
-  // const storedSite = localStorage.getItem('selectedSite')
-  // if (storedSite) {
-  //   const parsedSite = JSON.parse(storedSite)
-  //   siteId = parsedSite.id
-  // }
+  let siteID =
+    JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+
   var year = localStorage.getItem('year')
 
   //const url = `${process.env.REACT_APP_API_URL}/task/getConfigurationData?year=${year}&plantFKId=${plantId}`
@@ -487,14 +470,11 @@ async function getProductionNormsData(keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  var siteId = ''
 
-  const storedSite = localStorage.getItem('selectedSite')
-  if (storedSite) {
-    const parsedSite = JSON.parse(storedSite)
-    siteId = parsedSite.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/getProductionNormData?year=2024&plantId=${plantId}&siteId=${siteId}`
+  let siteID =
+    JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+
+  const url = `${Config.CaseEngineUrl}/task/getProductionNormData?year=2024&plantId=${plantId}&siteId=${siteID}`
 
   const headers = {
     Accept: 'application/json',
@@ -518,13 +498,9 @@ async function getConsumptionNormsData(keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  var siteId = ''
 
-  const storedSite = localStorage.getItem('selectedSite')
-  if (storedSite) {
-    const parsedSite = JSON.parse(storedSite)
-    siteId = parsedSite.id
-  }
+  let siteID =
+    JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
 
   var year = localStorage.getItem('year')
 

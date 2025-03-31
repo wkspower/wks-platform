@@ -68,12 +68,8 @@ const NormalOpNormsScreen = () => {
         plantId = parsedPlant.id
       }
 
-      let siteId = ''
-      const storedSite = localStorage.getItem('selectedSite')
-      if (storedSite) {
-        const parsedSite = JSON.parse(storedSite)
-        siteId = parsedSite.id
-      }
+      let siteID =
+        JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
 
       let verticalId = localStorage.getItem('verticalId')
 
@@ -93,7 +89,7 @@ const NormalOpNormsScreen = () => {
         aopRemarks: row.aopRemarks || null,
         aopYear: localStorage.getItem('year'),
         plantFkId: plantId,
-        siteFkId: siteId,
+        siteFkId: siteID,
         verticalFkId: verticalId,
         materialFkId: row.NormParametersId,
         id: row.idFromApi || null,

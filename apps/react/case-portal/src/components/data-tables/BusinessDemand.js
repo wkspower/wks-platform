@@ -43,14 +43,7 @@ const BusinessDemand = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const data1 = await DataService.getBDData(keycloak)
-
-      const data = data1.sort((a, b) =>
-        b.normParameterTypeDisplayName.localeCompare(
-          a.normParameterTypeDisplayName,
-        ),
-      )
-      // console.log(sortedData)
+      const data = await DataService.getBDData(keycloak)
 
       const groupedRows = []
       const groups = new Map()
@@ -201,20 +194,11 @@ const BusinessDemand = () => {
         plantId = parsedPlant.id
       }
 
-      let siteId = ''
-      const storedSite = localStorage.getItem('selectedSiteId')
-      if (storedSite) {
-        const parsedSite = JSON.parse(storedSite)
-        siteId = parsedSite.id
-      }
+      let siteID =
+        JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
 
       let verticalId = localStorage.getItem('verticalId')
-      // const storedVertical = localStorage.getItem('selectedSite')
-      // if (storedVertical) {
-      //   const parsedVertical = JSON.parse(storedVertical)
-      //   verticalId = parsedVertical.id
-      // }
-      // console.log(siteId)
+
       const businessData = newRows.map((row) => ({
         april: row.april || null,
         may: row.may || null,
@@ -232,7 +216,7 @@ const BusinessDemand = () => {
         avgTph: row.avgTph || null,
         year: localStorage.getItem('year'),
         plantId: plantId,
-        siteFKId: siteId,
+        siteFKId: siteID,
         verticalFKId: verticalId,
         normParameterId: row.normParameterId,
         id: row.idFromApi || null,

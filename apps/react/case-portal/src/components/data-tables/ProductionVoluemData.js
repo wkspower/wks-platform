@@ -77,13 +77,8 @@ const ProductionvolumeData = () => {
         plantId = parsedPlant.id
       }
 
-      let siteId = ''
-
-      const storedSite = localStorage.getItem('selectedSite')
-      if (storedSite) {
-        const parsedSite = JSON.parse(storedSite)
-        siteId = parsedSite.id
-      }
+      let siteID =
+        JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
 
       const aopmccCalculatedData = newRows.map((row) => ({
         april: isTPH && row.april ? row.april / 24 : row.april || null,
@@ -107,7 +102,7 @@ const ProductionvolumeData = () => {
         financialYear: row.financialYear,
         // plant: plantId,
         plantFKId: row.plantFKId || plantId,
-        siteFKId: row.siteFKId || siteId,
+        siteFKId: siteID || row.siteFKId ,
         // material: 'EOE',
         materialFKId: row.normParametersFKId,
         verticalFKId: row.verticalFKId ??  localStorage.getItem('verticalId'),
