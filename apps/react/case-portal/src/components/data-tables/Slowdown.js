@@ -110,10 +110,9 @@ const SlowDown = ({ permissions }) => {
         productId: row.product,
         discription: row.discription,
         durationInHrs:
-          // lowerVertName === 'meg'
-          //   ? parseFloat(row.durationInHrs)
-          // :
-          parseFloat(findDuration('1', row)),
+          lowerVertName === 'meg'
+            ? parseFloat(row.durationInHrs)
+            : parseFloat(findDuration('1', row)),
         // durationInHrs: parseFloat(row.durationInHrs),
         maintEndDateTime: addTimeOffset(row.maintEndDateTime),
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
@@ -382,17 +381,26 @@ const SlowDown = ({ permissions }) => {
         return params ? dayjs(params).format('DD/MM/YYYY, h:mm:ss A') : ''
       },
     },
-
-    {
-      field: 'durationInHrs',
-      headerName: 'Duration (hrs)',
-      editable: false,
-      minWidth: 75,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-      valueGetter: findDuration,
-    },
+    lowerVertName === 'meg'
+      ? {
+          field: 'durationInHrs',
+          headerName: 'Duration (hrs)',
+          editable: true,
+          minWidth: 75,
+          renderEditCell: NumericInputOnly,
+          align: 'left',
+          headerAlign: 'left',
+        }
+      : {
+          field: 'durationInHrs',
+          headerName: 'Duration (hrs)',
+          editable: false,
+          minWidth: 75,
+          renderEditCell: NumericInputOnly,
+          align: 'left',
+          headerAlign: 'left',
+          valueGetter: findDuration,
+        },
 
     {
       field: 'rate',

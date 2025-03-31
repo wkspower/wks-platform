@@ -1,29 +1,23 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+// import { useSelector } from 'react-redux'
 import NumericInputOnly from 'utils/NumericInputOnly'
 import Tooltip from '@mui/material/Tooltip'
 import { truncateRemarks } from 'utils/remarksUtils'
 import baseColDefs from '../../../assets/slowdown.json'
 
-const useEnhancedSlowdownColDefs = ({
-  allProducts,
-  headerMap,
-  handleRemarkCellClick,
-}) => {
-  // Example: we may still need some redux state (like the selected vertical)
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange } = dataGridStore
-  const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+const useEnhancedSlowdownColDefs = ({ allProducts, handleRemarkCellClick }) => {
+  //   const dataGridStore = useSelector((state) => state.dataGridStore)
+  //   const { verticalChange } = dataGridStore
+  //   const vertName = verticalChange?.selectedVertical
+  //   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   // Enhance each column from our base JSON
   const enhancedColDefs = baseColDefs.map((col) => {
     let updatedCol = { ...col }
 
-    // If a headerMap is provided, override the headerName
-    if (headerMap && headerMap[col.headerName]) {
-      updatedCol.headerName = headerMap[col.headerName]
-    }
+    // // If a headerMap is provided, override the headerName
+    // if (headerMap && headerMap[col.headerName]) {
+    //   updatedCol.headerName = headerMap[col.headerName]
+    // }
 
     // Handle the "product" field: add value getter/formatter and a custom edit cell (dropdown)
     if (col.field === 'product') {

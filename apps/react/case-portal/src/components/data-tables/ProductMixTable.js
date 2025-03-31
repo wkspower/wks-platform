@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import ASDataGrid from './ASDataGrid'
 
 import {
   Accordion,
@@ -247,27 +246,7 @@ const FiveTables = () => {
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             {table.title}
           </AccordionSummary>
-          <AccordionDetails>
-            {table.component ? (
-              // Render the imported component directly
-              table.component
-            ) : (
-              // Otherwise, render ASDataGrid with provided columns and rows
-              <ASDataGrid
-                columns={table.columns}
-                rows={table.rows}
-                isCellEditable={() => false}
-                permissions={{
-                  showAction: false,
-                  addButton: false,
-                  deleteButton: false,
-                  editButton: false,
-                  saveBtn: false,
-                  allAction: false,
-                }}
-              />
-            )}
-          </AccordionDetails>
+          <AccordionDetails>{table.component}</AccordionDetails>
         </Accordion>
       ))}
     </div>
