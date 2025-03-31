@@ -156,12 +156,12 @@ public class AOPServiceImpl implements  AOPService{
 				if(aOPDTO.getSiteFKId()!=null) {
 					Site=UUID.fromString(aOPDTO.getSiteFKId());
 				}else {
-					Site=UUID.fromString(aOPDTO.getSiteFKId());
+					Site=site.getId();
 				}
 				if(aOPDTO.getVerticalFKId()!=null) {
 					Vertical=UUID.fromString(aOPDTO.getVerticalFKId());
 				}else {
-					Vertical=UUID.fromString(aOPDTO.getVerticalFKId());
+					Vertical=vertical.getId();
 				}
 				if(aOPDTO.getMaterialFKId()!=null) {
 					Material=UUID.fromString(aOPDTO.getMaterialFKId());
