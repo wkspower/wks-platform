@@ -443,6 +443,7 @@ const ShutDown = ({ permissions }) => {
           showUnit: permissions?.showUnit ?? false,
           saveWithRemark: permissions?.saveWithRemark ?? true,
           saveBtn: permissions?.saveBtn ?? true,
+          customHeight: permissions?.customHeight,
         }}
       />
     </div>

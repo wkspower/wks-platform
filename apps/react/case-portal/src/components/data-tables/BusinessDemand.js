@@ -243,7 +243,7 @@ const BusinessDemand = ({ permissions }) => {
         keycloak,
       )
 
-      // console.log(response)
+      // console.log(response?.length > 0)
 
       // if (response.status == 200) {
       setSnackbarOpen(true)
@@ -351,6 +351,7 @@ const BusinessDemand = ({ permissions }) => {
           saveWithRemark: permissions?.saveWithRemark ?? true,
           saveBtn: permissions?.saveBtn ?? true,
           units: ['TPH', 'TPD'],
+          customHeight: permissions?.customHeight,
         }}
       />
     </div>

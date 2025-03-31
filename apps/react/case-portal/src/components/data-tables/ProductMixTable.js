@@ -38,6 +38,109 @@ const FiveTables = () => {
     // 'Closed',
   ]
 
+  // const tables = [
+  //   {
+  //     title: 'Production AOP',
+  //     component: (
+  //       <ProductionNorms
+  //         permissions={{
+  //           showAction: false,
+  //           addButton: false,
+  //           deleteButton: false,
+  //           editButton: false,
+  //           showUnit: false,
+  //           saveWithRemark: false,
+  //           showCalculate: false,
+  //           saveBtn: false,
+  //           // UOM: 'Ton',
+  //           units: ['Ton', 'Kilo Ton'],
+  //           customHeight: { mainBox: 60, otherBox: 124 },
+  //           // UnitToShow: 'Values/Ton',
+  //         }}
+  //       />
+  //     ),
+  //   },
+  //   {
+  //     title: 'Business Demand',
+  //     // columns: businessDemandColumns,
+  //     // rows: businessDemandData,
+  //     component: (
+  //       <BusinessDemand
+  //         permissions={{
+  //           showAction: false,
+  //           addButton: false,
+  //           deleteButton: false,
+  //           editButton: false,
+  //           showUnit: false,
+  //           saveWithRemark: false,
+  //           saveBtn: false,
+  //           units: ['TPH', 'TPD'],
+  //         }}
+  //       />
+  //     ),
+  //   },
+  //   {
+  //     title: 'Production Volume Data',
+  //     // columns: productionVolume,
+  //     // rows: productionVolumeData,
+  //     component: (
+  //       <ProductionvolumeData
+  //         permissions={{
+  //           showAction: false,
+  //           addButton: false,
+  //           deleteButton: false,
+  //           editButton: false,
+  //           showUnit: false,
+  //           saveWithRemark: false,
+  //           showRefreshBtn: false,
+  //           saveBtn: false,
+  //           units: ['TPH', 'TPD'],
+  //         }}
+  //       />
+  //     ),
+  //   },
+  //   {
+  //     title: 'Shutdown Activities',
+  //     // columns: shutdownColumns,
+  //     // rows: shutdownData,
+  //     component: (
+  //       <ShutDown
+  //         permissions={{
+  //           showAction: false,
+  //           addButton: false,
+  //           deleteButton: false,
+  //           editButton: false,
+  //           showUnit: false,
+  //           saveWithRemark: false,
+  //           saveBtn: false,
+  //         }}
+  //       />
+  //     ),
+  //   },
+  //   {
+  //     title: 'Slowdown Activities',
+  //     // columns: slowdownColumns,
+  //     // rows: slowDownData,
+  //     component: (
+  //       <SlowDown
+  //         permissions={{
+  //           showAction: false,
+  //           addButton: false,
+  //           deleteButton: false,
+  //           editButton: false,
+  //           showUnit: false,
+  //           saveWithRemark: false,
+  //           saveBtn: false,
+  //         }}
+  //       />
+  //     ),
+  //   },
+  // ]
+
+  // Handlers for Reject Dialog
+  // Define the default custom height
+  const defaultCustomHeight = { mainBox: '60vh', otherBox: '124%' }
+
   const tables = [
     {
       title: 'Production AOP',
@@ -52,17 +155,14 @@ const FiveTables = () => {
             saveWithRemark: false,
             showCalculate: false,
             saveBtn: false,
-            // UOM: 'Ton',
             units: ['Ton', 'Kilo Ton'],
-            // UnitToShow: 'Values/Ton',
+            customHeight: defaultCustomHeight, // use default height
           }}
         />
       ),
     },
     {
       title: 'Business Demand',
-      // columns: businessDemandColumns,
-      // rows: businessDemandData,
       component: (
         <BusinessDemand
           permissions={{
@@ -74,14 +174,13 @@ const FiveTables = () => {
             saveWithRemark: false,
             saveBtn: false,
             units: ['TPH', 'TPD'],
+            customHeight: defaultCustomHeight, // add height here too
           }}
         />
       ),
     },
     {
       title: 'Production Volume Data',
-      // columns: productionVolume,
-      // rows: productionVolumeData,
       component: (
         <ProductionvolumeData
           permissions={{
@@ -94,14 +193,13 @@ const FiveTables = () => {
             showRefreshBtn: false,
             saveBtn: false,
             units: ['TPH', 'TPD'],
+            customHeight: defaultCustomHeight,
           }}
         />
       ),
     },
     {
       title: 'Shutdown Activities',
-      // columns: shutdownColumns,
-      // rows: shutdownData,
       component: (
         <ShutDown
           permissions={{
@@ -112,14 +210,13 @@ const FiveTables = () => {
             showUnit: false,
             saveWithRemark: false,
             saveBtn: false,
+            customHeight: defaultCustomHeight,
           }}
         />
       ),
     },
     {
       title: 'Slowdown Activities',
-      // columns: slowdownColumns,
-      // rows: slowDownData,
       component: (
         <SlowDown
           permissions={{
@@ -130,13 +227,13 @@ const FiveTables = () => {
             showUnit: false,
             saveWithRemark: false,
             saveBtn: false,
+            customHeight: defaultCustomHeight,
           }}
         />
       ),
     },
   ]
 
-  // Handlers for Reject Dialog
   const handleRejectClick = () => {
     setOpenRejectDialog(true)
   }
@@ -246,7 +343,14 @@ const FiveTables = () => {
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             {table.title}
           </AccordionSummary>
-          <AccordionDetails>{table.component}</AccordionDetails>
+          <AccordionDetails
+          // sx={{
+          //   height: 'calc(100% - 70rem)', // Fixed height for testing
+          //   overflowY: 'auto', // Allows scrolling if content exceeds 300px
+          // }}
+          >
+            {table.component}
+          </AccordionDetails>
         </Accordion>
       ))}
     </div>

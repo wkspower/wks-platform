@@ -293,9 +293,9 @@ const DataGridTable = ({
           const keysToUpdate = ['aopRemarks', 'remarks', 'remark'].filter(
             (key) => key in row,
           )
-//          console.log(keysToUpdate)
+          //          console.log(keysToUpdate)
           const keyToUpdate = keysToUpdate[0] || 'remark'
-//          console.log([keyToUpdate])
+          //          console.log([keyToUpdate])
           updatedRow = { ...row, [keyToUpdate]: currentRemark }
           return updatedRow
         }
@@ -358,13 +358,16 @@ const DataGridTable = ({
       setIsButtonDisabled(false)
     }, 500)
   }
-
+  const boxHeight = permissions?.customHeight?.mainBox
+  const otherHeight = permissions?.customHeight?.otherBox
+  // console.log(boxHeight)
   return (
     <Box
       sx={{
-        height: '81vh',
+        height: `${boxHeight ?? '80vh'}`,
         width: '100%',
-        padding: 1,
+        padding: '0px 5px',
+        margin: '0px 5px 0px',
         backgroundColor: '#F2F3F8',
         // backgroundColor: '#fff',
         borderRadius: 0,
@@ -600,7 +603,14 @@ const DataGridTable = ({
         </Box>
       )}
 
-      <Box sx={{ height: 'calc(100% - 120px)', width: '100%' }}>
+      <Box
+        sx={{
+          height: `calc( ${otherHeight ?? '102%'} - 120px)`,
+          width: '100%',
+          marginBottom: 0,
+          padding: 0,
+        }}
+      >
         {/* {!tempHide && (
           <Grid container spacing={2}>
             {columns.map((col) => (
@@ -754,10 +764,6 @@ const DataGridTable = ({
             },
 
             '& .MuiDataGrid-columnHeaders': {
-              // borderRight: `1px solid ${jioColors.border}`,
-              // backgroundColor: jioColors.headerBg,
-              // color: '#FFFFFF',
-
               backgroundColor: '#FAFAFC',
               color: '#3E4E75',
               fontSize: '0.8rem',

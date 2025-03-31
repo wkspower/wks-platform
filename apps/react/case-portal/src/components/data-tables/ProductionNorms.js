@@ -69,7 +69,7 @@ const ProductionNorms = ({ permissions }) => {
       const updatedRows = allRows.map(
         (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
       )
-    //  console.log(updatedRows)
+      //  console.log(updatedRows)
       if (updatedRows.length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -461,6 +461,7 @@ const ProductionNorms = ({ permissions }) => {
           saveBtn: permissions?.saveBtn ?? true,
           // UOM: 'Ton',
           units: ['Ton', 'Kilo Ton'],
+          customHeight: permissions?.customHeight,
           // UnitToShow: 'Values/Ton',
         }}
       />
