@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
+import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.ConfigurationDataDTO;
 import com.wks.caseengine.entity.NormAttributeTransactions;
@@ -40,10 +41,20 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	@Autowired
 	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
 	
+	@Autowired
+	private PlantsRepository plantsRepository;
+	
 	
 	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId) {
         System.out.println("GET CofigurationDataService==============================>");
-		 List<Object[]> obj= normAttributeTransactionsRepository.findByYearAndPlantFkId(year,plantFKId);
+      String verticalName=  plantsRepository.findVerticalNameByPlantId(plantFKId);
+      List<Object[]> obj= new ArrayList<>();
+      if(verticalName.equalsIgnoreCase("PE")) {
+		 obj= normAttributeTransactionsRepository.findByYearAndPlantFkIdPE(year,plantFKId);
+      }else if(verticalName.equalsIgnoreCase("MEG")){
+    	 obj= normAttributeTransactionsRepository.findByYearAndPlantFkIdMEG(year,plantFKId);  
+      }
+		 
 	     List<ConfigurationDTO> configurationDTOList = new ArrayList<>();
       int i=0;
 		 for (Object[] row : obj) {
@@ -67,7 +78,10 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 			configurationDTO.setId(row[14] != null ? row[14].toString() : i+"#");
 			configurationDTO.setAuditYear(row[15] != null ? row[15].toString() : "" );
 			configurationDTO.setUOM(row[16] != null ? row[16].toString() : "" );
-			
+			if(verticalName.equalsIgnoreCase("PE")) {
+			configurationDTO.setLossCategory(row[17] != null ? row[17].toString() : "");
+			configurationDTO.setNormType(row[18] != null ? row[18].toString() : "");
+			}
 			
 			configurationDTOList.add(configurationDTO);
 			if(row[14] == null){
