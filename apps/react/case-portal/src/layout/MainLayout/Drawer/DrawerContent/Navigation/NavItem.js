@@ -59,7 +59,8 @@ const NavItem = ({ item, level }) => {
   }, [])
 
   const textColor = 'text.primary'
-  const iconSelectedColor = 'primary.main'
+  // const iconSelectedColor = 'white'
+  // const iconSelectedColor = 'primary.main'
 
   return (
     <ListItemButton
@@ -73,27 +74,37 @@ const NavItem = ({ item, level }) => {
         py: !drawerOpen && level === 1 ? 1.25 : 1,
         ...(drawerOpen && {
           '&:hover': {
-            bgcolor: 'primary.lighter',
+            bgcolor: '#3f93dc',
+            // bgcolor: 'primary.lighter',
+            color: 'white',
           },
           '&.Mui-selected': {
-            bgcolor: 'primary.lighter',
+            bgcolor: '#3f93dc',
+            // bgcolor: 'primary.lighter',
             borderRight: `2px solid ${theme.palette.primary.main}`,
-            color: iconSelectedColor,
+            color: 'white',
+            borderRadius: 0,
+            // color: iconSelectedColor,
             '&:hover': {
-              color: iconSelectedColor,
-              bgcolor: 'primary.lighter',
+              // color: iconSelectedColor,
+              // bgcolor: 'primary.lighter',
+              bgcolor: '#3f93dc',
+              color: 'white',
             },
           },
         }),
         ...(!drawerOpen && {
           '&:hover': {
-            bgcolor: 'transparent',
+            // bgcolor: 'transparent',
+            bgcolor: '#3f93dc',
           },
           '&.Mui-selected': {
+            bgcolor: '#3f93dc',
             '&:hover': {
-              bgcolor: 'transparent',
+              // bgcolor: 'transparent',
+              bgcolor: '#3f93dc',
             },
-            bgcolor: 'transparent',
+            // bgcolor: 'transparent',
           },
         }),
       }}
@@ -102,7 +113,7 @@ const NavItem = ({ item, level }) => {
         <ListItemIcon
           sx={{
             minWidth: 28,
-            color: isSelected ? iconSelectedColor : textColor,
+            color: isSelected ? 'white' : textColor,
             ...(!drawerOpen && {
               borderRadius: 1.5,
               width: 36,
@@ -115,9 +126,12 @@ const NavItem = ({ item, level }) => {
             }),
             ...(!drawerOpen &&
               isSelected && {
-                bgcolor: 'primary.lighter',
+                // bgcolor: 'primary.lighter',
+                // '&:hover': {
+                //   bgcolor: 'primary.lighter',
+                bgcolor: '#3f93dc',
                 '&:hover': {
-                  bgcolor: 'primary.lighter',
+                  bgcolor: '#3f93dc',
                 },
               }),
           }}
@@ -130,7 +144,13 @@ const NavItem = ({ item, level }) => {
           primary={
             <Typography
               variant='h6'
-              sx={{ color: isSelected ? iconSelectedColor : textColor }}
+              sx={{
+                color: isSelected ? 'white' : textColor,
+                '&:hover': {
+                  color: 'white',
+                  bgcolor: '#3f93dc',
+                },
+              }}
             >
               {item.title}
             </Typography>
