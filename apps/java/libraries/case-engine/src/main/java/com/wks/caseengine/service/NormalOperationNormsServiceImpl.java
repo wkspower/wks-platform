@@ -1,6 +1,10 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -10,13 +14,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.MCUNormsValueDTO;
 import com.wks.caseengine.entity.MCUNormsValue;
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.repository.NormalOperationNormsRepository;
+import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.SiteRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
 
 @Service
 public class NormalOperationNormsServiceImpl implements NormalOperationNormsService{
 	
 	@Autowired
 	private NormalOperationNormsRepository normalOperationNormsRepository;
+	
+	@PersistenceContext
+    private EntityManager entityManager;
+	@Autowired
+	PlantsRepository plantsRepository;
+	@Autowired
+	SiteRepository siteRepository;
+	@Autowired
+	VerticalsRepository verticalRepository;
+
 
 	@Override
 	public List<MCUNormsValueDTO> getNormalOperationNormsData(String year, String plantId) {
@@ -112,8 +132,27 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	@Override
-	public int calculateExpressionConsumptionNorms(String year) {
-		return normalOperationNormsRepository.calculateExpressionConsumptionNorms(year);
+	public int calculateExpressionConsumptionNorms(String year,String plantId) {
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		String storedProcedure=vertical.getName()+"_HMD_CalculateExpressionConsumptionNorms";
+		return executeDynamicUpdateProcedure(storedProcedure,year);
 	}
+	
+	@Transactional
+    public int executeDynamicUpdateProcedure(String procedureName, String finYear) {
+        try {
+            String sql = "EXEC " + procedureName + " @finYear = :finYear"; // Fixed syntax for SQL Server
+            Query query = entityManager.createNativeQuery(sql);
+            query.setParameter("finYear", finYear);
+
+            return query.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace(); // Log detailed exception for debugging
+            return 0; // Return 0 if execution fails
+        }
+    }
+	 
 
 }

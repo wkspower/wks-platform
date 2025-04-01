@@ -32,3 +32,4 @@ public class MaintenanceDetailsDTO {
 	    private Float Mar;
 	
 }
+
