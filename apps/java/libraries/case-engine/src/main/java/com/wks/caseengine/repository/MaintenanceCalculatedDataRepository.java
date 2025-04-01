@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.wks.caseengine.dto.MaintenanceDetailsDTO;
 import com.wks.caseengine.entity.MaintenanceCalculatedData;
 
 @Repository
@@ -18,7 +19,7 @@ public interface MaintenanceCalculatedDataRepository extends JpaRepository<Maint
 
 	@Transactional
 	@Query(value = "EXEC MEG_HMD_GETMaintenance @plantId = :plantId,@siteId=:siteId,@verticalId=:verticalId,@aopYear=:aopYear ", nativeQuery = true)
-	List<MaintenanceCalculatedData> MEG_HMD_GETMaintenance(@Param("plantId") String plantName,
+	List<MaintenanceDetailsDTO> MEG_HMD_GETMaintenance(@Param("plantId") String plantName,
 			@Param("siteId") String siteName, @Param("verticalId") String verticalName,
 			@Param("aopYear") String aopYear);
 }

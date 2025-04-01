@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.MaintenanceCalculatedDataDTO;
+import com.wks.caseengine.dto.MaintenanceDetailsDTO;
 import com.wks.caseengine.entity.MaintenanceCalculatedData;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
@@ -31,16 +32,16 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	@Autowired
 	VerticalsRepository verticalRepository;
 	@Override
-	public List<MaintenanceCalculatedDataDTO> getMaintenanceCalculatedData(String plantId,  String year) {
+	public List<MaintenanceDetailsDTO> getMaintenanceCalculatedData(String plantId,  String year) {
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 //		List<MaintenanceCalculatedData> maintenanceCalculatedDataList= 	maintenanceCalculatedDataRepository.findAllByPlantFKIdAndAopYear(UUID.fromString(plantId),year);
-		List<MaintenanceCalculatedData> list = maintenanceCalculatedDataRepository.MEG_HMD_GETMaintenance(plantId,
+		List<MaintenanceDetailsDTO> list = maintenanceCalculatedDataRepository.MEG_HMD_GETMaintenance(plantId,
 				site.getId().toString(), vertical.getId().toString(), year);
-		List<MaintenanceCalculatedDataDTO> maintenanceCalculatedDataDTOList = list.stream()
-			    .map(MaintenanceCalculatedDataDTO::new)
-			    .collect(Collectors.toList());
+		//List<MaintenanceCalculatedDataDTO> maintenanceCalculatedDataDTOList = list.stream()
+			//    .map(MaintenanceCalculatedDataDTO::new)
+			  //  .collect(Collectors.toList());
 //		List<MaintenanceCalculatedDataDTO> maintenanceCalculatedDataDTOList= new ArrayList<>();
 //		for(MaintenanceCalculatedData maintenanceCalculatedData:maintenanceCalculatedDataList) {
 //			MaintenanceCalculatedDataDTO maintenanceCalculatedDataDTO= new MaintenanceCalculatedDataDTO();
@@ -57,6 +58,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 //			maintenanceCalculatedDataDTOList.add(maintenanceCalculatedDataDTO);
 //		}
 		// TODO Auto-generated method stub
-		return maintenanceCalculatedDataDTOList;
+		return list;
 	}
 }

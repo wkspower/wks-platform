@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.MaintenanceCalculatedDataDTO;
+import com.wks.caseengine.dto.MaintenanceDetailsDTO;
 import com.wks.caseengine.service.MaintenanceCalculatedDataService;
 
 @RestController
@@ -20,7 +21,7 @@ public class MaintenanceCalculatedDataController {
 	private MaintenanceCalculatedDataService maintenanceCalculatedDataService;
 	
 	@GetMapping(value="/getMaintenanceCalculatedData")
-	public List<MaintenanceCalculatedDataDTO> getMaintenanceCalculatedData(@RequestParam String plantId, @RequestParam String year){
+	public List<MaintenanceDetailsDTO> getMaintenanceCalculatedData(@RequestParam String plantId, @RequestParam String year){
 		return maintenanceCalculatedDataService.getMaintenanceCalculatedData(plantId,year);		
 	}
 }
