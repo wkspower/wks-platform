@@ -16,18 +16,19 @@ import lombok.NoArgsConstructor;
 @Data
 public class MaintenanceDetailsDTO {
 	
-	 private String name;
-	    private Float april;
-	    private Float may;
-	    private Float june;
-	    private Float july;
-	    private Float august;
-	    private Float september;
-	    private Float october;
-	    private Float november;
-	    private Float december;
-	    private Float january;
-	    private Float february;
-	    private Float march;
-
+	
+	    private String Name;
+	    private Float April;
+	    private Float May;
+	    private Float June;
+	    private Float July;
+	    private Float Aug;
+	    private Float Sep;
+	    private Float Oct;
+	    private Float Nov;
+	    private Float Dec;
+	    private Float Jan;
+	    private Float Feb;
+	    private Float Mar;
+	
 }
