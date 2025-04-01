@@ -119,11 +119,13 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 	}
 
 	@Override
+	@Transactional
 	public int calculateExpressionConsumptionNorms(String year,String plantId) {
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		String storedProcedure=vertical.getName()+"_HMD_CalculateConsumptionAOPValues";
+		System.out.println(storedProcedure);
 		return executeDynamicUpdateProcedure(storedProcedure,year);
 	}
 	

@@ -6,6 +6,8 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +41,26 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		String storedProcedure=vertical.getName()+"_HMD_GETMaintenance";
 //		List<MaintenanceCalculatedData> maintenanceCalculatedDataList= 	maintenanceCalculatedDataRepository.findAllByPlantFKIdAndAopYear(UUID.fromString(plantId),year);
-		List<MaintenanceDetailsDTO> list = executeDynamicStoredProcedure(storedProcedure,plantId,
+		List<Object[]> list = executeDynamicStoredProcedure(storedProcedure,plantId,
 				site.getId().toString(), vertical.getId().toString(), year);
+		List<MaintenanceDetailsDTO> maintenanceDetailsDTOList=new ArrayList<>();
+		for(Object[] row : list) {
+			MaintenanceDetailsDTO dto = new MaintenanceDetailsDTO();
+			dto.setName(row[2] != null ? row[2].toString() : null);
+			dto.setJan(row[3] != null ? Float.valueOf(row[3].toString()) : null);
+	        dto.setFeb(row[4] != null ? Float.valueOf(row[4].toString()) : null);
+	        dto.setMar(row[5] != null ? Float.valueOf(row[5].toString()) : null);
+	        dto.setApril(row[6] != null ? Float.valueOf(row[6].toString()) : null);
+	        dto.setMay(row[7] != null ? Float.valueOf(row[7].toString()) : null);
+	        dto.setJune(row[8] != null ? Float.valueOf(row[8].toString()) : null);
+	        dto.setJuly(row[9] != null ? Float.valueOf(row[9].toString()) : null);
+	        dto.setAug(row[10] != null ? Float.valueOf(row[10].toString()) : null);
+	        dto.setSep(row[11] != null ? Float.valueOf(row[11].toString()) : null);
+	        dto.setOct(row[12] != null ? Float.valueOf(row[12].toString()) : null);
+	        dto.setNov(row[13] != null ? Float.valueOf(row[13].toString()) : null);
+	        dto.setDec(row[14] != null ? Float.valueOf(row[14].toString()) : null);
+	        maintenanceDetailsDTOList.add(dto);
+		}
 		
 		//List<MaintenanceCalculatedDataDTO> maintenanceCalculatedDataDTOList = list.stream()
 			//    .map(MaintenanceCalculatedDataDTO::new)
@@ -61,11 +81,11 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 //			maintenanceCalculatedDataDTOList.add(maintenanceCalculatedDataDTO);
 //		}
 		// TODO Auto-generated method stub
-		return list;
+		return maintenanceDetailsDTOList;
 	}
 	
 	@Transactional
-    public List<MaintenanceDetailsDTO> executeDynamicStoredProcedure(String procedureName, String plantId, String siteId, String verticalId, String aopYear) {
+    public List<Object[]> executeDynamicStoredProcedure(String procedureName, String plantId, String siteId, String verticalId, String aopYear) {
         String sql = "EXEC " + procedureName + " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @aopYear = :aopYear";
         Query query = entityManager.createNativeQuery(sql);
         
