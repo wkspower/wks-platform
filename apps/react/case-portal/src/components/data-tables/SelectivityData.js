@@ -17,9 +17,11 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
 
-const SelectivityData = () => {
+const SelectivityData = (props) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange } = dataGridStore
+  const { sitePlantChange, verticalChange } = dataGridStore
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
   const keycloak = useSession()
   // const [csData, setCsData] = useState([])
   // const [allProducts, setAllProducts] = useState([])
@@ -31,7 +33,8 @@ const SelectivityData = () => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
 
-  const [rows, setRows] = useState()
+  // const [rows, setRows] = useState()
+  // const [rows2, setRows2] = useState()
 
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -62,7 +65,7 @@ const SelectivityData = () => {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
 
-    setRows((prevRows) =>
+    props.setRows((prevRows) =>
       prevRows.map((row) =>
         row.id === newRow.id ? { ...newRow, isNew: false } : row,
       ),
@@ -149,7 +152,7 @@ const SelectivityData = () => {
         }
         setLoading(false)
 
-        fetchData()
+        props.fetchData()
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -187,29 +190,106 @@ const SelectivityData = () => {
     } catch (error) {
       console.error(`Error deleting Configuration data:`, error)
     } finally {
-      fetchData()
+      props.fetchData()
     }
   }
-  const fetchData = async () => {
-    setLoading(true)
-    try {
-      const data = await DataService.getCatalystSelectivityData(keycloak)
-      var formattedData = []
-      if (data) {
-        formattedData = data?.map((item, index) => ({
-          ...item,
-          idFromApi: item.id,
-          id: index,
-        }))
-      }
-      // setCsData(formattedData)
-      setRows(formattedData)
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching  data:', error)
-      setLoading(false)
-    }
-  }
+  // const fetchData = async () => {
+  //   setLoading(true)
+  //   try {
+  //     const data = await DataService.getCatalystSelectivityData(keycloak)
+  //     console.log(data)
+  //     if (lowerVertName === 'meg') {
+  //       // For 'meg', simply map items without grouping.
+  //       const formattedData = data.map((item, index) => ({
+  //         ...item,
+  //         idFromApi: item.id,
+  //         id: index,
+  //       }))
+  //       setRows(formattedData)
+  //     } else {
+  //       // Create a nested grouping: first by lossCategory then by normType.
+  //       const groups = new Map()
+
+  //       data.forEach((item) => {
+  //         const lossCategory = item.lossCategory
+  //         const normType = item.normType
+
+  //         if (!groups.has(lossCategory)) {
+  //           groups.set(lossCategory, new Map())
+  //         }
+  //         const normGroup = groups.get(lossCategory)
+  //         if (!normGroup.has(normType)) {
+  //           normGroup.set(normType, [])
+  //         }
+  //         normGroup.get(normType).push(item)
+  //       })
+
+  //       let groupId = 0
+  //       const groupedRows = []
+  //       const shutdownRows = []
+
+  //       // Build the final grouped arrays.
+  //       groups.forEach((normGroup, lossCategory) => {
+  //         if (lossCategory.toLowerCase() === 'shutdownnorms') {
+  //           // Add shutdown norms to the shutdownRows array.
+  //           shutdownRows.push({
+  //             id: groupId++,
+  //             Particulars: lossCategory,
+  //             isGroupHeader: true,
+  //           })
+  //           normGroup.forEach((items, normType) => {
+  //             shutdownRows.push({
+  //               id: groupId++,
+  //               Particulars2: normType,
+  //               isSubGroupHeader: true,
+  //             })
+  //             items.forEach((item) => {
+  //               shutdownRows.push({
+  //                 ...item,
+  //                 idFromApi: item.id,
+  //                 id: groupId++,
+  //               })
+  //             })
+  //           })
+  //         } else {
+  //           // Add all other items to the groupedRows array.
+  //           groupedRows.push({
+  //             id: groupId++,
+  //             Particulars: lossCategory,
+  //             isGroupHeader: true,
+  //           })
+  //           normGroup.forEach((items, normType) => {
+  //             groupedRows.push({
+  //               id: groupId++,
+  //               Particulars2: normType,
+  //               isSubGroupHeader: true,
+  //             })
+  //             items.forEach((item) => {
+  //               groupedRows.push({
+  //                 ...item,
+  //                 idFromApi: item.id,
+  //                 id: groupId++,
+  //               })
+  //             })
+  //           })
+  //         }
+  //       })
+
+  //       console.log('groupedRows:', groupedRows)
+  //       console.log('shutdownRows:', shutdownRows)
+  //       setRows(groupedRows)
+  //       setRows2(shutdownRows)
+
+  //       // If needed, you can store shutdownRows separately, e.g.:
+  //       // setShutdownRows(shutdownRows);
+  //     }
+  //     setLoading(false)
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error)
+  //     setLoading(false)
+  //   }
+  // }
+
   useEffect(() => {
     const getAllProducts = async () => {
       try {
@@ -228,11 +308,11 @@ const SelectivityData = () => {
 
     getAllProducts()
     // getAllCatalyst()
-    fetchData()
-  }, [sitePlantChange, keycloak])
+    props.fetchData()
+  }, [sitePlantChange, keycloak, lowerVertName])
+
   // Use catalyst options from the JSON file
   // const productOptions = catalystOptionsData.catalystOptions
-
   const productionColumns = [
     {
       field: 'normParameterFKId',
@@ -429,6 +509,331 @@ const SelectivityData = () => {
       },
     },
   ]
+  const productionColumnsPE1 = [
+    {
+      field: 'Particulars',
+      headerName: 'Type',
+      minWidth: 125,
+      groupable: true,
+      headerClass: 'bold-header',
+    },
+    // {
+    //   field: 'Particulars2',
+    //   headerName: 'Sub-Type',
+    //   minWidth: 125,
+    //   groupable: true,
+    //   headerClass: 'bold-header',
+    // },
+    {
+      field: 'normParameterFKId',
+      headerName: 'Particulars',
+      editable: false,
+      minWidth: 160,
+      valueGetter: (params) => {
+        // console.log('valueGetter params:', params)
+        return params ?? ''
+      },
+      valueFormatter: (params) => {
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : params?.Particulars2
+      },
+      renderEditCell: (params) => {
+        const { value, id, api } = params
+
+        const existingValues = new Set(
+          [...api.getRowModels().values()]
+            .filter((row) => row.id !== id)
+            .map((row) => row.normParameterFKId || row.Particulars2),
+        )
+
+        return (
+          <select
+            value={value || ''}
+            onChange={(event) => {
+              api.setEditCellValue({
+                id: params.id,
+                field: 'normParameterFKId',
+                value: event.target.value,
+              })
+            }}
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+            }}
+          >
+            <option value='' disabled>
+              Select
+            </option>
+            {allProducts
+              .filter((product) => !existingValues.has(product.id))
+              .map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.displayName}
+                </option>
+              ))}
+          </select>
+        )
+      },
+    },
+
+    // {
+    //   field: 'NormParameterFKId',
+    //   headerName: 'NormParameterFKId',
+    //   // editable: true,
+    //   minWidth: 250,
+    // },
+    {
+      field: 'UOM',
+      headerName: 'UOM',
+      editable: false,
+      align: 'left',
+      headerAlign: 'left',
+      // valueGetter: convertUnits,
+    },
+    {
+      field: 'apr',
+      headerName: headerMap[4],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+      // valueGetter: convertUnits,
+    },
+
+    {
+      field: 'may',
+      headerName: headerMap[5],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'jun',
+      headerName: headerMap[6],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'jul',
+      headerName: headerMap[7],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'aug',
+      headerName: headerMap[8],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'sep',
+      headerName: headerMap[9],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'oct',
+      headerName: headerMap[10],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+    },
+
+    {
+      field: 'nov',
+      headerName: headerMap[11],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'dec',
+      headerName: headerMap[12],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'jan',
+      headerName: headerMap[1],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'feb',
+      headerName: headerMap[2],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'mar',
+      headerName: headerMap[3],
+      editable: true,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+    },
+
+    {
+      field: 'remarks',
+      headerName: 'Remark',
+      minWidth: 110,
+      editable: true,
+      renderCell: (params) => {
+        const displayText = truncateRemarks(params.value)
+        const isEditable = !params.row.Particulars
+
+        return (
+          <Tooltip title={params.value || ''} arrow>
+            <div
+              style={{
+                cursor: 'pointer',
+                color: params.value ? 'inherit' : 'gray',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: 140,
+              }}
+              onClick={() => handleRemarkCellClick(params.row)}
+            >
+              {displayText || (isEditable ? 'Click to add remark' : '')}
+            </div>
+          </Tooltip>
+        )
+      },
+    },
+  ]
+  const productionColumnsPE2 = [
+    {
+      field: 'Particulars',
+      headerName: 'Constant',
+      minWidth: 125,
+      groupable: true,
+      headerClass: 'bold-header',
+    },
+    {
+      field: 'Particulars2',
+      headerName: 'Type',
+      minWidth: 125,
+      groupable: true,
+      headerClass: 'bold-header',
+      // renderEditCell: NumericInputOnly,
+    },
+    {
+      field: 'normParameterFKId',
+      headerName: 'Particulars',
+      editable: false,
+      minWidth: 160,
+      valueGetter: (params) => params || '',
+      valueFormatter: (params) => {
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : ''
+      },
+      renderEditCell: (params) => {
+        const { value, id, api } = params
+
+        const existingValues = new Set(
+          [...api.getRowModels().values()]
+            .filter((row) => row.id !== id)
+            .map((row) => row.normParameterFKId),
+        )
+
+        return (
+          <select
+            value={value || ''}
+            onChange={(event) => {
+              api.setEditCellValue({
+                id: params.id,
+                field: 'normParameterFKId',
+                value: event.target.value,
+              })
+            }}
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+            }}
+          >
+            <option value='' disabled>
+              Select
+            </option>
+            {allProducts
+              .filter((product) => !existingValues.has(product.id))
+              .map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.displayName}
+                </option>
+              ))}
+          </select>
+        )
+      },
+    },
+
+    // {
+    //   field: 'NormParameterFKId',
+    //   headerName: 'NormParameterFKId',
+    //   // editable: true,
+    //   minWidth: 250,
+    // },
+    {
+      field: 'apr',
+      headerName: 'Values',
+      editable: true,
+      align: 'left',
+      headerAlign: 'left',
+      // valueGetter: NumericInputOnly || 0,
+    },
+
+    {
+      field: 'remarks',
+      headerName: 'Remark',
+      minWidth: 250,
+      editable: true,
+      renderCell: (params) => {
+        const displayText = truncateRemarks(params.value)
+        const isEditable = !params.row.Particulars
+
+        return (
+          <Tooltip title={params.value || ''} arrow>
+            <div
+              style={{
+                cursor: 'pointer',
+                color: params.value ? 'inherit' : 'gray',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: 140,
+              }}
+              onClick={() => handleRemarkCellClick(params.row)}
+            >
+              {displayText || (isEditable ? 'Click to add remark' : '')}
+            </div>
+          </Tooltip>
+        )
+      },
+    },
+  ]
 
   return (
     <div>
@@ -439,9 +844,15 @@ const SelectivityData = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <ASDataGrid
-        columns={productionColumns}
-        rows={rows}
-        setRows={setRows}
+        columns={
+          lowerVertName === 'meg'
+            ? productionColumns
+            : props?.tabIndex === 1
+              ? productionColumnsPE2
+              : productionColumnsPE1
+        }
+        rows={props?.rows}
+        setRows={props?.setRows}
         title='Configuration'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
@@ -453,7 +864,7 @@ const SelectivityData = () => {
         snackbarOpen={snackbarOpen}
         apiRef={apiRef}
         setDeleteId={setDeleteId}
-        fetchData={fetchData}
+        // fetchData={props?.fetchData}
         setOpen1={setOpen1}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
@@ -474,6 +885,8 @@ const SelectivityData = () => {
           showUnit: false,
           saveWithRemark: true,
           saveBtn: true,
+          customHeight:
+            lowerVertName === 'meg' ? undefined : props.defaultCustomHeight,
         }}
       />
     </div>

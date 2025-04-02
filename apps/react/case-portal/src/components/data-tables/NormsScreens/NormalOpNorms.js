@@ -137,7 +137,7 @@ const NormalOpNormsScreen = () => {
         return product ? product.displayName : ''
       },
       renderEditCell: (params) => {
-        const { value, id, api } = params
+        const { value, api } = params
         return (
           <select
             value={value || ''}

@@ -13,7 +13,7 @@ const ScrollTop = lazy(() => import('./components/ScrollTop'))
 
 const App = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange, sitePlantChange } = dataGridStore
+  const { verticalChange } = dataGridStore
   const [keycloak, setKeycloak] = useState({})
   const [authenticated, setAuthenticated] = useState(null)
   // const [recordsTypes, setRecordsTypes] = useState([])
