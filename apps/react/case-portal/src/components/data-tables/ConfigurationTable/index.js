@@ -103,7 +103,7 @@ const ConfigurationTable = () => {
         // const reorderedTransformedData = reorderData(transformedData)
 
         setRows1(transformedData)
-        console.log(transformedData)
+        // console.log(transformedData)
         setRows2(shutdownRows)
       }
       setLoading(false)

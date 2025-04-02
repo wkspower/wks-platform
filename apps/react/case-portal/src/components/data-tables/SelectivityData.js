@@ -171,6 +171,14 @@ const SelectivityData = (props) => {
     }
   }
 
+  const isCellEditable = (params) => {
+    return !(
+      params.row.Particulars ||
+      params.row.isGroupHeader ||
+      params.row.isSubGroupHeader
+    )
+  }
+
   const handleDeleteClick = async (id, params) => {
     try {
       const maintenanceId =
@@ -871,6 +879,7 @@ const SelectivityData = (props) => {
         rows={props?.rows}
         setRows={props?.setRows}
         title='Configuration'
+        isCellEditable={isCellEditable}
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}

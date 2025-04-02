@@ -675,7 +675,9 @@ const DataGridTable = ({
             },
           }}
           getRowClassName={(params) => {
-            return params.row.Particulars
+            // console.log('params getRowClassName', params)
+
+            return params.row.Particulars || params.row.Particulars2
               ? 'no-border-row'
               : params.indexRelativeToCurrentPage % 2 === 0
                 ? 'even-row'
