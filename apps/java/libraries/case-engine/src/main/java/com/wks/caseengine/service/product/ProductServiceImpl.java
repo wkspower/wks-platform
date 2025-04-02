@@ -103,6 +103,10 @@ public class ProductServiceImpl implements ProductService {
 	public List<Object[]> getAllProductsFromNormParameters(String normParameterTypeName, UUID plantId) {
 	    System.out.println("normParameterTypeName: " + normParameterTypeName);
 
+		if(normParameterTypeName.equalsIgnoreCase("BusinessDemandMEG")){
+			return getProductsFromDynamicView("vwScrnMEGBusinessDemandGetAllProducts" , plantId);
+		}
+
 	    // Convert "null" string to actual null (if needed)
 	    if ("null".equals(normParameterTypeName)) {
 	        normParameterTypeName = null;
@@ -141,9 +145,22 @@ public class ProductServiceImpl implements ProductService {
 
 
 
+
+
+
+
 	public List<Object[]> getMonthlyDataForYear(int year) {
         String query = "SELECT NormParameter_FK_Id, month, monthValue, Remarks FROM NormParameterMonthlyTransaction WHERE year = :year";
         return entityManager.createNativeQuery(query).setParameter("year", year).getResultList();
     }
+
+	
+	public List<Object[]> getProductsFromDynamicView(String viewName, UUID plantId) {
+        String sql = "SELECT Id, Name, DisplayName, Plant_FK_Id FROM " + viewName + " WHERE Plant_FK_Id = :plantId";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("plantId", plantId);
+        return query.getResultList();
+	}
+
 
 }

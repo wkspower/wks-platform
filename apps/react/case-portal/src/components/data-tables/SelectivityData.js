@@ -529,6 +529,20 @@ const SelectivityData = (props) => {
       headerName: 'Particulars',
       editable: false,
       minWidth: 160,
+      renderCell: (params) => {
+        if (
+          params.value === 'By Products' ||
+          params.value === 'Cat Chem' ||
+          params.value === 'Utility Consumption' ||
+          params.value === 'Raw Material'
+        ) {
+          return <strong>{params.value}</strong>
+        } else {
+          const product = allProducts.find((p) => p.id === params.value)
+          return product ? product.displayName : params.value
+        }
+      },
+
       valueGetter: (params) => {
         // console.log('valueGetter params:', params)
         return params ?? ''
@@ -700,8 +714,9 @@ const SelectivityData = (props) => {
       editable: true,
       renderCell: (params) => {
         const displayText = truncateRemarks(params.value)
-        const isEditable = !params.row.Particulars
-
+        const isEditable = !(
+          params.row.Particulars || params.row.isSubGroupHeader
+        )
         return (
           <Tooltip title={params.value || ''} arrow>
             <div

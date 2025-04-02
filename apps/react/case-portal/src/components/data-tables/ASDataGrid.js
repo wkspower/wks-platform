@@ -225,7 +225,7 @@ const DataGridTable = ({
 
             getActions: (params) => {
               const { id, row } = params
-              console.log(row)
+              // console.log(row)
               if (row.isGroupHeader || row.isSubGroupHeader) {
                 return [] || null
               }

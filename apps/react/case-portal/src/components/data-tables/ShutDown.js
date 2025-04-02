@@ -246,19 +246,17 @@ const ShutDown = ({ permissions }) => {
     if (row && row.maintStartDateTime && row.maintEndDateTime) {
       const start = new Date(row.maintStartDateTime)
       const end = new Date(row.maintEndDateTime)
-
       if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
         const durationInMs = end - start
-        const durationInHours = durationInMs / (1000 * 60 * 60)
-        const formattedDuration = durationInHours.toFixed(2)
-
+        const durationInMinutes = durationInMs / (1000 * 60)
+        const hours = Math.floor(durationInMinutes / 60)
+        const minutes = durationInMinutes % 60
+        // const formattedDuration = (hours + minutes / 60).toFixed(2)
+        const formattedDuration = `${hours}.${minutes}`
         return formattedDuration
-      } else {
-        return ''
       }
-    } else {
-      return ''
     }
+    return ''
   }
 
   const colDefs = [
