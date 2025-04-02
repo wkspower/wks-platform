@@ -251,8 +251,8 @@ const ShutDown = ({ permissions }) => {
         const durationInMinutes = durationInMs / (1000 * 60)
         const hours = Math.floor(durationInMinutes / 60)
         const minutes = durationInMinutes % 60
-        // const formattedDuration = (hours + minutes / 60).toFixed(2)
-        const formattedDuration = `${hours}.${minutes}`
+        const formattedMinutes = minutes.toString().padStart(2, '0')
+        const formattedDuration = `${hours}.${formattedMinutes}`
         return formattedDuration
       }
     }
