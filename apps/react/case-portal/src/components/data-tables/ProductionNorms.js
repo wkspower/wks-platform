@@ -32,7 +32,7 @@ const ProductionNorms = ({ permissions }) => {
   const [selectedUnit, setSelectedUnit] = useState('Ton')
 
   const [rows, setRows] = useState([])
-  const [isSaving, setIsSaving] = useState(false)
+  // const [isSaving, setIsSaving] = useState(false)
   // States for the Remark Dialog
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -49,6 +49,10 @@ const ProductionNorms = ({ permissions }) => {
   }
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
+    if (newRow.id === 'total') {
+      // Prevent updates on the total row
+      return newRow
+    }
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
@@ -65,10 +69,15 @@ const ProductionNorms = ({ permissions }) => {
 
   const saveChanges = React.useCallback(async () => {
     try {
+      var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
       const allRows = Array.from(apiRef.current.getRowModels().values())
       const updatedRows = allRows.map(
         (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
       )
+      const rowsToSave = updatedRows.filter((row) => row.id !== 'total')
+      // console.log(rowsToSave)
+      // console.log(editedData)
+
       //  console.log(updatedRows)
       if (updatedRows.length === 0) {
         setSnackbarOpen(true)
@@ -81,7 +90,7 @@ const ProductionNorms = ({ permissions }) => {
 
       const requiredFields = ['aopRemarks']
 
-      const validationMessage = validateFields(allRows, requiredFields)
+      const validationMessage = validateFields(editedData, requiredFields)
       if (validationMessage) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -90,8 +99,9 @@ const ProductionNorms = ({ permissions }) => {
         })
         return
       }
-
-      updateProductNormData(updatedRows)
+      // const finalData = [...rowsToSave, editedData]
+      // console.log(finalData)
+      updateProductNormData(rowsToSave)
     } catch (error) {
       console.log('Error saving changes:', error)
     }
@@ -108,8 +118,8 @@ const ProductionNorms = ({ permissions }) => {
         plantId = parsedPlant.id
       }
 
-      let siteID =
-        JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+      // let siteID =
+      //   JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
 
       const productNormData = newRow.map((row) => ({
         aopType: row.aopType || 'production',
@@ -224,8 +234,13 @@ const ProductionNorms = ({ permissions }) => {
           }
         })
 
-        // setCsData(formattedData)
-        setRows(formattedData)
+        let totalRows = []
+        if (formattedData) {
+          totalRows = totalRow(formattedData)
+        }
+        const finalData = [...formattedData, totalRows]
+        setRows(finalData)
+        // setRows(formattedData)
         setLoading(false)
       } else {
         setSnackbarOpen(true)
@@ -286,7 +301,15 @@ const ProductionNorms = ({ permissions }) => {
           }),
         }
       })
-      setRows(formattedData)
+      console.log(formattedData)
+      let totalRows = []
+      if (formattedData.length > 0) {
+        totalRows = totalRow(formattedData)
+      }
+      const finalData = [...formattedData, totalRows]
+      setRows(finalData)
+
+      // setRows(formattedData)
       setLoading(false) // Hide loading
       // }
       // else {
@@ -303,53 +326,39 @@ const ProductionNorms = ({ permissions }) => {
     }
   }
 
-  // const getProductName = async (value, row) => {
-  //   if (!row || !row.normParametersFKId) {
-  //     return ''
-  //   }
+  const totalRow = (formattedData) => {
+    const months = [
+      'jan',
+      'feb',
+      'march',
+      'april',
+      'may',
+      'june',
+      'july',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+    ]
 
-  //   let product
-  //   if (allProducts && allProducts.length > 0) {
-  //     product = allProducts.find((p) => p.id === row.normParametersFKId)
-  //   } else {
-  //     try {
-  //       const data = await DataService.getAllProducts(
-  //         keycloak,
-  //         lowerVertName === 'meg' ? 'Production' : 'Grade',
-  //       )
-  //       product = data.find((p) => p.id === row.normParametersFKId)
-  //     } catch (error) {
-  //       console.error('Error fetching products:', error)
-  //       return ''
-  //     }
-  //   }
+    // Calculate totals for each month column
+    const totals = months.reduce((acc, month) => {
+      acc[month] = formattedData.reduce(
+        (sum, row) => sum + (Number(row[month]) || 0),
+        0,
+      )
+      return acc
+    }, {})
 
-  //   return product ? product.name : ''
-  // }
-
-  // const findAvg = (value, row) => {
-  //   const months = [
-  //     'april',
-  //     'may',
-  //     'june',
-  //     'july',
-  //     'aug',
-  //     'sep',
-  //     'oct',
-  //     'nov',
-  //     'dec',
-  //     'jan',
-  //     'feb',
-  //     'march',
-  //   ]
-
-  //   const values = months.map((month) => row[month] || 0)
-  //   const sum = values.reduce((acc, val) => acc + val, 0)
-  //   const avg = (sum / values.length).toFixed(2)
-
-  //   return avg === '0.00' ? null : avg
-  // }
-
+    const totalRow = {
+      id: 'total', // Unique ID to identify the total row
+      Particulars: 'Total', // Ensure this appears in the first column
+      ...totals,
+      isEditable: false, // Custom property for checking editability
+    }
+    return totalRow
+  }
   const findSum = (value, row) => {
     const months = [
       'april',
@@ -389,7 +398,7 @@ const ProductionNorms = ({ permissions }) => {
       } catch (error) {
         console.error('Error fetching product:', error)
       } finally {
-        setIsSaving(false) // Reset loading state when API call finishes
+        setLoading(false) // Reset loading state when API call finishes
       }
     }
 
@@ -411,6 +420,7 @@ const ProductionNorms = ({ permissions }) => {
   const handleUnitChange = (unit) => {
     setSelectedUnit(unit)
   }
+  const isCellEditable = (params) => params.row.id !== 'total'
 
   return (
     <div>
@@ -426,6 +436,7 @@ const ProductionNorms = ({ permissions }) => {
         rows={rows}
         setRows={setRows}
         title={'Production AOP'}
+        isCellEditable={isCellEditable}
         // title={lowerVertName === 'meg' ? 'Production AOP' : 'Budget Production'}
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}

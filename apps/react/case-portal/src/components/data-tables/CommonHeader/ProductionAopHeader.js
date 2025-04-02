@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux'
+// import { useSelector } from 'react-redux'
 import productionColDefs from '../../../assets/production_aop.json' // Adjust path as needed
 import Tooltip from '@mui/material/Tooltip'
 import { truncateRemarks } from 'utils/remarksUtils'
@@ -9,10 +9,10 @@ const getEnhancedColDefs = ({
   handleRemarkCellClick,
   findSum,
 }) => {
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange } = dataGridStore
-  const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  // const dataGridStore = useSelector((state) => state.dataGridStore)
+  // const { verticalChange } = dataGridStore
+  // const vertName = verticalChange?.selectedVertical
+  // const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const enhancedColDefs = productionColDefs.map((col) => {
     let updatedCol = { ...col }
@@ -23,8 +23,21 @@ const getEnhancedColDefs = ({
         ...updatedCol,
         headerName: 'Particulars',
         valueGetter: (params) => params || '',
+        renderCell: (params) => {
+          // console.log(params?.row)
+          if (params?.row?.id === 'total') {
+            return params?.row?.Particulars
+          } else {
+            const product = allProducts.find(
+              (p) => p.id === params?.row?.normParametersFKId,
+            )
+            return product ? product.displayName : ''
+          }
+        },
         valueFormatter: (params) => {
+          // console.log(params)
           const product = allProducts.find((p) => p.id === params)
+          // if (product?.displayName?.length > 0)
           return product ? product.displayName : ''
         },
         renderEditCell: (params) => {
