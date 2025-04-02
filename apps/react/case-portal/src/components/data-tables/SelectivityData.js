@@ -515,7 +515,7 @@ const SelectivityData = (props) => {
       headerName: 'Type',
       minWidth: 125,
       groupable: true,
-      headerClass: 'bold-header',
+      renderCell: (params) => <strong>{params.value}</strong>,
     },
     // {
     //   field: 'Particulars2',
@@ -728,15 +728,16 @@ const SelectivityData = (props) => {
       headerName: 'Constant',
       minWidth: 125,
       groupable: true,
-      headerClass: 'bold-header',
+      flex: 1,
+      renderCell: (params) => <strong>{params.value}</strong>,
     },
     {
       field: 'Particulars2',
       headerName: 'Type',
       minWidth: 125,
       groupable: true,
-      headerClass: 'bold-header',
-      // renderEditCell: NumericInputOnly,
+      flex: 1,
+      renderCell: (params) => <strong>{params.value}</strong>,
     },
     {
       field: 'normParameterFKId',
@@ -800,6 +801,7 @@ const SelectivityData = (props) => {
       field: 'apr',
       headerName: 'Values',
       editable: true,
+      renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       // valueGetter: NumericInputOnly || 0,
@@ -812,7 +814,7 @@ const SelectivityData = (props) => {
       editable: true,
       renderCell: (params) => {
         const displayText = truncateRemarks(params.value)
-        const isEditable = !params.row.Particulars
+        const isEditable = !params.row.Particulars && !params.row.Particulars2
 
         return (
           <Tooltip title={params.value || ''} arrow>

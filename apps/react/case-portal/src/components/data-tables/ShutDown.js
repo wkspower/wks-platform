@@ -89,10 +89,6 @@ const ShutDown = ({ permissions }) => {
       }
 
       saveShutdownData(data)
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
-      }
     } catch (error) {
       console.log('Error saving changes:', error)
     }
@@ -107,6 +103,7 @@ const ShutDown = ({ permissions }) => {
   }
 
   const saveShutdownData = async (newRow) => {
+    setLoading(true)
     try {
       let plantId = ''
 
@@ -126,27 +123,30 @@ const ShutDown = ({ permissions }) => {
         id: row.idFromApi || null,
         remark: row.remark || 'null',
       }))
-      // const verticalName= lowerVertName
+
       const response = await DataService.saveShutdownData(
         plantId,
         shutdownDetails,
         keycloak,
-        // verticalName
       )
 
       setSnackbarOpen(true)
-      // setSnackbarMessage("Shutdown data Saved Successfully !");
       setSnackbarData({
         message: 'Shutdown data Saved Successfully!',
         severity: 'success',
       })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Shutdown data Saved Successfully!", severity: "success" });
+      unsavedChangesRef.current = {
+        unsavedRows: {},
+        rowsBeforeChange: {},
+      }
+      setLoading(false)
       return response
     } catch (error) {
+      setLoading(false)
       console.error('Error saving shutdown data:', error)
     } finally {
       fetchData()
+      setLoading(false)
     }
   }
 
@@ -248,22 +248,16 @@ const ShutDown = ({ permissions }) => {
       const end = new Date(row.maintEndDateTime)
 
       if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-        // Check if dates are valid
         const durationInMs = end - start
+        const durationInHours = durationInMs / (1000 * 60 * 60)
+        const formattedDuration = durationInHours.toFixed(2)
 
-        // Calculate duration in hours and minutes
-        const durationInHours = Math.floor(durationInMs / (1000 * 60 * 60))
-        const remainingMs = durationInMs % (1000 * 60 * 60)
-        const durationInMinutes = Math.floor(remainingMs / (1000 * 60))
-
-        // Format the duration as "HH:MM"
-        const formattedDuration = `${String(durationInHours).padStart(2, '0')}:${String(durationInMinutes).padStart(2, '0')}`
         return formattedDuration
       } else {
-        return '' // Or handle invalid dates as needed
+        return ''
       }
     } else {
-      return '' // Or handle missing dates as needed
+      return ''
     }
   }
 

@@ -111,7 +111,9 @@ const NormalOpNormsScreen = () => {
         // handleMenuClose();
       }
     }
-    fetchData()
+    setTimeout(() => {
+      fetchData()
+    }, 450)
     getAllProducts()
   }, [sitePlantChange, keycloak, lowerVertName])
 
@@ -137,7 +139,7 @@ const NormalOpNormsScreen = () => {
         return product ? product.displayName : ''
       },
       renderEditCell: (params) => {
-        const { value, api } = params
+        const { value, id, api } = params
         return (
           <select
             value={value || ''}
@@ -473,10 +475,11 @@ const NormalOpNormsScreen = () => {
           message: 'Data refreshed successfully!',
           severity: 'success',
         })
-        setLoading(false)
         fetchData()
+        setLoading(false)
       } else {
         setSnackbarOpen(true)
+
         setSnackbarData({
           message: 'Data Refresh Falied!',
           severity: 'error',

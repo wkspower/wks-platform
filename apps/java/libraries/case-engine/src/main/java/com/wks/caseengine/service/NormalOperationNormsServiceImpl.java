@@ -139,17 +139,23 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		String storedProcedure=vertical.getName()+"_HMD_CalculateExpressionConsumptionNorms";
 		System.out.println("storedProcedure"+storedProcedure);
-		return executeDynamicUpdateProcedure(storedProcedure,year);
+		return executeDynamicUpdateProcedure(storedProcedure,plantId,site.getId().toString(), vertical.getId().toString(),year);
 	}
 	
 	@Transactional
-    public int executeDynamicUpdateProcedure(String procedureName, String finYear) {
+    public int executeDynamicUpdateProcedure(String procedureName, String plantId, String siteId, String verticalId, String finYear) {
         try {
-            String sql = "EXEC " + procedureName + " @finYear = :finYear"; // Fixed syntax for SQL Server
+            String sql = "EXEC " + procedureName + " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear"; // Fixed syntax for SQL Server
             Query query = entityManager.createNativeQuery(sql);
-            query.setParameter("finYear", finYear);
+                    
+        // Setting all parameters
+        query.setParameter("plantId", plantId);
+        query.setParameter("siteId", siteId);
+        query.setParameter("verticalId", verticalId);
+        query.setParameter("finYear", finYear);
 
             return query.executeUpdate();
+
         } catch (Exception e) {
             e.printStackTrace(); // Log detailed exception for debugging
             return 0; // Return 0 if execution fails

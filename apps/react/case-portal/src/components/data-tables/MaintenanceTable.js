@@ -14,14 +14,18 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 
 const MaintenanceTable = () => {
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange } = dataGridStore
   const keycloak = useSession()
   const [loading, setLoading] = useState(false)
   const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const [rows, setRows] = useState()
+
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { sitePlantChange, verticalChange } = dataGridStore
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
+
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -44,6 +48,7 @@ const MaintenanceTable = () => {
       setLoading(false)
     } catch (error) {
       console.error('Error fetching  data:', error)
+      setRows([])
       setLoading(false)
     }
   }
@@ -91,12 +96,12 @@ const MaintenanceTable = () => {
 
   useEffect(() => {
     fetchData()
-  }, [sitePlantChange, keycloak])
+  }, [sitePlantChange, keycloak, lowerVertName])
 
   const productionColumns = [
     {
-      field: 'Description in (Hrs)',
-      headerName: 'Description in (Hrs)',
+      field: 'Name',
+      headerName: 'Description',
       align: 'left',
       headerAlign: 'left',
       minWidth: 250,

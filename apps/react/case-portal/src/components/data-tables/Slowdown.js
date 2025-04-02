@@ -80,16 +80,9 @@ const SlowDown = ({ permissions }) => {
       const end = new Date(row.maintEndDateTime)
 
       if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-        // Check if dates are valid
         const durationInMs = end - start
-
-        // Calculate duration in hours and minutes
-        const durationInHours = Math.floor(durationInMs / (1000 * 60 * 60))
-        const remainingMs = durationInMs % (1000 * 60 * 60)
-        const durationInMinutes = Math.floor(remainingMs / (1000 * 60))
-
-        // Format the duration as "HH:MM"
-        const formattedDuration = `${String(durationInHours).padStart(2, '0')}:${String(durationInMinutes).padStart(2, '0')}`
+        const durationInHours = durationInMs / (1000 * 60 * 60)
+        const formattedDuration = durationInHours.toFixed(2)
         return formattedDuration
       } else {
         return '' // Or handle invalid dates as needed
@@ -99,6 +92,7 @@ const SlowDown = ({ permissions }) => {
     }
   }
   const saveSlowDownData = async (newRow) => {
+    setLoading(true)
     try {
       var plantId = ''
       const storedPlant = localStorage.getItem('selectedPlant')
@@ -140,13 +134,20 @@ const SlowDown = ({ permissions }) => {
         message: 'Slowdown data Saved Successfully!',
         severity: 'success',
       })
+      unsavedChangesRef.current = {
+        unsavedRows: {},
+        rowsBeforeChange: {},
+      }
+      setLoading(false)
       // setSnackbarOpen(true);
       // setSnackbarData({ message: "Slowdown data Saved Successfully!", severity: "success" });
       return response
     } catch (error) {
       console.error('Error saving Slowdown data:', error)
+      setLoading(false)
     } finally {
       fetchData()
+      setLoading(false)
     }
   }
   const saveChanges = React.useCallback(async () => {
@@ -181,11 +182,6 @@ const SlowDown = ({ permissions }) => {
       }
 
       saveSlowDownData(data)
-
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
-      }
     } catch (error) {
       // setIsSaving(false);
     }
