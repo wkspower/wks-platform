@@ -254,6 +254,7 @@ const ProductionNorms = ({ permissions }) => {
       return data
     } catch (error) {
       console.error('Error saving refresh data:', error)
+      setLoading(false)
     }
   }
 

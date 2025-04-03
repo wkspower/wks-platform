@@ -122,32 +122,69 @@ const NormalOpNormsScreen = () => {
 
   const saveChanges = React.useCallback(async () => {
     setLoading(true)
-    try {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      if (data.length == 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        return
-      }
-      const requiredFields = ['aopRemarks']
-      const validationMessage = validateFields(data, requiredFields)
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationMessage,
-          severity: 'error',
-        })
-        setLoading(false)
-        return
-      }
 
-      saveEditedData(data)
-    } catch (error) {
-      console.log('Error saving changes:', error)
-      setLoading(false)
+    if (lowerVertName == 'meg') {
+      try {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        if (data.length == 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
+        }
+        const requiredFields = ['aopRemarks']
+        const validationMessage = validateFields(data, requiredFields)
+        if (validationMessage) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: validationMessage,
+            severity: 'error',
+          })
+          setLoading(false)
+          return
+        }
+
+        saveEditedData(data)
+      } catch (error) {
+        console.log('Error saving changes:', error)
+        setLoading(false)
+      }
+    }
+
+    if (lowerVertName == 'pe') {
+      try {
+        var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
+        const allRows = Array.from(apiRef.current.getRowModels().values())
+        const updatedRows = allRows.map(
+          (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
+        )
+
+        if (updatedRows.length === 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
+        }
+
+        const requiredFields = ['aopRemarks']
+
+        const validationMessage = validateFields(editedData, requiredFields)
+        if (validationMessage) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: validationMessage,
+            severity: 'error',
+          })
+          return
+        }
+        saveEditedData(updatedRows)
+      } catch (error) {
+        console.log('Error saving changes:', error)
+      }
     }
   }, [apiRef, selectedUnit])
 
@@ -237,7 +274,16 @@ const NormalOpNormsScreen = () => {
   const handleUnitChange = (unit) => {
     setSelectedUnit(unit)
   }
-  const handleCalculate = async () => {
+
+  const handleCalculate = () => {
+    if (lowerVertName == 'meg') {
+      handleCalculateMeg()
+    } else {
+      handleCalculatePe()
+    }
+  }
+
+  const handleCalculateMeg = async () => {
     try {
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
@@ -245,6 +291,7 @@ const NormalOpNormsScreen = () => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
+
       var plantId = plantId
       const data = await DataService.handleCalculateonsumptionNorms(
         plantId,
@@ -252,7 +299,7 @@ const NormalOpNormsScreen = () => {
         keycloak,
       )
 
-      if (data == 0) {
+      if (data || data == 0) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data refreshed successfully!',
@@ -275,6 +322,72 @@ const NormalOpNormsScreen = () => {
         severity: 'error',
       })
       console.error('Error!', error)
+    }
+  }
+
+  const handleCalculatePe = async () => {
+    try {
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const year = localStorage.getItem('year')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      var plantId = plantId
+      var data = await DataService.handleCalculateConsumptionNorm1(
+        plantId,
+        year,
+        keycloak,
+      )
+
+      if (data) {
+        const groupedRows = []
+        const groups = new Map()
+        let groupId = 0
+
+        data.forEach((item) => {
+          const groupKey = item.normParameterTypeDisplayName
+
+          if (!groups.has(groupKey)) {
+            groups.set(groupKey, [])
+            groupedRows.push({
+              id: groupId++,
+              Particulars: groupKey,
+              isGroupHeader: true,
+            })
+          }
+          const formattedItem = {
+            ...item,
+            idFromApi: item.id,
+            NormParametersId: item.materialFkId.toLowerCase(),
+            id: groupId++,
+          }
+
+          groups.get(groupKey).push(formattedItem)
+          groupedRows.push(formattedItem)
+        })
+
+        setRows(groupedRows)
+        setLoading(false)
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refresh Falied!',
+          severity: 'error',
+        })
+        setLoading(false)
+      }
+
+      return data
+    } catch (error) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: error.message || 'An error occurred',
+        severity: 'error',
+      })
+      console.error('Error!', error)
+      setLoading(false)
     }
   }
 

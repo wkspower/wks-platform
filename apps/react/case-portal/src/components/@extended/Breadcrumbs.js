@@ -1,13 +1,84 @@
 import PropTypes from 'prop-types'
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { IconButton, Tooltip } from '@mui/material'
+import InfoIcon from '@mui/icons-material/Info'
+import Notification from 'components/Utilities/Notification'
 
-// material-ui
 import MuiBreadcrumbs from '@mui/material/Breadcrumbs'
 import { Grid, Typography } from '@mui/material'
 import MainCard from '../MainCard'
+import { useSession } from 'SessionStoreContext'
+import Config from 'consts/index'
+import { useSelector } from 'react-redux'
 
 const Breadcrumbs = ({ navigation, title, ...others }) => {
+  const keycloak = useSession()
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { verticalChange } = dataGridStore
+  const vertName = verticalChange?.selectedVertical
+
+  const [notification, setNotification] = useState({
+    open: false,
+    message: '',
+    severity: 'info',
+  })
+
+  // http://localhost:8085/storage/files1/newFile/downloads/sample.pdf?content-type=application/pdf
+
+  // const handleOpenPdf = async (title) => {
+  //   const fileName = `${title}.pdf`
+  //   const fileUrl = `/files/${fileName}`
+
+  //   try {
+  //     const response = await fetch(fileUrl, { method: 'HEAD' })
+  //     if (response.ok) {
+  //       window.open(fileUrl, '_blank')
+  //     } else {
+  //       setNotification({
+  //         open: true,
+  //         message: 'Basis not found!',
+  //         severity: 'error',
+  //       })
+  //     }
+  //   } catch (error) {
+  //     setNotification({
+  //       open: true,
+  //       message: 'Error checking file. Please try again.',
+  //       severity: 'error',
+  //     })
+  //   }
+  // }
+
+  async function handleOpenPdf(title) {
+    const url = `${Config.StorageUrl}/storage/files1/newFile/downloads/${title}_${vertName}.pdf?content-type=application/pdf`
+    const headers = {
+      Authorization: `Bearer ${keycloak.token}`,
+    }
+
+    try {
+      const resp = await fetch(url, {
+        method: 'GET',
+        headers,
+      })
+      if (!resp.ok) {
+        setNotification({
+          open: true,
+          message: 'Basis not found! Please try again.',
+          severity: 'error',
+        })
+        return
+      }
+      const blob = await resp.blob()
+      const fileURL = window.URL.createObjectURL(blob)
+      window.open(fileURL, '_blank')
+      return true
+    } catch (e) {
+      console.error('Error fetching PDF:', e)
+      return Promise.reject(e)
+    }
+  }
+
   const location = useLocation()
   const [main, setMain] = useState()
   const [item, setItem] = useState()
@@ -66,8 +137,30 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   if (item && item.type === 'item') {
     itemTitle = item.title
     itemContent = (
-      <Typography variant='subtitle1' color='textPrimary'>
+      <Typography
+        variant='subtitle1'
+        color='textPrimary'
+        display='flex'
+        alignItems='center'
+      >
         {itemTitle}
+        <Tooltip title={`Basis for ${itemTitle}`}>
+          <IconButton
+            size='medium'
+            sx={{
+              ml: 1,
+              backgroundColor: 'transparent', // Transparent background
+              '&:hover': {
+                backgroundColor: 'rgba(0, 0, 0, 0.1)', // Light hover effect
+              },
+              padding: '6px', // Slightly increase padding for better spacing
+            }}
+            onClick={() => handleOpenPdf(item.title)}
+          >
+            <InfoIcon fontSize='medium' sx={{ opacity: 0.7 }} />{' '}
+            {/* Slightly faded icon */}
+          </IconButton>
+        </Tooltip>
       </Typography>
     )
 
@@ -109,6 +202,13 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
               </Grid>
             )}
           </Grid>
+          {/* Notification Component */}
+          <Notification
+            open={notification.open}
+            message={notification.message}
+            severity={notification.severity}
+            onClose={() => setNotification({ ...notification, open: false })}
+          />
         </MainCard>
       )
     }
