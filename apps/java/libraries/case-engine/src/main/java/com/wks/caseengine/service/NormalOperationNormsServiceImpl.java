@@ -1,6 +1,8 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -155,12 +157,44 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
         query.setParameter("finYear", finYear);
 
             return query.executeUpdate();
-
         } catch (Exception e) {
             e.printStackTrace(); // Log detailed exception for debugging
             return 0; // Return 0 if execution fails
         }
     }
+	@Transactional
+	public List<Object[]> getCalculatedNormalOpsNormsSP(String procedureName, String finYear,String plantId, String siteId, String verticalId) {
+	    try {
+	    	 // Create a native query to execute the stored procedure
+	        String sql = "EXEC " + procedureName + 
+	                     " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear";
+	        
+	        Query query = entityManager.createNativeQuery(sql);
+	        
+	        // Set parameters
+	        query.setParameter("plantId", plantId);
+	        query.setParameter("siteId", siteId);
+	        query.setParameter("verticalId", verticalId);
+	        query.setParameter("finYear", finYear);
+
+	        return query.getResultList(); // Fetch results instead of executing an update
+	    } catch (Exception e) {
+	        e.printStackTrace(); // Log detailed exception for debugging
+	        return Collections.emptyList(); // Return an empty list instead of 0
+	    }
+	}
+
+
+	@Override
+	@Transactional
+	public List<Object[]> getCalculatedNormalOpsNorms(String year, String plantId) {
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		String storedProcedure=vertical.getName()+"_HMD_CalculateExpressionConsumptionNorms";
+		return getCalculatedNormalOpsNormsSP(storedProcedure,year,plant.getId().toString(),site.getId().toString(),vertical.getId().toString());
+		// TODO Auto-generated method stub
+	}
 	 
 
 }

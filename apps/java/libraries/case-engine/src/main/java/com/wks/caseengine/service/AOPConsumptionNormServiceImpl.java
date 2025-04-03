@@ -126,22 +126,44 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		String storedProcedure=vertical.getName()+"_HMD_CalculateConsumptionAOPValues";
 		System.out.println(storedProcedure);
-		return executeDynamicUpdateProcedure(storedProcedure,plantId,site.getId().toString(), vertical.getId().toString(),year);
+		return executeDynamicUpdateProcedure(storedProcedure,year);
 	}
 	
 	@Transactional
-	public int executeDynamicUpdateProcedure(String procedureName, String plantId, String siteId, String verticalId, String finYear) {
-	    String sql = "EXEC " + procedureName + " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear"; // Ensure correct parameter format
+	public int executeDynamicUpdateProcedure(String procedureName, String finYear) {
+	    String sql = "EXEC " + procedureName + " @finYear = :finYear"; // Ensure correct parameter format
 	    Query query = entityManager.createNativeQuery(sql);
-
-
-	        // Setting all parameters
-    query.setParameter("plantId", plantId);
-    query.setParameter("siteId", siteId);
-    query.setParameter("verticalId", verticalId);
-    query.setParameter("finYear", finYear);
+	    query.setParameter("finYear", finYear);
 	    
 	    return query.executeUpdate();
+	}
+	
+	@Transactional
+	public List<Object[]> getCalculatedConsumptionNormsSP(String procedureName, String finYear,String plantId, String siteId, String verticalId) {
+		 // Create a native query to execute the stored procedure
+        String sql = "EXEC " + procedureName + 
+                     " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear";
+        
+        Query query = entityManager.createNativeQuery(sql);
+        
+        // Set parameters
+        query.setParameter("plantId", plantId);
+        query.setParameter("siteId", siteId);
+        query.setParameter("verticalId", verticalId);
+        query.setParameter("finYear", finYear);
+	    return query.getResultList(); // Fetching results instead of executing an update
+	}
+
+	@Override
+	@Transactional
+	public List<Object[]> getCalculatedConsumptionNorms(String year, String plantId) {
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		String storedProcedure=vertical.getName()+"_HMD_CalculateConsumptionAOPValues";
+		System.out.println(storedProcedure);
+		return getCalculatedConsumptionNormsSP(storedProcedure,year,plant.getId().toString(),site.getId().toString(),vertical.getId().toString());
+		// TODO Auto-generated method stub
 	}
 
 
