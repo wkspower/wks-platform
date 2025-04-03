@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.dto.CalculatedConsumptionNormsDTO;
 import com.wks.caseengine.dto.AOPConsumptionNormDTO;
 import com.wks.caseengine.service.AOPConsumptionNormService;
 
@@ -40,7 +41,7 @@ public class AOPConsumptionNormController {
 	}
 	
 	@GetMapping(value="/getCalculatedConsumptionNorms")
-	public List<Object[]> getCalculatedConsumptionNorms(@RequestParam String year,@RequestParam String plantId){
+	public  List<CalculatedConsumptionNormsDTO>  getCalculatedConsumptionNorms(@RequestParam String year,@RequestParam String plantId){
 		return	 aOPConsumptionNormService.getCalculatedConsumptionNorms(year,plantId);
 		
 	}
