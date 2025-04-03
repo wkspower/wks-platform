@@ -1,4 +1,4 @@
-package com.example.demo.AOPDTO;
+package com.wks.caseengine.dto;
 
 import java.util.UUID;
 
