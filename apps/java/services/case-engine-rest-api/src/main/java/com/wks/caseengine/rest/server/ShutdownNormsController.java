@@ -29,5 +29,10 @@ public class ShutdownNormsController {
 	public List<ShutdownNormsValueDTO> saveShutdownNormsData(@RequestBody List<ShutdownNormsValueDTO> shutdownNormsValueDTOList){
 		return	shutdownNormsService.saveShutdownNormsData(shutdownNormsValueDTOList);
 	}
+	
+	@GetMapping(value="/getShutdownNormsSPData")
+	public List<ShutdownNormsValueDTO> getShutdownNormsSPData(@RequestParam String year,@RequestParam String plantId){
+		return	shutdownNormsService.getShutdownNormsSPData(year, plantId);
+	}
 
 }

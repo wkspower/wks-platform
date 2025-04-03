@@ -1,6 +1,7 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -11,14 +12,34 @@ import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
 import com.wks.caseengine.entity.MCUNormsValue;
+import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ShutdownNormsValue;
+import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.Verticals;
+import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ShutdownNormsRepository;
+import com.wks.caseengine.repository.SiteRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 
 @Service
 public class ShutdownNormsServiceImpl implements ShutdownNormsService{
 	
 	@Autowired
 	private ShutdownNormsRepository shutdownNormsRepository;
+	
+	@PersistenceContext
+    private EntityManager entityManager;
+	@Autowired
+	PlantsRepository plantsRepository;
+	@Autowired
+	SiteRepository siteRepository;
+	@Autowired
+	VerticalsRepository verticalRepository;
 	
 	@Override
 	public List<ShutdownNormsValueDTO> getShutdownNormsData(String year, String plantId) {
@@ -118,6 +139,66 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService{
 		// TODO Auto-generated method stub
 		return shutdownNormsValueDTOList;
 	}
+	
+	@Override
+	@Transactional
+	public List<ShutdownNormsValueDTO> getShutdownNormsSPData(String year, String plantId) {
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		String storedProcedure=vertical.getName()+"_HMD_CalculateShutdownNorms";
+		List<Object[]> list= getCalculatedShutdownNormsSP(storedProcedure,year,plant.getId().toString(),site.getId().toString(),vertical.getId().toString());
+		List<ShutdownNormsValueDTO> shutdownNormsValueDTOList = new ArrayList<>();
+		for (Object[] row : list) {
+			ShutdownNormsValueDTO shutdownNormsValueDTO = new ShutdownNormsValueDTO();
+			shutdownNormsValueDTO.setNormParameterTypeDisplayName(row[0] != null ? row[0].toString() : null);
+			shutdownNormsValueDTO.setUOM(row[1] != null ? row[1].toString() : null);
+			shutdownNormsValueDTO.setSiteFkId(row[2] != null ? row[2].toString() : null);
+			shutdownNormsValueDTO.setVerticalFkId(row[3] != null ? row[3].toString() : null);
+			shutdownNormsValueDTO.setAOPCaseId(row[4] != null ? row[4].toString() : null);
+			shutdownNormsValueDTO.setAOPStatus(row[5] != null ? row[5].toString() : null);
+			shutdownNormsValueDTO.setRemarks(row[6] != null ? row[6].toString() : "");
+			shutdownNormsValueDTO.setMaterialFkId(row[7] != null ? row[7].toString() : null);
+			shutdownNormsValueDTO.setJanuary(row[8] != null ? Float.parseFloat(row[8].toString()) : null);
+			shutdownNormsValueDTO.setFebruary(row[9] != null ? Float.parseFloat(row[9].toString()) : null);
+			shutdownNormsValueDTO.setMarch(row[10] != null ? Float.parseFloat(row[10].toString()) : null);
+			shutdownNormsValueDTO.setApril(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
+			shutdownNormsValueDTO.setMay(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
+			shutdownNormsValueDTO.setJune(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
+			shutdownNormsValueDTO.setJuly(row[14] != null ? Float.parseFloat(row[14].toString()) : null);
+			shutdownNormsValueDTO.setAugust(row[15] != null ? Float.parseFloat(row[15].toString()) : null);
+			shutdownNormsValueDTO.setSeptember(row[16] != null ? Float.parseFloat(row[16].toString()) : null); 
+			shutdownNormsValueDTO.setOctober(row[17] != null ? Float.parseFloat(row[17].toString()) : null);
+			shutdownNormsValueDTO.setNovember(row[18] != null ? Float.parseFloat(row[18].toString()) : null);
+			shutdownNormsValueDTO.setDecember(row[19] != null ? Float.parseFloat(row[19].toString()) : null);
+			shutdownNormsValueDTO.setFinancialYear(row[20] != null ? row[20].toString() : null);
+			shutdownNormsValueDTO.setPlantFkId(row[21] != null ? row[21].toString() : null);
+			shutdownNormsValueDTOList.add(shutdownNormsValueDTO);
+		}
+		
+		return shutdownNormsValueDTOList;
+	}
+	
+	@Transactional
+	public List<Object[]> getCalculatedShutdownNormsSP(String procedureName, String finYear,String plantId, String siteId, String verticalId) {
+	    try {
+	    	 // Create a native query to execute the stored procedure
+	        String sql = "EXEC " + procedureName + 
+	                     " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear";
+	        
+	        Query query = entityManager.createNativeQuery(sql);
+	        
+	        // Set parameters
+	        query.setParameter("plantId", plantId);
+	        query.setParameter("siteId", siteId);
+	        query.setParameter("verticalId", verticalId);
+	        query.setParameter("finYear", finYear);
 
+	        return query.getResultList(); // Fetch results instead of executing an update
+	    } catch (Exception e) {
+	        e.printStackTrace(); // Log detailed exception for debugging
+	        return Collections.emptyList(); // Return an empty list instead of 0
+	    }
+	}
 
 }
