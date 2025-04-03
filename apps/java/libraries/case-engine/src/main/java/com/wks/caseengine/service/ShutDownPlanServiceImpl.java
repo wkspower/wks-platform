@@ -48,10 +48,13 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
             dto.setMaintStartDateTime((Date) result[1]);
             dto.setMaintEndDateTime((Date) result[2]);
             dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null); 
-			if(result[3]!=null){
-				double durationInHrs = ((Integer) result[3]) / 60.0;
-				dto.setDurationInHrs(durationInHrs);
-			}
+			if (result[3] != null) {
+                int totalMinutes = (Integer) result[3];
+                int hours = totalMinutes / 60; 
+                int minutes = totalMinutes % 60;
+                double durationInHrs = hours + (minutes / 100.0); 
+                dto.setDurationInHrs(durationInHrs);
+            }
             dto.setProduct((String) result[6]);
             //FOR ID : pmt.Id
             dto.setId(result[5] != null ? result[5].toString() : null); 
@@ -116,8 +119,14 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 				);
 
 				if (shutDownPlanDTO.getDurationInHrs() != null) {
-				    plantMaintenanceTransaction.setDurationInMins((int) (shutDownPlanDTO.getDurationInHrs() * 60));
-				} else {
+				    // plantMaintenanceTransaction.setDurationInMins((int) (shutDownPlanDTO.getDurationInHrs() * 60));
+					plantMaintenanceTransaction.setDurationInMins((int) (Math.floor(shutDownPlanDTO.getDurationInHrs()) * 60) 
+					+ 
+					(int) Math.round((shutDownPlanDTO.getDurationInHrs() 
+					- Math.floor(shutDownPlanDTO.getDurationInHrs())) * 100));
+
+				} 
+				else {
 				    plantMaintenanceTransaction.setDurationInMins(0);
 				}
 
@@ -207,7 +216,12 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 						// }
 						
 				if (shutDownPlanDTO.getDurationInHrs() != null) {
-				    plantMaintenanceTransaction.setDurationInMins((int) (shutDownPlanDTO.getDurationInHrs() * 60));
+				    // plantMaintenanceTransaction.setDurationInMins((int) (shutDownPlanDTO.getDurationInHrs() * 60));
+					plantMaintenanceTransaction.setDurationInMins((int) (Math.floor(shutDownPlanDTO.getDurationInHrs()) * 60) 
+					+ 
+					(int) Math.round((shutDownPlanDTO.getDurationInHrs() 
+					- Math.floor(shutDownPlanDTO.getDurationInHrs())) * 100));
+
 				} else {
 				    plantMaintenanceTransaction.setDurationInMins(0);
 				}
