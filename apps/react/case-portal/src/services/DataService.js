@@ -135,7 +135,8 @@ async function handleCalculateNormalOpsNorms1(plantId, year, keycloak) {
 }
 async function handleCalculateShutdownNorms(plantId, year, keycloak) {
   const year1 = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/getCalculatedShutdownNorms?year=${year1}&plantId=${plantId}`
+  // const url = `${Config.CaseEngineUrl}/task/getCalculatedShutdownNorms?year=${year1}&plantId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/getShutdownNormsSPData?year=${year1}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
