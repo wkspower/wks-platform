@@ -97,6 +97,27 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService{
 				shutdownNormsValue.setId(UUID.fromString(shutdownNormsValueDTO.getId()));
 				shutdownNormsValue.setModifiedOn(new Date());
 			}else {
+				UUID plantId=null;
+				UUID siteId=null;
+				UUID verticalId=null;
+				UUID materialId=null;
+				if (shutdownNormsValueDTO.getSiteFkId() != null) {
+					 siteId=UUID.fromString(shutdownNormsValueDTO.getSiteFkId());
+				}
+				if (shutdownNormsValueDTO.getPlantFkId() != null) {
+					 plantId=UUID.fromString(shutdownNormsValueDTO.getPlantFkId());
+				}
+				if (shutdownNormsValueDTO.getVerticalFkId() != null) {
+					verticalId=UUID.fromString(shutdownNormsValueDTO.getVerticalFkId());
+				}
+				if (shutdownNormsValueDTO.getMaterialFkId() != null) {
+					materialId=UUID.fromString(shutdownNormsValueDTO.getMaterialFkId());
+				}
+				UUID Id=shutdownNormsRepository.findIdByFilters(plantId, siteId, verticalId, materialId, shutdownNormsValueDTO.getFinancialYear());
+				if(Id!=null) {
+					shutdownNormsValue.setId(Id);
+				}
+				
 				shutdownNormsValue.setCreatedOn(new Date());
 			}
 			shutdownNormsValue.setApril(Optional.ofNullable(shutdownNormsValueDTO.getApril()).orElse(0.0f));

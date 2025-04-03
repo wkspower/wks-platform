@@ -46,6 +46,18 @@ public interface ShutdownNormsRepository extends JpaRepository<ShutdownNormsValu
 		    WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL) ORDER BY NormTypeDisplayOrder
 		    """, nativeQuery = true)
 		List<Object[]> findByYearAndPlantFkId(@Param("year") String year, @Param("plantId") UUID plantId);
-
+		
+		@Query(value = "SELECT TOP 1 Id FROM ShutdownNormsValue " +
+                "WHERE Plant_FK_Id = :plantId " +
+                "AND Site_FK_Id = :siteId " +
+                "AND Vertical_FK_Id = :verticalId " +
+                "AND Material_FK_Id = :materialId " +
+                "AND FinancialYear = :financialYear", 
+        nativeQuery = true)
+		UUID findIdByFilters(@Param("plantId") UUID plantId,
+                      @Param("siteId") UUID siteId,
+                      @Param("verticalId") UUID verticalId,
+                      @Param("materialId") UUID materialId,
+                      @Param("financialYear") String financialYear);
 
 }
