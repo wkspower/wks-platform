@@ -126,14 +126,17 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		String storedProcedure=vertical.getName()+"_HMD_CalculateConsumptionAOPValues";
 		System.out.println(storedProcedure);
-		return executeDynamicUpdateProcedure(storedProcedure,year);
+		return executeDynamicUpdateProcedure(storedProcedure,plantId,site.getId().toString(), vertical.getId().toString(),year);
 	}
 	
 	@Transactional
-	public int executeDynamicUpdateProcedure(String procedureName, String finYear) {
-	    String sql = "EXEC " + procedureName + " @finYear = :finYear"; // Ensure correct parameter format
+	public int executeDynamicUpdateProcedure(String procedureName,String plantId, String siteId, String verticalId, String finYear) {
+		String sql = "EXEC " + procedureName + " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear";
 	    Query query = entityManager.createNativeQuery(sql);
-	    query.setParameter("finYear", finYear);
+	    query.setParameter("plantId", plantId);
+	     query.setParameter("siteId", siteId);
+	     query.setParameter("verticalId", verticalId);
+	     query.setParameter("finYear", finYear);
 	    
 	    return query.executeUpdate();
 	}
