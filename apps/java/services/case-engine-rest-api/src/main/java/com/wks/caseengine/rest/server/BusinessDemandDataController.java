@@ -25,6 +25,7 @@ public class BusinessDemandDataController {
 	
 	@GetMapping(value="/getBusinessDemandData")
 	public	List<BusinessDemandDataDTO> getBusinessDemandData(@RequestParam String year,@RequestParam String plantId){
+		System.out.println(plantId);
 		return businessDemandDataService.getBusinessDemandData(year,plantId);	
 	}
 	
