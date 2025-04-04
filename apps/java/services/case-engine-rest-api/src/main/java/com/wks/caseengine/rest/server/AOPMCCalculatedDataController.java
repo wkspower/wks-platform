@@ -29,4 +29,9 @@ public class AOPMCCalculatedDataController {
 		return aOPMCCalculatedDataService.editAOPMCCalculatedData(aOPMCCalculatedDataDTO);
 		
 	}
+	
+	@GetMapping(value="/getAOPMCCalculatedDataSP")
+	public  int getAOPMCCalculatedDataSP(@RequestParam String plantId, @RequestParam String year){
+		return aOPMCCalculatedDataService.getAOPMCCalculatedDataSP(plantId,year);
+	}
 }

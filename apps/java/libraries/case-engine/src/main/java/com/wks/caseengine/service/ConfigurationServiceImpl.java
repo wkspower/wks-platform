@@ -1,6 +1,7 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import jakarta.persistence.Query;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -26,23 +27,35 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.SiteRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.ConfigurationDataDTO;
+import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
 import com.wks.caseengine.entity.NormAttributeTransactions;
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 @Service
 public class ConfigurationServiceImpl implements ConfigurationService{
-	
-	@PersistenceContext
-    private EntityManager entityManager;
-	
 	
 
 	@Autowired
 	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
 	
+	
 	@Autowired
 	private PlantsRepository plantsRepository;
+	
+	@Autowired
+	private SiteRepository siteRepository;
+	
+	@Autowired
+	private VerticalsRepository verticalRepository;
+	
+	@PersistenceContext
+    private EntityManager entityManager;
 	
 	
 	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId) {
@@ -186,6 +199,49 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 		 }
 		 return configurationDTO.getJan();
 	 }
+	 @Transactional
+	 @Override
+	    public  List<NormAttributeTransactionReceipeDTO>  getNormAttributeTransactionReceipe(String year, String plantId) {
+		   Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+	        Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).orElseThrow();
+	        
+	        List<NormAttributeTransactionReceipeDTO> listDTO=new ArrayList<>();
+	        String storedProcedure = vertical.getName() + "_HMD_ReceipeWiseGradeDetail";
+	        System.out.println("Executing SP: " + storedProcedure);
+
+	        List<Object[]> results = getNormAttributeTransactionReceipeSP(storedProcedure, year, plant.getId().toString(), site.getId().toString(), vertical.getId().toString());
+	        
+	        for(Object[] row :results){
+	        	NormAttributeTransactionReceipeDTO dto = new NormAttributeTransactionReceipeDTO();
+	        	
+	        	dto.setGradeName(row[0] != null ? row[0].toString() : "");
+	        	dto.setReceipeName(row[1] != null ? row[1].toString() : "");
+	        	dto.setGradeFkId(row[2] != null ? row[2].toString() : "");
+	        	dto.setReciepeFkId(row[3] != null ? row[3].toString() : "");
+	        	dto.setAttributeValue(row[4] != null ? row[4].toString() : "");
+	        	
+	            listDTO.add(dto);
+	        }
+	        
+	        
+	        return listDTO;
+	 
+	 }
+	 
+	 @Transactional
+	    public List<Object[]> getNormAttributeTransactionReceipeSP(String procedureName, String finYear, String plantId, String siteId, String verticalId) {
+	        String sql = "EXEC " + procedureName + 
+	                     " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear";
+	        
+	        Query query = entityManager.createNativeQuery(sql);
+	        query.setParameter("plantId", plantId);
+	        query.setParameter("siteId", siteId);
+	        query.setParameter("verticalId", verticalId);
+	        query.setParameter("finYear", finYear);
+
+	        return query.getResultList();
+	    }
 
 	
 }

@@ -163,12 +163,6 @@ public class ProductServiceImpl implements ProductService {
 	    return query.getResultList();
 	}
 
-
-
-
-
-
-
 	public List<Object[]> getMonthlyDataForYear(int year) {
         String query = "SELECT NormParameter_FK_Id, month, monthValue, Remarks FROM NormParameterMonthlyTransaction WHERE year = :year";
         return entityManager.createNativeQuery(query).setParameter("year", year).getResultList();

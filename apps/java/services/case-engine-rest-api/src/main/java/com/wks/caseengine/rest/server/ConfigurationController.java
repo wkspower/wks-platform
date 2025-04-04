@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.ConfigurationDTO;
+import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
 import com.wks.caseengine.service.ConfigurationService;
 
 @RestController
@@ -31,6 +32,12 @@ public class ConfigurationController {
 	public List<ConfigurationDTO> saveConfigurationData(@RequestParam String year, @RequestBody List<ConfigurationDTO> configurationDTOList) {
 		configurationService.saveConfigurationData(year,configurationDTOList);
 		return configurationDTOList;
+	}
+	
+	@GetMapping(value="/getPeConfigData")
+	public  List<NormAttributeTransactionReceipeDTO> getNormAttributeTransactionReceipeSp(@RequestParam String year,@RequestParam String plantId){
+		return	 configurationService.getNormAttributeTransactionReceipe(year,plantId);
+		
 	}
 
 }

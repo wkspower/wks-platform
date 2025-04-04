@@ -10,5 +10,6 @@ public interface AOPMCCalculatedDataService {
 	
 	public  List<AOPMCCalculatedDataDTO> getAOPMCCalculatedData(String plantId, String year);
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList);
+	public  int getAOPMCCalculatedDataSP(String plantId, String year);
 
 }
