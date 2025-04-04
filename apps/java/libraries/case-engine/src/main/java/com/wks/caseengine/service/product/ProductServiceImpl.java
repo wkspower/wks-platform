@@ -21,11 +21,11 @@ import com.wks.caseengine.rest.entity.Product;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Verticals;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import com.wks.caseengine.repository.PlantsRepository;
-import com.wks.caseengine.repository.ShutdownNormsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 
@@ -49,7 +49,7 @@ public class ProductServiceImpl implements ProductService {
 	SiteRepository siteRepository;
 	
 	@Autowired
-	VerticalsRepository verticalRepository
+	VerticalsRepository verticalRepository;
 
 	@Override
 	public List<Product> getAllProducts() {
@@ -116,11 +116,11 @@ public class ProductServiceImpl implements ProductService {
 	public List<Object[]> getAllProductsFromNormParameters(String normParameterTypeName, UUID plantId) {
 	    System.out.println("normParameterTypeName: " + normParameterTypeName);
 	    
-	    Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+	    Plants plant = plantsRepository.findById(plantId).get();
 		//Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		if(vertical.getName().equalsIgnoreCase("PE")) {
-			return 	getProductsFromDynamicViewForPE( year,  plant.getId(),"vwGetAllProductsPE");
+			return 	getProductsFromDynamicViewForPE( "vwGetAllProductsPE",  plantId,normParameterTypeName);
 		}
 
 		if(normParameterTypeName.equalsIgnoreCase("BusinessDemandMEG")){
@@ -182,7 +182,7 @@ public class ProductServiceImpl implements ProductService {
         return query.getResultList();
 	}
 	
-	public List<Object[]> getProductsFromDynamicViewForPE(String viewName, UUID plantId, String normParameterTypeName) {
+	public List<Object[]> getProductsFromDynamicViewForPE(String viewName, UUID plantFkId, String normParameterTypeName) {
 		String sql = "SELECT NP.Id, NP.Name, NP.DisplayName FROM " + viewName + " NP, NormParameterType npt "
 				+ "WHERE npt.Id = NP.NormParameterType_FK_Id " + "AND NP.NormParameterType_FK_Id IS NOT NULL "
 				+ "AND NP.Plant_FK_Id = :plantFkId " + "AND npt.Name = :normParameterTypeName";
