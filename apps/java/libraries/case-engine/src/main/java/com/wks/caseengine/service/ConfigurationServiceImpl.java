@@ -32,10 +32,12 @@ import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.ConfigurationDataDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
+import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
+import com.wks.caseengine.repository.NormAttributeTransactionReceipeRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 @Service
 public class ConfigurationServiceImpl implements ConfigurationService{
@@ -247,8 +249,9 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	        return query.getResultList();
 	    }
 	    
-	    
+	   
 	    @Transactional
+		@Override
 	    public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms(
 	            String year, String plantId, 
 	            List<NormAttributeTransactionReceipeDTO> normAttributeTransactionReceipeDTOLists) {

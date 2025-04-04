@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
+import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
 import com.wks.caseengine.service.ConfigurationService;
 
 @RestController
