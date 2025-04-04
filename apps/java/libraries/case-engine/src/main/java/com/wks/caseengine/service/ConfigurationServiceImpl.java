@@ -57,6 +57,10 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	@PersistenceContext
     private EntityManager entityManager;
 	
+	@Autowired
+	NormAttributeTransactionReceipeRepository normAttributeTransactionReceipeRepository;
+	
+	
 	
 	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId) {
         System.out.println("GET CofigurationDataService==============================>");
@@ -219,7 +223,7 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	        	dto.setReceipeName(row[1] != null ? row[1].toString() : "");
 	        	dto.setGradeFkId(row[2] != null ? row[2].toString() : "");
 	        	dto.setReciepeFkId(row[3] != null ? row[3].toString() : "");
-	        	dto.setAttributeValue(row[4] != null ? row[4].toString() : "");
+	        	dto.setAttributeValue(row[4] != null ? Integer.parseInt(row[4].toString()) : null);
 	        	
 	            listDTO.add(dto);
 	        }
@@ -241,6 +245,39 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	        query.setParameter("finYear", finYear);
 
 	        return query.getResultList();
+	    }
+	    
+	    
+	    @Transactional
+	    public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms(
+	            String year, String plantId, 
+	            List<NormAttributeTransactionReceipeDTO> normAttributeTransactionReceipeDTOLists) {
+	        
+	        List<NormAttributeTransactionReceipe> normAttributeTransactionReceipelist = new ArrayList<>();
+
+	        for (NormAttributeTransactionReceipeDTO dto : normAttributeTransactionReceipeDTOLists) {
+	            UUID gradeUUId = dto.getGradeFkId() != null ? UUID.fromString(dto.getGradeFkId()) : null;
+	            UUID reciepeUUId = dto.getReciepeFkId() != null ? UUID.fromString(dto.getReciepeFkId()) : null;
+	            UUID plantUUId = plantId != null ? UUID.fromString(plantId) : null;
+	            
+
+	            NormAttributeTransactionReceipe normAttributeTransactionReceipeData =
+	                normAttributeTransactionReceipeRepository.findIdByFilters(year, plantUUId, gradeUUId, reciepeUUId);
+
+	            if (normAttributeTransactionReceipeData != null) { 
+	            	normAttributeTransactionReceipeData.setAttributeValue(dto.getAttributeValue());
+	            	normAttributeTransactionReceipeData.setModifiedOn(new Date());
+	                normAttributeTransactionReceipelist.add(normAttributeTransactionReceipeData);
+	            } else {
+	                throw new RuntimeException("No record found for update with given filters.");
+	            }
+	        }
+
+	        if (!normAttributeTransactionReceipelist.isEmpty()) {
+	            return normAttributeTransactionReceipeRepository.saveAll(normAttributeTransactionReceipelist);
+	        } else {
+	            throw new RuntimeException("No records available for update.");
+	        }
 	    }
 
 	
