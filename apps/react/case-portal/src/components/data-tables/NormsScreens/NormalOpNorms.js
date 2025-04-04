@@ -544,7 +544,7 @@ const NormalOpNormsScreen = () => {
           showUnit: false,
           saveWithRemark: true,
           saveBtn: true,
-          showCalculate: true,
+          showCalculate: lowerVertName == 'meg' ? true : false,
         }}
       />
     </div>

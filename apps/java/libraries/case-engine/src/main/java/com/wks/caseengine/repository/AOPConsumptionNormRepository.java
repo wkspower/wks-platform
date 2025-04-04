@@ -51,6 +51,20 @@ public interface AOPConsumptionNormRepository extends JpaRepository<AOPConsumpti
     @Query(value = "EXEC MEG_HMD_CalculateConsumptionAOPValues :finYear", nativeQuery = true)
 		int calculateExpressionConsumptionNorms(@Param("finYear") String finYear);
 
+
+		@Query(value = "SELECT TOP 1 Id FROM AOPConsumptionNorm " +
+                "WHERE Plant_FK_Id = :plantId " +
+                "AND Site_FK_Id = :siteId " +
+                "AND Vertical_FK_Id = :verticalId " +
+                "AND Material_FK_Id = :materialId " +
+                "AND AOPYear = :financialYear", 
+        nativeQuery = true)
+		UUID findIdByFilters(@Param("plantId") UUID plantId,
+                      @Param("siteId") UUID siteId,
+                      @Param("verticalId") UUID verticalId,
+                      @Param("materialId") UUID materialId,
+                      @Param("financialYear") String financialYear);
+
 }
 
 

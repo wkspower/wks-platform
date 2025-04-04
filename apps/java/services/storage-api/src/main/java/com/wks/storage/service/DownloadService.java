@@ -11,6 +11,9 @@
  */
 package com.wks.storage.service;
 
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ResponseEntity;
+
 import com.wks.storage.model.DownloadFileUrl;
 
 public interface DownloadService {
@@ -18,5 +21,7 @@ public interface DownloadService {
 	DownloadFileUrl createPresignedObjectUrl(String dir, String fileName, String contentType);
 
 	DownloadFileUrl createPresignedObjectUrl(String fileName, String contentType);
+
+	ResponseEntity<InputStreamResource> downloadObj(String dir, String fileName, String contentType);
 
 }

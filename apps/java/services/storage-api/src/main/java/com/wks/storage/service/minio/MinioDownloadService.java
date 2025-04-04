@@ -11,12 +11,17 @@
  */
 package com.wks.storage.service.minio;
 
+import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.wks.storage.driver.MinioClientDelegate;
@@ -24,6 +29,8 @@ import com.wks.storage.model.DownloadFileUrl;
 import com.wks.storage.service.BucketService;
 import com.wks.storage.service.DownloadService;
 
+import io.minio.GetObjectArgs;
+import io.minio.GetObjectResponse;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.http.Method;
 
@@ -65,6 +72,29 @@ public class MinioDownloadService implements DownloadService {
 		String url = client.getPresignedObjectUrl(signed);
 
 		return new DownloadFileUrl(url);
+	}
+
+	public ResponseEntity<InputStreamResource> downloadObj(String dir, String fileName, String contentType){
+		// Generate pre-signed URL for GET (Download)
+		String bucketName = bucketService.createAssignedTenant();
+		String objectName = fileName;
+		if (dir != null && !dir.isBlank()) {
+			objectName = bucketService.createObjectWithPath(dir, fileName);
+		}
+		GetObjectArgs getObjectArgs = GetObjectArgs.builder().bucket(bucketName).object(objectName).build();
+		GetObjectResponse response = client.getObject(getObjectArgs);
+	    String fileContentType = response.headers().get(HttpHeaders.CONTENT_TYPE);
+	    if (fileContentType == null) {
+	        fileContentType = "application/octet-stream"; // Default content type for unknown files
+	    }
+	    InputStream fileInputStream = new BufferedInputStream(response); // Buffered stream for efficiency
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
+	    headers.add(HttpHeaders.CONTENT_TYPE, fileContentType); // Use content type from MinIO response
+        
+	    return ResponseEntity.ok()
+	            .headers(headers)
+	            .body(new InputStreamResource(fileInputStream));
 	}
 
 }

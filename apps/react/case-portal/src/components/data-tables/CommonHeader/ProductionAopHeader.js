@@ -1,5 +1,7 @@
 // import { useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import productionColDefs from '../../../assets/production_aop.json' // Adjust path as needed
+import productionColDefsPE from '../../../assets/production_aop_pe.json' // Adjust path as needed
 import Tooltip from '@mui/material/Tooltip'
 import { truncateRemarks } from 'utils/remarksUtils'
 
@@ -9,12 +11,20 @@ const getEnhancedColDefs = ({
   handleRemarkCellClick,
   findSum,
 }) => {
-  // const dataGridStore = useSelector((state) => state.dataGridStore)
-  // const { verticalChange } = dataGridStore
-  // const vertName = verticalChange?.selectedVertical
-  // const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { verticalChange } = dataGridStore
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
 
-  const enhancedColDefs = productionColDefs.map((col) => {
+  let cols
+
+  if (lowerVertName == 'pe') {
+    cols = productionColDefsPE
+  } else {
+    cols = productionColDefs
+  }
+
+  const enhancedColDefs = cols.map((col) => {
     let updatedCol = { ...col }
 
     // For the normParametersFKId column, change the header based on vertical:
@@ -35,9 +45,7 @@ const getEnhancedColDefs = ({
           }
         },
         valueFormatter: (params) => {
-          // console.log(params)
           const product = allProducts.find((p) => p.id === params)
-          // if (product?.displayName?.length > 0)
           return product ? product.displayName : ''
         },
         renderEditCell: (params) => {

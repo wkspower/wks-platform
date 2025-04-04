@@ -24,6 +24,7 @@ const ProductionNorms = ({ permissions }) => {
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [loading, setLoading] = useState(false)
+  const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -50,7 +51,6 @@ const ProductionNorms = ({ permissions }) => {
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     if (newRow.id === 'total') {
-      // Prevent updates on the total row
       return newRow
     }
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
@@ -75,10 +75,7 @@ const ProductionNorms = ({ permissions }) => {
         (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
       )
       const rowsToSave = updatedRows.filter((row) => row.id !== 'total')
-      // console.log(rowsToSave)
-      // console.log(editedData)
 
-      //  console.log(updatedRows)
       if (updatedRows.length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -100,15 +97,32 @@ const ProductionNorms = ({ permissions }) => {
         return
       }
       // const finalData = [...rowsToSave, editedData]
-      // console.log(finalData)
-      updateProductNormData(rowsToSave)
+      // console.log('calculatebtnClicked', calculatebtnClicked)
+
+      if (calculatebtnClicked == false) {
+        if (editedData.length === 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          setCalculatebtnClicked(false)
+          return
+        }
+
+        updateProductNormData(editedData)
+      } else {
+        updateProductNormData(rowsToSave)
+      }
     } catch (error) {
       console.log('Error saving changes:', error)
+      setCalculatebtnClicked(false)
     }
-  }, [apiRef, selectedUnit])
+  }, [apiRef, selectedUnit, calculatebtnClicked])
 
   const updateProductNormData = async (newRow) => {
     setLoading(true)
+
     try {
       let plantId = ''
       const isKiloTon = selectedUnit != 'Ton'
@@ -146,7 +160,7 @@ const ProductionNorms = ({ permissions }) => {
         march: isKiloTon && row.march ? row.march * 1000 : row.march || null,
         // avgTPH: findAvg('1', row) || null,
         avgTPH: findSum('1', row) || null,
-        aopRemarks: row.aopRemarks || 'remarks',
+        aopRemarks: row.aopRemarks,
         id: row.idFromApi || null,
       }))
 
@@ -161,11 +175,13 @@ const ProductionNorms = ({ permissions }) => {
           message: 'Production AOP Saved Successfully !',
           severity: 'success',
         })
+        setCalculatebtnClicked(false)
         setLoading(false)
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},
         }
+        setCalculatebtnClicked(false)
         fetchData()
       } else {
         setSnackbarOpen(true)
@@ -174,6 +190,7 @@ const ProductionNorms = ({ permissions }) => {
           severity: 'error',
         })
         setLoading(false)
+        setCalculatebtnClicked(false)
       }
     } catch (error) {
       console.error('Error Saving Production AOP:', error)
@@ -184,10 +201,12 @@ const ProductionNorms = ({ permissions }) => {
       })
     } finally {
       setLoading(false)
+      setCalculatebtnClicked(false)
     }
   }
 
   const handleCalculate = async () => {
+    setCalculatebtnClicked(true)
     setLoading(true)
     try {
       const year = localStorage.getItem('year')
@@ -238,9 +257,19 @@ const ProductionNorms = ({ permissions }) => {
         if (formattedData) {
           totalRows = totalRow(formattedData)
         }
+
         const finalData = [...formattedData, totalRows]
-        setRows(finalData)
-        // setRows(formattedData)
+
+        if (lowerVertName == 'pe') {
+          setRows(finalData)
+        }
+        if (lowerVertName == 'meg') {
+          setRows(formattedData)
+        } else {
+          setRows(finalData)
+        }
+
+        // setRows(finalData)
         setLoading(false)
       } else {
         setSnackbarOpen(true)
@@ -302,13 +331,21 @@ const ProductionNorms = ({ permissions }) => {
           }),
         }
       })
-      console.log(formattedData)
+
       let totalRows = []
       if (formattedData.length > 0) {
         totalRows = totalRow(formattedData)
       }
       const finalData = [...formattedData, totalRows]
-      setRows(finalData)
+
+      if (lowerVertName == 'pe') {
+        setRows(finalData)
+      }
+      if (lowerVertName == 'meg') {
+        setRows(formattedData)
+      } else {
+        setRows(finalData)
+      }
 
       // setRows(formattedData)
       setLoading(false) // Hide loading

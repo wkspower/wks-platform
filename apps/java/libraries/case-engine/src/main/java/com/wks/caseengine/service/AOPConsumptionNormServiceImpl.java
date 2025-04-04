@@ -1,6 +1,7 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import jakarta.persistence.EntityManager;
@@ -79,7 +80,41 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 	public List<AOPConsumptionNormDTO> saveAOPConsumptionNorm(List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList) {
 		
 		for(AOPConsumptionNormDTO aOPConsumptionNormDTO:aOPConsumptionNormDTOList) {
+			
+
 			AOPConsumptionNorm aOPConsumptionNorm=new AOPConsumptionNorm();
+
+			// AOPConsumptionNorm aOPConsumptionNorm = new AOPConsumptionNorm();
+
+			if (aOPConsumptionNormDTO.getId() != null && !aOPConsumptionNormDTO.getId().isEmpty()) {
+				aOPConsumptionNorm.setId(UUID.fromString(aOPConsumptionNormDTO.getId()));
+				// aOPConsumptionNorm.setModifiedOn(new Date());
+			} else {
+				UUID plantId = null;
+				UUID siteId = null;
+				UUID verticalId = null;
+				UUID materialId = null;
+	
+				if (aOPConsumptionNormDTO.getSiteFkId() != null) {
+					siteId = UUID.fromString(aOPConsumptionNormDTO.getSiteFkId());
+				}
+				if (aOPConsumptionNormDTO.getPlantFkId() != null) {
+					plantId = UUID.fromString(aOPConsumptionNormDTO.getPlantFkId());
+				}
+				if (aOPConsumptionNormDTO.getVerticalFkId() != null) {
+					verticalId = UUID.fromString(aOPConsumptionNormDTO.getVerticalFkId());
+				}
+				if (aOPConsumptionNormDTO.getMaterialFkId() != null) {
+					materialId = UUID.fromString(aOPConsumptionNormDTO.getMaterialFkId());
+				}
+	
+				UUID Id = aOPConsumptionNormRepository.findIdByFilters(plantId, siteId, verticalId, materialId, aOPConsumptionNormDTO.getAopYear());
+				if (Id != null) {
+					aOPConsumptionNorm.setId(Id);
+				}
+	
+				// aOPConsumptionNorm.setCreatedOn(new Date());
+			}
 			aOPConsumptionNorm.setAopCaseId(aOPConsumptionNormDTO.getAopCaseId());
 			aOPConsumptionNorm.setAopCaseId(aOPConsumptionNormDTO.getAopCaseId());
 			aOPConsumptionNorm.setAopRemarks(aOPConsumptionNormDTO.getAopRemarks());

@@ -19,6 +19,8 @@ import java.util.Map;
 import com.wks.storage.exception.StorageException;
 
 import io.minio.BucketExistsArgs;
+import io.minio.GetObjectArgs;
+import io.minio.GetObjectResponse;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
@@ -75,6 +77,17 @@ public class MinioClientDelegateImpl implements MinioClientDelegate {
 	public Map<String, String> getPresignedPostFormData(PostPolicy policy) {
 		try {
 			return delegate.getPresignedPostFormData(policy);
+		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
+				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
+				| IOException e) {
+			throw new StorageException(e);
+		}
+	}
+
+	@Override
+	public GetObjectResponse getObject(GetObjectArgs args) {
+		try {
+			return delegate.getObject(args);
 		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
 				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
 				| IOException e) {

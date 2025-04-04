@@ -17,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.wks.storage.driver.MinioClientDelegate;
@@ -26,6 +28,8 @@ import com.wks.storage.service.DownloadService;
 
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.http.Method;
+
+
 
 @Service("DigitalOceanDownloadService")
 public class DigitalOceanDownloadService implements DownloadService {
@@ -66,5 +70,11 @@ public class DigitalOceanDownloadService implements DownloadService {
 
 		return new DownloadFileUrl(url);
 	}
+		@Override
+	public ResponseEntity<InputStreamResource> downloadObj(String dir, String fileName, String contentType) {
+		
+		return null;
+	}
+
 
 }

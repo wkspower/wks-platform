@@ -40,6 +40,12 @@ public class FilesController {
 		return ResponseEntity.ok(downloadService().createPresignedObjectUrl(dir, fileName, contentType));
 	}
 
+	@GetMapping(value = "/storage/files1/{dir}/downloads/{fileName}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+	public ResponseEntity<?> downloadFileWithDir1(@PathVariable(required = true) String dir, @PathVariable(required = true) String fileName, @RequestParam(name = "content-type", required = true) String contentType) {
+		System.out.println("ratnesh controller line 46");
+		return downloadService().downloadObj(dir, fileName, contentType);
+	}
+
 	@GetMapping(value = "/storage/files/downloads/{fileName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<DownloadFileUrl> downloadFile(@PathVariable(required = true) String fileName,
 			@RequestParam(name = "content-type", required = true) String contentType) {

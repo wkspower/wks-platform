@@ -14,6 +14,7 @@ const headerMap = generateHeaderNames()
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
+import { validateFields } from 'utils/validationUtils'
 
 const ShutdownNorms = () => {
   const [loading, setLoading] = useState(false)
@@ -30,10 +31,12 @@ const ShutdownNorms = () => {
     severity: 'info',
   })
 
+  const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
 
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('TPH')
@@ -75,7 +78,9 @@ const ShutdownNorms = () => {
     if (lowerVertName == 'pe') {
       try {
         var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
-        const allRows = Array.from(apiRef.current.getRowModels().values())
+        var allRows = Array.from(apiRef.current.getRowModels().values())
+        allRows = allRows.filter((row) => !row.isGroupHeader)
+
         const updatedRows = allRows.map(
           (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
         )
@@ -101,13 +106,29 @@ const ShutdownNorms = () => {
           setLoading(false)
           return
         }
-        saveShutDownNormsData(updatedRows)
+
+        if (calculatebtnClicked == false) {
+          if (editedData.length === 0) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: 'No Records to Save!',
+              severity: 'info',
+            })
+            setCalculatebtnClicked(false)
+            return
+          }
+
+          saveShutDownNormsData(editedData)
+        } else {
+          saveShutDownNormsData(updatedRows)
+        }
       } catch (error) {
         console.log('Error saving changes:', error)
         setLoading(false)
+        setCalculatebtnClicked(false)
       }
     }
-  }, [apiRef, selectedUnit])
+  }, [apiRef, selectedUnit, calculatebtnClicked])
 
   useEffect(() => {
     const getAllProducts = async () => {
@@ -410,6 +431,8 @@ const ShutdownNorms = () => {
           message: `Shutdown Norms Saved Successfully!`,
           severity: 'success',
         })
+        setCalculatebtnClicked(false)
+
         // fetchData()
         return response
       } else {
@@ -418,11 +441,13 @@ const ShutdownNorms = () => {
           message: `Shutdown Norms not saved!`,
           severity: 'error',
         })
+        setCalculatebtnClicked(false)
       }
     } catch (error) {
       console.error(`Error saving Shutdown Norms`, error)
     } finally {
       fetchData()
+      setCalculatebtnClicked(false)
     }
   }
 
@@ -512,7 +537,7 @@ const ShutdownNorms = () => {
       setLoading(false)
     } catch (error) {
       setLoading(false)
-      console.error('Error fetching Business Demand data:', error)
+      console.error('Error fetching data:', error)
     }
   }
 
@@ -525,6 +550,7 @@ const ShutdownNorms = () => {
   }, [])
 
   const handleCalculatePe = async () => {
+    setCalculatebtnClicked(true)
     setLoading(true)
     try {
       const year = localStorage.getItem('year')
@@ -560,8 +586,10 @@ const ShutdownNorms = () => {
           const formattedItem = {
             ...item,
             idFromApi: item.id,
-            NormParametersId: item.materialFkId.toLowerCase(),
+            // NormParametersId: item.materialFkId.toLowerCase(),
+            materialFkId: item?.materialFkId.toLowerCase(),
             id: groupId++,
+            remarks: item?.remarks?.trim() || null,
           }
 
           groups.get(groupKey).push(formattedItem)

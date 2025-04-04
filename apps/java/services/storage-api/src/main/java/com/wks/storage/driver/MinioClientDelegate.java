@@ -14,6 +14,8 @@ package com.wks.storage.driver;
 import java.util.Map;
 
 import io.minio.BucketExistsArgs;
+import io.minio.GetObjectArgs;
+import io.minio.GetObjectResponse;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.PostPolicy;
@@ -27,5 +29,7 @@ public interface MinioClientDelegate {
 	String getPresignedObjectUrl(GetPresignedObjectUrlArgs args);
 
 	Map<String, String> getPresignedPostFormData(PostPolicy policy);
+
+	GetObjectResponse getObject(GetObjectArgs args);
 
 }

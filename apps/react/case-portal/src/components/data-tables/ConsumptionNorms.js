@@ -27,6 +27,7 @@ const NormalOpNormsScreen = () => {
     message: '',
     severity: 'info',
   })
+  const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -132,6 +133,8 @@ const NormalOpNormsScreen = () => {
             message: 'No Records to Save!',
             severity: 'info',
           })
+          setLoading(false)
+
           return
         }
         const requiredFields = ['aopRemarks']
@@ -156,7 +159,8 @@ const NormalOpNormsScreen = () => {
     if (lowerVertName == 'pe') {
       try {
         var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
-        const allRows = Array.from(apiRef.current.getRowModels().values())
+        var allRows = Array.from(apiRef.current.getRowModels().values())
+        allRows = allRows.filter((row) => !row.isGroupHeader)
         const updatedRows = allRows.map(
           (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
         )
@@ -167,6 +171,8 @@ const NormalOpNormsScreen = () => {
             message: 'No Records to Save!',
             severity: 'info',
           })
+          setLoading(false)
+
           return
         }
 
@@ -179,14 +185,34 @@ const NormalOpNormsScreen = () => {
             message: validationMessage,
             severity: 'error',
           })
+          setLoading(false)
           return
         }
-        saveEditedData(updatedRows)
+
+        if (calculatebtnClicked == false) {
+          if (editedData.length === 0) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: 'No Records to Save!',
+              severity: 'info',
+            })
+            setLoading(false)
+
+            setCalculatebtnClicked(false)
+            return
+          }
+
+          saveEditedData(editedData)
+        } else {
+          saveEditedData(updatedRows)
+        }
       } catch (error) {
+        setLoading(false)
         console.log('Error saving changes:', error)
+        setCalculatebtnClicked(false)
       }
     }
-  }, [apiRef, selectedUnit])
+  }, [apiRef, selectedUnit, calculatebtnClicked])
 
   const fetchData = async () => {
     setLoading(true)
@@ -236,9 +262,11 @@ const NormalOpNormsScreen = () => {
       // setBDData(groupedRows)
       setRows(groupedRows)
       setLoading(false)
+      setCalculatebtnClicked(false)
     } catch (error) {
       console.error('Error fetching data:', error)
       setLoading(false)
+      setCalculatebtnClicked(false)
     }
   }
 
@@ -362,6 +390,7 @@ const NormalOpNormsScreen = () => {
             idFromApi: item.id,
             NormParametersId: item.materialFkId.toLowerCase(),
             id: groupId++,
+            aopRemarks: item?.aopRemarks?.trim() || null,
           }
 
           groups.get(groupKey).push(formattedItem)
