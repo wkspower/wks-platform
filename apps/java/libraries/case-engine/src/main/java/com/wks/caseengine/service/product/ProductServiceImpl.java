@@ -24,6 +24,10 @@ import jakarta.persistence.Query;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
+import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.ShutdownNormsRepository;
+import com.wks.caseengine.repository.SiteRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
 
 @Component
 public class ProductServiceImpl implements ProductService {
@@ -37,6 +41,15 @@ public class ProductServiceImpl implements ProductService {
 	
 	@Autowired
 	private ProductMonthWiseDataRepository productMonthWiseDataRepository;
+	
+	@Autowired
+	PlantsRepository plantsRepository;
+	
+	@Autowired
+	SiteRepository siteRepository;
+	
+	@Autowired
+	VerticalsRepository verticalRepository
 
 	@Override
 	public List<Product> getAllProducts() {
@@ -102,6 +115,13 @@ public class ProductServiceImpl implements ProductService {
 
 	public List<Object[]> getAllProductsFromNormParameters(String normParameterTypeName, UUID plantId) {
 	    System.out.println("normParameterTypeName: " + normParameterTypeName);
+	    
+	    Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		//Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		if(vertical.getName().equalsIgnoreCase("PE")) {
+			return 	getProductsFromDynamicViewForPE( year,  plant.getId(),"vwGetAllProductsPE");
+		}
 
 		if(normParameterTypeName.equalsIgnoreCase("BusinessDemandMEG")){
 			return getProductsFromDynamicView("vwScrnMEGBusinessDemandGetAllProducts" , plantId);
@@ -160,6 +180,18 @@ public class ProductServiceImpl implements ProductService {
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("plantId", plantId);
         return query.getResultList();
+	}
+	
+	public List<Object[]> getProductsFromDynamicViewForPE(String viewName, UUID plantId, String normParameterTypeName) {
+		String sql = "SELECT NP.Id, NP.Name, NP.DisplayName FROM " + viewName + " NP, NormParameterType npt "
+				+ "WHERE npt.Id = NP.NormParameterType_FK_Id " + "AND NP.NormParameterType_FK_Id IS NOT NULL "
+				+ "AND NP.Plant_FK_Id = :plantFkId " + "AND npt.Name = :normParameterTypeName";
+
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("plantFkId", plantFkId);
+		query.setParameter("normParameterTypeName", normParameterTypeName);
+
+		return query.getResultList();
 	}
 
 
