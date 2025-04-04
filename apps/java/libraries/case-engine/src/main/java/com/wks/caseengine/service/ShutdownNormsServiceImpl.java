@@ -43,7 +43,16 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService{
 	
 	@Override
 	public List<ShutdownNormsValueDTO> getShutdownNormsData(String year, String plantId) {
-		List<Object[]> objList = shutdownNormsRepository.findByYearAndPlantFkId(year, UUID.fromString(plantId));
+		List<Object[]> objList=null;
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		//Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		if(vertical.getName().equalsIgnoreCase("PE")) {
+			objList=	getShutdownNorms( year,  plant.getId(),"vwScrnPEShutdownNorms");
+		}else if(vertical.getName().equalsIgnoreCase("MEG")){
+			objList=	getShutdownNorms( year,  plant.getId(),"vwScrnShutdownNorms");
+		}
+		//List<Object[]> objList = shutdownNormsRepository.findByYearAndPlantFkId(year, UUID.fromString(plantId));
 		System.out.println("obj.size(): " + objList.size());
 		List<ShutdownNormsValueDTO> shutdownNormsValueDTOList = new ArrayList<>();
 		for (Object[] row : objList) {
@@ -221,5 +230,23 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService{
 	        return Collections.emptyList(); // Return an empty list instead of 0
 	    }
 	}
+	
+	public List<Object[]> getShutdownNorms(String year, UUID plantId, String viewName) {
+        String sql = "SELECT TOP (1000) [Id], [Site_FK_Id], [Plant_FK_Id], [Vertical_FK_Id], " +
+                "[Material_FK_Id], [April], [May], [June], [July], [August], [September], " +
+                "[October], [November], [December], [January], [February], [March], " +
+                "[FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [MCUVersion], " +
+                "[UpdatedBy], [NormParameterTypeId], [NormParameterTypeName], " +
+                "[NormParameterTypeDisplayName], [NormTypeDisplayOrder], [MaterialDisplayOrder], [UOM] " +
+                "FROM " + viewName + " " +
+                "WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL) " +
+                "ORDER BY NormTypeDisplayOrder";
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("plantId", plantId);
+        query.setParameter("year", year);
+
+        return query.getResultList();
+    }
 
 }
