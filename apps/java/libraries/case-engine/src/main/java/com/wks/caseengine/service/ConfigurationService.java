@@ -19,6 +19,6 @@ public interface ConfigurationService {
 	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId);
     public List<ConfigurationDTO> saveConfigurationData( String year,  List<ConfigurationDTO> configurationDTOList);
     public  List<NormAttributeTransactionReceipeDTO>  getNormAttributeTransactionReceipe(String year, String plantId);
-    public List<NormAttributeTransactionReceipe> NormAttributeTransactionReceipe(String year,String plantId,List<NormAttributeTransactionReceipeDTO> normAttributeTransactionReceipeDTOList);
+    public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms( String year, String plantId,  List<NormAttributeTransactionReceipeDTO> normAttributeTransactionReceipeDTOLists);
 
 }

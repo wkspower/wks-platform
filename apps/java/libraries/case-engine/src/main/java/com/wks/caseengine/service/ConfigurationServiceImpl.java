@@ -252,9 +252,7 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	   
 	    @Transactional
 		@Override
-	    public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms(
-	            String year, String plantId, 
-	            List<NormAttributeTransactionReceipeDTO> normAttributeTransactionReceipeDTOLists) {
+	    public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms( String year, String plantId,  List<NormAttributeTransactionReceipeDTO> normAttributeTransactionReceipeDTOLists) {
 	        
 	        List<NormAttributeTransactionReceipe> normAttributeTransactionReceipelist = new ArrayList<>();
 
