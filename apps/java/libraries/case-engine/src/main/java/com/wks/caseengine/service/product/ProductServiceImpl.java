@@ -115,13 +115,6 @@ public class ProductServiceImpl implements ProductService {
 
 	public List<Object[]> getAllProductsFromNormParameters(String normParameterTypeName, UUID plantId) {
 	    System.out.println("normParameterTypeName: " + normParameterTypeName);
-	    
-	    Plants plant = plantsRepository.findById(plantId).get();
-		//Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-		if(vertical.getName().equalsIgnoreCase("PE")) {
-			return 	getProductsFromDynamicViewForPE( "vwGetAllProductsPE",  plantId,normParameterTypeName);
-		}
 
 		if(normParameterTypeName.equalsIgnoreCase("BusinessDemandMEG")){
 			return getProductsFromDynamicView("vwScrnMEGBusinessDemandGetAllProducts" , plantId);
