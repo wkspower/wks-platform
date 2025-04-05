@@ -42,7 +42,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 	@Override
 	public List<MCUNormsValueDTO> getNormalOperationNormsData(String year, String plantId) {
-		List<Object[]> obj = normalOperationNormsRepository.findByYearAndPlantFkId(year, UUID.fromString(plantId));
+		List<Object[]> obj = getNormalOperationNormsDataFromView(year, UUID.fromString(plantId));
 		List<MCUNormsValueDTO> mCUNormsValueDTOList = new ArrayList<>();
 
 		for (Object[] row : obj) {
@@ -163,59 +163,24 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
             return 0; 
         }
     }
-	// @Transactional
-	// public List<Object[]> getCalculatedNormalOpsNormsSP(String procedureName, String finYear,String plantId, String siteId, String verticalId) {
-	//     try {
-	//     	 // Create a native query to execute the stored procedure
-	//         String sql = "EXEC " + procedureName + 
-	//                      " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear";
-	        
-	//         Query query = entityManager.createNativeQuery(sql);
-	        
-	//         // Set parameters
-	//         query.setParameter("plantId", plantId);
-	//         query.setParameter("siteId", siteId);
-	//         query.setParameter("verticalId", verticalId);
-	//         query.setParameter("finYear", finYear);
+		 
+	@Transactional
+	public List<Object[]> getNormalOperationNormsDataFromView(String financialYear,UUID plantId){
+		Plants plant = plantsRepository.findById(plantId).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		
+		
+		String viewName="vwScrn"+vertical.getName()+"NormalOperationNorms";
+		 // Validate or sanitize viewName before using it directly in the query to prevent SQL injection
+        String sql = "SELECT * FROM " + viewName +
+                     " WHERE FinancialYear = :financialYear AND Plant_FK_Id = :plantId" +
+                     " ORDER BY NormParameterTypeDisplayName";
 
-	//         return query.getResultList(); // Fetch results instead of executing an update
-	//     } catch (Exception e) {
-	//         e.printStackTrace(); // Log detailed exception for debugging
-	//         return Collections.emptyList(); // Return an empty list instead of 0
-	//     }
-	// }
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("financialYear", financialYear);
+        query.setParameter("plantId", plantId);
 
-
-	// @Transactional
-	// public int getCalculatedNormalOpsNormsSP(String procedureName, String finYear, String plantId, String siteId, String verticalId) {
-	// 	try {
-	// 		String sql = "EXEC " + procedureName + 
-	// 					 " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear";
-	// 		Query query = entityManager.createNativeQuery(sql);
-	// 		query.setParameter("plantId", plantId);
-	// 		query.setParameter("siteId", siteId);
-	// 		query.setParameter("verticalId", verticalId);
-	// 		query.setParameter("finYear", finYear);
-	
-	// 		return query.executeUpdate(); // returns number of rows affected
-	// 	} catch (Exception e) {
-	// 		e.printStackTrace();
-	// 		return -1; // return -1 or any error code to indicate failure
-	// 	}
-	// }
-	
-
-
-	// @Override
-	// @Transactional
-	// public List<Object[]> getCalculatedNormalOpsNorms(String year, String plantId) {
-	// 	Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
-	// 	Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-	// 	Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-	// 	String storedProcedure=vertical.getName()+"_HMD_NormsCalculation";
-	// 	return getCalculatedNormalOpsNormsSP(storedProcedure,year,plant.getId().toString(),site.getId().toString(),vertical.getId().toString());
-	// 	// TODO Auto-generated method stub
-	// }
-	 
+        return query.getResultList(); // You can cast this to a DTO later
+	}
 
 }

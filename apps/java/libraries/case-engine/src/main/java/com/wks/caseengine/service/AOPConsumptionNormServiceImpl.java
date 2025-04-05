@@ -40,7 +40,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 
 	@Override
 	public List<AOPConsumptionNormDTO> getAOPConsumptionNorm(String plantId, String year) {
-	    List<Object[]> resultList = aOPConsumptionNormRepository.findByPlantFkIdAndAopYear(UUID.fromString(plantId), year);
+	    List<Object[]> resultList = getAOPConsumptionNormDataFromView(year,UUID.fromString(plantId));
 	    List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList = new ArrayList<>();
 
 	    for (Object[] row : resultList) {
@@ -245,6 +245,23 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 	        return query.getResultList();
 	    }
 
+	    @Transactional
+		public List<Object[]> getAOPConsumptionNormDataFromView(String aopYear,UUID plantFkId){
+			Plants plant = plantsRepository.findById(plantFkId).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			
+			
+			String viewName="vwScrn"+vertical.getName()+"AOPConsumptionNorms";
+			 String sql = "SELECT * FROM " + viewName +
+	                 " WHERE Plant_FK_Id = :plantFkId AND AOPYear = :aopYear" +
+	                 " ORDER BY NormParameterType_DisplayName";
+
+	    Query query = entityManager.createNativeQuery(sql);
+	    query.setParameter("plantFkId", plantFkId);
+	    query.setParameter("aopYear", aopYear);
+
+	    return query.getResultList(); // Later you can map this to a
+		}
 
 
 }
