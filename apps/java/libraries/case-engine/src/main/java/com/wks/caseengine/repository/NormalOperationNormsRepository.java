@@ -29,7 +29,7 @@ public interface NormalOperationNormsRepository extends JpaRepository<MCUNormsVa
 		
 		@Modifying
 		@Transactional
-		@Query(value = "EXEC MEG_HMD_CalculateExpressionConsumptionNorms :finYear", nativeQuery = true)
+		@Query(value = "EXEC MEG_HMD_CalculateShutdownNorms :finYear", nativeQuery = true)
 		int calculateExpressionConsumptionNorms(@Param("finYear") String finYear);
 
 }

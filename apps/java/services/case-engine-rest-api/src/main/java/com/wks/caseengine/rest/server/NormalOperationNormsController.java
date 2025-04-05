@@ -39,9 +39,9 @@ public class NormalOperationNormsController {
 		return normalOperationNormsService.calculateExpressionConsumptionNorms(year,plantId);
 	}
 	
-	@GetMapping(value="/getCalculatedNormalOpsNorms")
-	public List<Object[]> getCalculatedNormalOpsNorms(@RequestParam String year,@RequestParam String plantId){
-		return normalOperationNormsService.getCalculatedNormalOpsNorms(year,plantId);
-	}
+	// @GetMapping(value="/getCalculatedNormalOpsNorms")
+	// public List<Object[]> getCalculatedNormalOpsNorms(@RequestParam String year,@RequestParam String plantId){
+	// 	return normalOperationNormsService.getCalculatedNormalOpsNorms(year,plantId);
+	// }
 
 }

@@ -10,6 +10,7 @@ public interface SlowdownPlanService {
 	
 	public List<ShutDownPlanDTO> findSlowdownDetailsByPlantIdAndType(UUID plantId,String maintenanceTypeName,String year);
 	public List<ShutDownPlanDTO> saveShutdownData( UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList);
+	// public List<ShutDownPlanDTO> saveShutdownData2( UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList);
 	public List<ShutDownPlanDTO> editShutdownData(UUID plantMaintenanceTransactionId, List<ShutDownPlanDTO> shutDownPlanDTOList); 
 
 }

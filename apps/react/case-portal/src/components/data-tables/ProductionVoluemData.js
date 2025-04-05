@@ -342,6 +342,56 @@ const ProductionvolumeData = ({ permissions }) => {
     setSelectedUnit(unit)
   }
 
+  const handleCalculate = () => {
+    if (lowerVertName == 'meg') {
+      handleCalculateMeg()
+    } else {
+      // handleCalculatePe()
+    }
+  }
+
+  const handleCalculateMeg = async () => {
+    try {
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const year = localStorage.getItem('year')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      var plantId = plantId
+      const data = await DataService.handleCalculateProductionVolData(
+        plantId,
+        year,
+        keycloak,
+      )
+
+      if (data || data == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data refreshed successfully!',
+          severity: 'success',
+        })
+        fetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refresh Falied!',
+          severity: 'error',
+        })
+      }
+
+      return data
+    } catch (error) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: error.message || 'An error occurred',
+        severity: 'error',
+      })
+      console.error('Error!', error)
+    }
+  }
+
   return (
     <div>
       <Backdrop
@@ -382,6 +432,7 @@ const ProductionvolumeData = ({ permissions }) => {
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
+        handleCalculate={handleCalculate}
         permissions={{
           showAction: permissions?.showAction ?? true,
           addButton: permissions?.addButton ?? false,
@@ -393,6 +444,7 @@ const ProductionvolumeData = ({ permissions }) => {
           saveBtn: permissions?.saveBtn ?? true,
           units: ['TPH', 'TPD'],
           customHeight: permissions?.customHeight,
+          showCalculate: lowerVertName == 'meg' ? true : false,
         }}
       />
     </div>

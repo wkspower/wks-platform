@@ -45,7 +45,13 @@ const NormalOpNormsScreen = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const data = await DataService.getNormalOperationNormsData(keycloak)
+      var data = []
+      // const data = await DataService.getNormalOperationNormsData(keycloak)
+      data = await DataService.getNormalOperationNormsData(keycloak)
+
+      data = data.filter(
+        (item) => item.normParameterTypeDisplayName !== 'Configuration',
+      )
 
       // const customOrder = [
       //   'Raw Material',
@@ -463,7 +469,7 @@ const NormalOpNormsScreen = () => {
         plantId = parsedPlant.id
       }
       var plantId = plantId
-      const data = await DataService.handleCalculateNormalOpsNorms(
+      const data = await DataService.handleCalculateNormalOpsNorms34(
         plantId,
         year,
         keycloak,

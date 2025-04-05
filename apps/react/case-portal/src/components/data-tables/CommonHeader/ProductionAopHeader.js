@@ -4,6 +4,7 @@ import productionColDefs from '../../../assets/production_aop.json' // Adjust pa
 import productionColDefsPE from '../../../assets/production_aop_pe.json' // Adjust path as needed
 import Tooltip from '@mui/material/Tooltip'
 import { truncateRemarks } from 'utils/remarksUtils'
+import NumericInputOnly from 'utils/NumericInputOnly'
 
 const getEnhancedColDefs = ({
   allProducts,
@@ -15,6 +16,9 @@ const getEnhancedColDefs = ({
   const { verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
+
+  const formatValueToThreeDecimals = (params) =>
+    params ? parseFloat(params).toFixed(3) : ''
 
   let cols
 
@@ -121,6 +125,8 @@ const getEnhancedColDefs = ({
       updatedCol = {
         ...updatedCol,
         headerName: headerMap[col.headerName],
+        valueFormatter: formatValueToThreeDecimals,
+        renderEditCell: NumericInputOnly,
       }
     }
 

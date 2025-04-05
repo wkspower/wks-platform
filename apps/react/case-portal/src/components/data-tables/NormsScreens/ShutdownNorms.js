@@ -591,6 +591,11 @@ const ShutdownNorms = () => {
             id: groupId++,
             remarks: item?.remarks?.trim() || null,
           }
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Data refreshed successfully!',
+            severity: 'success',
+          })
 
           groups.get(groupKey).push(formattedItem)
           groupedRows.push(formattedItem)

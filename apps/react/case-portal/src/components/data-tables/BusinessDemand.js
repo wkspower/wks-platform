@@ -14,8 +14,6 @@ import { validateFields } from 'utils/validationUtils'
 const BusinessDemand = ({ permissions }) => {
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
-  // const [bdData, setBDData] = useState([])
-  //test
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -30,7 +28,6 @@ const BusinessDemand = ({ permissions }) => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  // States for the Remark Dialog
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -98,11 +95,12 @@ const BusinessDemand = ({ permissions }) => {
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(
-          keycloak,
-          // lowerVertName === 'meg' ? 'Production' : 'Grade',
-          null,
-        )
+        var data = []
+        if (lowerVertName == 'meg')
+          data = await DataService.getAllProducts(keycloak, null)
+        else {
+          data = await DataService.getAllProductsAll(keycloak, 'Production')
+        }
         var productList = []
         if (lowerVertName === 'meg') {
           productList = data
@@ -243,7 +241,7 @@ const BusinessDemand = ({ permissions }) => {
         keycloak,
       )
 
-      // console.log(response?.length > 0)
+      // console.log(response)
 
       // if (response.status == 200) {
       setSnackbarOpen(true)
@@ -295,7 +293,7 @@ const BusinessDemand = ({ permissions }) => {
   return (
     <div>
       {/* <div>
-        {`Plant: ${verticalChange?.selectedVertical?.selectedPlant}, Site: ${verticalChange?.selectedVertical?.selectedSite}, Vertical: ${verticalChange?.selectedVertical?.selectedVertical}`}
+        {`Plant: ${verticalChange?.verticalChange?.selectedPlant}, Site: ${verticalChange?.verticalChange?.selectedSite}, Vertical: ${verticalChange?.verticalChange?.selectedVertical}`}
       </div> */}
 
       <Backdrop

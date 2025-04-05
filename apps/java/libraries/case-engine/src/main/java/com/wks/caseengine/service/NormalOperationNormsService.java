@@ -8,6 +8,6 @@ public interface NormalOperationNormsService {
 	public List<MCUNormsValueDTO> getNormalOperationNormsData( String year, String plantId);
 	public List<MCUNormsValueDTO> saveNormalOperationNormsData( List<MCUNormsValueDTO> mCUNormsValueDTOList);
 	public int calculateExpressionConsumptionNorms(String year,String plantId);
-	public List<Object[]> getCalculatedNormalOpsNorms( String year, String plantId);
+	// public int getCalculatedNormalOpsNorms( String year, String plantId);
 
 }

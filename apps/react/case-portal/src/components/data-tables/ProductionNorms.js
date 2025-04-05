@@ -146,18 +146,80 @@ const ProductionNorms = ({ permissions }) => {
         verticalFKId: localStorage.getItem('verticalId'),
         // normItem: getProductName('1', row.normParametersFKId) || null,
         // normItem: 'EOE',
-        april: isKiloTon && row.april ? row.april * 1000 : row.april || null,
-        may: isKiloTon && row.may ? row.may * 1000 : row.may || null,
-        june: isKiloTon && row.june ? row.june * 1000 : row.june || null,
-        july: isKiloTon && row.july ? row.july * 1000 : row.july || null,
-        aug: isKiloTon && row.aug ? row.aug * 1000 : row.aug || null,
-        sep: isKiloTon && row.sep ? row.sep * 1000 : row.sep || null,
-        oct: isKiloTon && row.oct ? row.oct * 1000 : row.oct || null,
-        nov: isKiloTon && row.nov ? row.nov * 1000 : row.nov || null,
-        dec: isKiloTon && row.dec ? row.dec * 1000 : row.dec || null,
-        jan: isKiloTon && row.jan ? row.jan * 1000 : row.jan || null,
-        feb: isKiloTon && row.feb ? row.feb * 1000 : row.feb || null,
-        march: isKiloTon && row.march ? row.march * 1000 : row.march || null,
+
+        april:
+          row.april === 0
+            ? 0
+            : isKiloTon && row.april
+              ? row.april * 1000
+              : row.april || null,
+        may:
+          row.may === 0
+            ? 0
+            : isKiloTon && row.may
+              ? row.may * 1000
+              : row.may || null,
+        june:
+          row.june === 0
+            ? 0
+            : isKiloTon && row.june
+              ? row.june * 1000
+              : row.june || null,
+        july:
+          row.july === 0
+            ? 0
+            : isKiloTon && row.july
+              ? row.july * 1000
+              : row.july || null,
+        aug:
+          row.aug === 0
+            ? 0
+            : isKiloTon && row.aug
+              ? row.aug * 1000
+              : row.aug || null,
+        sep:
+          row.sep === 0
+            ? 0
+            : isKiloTon && row.sep
+              ? row.sep * 1000
+              : row.sep || null,
+        oct:
+          row.oct === 0
+            ? 0
+            : isKiloTon && row.oct
+              ? row.oct * 1000
+              : row.oct || null,
+        nov:
+          row.nov === 0
+            ? 0
+            : isKiloTon && row.nov
+              ? row.nov * 1000
+              : row.nov || null,
+        dec:
+          row.dec === 0
+            ? 0
+            : isKiloTon && row.dec
+              ? row.dec * 1000
+              : row.dec || null,
+        jan:
+          row.jan === 0
+            ? 0
+            : isKiloTon && row.jan
+              ? row.jan * 1000
+              : row.jan || null,
+        feb:
+          row.feb === 0
+            ? 0
+            : isKiloTon && row.feb
+              ? row.feb * 1000
+              : row.feb || null,
+        march:
+          row.march === 0
+            ? 0
+            : isKiloTon && row.march
+              ? row.march * 1000
+              : row.march || null,
+
         // avgTPH: findAvg('1', row) || null,
         avgTPH: findSum('1', row) || null,
         aopRemarks: row.aopRemarks,
@@ -229,6 +291,7 @@ const ProductionNorms = ({ permissions }) => {
 
         const formattedData = data.map((item, index) => {
           const isKiloTon = selectedUnit != 'Ton'
+
           return {
             ...item,
             idFromApi: item.id,
@@ -237,18 +300,18 @@ const ProductionNorms = ({ permissions }) => {
               item?.materialFKId?.toLowerCase(),
             id: index,
             ...(isKiloTon && {
-              jan: item.jan ? item.jan / 1000 : item.jan,
-              feb: item.feb ? item.feb / 1000 : item.feb,
-              march: item.march ? item.march / 1000 : item.march,
-              april: item.april ? item.april / 1000 : item.april,
-              may: item.may ? item.may / 1000 : item.may,
-              june: item.june ? item.june / 1000 : item.june,
-              july: item.july ? item.july / 1000 : item.july,
-              aug: item.aug ? item.aug / 1000 : item.aug,
-              sep: item.sep ? item.sep / 1000 : item.sep,
-              oct: item.oct ? item.oct / 1000 : item.oct,
-              nov: item.nov ? item.nov / 1000 : item.nov,
-              dec: item.dec ? item.dec / 1000 : item.dec,
+              jan: item.jan != null ? item.jan / 1000 : item.jan,
+              feb: item.feb != null ? item.feb / 1000 : item.feb,
+              march: item.march != null ? item.march / 1000 : item.march,
+              april: item.april != null ? item.april / 1000 : item.april,
+              may: item.may != null ? item.may / 1000 : item.may,
+              june: item.june != null ? item.june / 1000 : item.june,
+              july: item.july != null ? item.july / 1000 : item.july,
+              aug: item.aug != null ? item.aug / 1000 : item.aug,
+              sep: item.sep != null ? item.sep / 1000 : item.sep,
+              oct: item.oct != null ? item.oct / 1000 : item.oct,
+              nov: item.nov != null ? item.nov / 1000 : item.nov,
+              dec: item.dec != null ? item.dec / 1000 : item.dec,
             }),
           }
         })

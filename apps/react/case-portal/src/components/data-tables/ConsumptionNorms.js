@@ -355,6 +355,8 @@ const NormalOpNormsScreen = () => {
 
   const handleCalculatePe = async () => {
     try {
+      setCalculatebtnClicked(true)
+
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
       if (storedPlant) {
@@ -392,6 +394,11 @@ const NormalOpNormsScreen = () => {
             id: groupId++,
             aopRemarks: item?.aopRemarks?.trim() || null,
           }
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Data refreshed successfully!',
+            severity: 'success',
+          })
 
           groups.get(groupKey).push(formattedItem)
           groupedRows.push(formattedItem)

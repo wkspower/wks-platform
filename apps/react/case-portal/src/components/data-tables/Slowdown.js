@@ -124,7 +124,7 @@ const SlowDown = ({ permissions }) => {
       }))
       const response = await DataService.saveSlowdownData(
         plantId,
-        lowerVertName === 'meg' ? slowDownDetailsMEG : slowDownDetails,
+        lowerVertName === 'meg' ? slowDownDetailsMEG : slowDownDetailsMEG,
         keycloak,
       )
       //console.log('Slowdown data Saved Successfully:', response)
@@ -245,10 +245,12 @@ const SlowDown = ({ permissions }) => {
   useEffect(() => {
     const getAllProducts = async () => {
       try {
-        const data = await DataService.getAllProducts(
-          keycloak,
-          lowerVertName === 'meg' ? 'Production' : 'Grade',
-        )
+        var data = []
+        if (lowerVertName == 'meg')
+          data = await DataService.getAllProducts(keycloak, null)
+        else {
+          data = await DataService.getAllProductsAll(keycloak, 'Production')
+        }
         var productList = []
         if (lowerVertName === 'meg') {
           productList = data
@@ -273,6 +275,37 @@ const SlowDown = ({ permissions }) => {
         // handleMenuClose();
       }
     }
+
+    // const saveShutdownData = async () => {
+    //   try {
+    //     // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D';
+    //     var plantId = ''
+
+    //     const storedPlant = localStorage.getItem('selectedPlant')
+    //     if (storedPlant) {
+    //       const parsedPlant = JSON.parse(storedPlant)
+    //       plantId = parsedPlant.id
+    //     }
+
+    //     const shutdownDetails = {
+    //       product: 'Oxygen',
+    //       discription: '1 Shutdown maintenance',
+    //       durationInHrs: 120,
+    //       maintEndDateTime: '2025-02-20T18:00:00Z',
+    //       maintStartDateTime: '2025-02-20T16:00:00Z',
+    //     }
+
+    //     const response = await DataService.saveShutdownData(
+    //       plantId,
+    //       shutdownDetails,
+    //       keycloak,
+    //     )
+    //     console.log('Shutdown data Saved Successfully:', response)
+    //     return response
+    //   } catch (error) {
+    //     console.error('Error saving shutdown data:', error)
+    //   }
+    // }
 
     fetchData()
     // saveShutdownData()
@@ -385,15 +418,17 @@ const SlowDown = ({ permissions }) => {
         return params ? dayjs(params).format('DD/MM/YYYY, h:mm:ss A') : ''
       },
     },
+
     lowerVertName === 'meg'
       ? {
           field: 'durationInHrs',
           headerName: 'Duration (hrs)',
-          editable: true,
+          editable: false,
           minWidth: 75,
           renderEditCell: NumericInputOnly,
           align: 'left',
           headerAlign: 'left',
+          valueGetter: findDuration,
         }
       : {
           field: 'durationInHrs',
