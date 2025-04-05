@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
+import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
 import com.wks.caseengine.service.ConfigurationService;
 
 @RestController
@@ -37,6 +38,12 @@ public class ConfigurationController {
 	@GetMapping(value="/getPeConfigData")
 	public  List<NormAttributeTransactionReceipeDTO> getNormAttributeTransactionReceipeSp(@RequestParam String year,@RequestParam String plantId){
 		return	 configurationService.getNormAttributeTransactionReceipe(year,plantId);
+		
+	}
+	
+	@PostMapping(value="/updatePeConfigData")
+	public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms(@RequestParam String year,@RequestParam String plantId,@RequestBody List<NormAttributeTransactionReceipeDTO> normAttributeTransactionReceipeDTOList){
+		return configurationService.updateCalculatedConsumptionNorms(year,plantId,normAttributeTransactionReceipeDTOList);
 		
 	}
 

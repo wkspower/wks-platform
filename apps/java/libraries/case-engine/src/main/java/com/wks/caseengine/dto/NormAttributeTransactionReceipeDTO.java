@@ -17,6 +17,6 @@ public class NormAttributeTransactionReceipeDTO {
 	private String receipeName;
 	private String gradeFkId;
 	private String reciepeFkId;
-	private String attributeValue;
+	private Integer attributeValue;
 
 }
