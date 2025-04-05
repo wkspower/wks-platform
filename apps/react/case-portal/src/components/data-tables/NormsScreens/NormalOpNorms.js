@@ -49,9 +49,9 @@ const NormalOpNormsScreen = () => {
       // const data = await DataService.getNormalOperationNormsData(keycloak)
       data = await DataService.getNormalOperationNormsData(keycloak)
 
-      data = data.filter(
-        (item) => item.normParameterTypeDisplayName !== 'Configuration',
-      )
+      // data = data.filter(
+      //   (item) => item.normParameterTypeDisplayName !== 'Configuration',
+      // )
 
       // const customOrder = [
       //   'Raw Material',

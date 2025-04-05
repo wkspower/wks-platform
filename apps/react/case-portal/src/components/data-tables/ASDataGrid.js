@@ -639,6 +639,12 @@ const DataGridTable = ({
           loading={loading}
           apiRef={apiRef}
           rows={filteredRows}
+          disableColumnFilter
+          disableColumnMenu
+          onFilterModelChange={() => {}}
+          disableColumnSelector
+          sortingOrder={[]}
+          disableSelectionOnClick
           columns={columns.map((col) => ({
             ...col,
             editable: col.field === 'product' ? true : col.editable,
