@@ -232,6 +232,7 @@ const SlowDown = ({ permissions }) => {
         ...item,
         idFromApi: item?.maintenanceId || item?.id,
         id: index,
+        originalRemark: item.remark,
       }))
       // setSlowDownData(formattedData)
       setRows(formattedData)

@@ -38,7 +38,7 @@ const NormalOpNormsScreen = () => {
     rowsBeforeChange: {},
   })
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remark || '')
+    setCurrentRemark(row.aopRemarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -252,6 +252,8 @@ const NormalOpNormsScreen = () => {
           ...item,
           idFromApi: item.id,
           NormParametersId: item.materialFkId.toLowerCase(),
+          // originalRemark: item.aopRemarks,
+          originalRemark: item.aopRemarks?.trim() || null,
           id: groupId++,
         }
 
@@ -393,6 +395,7 @@ const NormalOpNormsScreen = () => {
             NormParametersId: item.materialFkId.toLowerCase(),
             id: groupId++,
             aopRemarks: item?.aopRemarks?.trim() || null,
+            originalRemark: item.aopRemarks?.trim() || null,
           }
           setSnackbarOpen(true)
           setSnackbarData({

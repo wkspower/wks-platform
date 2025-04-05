@@ -85,7 +85,7 @@ const NormalOpNormsScreen = () => {
         const formattedItem = {
           ...item,
           idFromApi: item.id,
-
+          originalRemark: item.remarks,
           id: groupId++,
         }
 

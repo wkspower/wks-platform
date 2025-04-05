@@ -170,13 +170,7 @@ const ProductionvolumeData = ({ permissions }) => {
         })
         return
       }
-      // Validate that both normParameterId and remark are not empty
 
-      // const invalidRows = data.filter(
-      //   (row) => !row.normParametersFKId.trim(),
-      //   // (row) => !row.normParametersFKId.trim() || !row.remark.trim(),
-      // )
-      // console.log(data)
       const months = [
         'april',
         'may',
@@ -193,12 +187,10 @@ const ProductionvolumeData = ({ permissions }) => {
       ]
 
       const invalidRows = data.filter((row) => {
-        // Check normParametersFKId: if missing or blank after trim, mark invalid.
         if (!row.normParametersFKId || !row.normParametersFKId.trim()) {
           return true
         }
 
-        // Check all month fields.
         for (const month of months) {
           const value = row[month]
           if (
@@ -210,29 +202,29 @@ const ProductionvolumeData = ({ permissions }) => {
           }
         }
 
-        // Use "remarks" as the key since your data uses "remarks"
         const remarkValue = row.remark || row.remarks
+        const originalRemarkValue =
+          row.originalRemark || row.originalRemarks || ''
+
         if (
           !remarkValue ||
-          (typeof remarkValue === 'string' && !remarkValue.trim())
+          (typeof remarkValue === 'string' && !remarkValue.trim()) ||
+          remarkValue.trim() === originalRemarkValue.trim()
         ) {
           return true
         }
 
-        // If all checks pass, the row is valid.
         return false
       })
 
-      console.log('Invalid rows:', invalidRows)
-
       if (invalidRows.length > 0) {
         setSnackbarData({
-          message: 'Please fill all fields in edited row!',
+          message:
+            'Please fill all fields in edited row and update the Remark!',
           severity: 'error',
         })
         setSnackbarOpen(true)
-        // console.log('Invalid rows:', invalidRows)
-        return // Prevent further processing until data is valid.
+        return
       } else {
         editAOPMCCalculatedData(data)
       }
@@ -258,6 +250,8 @@ const ProductionvolumeData = ({ permissions }) => {
           idFromApi: item?.id,
           normParametersFKId: item?.materialFKId.toLowerCase(),
           remarks: item?.remarks?.trim() || null,
+          originalRemark: item?.remarks?.trim() || null,
+
           id: index,
 
           ...(isTPH && {

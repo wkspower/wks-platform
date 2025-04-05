@@ -63,6 +63,7 @@ const BusinessDemand = ({ permissions }) => {
           ...item,
           idFromApi: item.id,
           id: groupId++,
+          originalRemark: item.remark,
         }
 
         // if (lowerVertName !== 'pe') {

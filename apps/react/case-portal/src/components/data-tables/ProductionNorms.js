@@ -360,6 +360,8 @@ const ProductionNorms = ({ permissions }) => {
         .map((product) => ({
           ...product,
           normParametersFKId: product.materialFKId,
+          originalRemark: product.aopRemarks,
+
           ...(product.materialFKId !== undefined
             ? { materialFKId: undefined }
             : {}),
@@ -453,8 +455,8 @@ const ProductionNorms = ({ permissions }) => {
     }, {})
 
     const totalRow = {
-      id: 'total', // Unique ID to identify the total row
-      Particulars: 'Total', // Ensure this appears in the first column
+      id: 'total',
+      Particulars: 'Total',
       ...totals,
       isEditable: false, // Custom property for checking editability
     }

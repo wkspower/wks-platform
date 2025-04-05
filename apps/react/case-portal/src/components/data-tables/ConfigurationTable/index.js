@@ -33,6 +33,7 @@ const ConfigurationTable = () => {
           ...item,
           idFromApi: item.id,
           id: index,
+          originalRemark: item.remarks,
         }))
         setRows(formattedData)
       } else {

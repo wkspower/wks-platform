@@ -207,6 +207,7 @@ const ShutDown = ({ permissions }) => {
         ...item,
         idFromApi: item?.id,
         id: index,
+        originalRemark: item.remark,
       }))
       // setShutdownData(formattedData)
       setRows(formattedData)
