@@ -163,12 +163,11 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 				System.out.println("verticalName"+verticalName);
 				String description = shutDownPlanDTO.getDiscription();
 				 if(verticalName.equalsIgnoreCase("MEG")) {
+					shutDownPlanDTO.setMaintEndDateTime(shutDownPlanDTO.getMaintStartDateTime());
 					List<ShutDownPlanDTO> list = new ArrayList<>();
 					shutDownPlanDTO.setDurationInHrs(0.00);
 					shutDownPlanDTO.setDurationInMins(0);
 					shutDownPlanDTO.setDiscription(description+" Ramp Up");
-					System.out.println(plantId);
-					System.out.println("plantMaintenanceTransactionRepository.findIdByNameAndPlantFkId(\"EO\",shutDownPlanDTO.getPlantId())"+plantMaintenanceTransactionRepository.findIdByNameAndPlantFkId("EO",plantId));
 					shutDownPlanDTO.setProductId(plantMaintenanceTransactionRepository.findIdByNameAndPlantFkId("EO",plantId));
 					list.add(shutDownPlanDTO);
 				    slowdownPlanService.saveShutdownData(plantId, list);
