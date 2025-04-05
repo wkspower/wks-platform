@@ -14,10 +14,10 @@ export const validateFields = (data, requiredFields) => {
   }
 
   const invalidRows = data.filter((row) => {
-    return requiredFields.some((field) => {
+    // Check for required fields
+    const hasMissingField = requiredFields.some((field) => {
       const value = row[field]
       if (field === 'remark' || field === 'aopRemarks' || field === 'remarks') {
-        // Check if remark has changed
         return (
           value === undefined ||
           value === null ||
@@ -30,6 +30,13 @@ export const validateFields = (data, requiredFields) => {
       if (typeof value === 'string' && value.trim() === '') return true
       return false
     })
+
+    // Additional check: End Date must be after Start Date
+    const startDate = new Date(row.maintStartDateTime)
+    const endDate = new Date(row.maintEndDateTime)
+    const invalidDate = startDate && endDate && endDate <= startDate
+
+    return hasMissingField || invalidDate
   })
 
   if (invalidRows.length > 0) {
@@ -58,6 +65,13 @@ export const validateFields = (data, requiredFields) => {
             missingFieldsMessage.push(fieldHeaders[field] || field)
           }
         })
+
+        // Add End Date check message
+        const startDate = new Date(row.maintStartDateTime)
+        const endDate = new Date(row.maintEndDateTime)
+        if (startDate && endDate && endDate <= startDate) {
+          missingFieldsMessage.push('End Date must be after Start Date')
+        }
 
         return missingFieldsMessage.join(', ')
       })

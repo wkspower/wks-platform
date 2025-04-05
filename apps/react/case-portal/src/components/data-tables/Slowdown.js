@@ -420,27 +420,16 @@ const SlowDown = ({ permissions }) => {
       },
     },
 
-    lowerVertName === 'meg'
-      ? {
-          field: 'durationInHrs',
-          headerName: 'Duration (hrs)',
-          editable: false,
-          minWidth: 75,
-          renderEditCell: NumericInputOnly,
-          align: 'left',
-          headerAlign: 'left',
-          valueGetter: findDuration,
-        }
-      : {
-          field: 'durationInHrs',
-          headerName: 'Duration (hrs)',
-          editable: false,
-          minWidth: 75,
-          renderEditCell: NumericInputOnly,
-          align: 'left',
-          headerAlign: 'left',
-          valueGetter: findDuration,
-        },
+    {
+      field: 'durationInHrs',
+      headerName: 'Duration (hrs)',
+      editable: false,
+      minWidth: 75,
+      renderEditCell: NumericInputOnly,
+      align: 'left',
+      headerAlign: 'left',
+      valueGetter: findDuration,
+    },
 
     {
       field: 'rate',
