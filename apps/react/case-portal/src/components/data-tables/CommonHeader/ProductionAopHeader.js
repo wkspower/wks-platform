@@ -1,6 +1,5 @@
-// import { useSelector } from 'react-redux'
 import { useSelector } from 'react-redux'
-import productionColDefs from '../../../assets/production_aop.json' // Adjust path as needed
+import productionColDefs from '../../../assets/production_aop_meg.json' // Adjust path as needed
 import productionColDefsPE from '../../../assets/production_aop_pe.json' // Adjust path as needed
 import Tooltip from '@mui/material/Tooltip'
 import { truncateRemarks } from 'utils/remarksUtils'

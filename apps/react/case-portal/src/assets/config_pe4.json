@@ -1,0 +1,50 @@
+[
+  {
+    "field": "receipeName",
+    "headerName": "Grade",
+    "minWidth": 120,
+    "flex": 1
+  },
+  {
+    "field": "attributeValue",
+    "headerName": "B56003",
+    "editable": true,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "F19010",
+    "headerName": "F19010",
+    "editable": true,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "E52007",
+    "headerName": "E52007",
+    "editable": true,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "P15807",
+    "headerName": "P15807",
+    "editable": true,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "M24300",
+    "headerName": "M24300",
+    "editable": true,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "M60075",
+    "headerName": "M60075",
+    "editable": true,
+    "align": "left",
+    "headerAlign": "left"
+  }
+]

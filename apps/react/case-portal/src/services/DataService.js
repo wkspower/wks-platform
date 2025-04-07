@@ -63,6 +63,8 @@ export const DataService = {
   handleCalculateNormalOpsNorms34,
 
   handleCalculateShutdownNorms,
+  updatePeConfigData,
+  getPeConfigData,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -450,6 +452,39 @@ async function updateBusinessDemandDataM(maintenanceId, keycloak) {
     return Promise.reject(e)
   }
 }
+async function updatePeConfigData(keycloak, payload) {
+  var year = localStorage.getItem('year')
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+  const url = `${Config.CaseEngineUrl}/task/updatePeConfigData?year=${year}&plantId=${plantId}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    })
+
+    if (!resp.ok) {
+      throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
+    }
+
+    return await resp.text() // Handle text response from the backend
+  } catch (e) {
+    console.error('Error Editing Config data:', e)
+    return Promise.reject(e)
+  }
+}
 
 async function getProductById(keycloak) {
   const url = `${Config.CaseEngineUrl}/task/productList`
@@ -478,6 +513,30 @@ async function getBDData(keycloak) {
   }
 
   const url = `${Config.CaseEngineUrl}/task/getBusinessDemandData?year=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getPeConfigData(keycloak) {
+  var year = localStorage.getItem('year')
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  const url = `${Config.CaseEngineUrl}/task/getPeConfigData?year=${year}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -525,8 +584,8 @@ async function getNormalOperationNormsData(keycloak) {
     plantId = parsedPlant.id
   }
 
-  let siteID =
-    JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+  // let siteID =
+  //   JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
 
   const url = `${Config.CaseEngineUrl}/task/normalOperationNorms?year=${year}&plantId=${plantId}`
   const headers = {
@@ -552,8 +611,8 @@ async function getShutdownNormsData(keycloak) {
     plantId = parsedPlant.id
   }
 
-  let siteID =
-    JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+  // let siteID =
+  //   JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
 
   const url = `${Config.CaseEngineUrl}/task/shutdownNorms?year=${year}&plantId=${plantId}`
   const headers = {
@@ -580,8 +639,8 @@ async function getCatalystSelectivityData(keycloak) {
     plantId = parsedPlant.id
   }
 
-  let siteID =
-    JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+  // let siteID =
+  //   JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
 
   var year = localStorage.getItem('year')
 
@@ -639,8 +698,8 @@ async function getConsumptionNormsData(keycloak) {
     plantId = parsedPlant.id
   }
 
-  let siteID =
-    JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+  // let siteID =
+  //   JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
 
   var year = localStorage.getItem('year')
 
@@ -1042,7 +1101,7 @@ async function getAllSites(keycloak) {
   }
 }
 
-async function getAllProducts(keycloak, type) {
+async function getAllProducts(keycloak) {
   const storedPlant = localStorage.getItem('selectedPlant')
   const parsedPlant = JSON.parse(storedPlant)
   // const url = `${Config.CaseEngineUrl}/task/getAllProducts?normParameterTypeName=${type}&plantId=${parsedPlant.id}`

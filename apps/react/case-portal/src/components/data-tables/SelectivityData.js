@@ -7,17 +7,14 @@ import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 // import catalystOptionsData from '../../assets/Catalyst.json'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import NumericInputOnly from 'utils/NumericInputOnly'
-import Tooltip from '@mui/material/Tooltip'
-import { truncateRemarks } from 'utils/remarksUtils'
-
-const headerMap = generateHeaderNames()
-
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
+import getEnhancedAOPColDefs from './CommonHeader/ConfigHeader'
+// import getEnhancedAOPColDefs from './CommonHeader/ProductionAopHeader'
 
 const SelectivityData = (props) => {
+  const headerMap = generateHeaderNames()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
@@ -60,7 +57,7 @@ const SelectivityData = (props) => {
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-
+    console.log(newRow, 'test1923888', oldRow)
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
@@ -77,6 +74,8 @@ const SelectivityData = (props) => {
   const saveChanges = React.useCallback(async () => {
     try {
       var data = Object.values(unsavedChangesRef.current.unsavedRows)
+
+      console.log(data)
       if (data.length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -85,19 +84,22 @@ const SelectivityData = (props) => {
         })
         return
       }
-
-      const requiredFields = ['remarks']
-      const validationMessage = validateFields(data, requiredFields)
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationMessage,
-          severity: 'error',
-        })
-        return
+      console.log(props?.configType)
+      if (props?.configType !== 'grades') {
+        const requiredFields = ['remarks']
+        const validationMessage = validateFields(data, requiredFields)
+        if (validationMessage) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: validationMessage,
+            severity: 'error',
+          })
+          return
+        }
+        saveCatalystData(data)
+      } else {
+        handleUpdate(data)
       }
-
-      saveCatalystData(data)
     } catch (error) {
       // Handle error if necessary
     }
@@ -152,7 +154,9 @@ const SelectivityData = (props) => {
         }
         setLoading(false)
 
-        props.fetchData()
+        if (props?.configType !== 'grades') {
+          props.fetchData()
+        }
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -167,6 +171,62 @@ const SelectivityData = (props) => {
       setLoading(false)
     } finally {
       // fetchData()
+      setLoading(false)
+    }
+  }
+  const handleUpdate = async (updatedRows) => {
+    setLoading(true)
+    try {
+      const payload = []
+      updatedRows.forEach((row) => {
+        // Iterate over each key in the row
+        Object.keys(row).forEach((key) => {
+          // Skip non-grade keys
+          if (
+            key === 'id' ||
+            key === 'receipeName' ||
+            key === 'reciepeFkId' ||
+            key === 'grades'
+          ) {
+            return
+          }
+          // If the key exists in the nested grades object
+          if (row.grades && row.grades[key]) {
+            // Use the updated value from the top-level key (e.g., "200" or "500")
+            const updatedValue = row[key]
+            // Optionally, you can update the nested object here
+            row.grades[key].attributeValue = updatedValue
+            payload.push({
+              gradeName: row.grades[key].gradeName,
+              receipeName: row.receipeName,
+              gradeFkId: row.grades[key].gradeFkId,
+              reciepeFkId: row.reciepeFkId,
+              attributeValue: parseInt(updatedValue),
+            })
+          }
+        })
+      })
+      console.log(payload)
+      const response = await DataService.updatePeConfigData(keycloak, payload)
+      if (response) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Update successful!',
+          severity: 'success',
+        })
+        fetchConfigData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Update failed!',
+          severity: 'error',
+        })
+      }
+
+      return response
+    } catch (error) {
+      console.error('Error updating data:', error)
+    } finally {
       setLoading(false)
     }
   }
@@ -194,109 +254,21 @@ const SelectivityData = (props) => {
       setDeleteId(id)
 
       // Perform the delete operation
-      return await DataService.deleteBusinessDemandData(maintenanceId, keycloak)
+      const resp = await DataService.deleteBusinessDemandData(
+        maintenanceId,
+        keycloak,
+      )
+      if (props?.configType !== 'grades') {
+        props.fetchData()
+      }
+      return resp
     } catch (error) {
       console.error(`Error deleting Configuration data:`, error)
     } finally {
-      props.fetchData()
+      // props.fetchData()
+      setOpen1(false)
     }
   }
-  // const fetchData = async () => {
-  //   setLoading(true)
-  //   try {
-  //     const data = await DataService.getCatalystSelectivityData(keycloak)
-  //     console.log(data)
-  //     if (lowerVertName === 'meg') {
-  //       // For 'meg', simply map items without grouping.
-  //       const formattedData = data.map((item, index) => ({
-  //         ...item,
-  //         idFromApi: item.id,
-  //         id: index,
-  //       }))
-  //       setRows(formattedData)
-  //     } else {
-  //       // Create a nested grouping: first by lossCategory then by normType.
-  //       const groups = new Map()
-
-  //       data.forEach((item) => {
-  //         const lossCategory = item.lossCategory
-  //         const normType = item.normType
-
-  //         if (!groups.has(lossCategory)) {
-  //           groups.set(lossCategory, new Map())
-  //         }
-  //         const normGroup = groups.get(lossCategory)
-  //         if (!normGroup.has(normType)) {
-  //           normGroup.set(normType, [])
-  //         }
-  //         normGroup.get(normType).push(item)
-  //       })
-
-  //       let groupId = 0
-  //       const groupedRows = []
-  //       const shutdownRows = []
-
-  //       // Build the final grouped arrays.
-  //       groups.forEach((normGroup, lossCategory) => {
-  //         if (lossCategory.toLowerCase() === 'shutdownnorms') {
-  //           // Add shutdown norms to the shutdownRows array.
-  //           shutdownRows.push({
-  //             id: groupId++,
-  //             Particulars: lossCategory,
-  //             isGroupHeader: true,
-  //           })
-  //           normGroup.forEach((items, normType) => {
-  //             shutdownRows.push({
-  //               id: groupId++,
-  //               Particulars2: normType,
-  //               isSubGroupHeader: true,
-  //             })
-  //             items.forEach((item) => {
-  //               shutdownRows.push({
-  //                 ...item,
-  //                 idFromApi: item.id,
-  //                 id: groupId++,
-  //               })
-  //             })
-  //           })
-  //         } else {
-  //           // Add all other items to the groupedRows array.
-  //           groupedRows.push({
-  //             id: groupId++,
-  //             Particulars: lossCategory,
-  //             isGroupHeader: true,
-  //           })
-  //           normGroup.forEach((items, normType) => {
-  //             groupedRows.push({
-  //               id: groupId++,
-  //               Particulars2: normType,
-  //               isSubGroupHeader: true,
-  //             })
-  //             items.forEach((item) => {
-  //               groupedRows.push({
-  //                 ...item,
-  //                 idFromApi: item.id,
-  //                 id: groupId++,
-  //               })
-  //             })
-  //           })
-  //         }
-  //       })
-
-  //       console.log('groupedRows:', groupedRows)
-  //       console.log('shutdownRows:', shutdownRows)
-  //       setRows(groupedRows)
-  //       setRows2(shutdownRows)
-
-  //       // If needed, you can store shutdownRows separately, e.g.:
-  //       // setShutdownRows(shutdownRows);
-  //     }
-  //     setLoading(false)
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error)
-  //     setLoading(false)
-  //   }
-  // }
 
   useEffect(() => {
     const getAllProducts = async () => {
@@ -316,549 +288,151 @@ const SelectivityData = (props) => {
 
     getAllProducts()
     // getAllCatalyst()
-    props.fetchData()
+    if (props?.configType !== 'grades') {
+      props.fetchData()
+    }
+    if (props?.configType === 'grades') fetchConfigData()
   }, [sitePlantChange, keycloak, lowerVertName])
 
-  // Use catalyst options from the JSON file
-  // const productOptions = catalystOptionsData.catalystOptions
-  const productionColumns = [
-    {
-      field: 'normParameterFKId',
-      headerName: 'Particulars',
-      editable: false,
-      minWidth: 160,
-      valueGetter: (params) => params || '',
-      valueFormatter: (params) => {
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : ''
+  // const transformGradeValue = (data) => {
+  //   return data.map((item, index) => {
+  //     const { attributeValue, gradeName, ...rest } = item
+  //     return {
+  //       id: index,
+  //       ...rest,
+  //       gradeName,
+  //       [gradeName]: attributeValue, // dynamic key
+  //     }
+  //   })
+  // }
+  const generateDynamicColumns = (data) => {
+    const columns = [
+      {
+        field: 'receipeName',
+        headerName: 'Grade',
+        editable: true,
+        minWidth: 120,
+        flex: 1,
       },
-      renderEditCell: (params) => {
-        const { value, id, api } = params
+    ]
 
-        const existingValues = new Set(
-          [...api.getRowModels().values()]
-            .filter((row) => row.id !== id)
-            .map((row) => row.normParameterFKId),
-        )
+    const uniqueGradeNames = [...new Set(data.map((item) => item.gradeName))]
 
-        return (
-          <select
-            value={value || ''}
-            onChange={(event) => {
-              api.setEditCellValue({
-                id: params.id,
-                field: 'normParameterFKId',
-                value: event.target.value,
-              })
-            }}
-            style={{
-              width: '100%',
-              padding: '5px',
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-            }}
-          >
-            <option value='' disabled>
-              Select
-            </option>
-            {allProducts
-              .filter((product) => !existingValues.has(product.id))
-              .map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.displayName}
-                </option>
-              ))}
-          </select>
-        )
-      },
-    },
+    uniqueGradeNames.forEach((grade) => {
+      columns.push({
+        field: grade,
+        headerName: grade,
+        editable: true,
+        align: 'left',
+        headerAlign: 'left',
+      })
+    })
 
-    // {
-    //   field: 'NormParameterFKId',
-    //   headerName: 'NormParameterFKId',
-    //   // editable: true,
-    //   minWidth: 250,
-    // },
-    {
-      field: 'UOM',
-      headerName: 'UOM',
-      editable: false,
-      align: 'left',
-      headerAlign: 'left',
-      // valueGetter: convertUnits,
-    },
-    {
-      field: 'apr',
-      headerName: headerMap[4],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-      // valueGetter: convertUnits,
-    },
+    return columns
+  }
+  const [columnConfig, setColumnConfig] = useState([])
+  const fetchConfigData = async () => {
+    setLoading(true)
+    try {
+      const data = await DataService.getPeConfigData(keycloak)
+      const data1 = [
+        {
+          id: 1,
+          gradeName: 'F19010',
+          receipeName: '',
+          gradeFkId: '1AC76D49-D113-4FF0-9516-9F9E96D85DAE',
+          reciepeFkId: '2AE40205-F960-4A57-975A-4598664E7F71',
+          attributeValue: 104,
+        },
+        {
+          id: 2,
+          gradeName: 'E52007',
+          receipeName: '',
+          gradeFkId: '7BB94524-FFE3-4D04-8CAC-972047D8AD2F',
+          reciepeFkId: '2AE40205-F960-4A57-975A-4598664E7F71',
+          attributeValue: 100,
+        },
+      ]
+      setColumnConfig(generateDynamicColumns(data1))
+      // console.log(columnConfig)
 
-    {
-      field: 'may',
-      headerName: headerMap[5],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'jun',
-      headerName: headerMap[6],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'jul',
-      headerName: headerMap[7],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'aug',
-      headerName: headerMap[8],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'sep',
-      headerName: headerMap[9],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'oct',
-      headerName: headerMap[10],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
+      // console.log(data)
+      // For 'meg', simply map items without grouping.
+      // const formattedData = data.map((item, index) => ({
+      //   ...item,
+      //   // idFromApi: item.id,
+      //   id: index,
+      // }))
+      // const formattedData = transformGradeValue(data)
+      // console.log(formattedData)
+      const data2 = groupRowsByReceipe(data1)
 
-    {
-      field: 'nov',
-      headerName: headerMap[11],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'dec',
-      headerName: headerMap[12],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'jan',
-      headerName: headerMap[1],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'feb',
-      headerName: headerMap[2],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'mar',
-      headerName: headerMap[3],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
+      console.log(data2)
+      props?.setRows(data2)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      setLoading(false)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-    {
-      field: 'remarks',
-      headerName: 'Remark',
-      minWidth: 150,
-      editable: true,
-      renderCell: (params) => {
-        const displayText = truncateRemarks(params.value)
-        const isEditable = !params.row.Particulars
+  // const groupRowsByReceipe = (data) => {
+  //   const grouped = {}
 
-        return (
-          <Tooltip title={params.value || ''} arrow>
-            <div
-              style={{
-                cursor: 'pointer',
-                color: params.value ? 'inherit' : 'gray',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                maxWidth: 140,
-              }}
-              onClick={() => handleRemarkCellClick(params.row)}
-            >
-              {displayText || (isEditable ? 'Click to add remark' : '')}
-            </div>
-          </Tooltip>
-        )
-      },
-    },
-  ]
-  const productionColumnsPE1 = [
-    {
-      field: 'Particulars',
-      headerName: 'Type',
-      minWidth: 125,
-      groupable: true,
-      renderCell: (params) => <strong>{params.value}</strong>,
-    },
-    // {
-    //   field: 'Particulars2',
-    //   headerName: 'Sub-Type',
-    //   minWidth: 125,
-    //   groupable: true,
-    //   headerClass: 'bold-header',
-    // },
-    {
-      field: 'normParameterFKId',
-      headerName: 'Particulars',
-      editable: false,
-      minWidth: 160,
-      renderCell: (params) => {
-        if (
-          params.value === 'By Products' ||
-          params.value === 'Cat Chem' ||
-          params.value === 'Utility Consumption' ||
-          params.value === 'Raw Material'
-        ) {
-          return <strong>{params.value}</strong>
-        } else {
-          const product = allProducts.find((p) => p.id === params.value)
-          return product ? product.displayName : params.value
+  //   data.forEach((item) => {
+  //     const { reciepeFkId, gradeName, attributeValue, gradeFkId, receipeName } =
+  //       item
+  //     if (!grouped[reciepeFkId]) {
+  //       grouped[reciepeFkId] = {
+  //         reciepeFkId,
+  //         receipeName,
+  //         grades: {},
+  //       }
+  //     }
+  //     grouped[reciepeFkId][gradeName] = { attributeValue, gradeFkId }
+  //   })
+
+  //   return Object.values(grouped).map((item, index) => ({
+  //     id: index,
+  //     ...item,
+  //   }))
+  // }
+  const groupRowsByReceipe = (data) => {
+    const grouped = {}
+
+    data.forEach((item) => {
+      const { reciepeFkId, gradeName, attributeValue, gradeFkId, receipeName } =
+        item
+      if (!grouped[reciepeFkId]) {
+        grouped[reciepeFkId] = {
+          reciepeFkId,
+          receipeName,
+          grades: {},
         }
-      },
+      }
+      grouped[reciepeFkId].grades[gradeName] = {
+        gradeName, // now explicitly stored
+        attributeValue,
+        gradeFkId,
+      }
+    })
 
-      valueGetter: (params) => {
-        // console.log('valueGetter params:', params)
-        return params ?? ''
-      },
-      valueFormatter: (params) => {
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : params?.Particulars2
-      },
-      renderEditCell: (params) => {
-        const { value, id, api } = params
+    // Convert the grouped object to an array of rows
+    return Object.values(grouped).map((item, index) => ({
+      id: index,
+      ...item,
+    }))
+  }
 
-        const existingValues = new Set(
-          [...api.getRowModels().values()]
-            .filter((row) => row.id !== id)
-            .map((row) => row.normParameterFKId || row.Particulars2),
-        )
-
-        return (
-          <select
-            value={value || ''}
-            onChange={(event) => {
-              api.setEditCellValue({
-                id: params.id,
-                field: 'normParameterFKId',
-                value: event.target.value,
-              })
-            }}
-            style={{
-              width: '100%',
-              padding: '5px',
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-            }}
-          >
-            <option value='' disabled>
-              Select
-            </option>
-            {allProducts
-              .filter((product) => !existingValues.has(product.id))
-              .map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.displayName}
-                </option>
-              ))}
-          </select>
-        )
-      },
-    },
-
-    // {
-    //   field: 'NormParameterFKId',
-    //   headerName: 'NormParameterFKId',
-    //   // editable: true,
-    //   minWidth: 250,
-    // },
-    {
-      field: 'UOM',
-      headerName: 'UOM',
-      editable: false,
-      align: 'left',
-      headerAlign: 'left',
-      // valueGetter: convertUnits,
-    },
-    {
-      field: 'apr',
-      headerName: headerMap[4],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-      // valueGetter: convertUnits,
-    },
-
-    {
-      field: 'may',
-      headerName: headerMap[5],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'jun',
-      headerName: headerMap[6],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'jul',
-      headerName: headerMap[7],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'aug',
-      headerName: headerMap[8],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'sep',
-      headerName: headerMap[9],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'oct',
-      headerName: headerMap[10],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-
-    {
-      field: 'nov',
-      headerName: headerMap[11],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'dec',
-      headerName: headerMap[12],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'jan',
-      headerName: headerMap[1],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'feb',
-      headerName: headerMap[2],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-    {
-      field: 'mar',
-      headerName: headerMap[3],
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-    },
-
-    {
-      field: 'remarks',
-      headerName: 'Remark',
-      minWidth: 110,
-      editable: true,
-      renderCell: (params) => {
-        const displayText = truncateRemarks(params.value)
-        const isEditable = !(
-          params.row.Particulars || params.row.isSubGroupHeader
-        )
-        return (
-          <Tooltip title={params.value || ''} arrow>
-            <div
-              style={{
-                cursor: 'pointer',
-                color: params.value ? 'inherit' : 'gray',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                maxWidth: 140,
-              }}
-              onClick={() => handleRemarkCellClick(params.row)}
-            >
-              {displayText || (isEditable ? 'Click to add remark' : '')}
-            </div>
-          </Tooltip>
-        )
-      },
-    },
-  ]
-  const productionColumnsPE2 = [
-    {
-      field: 'Particulars',
-      headerName: 'Constant',
-      minWidth: 125,
-      groupable: true,
-      flex: 1,
-      renderCell: (params) => <strong>{params.value}</strong>,
-    },
-    {
-      field: 'Particulars2',
-      headerName: 'Type',
-      minWidth: 125,
-      groupable: true,
-      flex: 1,
-      renderCell: (params) => <strong>{params.value}</strong>,
-    },
-    {
-      field: 'normParameterFKId',
-      headerName: 'Particulars',
-      editable: false,
-      minWidth: 160,
-      valueGetter: (params) => params || '',
-      valueFormatter: (params) => {
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : ''
-      },
-      renderEditCell: (params) => {
-        const { value, id, api } = params
-
-        const existingValues = new Set(
-          [...api.getRowModels().values()]
-            .filter((row) => row.id !== id)
-            .map((row) => row.normParameterFKId),
-        )
-
-        return (
-          <select
-            value={value || ''}
-            onChange={(event) => {
-              api.setEditCellValue({
-                id: params.id,
-                field: 'normParameterFKId',
-                value: event.target.value,
-              })
-            }}
-            style={{
-              width: '100%',
-              padding: '5px',
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-            }}
-          >
-            <option value='' disabled>
-              Select
-            </option>
-            {allProducts
-              .filter((product) => !existingValues.has(product.id))
-              .map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.displayName}
-                </option>
-              ))}
-          </select>
-        )
-      },
-    },
-
-    // {
-    //   field: 'NormParameterFKId',
-    //   headerName: 'NormParameterFKId',
-    //   // editable: true,
-    //   minWidth: 250,
-    // },
-    {
-      field: 'apr',
-      headerName: 'Values',
-      editable: true,
-      renderEditCell: NumericInputOnly,
-      align: 'left',
-      headerAlign: 'left',
-      // valueGetter: NumericInputOnly || 0,
-    },
-
-    {
-      field: 'remarks',
-      headerName: 'Remark',
-      minWidth: 250,
-      editable: true,
-      renderCell: (params) => {
-        const displayText = truncateRemarks(params.value)
-        const isEditable = !params.row.Particulars && !params.row.Particulars2
-
-        return (
-          <Tooltip title={params.value || ''} arrow>
-            <div
-              style={{
-                cursor: 'pointer',
-                color: params.value ? 'inherit' : 'gray',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                maxWidth: 140,
-              }}
-              onClick={() => handleRemarkCellClick(params.row)}
-            >
-              {displayText || (isEditable ? 'Click to add remark' : '')}
-            </div>
-          </Tooltip>
-        )
-      },
-    },
-  ]
+  // console.log(props?.configType)
+  const productionColumns = getEnhancedAOPColDefs({
+    allProducts,
+    headerMap,
+    handleRemarkCellClick,
+    configType: props?.configType,
+    columnConfig,
+  })
 
   return (
     <div>
@@ -869,13 +443,7 @@ const SelectivityData = (props) => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <ASDataGrid
-        columns={
-          lowerVertName === 'meg'
-            ? productionColumns
-            : props?.tabIndex === 1
-              ? productionColumnsPE2
-              : productionColumnsPE1
-        }
+        columns={productionColumns}
         rows={props?.rows}
         setRows={props?.setRows}
         title='Configuration'

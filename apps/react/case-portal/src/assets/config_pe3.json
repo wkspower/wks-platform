@@ -1,0 +1,42 @@
+[
+  {
+    "field": "Particulars",
+    "headerName": "Constant",
+    "minWidth": 125,
+    "groupable": true,
+    "flex": 1,
+    "renderCell": "renderStrongCell"
+  },
+  {
+    "field": "Particulars2",
+    "headerName": "Type",
+    "minWidth": 125,
+    "groupable": true,
+    "flex": 1,
+    "renderCell": "renderStrongCell"
+  },
+  {
+    "field": "normParameterFKId",
+    "headerName": "Particulars",
+    "editable": false,
+    "minWidth": 160,
+    "valueGetter": "defaultValueGetter",
+    "valueFormatter": "productDisplayNameFormatter",
+    "renderEditCell": "renderNormParameterSelectCell"
+  },
+  {
+    "field": "apr",
+    "headerName": "Values",
+    "editable": true,
+    "renderEditCell": "NumericInputOnly",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "remarks",
+    "headerName": "Remark",
+    "minWidth": 250,
+    "editable": true,
+    "renderCell": "renderRemarkCell"
+  }
+]
