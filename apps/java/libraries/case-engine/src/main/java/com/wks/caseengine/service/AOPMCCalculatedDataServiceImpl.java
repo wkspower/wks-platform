@@ -122,6 +122,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 		return aOPMCCalculatedDataDTOList;
 	}
 
+	@Transactional
 	@Override
 	public int getAOPMCCalculatedDataSP(String plantId, String finYear) {
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
