@@ -10,19 +10,19 @@ WKS is built on a modular microservices architecture, designed for scalability, 
 
 1.	**Camunda**: An open-source Business Process Management (BPM) engine used to define, orchestrate, and execute complex workflows. Camunda ensures transactional integrity and acts as the central orchestrator for distributed services, following the Saga Pattern for managing long-running business processes.
 2.	**Case Engine - Rest API**: A custom API layer that exposes functionality for case management. It enables creation, modification, and retrieval of case data, and serves as a key integration point for other services in the platform.
-3.	**Case Engine - Camunda External Tasks**: Interacts with the BPM engine to process async operations within a business process.
-4.	**E-mail to Case**: A service responsible for converting emails into cases in the platform.
-5.	**Storage API**: An API service for interacting with the Minio storage.
-6.	**Case Portal**: A web application built with React, serving as the user interface for interacting with the platform.
-7.  **Websocket Publisher**: Responsible for sending backend event notifications to the UI.
-8.  **Novu Publisher**: Integrates with [Novu](https://novu.co/), a communication management platform offering simple components and APIs for managing all communication channels in one place, including Email, SMS, Direct, In-App, and Push notifications.
-9. **Kafka**: Serves as the middleware for all asynchronous event processing on the platform, facilitating seamless communication between components. It is utilized by the Websocket Publisher and Novu Publisher to capture and handle backend events efficiently.
-10.	**Minio**: An object storage server used for storing and accessing files and data.
-11.	**MongoDB**: A document-oriented NoSQL database used for persistent data storage.
-12.	**OPA**: Open Policy Agent, used for policy-based authorization and access control.
-13.	**Traefik**: A reverse proxy and load balancer used for routing and securing HTTP traffic to different services.
-14.	**Keycloak**: An open-source identity and access management solution used for authentication and authorization.
-15.	**Demo Data Loader**: A service responsible for loading demo data into the platform.
+3.	**Case Engine - Camunda External Tasks**: This service interacts directly with Camunda to process external tasks asynchronously. It enables the execution of business logic within workflows without tightly coupling it to the BPM engine.
+4.	**E-mail to Case**: A utility service that transforms emails into structured cases. It automates case creation from email communication, streamlining service desk, support, and request workflows.
+5.	**Storage API**: An API service used to store and retrieve files in the object storage layer (MinIO). It abstracts the complexity of file management and provides secure access to stored content across services.
+6.	**Case Portal**: The primary user interface of the platform, built with React. It allows users to manage cases, interact with workflows, and perform administrative tasks via an intuitive web application.
+7.  **Websocket Publisher**: Responsible for sending real-time backend event updates to the frontend. It keeps the UI synchronized with the state of long-running processes and data changes.
+8.  **Novu Publisher**: Integrates with [Novu](https://novu.co/), an open-source notification infrastructure, to manage and deliver multi-channel communications — including Email, SMS, Push, In-App, and Direct messages. This ensures users are notified at every relevant step in a process.
+9. **Kafka**: A distributed event streaming platform that serves as the backbone for asynchronous communication across the platform. Kafka decouples producers and consumers, allowing for real-time, scalable, and reliable data flow. It powers both the WebSocket and Novu publishers, ensuring seamless event handling.
+10.	**MinIO**: An S3-compatible object storage server used for storing files and attachments securely and efficiently. It offers high durability and is optimized for cloud-native applications.
+11.	**MongoDB**: A document-oriented NoSQL database used for persistent data storage. It offers flexibility and scalability for storing structured and semi-structured data used by core services like the Case Engine and Email to Case.
+12.	**OPA (Open Policy Agent)**: A policy-based access control engine that governs user permissions and enforces security rules across the platform. OPA enables fine-grained access management based on roles, conditions, and policies.
+13.	**Traefik**: A modern reverse proxy and load balancer that manages routing of HTTP/S traffic to internal services. It handles SSL termination, traffic splitting, and service discovery, ensuring secure and resilient access to platform endpoints.
+14.	**Keycloak**: An open-source identity and access management (IAM) solution used for authentication and user federation. Keycloak ensures secure user login, token-based authentication, and single sign-on (SSO) support.
+15.	**Demo Data Loader**: A service used to preload sample data into the platform. It interacts with MongoDB, Camunda, and Keycloak, making it possible to populate users, processes, and case data for demonstration or testing purposes.
 
 ## Architecture Overview
 
