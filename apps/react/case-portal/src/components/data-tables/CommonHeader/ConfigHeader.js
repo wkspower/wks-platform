@@ -160,11 +160,18 @@ const getEnhancedAOPColDefs = ({
       }
     }
 
-    if ((headerMap && headerMap[col.headerName]) || col.field == 'apr') {
+    if ((headerMap && headerMap[col.headerName]) ) {
       return {
         ...col,
         renderEditCell: NumericInputOnly,
         headerName: headerMap[col.headerName],
+      }
+    }
+
+    if (col.field == 'apr') {
+      return {
+        ...col,
+        renderEditCell: NumericInputOnly,
       }
     }
 
