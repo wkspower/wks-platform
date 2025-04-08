@@ -33,14 +33,11 @@ const getEnhancedAOPColDefs = ({
   configType,
   columnConfig,
 }) => {
-  // const dataGridStore = useSelector((state) => state.dataGridStore)
-  // Select the JSON configuration based on the passed configType
   const config = getConfigByType(configType)
-  // console.log(config)
-  const finalColumns = configType === 'grades' ? columnConfig : config
-  console.log(finalColumns)
-  const enhancedColDefs = finalColumns.map((col) => {
-    // For normParameterFKId field – attach value getter, formatter, and edit cell renderer
+
+  // const finalColumns = configType === 'grades' ? columnConfig : config
+
+  const enhancedColDefs = config.map((col) => {
     if (col.field === 'normParameterFKId') {
       return {
         ...col,
@@ -186,43 +183,43 @@ const getEnhancedAOPColDefs = ({
     //   }
     // }
     // For other fields, if configType is 'grades' and the field is a dynamic grade column:
-    if (configType === 'grades' && col.field !== 'receipeName') {
-      return {
-        ...col,
-        renderCell: (params) => {
-          // Access the grade information from the nested 'grades' object
-          const gradeData = params.row.grades && params.row.grades[col.field]
-          return gradeData ? gradeData.attributeValue : ''
-        },
-        renderEditCell: (params) => {
-          // Use NumericInputOnly for editing, but ensure you update the nested attribute.
-          // You might need to create a custom NumericInputOnly that works with nested paths.
-          return NumericInputOnly(params)
-        },
-      }
-    }
+    // if (configType === 'grades' && col.field !== 'receipeName') {
+    //   return {
+    //     ...col,
+    //     renderCell: (params) => {
+    //       // Access the grade information from the nested 'grades' object
+    //       const gradeData = params.row.grades && params.row.grades[col.field]
+    //       return gradeData ? gradeData.attributeValue : ''
+    //     },
+    //     renderEditCell: (params) => {
+    //       // Use NumericInputOnly for editing, but ensure you update the nested attribute.
+    //       // You might need to create a custom NumericInputOnly that works with nested paths.
+    //       return NumericInputOnly(params)
+    //     },
+    //   }
+    // }
 
     // For receipeName and any other static columns:
-    if (col.field === 'receipeName') {
-      return {
-        ...col,
-        renderCell: (params) => params?.value,
-      }
-    }
-    if (
-      col.field != 'receipeName' ||
-      col.field != 'attributeValue' ||
-      col.field != 'gradeName'
-      //  col.field != 'gradeName'
-    ) {
-      return {
-        ...col,
-        renderCell: (params) => {
-          params?.value
-        },
-        renderEditCell: NumericInputOnly,
-      }
-    }
+    // if (col.field === 'receipeName') {
+    //   return {
+    //     ...col,
+    //     renderCell: (params) => params?.value,
+    //   }
+    // }
+    // if (
+    //   col.field != 'receipeName' ||
+    //   col.field != 'attributeValue' ||
+    //   col.field != 'gradeName'
+    //   //  col.field != 'gradeName'
+    // ) {
+    //   return {
+    //     ...col,
+    //     renderCell: (params) => {
+    //       params?.value
+    //     },
+    //     renderEditCell: NumericInputOnly,
+    //   }
+    // }
     // Default return for any fields not matched above.
     //   return {
     //     ...col,

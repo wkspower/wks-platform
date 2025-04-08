@@ -65,6 +65,8 @@ export const DataService = {
   handleCalculateShutdownNorms,
   updatePeConfigData,
   getPeConfigData,
+
+  getAllGradesReciepes,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -536,7 +538,33 @@ async function getPeConfigData(keycloak) {
     plantId = parsedPlant.id
   }
 
+  // const url = `${Config.CaseEngineUrl}/task/getPeConfigData?year=${year}&plantId=${plantId}`
   const url = `${Config.CaseEngineUrl}/task/getPeConfigData?year=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getAllGradesReciepes(keycloak) {
+  var year = localStorage.getItem('year')
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  const url = `${Config.CaseEngineUrl}/task/getAllGrades?plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -1101,7 +1129,7 @@ async function getAllSites(keycloak) {
   }
 }
 
-async function getAllProducts(keycloak) {
+async function getAllProducts(keycloak, type) {
   const storedPlant = localStorage.getItem('selectedPlant')
   const parsedPlant = JSON.parse(storedPlant)
   // const url = `${Config.CaseEngineUrl}/task/getAllProducts?normParameterTypeName=${type}&plantId=${parsedPlant.id}`

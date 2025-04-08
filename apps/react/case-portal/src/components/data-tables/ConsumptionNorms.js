@@ -9,6 +9,7 @@ import getEnhancedColDefs from './CommonHeader/consumptionHeader'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
+import TextField from '@mui/material/TextField'
 
 const NormalOpNormsScreen = () => {
   const keycloak = useSession()
@@ -42,6 +43,13 @@ const NormalOpNormsScreen = () => {
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
+
+  const getProductDisplayName = (id) => {
+    if (!id) return
+    const product = allProducts.find((p) => p.id === id)
+    return product ? product.displayName : ''
+  }
+
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow

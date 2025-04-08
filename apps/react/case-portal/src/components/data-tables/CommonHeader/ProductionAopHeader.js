@@ -5,6 +5,9 @@ import Tooltip from '@mui/material/Tooltip'
 import { truncateRemarks } from 'utils/remarksUtils'
 import NumericInputOnly from 'utils/NumericInputOnly'
 
+// import Autocomplete from '@mui/material/Autocomplete'
+import TextField from '@mui/material/TextField'
+
 const getEnhancedColDefs = ({
   allProducts,
   headerMap,
@@ -15,6 +18,12 @@ const getEnhancedColDefs = ({
   const { verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
+
+  const getProductDisplayName = (id) => {
+    if (!id) return
+    const product = allProducts.find((p) => p.id === id)
+    return product ? product.displayName : ''
+  }
 
   const formatValueToThreeDecimals = (params) =>
     params ? parseFloat(params).toFixed(3) : ''
@@ -51,6 +60,42 @@ const getEnhancedColDefs = ({
           const product = allProducts.find((p) => p.id === params)
           return product ? product.displayName : ''
         },
+
+        filterOperators: [
+          {
+            label: 'contains',
+            value: 'contains',
+            getApplyFilterFn: (filterItem) => {
+              if (!filterItem?.value) {
+                return
+              }
+              return (rowId) => {
+                const filterValue = filterItem.value.toLowerCase()
+                if (filterValue) {
+                  const productName = getProductDisplayName(rowId)
+                  if (productName) {
+                    return productName.toLowerCase().includes(filterValue)
+                  }
+                }
+                return true
+              }
+            },
+            InputComponent: ({ item, applyValue, focusElementRef }) => (
+              <TextField
+                autoFocus
+                inputRef={focusElementRef}
+                size='small'
+                label='Contains'
+                value={item.value || ''}
+                onChange={(event) =>
+                  applyValue({ ...item, value: event.target.value })
+                }
+                style={{ marginTop: '8px' }}
+              />
+            ),
+          },
+        ],
+
         renderEditCell: (params) => {
           const { value, id, api } = params
           return (

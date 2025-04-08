@@ -5,6 +5,9 @@ import NumericInputOnly from 'utils/NumericInputOnly'
 import Tooltip from '@mui/material/Tooltip'
 import { truncateRemarks } from 'utils/remarksUtils'
 
+import Autocomplete from '@mui/material/Autocomplete'
+import TextField from '@mui/material/TextField'
+
 const getEnhancedColDefs = ({
   allProducts,
   headerMap,
@@ -14,6 +17,12 @@ const getEnhancedColDefs = ({
   const { verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
+
+  const getProductDisplayName = (id) => {
+    if (!id) return
+    const product = allProducts.find((p) => p.id === id)
+    return product ? product.displayName : ''
+  }
 
   const enhancedColDefs = (
     lowerVertName === 'meg' ? vertical_meg_coldefs_bd : vertical_pe_coldefs_bd
@@ -26,8 +35,48 @@ const getEnhancedColDefs = ({
           const product = allProducts.find((p) => p.id === params)
           return product ? product.displayName : ''
         },
+
+        filterOperators: [
+          {
+            label: 'contains',
+            value: 'contains',
+            getApplyFilterFn: (filterItem) => {
+              if (!filterItem?.value) {
+                return
+              }
+              return (rowId) => {
+                const filterValue = filterItem.value.toLowerCase()
+                if (filterValue) {
+                  const productName = getProductDisplayName(rowId)
+                  if (productName) {
+                    return productName.toLowerCase().includes(filterValue)
+                  }
+                }
+                return true
+              }
+            },
+            InputComponent: ({ item, applyValue, focusElementRef }) => (
+              <TextField
+                autoFocus
+                inputRef={focusElementRef}
+                size='small'
+                label='Value'
+                value={item.value || ''}
+                onChange={(event) =>
+                  applyValue({ ...item, value: event.target.value })
+                }
+                style={{ marginTop: '8px' }}
+              />
+            ),
+          },
+        ],
         renderEditCell: (params) => {
           const { value, id, api } = params
+
+          const allProductOptions = allProducts.map((product) => ({
+            value: product.id,
+            label: product.displayName,
+          }))
 
           const existingValues = new Set(
             [...api.getRowModels().values()]
@@ -35,35 +84,42 @@ const getEnhancedColDefs = ({
               .map((row) => row.normParameterId),
           )
 
+          const filteredOptions = allProductOptions.filter(
+            (option) =>
+              option.value === value || !existingValues.has(option.value),
+          )
+
           return (
-            <select
-              value={value || ''}
-              onChange={(event) => {
+            <Autocomplete
+              value={
+                allProductOptions.find((option) => option.value === value) ||
+                (params.row.product &&
+                  allProductOptions.find(
+                    (opt) => opt.value === params.row.product,
+                  )) ||
+                null
+              }
+              options={filteredOptions}
+              // forcePopupIcon={false}
+              disableClearable
+              getOptionLabel={(option) => option?.label || ''}
+              onChange={(event, newValue) => {
                 api.setEditCellValue({
                   id,
                   field: 'normParameterId',
-                  value: event.target.value,
+                  value: newValue?.value || '',
                 })
               }}
-              style={{
-                width: '100%',
-                padding: '5px',
-                border: 'none',
-                outline: 'none',
-                background: 'transparent',
-              }}
-            >
-              <option value='' disabled>
-                Select
-              </option>
-              {allProducts
-                .filter((product) => !existingValues.has(product.id))
-                .map((product) => (
-                  <option key={product.id} value={product.id}>
-                    {product.displayName}
-                  </option>
-                ))}
-            </select>
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant='outlined'
+                  size='small'
+                  fullWidth
+                  style={{ width: '150px' }}
+                />
+              )}
+            />
           )
         },
       }

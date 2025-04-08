@@ -1,17 +1,11 @@
 [
   {
     "field": "receipeName",
-    "headerName": "Grade",
+    "headerName": "Receipe",
     "minWidth": 120,
     "flex": 1
   },
-  {
-    "field": "attributeValue",
-    "headerName": "B56003",
-    "editable": true,
-    "align": "left",
-    "headerAlign": "left"
-  },
+
   {
     "field": "F19010",
     "headerName": "F19010",

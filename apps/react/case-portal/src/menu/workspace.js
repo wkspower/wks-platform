@@ -44,7 +44,7 @@ const icons = {
 }
 
 const workspace = {
-  id: 'utilities',
+  id: 'utilities2',
   title: '',
   type: 'group',
   children: [

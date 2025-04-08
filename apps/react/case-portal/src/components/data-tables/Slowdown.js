@@ -8,6 +8,9 @@ import { useSelector } from 'react-redux'
 import NumericInputOnly from 'utils/NumericInputOnly'
 import Tooltip from '@mui/material/Tooltip'
 
+import Autocomplete from '@mui/material/Autocomplete'
+import TextField from '@mui/material/TextField'
+
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { truncateRemarks } from 'utils/remarksUtils'
@@ -243,6 +246,12 @@ const SlowDown = ({ permissions }) => {
     }
   }
 
+  const getProductDisplayName = (id) => {
+    if (!id) return
+    const product = allProducts.find((p) => p.id === id)
+    return product ? product.displayName : ''
+  }
+
   useEffect(() => {
     const getAllProducts = async () => {
       try {
@@ -333,14 +342,14 @@ const SlowDown = ({ permissions }) => {
       field: 'product',
       headerName: 'Particulars',
       editable: true,
-      minWidth: 125,
-      valueGetter: (params) => params || '',
-      valueFormatter: (params) => {
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : ''
-      },
+      minWidth: 150,
       renderEditCell: (params) => {
         const { value, id, api } = params
+
+        const allProductOptions = allProducts.map((product) => ({
+          value: product.id,
+          label: product.displayName,
+        }))
 
         const existingValues = new Set(
           [...api.getRowModels().values()]
@@ -348,40 +357,82 @@ const SlowDown = ({ permissions }) => {
             .map((row) => row.product),
         )
 
+        const filteredOptions = allProductOptions.filter(
+          (option) =>
+            option.value === value || !existingValues.has(option.value),
+        )
+
         return (
-          <select
-            value={value || ''}
-            onChange={(event) => {
+          <Autocomplete
+            value={
+              allProductOptions.find((option) => option.value === value) ||
+              (params.row.product &&
+                allProductOptions.find(
+                  (opt) => opt.value === params.row.product,
+                )) ||
+              null
+            }
+            disableClearable
+            options={filteredOptions}
+            getOptionLabel={(option) => option?.label || ''}
+            onChange={(event, newValue) => {
               params.api.setEditCellValue({
                 id: params.id,
                 field: 'product',
-                value: event.target.value,
+                value: newValue?.value || '',
               })
             }}
-            style={{
-              width: '100%',
-              padding: '5px',
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-            }}
-          >
-            <option value='' disabled>
-              Select
-            </option>
-            {allProducts
-              .filter(
-                (product) =>
-                  product.id === value || !existingValues.has(product.id),
-              ) // Ensure selected value is included
-              .map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.displayName}
-                </option>
-              ))}
-          </select>
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant='outlined'
+                size='small'
+                fullWidth
+                style={{ width: '210px' }}
+              />
+            )}
+          />
         )
       },
+      valueGetter: (params) => params || '',
+      valueFormatter: (params) => {
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : ''
+      },
+      filterOperators: [
+        {
+          label: 'contains',
+          value: 'contains',
+          getApplyFilterFn: (filterItem) => {
+            if (!filterItem?.value) {
+              return
+            }
+            return (rowId) => {
+              const filterValue = filterItem.value.toLowerCase()
+              if (filterValue) {
+                const productName = getProductDisplayName(rowId)
+                if (productName) {
+                  return productName.toLowerCase().includes(filterValue)
+                }
+              }
+              return true
+            }
+          },
+          InputComponent: ({ item, applyValue, focusElementRef }) => (
+            <TextField
+              autoFocus
+              inputRef={focusElementRef}
+              size='small'
+              label='Contains'
+              value={item.value || ''}
+              onChange={(event) =>
+                applyValue({ ...item, value: event.target.value })
+              }
+              style={{ marginTop: '8px' }}
+            />
+          ),
+        },
+      ],
     },
 
     {

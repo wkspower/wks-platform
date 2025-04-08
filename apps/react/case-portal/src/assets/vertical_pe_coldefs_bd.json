@@ -10,7 +10,7 @@
     "field": "normParameterId",
     "headerName": "Particulars",
     "editable": true,
-    "minWidth": 100
+    "minWidth": 150
   },
   {
     "field": "april",
@@ -111,7 +111,7 @@
   {
     "field": "remark",
     "headerName": "Remark",
-    "minWidth": 200,
+    "minWidth": 150,
     "editable": true
   },
   {

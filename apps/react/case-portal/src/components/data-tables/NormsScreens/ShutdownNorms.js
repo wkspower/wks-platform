@@ -15,6 +15,7 @@ const headerMap = generateHeaderNames()
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
+import TextField from '@mui/material/TextField'
 
 const ShutdownNorms = () => {
   const [loading, setLoading] = useState(false)
@@ -48,6 +49,13 @@ const ShutdownNorms = () => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+
+  const getProductDisplayName = (id) => {
+    if (!id) return
+    const product = allProducts.find((p) => p.id === id)
+    return product ? product.displayName : ''
+  }
+
   const keycloak = useSession()
 
   const saveChanges = React.useCallback(async () => {
@@ -174,6 +182,42 @@ const ShutdownNorms = () => {
         const product = allProducts.find((p) => p.id === params)
         return product ? product.displayName : ''
       },
+
+      filterOperators: [
+        {
+          label: 'contains',
+          value: 'contains',
+          getApplyFilterFn: (filterItem) => {
+            if (!filterItem?.value) {
+              return
+            }
+            return (rowId) => {
+              const filterValue = filterItem.value.toLowerCase()
+              if (filterValue) {
+                const productName = getProductDisplayName(rowId)
+                if (productName) {
+                  return productName.toLowerCase().includes(filterValue)
+                }
+              }
+              return true
+            }
+          },
+          InputComponent: ({ item, applyValue, focusElementRef }) => (
+            <TextField
+              autoFocus
+              inputRef={focusElementRef}
+              size='small'
+              label='Contains'
+              value={item.value || ''}
+              onChange={(event) =>
+                applyValue({ ...item, value: event.target.value })
+              }
+              style={{ marginTop: '8px' }}
+            />
+          ),
+        },
+      ],
+
       renderEditCell: (params) => {
         const { value, id, api } = params
         return (
@@ -621,11 +665,7 @@ const ShutdownNorms = () => {
   }
 
   const handleCalculate = () => {
-    if (lowerVertName == 'meg') {
-      // handleCalculateMeg()
-    } else {
-      handleCalculatePe()
-    }
+    handleCalculatePe()
   }
 
   return (
@@ -675,7 +715,7 @@ const ShutdownNorms = () => {
           units: ['TPH', 'TPD'],
           saveWithRemark: false,
           saveBtn: true,
-          showCalculate: lowerVertName == 'pe' ? true : false,
+          showCalculate: true,
         }}
       />
     </div>

@@ -107,7 +107,7 @@ const App = () => {
     }
 
     menu.items = menu.items.map((item) => {
-      if (item.id === 'utilities') {
+      if (item.id === 'utilities1') {
         return {
           ...item,
           children: item.children.map((group) => {

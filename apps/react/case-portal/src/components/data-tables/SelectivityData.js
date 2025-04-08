@@ -3,15 +3,12 @@ import ASDataGrid from './ASDataGrid'
 import React, { useEffect, useState } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
-// Import the catalyst options from the JSON file
-// import catalystOptionsData from '../../assets/Catalyst.json'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
 import getEnhancedAOPColDefs from './CommonHeader/ConfigHeader'
-// import getEnhancedAOPColDefs from './CommonHeader/ProductionAopHeader'
 
 const SelectivityData = (props) => {
   const headerMap = generateHeaderNames()
@@ -20,25 +17,17 @@ const SelectivityData = (props) => {
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const keycloak = useSession()
-  // const [csData, setCsData] = useState([])
-  // const [allProducts, setAllProducts] = useState([])
-  // const [allCatalyst, setAllCatalyst] = useState([])
-
   const [loading, setLoading] = useState(false)
-
   const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
-
-  // const [rows, setRows] = useState()
-  // const [rows2, setRows2] = useState()
+  const [allGradesReciepes, setAllGradesReciepes] = useState(null)
 
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  // States for the Remark Dialog
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -48,6 +37,7 @@ const SelectivityData = (props) => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
@@ -57,25 +47,20 @@ const SelectivityData = (props) => {
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    console.log(newRow, 'test1923888', oldRow)
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
-
     props.setRows((prevRows) =>
       prevRows.map((row) =>
         row.id === newRow.id ? { ...newRow, isNew: false } : row,
       ),
     )
-
     return newRow
   }, [])
 
   const saveChanges = React.useCallback(async () => {
     try {
       var data = Object.values(unsavedChangesRef.current.unsavedRows)
-
-      console.log(data)
       if (data.length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -107,7 +92,6 @@ const SelectivityData = (props) => {
 
   const saveCatalystData = async (newRow) => {
     setLoading(true)
-
     try {
       var plantId = ''
       const storedPlant = localStorage.getItem('selectedPlant')
@@ -115,8 +99,7 @@ const SelectivityData = (props) => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-
-      const turnAroundDetails = newRow.map((row) => ({
+      const payload = newRow.map((row) => ({
         apr: row.apr || null,
         may: row.may || null,
         jun: row.jun || null,
@@ -138,10 +121,9 @@ const SelectivityData = (props) => {
 
       const response = await DataService.saveCatalystData(
         plantId,
-        turnAroundDetails,
+        payload,
         keycloak,
       )
-
       if (response) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -174,14 +156,13 @@ const SelectivityData = (props) => {
       setLoading(false)
     }
   }
+
   const handleUpdate = async (updatedRows) => {
     setLoading(true)
     try {
       const payload = []
       updatedRows.forEach((row) => {
-        // Iterate over each key in the row
         Object.keys(row).forEach((key) => {
-          // Skip non-grade keys
           if (
             key === 'id' ||
             key === 'receipeName' ||
@@ -190,11 +171,8 @@ const SelectivityData = (props) => {
           ) {
             return
           }
-          // If the key exists in the nested grades object
           if (row.grades && row.grades[key]) {
-            // Use the updated value from the top-level key (e.g., "200" or "500")
             const updatedValue = row[key]
-            // Optionally, you can update the nested object here
             row.grades[key].attributeValue = updatedValue
             payload.push({
               gradeName: row.grades[key].gradeName,
@@ -239,37 +217,6 @@ const SelectivityData = (props) => {
     )
   }
 
-  const handleDeleteClick = async (id, params) => {
-    try {
-      const maintenanceId =
-        id?.maintenanceId ||
-        params?.row?.idFromApi ||
-        params?.row?.maintenanceId ||
-        params?.NormParameterMonthlyTransactionId
-
-      // console.log(maintenanceId, params, id)
-
-      // Ensure UI state updates before the deletion process
-      setOpen1(true)
-      setDeleteId(id)
-
-      // Perform the delete operation
-      const resp = await DataService.deleteBusinessDemandData(
-        maintenanceId,
-        keycloak,
-      )
-      if (props?.configType !== 'grades') {
-        props.fetchData()
-      }
-      return resp
-    } catch (error) {
-      console.error(`Error deleting Configuration data:`, error)
-    } finally {
-      // props.fetchData()
-      setOpen1(false)
-    }
-  }
-
   useEffect(() => {
     const getAllProducts = async () => {
       try {
@@ -285,8 +232,23 @@ const SelectivityData = (props) => {
         // handleMenuClose();
       }
     }
+    const getAllGradesReciepes = async () => {
+      try {
+        const data = await DataService.getAllGradesReciepes(keycloak)
+        const productList = data.map((product) => ({
+          id: product.id,
+          displayName: product.displayName,
+        }))
+        setAllGradesReciepes(productList)
+      } catch (error) {
+        console.error('Error fetching Grades/Reciepes:', error)
+      } finally {
+        // handleMenuClose();
+      }
+    }
 
     getAllProducts()
+    getAllGradesReciepes()
     // getAllCatalyst()
     if (props?.configType !== 'grades') {
       props.fetchData()
@@ -294,81 +256,48 @@ const SelectivityData = (props) => {
     if (props?.configType === 'grades') fetchConfigData()
   }, [sitePlantChange, keycloak, lowerVertName])
 
-  // const transformGradeValue = (data) => {
-  //   return data.map((item, index) => {
-  //     const { attributeValue, gradeName, ...rest } = item
-  //     return {
-  //       id: index,
-  //       ...rest,
-  //       gradeName,
-  //       [gradeName]: attributeValue, // dynamic key
-  //     }
-  //   })
-  // }
-  const generateDynamicColumns = (data) => {
-    const columns = [
-      {
-        field: 'receipeName',
-        headerName: 'Grade',
-        editable: true,
-        minWidth: 120,
-        flex: 1,
-      },
-    ]
-
-    const uniqueGradeNames = [...new Set(data.map((item) => item.gradeName))]
-
-    uniqueGradeNames.forEach((grade) => {
-      columns.push({
-        field: grade,
-        headerName: grade,
-        editable: true,
-        align: 'left',
-        headerAlign: 'left',
-      })
-    })
-
-    return columns
-  }
   const [columnConfig, setColumnConfig] = useState([])
+
+  // setColumnConfig()
+
   const fetchConfigData = async () => {
     setLoading(true)
     try {
-      const data = await DataService.getPeConfigData(keycloak)
-      const data1 = [
+      var data1 = await DataService.getPeConfigData(keycloak)
+      data1 = [
+        {
+          id: 0,
+          receipeName: 'Recipe A',
+          F19010: 10.5,
+          E52007: 12.0,
+          P15807: 5.5,
+          M24300: 7.25,
+          M60075: 8.0,
+          gradeFkId: '445D935C-D3A6-4AD4-99E3-67FED285E665',
+          reciepeFkId: '2AE40205-F960-4A57-975A-4598664E7F71',
+        },
         {
           id: 1,
-          gradeName: 'F19010',
-          receipeName: '',
-          gradeFkId: '1AC76D49-D113-4FF0-9516-9F9E96D85DAE',
-          reciepeFkId: '2AE40205-F960-4A57-975A-4598664E7F71',
-          attributeValue: 104,
+          receipeName: 'Recipe B',
+          F19010: 9.0,
+          E52007: 13.5,
+          P15807: 6.0,
+          M24300: 7.75,
+          M60075: 8.5,
+          gradeFkId: '445D935C-D3A6-4AD4-99E3-67FED285E665',
         },
         {
           id: 2,
-          gradeName: 'E52007',
-          receipeName: '',
-          gradeFkId: '7BB94524-FFE3-4D04-8CAC-972047D8AD2F',
+          receipeName: 'Recipe C',
+          F19010: 11.0,
+          E52007: 12.5,
+          P15807: 5.0,
+          M24300: 6.5,
+          M60075: 9.0,
           reciepeFkId: '2AE40205-F960-4A57-975A-4598664E7F71',
-          attributeValue: 100,
         },
       ]
-      setColumnConfig(generateDynamicColumns(data1))
-      // console.log(columnConfig)
-
-      // console.log(data)
-      // For 'meg', simply map items without grouping.
-      // const formattedData = data.map((item, index) => ({
-      //   ...item,
-      //   // idFromApi: item.id,
-      //   id: index,
-      // }))
-      // const formattedData = transformGradeValue(data)
-      // console.log(formattedData)
-      const data2 = groupRowsByReceipe(data1)
-
-      console.log(data2)
-      props?.setRows(data2)
+      props?.setRows(data1)
     } catch (error) {
       console.error('Error fetching data:', error)
       setLoading(false)
@@ -377,55 +306,6 @@ const SelectivityData = (props) => {
     }
   }
 
-  // const groupRowsByReceipe = (data) => {
-  //   const grouped = {}
-
-  //   data.forEach((item) => {
-  //     const { reciepeFkId, gradeName, attributeValue, gradeFkId, receipeName } =
-  //       item
-  //     if (!grouped[reciepeFkId]) {
-  //       grouped[reciepeFkId] = {
-  //         reciepeFkId,
-  //         receipeName,
-  //         grades: {},
-  //       }
-  //     }
-  //     grouped[reciepeFkId][gradeName] = { attributeValue, gradeFkId }
-  //   })
-
-  //   return Object.values(grouped).map((item, index) => ({
-  //     id: index,
-  //     ...item,
-  //   }))
-  // }
-  const groupRowsByReceipe = (data) => {
-    const grouped = {}
-
-    data.forEach((item) => {
-      const { reciepeFkId, gradeName, attributeValue, gradeFkId, receipeName } =
-        item
-      if (!grouped[reciepeFkId]) {
-        grouped[reciepeFkId] = {
-          reciepeFkId,
-          receipeName,
-          grades: {},
-        }
-      }
-      grouped[reciepeFkId].grades[gradeName] = {
-        gradeName, // now explicitly stored
-        attributeValue,
-        gradeFkId,
-      }
-    })
-
-    // Convert the grouped object to an array of rows
-    return Object.values(grouped).map((item, index) => ({
-      id: index,
-      ...item,
-    }))
-  }
-
-  // console.log(props?.configType)
   const productionColumns = getEnhancedAOPColDefs({
     allProducts,
     headerMap,
@@ -458,13 +338,11 @@ const SelectivityData = (props) => {
         snackbarOpen={snackbarOpen}
         apiRef={apiRef}
         setDeleteId={setDeleteId}
-        // fetchData={props?.fetchData}
         setOpen1={setOpen1}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
         deleteId={deleteId}
         open1={open1}
-        handleDeleteClick={handleDeleteClick}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}
         currentRemark={currentRemark}
