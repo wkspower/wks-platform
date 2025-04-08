@@ -4,31 +4,25 @@
     "headerName": "Constant",
     "minWidth": 125,
     "groupable": true,
-    "flex": 1,
-    "renderCell": "renderStrongCell"
+    "flex": 1
   },
   {
     "field": "Particulars2",
     "headerName": "Type",
     "minWidth": 125,
     "groupable": true,
-    "flex": 1,
-    "renderCell": "renderStrongCell"
+    "flex": 1
   },
   {
     "field": "normParameterFKId",
     "headerName": "Particulars",
     "editable": false,
-    "minWidth": 160,
-    "valueGetter": "defaultValueGetter",
-    "valueFormatter": "productDisplayNameFormatter",
-    "renderEditCell": "renderNormParameterSelectCell"
+    "minWidth": 160
   },
   {
     "field": "apr",
     "headerName": "Values",
     "editable": true,
-    "renderEditCell": "NumericInputOnly",
     "align": "left",
     "headerAlign": "left"
   },

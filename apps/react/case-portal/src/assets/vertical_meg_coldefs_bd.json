@@ -4,7 +4,8 @@
     "headerName": "Type",
     "minWidth": 125,
     "groupable": true,
-    "headerClass": "bold-header"
+    "headerClass": "bold-header",
+    "filterable": "false"
   },
   {
     "field": "normParameterId",
@@ -115,6 +116,7 @@
   },
   {
     "field": "idFromApi",
-    "headerName": "idFromApi"
+    "headerName": "idFromApi",
+    "filterable": "false"
   }
 ]

@@ -69,7 +69,7 @@ const SelectivityData = (props) => {
         })
         return
       }
-      console.log(props?.configType)
+      // console.log(props?.configType)
       if (props?.configType !== 'grades') {
         const requiredFields = ['remarks']
         const validationMessage = validateFields(data, requiredFields)
@@ -160,48 +160,35 @@ const SelectivityData = (props) => {
   const handleUpdate = async (updatedRows) => {
     setLoading(true)
     try {
-      const payload = []
-      updatedRows.forEach((row) => {
-        Object.keys(row).forEach((key) => {
-          if (
-            key === 'id' ||
-            key === 'receipeName' ||
-            key === 'reciepeFkId' ||
-            key === 'grades'
-          ) {
-            return
-          }
-          if (row.grades && row.grades[key]) {
-            const updatedValue = row[key]
-            row.grades[key].attributeValue = updatedValue
-            payload.push({
-              gradeName: row.grades[key].gradeName,
-              receipeName: row.receipeName,
-              gradeFkId: row.grades[key].gradeFkId,
-              reciepeFkId: row.reciepeFkId,
-              attributeValue: parseInt(updatedValue),
-            })
-          }
-        })
-      })
-      console.log(payload)
-      const response = await DataService.updatePeConfigData(keycloak, payload)
-      if (response) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Update successful!',
-          severity: 'success',
-        })
-        fetchConfigData()
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Update failed!',
-          severity: 'error',
-        })
-      }
+      const payload = updatedRows.map((row) => ({
+        recId: row.Reciepe_FK_ID.toString(),
+        grades: Object.entries(row)
+          .filter(([key]) => /^[0-9A-Fa-f-]{36}$/.test(key))
+          .map(([key, value]) => ({
+            key,
+            value: Number(value),
+          })),
+      }))
 
-      return response
+      if (payload.length > 0) {
+        const response = await DataService.updatePeConfigData(keycloak, payload)
+        if (response) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Configuration Data Saved Successfully!',
+            severity: 'success',
+          })
+          fetchConfigData()
+        } else {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Configuration Data Saved failed!',
+            severity: 'error',
+          })
+        }
+
+        return response
+      }
     } catch (error) {
       console.error('Error updating data:', error)
     } finally {
@@ -235,11 +222,7 @@ const SelectivityData = (props) => {
     const getAllGradesReciepes = async () => {
       try {
         const data = await DataService.getAllGradesReciepes(keycloak)
-        const productList = data.map((product) => ({
-          id: product.id,
-          displayName: product.displayName,
-        }))
-        setAllGradesReciepes(productList)
+        setAllGradesReciepes(data)
       } catch (error) {
         console.error('Error fetching Grades/Reciepes:', error)
       } finally {
@@ -263,41 +246,46 @@ const SelectivityData = (props) => {
   const fetchConfigData = async () => {
     setLoading(true)
     try {
-      var data1 = await DataService.getPeConfigData(keycloak)
-      data1 = [
-        {
-          id: 0,
-          receipeName: 'Recipe A',
-          F19010: 10.5,
-          E52007: 12.0,
-          P15807: 5.5,
-          M24300: 7.25,
-          M60075: 8.0,
-          gradeFkId: '445D935C-D3A6-4AD4-99E3-67FED285E665',
-          reciepeFkId: '2AE40205-F960-4A57-975A-4598664E7F71',
-        },
-        {
-          id: 1,
-          receipeName: 'Recipe B',
-          F19010: 9.0,
-          E52007: 13.5,
-          P15807: 6.0,
-          M24300: 7.75,
-          M60075: 8.5,
-          gradeFkId: '445D935C-D3A6-4AD4-99E3-67FED285E665',
-        },
-        {
-          id: 2,
-          receipeName: 'Recipe C',
-          F19010: 11.0,
-          E52007: 12.5,
-          P15807: 5.0,
-          M24300: 6.5,
-          M60075: 9.0,
-          reciepeFkId: '2AE40205-F960-4A57-975A-4598664E7F71',
-        },
-      ]
-      props?.setRows(data1)
+      var data = await DataService.getPeConfigData(keycloak)
+
+      data = data.map((item, index) => ({
+        ...item,
+        id: index,
+      }))
+
+      // data = [
+      //   {
+      //     id: 1,
+      //     Reciepe_FK_ID: 12345,
+      //     ReceipeName: 'Reciepe 01',
+      //     AOPYear: '2025-26',
+      //     '91278FC9-6554-4F80-B52B-05A5F8AC1B42': 100,
+      //     '54E12CC7-6306-4E36-BEE5-0D97FC3BABCE': 120,
+      //     '34D6DCB6-31E6-4D8D-B2F6-112649E23737': 120,
+      //     '6481FB2E-373F-4CB5-8D1C-15E80D187060': 120,
+      //     '23E76D93-7804-403F-A5E3-20FA11917505': 1020,
+      //     '483EE917-9C42-4B16-8665-25CF39F7B454': 1020,
+      //     '97FE0795-1900-43FD-A513-269BF965712C': 1020,
+      //     '60733500-7F07-443B-B893-2FCA2EBD8744': 1020,
+      //     'D1B0E1D0-50C7-429C-B545-4560DBB20A83': 1020,
+      //     'EF022EA3-2A44-4B5C-BB3C-622B38DCA38C': 1020,
+      //     '39C5CE0A-7C91-423F-BD8E-656B07B33002': 1020,
+      //     '445D935C-D3A6-4AD4-99E3-67FED285E665': 1020,
+      //     '9929136F-0CEF-402B-8FE9-825EC325E14E': 1020,
+      //     '37D843AB-8066-4011-80CE-8E813A58A87A': 1020,
+      //     '7BB94524-FFE3-4D04-8CAC-972047D8AD2F': 1020,
+      //     '1AC76D49-D113-4FF0-9516-9F9E96D85DAE': 1020,
+      //     '7744C9A0-7292-4D3E-A55C-B266EA2FAD3F': 1020,
+      //     '051934D2-3C1B-47C3-8624-BA56018C22A3': 1020,
+      //     '45657662-4EB2-4BF4-B529-E3175A754882': 1020,
+      //     'EA9CE255-E8D2-4173-93C9-EEFA4BE0A0DA': 1020,
+      //     '321E1892-7084-4918-AC47-F407F6363E47': 1020,
+      //     '0F21B398-A787-48DA-B586-FA90E0E83D4E': 1020,
+      //     'BC4DBDB9-349A-4755-818C-FDB213BE3596': 1020,
+      //   },
+      // ]
+
+      props?.setRows(data)
     } catch (error) {
       console.error('Error fetching data:', error)
       setLoading(false)
@@ -307,6 +295,7 @@ const SelectivityData = (props) => {
   }
 
   const productionColumns = getEnhancedAOPColDefs({
+    allGradesReciepes,
     allProducts,
     headerMap,
     handleRemarkCellClick,

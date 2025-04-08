@@ -6,6 +6,7 @@ import productionColumnsPE4 from '../../../assets/config_pe4.json'
 import NumericInputOnly from 'utils/NumericInputOnly'
 import Tooltip from '@mui/material/Tooltip'
 import { truncateRemarks } from 'utils/remarksUtils'
+import TextField from '@mui/material/TextField'
 // import { allProducts } from 'data/allProducts'; // adjust path as needed
 
 // This function returns the appropriate JSON configuration based on the configType
@@ -27,6 +28,7 @@ const getConfigByType = (configType) => {
 }
 
 const getEnhancedAOPColDefs = ({
+  allGradesReciepes,
   allProducts,
   headerMap,
   handleRemarkCellClick,
@@ -35,7 +37,11 @@ const getEnhancedAOPColDefs = ({
 }) => {
   const config = getConfigByType(configType)
 
-  // const finalColumns = configType === 'grades' ? columnConfig : config
+  const getProductDisplayName = (id) => {
+    if (!id) return
+    const product = allProducts.find((p) => p.id === id)
+    return product ? product.displayName : ''
+  }
 
   const enhancedColDefs = config.map((col) => {
     if (col.field === 'normParameterFKId') {
@@ -46,6 +52,42 @@ const getEnhancedAOPColDefs = ({
           const product = allProducts.find((p) => p.id === params)
           return product ? product.displayName : ''
         },
+
+        filterOperators: [
+          {
+            label: 'contains',
+            value: 'contains',
+            getApplyFilterFn: (filterItem) => {
+              if (!filterItem?.value) {
+                return
+              }
+              return (rowId) => {
+                const filterValue = filterItem.value.toLowerCase()
+                if (filterValue) {
+                  const productName = getProductDisplayName(rowId)
+                  if (productName) {
+                    return productName.toLowerCase().includes(filterValue)
+                  }
+                }
+                return true
+              }
+            },
+            InputComponent: ({ item, applyValue, focusElementRef }) => (
+              <TextField
+                autoFocus
+                inputRef={focusElementRef}
+                size='small'
+                label='Value'
+                value={item.value || ''}
+                onChange={(event) =>
+                  applyValue({ ...item, value: event.target.value })
+                }
+                style={{ marginTop: '8px' }}
+              />
+            ),
+          },
+        ],
+
         renderEditCell: (params) => {
           const { value, id, api } = params
           const existingValues = new Set(
@@ -87,7 +129,6 @@ const getEnhancedAOPColDefs = ({
       }
     }
 
-    // For remarks field – attach custom cell renderer for remarks
     if (col.field === 'remarks') {
       return {
         ...col,
@@ -119,8 +160,7 @@ const getEnhancedAOPColDefs = ({
       }
     }
 
-    // If headerMap is provided and headerName exists in headerMap, update headerName and attach NumericInputOnly as edit cell renderer
-    if (headerMap && headerMap[col.headerName]) {
+    if ((headerMap && headerMap[col.headerName]) || col.field == 'apr') {
       return {
         ...col,
         renderEditCell: NumericInputOnly,
@@ -128,109 +168,29 @@ const getEnhancedAOPColDefs = ({
       }
     }
 
-    // For Particulars field, render the text as bold
-    if (col.field === 'Particulars') {
+    if (col.field === 'Particulars' || col.field === 'Particulars2') {
       return {
         ...col,
         renderCell: (params) => <strong>{params?.value}</strong>,
+        filterable: false,
       }
     }
-    if (col.field === 'Particulars2') {
+
+    if (col.isGradeHeader === 'true') {
+      const matchedGrade = allGradesReciepes?.find(
+        (item) => item.id.toLowerCase() === col.field.toLowerCase(),
+      )
+
       return {
         ...col,
-        renderCell: (params) => <strong>{params?.value}</strong>,
+        headerName: matchedGrade?.displayName ?? col.headerName,
+        renderEditCell: NumericInputOnly,
       }
     }
-    // if (col.field === 'gradeName' || col.field === 'apr') {
-    //   return {
-    //     ...col,
-    //     renderCell: (params) => {
-    //       params?.value
-    //     },
-    //     renderEditCell: NumericInputOnly,
-    //   }
-    // }
-    // if (col.field === 'attributeValue') {
-    //   return {
-    //     ...col,
-    //     // renderCell: (params) => {
-    //     //   params?.value
-    //     // },
-    //     // renderEditCell: NumericInputOnly,
-    //   }
-    // }
-    // if (col.field === 'receipeName') {
-    //   return {
-    //     ...col,
-    //     renderCell: (params) => {
-    //       params?.value
-    //     },
-    //     renderEditCell: NumericInputOnly,
-    //   }
-    // }
-    // if (
-    //   col.field != 'receipeName' ||
-    //   col.field != 'attributeValue' ||
-    //   col.field != 'gradeName'
-    //   //  col.field != 'gradeName'
-    // ) {
-    //   return {
-    //     ...col,
-    //     renderCell: (params) => {
-    //       params?.value
-    //     },
-    //     renderEditCell: NumericInputOnly,
-    //   }
-    // }
-    // For other fields, if configType is 'grades' and the field is a dynamic grade column:
-    // if (configType === 'grades' && col.field !== 'receipeName') {
-    //   return {
-    //     ...col,
-    //     renderCell: (params) => {
-    //       // Access the grade information from the nested 'grades' object
-    //       const gradeData = params.row.grades && params.row.grades[col.field]
-    //       return gradeData ? gradeData.attributeValue : ''
-    //     },
-    //     renderEditCell: (params) => {
-    //       // Use NumericInputOnly for editing, but ensure you update the nested attribute.
-    //       // You might need to create a custom NumericInputOnly that works with nested paths.
-    //       return NumericInputOnly(params)
-    //     },
-    //   }
-    // }
 
-    // For receipeName and any other static columns:
-    // if (col.field === 'receipeName') {
-    //   return {
-    //     ...col,
-    //     renderCell: (params) => params?.value,
-    //   }
-    // }
-    // if (
-    //   col.field != 'receipeName' ||
-    //   col.field != 'attributeValue' ||
-    //   col.field != 'gradeName'
-    //   //  col.field != 'gradeName'
-    // ) {
-    //   return {
-    //     ...col,
-    //     renderCell: (params) => {
-    //       params?.value
-    //     },
-    //     renderEditCell: NumericInputOnly,
-    //   }
-    // }
-    // Default return for any fields not matched above.
-    //   return {
-    //     ...col,
-    //     renderCell: (params) => params?.value,
-    //     renderEditCell: NumericInputOnly,
-    //   }
-    // })
-
-    // Otherwise, return the column as is
     return col
   })
+
   return enhancedColDefs
 }
 

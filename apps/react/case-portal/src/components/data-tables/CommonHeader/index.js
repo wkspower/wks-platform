@@ -151,6 +151,7 @@ const getEnhancedColDefs = ({
         },
       }
     }
+
     if (headerMap && headerMap[col.headerName]) {
       return {
         ...col,
@@ -161,6 +162,7 @@ const getEnhancedColDefs = ({
     if (col.field === 'Particulars') {
       return {
         ...col,
+        filterable: false,
         renderCell: (params) => <strong>{params.value}</strong>,
       }
     }
