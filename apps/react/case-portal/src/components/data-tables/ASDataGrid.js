@@ -68,29 +68,14 @@ const DataGridTable = ({
   unsavedChangesRef = { current: { unsavedRows: {}, rowsBeforeChange: {} } },
   deleteRowData = () => {},
 }) => {
-  // const [tempHide, setTempHide] = useState(true)
-  // const [isUpdating, setIsUpdating] = useState(false)
-  // const [isSaving, setIsSaving] = useState(false)
   const [resizedColumns, setResizedColumns] = useState({})
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
-
-  // const [open, setOpen] = useState(false)
-  // const [remark, setRemark] = useState('')
-  // const [product, setProduct] = useState('')
-  // const [openRemark, setOpenRemark] = useState(false)
-  // const keycloak = useSession()
-  // const [days, setDays] = useState([])
   const [searchText, setSearchText] = useState('')
   const isFilterActive = false
-  // const [selectedRowId, setSelectedRowId] = useState(null)
   const [selectedUnit, setSelectedUnit] = useState()
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
-  // const [deleteId, setDeleteId] = useState(false)
-  // const [deleteIdTemp, setDeleteIdTemp] = useState(false)
   const [paramsForDelete, setParamsForDelete] = useState([])
-  // const handleOpenRemark = () => setOpenRemark(true)
-  // const handleCloseRemark = () => setOpenRemark(false)
   const closeDeleteDialogeBox = () => setOpenDeleteDialogeBox(false)
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
   const handleSearchChange = (event) => {
@@ -639,10 +624,6 @@ const DataGridTable = ({
           loading={loading}
           apiRef={apiRef}
           rows={filteredRows}
-          // disableColumnFilter
-          // disableColumnMenu
-          // onFilterModelChange={() => {}}
-          // disableColumnSelector
           sortingOrder={[]}
           disableSelectionOnClick
           columns={columns}

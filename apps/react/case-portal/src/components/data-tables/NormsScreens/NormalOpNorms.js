@@ -12,7 +12,8 @@ import DataGridTable from '../ASDataGrid'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
-import TextField from '@mui/material/TextField'
+import { useDispatch } from 'react-redux'
+import { setIsBlocked } from 'store/reducers/dataGridStore'
 
 const headerMap = generateHeaderNames()
 
@@ -37,6 +38,7 @@ const NormalOpNormsScreen = () => {
   const { sitePlantChange, verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const dispatch = useDispatch()
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -189,7 +191,7 @@ const NormalOpNormsScreen = () => {
       ],
 
       renderEditCell: (params) => {
-        const { value, id, api } = params
+        const { value, api } = params
         return (
           <select
             value={value || ''}
@@ -469,6 +471,7 @@ const NormalOpNormsScreen = () => {
 
         // if (response.status === 200) {
         if (response) {
+          dispatch(setIsBlocked(false))
           setSnackbarOpen(true)
           setSnackbarData({
             message: `Normal Operations Norms Saved Successfully!`,
@@ -520,6 +523,8 @@ const NormalOpNormsScreen = () => {
       )
 
       if (data == 0 || data) {
+        dispatch(setIsBlocked(true))
+
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data refreshed successfully!',

@@ -17,11 +17,7 @@ import {
   setVerticalChange,
 } from 'store/reducers/dataGridStore'
 import { DataService } from 'services/DataService'
-
 import honLogo from 'assets/images/hon_white.png' //WHITE COLOR
-// import honLogo from 'assets/images/hon.svg' //RED COLOR
-
-// import siteData from '../../../../assets/sitesData.json'
 
 const HeaderContent = ({ keycloak }) => {
   const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
@@ -29,6 +25,7 @@ const HeaderContent = ({ keycloak }) => {
   const [selectedSite, setSelectedSite] = useState('')
   const [selectedVertical, setSelectedVertical] = useState('')
   const [verticals, setVerticals] = useState([])
+  // const [allowedVerticals, setAllowedVerticals] = useState([])
   const [sites, setSites] = useState([])
   // const [allSites, setAllSites] = useState([])
   // const [userSites, setUserSites] = useState([])
@@ -41,6 +38,11 @@ const HeaderContent = ({ keycloak }) => {
   const getAllowedFilter = () => {
     try {
       const parsed = JSON.parse(keycloak.idTokenParsed.plants)
+      const { verticalIds, siteIds, plantIds } = extractIds(parsed)
+      // console.log('Vertical IDs:', verticalIds)
+      // console.log('Site IDs:', siteIds)
+      // console.log('Plant IDs:', plantIds)
+      // console.log(parsed)
       let allowedSiteIds = []
       let allowedPlantIds = []
       parsed.forEach((obj) => {
@@ -49,18 +51,68 @@ const HeaderContent = ({ keycloak }) => {
           allowedPlantIds = allowedPlantIds.concat(obj[siteId])
         })
       })
-      return { allowedSiteIds, allowedPlantIds }
+      return {
+        allowedSiteIds: siteIds,
+        allowedPlantIds: plantIds,
+        allowedVert: verticalIds,
+      }
     } catch (err) {
       console.error('Error parsing keycloak token:', err)
       return { allowedSiteIds: [], allowedPlantIds: [] }
     }
   }
 
+  // Function to extract IDs from the data
+  function extractIds(data) {
+    // Use Set to keep lists unique.
+    const verticalIds = new Set()
+    const siteIds = new Set()
+    const plantIds = new Set()
+
+    // Iterate over each object in the array.
+    data.forEach((verticalObj) => {
+      // verticalObj's keys are the vertical IDs.
+      Object.keys(verticalObj).forEach((verticalId) => {
+        verticalIds.add(verticalId)
+        const sitesObj = verticalObj[verticalId]
+        // In sitesObj, each key is a site ID.
+        Object.keys(sitesObj).forEach((siteId) => {
+          siteIds.add(siteId)
+          const plantsArray = sitesObj[siteId]
+          // Each item in plantsArray is a plant ID.
+          plantsArray.forEach((plantId) => {
+            plantIds.add(plantId)
+          })
+        })
+      })
+    })
+
+    // Return arrays converted from sets.
+    return {
+      verticalIds: Array.from(verticalIds),
+      siteIds: Array.from(siteIds),
+      plantIds: Array.from(plantIds),
+    }
+  }
+
+  // Usage:
+  // const { verticalIds, siteIds, plantIds } = extractIds(data)
+  // console.log('Vertical IDs:', verticalIds)
+  // console.log('Site IDs:', siteIds)
+  // console.log('Plant IDs:', plantIds)
+
   const getPlantAndSite = async () => {
     try {
       const response = await DataService.getAllSites(keycloak)
       if (response) {
-        setVerticals(response)
+        // Get allowed filter arrays.
+        const { allowedSiteIds, allowedPlantIds, allowedVert } =
+          getAllowedFilter()
+        const filteredVerticals = response.filter((vertical) =>
+          allowedVert.includes(vertical.id),
+        )
+        setVerticals(filteredVerticals)
+        // console.log(response)
         // setUserSites(keycloak.idTokenParsed.plants)
 
         // Flatten verticals into sites and plants arrays.
@@ -104,17 +156,14 @@ const HeaderContent = ({ keycloak }) => {
         // setAllSites(sitesData)
         setAllPlants(plantsData)
 
-        // Get allowed filter arrays.
-        const { allowedSiteIds, allowedPlantIds } = getAllowedFilter()
-
         // Filter plants based on allowed plant IDs.
         const filteredPlantsData = plantsData.filter((plant) =>
           allowedPlantIds.includes(plant.id),
         )
 
         // Filter sites based on allowed site IDs.
-        // const filteredSitesData = sitesData.filter((site) =>
-        //   allowedSiteIds.includes(site.id),
+        // const filteredSitesData = plantsData.filter((site) =>
+        //   allowedVert.includes(site),
         // )
 
         // Set default selections based on the first available allowed plant.
@@ -201,7 +250,7 @@ const HeaderContent = ({ keycloak }) => {
       localStorage.setItem(
         'selectedPlant',
         JSON.stringify({
-          id: filteredPlants[0].id,
+          id: filteredPlants[0]?.id,
           name: filteredPlants[0].name,
         }),
       )
@@ -264,7 +313,7 @@ const HeaderContent = ({ keycloak }) => {
         localStorage.setItem(
           'selectedPlant',
           JSON.stringify({
-            id: filteredPlants[0].id,
+            id: filteredPlants[0]?.id,
             name: filteredPlants[0].name,
           }),
         )
@@ -329,7 +378,7 @@ const HeaderContent = ({ keycloak }) => {
     //  console.log(selectedVertical)
     localStorage.setItem(
       'selectedSiteId',
-      JSON.stringify({ id: siteAvailable[0].id }),
+      JSON.stringify({ id: siteAvailable[0]?.id }),
     )
     dispatch(
       setVerticalChange({

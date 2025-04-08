@@ -78,7 +78,7 @@ const App = () => {
   async function buildMenuItems(keycloak) {
     let rawAllowedVerticals = []
     const verticals = keycloak?.idTokenParsed?.verticals
-
+    // console.log('keycloak', keycloak)
     if (verticals) {
       try {
         rawAllowedVerticals = JSON.parse(verticals)
@@ -97,7 +97,9 @@ const App = () => {
     // console.log(allowedVerticalsMapping)
     // console.log(verticalChange)
 
-    const selectedVertical = verticalChange?.selectedVertical?.toLowerCase()
+    const selectedVertical =
+      localStorage.getItem('verticalId') ||
+      verticalChange?.selectedVertical?.toLowerCase()
     const allowedChildIds =
       (selectedVertical && allowedVerticalsMapping[selectedVertical]) || []
 
@@ -107,7 +109,7 @@ const App = () => {
     }
 
     menu.items = menu.items.map((item) => {
-      if (item.id === 'utilities1') {
+      if (item.id === 'utilities') {
         return {
           ...item,
           children: item.children.map((group) => {

@@ -129,6 +129,19 @@ const BusinessDemand = ({ permissions }) => {
         // handleMenuClose();
       }
     }
+    const getHeaderData = async () => {
+      try {
+        const res = await DataService.getHeaderData(keycloak, 'Business Demand')
+        if (res) {
+          console.log(res)
+          // setHeader(res);
+        }
+        return res
+      } catch (err) {
+        console.log(err)
+      }
+    }
+    getHeaderData()
     fetchData()
     getAllProducts()
   }, [sitePlantChange, keycloak, lowerVertName])

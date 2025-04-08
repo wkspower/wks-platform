@@ -14,6 +14,9 @@ import { useSelector } from 'react-redux'
 // import NumericInputOnly from 'utils/NumericInputOnly'
 import { validateFields } from 'utils/validationUtils'
 import getEnhancedColDefs from './CommonHeader/ProductionAopHeader'
+import { useDispatch } from 'react-redux'
+import { setIsBlocked } from 'store/reducers/dataGridStore'
+
 const ProductionNorms = ({ permissions }) => {
   const keycloak = useSession()
   // const [csData, setCsData] = useState([])
@@ -43,6 +46,9 @@ const ProductionNorms = ({ permissions }) => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+  const dispatch = useDispatch()
+  // const isBlocked = useSelector((state) => state.isBlocked) // Get block flag from Redux
+
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remark || row.aopRemarks || '')
     setCurrentRowId(row.id)
@@ -232,6 +238,7 @@ const ProductionNorms = ({ permissions }) => {
       )
 
       if (response) {
+        dispatch(setIsBlocked(false))
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Production AOP Saved Successfully !',
@@ -268,6 +275,7 @@ const ProductionNorms = ({ permissions }) => {
   }
 
   const handleCalculate = async () => {
+    dispatch(setIsBlocked(true))
     setCalculatebtnClicked(true)
     setLoading(true)
     try {

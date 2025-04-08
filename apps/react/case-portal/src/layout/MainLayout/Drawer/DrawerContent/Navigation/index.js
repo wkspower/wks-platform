@@ -6,13 +6,19 @@ import { useMenu } from 'SessionStoreContext'
 const Navigation = () => {
   const menu = useMenu()
 
-  const navGroups = menu.items.map((item) => {
+
+  const navGroups = menu.items.map((item, index) => {
     switch (item.type) {
       case 'group':
-        return <NavGroup key={item.id} item={item} />
+        return <NavGroup key={`${item.id}-${index}`} item={item} />
       default:
         return (
-          <Typography key={item.id} variant='h6' color='error' align='center'>
+          <Typography
+            key={`${item.id}-${index}`}
+            variant='h6'
+            color='error'
+            align='center'
+          >
             Fix - Navigation Group
           </Typography>
         )
