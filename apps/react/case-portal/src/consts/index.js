@@ -33,7 +33,7 @@ const Config = {
 
 async function fetchNovuAppId() {
   try {
-    const host = getEnv('REACT_APP_NOVU_PUBLISHER_API_URL')
+    const host = getEnv(process.env.REACT_APP_NOVU_PUBLISHER_API_URL)
 
     const apiUrl = `${host}/novu-app-id`
 
