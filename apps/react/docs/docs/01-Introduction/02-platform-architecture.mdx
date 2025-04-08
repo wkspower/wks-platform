@@ -4,11 +4,12 @@ title: Platform Architecture
 ---
 
 # Platform Architecture
+WKS is built on a modular microservices architecture, designed for scalability, flexibility, and high-performance process automation. The platform integrates open-source technologies with custom services to orchestrate business workflows, manage data, and deliver a responsive user experience.
 
-## The platform consists of the following components:
+## The architecture is composed of the following core components::
 
-1.	**Camunda**: A BPM (Business Process Management) platform used for workflow automation and process execution.
-2.	**Case Engine - Rest API**: A custom REST API service for the case engine, providing case-related functionality.
+1.	**Camunda**: An open-source Business Process Management (BPM) engine used to define, orchestrate, and execute complex workflows. Camunda ensures transactional integrity and acts as the central orchestrator for distributed services, following the Saga Pattern for managing long-running business processes.
+2.	**Case Engine - Rest API**: A custom API layer that exposes functionality for case management. It enables creation, modification, and retrieval of case data, and serves as a key integration point for other services in the platform.
 3.	**Case Engine - Camunda External Tasks**: Interacts with the BPM engine to process async operations within a business process.
 4.	**E-mail to Case**: A service responsible for converting emails into cases in the platform.
 5.	**Storage API**: An API service for interacting with the Minio storage.
