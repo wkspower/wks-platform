@@ -8,4 +8,6 @@
 	
  	public List<NormParameters> findAllByType(String type);
 
+    public List<NormParameters> getAllGrades(String plantId);
+
  }

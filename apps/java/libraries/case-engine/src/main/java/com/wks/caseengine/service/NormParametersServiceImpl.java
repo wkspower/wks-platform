@@ -19,4 +19,9 @@
  		return	normParametersRepository.findAllByType(type);
  	}
 
+	@Override
+ 	public List<NormParameters> getAllGrades(String type) {
+ 		return	normParametersRepository.getAllGrades(type);
+ 	}
+
  }
