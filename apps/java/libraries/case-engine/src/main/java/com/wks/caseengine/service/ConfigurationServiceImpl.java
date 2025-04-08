@@ -1,5 +1,8 @@
 package com.wks.caseengine.service;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import jakarta.persistence.Query;
 import java.util.Arrays;
@@ -14,6 +17,8 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +37,7 @@ import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.ConfigurationDataDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
+import com.wks.caseengine.dto.NormAttributeTransactionReceipeRequestDTO;
 import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.Plants;
@@ -61,6 +67,9 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	
 	@Autowired
 	NormAttributeTransactionReceipeRepository normAttributeTransactionReceipeRepository;
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 	
 	
 	
@@ -206,34 +215,50 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 		 return configurationDTO.getJan();
 	 }
 	 @Transactional
-	 @Override
-	    public  List<NormAttributeTransactionReceipeDTO>  getNormAttributeTransactionReceipe(String year, String plantId) {
-		   Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
-	        Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
-	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).orElseThrow();
-	        
-	        List<NormAttributeTransactionReceipeDTO> listDTO=new ArrayList<>();
-	        String storedProcedure = vertical.getName() + "_HMD_ReceipeWiseGradeDetail";
-	        System.out.println("Executing SP: " + storedProcedure);
+	 @Override 
+	 public   List<Map<String, Object>>  getNormAttributeTransactionReceipe(String year, String plantId) {
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+		 Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+		 Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).orElseThrow();
+		 
+		 List<NormAttributeTransactionReceipeDTO> listDTO=new ArrayList<>();
+		 String storedProcedure = vertical.getName() + "_HMD_ReceipeWiseGradeDetail";
+		 System.out.println("Executing SP: " + storedProcedure);
 
-	        List<Object[]> results = getNormAttributeTransactionReceipeSP(storedProcedure, year, plant.getId().toString(), site.getId().toString(), vertical.getId().toString());
-	        
-	        for(Object[] row :results){
-	        	NormAttributeTransactionReceipeDTO dto = new NormAttributeTransactionReceipeDTO();
-	        	
-	        	dto.setGradeName(row[0] != null ? row[0].toString() : "");
-	        	dto.setReceipeName(row[1] != null ? row[1].toString() : "");
-	        	dto.setGradeFkId(row[2] != null ? row[2].toString() : "");
-	        	dto.setReciepeFkId(row[3] != null ? row[3].toString() : "");
-	        	dto.setAttributeValue(row[4] != null ? Integer.parseInt(row[4].toString()) : null);
-	        	
-	            listDTO.add(dto);
-	        }
-	        
-	        
-	        return listDTO;
-	 
-	 }
+		 List<Object[]> results = getNormAttributeTransactionReceipeSP(storedProcedure, year, plant.getId().toString(), site.getId().toString(), vertical.getId().toString());
+		 List<Map<String, Object>> resultRows=   callStoredProcedureWithHeaders(storedProcedure, year, plant.getId().toString(), site.getId().toString(), vertical.getId().toString());
+
+		 return resultRows;
+  }
+
+	 public  List<Map<String, Object>> callStoredProcedureWithHeaders( String procedureName, String finYear, String plantId, String siteId, String verticalId) {
+		    String sql = "EXEC " + procedureName + 
+		                 " @plantId = ?, @siteId = ?, @verticalId = ?, @finYear = ?";
+
+		    return jdbcTemplate.query(sql, new Object[]{plantId, siteId, verticalId, finYear}, new ResultSetExtractor<List<Map<String, Object>>>() {
+		        @Override
+		        public List<Map<String, Object>> extractData(ResultSet rs) throws SQLException {
+		            List<Map<String, Object>> result = new ArrayList<>();
+
+		            ResultSetMetaData metaData = rs.getMetaData();
+		            int columnCount = metaData.getColumnCount();
+		            List<String> headers = new ArrayList<>();
+		            for (int i = 1; i <= columnCount; i++) {
+		                headers.add(metaData.getColumnLabel(i)); 
+		            }
+
+		            while (rs.next()) {
+		                Map<String, Object> row = new LinkedHashMap<>();
+		                for (int i = 1; i <= columnCount; i++) {
+		                    row.put(headers.get(i - 1), rs.getObject(i));
+		                }
+		                result.add(row);
+		            }
+
+		            return result;
+		        }
+		    });
+		}
 	 
 	 @Transactional
 	    public List<Object[]> getNormAttributeTransactionReceipeSP(String procedureName, String finYear, String plantId, String siteId, String verticalId) {
@@ -250,27 +275,53 @@ public class ConfigurationServiceImpl implements ConfigurationService{
 	    }
 	    
 	   
-	    @Transactional
-		@Override
-	    public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms( String year, String plantId,  List<NormAttributeTransactionReceipeDTO> normAttributeTransactionReceipeDTOLists) {
-	        
+	   
+		@Transactional
+		@Override 
+	    public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms( String year, String plantId, List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOLists) {
+
 	        List<NormAttributeTransactionReceipe> normAttributeTransactionReceipelist = new ArrayList<>();
+	        UUID plantUUId = UUID.fromString(plantId);
 
-	        for (NormAttributeTransactionReceipeDTO dto : normAttributeTransactionReceipeDTOLists) {
-	            UUID gradeUUId = dto.getGradeFkId() != null ? UUID.fromString(dto.getGradeFkId()) : null;
-	            UUID reciepeUUId = dto.getReciepeFkId() != null ? UUID.fromString(dto.getReciepeFkId()) : null;
-	            UUID plantUUId = plantId != null ? UUID.fromString(plantId) : null;
-	            
+	        for (NormAttributeTransactionReceipeRequestDTO dto : normAttributeTransactionReceipeDTOLists) {
+	            UUID reciepeUUId = UUID.fromString(dto.getRecId());
 
-	            NormAttributeTransactionReceipe normAttributeTransactionReceipeData =
-	                normAttributeTransactionReceipeRepository.findIdByFilters(year, plantUUId, gradeUUId, reciepeUUId);
+	            for (Map.Entry<String, String> entry : dto.getGrades().entrySet()) {
+	                String gradeId = entry.getKey();              
+	                String attributeValue = entry.getValue();     
 
-	            if (normAttributeTransactionReceipeData != null) { 
-	            	normAttributeTransactionReceipeData.setAttributeValue(dto.getAttributeValue());
-	            	normAttributeTransactionReceipeData.setModifiedOn(new Date());
-	                normAttributeTransactionReceipelist.add(normAttributeTransactionReceipeData);
-	            } else {
-	                throw new RuntimeException("No record found for update with given filters.");
+	                UUID gradeUUId = UUID.fromString(gradeId);
+
+	                NormAttributeTransactionReceipe existingEntity =
+	                        normAttributeTransactionReceipeRepository.findIdByFilters(year, plantUUId, gradeUUId, reciepeUUId);
+
+	                if (existingEntity != null) {
+	                    if (attributeValue != null && !attributeValue.trim().isEmpty()) {
+	                        existingEntity.setAttributeValue(Integer.parseInt(attributeValue.trim()));
+	                    } else {
+	                        existingEntity.setAttributeValue(null); 
+	                    }
+
+	                    existingEntity.setModifiedOn(new Date());
+	                    normAttributeTransactionReceipelist.add(existingEntity);
+	                } else {
+	                    NormAttributeTransactionReceipe newEntity = new NormAttributeTransactionReceipe();
+	                    newEntity.setGradeFkId(gradeUUId);
+	                    newEntity.setReciepeFkId(reciepeUUId);
+	                    newEntity.setPlantFkId(plantUUId);
+	                    newEntity.setAopYear(year);
+	                    newEntity.setCreatedOn(new Date());
+	                    newEntity.setModifiedOn(new Date());
+	                    newEntity.setUser("System");
+
+	                    if (attributeValue != null && !attributeValue.trim().isEmpty()) {
+	                        newEntity.setAttributeValue(Integer.parseInt(attributeValue.trim()));
+	                    } else {
+	                        newEntity.setAttributeValue(null); 
+	                    }
+
+	                    normAttributeTransactionReceipelist.add(newEntity);
+	                }
 	            }
 	        }
 
