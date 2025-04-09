@@ -58,6 +58,7 @@ const defs = {
       },
       action: {
         newcase: 'Create',
+        refresh: 'Refresh',
       },
     },
     caseform: {
