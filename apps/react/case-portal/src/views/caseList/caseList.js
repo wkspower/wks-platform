@@ -14,7 +14,6 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Tooltip from '@mui/material/Tooltip'
 import { useSession } from 'SessionStoreContext'
 import MainCard from 'components/MainCard'
-import Config from 'consts/index'
 import React, {
   Suspense,
   createContext,
