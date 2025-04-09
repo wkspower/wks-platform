@@ -79,6 +79,14 @@ const defs = {
       manualProcesses: {
         title: 'Selecione o processo para iniciar',
       },
+      validation: {
+        pleaseCorrectErrors:
+          'Por favor, corrija os seguintes erros no formulário:',
+        requiredFieldsMissing:
+          'Campos obrigatórios estão ausentes ou contêm valores inválidos.',
+        pleaseFixErrors:
+          'Por favor, corrija os seguintes erros antes de enviar.',
+      },
     },
     tasklist: {
       datagrid: {

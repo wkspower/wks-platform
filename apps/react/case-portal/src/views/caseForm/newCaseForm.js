@@ -15,6 +15,7 @@ import { Form } from '@formio/react'
 import { useSession } from 'SessionStoreContext'
 import { CaseService, FormService } from '../../services'
 import { StorageService } from 'plugins/storage'
+import { useTranslation } from 'react-i18next'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction='up' ref={ref} {...props} />
@@ -33,6 +34,7 @@ export const NewCaseForm = ({
   const [validationErrors, setValidationErrors] = useState([])
   const formRef = useRef(null)
   const keycloak = useSession()
+  const { t } = useTranslation()
 
   useEffect(() => {
     CaseService.getCaseDefinitionsById(keycloak, caseDefId)
@@ -61,113 +63,18 @@ export const NewCaseForm = ({
     setFormData(newFormData)
   }
 
-  const extractValidationErrors = () => {
-    if (!formRef.current || !formRef.current.formio || !form.structure) {
-      return []
-    }
-
-    const errorsList = []
-    
-    const isEmpty = (value) => {
-      return value === undefined || value === null || value === '' || 
-        (Array.isArray(value) && value.length === 0) ||
-        (typeof value === 'object' && Object.keys(value).length === 0)
-    }
-    
-    const checkRequiredFields = (components, path = '') => {
-      if (!components) return
-      
-      components.forEach(component => {
-        if (component.key) {
-          const fieldKey = component.key
-          const fieldPath = path ? `${path}.${fieldKey}` : fieldKey
-          const label = component.label || fieldKey
-          
-          if (component.validate && component.validate.required) {
-            const value = getNestedValue(formData.data, fieldPath)
-            
-            if (isEmpty(value)) {
-              errorsList.push({
-                field: label,
-                key: fieldPath,
-                message: 'This field is required'
-              })
-            }
-          }
-          
-          if (component.validate) {
-            const value = getNestedValue(formData.data, fieldPath)
-            
-            if (!isEmpty(value)) {
-              if (component.validate.minLength && typeof value === 'string' && 
-                  value.length < component.validate.minLength) {
-                errorsList.push({
-                  field: label,
-                  key: fieldPath,
-                  message: `Minimum length is ${component.validate.minLength} characters`
-                })
-              }
-              
-              if (component.validate.maxLength && typeof value === 'string' && 
-                  value.length > component.validate.maxLength) {
-                errorsList.push({
-                  field: label, 
-                  key: fieldPath,
-                  message: `Maximum length is ${component.validate.maxLength} characters`
-                })
-              }
-              
-              if (component.validate.pattern && typeof value === 'string') {
-                const pattern = new RegExp(component.validate.pattern)
-                if (!pattern.test(value)) {
-                  errorsList.push({
-                    field: label,
-                    key: fieldPath,
-                    message: component.validate.patternMessage || 'Invalid format'
-                  })
-                }
-              }
-            }
-          }
-        }
-        
-        if (component.components) {
-          checkRequiredFields(component.components, component.key)
-        }
-      })
-    }
-    
-    const getNestedValue = (obj, path) => {
-      if (!obj || !path) return undefined
-      const parts = path.split('.')
-      let value = obj
-      for (const part of parts) {
-        if (value === undefined || value === null) return undefined
-        value = value[part]
-      }
-      return value
-    }
-    
-    checkRequiredFields(form.structure.components)
-    
-    return errorsList
-  }
-
   const onSave = () => {
     if (formRef.current && formRef.current.formio) {
       const formioInstance = formRef.current.formio
-      
+
       const isValid = formioInstance.checkValidity()
-      
+
       if (!isValid) {
         forceShowComponentErrors(formioInstance.components)
-        
+
         if (typeof formioInstance.showErrors === 'function') {
           formioInstance.showErrors()
         }
-        
-        const validationErrorsList = extractValidationErrors()
-        setValidationErrors(validationErrorsList)
         setAlertOpen(true)
       } else {
         saveFormData()
@@ -180,28 +87,28 @@ export const NewCaseForm = ({
       }
     }
   }
-  
+
   const forceShowComponentErrors = (components) => {
     if (!components) return
-    
-    components.forEach(comp => {
+
+    components.forEach((comp) => {
       try {
         if (typeof comp.setPristine === 'function') {
           comp.setPristine(false)
         }
-        
+
         if (typeof comp.showError === 'function') {
           comp.showError()
         }
-        
+
         if (typeof comp.setDirty === 'function') {
           comp.setDirty(true)
         }
-        
+
         if (typeof comp.triggerChange === 'function') {
           comp.triggerChange()
         }
-        
+
         if (comp.refs && comp.refs.input) {
           try {
             const event = new Event('blur', { bubbles: true })
@@ -210,7 +117,7 @@ export const NewCaseForm = ({
             console.log('Error dispatching blur event:', e)
           }
         }
-        
+
         if (comp.components) {
           forceShowComponentErrors(comp.components)
         }
@@ -219,7 +126,7 @@ export const NewCaseForm = ({
       }
     })
   }
-  
+
   const saveFormData = () => {
     const caseAttributes = []
     Object.keys(formData.data).forEach((key) => {
@@ -299,15 +206,15 @@ export const NewCaseForm = ({
                 </Tooltip>
               )}
             </Box>
-            
+
             {alertOpen && (
-              <Alert 
-                severity="error" 
+              <Alert
+                severity='error'
                 sx={{ mb: 2 }}
                 onClose={() => setAlertOpen(false)}
               >
-                <Typography variant="subtitle1" fontWeight="bold">
-                  Please correct the following errors in the form:
+                <Typography variant='subtitle1' fontWeight='bold'>
+                  {t('pages.caseform.validation.pleaseCorrectErrors')}
                 </Typography>
                 {validationErrors.length > 0 ? (
                   <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
@@ -319,12 +226,12 @@ export const NewCaseForm = ({
                   </ul>
                 ) : (
                   <Typography>
-                    Required fields are missing or contain invalid values.
+                    {t('pages.caseform.validation.requiredFieldsMissing')}
                   </Typography>
                 )}
               </Alert>
             )}
-            
+
             <Form
               ref={formRef}
               form={form.structure}
@@ -338,16 +245,16 @@ export const NewCaseForm = ({
                 highlightErrors: true,
                 redrawOn: 'change',
                 errors: {
-                  message: 'Please fix the following errors before submitting.'
+                  message: t('pages.caseform.validation.pleaseFixErrors'),
                 },
                 noAlerts: false,
                 displayErrorsFor: ['validations', 'conditions', 'required'],
                 alerts: {
-                  submitMessage: false
+                  submitMessage: false,
                 },
                 buttonSettings: {
-                  showSubmit: false
-                }
+                  showSubmit: false,
+                },
               }}
             />
           </Grid>
