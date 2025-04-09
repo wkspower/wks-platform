@@ -171,8 +171,10 @@ const NavItem = ({ item, level }) => {
 
       {/* Confirmation Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-        <DialogTitle>Are you sure?</DialogTitle>
-        <DialogContent>Do you really want to go to this page?</DialogContent>
+        <DialogTitle>Unsaved Changes</DialogTitle>
+        <DialogContent>
+          You have unsaved changes. Are you sure you want to leave this page?
+        </DialogContent>
         <DialogActions>
           <Button onClick={stayOnPage} color='error'>
             Stay

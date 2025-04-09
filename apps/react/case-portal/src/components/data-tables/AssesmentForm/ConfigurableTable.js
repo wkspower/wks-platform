@@ -725,10 +725,10 @@ const ASDataGrid1 = ({
         apiRef={apiRef}
         columns={modifiedColumns}
         rows={processedRows}
-        filterModel={filterModel}
-        onFilterModelChange={(newFilterModel) =>
-          setFilterModel(newFilterModel || { items: [] })
-        }
+        // filterModel={filterModel}
+        // onFilterModelChange={(newFilterModel) =>
+        //   setFilterModel(newFilterModel || { items: [] })
+        // }
         checkboxSelection={checkboxSelection}
         disableSelectionOnClick={disableSelectionOnClick}
         autoHeight={autoHeight}

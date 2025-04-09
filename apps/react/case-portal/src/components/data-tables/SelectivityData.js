@@ -164,10 +164,10 @@ const SelectivityData = (props) => {
         recId: row.Reciepe_FK_ID.toString(),
         grades: Object.entries(row)
           .filter(([key]) => /^[0-9A-Fa-f-]{36}$/.test(key))
-          .map(([key, value]) => ({
-            key,
-            value: Number(value),
-          })),
+          .reduce((acc, [key, value]) => {
+            acc[key] = Number(value)
+            return acc
+          }, {}),
       }))
 
       if (payload.length > 0) {
@@ -219,9 +219,9 @@ const SelectivityData = (props) => {
         // handleMenuClose();
       }
     }
-    const getAllGradesReciepes = async () => {
+    const getAllGrades = async () => {
       try {
-        const data = await DataService.getAllGradesReciepes(keycloak)
+        const data = await DataService.getAllGrades(keycloak)
         setAllGradesReciepes(data)
       } catch (error) {
         console.error('Error fetching Grades/Reciepes:', error)
@@ -231,7 +231,7 @@ const SelectivityData = (props) => {
     }
 
     getAllProducts()
-    getAllGradesReciepes()
+    getAllGrades()
     // getAllCatalyst()
     if (props?.configType !== 'grades') {
       props.fetchData()
