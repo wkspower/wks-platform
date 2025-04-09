@@ -35,7 +35,31 @@ const getEnhancedAOPColDefs = ({
   configType,
   columnConfig,
 }) => {
-  const config = getConfigByType(configType)
+  var config = []
+  if (configType == 'grades') {
+    config = [
+      {
+        field: 'ReceipeName',
+        headerName: 'Receipe',
+        minWidth: 120,
+        editable: false,
+        flex: 1,
+      },
+    ]
+    allGradesReciepes?.forEach((field) => {
+      config.push({
+        field: field?.id.toUpperCase(),
+        headerName: field?.id,
+        editable: true,
+        align: 'left',
+        headerAlign: 'left',
+        minWidth: 120,
+        isGradeHeader: 'true',
+      })
+    })
+  } else {
+    config = getConfigByType(configType)
+  }
 
   const getProductDisplayName = (id) => {
     if (!id) return
@@ -160,7 +184,7 @@ const getEnhancedAOPColDefs = ({
       }
     }
 
-    if ((headerMap && headerMap[col.headerName]) ) {
+    if (headerMap && headerMap[col.headerName]) {
       return {
         ...col,
         renderEditCell: NumericInputOnly,

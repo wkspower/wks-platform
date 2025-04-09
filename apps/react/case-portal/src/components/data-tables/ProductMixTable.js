@@ -52,10 +52,10 @@ const FiveTables = () => {
   //           saveWithRemark: false,
   //           showCalculate: false,
   //           saveBtn: false,
-  //           // UOM: 'Ton',
-  //           units: ['Ton', 'Kilo Ton'],
+  //           // UOM: 'MT',
+  //           units: ['MT', 'KT'],
   //           customHeight: { mainBox: 60, otherBox: 124 },
-  //           // UnitToShow: 'Values/Ton',
+  //           // UnitToShow: 'Values/MT',
   //         }}
   //       />
   //     ),
@@ -155,7 +155,7 @@ const FiveTables = () => {
             saveWithRemark: false,
             showCalculate: false,
             saveBtn: false,
-            units: ['Ton', 'Kilo Ton'],
+            units: ['MT', 'KT'],
             customHeight: defaultCustomHeight, // use default height
           }}
         />

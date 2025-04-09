@@ -17,6 +17,8 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
+  const plantName = JSON.parse(localStorage.getItem('selectedPlant'))?.name
+  // const siteName = JSON.parse(localStorage.getItem('selectedSite'))?.name;
 
   const [notification, setNotification] = useState({
     open: false,
@@ -24,34 +26,8 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     severity: 'info',
   })
 
-  // http://localhost:8085/storage/files1/newFile/downloads/sample.pdf?content-type=application/pdf
-
-  // const handleOpenPdf = async (title) => {
-  //   const fileName = `${title}.pdf`
-  //   const fileUrl = `/files/${fileName}`
-
-  //   try {
-  //     const response = await fetch(fileUrl, { method: 'HEAD' })
-  //     if (response.ok) {
-  //       window.open(fileUrl, '_blank')
-  //     } else {
-  //       setNotification({
-  //         open: true,
-  //         message: 'Basis not found!',
-  //         severity: 'error',
-  //       })
-  //     }
-  //   } catch (error) {
-  //     setNotification({
-  //       open: true,
-  //       message: 'Error checking file. Please try again.',
-  //       severity: 'error',
-  //     })
-  //   }
-  // }
-
   async function handleOpenPdf(title) {
-    const url = `${Config.StorageUrl}/storage/files1/newFile/downloads/${title}_${vertName}.pdf?content-type=application/pdf`
+    const url = `${Config.StorageUrl}/storage/files1/newFile/downloads/${title}_${vertName}_${plantName}.pdf?content-type=application/pdf`
     const headers = {
       Authorization: `Bearer ${keycloak.token}`,
     }
@@ -136,6 +112,21 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   // items
   if (item && item.type === 'item') {
     itemTitle = item.title
+    var title1 = itemTitle
+    if (
+      title1 === 'Business Demand' &&
+      verticalChange?.selectedVertical?.toLowerCase() === 'meg'
+    ) {
+      title1 = 'Business Demand (Percentage)'
+    }
+
+    if (
+      title1 === 'Business Demand' &&
+      verticalChange?.selectedVertical?.toLowerCase() === 'pe'
+    ) {
+      title1 = 'Business Demand (Absolute)'
+    }
+
     itemContent = (
       <Typography
         variant='subtitle1'
@@ -143,7 +134,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
         display='flex'
         alignItems='center'
       >
-        {itemTitle}
+        {title1}
         <Tooltip title={`Basis for ${itemTitle}`}>
           <IconButton
             size='medium'
@@ -157,8 +148,10 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
             }}
             onClick={() => handleOpenPdf(item.title)}
           >
-            <InfoIcon fontSize='medium' sx={{ opacity: 0.7 }} />{' '}
-            {/* Slightly faded icon */}
+            <InfoIcon
+              fontSize='medium'
+              sx={{ opacity: 0.7, color: '#1976d2' }}
+            />
           </IconButton>
         </Tooltip>
       </Typography>

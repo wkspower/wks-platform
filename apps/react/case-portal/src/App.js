@@ -107,7 +107,22 @@ const App = () => {
     const menu = {
       items: [...menuItemsDefs.items],
     }
-
+    menu.items = menu.items.filter((item) => item.id !== 'ta-plan')
+    menu.items = menu.items.map((item) => {
+      if (item.children && Array.isArray(item.children)) {
+        item.children = item.children.filter((child) => child.id !== 'ta-plan')
+        // If you have nested groups inside children, you can further map and filter
+        item.children = item.children.map((group) => {
+          if (group.children && Array.isArray(group.children)) {
+            group.children = group.children.filter(
+              (child) => child.id !== 'ta-plan',
+            )
+          }
+          return group
+        })
+      }
+      return item
+    })
     menu.items = menu.items.map((item) => {
       if (item.id === 'utilities') {
         return {

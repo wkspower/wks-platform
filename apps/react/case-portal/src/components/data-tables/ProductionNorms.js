@@ -33,7 +33,7 @@ const ProductionNorms = ({ permissions }) => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [selectedUnit, setSelectedUnit] = useState('Ton')
+  const [selectedUnit, setSelectedUnit] = useState('MT')
 
   const [rows, setRows] = useState([])
   // const [isSaving, setIsSaving] = useState(false)
@@ -131,7 +131,7 @@ const ProductionNorms = ({ permissions }) => {
 
     try {
       let plantId = ''
-      const isKiloTon = selectedUnit != 'Ton'
+      const isKiloTon = selectedUnit != 'MT'
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
@@ -298,7 +298,7 @@ const ProductionNorms = ({ permissions }) => {
         // setLoading(false)
 
         const formattedData = data.map((item, index) => {
-          const isKiloTon = selectedUnit != 'Ton'
+          const isKiloTon = selectedUnit != 'MT'
 
           return {
             ...item,
@@ -382,7 +382,7 @@ const ProductionNorms = ({ permissions }) => {
 
       // if (data.status === 200) {
       const formattedData = data.map((item, index) => {
-        const isKiloTon = selectedUnit !== 'Ton'
+        const isKiloTon = selectedUnit !== 'MT'
         return {
           ...item,
           idFromApi: item.id,
@@ -581,10 +581,10 @@ const ProductionNorms = ({ permissions }) => {
           saveWithRemark: permissions?.saveWithRemark ?? true,
           showCalculate: permissions?.showCalculate ?? true,
           saveBtn: permissions?.saveBtn ?? true,
-          // UOM: 'Ton',
-          units: ['Ton', 'Kilo Ton'],
+          // UOM: 'MT',
+          units: ['MT', 'KT'],
           customHeight: permissions?.customHeight,
-          // UnitToShow: 'Values/Ton',
+          // UnitToShow: 'Values/MT',
         }}
       />
     </div>
