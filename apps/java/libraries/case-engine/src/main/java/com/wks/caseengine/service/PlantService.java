@@ -10,6 +10,7 @@ public interface PlantService {
 	
 	public List<Plant> getPlantBySite(String siteId);
 	public List<Object[]> getPlantAndSite();
+	public List getShutdownMonths(UUID plantId,String maintenanceName);
 	
 
 }

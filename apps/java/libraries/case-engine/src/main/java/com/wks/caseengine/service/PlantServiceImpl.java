@@ -17,6 +17,7 @@ import com.wks.caseengine.rest.entity.Site;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 
 @Service
 public class PlantServiceImpl implements PlantService {
@@ -56,6 +57,12 @@ public class PlantServiceImpl implements PlantService {
 		 * searchResults = query.getResultList();
 		 */				return searchResults;
 	}
+	@Override
+	@Transactional
+     public List getShutdownMonths(UUID plantId,String maintenanceName){
+	    	 return	plantsRepository.getShutdownMonths(plantId,maintenanceName);
+	    	
+	    }
 
 	
 

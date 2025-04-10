@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.product.SiteAndPlantDTO;
@@ -28,6 +29,12 @@ public class SiteAndPlantController {
     // Constructor injection
     public SiteAndPlantController(PlantService plantService) {
         this.plantService = plantService;
+    }
+
+    @GetMapping("/shutdown-months")
+    public ResponseEntity<List> getShutdownMonths(@RequestParam UUID plantId,@RequestParam String maintenanceName){
+        List data = plantService.getShutdownMonths(plantId, maintenanceName);
+        return ResponseEntity.ok(data);
     }
 
     @GetMapping(value = "/getPlantAndSite")
