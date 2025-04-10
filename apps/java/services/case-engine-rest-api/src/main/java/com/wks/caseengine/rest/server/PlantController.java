@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.service.PlantService;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.rest.entity.Plant;
 
 @RestController
@@ -17,9 +18,9 @@ public class PlantController {
 	private PlantService PlantService;
 	
 	@GetMapping(value = "/plants")
-	public ResponseEntity<List<Plant>> getPlantBySite(@RequestParam String siteId) {
-		List<Plant> listOfSite = PlantService.getPlantBySite(siteId); 
-	    return ResponseEntity.ok(listOfSite);
+	public  ResponseEntity<AOPMessageVM> getPlantBySite(@RequestParam String siteId) {
+		AOPMessageVM response = PlantService.getPlantBySite(siteId); 
+		return ResponseEntity.status(response.getCode()).body(response);
 	}
 
 }

@@ -2,11 +2,12 @@ package com.wks.caseengine.service;
 
 import java.util.List;
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface ShutdownNormsService {
 	
-	public List<ShutdownNormsValueDTO> getShutdownNormsData( String year, String plantId);
-	public List<ShutdownNormsValueDTO> saveShutdownNormsData( List<ShutdownNormsValueDTO> shutdownNormsValueDTOList);
-	public List<ShutdownNormsValueDTO> getShutdownNormsSPData(String year, String plantId);
+	public AOPMessageVM getShutdownNormsData( String year, String plantId);
+	public AOPMessageVM saveShutdownNormsData( List<ShutdownNormsValueDTO> shutdownNormsValueDTOList);
+	public AOPMessageVM getShutdownNormsSPData(String year, String plantId);
 
 }

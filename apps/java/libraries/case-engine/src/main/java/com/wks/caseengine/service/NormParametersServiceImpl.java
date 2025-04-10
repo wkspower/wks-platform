@@ -6,7 +6,9 @@
  import org.springframework.stereotype.Service;
 
  import com.wks.caseengine.entity.NormParameters;
- import com.wks.caseengine.repository.NormParametersRepository;
+import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.NormParametersRepository;
 
  @Service
  public class NormParametersServiceImpl implements NormParametersService {
@@ -20,8 +22,19 @@
  	}
 
 	@Override
- 	public List<NormParameters> getAllGrades(String type) {
- 		return	normParametersRepository.getAllGrades(type);
+ 	public AOPMessageVM getAllGrades(String type) {
+		AOPMessageVM aopMessageVM =new AOPMessageVM();
+		try {
+		List<NormParameters> normParametersList=	normParametersRepository.getAllGrades(type);
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Data fetched successfully");
+		aopMessageVM.setData(normParametersList);
+		return aopMessageVM;
+	} catch (IllegalArgumentException e) {
+		throw new RestInvalidArgumentException("Invalid type", e);
+	} catch (Exception ex) {
+		throw new RuntimeException("Failed to fetch data", ex);
+	}
  	}
 
  }

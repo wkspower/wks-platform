@@ -23,6 +23,9 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Verticals;
+import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import com.wks.caseengine.repository.PlantsRepository;
@@ -52,12 +55,22 @@ public class ProductServiceImpl implements ProductService {
 	VerticalsRepository verticalRepository;
 
 	@Override
-	public List<Product> getAllProducts() {
+	public AOPMessageVM getAllProducts() {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
 		String queryStr = "SELECT * FROM [MST].[mesProduct]";
 
 		Query query = entityManager.createNativeQuery(queryStr, Product.class);
 		List<Product> searchResults = query.getResultList();
-		return searchResults;
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Data fetched successfully");
+		aopMessageVM.setData(searchResults);
+		return aopMessageVM;
+	} catch (IllegalArgumentException e) {
+		throw new RestInvalidArgumentException("Invalid type", e);
+	} catch (Exception ex) {
+		throw new RuntimeException("Failed to fetch data", ex);
+	}
 
 	}
 	public String getMonthName(int monthNumber) {
@@ -115,6 +128,13 @@ public class ProductServiceImpl implements ProductService {
 
 	public List<Object[]> getAllProductsFromNormParameters(String normParameterTypeName, UUID plantId) {
 	    System.out.println("normParameterTypeName: " + normParameterTypeName);
+	    
+	    Plants plant = plantsRepository.findById(plantId).get();
+		//Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		if(vertical.getName().equalsIgnoreCase("PE")) {
+			return 	getProductsFromDynamicViewForPE( "vwGetAllProductsPE",  plantId,normParameterTypeName);
+		}
 
 		if(normParameterTypeName.equalsIgnoreCase("BusinessDemandMEG")){
 			return getProductsFromDynamicView("vwScrnMEGBusinessDemandGetAllProducts" , plantId);

@@ -21,117 +21,114 @@ import com.wks.caseengine.service.PlantService;
 @RequestMapping("task")
 public class SiteAndPlantController {
 
-    private final PlantService plantService;
-    
-    // @Autowired
-    // private NormParameterMonthlyTransactionService normParameterMonthlyTransactionService;
+	private final PlantService plantService;
 
-    // Constructor injection
-    public SiteAndPlantController(PlantService plantService) {
-        this.plantService = plantService;
-    }
+	public SiteAndPlantController(PlantService plantService) {
+		this.plantService = plantService;
+	}
 
-    @GetMapping("/shutdown-months")
-    public ResponseEntity<List> getShutdownMonths(@RequestParam UUID plantId,@RequestParam String maintenanceName){
-        List data = plantService.getShutdownMonths(plantId, maintenanceName);
-        return ResponseEntity.ok(data);
-    }
-    @GetMapping(value = "/plant-site")
-    public ResponseEntity<List<Object>> getPlantAndSite() {
-        List<Object[]> listOfSite = plantService.getPlantAndSite();
-        
-        // Group plants by site ID
-        Map<UUID, List<Object[]>> groupedBySite = listOfSite.stream()
-                .collect(Collectors.groupingBy(result -> UUID.fromString((String) result[0])));
+	@GetMapping("/shutdown-months")
+	public ResponseEntity<List> getShutdownMonths(@RequestParam UUID plantId, @RequestParam String maintenanceName) {
+		List data = plantService.getShutdownMonths(plantId, maintenanceName);
+		return ResponseEntity.ok(data);
+	}
 
-        List<Object> siteData = new ArrayList<>();
+	@GetMapping(value = "/plant-site")
+	public ResponseEntity<List<Object>> getPlantAndSite() {
+		List<Object[]> listOfSite = plantService.getPlantAndSite();
 
-        // Iterate through grouped sites and build the response
-        for (Map.Entry<UUID, List<Object[]>> entry : groupedBySite.entrySet()) {
-            UUID siteId = entry.getKey();
-            List<Object[]> plants = entry.getValue();
-            
-            // Create the Site object
-            SiteResponse siteResponse = new SiteResponse();
-            siteResponse.setId(siteId);
-            siteResponse.setName((String) plants.get(0)[1]);
-            
-            List<PlantResponse> plantResponses = new ArrayList<>();
-            for (Object[] plant : plants) {
-                PlantResponse plantResponse = new PlantResponse();
-                plantResponse.setId(UUID.fromString((String) plant[3]));
-                plantResponse.setName((String) plant[4]);
-                plantResponse.setDisplayName((String) plant[5]);
-                plantResponses.add(plantResponse);
-            }
+		// Group plants by site ID
+		Map<UUID, List<Object[]>> groupedBySite = listOfSite.stream()
+				.collect(Collectors.groupingBy(result -> UUID.fromString((String) result[0])));
 
-            siteResponse.setPlants(plantResponses);
-            siteData.add(siteResponse);
-        }
+		List<Object> siteData = new ArrayList<>();
 
-        return ResponseEntity.ok(siteData);
-    }
+		// Iterate through grouped sites and build the response
+		for (Map.Entry<UUID, List<Object[]>> entry : groupedBySite.entrySet()) {
+			UUID siteId = entry.getKey();
+			List<Object[]> plants = entry.getValue();
 
-    // Inner DTOs for the response format
-    public static class SiteResponse {
-        private UUID id;
-        private String name;
-        private List<PlantResponse> plants;
+			// Create the Site object
+			SiteResponse siteResponse = new SiteResponse();
+			siteResponse.setId(siteId);
+			siteResponse.setName((String) plants.get(0)[1]);
 
-        // Getters and setters
-        public UUID getId() {
-            return id;
-        }
+			List<PlantResponse> plantResponses = new ArrayList<>();
+			for (Object[] plant : plants) {
+				PlantResponse plantResponse = new PlantResponse();
+				plantResponse.setId(UUID.fromString((String) plant[3]));
+				plantResponse.setName((String) plant[4]);
+				plantResponse.setDisplayName((String) plant[5]);
+				plantResponses.add(plantResponse);
+			}
 
-        public void setId(UUID id) {
-            this.id = id;
-        }
+			siteResponse.setPlants(plantResponses);
+			siteData.add(siteResponse);
+		}
 
-        public String getName() {
-            return name;
-        }
+		return ResponseEntity.ok(siteData);
+	}
 
-        public void setName(String name) {
-            this.name = name;
-        }
+	// Inner DTOs for the response format
+	public static class SiteResponse {
+		private UUID id;
+		private String name;
+		private List<PlantResponse> plants;
 
-        public List<PlantResponse> getPlants() {
-            return plants;
-        }
+		// Getters and setters
+		public UUID getId() {
+			return id;
+		}
 
-        public void setPlants(List<PlantResponse> plants) {
-            this.plants = plants;
-        }
-    }
+		public void setId(UUID id) {
+			this.id = id;
+		}
 
-    public static class PlantResponse {
-        private UUID id;
-        private String name;
-        private String displayName;
+		public String getName() {
+			return name;
+		}
 
-        // Getters and setters
-        public UUID getId() {
-            return id;
-        }
+		public void setName(String name) {
+			this.name = name;
+		}
 
-        public void setId(UUID id) {
-            this.id = id;
-        }
+		public List<PlantResponse> getPlants() {
+			return plants;
+		}
 
-        public String getName() {
-            return name;
-        }
+		public void setPlants(List<PlantResponse> plants) {
+			this.plants = plants;
+		}
+	}
 
-        public void setName(String name) {
-            this.name = name;
-        }
+	public static class PlantResponse {
+		private UUID id;
+		private String name;
+		private String displayName;
 
-        public String getDisplayName() {
-            return displayName;
-        }
+		// Getters and setters
+		public UUID getId() {
+			return id;
+		}
 
-        public void setDisplayName(String displayName) {
-            this.displayName = displayName;
-        }
-    }
+		public void setId(UUID id) {
+			this.id = id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getDisplayName() {
+			return displayName;
+		}
+
+		public void setDisplayName(String displayName) {
+			this.displayName = displayName;
+		}
+	}
 }

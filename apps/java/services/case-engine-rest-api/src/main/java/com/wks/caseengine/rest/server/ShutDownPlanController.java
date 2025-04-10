@@ -16,55 +16,66 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.wks.caseengine.dto.MonthWiseDataDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
+import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.ShutDownPlanService;
-
-
 
 @RestController
 @RequestMapping("task")
 public class ShutDownPlanController {
-	
+
 	@Autowired
 	private ShutDownPlanService shutDownPlanService;
-	
+
 	@GetMapping(value = "/shutdown-plan")
-    public ResponseEntity<List<ShutDownPlanDTO>> findMaintenanceDetailsByPlantIdAndType( @RequestParam String plantId, @RequestParam String maintenanceTypeName, @RequestParam String year){
-            
-		List<ShutDownPlanDTO> shutDownPlanDTOList=null;
-         try {
-            // Convert String to UUID
-            UUID plantUuid = UUID.fromString(plantId); 
-            shutDownPlanDTOList = shutDownPlanService.findMaintenanceDetailsByPlantIdAndType(plantUuid, maintenanceTypeName,year);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null); 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body(null); 
-        }
+	public ResponseEntity<AOPMessageVM> findMaintenanceDetailsByPlantIdAndType(@RequestParam String plantId,
+			@RequestParam String maintenanceTypeName, @RequestParam String year) {
+		
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<ShutDownPlanDTO> shutDownPlanDTOList = null;
+		try {
+			// Convert String to UUID
+			UUID plantUuid = UUID.fromString(plantId);
+			shutDownPlanDTOList = shutDownPlanService.findMaintenanceDetailsByPlantIdAndType(plantUuid,
+					maintenanceTypeName, year);
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(shutDownPlanDTOList);
+			
+		
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(null);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.internalServerError().body(null);
+		}
 
-        return ResponseEntity.ok(shutDownPlanDTOList);
-    }
+		return ResponseEntity.status(aopMessageVM.getCode()).body(aopMessageVM);
+	}
 	
-		  @PostMapping(value = "/shutdown-plan/{plantId}")
-            public ResponseEntity<List<ShutDownPlanDTO>> saveShutdownData(@PathVariable UUID plantId, @RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
-                shutDownPlanService.saveShutdownPlantData(plantId,shutDownPlanDTOList);
-                return ResponseEntity.ok(shutDownPlanDTOList);
-            }
-		  
-		  @PutMapping(value = "/shutdown-plan/{plantMaintenanceTransactionId}")
-          public ResponseEntity<List<ShutDownPlanDTO>> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId, @RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
-              shutDownPlanService.editShutdownData(plantMaintenanceTransactionId,shutDownPlanDTOList);
-              return ResponseEntity.ok(shutDownPlanDTOList);
-          }
+	@PostMapping(value = "/shutdown-plan/{plantId}")
+	public ResponseEntity<AOPMessageVM> saveShutdownData(@PathVariable UUID plantId,
+			@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
+		AOPMessageVM aopMessageVM =shutDownPlanService.saveShutdownPlantData(plantId, shutDownPlanDTOList);
+		return ResponseEntity.status(aopMessageVM.getCode()).body(aopMessageVM);
+	}
 
-		  @DeleteMapping("/shutdown-plan/{plantMaintenanceTransactionId}")
-		    public ResponseEntity<String> deletePlant(@PathVariable UUID plantMaintenanceTransactionId) {
-			  	shutDownPlanService.deletePlanData(plantMaintenanceTransactionId);
-		        return ResponseEntity.ok("Plant with ID " + plantMaintenanceTransactionId + " deleted successfully");
-		    }
-		  
-		  @GetMapping("/shutdown-plan/monthly-hours")
-		  public List<MonthWiseDataDTO> getMonthlyShutdownHours(@RequestParam String auditYear,@RequestParam String plantId){
-			  return shutDownPlanService.getMonthlyShutdownHours(auditYear,UUID.fromString(plantId));
-		  }
+	@PutMapping(value = "/shutdown-plan/{plantMaintenanceTransactionId}")
+	public ResponseEntity<List<ShutDownPlanDTO>> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId,
+			@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
+		shutDownPlanService.editShutdownData(plantMaintenanceTransactionId, shutDownPlanDTOList);
+		return ResponseEntity.ok(shutDownPlanDTOList);
+	}
+
+	@DeleteMapping("/shutdown-plan/{plantMaintenanceTransactionId}")
+	public ResponseEntity<String> deletePlant(@PathVariable UUID plantMaintenanceTransactionId) {
+		shutDownPlanService.deletePlanData(plantMaintenanceTransactionId);
+		return ResponseEntity.ok("Plant with ID " + plantMaintenanceTransactionId + " deleted successfully");
+	}
+
+	@GetMapping("/shutdown-plan/monthly-hours")
+	public List<MonthWiseDataDTO> getMonthlyShutdownHours(@RequestParam String auditYear,
+			@RequestParam String plantId) {
+		return shutDownPlanService.getMonthlyShutdownHours(auditYear, UUID.fromString(plantId));
+	}
 }

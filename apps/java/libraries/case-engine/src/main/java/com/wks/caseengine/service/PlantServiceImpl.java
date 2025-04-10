@@ -9,6 +9,8 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.rest.entity.Plant;
@@ -21,50 +23,49 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class PlantServiceImpl implements PlantService {
-	
+
 	@Autowired
 	private SiteRepository siteRepository;
-	
+
 	@Autowired
-	 private PlantsRepository plantsRepository;
+	private PlantsRepository plantsRepository;
 
 	@PersistenceContext(unitName = "db1")
 	private EntityManager entityManager;
 
 	@Override
-	public List<Plant> getPlantBySite(String siteId) {
-		String queryStr = "SELECT * FROM [MST].[Plant] WHERE site_id = :siteId";
+	public AOPMessageVM getPlantBySite(String siteId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			String queryStr = "SELECT * FROM [MST].[Plant] WHERE site_id = :siteId";
 
-		Query query = entityManager.createNativeQuery(queryStr, Plant.class);
-		query.setParameter("siteId", siteId);
+			Query query = entityManager.createNativeQuery(queryStr, Plant.class);
+			query.setParameter("siteId", siteId);
 
-		List<Plant> searchResults = query.getResultList();
-		return searchResults;
+			List<Plant> searchResults = query.getResultList();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(searchResults);
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid type", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
 	}
 
 	@Override
 	public List<Object[]> getPlantAndSite() {
-		
-		List<Object[]> searchResults= siteRepository.getPlantAndSite();
-		/*
-		 * String queryStr =
-		 * "select sites.Id, sites.Name, sites.DisplayName, plants.Id, plants.Name, plants.DisplayName, plants.Site_FK_Id from   [dbo].[Sites] sites join   [dbo].[Plants] plants on sites.id = plants.Site_FK_Id"
-		 * ;
-		 * 
-		 * // Query query = entityManager.createNativeQuery(queryStr, Plant.class);
-		 * 
-		 * Query query = entityManager.createNativeQuery(queryStr); List<Object[]>
-		 * searchResults = query.getResultList();
-		 */				return searchResults;
+
+		List<Object[]> searchResults = siteRepository.getPlantAndSite();
+		return searchResults;
 	}
+
 	@Override
 	@Transactional
-     public List getShutdownMonths(UUID plantId,String maintenanceName){
-	    	 return	plantsRepository.getShutdownMonths(plantId,maintenanceName);
-	    	
-	    }
+	public List getShutdownMonths(UUID plantId, String maintenanceName) {
+		return plantsRepository.getShutdownMonths(plantId, maintenanceName);
 
-	
+	}
 
 }
-
