@@ -18,7 +18,7 @@ public class NormParametersController {
     @Autowired
     NormParametersService normParametersService;
 
-    @GetMapping(value="/getAllGrades")
+    @GetMapping(value="/grades")
 		public  List<NormParameters> getAllGrades(@RequestParam String plantId){
 			return	 normParametersService.getAllGrades(plantId);
 			

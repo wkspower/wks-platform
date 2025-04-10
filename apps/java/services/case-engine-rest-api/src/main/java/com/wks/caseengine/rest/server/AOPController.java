@@ -20,19 +20,19 @@ public class AOPController {
 	@Autowired
 	private AOPService aOPService;
 	
-	@GetMapping(value="/getAOP")
+	@GetMapping(value="/aop")
 	public ResponseEntity<List<AOPDTO>> getAOP(@RequestParam String plantId,@RequestParam String year){
 		 List<AOPDTO> aOPList= aOPService.getAOPData(plantId,year);
 		 return ResponseEntity.ok(aOPList);
 	}
 	
-	@PutMapping(value="/updateAOP")
+	@PutMapping(value="/aop")
 	public List<AOPDTO> updateAOP(@RequestBody List<AOPDTO> aOPDTOList) {
 		aOPService.updateAOP(aOPDTOList);
 		return aOPDTOList;
 	}
 
-    @GetMapping(value="/calculateData")
+    @GetMapping(value="/aop/calculate")
 	public ResponseEntity<List<AOPDTO>> calculateData(@RequestParam String plantId,@RequestParam String year){
     	try {
     		 List<AOPDTO> aOPList= aOPService.calculateData(plantId,year);

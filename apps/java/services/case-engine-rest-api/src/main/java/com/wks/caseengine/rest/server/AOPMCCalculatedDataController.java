@@ -20,17 +20,16 @@ public class AOPMCCalculatedDataController {
 	@Autowired
 	private AOPMCCalculatedDataService aOPMCCalculatedDataService;
 	
-	@GetMapping(value="/getAOPMCCalculatedData")
+	@GetMapping(value="/aop-mc-calculated-data")
 	public  List<AOPMCCalculatedDataDTO> getAOPMCCalculatedData(@RequestParam String plantId, @RequestParam String year){
 		return aOPMCCalculatedDataService.getAOPMCCalculatedData(plantId,year);
 	}
-	@PutMapping(value="/editAOPMCCalculatedData")
+	@PutMapping(value="/aop-mc-calculated-data")
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(@RequestBody List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTO) {
 		return aOPMCCalculatedDataService.editAOPMCCalculatedData(aOPMCCalculatedDataDTO);
-		
 	}
 	
-	@GetMapping(value="/getAOPMCCalculatedDataSP")
+	@GetMapping(value="/aop-mc-calculated-data/calculate")
 	public  int getAOPMCCalculatedDataSP(@RequestParam String plantId, @RequestParam String year){
 		return aOPMCCalculatedDataService.getAOPMCCalculatedDataSP(plantId,year);
 	}

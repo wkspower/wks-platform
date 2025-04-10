@@ -21,13 +21,13 @@ public class SiteController {
 	@Autowired
 	private SiteService siteService;
 	
-	@GetMapping(value = "/getAllSites")
+	@GetMapping(value = "/site")
 	public ResponseEntity<List<Sites>> getAllSites() {
 		List<Sites> listOfSites = siteService.getAllSites(); 
 	    return ResponseEntity.ok(listOfSites);
 	}
 	
-	@GetMapping(value = "/getAllSitesAndPlants")
+	@GetMapping(value = "/site/with-plants")
 	public ResponseEntity<List<Object[]>> getAllSitesAndPlants() {
 		List<Object[]> listOfSites = siteService.getAllSitesAndPlants(); 
 		return ResponseEntity.ok(listOfSites);

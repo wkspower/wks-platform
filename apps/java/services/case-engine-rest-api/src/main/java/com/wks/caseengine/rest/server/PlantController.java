@@ -16,7 +16,7 @@ public class PlantController {
 	@Autowired
 	private PlantService PlantService;
 	
-	@GetMapping(value = "/getPlantBySite")
+	@GetMapping(value = "/plants")
 	public ResponseEntity<List<Plant>> getPlantBySite(@RequestParam String siteId) {
 		List<Plant> listOfSite = PlantService.getPlantBySite(siteId); 
 	    return ResponseEntity.ok(listOfSite);

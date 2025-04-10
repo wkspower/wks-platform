@@ -25,24 +25,25 @@ public class ConfigurationController {
 	@Autowired
 	private ConfigurationService configurationService;
 	
-	@GetMapping(value="/getConfigurationData")
+	@GetMapping(value="/configuration-data")
 	public List<ConfigurationDTO> getConfigurationData(@RequestParam String year,@RequestParam UUID plantFKId) {
 		return configurationService.getConfigurationData(year,plantFKId);
 	}
 	
-	@PostMapping(value="/saveConfigurationData")
+	@PostMapping(value="/configuration-data/save")
 	public List<ConfigurationDTO> saveConfigurationData(@RequestParam String year, @RequestBody List<ConfigurationDTO> configurationDTOList) {
 		configurationService.saveConfigurationData(year,configurationDTOList);
 		return configurationDTOList;
 	}
 	
-	@GetMapping(value="/getPeConfigData")
-	public  List<Map<String, Object>> getNormAttributeTransactionReceipeSp(@RequestParam String year,@RequestParam String plantId){
+	@GetMapping(value="/pe-configuration-data")
+public  List<Map<String, Object>> getNormAttributeTransactionReceipeSp(@RequestParam String year,@RequestParam String plantId){
 		return	 configurationService.getNormAttributeTransactionReceipe(year,plantId);
 		
 	}
+
 	
-	@PostMapping(value="/updatePeConfigData")
+	@PostMapping(value="/pe-configuration-data/update")
 	public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms(@RequestParam String year,@RequestParam String plantId,@RequestBody List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOList){
 		return configurationService.updateCalculatedConsumptionNorms(year,plantId,normAttributeTransactionReceipeDTOList);
 		

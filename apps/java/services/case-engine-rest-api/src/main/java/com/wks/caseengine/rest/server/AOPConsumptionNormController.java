@@ -22,25 +22,23 @@ public class AOPConsumptionNormController {
 	@Autowired
 	private AOPConsumptionNormService aOPConsumptionNormService;
 	
-	@GetMapping(value="/getAOPConsumptionNorm")
+	@GetMapping(value="/aop-consumption-norms")
 	public ResponseEntity<List<AOPConsumptionNormDTO>> getAOPConsumptionNorm(@RequestParam String plantId,@RequestParam String year){
 		List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList	=aOPConsumptionNormService.getAOPConsumptionNorm(plantId,year);
 		return ResponseEntity.ok(aOPConsumptionNormDTOList);
 	}
 	
-	@PostMapping(value="/saveAOPConsumptionNorm")
+	@PostMapping(value="/aop-consumption-norms")
 	public List<AOPConsumptionNormDTO> saveAOPConsumptionNorm(@RequestBody List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList){
 		return aOPConsumptionNormService.saveAOPConsumptionNorm(aOPConsumptionNormDTOList);
-		
 	}
 
-	@GetMapping(value="/handleCalculateonsumptionNorms")
+	@GetMapping(value="/aop-consumption-norms/calculate")
 	public int getNormalOperationNormsDataFromSP(@RequestParam String year,@RequestParam String plantId){
 		return	 aOPConsumptionNormService.calculateExpressionConsumptionNorms(year,plantId);
-		
 	}
 	
-	@GetMapping(value="/getCalculatedConsumptionNorms")
+	@GetMapping(value="/aop-consumption-norms/calculated")
 	public  List<CalculatedConsumptionNormsDTO>  getCalculatedConsumptionNorms(@RequestParam String year,@RequestParam String plantId){
 		return	 aOPConsumptionNormService.getCalculatedConsumptionNorms(year,plantId);
 		

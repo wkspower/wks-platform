@@ -20,7 +20,7 @@ public class MaintenanceCalculatedDataController {
 	@Autowired
 	private MaintenanceCalculatedDataService maintenanceCalculatedDataService;
 	
-	@GetMapping(value="/getMaintenanceCalculatedData")
+	@GetMapping(value="/maintenance-calculated-data")
 	public List<MaintenanceDetailsDTO> getMaintenanceCalculatedData(@RequestParam String plantId, @RequestParam String year){
 		return maintenanceCalculatedDataService.getMaintenanceCalculatedData(plantId,year);		
 	}

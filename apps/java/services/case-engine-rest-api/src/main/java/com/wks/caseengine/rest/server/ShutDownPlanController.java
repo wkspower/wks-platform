@@ -27,7 +27,7 @@ public class ShutDownPlanController {
 	@Autowired
 	private ShutDownPlanService shutDownPlanService;
 	
-	@GetMapping(value = "/getShutDownPlanData")
+	@GetMapping(value = "/shutdown-plan")
     public ResponseEntity<List<ShutDownPlanDTO>> findMaintenanceDetailsByPlantIdAndType( @RequestParam String plantId, @RequestParam String maintenanceTypeName, @RequestParam String year){
             
 		List<ShutDownPlanDTO> shutDownPlanDTOList=null;
@@ -45,25 +45,25 @@ public class ShutDownPlanController {
         return ResponseEntity.ok(shutDownPlanDTOList);
     }
 	
-		  @PostMapping(value = "/saveShutdownData/{plantId}")
+		  @PostMapping(value = "/shutdown-plan/{plantId}")
             public ResponseEntity<List<ShutDownPlanDTO>> saveShutdownData(@PathVariable UUID plantId, @RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
                 shutDownPlanService.saveShutdownPlantData(plantId,shutDownPlanDTOList);
                 return ResponseEntity.ok(shutDownPlanDTOList);
             }
 		  
-		  @PutMapping(value = "/editShutdownData/{plantMaintenanceTransactionId}")
+		  @PutMapping(value = "/shutdown-plan/{plantMaintenanceTransactionId}")
           public ResponseEntity<List<ShutDownPlanDTO>> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId, @RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
               shutDownPlanService.editShutdownData(plantMaintenanceTransactionId,shutDownPlanDTOList);
               return ResponseEntity.ok(shutDownPlanDTOList);
           }
 
-		  @DeleteMapping("/deleteShutdownData/{plantMaintenanceTransactionId}")
+		  @DeleteMapping("/shutdown-plan/{plantMaintenanceTransactionId}")
 		    public ResponseEntity<String> deletePlant(@PathVariable UUID plantMaintenanceTransactionId) {
 			  	shutDownPlanService.deletePlanData(plantMaintenanceTransactionId);
 		        return ResponseEntity.ok("Plant with ID " + plantMaintenanceTransactionId + " deleted successfully");
 		    }
 		  
-		  @GetMapping("/getMonthlyShutdownHours")
+		  @GetMapping("/shutdown-plan/monthly-hours")
 		  public List<MonthWiseDataDTO> getMonthlyShutdownHours(@RequestParam String auditYear,@RequestParam String plantId){
 			  return shutDownPlanService.getMonthlyShutdownHours(auditYear,UUID.fromString(plantId));
 		  }

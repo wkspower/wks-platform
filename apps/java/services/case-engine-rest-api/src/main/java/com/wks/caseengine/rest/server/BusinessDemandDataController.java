@@ -23,23 +23,23 @@ public class BusinessDemandDataController {
 	@Autowired
 	private BusinessDemandDataService businessDemandDataService;
 	
-	@GetMapping(value="/getBusinessDemandData")
+	@GetMapping(value="/business-demand-data")
 	public	List<BusinessDemandDataDTO> getBusinessDemandData(@RequestParam String year,@RequestParam String plantId){
 		System.out.println(plantId);
 		return businessDemandDataService.getBusinessDemandData(year,plantId);	
 	}
 	
-	@PostMapping(value="/saveBusinessDemandData")
+	@PostMapping(value="/business-demand-data")
 	public 	List<BusinessDemandDataDTO>  saveBusinessDemandData(@RequestBody List<BusinessDemandDataDTO> businessDemandDataDTO) {
 		return businessDemandDataService.saveBusinessDemandData(businessDemandDataDTO);
 	}
 	
-	@PutMapping(value="/editBusinessDemandData")
+	@PutMapping(value="/business-demand-data")
 	public List<BusinessDemandDataDTO> editBusinessDemandData(@RequestBody List<BusinessDemandDataDTO> businessDemandDataDTO){
 		return businessDemandDataService.saveBusinessDemandData(businessDemandDataDTO);	
 	}
 	
-	@DeleteMapping(value="/deleteBusinessDemandData/{id}")
+	@DeleteMapping(value="/business-demand-data/{id}")
 	public BusinessDemandDataDTO deleteBusinessDemandData(@PathVariable UUID id){
 		return businessDemandDataService.deleteBusinessDemandData(id);	
 	}

@@ -20,7 +20,7 @@ public class CatalystAttributesController {
 	@Autowired
 	private CatalystAttributesService catalystAttributesService;
 	
-	@GetMapping(value="getAllCatalystAttributes")
+	@GetMapping(value="/catalyst-attributes")
 	public List<CatalystAttributes> getAllCatalystAttributes(){
 		return catalystAttributesService.findAll();
 	}

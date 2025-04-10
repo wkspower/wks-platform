@@ -36,8 +36,7 @@ public class SiteAndPlantController {
         List data = plantService.getShutdownMonths(plantId, maintenanceName);
         return ResponseEntity.ok(data);
     }
-
-    @GetMapping(value = "/getPlantAndSite")
+    @GetMapping(value = "/plant-site")
     public ResponseEntity<List<Object>> getPlantAndSite() {
         List<Object[]> listOfSite = plantService.getPlantAndSite();
         

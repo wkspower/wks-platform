@@ -28,7 +28,7 @@ public class NormAttributeTransactionsController {
 	@Autowired
 	private ConfigurationService configurationService;
 	
-	@GetMapping(value="/getCatalystSelectivityData")
+	@GetMapping(value="/catalyst")
 	public	String getCatalystSelectivityData(@RequestParam String year,@RequestParam UUID plantId,@RequestParam UUID siteId){
 		try {
 			System.out.println("result for configuration"+configurationService.getConfigurationData(year,plantId));
@@ -39,23 +39,23 @@ public class NormAttributeTransactionsController {
 		return null;
 	}
 	
-	@PutMapping(value="/updateNormAttributeTransactions")
+	@PutMapping(value="/catalyst")
 	public NormAttributeTransactionsDTO updateNormAttributeTransactions(@RequestBody NormAttributeTransactionsDTO normAttributeTransactionsDTO) {
 		return normAttributeTransactionsService.updateNormAttributeTransactions(normAttributeTransactionsDTO);
 	}
 	
-	@PutMapping(value="/updateCatalystData")
+	@PutMapping(value="/catalyst/data")
 	public Boolean updateCatalystData(@RequestBody CatalystAttributesDTO catalystAttributesDTO) {
 		return normAttributeTransactionsService.updateCatalystData(catalystAttributesDTO);
 	}
 	
-	@PostMapping(value = "/saveCatalystData")
+	@PostMapping(value = "/catalyst")
 	public Boolean saveCatalystData(@RequestBody CatalystAttributesDTO catalystAttributesDTO) {
 		normAttributeTransactionsService.saveCatalystData(catalystAttributesDTO);
 		return true;
 	}
 	
-	@DeleteMapping(value="/deleteCatalystData")
+	@DeleteMapping(value="/catalyst")
 	public Boolean deleteCatalystData(@RequestBody CatalystAttributesDTO catalystAttributesDTO) {
 		normAttributeTransactionsService.deleteCatalystData(catalystAttributesDTO);
 		return true;

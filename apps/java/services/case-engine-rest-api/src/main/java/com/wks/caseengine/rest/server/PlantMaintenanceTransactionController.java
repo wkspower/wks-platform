@@ -15,7 +15,7 @@ public class PlantMaintenanceTransactionController {
 	@Autowired
 	private PlantMaintenanceTransactionService plantMaintenanceTransactionService;
 	
-	@GetMapping(value = "/getAll")
+	@GetMapping(value = "/plant-maintenance-records")
 	public ResponseEntity<List<PlantMaintenanceTransaction>> getAll() {
 		List<PlantMaintenanceTransaction> listOfSites = plantMaintenanceTransactionService.getAll(); 
 	    return ResponseEntity.ok(listOfSites);

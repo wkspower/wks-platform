@@ -50,13 +50,13 @@ public class ProductController {
         this.productService = productService;
     }
       
-	@GetMapping(value = "/productList")
+	@GetMapping(value = "/product")
 	public ResponseEntity<List<Product>> getProducts() {
 	    List<Product> products = productService.getAllProducts(); 
 	    return ResponseEntity.ok(products);
 	}
 	
-	@GetMapping(value = "/getMonthWiseData")
+	@GetMapping(value = "/products/monthly")
 	public ResponseEntity<List<ProductMonthWiseDataDTO>> getProductListByTypeAndYear(@RequestParam String type, @RequestParam String year) {
 		 List<Object[]> productMonthWiseDataList = productService.getMonthWiseDataByTypeAndYear(type,year);
 		 List<ProductMonthWiseDataDTO> productMonthWiseDataDTOList = new ArrayList<>();
@@ -77,7 +77,7 @@ public class ProductController {
 	}
 
 
-	@GetMapping(value = "/getAllProducts")
+	@GetMapping(value = "/products/by-parameter")
 	public ResponseEntity<List<ProductDTO>> getAllProducts(@RequestParam  String normParameterTypeName,@RequestParam String plantId) {
 		List<Object[]> productList = productService.getAllProductsFromNormParameters(normParameterTypeName, UUID.fromString(plantId));
 		List<ProductDTO> productDTOList = new ArrayList<>();
@@ -104,7 +104,7 @@ public class ProductController {
 	}*/
 
 
-	@GetMapping("/yearly-data")
+	@GetMapping("/products/yearly")
 	public ResponseEntity<List<ProductYearlyDataDTO>> getProductYearlyData(@RequestParam int year) {
 		List<Object[]> products = productService.getAllProductsFromNormParameters(null,null);
 		List<Object[]> monthlyData = productService.getMonthlyDataForYear(year);

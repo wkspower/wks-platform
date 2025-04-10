@@ -20,17 +20,17 @@ public class ShutdownNormsController {
 	@Autowired
 	private ShutdownNormsService shutdownNormsService;
 	
-	@GetMapping(value="/shutdownNorms")
+	@GetMapping(value="/shutdown-norms")
 	public List<ShutdownNormsValueDTO> getShutdownNormsData(@RequestParam String year,@RequestParam String plantId){
 		return	shutdownNormsService.getShutdownNormsData(year, plantId);
 	}
 	
-	@PostMapping(value="/shutdownNorms")
+	@PostMapping(value="/shutdown-norms")
 	public List<ShutdownNormsValueDTO> saveShutdownNormsData(@RequestBody List<ShutdownNormsValueDTO> shutdownNormsValueDTOList){
 		return	shutdownNormsService.saveShutdownNormsData(shutdownNormsValueDTOList);
 	}
 	
-	@GetMapping(value="/getShutdownNormsSPData")
+	@GetMapping(value="/shutdown-norms/sp-data")
 	public List<ShutdownNormsValueDTO> getShutdownNormsSPData(@RequestParam String year,@RequestParam String plantId){
 		return	shutdownNormsService.getShutdownNormsSPData(year, plantId);
 	}

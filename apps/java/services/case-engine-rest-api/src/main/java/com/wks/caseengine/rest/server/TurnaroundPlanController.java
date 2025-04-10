@@ -30,7 +30,7 @@ public class TurnaroundPlanController {
 	@Autowired
 	private TurnaroundPlanService turnaroundPlanService;
 	
-	@GetMapping(value = "/getTurnaroundPlanData")
+	@GetMapping(value = "/turnaround-plan")
     public ResponseEntity<List<ShutDownPlanDTO>> findTurnaroundPlanDataByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName,@RequestParam String year) {
 		
 		List<ShutDownPlanDTO> listOfSite=null;
@@ -45,13 +45,13 @@ public class TurnaroundPlanController {
         return ResponseEntity.ok(listOfSite);
     }
 	
-	@PostMapping(value="/saveTurnaroundPlanData/{plantId}")
+	@PostMapping(value="/turnaround-plan/{plantId}")
 	public ResponseEntity<List<ShutDownPlanDTO>> saveShutdownData(@PathVariable UUID plantId,@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList){
 		turnaroundPlanService.saveTurnaroundPlanData(plantId,shutDownPlanDTOList);
 		return ResponseEntity.ok(shutDownPlanDTOList); 
 	}
 	
-	@PutMapping(value = "/editTurnaroundData/{plantMaintenanceTransactionId}")
+	@PutMapping(value = "/turnaround-plan/{plantMaintenanceTransactionId}")
     public ResponseEntity<List<ShutDownPlanDTO>> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId, @RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
         
 		          // Save entity
@@ -60,7 +60,7 @@ public class TurnaroundPlanController {
         return ResponseEntity.ok(shutDownPlanDTOList);
     }
 	
-	@DeleteMapping("/deleteTurnaroundData/{plantMaintenanceTransactionId}")
+	@DeleteMapping("/turnaround-plan/{plantMaintenanceTransactionId}")
     public ResponseEntity<String> deletePlant(@PathVariable UUID plantMaintenanceTransactionId) {
 	  	shutDownPlanService.deletePlanData(plantMaintenanceTransactionId);
         return ResponseEntity.ok("Plant with ID " + plantMaintenanceTransactionId + " deleted successfully");
