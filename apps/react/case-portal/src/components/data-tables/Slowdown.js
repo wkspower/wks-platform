@@ -23,6 +23,8 @@ const SlowDown = ({ permissions }) => {
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   // const [slowDownData, setSlowDownData] = useState([])
+  const [rowModesModel, setRowModesModel] = useState({})
+
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
@@ -117,7 +119,7 @@ const SlowDown = ({ permissions }) => {
       const slowDownDetailsMEG = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
-        durationInHrs: parseFloat(row.durationInHrs),
+        durationInHrs: parseFloat(findDuration('1', row)),
         maintEndDateTime: addTimeOffset(row.maintEndDateTime),
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         remark: row.remark,
@@ -154,16 +156,24 @@ const SlowDown = ({ permissions }) => {
     }
   }
   const saveChanges = React.useCallback(async () => {
-    try {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      if (data.length == 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        return
-      }
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
+
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
+    setTimeout(() => {
+      try {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        if (data.length == 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
+        }
 
       const requiredFields = [
         'maintStartDateTime',
@@ -184,11 +194,12 @@ const SlowDown = ({ permissions }) => {
         return
       }
 
-      saveSlowDownData(data)
-    } catch (error) {
-      // setIsSaving(false);
-    }
-  }, [apiRef])
+        saveSlowDownData(data)
+      } catch (error) {
+        // setIsSaving(false);
+      }
+    }, 400)
+  }, [apiRef, rowModesModel])
 
   const updateSlowdownData = async (newRow) => {
     try {
@@ -495,7 +506,7 @@ const SlowDown = ({ permissions }) => {
     {
       field: 'remark',
       headerName: 'Remarks',
-      editable: true,
+      editable: false,
       minWidth: 180,
       renderCell: (params) => {
         const displayText = truncateRemarks(params.value)
@@ -532,6 +543,10 @@ const SlowDown = ({ permissions }) => {
   const onProcessRowUpdateError = React.useCallback((error) => {
     console.log(error)
   }, [])
+
+  const onRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel)
+  }
 
   const deleteRowData = async (paramsForDelete) => {
     try {
@@ -577,6 +592,8 @@ const SlowDown = ({ permissions }) => {
         paginationOptions={[100, 200, 300]}
         updateSlowdownData={updateSlowdownData}
         processRowUpdate={processRowUpdate}
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={onRowModesModelChange}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

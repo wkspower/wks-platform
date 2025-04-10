@@ -111,7 +111,7 @@
   {
     "field": "remark",
     "headerName": "Remark",
-    "editable": true,
+    "editable": false,
     "minWidth": 150
   },
   {

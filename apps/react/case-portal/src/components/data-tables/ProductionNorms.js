@@ -22,6 +22,8 @@ const ProductionNorms = ({ permissions }) => {
   // const [csData, setCsData] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
+  const [rowModesModel, setRowModesModel] = useState({})
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
@@ -74,13 +76,21 @@ const ProductionNorms = ({ permissions }) => {
   }, [])
 
   const saveChanges = React.useCallback(async () => {
-    try {
-      var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
-      const allRows = Array.from(apiRef.current.getRowModels().values())
-      const updatedRows = allRows.map(
-        (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
-      )
-      const rowsToSave = updatedRows.filter((row) => row.id !== 'total')
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
+
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
+    setTimeout(() => {
+      try {
+        var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
+        const allRows = Array.from(apiRef.current.getRowModels().values())
+        const updatedRows = allRows.map(
+          (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
+        )
+        const rowsToSave = updatedRows.filter((row) => row.id !== 'total')
 
       if (updatedRows.length === 0) {
         setSnackbarOpen(true)
@@ -116,15 +126,16 @@ const ProductionNorms = ({ permissions }) => {
           return
         }
 
-        updateProductNormData(editedData)
-      } else {
-        updateProductNormData(rowsToSave)
+          updateProductNormData(editedData)
+        } else {
+          updateProductNormData(rowsToSave)
+        }
+      } catch (error) {
+        console.log('Error saving changes:', error)
+        setCalculatebtnClicked(false)
       }
-    } catch (error) {
-      console.log('Error saving changes:', error)
-      setCalculatebtnClicked(false)
-    }
-  }, [apiRef, selectedUnit, calculatebtnClicked])
+    }, 400)
+  }, [apiRef, rowModesModel, selectedUnit, calculatebtnClicked])
 
   const updateProductNormData = async (newRow) => {
     setLoading(true)
@@ -528,6 +539,10 @@ const ProductionNorms = ({ permissions }) => {
     console.log(error)
   }, [])
 
+  const onRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel)
+  }
+
   const handleUnitChange = (unit) => {
     setSelectedUnit(unit)
   }
@@ -555,6 +570,8 @@ const ProductionNorms = ({ permissions }) => {
         paginationOptions={[100, 200, 300]}
         updateProductNormData={updateProductNormData}
         processRowUpdate={processRowUpdate}
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={onRowModesModelChange}
         // onRowEditStop={handleRowEditStop}
         saveChanges={saveChanges}
         snackbarData={snackbarData}

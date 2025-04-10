@@ -26,6 +26,7 @@ const NormalOpNormsScreen = () => {
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
+  const [rowModesModel, setRowModesModel] = useState({})
   const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -344,7 +345,7 @@ const NormalOpNormsScreen = () => {
       field: 'remarks',
       headerName: 'Remark',
       minWidth: 150,
-      editable: true,
+      editable: false,
       renderCell: (params) => {
         const displayText = truncateRemarks(params.value)
         const isEditable = !params.row.Particulars
@@ -399,33 +400,43 @@ const NormalOpNormsScreen = () => {
   }, [])
 
   const saveChanges = React.useCallback(async () => {
-    try {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      if (data.length == 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        return
-      }
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
 
-      const requiredFields = ['materialFkId', 'remarks']
-      const validationMessage = validateFields(data, requiredFields)
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationMessage,
-          severity: 'error',
-        })
-        return
-      }
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
 
-      saveNormalOperationNormsData(data)
-    } catch (error) {
-      /* empty */
-    }
-  }, [apiRef])
+    setTimeout(() => {
+      try {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        if (data.length == 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
+        }
+
+        const requiredFields = ['materialFkId', 'remarks']
+        const validationMessage = validateFields(data, requiredFields)
+        if (validationMessage) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: validationMessage,
+            severity: 'error',
+          })
+          return
+        }
+
+        saveNormalOperationNormsData(data)
+      } catch (error) {
+        /* empty */
+      }
+    }, 400)
+  }, [apiRef, rowModesModel])
 
   const saveNormalOperationNormsData = async (newRows) => {
     try {
@@ -503,6 +514,9 @@ const NormalOpNormsScreen = () => {
     console.log(error)
   }, [])
 
+  const onRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel)
+  }
   const isCellEditable = (params) => {
     return !params.row.Particulars
   }
@@ -573,6 +587,8 @@ const NormalOpNormsScreen = () => {
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
         processRowUpdate={processRowUpdate}
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={onRowModesModelChange}
         saveChanges={saveChanges}
         isCellEditable={isCellEditable}
         snackbarData={snackbarData}

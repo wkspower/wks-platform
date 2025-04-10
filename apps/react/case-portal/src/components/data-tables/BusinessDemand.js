@@ -12,6 +12,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
 
 const BusinessDemand = ({ permissions }) => {
+  const [rowModesModel, setRowModesModel] = useState({})
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
   const [open1, setOpen1] = useState(false)
@@ -182,33 +183,43 @@ const BusinessDemand = ({ permissions }) => {
   }, [])
 
   const saveChanges = React.useCallback(async () => {
-    try {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      if (data.length == 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        return
-      }
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
 
-      const requiredFields = ['normParameterId', 'remark']
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
 
-      const validationMessage = validateFields(data, requiredFields)
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationMessage,
-          severity: 'error',
-        })
-        return
+    setTimeout(() => {
+      try {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        if (data.length == 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
+        }
+
+        const requiredFields = ['normParameterId', 'remark']
+
+        const validationMessage = validateFields(data, requiredFields)
+        if (validationMessage) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: validationMessage,
+            severity: 'error',
+          })
+          return
+        }
+        saveBusinessDemandData(data)
+      } catch (error) {
+        console.log('Error saving changes:', error)
       }
-      saveBusinessDemandData(data)
-    } catch (error) {
-      console.log('Error saving changes:', error)
-    }
-  }, [apiRef])
+    }, 400)
+  }, [apiRef, rowModesModel])
 
   const saveBusinessDemandData = async (newRows) => {
     try {
@@ -283,6 +294,10 @@ const BusinessDemand = ({ permissions }) => {
     console.log(error)
   }, [])
 
+  const onRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel)
+  }
+
   const deleteRowData = async (paramsForDelete) => {
     try {
       const { idFromApi, id } = paramsForDelete.row
@@ -336,6 +351,8 @@ const BusinessDemand = ({ permissions }) => {
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
         processRowUpdate={processRowUpdate}
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={onRowModesModelChange}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

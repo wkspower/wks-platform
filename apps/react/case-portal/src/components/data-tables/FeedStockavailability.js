@@ -15,6 +15,8 @@ const FeedStockAvailability = () => {
   // const dataGridStore = useSelector((state) => state.dataGridStore)
   // const { sitePlantChange } = dataGridStore
   const [open1, setOpen1] = useState(false)
+  const [rowModesModel, setRowModesModel] = useState({})
+
   // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
@@ -34,6 +36,10 @@ const FeedStockAvailability = () => {
     headerMap,
   })
 
+  const onRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel)
+  }
+
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
@@ -51,6 +57,13 @@ const FeedStockAvailability = () => {
     return newRow
   }, [])
   const saveChanges = React.useCallback(async () => {
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
+
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
     // console.log(
     //   'Edited Data: ',
     //   Object.values(unsavedChangesRef.current.unsavedRows),
@@ -90,7 +103,7 @@ const FeedStockAvailability = () => {
         // setIsSaving(false);
       }
     }, 1000) // Delay of 2 seconds
-  }, [apiRef])
+  }, [apiRef, rowModesModel])
   // useEffect(() => {
   //   // getAllProducts()
   // }, [])
@@ -138,6 +151,8 @@ const FeedStockAvailability = () => {
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[10, 20, 30]}
         processRowUpdate={processRowUpdate}
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={onRowModesModelChange}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

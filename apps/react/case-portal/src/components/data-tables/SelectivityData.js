@@ -33,10 +33,15 @@ const SelectivityData = (props) => {
   const [currentRowId, setCurrentRowId] = useState(null)
   const [allProducts, setAllProducts] = useState([])
 
+  const [rowModesModel, setRowModesModel] = useState({})
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+
+  const onRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel)
+  }
 
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
@@ -59,36 +64,45 @@ const SelectivityData = (props) => {
   }, [])
 
   const saveChanges = React.useCallback(async () => {
-    try {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      if (data.length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        return
-      }
-      // console.log(props?.configType)
-      if (props?.configType !== 'grades') {
-        const requiredFields = ['remarks']
-        const validationMessage = validateFields(data, requiredFields)
-        if (validationMessage) {
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
+
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
+    setTimeout(() => {
+      try {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        if (data.length === 0) {
           setSnackbarOpen(true)
           setSnackbarData({
-            message: validationMessage,
-            severity: 'error',
+            message: 'No Records to Save!',
+            severity: 'info',
           })
           return
         }
-        saveCatalystData(data)
-      } else {
-        handleUpdate(data)
+        // console.log(props?.configType)
+        if (props?.configType !== 'grades') {
+          const requiredFields = ['remarks']
+          const validationMessage = validateFields(data, requiredFields)
+          if (validationMessage) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: validationMessage,
+              severity: 'error',
+            })
+            return
+          }
+          saveCatalystData(data)
+        } else {
+          handleUpdate(data)
+        }
+      } catch (error) {
+        // Handle error if necessary
       }
-    } catch (error) {
-      // Handle error if necessary
-    }
-  }, [apiRef])
+    }, 400)
+  }, [apiRef, rowModesModel])
 
   const saveCatalystData = async (newRow) => {
     setLoading(true)
@@ -322,6 +336,8 @@ const SelectivityData = (props) => {
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
         processRowUpdate={processRowUpdate}
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={onRowModesModelChange}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

@@ -16,6 +16,8 @@ const TurnaroundPlanTable = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
+  const [rowModesModel, setRowModesModel] = useState({})
+
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const [loading, setLoading] = useState(false)
@@ -134,6 +136,13 @@ const TurnaroundPlanTable = () => {
   }
 
   const saveChanges = React.useCallback(async () => {
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
+
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
     try {
       var data = Object.values(unsavedChangesRef.current.unsavedRows)
       saveTurnAroundData(data)
@@ -333,7 +342,7 @@ const TurnaroundPlanTable = () => {
     {
       field: 'remark',
       headerName: 'Remarks',
-      editable: true,
+      editable: false,
       minWidth: 200,
       renderCell: (params) => {
         const displayText = truncateRemarks(params.value)
@@ -402,6 +411,10 @@ const TurnaroundPlanTable = () => {
     console.log(error)
   }, [])
 
+  const onRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel)
+  }
+
   const deleteRowData = async (paramsForDelete) => {
     try {
       const { idFromApi, id } = paramsForDelete.row
@@ -448,6 +461,8 @@ const TurnaroundPlanTable = () => {
         snackbarOpen={snackbarOpen}
         snackbarData={snackbarData}
         processRowUpdate={processRowUpdate}
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={onRowModesModelChange}
         apiRef={apiRef}
         deleteId={deleteId}
         open1={open1}

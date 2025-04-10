@@ -50,6 +50,8 @@ const DataGridTable = ({
   isCellEditable = () => true,
   saveChanges = () => {},
   apiRef = null,
+  rowModesModel,
+  setRowModesModel,
   snackbarData = { message: '', severity: 'info' },
   snackbarOpen = false,
   // setSnackbarData = () => {},
@@ -61,6 +63,7 @@ const DataGridTable = ({
   rows = [],
   loading = false,
   remarkDialogOpen = false,
+  onRowModesModelChange,
   setRemarkDialogOpen = () => {},
   currentRemark = '',
   setCurrentRemark = () => {},
@@ -81,7 +84,7 @@ const DataGridTable = ({
   const handleSearchChange = (event) => {
     setSearchText(event.target.value)
   }
-  const [rowModesModel, setRowModesModel] = useState({})
+  // const [rowModesModel, setRowModesModel] = useState({})
   // const [changedRowIds, setChangedRowIds] = useState([])
   // const [columnFilters, setColumnFilters] = useState({})
   const columnFilters = {}
@@ -94,22 +97,22 @@ const DataGridTable = ({
 
   const handleEditClick = (id) => () => {
     // setIsUpdating(true)
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } })
+    // setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } })
   }
 
   const handleSaveClick = (id) => {
     // handleOpenRemark()
-    setRowModesModel((prev) => ({
-      ...prev,
-      [id]: { mode: GridRowModes.View },
-    }))
+    // setRowModesModel((prev) => ({
+    //   ...prev,
+    //   [id]: { mode: GridRowModes.View },
+    // }))
   }
 
   const handleCancelClick = (id) => () => {
-    setRowModesModel({
-      ...rowModesModel,
-      [id]: { mode: GridRowModes.View, ignoreModifications: true },
-    })
+    // setRowModesModel({
+    //   ...rowModesModel,
+    //   [id]: { mode: GridRowModes.View, ignoreModifications: true },
+    // })
 
     const editedRow = rows.find((row) => row.id === id)
     if (editedRow.isNew) {
@@ -117,9 +120,9 @@ const DataGridTable = ({
     }
   }
 
-  const handleRowModesModelChange = (newRowModesModel) => {
-    setRowModesModel(newRowModesModel)
-  }
+  // const handleRowModesModelChange = (newRowModesModel) => {
+  //   setRowModesModel(newRowModesModel)
+  // }
 
   useEffect(() => {
     if (rows) setRows(rows)
@@ -176,10 +179,10 @@ const DataGridTable = ({
     setRows((prevRows) => [newRow, ...prevRows])
     onAddRow?.(newRow)
     // setProduct('')
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
-    }))
+    // setRowModesModel((oldModel) => ({
+    //   ...oldModel,
+    //   [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
+    // }))
     setTimeout(() => {
       setIsButtonDisabled(false)
     }, 500)
@@ -624,9 +627,17 @@ const DataGridTable = ({
           loading={loading}
           apiRef={apiRef}
           rows={filteredRows}
+          // disableColumnFilter
+          // disableColumnMenu
+          // onFilterModelChange={() => {}}
+          // disableColumnSelector
           sortingOrder={[]}
           disableSelectionOnClick
-          columns={columns}
+          columns={columns.map((col) => ({
+            ...col,
+            cellClassName: col.isDisabled ? 'disabled-cell' : undefined,
+            headerClassName: col.isDisabled ? 'disabled-header' : undefined,
+          }))}
           columnVisibilityModel={{
             maintenanceId: false,
             id: false,
@@ -648,19 +659,17 @@ const DataGridTable = ({
           experimentalFeatures={{ newEditingApi: true }}
           editMode='row'
           rowModesModel={rowModesModel}
-          onRowModesModelChange={handleRowModesModelChange}
+          onRowModesModelChange={onRowModesModelChange}
           handleCalculate={handleCalculate}
           deleteRowData={deleteRowData}
           slotProps={{
-            toolbar: { setRows, setRowModesModel, GridToolbar },
+            toolbar: { setRows, GridToolbar },
             loadingOverlay: {
               variant: 'linear-progress',
               noRowsVariant: 'skeleton',
             },
           }}
           getRowClassName={(params) => {
-            // console.log('params getRowClassName', params)
-
             return params.row.Particulars || params.row.Particulars2
               ? 'no-border-row'
               : params.indexRelativeToCurrentPage % 2 === 0
@@ -794,9 +803,29 @@ const DataGridTable = ({
             '& .MuiDataGrid-columnHeaderTitle': {
               fontWeight: 'bold', // Ensure column titles are bold
             },
+
+            // '& .MuiDataGrid-columnHeader[data-field="Particulars"] .MuiDataGrid-columnHeaderTitle':
+            //   {
+            //     color: 'red',
+            //   },
+
+            '& .disabled-cell': {
+              // color: '#A9A9A9 !important', // Grey color for disabled text
+              // backgroundColor: '#F0F0F0 !important', // Light grey background
+              // cursor: 'not-allowed !important', // Indicate it's not interactive
+              // Optional: Add a border or other visual cues
+              // border: '1px solid #ccc !important',
+              opacity: 0.7, // Reduce opacity for a faded look
+            },
+            '& .disabled-header': {
+              color: '#A9A9A9 !important', // Fade the header text color
+              opacity: 0.7, // Optionally fade the header opacity as well
+              // You might want to adjust other header styles if needed
+            },
           }}
         />
       </Box>
+
       {(permissions?.allAction ?? true) && (
         <Box
           sx={{

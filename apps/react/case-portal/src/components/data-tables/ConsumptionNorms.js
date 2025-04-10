@@ -17,6 +17,8 @@ const NormalOpNormsScreen = () => {
   const [allProducts, setAllProducts] = useState([])
   const headerMap = generateHeaderNames()
   const dataGridStore = useSelector((state) => state.dataGridStore)
+  const [rowModesModel, setRowModesModel] = useState({})
+
   const { sitePlantChange, verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const [open1, setOpen1] = useState(false)
@@ -134,18 +136,26 @@ const NormalOpNormsScreen = () => {
   }
 
   const saveChanges = React.useCallback(async () => {
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
+
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
     setLoading(true)
 
-    if (lowerVertName == 'meg') {
-      try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        if (data.length == 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          setLoading(false)
+    setTimeout(() => {
+      if (lowerVertName == 'meg') {
+        try {
+          var data = Object.values(unsavedChangesRef.current.unsavedRows)
+          if (data.length == 0) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: 'No Records to Save!',
+              severity: 'info',
+            })
+            setLoading(false)
 
           return
         }
@@ -214,17 +224,18 @@ const NormalOpNormsScreen = () => {
             return
           }
 
-          saveEditedData(editedData)
-        } else {
-          saveEditedData(updatedRows)
+            saveEditedData(editedData)
+          } else {
+            saveEditedData(updatedRows)
+          }
+        } catch (error) {
+          setLoading(false)
+          console.log('Error saving changes:', error)
+          setCalculatebtnClicked(false)
         }
-      } catch (error) {
-        setLoading(false)
-        console.log('Error saving changes:', error)
-        setCalculatebtnClicked(false)
       }
-    }
-  }, [apiRef, selectedUnit, calculatebtnClicked])
+    }, 400)
+  }, [apiRef, selectedUnit, rowModesModel, calculatebtnClicked])
 
   const fetchData = async () => {
     setLoading(true)
@@ -312,6 +323,10 @@ const NormalOpNormsScreen = () => {
   const onProcessRowUpdateError = React.useCallback((error) => {
     console.log(error)
   }, [])
+
+  const onRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel)
+  }
 
   const handleUnitChange = (unit) => {
     setSelectedUnit(unit)
@@ -459,6 +474,8 @@ const NormalOpNormsScreen = () => {
         title='Consumption AOP'
         paginationOptions={[100, 200, 300]}
         processRowUpdate={processRowUpdate}
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={onRowModesModelChange}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

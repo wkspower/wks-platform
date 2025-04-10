@@ -30,7 +30,7 @@
     "field": "remarks",
     "headerName": "Remark",
     "minWidth": 250,
-    "editable": true,
+    "editable": false,
     "renderCell": "renderRemarkCell"
   }
 ]

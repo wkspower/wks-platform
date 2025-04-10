@@ -112,7 +112,7 @@
     "field": "remark",
     "headerName": "Remark",
     "minWidth": 150,
-    "editable": true
+    "editable": false
   },
   {
     "field": "idFromApi",

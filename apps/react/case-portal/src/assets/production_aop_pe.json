@@ -115,7 +115,7 @@
     "field": "aopRemarks",
     "headerName": "Remark",
     "minWidth": 175,
-    "editable": true
+    "editable": false
   },
   { "field": "aopStatus", "headerName": "aopStatus", "editable": false }
 ]

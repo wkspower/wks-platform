@@ -21,6 +21,7 @@ const ShutdownNorms = () => {
   const [loading, setLoading] = useState(false)
   const menu = useSelector((state) => state.dataGridStore)
   const [allProducts, setAllProducts] = useState([])
+  const [shutdownMonths, setShutdownMonths] = useState([])
   const { sitePlantChange } = menu
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
@@ -33,6 +34,7 @@ const ShutdownNorms = () => {
   })
 
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
+  const [rowModesModel, setRowModesModel] = useState({}) // Track row edit state
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange } = dataGridStore
@@ -59,35 +61,55 @@ const ShutdownNorms = () => {
   const keycloak = useSession()
 
   const saveChanges = React.useCallback(async () => {
-    setLoading(true)
-    if (lowerVertName == 'meg') {
-      try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-        if (data.length == 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          setLoading(false)
-          return
-        }
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
 
-        saveShutDownNormsData(data)
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
+
+    setTimeout(() => {
+      if (lowerVertName == 'meg') {
+        try {
+          var data = Object.values(unsavedChangesRef.current.unsavedRows)
+          if (data.length == 0) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: 'No Records to Save!',
+              severity: 'info',
+            })
+            setLoading(false)
+            return
+          }
+
+          const requiredFields = ['remarks']
+          const validationMessage = validateFields(data, requiredFields)
+          if (validationMessage) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: validationMessage,
+              severity: 'error',
+            })
+            setLoading(false)
+            return
+          }
+
+          saveShutDownNormsData(data)
+          unsavedChangesRef.current = {
+            unsavedRows: {},
+            rowsBeforeChange: {},
+          }
+        } catch (error) {
+          /* empty */
+          setLoading(false)
         }
-      } catch (error) {
-        /* empty */
-        setLoading(false)
       }
-    }
-    if (lowerVertName == 'pe') {
-      try {
-        var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
-        var allRows = Array.from(apiRef.current.getRowModels().values())
-        allRows = allRows.filter((row) => !row.isGroupHeader)
+      if (lowerVertName == 'pe') {
+        try {
+          var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
+          var allRows = Array.from(apiRef.current.getRowModels().values())
+          allRows = allRows.filter((row) => !row.isGroupHeader)
 
         const updatedRows = allRows.map(
           (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
@@ -126,17 +148,18 @@ const ShutdownNorms = () => {
             return
           }
 
-          saveShutDownNormsData(editedData)
-        } else {
-          saveShutDownNormsData(updatedRows)
+            saveShutDownNormsData(editedData)
+          } else {
+            saveShutDownNormsData(updatedRows)
+          }
+        } catch (error) {
+          console.log('Error saving changes:', error)
+          setLoading(false)
+          setCalculatebtnClicked(false)
         }
-      } catch (error) {
-        console.log('Error saving changes:', error)
-        setLoading(false)
-        setCalculatebtnClicked(false)
       }
-    }
-  }, [apiRef, selectedUnit, calculatebtnClicked])
+    }, 400)
+  }, [apiRef, selectedUnit, calculatebtnClicked, rowModesModel])
 
   useEffect(() => {
     const getAllProducts = async () => {
@@ -153,8 +176,20 @@ const ShutdownNorms = () => {
         // handleMenuClose();
       }
     }
+    const getShutdownMonths = async () => {
+      try {
+        const data = await DataService.getShutdownMonths(keycloak, null)
+        setShutdownMonths(data)
+        console.log('setShutdownMonths', data)
+      } catch (error) {
+        console.error('Error fetching months:', error)
+      } finally {
+        // handleMenuClose();
+      }
+    }
     fetchData()
     getAllProducts()
+    getShutdownMonths()
   }, [sitePlantChange, keycloak, selectedUnit, lowerVertName])
 
   const formatValueToThreeDecimals = (params) =>
@@ -164,7 +199,7 @@ const ShutdownNorms = () => {
     return !params.row.Particulars
   }
 
-  const months = ['july', 'june', 'may', 'april']
+  // const months = shutdownMonths
 
   const colDefs = [
     {
@@ -258,111 +293,126 @@ const ShutdownNorms = () => {
     {
       field: 'april',
       headerName: headerMap[4],
-      editable: true,
+      editable: shutdownMonths.includes(4),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      isDisabled: !shutdownMonths.includes(4),
+      columnClassName: 'first-column',
     },
+
     {
       field: 'may',
       headerName: headerMap[5],
-      editable: true,
+      editable: shutdownMonths.includes(5),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      isDisabled: !shutdownMonths.includes(5),
+      columnClassName: 'first-column',
     },
     {
       field: 'june',
       headerName: headerMap[6],
-      editable: true,
+      editable: shutdownMonths.includes(6),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      isDisabled: !shutdownMonths.includes(6),
     },
     {
       field: 'july',
       headerName: headerMap[7],
-      editable: true,
+      editable: shutdownMonths.includes(7),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      isDisabled: !shutdownMonths.includes(7),
     },
 
     {
       field: 'august',
       headerName: headerMap[8],
-      editable: true,
+      editable: shutdownMonths.includes(8),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      isDisabled: !shutdownMonths.includes(8),
     },
     {
       field: 'september',
       headerName: headerMap[9],
-      editable: true,
+      editable: shutdownMonths.includes(9),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      isDisabled: !shutdownMonths.includes(9),
     },
     {
       field: 'october',
       headerName: headerMap[10],
-      editable: true,
+      editable: shutdownMonths.includes(10),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      isDisabled: !shutdownMonths.includes(10),
     },
     {
       field: 'november',
       headerName: headerMap[11],
-      editable: true,
+      editable: shutdownMonths.includes(11),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      isDisabled: !shutdownMonths.includes(11),
     },
     {
       field: 'december',
       headerName: headerMap[12],
-      editable: true,
+      editable: shutdownMonths.includes(12),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      isDisabled: !shutdownMonths.includes(12),
     },
     {
       field: 'january',
       headerName: headerMap[1],
-      editable: true,
+      editable: shutdownMonths.includes(1),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      isDisabled: !shutdownMonths.includes(1),
     },
     {
       field: 'february',
       headerName: headerMap[2],
-      editable: true,
+      editable: shutdownMonths.includes(2),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      isDisabled: !shutdownMonths.includes(2),
     },
     {
       field: 'march',
       headerName: headerMap[3],
-      editable: true,
+      editable: shutdownMonths.includes(3),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      isDisabled: !shutdownMonths.includes(3),
     },
 
     // remarks
@@ -424,6 +474,7 @@ const ShutdownNorms = () => {
   }, [])
 
   const saveShutDownNormsData = async (newRows) => {
+    setLoading(true)
     try {
       let plantId = ''
       const storedPlant = localStorage.getItem('selectedPlant')
@@ -477,12 +528,14 @@ const ShutdownNorms = () => {
           message: `Shutdown Norms Saved Successfully!`,
           severity: 'success',
         })
+        setLoading(false)
         setCalculatebtnClicked(false)
 
         // fetchData()
         return response
       } else {
         setSnackbarOpen(true)
+        setLoading(false)
         setSnackbarData({
           message: `Shutdown Norms not saved!`,
           severity: 'error',
@@ -491,9 +544,11 @@ const ShutdownNorms = () => {
       }
     } catch (error) {
       console.error(`Error saving Shutdown Norms`, error)
+      setLoading(false)
     } finally {
       fetchData()
       setCalculatebtnClicked(false)
+      setLoading(false)
     }
   }
 
@@ -670,6 +725,10 @@ const ShutdownNorms = () => {
     handleCalculatePe()
   }
 
+  const onRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel)
+  }
+
   return (
     <div>
       <Backdrop
@@ -690,10 +749,12 @@ const ShutdownNorms = () => {
         paginationOptions={[100, 200, 300]}
         processRowUpdate={processRowUpdate}
         handleUnitChange={handleUnitChange}
+        onRowModesModelChange={onRowModesModelChange}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         apiRef={apiRef}
+        rowModesModel={rowModesModel}
         open1={open1}
         setOpen1={setOpen1}
         setSnackbarOpen={setSnackbarOpen}

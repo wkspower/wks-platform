@@ -12,7 +12,7 @@
     "editable": false
   },
   {
-    "field": "uom",
+    "field": "UOM",
     "headerName": "UOM",
     "minWidth": 50,
     "editable": false
@@ -116,7 +116,7 @@
   {
     "field": "aopRemarks",
     "headerName": "Remark",
-    "editable": true,
+    "editable": false,
     "minWidth": 100
   }
 ]

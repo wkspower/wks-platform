@@ -19,6 +19,8 @@ const ShutDown = ({ permissions }) => {
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   // const [shutdownData, setShutdownData] = useState([])
   // const [allProducts, setAllProducts] = useState([])
+  const [rowModesModel, setRowModesModel] = useState({})
+
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
@@ -61,38 +63,47 @@ const ShutDown = ({ permissions }) => {
   }, [])
 
   const saveChanges = React.useCallback(async () => {
-    try {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      if (data.length == 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        return
-      }
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
 
-      const requiredFields = [
-        'maintStartDateTime',
-        'maintEndDateTime',
-        'discription',
-        'remark',
-      ]
-      const validationMessage = validateFields(data, requiredFields)
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationMessage,
-          severity: 'error',
-        })
-        return
-      }
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
+    setTimeout(() => {
+      try {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        if (data.length == 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
+        }
 
-      saveShutdownData(data)
-    } catch (error) {
-      console.log('Error saving changes:', error)
-    }
-  }, [apiRef])
+        const requiredFields = [
+          'maintStartDateTime',
+          'maintEndDateTime',
+          'discription',
+          'remark',
+        ]
+        const validationMessage = validateFields(data, requiredFields)
+        if (validationMessage) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: validationMessage,
+            severity: 'error',
+          })
+          return
+        }
+
+        saveShutdownData(data)
+      } catch (error) {
+        console.log('Error saving changes:', error)
+      }
+    }, 400)
+  }, [apiRef, rowModesModel])
 
   function addTimeOffset(dateTime) {
     if (!dateTime) return null
@@ -362,6 +373,10 @@ const ShutDown = ({ permissions }) => {
     console.log(error)
   }, [])
 
+  const onRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel)
+  }
+
   const deleteRowData = async (paramsForDelete) => {
     try {
       const { idFromApi, id } = paramsForDelete.row
@@ -406,6 +421,8 @@ const ShutDown = ({ permissions }) => {
         paginationOptions={[100, 200, 300]}
         updateShutdownData={updateShutdownData}
         processRowUpdate={processRowUpdate}
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={onRowModesModelChange}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

@@ -15,6 +15,8 @@ import CircularProgress from '@mui/material/CircularProgress'
 const ProductionvolumeData = ({ permissions }) => {
   const keycloak = useSession()
   // const [productNormData, setProductNormData] = useState([])
+  const [rowModesModel, setRowModesModel] = useState({})
+
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -163,16 +165,24 @@ const ProductionvolumeData = ({ permissions }) => {
   }, [])
 
   const saveChanges = React.useCallback(async () => {
-    try {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
-      if (data.length == 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        return
-      }
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
+
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
+    setTimeout(() => {
+      try {
+        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        if (data.length == 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
+        }
 
       const months = [
         'april',
@@ -232,14 +242,15 @@ const ProductionvolumeData = ({ permissions }) => {
         editAOPMCCalculatedData(data)
       }
 
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } catch (error) {
+        console.log('Facing issue at saving data', error)
       }
-    } catch (error) {
-      console.log('Facing issue at saving data', error)
-    }
-  }, [apiRef, selectedUnit])
+    }, 400)
+  }, [apiRef, rowModesModel, selectedUnit])
 
   const fetchData = async () => {
     try {
@@ -335,6 +346,10 @@ const ProductionvolumeData = ({ permissions }) => {
     console.log(error)
   }, [])
 
+  const onRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel)
+  }
+
   const handleUnitChange = (unit) => {
     setSelectedUnit(unit)
   }
@@ -408,6 +423,8 @@ const ProductionvolumeData = ({ permissions }) => {
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
         processRowUpdate={processRowUpdate}
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={onRowModesModelChange}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
