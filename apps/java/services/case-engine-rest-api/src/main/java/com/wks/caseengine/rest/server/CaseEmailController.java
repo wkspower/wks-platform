@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.cases.instance.email.CaseEmail;
 import com.wks.caseengine.cases.instance.email.CaseEmailService;
-import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
+import com.wks.caseengine.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;

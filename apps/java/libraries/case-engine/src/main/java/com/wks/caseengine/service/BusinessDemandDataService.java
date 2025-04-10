@@ -4,10 +4,11 @@ import java.util.List;
 import java.util.UUID;
 
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface BusinessDemandDataService {
-	public	List<BusinessDemandDataDTO> getBusinessDemandData(String year, String plantId);
-	public 	List<BusinessDemandDataDTO>  saveBusinessDemandData(List<BusinessDemandDataDTO> businessDemandDataDTO);
+	public	AOPMessageVM getBusinessDemandData(String year, String plantId);
+	public 	AOPMessageVM  saveBusinessDemandData(List<BusinessDemandDataDTO> businessDemandDataDTO);
 	public 	List<BusinessDemandDataDTO>  editBusinessDemandData(List<BusinessDemandDataDTO> businessDemandDataDTO);
 	public 	BusinessDemandDataDTO  deleteBusinessDemandData(UUID id);
 

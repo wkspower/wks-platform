@@ -33,6 +33,13 @@
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
         </dependency>
+        <dependency>
+		    <groupId>org.modelmapper</groupId>
+		    <artifactId>modelmapper</artifactId>
+		    <version>3.1.1</version> <!-- or latest -->
+		</dependency>
+        
+        
         
          <dependency>
 	        <groupId>org.springframework.boot</groupId>

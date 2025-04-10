@@ -24,10 +24,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.exception.RestResourceNotFoundException;
 import com.wks.caseengine.queue.Queue;
 import com.wks.caseengine.queue.QueueNotFoundException;
 import com.wks.caseengine.queue.QueueService;
-import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 

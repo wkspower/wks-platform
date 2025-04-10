@@ -9,20 +9,22 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.rest.exception;
+package com.wks.caseengine.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * @author victor.franca
  *
  */
-public class RestInvalidArgumentException extends RuntimeException {
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class RestResourceNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String DEFAULT_MESSAGE = "The provided %s is empty or invalid.";
-
-	public RestInvalidArgumentException(final String argumentName, final Throwable t) {
-		super(String.format(DEFAULT_MESSAGE, argumentName), t);
+	public RestResourceNotFoundException(final String message) {
+		super(message);
 	}
 
 }

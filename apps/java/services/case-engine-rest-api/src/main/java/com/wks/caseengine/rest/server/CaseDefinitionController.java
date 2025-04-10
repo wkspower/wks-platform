@@ -29,8 +29,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.definition.service.CaseDefinitionService;
-import com.wks.caseengine.rest.exception.RestInvalidArgumentException;
-import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
+import com.wks.caseengine.exception.GlobalExceptionHandler;
+import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -41,6 +42,11 @@ public class CaseDefinitionController {
 
 	@Autowired
 	private CaseDefinitionService caseDefinitionService;
+	
+	@Autowired
+	private GlobalExceptionHandler globalExceptionHandler;
+	
+	
 
 	@GetMapping
 	public ResponseEntity<List<CaseDefinition>> find(@RequestParam(required = false) Boolean deployed) {

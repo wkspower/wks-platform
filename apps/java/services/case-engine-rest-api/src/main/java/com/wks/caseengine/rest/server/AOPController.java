@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.dto.AOPDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.AOPService;
 
 @RestController
@@ -21,22 +22,22 @@ public class AOPController {
 	private AOPService aOPService;
 	
 	@GetMapping(value="/aop")
-	public ResponseEntity<List<AOPDTO>> getAOP(@RequestParam String plantId,@RequestParam String year){
-		 List<AOPDTO> aOPList= aOPService.getAOPData(plantId,year);
-		 return ResponseEntity.ok(aOPList);
+	public ResponseEntity<AOPMessageVM> getAOP(@RequestParam String plantId,@RequestParam String year){
+		AOPMessageVM response= aOPService.getAOPData(plantId,year);
+		 return ResponseEntity.status(response.getCode()).body(response);
 	}
 	
 	@PutMapping(value="/aop")
-	public List<AOPDTO> updateAOP(@RequestBody List<AOPDTO> aOPDTOList) {
-		aOPService.updateAOP(aOPDTOList);
-		return aOPDTOList;
+	public ResponseEntity<AOPMessageVM> updateAOP(@RequestBody List<AOPDTO> aOPDTOList) {
+		AOPMessageVM response= aOPService.updateAOP(aOPDTOList);
+		 return ResponseEntity.status(response.getCode()).body(response);
 	}
 
     @GetMapping(value="/aop/calculate")
-	public ResponseEntity<List<AOPDTO>> calculateData(@RequestParam String plantId,@RequestParam String year){
+	public ResponseEntity<AOPMessageVM> calculateData(@RequestParam String plantId,@RequestParam String year){
     	try {
-    		 List<AOPDTO> aOPList= aOPService.calculateData(plantId,year);
-    		 return ResponseEntity.ok(aOPList);
+    		AOPMessageVM response= aOPService.calculateData(plantId,year);
+    		return ResponseEntity.status(response.getCode()).body(response);
     	}catch(Exception e) {
     		e.printStackTrace();
     	}

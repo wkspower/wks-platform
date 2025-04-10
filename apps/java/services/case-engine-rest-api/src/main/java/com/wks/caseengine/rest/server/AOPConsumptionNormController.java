@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.CalculatedConsumptionNormsDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.dto.AOPConsumptionNormDTO;
 import com.wks.caseengine.service.AOPConsumptionNormService;
 
@@ -23,14 +24,16 @@ public class AOPConsumptionNormController {
 	private AOPConsumptionNormService aOPConsumptionNormService;
 	
 	@GetMapping(value="/aop-consumption-norms")
-	public ResponseEntity<List<AOPConsumptionNormDTO>> getAOPConsumptionNorm(@RequestParam String plantId,@RequestParam String year){
-		List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList	=aOPConsumptionNormService.getAOPConsumptionNorm(plantId,year);
-		return ResponseEntity.ok(aOPConsumptionNormDTOList);
+	public ResponseEntity<AOPMessageVM> getAOPConsumptionNorm(@RequestParam String plantId,@RequestParam String year){
+		 AOPMessageVM response	=aOPConsumptionNormService.getAOPConsumptionNorm(plantId,year);
+		 return ResponseEntity.status(response.getCode()).body(response);
 	}
 	
 	@PostMapping(value="/aop-consumption-norms")
-	public List<AOPConsumptionNormDTO> saveAOPConsumptionNorm(@RequestBody List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList){
-		return aOPConsumptionNormService.saveAOPConsumptionNorm(aOPConsumptionNormDTOList);
+	public ResponseEntity<AOPMessageVM> saveAOPConsumptionNorm(@RequestBody List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList){
+		AOPMessageVM response	= aOPConsumptionNormService.saveAOPConsumptionNorm(aOPConsumptionNormDTOList);
+		return ResponseEntity.status(response.getCode()).body(response);
+		
 	}
 
 	@GetMapping(value="/aop-consumption-norms/calculate")
@@ -39,8 +42,10 @@ public class AOPConsumptionNormController {
 	}
 	
 	@GetMapping(value="/aop-consumption-norms/calculated")
-	public  List<CalculatedConsumptionNormsDTO>  getCalculatedConsumptionNorms(@RequestParam String year,@RequestParam String plantId){
-		return	 aOPConsumptionNormService.getCalculatedConsumptionNorms(year,plantId);
+	public  ResponseEntity<AOPMessageVM>  getCalculatedConsumptionNorms(@RequestParam String year,@RequestParam String plantId){
+		plantId="12345";
+		AOPMessageVM response	=	 aOPConsumptionNormService.getCalculatedConsumptionNorms(year,plantId);
+		return ResponseEntity.status(response.getCode()).body(response);
 		
 	}
 	
