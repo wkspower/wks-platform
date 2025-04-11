@@ -9,11 +9,15 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.dto.product.SiteAndPlantDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 //import com.wks.caseengine.service.NormParameterMonthlyTransactionService;
 import com.wks.caseengine.service.PlantService;
 
@@ -34,7 +38,9 @@ public class SiteAndPlantController {
 	}
 
 	@GetMapping(value = "/plant-site")
-	public ResponseEntity<List<Object>> getPlantAndSite() {
+	public ResponseEntity<AOPMessageVM> getPlantAndSite() {
+		AOPMessageVM aopMessageVM=new AOPMessageVM();
+		try {
 		List<Object[]> listOfSite = plantService.getPlantAndSite();
 
 		// Group plants by site ID
@@ -65,8 +71,14 @@ public class SiteAndPlantController {
 			siteResponse.setPlants(plantResponses);
 			siteData.add(siteResponse);
 		}
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Data fetched successfully");
+		aopMessageVM.setData(siteData);
+		return ResponseEntity.status(aopMessageVM.getCode()).body(aopMessageVM);
+		}  catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
 
-		return ResponseEntity.ok(siteData);
 	}
 
 	// Inner DTOs for the response format

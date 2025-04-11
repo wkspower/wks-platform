@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.MaintenanceCalculatedDataDTO;
 import com.wks.caseengine.dto.MaintenanceDetailsDTO;
-import com.wks.caseengine.service.MaintenanceCalculatedDataService;
+import com.wks.caseengine.service.MaintenanceCalculatedService;
 
 @RestController
 @RequestMapping("task")
 public class MaintenanceCalculatedDataController {
 	
 	@Autowired
-	private MaintenanceCalculatedDataService maintenanceCalculatedDataService;
+	private MaintenanceCalculatedService maintenanceCalculatedDataService;
 	
 	@GetMapping(value="/maintenance-calculated-data")
 	public List<MaintenanceDetailsDTO> getMaintenanceCalculatedData(@RequestParam String plantId, @RequestParam String year){

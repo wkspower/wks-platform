@@ -9,7 +9,8 @@ import java.util.UUID;
 import com.wks.caseengine.entity.BusinessDemand;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
@@ -17,7 +18,7 @@ import com.wks.caseengine.repository.BusinessDemandDataRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 
 @Service
-public class BusinessDemandDataServiceImpl implements BusinessDemandDataService {
+public class BusinessDemandDataServiceImpl implements BusinessDemandService {
 
 	@Autowired
 	private BusinessDemandDataRepository businessDemandDataRepository;
@@ -82,60 +83,85 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 
 	@Override
 	public AOPMessageVM saveBusinessDemandData(List<BusinessDemandDataDTO> businessDemandDataDTOList) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<BusinessDemand> businessDemandList = new ArrayList<>();
-		try {
-			for (BusinessDemandDataDTO businessDemandDataDTO : businessDemandDataDTOList) {
-				BusinessDemand businessDemand = new BusinessDemand();
-				businessDemand.setApril(businessDemandDataDTO.getApril());
-				businessDemand.setAug(businessDemandDataDTO.getAug());
-				businessDemand.setAvgTph(businessDemandDataDTO.getAvgTph());
-				businessDemand.setDec(businessDemandDataDTO.getDec());
-				businessDemand.setFeb(businessDemandDataDTO.getFeb());
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    List<BusinessDemand> businessDemandList = new ArrayList<>();
+	    Logger logger = LoggerFactory.getLogger(this.getClass());
 
-				if (businessDemandDataDTO.getId() == null || businessDemandDataDTO.getId().contains("#")) {
-					businessDemand.setId(null);
-				} else {
-					businessDemand.setId(UUID.fromString(businessDemandDataDTO.getId()));
-				}
+	    if (businessDemandDataDTOList == null || businessDemandDataDTOList.isEmpty()) {
+	        aopMessageVM.setCode(400);
+	        aopMessageVM.setMessage("Input list is null or empty.");
+	        return aopMessageVM;
+	    }
 
-				businessDemand.setJan(businessDemandDataDTO.getJan());
-				businessDemand.setJuly(businessDemandDataDTO.getJuly());
-				businessDemand.setJune(businessDemandDataDTO.getJune());
-				businessDemand.setMarch(businessDemandDataDTO.getMarch());
-				businessDemand.setMay(businessDemandDataDTO.getMay());
+	    try {
+	        for (BusinessDemandDataDTO dto : businessDemandDataDTOList) {
+	            try {
+	                BusinessDemand businessDemand = new BusinessDemand();
 
-				if (businessDemandDataDTO.getNormParameterId() != null
-						&& !businessDemandDataDTO.getNormParameterId().isEmpty()) {
-					businessDemand.setNormParameterId(UUID.fromString(businessDemandDataDTO.getNormParameterId()));
-				}
+	                businessDemand.setApril(dto.getApril());
+	                businessDemand.setAug(dto.getAug());
+	                businessDemand.setAvgTph(dto.getAvgTph());
+	                businessDemand.setDec(dto.getDec());
+	                businessDemand.setFeb(dto.getFeb());
+	                businessDemand.setJan(dto.getJan());
+	                businessDemand.setJuly(dto.getJuly());
+	                businessDemand.setJune(dto.getJune());
+	                businessDemand.setMarch(dto.getMarch());
+	                businessDemand.setMay(dto.getMay());
+	                businessDemand.setNov(dto.getNov());
+	                businessDemand.setOct(dto.getOct());
+	                businessDemand.setRemark(dto.getRemark());
+	                businessDemand.setSep(dto.getSep());
+	                businessDemand.setYear(dto.getYear());
 
-				businessDemand.setNov(businessDemandDataDTO.getNov());
-				businessDemand.setOct(businessDemandDataDTO.getOct());
+	                // Set ID
+	                if (dto.getId() != null && !dto.getId().contains("#")) {
+	                    businessDemand.setId(UUID.fromString(dto.getId()));
+	                }
 
-				if (businessDemandDataDTO.getPlantId() != null && !businessDemandDataDTO.getPlantId().isEmpty()) {
-					businessDemand.setPlantId(UUID.fromString(businessDemandDataDTO.getPlantId()));
-					businessDemand.setRemark(businessDemandDataDTO.getRemark());
-					businessDemand.setSep(businessDemandDataDTO.getSep());
-					businessDemand.setYear(businessDemandDataDTO.getYear());
-					if (businessDemandDataDTO.getSiteFKId() != null) {
-						businessDemand.setSiteFKId(UUID.fromString(businessDemandDataDTO.getSiteFKId()));
-					}
-					if (businessDemandDataDTO.getVerticalFKId() != null) {
-						businessDemand.setVerticalFKId(UUID.fromString(businessDemandDataDTO.getVerticalFKId()));
-					}
-					businessDemandDataRepository.save(businessDemand);
-					businessDemandList.add(businessDemand);
-				}
-			} // TODO Auto-generated method stub
+	                // Set NormParameterId
+	                if (dto.getNormParameterId() != null && !dto.getNormParameterId().isEmpty()) {
+	                    businessDemand.setNormParameterId(UUID.fromString(dto.getNormParameterId()));
+	                }
 
-			aopMessageVM.setCode(200);
-			aopMessageVM.setMessage("Data saved successfully");
-			aopMessageVM.setData(businessDemandList);
-			return aopMessageVM;
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to save data", ex);
-		}
+	                // Set required IDs
+	                if (dto.getPlantId() == null || dto.getPlantId().isEmpty()) {
+	                    throw new IllegalArgumentException("Plant ID is required.");
+	                }
+	                businessDemand.setPlantId(UUID.fromString(dto.getPlantId()));
+
+	                if (dto.getSiteFKId() != null) {
+	                    businessDemand.setSiteFKId(UUID.fromString(dto.getSiteFKId()));
+	                }
+
+	                if (dto.getVerticalFKId() != null) {
+	                    businessDemand.setVerticalFKId(UUID.fromString(dto.getVerticalFKId()));
+	                }
+
+	                // Save to repository
+	                businessDemandDataRepository.save(businessDemand);
+	                businessDemandList.add(businessDemand);
+
+	            } catch (IllegalArgumentException | NullPointerException e) {
+	                logger.error("Validation error for BusinessDemandDataDTO: {}", dto, e);
+	                // Optionally collect errors in a list to return to user
+	            } catch (Exception e) {
+	                logger.error("Unexpected error while processing BusinessDemandDataDTO: {}", dto, e);
+	                // Optionally collect errors
+	            }
+	        }
+
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("Data saved successfully");
+	        aopMessageVM.setData(businessDemandList);
+	        return aopMessageVM;
+
+	    } catch (Exception ex) {
+	        logger.error("Failed to save business demand data", ex);
+	        aopMessageVM.setCode(500);
+	        aopMessageVM.setMessage("Internal server error occurred while saving data.");
+	        return aopMessageVM;
+	    }
 	}
 
 	@Override

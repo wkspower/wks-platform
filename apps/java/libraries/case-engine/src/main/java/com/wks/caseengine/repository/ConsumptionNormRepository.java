@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.wks.caseengine.entity.AOPConsumptionNorm;
 
 @Repository
-public interface AOPConsumptionNormRepository extends JpaRepository<AOPConsumptionNorm,UUID>{
+public interface ConsumptionNormRepository extends JpaRepository<AOPConsumptionNorm,UUID>{
 	
 	@Query(value = """
 		    SELECT 

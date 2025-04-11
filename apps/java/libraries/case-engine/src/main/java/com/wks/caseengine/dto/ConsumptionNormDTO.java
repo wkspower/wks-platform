@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Data
-public class AOPConsumptionNormDTO {
+public class ConsumptionNormDTO {
 	
 	private String id;
     private String siteFkId;

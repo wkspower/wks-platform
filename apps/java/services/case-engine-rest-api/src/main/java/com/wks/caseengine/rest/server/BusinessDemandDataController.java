@@ -17,14 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
-import com.wks.caseengine.service.BusinessDemandDataService;
+import com.wks.caseengine.service.BusinessDemandService;
 
 @RestController
 @RequestMapping("task")
 public class BusinessDemandDataController {
 	
 	@Autowired
-	private BusinessDemandDataService businessDemandDataService;
+	private BusinessDemandService businessDemandDataService;
 	
 	@GetMapping(value="/business-demand-data")
 	public	ResponseEntity<AOPMessageVM> getBusinessDemandData(@RequestParam String year,@RequestParam String plantId){

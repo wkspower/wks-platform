@@ -10,18 +10,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.wks.caseengine.dto.CalculatedConsumptionNormsDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
-import com.wks.caseengine.dto.AOPConsumptionNormDTO;
-import com.wks.caseengine.service.AOPConsumptionNormService;
+import com.wks.caseengine.dto.ConsumptionNormDTO;
+import com.wks.caseengine.service.ConsumptionNormService;
 
 @RestController
 @RequestMapping("task")
 public class AOPConsumptionNormController {
 	
 	@Autowired
-	private AOPConsumptionNormService aOPConsumptionNormService;
+	private ConsumptionNormService aOPConsumptionNormService;
 	
 	@GetMapping(value="/aop-consumption-norms")
 	public ResponseEntity<AOPMessageVM> getAOPConsumptionNorm(@RequestParam String plantId,@RequestParam String year){
@@ -30,7 +28,7 @@ public class AOPConsumptionNormController {
 	}
 	
 	@PostMapping(value="/aop-consumption-norms")
-	public ResponseEntity<AOPMessageVM> saveAOPConsumptionNorm(@RequestBody List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList){
+	public ResponseEntity<AOPMessageVM> saveAOPConsumptionNorm(@RequestBody List<ConsumptionNormDTO> aOPConsumptionNormDTOList){
 		AOPMessageVM response	= aOPConsumptionNormService.saveAOPConsumptionNorm(aOPConsumptionNormDTOList);
 		return ResponseEntity.status(response.getCode()).body(response);
 		
