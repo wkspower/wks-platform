@@ -15,7 +15,7 @@ public class CatalystAttributesServiceImpl implements CatalystAttributesService{
 	private CatalystAttributesRepository catalystAttributesRepository;
 
 	@Override
-	public List<CatalystAttributes> findAll() {
+	public List<CatalystAttributes> getAllCatalystAttributes() {
 		return catalystAttributesRepository.findAll();
 	}
 

@@ -5,6 +5,6 @@ import com.wks.caseengine.entity.CatalystAttributes;
 
 public interface CatalystAttributesService {
 	
-	public List<CatalystAttributes> findAll();
+	public List<CatalystAttributes> getAllCatalystAttributes();
 
 }

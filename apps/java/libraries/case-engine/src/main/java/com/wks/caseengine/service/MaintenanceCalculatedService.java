@@ -9,6 +9,6 @@ import com.wks.caseengine.dto.MaintenanceDetailsDTO;
 
 public interface MaintenanceCalculatedService {
 	
-	public List<MaintenanceDetailsDTO> getMaintenanceCalculatedData(String plantId, String year);
+	public List<MaintenanceDetailsDTO> getMaintenanceCalculated(String plantId, String year);
 
 }

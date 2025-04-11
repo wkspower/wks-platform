@@ -46,7 +46,7 @@ public interface AOPRepository extends JpaRepository<AOP, UUID>{
           "  FROM PlantMaintenanceTransaction pmt " + 
           " join  PlantMaintenance pt on pmt.PlantMaintenance_FK_Id = pt.Id" + 
           " where pt.Plant_FK_Id = :plantId and pmt.AuditYear = :year ", nativeQuery=true)
-    List<Object[]> CheckIfMaintainanceDataExists(@Param("plantId") String plantId, @Param("year") String year);
+    List<Object[]> checkMaintainance(@Param("plantId") String plantId, @Param("year") String year);
 
 
 

@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.wks.caseengine.constants.QueryConstants;
+import com.wks.caseengine.constants.StoredProcedureConstants;
 import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
 import com.wks.caseengine.entity.AOPMCCalculatedData;
 import com.wks.caseengine.entity.NormParameters;
@@ -149,9 +152,8 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			UUID siteId = site.getId();
 			UUID verticalId = vertical.getId();
-			String storedProcedure = "MEG_LoadMCValues";
-			String sql = "EXEC " + storedProcedure
-					+ " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear";
+		String sql = StoredProcedureConstants.MEG_LOAD_MC_VALUES;
+		
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("plantId", plantId);
 			query.setParameter("siteId", siteId);

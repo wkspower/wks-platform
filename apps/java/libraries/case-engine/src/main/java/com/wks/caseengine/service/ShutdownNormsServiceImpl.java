@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.wks.caseengine.constants.QueryConstants;
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
 import com.wks.caseengine.entity.MCUNormsValue;
 import com.wks.caseengine.entity.Plants;
@@ -265,22 +266,24 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			return Collections.emptyList(); // Return an empty list instead of 0
 		}
 	}
-
+	
 	public List<Object[]> getShutdownNorms(String year, UUID plantId, String viewName) {
-		String sql = "SELECT TOP (1000) [Id], [Site_FK_Id], [Plant_FK_Id], [Vertical_FK_Id], "
-				+ "[Material_FK_Id], [April], [May], [June], [July], [August], [September], "
-				+ "[October], [November], [December], [January], [February], [March], "
-				+ "[FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [MCUVersion], "
-				+ "[UpdatedBy], [NormParameterTypeId], [NormParameterTypeName], "
-				+ "[NormParameterTypeDisplayName], [NormTypeDisplayOrder], [MaterialDisplayOrder], [UOM] " + "FROM "
-				+ viewName + " " + "WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL) "
-				+ "ORDER BY NormTypeDisplayOrder";
+        // String sql = "SELECT TOP (1000) [Id], [Site_FK_Id], [Plant_FK_Id], [Vertical_FK_Id], " +
+        //         "[Material_FK_Id], [April], [May], [June], [July], [August], [September], " +
+        //         "[October], [November], [December], [January], [February], [March], " +
+        //         "[FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [MCUVersion], " +
+        //         "[UpdatedBy], [NormParameterTypeId], [NormParameterTypeName], " +
+        //         "[NormParameterTypeDisplayName], [NormTypeDisplayOrder], [MaterialDisplayOrder], [UOM] " +
+        //         "FROM " + viewName + " " +
+        //         "WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL) " +
+        //         "ORDER BY NormTypeDisplayOrder";
 
-		Query query = entityManager.createNativeQuery(sql);
-		query.setParameter("plantId", plantId);
-		query.setParameter("year", year);
+		String sql = String.format(QueryConstants.GET_SHUTDOWN_NORMS, viewName);
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("plantId", plantId);
+        query.setParameter("year", year);
 
-		return query.getResultList();
-	}
+        return query.getResultList();
+    }
 
 }

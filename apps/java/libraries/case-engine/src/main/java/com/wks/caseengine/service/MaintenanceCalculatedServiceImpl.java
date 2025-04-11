@@ -35,7 +35,7 @@ public class MaintenanceCalculatedServiceImpl implements MaintenanceCalculatedSe
 	@PersistenceContext
     private EntityManager entityManager;
 	@Override
-	public List<MaintenanceDetailsDTO> getMaintenanceCalculatedData(String plantId,  String year) {
+	public List<MaintenanceDetailsDTO> getMaintenanceCalculated(String plantId,  String year) {
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();

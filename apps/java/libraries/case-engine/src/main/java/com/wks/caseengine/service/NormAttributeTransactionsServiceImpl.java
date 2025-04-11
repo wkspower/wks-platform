@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wks.caseengine.constants.QueryConstants;
 import com.wks.caseengine.dto.CatalystAttributesDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.entity.NormAttributeTransactions;
@@ -35,23 +36,25 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	public String getCatalystSelectivityData(String year, UUID plantFKId) {
 	    try {
 	    	// Step 1: Generate dynamic pivot column names
-	    	String pivotColumnsQuery = """
-	    	    WITH Months AS (
-	    	        SELECT DISTINCT 
-	    	            CASE Month 
-	    	                WHEN 4 THEN 'Apr' WHEN 5 THEN 'May' WHEN 6 THEN 'Jun' WHEN 7 THEN 'Jul' 
-	    	                WHEN 8 THEN 'Aug' WHEN 9 THEN 'Sep' WHEN 10 THEN 'Oct' WHEN 11 THEN 'Nov' 
-	    	                WHEN 12 THEN 'Dec' WHEN 1 THEN 'Jan' WHEN 2 THEN 'Feb' WHEN 3 THEN 'Mar' 
-	    	            END + RIGHT(AuditYear, 2) AS MonthYear 
-	    	        FROM NormAttributeTransactions 
-	    	        WHERE AuditYear = :auditYear AND Plant_FK_Id = :plantFKId
-	    	    )
-	    	    SELECT STRING_AGG(
-	    	        'MAX(CASE WHEN MonthYear = ''' + MonthYear + ''' THEN AttributeValue END) AS [' + LOWER(MonthYear) + ']',
-	    	        ', '
-	    	    ) AS ColumnsList 
-	    	    FROM Months
-	    	""";
+	    	// String pivotColumnsQuery = """
+	    	//     WITH Months AS (
+	    	//         SELECT DISTINCT 
+	    	//             CASE Month 
+	    	//                 WHEN 4 THEN 'Apr' WHEN 5 THEN 'May' WHEN 6 THEN 'Jun' WHEN 7 THEN 'Jul' 
+	    	//                 WHEN 8 THEN 'Aug' WHEN 9 THEN 'Sep' WHEN 10 THEN 'Oct' WHEN 11 THEN 'Nov' 
+	    	//                 WHEN 12 THEN 'Dec' WHEN 1 THEN 'Jan' WHEN 2 THEN 'Feb' WHEN 3 THEN 'Mar' 
+	    	//             END + RIGHT(AuditYear, 2) AS MonthYear 
+	    	//         FROM NormAttributeTransactions 
+	    	//         WHERE AuditYear = :auditYear AND Plant_FK_Id = :plantFKId
+	    	//     )
+	    	//     SELECT STRING_AGG(
+	    	//         'MAX(CASE WHEN MonthYear = ''' + MonthYear + ''' THEN AttributeValue END) AS [' + LOWER(MonthYear) + ']',
+	    	//         ', '
+	    	//     ) AS ColumnsList 
+	    	//     FROM Months
+	    	// """;
+
+			String pivotColumnsQuery = QueryConstants.GET_CATALYST_PIVOT_COLUMNS;
 
 	    	String pivotColumns = (String) entityManager.createNativeQuery(pivotColumnsQuery)
 	    	        .setParameter("auditYear", year)
@@ -64,31 +67,32 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	    	}
 
 	    	// Step 2: Construct the final dynamic SQL query
-	    	String finalQuery = """
-	    	    WITH Data_CTE AS (
-	    	        SELECT 
-	    	            nat.Id, 
-	    	            ca.CatalystName AS catalyst, 
-	    	            CASE nat.Month 
-	    	                WHEN 4 THEN 'Apr' WHEN 5 THEN 'May' WHEN 6 THEN 'Jun' WHEN 7 THEN 'Jul' 
-	    	                WHEN 8 THEN 'Aug' WHEN 9 THEN 'Sep' WHEN 10 THEN 'Oct' WHEN 11 THEN 'Nov' 
-	    	                WHEN 12 THEN 'Dec' WHEN 1 THEN 'Jan' WHEN 2 THEN 'Feb' WHEN 3 THEN 'Mar' 
-	    	            END + RIGHT(nat.AuditYear, 2) AS MonthYear,
-	    	            TRY_CAST(nat.AttributeValue AS FLOAT) AS AttributeValue,
-	    	            nat.Remarks, 
-	    	            nat.CatalystAttribute_FK_Id AS catalystId,  
-	    	            nat.NormParameter_FK_Id AS NormParameterFKId 
-	    	        FROM NormAttributeTransactions AS nat 
-	    	        JOIN CatalystAttributes AS ca 
-	    	            ON nat.CatalystAttribute_FK_Id = ca.Id 
-	    	        WHERE nat.AuditYear = :auditYear AND nat.Plant_FK_Id = :plantFKId
-	    	    )
-	    	    SELECT d.Id, d.catalyst, """ + pivotColumns + """ 
-	    	           ,d.Remarks AS remark, d.catalystId, d.NormParameterFKId
-	    	    FROM Data_CTE d
-	    	    GROUP BY d.Id, d.catalyst, d.Remarks, d.catalystId, d.NormParameterFKId
-	    	    ORDER BY d.Id
-	    	""";
+	    	// String finalQuery = """
+	    	//     WITH Data_CTE AS (
+	    	//         SELECT 
+	    	//             nat.Id, 
+	    	//             ca.CatalystName AS catalyst, 
+	    	//             CASE nat.Month 
+	    	//                 WHEN 4 THEN 'Apr' WHEN 5 THEN 'May' WHEN 6 THEN 'Jun' WHEN 7 THEN 'Jul' 
+	    	//                 WHEN 8 THEN 'Aug' WHEN 9 THEN 'Sep' WHEN 10 THEN 'Oct' WHEN 11 THEN 'Nov' 
+	    	//                 WHEN 12 THEN 'Dec' WHEN 1 THEN 'Jan' WHEN 2 THEN 'Feb' WHEN 3 THEN 'Mar' 
+	    	//             END + RIGHT(nat.AuditYear, 2) AS MonthYear,
+	    	//             TRY_CAST(nat.AttributeValue AS FLOAT) AS AttributeValue,
+	    	//             nat.Remarks, 
+	    	//             nat.CatalystAttribute_FK_Id AS catalystId,  
+	    	//             nat.NormParameter_FK_Id AS NormParameterFKId 
+	    	//         FROM NormAttributeTransactions AS nat 
+	    	//         JOIN CatalystAttributes AS ca 
+	    	//             ON nat.CatalystAttribute_FK_Id = ca.Id 
+	    	//         WHERE nat.AuditYear = :auditYear AND nat.Plant_FK_Id = :plantFKId
+	    	//     )
+	    	//     SELECT d.Id, d.catalyst, """ + pivotColumns + """ 
+	    	//            ,d.Remarks AS remark, d.catalystId, d.NormParameterFKId
+	    	//     FROM Data_CTE d
+	    	//     GROUP BY d.Id, d.catalyst, d.Remarks, d.catalystId, d.NormParameterFKId
+	    	//     ORDER BY d.Id
+	    	// """;
+			String finalQuery = String.format(QueryConstants.GET_CATALYST_SELECTIVITY_BASE_QUERY, pivotColumns);
 
 
 	        // Step 3: Execute query

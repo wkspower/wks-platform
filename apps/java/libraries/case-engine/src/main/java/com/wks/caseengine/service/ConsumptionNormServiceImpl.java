@@ -48,7 +48,7 @@ public class ConsumptionNormServiceImpl implements ConsumptionNormService {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
 
-			List<Object[]> resultList = getAOPConsumptionNormDataFromView(year, UUID.fromString(plantId));
+			List<Object[]> resultList = getConsumptionNorm(year, UUID.fromString(plantId));
 			List<ConsumptionNormDTO> aOPConsumptionNormDTOList = new ArrayList<>();
 
 			for (Object[] row : resultList) {
@@ -226,8 +226,8 @@ public class ConsumptionNormServiceImpl implements ConsumptionNormService {
 			String storedProcedure = vertical.getName() + "_HMD_CalculateConsumptionAOPValues";
 			System.out.println("Executing SP: " + storedProcedure);
 
-			List<Object[]> results = getCalculatedConsumptionNormsSP(storedProcedure, year, plant.getId().toString(),
-					site.getId().toString(), vertical.getId().toString());
+		List<Object[]> results = getCalculatedConsumptionNorms(storedProcedure, year, plant.getId().toString(),
+				site.getId().toString(), vertical.getId().toString());
 
 			for (Object[] row : results) {
 				CalculatedConsumptionNormsDTO dto = new CalculatedConsumptionNormsDTO();
@@ -270,7 +270,7 @@ public class ConsumptionNormServiceImpl implements ConsumptionNormService {
 	}
 
 	@Transactional
-	public List<Object[]> getCalculatedConsumptionNormsSP(String procedureName, String finYear, String plantId,
+	public List<Object[]> getCalculatedConsumptionNorms(String procedureName, String finYear, String plantId,
 			String siteId, String verticalId) {
 		try {
 			String sql = "EXEC " + procedureName
@@ -290,7 +290,7 @@ public class ConsumptionNormServiceImpl implements ConsumptionNormService {
 	}
 
 	@Transactional
-	public List<Object[]> getAOPConsumptionNormDataFromView(String aopYear, UUID plantFkId) {
+	public List<Object[]> getConsumptionNorm(String aopYear, UUID plantFkId) {
 		try {
 			Plants plant = plantsRepository.findById(plantFkId).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();

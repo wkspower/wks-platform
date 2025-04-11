@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.constants.QueryConstants;
 
 @Service
 public class BusinessDemandDataServiceImpl implements BusinessDemandService {
@@ -205,20 +206,26 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandService {
 		businessDemandDataRepository.delete(businessDemand);
 		return null;
 	}
-
+	
 	public List<Object[]> findByYearAndPlantFkId(String year, UUID plantFkId, String viewName) {
-		String sql = "SELECT " + "Id, Remark, Jan, Feb, March, April, May, June, July, Aug, Sep, Oct, Nov, Dec, "
-				+ "Year, Plant_FK_Id, NormParameters_FK_Id, AvgTPH, NormTypeDisplayOrder, "
-				+ "NormParameterTypeId, NormParameterTypeName, NormParameterTypeDisplayName, "
-				+ "CreatedOn, ModifiedOn, UpdatedBy, IsDeleted, MaterialDisplayOrder, " + "Site_FK_Id, Vertical_FK_Id "
-				+ "FROM " + viewName + " " + "WHERE (Year = :year OR Year IS NULL) " + "AND Plant_FK_Id = :plantFkId "
-				+ "ORDER BY NormTypeDisplayOrder, MaterialDisplayOrder";
+        // String sql = "SELECT " +
+        //         "Id, Remark, Jan, Feb, March, April, May, June, July, Aug, Sep, Oct, Nov, Dec, " +
+        //         "Year, Plant_FK_Id, NormParameters_FK_Id, AvgTPH, NormTypeDisplayOrder, " +
+        //         "NormParameterTypeId, NormParameterTypeName, NormParameterTypeDisplayName, " +
+        //         "CreatedOn, ModifiedOn, UpdatedBy, IsDeleted, MaterialDisplayOrder, " +
+        //         "Site_FK_Id, Vertical_FK_Id " +
+        //         "FROM " + viewName + " " +
+        //         "WHERE (Year = :year OR Year IS NULL) " +
+        //         "AND Plant_FK_Id = :plantFkId " +
+        //         "ORDER BY NormTypeDisplayOrder, MaterialDisplayOrder";
 
-		Query query = entityManager.createNativeQuery(sql);
-		query.setParameter("year", year);
-		query.setParameter("plantFkId", plantFkId);
+		String sql = String.format(QueryConstants.BD_FIND_BY_YEAR_AND_PLANT, viewName);
 
-		return query.getResultList();
-	}
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("year", year);
+        query.setParameter("plantFkId", plantFkId);
+
+        return query.getResultList();
+    }
 
 }

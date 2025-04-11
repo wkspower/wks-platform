@@ -15,25 +15,25 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.AOPService;
 
 @RestController
-@RequestMapping("task")
+@RequestMapping("/aop")
 public class AOPController {
 	
 	@Autowired
 	private AOPService aOPService;
 	
-	@GetMapping(value="/aop")
+	@GetMapping
 	public ResponseEntity<AOPMessageVM> getAOP(@RequestParam String plantId,@RequestParam String year){
 		AOPMessageVM response= aOPService.getAOPData(plantId,year);
 		 return ResponseEntity.status(response.getCode()).body(response);
 	}
 	
-	@PutMapping(value="/aop")
+	@PutMapping
 	public ResponseEntity<AOPMessageVM> updateAOP(@RequestBody List<AOPDTO> aOPDTOList) {
 		AOPMessageVM response= aOPService.updateAOP(aOPDTOList);
 		 return ResponseEntity.status(response.getCode()).body(response);
 	}
 
-    @GetMapping(value="/aop/calculate")
+    @GetMapping(value="/calculate")
 	public ResponseEntity<AOPMessageVM> calculateData(@RequestParam String plantId,@RequestParam String year){
     	try {
     		AOPMessageVM response= aOPService.calculateData(plantId,year);

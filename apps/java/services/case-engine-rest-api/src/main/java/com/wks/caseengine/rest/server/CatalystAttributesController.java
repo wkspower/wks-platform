@@ -14,15 +14,15 @@ import com.wks.caseengine.entity.CatalystAttributes;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.service.CatalystAttributesService;
 @RestController
-@RequestMapping("task")
+@RequestMapping("/catalyst-attributes")
 public class CatalystAttributesController {
 	
 	@Autowired
 	private CatalystAttributesService catalystAttributesService;
 	
-	@GetMapping(value="/catalyst-attributes")
+	@GetMapping
 	public List<CatalystAttributes> getAllCatalystAttributes(){
-		return catalystAttributesService.findAll();
+		return catalystAttributesService.getAllCatalystAttributes();
 	}
 
 }

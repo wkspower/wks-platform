@@ -16,24 +16,25 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.AOPMCCalculatedDataService;
 
 @RestController
-@RequestMapping("task")
-public class AOPMCCalculatedDataController {
+@RequestMapping("/aop-mc-calculated-data")
+public class AOPMCCalculatedController {
 	
 	@Autowired
 	private AOPMCCalculatedDataService aOPMCCalculatedDataService;
 	
-	@GetMapping(value="/aop-mc-calculated-data")
+
+	@GetMapping
 	public  ResponseEntity<AOPMessageVM> getAOPMCCalculatedData(@RequestParam String plantId, @RequestParam String year){
 		AOPMessageVM response=  aOPMCCalculatedDataService.getAOPMCCalculatedData(plantId,year);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
-	@PutMapping(value="/aop-mc-calculated-data")
+	@PutMapping
 	public ResponseEntity<AOPMessageVM> editAOPMCCalculatedData(@RequestBody List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTO) {
 		AOPMessageVM response=  aOPMCCalculatedDataService.editAOPMCCalculatedData(aOPMCCalculatedDataDTO);
 		return ResponseEntity.status(response.getCode()).body(response);	
 	}
 	
-	@GetMapping(value="/aop-mc-calculated-data/calculate")
+	@GetMapping(value="/calculate")
 	public  int getAOPMCCalculatedDataSP(@RequestParam String plantId, @RequestParam String year){
 		return aOPMCCalculatedDataService.getAOPMCCalculatedDataSP(plantId,year);
 	}

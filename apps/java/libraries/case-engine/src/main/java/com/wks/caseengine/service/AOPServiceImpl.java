@@ -256,7 +256,7 @@ public class AOPServiceImpl implements AOPService {
 		try {
 			List<AOPDTO> dtoList = new ArrayList<>();
 
-			List<Object[]> maintainsData = aOPRepository.CheckIfMaintainanceDataExists(plantId, year);
+		List<Object[]> maintainsData = aOPRepository.checkMaintainance(plantId, year);
 			// if(maintainsData != null && !maintainsData.isEmpty()) {
 			if (1 == 1) {
 				Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();

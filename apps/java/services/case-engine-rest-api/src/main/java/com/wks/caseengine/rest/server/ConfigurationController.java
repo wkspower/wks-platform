@@ -19,31 +19,31 @@ import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
 import com.wks.caseengine.service.ConfigurationService;
 
 @RestController
-@RequestMapping("task")
+@RequestMapping("/configuration-data")
 public class ConfigurationController {
 	
 	@Autowired
 	private ConfigurationService configurationService;
 	
-	@GetMapping(value="/configuration-data")
+	@GetMapping
 	public List<ConfigurationDTO> getConfigurationData(@RequestParam String year,@RequestParam UUID plantFKId) {
 		return configurationService.getConfigurationData(year,plantFKId);
 	}
 	
-	@PostMapping(value="/configuration-data/save")
+	@PostMapping
 	public List<ConfigurationDTO> saveConfigurationData(@RequestParam String year, @RequestBody List<ConfigurationDTO> configurationDTOList) {
 		configurationService.saveConfigurationData(year,configurationDTOList);
 		return configurationDTOList;
 	}
 	
-	@GetMapping(value="/pe-configuration-data")
+	@GetMapping(value="/pe")
 public  List<Map<String, Object>> getNormAttributeTransactionReceipeSp(@RequestParam String year,@RequestParam String plantId){
 		return	 configurationService.getNormAttributeTransactionReceipe(year,plantId);
 		
 	}
 
 	
-	@PostMapping(value="/pe-configuration-data/update")
+	@PostMapping(value="/pe/update")
 	public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms(@RequestParam String year,@RequestParam String plantId,@RequestBody List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOList){
 		return configurationService.updateCalculatedConsumptionNorms(year,plantId,normAttributeTransactionReceipeDTOList);
 		

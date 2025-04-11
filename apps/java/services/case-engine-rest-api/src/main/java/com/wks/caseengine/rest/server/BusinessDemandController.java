@@ -15,40 +15,39 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
-import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.BusinessDemandService;
 
 @RestController
-@RequestMapping("task")
-public class BusinessDemandDataController {
+@RequestMapping("/business-demand-data")
+public class BusinessDemandController {
 	
 	@Autowired
 	private BusinessDemandService businessDemandDataService;
 	
-	@GetMapping(value="/business-demand-data")
+
+	@GetMapping
 	public	ResponseEntity<AOPMessageVM> getBusinessDemandData(@RequestParam String year,@RequestParam String plantId){
 			AOPMessageVM response=	 businessDemandDataService.getBusinessDemandData(year,plantId);	
 			return ResponseEntity.status(response.getCode()).body(response);
 	}
 	
-	@PostMapping(value="/business-demand-data")
+	@PostMapping
 	public 	ResponseEntity<AOPMessageVM>  saveBusinessDemandData(@RequestBody List<BusinessDemandDataDTO> businessDemandDataDTO) {
 		AOPMessageVM response=	 businessDemandDataService.saveBusinessDemandData(businessDemandDataDTO);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 	
-	@PutMapping(value="/business-demand-data")
+	@PutMapping
 	public ResponseEntity<AOPMessageVM> editBusinessDemandData(@RequestBody List<BusinessDemandDataDTO> businessDemandDataDTO){
 		AOPMessageVM response= businessDemandDataService.saveBusinessDemandData(businessDemandDataDTO);	
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 	
-	@DeleteMapping(value="/business-demand-data/{id}")
+	@DeleteMapping(value="/{id}")
 	public BusinessDemandDataDTO deleteBusinessDemandData(@PathVariable UUID id){
 		return businessDemandDataService.deleteBusinessDemandData(id);	
 	}
-	
 	
 
 
