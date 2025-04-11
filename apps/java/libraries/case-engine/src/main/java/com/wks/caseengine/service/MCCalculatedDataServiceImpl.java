@@ -33,7 +33,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AOPMCCalculatedDataRepository;
 
 @Service
-public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataService {
+public class MCCalculatedDataServiceImpl implements MCCalculatedDataService {
 
 	@Autowired
 	private AOPMCCalculatedDataRepository aOPMCCalculatedDataRepository;

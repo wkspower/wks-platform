@@ -19,7 +19,7 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.constants.QueryConstants;
 
 @Service
-public class BusinessDemandDataServiceImpl implements BusinessDemandService {
+public class BusinessDemandServiceImpl implements BusinessDemandService {
 
 	@Autowired
 	private BusinessDemandDataRepository businessDemandDataRepository;

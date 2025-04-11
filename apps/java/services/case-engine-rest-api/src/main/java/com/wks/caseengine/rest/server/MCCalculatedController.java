@@ -17,7 +17,7 @@ import com.wks.caseengine.service.AOPMCCalculatedDataService;
 
 @RestController
 @RequestMapping("/aop-mc-calculated-data")
-public class AOPMCCalculatedController {
+public class MCCalculatedController {
 	
 	@Autowired
 	private AOPMCCalculatedDataService aOPMCCalculatedDataService;
