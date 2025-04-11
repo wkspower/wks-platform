@@ -34,6 +34,9 @@ services:
             - MONGO_CONN=${MONGO_CONNECTION_URL}
             - KEYCLOAK_URL=${KEYCLOAK_URL}
             - OPA_URL=${OPA_URL}
+            - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+            - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+            - KEYCLOAK_REALM_NAME=${KEYCLOAK_REALM_NAME}
         depends_on:
             mongodb:
                 condition: service_healthy

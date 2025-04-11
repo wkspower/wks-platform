@@ -44,6 +44,9 @@ spring.data.mongodb.database.max-connection-life-time: 3000
 
 opa.url: ${OPA_URL:http://localhost:8181/v1/data/wks/authz/allow}
 keycloak.url: ${KEYCLOAK_URL:http://localhost:8082}
+keycloak.admin: ${KEYCLOAK_ADMIN:admin}
+keycloak.admin.password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
+keycloak.realm.name: {KEYCLOAK_REALM_NAME: localhost}
 
 management.health.mongo.enabled: false
 management.health.reds.enabled: false
