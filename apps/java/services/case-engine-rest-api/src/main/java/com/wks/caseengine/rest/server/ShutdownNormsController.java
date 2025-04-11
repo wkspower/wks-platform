@@ -16,25 +16,25 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.ShutdownNormsService;
 
 @RestController
-@RequestMapping("task")
+@RequestMapping("/shutdown-norms")
 public class ShutdownNormsController {
 	
 	@Autowired
 	private ShutdownNormsService shutdownNormsService;
 	
-	@GetMapping(value="/shutdown-norms")
+	@GetMapping
 	public ResponseEntity<AOPMessageVM> getShutdownNormsData(@RequestParam String year,@RequestParam String plantId){
 		AOPMessageVM response =	shutdownNormsService.getShutdownNormsData(year, plantId);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 		
-	@PostMapping(value="/shutdown-norms")
+	@PostMapping
 	public ResponseEntity<AOPMessageVM> saveShutdownNormsData(@RequestBody List<ShutdownNormsValueDTO> shutdownNormsValueDTOList){
 		AOPMessageVM response =	shutdownNormsService.saveShutdownNormsData(shutdownNormsValueDTOList);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 	
-	@GetMapping(value="/shutdown-norms/sp-data")
+	@GetMapping(value="/sp")
 	public ResponseEntity<AOPMessageVM> getShutdownNormsSPData(@RequestParam String year,@RequestParam String plantId){
 		AOPMessageVM response =		shutdownNormsService.getShutdownNormsSPData(year, plantId);
 		return ResponseEntity.status(response.getCode()).body(response);

@@ -21,7 +21,7 @@ import com.wks.caseengine.service.TurnaroundPlanService;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
-@RequestMapping("task")
+@RequestMapping("/turnaround-plan")
 public class TurnaroundPlanController {
 	
 	@Autowired
@@ -30,7 +30,7 @@ public class TurnaroundPlanController {
 	@Autowired
 	private TurnaroundPlanService turnaroundPlanService;
 	
-	@GetMapping(value = "/turnaround-plan")
+	@GetMapping
     public ResponseEntity<List<ShutDownPlanDTO>> findTurnaroundPlanDataByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName,@RequestParam String year) {
 		
 		List<ShutDownPlanDTO> listOfSite=null;
@@ -45,13 +45,13 @@ public class TurnaroundPlanController {
         return ResponseEntity.ok(listOfSite);
     }
 	
-	@PostMapping(value="/turnaround-plan/{plantId}")
+	@PostMapping(value="/{plantId}")
 	public ResponseEntity<List<ShutDownPlanDTO>> saveShutdownData(@PathVariable UUID plantId,@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList){
 		turnaroundPlanService.saveTurnaroundPlanData(plantId,shutDownPlanDTOList);
 		return ResponseEntity.ok(shutDownPlanDTOList); 
 	}
 	
-	@PutMapping(value = "/turnaround-plan/{plantMaintenanceTransactionId}")
+	@PutMapping(value = "/{plantMaintenanceTransactionId}")
     public ResponseEntity<List<ShutDownPlanDTO>> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId, @RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
         
 		          // Save entity
@@ -60,7 +60,7 @@ public class TurnaroundPlanController {
         return ResponseEntity.ok(shutDownPlanDTOList);
     }
 	
-	@DeleteMapping("/turnaround-plan/{plantMaintenanceTransactionId}")
+	@DeleteMapping("/{plantMaintenanceTransactionId}")
     public ResponseEntity<String> deletePlant(@PathVariable UUID plantMaintenanceTransactionId) {
 	  	shutDownPlanService.deletePlanData(plantMaintenanceTransactionId);
         return ResponseEntity.ok("Plant with ID " + plantMaintenanceTransactionId + " deleted successfully");

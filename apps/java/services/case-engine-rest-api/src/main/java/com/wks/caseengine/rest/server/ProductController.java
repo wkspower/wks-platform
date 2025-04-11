@@ -25,7 +25,7 @@ import com.wks.caseengine.service.product.ProductService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("task")
+@RequestMapping("/products")
 @Tag(name = "Product", description = "test Product")
 public class ProductController {
 	private ProductService productService;
@@ -53,13 +53,13 @@ public class ProductController {
 		this.productService = productService;
 	}
 
-	@GetMapping(value = "/product")
+	@GetMapping
 	public ResponseEntity<AOPMessageVM> getProducts() {
 		AOPMessageVM response = productService.getAllProducts();
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 
-	@GetMapping(value = "/products/monthly")
+	@GetMapping(value = "/monthly")
 	public ResponseEntity<List<ProductMonthWiseDataDTO>> getProductListByTypeAndYear(@RequestParam String type,
 			@RequestParam String year) {
 		List<Object[]> productMonthWiseDataList = productService.getMonthWiseDataByTypeAndYear(type, year);
@@ -80,7 +80,7 @@ public class ProductController {
 		return ResponseEntity.ok(productMonthWiseDataDTOList);
 	}
 
-	@GetMapping(value = "/products/by-parameter")
+	@GetMapping(value = "/by-parameter")
 	public ResponseEntity<AOPMessageVM> getAllProducts(@RequestParam String normParameterTypeName,
 			@RequestParam String plantId) {
 
@@ -116,7 +116,7 @@ public class ProductController {
 		}
 	}
 
-	@GetMapping("/products/yearly")
+	@GetMapping("/yearly")
 	public ResponseEntity<List<ProductYearlyDataDTO>> getProductYearlyData(@RequestParam int year) {
 		List<Object[]> products = productService.getAllProductsFromNormParameters(null, null);
 		List<Object[]> monthlyData = productService.getMonthlyDataForYear(year);

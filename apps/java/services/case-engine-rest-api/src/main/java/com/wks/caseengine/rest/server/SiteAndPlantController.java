@@ -22,7 +22,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.PlantService;
 
 @RestController
-@RequestMapping("task")
+@RequestMapping("/shutdown-months")
 public class SiteAndPlantController {
 
 	private final PlantService plantService;
@@ -31,7 +31,7 @@ public class SiteAndPlantController {
 		this.plantService = plantService;
 	}
 
-	@GetMapping("/shutdown-months")
+	@GetMapping
 	public ResponseEntity<List> getShutdownMonths(@RequestParam UUID plantId, @RequestParam String maintenanceName) {
 		List data = plantService.getShutdownMonths(plantId, maintenanceName);
 		return ResponseEntity.ok(data);

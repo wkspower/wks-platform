@@ -21,13 +21,13 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.ShutDownPlanService;
 
 @RestController
-@RequestMapping("task")
+@RequestMapping("/shutdown-plan")
 public class ShutDownPlanController {
 
 	@Autowired
 	private ShutDownPlanService shutDownPlanService;
 
-	@GetMapping(value = "/shutdown-plan")
+	@GetMapping
 	public ResponseEntity<AOPMessageVM> findMaintenanceDetailsByPlantIdAndType(@RequestParam String plantId,
 			@RequestParam String maintenanceTypeName, @RequestParam String year) {
 		
@@ -53,27 +53,27 @@ public class ShutDownPlanController {
 		return ResponseEntity.status(aopMessageVM.getCode()).body(aopMessageVM);
 	}
 	
-	@PostMapping(value = "/shutdown-plan/{plantId}")
+	@PostMapping(value = "/{plantId}")
 	public ResponseEntity<AOPMessageVM> saveShutdownData(@PathVariable UUID plantId,
 			@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
 		AOPMessageVM aopMessageVM =shutDownPlanService.saveShutdownPlantData(plantId, shutDownPlanDTOList);
 		return ResponseEntity.status(aopMessageVM.getCode()).body(aopMessageVM);
 	}
 
-	@PutMapping(value = "/shutdown-plan/{plantMaintenanceTransactionId}")
+	@PutMapping(value = "/{plantMaintenanceTransactionId}")
 	public ResponseEntity<List<ShutDownPlanDTO>> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId,
 			@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
 		shutDownPlanService.editShutdownData(plantMaintenanceTransactionId, shutDownPlanDTOList);
 		return ResponseEntity.ok(shutDownPlanDTOList);
 	}
 
-	@DeleteMapping("/shutdown-plan/{plantMaintenanceTransactionId}")
+	@DeleteMapping("/{plantMaintenanceTransactionId}")
 	public ResponseEntity<String> deletePlant(@PathVariable UUID plantMaintenanceTransactionId) {
 		shutDownPlanService.deletePlanData(plantMaintenanceTransactionId);
 		return ResponseEntity.ok("Plant with ID " + plantMaintenanceTransactionId + " deleted successfully");
 	}
 
-	@GetMapping("/shutdown-plan/monthly-hours")
+	@GetMapping("/monthly-hours")
 	public List<MonthWiseDataDTO> getMonthlyShutdownHours(@RequestParam String auditYear,
 			@RequestParam String plantId) {
 		return shutDownPlanService.getMonthlyShutdownHours(auditYear, UUID.fromString(plantId));

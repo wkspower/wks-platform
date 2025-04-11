@@ -15,25 +15,25 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.NormalOperationNormsService;
 
 @RestController
-@RequestMapping("task")
+@RequestMapping("/normal-ops-norms")
 public class NormalOperationNormsController {
 	
 	@Autowired
 	private NormalOperationNormsService normalOperationNormsService;
 	
-	@GetMapping(value="/normal-ops-norms")
+	@GetMapping
 	public ResponseEntity<AOPMessageVM> getNormalOperationNormsData(@RequestParam String year,@RequestParam String plantId){
 		AOPMessageVM response=	normalOperationNormsService.getNormalOperationNormsData(year, plantId);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 	
-	@PostMapping(value="/normal-ops-norms")
+	@PostMapping
 	public ResponseEntity<AOPMessageVM> saveNormalOperationNormsData(@RequestBody List<MCUNormsValueDTO> mCUNormsValueDTOList){
 			AOPMessageVM response=	normalOperationNormsService.saveNormalOperationNormsData(mCUNormsValueDTOList);
 			return ResponseEntity.status(response.getCode()).body(response);
 	}
 	
-	@GetMapping(value="/normal-ops-norms/calculate")
+	@GetMapping(value="/calculate")
 	public int getNormalOperationNormsDataFromSP(@RequestParam String year,@RequestParam String plantId){
 		return normalOperationNormsService.calculateExpressionConsumptionNorms(year,plantId);
 	}

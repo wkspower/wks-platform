@@ -24,7 +24,7 @@ import com.wks.caseengine.service.SlowdownPlanService;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
-@RequestMapping("task")
+@RequestMapping("/slowdown-plan")
 public class SlowdownPlanController {
 	
 	@Autowired
@@ -33,7 +33,7 @@ public class SlowdownPlanController {
 	@Autowired
 	private ShutDownPlanService shutDownPlanService;
 	
-	@GetMapping(value = "/slowdown-plan")
+	@GetMapping
     public ResponseEntity<List<ShutDownPlanDTO>> findSlowdownDetailsByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName, @RequestParam String year) {
 		List<ShutDownPlanDTO> listOfSite=null;
 		try {
@@ -44,13 +44,13 @@ public class SlowdownPlanController {
         return ResponseEntity.ok(listOfSite);
     }
 	
-	@PostMapping(value="/slowdown-plan/{plantId}")
+	@PostMapping(value="/{plantId}")
 	public ResponseEntity<List<ShutDownPlanDTO>> saveShutdownData(@PathVariable UUID plantId,@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList){
 		slowdownPlanService.saveShutdownData(plantId,shutDownPlanDTOList);
 				return ResponseEntity.ok(shutDownPlanDTOList); 
 	}
 	
-	@PutMapping(value = "/slowdown-plan/{plantMaintenanceTransactionId}")
+	@PutMapping(value = "/{plantMaintenanceTransactionId}")
     public ResponseEntity<List<ShutDownPlanDTO>> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId, @RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
         
 		slowdownPlanService.editShutdownData(plantMaintenanceTransactionId,shutDownPlanDTOList);
@@ -58,7 +58,7 @@ public class SlowdownPlanController {
         return ResponseEntity.ok(shutDownPlanDTOList);
     }
 	
-	@DeleteMapping("/slowdown-plan/{plantMaintenanceTransactionId}")
+	@DeleteMapping("/{plantMaintenanceTransactionId}")
     public ResponseEntity<String> deletePlant(@PathVariable UUID plantMaintenanceTransactionId) {
 	  	shutDownPlanService.deletePlanData(plantMaintenanceTransactionId);
         return ResponseEntity.ok("Plant with ID " + plantMaintenanceTransactionId + " deleted successfully");

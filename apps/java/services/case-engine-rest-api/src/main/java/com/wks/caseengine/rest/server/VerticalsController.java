@@ -19,7 +19,7 @@ import com.wks.caseengine.service.SiteService;
 import com.wks.caseengine.service.VerticalsService;
 
 @RestController
-@RequestMapping("task")
+@RequestMapping("/getAllVerticals")
 public class VerticalsController {
 	
 	@Autowired
@@ -31,12 +31,12 @@ public class VerticalsController {
 	@Autowired
 	private VerticalsService verticalsService;
 	
-	@GetMapping(value="/getAllVerticals")
+	@GetMapping
 	public List<VerticalsDTO> getAllVerticals() {
 		return verticalsService.getAllVerticals();
 	}
 	
-	@GetMapping(value="/getPlantsAndSidesAndVerticals")
+	@GetMapping(value="/plants")
 	public List<VerticalsDTO> getPlantsAndSites() {
 		
 		List<VerticalsDTO> verticals= verticalsService.getHierarchyData();

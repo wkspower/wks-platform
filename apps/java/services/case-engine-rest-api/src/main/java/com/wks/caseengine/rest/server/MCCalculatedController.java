@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
-import com.wks.caseengine.service.AOPMCCalculatedDataService;
+import com.wks.caseengine.service.MCCalculatedDataService;
 
 @RestController
-@RequestMapping("/aop-mc-calculated-data")
+@RequestMapping("/mc-calculated")
 public class MCCalculatedController {
 	
 	@Autowired
-	private AOPMCCalculatedDataService aOPMCCalculatedDataService;
+	private MCCalculatedDataService aOPMCCalculatedDataService;
 	
 
 	@GetMapping
@@ -34,7 +34,7 @@ public class MCCalculatedController {
 		return ResponseEntity.status(response.getCode()).body(response);	
 	}
 	
-	@GetMapping(value="/calculate")
+	@GetMapping(value="/sp")
 	public  int getAOPMCCalculatedDataSP(@RequestParam String plantId, @RequestParam String year){
 		return aOPMCCalculatedDataService.getAOPMCCalculatedDataSP(plantId,year);
 	}
