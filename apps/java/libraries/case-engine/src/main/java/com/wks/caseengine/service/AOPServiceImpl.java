@@ -1,19 +1,14 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.AOPDTO;
-import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
 import com.wks.caseengine.entity.AOP;
-import com.wks.caseengine.entity.AOPMCCalculatedData;
-import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
@@ -23,29 +18,25 @@ import com.wks.caseengine.repository.AOPRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
-import com.wks.caseengine.rest.entity.Vertical;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-
 import java.util.UUID;
-import java.util.stream.Collectors;
 import jakarta.persistence.Query;
 
 @Service
 public class AOPServiceImpl implements AOPService {
 
 	@Autowired
-	private AOPRepository aOPRepository;
+	private AOPRepository aopRepository;
+	
 	@Autowired
 	private PlantsRepository plantsRepository;
+	
 	@Autowired
 	private SiteRepository siteRepository;
+	
 	@Autowired
 	private VerticalsRepository verticalRepository;
-
-	@Autowired
-	private NormParametersService normParametersService;
 
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -53,83 +44,83 @@ public class AOPServiceImpl implements AOPService {
 	@Override
 	public List<AOPDTO> getAOP() {
 
-		List<AOP> listAOP = aOPRepository.findAll();
-		List<AOPDTO> aOPList = new ArrayList<>();
+		List<AOP> listAOP = aopRepository.findAll();
+		List<AOPDTO> aopList = new ArrayList<>();
 
-		for (AOP aOP : listAOP) {
-			AOPDTO aOPDTO = new AOPDTO();
-			aOPDTO.setId(aOP.getId().toString());
-			aOPDTO.setAopCaseId(aOP.getAopCaseId());
-			aOPDTO.setAopRemarks(aOP.getAopRemarks());
-			aOPDTO.setAopStatus(aOP.getAopStatus());
-			aOPDTO.setAopType(aOP.getAopType());
-			aOPDTO.setAopYear(aOP.getAopYear());
-			aOPDTO.setApril(aOP.getApril());
-			aOPDTO.setAug(aOP.getAug());
-			aOPDTO.setAvgTPH(aOP.getAvgTPH());
-			aOPDTO.setDec(aOP.getDec());
-			aOPDTO.setFeb(aOP.getFeb());
-			aOPDTO.setJan(aOP.getJan());
-			aOPDTO.setJuly(aOP.getJuly());
-			aOPDTO.setJune(aOP.getJune());
-			aOPDTO.setMarch(aOP.getMarch());
-			aOPDTO.setMay(aOP.getMay());
+		for (AOP aop : listAOP) {
+			AOPDTO aopDTO = new AOPDTO();
+			aopDTO.setId(aop.getId().toString());
+			aopDTO.setAopCaseId(aop.getAopCaseId());
+			aopDTO.setAopRemarks(aop.getAopRemarks());
+			aopDTO.setAopStatus(aop.getAopStatus());
+			aopDTO.setAopType(aop.getAopType());
+			aopDTO.setAopYear(aop.getAopYear());
+			aopDTO.setApril(aop.getApril());
+			aopDTO.setAug(aop.getAug());
+			aopDTO.setAvgTPH(aop.getAvgTPH());
+			aopDTO.setDec(aop.getDec());
+			aopDTO.setFeb(aop.getFeb());
+			aopDTO.setJan(aop.getJan());
+			aopDTO.setJuly(aop.getJuly());
+			aopDTO.setJune(aop.getJune());
+			aopDTO.setMarch(aop.getMarch());
+			aopDTO.setMay(aop.getMay());
 			// aOPDTO.setNormItem(aOP.getNormItem());
-			aOPDTO.setNov(aOP.getNov());
-			aOPDTO.setOct(aOP.getOct());
-			aOPDTO.setPlantFKId(aOP.getPlantFkId().toString());
-			aOPDTO.setSep(aOP.getSep());
-			aOPList.add(aOPDTO);
+			aopDTO.setNov(aop.getNov());
+			aopDTO.setOct(aop.getOct());
+			aopDTO.setPlantFKId(aop.getPlantFkId().toString());
+			aopDTO.setSep(aop.getSep());
+			aopList.add(aopDTO);
 		}
 
 		// TODO Auto-generated method stub
-		return aOPList;
+		return aopList;
 	}
 
 	@Override
 	public AOPMessageVM getAOPData(String plantId, String year) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<AOPDTO> aOPDTOList = new ArrayList<>();
+		List<AOPDTO> aopDTOList = new ArrayList<>();
 		try {
-			List<Object[]> obj = aOPRepository.findByAOPYearAndPlantFkId(year, UUID.fromString(plantId));
+			List<Object[]> obj = aopRepository.findByAOPYearAndPlantFkId(year, UUID.fromString(plantId));
 
 			for (Object[] row : obj) {
-				AOPDTO aOPDTO = new AOPDTO();
+				AOPDTO aopDTO = new AOPDTO();
 
-				aOPDTO.setId(row[0] != null ? row[0].toString() : null);
-				aOPDTO.setAopCaseId(row[1] != null ? row[1].toString() : null);
-				aOPDTO.setAopStatus(row[2] != null ? row[2].toString() : null);
-				aOPDTO.setAopRemarks(row[3] != null ? row[3].toString() : null);
-				aOPDTO.setAopType(row[4] != null ? row[4].toString() : null);
+				aopDTO.setId(row[0] != null ? row[0].toString() : null);
+				aopDTO.setAopCaseId(row[1] != null ? row[1].toString() : null);
+				aopDTO.setAopStatus(row[2] != null ? row[2].toString() : null);
+				aopDTO.setAopRemarks(row[3] != null ? row[3].toString() : null);
+				aopDTO.setAopType(row[4] != null ? row[4].toString() : null);
 
 				// Directly parsing float values
-				aOPDTO.setJan(row[5] != null ? Float.valueOf(row[5].toString()) : null);
-				aOPDTO.setFeb(row[6] != null ? Float.valueOf(row[6].toString()) : null);
-				aOPDTO.setMarch(row[7] != null ? Float.valueOf(row[7].toString()) : null);
-				aOPDTO.setApril(row[8] != null ? Float.valueOf(row[8].toString()) : null);
-				aOPDTO.setMay(row[9] != null ? Float.valueOf(row[9].toString()) : null);
-				aOPDTO.setJune(row[10] != null ? Float.valueOf(row[10].toString()) : null);
-				aOPDTO.setJuly(row[11] != null ? Float.valueOf(row[11].toString()) : null);
-				aOPDTO.setAug(row[12] != null ? Float.valueOf(row[12].toString()) : null);
-				aOPDTO.setSep(row[13] != null ? Float.valueOf(row[13].toString()) : null);
-				aOPDTO.setOct(row[14] != null ? Float.valueOf(row[14].toString()) : null);
-				aOPDTO.setNov(row[15] != null ? Float.valueOf(row[15].toString()) : null);
-				aOPDTO.setDec(row[16] != null ? Float.valueOf(row[16].toString()) : null);
+				aopDTO.setJan(row[5] != null ? Float.valueOf(row[5].toString()) : null);
+				aopDTO.setFeb(row[6] != null ? Float.valueOf(row[6].toString()) : null);
+				aopDTO.setMarch(row[7] != null ? Float.valueOf(row[7].toString()) : null);
+				aopDTO.setApril(row[8] != null ? Float.valueOf(row[8].toString()) : null);
+				aopDTO.setMay(row[9] != null ? Float.valueOf(row[9].toString()) : null);
+				aopDTO.setJune(row[10] != null ? Float.valueOf(row[10].toString()) : null);
+				aopDTO.setJuly(row[11] != null ? Float.valueOf(row[11].toString()) : null);
+				aopDTO.setAug(row[12] != null ? Float.valueOf(row[12].toString()) : null);
+				aopDTO.setSep(row[13] != null ? Float.valueOf(row[13].toString()) : null);
+				aopDTO.setOct(row[14] != null ? Float.valueOf(row[14].toString()) : null);
+				aopDTO.setNov(row[15] != null ? Float.valueOf(row[15].toString()) : null);
+				aopDTO.setDec(row[16] != null ? Float.valueOf(row[16].toString()) : null);
 
-				aOPDTO.setAopYear(row[17] != null ? row[17].toString() : null);
-				aOPDTO.setPlantFKId(row[18] != null ? row[18].toString() : null);
-				aOPDTO.setAvgTPH(row[19] != null ? Float.valueOf(row[19].toString()) : null);
-				aOPDTO.setMaterialFKId(row[20] != null ? row[20].toString() : null);
+				aopDTO.setAopYear(row[17] != null ? row[17].toString() : null);
+				aopDTO.setPlantFKId(row[18] != null ? row[18].toString() : null);
+				aopDTO.setAvgTPH(row[19] != null ? Float.valueOf(row[19].toString()) : null);
+				aopDTO.setMaterialFKId(row[20] != null ? row[20].toString() : null);
 
 				// Directly parsing integer value
-				aOPDTO.setDisplayOrder(row[21] != null ? Integer.valueOf(row[21].toString()) : null);
+				aopDTO.setDisplayOrder(row[21] != null ? Integer.valueOf(row[21].toString()) : null);
 
-				aOPDTOList.add(aOPDTO);
+				aopDTOList.add(aopDTO);
 			}
 
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data fetched successfully");
-			aopMessageVM.setData(aOPDTOList);
+			aopMessageVM.setData(aopDTOList);
 			return aopMessageVM;
 
 		} catch (IllegalArgumentException e) {
@@ -140,106 +131,106 @@ public class AOPServiceImpl implements AOPService {
 	}
 
 	@Override
-	public AOPMessageVM updateAOP(List<AOPDTO> aOPDTOList) {
+	public AOPMessageVM updateAOP(List<AOPDTO> aopDTOList) {
 		AOPMessageVM aopMessageVM=new AOPMessageVM();
 		List<AOP> aopList=new ArrayList<>();
 		try {
-		for (AOPDTO aOPDTO : aOPDTOList) {
+		for (AOPDTO aopDTO : aopDTOList) {
 
-			AOP aOP = null;
+			AOP aop = null;
 			Plants plant = null;
 			Sites site = null;
 			Verticals vertical = null;
-			if (aOPDTO.getSiteFKId() == null || aOPDTO.getVerticalFKId() == null) {
-				plant = plantsRepository.findById(UUID.fromString(aOPDTO.getPlantFKId())).get();
+			if (aopDTO.getSiteFKId() == null || aopDTO.getVerticalFKId() == null) {
+				plant = plantsRepository.findById(UUID.fromString(aopDTO.getPlantFKId())).get();
 				site = siteRepository.findById(plant.getSiteFkId()).get();
 				vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			}
 
-			if (aOPDTO.getId() == null) {
+			if (aopDTO.getId() == null) {
 				UUID Site = null;
 				UUID Vertical = null;
 				UUID Material = null;
 				UUID Plant = null;
-				if (aOPDTO.getSiteFKId() != null) {
-					Site = UUID.fromString(aOPDTO.getSiteFKId());
+				if (aopDTO.getSiteFKId() != null) {
+					Site = UUID.fromString(aopDTO.getSiteFKId());
 				} else {
 					Site = site.getId();
 				}
-				if (aOPDTO.getVerticalFKId() != null) {
-					Vertical = UUID.fromString(aOPDTO.getVerticalFKId());
+				if (aopDTO.getVerticalFKId() != null) {
+					Vertical = UUID.fromString(aopDTO.getVerticalFKId());
 				} else {
 					Vertical = vertical.getId();
 				}
-				if (aOPDTO.getMaterialFKId() != null) {
-					Material = UUID.fromString(aOPDTO.getMaterialFKId());
+				if (aopDTO.getMaterialFKId() != null) {
+					Material = UUID.fromString(aopDTO.getMaterialFKId());
 				}
-				if (aOPDTO.getPlantFKId() != null) {
-					Plant = UUID.fromString(aOPDTO.getPlantFKId());
+				if (aopDTO.getPlantFKId() != null) {
+					Plant = UUID.fromString(aopDTO.getPlantFKId());
 				}
-				Optional<UUID> Id = aOPRepository.findAopIdByFilters(Site, Vertical, Material, Plant,
-						aOPDTO.getAopYear());
-				aOP = new AOP();
+				Optional<UUID> Id = aopRepository.findAopIdByFilters(Site, Vertical, Material, Plant,
+						aopDTO.getAopYear());
+				aop = new AOP();
 				if (Id != null && !Id.isEmpty()) {
-					aOP.setId(Id.get());
+					aop.setId(Id.get());
 				}
 
-				String caseId = aOPDTO.getAopYear() + "-AOP-" + "-V1";
-				aOP.setAopStatus("draft");
-				aOP.setAopType("production");
-				aOP.setAopCaseId(caseId);
-			} else if (aOPDTO.getId().contains("#")) {
-				aOP = new AOP();
-				aOP.setId(null);
-				String caseId = aOPDTO.getAopYear() + "-AOP-" + "-V1";
-				aOP.setAopStatus("draft");
-				aOP.setAopType("production");
-				aOP.setAopCaseId(caseId);
+				String caseId = aopDTO.getAopYear() + "-AOP-" + "-V1";
+				aop.setAopStatus("draft");
+				aop.setAopType("production");
+				aop.setAopCaseId(caseId);
+			} else if (aopDTO.getId().contains("#")) {
+				aop = new AOP();
+				aop.setId(null);
+				String caseId = aopDTO.getAopYear() + "-AOP-" + "-V1";
+				aop.setAopStatus("draft");
+				aop.setAopType("production");
+				aop.setAopCaseId(caseId);
 			} else {
-				aOP = aOPRepository.findById(UUID.fromString(aOPDTO.getId())).get();
-				aOP.setAopCaseId(aOPDTO.getAopCaseId());
-				aOP.setAopStatus(aOPDTO.getAopStatus());
-				aOP.setAopType(aOPDTO.getAopType());
+				aop = aopRepository.findById(UUID.fromString(aopDTO.getId())).get();
+				aop.setAopCaseId(aopDTO.getAopCaseId());
+				aop.setAopStatus(aopDTO.getAopStatus());
+				aop.setAopType(aopDTO.getAopType());
 			}
-			aOP.setAopRemarks(aOPDTO.getAopRemarks());
-			aOP.setAopType(aOPDTO.getAopType());
-			aOP.setAopYear(aOPDTO.getAopYear());
-			aOP.setApril(aOPDTO.getApril());
-			aOP.setAug(aOPDTO.getAug());
-			aOP.setAvgTPH(aOPDTO.getAvgTPH());
-			aOP.setDec(aOPDTO.getDec());
-			aOP.setFeb(aOPDTO.getFeb());
-			aOP.setJan(aOPDTO.getJan());
-			aOP.setJuly(aOPDTO.getJuly());
-			aOP.setJune(aOPDTO.getJune());
-			aOP.setMarch(aOPDTO.getMarch());
-			aOP.setMay(aOPDTO.getMay());
+			aop.setAopRemarks(aopDTO.getAopRemarks());
+			aop.setAopType(aopDTO.getAopType());
+			aop.setAopYear(aopDTO.getAopYear());
+			aop.setApril(aopDTO.getApril());
+			aop.setAug(aopDTO.getAug());
+			aop.setAvgTPH(aopDTO.getAvgTPH());
+			aop.setDec(aopDTO.getDec());
+			aop.setFeb(aopDTO.getFeb());
+			aop.setJan(aopDTO.getJan());
+			aop.setJuly(aopDTO.getJuly());
+			aop.setJune(aopDTO.getJune());
+			aop.setMarch(aopDTO.getMarch());
+			aop.setMay(aopDTO.getMay());
 			// aOP.setNormItem(aOPDTO.getNormItem());
-			aOP.setNov(aOPDTO.getNov());
-			aOP.setOct(aOPDTO.getOct());
+			aop.setNov(aopDTO.getNov());
+			aop.setOct(aopDTO.getOct());
 
-			if (aOPDTO.getSiteFKId() != null) {
-				aOP.setSiteFkId(UUID.fromString(aOPDTO.getSiteFKId()));
+			if (aopDTO.getSiteFKId() != null) {
+				aop.setSiteFkId(UUID.fromString(aopDTO.getSiteFKId()));
 			} else {
-				aOP.setSiteFkId(site.getId());
+				aop.setSiteFkId(site.getId());
 			}
-			if (aOPDTO.getVerticalFKId() != null) {
-				aOP.setVerticalFkId(UUID.fromString(aOPDTO.getVerticalFKId()));
+			if (aopDTO.getVerticalFKId() != null) {
+				aop.setVerticalFkId(UUID.fromString(aopDTO.getVerticalFKId()));
 			} else {
-				aOP.setVerticalFkId(vertical.getId());
+				aop.setVerticalFkId(vertical.getId());
 			}
-			if (aOPDTO.getMaterialFKId() != null) {
-				aOP.setMaterialFKId(UUID.fromString(aOPDTO.getMaterialFKId()));
+			if (aopDTO.getMaterialFKId() != null) {
+				aop.setMaterialFKId(UUID.fromString(aopDTO.getMaterialFKId()));
 			}
-			if (aOPDTO.getPlantFKId() != null) {
-				aOP.setPlantFkId(UUID.fromString(aOPDTO.getPlantFKId()));
+			if (aopDTO.getPlantFKId() != null) {
+				aop.setPlantFkId(UUID.fromString(aopDTO.getPlantFKId()));
 			}
 
-			aOP.setSep(aOPDTO.getSep());
-			aOP.setAopYear(aOPDTO.getAopYear());
+			aop.setSep(aopDTO.getSep());
+			aop.setAopYear(aopDTO.getAopYear());
 			
-			aOPRepository.save(aOP);
-			aopList.add(aOP);
+			aopRepository.save(aop);
+			aopList.add(aop);
 		}
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("Data saved successfully");
@@ -256,7 +247,7 @@ public class AOPServiceImpl implements AOPService {
 		try {
 			List<AOPDTO> dtoList = new ArrayList<>();
 
-		List<Object[]> maintainsData = aOPRepository.checkMaintainance(plantId, year);
+		List<Object[]> maintainsData = aopRepository.checkMaintainance(plantId, year);
 			// if(maintainsData != null && !maintainsData.isEmpty()) {
 			if (1 == 1) {
 				Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
@@ -272,7 +263,7 @@ public class AOPServiceImpl implements AOPService {
 					year
 				);
 
-				List<AOP> objList = aOPRepository.findAllByAopYearAndPlantFkId(year, UUID.fromString(plantId));
+				List<AOP> objList = aopRepository.findAllByAopYearAndPlantFkId(year, UUID.fromString(plantId));
 
 				for (Object[] obj : list) {
 					AOPDTO aopDto = new AOPDTO();
