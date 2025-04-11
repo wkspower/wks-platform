@@ -22,7 +22,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.PlantService;
 
 @RestController
-@RequestMapping("/shutdown-months")
+@RequestMapping("/site-and-plant")
 public class SiteAndPlantController {
 
 	private final PlantService plantService;
@@ -31,21 +31,18 @@ public class SiteAndPlantController {
 		this.plantService = plantService;
 	}
 
-	@GetMapping
-	public ResponseEntity<List> getShutdownMonths(@RequestParam UUID plantId, @RequestParam String maintenanceName) {
-		List data = plantService.getShutdownMonths(plantId, maintenanceName);
-		return ResponseEntity.ok(data);
-	}
-
-	@GetMapping(value = "/plant-site")
-	public ResponseEntity<AOPMessageVM> getPlantAndSite() {
-		AOPMessageVM aopMessageVM=new AOPMessageVM();
-		try {
-		List<Object[]> listOfSite = plantService.getPlantAndSite();
-
-		// Group plants by site ID
-		Map<UUID, List<Object[]>> groupedBySite = listOfSite.stream()
-				.collect(Collectors.groupingBy(result -> UUID.fromString((String) result[0])));
+    @GetMapping("/shutdown-months")
+    public ResponseEntity<List> getShutdownMonths(@RequestParam UUID plantId,@RequestParam String maintenanceName){
+        List data = plantService.getShutdownMonths(plantId, maintenanceName);
+        return ResponseEntity.ok(data);
+    }
+    @GetMapping
+    public ResponseEntity<List<Object>> getPlantAndSite() {
+        List<Object[]> listOfSite = plantService.getPlantAndSite();
+        
+        // Group plants by site ID
+        Map<UUID, List<Object[]>> groupedBySite = listOfSite.stream()
+                .collect(Collectors.groupingBy(result -> UUID.fromString((String) result[0])));
 
 		List<Object> siteData = new ArrayList<>();
 

@@ -31,39 +31,38 @@ public class TurnaroundPlanController {
 	private TurnaroundPlanService turnaroundPlanService;
 	
 	@GetMapping
-    public ResponseEntity<List<ShutDownPlanDTO>> findTurnaroundPlanDataByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName,@RequestParam String year) {
-		
-		List<ShutDownPlanDTO> listOfSite=null;
+	public ResponseEntity<List<ShutDownPlanDTO>> getPlans(@RequestParam UUID plantId, @RequestParam String type,
+			@RequestParam String year) {
+
+		List<ShutDownPlanDTO> listOfSite = null;
 		try {
-			listOfSite = turnaroundPlanService.findTurnaroundPlanDataByPlantIdAndType(plantId,maintenanceTypeName,year);
-		}catch(Exception e) {
+			listOfSite = turnaroundPlanService.getPlans(plantId, type, year);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-        
-		 
-        return ResponseEntity.ok(listOfSite);
-    }
-	
-	@PostMapping(value="/{plantId}")
-	public ResponseEntity<List<ShutDownPlanDTO>> saveShutdownData(@PathVariable UUID plantId,@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList){
-		turnaroundPlanService.saveTurnaroundPlanData(plantId,shutDownPlanDTOList);
-		return ResponseEntity.ok(shutDownPlanDTOList); 
+		return ResponseEntity.ok(listOfSite);
 	}
-	
-	@PutMapping(value = "/{plantMaintenanceTransactionId}")
-    public ResponseEntity<List<ShutDownPlanDTO>> editShutdownData(@PathVariable UUID plantMaintenanceTransactionId, @RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
-        
-		          // Save entity
-		turnaroundPlanService.editTurnaroundPlanData(plantMaintenanceTransactionId,shutDownPlanDTOList);
-        
-        return ResponseEntity.ok(shutDownPlanDTOList);
-    }
-	
-	@DeleteMapping("/{plantMaintenanceTransactionId}")
-    public ResponseEntity<String> deletePlant(@PathVariable UUID plantMaintenanceTransactionId) {
-	  	shutDownPlanService.deletePlanData(plantMaintenanceTransactionId);
-        return ResponseEntity.ok("Plant with ID " + plantMaintenanceTransactionId + " deleted successfully");
-    }
 
+	@PostMapping(value = "/{plantId}")
+	public ResponseEntity<List<ShutDownPlanDTO>> savePlans(@PathVariable UUID plantId,
+			@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
+		turnaroundPlanService.savePlans(plantId, shutDownPlanDTOList);
+		return ResponseEntity.ok(shutDownPlanDTOList);
+	}
+
+	@PutMapping(value = "/{transactionId}")
+	public ResponseEntity<List<ShutDownPlanDTO>> updatePlans(@PathVariable UUID transactionId,
+			@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
+
+		// Save entity
+		turnaroundPlanService.updatePlans(transactionId, shutDownPlanDTOList);
+
+		return ResponseEntity.ok(shutDownPlanDTOList);
+	}
+
+	@DeleteMapping(value = "/{transactionId}")
+	public ResponseEntity<String> deletePlan(@PathVariable UUID transactionId) {
+		shutDownPlanService.deletePlanData(transactionId);
+		return ResponseEntity.ok("Plant with ID " + transactionId + " deleted successfully");
+	}
 }

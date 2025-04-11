@@ -14,22 +14,22 @@ import com.wks.caseengine.service.SiteService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("site")
+@RequestMapping("/site")
 @Tag(name = "Site", description = "test Site")
 public class SiteController {
 	
 	@Autowired
 	private SiteService siteService;
-	
-	@GetMapping(value = "/site")
+
+	@GetMapping
 	public ResponseEntity<List<Sites>> getAllSites() {
-		List<Sites> listOfSites = siteService.getAllSites(); 
-	    return ResponseEntity.ok(listOfSites);
+		List<Sites> listOfSites = siteService.getAllSites();
+		return ResponseEntity.ok(listOfSites);
 	}
-	
-	@GetMapping(value = "/site/with-plants")
+
+	@GetMapping(value = "/with-plants")
 	public ResponseEntity<List<Object[]>> getAllSitesAndPlants() {
-		List<Object[]> listOfSites = siteService.getAllSitesAndPlants(); 
+		List<Object[]> listOfSites = siteService.getAllSitesAndPlants();
 		return ResponseEntity.ok(listOfSites);
 	}
 

@@ -32,17 +32,17 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 	private PlantMaintenanceTransactionRepository plantMaintenanceTransactionRepository;
 
 	@Override
-	public List<ShutDownPlanDTO> findTurnaroundPlanDataByPlantIdAndType(UUID plantId, String maintenanceTypeName,String year) {
-		List<Object[]> listOfSite=null;
+	public List<ShutDownPlanDTO> getPlans(UUID plantId, String type, String year) {
+		List<Object[]> listOfSite = null;
 		List<ShutDownPlanDTO> dtoList = new ArrayList<>();
-		 listOfSite=turnaroundPlanRepository.findTurnaroundPlanDetailsByPlantIdAndType(maintenanceTypeName,plantId.toString(), year);
-		 for (Object[] result : listOfSite) {
-            ShutDownPlanDTO dto = new ShutDownPlanDTO();
-            dto.setDiscription((String) result[0]);
-            dto.setMaintStartDateTime((Date) result[1]);
-            dto.setMaintEndDateTime((Date) result[2]);
-            dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null); 
-			if(result[3]!=null){
+		listOfSite = turnaroundPlanRepository.getPlans(type, plantId.toString(), year);
+		for (Object[] result : listOfSite) {
+			ShutDownPlanDTO dto = new ShutDownPlanDTO();
+			dto.setDiscription((String) result[0]);
+			dto.setMaintStartDateTime((Date) result[1]);
+			dto.setMaintEndDateTime((Date) result[2]);
+			dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null);
+			if (result[3] != null) {
 				double durationInHrs = ((Integer) result[3]) / 60.0;
 				dto.setDurationInHrs(durationInHrs);
 			}
@@ -66,11 +66,11 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 
 
 	@Override
-	public List<ShutDownPlanDTO> saveTurnaroundPlanData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
-		UUID plantMaintenanceId=shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId,"TA_Plan");
-		if(plantMaintenanceId==null) {
-			UUID maintenanceTypesId =plantMaintenanceTransactionRepository.findIdByName("TA_Plan");
-			PlantMaintenance plantMaintenance=new PlantMaintenance();
+	public List<ShutDownPlanDTO> savePlans(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
+		UUID plantMaintenanceId = shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId, "TA_Plan");
+		if (plantMaintenanceId == null) {
+			UUID maintenanceTypesId = plantMaintenanceTransactionRepository.findIdByName("TA_Plan");
+			PlantMaintenance plantMaintenance = new PlantMaintenance();
 			plantMaintenance.setMaintenanceText("TA_Plan");
 			plantMaintenance.setIsDefault(true);
 			plantMaintenance.setPlantFkId(plantId);
@@ -95,8 +95,9 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 				plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 				plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 				plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
-				if(shutDownPlanDTO.getMaintStartDateTime()!=null){
-					plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
+				if (shutDownPlanDTO.getMaintStartDateTime() != null) {
+					plantMaintenanceTransaction
+							.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1);
 				}
 				
 				plantMaintenanceTransaction.setCreatedOn(new Date());
@@ -162,18 +163,18 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 
 
 	@Override
-	public List<ShutDownPlanDTO> editTurnaroundPlanData(UUID plantMaintenanceTransactionId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
-		for(ShutDownPlanDTO shutDownPlanDTO:shutDownPlanDTOList) {
-			Optional<PlantMaintenanceTransaction> plantMaintenance=turnaroundPlanRepository.findById(plantMaintenanceTransactionId);
-			PlantMaintenanceTransaction plantMaintenanceTransaction=plantMaintenance.get();
-			  plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-			  plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
-			  plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
-			  plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
-			  plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
-			  plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
-			  plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
-			  turnaroundPlanRepository.save(plantMaintenanceTransaction);
+	public List<ShutDownPlanDTO> updatePlans(UUID transactionId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
+		for (ShutDownPlanDTO shutDownPlanDTO : shutDownPlanDTOList) {
+			Optional<PlantMaintenanceTransaction> plantMaintenance = turnaroundPlanRepository.findById(transactionId);
+			PlantMaintenanceTransaction plantMaintenanceTransaction = plantMaintenance.get();
+			plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+			plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins().intValue());
+			plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+			plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1);
+			plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+			plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+			plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+			turnaroundPlanRepository.save(plantMaintenanceTransaction);
 		}
 		// TODO Auto-generated method stub
 		return shutDownPlanDTOList;

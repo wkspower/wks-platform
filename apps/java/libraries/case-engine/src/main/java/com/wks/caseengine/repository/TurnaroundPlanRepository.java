@@ -29,7 +29,7 @@ public interface TurnaroundPlanRepository extends JpaRepository<PlantMaintenance
             "and pmt.Plant_FK_Id = :plantId " +
 			"and AuditYear = :year order by NPT.DisplayOrder",
             nativeQuery = true)
-	List<Object[]> findTurnaroundPlanDetailsByPlantIdAndType( 
+	List<Object[]> getPlans( 
         @Param("maintenanceTypeName") String maintenanceTypeName, @Param("plantId") String plantId,  @Param("year") String year);
 
 

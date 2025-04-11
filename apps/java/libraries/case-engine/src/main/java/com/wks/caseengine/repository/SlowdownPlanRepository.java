@@ -29,7 +29,7 @@ public interface SlowdownPlanRepository extends JpaRepository<PlantMaintenanceTr
             "and pmt.Plant_FK_Id = :plantId " +
 			"and AuditYear = :year order by np.DisplayOrder,pm.CreatedOn desc",
             nativeQuery = true)
-	List<Object[]> findSlowdownPlanDetailsByPlantIdAndType( 
+	List<Object[]> getPlans( 
         @Param("maintenanceTypeName") String maintenanceTypeName, @Param("plantId") String plantId,  @Param("year") String year);
 
         //List<Object[]> findSlowdownPlanDetailsByPlantIdAndType(String maintenanceTypeName, String plantId, String year);

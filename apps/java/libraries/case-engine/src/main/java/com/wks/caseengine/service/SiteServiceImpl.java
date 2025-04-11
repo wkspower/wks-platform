@@ -14,11 +14,11 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
 @Service
-public class SiteServiceImpl implements SiteService{
+public class SiteServiceImpl implements SiteService {
 
 	@PersistenceContext(unitName = "db1")
 	private EntityManager entityManager;
-	
+
 	@Autowired
 	private SiteRepository siteRepository;
 
@@ -37,10 +37,10 @@ public class SiteServiceImpl implements SiteService{
 
 	@Override
 	public List<SitesDTO> getSites() {
-		List<Sites> sitesList=siteRepository.findAll();
-		List<SitesDTO> sitesDTOList=new ArrayList<>();
-		for(Sites sites: sitesList) {
-			SitesDTO sitesDTO=new SitesDTO();
+		List<Sites> sitesList = siteRepository.findAll();
+		List<SitesDTO> sitesDTOList = new ArrayList<>();
+		for (Sites sites : sitesList) {
+			SitesDTO sitesDTO = new SitesDTO();
 			sitesDTO.setDisplayName(sites.getDisplayName());
 			sitesDTO.setDisplayOrder(sites.getDisplayOrder());
 			sitesDTO.setId(sites.getId().toString());
