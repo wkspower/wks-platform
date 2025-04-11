@@ -54,7 +54,7 @@ const icons = {
 }
 
 const plan = {
-  id: 'utilities1',
+  id: 'utilities',
   title: '',
   type: 'group',
   children: [

@@ -44,7 +44,7 @@ const icons = {
 }
 
 const workspace = {
-  id: 'utilities2',
+  id: 'utilities',
   title: '',
   type: 'group',
   children: [
@@ -134,6 +134,14 @@ const workspace = {
       type: 'item',
       url: '/workflow',
       icon: icons?.IconList,
+      breadcrumbs: true,
+    },
+    {
+      id: 'user-management',
+      title: i18n.t('menu.userManage'),
+      type: 'item',
+      url: '/user-management',
+      icon: icons?.IconSettings,
       breadcrumbs: true,
     },
   ],

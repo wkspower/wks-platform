@@ -76,33 +76,38 @@ const App = () => {
   }, [verticalChange, keycloak])
 
   async function buildMenuItems(keycloak) {
-    let rawAllowedVerticals = []
+    let allowedLinked = []
     const verticals = keycloak?.idTokenParsed?.verticals
-    // console.log('keycloak', keycloak)
+    const selectedVertical = localStorage.getItem('verticalId').toLowerCase()
+
+    // console.log('keycloak', verticals)
     if (verticals) {
       try {
-        rawAllowedVerticals = JSON.parse(verticals)
+        allowedLinked = JSON.parse(verticals)
       } catch (error) {
         console.error('Error parsing verticals JSON:', error)
-        rawAllowedVerticals = []
+        allowedLinked = []
       }
     } else {
       // console.log('No verticals found in idTokenParsed')
     }
 
-    const allowedVerticalsMapping = rawAllowedVerticals.reduce((acc, obj) => {
-      return { ...acc, ...obj }
+    // const allowedVerticalsMapping = allowedLinked.reduce((acc, obj) => {
+    //   return { ...acc, ...obj }
+    // }, {})
+    const allowedVerticalsMapping = allowedLinked.reduce((acc, obj) => {
+      // Convert each key to lowercase for consistent matching.
+      const key = Object.keys(obj)[0].toLowerCase()
+      return { ...acc, [key]: obj[Object.keys(obj)[0]] }
     }, {})
 
     // console.log(allowedVerticalsMapping)
-    // console.log(verticalChange)
+    // console.log(selectedVertical)
 
-    const selectedVertical =
-      localStorage.getItem('verticalId') ||
-      verticalChange?.selectedVertical?.toLowerCase()
+    // verticalChange?.selectedVertical?.toLowerCase()
     const allowedChildIds =
       (selectedVertical && allowedVerticalsMapping[selectedVertical]) || []
-
+    // console.log(allowedChildIds)
     // Build the menu based on allowed verticals
     const menu = {
       items: [...menuItemsDefs.items],
@@ -133,7 +138,7 @@ const App = () => {
                 ...group,
                 children: group.children.filter((child) =>
                   allowedChildIds.length > 0
-                    ? allowedChildIds.includes(child.id)
+                    ? allowedChildIds.includes(child.id.toLowerCase())
                     : true,
                 ),
               }
@@ -144,7 +149,7 @@ const App = () => {
       }
       return item
     })
-
+    // console.log(menu)
     // Safely determine if the user is a manager.
     // If keycloak.hasRealmRole is not a function, default to false.
     const isManagerUser =

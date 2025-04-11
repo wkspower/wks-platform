@@ -24,8 +24,12 @@ import MaintenanceTable from 'components/data-tables/MaintenanceTable'
 import ConsumptionNorms from 'components/data-tables/ConsumptionNorms'
 import ProductionNorms from 'components/data-tables/ProductionNorms'
 // import SelectivityData from 'components/data-tables/SelectivityData'
-import FiveTables from 'components/data-tables/ProductMixTable'
+import FiveTables from 'components/data-tables/AOPWorkFlow/ProductMixTable'
 import ConfigurationTable from 'components/data-tables/ConfigurationTable/index'
+// import UserManagement from 'components/user-management/UserManagementTable'
+import UserForm from 'components/user-management/UserForm'
+import UserManagementTable from 'components/user-management/UserManagementTable'
+import AssessmentForm from 'components/data-tables/AssesmentForm/AssessmentContext'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -188,6 +192,18 @@ export const MainRoutes = (
       {
         path: 'workflow',
         element: <FiveTables />,
+      },
+      {
+        path: 'user-management',
+        element: <UserManagementTable keycloak={keycloak} />,
+      },
+      {
+        path: 'user-form',
+        element: <UserForm keycloak={keycloak} />,
+      },
+      {
+        path: 'assessment-form',
+        element: <AssessmentForm />,
       },
     ],
   }

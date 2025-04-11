@@ -16,6 +16,8 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
 import TextField from '@mui/material/TextField'
+import { useDispatch } from 'react-redux'
+import { setIsBlocked } from 'store/reducers/dataGridStore'
 
 const ShutdownNorms = () => {
   const [loading, setLoading] = useState(false)
@@ -26,6 +28,7 @@ const ShutdownNorms = () => {
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
+  const dispatch = useDispatch()
   const [rows, setRows] = useState([])
   // const [productNormData, setProductNormData] = useState([])
   const [snackbarData, setSnackbarData] = useState({
@@ -111,42 +114,42 @@ const ShutdownNorms = () => {
           var allRows = Array.from(apiRef.current.getRowModels().values())
           allRows = allRows.filter((row) => !row.isGroupHeader)
 
-        const updatedRows = allRows.map(
-          (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
-        )
+          const updatedRows = allRows.map(
+            (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
+          )
 
-        if (updatedRows.length === 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          return
-        }
-
-        const requiredFields = ['remarks']
-
-        const validationMessage = validateFields(editedData, requiredFields)
-        if (validationMessage) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: validationMessage,
-            severity: 'error',
-          })
-          setLoading(false)
-          return
-        }
-
-        if (calculatebtnClicked == false) {
-          if (editedData.length === 0) {
+          if (updatedRows.length === 0) {
             setSnackbarOpen(true)
             setSnackbarData({
               message: 'No Records to Save!',
               severity: 'info',
             })
-            setCalculatebtnClicked(false)
             return
           }
+
+          const requiredFields = ['remarks']
+
+          const validationMessage = validateFields(editedData, requiredFields)
+          if (validationMessage) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: validationMessage,
+              severity: 'error',
+            })
+            setLoading(false)
+            return
+          }
+
+          if (calculatebtnClicked == false) {
+            if (editedData.length === 0) {
+              setSnackbarOpen(true)
+              setSnackbarData({
+                message: 'No Records to Save!',
+                severity: 'info',
+              })
+              setCalculatebtnClicked(false)
+              return
+            }
 
             saveShutDownNormsData(editedData)
           } else {
@@ -293,126 +296,126 @@ const ShutdownNorms = () => {
     {
       field: 'april',
       headerName: headerMap[4],
-      editable: shutdownMonths.includes(4),
+      editable: shutdownMonths?.includes(4),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
-      isDisabled: !shutdownMonths.includes(4),
+      isDisabled: !shutdownMonths?.includes(4),
       columnClassName: 'first-column',
     },
 
     {
       field: 'may',
       headerName: headerMap[5],
-      editable: shutdownMonths.includes(5),
+      editable: shutdownMonths?.includes(5),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
-      isDisabled: !shutdownMonths.includes(5),
+      isDisabled: !shutdownMonths?.includes(5),
       columnClassName: 'first-column',
     },
     {
       field: 'june',
       headerName: headerMap[6],
-      editable: shutdownMonths.includes(6),
+      editable: shutdownMonths?.includes(6),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
-      isDisabled: !shutdownMonths.includes(6),
+      isDisabled: !shutdownMonths?.includes(6),
     },
     {
       field: 'july',
       headerName: headerMap[7],
-      editable: shutdownMonths.includes(7),
+      editable: shutdownMonths?.includes(7),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
-      isDisabled: !shutdownMonths.includes(7),
+      isDisabled: !shutdownMonths?.includes(7),
     },
 
     {
       field: 'august',
       headerName: headerMap[8],
-      editable: shutdownMonths.includes(8),
+      editable: shutdownMonths?.includes(8),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
-      isDisabled: !shutdownMonths.includes(8),
+      isDisabled: !shutdownMonths?.includes(8),
     },
     {
       field: 'september',
       headerName: headerMap[9],
-      editable: shutdownMonths.includes(9),
+      editable: shutdownMonths?.includes(9),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
-      isDisabled: !shutdownMonths.includes(9),
+      isDisabled: !shutdownMonths?.includes(9),
     },
     {
       field: 'october',
       headerName: headerMap[10],
-      editable: shutdownMonths.includes(10),
+      editable: shutdownMonths?.includes(10),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
-      isDisabled: !shutdownMonths.includes(10),
+      isDisabled: !shutdownMonths?.includes(10),
     },
     {
       field: 'november',
       headerName: headerMap[11],
-      editable: shutdownMonths.includes(11),
+      editable: shutdownMonths?.includes(11),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
-      isDisabled: !shutdownMonths.includes(11),
+      isDisabled: !shutdownMonths?.includes(11),
     },
     {
       field: 'december',
       headerName: headerMap[12],
-      editable: shutdownMonths.includes(12),
+      editable: shutdownMonths?.includes(12),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
-      isDisabled: !shutdownMonths.includes(12),
+      isDisabled: !shutdownMonths?.includes(12),
     },
     {
       field: 'january',
       headerName: headerMap[1],
-      editable: shutdownMonths.includes(1),
+      editable: shutdownMonths?.includes(1),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
-      isDisabled: !shutdownMonths.includes(1),
+      isDisabled: !shutdownMonths?.includes(1),
     },
     {
       field: 'february',
       headerName: headerMap[2],
-      editable: shutdownMonths.includes(2),
+      editable: shutdownMonths?.includes(2),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
-      isDisabled: !shutdownMonths.includes(2),
+      isDisabled: !shutdownMonths?.includes(2),
     },
     {
       field: 'march',
       headerName: headerMap[3],
-      editable: shutdownMonths.includes(3),
+      editable: shutdownMonths?.includes(3),
       renderEditCell: NumericInputOnly,
       align: 'left',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
-      isDisabled: !shutdownMonths.includes(3),
+      isDisabled: !shutdownMonths?.includes(3),
     },
 
     // remarks
@@ -523,6 +526,8 @@ const ShutdownNorms = () => {
           businessData,
           keycloak,
         )
+        dispatch(setIsBlocked(true))
+
         setSnackbarOpen(true)
         setSnackbarData({
           message: `Shutdown Norms Saved Successfully!`,
@@ -704,6 +709,7 @@ const ShutdownNorms = () => {
         })
 
         setRows(groupedRows)
+        dispatch(setIsBlocked(true))
         setLoading(false)
       } else {
         setSnackbarOpen(true)

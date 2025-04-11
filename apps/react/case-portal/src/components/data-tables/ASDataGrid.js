@@ -2,6 +2,7 @@ import CancelIcon from '@mui/icons-material/Close'
 // import DeleteIcon from '@mui/icons-material/Delete'
 import DeleteIcon from '@mui/icons-material/DeleteOutlined'
 import EditIcon from '@mui/icons-material/Edit'
+import VisibilityIcon from '@mui/icons-material/Visibility'
 import SaveIcon from '@mui/icons-material/Save'
 import { Box, Button, IconButton, TextField } from '@mui/material'
 import { DataGrid, GridToolbar } from '@mui/x-data-grid'
@@ -50,8 +51,8 @@ const DataGridTable = ({
   isCellEditable = () => true,
   saveChanges = () => {},
   apiRef = null,
-  rowModesModel,
-  setRowModesModel,
+  rowModesModel: rowModesModel,
+  // setRowModesModel,
   snackbarData = { message: '', severity: 'info' },
   snackbarOpen = false,
   // setSnackbarData = () => {},
@@ -63,13 +64,14 @@ const DataGridTable = ({
   rows = [],
   loading = false,
   remarkDialogOpen = false,
-  onRowModesModelChange,
+  onRowModesModelChange = () => {},
   setRemarkDialogOpen = () => {},
   currentRemark = '',
   setCurrentRemark = () => {},
   currentRowId = null,
   unsavedChangesRef = { current: { unsavedRows: {}, rowsBeforeChange: {} } },
   deleteRowData = () => {},
+  handleAddPlantSite = () => {},
 }) => {
   const [resizedColumns, setResizedColumns] = useState({})
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
@@ -95,12 +97,17 @@ const DataGridTable = ({
 
   // const handleCellEditCommit = (id, event) => {}
 
-  const handleEditClick = (id) => () => {
+  const handleEditClick = (row) => () => {
     // setIsUpdating(true)
     // setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } })
+    handleAddPlantSite(row)
+    // setRowModesModel({
+    //   ...rowModesModel,
+    //   [row.id]: { mode: GridRowModes.Edit },
+    // })
   }
 
-  const handleSaveClick = (id) => {
+  const handleSaveClick = () => {
     // handleOpenRemark()
     // setRowModesModel((prev) => ({
     //   ...prev,
@@ -240,6 +247,18 @@ const DataGridTable = ({
               }
 
               return [
+                permissions?.viewBtn && (
+                  <GridActionsCellItem
+                    key={`view-${id}`}
+                    // icon={<EditIcon sx={{ color: jioColors.primaryBlue }} />}
+                    icon={<VisibilityIcon />}
+                    label='View'
+                    className='textPrimary'
+                    onClick={handleEditClick(row)}
+                    color='inherit'
+                    // sx={{ display: 'none' }}
+                  />
+                ),
                 permissions?.editButton && (
                   <GridActionsCellItem
                     key={`edit-${id}`}
@@ -247,7 +266,7 @@ const DataGridTable = ({
                     icon={<EditIcon />}
                     label='Edit'
                     className='textPrimary'
-                    onClick={handleEditClick(id, row)}
+                    onClick={handleEditClick(row)}
                     color='inherit'
                     sx={{ display: 'none' }}
                   />
@@ -627,10 +646,6 @@ const DataGridTable = ({
           loading={loading}
           apiRef={apiRef}
           rows={filteredRows}
-          // disableColumnFilter
-          // disableColumnMenu
-          // onFilterModelChange={() => {}}
-          // disableColumnSelector
           sortingOrder={[]}
           disableSelectionOnClick
           columns={columns.map((col) => ({
@@ -825,7 +840,6 @@ const DataGridTable = ({
           }}
         />
       </Box>
-
       {(permissions?.allAction ?? true) && (
         <Box
           sx={{

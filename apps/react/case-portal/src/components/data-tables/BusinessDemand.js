@@ -130,19 +130,19 @@ const BusinessDemand = ({ permissions }) => {
         // handleMenuClose();
       }
     }
-    const getHeaderData = async () => {
-      try {
-        const res = await DataService.getHeaderData(keycloak, 'Business Demand')
-        if (res) {
-          console.log(res)
-          // setHeader(res);
-        }
-        return res
-      } catch (err) {
-        console.log(err)
-      }
-    }
-    getHeaderData()
+    // const getHeaderData = async () => {
+    //   try {
+    //     const res = await DataService.getHeaderData(keycloak, 'Business Demand')
+    //     if (res) {
+    //       // console.log(res)
+    //       // setHeader(res);
+    //     }
+    //     return res
+    //   } catch (err) {
+    //     console.log(err)
+    //   }
+    // }
+    // getHeaderData()
     fetchData()
     getAllProducts()
   }, [sitePlantChange, keycloak, lowerVertName])
@@ -378,7 +378,7 @@ const BusinessDemand = ({ permissions }) => {
           showAction: permissions?.showAction ?? true,
           addButton: permissions?.addButton ?? true,
           deleteButton: permissions?.deleteButton ?? true,
-          editButton: permissions?.editButton ?? true,
+          editButton: permissions?.editButton ?? false,
           showUnit: permissions?.showUnit ?? false,
           saveWithRemark: permissions?.saveWithRemark ?? true,
           saveBtn: permissions?.saveBtn ?? true,

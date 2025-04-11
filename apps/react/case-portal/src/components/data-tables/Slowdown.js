@@ -120,6 +120,7 @@ const SlowDown = ({ permissions }) => {
         productId: row.product,
         discription: row.discription,
         durationInHrs: parseFloat(findDuration('1', row)),
+           // durationInHrs: parseFloat(row.durationInHrs),
         maintEndDateTime: addTimeOffset(row.maintEndDateTime),
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         remark: row.remark,
