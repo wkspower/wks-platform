@@ -64,22 +64,20 @@ export const NewCaseForm = ({
     setFormData(newFormData)
   }
 
-  // Handle form initialization
   const onFormInit = (instance) => {
-    console.log("Form initialized:", instance)
+    console.log('Form initialized:', instance)
     setFormioInstance(instance)
   }
 
   const onSave = () => {
-    console.log("Form instance on save:", formioInstance)
-    
-    // Validate the form using our external validation utility
+    console.log('Form instance on save:', formioInstance)
+
     const validationResult = validateForm(
-      formioInstance, 
-      form.structure, 
-      formData
+      formioInstance,
+      form.structure,
+      formData,
     )
-    
+
     if (!validationResult.isValid) {
       setValidationErrors(validationResult.errors)
       setAlertOpen(true)
@@ -87,7 +85,7 @@ export const NewCaseForm = ({
       saveFormData()
     }
   }
-  
+
   const saveFormData = () => {
     const caseAttributes = []
     Object.keys(formData.data).forEach((key) => {
@@ -167,13 +165,13 @@ export const NewCaseForm = ({
                 </Tooltip>
               )}
             </Box>
-            
-            <ValidationErrorAlert 
+
+            <ValidationErrorAlert
               errors={validationErrors}
               open={alertOpen}
               onClose={handleAlertClose}
             />
-            
+
             <Form
               ref={formRef}
               form={form.structure}
@@ -187,17 +185,14 @@ export const NewCaseForm = ({
                 showErrors: true,
                 highlightErrors: true,
                 redrawOn: 'change',
-                errors: {
-                  message: 'Please fix the following errors before submitting.'
-                },
                 noAlerts: false,
                 displayErrorsFor: ['validations', 'conditions', 'required'],
                 alerts: {
-                  submitMessage: false
+                  submitMessage: false,
                 },
                 buttonSettings: {
-                  showSubmit: false
-                }
+                  showSubmit: false,
+                },
               }}
             />
           </Grid>

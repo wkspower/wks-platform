@@ -1,21 +1,20 @@
 // components/FormValidation/ValidationErrorAlert.js
-import React from 'react';
-import { Alert, Typography } from '@mui/material';
+import React from 'react'
+import { Alert, Typography } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Component to display form validation errors
  */
 const ValidationErrorAlert = ({ errors, open, onClose }) => {
-  if (!open) return null;
-  
+  if (!open) return null
+
+  const { t } = useTranslation()
+
   return (
-    <Alert 
-      severity="error" 
-      sx={{ mb: 2 }}
-      onClose={onClose}
-    >
-      <Typography variant="subtitle1" fontWeight="bold">
-        Please correct the following errors in the form:
+    <Alert severity='error' sx={{ mb: 2 }} onClose={onClose}>
+      <Typography variant='subtitle1' fontWeight='bold'>
+        {t('pages.validation.pleaseCorrectErrors')}
       </Typography>
       {errors.length > 0 ? (
         <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
@@ -26,12 +25,10 @@ const ValidationErrorAlert = ({ errors, open, onClose }) => {
           ))}
         </ul>
       ) : (
-        <Typography>
-          Required fields are missing or contain invalid values.
-        </Typography>
+        <Typography>{t('pages.validation.requiredFieldsMissing')}</Typography>
       )}
     </Alert>
-  );
-};
+  )
+}
 
-export default ValidationErrorAlert;
+export default ValidationErrorAlert
