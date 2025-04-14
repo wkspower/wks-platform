@@ -63,23 +63,11 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
 		    businessDemandDataDTO.setNormParameterTypeId(row[19] != null ? row[19].toString() : null);
 		    businessDemandDataDTO.setNormParameterTypeName(row[20] != null ? row[20].toString() : null);
 		    businessDemandDataDTO.setNormParameterTypeDisplayName(row[21] != null ? row[21].toString() : null);
-		    
+		    businessDemandDataDTO.setIsEditable(row[29] != null ? Boolean.valueOf(row[29].toString()) : null);
+		    businessDemandDataDTO.setIsVisible(row[30] != null ? Boolean.valueOf(row[30].toString()) : null);
+
 		    businessDemandDataDTOList.add(businessDemandDataDTO);
 		}
-		
-//		List<Object[]> list = businessDemandDataRepository.getAllBusinessDemandData(plantId);
-// 		int i=1;
-// 		for(Object[] obj1 :list){
-//            System.out.println("obj1"+obj1);
-// 			BusinessDemandDataDTO businessDemandDataDTO = new BusinessDemandDataDTO();
-
-// 			businessDemandDataDTO.setNormParameterId(obj1[0]!=null? obj1[0].toString():null);
-// 			businessDemandDataDTO.setNormParameterTypeDisplayName(obj1[1]!=null? obj1[1].toString():null);
-// 			businessDemandDataDTO.setId(i+"#");
-// 			businessDemandDataDTOList.add(businessDemandDataDTO);
-// 			i++;
-// 		}
-
 		 
         return businessDemandDataDTOList;
 	}
@@ -182,7 +170,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService{
                 "Year, Plant_FK_Id, NormParameters_FK_Id, AvgTPH, NormTypeDisplayOrder, " +
                 "NormParameterTypeId, NormParameterTypeName, NormParameterTypeDisplayName, " +
                 "CreatedOn, ModifiedOn, UpdatedBy, IsDeleted, MaterialDisplayOrder, " +
-                "Site_FK_Id, Vertical_FK_Id " +
+                "Site_FK_Id, Vertical_FK_Id,isEditable,isVisible " +
                 "FROM " + viewName + " " +
                 "WHERE (Year = :year OR Year IS NULL) " +
                 "AND Plant_FK_Id = :plantFkId " +

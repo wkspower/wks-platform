@@ -44,5 +44,7 @@ public class BusinessDemandDataDTO {
     private String normParameterTypeName;
     private String siteFKId;
     private String verticalFKId;
+    private Boolean isEditable;
+    private Boolean isVisible;
 
 }
