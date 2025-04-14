@@ -2,6 +2,7 @@ import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material'
 import CloseIcon from '@mui/icons-material/Close'
 import ViewKanbanIcon from '@mui/icons-material/ViewKanban'
 import ViewListIcon from '@mui/icons-material/ViewList'
+import RefreshIcon from '@mui/icons-material/Refresh'
 import { useTheme } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -10,9 +11,9 @@ import Snackbar from '@mui/material/Snackbar'
 import TablePagination from '@mui/material/TablePagination'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import Tooltip from '@mui/material/Tooltip'
 import { useSession } from 'SessionStoreContext'
 import MainCard from 'components/MainCard'
-import Config from 'consts/index'
 import React, {
   Suspense,
   createContext,
@@ -69,29 +70,6 @@ export const CaseList = ({ status, caseDefId }) => {
   })
 
   useEffect(() => {
-    if (Config.WebsocketsEnabled) {
-      const websocketUrl = Config.WebsocketUrl
-      const topic = Config.WebsocketsTopicCaseCreated
-      const ws = new WebSocket(`${websocketUrl}/${topic}`)
-      ws.onmessage = () => {
-        fetchCases(
-          setFetching,
-          keycloak,
-          caseDefId,
-          setStages,
-          status,
-          filter,
-          setCases,
-          setFilter,
-        )
-      }
-      return () => {
-        ws.close() // Close WebSocket connection when component unmounts
-      }
-    }
-  }, [])
-
-  useEffect(() => {
     fetchCases(
       setFetching,
       keycloak,
@@ -109,6 +87,19 @@ export const CaseList = ({ status, caseDefId }) => {
       setCaseDefs(resp)
     })
   }, [])
+
+  const handleRefresh = () => {
+    fetchCases(
+      setFetching,
+      keycloak,
+      caseDefId,
+      setStages,
+      status,
+      filter,
+      setCases,
+      setFilter,
+    )
+  }
 
   const makeColumns = () => {
     return [
@@ -386,33 +377,46 @@ export const CaseList = ({ status, caseDefId }) => {
 
   return (
     <div style={{ height: 650, width: '100%' }}>
-      {caseDefId && (
-        <div>
-          <Button
-            id='basic-button'
-            onClick={handleNewCaseAction}
-            variant='contained'
-          >
-            {t('pages.caselist.action.newcase')}
-          </Button>
-        </div>
-      )}
-
-      {caseDefId && (
-        <ToggleButtonGroup
-          orientation='horizontal'
-          value={view}
-          exclusive
-          onChange={handleChangeView}
-        >
-          <ToggleButton value='list' aria-label='list'>
-            <ViewListIcon />
-          </ToggleButton>
-          <ToggleButton value='kanban' aria-label='kanban'>
-            <ViewKanbanIcon />
-          </ToggleButton>
-        </ToggleButtonGroup>
-      )}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+        <Box>
+          {caseDefId && (
+            <Button
+              id='basic-button'
+              onClick={handleNewCaseAction}
+              variant='contained'
+            >
+              {t('pages.caselist.action.newcase')}
+            </Button>
+          )}
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {caseDefId && (
+            <ToggleButtonGroup
+              orientation='horizontal'
+              value={view}
+              exclusive
+              onChange={handleChangeView}
+              sx={{ mr: 2 }}
+            >
+              <ToggleButton value='list' aria-label='list'>
+                <ViewListIcon />
+              </ToggleButton>
+              <ToggleButton value='kanban' aria-label='kanban'>
+                <ViewKanbanIcon />
+              </ToggleButton>
+            </ToggleButtonGroup>
+          )}
+          <Tooltip title={t('pages.caselist.action.refresh')}>
+            <IconButton
+              onClick={handleRefresh}
+              color='primary'
+              disabled={fetching}
+            >
+              <RefreshIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
 
       <MainCard sx={{ mt: 2 }} content={false}>
         <Box>
