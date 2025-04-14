@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class UserScreenMappingDTO {
 
 	private Long id;
-	private Long userId;
+	private String userId;
 	private String plantFKId;
 	private String verticalFKId;
 	private String screenCode;

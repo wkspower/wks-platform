@@ -2,9 +2,6 @@ package com.wks.caseengine.entity;
 
 import java.util.UUID;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,21 +11,19 @@ import jakarta.persistence.*;
 
 
 @Entity
-@Table(name = "GroupScreenMapping")
+@Table(name = "UserScreenMapping")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GroupScreenMapping {
-	
+public class UserScreenMapping {	
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Id", nullable = false, updatable = false)
-    private Long id;
+    @Column(name = "Id", columnDefinition = "uniqueidentifier")
+    private UUID id;
 
-    @Column(name = "GroupId")
-    private Long groupId;
+    @Column(name = "UserId")
+    private UUID userId;
 
     @Column(name = "PlantFKId")
     private UUID plantFKId;
@@ -38,6 +33,7 @@ public class GroupScreenMapping {
 
     @Column(name = "ScreenCode")
     private String screenCode;
-
-
+    
+    @Column(name = "Permissions")
+    private String permissions;
 }

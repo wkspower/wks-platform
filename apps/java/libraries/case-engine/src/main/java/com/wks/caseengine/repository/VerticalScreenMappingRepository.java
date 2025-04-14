@@ -10,9 +10,9 @@ import com.wks.caseengine.entity.VerticalScreenMapping;
 
 
 @Repository
-public interface ScreenMappingRepository extends JpaRepository<VerticalScreenMapping,Long>{
+public interface VerticalScreenMappingRepository extends JpaRepository<VerticalScreenMapping,Long>{
 	
-	List<VerticalScreenMapping> findAllByVerticalIdOrderBySequence(@Param("verticalId") UUID verticalId);
+	List<VerticalScreenMapping> findAllByVerticalFKIdOrderBySequence(@Param("verticalFKId") UUID verticalFKId);
 
 
 }

@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.springframework.context.annotation.Configuration;
 
+import com.wks.caseengine.entity.GroupMaster;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,12 +24,13 @@ public class VerticalScreenMappingDTO {
     private String screenDisplayName;
     private String screenCode;
     private Integer sequence;
-    private Long groupId;
     private String route;
     private String menuJson;
     private String title;
     private String type;
     private String icon;
     private Boolean breadCrumbs;
+    private GroupMaster group;
+
 
 }

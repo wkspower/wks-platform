@@ -20,13 +20,23 @@ public class UserController {
 		return userService.getUsers();
 	}
 
-	@PutMapping("/{userId}")
-	public Map<String, Object> updateUser(@PathVariable String userId, @RequestBody Map<String, Object> data) throws Exception {
-		return userService.updateUser(userId, data);
+	@PutMapping()
+	public Map<String, Object> updateUser(@RequestBody Map<String, Object> data) throws Exception {
+		return userService.updateUser(data);
 	}
 
 	@GetMapping("/roles")
 	public Map<String, Object> getRealmRoles() throws Exception {
 		return userService.getRealmRoles();
+	}
+	
+	@GetMapping("/groups")
+    public Map<String, Object> getUserGroups() throws Exception {
+        return userService.getAllGroups();
+    }
+	
+	@GetMapping("/search")
+	public Map<String, Object> getUsers(@RequestParam("search") String search) throws Exception {
+		return userService.searchUsers(search);
 	}
 }

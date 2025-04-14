@@ -1,6 +1,8 @@
 package com.wks.caseengine.entity;
 
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +22,7 @@ public class GroupMaster {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "Id", nullable = false, updatable = false)
-    private Long id;
+    private UUID id;
 
     @Column(name = "GroupName", length = 255, nullable = false)
     private String groupName;
@@ -30,4 +32,10 @@ public class GroupMaster {
 
     @Column(name = "Sequence")
     private Integer sequence;
+    
+    @Column(name = "Type")
+    private String type;
+
+    @Column(name = "Icon")
+    private String icon;
 }

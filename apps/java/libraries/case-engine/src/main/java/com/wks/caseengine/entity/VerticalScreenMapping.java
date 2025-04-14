@@ -22,10 +22,10 @@ public class VerticalScreenMapping {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "Id", nullable = false, updatable = false)
-    private Long id;
+    private UUID id;
 
-    @Column(name = "VerticalId", nullable = false)
-    private UUID verticalId;
+    @Column(name = "VerticalFKId", nullable = false)
+    private UUID verticalFKId;
 
     @Column(name = "ScreenDisplayName")
     private String screenDisplayName;
@@ -36,13 +36,13 @@ public class VerticalScreenMapping {
     @Column(name = "Sequence")
     private Integer sequence;
 
-    @Column(name = "GroupId")
-    private Long groupId;
+    @Column(name = "GroupFKId")
+    private UUID groupId;
 
     @Column(name = "Route")
     private String route;
 
-    @Column(name = "MenuJson")
+    @Column(name = "MenuJSON")
     private String menuJson;
 
     @Column(name = "Title")
