@@ -79,6 +79,12 @@ const defs = {
       manualProcesses: {
         title: 'Choose a process to start',
       },
+      validation: {
+        pleaseCorrectErrors: 'Please correct the following errors in the form:',
+        requiredFieldsMissing:
+          'Required fields are missing or contain invalid values.',
+        pleaseFixErrors: 'Please fix the following errors before submitting.',
+      },
     },
     tasklist: {
       datagrid: {
@@ -158,6 +164,24 @@ const defs = {
           couldNotUpload: 'Could not upload this file.',
         },
       },
+    },
+    validation: {
+      pleaseCorrectErrors: 'Please correct the following errors in the form:',
+      requiredFieldsMissing:
+        'Required fields are missing or contain invalid values.',
+      requiredField: 'This field is required.',
+      maxLength: 'Maximum length is {{length}} characters.',
+      minLength: 'Minimum length is {{length}} characters.',
+      pattern: 'Invalid format.',
+      invalidEmail: 'Please enter a valid email address.',
+      minValue: 'Minimum value is {{min}}.',
+      maxValue: 'Maximum value is {{max}}.',
+      notANumber: 'Please enter a valid number.',
+      invalidDate: 'Please enter a valid date.',
+      invalidUrl: 'Please enter a valid URL.',
+      custom: 'Invalid value.',
+      genericError:
+        'The {{field}} field has an invalid value. Please review and correct.',
     },
   },
 }

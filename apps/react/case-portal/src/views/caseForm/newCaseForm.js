@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Tooltip } from '@mui/material'
@@ -10,11 +10,13 @@ import IconButton from '@mui/material/IconButton'
 import Slide from '@mui/material/Slide'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Form } from '@formio/react'
 import { useSession } from 'SessionStoreContext'
 import { CaseService, FormService } from '../../services'
 import { StorageService } from 'plugins/storage'
+import ValidationErrorAlert from '../../components/FormValidation/ValidationErrorAlert'
+import { validateForm } from '../../utils/formValidation'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction='up' ref={ref} {...props} />
@@ -29,6 +31,10 @@ export const NewCaseForm = ({
   const [caseDef, setCaseDef] = useState([])
   const [form, setForm] = useState([])
   const [formData, setFormData] = useState(null)
+  const [alertOpen, setAlertOpen] = useState(false)
+  const [validationErrors, setValidationErrors] = useState([])
+  const formRef = useRef(null)
+  const [formioInstance, setFormioInstance] = useState(null)
   const keycloak = useSession()
 
   useEffect(() => {
@@ -48,9 +54,39 @@ export const NewCaseForm = ({
       .catch((err) => {
         console.log(err.message)
       })
-  }, [open, caseDefId])
+  }, [open, caseDefId, keycloak])
+
+  const handleAlertClose = () => {
+    setAlertOpen(false)
+  }
+
+  const onChange = (newFormData) => {
+    setFormData(newFormData)
+  }
+
+  const onFormInit = (instance) => {
+    console.log('Form initialized:', instance)
+    setFormioInstance(instance)
+  }
 
   const onSave = () => {
+    console.log('Form instance on save:', formioInstance)
+
+    const validationResult = validateForm(
+      formioInstance,
+      form.structure,
+      formData,
+    )
+
+    if (!validationResult.isValid) {
+      setValidationErrors(validationResult.errors)
+      setAlertOpen(true)
+    } else {
+      saveFormData()
+    }
+  }
+
+  const saveFormData = () => {
     const caseAttributes = []
     Object.keys(formData.data).forEach((key) => {
       caseAttributes.push({
@@ -82,6 +118,7 @@ export const NewCaseForm = ({
       })
       .catch((err) => {
         console.log(err.message)
+        setAlertOpen(true)
       })
   }
 
@@ -128,11 +165,34 @@ export const NewCaseForm = ({
                 </Tooltip>
               )}
             </Box>
+
+            <ValidationErrorAlert
+              errors={validationErrors}
+              open={alertOpen}
+              onClose={handleAlertClose}
+            />
+
             <Form
+              ref={formRef}
               form={form.structure}
               submission={formData}
+              onChange={onChange}
+              onInit={onFormInit}
               options={{
                 fileService: new StorageService(),
+                validateOnInit: false,
+                validate: true,
+                showErrors: true,
+                highlightErrors: true,
+                redrawOn: 'change',
+                noAlerts: false,
+                displayErrorsFor: ['validations', 'conditions', 'required'],
+                alerts: {
+                  submitMessage: false,
+                },
+                buttonSettings: {
+                  showSubmit: false,
+                },
               }}
             />
           </Grid>
