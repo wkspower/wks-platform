@@ -15,7 +15,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.AOPService;
 
 @RestController
-@RequestMapping("/aop")
+@RequestMapping("api/aop")
 public class AOPController {
 	
 	@Autowired

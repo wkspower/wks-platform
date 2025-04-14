@@ -17,7 +17,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.ConsumptionNormService;
 
 @RestController
-@RequestMapping("/consumption-norms")
+@RequestMapping("api/consumption-norms")
 public class ConsumptionNormController {
 	
 	@Autowired

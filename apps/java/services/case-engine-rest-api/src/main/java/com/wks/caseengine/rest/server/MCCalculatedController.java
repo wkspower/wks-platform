@@ -16,7 +16,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.MCCalculatedDataService;
 
 @RestController
-@RequestMapping("/mc-calculated")
+@RequestMapping("api/mc-calculated")
 public class MCCalculatedController {
 	
 	@Autowired

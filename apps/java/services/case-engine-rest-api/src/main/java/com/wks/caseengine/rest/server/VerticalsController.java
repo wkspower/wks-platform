@@ -19,7 +19,7 @@ import com.wks.caseengine.service.SiteService;
 import com.wks.caseengine.service.VerticalsService;
 
 @RestController
-@RequestMapping("/verticals")
+@RequestMapping("api/verticals")
 public class VerticalsController {
 	
 	@Autowired

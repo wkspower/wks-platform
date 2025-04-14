@@ -21,7 +21,7 @@ import com.wks.caseengine.service.TurnaroundPlanService;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
-@RequestMapping("/turnaround-plan")
+@RequestMapping("api/turnaround-plan")
 public class TurnaroundPlanController {
 	
 	@Autowired

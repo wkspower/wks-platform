@@ -16,7 +16,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.ShutdownNormsService;
 
 @RestController
-@RequestMapping("/shutdown-norms")
+@RequestMapping("api/shutdown-norms")
 public class ShutdownNormsController {
 	
 	@Autowired

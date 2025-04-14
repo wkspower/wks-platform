@@ -15,7 +15,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.NormalOperationNormsService;
 
 @RestController
-@RequestMapping("/normal-ops-norms")
+@RequestMapping("api/normal-ops-norms")
 public class NormalOperationNormsController {
 	
 	@Autowired

@@ -14,7 +14,7 @@ import com.wks.caseengine.service.SiteService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/site")
+@RequestMapping("api/site")
 @Tag(name = "Site", description = "test Site")
 public class SiteController {
 	

@@ -25,7 +25,7 @@ import com.wks.caseengine.service.product.ProductService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/products")
+@RequestMapping("api/products")
 @Tag(name = "Product", description = "test Product")
 public class ProductController {
 	private ProductService productService;

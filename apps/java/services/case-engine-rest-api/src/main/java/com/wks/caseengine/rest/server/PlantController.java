@@ -11,13 +11,13 @@ import com.wks.caseengine.service.PlantService;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.rest.entity.Plant;
 
-@RestController
+@RestController(value = "api/plants")
 public class PlantController {
 	
 	@Autowired
 	private PlantService PlantService;
 	
-	@GetMapping(value = "/plants")
+	@GetMapping
 	public  ResponseEntity<AOPMessageVM> getPlantBySite(@RequestParam String siteId) {
 		AOPMessageVM response = PlantService.getPlantBySite(siteId); 
 		return ResponseEntity.status(response.getCode()).body(response);

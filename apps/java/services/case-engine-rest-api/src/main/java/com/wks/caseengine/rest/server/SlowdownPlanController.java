@@ -24,7 +24,7 @@ import com.wks.caseengine.service.SlowdownPlanService;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
-@RequestMapping("/slowdown-plan")
+@RequestMapping("api/slowdown-plan")
 public class SlowdownPlanController {
 	
 	@Autowired

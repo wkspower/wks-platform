@@ -14,7 +14,7 @@ import com.wks.caseengine.entity.CatalystAttributes;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.service.CatalystAttributesService;
 @RestController
-@RequestMapping("/catalyst-attributes")
+@RequestMapping("api/catalyst-attributes")
 public class CatalystAttributesController {
 	
 	@Autowired

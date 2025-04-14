@@ -19,7 +19,7 @@ import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
 import com.wks.caseengine.service.ConfigurationService;
 
 @RestController
-@RequestMapping("/configuration-data")
+@RequestMapping("api/configuration")
 public class ConfigurationController {
 	
 	@Autowired

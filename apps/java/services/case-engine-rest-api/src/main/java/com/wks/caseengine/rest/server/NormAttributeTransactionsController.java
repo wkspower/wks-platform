@@ -19,7 +19,7 @@ import com.wks.caseengine.service.ConfigurationService;
 import com.wks.caseengine.service.NormAttributeTransactionsService;
 ///
 @RestController
-@RequestMapping("task")
+@RequestMapping(value="api/catalyst")
 public class NormAttributeTransactionsController {
 	
 	@Autowired
@@ -28,7 +28,7 @@ public class NormAttributeTransactionsController {
 	@Autowired
 	private ConfigurationService configurationService;
 	
-	@GetMapping(value="/catalyst")
+	@GetMapping
 	public	String getCatalystSelectivityData(@RequestParam String year,@RequestParam UUID plantId,@RequestParam UUID siteId){
 		try {
 			System.out.println("result for configuration"+configurationService.getConfigurationData(year,plantId));
@@ -39,12 +39,12 @@ public class NormAttributeTransactionsController {
 		return null;
 	}
 	
-	@PutMapping(value="/catalyst")
+	@PutMapping
 	public NormAttributeTransactionsDTO updateNormAttributeTransactions(@RequestBody NormAttributeTransactionsDTO normAttributeTransactionsDTO) {
 		return normAttributeTransactionsService.updateNormAttributeTransactions(normAttributeTransactionsDTO);
 	}
 	
-	@PutMapping(value="/catalyst/data")
+	@PutMapping(value="/data")
 	public Boolean updateCatalystData(@RequestBody CatalystAttributesDTO catalystAttributesDTO) {
 		return normAttributeTransactionsService.updateCatalystData(catalystAttributesDTO);
 	}

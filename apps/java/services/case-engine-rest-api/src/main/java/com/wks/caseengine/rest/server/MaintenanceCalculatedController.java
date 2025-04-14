@@ -11,7 +11,7 @@ import com.wks.caseengine.dto.MaintenanceDetailsDTO;
 import com.wks.caseengine.service.MaintenanceCalculatedService;
 
 @RestController
-@RequestMapping("/maintenance-calculated-data")
+@RequestMapping("api/maintenance-calculated")
 public class MaintenanceCalculatedController {
 	
 	@Autowired

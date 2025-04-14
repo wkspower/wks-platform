@@ -11,13 +11,13 @@ import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.PlantMaintenanceTransactionService;
 
-@RestController
+@RestController(value = "api/plant-maintenance")
 public class PlantMaintenanceTransactionController {
 	
 	@Autowired
 	private PlantMaintenanceTransactionService plantMaintenanceTransactionService;
 	
-	@GetMapping(value = "/plant-maintenance-records")
+	@GetMapping
 	public ResponseEntity<AOPMessageVM> getAll() {
 		AOPMessageVM response = plantMaintenanceTransactionService.getAll(); 
 		return ResponseEntity.status(response.getCode()).body(response);

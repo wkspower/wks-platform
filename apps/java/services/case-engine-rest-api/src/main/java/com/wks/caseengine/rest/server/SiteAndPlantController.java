@@ -22,7 +22,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.PlantService;
 
 @RestController
-@RequestMapping("/site-and-plant")
+@RequestMapping("api/site-and-plant")
 public class SiteAndPlantController {
 
 	private final PlantService plantService;

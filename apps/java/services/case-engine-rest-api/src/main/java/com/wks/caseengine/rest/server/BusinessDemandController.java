@@ -19,7 +19,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.BusinessDemandService;
 
 @RestController
-@RequestMapping("/business-demand")
+@RequestMapping("api/business-demand")
 public class BusinessDemandController {
 	
 	@Autowired

@@ -14,13 +14,13 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.NormParametersService;
 
 @RestController
-@RequestMapping("task")
+@RequestMapping(value = "api/grades")
 public class NormParametersController {
 
 	@Autowired
 	NormParametersService normParametersService;
 
-	@GetMapping(value = "/grades")
+	@GetMapping
 	public ResponseEntity<AOPMessageVM> getAllGrades(@RequestParam String plantId) {
 		AOPMessageVM response = normParametersService.getAllGrades(plantId);
 		return ResponseEntity.status(response.getCode()).body(response);

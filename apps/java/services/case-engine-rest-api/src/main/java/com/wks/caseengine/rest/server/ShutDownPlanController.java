@@ -21,7 +21,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.ShutDownPlanService;
 
 @RestController
-@RequestMapping("/shutdown-plan")
+@RequestMapping("api/shutdown-plan")
 public class ShutDownPlanController {
 
 	@Autowired
