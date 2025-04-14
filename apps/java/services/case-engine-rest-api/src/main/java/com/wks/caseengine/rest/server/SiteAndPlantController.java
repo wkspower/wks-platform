@@ -37,8 +37,10 @@ public class SiteAndPlantController {
         return ResponseEntity.ok(data);
     }
     @GetMapping
-    public ResponseEntity<List<Object>> getPlantAndSite() {
+    public ResponseEntity<AOPMessageVM> getPlantAndSite() {
+		try{
         List<Object[]> listOfSite = plantService.getPlantAndSite();
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
         
         // Group plants by site ID
         Map<UUID, List<Object[]>> groupedBySite = listOfSite.stream()
