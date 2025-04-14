@@ -79,6 +79,14 @@ const defs = {
       manualProcesses: {
         title: 'Selecione o processo para iniciar',
       },
+      validation: {
+        pleaseCorrectErrors:
+          'Por favor, corrija os seguintes erros no formulário:',
+        requiredFieldsMissing:
+          'Campos obrigatórios estão ausentes ou contêm valores inválidos.',
+        pleaseFixErrors:
+          'Por favor, corrija os seguintes erros antes de enviar.',
+      },
     },
     tasklist: {
       datagrid: {
@@ -158,6 +166,25 @@ const defs = {
           couldNotUpload: 'Não foi possível fazer o upload do arquivo.',
         },
       },
+    },
+    validation: {
+      pleaseCorrectErrors:
+        'Por favor, corrija os seguintes erros no formulário:',
+      requiredFieldsMissing:
+        'Campos obrigatórios estão ausentes ou contêm valores inválidos.',
+      requiredField: 'Este campo é obrigatório.',
+      maxLength: 'O comprimento máximo é de {{length}} caracteres.',
+      minLength: 'O comprimento mínimo é de {{length}} caracteres.',
+      pattern: 'Formato inválido.',
+      invalidEmail: 'Por favor, insira um endereço de email válido.',
+      minValue: 'O valor mínimo é {{min}}.',
+      maxValue: 'O valor máximo é {{max}}.',
+      notANumber: 'Por favor, insira um número válido.',
+      invalidDate: 'Por favor, insira uma data válida.',
+      invalidUrl: 'Por favor, insira uma URL válida.',
+      custom: 'Valor inválido.',
+      genericError:
+        'O campo {{field}} contém um valor inválido. Por favor, revise e corrija.',
     },
   },
 }
