@@ -92,39 +92,39 @@ const ProductionNorms = ({ permissions }) => {
         )
         const rowsToSave = updatedRows.filter((row) => row.id !== 'total')
 
-      if (updatedRows.length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        return
-      }
-
-      const requiredFields = ['aopRemarks']
-
-      const validationMessage = validateFields(editedData, requiredFields)
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationMessage,
-          severity: 'error',
-        })
-        return
-      }
-      // const finalData = [...rowsToSave, editedData]
-      // console.log('calculatebtnClicked', calculatebtnClicked)
-
-      if (calculatebtnClicked == false) {
-        if (editedData.length === 0) {
+        if (updatedRows.length === 0) {
           setSnackbarOpen(true)
           setSnackbarData({
             message: 'No Records to Save!',
             severity: 'info',
           })
-          setCalculatebtnClicked(false)
           return
         }
+
+        const requiredFields = ['aopRemarks']
+
+        const validationMessage = validateFields(editedData, requiredFields)
+        if (validationMessage) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: validationMessage,
+            severity: 'error',
+          })
+          return
+        }
+        // const finalData = [...rowsToSave, editedData]
+        // console.log('calculatebtnClicked', calculatebtnClicked)
+
+        if (calculatebtnClicked == false) {
+          if (editedData.length === 0) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: 'No Records to Save!',
+              severity: 'info',
+            })
+            setCalculatebtnClicked(false)
+            return
+          }
 
           updateProductNormData(editedData)
         } else {
@@ -590,10 +590,10 @@ const ProductionNorms = ({ permissions }) => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         permissions={{
-          showAction: permissions?.showAction ?? true,
+          showAction: permissions?.showAction ?? false,
           addButton: permissions?.addButton ?? false,
           deleteButton: permissions?.deleteButton ?? false,
-          editButton: permissions?.editButton ?? true,
+          editButton: permissions?.editButton ?? false,
           showUnit: permissions?.showUnit ?? true,
           saveWithRemark: permissions?.saveWithRemark ?? true,
           showCalculate: permissions?.showCalculate ?? true,

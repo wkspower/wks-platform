@@ -157,62 +157,37 @@ const NormalOpNormsScreen = () => {
             })
             setLoading(false)
 
-          return
-        }
-        const requiredFields = ['aopRemarks']
-        const validationMessage = validateFields(data, requiredFields)
-        if (validationMessage) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: validationMessage,
-            severity: 'error',
-          })
-          setLoading(false)
-          return
-        }
+            return
+          }
+          const requiredFields = ['aopRemarks']
+          const validationMessage = validateFields(data, requiredFields)
+          if (validationMessage) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: validationMessage,
+              severity: 'error',
+            })
+            setLoading(false)
+            return
+          }
 
-        saveEditedData(data)
-      } catch (error) {
-        console.log('Error saving changes:', error)
-        setLoading(false)
+          saveEditedData(data)
+        } catch (error) {
+          console.log('Error saving changes:', error)
+          setLoading(false)
+        }
       }
-    }
 
-    if (lowerVertName == 'pe') {
-      try {
-        var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
-        var allRows = Array.from(apiRef.current.getRowModels().values())
-        allRows = allRows.filter((row) => !row.isGroupHeader)
-        const updatedRows = allRows.map(
-          (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
-        )
+      if (lowerVertName == 'pe') {
+        try {
+          var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
+          var allRows = Array.from(apiRef.current.getRowModels().values())
+          allRows = allRows.filter((row) => !row.isGroupHeader)
+          const updatedRows = allRows.map(
+            (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
+          )
 
-        if (updatedRows.length === 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          setLoading(false)
-
-          return
-        }
-
-        const requiredFields = ['aopRemarks']
-
-        const validationMessage = validateFields(editedData, requiredFields)
-        if (validationMessage) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: validationMessage,
-            severity: 'error',
-          })
-          setLoading(false)
-          return
-        }
-
-        if (calculatebtnClicked == false) {
-          if (editedData.length === 0) {
+          if (updatedRows.length === 0) {
             setSnackbarOpen(true)
             setSnackbarData({
               message: 'No Records to Save!',
@@ -220,9 +195,34 @@ const NormalOpNormsScreen = () => {
             })
             setLoading(false)
 
-            setCalculatebtnClicked(false)
             return
           }
+
+          const requiredFields = ['aopRemarks']
+
+          const validationMessage = validateFields(editedData, requiredFields)
+          if (validationMessage) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: validationMessage,
+              severity: 'error',
+            })
+            setLoading(false)
+            return
+          }
+
+          if (calculatebtnClicked == false) {
+            if (editedData.length === 0) {
+              setSnackbarOpen(true)
+              setSnackbarData({
+                message: 'No Records to Save!',
+                severity: 'info',
+              })
+              setLoading(false)
+
+              setCalculatebtnClicked(false)
+              return
+            }
 
             saveEditedData(editedData)
           } else {
@@ -499,10 +499,10 @@ const NormalOpNormsScreen = () => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         permissions={{
-          showAction: true,
+          showAction: false,
           addButton: false,
           deleteButton: false,
-          editButton: true,
+          editButton: false,
           showUnit: false,
           units: ['TPH', 'TPD'],
           saveWithRemark: true,

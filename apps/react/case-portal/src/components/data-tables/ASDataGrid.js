@@ -27,6 +27,7 @@ import {
   FileDownload,
   FileUpload,
 } from '../../../node_modules/@mui/icons-material/index'
+// import { useNavigate } from '../../../node_modules/react-router-dom/dist/index'
 
 const jioColors = {
   primaryBlue: '#387ec3',
@@ -86,6 +87,8 @@ const DataGridTable = ({
   const handleSearchChange = (event) => {
     setSearchText(event.target.value)
   }
+  // const navigate = useNavigate()
+
   // const [rowModesModel, setRowModesModel] = useState({})
   // const [changedRowIds, setChangedRowIds] = useState([])
   // const [columnFilters, setColumnFilters] = useState({})
@@ -209,7 +212,7 @@ const DataGridTable = ({
 
   const columns = useMemo(() => [
     ...defaultColumns,
-    ...(permissions?.showAction && permissions?.deleteButton
+    ...(permissions?.showAction
       ? [
           {
             field: 'actions',
@@ -268,7 +271,7 @@ const DataGridTable = ({
                     className='textPrimary'
                     onClick={handleEditClick(row)}
                     color='inherit'
-                    sx={{ display: 'none' }}
+                    // sx={{ display: 'none' }}
                   />
                 ),
                 permissions?.deleteButton && (
@@ -648,6 +651,7 @@ const DataGridTable = ({
           rows={filteredRows}
           sortingOrder={[]}
           disableSelectionOnClick
+          checkboxSelection={permissions?.showCheckBox}
           columns={columns.map((col) => ({
             ...col,
             cellClassName: col.isDisabled ? 'disabled-cell' : undefined,
@@ -906,6 +910,41 @@ const DataGridTable = ({
               loadingposition='start' // Use loadingPosition to control where the spinner appears
             >
               Save
+            </Button>
+          )}
+          {permissions?.nextBtn && (
+            <Button
+              variant='contained'
+              sx={{
+                backgroundColor: jioColors.primaryBlue,
+                color: jioColors.background,
+                borderRadius: 1,
+                padding: '8px 24px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                minWidth: 120,
+                '&:hover': {
+                  backgroundColor: '#143B6F',
+                  boxShadow: 'none',
+                },
+                '&.Mui-disabled': {
+                  backgroundColor: jioColors.primaryBlue,
+                  color: jioColors.background,
+                  opacity: 0.7,
+                },
+              }}
+              onClick={() => {
+                // Write any additional logic here before navigating.
+                // console.log('Navigating to dashboard')
+                // navigate('/user-form')
+                handleAddPlantSite()
+              }}
+              disabled={isButtonDisabled}
+              loading={loading} // Use the loading prop to trigger loading state
+              loadingposition='start' // Use loadingPosition to control where the spinner appears
+            >
+              Next
             </Button>
           )}
         </Box>

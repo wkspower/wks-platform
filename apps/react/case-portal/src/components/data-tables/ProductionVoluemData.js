@@ -184,63 +184,63 @@ const ProductionvolumeData = ({ permissions }) => {
           return
         }
 
-      const months = [
-        'april',
-        'may',
-        'june',
-        'july',
-        'august',
-        'september',
-        'october',
-        'november',
-        'december',
-        'january',
-        'february',
-        'march',
-      ]
+        const months = [
+          'april',
+          'may',
+          'june',
+          'july',
+          'august',
+          'september',
+          'october',
+          'november',
+          'december',
+          'january',
+          'february',
+          'march',
+        ]
 
-      const invalidRows = data.filter((row) => {
-        if (!row.normParametersFKId || !row.normParametersFKId.trim()) {
-          return true
-        }
+        const invalidRows = data.filter((row) => {
+          if (!row.normParametersFKId || !row.normParametersFKId.trim()) {
+            return true
+          }
 
-        for (const month of months) {
-          const value = row[month]
+          for (const month of months) {
+            const value = row[month]
+            if (
+              value === 0 ||
+              value === null ||
+              (typeof value === 'string' && !value.trim())
+            ) {
+              return true
+            }
+          }
+
+          const remarkValue = row.remark || row.remarks
+          const originalRemarkValue =
+            row.originalRemark || row.originalRemarks || ''
+
           if (
-            value === 0 ||
-            value === null ||
-            (typeof value === 'string' && !value.trim())
+            !remarkValue ||
+            (typeof remarkValue === 'string' && !remarkValue.trim()) ||
+            remarkValue.trim() === originalRemarkValue.trim()
           ) {
             return true
           }
-        }
 
-        const remarkValue = row.remark || row.remarks
-        const originalRemarkValue =
-          row.originalRemark || row.originalRemarks || ''
-
-        if (
-          !remarkValue ||
-          (typeof remarkValue === 'string' && !remarkValue.trim()) ||
-          remarkValue.trim() === originalRemarkValue.trim()
-        ) {
-          return true
-        }
-
-        return false
-      })
-
-      if (invalidRows.length > 0) {
-        setSnackbarData({
-          message:
-            'Please fill all fields in edited row and update the Remark!',
-          severity: 'error',
+          return false
         })
-        setSnackbarOpen(true)
-        return
-      } else {
-        editAOPMCCalculatedData(data)
-      }
+
+        if (invalidRows.length > 0) {
+          setSnackbarData({
+            message:
+              'Please fill all fields in edited row and update the Remark!',
+            severity: 'error',
+          })
+          setSnackbarOpen(true)
+          return
+        } else {
+          editAOPMCCalculatedData(data)
+        }
 
         unsavedChangesRef.current = {
           unsavedRows: {},
@@ -449,10 +449,10 @@ const ProductionvolumeData = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         handleCalculate={handleCalculate}
         permissions={{
-          showAction: permissions?.showAction ?? true,
+          showAction: permissions?.showAction ?? false,
           addButton: permissions?.addButton ?? false,
           deleteButton: permissions?.deleteButton ?? false,
-          editButton: permissions?.editButton ?? true,
+          editButton: permissions?.editButton ?? false,
           showUnit: permissions?.showUnit ?? true,
           saveWithRemark: permissions?.saveWithRemark ?? true,
           showRefreshBtn: permissions?.showRefreshBtn ?? true,

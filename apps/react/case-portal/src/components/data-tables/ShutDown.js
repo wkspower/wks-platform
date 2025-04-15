@@ -449,7 +449,7 @@ const ShutDown = ({ permissions }) => {
           showAction: permissions?.showAction ?? true,
           addButton: permissions?.addButton ?? true,
           deleteButton: permissions?.deleteButton ?? true,
-          editButton: permissions?.editButton ?? true,
+          editButton: permissions?.editButton ?? false,
           showUnit: permissions?.showUnit ?? false,
           saveWithRemark: permissions?.saveWithRemark ?? true,
           saveBtn: permissions?.saveBtn ?? true,

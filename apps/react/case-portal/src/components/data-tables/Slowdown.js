@@ -120,7 +120,7 @@ const SlowDown = ({ permissions }) => {
         productId: row.product,
         discription: row.discription,
         durationInHrs: parseFloat(findDuration('1', row)),
-           // durationInHrs: parseFloat(row.durationInHrs),
+        // durationInHrs: parseFloat(row.durationInHrs),
         maintEndDateTime: addTimeOffset(row.maintEndDateTime),
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         remark: row.remark,
@@ -176,24 +176,24 @@ const SlowDown = ({ permissions }) => {
           return
         }
 
-      const requiredFields = [
-        'maintStartDateTime',
-        'maintEndDateTime',
-        'discription',
-        'remark',
-        'rate',
-        // 'durationInHrs',
-        'product',
-      ]
-      const validationMessage = validateFields(data, requiredFields)
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationMessage,
-          severity: 'error',
-        })
-        return
-      }
+        const requiredFields = [
+          'maintStartDateTime',
+          'maintEndDateTime',
+          'discription',
+          'remark',
+          'rate',
+          // 'durationInHrs',
+          'product',
+        ]
+        const validationMessage = validateFields(data, requiredFields)
+        if (validationMessage) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: validationMessage,
+            severity: 'error',
+          })
+          return
+        }
 
         saveSlowDownData(data)
       } catch (error) {
@@ -621,7 +621,7 @@ const SlowDown = ({ permissions }) => {
           showAction: permissions?.showAction ?? true,
           addButton: permissions?.addButton ?? true,
           deleteButton: permissions?.deleteButton ?? true,
-          editButton: permissions?.editButton ?? true,
+          editButton: permissions?.editButton ?? false,
           showUnit: permissions?.showUnit ?? false,
           saveWithRemark: permissions?.saveWithRemark ?? true,
           saveBtn: permissions?.saveBtn ?? true,

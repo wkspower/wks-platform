@@ -355,10 +355,10 @@ const SelectivityData = (props) => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         permissions={{
-          showAction: true,
+          showAction: false,
           addButton: false,
           deleteButton: false,
-          editButton: true,
+          editButton: false,
           showUnit: false,
           saveWithRemark: true,
           saveBtn: true,

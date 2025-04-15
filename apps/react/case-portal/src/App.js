@@ -92,9 +92,6 @@ const App = () => {
       // console.log('No verticals found in idTokenParsed')
     }
 
-    // const allowedVerticalsMapping = allowedLinked.reduce((acc, obj) => {
-    //   return { ...acc, ...obj }
-    // }, {})
     const allowedVerticalsMapping = allowedLinked.reduce((acc, obj) => {
       // Convert each key to lowercase for consistent matching.
       const key = Object.keys(obj)[0].toLowerCase()

@@ -70,6 +70,8 @@ export const DataService = {
 
   getShutdownMonths,
   getUsersData,
+  getUserRoles,
+  getUserAllData,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -581,14 +583,6 @@ async function getAllGrades(keycloak) {
   }
 }
 async function getUsersData(keycloak) {
-  // var year = localStorage.getItem('year')
-  // var plantId = ''
-  // const storedPlant = localStorage.getItem('selectedPlant')
-  // if (storedPlant) {
-  //   const parsedPlant = JSON.parse(storedPlant)
-  //   plantId = parsedPlant.id
-  // }
-
   const url = `${Config.CaseEngineUrl}/task/users`
   const headers = {
     Accept: 'application/json',
@@ -598,6 +592,38 @@ async function getUsersData(keycloak) {
 
   try {
     const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getUserRoles(keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/users/roles`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getUserAllData(keycloak, userId) {
+  const url = `${Config.CaseEngineUrl}/task/users/${userId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'PUT', headers })
     return json(keycloak, resp)
   } catch (e) {
     console.log(e)
