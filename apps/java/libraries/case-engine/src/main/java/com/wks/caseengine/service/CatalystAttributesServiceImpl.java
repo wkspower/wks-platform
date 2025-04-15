@@ -9,8 +9,8 @@ import com.wks.caseengine.entity.CatalystAttributes;
 import com.wks.caseengine.repository.CatalystAttributesRepository;
 
 @Service
-public class CatalystAttributesServiceImpl implements CatalystAttributesService{
-	
+public class CatalystAttributesServiceImpl implements CatalystAttributesService {
+
 	@Autowired
 	private CatalystAttributesRepository catalystAttributesRepository;
 

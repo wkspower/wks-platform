@@ -43,32 +43,40 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	public List<ShutDownPlanDTO> findMaintenanceDetailsByPlantIdAndType(UUID plantId, String maintenanceTypeName,
 			String year) {
 		List<ShutDownPlanDTO> dtoList = new ArrayList<>();
-		List<Object[]> listOfSite = shutDownPlanRepository.findMaintenanceDetailsByPlantIdAndType(maintenanceTypeName,
-				plantId.toString(), year);
-		for (Object[] result : listOfSite) {
-			ShutDownPlanDTO dto = new ShutDownPlanDTO();
-			dto.setDiscription((String) result[0]);
-			dto.setMaintStartDateTime((Date) result[1]);
-			dto.setMaintEndDateTime((Date) result[2]);
-			dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null);
-			if (result[3] != null) {
-				int totalMinutes = (Integer) result[3];
-				int hours = totalMinutes / 60;
-				int minutes = totalMinutes % 60;
-				double durationInHrs = hours + (minutes / 100.0);
-				dto.setDurationInHrs(durationInHrs);
+		try {
+			List<Object[]> listOfSite = shutDownPlanRepository.findMaintenanceDetailsByPlantIdAndType(
+					maintenanceTypeName,
+					plantId.toString(), year);
+			for (Object[] result : listOfSite) {
+				ShutDownPlanDTO dto = new ShutDownPlanDTO();
+				dto.setDiscription((String) result[0]);
+				dto.setMaintStartDateTime((Date) result[1]);
+				dto.setMaintEndDateTime((Date) result[2]);
+				dto.setDurationInMins(result[3] != null ? ((Integer) result[3]) : null);
+				if (result[3] != null) {
+					int totalMinutes = (Integer) result[3];
+					int hours = totalMinutes / 60;
+					int minutes = totalMinutes % 60;
+					double durationInHrs = hours + (minutes / 100.0);
+					dto.setDurationInHrs(durationInHrs);
+				}
+				dto.setProduct((String) result[6]);
+				// FOR ID : pmt.Id
+				dto.setId(result[5] != null ? result[5].toString() : null);
+				if ((String) result[7] != null) {
+					dto.setRemark((String) result[7]);
+				} else {
+					dto.setRemark(null);
+				}
+				dto.setDisplayOrder(result[8] != null ? ((Integer) result[8]) : null);
+				dtoList.add(dto);
 			}
-			dto.setProduct((String) result[6]);
-			// FOR ID : pmt.Id
-			dto.setId(result[5] != null ? result[5].toString() : null);
-			if ((String) result[7] != null) {
-				dto.setRemark((String) result[7]);
-			} else {
-				dto.setRemark(null);
-			}
-			dto.setDisplayOrder(result[8] != null ? ((Integer) result[8]) : null);
-			dtoList.add(dto);
+		} catch (Exception e) {
+			System.err.println("Error while fetching maintenance details: " + e.getMessage());
+			e.printStackTrace();
+			throw new RuntimeException("Failed to fetch maintenance details by plant ID and type", e);
 		}
+
 		return dtoList;
 	}
 
@@ -165,7 +173,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						shutDownPlanDTO.setProductId(
 								plantMaintenanceTransactionRepository.findIdByNameAndPlantFkId("EO", plantId));
 						list.add(shutDownPlanDTO);
-						slowdownPlanService.saveShutdownData(plantId, list);
+						slowdownPlanService.savePlans(plantId, list);
 
 						List<ShutDownPlanDTO> list2 = new ArrayList<>();
 						shutDownPlanDTO.setDiscription(description + " Ramp Down");
@@ -174,7 +182,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						shutDownPlanDTO.setDurationInHrs(0.00);
 						shutDownPlanDTO.setDurationInMins(0);
 						list2.add(shutDownPlanDTO);
-						slowdownPlanService.saveShutdownData(plantId, list2);
+						slowdownPlanService.savePlans(plantId, list2);
 
 						List<ShutDownPlanDTO> list3 = new ArrayList<>();
 						shutDownPlanDTO.setDiscription(description + " Ramp Down");
@@ -183,7 +191,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						shutDownPlanDTO.setDurationInHrs(0.00);
 						shutDownPlanDTO.setDurationInMins(0);
 						list3.add(shutDownPlanDTO);
-						slowdownPlanService.saveShutdownData(plantId, list3);
+						slowdownPlanService.savePlans(plantId, list3);
 
 						List<ShutDownPlanDTO> list4 = new ArrayList<>();
 						shutDownPlanDTO.setDiscription(description + " Ramp Up");
@@ -192,7 +200,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						shutDownPlanDTO.setDurationInHrs(0.00);
 						shutDownPlanDTO.setDurationInMins(0);
 						list4.add(shutDownPlanDTO);
-						slowdownPlanService.saveShutdownData(plantId, list4);
+						slowdownPlanService.savePlans(plantId, list4);
 
 					}
 				} else {
@@ -246,18 +254,24 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	@Override
 	public List<ShutDownPlanDTO> editShutdownData(UUID plantMaintenanceTransactionId,
 			List<ShutDownPlanDTO> shutDownPlanDTOList) {
-		for (ShutDownPlanDTO shutDownPlanDTO : shutDownPlanDTOList) {
-			Optional<PlantMaintenanceTransaction> plantMaintenance = shutDownPlanRepository
-					.findById(plantMaintenanceTransactionId);
-			PlantMaintenanceTransaction plantMaintenanceTransaction = plantMaintenance.get();
-			plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-			plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
-			plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
-			plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
-			plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
-			plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
+		try {
+			for (ShutDownPlanDTO shutDownPlanDTO : shutDownPlanDTOList) {
+				Optional<PlantMaintenanceTransaction> plantMaintenance = shutDownPlanRepository
+						.findById(plantMaintenanceTransactionId);
+				PlantMaintenanceTransaction plantMaintenanceTransaction = plantMaintenance.get();
+				plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+				plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
+				plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+				plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+				plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+				plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
+			}
+			// TODO Auto-generated method stub
+		} catch (Exception e) {
+			System.err.println("Error while editing details: " + e.getMessage());
+			e.printStackTrace();
+			throw new RuntimeException("Failed to edit shutdown details by plant ID ", e);
 		}
-		// TODO Auto-generated method stub
 		return shutDownPlanDTOList;
 	}
 
@@ -270,13 +284,19 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	@Override
 	public List<MonthWiseDataDTO> getMonthlyShutdownHours(String auditYear, UUID plantId) {
 		List<MonthWiseDataDTO> monthWiseDataDTOList = new ArrayList<>();
-		List<Object[]> results = shutDownPlanRepository.getMonthlyShutdownHours(auditYear, plantId);
-		for (Object[] obj : results) {
-			MonthWiseDataDTO monthWiseDataDTO = new MonthWiseDataDTO();
-			monthWiseDataDTO.setMonthYear(obj[0].toString());
-			monthWiseDataDTO.setProduct(obj[1].toString());
-			monthWiseDataDTO.setTotalHours(Double.parseDouble(obj[2].toString()));
-			monthWiseDataDTOList.add(monthWiseDataDTO);
+		try {
+			List<Object[]> results = shutDownPlanRepository.getMonthlyShutdownHours(auditYear, plantId);
+			for (Object[] obj : results) {
+				MonthWiseDataDTO monthWiseDataDTO = new MonthWiseDataDTO();
+				monthWiseDataDTO.setMonthYear(obj[0].toString());
+				monthWiseDataDTO.setProduct(obj[1].toString());
+				monthWiseDataDTO.setTotalHours(Double.parseDouble(obj[2].toString()));
+				monthWiseDataDTOList.add(monthWiseDataDTO);
+			}
+		} catch (Exception e) {
+			System.err.println("Error while fetching shutdown details: " + e.getMessage());
+			e.printStackTrace();
+			throw new RuntimeException("Failed to fetch shutdown details by plant ID and type", e);
 		}
 		return monthWiseDataDTOList;
 	}

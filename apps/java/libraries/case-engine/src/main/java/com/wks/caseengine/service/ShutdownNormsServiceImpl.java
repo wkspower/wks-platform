@@ -266,24 +266,34 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			return Collections.emptyList(); // Return an empty list instead of 0
 		}
 	}
-	
+
 	public List<Object[]> getShutdownNorms(String year, UUID plantId, String viewName) {
-        // String sql = "SELECT TOP (1000) [Id], [Site_FK_Id], [Plant_FK_Id], [Vertical_FK_Id], " +
-        //         "[Material_FK_Id], [April], [May], [June], [July], [August], [September], " +
-        //         "[October], [November], [December], [January], [February], [March], " +
-        //         "[FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [MCUVersion], " +
-        //         "[UpdatedBy], [NormParameterTypeId], [NormParameterTypeName], " +
-        //         "[NormParameterTypeDisplayName], [NormTypeDisplayOrder], [MaterialDisplayOrder], [UOM] " +
-        //         "FROM " + viewName + " " +
-        //         "WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL) " +
-        //         "ORDER BY NormTypeDisplayOrder";
+		try {
+			// String sql = "SELECT TOP (1000) [Id], [Site_FK_Id], [Plant_FK_Id],
+			// [Vertical_FK_Id], " +
+			// "[Material_FK_Id], [April], [May], [June], [July], [August], [September], " +
+			// "[October], [November], [December], [January], [February], [March], " +
+			// "[FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [MCUVersion], " +
+			// "[UpdatedBy], [NormParameterTypeId], [NormParameterTypeName], " +
+			// "[NormParameterTypeDisplayName], [NormTypeDisplayOrder],
+			// [MaterialDisplayOrder], [UOM] " +
+			// "FROM " + viewName + " " +
+			// "WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS
+			// NULL) " +
+			// "ORDER BY NormTypeDisplayOrder";
 
-		String sql = String.format(QueryConstants.GET_SHUTDOWN_NORMS, viewName);
-        Query query = entityManager.createNativeQuery(sql);
-        query.setParameter("plantId", plantId);
-        query.setParameter("year", year);
+			String sql = String.format(QueryConstants.GET_SHUTDOWN_NORMS, viewName);
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("year", year);
 
-        return query.getResultList();
-    }
+			return query.getResultList();
+		} catch (Exception e) {
+			// Log error and rethrow a runtime exception
+			System.err.println("Exception occurred while fetching data: " + e.getMessage());
+			e.printStackTrace();
+			throw new RuntimeException("Unable to fetch shutdown norms data from database", e);
+		}
+	}
 
 }

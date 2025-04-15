@@ -56,16 +56,24 @@ public class PlantServiceImpl implements PlantService {
 
 	@Override
 	public List<Object[]> getPlantAndSite() {
-
-		List<Object[]> searchResults = siteRepository.getPlantAndSite();
-		return searchResults;
+		try {
+			List<Object[]> searchResults = siteRepository.getPlantAndSite();
+			return searchResults;
+		} catch (Exception e) {
+			System.err.println("Error while fetching plant and site data: " + e.getMessage());
+			throw new RuntimeException("Failed to fetch plant and site data", e);
+		}
 	}
 
 	@Override
 	@Transactional
 	public List getShutdownMonths(UUID plantId, String maintenanceName) {
-		return plantsRepository.getShutdownMonths(plantId, maintenanceName);
-
+		try {
+			return plantsRepository.getShutdownMonths(plantId, maintenanceName);
+		} catch (Exception e) {
+			System.err.println("Error while fetching shutdown months : " + e.getMessage());
+			throw new RuntimeException("Failed to fetch shut down months ", e);
+		}
 	}
 
 }

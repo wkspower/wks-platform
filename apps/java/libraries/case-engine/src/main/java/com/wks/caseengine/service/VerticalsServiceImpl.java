@@ -47,39 +47,43 @@ public class VerticalsServiceImpl implements VerticalsService{
 	 */
 	@Override
 	public List<VerticalsDTO> getAllVerticals() {
-		List<Verticals> verticalsList= verticalsRepository.findAll();
-		List<VerticalsDTO> verticalsDTOList=new ArrayList<>();
-		
-		for(Verticals verticals:verticalsList) {
-			VerticalsDTO verticalsDTO=new VerticalsDTO();
-			verticalsDTO.setDisplayName(verticals.getDisplayName());
-			verticalsDTO.setDisplayOrder(verticals.getDisplayOrder());
-			verticalsDTO.setId(verticals.getId().toString());
-			verticalsDTO.setIsActive(verticals.getIsActive());
-			verticalsDTO.setName(verticals.getName());
-			verticalsDTOList.add(verticalsDTO);
+		List<Verticals> verticalsList = verticalsRepository.findAll();
+		List<VerticalsDTO> verticalsDTOList = new ArrayList<>();
+		try {
+			for (Verticals verticals : verticalsList) {
+				VerticalsDTO verticalsDTO = new VerticalsDTO();
+				verticalsDTO.setDisplayName(verticals.getDisplayName());
+				verticalsDTO.setDisplayOrder(verticals.getDisplayOrder());
+				verticalsDTO.setId(verticals.getId().toString());
+				verticalsDTO.setIsActive(verticals.getIsActive());
+				verticalsDTO.setName(verticals.getName());
+				verticalsDTOList.add(verticalsDTO);
+			}
+			// TODO Auto-generated method stub
+			return verticalsDTOList;
+		} catch (Exception e) {
+			System.err.println("Error occurred while getting verticals: " + e.getMessage());
+			e.printStackTrace();
+			throw new RuntimeException("Failed to getting verticals", e);
 		}
-		
-		// TODO Auto-generated method stub
-		return verticalsDTOList;
 	}
 
 	@Override
 	public List<VerticalsDTO> getHierarchyData() {
-	    List<Object[]> results = verticalsRepository.getHierarchyData();
-	    Map<String, VerticalsDTO> verticalMap = new HashMap<>();
-
-	    for (Object[] row : results) {
-	        // Extracting values from the result set
-	        String verticalId = row[0].toString();
-	        String verticalName = row[1].toString();
-	        String verticalDisplayName = row[2] != null ? row[2].toString() : null;
-	        String siteId = row[3] != null ? row[3].toString() : null;
-	        String siteName = row[4] != null ? row[4].toString() : null;
-	        String siteDisplayName = row[5] != null ? row[5].toString() : null;
-	        String plantId = row[6] != null ? row[6].toString() : null;
-	        String plantName = row[7] != null ? row[7].toString() : null;
-	        String plantDisplayName = row[8] != null ? row[8].toString() : null;
+		List<Object[]> results = verticalsRepository.getHierarchyData();
+		Map<String, VerticalsDTO> verticalMap = new HashMap<>();
+		try {
+			for (Object[] row : results) {
+				// Extracting values from the result set
+				String verticalId = row[0].toString();
+				String verticalName = row[1].toString();
+				String verticalDisplayName = row[2] != null ? row[2].toString() : null;
+				String siteId = row[3] != null ? row[3].toString() : null;
+				String siteName = row[4] != null ? row[4].toString() : null;
+				String siteDisplayName = row[5] != null ? row[5].toString() : null;
+				String plantId = row[6] != null ? row[6].toString() : null;
+				String plantName = row[7] != null ? row[7].toString() : null;
+				String plantDisplayName = row[8] != null ? row[8].toString() : null;
 
 	        // Fetch or create VerticalDTO
 	        VerticalsDTO verticalDTO = verticalMap.computeIfAbsent(verticalId, id -> {
@@ -106,22 +110,27 @@ public class VerticalsServiceImpl implements VerticalsService{
 	                return s;
 	            });
 
-	            if (plantId != null) {
-	                PlantsDTO plantDTO = new PlantsDTO();
-	                plantDTO.setId(plantId);
-	                plantDTO.setName(plantName);
-	                plantDTO.setDisplayName(plantDisplayName);
-	                siteDTO.getPlants().add(plantDTO);
-	            }
-	        }
-	    }
+					if (plantId != null) {
+						PlantsDTO plantDTO = new PlantsDTO();
+						plantDTO.setId(plantId);
+						plantDTO.setName(plantName);
+						plantDTO.setDisplayName(plantDisplayName);
+						siteDTO.getPlants().add(plantDTO);
+					}
+				}
+			}
 
-	    // **Sort sites by the number of plants in descending order**
-	    for (VerticalsDTO vertical : verticalMap.values()) {
-	        vertical.getSites().sort((s1, s2) -> Integer.compare(s2.getPlants().size(), s1.getPlants().size()));
-	    }
+			// **Sort sites by the number of plants in descending order**
+			for (VerticalsDTO vertical : verticalMap.values()) {
+				vertical.getSites().sort((s1, s2) -> Integer.compare(s2.getPlants().size(), s1.getPlants().size()));
+			}
 
-	    return new ArrayList<>(verticalMap.values());
+			return new ArrayList<>(verticalMap.values());
+		} catch (Exception e) {
+			System.err.println("Error occurred while getting hierarchy data : " + e.getMessage());
+			e.printStackTrace();
+			throw new RuntimeException("Failed to get hierarchy data", e);
+		}
 	}
 
 }

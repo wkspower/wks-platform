@@ -35,8 +35,8 @@ public interface ProductMonthWiseDataRepository extends JpaRepository<ProductMon
 	        "  FROM dbo.product_month_plant_wise_data " +
 	        "  WHERE type = :type " +
 	        ") AS month_data " +
-	        "WHERE ((year = :currentYear " +
-	        "GROUP BY month_number, plant_id", 
+	        "WHERE year = :currentYear " +
+	        "GROUP BY month_number, plant_id" , 
 	        nativeQuery = true)
 	List<Object[]> getMonthWiseDataByTypeAndYear(@Param("type") String type, 
 	                                             @Param("currentYear") String currentYear

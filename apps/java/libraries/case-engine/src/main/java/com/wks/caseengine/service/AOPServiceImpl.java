@@ -28,13 +28,13 @@ public class AOPServiceImpl implements AOPService {
 
 	@Autowired
 	private AOPRepository aopRepository;
-	
+
 	@Autowired
 	private PlantsRepository plantsRepository;
-	
+
 	@Autowired
 	private SiteRepository siteRepository;
-	
+
 	@Autowired
 	private VerticalsRepository verticalRepository;
 
@@ -46,35 +46,40 @@ public class AOPServiceImpl implements AOPService {
 
 		List<AOP> listAOP = aopRepository.findAll();
 		List<AOPDTO> aopList = new ArrayList<>();
+		try {
+			for (AOP aop : listAOP) {
+				AOPDTO aopDTO = new AOPDTO();
+				aopDTO.setId(aop.getId().toString());
+				aopDTO.setAopCaseId(aop.getAopCaseId());
+				aopDTO.setAopRemarks(aop.getAopRemarks());
+				aopDTO.setAopStatus(aop.getAopStatus());
+				aopDTO.setAopType(aop.getAopType());
+				aopDTO.setAopYear(aop.getAopYear());
+				aopDTO.setApril(aop.getApril());
+				aopDTO.setAug(aop.getAug());
+				aopDTO.setAvgTPH(aop.getAvgTPH());
+				aopDTO.setDec(aop.getDec());
+				aopDTO.setFeb(aop.getFeb());
+				aopDTO.setJan(aop.getJan());
+				aopDTO.setJuly(aop.getJuly());
+				aopDTO.setJune(aop.getJune());
+				aopDTO.setMarch(aop.getMarch());
+				aopDTO.setMay(aop.getMay());
+				// aOPDTO.setNormItem(aOP.getNormItem());
+				aopDTO.setNov(aop.getNov());
+				aopDTO.setOct(aop.getOct());
+				aopDTO.setPlantFKId(aop.getPlantFkId().toString());
+				aopDTO.setSep(aop.getSep());
+				aopList.add(aopDTO);
+			}
 
-		for (AOP aop : listAOP) {
-			AOPDTO aopDTO = new AOPDTO();
-			aopDTO.setId(aop.getId().toString());
-			aopDTO.setAopCaseId(aop.getAopCaseId());
-			aopDTO.setAopRemarks(aop.getAopRemarks());
-			aopDTO.setAopStatus(aop.getAopStatus());
-			aopDTO.setAopType(aop.getAopType());
-			aopDTO.setAopYear(aop.getAopYear());
-			aopDTO.setApril(aop.getApril());
-			aopDTO.setAug(aop.getAug());
-			aopDTO.setAvgTPH(aop.getAvgTPH());
-			aopDTO.setDec(aop.getDec());
-			aopDTO.setFeb(aop.getFeb());
-			aopDTO.setJan(aop.getJan());
-			aopDTO.setJuly(aop.getJuly());
-			aopDTO.setJune(aop.getJune());
-			aopDTO.setMarch(aop.getMarch());
-			aopDTO.setMay(aop.getMay());
-			// aOPDTO.setNormItem(aOP.getNormItem());
-			aopDTO.setNov(aop.getNov());
-			aopDTO.setOct(aop.getOct());
-			aopDTO.setPlantFKId(aop.getPlantFkId().toString());
-			aopDTO.setSep(aop.getSep());
-			aopList.add(aopDTO);
+			// TODO Auto-generated method stub
+			return aopList;
+		} catch (Exception e) {
+			System.err.println("Error occurred while getting AOP data: " + e.getMessage());
+			e.printStackTrace();
+			throw new RuntimeException("Failed to get AOP data: ", e);
 		}
-
-		// TODO Auto-generated method stub
-		return aopList;
 	}
 
 	@Override
@@ -132,110 +137,110 @@ public class AOPServiceImpl implements AOPService {
 
 	@Override
 	public AOPMessageVM updateAOP(List<AOPDTO> aopDTOList) {
-		AOPMessageVM aopMessageVM=new AOPMessageVM();
-		List<AOP> aopList=new ArrayList<>();
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<AOP> aopList = new ArrayList<>();
 		try {
-		for (AOPDTO aopDTO : aopDTOList) {
+			for (AOPDTO aopDTO : aopDTOList) {
 
-			AOP aop = null;
-			Plants plant = null;
-			Sites site = null;
-			Verticals vertical = null;
-			if (aopDTO.getSiteFKId() == null || aopDTO.getVerticalFKId() == null) {
-				plant = plantsRepository.findById(UUID.fromString(aopDTO.getPlantFKId())).get();
-				site = siteRepository.findById(plant.getSiteFkId()).get();
-				vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			}
+				AOP aop = null;
+				Plants plant = null;
+				Sites site = null;
+				Verticals vertical = null;
+				if (aopDTO.getSiteFKId() == null || aopDTO.getVerticalFKId() == null) {
+					plant = plantsRepository.findById(UUID.fromString(aopDTO.getPlantFKId())).get();
+					site = siteRepository.findById(plant.getSiteFkId()).get();
+					vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+				}
 
-			if (aopDTO.getId() == null) {
-				UUID Site = null;
-				UUID Vertical = null;
-				UUID Material = null;
-				UUID Plant = null;
-				if (aopDTO.getSiteFKId() != null) {
-					Site = UUID.fromString(aopDTO.getSiteFKId());
+				if (aopDTO.getId() == null) {
+					UUID Site = null;
+					UUID Vertical = null;
+					UUID Material = null;
+					UUID Plant = null;
+					if (aopDTO.getSiteFKId() != null) {
+						Site = UUID.fromString(aopDTO.getSiteFKId());
+					} else {
+						Site = site.getId();
+					}
+					if (aopDTO.getVerticalFKId() != null) {
+						Vertical = UUID.fromString(aopDTO.getVerticalFKId());
+					} else {
+						Vertical = vertical.getId();
+					}
+					if (aopDTO.getMaterialFKId() != null) {
+						Material = UUID.fromString(aopDTO.getMaterialFKId());
+					}
+					if (aopDTO.getPlantFKId() != null) {
+						Plant = UUID.fromString(aopDTO.getPlantFKId());
+					}
+					Optional<UUID> Id = aopRepository.findAopIdByFilters(Site, Vertical, Material, Plant,
+							aopDTO.getAopYear());
+					aop = new AOP();
+					if (Id != null && !Id.isEmpty()) {
+						aop.setId(Id.get());
+					}
+
+					String caseId = aopDTO.getAopYear() + "-AOP-" + "-V1";
+					aop.setAopStatus("draft");
+					aop.setAopType("production");
+					aop.setAopCaseId(caseId);
+				} else if (aopDTO.getId().contains("#")) {
+					aop = new AOP();
+					aop.setId(null);
+					String caseId = aopDTO.getAopYear() + "-AOP-" + "-V1";
+					aop.setAopStatus("draft");
+					aop.setAopType("production");
+					aop.setAopCaseId(caseId);
 				} else {
-					Site = site.getId();
+					aop = aopRepository.findById(UUID.fromString(aopDTO.getId())).get();
+					aop.setAopCaseId(aopDTO.getAopCaseId());
+					aop.setAopStatus(aopDTO.getAopStatus());
+					aop.setAopType(aopDTO.getAopType());
+				}
+				aop.setAopRemarks(aopDTO.getAopRemarks());
+				aop.setAopType(aopDTO.getAopType());
+				aop.setAopYear(aopDTO.getAopYear());
+				aop.setApril(aopDTO.getApril());
+				aop.setAug(aopDTO.getAug());
+				aop.setAvgTPH(aopDTO.getAvgTPH());
+				aop.setDec(aopDTO.getDec());
+				aop.setFeb(aopDTO.getFeb());
+				aop.setJan(aopDTO.getJan());
+				aop.setJuly(aopDTO.getJuly());
+				aop.setJune(aopDTO.getJune());
+				aop.setMarch(aopDTO.getMarch());
+				aop.setMay(aopDTO.getMay());
+				// aOP.setNormItem(aOPDTO.getNormItem());
+				aop.setNov(aopDTO.getNov());
+				aop.setOct(aopDTO.getOct());
+
+				if (aopDTO.getSiteFKId() != null) {
+					aop.setSiteFkId(UUID.fromString(aopDTO.getSiteFKId()));
+				} else {
+					aop.setSiteFkId(site.getId());
 				}
 				if (aopDTO.getVerticalFKId() != null) {
-					Vertical = UUID.fromString(aopDTO.getVerticalFKId());
+					aop.setVerticalFkId(UUID.fromString(aopDTO.getVerticalFKId()));
 				} else {
-					Vertical = vertical.getId();
+					aop.setVerticalFkId(vertical.getId());
 				}
 				if (aopDTO.getMaterialFKId() != null) {
-					Material = UUID.fromString(aopDTO.getMaterialFKId());
+					aop.setMaterialFKId(UUID.fromString(aopDTO.getMaterialFKId()));
 				}
 				if (aopDTO.getPlantFKId() != null) {
-					Plant = UUID.fromString(aopDTO.getPlantFKId());
-				}
-				Optional<UUID> Id = aopRepository.findAopIdByFilters(Site, Vertical, Material, Plant,
-						aopDTO.getAopYear());
-				aop = new AOP();
-				if (Id != null && !Id.isEmpty()) {
-					aop.setId(Id.get());
+					aop.setPlantFkId(UUID.fromString(aopDTO.getPlantFKId()));
 				}
 
-				String caseId = aopDTO.getAopYear() + "-AOP-" + "-V1";
-				aop.setAopStatus("draft");
-				aop.setAopType("production");
-				aop.setAopCaseId(caseId);
-			} else if (aopDTO.getId().contains("#")) {
-				aop = new AOP();
-				aop.setId(null);
-				String caseId = aopDTO.getAopYear() + "-AOP-" + "-V1";
-				aop.setAopStatus("draft");
-				aop.setAopType("production");
-				aop.setAopCaseId(caseId);
-			} else {
-				aop = aopRepository.findById(UUID.fromString(aopDTO.getId())).get();
-				aop.setAopCaseId(aopDTO.getAopCaseId());
-				aop.setAopStatus(aopDTO.getAopStatus());
-				aop.setAopType(aopDTO.getAopType());
-			}
-			aop.setAopRemarks(aopDTO.getAopRemarks());
-			aop.setAopType(aopDTO.getAopType());
-			aop.setAopYear(aopDTO.getAopYear());
-			aop.setApril(aopDTO.getApril());
-			aop.setAug(aopDTO.getAug());
-			aop.setAvgTPH(aopDTO.getAvgTPH());
-			aop.setDec(aopDTO.getDec());
-			aop.setFeb(aopDTO.getFeb());
-			aop.setJan(aopDTO.getJan());
-			aop.setJuly(aopDTO.getJuly());
-			aop.setJune(aopDTO.getJune());
-			aop.setMarch(aopDTO.getMarch());
-			aop.setMay(aopDTO.getMay());
-			// aOP.setNormItem(aOPDTO.getNormItem());
-			aop.setNov(aopDTO.getNov());
-			aop.setOct(aopDTO.getOct());
+				aop.setSep(aopDTO.getSep());
+				aop.setAopYear(aopDTO.getAopYear());
 
-			if (aopDTO.getSiteFKId() != null) {
-				aop.setSiteFkId(UUID.fromString(aopDTO.getSiteFKId()));
-			} else {
-				aop.setSiteFkId(site.getId());
+				aopRepository.save(aop);
+				aopList.add(aop);
 			}
-			if (aopDTO.getVerticalFKId() != null) {
-				aop.setVerticalFkId(UUID.fromString(aopDTO.getVerticalFKId()));
-			} else {
-				aop.setVerticalFkId(vertical.getId());
-			}
-			if (aopDTO.getMaterialFKId() != null) {
-				aop.setMaterialFKId(UUID.fromString(aopDTO.getMaterialFKId()));
-			}
-			if (aopDTO.getPlantFKId() != null) {
-				aop.setPlantFkId(UUID.fromString(aopDTO.getPlantFKId()));
-			}
-
-			aop.setSep(aopDTO.getSep());
-			aop.setAopYear(aopDTO.getAopYear());
-			
-			aopRepository.save(aop);
-			aopList.add(aop);
-		}
-		aopMessageVM.setCode(200);
-		aopMessageVM.setMessage("Data saved successfully");
-		aopMessageVM.setData(aopList);
-		return aopMessageVM;
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data saved successfully");
+			aopMessageVM.setData(aopList);
+			return aopMessageVM;
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to save data", ex);
 		}
@@ -247,7 +252,7 @@ public class AOPServiceImpl implements AOPService {
 		try {
 			List<AOPDTO> dtoList = new ArrayList<>();
 
-		List<Object[]> maintainsData = aopRepository.checkMaintainance(plantId, year);
+			List<Object[]> maintainsData = aopRepository.checkMaintainance(plantId, year);
 			// if(maintainsData != null && !maintainsData.isEmpty()) {
 			if (1 == 1) {
 				Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
@@ -256,12 +261,11 @@ public class AOPServiceImpl implements AOPService {
 				String verticalName = plantsRepository.findVerticalNameByPlantId(plant.getId());
 
 				List<Object[]> list = executeDynamicMaintenanceCalculation(
-					verticalName,
-					plant.getId().toString(),
-					site.getId().toString(),
-					vertical.getId().toString(),
-					year
-				);
+						verticalName,
+						plant.getId().toString(),
+						site.getId().toString(),
+						vertical.getId().toString(),
+						year);
 
 				List<AOP> objList = aopRepository.findAllByAopYearAndPlantFkId(year, UUID.fromString(plantId));
 
@@ -307,23 +311,29 @@ public class AOPServiceImpl implements AOPService {
 	@Override
 	public List<Object[]> executeDynamicMaintenanceCalculation(String verticalName, String plantId, String siteId,
 			String verticalId, String aopYear) {
+		try {
+			// Construct dynamic stored procedure name
+			String procedureName = verticalName + "_HMD_MaintenanceCalculation";
 
-		// Construct dynamic stored procedure name
-		String procedureName = verticalName + "_HMD_MaintenanceCalculation";
+			// Create a native query to execute the stored procedure
+			String sql = "EXEC " + procedureName
+					+ " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @aopYear = :aopYear";
 
-		// Create a native query to execute the stored procedure
-		String sql = "EXEC " + procedureName
-				+ " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @aopYear = :aopYear";
+			Query query = entityManager.createNativeQuery(sql);
 
-		Query query = entityManager.createNativeQuery(sql);
+			// Set parameters
+			query.setParameter("plantId", plantId);
+			query.setParameter("siteId", siteId);
+			query.setParameter("verticalId", verticalId);
+			query.setParameter("aopYear", aopYear);
 
-		// Set parameters
-		query.setParameter("plantId", plantId);
-		query.setParameter("siteId", siteId);
-		query.setParameter("verticalId", verticalId);
-		query.setParameter("aopYear", aopYear);
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Invalid argument passed to the query: " + e.getMessage(), e);
+		} catch (Exception e) {
+			throw new RuntimeException("Unexpected error occurred while executing dynamic maintenance calculation.", e);
+		}
 
-		return query.getResultList();
 	}
 
 }

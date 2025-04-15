@@ -9,15 +9,25 @@ import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface ShutDownPlanService {
-	
-	public List<ShutDownPlanDTO> findMaintenanceDetailsByPlantIdAndType(UUID plantId,String maintenanceTypeName, String year);
-	public AOPMessageVM saveShutdownPlantData(UUID plantId,List<ShutDownPlanDTO> shutDownPlanDTOList);
+
+	public List<ShutDownPlanDTO> findMaintenanceDetailsByPlantIdAndType(UUID plantId, String maintenanceTypeName,
+			String year);
+
+	public AOPMessageVM saveShutdownPlantData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList);
+
 	public UUID findPlantMaintenanceId(String productName);
+
 	public void saveShutdownData(PlantMaintenanceTransaction plantMaintenanceTransaction);
-	public UUID findIdByPlantIdAndMaintenanceTypeName(UUID plantId,String maintenanceTypeName);
+
+	public UUID findIdByPlantIdAndMaintenanceTypeName(UUID plantId, String maintenanceTypeName);
+
 	public PlantMaintenanceTransaction editShutDownPlanData(UUID plantMaintenanceTransactionId);
+
 	public void deletePlanData(UUID plantMaintenanceTransactionId);
-	public List<ShutDownPlanDTO> editShutdownData(UUID plantMaintenanceTransactionId, List<ShutDownPlanDTO> shutDownPlanDTOList);
-	public List<MonthWiseDataDTO> getMonthlyShutdownHours(String auditYear,  UUID plantId);
+
+	public List<ShutDownPlanDTO> editShutdownData(UUID plantMaintenanceTransactionId,
+			List<ShutDownPlanDTO> shutDownPlanDTOList);
+
+	public List<MonthWiseDataDTO> getMonthlyShutdownHours(String auditYear, UUID plantId);
 
 }

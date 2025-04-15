@@ -32,6 +32,7 @@ import com.wks.caseengine.cases.definition.service.CaseDefinitionService;
 import com.wks.caseengine.exception.GlobalExceptionHandler;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.exception.RestResourceNotFoundException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -49,33 +50,38 @@ public class CaseDefinitionController {
 	
 
 	@GetMapping
-	public ResponseEntity<List<CaseDefinition>> find(@RequestParam(required = false) Boolean deployed) {
-		return ResponseEntity.ok(caseDefinitionService.find(Optional.ofNullable(deployed)));
+	public ResponseEntity<AOPMessageVM> find(@RequestParam(required = false) Boolean deployed) {
+		AOPMessageVM response = caseDefinitionService.find(Optional.ofNullable(deployed));
+		return ResponseEntity.status(response.getCode()).body(response);
 	}
 
 	@GetMapping(value = "/{caseDefId}")
-	public ResponseEntity<CaseDefinition> get(@PathVariable final String caseDefId) {
+	public ResponseEntity<AOPMessageVM> get(@PathVariable final String caseDefId) {
 		try {
-			return ResponseEntity.ok(caseDefinitionService.get(caseDefId));
+
+			AOPMessageVM response= caseDefinitionService.get(caseDefId);
+			return ResponseEntity.status(response.getCode()).body(response);
 		} catch (CaseDefinitionNotFoundException e) {
 			throw new RestResourceNotFoundException(e.getMessage());
 		}
 	}
 
 	@PostMapping
-	public ResponseEntity<CaseDefinition> save(@RequestBody final CaseDefinition caseDefinition) {
+	public ResponseEntity<AOPMessageVM> save(@RequestBody final CaseDefinition caseDefinition) {
 		try {
-			return ResponseEntity.ok(caseDefinitionService.create(caseDefinition));
+			AOPMessageVM response = caseDefinitionService.create(caseDefinition);
+			return ResponseEntity.status(response.getCode()).body(response);
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("caseDefinitionId", e);
 		}
 	}
 
 	@PutMapping(value = "/{caseDefId}")
-	public ResponseEntity<CaseDefinition> update(@PathVariable final String caseDefId,
+	public ResponseEntity<AOPMessageVM> update(@PathVariable final String caseDefId,
 			@RequestBody final CaseDefinition caseDefinition) {
 		try {
-			return ResponseEntity.ok(caseDefinitionService.update(caseDefId, caseDefinition));
+			AOPMessageVM response = caseDefinitionService.update(caseDefId, caseDefinition);
+			return ResponseEntity.status(response.getCode()).body(response);
 		} catch (CaseDefinitionNotFoundException e) {
 			throw new RestResourceNotFoundException(e.getMessage());
 		}

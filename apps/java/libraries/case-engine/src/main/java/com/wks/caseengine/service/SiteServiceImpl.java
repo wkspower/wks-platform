@@ -24,10 +24,16 @@ public class SiteServiceImpl implements SiteService {
 
 	@Override
 	public List<Sites> getAllSites() {
-		String queryStr = "SELECT * FROM [dbo].[Sites]";
-		Query query = entityManager.createNativeQuery(queryStr, Sites.class);
-		List<Sites> searchResults = query.getResultList();
-		return searchResults;
+		try {
+			String queryStr = "SELECT * FROM [dbo].[Sites]";
+			Query query = entityManager.createNativeQuery(queryStr, Sites.class);
+			List<Sites> searchResults = query.getResultList();
+			return searchResults;
+		} catch (Exception e) {
+			System.err.println("Error while fetching all sites: " + e.getMessage());
+			e.printStackTrace();
+			throw new RuntimeException("Failed to fetch all sites", e);
+		}
 	}
 
 	@Override
@@ -38,18 +44,24 @@ public class SiteServiceImpl implements SiteService {
 	@Override
 	public List<SitesDTO> getSites() {
 		List<Sites> sitesList = siteRepository.findAll();
-		List<SitesDTO> sitesDTOList = new ArrayList<>();
-		for (Sites sites : sitesList) {
-			SitesDTO sitesDTO = new SitesDTO();
-			sitesDTO.setDisplayName(sites.getDisplayName());
-			sitesDTO.setDisplayOrder(sites.getDisplayOrder());
-			sitesDTO.setId(sites.getId().toString());
-			sitesDTO.setIsActive(sites.getIsActive());
-			sitesDTO.setName(sites.getName());
-			sitesDTOList.add(sitesDTO);
+		try {
+			List<SitesDTO> sitesDTOList = new ArrayList<>();
+			for (Sites sites : sitesList) {
+				SitesDTO sitesDTO = new SitesDTO();
+				sitesDTO.setDisplayName(sites.getDisplayName());
+				sitesDTO.setDisplayOrder(sites.getDisplayOrder());
+				sitesDTO.setId(sites.getId().toString());
+				sitesDTO.setIsActive(sites.getIsActive());
+				sitesDTO.setName(sites.getName());
+				sitesDTOList.add(sitesDTO);
+			}
+			// TODO Auto-generated method stub
+			return sitesDTOList;
+		} catch (Exception e) {
+			System.err.println("Error while fetching sites details: " + e.getMessage());
+			e.printStackTrace();
+			throw new RuntimeException("Failed to fetch sites details by plant ID and type", e);
 		}
-		// TODO Auto-generated method stub
-		return sitesDTOList;
 	}
 
 }

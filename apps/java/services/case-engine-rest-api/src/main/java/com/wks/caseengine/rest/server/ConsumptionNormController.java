@@ -22,10 +22,7 @@ public class ConsumptionNormController {
 	
 	@Autowired
 	private ConsumptionNormService consumptionNormService;
-	
 
-	
-	
 	@GetMapping
 	public ResponseEntity<AOPMessageVM> getAOPConsumptionNorm(@RequestParam String plantId,@RequestParam String year){
 		 AOPMessageVM response	=consumptionNormService.getAOPConsumptionNorm(plantId,year);
