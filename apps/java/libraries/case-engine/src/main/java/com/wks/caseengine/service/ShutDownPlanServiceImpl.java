@@ -14,9 +14,14 @@ import com.wks.caseengine.dto.MonthWiseDataDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
+import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantMaintenanceRepository;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
 import com.wks.caseengine.repository.ShutDownPlanRepository;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -37,6 +42,9 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	
 	@Autowired
 	private PlantsService plantsService;
+	
+	@Autowired
+	private NormParametersRepository normParametersRepository;
 
 	@Override
 	public List<ShutDownPlanDTO> findMaintenanceDetailsByPlantIdAndType(UUID plantId,String maintenanceTypeName, String year) {
@@ -85,11 +93,39 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	}
 
 	
-
+	@Transactional
 	@Override
-	public void deletePlanData(UUID plantMaintenanceTransactionId) {
+	public void deletePlanData(UUID plantMaintenanceTransactionId,UUID plantId)  {
 		Optional<PlantMaintenanceTransaction> plantMaintenanceTransaction=plantMaintenanceTransactionRepository.findById(plantMaintenanceTransactionId);
-		plantMaintenanceTransactionRepository.delete(plantMaintenanceTransaction.get());	
+		String verticalName=plantsService.findVerticalNameByPlantId(plantId);
+		if(verticalName.equalsIgnoreCase("MEG")) {
+			int updatedRows=0;
+			UUID normparameterId1=normParametersRepository.findNormParameterIdByNameAndPlant("EO", plantId);
+			// Original date
+			Date originalCreatedOn = plantMaintenanceTransaction.get().getCreatedOn();
+
+			// Format then parse back to Date (to ensure trimmed to "yyyy-MM-dd HH:mm:ss.SSS")
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+			String formatted = sdf.format(originalCreatedOn);
+			Date createdOn=null;
+			try {
+				 createdOn = sdf.parse(formatted);
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+			
+
+			// Logging
+			System.out.println("createdOn = " + formatted);
+
+			// Now pass to repo
+			updatedRows = plantMaintenanceTransactionRepository.deleteRampActivitiesByNormAndDate(normparameterId1, createdOn);
+			System.out.println("updatedRows"+updatedRows);
+			UUID normparameterId2=normParametersRepository.findNormParameterIdByNameAndPlant("EOE", plantId);
+			updatedRows=plantMaintenanceTransactionRepository.deleteRampActivitiesByNormAndDate(normparameterId2,createdOn);
+			System.out.println("updatedRows"+updatedRows);
+		}	
+		plantMaintenanceTransactionRepository.delete(plantMaintenanceTransaction.get());
 	}
 
 	@Override
@@ -141,9 +177,9 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 				plantMaintenanceTransaction.setVersion("V1");
 				plantMaintenanceTransaction.setCreatedOn(new Date());
 				plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
-
+				
 				plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
-	
+				
 				if (shutDownPlanDTO.getProductId() != null) {
 					plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
 				}
@@ -163,6 +199,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 				System.out.println("verticalName"+verticalName);
 				String description = shutDownPlanDTO.getDiscription();
 				 if(verticalName.equalsIgnoreCase("MEG")) {
+					shutDownPlanDTO.setCreatedOn(plantMaintenanceTransaction.getCreatedOn()); 
 					shutDownPlanDTO.setMaintEndDateTime(shutDownPlanDTO.getMaintStartDateTime());
 					List<ShutDownPlanDTO> list = new ArrayList<>();
 					shutDownPlanDTO.setDurationInHrs(0.00);

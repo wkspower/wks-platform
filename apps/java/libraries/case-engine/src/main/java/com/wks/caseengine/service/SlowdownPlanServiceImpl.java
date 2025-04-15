@@ -107,8 +107,12 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 			if(shutDownPlanDTO.getMaintStartDateTime()!=null){
 				plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
 			}
-			
-			plantMaintenanceTransaction.setCreatedOn(new Date());
+			System.out.println("shutDownPlanDTO.getCreatedOn()"+shutDownPlanDTO.getCreatedOn());
+			if(shutDownPlanDTO.getCreatedOn()==null) {
+				plantMaintenanceTransaction.setCreatedOn(new Date());
+			}else {
+				plantMaintenanceTransaction.setCreatedOn(shutDownPlanDTO.getCreatedOn());
+			}
 			plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
 			plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 			plantMaintenanceTransaction.setName("Default Name"); 
@@ -146,7 +150,12 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService{
 			plantMaintenanceTransaction.setUser("system");
 			plantMaintenanceTransaction.setName("Default Name");
 			plantMaintenanceTransaction.setVersion("V1");
-			plantMaintenanceTransaction.setCreatedOn(new Date());
+			System.out.println("shutDownPlanDTO.getCreatedOn()"+shutDownPlanDTO.getCreatedOn());
+			if(shutDownPlanDTO.getCreatedOn()==null) {
+				plantMaintenanceTransaction.setCreatedOn(new Date());
+			}else {
+				plantMaintenanceTransaction.setCreatedOn(shutDownPlanDTO.getCreatedOn());
+			}
 			plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
 			plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
 

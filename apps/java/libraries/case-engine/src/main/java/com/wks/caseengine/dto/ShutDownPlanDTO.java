@@ -40,4 +40,5 @@ public class ShutDownPlanDTO {
 	private String audityear;
 	private Integer displayOrder;
 	private String verticalName;
+	private Date createdOn;
 }

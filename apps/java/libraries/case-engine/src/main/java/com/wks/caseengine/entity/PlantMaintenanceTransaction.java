@@ -62,10 +62,4 @@ public class PlantMaintenanceTransaction {
     @Transient
     private Double durationInHrs;
 
-    @PrePersist
-    protected void onCreate() {
-        if (createdOn == null) {
-            createdOn = new Date();
-        }
-    }
 }

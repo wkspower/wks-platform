@@ -1,21 +1,35 @@
 package com.wks.caseengine.repository;
 
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 
-
 @Repository
-public interface PlantMaintenanceTransactionRepository extends JpaRepository<PlantMaintenanceTransaction, UUID>{
-	
+public interface PlantMaintenanceTransactionRepository extends JpaRepository<PlantMaintenanceTransaction, UUID> {
+
 	@Query(value = "SELECT Id FROM MaintenanceTypes WHERE Name = :name", nativeQuery = true)
-    UUID findIdByName(@Param("name") String name);
-	
-	 @Query(value = "SELECT Id FROM NormParameters WHERE Name = :name AND Plant_FK_Id = :plantFkId", nativeQuery = true)
-	    UUID findIdByNameAndPlantFkId(@Param("name") String name, @Param("plantFkId") UUID plantFkId);
+	UUID findIdByName(@Param("name") String name);
+
+	@Query(value = "SELECT Id FROM NormParameters WHERE Name = :name AND Plant_FK_Id = :plantFkId", nativeQuery = true)
+	UUID findIdByNameAndPlantFkId(@Param("name") String name, @Param("plantFkId") UUID plantFkId);
+
+	@Modifying
+	@Query(value = "DELETE FROM PlantMaintenanceTransaction "
+	        + "WHERE (Discription LIKE '%Ramp Up%' OR Discription LIKE '%Ramp Down%') "
+	        + "AND NormParameter_FK_Id = :normParamId "
+	        + "AND CreatedOn = :createdOn", nativeQuery = true)
+	int deleteRampActivitiesByNormAndDate(
+	    @Param("normParamId") UUID normParamId,
+	    @Param("createdOn") Date createdOn
+	);
+
+
 }
