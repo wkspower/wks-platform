@@ -15,17 +15,16 @@ import java.util.List;
 import java.util.Optional;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
-import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface CaseDefinitionService {
 
-	AOPMessageVM find(final Optional<Boolean> deployed);
+	List<CaseDefinition> find(final Optional<Boolean> deployed);
 
-	AOPMessageVM get(final String caseDefId);
+	CaseDefinition get(final String caseDefId);
 
-	AOPMessageVM create(final CaseDefinition caseDefinition);
+	CaseDefinition create(final CaseDefinition caseDefinition);
 
-	AOPMessageVM update(final String caseDefId, CaseDefinition caseDefinition);
+	CaseDefinition update(final String caseDefId, CaseDefinition caseDefinition);
 
 	void delete(final String caseDefinitionId);
 

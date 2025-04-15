@@ -29,7 +29,6 @@ import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.cases.instance.email.CaseEmail;
 import com.wks.caseengine.cases.instance.email.CaseEmailService;
 import com.wks.caseengine.exception.RestResourceNotFoundException;
-import com.wks.caseengine.message.vm.AOPMessageVM;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -42,47 +41,37 @@ public class CaseEmailController {
 
 	@Autowired
 	private CaseEmailService caseEmailService;
-
+	
 	@GetMapping
-	public ResponseEntity<AOPMessageVM> find(@RequestParam(required = false) String caseInstanceBusinessKey,
+	public ResponseEntity<List<CaseEmail>> find(@RequestParam(required = false) String caseInstanceBusinessKey,
 			@RequestParam(required = false) String caseDefinitionId) {
 
-		AOPMessageVM response = caseEmailService.find(Optional.ofNullable(caseInstanceBusinessKey));
-
-		return ResponseEntity.status(response.getCode()).body(response);
+		return ResponseEntity.ok(caseEmailService.find(Optional.ofNullable(caseInstanceBusinessKey)));
 	}
 
 	@PostMapping
-	public ResponseEntity<AOPMessageVM> start(@RequestBody final CaseEmail caseEmail) {
-		System.out.println("in case email start 123" + caseEmail.toString());
+	public ResponseEntity<Void> start(@RequestBody final CaseEmail caseEmail) {
+        System.out.println("in case email start 123"+ caseEmail.toString());
 		caseEmail.setFrom("rakeshittam27@gmail.com");
-		// caseEmail.setCaseDefinitionId("send-email-outbound");
+		//caseEmail.setCaseDefinitionId("send-email-outbound");
 		log.debug("### Email processing started ###");
 		log.debug("To: " + caseEmail.getTo());
 		log.debug("From: " + caseEmail.getFrom());
 		log.debug("Subject: " + caseEmail.getSubject());
 		log.debug("Body: " + caseEmail.getBody());
+		
+
 		log.debug("Definition Id: " + caseEmail.getCaseDefinitionId());
 
-		AOPMessageVM response = new AOPMessageVM();
-		try {
-			AOPMessageVM result = caseEmailService.start(caseEmail);
-			log.debug("### Email processing finished ###");
-			return ResponseEntity.status(result.getCode()).body(result);
-
-		} catch (Exception e) {
-			log.error("Error during email processing", e);
-			response.setCode(500);
-			response.setMessage("Email processing failed: " + e.getMessage());
-			response.setData(null);
-			return ResponseEntity.status(response.getCode()).body(response);
-		}
+		caseEmailService.start(caseEmail);
+        System.out.println("in case email start 123 end");
+		log.debug("### Email processing finished ###");
+		return ResponseEntity.noContent().build();
 
 	}
 
 	@PostMapping(value = "/save")
-	public ResponseEntity<AOPMessageVM> save(@RequestBody final CaseEmail caseEmail) {
-
+	public ResponseEntity<CaseEmail> save(@RequestBody final CaseEmail caseEmail) {
 		log.debug("### Email processing started ###");
 		log.debug("To: " + caseEmail.getTo());
 		log.debug("From: " + caseEmail.getFrom());
@@ -90,36 +79,35 @@ public class CaseEmailController {
 		log.debug("Body: " + caseEmail.getBody());
 		log.debug("Definition Id: " + caseEmail.getCaseDefinitionId());
 
-		AOPMessageVM response = caseEmailService.save(caseEmail);
-
 		log.debug("### Email processing finished ###");
-		return ResponseEntity.status(response.getCode()).body(response);
+		return ResponseEntity.ok(caseEmailService.save(caseEmail));
 
 	}
 
 	@PatchMapping(value = "/{id}/sent", consumes = "application/merge-patch+json")
-	public ResponseEntity<AOPMessageVM> markAsSent(@PathVariable final String id,
+	public ResponseEntity<CaseEmail> markAsSent(@PathVariable final String id,
 			@RequestBody final CaseEmail mergePatch) {
-		log.debug("### Marking case email as sent ###");
+
 		try {
-			System.out.println("in case email markAsSent 123" + mergePatch.toString());
-			AOPMessageVM response = caseEmailService.markAsSent(id, mergePatch.getReceivedDateTime());
-			return ResponseEntity.status(response.getCode()).body(response);
+			System.out.println("in case email markAsSent 123"+ mergePatch.toString());
+			caseEmailService.markAsSent(id, mergePatch.getReceivedDateTime());
 		} catch (CaseInstanceNotFoundException e) {
 			throw new RestResourceNotFoundException(e.getMessage());
 		}
+
+		return ResponseEntity.noContent().build();
 	}
 
 	@PatchMapping(value = "/{id}", consumes = "application/merge-patch+json")
-	public ResponseEntity<AOPMessageVM> mergePatch(@PathVariable final String id,
-			@RequestBody final CaseEmail mergePatch) {
+	public ResponseEntity<CaseEmail> mergePatch(@PathVariable final String id, @RequestBody final CaseEmail mergePatch) {
 		try {
-			System.out.println("in case email mergePatch 123" + mergePatch.toString());
-			AOPMessageVM response = caseEmailService.patch(id, mergePatch);
-			return ResponseEntity.status(response.getCode()).body(response);
+			System.out.println("in case email mergePatch 123"+ mergePatch.toString());
+			caseEmailService.patch(id, mergePatch);
 		} catch (CaseInstanceNotFoundException e) {
 			throw new RestResourceNotFoundException(e.getMessage());
 		}
+
+		return ResponseEntity.noContent().build();
 	}
 
 }
