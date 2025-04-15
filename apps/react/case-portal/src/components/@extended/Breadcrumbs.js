@@ -11,6 +11,8 @@ import MainCard from '../MainCard'
 import { useSession } from 'SessionStoreContext'
 import Config from 'consts/index'
 import { useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
+import { setScreenTitle } from 'store/reducers/dataGridStore'
 
 const Breadcrumbs = ({ navigation, title, ...others }) => {
   const keycloak = useSession()
@@ -18,6 +20,12 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   const { verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const plantName = JSON.parse(localStorage.getItem('selectedPlant'))?.name
+  const siteName = JSON.parse(localStorage.getItem('selectedSite'))?.name
+  const verticalName = JSON.parse(
+    localStorage.getItem('selectedVertical'),
+  )?.name
+  const dispatch = useDispatch()
+
   // const siteName = JSON.parse(localStorage.getItem('selectedSite'))?.name;
 
   const [notification, setNotification] = useState({
@@ -41,7 +49,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
         setNotification({
           open: true,
           message: 'Basis not found! Please try again.',
-          severity: 'error',
+          severity: 'info',
         })
         return
       }
@@ -59,6 +67,15 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   const [main, setMain] = useState()
   const [item, setItem] = useState()
 
+  useEffect(() => {
+    var title = item?.title
+    dispatch(
+      setScreenTitle({
+        title,
+      }),
+    )
+  }, [item])
+
   // set active item state
   const getCollapse = (menu) => {
     if (menu.children) {
@@ -69,6 +86,8 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
           if (location.pathname === collapse.url) {
             setMain(menu)
             setItem(collapse)
+            // console.log('collapse', collapse)
+            var title = collapse?.title
           }
         }
         return false
@@ -134,7 +153,8 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
         display='flex'
         alignItems='center'
       >
-        {title1}
+        {/* HIDE THE TITLE NAME  */}
+        {/* {title1} */}
         <Tooltip title={`Basis for ${itemTitle}`}>
           <IconButton
             size='medium'
@@ -173,10 +193,10 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
             alignItems='flex-start'
             spacing={1}
           >
-            <Grid item sx={{ ml: 1.5 }}>
-              <MuiBreadcrumbs aria-label='breadcrumb'>
-                {/* HIDE HOME OPTION FROM Navigators MENU */}
-                {/* <Typography
+            {/* <Grid item sx={{ ml: 1.5, display: none }}> */}
+            {/* <MuiBreadcrumbs aria-label='breadcrumb'> */}
+            {/* HIDE HOME OPTION FROM Navigators MENU */}
+            {/* <Typography
                   component={Link}
                   to='/home'
                   color='textSecondary'
@@ -185,10 +205,43 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                 >
                   Home
                 </Typography> */}
-                {mainContent}
+
+            {/* {mainContent} */}
+
+            {/* <Typography
+                  component='div'
+                  sx={{
+                    textDecoration: 'none',
+                    fontWeight: 800,
+                    color: 'black',
+                    // fontStyle: 'italic',
+                    fontSize: '1rem',
+                  }}
+                >
+                  {verticalName} / {siteName} / {plantName}
+                </Typography>
                 {itemContent}
               </MuiBreadcrumbs>
+            </Grid> */}
+
+            <Grid item sx={{ ml: 1.5 }}>
+              <Typography
+                component='div'
+                sx={{
+                  textDecoration: 'none',
+                  fontWeight: 800,
+                  color: 'black',
+                  fontSize: '1rem',
+                  display: 'flex', // Use flex to align items inline
+                  alignItems: 'center', // Vertically align items in the center (optional)
+                }}
+              >
+                {verticalName} / {siteName} / {plantName}
+                {itemContent} {/* The icon will now appear next to the text */}
+              </Typography>
             </Grid>
+
+            {/* HIDE THE TITLE NAME */}
             {title && (
               <Grid item sx={{ mt: 2 }}>
                 <Typography variant='h5'>{item.title}</Typography>

@@ -19,10 +19,17 @@ const dataGridStore = createSlice({
     setIsBlocked(state, action) {
       state.isBlocked = action.payload
     },
+    setScreenTitle(state, action) {
+      state.screenTitle = action.payload
+    },
   },
 })
 
 export default dataGridStore.reducer
 
-export const { setSitePlantChange, setVerticalChange, setIsBlocked } =
-  dataGridStore.actions
+export const {
+  setSitePlantChange,
+  setVerticalChange,
+  setIsBlocked,
+  setScreenTitle,
+} = dataGridStore.actions

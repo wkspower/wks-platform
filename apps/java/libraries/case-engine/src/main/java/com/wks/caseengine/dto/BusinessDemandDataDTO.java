@@ -46,5 +46,6 @@ public class BusinessDemandDataDTO {
     private String verticalFKId;
     private Boolean isEditable;
     private Boolean isVisible;
+    private String UOM;
 
 }

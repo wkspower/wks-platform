@@ -6,6 +6,8 @@ import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import { useSelector } from 'react-redux'
 import NumericInputOnly from 'utils/NumericInputOnly'
+import { StartDateTimeEditCell } from 'utils/StartDateTimeEditCell'
+import { EndDateTimeEditCell } from 'utils/EndDateTimeEditCell'
 import Tooltip from '@mui/material/Tooltip'
 
 import Autocomplete from '@mui/material/Autocomplete'
@@ -120,7 +122,6 @@ const SlowDown = ({ permissions }) => {
         productId: row.product,
         discription: row.discription,
         durationInHrs: parseFloat(findDuration('1', row)),
-        // durationInHrs: parseFloat(row.durationInHrs),
         maintEndDateTime: addTimeOffset(row.maintEndDateTime),
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         remark: row.remark,
@@ -453,15 +454,12 @@ const SlowDown = ({ permissions }) => {
       type: 'dateTime',
       minWidth: 200,
       editable: true,
-      valueGetter: (params) => {
-        const value = params
-        const parsedDate = value
-          ? dayjs(value, 'D MMM, YYYY, h:mm:ss A').toDate()
-          : null
-        return parsedDate
-      },
+      renderEditCell: (params) => <StartDateTimeEditCell {...params} />,
       valueFormatter: (params) => {
-        return params ? dayjs(params).format('DD/MM/YYYY, h:mm:ss A') : ''
+        const value = params
+        return value && dayjs(value).isValid()
+          ? dayjs(value).format('DD/MM/YYYY, h:mm:ss A')
+          : ''
       },
     },
 
@@ -471,15 +469,12 @@ const SlowDown = ({ permissions }) => {
       type: 'dateTime',
       minWidth: 200,
       editable: true,
-      valueGetter: (params) => {
-        const value = params
-        const parsedDate = value
-          ? dayjs(value, 'D MMM, YYYY, h:mm:ss A').toDate()
-          : null
-        return parsedDate
-      },
+      renderEditCell: (params) => <EndDateTimeEditCell {...params} />,
       valueFormatter: (params) => {
-        return params ? dayjs(params).format('DD/MM/YYYY, h:mm:ss A') : ''
+        const value = params
+        return value && dayjs(value).isValid()
+          ? dayjs(value).format('DD/MM/YYYY, h:mm:ss A')
+          : ''
       },
     },
 
@@ -621,7 +616,7 @@ const SlowDown = ({ permissions }) => {
           showAction: permissions?.showAction ?? true,
           addButton: permissions?.addButton ?? true,
           deleteButton: permissions?.deleteButton ?? true,
-          editButton: permissions?.editButton ?? false,
+          editButton: permissions?.editButton ?? true,
           showUnit: permissions?.showUnit ?? false,
           saveWithRemark: permissions?.saveWithRemark ?? true,
           saveBtn: permissions?.saveBtn ?? true,

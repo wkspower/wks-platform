@@ -18,6 +18,8 @@ import {
   IconFile, // General file icon
   IconFileText, // For textual reports
   // IconFlow, // For workflow-related processes
+  IconSettingsAutomation,
+  IconUserCog,
 } from '@tabler/icons-react'
 
 import i18n from '../i18n'
@@ -29,6 +31,8 @@ const icons = {
   IconArchive,
   IconSquareAsterisk,
   IconList,
+  IconUserCog,
+  IconSettingsAutomation,
   IconDatabase,
   IconChartBar,
   IconSettings,
@@ -133,7 +137,7 @@ const workspace = {
       title: i18n.t('menu.workflow'),
       type: 'item',
       url: '/workflow',
-      icon: icons?.IconList,
+      icon: icons?.IconSettingsAutomation,
       breadcrumbs: true,
     },
     {
@@ -141,7 +145,7 @@ const workspace = {
       title: i18n.t('menu.userManage'),
       type: 'item',
       url: '/user-management',
-      icon: icons?.IconSettings,
+      icon: icons?.IconUserCog,
       breadcrumbs: true,
     },
   ],

@@ -122,39 +122,44 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	List<Object[]> findByYearAndPlantFkIdPE(@Param("year") String year, @Param("plantFKId") UUID plantFKId);
 
 	@Query(value = """
-			SELECT
-			NP.Id AS NormParameter_FK_Id,
-			MAX(CASE WHEN NAT.AOPMonth = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan,
-			MAX(CASE WHEN NAT.AOPMonth = '2' THEN NAT.AttributeValue ELSE NULL END) AS Feb,
-			MAX(CASE WHEN NAT.AOPMonth = '3' THEN NAT.AttributeValue ELSE NULL END) AS Mar,
-			MAX(CASE WHEN NAT.AOPMonth = '4' THEN NAT.AttributeValue ELSE NULL END) AS Apr,
-			MAX(CASE WHEN NAT.AOPMonth = '5' THEN NAT.AttributeValue ELSE NULL END) AS May,
-			MAX(CASE WHEN NAT.AOPMonth = '6' THEN NAT.AttributeValue ELSE NULL END) AS Jun,
-			MAX(CASE WHEN NAT.AOPMonth = '7' THEN NAT.AttributeValue ELSE NULL END) AS Jul,
-			MAX(CASE WHEN NAT.AOPMonth = '8' THEN NAT.AttributeValue ELSE NULL END) AS Aug,
-			MAX(CASE WHEN NAT.AOPMonth = '9' THEN NAT.AttributeValue ELSE NULL END) AS Sep,
-			MAX(CASE WHEN NAT.AOPMonth = '10' THEN NAT.AttributeValue ELSE NULL END) AS Oct,
-			MAX(CASE WHEN NAT.AOPMonth = '11' THEN NAT.AttributeValue ELSE NULL END) AS Nov,
-			MAX(CASE WHEN NAT.AOPMonth = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec,
-			MAX(NAT.Remarks) AS Remarks ,
-			MAX(NAT.Id) AS NormAttributeTransaction_Id,
-			MAX(NAT.AuditYear) AS AuditYear,
-			MAX(NP.UOM) AS UOM
+				SELECT
+			    NP.Id AS NormParameter_FK_Id,
+			    MAX(CASE WHEN NAT.AOPMonth = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan,
+			    MAX(CASE WHEN NAT.AOPMonth = '2' THEN NAT.AttributeValue ELSE NULL END) AS Feb,
+			    MAX(CASE WHEN NAT.AOPMonth = '3' THEN NAT.AttributeValue ELSE NULL END) AS Mar,
+			    MAX(CASE WHEN NAT.AOPMonth = '4' THEN NAT.AttributeValue ELSE NULL END) AS Apr,
+			    MAX(CASE WHEN NAT.AOPMonth = '5' THEN NAT.AttributeValue ELSE NULL END) AS May,
+			    MAX(CASE WHEN NAT.AOPMonth = '6' THEN NAT.AttributeValue ELSE NULL END) AS Jun,
+			    MAX(CASE WHEN NAT.AOPMonth = '7' THEN NAT.AttributeValue ELSE NULL END) AS Jul,
+			    MAX(CASE WHEN NAT.AOPMonth = '8' THEN NAT.AttributeValue ELSE NULL END) AS Aug,
+			    MAX(CASE WHEN NAT.AOPMonth = '9' THEN NAT.AttributeValue ELSE NULL END) AS Sep,
+			    MAX(CASE WHEN NAT.AOPMonth = '10' THEN NAT.AttributeValue ELSE NULL END) AS Oct,
+			    MAX(CASE WHEN NAT.AOPMonth = '11' THEN NAT.AttributeValue ELSE NULL END) AS Nov,
+			    MAX(CASE WHEN NAT.AOPMonth = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec,
+			    MAX(NAT.Remarks) AS Remarks,
+			    MAX(NAT.Id) AS NormAttributeTransaction_Id,
+			    MAX(NAT.AuditYear) AS AuditYear,
+			    MAX(NP.UOM) AS UOM,
+			    MAX(NT.NormName) AS NormTypeName
 			FROM NormParameters NP
 			JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id
 			LEFT JOIN NormAttributeTransactions NAT
-			ON NAT.NormParameter_FK_Id = NP.Id
-			AND NAT.AuditYear = :year
-			WHERE NPT.Name = 'Configuration'  AND NP.Plant_FK_Id = :plantFKId
+			    ON NAT.NormParameter_FK_Id = NP.Id
+			    AND NAT.AuditYear = :year
+			LEFT JOIN NormTypes NT
+			    ON NP.NormType_FK_Id = NT.Id
+			WHERE NPT.Name = 'Configuration'
+			  AND NP.Plant_FK_Id = :plantFKId
 			GROUP BY NP.Id
 			ORDER BY NP.Id;
-			""", nativeQuery = true)
+						""", nativeQuery = true)
 	List<Object[]> findByYearAndPlantFkIdMEG(@Param("year") String year, @Param("plantFKId") UUID plantFKId);
 
 	@Query(value = """
 				SELECT * FROM NormAttributeTransactions d WHERE d.NormParameter_FK_Id = :normParameterFKId  AND d.AOPMonth = :month AND d.AuditYear = :auditYear
 			""", nativeQuery = true)
-	Optional<NormAttributeTransactions> findByNormParameterFKIdAndAOPMonthAndAuditYear(@Param("normParameterFKId") UUID normParameterFKId,
-			@Param("month")	Integer month,@Param("auditYear") String auditYear);
+	Optional<NormAttributeTransactions> findByNormParameterFKIdAndAOPMonthAndAuditYear(
+			@Param("normParameterFKId") UUID normParameterFKId,
+			@Param("month") Integer month, @Param("auditYear") String auditYear);
 
 }

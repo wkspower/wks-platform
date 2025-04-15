@@ -18,6 +18,7 @@ import {
 } from 'store/reducers/dataGridStore'
 import { DataService } from 'services/DataService'
 import honLogo from 'assets/images/hon_white.png' //WHITE COLOR
+import { useSelector } from 'react-redux'
 
 const HeaderContent = ({ keycloak }) => {
   const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
@@ -33,6 +34,10 @@ const HeaderContent = ({ keycloak }) => {
   const [allPlants, setAllPlants] = useState([])
   const dispatch = useDispatch()
   const [year, setYear] = useState('')
+
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { screenTitle } = dataGridStore
+  const screenTitleName = screenTitle?.title
 
   // Helper: Extract allowed site IDs and allowed plant IDs from Keycloak token
   const getAllowedFilter = () => {
@@ -391,7 +396,8 @@ const HeaderContent = ({ keycloak }) => {
 
   return (
     <>
-      <Box sx={{ ml: 3, mt: 1 }}>
+      {/* HIDE HONEYWELL LOGO */}
+      {/* <Box sx={{ ml: 3, mt: 1 }}>
         {' '}
         <img
           src={honLogo}
@@ -403,6 +409,17 @@ const HeaderContent = ({ keycloak }) => {
             display: 'block',
           }}
         />
+      </Box> */}
+
+      <Box sx={{ ml: 3, mt: 1 }}>
+        {' '}
+        <Typography
+          variant='body1'
+          color='white'
+          sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: '1rem' }}
+        >
+          {'AOP - ' + screenTitleName}
+        </Typography>
       </Box>
 
       {matchesXs && <Search />}

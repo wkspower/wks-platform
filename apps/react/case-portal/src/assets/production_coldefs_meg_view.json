@@ -6,14 +6,12 @@
   {
     "field": "aopCaseId",
     "headerName": "Case ID",
-    "minWidth": 120,
     "editable": false
   },
   {
     "field": "normParametersFKId",
     "headerName": "Particulars",
-    "editable": false,
-    "minWidth": 225
+    "editable": false
   },
   {
     "field": "april",
@@ -114,7 +112,6 @@
   {
     "field": "avgTph",
     "headerName": "AVG",
-    "minWidth": 150,
     "editable": false
   }
 ]

@@ -126,6 +126,11 @@ export const MainRoutes = (
             element: <BusinessDemand />,
           },
           {
+            path: 'configuration',
+            element: <ConfigurationTable />,
+            // element: <SelectivityData />,
+          },
+          {
             path: 'production-volume-data',
             element: <ProductionvolumeData />,
           },
@@ -142,11 +147,6 @@ export const MainRoutes = (
             element: <ProductionNorms />,
           },
           {
-            path: 'configuration',
-            element: <ConfigurationTable />,
-            // element: <SelectivityData />,
-          },
-          {
             path: 'normal-op-norms',
             element: <NormalOpNormsScreen />,
           },
@@ -154,6 +154,10 @@ export const MainRoutes = (
             path: 'shutdown-norms',
             element: <ShutdownNorms />,
           },
+          // {
+          //   path: 'slowdown-norms',
+          //   element: <SlowdownNorms />,
+          // },
 
           {
             path: 'shutdown-plan',

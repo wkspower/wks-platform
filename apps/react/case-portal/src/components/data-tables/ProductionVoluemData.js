@@ -449,18 +449,19 @@ const ProductionvolumeData = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         handleCalculate={handleCalculate}
         permissions={{
-          showAction: permissions?.showAction ?? false,
+          showAction: permissions?.showAction ?? true,
           addButton: permissions?.addButton ?? false,
           deleteButton: permissions?.deleteButton ?? false,
-          editButton: permissions?.editButton ?? false,
+          editButton: permissions?.editButton ?? true,
           showUnit: permissions?.showUnit ?? true,
           saveWithRemark: permissions?.saveWithRemark ?? true,
           showRefreshBtn: permissions?.showRefreshBtn ?? true,
-          saveBtn: permissions?.saveBtn ?? true,
+          saveBtn: permissions?.saveBtn ?? false,
+          // permissions?.saveBtn ?? lowerVertName == 'meg' ? false : true,
           units: ['TPH', 'TPD'],
           customHeight: permissions?.customHeight,
-          showCalculate:
-            permissions?.showCalculate ?? lowerVertName == 'meg' ? true : false,
+          showCalculate: permissions?.showCalculate ?? false,
+          // permissions?.showCalculate ?? lowerVertName == 'meg' ? true : false,
         }}
       />
     </div>

@@ -14,9 +14,15 @@
     "minWidth": 150
   },
   {
+    "field": "UOM",
+    "headerName": "UOM",
+    "editable": false
+  },
+  {
     "field": "april",
     "headerName": 4,
     "editable": true,
+
     "align": "left",
     "headerAlign": "left"
   },
@@ -60,6 +66,7 @@
     "align": "left",
     "headerAlign": "left"
   },
+
   {
     "field": "oct",
     "headerName": 10,

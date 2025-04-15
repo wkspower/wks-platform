@@ -38,7 +38,7 @@ public class BusinessDemandDTO {
     private String plantFkId;
     private Float TPH;
     private Float avgTPH;
-
+    private String UOM;
 
    public  Float getMonthValue(Integer month){
        Float value = 0.0F;

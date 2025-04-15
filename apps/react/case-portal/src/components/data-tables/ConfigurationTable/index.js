@@ -18,22 +18,41 @@ const ConfigurationTable = () => {
   const [startUpRows, setStartUpRows] = useState([])
   const [otherLossRows, setOtherLossRows] = useState([])
   const [shutdownNormsRows, setShutdownRows] = useState([])
+  const [productionRows, setProductionRows] = useState([])
+  const [consumptionRows, setConsumptionRows] = useState([])
   const [gradeData, setGradeData] = useState([])
 
   const fetchData = async () => {
     setLoading(true)
     try {
       const data = await DataService.getCatalystSelectivityData(keycloak)
-      // console.log(data)
+
       if (lowerVertName === 'meg') {
-        // For 'meg', simply map items without grouping.
         const formattedData = data.map((item, index) => ({
           ...item,
           idFromApi: item.id,
           id: index,
           originalRemark: item.remarks,
+          // normType: index % 2 === 0 ? 'Production' : 'Consumption',
         }))
-        setRows(formattedData)
+
+        const productionData = formattedData
+          .filter((item) => item.normType === 'Production')
+          .map((item, index) => ({
+            ...item,
+            srNo: index + 1, // Production srNo starts from 1
+          }))
+
+        const consumptionData = formattedData
+          .filter((item) => item.normType === 'Consumption')
+          .map((item, index) => ({
+            ...item,
+            srNo: index + 1, // Consumption srNo starts from 1
+          }))
+
+        setProductionRows(productionData)
+        setConsumptionRows(consumptionData)
+        setRows(formattedData) // Optional: if you still need all rows
       } else {
         // Group data by lossCategory and then by normType.
         const groups = new Map()
@@ -102,16 +121,11 @@ const ConfigurationTable = () => {
             otherLossRows = rowsForThisCategory
           }
         })
-
-        // console.log('shutdownRows:', shutdownRows)
-        // console.log('startUpRows:', startUpRows)
-        // console.log('otherLossRows:', otherLossRows)
-
-        // Update state as needed.
         setShutdownRows(shutdownRows)
         setStartUpRows(startUpRows)
         setOtherLossRows(otherLossRows)
       }
+
       setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -123,13 +137,64 @@ const ConfigurationTable = () => {
 
   if (lowerVertName === 'meg') {
     return (
-      <SelectivityData
-        rows={rows}
-        loading={loading}
-        fetchData={fetchData}
-        setRows={setRows}
-        configType={'meg'}
-      />
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '5px',
+          marginTop: '20px',
+        }}
+      >
+        <Tabs
+          value={tabIndex}
+          onChange={(event, newIndex) => setTabIndex(newIndex)}
+          sx={{
+            borderBottom: '0px solid #ccc',
+            '.MuiTabs-indicator': { display: 'none' },
+            margin: '0px 0px -22px 1%',
+          }}
+          textColor='primary'
+          indicatorColor='primary'
+        >
+          <Tab
+            label='Production'
+            sx={{
+              border: tabIndex === 0 ? '1px solid ' : 'none',
+              borderBottom: '1px solid',
+            }}
+          />
+          <Tab
+            label='Consumption'
+            sx={{
+              border: tabIndex === 1 ? '1px solid ' : 'none',
+              borderBottom: '1px solid',
+            }}
+          />
+        </Tabs>
+
+        <Box>
+          {tabIndex === 0 && (
+            <SelectivityData
+              rows={productionRows}
+              loading={loading}
+              fetchData={fetchData}
+              setRows={setProductionRows}
+              defaultCustomHeight={defaultCustomHeight}
+              configType={'production'}
+            />
+          )}
+          {tabIndex === 1 && (
+            <SelectivityData
+              rows={consumptionRows}
+              loading={loading}
+              fetchData={fetchData}
+              setRows={setConsumptionRows}
+              defaultCustomHeight={defaultCustomHeight}
+              configType={'consumption'}
+            />
+          )}
+        </Box>
+      </div>
     )
   }
 
@@ -175,7 +240,7 @@ const ConfigurationTable = () => {
           }}
         />
         <Tab
-          label='Grades'
+          label='Receipes'
           sx={{
             border: tabIndex === 3 ? '1px solid ' : 'none',
             borderBottom: '1px solid',

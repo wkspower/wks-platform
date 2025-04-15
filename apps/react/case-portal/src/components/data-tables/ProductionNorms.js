@@ -83,6 +83,7 @@ const ProductionNorms = ({ permissions }) => {
     rowsInEditMode.forEach((id) => {
       apiRef.current.stopRowEditMode({ id })
     })
+
     setTimeout(() => {
       try {
         var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
@@ -112,26 +113,27 @@ const ProductionNorms = ({ permissions }) => {
           })
           return
         }
-        // const finalData = [...rowsToSave, editedData]
-        // console.log('calculatebtnClicked', calculatebtnClicked)
 
         if (calculatebtnClicked == false) {
-          if (editedData.length === 0) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: 'No Records to Save!',
-              severity: 'info',
-            })
-            setCalculatebtnClicked(false)
-            return
-          }
-
-          updateProductNormData(editedData)
+          //Consition changed if permissions?.saveBtn --> SET TO FALSE
+          //UNCOMMENT THE CODE IF permissions?.saveBtn --> SET TO TRUE
+          // if (editedData.length === 0) {
+          //   setSnackbarOpen(true)
+          //   setSnackbarData({
+          //     message: 'No Records to Save!',
+          //     severity: 'info',
+          //   })
+          //   setCalculatebtnClicked(false)
+          //   return
+          // }
+          // updateProductNormData(editedData)
+          updateProductNormData(rowsToSave)
         } else {
           updateProductNormData(rowsToSave)
         }
       } catch (error) {
         console.log('Error saving changes:', error)
+
         setCalculatebtnClicked(false)
       }
     }, 400)
@@ -255,12 +257,14 @@ const ProductionNorms = ({ permissions }) => {
           message: 'Production AOP Saved Successfully !',
           severity: 'success',
         })
+
         setCalculatebtnClicked(false)
         setLoading(false)
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},
         }
+
         setCalculatebtnClicked(false)
         fetchData()
       } else {
@@ -270,6 +274,7 @@ const ProductionNorms = ({ permissions }) => {
           severity: 'error',
         })
         setLoading(false)
+
         setCalculatebtnClicked(false)
       }
     } catch (error) {
@@ -281,12 +286,14 @@ const ProductionNorms = ({ permissions }) => {
       })
     } finally {
       setLoading(false)
+
       setCalculatebtnClicked(false)
     }
   }
 
   const handleCalculate = async () => {
     dispatch(setIsBlocked(true))
+
     setCalculatebtnClicked(true)
     setLoading(true)
     try {
@@ -353,6 +360,10 @@ const ProductionNorms = ({ permissions }) => {
 
         // setRows(finalData)
         setLoading(false)
+
+        // setTimeout(() => {
+        saveChanges()
+        // }, 1000)
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -477,10 +488,11 @@ const ProductionNorms = ({ permissions }) => {
       id: 'total',
       Particulars: 'Total',
       ...totals,
-      isEditable: false, // Custom property for checking editability
+      isEditable: false,
     }
     return totalRow
   }
+
   const findSum = (value, row) => {
     const months = [
       'april',
@@ -590,14 +602,14 @@ const ProductionNorms = ({ permissions }) => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         permissions={{
-          showAction: permissions?.showAction ?? false,
+          showAction: permissions?.showAction ?? true,
           addButton: permissions?.addButton ?? false,
           deleteButton: permissions?.deleteButton ?? false,
-          editButton: permissions?.editButton ?? false,
+          editButton: permissions?.editButton ?? true,
           showUnit: permissions?.showUnit ?? true,
           saveWithRemark: permissions?.saveWithRemark ?? true,
           showCalculate: permissions?.showCalculate ?? true,
-          saveBtn: permissions?.saveBtn ?? true,
+          saveBtn: permissions?.saveBtn ?? false,
           // UOM: 'MT',
           units: ['MT', 'KT'],
           customHeight: permissions?.customHeight,

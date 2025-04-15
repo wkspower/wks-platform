@@ -18,7 +18,7 @@
   {
     "field": "april",
     "headerName": "4",
-    "editable": true,
+    "editable": false,
 
     "align": "left",
     "headerAlign": "left"
@@ -26,7 +26,7 @@
   {
     "field": "may",
     "headerName": "5",
-    "editable": true,
+    "editable": false,
 
     "align": "left",
     "headerAlign": "left"
@@ -34,7 +34,7 @@
   {
     "field": "june",
     "headerName": "6",
-    "editable": true,
+    "editable": false,
 
     "align": "left",
     "headerAlign": "left"
@@ -42,7 +42,7 @@
   {
     "field": "july",
     "headerName": "7",
-    "editable": true,
+    "editable": false,
 
     "align": "left",
     "headerAlign": "left"
@@ -50,7 +50,7 @@
   {
     "field": "aug",
     "headerName": "8",
-    "editable": true,
+    "editable": false,
 
     "align": "left",
     "headerAlign": "left"
@@ -58,7 +58,7 @@
   {
     "field": "sep",
     "headerName": "9",
-    "editable": true,
+    "editable": false,
 
     "align": "left",
     "headerAlign": "left"
@@ -66,7 +66,7 @@
   {
     "field": "oct",
     "headerName": "10",
-    "editable": true,
+    "editable": false,
 
     "align": "left",
     "headerAlign": "left"
@@ -74,7 +74,7 @@
   {
     "field": "nov",
     "headerName": "11",
-    "editable": true,
+    "editable": false,
 
     "align": "left",
     "headerAlign": "left"
@@ -82,7 +82,7 @@
   {
     "field": "dec",
     "headerName": "12",
-    "editable": true,
+    "editable": false,
 
     "align": "left",
     "headerAlign": "left"
@@ -90,7 +90,7 @@
   {
     "field": "jan",
     "headerName": "1",
-    "editable": true,
+    "editable": false,
 
     "align": "left",
     "headerAlign": "left"
@@ -98,7 +98,7 @@
   {
     "field": "feb",
     "headerName": "2",
-    "editable": true,
+    "editable": false,
 
     "align": "left",
     "headerAlign": "left"
@@ -106,16 +106,11 @@
   {
     "field": "march",
     "headerName": "3",
-    "editable": true,
+    "editable": false,
 
     "align": "left",
     "headerAlign": "left"
   },
-  {
-    "field": "aopRemarks",
-    "headerName": "Remark",
-    "minWidth": 175,
-    "editable": false
-  },
+
   { "field": "aopStatus", "headerName": "aopStatus", "editable": false }
 ]

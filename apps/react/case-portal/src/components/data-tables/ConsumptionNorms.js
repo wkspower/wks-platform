@@ -16,13 +16,16 @@ const NormalOpNormsScreen = () => {
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
   const headerMap = generateHeaderNames()
-  const dataGridStore = useSelector((state) => state.dataGridStore)
   const [rowModesModel, setRowModesModel] = useState({})
+
+  const [open1, setOpen1] = useState(false)
+
+  const dataGridStore = useSelector((state) => state.dataGridStore)
 
   const { sitePlantChange, verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
-  const [open1, setOpen1] = useState(false)
   const lowerVertName = vertName?.toLowerCase() || 'meg'
+
   const [loading, setLoading] = useState(false)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
@@ -119,6 +122,8 @@ const NormalOpNormsScreen = () => {
         message: 'Consumption AOP Saved Successfully!',
         severity: 'success',
       })
+      //
+
       setLoading(false)
       unsavedChangesRef.current = {
         unsavedRows: {},
@@ -131,6 +136,7 @@ const NormalOpNormsScreen = () => {
     } catch (error) {
       console.error('Error saving Consumption AOP!', error)
     } finally {
+      //
       setLoading(false)
     }
   }
@@ -146,7 +152,13 @@ const NormalOpNormsScreen = () => {
     setLoading(true)
 
     setTimeout(() => {
+      const lowerVertName = JSON.parse(
+        localStorage.getItem('selectedVertical'),
+      )?.name?.toLowerCase()
+
       if (lowerVertName == 'meg') {
+        // console.log('lowerVertName', lowerVertName)
+
         try {
           var data = Object.values(unsavedChangesRef.current.unsavedRows)
           if (data.length == 0) {
@@ -155,6 +167,7 @@ const NormalOpNormsScreen = () => {
               message: 'No Records to Save!',
               severity: 'info',
             })
+            //
             setLoading(false)
 
             return
@@ -167,6 +180,7 @@ const NormalOpNormsScreen = () => {
               message: validationMessage,
               severity: 'error',
             })
+            //
             setLoading(false)
             return
           }
@@ -174,12 +188,15 @@ const NormalOpNormsScreen = () => {
           saveEditedData(data)
         } catch (error) {
           console.log('Error saving changes:', error)
+          //
           setLoading(false)
         }
       }
 
       if (lowerVertName == 'pe') {
         try {
+          setLoading(true)
+
           var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
           var allRows = Array.from(apiRef.current.getRowModels().values())
           allRows = allRows.filter((row) => !row.isGroupHeader)
@@ -187,16 +204,17 @@ const NormalOpNormsScreen = () => {
             (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
           )
 
-          if (updatedRows.length === 0) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: 'No Records to Save!',
-              severity: 'info',
-            })
-            setLoading(false)
+          //SKIP THIS IF saveBtn IS SET TO --> FALSE
+          // if (updatedRows.length === 0) {
+          //   setSnackbarOpen(true)
+          //   setSnackbarData({
+          //     message: 'No Records to Save!',
+          //     severity: 'info',
+          //   })
+          //   setLoading(false)
 
-            return
-          }
+          //   return
+          // }
 
           const requiredFields = ['aopRemarks']
 
@@ -207,24 +225,29 @@ const NormalOpNormsScreen = () => {
               message: validationMessage,
               severity: 'error',
             })
+
             setLoading(false)
             return
           }
 
           if (calculatebtnClicked == false) {
-            if (editedData.length === 0) {
-              setSnackbarOpen(true)
-              setSnackbarData({
-                message: 'No Records to Save!',
-                severity: 'info',
-              })
-              setLoading(false)
+            // if (editedData.length === 0) {
+            //   setSnackbarOpen(true)
+            //   setSnackbarData({
+            //     message: 'No Records to Save!',
+            //     severity: 'info',
+            //   })
+            //   setLoading(false)
 
-              setCalculatebtnClicked(false)
-              return
-            }
+            //   setCalculatebtnClicked(false)
+            //   return
+            // }
+            //UNCOMMNET THIS IF saveBtn IS SET TO --> TRUE
+            saveEditedData(updatedRows)
 
-            saveEditedData(editedData)
+            // setLoading(false)
+            setCalculatebtnClicked(false)
+            // saveEditedData(editedData)
           } else {
             saveEditedData(updatedRows)
           }
@@ -286,10 +309,12 @@ const NormalOpNormsScreen = () => {
 
       // setBDData(groupedRows)
       setRows(groupedRows)
+
       setLoading(false)
       setCalculatebtnClicked(false)
     } catch (error) {
       console.error('Error fetching data:', error)
+
       setLoading(false)
       setCalculatebtnClicked(false)
     }
@@ -424,6 +449,7 @@ const NormalOpNormsScreen = () => {
             id: groupId++,
             aopRemarks: item?.aopRemarks?.trim() || null,
             originalRemark: item.aopRemarks?.trim() || null,
+            UOM: item?.uom,
           }
           setSnackbarOpen(true)
           setSnackbarData({
@@ -436,13 +462,17 @@ const NormalOpNormsScreen = () => {
         })
 
         setRows(groupedRows)
-        setLoading(false)
+
+        // setLoading(false)
+        //IF saveBtn IS SET TO --> FALSE
+        saveChanges()
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data Refresh Falied!',
           severity: 'error',
         })
+
         setLoading(false)
       }
 
@@ -454,6 +484,7 @@ const NormalOpNormsScreen = () => {
         severity: 'error',
       })
       console.error('Error!', error)
+
       setLoading(false)
     }
   }
@@ -499,14 +530,14 @@ const NormalOpNormsScreen = () => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         permissions={{
-          showAction: false,
+          showAction: true,
           addButton: false,
           deleteButton: false,
-          editButton: false,
+          editButton: true,
           showUnit: false,
           units: ['TPH', 'TPD'],
           saveWithRemark: true,
-          saveBtn: true,
+          saveBtn: false,
           showCalculate: true,
           showRefresh: false,
         }}

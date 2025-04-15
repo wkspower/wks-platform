@@ -212,7 +212,7 @@ const DataGridTable = ({
 
   const columns = useMemo(() => [
     ...defaultColumns,
-    ...(permissions?.showAction
+    ...(permissions?.showAction && permissions?.deleteButton
       ? [
           {
             field: 'actions',
@@ -271,7 +271,7 @@ const DataGridTable = ({
                     className='textPrimary'
                     onClick={handleEditClick(row)}
                     color='inherit'
-                    // sx={{ display: 'none' }}
+                    sx={{ display: 'none' }}
                   />
                 ),
                 permissions?.deleteButton && (
@@ -374,7 +374,8 @@ const DataGridTable = ({
   return (
     <Box
       sx={{
-        height: `${boxHeight ?? '80vh'}`,
+        height: `${boxHeight ?? (permissions.customHeight2 ? '50vh' : '80vh')}`,
+
         width: '100%',
         padding: '0px 5px',
         margin: '0px 5px 0px',
@@ -615,7 +616,7 @@ const DataGridTable = ({
 
       <Box
         sx={{
-          height: `calc( ${otherHeight ?? '102%'} - 120px)`,
+          height: `calc(${otherHeight ?? (permissions.customHeight2 ? '95%' : '102%')} - 120px)`,
           width: '100%',
           marginBottom: 0,
           padding: 0,
@@ -691,9 +692,9 @@ const DataGridTable = ({
           getRowClassName={(params) => {
             return params.row.Particulars || params.row.Particulars2
               ? 'no-border-row'
-              : params.indexRelativeToCurrentPage % 2 === 0
+              : params.indexRelativeToCurrentPage % 3 === 0
                 ? 'even-row'
-                : 'odd-row'
+                : 'even-row'
           }}
           sx={{
             borderRadius: '0px',
@@ -754,6 +755,7 @@ const DataGridTable = ({
             },
             //Do not remove this prop (for Grouped row it can be usefull !!!!!)
             '& .MuiDataGrid-row.no-border-row .MuiDataGrid-cell:after': {
+              backgroundColor: jioColors.rowOdd,
               borderRight: 'none !important',
             },
 
@@ -803,9 +805,17 @@ const DataGridTable = ({
             '& .even-row': {
               backgroundColor: jioColors.rowEven,
             },
-            '& .odd-row': {
+            '& .no-border-row': {
               backgroundColor: jioColors.rowOdd,
             },
+
+            '& .odd-row': {
+              filter: 'grayscale(1)', // Makes the row look faded
+              opacity: 0.1, // Slightly transparent
+              // pointerEvents: 'none', // Optional: prevents interaction
+              backgroundColor: 'rgba(200, 200, 200, 0.3)', // Example faded background color
+            },
+
             '& .MuiDataGrid-toolbarContainer': {
               display: 'flex',
               justifyContent: 'flex-end',
@@ -834,7 +844,9 @@ const DataGridTable = ({
               // cursor: 'not-allowed !important', // Indicate it's not interactive
               // Optional: Add a border or other visual cues
               // border: '1px solid #ccc !important',
-              opacity: 0.7, // Reduce opacity for a faded look
+              opacity: 0.2, // Slightly transparent
+              filter: 'grayscale(1)', // Makes the row look faded
+              backgroundColor: 'rgba(200, 200, 200, 0.3)', // Example faded background color
             },
             '& .disabled-header': {
               color: '#A9A9A9 !important', // Fade the header text color

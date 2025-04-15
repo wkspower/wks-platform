@@ -6,6 +6,9 @@ import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
 import NumericInputOnly from 'utils/NumericInputOnly'
+import { StartDateTimeEditCell } from 'utils/StartDateTimeEditCell'
+import { EndDateTimeEditCell } from 'utils/EndDateTimeEditCell'
+
 import Tooltip from '@mui/material/Tooltip'
 import { truncateRemarks } from 'utils/remarksUtils'
 import Backdrop from '@mui/material/Backdrop'
@@ -194,22 +197,7 @@ const ShutDown = ({ permissions }) => {
       fetchData()
     }
   }
-  // const handleDeleteClick = async (id, params) => {
-  //   try {
-  //     const maintenanceId =
-  //       id?.maintenanceId ||
-  //       params?.row?.idFromApi ||
-  //       params?.row?.maintenanceId ||
-  //       params?.NormParameterMonthlyTransactionId
-  //     setOpen1(true)
-  //     setDeleteId(id)
-  //     return await DataService.deleteShutdownData(maintenanceId, keycloak)
-  //   } catch (error) {
-  //     console.error(`Error deleting Shutdown data:`, error)
-  //   } finally {
-  //     fetchData()
-  //   }
-  // }
+
   const fetchData = async () => {
     try {
       setLoading(true)
@@ -220,7 +208,6 @@ const ShutDown = ({ permissions }) => {
         id: index,
         originalRemark: item.remark,
       }))
-      // setShutdownData(formattedData)
       setRows(formattedData)
       setLoading(false)
     } catch (error) {
@@ -229,29 +216,7 @@ const ShutDown = ({ permissions }) => {
     }
   }
   useEffect(() => {
-    // const getAllProducts = async () => {
-    //   try {
-    //     const data = await DataService.getAllProducts(
-    //       keycloak,
-    //       lowerVertName === 'meg' ? 'Production' : 'Grade',
-    //     )
-    //     const productList = data.map((product) => ({
-    //       // id: product.id.toLowerCase(), // Convert id to lowercase
-    //       id: product.id, // Convert id to lowercase
-    //       displayName: product.displayName,
-    //     }))
-
-    //     // setAllProducts(productList)
-    //   } catch (error) {
-    //     console.error('Error fetching product:', error)
-    //   } finally {
-    //     // handleMenuClose();
-    //   }
-    // }
-
     fetchData()
-    // saveShutdownData()
-    // getAllProducts()
   }, [sitePlantChange, keycloak, verticalChange, lowerVertName])
 
   const findDuration = (value, row) => {
@@ -286,21 +251,73 @@ const ShutDown = ({ permissions }) => {
       hide: true,
     },
 
+    // {
+    //   field: 'product',
+    //   headerName: lowerVertName === 'meg' ? 'Product' : 'Grade Name',
+    //   editable: true,
+    //   minWidth: 125,
+    //   valueGetter: (params) => {
+    //     // console.log('p1', params);
+    //     // console.log('p2', params2);
+    //     return params || ''
+    //   },
+    //   valueFormatter: (params) => {
+    //     // console.log('params valueFormatter ', params)
+    //     const product = allProducts.find((p) => p.id === params)
+    //     return product ? product.displayName : ''
+    //   },
+    //   renderEditCell: (params) => {
+    //     const { value } = params
+    //     // console.log('q1', params);
+    //     // console.log('q2', params2);
+    //     return (
+    //       <select
+    //         value={value || ''}
+    //         onChange={(event) => {
+    //           params.api.setEditCellValue({
+    //             id: params.id,
+    //             field: 'product',
+    //             value: event.target.value,
+    //           })
+    //         }}
+    //         style={{
+    //           width: '100%',
+    //           padding: '5px',
+    //           border: 'none', // Removes border
+    //           outline: 'none', // Removes focus outline
+    //           background: 'transparent', // Keeps background clean
+    //         }}
+    //       >
+    //         {/* Disabled first option */}
+    //         <option value='' disabled>
+    //           Select
+    //         </option>
+    //         {allProducts.map((product) => (
+    //           <option key={product.id} value={product.id}>
+    //             {product.displayName}
+    //           </option>
+    //         ))}
+    //       </select>
+    //     )
+    //   },
+    // },
+
     {
       field: 'maintStartDateTime',
       headerName: 'SD- From',
       type: 'dateTime',
-      minWidth: 175,
+      minWidth: 200,
       editable: true,
-      valueGetter: (params) => {
-        const value = params
-        const parsedDate = value
-          ? dayjs(value, 'D MMM, YYYY, h:mm:ss A').toDate()
-          : null
-        return parsedDate
-      },
+      // renderEditCell: (params) => <StartDateTimeEditCell {...params} />,
+      renderEditCell: (params) => (
+        <StartDateTimeEditCell {...params} apiRef={apiRef} />
+      ),
+
       valueFormatter: (params) => {
-        return params ? dayjs(params).format('DD/MM/YYYY, h:mm:ss A') : ''
+        const value = params
+        return value && dayjs(value).isValid()
+          ? dayjs(value).format('DD/MM/YYYY, h:mm:ss A')
+          : ''
       },
     },
 
@@ -308,17 +325,18 @@ const ShutDown = ({ permissions }) => {
       field: 'maintEndDateTime',
       headerName: 'SD- To',
       type: 'dateTime',
+      minWidth: 200,
       editable: true,
-      minWidth: 175,
-      valueGetter: (params) => {
-        const value = params
-        const parsedDate = value
-          ? dayjs(value, 'D MMM, YYYY, h:mm:ss A').toDate()
-          : null
-        return parsedDate
-      },
+      // renderEditCell: (params) => <EndDateTimeEditCell {...params} />,
+      // renderEditCell: (params) => <StartDateTimeEditCell {...params} apiRef={apiRef} />,
+      renderEditCell: (params) => (
+        <EndDateTimeEditCell {...params} apiRef={apiRef} />
+      ),
       valueFormatter: (params) => {
-        return params ? dayjs(params).format('DD/MM/YYYY, h:mm:ss A') : ''
+        const value = params
+        return value && dayjs(value).isValid()
+          ? dayjs(value).format('DD/MM/YYYY, h:mm:ss A')
+          : ''
       },
     },
     {
@@ -336,7 +354,7 @@ const ShutDown = ({ permissions }) => {
       field: 'remark',
       headerName: 'Remark',
       minWidth: 250,
-      editable: true,
+      editable: false,
       renderCell: (params) => {
         const displayText = truncateRemarks(params.value)
         const isEditable = !params.row.Particulars
@@ -449,7 +467,7 @@ const ShutDown = ({ permissions }) => {
           showAction: permissions?.showAction ?? true,
           addButton: permissions?.addButton ?? true,
           deleteButton: permissions?.deleteButton ?? true,
-          editButton: permissions?.editButton ?? false,
+          editButton: permissions?.editButton ?? true,
           showUnit: permissions?.showUnit ?? false,
           saveWithRemark: permissions?.saveWithRemark ?? true,
           saveBtn: permissions?.saveBtn ?? true,

@@ -72,6 +72,16 @@ const plan = {
           icon: icons.IconChartBar,
           breadcrumbs: true,
         },
+
+        {
+          id: 'catalyst-selectivity',
+          title: i18n.t('menu.catalystSelectivity'),
+          type: 'item',
+          url: '/production-norms-plan/configuration',
+          icon: icons.IconFilter,
+          breadcrumbs: true,
+        },
+
         {
           id: 'product-mcu-val',
           title: i18n.t('menu.productMCUVal'),
@@ -124,14 +134,7 @@ const plan = {
           icon: icons.IconDatabase,
           breadcrumbs: true,
         },
-        {
-          id: 'catalyst-selectivity',
-          title: i18n.t('menu.catalystSelectivity'),
-          type: 'item',
-          url: '/production-norms-plan/configuration',
-          icon: icons.IconFilter,
-          breadcrumbs: true,
-        },
+
         {
           id: 'normal-op-norms',
           title: i18n.t('menu.normalOpNorms'),
