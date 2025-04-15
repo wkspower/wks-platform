@@ -15,8 +15,9 @@ public interface ShutDownPlanService {
 	public void saveShutdownData(PlantMaintenanceTransaction plantMaintenanceTransaction);
 	public UUID findIdByPlantIdAndMaintenanceTypeName(UUID plantId,String maintenanceTypeName);
 	public PlantMaintenanceTransaction editShutDownPlanData(UUID plantMaintenanceTransactionId);
-	public void deletePlanData(UUID plantMaintenanceTransactionId,UUID plantId);
+	public void deletePlanData(UUID plantMaintenanceTransactionId);
 	public List<ShutDownPlanDTO> editShutdownData(UUID plantMaintenanceTransactionId, List<ShutDownPlanDTO> shutDownPlanDTOList);
 	public List<MonthWiseDataDTO> getMonthlyShutdownHours(String auditYear,  UUID plantId);
+	void deleteShutPlanData(UUID plantMaintenanceTransactionId, UUID plantId);
 
 }

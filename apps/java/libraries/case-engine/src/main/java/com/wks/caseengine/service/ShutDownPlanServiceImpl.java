@@ -95,7 +95,14 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 	
 	@Transactional
 	@Override
-	public void deletePlanData(UUID plantMaintenanceTransactionId,UUID plantId)  {
+	public void deletePlanData(UUID plantMaintenanceTransactionId)  {
+		Optional<PlantMaintenanceTransaction> plantMaintenanceTransaction=plantMaintenanceTransactionRepository.findById(plantMaintenanceTransactionId);
+		plantMaintenanceTransactionRepository.delete(plantMaintenanceTransaction.get());
+	}
+	
+	@Transactional
+	@Override
+	public void deleteShutPlanData(UUID plantMaintenanceTransactionId,UUID plantId)  {
 		Optional<PlantMaintenanceTransaction> plantMaintenanceTransaction=plantMaintenanceTransactionRepository.findById(plantMaintenanceTransactionId);
 		String verticalName=plantsService.findVerticalNameByPlantId(plantId);
 		if(verticalName.equalsIgnoreCase("MEG")) {
@@ -127,6 +134,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService{
 		}	
 		plantMaintenanceTransactionRepository.delete(plantMaintenanceTransaction.get());
 	}
+
 
 	@Override
 	public List<ShutDownPlanDTO> saveShutdownPlantData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {

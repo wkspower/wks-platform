@@ -57,9 +57,9 @@ public class ShutDownPlanController {
               return ResponseEntity.ok(shutDownPlanDTOList);
           }
 
-		  @DeleteMapping("/deleteShutdownData/{plantMaintenanceTransactionId}")
-		    public ResponseEntity<String> deletePlant(@PathVariable UUID plantMaintenanceTransactionId,@PathVariable String plantId) {	
-			  shutDownPlanService.deletePlanData(plantMaintenanceTransactionId,UUID.fromString(plantId));
+		  @DeleteMapping("/deleteShutdownData/{plantMaintenanceTransactionId}/{plantId}")
+		    public ResponseEntity<String> deletePlant(@PathVariable UUID plantMaintenanceTransactionId,@PathVariable UUID plantId) {	
+			  shutDownPlanService.deleteShutPlanData(plantMaintenanceTransactionId,plantId);
 		        return ResponseEntity.ok("Plant with ID " + plantMaintenanceTransactionId + " deleted successfully");
 		    }
 		  
