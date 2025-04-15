@@ -2,8 +2,69 @@
 id: intro-video
 title: Introduction Video
 ---
+# WKS Platform: Product Demo Documentation
 
-# Introduction Video
+## Introduction
+
+Welcome to the WKS Platform product demo. This document serves as a reference for the key features and concepts of the WKS Platform, an open-source case management framework seamlessly integrated with Camunda BPM.
+
+## What Is the WKS Platform?
+
+WKS (Workflow Knowledge System) is an adaptive case management platform built to streamline complex, knowledge-driven processes. Designed for flexibility, it blends structured BPM elements with the dynamic nature of case management. It is open-source under the MIT licence.
+
+### Core Concept: Case Definition
+
+A Case Definition is the backbone of any WKS implementation. It outlines the structural blueprint of a case, containing elements such as:
+
+1. Stages – Lifecycle milestones a case passes through
+2. Forms – UI components capturing case-related data
+3. Processes – BPMN-defined process workflows
+4. Tasks – User or system tasks to be completed
+5. Event Listeners – Triggers based on system or user events
+
+From a case definition, users or systems can generate Case Instances that follow the defined structure and flow.
+
+## Key Platform Features
+
+###  Stages
+
+Stages define the milestones in a case’s lifecycle. As users complete tasks or processes, the case progresses through these predefined stages.
+
+### Forms
+
+Forms are built using Form.io, an open-source form builder. The interface allows for drag-and-drop components, validations, and conditional logic, making forms highly customisable and reusable.
+
+### BPMN Processes
+
+Using a web-based modeler (integrated with Camunda), users can design process diagrams that control logic within stages. Processes can be triggered automatically or manually at different case stages.
+
+### Event Listeners
+
+These define how the system reacts to case-related events:
+
+- Task completions
+- Stage updates
+- Case data changes
+
+Listeners can trigger actions such as stage transitions.
+
+### Access Control
+
+Future roadmap features include more granular access controls:
+
+- Role-based process visibility
+
+- Stage-based process initiation rights
+
+### Integration with MinIO
+
+Documents uploaded to a case instance are stored in MinIO, a high-performance object storage system. Users can preview files directly from the interface.
+
+### Communication
+
+Users can send and receive emails within case instances, centralising all communication related to a case. This helps reduce reliance on fragmented email threads.
+
+Check the video bellow and understand more about the WKS platform and its capabilities.
 
 export const Video = () => (
   <div style={{ padding: '56.25% 0 0 0', position: 'relative' }}>
