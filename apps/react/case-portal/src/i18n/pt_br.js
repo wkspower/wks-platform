@@ -35,6 +35,8 @@ const defs = {
     productDemand: 'Demanda de Produto',
     shutdownPlan: 'Plano de Parada',
     shutdownNorms: 'Shutdown Norms',
+    slowdownNorms: 'Slowdown Norms',
+
     normalOpNorms: 'Normal Operation Norms',
     slowdownPlan: 'Plano de Redução',
     taPlan: 'Plano de TA',
@@ -191,6 +193,7 @@ const defs = {
         productDemand: 'Demanda de Produto',
         shutdownPlan: 'Plano de Parada',
         shutdownNorms: 'Shutdown Norms',
+        slowdownNorms: 'Slowdown Norms',
         normalOpNorms: 'Normal Operation Norms',
         slowdownPlan: 'Plano de Redução',
         taPlan: 'Plano de TA',

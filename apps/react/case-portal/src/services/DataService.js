@@ -332,13 +332,13 @@ async function handleCalculateMaintenance(plantId, year, keycloak) {
 }
 
 async function deleteSlowdownData(maintenanceId, keycloak) {
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/deleteSlowdownData/${maintenanceId}?plantId=${plantId}`
+  // var plantId = ''
+  // const storedPlant = localStorage.getItem('selectedPlant')
+  // if (storedPlant) {
+  //   const parsedPlant = JSON.parse(storedPlant)
+  //   plantId = parsedPlant.id
+  // }
+  const url = `${Config.CaseEngineUrl}/task/deleteSlowdownData/${maintenanceId}`
 
   const headers = {
     Accept: 'application/json',
@@ -370,7 +370,7 @@ async function deleteShutdownData(maintenanceId, keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  const url = `${Config.CaseEngineUrl}/task/deleteShutdownData/${maintenanceId}?plantId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/deleteShutdownData/${maintenanceId}/${plantId}`
 
   const headers = {
     Accept: 'application/json',

@@ -25,13 +25,12 @@ public interface PlantMaintenanceTransactionRepository extends JpaRepository<Pla
 	@Modifying
 	@Transactional
 	@Query(value = "DELETE FROM PlantMaintenanceTransaction "
-	        + "WHERE "
-	        + " NormParameter_FK_Id = :normParamId "
-	        + "AND Name = :name", nativeQuery = true)
+			+ "WHERE "
+			+ " NormParameter_FK_Id = :normParamId "
+			+ "AND Name = :name", nativeQuery = true)
 	int deleteRampActivitiesByNormAndDate(
-	    @Param("normParamId") UUID normParamId,
-	    @Param("name") Date name
-	);
+			@Param("normParamId") UUID normParamId,
+			@Param("name") String name);
 
 
 }

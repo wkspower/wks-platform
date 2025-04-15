@@ -38,6 +38,7 @@ const HeaderContent = ({ keycloak }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { screenTitle } = dataGridStore
   const screenTitleName = screenTitle?.title
+  const [selectedYear, setSelectedYear] = useState('2025-26')
 
   // Helper: Extract allowed site IDs and allowed plant IDs from Keycloak token
   const getAllowedFilter = () => {
@@ -394,6 +395,12 @@ const HeaderContent = ({ keycloak }) => {
     )
   }, [verticals, selectedVertical])
 
+  const handleYearChange = (event) => {
+    setSelectedYear(event.target.value)
+    // Handle year change logic here
+    console.log('Selected Year:', event.target.value)
+  }
+
   return (
     <>
       {/* HIDE HONEYWELL LOGO */}
@@ -418,7 +425,7 @@ const HeaderContent = ({ keycloak }) => {
           color='white'
           sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: '1rem' }}
         >
-          {'AOP - ' + screenTitleName}
+          {screenTitleName}
         </Typography>
       </Box>
 
@@ -426,13 +433,18 @@ const HeaderContent = ({ keycloak }) => {
       {!matchesXs && <Box sx={{ width: '100%', ml: 1 }} />}
       <Stack direction='row' spacing={2} alignItems='center'>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography
-            variant='body1'
-            color='white'
-            sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}
-          >
-            Year: {year}
+          <Typography variant='body1' color='white'>
+            Year:
           </Typography>
+          <FormControl sx={{ minWidth: 100 }}>
+            <Select
+              value={selectedYear}
+              onChange={handleYearChange}
+              sx={{ color: 'white' }}
+            >
+              <MenuItem value='2025-26'>2025-26</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
 
         {/* Vertical Selector */}

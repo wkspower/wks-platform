@@ -38,6 +38,7 @@ const defs = {
     productDemand: 'Business Demand',
     shutdownPlan: 'Shutdown/TA Activities',
     shutdownNorms: 'Shutdown Norms',
+    slowdownNorms: 'Slowdown Norms',
     normalOpNorms: 'Normal Operation Norms',
     slowdownPlan: 'Slowdown Activities',
     taPlan: 'Turnaround Activities',
@@ -212,7 +213,7 @@ const defs = {
         previousFYAOPResult: 'Previous FY AOP Result', // New addition
         matBalSheet: 'MAT Bal Sheet', // New addition
         userManage: 'User Management', // New addition
-         workflow: 'AOP Approval Flow', // New addition
+        workflow: 'AOP Approval Flow', // New addition
       },
     },
   },

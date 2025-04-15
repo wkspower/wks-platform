@@ -30,6 +30,7 @@ import ConfigurationTable from 'components/data-tables/ConfigurationTable/index'
 import UserForm from 'components/user-management/UserForm'
 import UserManagementTable from 'components/user-management/UserManagementTable'
 import AssessmentForm from 'components/data-tables/AssesmentForm/AssessmentContext'
+import SlowdownNorms from 'components/data-tables/NormsScreens/SlowdownNorms'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -153,6 +154,10 @@ export const MainRoutes = (
           {
             path: 'shutdown-norms',
             element: <ShutdownNorms />,
+          },
+          {
+            path: 'slowdown-norms',
+            element: <SlowdownNorms />,
           },
           // {
           //   path: 'slowdown-norms',

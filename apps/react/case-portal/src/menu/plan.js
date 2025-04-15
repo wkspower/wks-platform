@@ -151,6 +151,14 @@ const plan = {
           icon: icons.IconPower,
           breadcrumbs: true,
         },
+        {
+          id: 'slowdown-norms',
+          title: i18n.t('menu.slowdownNorms'),
+          type: 'item',
+          url: '/production-norms-plan/slowdown-norms',
+          icon: icons.IconTrendingDown,
+          breadcrumbs: true,
+        },
 
         {
           id: 'consumption-norms',

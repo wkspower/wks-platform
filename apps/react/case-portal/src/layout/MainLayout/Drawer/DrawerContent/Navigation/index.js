@@ -2,6 +2,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import NavGroup from './NavGroup'
 import { useMenu } from 'SessionStoreContext'
+import LogoBottom from 'components/Logo/LogoBottom'
 
 const Navigation = () => {
   const menu = useMenu()
@@ -25,7 +26,32 @@ const Navigation = () => {
     }
   })
 
-  return <Box sx={{ pt: 2 }}>{navGroups}</Box>
+  return (
+    <Box
+      sx={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        overflow: 'hidden',
+      }}
+    >
+      <Box
+        sx={{
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          flex: 1,
+          pr: 1,
+        }}
+      >
+        {navGroups}
+      </Box>
+
+      <Box sx={{ p: 2 }}>
+        <LogoBottom />
+      </Box>
+    </Box>
+  )
 }
 
 export default Navigation
