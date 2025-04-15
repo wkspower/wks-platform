@@ -13,10 +13,11 @@ import lombok.NoArgsConstructor;
 @Data
 public class UserScreenMappingDTO {
 
-	private Long id;
+	private String id;
 	private String userId;
 	private String plantFKId;
 	private String verticalFKId;
 	private String screenCode;
+	private String permissions;
 
 }

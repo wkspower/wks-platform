@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wks.caseengine.entity.UserScreenMapping;
 import com.wks.caseengine.repository.UserScreenMappingRepository;
@@ -21,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -80,57 +82,6 @@ public class KeycloakUserService {
 	public Map<String, Object> updateUser(Map<String, Object> data) throws Exception {
 		Map<String, Object> result = new HashMap<>();
 		Keycloak keycloak = keycloakAdminClient.getInstance();
-
-//		try {
-//			// Fetch user
-//			UserResource userResource = keycloak.realm(keycloakRealmName).users().get(userId);
-//			UserRepresentation user = userResource.toRepresentation();
-//
-//			// Update attributes if present
-//			Object attrObj = data.get("attributes");
-//			if (attrObj instanceof Map) {
-//				Map<String, Object> newAttributes = (Map<String, Object>) attrObj;
-//				Map<String, List<String>> attributes = Optional.ofNullable(user.getAttributes())
-//				        .orElseGet(HashMap::new);
-//
-//				newAttributes.forEach((key, value) -> {
-//				    if (value instanceof String) {
-//				        attributes.put(key, Collections.singletonList((String) value));
-//				    } else if (value instanceof List) {
-//				        List<?> rawList = (List<?>) value;
-//				        // Convert list items to string (safely)
-//				        List<String> stringList = rawList.stream()
-//				                                         .map(String::valueOf)
-//				                                         .collect(Collectors.toList());
-//				        attributes.put(key, stringList);
-//				    } else {
-//				        attributes.put(key, Collections.singletonList(String.valueOf(value)));
-//				    }
-//				});
-//
-//				user.setAttributes(attributes);
-//				userResource.update(user);
-//			}
-//
-//			// Update realm role if provided
-//			Object roleObj = data.get("role");
-//			if (roleObj instanceof String && !((String) roleObj).isBlank()) {
-//				String roleName = (String) roleObj;
-//
-//				RoleRepresentation roleToAdd = keycloak.realm(keycloakRealmName).roles().get(roleName)
-//						.toRepresentation();
-//
-//				userResource.roles().realmLevel().add(Collections.singletonList(roleToAdd));
-//			}
-//
-//			result.put("status", 200);
-//			result.put("message", "User updated successfully.");
-//			result.put("data", user);
-//
-//		} catch (Exception e) {
-//			throw new Exception("Failed to update user. Reason: " + e.getMessage(), e);
-//		}
-
 		
 		try {
 		    // Get shared data
@@ -203,18 +154,46 @@ public class KeycloakUserService {
 		                        ObjectMapper objectMapper = new ObjectMapper();
 		                        String permissionsString = objectMapper.writeValueAsString(permissions);
 		                        
-		                        for (String screen : screens) {
-			                        UserScreenMapping userScreenMapping = new UserScreenMapping();
-			                        userScreenMapping.setId(UUID.randomUUID());
-			                        userScreenMapping.setUserId(UUID.fromString(userId));
-			                        userScreenMapping.setPlantFKId(UUID.fromString(plantId));
-			                        userScreenMapping.setVerticalFKId(UUID.fromString(verticalId));
-			                        userScreenMapping.setScreenCode(screen);
-			                        userScreenMapping.setPermissions(permissionsString);
-			                        
-			                        userScreenMappingRepository.save(userScreenMapping);
-		                        }
+//		                        for (String screen : screens) {
+//			                        UserScreenMapping userScreenMapping = new UserScreenMapping();
+//			                        userScreenMapping.setId(UUID.randomUUID());
+//			                        userScreenMapping.setUserId(UUID.fromString(userId));
+//			                        userScreenMapping.setPlantFKId(UUID.fromString(plantId));
+//			                        userScreenMapping.setVerticalFKId(UUID.fromString(verticalId));
+//			                        userScreenMapping.setScreenCode(screen);
+//			                        userScreenMapping.setPermissions(permissionsString);
+//			                        
+//			                        userScreenMappingRepository.save(userScreenMapping);
+//		                        }
+		                        
+		                        List<UserScreenMapping> existingMappings = userScreenMappingRepository
+		                        	    .findByUserIdAndPlantFKIdAndVerticalFKId(
+		                        	        UUID.fromString(userId),
+		                        	        UUID.fromString(plantId),
+		                        	        UUID.fromString(verticalId)
+		                        	    );
 
+		                        	Set<String> existingScreenCodes = existingMappings.stream()
+		                        	    .map(UserScreenMapping::getScreenCode)
+		                        	    .collect(Collectors.toSet());
+
+		                        	List<UserScreenMapping> newMappings = new ArrayList<>();
+
+		                        	for (String screen : screens) {
+		                        	    if (!existingScreenCodes.contains(screen)) {
+		                        	        UserScreenMapping userScreenMapping = new UserScreenMapping();
+		                        	        userScreenMapping.setId(UUID.randomUUID());
+		                        	        userScreenMapping.setUserId(UUID.fromString(userId));
+		                        	        userScreenMapping.setPlantFKId(UUID.fromString(plantId));
+		                        	        userScreenMapping.setVerticalFKId(UUID.fromString(verticalId));
+		                        	        userScreenMapping.setScreenCode(screen);
+		                        	        userScreenMapping.setPermissions(permissionsString);
+
+		                        	        newMappings.add(userScreenMapping);
+		                        	    }
+		                        	}
+
+		                        	userScreenMappingRepository.saveAll(newMappings);
 		                    }
 
 		                    siteEntries.add(Map.of(siteId, plantIds));
@@ -226,14 +205,70 @@ public class KeycloakUserService {
 
 		        System.out.println("User screen mapping saved.");
 
-		        // Set user attribute for plantMapping
+		     // Step 1: Get current attributes
 		        Map<String, List<String>> attributes = Optional.ofNullable(user.getAttributes())
 		            .orElseGet(HashMap::new);
-		        
-		        attributes.put("plants", Collections.singletonList(new ObjectMapper().writeValueAsString(userPlantMapping)));
 
-		        System.out.println("attributes " + attributes.toString());
+		        // Step 2: Parse existing plants data if available
+		        ObjectMapper objectMapper = new ObjectMapper();
+		        List<Map<String, List<Map<String, List<String>>>>> existingPlantMapping = new ArrayList<>();
 
+		        if (attributes.containsKey("plants")) {
+		            String existingJson = attributes.get("plants").get(0);
+		            existingPlantMapping = objectMapper.readValue(existingJson, new TypeReference<>() {});
+		        }
+
+		        // Step 3: Merge newPlantMapping with existingPlantMapping
+		        for (Map<String, List<Map<String, List<String>>>> newVertical : userPlantMapping) {
+		            for (Map.Entry<String, List<Map<String, List<String>>>> newVerticalEntry : newVertical.entrySet()) {
+		                String newVerticalId = newVerticalEntry.getKey();
+		                List<Map<String, List<String>>> newSites = newVerticalEntry.getValue();
+
+		                // Check if vertical already exists
+		                Optional<Map<String, List<Map<String, List<String>>>>> existingVerticalOpt = existingPlantMapping.stream()
+		                    .filter(v -> v.containsKey(newVerticalId))
+		                    .findFirst();
+
+		                if (existingVerticalOpt.isPresent()) {
+		                    Map<String, List<Map<String, List<String>>>> existingVertical = existingVerticalOpt.get();
+		                    List<Map<String, List<String>>> existingSites = existingVertical.get(newVerticalId);
+
+		                    for (Map<String, List<String>> newSiteMap : newSites) {
+		                        for (Map.Entry<String, List<String>> newSiteEntry : newSiteMap.entrySet()) {
+		                            String newSiteId = newSiteEntry.getKey();
+		                            List<String> newPlantIds = newSiteEntry.getValue();
+
+		                            // Find existing site if any
+		                            Optional<Map<String, List<String>>> existingSiteOpt = existingSites.stream()
+		                                .filter(s -> s.containsKey(newSiteId))
+		                                .findFirst();
+
+		                            if (existingSiteOpt.isPresent()) {
+		                                Map<String, List<String>> existingSite = existingSiteOpt.get();
+		                                List<String> existingPlantIds = existingSite.get(newSiteId);
+
+		                                // Merge plantIds (avoid duplicates)
+		                                for (String newPlantId : newPlantIds) {
+		                                    if (!existingPlantIds.contains(newPlantId)) {
+		                                        existingPlantIds.add(newPlantId);
+		                                    }
+		                                }
+		                            } else {
+		                                // Add new site entry
+		                                existingSites.add(Map.of(newSiteId, new ArrayList<>(newPlantIds)));
+		                            }
+		                        }
+		                    }
+		                } else {
+		                    // Add new vertical entry
+		                    existingPlantMapping.add(Map.of(newVerticalId, newSites));
+		                }
+		            }
+		        }
+
+		        // Step 4: Set merged plantMapping back to user attribute
+		        String finalPlantMappingJson = objectMapper.writeValueAsString(existingPlantMapping);
+		        attributes.put("plants", Collections.singletonList(finalPlantMappingJson));
 		        user.setAttributes(attributes);
 		        userResource.update(user);
 
