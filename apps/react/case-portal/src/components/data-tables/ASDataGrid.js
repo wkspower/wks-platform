@@ -87,8 +87,6 @@ const DataGridTable = ({
   const handleSearchChange = (event) => {
     setSearchText(event.target.value)
   }
-  // const navigate = useNavigate()
-
   // const [rowModesModel, setRowModesModel] = useState({})
   // const [changedRowIds, setChangedRowIds] = useState([])
   // const [columnFilters, setColumnFilters] = useState({})
@@ -669,6 +667,7 @@ const DataGridTable = ({
             NormParameterMonthlyTransactionId: false,
             aopStatus: false,
             idFromApi: false,
+            isEditable: false,
             period: false,
           }}
           rowHeight={35}
@@ -692,8 +691,8 @@ const DataGridTable = ({
           getRowClassName={(params) => {
             return params.row.Particulars || params.row.Particulars2
               ? 'no-border-row'
-              : params.indexRelativeToCurrentPage % 3 === 0
-                ? 'even-row'
+              : params.row.isEditable == false
+                ? 'odd-row'
                 : 'even-row'
           }}
           sx={{
@@ -810,12 +809,11 @@ const DataGridTable = ({
             },
 
             '& .odd-row': {
-              filter: 'grayscale(1)', // Makes the row look faded
-              opacity: 0.1, // Slightly transparent
-              // pointerEvents: 'none', // Optional: prevents interaction
-              backgroundColor: 'rgba(200, 200, 200, 0.3)', // Example faded background color
+              opacity: 0.9,
+              pointerEvents: 'none',
+              backgroundColor: 'rgba(200, 200, 200, 0.3)',
+              color: 'rgba(0, 0, 0, 0.6)',
             },
-
             '& .MuiDataGrid-toolbarContainer': {
               display: 'flex',
               justifyContent: 'flex-end',
@@ -856,6 +854,7 @@ const DataGridTable = ({
           }}
         />
       </Box>
+
       {(permissions?.allAction ?? true) && (
         <Box
           sx={{
@@ -961,6 +960,7 @@ const DataGridTable = ({
           )}
         </Box>
       )}
+
       {(permissions?.allAction ?? true) && (
         <Notification
           open={snackbarOpen}
@@ -969,6 +969,7 @@ const DataGridTable = ({
           onClose={() => setSnackbarOpen(false)}
         />
       )}
+
       <Dialog
         open={openDeleteDialogeBox}
         onClose={closeDeleteDialogeBox}

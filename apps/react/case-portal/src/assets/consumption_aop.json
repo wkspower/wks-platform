@@ -112,5 +112,9 @@
 
     "align": "left",
     "headerAlign": "left"
+  },
+  {
+    "field": "isEditable",
+    "headerName": "isEditable"
   }
 ]

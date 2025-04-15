@@ -212,6 +212,7 @@ const ShutdownNorms = () => {
       groupable: true,
       renderCell: (params) => <strong>{params.value}</strong>,
     },
+
     {
       field: 'materialFkId',
       headerName: 'Particulars',
@@ -316,6 +317,7 @@ const ShutdownNorms = () => {
       isDisabled: !shutdownMonths?.includes(5),
       columnClassName: 'first-column',
     },
+
     {
       field: 'june',
       headerName: headerMap[6],
@@ -450,6 +452,10 @@ const ShutdownNorms = () => {
     {
       field: 'idFromApi',
       headerName: 'idFromApi',
+    },
+    {
+      field: 'isEditable',
+      headerName: 'isEditable',
     },
   ]
 

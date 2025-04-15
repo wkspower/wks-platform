@@ -11,7 +11,7 @@ const config = {
 }
 
 export default config
-export const drawerWidth = 260
+export const drawerWidth = 280
 
 export const twitterColor = '#1DA1F2'
 export const facebookColor = '#3b5998'
