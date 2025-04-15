@@ -41,4 +41,5 @@ public class ShutDownPlanDTO {
 	private Integer displayOrder;
 	private String verticalName;
 	private Date createdOn;
+	private String plantMaintenanceTransactionName;
 }
