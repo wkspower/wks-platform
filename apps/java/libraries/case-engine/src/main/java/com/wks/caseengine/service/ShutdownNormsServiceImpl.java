@@ -91,7 +91,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService{
 			
 			
 			shutdownNormsValueDTO.setUOM(row[28] != null ? row[28].toString() : null);
-		
+			shutdownNormsValueDTO.setIsEditable(row[29] != null ? Boolean.valueOf(row[29].toString()) : null);
 			shutdownNormsValueDTOList.add(shutdownNormsValueDTO);
 		}
 
@@ -237,7 +237,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService{
                 "[October], [November], [December], [January], [February], [March], " +
                 "[FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [MCUVersion], " +
                 "[UpdatedBy], [NormParameterTypeId], [NormParameterTypeName], " +
-                "[NormParameterTypeDisplayName], [NormTypeDisplayOrder], [MaterialDisplayOrder], [UOM] " +
+                "[NormParameterTypeDisplayName], [NormTypeDisplayOrder], [MaterialDisplayOrder], [UOM],[isEditable] " +
                 "FROM " + viewName + " " +
                 "WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL) " +
                 "ORDER BY NormTypeDisplayOrder";
