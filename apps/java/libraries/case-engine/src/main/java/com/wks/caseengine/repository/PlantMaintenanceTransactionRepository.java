@@ -23,8 +23,8 @@ public interface PlantMaintenanceTransactionRepository extends JpaRepository<Pla
 
 	@Modifying
 	@Query(value = "DELETE FROM PlantMaintenanceTransaction "
-	        + "WHERE (Discription LIKE '%Ramp Up%' OR Discription LIKE '%Ramp Down%') "
-	        + "AND NormParameter_FK_Id = :normParamId "
+	        + "WHERE "
+	        + " NormParameter_FK_Id = :normParamId "
 	        + "AND CreatedOn = :createdOn", nativeQuery = true)
 	int deleteRampActivitiesByNormAndDate(
 	    @Param("normParamId") UUID normParamId,
