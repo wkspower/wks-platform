@@ -460,8 +460,9 @@ const ProductionvolumeData = ({ permissions }) => {
           // permissions?.saveBtn ?? lowerVertName == 'meg' ? false : true,
           units: ['TPH', 'TPD'],
           customHeight: permissions?.customHeight,
-          showCalculate: permissions?.showCalculate ?? false,
-          // permissions?.showCalculate ?? lowerVertName == 'meg' ? true : false,
+          showCalculate:
+            // permissions?.showCalculate ?? false,
+            permissions?.showCalculate ?? lowerVertName == 'meg' ? true : false,
         }}
       />
     </div>

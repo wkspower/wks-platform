@@ -17,6 +17,7 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { truncateRemarks } from 'utils/remarksUtils'
 import { validateFields } from 'utils/validationUtils'
+import TimeInputCell from 'utils/TimeInputCell'
 
 const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -50,28 +51,62 @@ const SlowDown = ({ permissions }) => {
   })
 
   const handleRemarkCellClick = (row) => {
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
+
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
+
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
-
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-
-    // Keep track of original values before editing
+    const durationChanged = newRow.durationInHrs !== oldRow.durationInHrs
+    if (durationChanged) {
+      newRow.maintEndDateTime = null
+    }
+    const updatedRow = { ...newRow }
+    const { maintStartDateTime, maintEndDateTime, durationInHrs } = updatedRow
+    const isValidDate = (d) => d && !isNaN(new Date(d).getTime())
+    if (isValidDate(maintStartDateTime) && isValidDate(maintEndDateTime)) {
+      const start = new Date(maintStartDateTime)
+      const end = new Date(maintEndDateTime)
+      const durationInMinutes = (end - start) / (1000 * 60)
+      if (durationInMinutes >= 0) {
+        const hours = Math.floor(durationInMinutes / 60)
+        const minutes = durationInMinutes % 60
+        updatedRow.durationInHrs = `${hours}.${minutes.toString().padStart(2, '0')}`
+      } else {
+        updatedRow.durationInHrs = ''
+      }
+    } else if (
+      isValidDate(maintStartDateTime) &&
+      durationInHrs &&
+      !isValidDate(maintEndDateTime)
+    ) {
+      const [hrs, mins = '00'] = durationInHrs.split('.')
+      const totalMinutes = parseInt(hrs) * 60 + parseInt(mins)
+      const calculatedEnd = new Date(
+        new Date(maintStartDateTime).getTime() + totalMinutes * 60000,
+      )
+      updatedRow.maintEndDateTime = calculatedEnd.toISOString()
+    }
+    unsavedChangesRef.current.unsavedRows[rowId || 0] = updatedRow
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
 
     setRows((prevRows) =>
       prevRows.map((row) =>
-        row.id === newRow.id ? { ...newRow, isNew: false } : row,
+        row.id === updatedRow.id ? { ...updatedRow, isNew: false } : row,
       ),
     )
 
-    // setHasUnsavedRows(true)
-    return newRow
+    return updatedRow
   }, [])
 
   function addTimeOffset(dateTime) {
@@ -81,8 +116,10 @@ const SlowDown = ({ permissions }) => {
     date.setUTCMinutes(date.getUTCMinutes() + 30)
     return date
   }
-  const findDuration = (value, row) => {
-    if (row && row.maintStartDateTime && row.maintEndDateTime) {
+  const findDuration = (v, row) => {
+    if (row.durationInHrs) return row.durationInHrs
+
+    if (row.maintStartDateTime && row.maintEndDateTime) {
       const start = new Date(row.maintStartDateTime)
       const end = new Date(row.maintEndDateTime)
 
@@ -91,9 +128,7 @@ const SlowDown = ({ permissions }) => {
         const durationInMinutes = durationInMs / (1000 * 60)
         const hours = Math.floor(durationInMinutes / 60)
         const minutes = durationInMinutes % 60
-        const formattedMinutes = minutes.toString().padStart(2, '0')
-        const formattedDuration = `${hours}.${formattedMinutes}`
-        return formattedDuration
+        return `${hours}.${minutes.toString().padStart(2, '0')}`
       }
     }
     return ''
@@ -481,11 +516,12 @@ const SlowDown = ({ permissions }) => {
     {
       field: 'durationInHrs',
       headerName: 'Duration (hrs)',
-      editable: false,
-      minWidth: 75,
-      renderEditCell: NumericInputOnly,
+      editable: true,
+      minWidth: 100,
+      renderEditCell: TimeInputCell,
       align: 'left',
       headerAlign: 'left',
+      // valueGetter: (params) => params?.durationInHrs || 0,
       valueGetter: findDuration,
     },
 

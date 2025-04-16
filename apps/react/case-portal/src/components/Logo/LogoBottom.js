@@ -10,9 +10,9 @@ const LogoBottom = () => {
         src={logo}
         alt='Digital AOP'
         style={{
-          width: '65%',
+          width: '50%',
           marginBottom: '85px',
-          marginLeft: '35px',
+          marginLeft: '10px',
           padding: '4px',
         }}
       />

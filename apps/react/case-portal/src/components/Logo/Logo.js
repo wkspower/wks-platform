@@ -14,6 +14,7 @@ const Logo = () => {
           marginLeft: '25%',
           marginRight: '40%',
           marginTop: '5%',
+          marginBottom: '5%',
         }}
       />
 

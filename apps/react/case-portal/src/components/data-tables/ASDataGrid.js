@@ -653,7 +653,16 @@ const DataGridTable = ({
           checkboxSelection={permissions?.showCheckBox}
           columns={columns.map((col) => ({
             ...col,
-            cellClassName: col.isDisabled ? 'disabled-cell' : undefined,
+            cellClassName: (params) => {
+              if (col.isDisabled) {
+                if (params.row.Particulars) {
+                  return undefined
+                } else {
+                  return 'disabled-cell'
+                }
+              }
+              return undefined
+            },
             headerClassName: col.isDisabled ? 'disabled-header' : undefined,
           }))}
           columnVisibilityModel={{
@@ -837,6 +846,12 @@ const DataGridTable = ({
             //   },
 
             '& .disabled-cell': {
+              backgroundColor: 'rgba(233, 233, 233, 0.3)',
+              borderRadius: '0px',
+              border: `1px solid ${jioColors.border}`,
+            },
+
+            '& .disabled-cell1': {
               // color: '#A9A9A9 !important', // Grey color for disabled text
               // backgroundColor: '#F0F0F0 !important', // Light grey background
               // cursor: 'not-allowed !important', // Indicate it's not interactive
@@ -844,7 +859,7 @@ const DataGridTable = ({
               // border: '1px solid #ccc !important',
               opacity: 0.2, // Slightly transparent
               filter: 'grayscale(1)', // Makes the row look faded
-              backgroundColor: 'rgba(200, 200, 200, 0.3)', // Example faded background color
+              backgroundColor: 'rgba(235, 224, 224, 0.3)', // Example faded background color
             },
             '& .disabled-header': {
               color: '#A9A9A9 !important', // Fade the header text color

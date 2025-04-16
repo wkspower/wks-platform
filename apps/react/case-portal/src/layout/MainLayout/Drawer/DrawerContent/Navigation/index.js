@@ -47,7 +47,7 @@ const Navigation = () => {
         {navGroups}
       </Box>
 
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 2, mb: 2.5 }}>
         <LogoBottom />
       </Box>
     </Box>
