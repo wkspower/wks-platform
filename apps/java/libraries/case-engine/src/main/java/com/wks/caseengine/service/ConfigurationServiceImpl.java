@@ -354,15 +354,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 	}
 	
-	public List<Object[]> findByYearAndPlantFkId(UUID plantFkId, String auditYear,String viewName) {
-        // Note: Do NOT concatenate user input directly into SQL to avoid SQL injection
-        String sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = :plantFkId AND AuditYearFilterable = :auditYear";
+	
+	 
+	 public List<Object[]> findByYearAndPlantFkId(UUID plantFkId, String auditYear, String viewName) {
+	        String sql = "SELECT * FROM " + viewName + " WHERE PlantId = :plantFkId AND AuditYear = :auditYear ORDER BY LossCategory, NormType, NormParameter_FK_Id";
 
-        Query nativeQuery = entityManager.createNativeQuery(sql);
-        nativeQuery.setParameter("plantFkId", plantFkId);
-        nativeQuery.setParameter("auditYear", auditYear);
-
-        return nativeQuery.getResultList();
-    }
-
+	        Query nativeQuery = entityManager.createNativeQuery(sql);
+	        nativeQuery.setParameter("plantFkId", plantFkId);
+	        nativeQuery.setParameter("auditYear", auditYear);
+	        return nativeQuery.getResultList();
+	    }
 }
