@@ -7,7 +7,6 @@ import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 // import NumericInputOnly from 'utils/NumericInputOnly'
 import getEnhancedColDefs from './CommonHeader/feedstockHeaders'
-const headerMap = generateHeaderNames()
 
 const FeedStockAvailability = () => {
   // const [productOptions, setProductOptions] = useState([])
@@ -16,6 +15,7 @@ const FeedStockAvailability = () => {
   // const { sitePlantChange } = dataGridStore
   const [open1, setOpen1] = useState(false)
   const [rowModesModel, setRowModesModel] = useState({})
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()

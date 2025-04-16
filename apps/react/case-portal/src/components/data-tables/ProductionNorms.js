@@ -3,7 +3,6 @@ import { DataService } from 'services/DataService'
 
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import ASDataGrid from './ASDataGrid'
-const headerMap = generateHeaderNames()
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -23,9 +22,10 @@ const ProductionNorms = ({ permissions }) => {
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
   const [rowModesModel, setRowModesModel] = useState({})
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [loading, setLoading] = useState(false)
@@ -538,7 +538,7 @@ const ProductionNorms = ({ permissions }) => {
 
     fetchData()
     getAllProducts()
-  }, [sitePlantChange, keycloak, selectedUnit, lowerVertName])
+  }, [sitePlantChange, yearChanged, keycloak, selectedUnit, lowerVertName])
 
   const productionColumns = getEnhancedColDefs({
     allProducts,

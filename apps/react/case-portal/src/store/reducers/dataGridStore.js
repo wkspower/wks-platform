@@ -4,6 +4,8 @@ const initialState = {
   sitePlantChange: false,
   verticalChange: {},
   isBlocked: false,
+  year: null,
+  yearChanged: false,
 }
 
 const dataGridStore = createSlice({
@@ -13,6 +15,9 @@ const dataGridStore = createSlice({
     setSitePlantChange(state, action) {
       state.sitePlantChange = action.payload
     },
+    setYearChange(state, action) {
+      state.yearChanged = action.payload
+    },
     setVerticalChange(state, action) {
       state.verticalChange = action.payload
     },
@@ -21,6 +26,9 @@ const dataGridStore = createSlice({
     },
     setScreenTitle(state, action) {
       state.screenTitle = action.payload
+    },
+    setAopYear(state, action) {
+      state.year = action.payload
     },
   },
 })
@@ -32,4 +40,6 @@ export const {
   setVerticalChange,
   setIsBlocked,
   setScreenTitle,
+  setAopYear,
+  setYearChange,
 } = dataGridStore.actions

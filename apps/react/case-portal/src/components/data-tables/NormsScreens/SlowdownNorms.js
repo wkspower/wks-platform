@@ -10,7 +10,6 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { DataService } from 'services/DataService'
 import NumericInputOnly from 'utils/NumericInputOnly'
 import { truncateRemarks } from 'utils/remarksUtils'
-const headerMap = generateHeaderNames()
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -25,7 +24,7 @@ const SlowdownNorms = () => {
   const [allProducts, setAllProducts] = useState([])
 
   const [slowdownMonths, setSlowdownMonths] = useState([])
-  const { sitePlantChange } = menu
+  const { sitePlantChange, yearChanged } = menu
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
@@ -36,6 +35,8 @@ const SlowdownNorms = () => {
     message: '',
     severity: 'info',
   })
+
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [rowModesModel, setRowModesModel] = useState({}) // Track row edit state
@@ -193,7 +194,7 @@ const SlowdownNorms = () => {
     fetchData()
     getAllProducts()
     getSlowdownMonths()
-  }, [sitePlantChange, keycloak, selectedUnit, lowerVertName])
+  }, [sitePlantChange, yearChanged, keycloak, selectedUnit, lowerVertName])
 
   const formatValueToThreeDecimals = (params) =>
     params ? parseFloat(params).toFixed(3) : ''

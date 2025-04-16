@@ -6,7 +6,6 @@ import { useSession } from 'SessionStoreContext'
 import { Box, Typography } from '@mui/material'
 import { DataGrid, GridToolbar } from '@mui/x-data-grid'
 import { useSelector } from 'react-redux'
-const headerMap = generateHeaderNames()
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import getEnhancedProductionColDefsView from 'components/data-tables/CommonHeader/ProductionVolumeHeaderView'
 
@@ -14,11 +13,13 @@ const SimpleDataTable = () => {
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [rows, setRows] = useState()
   const [loading, setLoading] = useState(false)
+
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   const jioColors = {
     primaryBlue: '#387ec3',
@@ -132,7 +133,7 @@ const SimpleDataTable = () => {
 
     getAllProducts()
     fetchData()
-  }, [sitePlantChange, keycloak, lowerVertName])
+  }, [sitePlantChange, yearChanged, keycloak, lowerVertName])
 
   const productionColumns = getEnhancedProductionColDefsView({
     headerMap,

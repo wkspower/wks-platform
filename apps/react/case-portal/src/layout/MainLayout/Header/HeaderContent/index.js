@@ -13,8 +13,10 @@ import Profile from './Profile'
 import Search from './Search'
 import { useDispatch } from 'react-redux'
 import {
+  setAopYear,
   setSitePlantChange,
   setVerticalChange,
+  setYearChange,
 } from 'store/reducers/dataGridStore'
 import { DataService } from 'services/DataService'
 import honLogo from 'assets/images/hon_white.png' //WHITE COLOR
@@ -39,6 +41,7 @@ const HeaderContent = ({ keycloak }) => {
   const { screenTitle } = dataGridStore
   const screenTitleName = screenTitle?.title
   const [selectedYear, setSelectedYear] = useState('2025-26')
+  const [aopYears, setAopYears] = useState([])
 
   // Helper: Extract allowed site IDs and allowed plant IDs from Keycloak token
   const getAllowedFilter = () => {
@@ -229,13 +232,50 @@ const HeaderContent = ({ keycloak }) => {
       console.error('Error fetching plant and site data:', error)
     }
   }
-
+  const getAopYears = async () => {
+    try {
+      var response = await DataService.getAopyears(keycloak)
+      if (response && response.length > 0) {
+        // response = [
+        //   { AOPDisplayYear: '2025-26', AOPYear: '2025-26' },
+        //   { AOPDisplayYear: '2026-27', AOPYear: '2026-27' },
+        // ]
+        setAopYears(response)
+        setSelectedYear(response[0].AOPYear)
+        localStorage.setItem('year', response[0].AOPYear)
+        var selectedYear = response[0].AOPYear
+        dispatch(
+          setAopYear({
+            selectedYear,
+          }),
+        )
+      } else {
+        console.warn('No AOP years found in the response.')
+      }
+    } catch (error) {
+      console.error('Error fetching AOP years:', error)
+    }
+  }
   useEffect(() => {
-    const year = '2025-26'
-    localStorage.setItem('year', year)
     setYear(year)
     getPlantAndSite()
+    getAopYears()
   }, [])
+
+  const handleYearChange = (event) => {
+    const newYear = event.target.value
+    dispatch(setYearChange({ yearChanged: true }))
+    setSelectedYear(newYear)
+    dispatch(
+      setAopYear({
+        selectedYear,
+      }),
+    )
+
+    localStorage.setItem('year', newYear)
+    // Handle year change logic here (e.g., refetch data based on the new year)
+    console.log('Selected Year:', newYear)
+  }
 
   const handleSiteChange = (event) => {
     dispatch(setSitePlantChange({ sitePlantChange: true }))
@@ -395,10 +435,22 @@ const HeaderContent = ({ keycloak }) => {
     )
   }, [verticals, selectedVertical])
 
-  const handleYearChange = (event) => {
-    setSelectedYear(event.target.value)
-    // Handle year change logic here
-    console.log('Selected Year:', event.target.value)
+  const handleYearChange1 = (event) => {
+    const newYear = event.target.value
+    setSelectedYear(newYear)
+    dispatch(
+      setAopYear({
+        selectedYear,
+      }),
+    )
+    dispatch(
+      setAopYear({
+        selectedYear,
+      }),
+    )
+    localStorage.setItem('year', newYear)
+    // Handle year change logic here (e.g., refetch data based on the new year)
+    console.log('Selected Year:', newYear)
   }
 
   return (
@@ -431,18 +483,24 @@ const HeaderContent = ({ keycloak }) => {
 
       {matchesXs && <Search />}
       {!matchesXs && <Box sx={{ width: '100%', ml: 1 }} />}
+
       <Stack direction='row' spacing={2} alignItems='center'>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant='body1' color='white'>
             Year:
           </Typography>
-          <FormControl sx={{ minWidth: 100 }}>
+          <FormControl sx={{ minWidth: 120 }}>
+            {' '}
             <Select
               value={selectedYear}
               onChange={handleYearChange}
               sx={{ color: 'white' }}
             >
-              <MenuItem value='2025-26'>2025-26</MenuItem>
+              {aopYears.map((yearItem) => (
+                <MenuItem key={yearItem.AOPYear} value={yearItem.AOPYear}>
+                  {yearItem.AOPDisplayYear}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Box>
@@ -467,6 +525,7 @@ const HeaderContent = ({ keycloak }) => {
             </Select>
           </FormControl>
         </Box>
+
         {/* Site Selector */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant='body1' color='white'>

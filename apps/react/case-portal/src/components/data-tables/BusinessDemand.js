@@ -6,7 +6,6 @@ import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import ASDataGrid from './ASDataGrid'
 import getEnhancedColDefs from './CommonHeader/index'
-const headerMap = generateHeaderNames()
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
@@ -20,12 +19,17 @@ const BusinessDemand = ({ permissions }) => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged, year } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
   const [rows2, setRows2] = useState()
+
+  // console.log('yearyear', year)
+
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -136,7 +140,11 @@ const BusinessDemand = ({ permissions }) => {
     fetchData()
     // fetchData2()
     getAllProducts()
-  }, [sitePlantChange, keycloak, lowerVertName])
+  }, [sitePlantChange, yearChanged, keycloak, lowerVertName])
+
+  // useEffect(()=>{
+  //   console.log('this is test for api call ')
+  // })
 
   const handleRemarkCellClick = (row) => {
     // console.log(row, newRow)

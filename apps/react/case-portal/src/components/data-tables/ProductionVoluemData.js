@@ -6,7 +6,7 @@ import { useGridApiRef } from '@mui/x-data-grid'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import getEnhancedProductionColDefs from './CommonHeader/ProductionVolumeHeader'
-const headerMap = generateHeaderNames()
+
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 import Backdrop from '@mui/material/Backdrop'
@@ -20,9 +20,11 @@ const ProductionvolumeData = ({ permissions }) => {
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
+
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -256,7 +258,6 @@ const ProductionvolumeData = ({ permissions }) => {
     try {
       setLoading(true)
       const data = await DataService.getAOPMCCalculatedData(keycloak)
-      // const data = data1.slice(0, 3)
       const formattedData = data.map((item, index) => {
         const isTPH = selectedUnit == 'TPD'
         return {
@@ -302,7 +303,6 @@ const ProductionvolumeData = ({ permissions }) => {
           }),
         }
       })
-      // setProductNormData(formattedData)
       setRows(formattedData)
       setLoading(false)
     } catch (error) {
@@ -334,7 +334,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
     getAllProducts()
     fetchData()
-  }, [sitePlantChange, keycloak, selectedUnit, lowerVertName])
+  }, [sitePlantChange, yearChanged, keycloak, selectedUnit, lowerVertName])
 
   const productionColumns = getEnhancedProductionColDefs({
     headerMap,
@@ -342,6 +342,7 @@ const ProductionvolumeData = ({ permissions }) => {
     handleRemarkCellClick,
     findAvg,
   })
+
   const onProcessRowUpdateError = React.useCallback((error) => {
     console.log(error)
   }, [])

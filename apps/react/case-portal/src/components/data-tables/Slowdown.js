@@ -21,7 +21,7 @@ import TimeInputCell from 'utils/TimeInputCell'
 
 const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
@@ -131,6 +131,7 @@ const SlowDown = ({ permissions }) => {
         return `${hours}.${minutes.toString().padStart(2, '0')}`
       }
     }
+
     return ''
   }
   const saveSlowDownData = async (newRow) => {
@@ -368,7 +369,7 @@ const SlowDown = ({ permissions }) => {
     fetchData()
     // saveShutdownData()
     getAllProducts()
-  }, [sitePlantChange, keycloak, lowerVertName])
+  }, [sitePlantChange, yearChanged, keycloak, lowerVertName])
 
   const colDefs = [
     {

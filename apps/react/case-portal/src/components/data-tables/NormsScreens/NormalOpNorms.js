@@ -16,8 +16,6 @@ import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 import TextField from '@mui/material/TextField'
 
-const headerMap = generateHeaderNames()
-
 const NormalOpNormsScreen = () => {
   const [allProducts, setAllProducts] = useState([])
   // const [bdData, setBDData] = useState([])
@@ -37,10 +35,11 @@ const NormalOpNormsScreen = () => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [loading, setLoading] = useState(false)
-  const { sitePlantChange, verticalChange } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const dispatch = useDispatch()
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -133,7 +132,7 @@ const NormalOpNormsScreen = () => {
       fetchData()
     }, 450)
     getAllProducts()
-  }, [sitePlantChange, keycloak, lowerVertName])
+  }, [sitePlantChange, yearChanged, keycloak, lowerVertName])
 
   const formatValueToThreeDecimals = (params) =>
     params ? parseFloat(params).toFixed(3) : ''

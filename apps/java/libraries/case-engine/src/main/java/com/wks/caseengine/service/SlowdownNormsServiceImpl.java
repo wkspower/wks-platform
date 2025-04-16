@@ -48,9 +48,9 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			if (vertical.getName().equalsIgnoreCase("PE")) {
-				objList = getSlowdownNorms(year, plant.getId(), "vwScrnPEShutdownNorms");
+				objList = getSlowdownNorms(year, plant.getId(), "vwScrnPESlowdownNorms");
 			} else if (vertical.getName().equalsIgnoreCase("MEG")) {
-				objList = getSlowdownNorms(year, plant.getId(), "vwScrnShutdownNorms");
+				objList = getSlowdownNorms(year, plant.getId(), "vwScrnSlowdownNorms");
 			}
 			// List<Object[]> objList = shutdownNormsRepository.findByYearAndPlantFkId(year,
 			// UUID.fromString(plantId));

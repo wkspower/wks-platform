@@ -8,8 +8,6 @@ import ASDataGrid from './ASDataGrid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 
-const headerMap = generateHeaderNames()
-
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 
@@ -21,8 +19,10 @@ const MaintenanceTable = () => {
   const [deleteId, setDeleteId] = useState(null)
   const [rows, setRows] = useState()
 
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
@@ -96,7 +96,7 @@ const MaintenanceTable = () => {
 
   useEffect(() => {
     fetchData()
-  }, [sitePlantChange, keycloak, lowerVertName])
+  }, [sitePlantChange, yearChanged, keycloak, lowerVertName])
 
   const productionColumns = [
     {

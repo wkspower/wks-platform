@@ -15,14 +15,14 @@ import { setIsBlocked } from 'store/reducers/dataGridStore'
 const NormalOpNormsScreen = () => {
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
-  const headerMap = generateHeaderNames()
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [rowModesModel, setRowModesModel] = useState({})
 
   const [open1, setOpen1] = useState(false)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
 
-  const { sitePlantChange, verticalChange } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
@@ -337,7 +337,7 @@ const NormalOpNormsScreen = () => {
 
     getAllProducts()
     fetchData()
-  }, [sitePlantChange, keycloak, selectedUnit, lowerVertName])
+  }, [sitePlantChange, yearChanged, keycloak, selectedUnit, lowerVertName])
 
   const productionColumns = getEnhancedColDefs({
     allProducts,

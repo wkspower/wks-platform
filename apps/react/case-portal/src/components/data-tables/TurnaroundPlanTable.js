@@ -14,7 +14,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 
 const TurnaroundPlanTable = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const [rowModesModel, setRowModesModel] = useState({})
 
@@ -195,7 +195,7 @@ const TurnaroundPlanTable = () => {
     }
     fetchData()
     getAllProducts()
-  }, [sitePlantChange, keycloak, verticalChange, lowerVertName])
+  }, [sitePlantChange, yearChanged, keycloak, verticalChange, lowerVertName])
 
   const findDuration = (value, row) => {
     if (row && row.maintStartDateTime && row.maintEndDateTime) {

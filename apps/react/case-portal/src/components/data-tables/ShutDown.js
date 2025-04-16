@@ -18,7 +18,7 @@ import TimeInputCell from 'utils/TimeInputCell'
 
 const ShutDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   // const [shutdownData, setShutdownData] = useState([])
@@ -259,7 +259,7 @@ const ShutDown = ({ permissions }) => {
 
   useEffect(() => {
     fetchData()
-  }, [sitePlantChange, keycloak, verticalChange, lowerVertName])
+  }, [sitePlantChange, yearChanged, keycloak, verticalChange, lowerVertName])
 
   const findDuration1 = (value, row) => {
     if (row && row.maintStartDateTime && row.maintEndDateTime) {
