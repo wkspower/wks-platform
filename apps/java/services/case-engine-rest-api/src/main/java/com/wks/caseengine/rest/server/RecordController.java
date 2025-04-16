@@ -28,7 +28,7 @@ import org.springframework.web.client.ResourceAccessException;
 import com.google.gson.JsonObject;
 import com.wks.caseengine.record.RecordNotFoundException;
 import com.wks.caseengine.record.RecordService;
-import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
+import com.wks.caseengine.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 

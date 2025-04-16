@@ -9,7 +9,7 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.rest.exception;
+package com.wks.caseengine.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

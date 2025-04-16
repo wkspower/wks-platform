@@ -33,7 +33,7 @@ import jakarta.persistence.Query;
 public class AOPServiceImpl implements  AOPService{
 	
 	@Autowired
-	private AOPRepository aOPRepository;
+	private AOPRepository aopRepository;
 	@Autowired
 	private PlantsRepository plantsRepository;
 	@Autowired
@@ -50,7 +50,7 @@ public class AOPServiceImpl implements  AOPService{
 	@Override
 	public List<AOPDTO> getAOP() {
 		
-		List<AOP> listAOP=aOPRepository.findAll();
+		List<AOP> listAOP=aopRepository.findAll();
 		List<AOPDTO> aOPList=new ArrayList<>();
 		
 		for(AOP aOP: listAOP) {
@@ -86,7 +86,7 @@ public class AOPServiceImpl implements  AOPService{
 	@Override
 	public List<AOPDTO> getAOPData(String plantId, String year) {
 	    List<AOPDTO> aOPDTOList = new ArrayList<>();
-	    List<Object[]> obj = aOPRepository.findByAOPYearAndPlantFkId(year, UUID.fromString(plantId));
+	    List<Object[]> obj = aopRepository.findByAOPYearAndPlantFkId(year, UUID.fromString(plantId));
 
 	    for (Object[] row : obj) {
 	        AOPDTO aOPDTO = new AOPDTO();
@@ -169,7 +169,7 @@ public class AOPServiceImpl implements  AOPService{
 				if(aOPDTO.getPlantFKId()!=null) {
 					Plant=UUID.fromString(aOPDTO.getPlantFKId());
 				}
-				Optional<UUID> Id=aOPRepository.findAopIdByFilters(Site,Vertical,Material,Plant,aOPDTO.getAopYear());
+				Optional<UUID> Id=aopRepository.findAopIdByFilters(Site,Vertical,Material,Plant,aOPDTO.getAopYear());
 				aOP=new AOP();
 				if(Id!=null && !Id.isEmpty()) {
 					aOP.setId(Id.get());
@@ -188,7 +188,7 @@ public class AOPServiceImpl implements  AOPService{
 				    aOP.setAopCaseId(caseId);
 			}
 			else{
-                aOP=aOPRepository.findById(UUID.fromString(aOPDTO.getId())).get();
+                aOP=aopRepository.findById(UUID.fromString(aOPDTO.getId())).get();
 			    aOP.setAopCaseId(aOPDTO.getAopCaseId());
 				aOP.setAopStatus(aOPDTO.getAopStatus());
 				aOP.setAopType(aOPDTO.getAopType());
@@ -229,7 +229,7 @@ public class AOPServiceImpl implements  AOPService{
 			
 			aOP.setSep(aOPDTO.getSep());
 			aOP.setAopYear(aOPDTO.getAopYear());			
-			aOPRepository.save(aOP);
+			aopRepository.save(aOP);
 		}
 		return aOPDTOList;
 	}
@@ -240,7 +240,7 @@ public class AOPServiceImpl implements  AOPService{
         List<AOPDTO> dtoList = new ArrayList<>();
 		
 
-		List<Object[]> maintainsData =aOPRepository.CheckIfMaintainanceDataExists(plantId,year);
+		List<Object[]> maintainsData =aopRepository.CheckIfMaintainanceDataExists(plantId,year);
 		// if(maintainsData!=null && maintainsData.size()>0){
 		if(1==1){
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
@@ -253,7 +253,7 @@ public class AOPServiceImpl implements  AOPService{
 						System.out.println("list"+list);
 						System.out.println("listTo String"+list.toString());
 		   
-		   List<AOP> objList = aOPRepository.findAllByAopYearAndPlantFkId(year, UUID.fromString(plantId));
+		   List<AOP> objList = aopRepository.findAllByAopYearAndPlantFkId(year, UUID.fromString(plantId));
 
 		   System.out.println("objList"+objList);
 		   System.out.println("objList String"+objList.toString());
@@ -325,6 +325,11 @@ public class AOPServiceImpl implements  AOPService{
 
 	        return query.getResultList();
 	    }
+
+	@Override
+	public List getAOPYears() {
+		return aopRepository.getAOPYears();
+	}
 	
 
 }

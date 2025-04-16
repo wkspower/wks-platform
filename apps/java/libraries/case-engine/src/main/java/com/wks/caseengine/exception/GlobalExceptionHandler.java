@@ -9,8 +9,9 @@
  * 
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.rest.exception;
+package com.wks.caseengine.exception;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @ControllerAdvice
 @Slf4j
+@Configuration
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(RestResourceNotFoundException.class)
@@ -34,10 +36,14 @@ public class GlobalExceptionHandler {
 	}
 
 	@ExceptionHandler(RestInvalidArgumentException.class)
-	public ResponseEntity<ErrorResponse> handleIllegalArgumentException(RestInvalidArgumentException ex) {
-		ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.getReasonPhrase(), ex.getMessage());
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-	}
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(RestInvalidArgumentException ex) {
+        log.error("RestInvalidArgumentException: {}", ex.getMessage(), ex);
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.getReasonPhrase(), 
+                ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {

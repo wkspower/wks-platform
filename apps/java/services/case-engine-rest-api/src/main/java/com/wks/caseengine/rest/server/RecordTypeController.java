@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.record.type.RecordType;
 import com.wks.caseengine.record.type.RecordTypeNotFoundException;
 import com.wks.caseengine.record.type.RecordTypeService;
-import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
+import com.wks.caseengine.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 

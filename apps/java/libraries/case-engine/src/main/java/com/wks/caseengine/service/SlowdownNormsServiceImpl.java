@@ -13,6 +13,7 @@ import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ShutdownNormsValue;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
+import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.SlowdownNormsRepository;
@@ -96,10 +97,11 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			}
 
 			return slowdownNormsValueDTOList;
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
 		}
-		return null;
 	}
 
 	@Override
@@ -174,10 +176,9 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			}
 			// TODO Auto-generated method stub
 			return slowdownNormsValueDTOList;
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
 		}
-		return null;
 	}
 
 	@Override
@@ -219,10 +220,11 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			}
 
 			return slowdownNormsValueDTOList;
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
 		}
-		return null;
 	}
 
 	@Transactional
@@ -265,10 +267,22 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			query.setParameter("year", year);
 
 			return query.getResultList();
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
 		}
-		return null;
 	}
+	
+	@Override
+	@Transactional
+     public List getSlowdownMonths(UUID plantId,String maintenanceName){
+		try {
+			return	slowdownNormsRepository.getSlowdownMonths(plantId,maintenanceName);
+		}catch(Exception e) {
+			e.printStackTrace();		
+		}  
+		return null;
+	  }
 
 }
