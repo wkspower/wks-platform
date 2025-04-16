@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.dto.SlowDownPlanDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.ShutDownPlanService;
 import com.wks.caseengine.service.SlowdownPlanService;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,37 +27,32 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("api/slowdown-plan")
 public class SlowdownPlanController {
-	
+
 	@Autowired
 	private SlowdownPlanService slowdownPlanService;
-	
+
 	@Autowired
 	private ShutDownPlanService shutDownPlanService;
-	
+
 	@GetMapping
-	public ResponseEntity<List<ShutDownPlanDTO>> getPlans(@RequestParam UUID plantId, @RequestParam String type,
+	public ResponseEntity<AOPMessageVM> getPlans(@RequestParam UUID plantId, @RequestParam String type,
 			@RequestParam String year) {
-		List<ShutDownPlanDTO> listOfSite = null;
-		try {
-			listOfSite = slowdownPlanService.getPlans(plantId, type, year);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(listOfSite);
+		AOPMessageVM response = slowdownPlanService.getPlans(plantId, type, year);
+		return ResponseEntity.status(response.getCode()).body(response);
 	}
 
 	@PostMapping(value = "/{plantId}")
-	public ResponseEntity<List<ShutDownPlanDTO>> savePlans(@PathVariable UUID plantId,
+	public ResponseEntity<AOPMessageVM> savePlans(@PathVariable UUID plantId,
 			@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
-		slowdownPlanService.savePlans(plantId, shutDownPlanDTOList);
-		return ResponseEntity.ok(shutDownPlanDTOList);
+				AOPMessageVM response =	slowdownPlanService.savePlans(plantId, shutDownPlanDTOList);
+				return ResponseEntity.status(response.getCode()).body(response);
 	}
 
 	@PutMapping(value = "/{transactionId}")
-	public ResponseEntity<List<ShutDownPlanDTO>> updatePlans(@PathVariable UUID transactionId,
+	public ResponseEntity<AOPMessageVM> updatePlans(@PathVariable UUID transactionId,
 			@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList) {
-		slowdownPlanService.updatePlans(transactionId, shutDownPlanDTOList);
-		return ResponseEntity.ok(shutDownPlanDTOList);
+				AOPMessageVM response = slowdownPlanService.updatePlans(transactionId, shutDownPlanDTOList);
+		return ResponseEntity.status(response.getCode()).body(response);
 	}
 
 	@DeleteMapping("/{transactionId}")
@@ -64,5 +60,4 @@ public class SlowdownPlanController {
 		shutDownPlanService.deletePlanData(transactionId);
 		return ResponseEntity.ok("Plant with ID " + transactionId + " deleted successfully");
 	}
-
 }

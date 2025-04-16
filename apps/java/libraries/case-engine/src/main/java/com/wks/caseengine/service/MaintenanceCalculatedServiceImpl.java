@@ -15,6 +15,7 @@ import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.MaintenanceCalculatedDataRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
@@ -36,7 +37,8 @@ public class MaintenanceCalculatedServiceImpl implements MaintenanceCalculatedSe
 	private EntityManager entityManager;
 
 	@Override
-	public List<MaintenanceDetailsDTO> getMaintenanceCalculated(String plantId, String year) {
+	public AOPMessageVM getMaintenanceCalculated(String plantId, String year) {
+		AOPMessageVM response = new AOPMessageVM();
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
@@ -88,12 +90,19 @@ public class MaintenanceCalculatedServiceImpl implements MaintenanceCalculatedSe
 			// maintenanceCalculatedDataDTOList.add(maintenanceCalculatedDataDTO);
 			// }
 			// TODO Auto-generated method stub
-			return maintenanceDetailsDTOList;
+			response.setCode(200);
+			response.setMessage("Maintenance data fetched successfully.");
+			response.setData(maintenanceDetailsDTOList);
 		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid Inpute parameter...", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch AOP Consumption Norms", ex);
+			response.setCode(400);
+			response.setMessage("Invalid input parameters.");
+			response.setData(null);
+		} catch (Exception e) {
+			response.setCode(500);
+			response.setMessage("Failed to fetch AOP Consumption Norms: " + e.getMessage());
+			response.setData(null);
 		}
+		return response;
 	}
 
 	@Transactional

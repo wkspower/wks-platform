@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,6 +15,7 @@ import com.wks.caseengine.dto.SitesDTO;
 import com.wks.caseengine.dto.VerticalsDTO;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.PlantsService;
 import com.wks.caseengine.service.SiteService;
 import com.wks.caseengine.service.VerticalsService;
@@ -32,16 +34,14 @@ public class VerticalsController {
 	private VerticalsService verticalsService;
 	
 	@GetMapping
-	public List<VerticalsDTO> getAllVerticals() {
-		return verticalsService.getAllVerticals();
+	public ResponseEntity<AOPMessageVM> getAllVerticals() {
+		AOPMessageVM response = verticalsService.getAllVerticals();
+		return ResponseEntity.status(response.getCode()).body(response);
 	}
 	
 	@GetMapping(value="/plants")
-	public List<VerticalsDTO> getPlantsAndSites() {
-		
-		List<VerticalsDTO> verticals= verticalsService.getHierarchyData();
-       
-        return verticals;
+	public ResponseEntity<AOPMessageVM> getPlantsAndSites() {
+		AOPMessageVM response = verticalsService.getHierarchyData(); 
+        return ResponseEntity.status(response.getCode()).body(response);
     }
-
 }

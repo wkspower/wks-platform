@@ -42,6 +42,7 @@ import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.NormAttributeTransactionReceipeRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 
@@ -69,7 +70,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
-	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId) {
+	public AOPMessageVM getConfigurationData(String year, UUID plantFKId) {
+		AOPMessageVM response = new AOPMessageVM();
 		try {
 			System.out.println("GET CofigurationDataService==============================>");
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
@@ -135,10 +137,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					i++;
 				}
 			}
-			return configurationDTOList;
+			response.setCode(200);
+			response.setMessage("Configuration data fetched successfully.");
+			response.setData(configurationDTOList);
 		} catch (Exception e) {
-			throw new RuntimeException("Failed to get configuration data: ", e);
+			response.setCode(500);
+			response.setMessage("Failed to fetch configuration data: " + e.getMessage());
+			response.setData(null);
 		}
+		return response;
 	}
 
 	/**
@@ -163,7 +170,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@Override
-	public List<ConfigurationDTO> saveConfigurationData(String year, List<ConfigurationDTO> configurationDTOList) {
+	public AOPMessageVM saveConfigurationData(String year, List<ConfigurationDTO> configurationDTOList) {
+		AOPMessageVM response = new AOPMessageVM();
 		try {
 			for (ConfigurationDTO configurationDTO : configurationDTOList) {
 				UUID normParameterFKId = UUID.fromString(configurationDTO.getNormParameterFKId());
@@ -202,10 +210,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					normAttributeTransactionsRepository.save(normAttributeTransactions);
 				}
 			}
-			return configurationDTOList;
+			response.setCode(200);
+			response.setMessage("Save Configuration data successfully...");
+			response.setData(configurationDTOList);
 		} catch (Exception e) {
-			throw new RuntimeException("Failed to save configuration data Exception in saveConfigurationData : ", e);
+			response.setCode(500);
+			response.setMessage("Failed to save configuration data: " + e.getMessage());
+			response.setData(null);
 		}
+		return response;
 	}
 
 	public Float getAttributeValue(ConfigurationDTO configurationDTO, Integer i) {
@@ -244,7 +257,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	@Transactional
 	@Override
-	public List<Map<String, Object>> getNormAttributeTransactionReceipe(String year, String plantId) {
+	public AOPMessageVM getNormAttributeTransactionReceipe(String year, String plantId) {
+		AOPMessageVM response = new AOPMessageVM();
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
@@ -260,11 +274,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<Map<String, Object>> resultRows = callStoredProcedureWithHeaders(storedProcedure, year,
 					plant.getId().toString(), site.getId().toString(), vertical.getId().toString());
 
-			return resultRows;
+			response.setCode(200);
+			response.setMessage("Recipe-wise configuration data fetched successfully.");
+			response.setData(resultRows);
 		} catch (Exception e) {
-			throw new RuntimeException(
-					"Failed to get configuration data Exception in getNormAttributeTransactionReceipe : ", e);
+			response.setCode(500);
+			response.setMessage("Failed to fetch recipe-wise configuration data: " + e.getMessage());
+			response.setData(null);
 		}
+		return response;
 	}
 
 	public List<Map<String, Object>> callStoredProcedureWithHeaders(String procedureName, String finYear,
@@ -325,59 +343,74 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	@Transactional
 	@Override
-	public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms(String year, String plantId,
+	public AOPMessageVM updateCalculatedConsumptionNorms(String year, String plantId,
 			List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOLists) {
+		AOPMessageVM response = new AOPMessageVM();
 
-		List<NormAttributeTransactionReceipe> normAttributeTransactionReceipelist = new ArrayList<>();
-		UUID plantUUId = UUID.fromString(plantId);
+		try {
+			List<NormAttributeTransactionReceipe> normAttributeTransactionReceipelist = new ArrayList<>();
+			UUID plantUUId = UUID.fromString(plantId);
 
-		for (NormAttributeTransactionReceipeRequestDTO dto : normAttributeTransactionReceipeDTOLists) {
-			UUID reciepeUUId = UUID.fromString(dto.getRecId());
+			for (NormAttributeTransactionReceipeRequestDTO dto : normAttributeTransactionReceipeDTOLists) {
+				UUID reciepeUUId = UUID.fromString(dto.getRecId());
 
-			for (Map.Entry<String, String> entry : dto.getGrades().entrySet()) {
-				String gradeId = entry.getKey();
-				String attributeValue = entry.getValue();
+				for (Map.Entry<String, String> entry : dto.getGrades().entrySet()) {
+					String gradeId = entry.getKey();
+					String attributeValue = entry.getValue();
 
-				UUID gradeUUId = UUID.fromString(gradeId);
+					UUID gradeUUId = UUID.fromString(gradeId);
 
-				NormAttributeTransactionReceipe existingEntity = normAttributeTransactionReceipeRepository
-						.findIdByFilters(year, plantUUId, gradeUUId, reciepeUUId);
+					NormAttributeTransactionReceipe existingEntity = normAttributeTransactionReceipeRepository
+							.findIdByFilters(year, plantUUId, gradeUUId, reciepeUUId);
 
-				if (existingEntity != null) {
-					if (attributeValue != null && !attributeValue.trim().isEmpty()) {
-						existingEntity.setAttributeValue(Integer.parseInt(attributeValue.trim()));
+					if (existingEntity != null) {
+						if (attributeValue != null && !attributeValue.trim().isEmpty()) {
+							existingEntity.setAttributeValue(Integer.parseInt(attributeValue.trim()));
+						} else {
+							existingEntity.setAttributeValue(null);
+						}
+
+						existingEntity.setModifiedOn(new Date());
+						normAttributeTransactionReceipelist.add(existingEntity);
 					} else {
-						existingEntity.setAttributeValue(null);
+						NormAttributeTransactionReceipe newEntity = new NormAttributeTransactionReceipe();
+						newEntity.setGradeFkId(gradeUUId);
+						newEntity.setReciepeFkId(reciepeUUId);
+						newEntity.setPlantFkId(plantUUId);
+						newEntity.setAopYear(year);
+						newEntity.setCreatedOn(new Date());
+						newEntity.setModifiedOn(new Date());
+						newEntity.setUser("System");
+
+						if (attributeValue != null && !attributeValue.trim().isEmpty()) {
+							newEntity.setAttributeValue(Integer.parseInt(attributeValue.trim()));
+						} else {
+							newEntity.setAttributeValue(null);
+						}
+
+						normAttributeTransactionReceipelist.add(newEntity);
 					}
-
-					existingEntity.setModifiedOn(new Date());
-					normAttributeTransactionReceipelist.add(existingEntity);
-				} else {
-					NormAttributeTransactionReceipe newEntity = new NormAttributeTransactionReceipe();
-					newEntity.setGradeFkId(gradeUUId);
-					newEntity.setReciepeFkId(reciepeUUId);
-					newEntity.setPlantFkId(plantUUId);
-					newEntity.setAopYear(year);
-					newEntity.setCreatedOn(new Date());
-					newEntity.setModifiedOn(new Date());
-					newEntity.setUser("System");
-
-					if (attributeValue != null && !attributeValue.trim().isEmpty()) {
-						newEntity.setAttributeValue(Integer.parseInt(attributeValue.trim()));
-					} else {
-						newEntity.setAttributeValue(null);
-					}
-
-					normAttributeTransactionReceipelist.add(newEntity);
 				}
 			}
-		}
 
-		if (!normAttributeTransactionReceipelist.isEmpty()) {
-			return normAttributeTransactionReceipeRepository.saveAll(normAttributeTransactionReceipelist);
-		} else {
-			throw new RuntimeException("No records available for update.");
+			if (!normAttributeTransactionReceipelist.isEmpty()) {
+				List<NormAttributeTransactionReceipe> savedEntities = normAttributeTransactionReceipeRepository
+						.saveAll(normAttributeTransactionReceipelist);
+
+				response.setCode(200);
+				response.setMessage("Calculated consumption norms updated successfully.");
+				response.setData(savedEntities);
+			} else {
+				response.setCode(400);
+				response.setMessage("No records available for update.");
+				response.setData(null);
+			}
+		} catch (Exception e) {
+			response.setCode(500);
+			response.setMessage("Failed to update consumption norms: " + e.getMessage());
+			response.setData(null);
 		}
+		return response;
 	}
 
 }

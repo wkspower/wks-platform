@@ -18,16 +18,17 @@ import com.wks.caseengine.dto.PlantsDTO;
 import com.wks.caseengine.dto.SitesDTO;
 import com.wks.caseengine.dto.VerticalsDTO;
 import com.wks.caseengine.entity.Verticals;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.VerticalsRepository;
 
 @Service
-public class VerticalsServiceImpl implements VerticalsService{
-	
+public class VerticalsServiceImpl implements VerticalsService {
+
 	@Autowired
 	private VerticalsRepository verticalsRepository;
-	
+
 	@PersistenceContext
-    private EntityManager entityManager;
+	private EntityManager entityManager;
 
 	/*
 	 * @Override public List<Object[]> getAllVerticalsAndPlantsAndSites() { String
@@ -46,10 +47,11 @@ public class VerticalsServiceImpl implements VerticalsService{
 	 * query.getResultList(); // Returning tabular format as List<Object[]> }
 	 */
 	@Override
-	public List<VerticalsDTO> getAllVerticals() {
-		List<Verticals> verticalsList = verticalsRepository.findAll();
-		List<VerticalsDTO> verticalsDTOList = new ArrayList<>();
+	public AOPMessageVM getAllVerticals() {
+		AOPMessageVM response = new AOPMessageVM();
 		try {
+			List<Verticals> verticalsList = verticalsRepository.findAll();
+			List<VerticalsDTO> verticalsDTOList = new ArrayList<>();
 			for (Verticals verticals : verticalsList) {
 				VerticalsDTO verticalsDTO = new VerticalsDTO();
 				verticalsDTO.setDisplayName(verticals.getDisplayName());
@@ -60,19 +62,23 @@ public class VerticalsServiceImpl implements VerticalsService{
 				verticalsDTOList.add(verticalsDTO);
 			}
 			// TODO Auto-generated method stub
-			return verticalsDTOList;
+			response.setCode(200);
+			response.setMessage("Verticals fetched successfully.");
+			response.setData(verticalsDTOList);
 		} catch (Exception e) {
-			System.err.println("Error occurred while getting verticals: " + e.getMessage());
-			e.printStackTrace();
-			throw new RuntimeException("Failed to getting verticals", e);
+			response.setCode(500);
+			response.setMessage("Failed to fetch verticals: " + e.getMessage());
+			response.setData(null);
 		}
+		return response;
 	}
 
 	@Override
-	public List<VerticalsDTO> getHierarchyData() {
-		List<Object[]> results = verticalsRepository.getHierarchyData();
+	public AOPMessageVM getHierarchyData() {
+		AOPMessageVM response = new AOPMessageVM();
 		Map<String, VerticalsDTO> verticalMap = new HashMap<>();
 		try {
+			List<Object[]> results = verticalsRepository.getHierarchyData();
 			for (Object[] row : results) {
 				// Extracting values from the result set
 				String verticalId = row[0].toString();
@@ -85,30 +91,30 @@ public class VerticalsServiceImpl implements VerticalsService{
 				String plantName = row[7] != null ? row[7].toString() : null;
 				String plantDisplayName = row[8] != null ? row[8].toString() : null;
 
-	        // Fetch or create VerticalDTO
-	        VerticalsDTO verticalDTO = verticalMap.computeIfAbsent(verticalId, id -> {
-	            VerticalsDTO v = new VerticalsDTO();
-	            v.setId(id);
-	            v.setName(verticalName);
-	            v.setDisplayName(verticalDisplayName);
-	            v.setSites(new ArrayList<>());
-	            return v;
-	        });
+				// Fetch or create VerticalDTO
+				VerticalsDTO verticalDTO = verticalMap.computeIfAbsent(verticalId, id -> {
+					VerticalsDTO v = new VerticalsDTO();
+					v.setId(id);
+					v.setName(verticalName);
+					v.setDisplayName(verticalDisplayName);
+					v.setSites(new ArrayList<>());
+					return v;
+				});
 
-	        // Use a map for faster site lookup inside each vertical
-	        Map<String, SitesDTO> siteMap = verticalDTO.getSites().stream()
-	                .collect(Collectors.toMap(SitesDTO::getId, s -> s, (s1, s2) -> s1));
+				// Use a map for faster site lookup inside each vertical
+				Map<String, SitesDTO> siteMap = verticalDTO.getSites().stream()
+						.collect(Collectors.toMap(SitesDTO::getId, s -> s, (s1, s2) -> s1));
 
-	        if (siteId != null) {
-	            SitesDTO siteDTO = siteMap.computeIfAbsent(siteId, id -> {
-	                SitesDTO s = new SitesDTO();
-	                s.setId(siteId);
-	                s.setName(siteName);
-	                s.setDisplayName(siteDisplayName);
-	                s.setPlants(new ArrayList<>());
-	                verticalDTO.getSites().add(s);
-	                return s;
-	            });
+				if (siteId != null) {
+					SitesDTO siteDTO = siteMap.computeIfAbsent(siteId, id -> {
+						SitesDTO s = new SitesDTO();
+						s.setId(siteId);
+						s.setName(siteName);
+						s.setDisplayName(siteDisplayName);
+						s.setPlants(new ArrayList<>());
+						verticalDTO.getSites().add(s);
+						return s;
+					});
 
 					if (plantId != null) {
 						PlantsDTO plantDTO = new PlantsDTO();
@@ -125,12 +131,17 @@ public class VerticalsServiceImpl implements VerticalsService{
 				vertical.getSites().sort((s1, s2) -> Integer.compare(s2.getPlants().size(), s1.getPlants().size()));
 			}
 
-			return new ArrayList<>(verticalMap.values());
+			List<VerticalsDTO> resultList = new ArrayList<>(verticalMap.values());
+			response.setCode(200);
+			response.setMessage("Hierarchy data fetched successfully.");
+			response.setData(resultList);
+
 		} catch (Exception e) {
-			System.err.println("Error occurred while getting hierarchy data : " + e.getMessage());
-			e.printStackTrace();
-			throw new RuntimeException("Failed to get hierarchy data", e);
+			response.setCode(500);
+			response.setMessage("Failed to get hierarchy data: " + e.getMessage());
+			response.setData(null);
 		}
+		return response;
 	}
 
 }

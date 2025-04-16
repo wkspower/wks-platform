@@ -37,8 +37,9 @@ public class ConsumptionNormController {
 	}
 
 	@GetMapping(value="/sp-calculate")
-	public int getNormalOperationNorms(@RequestParam String year,@RequestParam String plantId){
-		return	 consumptionNormService.calculateExpressionConsumptionNorms(year,plantId);
+	public ResponseEntity<AOPMessageVM> getNormalOperationNorms(@RequestParam String year,@RequestParam String plantId){
+		AOPMessageVM response =	 consumptionNormService.calculateExpressionConsumptionNorms(year,plantId);
+		return ResponseEntity.status(response.getCode()).body(response);
 	}
 	
 	@GetMapping(value="/calculate")

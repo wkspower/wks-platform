@@ -181,18 +181,25 @@ public class ConsumptionNormServiceImpl implements ConsumptionNormService {
 
 	@Override
 	@Transactional
-	public int calculateExpressionConsumptionNorms(String year, String plantId) {
+	public AOPMessageVM calculateExpressionConsumptionNorms(String year, String plantId) {
+		AOPMessageVM response = new AOPMessageVM();
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			String storedProcedure = vertical.getName() + "_HMD_CalculateConsumptionAOPValues";
 			System.out.println(storedProcedure);
-			return executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
+			int affectedRows = executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
 					vertical.getId().toString(), year);
+			response.setCode(200);
+			response.setMessage("Stored procedure executed successfully. Affected rows: " + affectedRows);
+			response.setData(affectedRows);
 		} catch (Exception e) {
-			throw new RuntimeException("Failed to get data", e);
+			response.setCode(500);
+			response.setMessage("Failed to execute stored procedure: " + e.getMessage());
+			response.setData(null);
 		}
+		return response;
 	}
 
 	@Transactional
@@ -226,12 +233,12 @@ public class ConsumptionNormServiceImpl implements ConsumptionNormService {
 			String storedProcedure = vertical.getName() + "_HMD_CalculateConsumptionAOPValues";
 			System.out.println("Executing SP: " + storedProcedure);
 
-		List<Object[]> results = getCalculatedConsumptionNorms(storedProcedure, year, plant.getId().toString(),
-				site.getId().toString(), vertical.getId().toString());
+			List<Object[]> results = getCalculatedConsumptionNorms(storedProcedure, year, plant.getId().toString(),
+					site.getId().toString(), vertical.getId().toString());
 
 			for (Object[] row : results) {
 				CalculatedConsumptionNormsDTO dto = new CalculatedConsumptionNormsDTO();
-//	        	dto.setId(row[0] != null ? UUID.fromString(row[0].toString()) : null);
+				// dto.setId(row[0] != null ? UUID.fromString(row[0].toString()) : null);
 				dto.setSiteFkId(row[0] != null ? UUID.fromString(row[0].toString()) : null);
 				dto.setVerticalFkId(row[1] != null ? UUID.fromString(row[1].toString()) : null);
 				dto.setAopCaseId(row[2] != null ? row[2].toString() : "N/A");

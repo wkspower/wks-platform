@@ -15,17 +15,19 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.wks.caseengine.message.vm.AOPMessageVM;
+
 public interface CaseEmailService {
 
-	List<CaseEmail> find(final Optional<String> businessKey);
+	AOPMessageVM find(final Optional<String> businessKey);
 
-	void start(final CaseEmail caseEmail);
+	AOPMessageVM start(final CaseEmail caseEmail);
 
-	CaseEmail save(final CaseEmail caseEmail);
+	AOPMessageVM save(final CaseEmail caseEmail);
 
-	void markAsSent(final String id, final Date sentDateTime);
+	AOPMessageVM markAsSent(final String id, final Date sentDateTime);
 
-	void patch(final String id, final CaseEmail mergePatch);
+	AOPMessageVM patch(final String id, final CaseEmail mergePatch);
 
 
 }

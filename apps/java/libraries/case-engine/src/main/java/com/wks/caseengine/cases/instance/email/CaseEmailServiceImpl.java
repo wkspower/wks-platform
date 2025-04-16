@@ -15,10 +15,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.hc.core5.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.command.CommandExecutor;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 
 @Component
 public class CaseEmailServiceImpl implements CaseEmailService {
@@ -27,31 +29,72 @@ public class CaseEmailServiceImpl implements CaseEmailService {
 	private CommandExecutor commandExecutor;
 
 	@Override
-	public List<CaseEmail> find(Optional<String> businessKey) {
-		return commandExecutor.execute(new FindCaseEmailCmd(businessKey));
-	}
+	public AOPMessageVM find(Optional<String> businessKey) {
+		AOPMessageVM response = new AOPMessageVM();
+		try {
+			List<CaseEmail> emails = commandExecutor.execute(new FindCaseEmailCmd(businessKey));
+			response.setCode(200);
+			response.setMessage("Emails fetched successfully");
+			response.setData(emails);
 
-	@Override
-	public void start(CaseEmail caseEmail) {
-		if (!caseEmail.isOutbound()) {
-			commandExecutor.execute(new StartCaseEmailCmd(caseEmail));
-		} else {
-			commandExecutor.execute(new StartCaseEmailOutboundCmd(caseEmail));
+		} catch (Exception e) {
+			response.setCode(500);
+			response.setMessage("Failed to fetch emails: " + e.getMessage());
+			response.setData(null);
 		}
+		return response;
 	}
 
 	@Override
-	public CaseEmail save(CaseEmail caseEmail) {
-		return commandExecutor.execute(new SaveCaseEmailCmd(caseEmail));
+	public AOPMessageVM start(CaseEmail caseEmail) {
+		AOPMessageVM response = new AOPMessageVM();
+		try {
+			if (!caseEmail.isOutbound()) {
+				commandExecutor.execute(new StartCaseEmailCmd(caseEmail));
+			} else {
+				commandExecutor.execute(new StartCaseEmailOutboundCmd(caseEmail));
+			}
+			response.setCode(200); // No Content
+			response.setMessage("Email process started successfully.");
+			response.setData(null);
+		} catch (Exception e) {
+			response.setCode(500);
+			response.setMessage("Failed to start email process: " + e.getMessage());
+			response.setData(null);
+		}
+		return response;
 	}
 
 	@Override
-	public void markAsSent(final String id, final Date sentDateTime) {
+	public AOPMessageVM save(CaseEmail caseEmail) {
+		CaseEmail savedEmail = commandExecutor.execute(new SaveCaseEmailCmd(caseEmail));
+		AOPMessageVM response = new AOPMessageVM();
+		response.setCode(200);
+		response.setMessage("Case Email Saved Successfully... ");
+		response.setData(savedEmail);
+
+		return response;
+	}
+
+	@Override
+	public AOPMessageVM markAsSent(final String id, final Date sentDateTime) {
 		commandExecutor.execute(new MarkAsSentCaseEmailCmd(id, sentDateTime));
+		AOPMessageVM response = new AOPMessageVM();
+
+		response.setCode(200);
+		response.setMessage("Marked email is sent successfully...");
+
+		return response;
 	}
 
 	@Override
-	public void patch(final String id, final CaseEmail mergePatch) {
+	public AOPMessageVM patch(final String id, final CaseEmail mergePatch) {
 		commandExecutor.execute(new PatchCaseEmailCmd(id, mergePatch));
+		AOPMessageVM response = new AOPMessageVM();
+
+		response.setCode(200);
+		response.setMessage("Marked email is sent successfully...");
+
+		return response;
 	}
 }

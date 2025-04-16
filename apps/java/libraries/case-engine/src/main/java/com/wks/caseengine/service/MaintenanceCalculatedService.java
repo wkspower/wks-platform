@@ -6,9 +6,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.wks.caseengine.dto.MaintenanceCalculatedDataDTO;
 import com.wks.caseengine.dto.MaintenanceDetailsDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface MaintenanceCalculatedService {
 
-	public List<MaintenanceDetailsDTO> getMaintenanceCalculated(String plantId, String year);
+	public AOPMessageVM getMaintenanceCalculated(String plantId, String year);
 
 }

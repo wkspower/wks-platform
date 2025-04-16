@@ -11,16 +11,17 @@ import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeRequestDTO;
 import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface ConfigurationService {
 
-    public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId);
+    public AOPMessageVM getConfigurationData(String year, UUID plantFKId);
 
-    public List<ConfigurationDTO> saveConfigurationData(String year, List<ConfigurationDTO> configurationDTOList);
+    public AOPMessageVM saveConfigurationData(String year, List<ConfigurationDTO> configurationDTOList);
 
-    public List<Map<String, Object>> getNormAttributeTransactionReceipe(String year, String plantId);
+    public AOPMessageVM getNormAttributeTransactionReceipe(String year, String plantId);
 
-    public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms(String year, String plantId,
+    public AOPMessageVM updateCalculatedConsumptionNorms(String year, String plantId,
             List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOLists);
 
 }
