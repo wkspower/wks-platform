@@ -2,6 +2,7 @@ package com.wks.caseengine.service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -326,10 +327,21 @@ public class AOPServiceImpl implements  AOPService{
 	        return query.getResultList();
 	    }
 
-	@Override
-	public List getAOPYears() {
-		return aopRepository.getAOPYears();
-	}
+	    @Override
+	    public List<Map<String, String>> getAOPYears() {
+	        List<Object[]> results = aopRepository.getAOPYears();
+	        List<Map<String, String>> aopYears = new ArrayList<>();
+
+	        for (Object[] row : results) {
+	            Map<String, String> map = new HashMap<>();
+	            map.put("AOPYear", row[0] != null ? row[0].toString() : null);
+	            map.put("AOPDisplayYear", row[1] != null ? row[1].toString() : null);
+	            aopYears.add(map);
+	        }
+
+	        return aopYears;
+	    }
+
 	
 
 }

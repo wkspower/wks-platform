@@ -45,10 +45,11 @@ public class AOPController {
 		return null;
 	}
     
-    @GetMapping(value="aop-years")
-    public ResponseEntity<List> getYears(){
-    	List data =  aopService.getAOPYears();
-    	return ResponseEntity.ok(data);
+    @GetMapping(value = "/aop-years")
+    public ResponseEntity<List<Map<String, String>>> getYears() {
+        List<Map<String, String>> data = aopService.getAOPYears();
+        return ResponseEntity.ok(data);
     }
+
   
 }

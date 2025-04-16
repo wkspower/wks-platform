@@ -10,7 +10,7 @@ public interface AOPService {
 	public List<AOPDTO> updateAOP(List<AOPDTO> aOPDTOList);
 	public List<AOPDTO> getAOPData(String plantId, String year);
     public List<AOPDTO> calculateData(String plantId, String year);
-    public List getAOPYears();
+    public List<Map<String, String>> getAOPYears();
 	List<Object[]> executeDynamicMaintenanceCalculation(String verticalName, String plantId, String siteId, String verticalId, String aopYear);
 
 }
