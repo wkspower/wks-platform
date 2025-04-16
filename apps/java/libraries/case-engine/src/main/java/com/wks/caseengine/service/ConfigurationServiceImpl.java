@@ -73,10 +73,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		System.out.println("GET CofigurationDataService==============================>");
 		String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 		List<Object[]> obj = new ArrayList<>();
-		String  viewName="vwScrn"+verticalName+"Configuration";
-		
-			obj = findByYearAndPlantFkId( plantFKId,year,viewName);
-		
+		if (verticalName.equalsIgnoreCase("PE")) {
+			obj = normAttributeTransactionsRepository.findByYearAndPlantFkIdPE(year, plantFKId);
+		} else if (verticalName.equalsIgnoreCase("MEG")) {
+			obj = normAttributeTransactionsRepository.findByYearAndPlantFkIdMEG(year, plantFKId);
+		}
+
 		List<ConfigurationDTO> configurationDTOList = new ArrayList<>();
 		int i = 0;
 		for (Object[] row : obj) {
@@ -353,15 +355,5 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			throw new RuntimeException("No records available for update.");
 		}
 	}
-	
-	
-	 
-	 public List<Object[]> findByYearAndPlantFkId(UUID plantFkId, String auditYear, String viewName) {
-	        String sql = "SELECT * FROM " + viewName + " WHERE PlantId = :plantFkId AND AuditYear = :auditYear ORDER BY LossCategory, NormType, NormParameter_FK_Id";
 
-	        Query nativeQuery = entityManager.createNativeQuery(sql);
-	        nativeQuery.setParameter("plantFkId", plantFkId);
-	        nativeQuery.setParameter("auditYear", auditYear);
-	        return nativeQuery.getResultList();
-	    }
 }
