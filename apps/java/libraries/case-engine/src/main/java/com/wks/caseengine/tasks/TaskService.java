@@ -17,17 +17,18 @@ import java.util.Optional;
 import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Product;
 import com.wks.bpm.engine.model.spi.Task;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface TaskService {
 
-	void create(final Task task);
+	AOPMessageVM create(final Task task);
 
-	List<Task> find(final Optional<String> processInstanceBusinessKey);
+	AOPMessageVM find(final Optional<String> processInstanceBusinessKey);
 
-	void claim(final String taskId, final String taskAssignee);
+	AOPMessageVM claim(final String taskId, final String taskAssignee);
 
-	void unclaim(final String taskId);
+	AOPMessageVM unclaim(final String taskId);
 
-	void complete(final String taskId, final List<ProcessVariable> variables);
+	AOPMessageVM complete(final String taskId, final List<ProcessVariable> variables);
 
 }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.caseengine.command.CommandExecutor;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 
 @Component
 public class VariableServiceImpl implements VariableService {
@@ -24,8 +25,20 @@ public class VariableServiceImpl implements VariableService {
 	private CommandExecutor commandExecutor;
 
 	@Override
-	public ProcessVariable[] findVariables(final String processInstanceId) {
-		return commandExecutor.execute(new FindVariableCommand(processInstanceId));
+	public AOPMessageVM findVariables(final String processInstanceId) {
+		AOPMessageVM response = new AOPMessageVM();
+		try {
+			ProcessVariable[] variables = commandExecutor.execute(new FindVariableCommand(processInstanceId));
+			response.setCode(200);
+			response.setMessage("Process variables fetched successfully.");
+			response.setData(variables);
+		} catch (Exception e) {
+			System.err.println("Error occurred while fetching process variables: " + e.getMessage());
+			e.printStackTrace();
+			response.setCode(500);
+			response.setMessage("Failed to fetch process variables: " + e.getMessage());
+			response.setData(null);
+		}
+		return response;
 	}
-
 }

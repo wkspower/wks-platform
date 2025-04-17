@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.SitesDTO;
 import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.SiteRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -23,22 +24,42 @@ public class SiteServiceImpl implements SiteService {
 	private SiteRepository siteRepository;
 
 	@Override
-	public List<Sites> getAllSites() {
+	public AOPMessageVM getAllSites() {
+		AOPMessageVM response = new AOPMessageVM();
 		try {
 			String queryStr = "SELECT * FROM [dbo].[Sites]";
 			Query query = entityManager.createNativeQuery(queryStr, Sites.class);
 			List<Sites> searchResults = query.getResultList();
-			return searchResults;
+			response.setCode(200);
+			response.setMessage("Sites fetched successfully.");
+			response.setData(searchResults);
 		} catch (Exception e) {
 			System.err.println("Error while fetching all sites: " + e.getMessage());
 			e.printStackTrace();
-			throw new RuntimeException("Failed to fetch all sites", e);
+			response.setCode(500);
+			response.setMessage("Failed to fetch sites: " + e.getMessage());
+			response.setData(null);
 		}
+		return response;
 	}
 
 	@Override
-	public List<Object[]> getAllSitesAndPlants() {
-		return siteRepository.getAllSitesAndPlants();
+	public AOPMessageVM getAllSitesAndPlants() {
+		AOPMessageVM response = new AOPMessageVM();
+		try {
+			List<Object[]> result = siteRepository.getAllSitesAndPlants();
+			response.setCode(200);
+			response.setMessage("Sites with plants fetched successfully.");
+			response.setData(result);
+		} catch (Exception e) {
+			System.err.println("Error while fetching sites with plants: " + e.getMessage());
+			e.printStackTrace();
+
+			response.setCode(500);
+			response.setMessage("Failed to fetch sites with plants: " + e.getMessage());
+			response.setData(null);
+		}
+		return response;
 	}
 
 	@Override

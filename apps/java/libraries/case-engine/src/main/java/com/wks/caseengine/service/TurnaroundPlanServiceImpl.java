@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantMaintenanceRepository;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
 import com.wks.caseengine.repository.TurnaroundPlanRepository;
@@ -32,11 +33,11 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService {
 	private PlantMaintenanceTransactionRepository plantMaintenanceTransactionRepository;
 
 	@Override
-	public List<ShutDownPlanDTO> getPlans(UUID plantId, String type, String year) {
+	public AOPMessageVM getPlans(UUID plantId, String type, String year) {
+		AOPMessageVM response = new AOPMessageVM();
 		try {
-			List<Object[]> listOfSite = null;
+			List<Object[]> listOfSite = turnaroundPlanRepository.getPlans(type, plantId.toString(), year);
 			List<ShutDownPlanDTO> dtoList = new ArrayList<>();
-			listOfSite = turnaroundPlanRepository.getPlans(type, plantId.toString(), year);
 			for (Object[] result : listOfSite) {
 				ShutDownPlanDTO dto = new ShutDownPlanDTO();
 				dto.setDiscription((String) result[0]);
@@ -48,29 +49,27 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService {
 					dto.setDurationInHrs(durationInHrs);
 				}
 				dto.setProduct((String) result[6]);
-				// FOR ID : pmt.Id
 				dto.setId(result[5] != null ? result[5].toString() : null);
-				if ((String) result[7] != null) {
-					dto.setRemark((String) result[7]);
-				} else {
-					dto.setRemark(null);
-				}
+				dto.setRemark(result[7] != null ? (String) result[7] : null);
 				dto.setDisplayOrder(result[8] != null ? ((Integer) result[8]) : null);
-				// dto.setRate(result[9] != null ? ((Number) result[4]).doubleValue() : null);
-				// // Extract Rate
 				dtoList.add(dto);
 			}
-			// TODO Auto-generated method stub
-			return dtoList;
+			response.setCode(200);
+			response.setMessage("Shutdown plans fetched successfully.");
+			response.setData(dtoList);
 		} catch (Exception e) {
 			System.err.println("Error occurred while getting plans: " + e.getMessage());
 			e.printStackTrace();
-			throw new RuntimeException("Failed to get plans", e);
+			response.setCode(500);
+			response.setMessage("Failed to get plans: " + e.getMessage());
+			response.setData(null);
 		}
+		return response;
 	}
 
 	@Override
-	public List<ShutDownPlanDTO> savePlans(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
+	public AOPMessageVM savePlans(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
+		AOPMessageVM response = new AOPMessageVM();
 		try {
 			UUID plantMaintenanceId = shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId, "TA_Plan");
 			if (plantMaintenanceId == null) {
@@ -159,19 +158,24 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService {
 					turnaroundPlanRepository.save(plantMaintenanceTransaction);
 
 				}
-
+				response.setCode(200);
+				response.setMessage("Shutdown plans saved successfully.");
+				response.setData(shutDownPlanDTOList);
 			}
 			// TODO Auto-generated method stub
 		} catch (Exception e) {
 			System.err.println("Error occurred while saving plans: " + e.getMessage());
 			e.printStackTrace();
-			throw new RuntimeException("Failed to save plans", e);
+			response.setCode(500);
+			response.setMessage("Failed to save shutdown plans: " + e.getMessage());
+			response.setData(null);
 		}
-		return shutDownPlanDTOList;
+		return response;
 	}
 
 	@Override
-	public List<ShutDownPlanDTO> updatePlans(UUID transactionId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
+	public AOPMessageVM updatePlans(UUID transactionId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
+		AOPMessageVM response = new AOPMessageVM();
 		try {
 			for (ShutDownPlanDTO shutDownPlanDTO : shutDownPlanDTOList) {
 				Optional<PlantMaintenanceTransaction> plantMaintenance = turnaroundPlanRepository
@@ -186,12 +190,16 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService {
 				plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 				turnaroundPlanRepository.save(plantMaintenanceTransaction);
 			}
-			// TODO Auto-generated method stub
-			return shutDownPlanDTOList;
+			response.setCode(200);
+			response.setMessage("Shutdown plan(s) updated successfully.");
+			response.setData(shutDownPlanDTOList);
 		} catch (Exception e) {
 			System.err.println("Error occurred while updating plans: " + e.getMessage());
 			e.printStackTrace();
-			throw new RuntimeException("Failed to update plans", e);
+			response.setCode(500);
+			response.setMessage("Failed to update shutdown plan(s): " + e.getMessage());
+			response.setData(null);
 		}
+		return response;
 	}
 }

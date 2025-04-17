@@ -4,12 +4,13 @@ import java.util.List;
 
 import com.wks.caseengine.dto.SitesDTO;
 import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface SiteService {
 
-	public List<Sites> getAllSites();
+	public AOPMessageVM getAllSites();
 
-	public List<Object[]> getAllSitesAndPlants();
+	public AOPMessageVM getAllSitesAndPlants();
 
 	public List<SitesDTO> getSites();
 

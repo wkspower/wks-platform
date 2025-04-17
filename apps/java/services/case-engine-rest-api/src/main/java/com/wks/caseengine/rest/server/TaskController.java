@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Task;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.tasks.TaskService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,33 +40,35 @@ public class TaskController {
 	private TaskService taskService;
 
 	@PostMapping(value = "/create")
-	public ResponseEntity<Void> create(@RequestBody final Task task) {
-		taskService.create(task);
-		return ResponseEntity.noContent().build();
+	public ResponseEntity<AOPMessageVM> create(@RequestBody final Task task) {
+		AOPMessageVM response = taskService.create(task);
+		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping
-	public ResponseEntity<List<Task>> find(@RequestParam(required = false) String businessKey) {
-		return ResponseEntity.ok(taskService.find(Optional.ofNullable(businessKey)));
+	public ResponseEntity<AOPMessageVM> find(@RequestParam(required = false) String businessKey) {
+		AOPMessageVM response = taskService.find(Optional.ofNullable(businessKey));
+		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping(value = "/{taskId}/claim/{taskAssignee}")
-	public ResponseEntity<Void> claim(@PathVariable final String taskId, @PathVariable final String taskAssignee) {
-		taskService.claim(taskId, taskAssignee);
-		return ResponseEntity.noContent().build();
+	public ResponseEntity<AOPMessageVM> claim(@PathVariable final String taskId,
+			@PathVariable final String taskAssignee) {
+		AOPMessageVM response = taskService.claim(taskId, taskAssignee);
+		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping(value = "/{taskId}/unclaim")
-	public ResponseEntity<Void> unclaim(@PathVariable final String taskId) {
-		taskService.unclaim(taskId);
-		return ResponseEntity.noContent().build();
+	public ResponseEntity<AOPMessageVM> unclaim(@PathVariable final String taskId) {
+		AOPMessageVM response = taskService.unclaim(taskId);
+		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping(value = "/{taskId}/complete")
-	public ResponseEntity<Void> complete(@PathVariable final String taskId,
+	public ResponseEntity<AOPMessageVM> complete(@PathVariable final String taskId,
 			@RequestBody final List<ProcessVariable> variables) {
-		taskService.complete(taskId, variables);
-		return ResponseEntity.noContent().build();
+		AOPMessageVM response = taskService.complete(taskId, variables);
+		return ResponseEntity.ok(response);
 	}
 
 }

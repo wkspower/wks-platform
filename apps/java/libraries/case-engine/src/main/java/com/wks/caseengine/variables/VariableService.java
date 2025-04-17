@@ -12,9 +12,10 @@
 package com.wks.caseengine.variables;
 
 import com.wks.bpm.engine.model.spi.ProcessVariable;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface VariableService {
 
-	ProcessVariable[] findVariables(final String processInstanceId);
+	AOPMessageVM findVariables(final String processInstanceId);
 
 }

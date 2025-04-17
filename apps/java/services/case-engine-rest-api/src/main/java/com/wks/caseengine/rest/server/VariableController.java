@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.bpm.engine.model.spi.ProcessVariable;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.variables.VariableService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,9 +34,9 @@ public class VariableController {
 	private VariableService variableService;
 
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ProcessVariable[]> findVariables(
+	public ResponseEntity<AOPMessageVM> findVariables(
 			@RequestParam(name = "processInstanceId") final String processInstanceId) {
-		return ResponseEntity.ok(variableService.findVariables(processInstanceId));
+		AOPMessageVM response = variableService.findVariables(processInstanceId);
+		return ResponseEntity.ok(response);
 	}
-
 }

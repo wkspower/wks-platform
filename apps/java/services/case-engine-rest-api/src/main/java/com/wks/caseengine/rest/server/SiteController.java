@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.SiteService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,15 +23,14 @@ public class SiteController {
 	private SiteService siteService;
 
 	@GetMapping
-	public ResponseEntity<List<Sites>> getAllSites() {
-		List<Sites> listOfSites = siteService.getAllSites();
-		return ResponseEntity.ok(listOfSites);
+	public ResponseEntity<AOPMessageVM> getAllSites() {
+		AOPMessageVM response = siteService.getAllSites();
+		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping(value = "/with-plants")
-	public ResponseEntity<List<Object[]>> getAllSitesAndPlants() {
-		List<Object[]> listOfSites = siteService.getAllSitesAndPlants();
-		return ResponseEntity.ok(listOfSites);
+	public ResponseEntity<AOPMessageVM> getAllSitesAndPlants() {
+		AOPMessageVM response = siteService.getAllSitesAndPlants();
+		return ResponseEntity.ok(response);
 	}
-
 }
