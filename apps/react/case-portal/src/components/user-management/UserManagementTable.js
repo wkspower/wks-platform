@@ -1,84 +1,65 @@
-// // UserManagement.jsx
-// import { Box } from '@mui/material'
-// import { useNavigate } from 'react-router-dom'
-// import DataGridTable from 'components/data-tables/ASDataGrid'
-// import React, { useEffect, useState } from 'react'
-// import { DataService } from 'services/DataService'
-
-// const columns = [
-//   { field: 'username', headerName: 'Username', width: 150 },
-//   // {
-//   //   field: 'firstName',
-//   //   headerName: 'First Name',
-//   //   width: 150,
-//   // },
-//   // { field: 'lastName', headerName: 'Last Name', width: 150 },
-//   { field: 'role', headerName: 'Role', width: 150 },
-//   { field: 'verticals', headerName: 'Verticals', width: 150 },
-//   {
-//     field: 'sites',
-//     headerName: 'Sites',
-//     width: 150,
-//   },
-//   { field: 'plants', headerName: 'Plants', width: 150 },
-// ]
-
-// const row = [
-//   {
-//     id: 1,
-//     username: 'user1',
-//     firstName: 'Pavan',
-//     lastName: 'Pophale',
-//     role: 'Head',
-//     verticals: ['MEG', 'PE', 'PP'],
-//     sites: ['HMD', 'DMD', 'VMD'],
-//     plants: ['MEG1', 'MEG2', 'MEG3', 'EOEG', 'PE1', 'PE2'],
-//     email: 'pophale8499@gmail.com',
-//   },
-//   {
-//     id: 2,
-//     username: 'user2',
-//     firstName: 'John',
-//     lastName: 'Doe',
-//     role: 'Manager',
-//     verticals: ['PE'],
-//     sites: ['HMD', 'DMD'],
-//     plants: ['PE1', 'PE2'],
-//     email: 'test@gmail.com',
-//   },
-// ]
-
 import { Box } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import DataGridTable from 'components/data-tables/ASDataGrid'
 import { useCallback, useEffect, useState, useRef } from 'react'
 import { DataService } from 'services/DataService'
+import Autocomplete from '@mui/material/Autocomplete'
+import TextField from '@mui/material/TextField'
+import { Checkbox, ListItemText } from '@mui/material'
+import { useLocation } from '../../../node_modules/react-router-dom/dist/index'
 
 const UserManagementTable = ({ keycloak }) => {
   const navigate = useNavigate()
-  const [rows, setRows] = useState([])
-  const [vert, setAllVerts] = useState([]) // not used in mappedRows now; API data is in `plantSiteData`
+  const [rows, setRows] = useState([]) // State for grid rows
+  const [plantSiteData, setPlantSiteData] = useState([])
+  // const [roles, setRoles] = useState([])
+  const [vert, setAllVerts] = useState([]) // used for mapping row data
   const [site, setAllSites] = useState([])
   const [plant, setAllPlants] = useState([])
-  const [plantSiteData, setPlantSiteData] = useState([]) // full API hierarchy data
-  const [roles, setRoles] = useState([])
+  const [loading, setLoading] = useState(false)
   const [rowModesModel, setRowModesModel] = useState({})
   const unsavedChangesRef = useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
+  })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [inputValue, setInputValue] = useState('') // keeps the typed text intact
+  const [open, setOpen] = useState(false)
+
+  const location = useLocation()
+  const data = location.state || ''
+  // console.log(data)
+  useEffect(() => {
+    // if (data?.includes('')) return
+    if (data?.includes('success')) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'User Data Updated successfully!',
+        severity: 'success',
+      })
+    } else {
+      // setSnackbarOpen(true)
+      // setSnackbarData({
+      //   message: 'User Data not updated!',
+      //   severity: 'error',
+      // })
+      return
+    }
+  }, [data])
+  // State for Autocomplete selections.
+  // final selections: used for grid rows.
+  const [selectedUsers, setSelectedUsers] = useState([])
+  // temporary state: used for user selection (confirmation required via Enter)
+  const [tempSelectedUsers, setTempSelectedUsers] = useState([])
+  const [searchOptions, setSearchOptions] = useState([])
 
   const columns = [
     { field: 'username', headerName: 'Username', width: 150 },
-    {
-      field: 'role',
-      headerName: 'Role',
-      width: 150,
-      // Optionally, you can add an editable dropdown for roles here.
-    },
-    { field: 'verticals', headerName: 'Verticals', width: 150 },
-    { field: 'sites', headerName: 'Sites', width: 150 },
-    { field: 'plants', headerName: 'Plants', width: 150 },
+    // add any additional columns if needed
   ]
 
   const processRowUpdate = useCallback((newRow, oldRow) => {
@@ -95,22 +76,17 @@ const UserManagementTable = ({ keycloak }) => {
     return newRow
   }, [])
 
-  const handleAddPlantSite = (row) => {
-    navigate('/user-form', { state: row })
+  const handleAddPlantSite = () => {
+    navigate('/user-form', { state: rows })
   }
 
-  // Fetch the plant/site data from the API.
+  // Fetch plant and site data.
   useEffect(() => {
     const getPlantAndSite = async () => {
       try {
         const response = await DataService.getAllSites(keycloak)
         if (response) {
-          console.log('Plant Site Data: ', response)
           setPlantSiteData(response)
-          // You could also flatten these into separate states if needed:
-          // setAllVerts(response)
-          // setAllSites(response.flatMap(v => v.sites))
-          // setAllPlants(response.flatMap(v => v.sites).flatMap(s => s.plants))
         }
       } catch (error) {
         console.error('Error fetching plant and site data:', error)
@@ -119,127 +95,282 @@ const UserManagementTable = ({ keycloak }) => {
     getPlantAndSite()
   }, [keycloak])
 
-  // Map users data by filtering with plantSiteData to show display names.
+  // Trigger search API for users.
+  // const handleSearchChange = async (event, inputValue) => {
+  //   if (inputValue.length > 2) {
+  //     setLoading(true)
+  //     try {
+  //       const res = await DataService.getUserBySearch(keycloak, inputValue)
+  //       // Assume res.data is an array of user objects.
+  //       const extendedOptions =
+  //         res.data.length > 0
+  //           ? [...res.data, { id: 'confirm', username: 'Confirm Selection' }]
+  //           : []
+  //       setSearchOptions(extendedOptions)
+  //       // setSearchOptions(res.data)
+  //     } catch (error) {
+  //       console.error('Error searching users:', error)
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   } else {
+  //     setSearchOptions([])
+  //   }
+  // }
+  const handleSearchChange = async (value) => {
+    if (value.length > 2) {
+      setLoading(true)
+      try {
+        const res = await DataService.getUserBySearch(keycloak, value)
+        setSearchOptions(res.data) // do *not* append “Confirm” here any longer
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    } else {
+      setSearchOptions([])
+    }
+  }
+  // Finalize selection when Enter key is pressed.
+  const finalizeSelection = (selected) => {
+    setSelectedUsers(selected)
+    // Map selected users into grid row data.
+    const newRows = selected.map((user, index) => ({
+      id: index,
+      username: user.username,
+      userId: user.id,
+      role: 'cts_head',
+      email: user.email,
+      verticals: vert,
+      plants: plant,
+      sites: site,
+      // map additional properties as needed
+    }))
+    setRows(newRows)
+  }
+
+  // Handle Autocomplete selection changes by updating the temporary state.
+  // const handleTempSelectionChange = (event, newSelected) => {
+  //   setTempSelectedUsers(newSelected)
+  // }
+
+  // Existing effect to fetch existing user data for the grid.
   useEffect(() => {
-    // Only map if API data is loaded (plantSiteData non-empty)
     if (plantSiteData.length === 0) return
 
     const getUsersData = async () => {
       try {
         const res = await DataService.getUsersData(keycloak)
-        // console.log('Users data: ', res.data)
-
-        // We'll use the API data to retrieve display names.
-        // Assume user.attributes contains arrays of strings.
         const mappedRows = res.data.map((item, index) => {
-          // const userVerticals = item.user.attributes?.verticals || []
-          // const userSites = item.user.attributes?.sites || []
           const userPlantsSiteVert =
-            JSON.parse(item.user.attributes?.plants) || []
-          // console.log(userPlantsSiteVert)
-
-          // Assume userPlantsSiteVert is the parsed JSON value.
-          const userVerticalIds = userPlantsSiteVert.reduce((acc, mapping) => {
-            // For each mapping (object) in the array, push its keys.
-            return acc.concat(Object.keys(mapping))
-          }, [])
-
+            JSON?.parse(item?.user?.attributes?.plants || '[]') || []
+          const userVerticalIds = userPlantsSiteVert.reduce(
+            (acc, mapping) => acc.concat(Object.keys(mapping)),
+            [],
+          )
           const userSiteIds = userPlantsSiteVert.reduce((acc, mapping) => {
-            // mapping is an object whose value is an object with site ids.
             Object.values(mapping).forEach((siteObj) => {
               acc = acc.concat(Object.keys(siteObj))
             })
             return acc
           }, [])
-
           const userPlantIds = userPlantsSiteVert.reduce((acc, mapping) => {
             Object.values(mapping).forEach((siteObj) => {
               Object.values(siteObj).forEach((plantArray) => {
-                acc = acc.concat(plantArray) // plantArray is an array of plant ids.
+                acc = acc.concat(plantArray)
               })
             })
             return acc
           }, [])
 
-          // console.log('User Vertical IDs: ', userVerticalIds)
-          // console.log('User Site IDs: ', userSiteIds)
-          // console.log('User Plant IDs: ', userPlantIds)
-          // Map vertical display names:
           const mappedVerticals = plantSiteData
             .filter((v) => userVerticalIds.includes(v.id))
             .map((v) => v.displayName)
             .join(', ')
-
-          // Flatten all sites from the API:
           const allSites = plantSiteData.flatMap((v) => v.sites)
           const mappedSites = allSites
             .filter((s) => userSiteIds.includes(s.id))
             .map((s) => s.displayName)
             .join(', ')
-
-          // Flatten all plants from the API:
           const allPlants = allSites.flatMap((s) => s.plants)
           const mappedPlants = allPlants
             .filter((p) => userPlantIds.includes(p.id))
             .map((p) => p.displayName)
             .join(', ')
 
-          // console.log(mappedVerticals, mappedSites, mappedPlants)
+          // Optionally update these states if needed.
+          setAllPlants(mappedPlants)
+          setAllSites(mappedSites)
+          setAllVerts(mappedVerticals)
 
           return {
             id: index,
+            userId: item?.user?.id,
             username: item.user.username,
             role: item.realmRoles[0] || '',
             verticals: mappedVerticals,
             sites: mappedSites,
             plants: mappedPlants,
             email: item.user.email,
-            screen: item.user.attributes?.verticals || '', // Assuming screen is in attributes
+            screen: item.user.attributes?.verticals || '',
           }
         })
 
         console.log('Mapped Rows: ', mappedRows)
-        setRows(mappedRows)
+        // Optionally, uncomment if you want to show API users by default:
+        // setRows(mappedRows);
       } catch (error) {
         console.error('Error fetching users data:', error)
       }
     }
 
-    // Also fetch roles
-    const getUserRole = async () => {
-      try {
-        const res = await DataService.getUserRoles(keycloak)
-        setRoles(res.data.map((item) => item.name))
-      } catch (error) {
-        console.error(error)
-      }
-    }
+    // const getUserRole = async () => {
+    //   try {
+    //     const res = await DataService.getUserRoles(keycloak)
+    //     setRoles(res.data.map((item) => item.name))
+    //   } catch (error) {
+    //     console.error(error)
+    //   }
+    // }
 
     getUsersData()
-    getUserRole()
+    // getUserRole()
   }, [keycloak, plantSiteData])
+
+  const defaultCustomHeight = { mainBox: '60vh', otherBox: '124%' }
 
   return (
     <Box sx={{ height: 600, width: '100%', p: 2 }}>
+      {/* Autocomplete for selecting multiple users */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr: 1 }}>
+        {/* <Autocomplete
+          multiple
+          disableCloseOnSelect
+          id='user-autocomplete'
+          options={searchOptions.filter(
+            (option) =>
+              !tempSelectedUsers.some((selected) => selected.id === option.id),
+          )}
+          getOptionLabel={(option) => option.username}
+          value={tempSelectedUsers}
+          onInputChange={(event, inputValue) => {
+            handleSearchChange(event, inputValue)
+          }}
+          onChange={handleTempSelectionChange}
+          loading={loading}
+          noOptionsText='No users found'
+          sx={{ width: '100%' }}
+          renderOption={(props, option, { selected }) => {
+            if (option.id === 'confirm') {
+              return (
+                <li
+                  {...props}
+                  onClick={(event) => {
+                    // Prevent selecting "confirm" as a user.
+                    finalizeSelection(tempSelectedUsers)
+                    event.stopPropagation()
+                  }}
+                  style={{ fontWeight: 'bold', backgroundColor: '#f0f0f0' }}
+                >
+                  {option.username}
+                </li>
+              )
+            }
+            return (
+              <li {...props}>
+                <Checkbox style={{ marginRight: 8 }} checked={selected} />
+                <ListItemText primary={option.username} />
+              </li>
+            )
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label='Select Users'
+              variant='outlined'
+              // When the user presses Enter, finalize the selection
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  finalizeSelection(tempSelectedUsers)
+                  e.preventDefault()
+                }
+              }}
+            />
+          )}
+        />
+      </Box> */}
+        <Autocomplete
+          multiple // enable array of selections :contentReference[oaicite:0]{index=0}
+          disableCloseOnSelect // popper stays open on each click :contentReference[oaicite:1]{index=1}
+          filterSelectedOptions // hide already‐chosen items cleanly :contentReference[oaicite:2]{index=2}
+          open={open} // optional: full control of open state
+          onOpen={() => setOpen(true)}
+          onClose={() => setOpen(false)}
+          options={searchOptions}
+          getOptionLabel={(opt) => opt.username}
+          value={tempSelectedUsers}
+          inputValue={inputValue} // controlled text :contentReference[oaicite:3]{index=3}
+          onInputChange={(e, newVal, reason) => {
+            if (reason === 'input') {
+              setInputValue(newVal)
+              handleSearchChange(newVal)
+            }
+          }}
+          onChange={(e, newSel) => setTempSelectedUsers(newSel)}
+          loading={loading}
+          noOptionsText='No users found'
+          sx={{ width: '100%' }}
+          renderOption={(props, option, { selected }) => (
+            <li {...props}>
+              <Checkbox checked={selected} style={{ marginRight: 8 }} />
+              <ListItemText primary={option.username} />
+            </li>
+          )}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label='Select Users'
+              variant='outlined'
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  finalizeSelection(tempSelectedUsers)
+                  e.preventDefault()
+                }
+              }}
+            />
+          )}
+        />
+      </Box>
+
+      {/* DataGridTable now uses selectedUsers as the rows to show only the confirmed selections */}
       <DataGridTable
         columns={columns}
-        rows={rows}
+        rows={selectedUsers}
         handleAddPlantSite={handleAddPlantSite}
         processRowUpdate={processRowUpdate}
         rowModesModel={rowModesModel}
+        selectedUsers={selectedUsers}
+        setSelectedUsers={setSelectedUsers}
         unsavedChangesRef={unsavedChangesRef}
         onRowModesModelChange={(newModel) => setRowModesModel(newModel)}
+        snackbarData={snackbarData}
+        snackbarOpen={snackbarOpen}
+        setSnackbarOpen={setSnackbarOpen}
+        setSnackbarData={setSnackbarData}
         permissions={{
           showAction: true,
           addButton: false,
-          deleteButton: false,
-          editButton: true,
-          viewBtn: true,
+          deleteButton: true,
+          editButton: false,
+          viewBtn: false,
           showUnit: false,
           saveWithRemark: true,
           saveBtn: false,
           showCheckBox: true,
           nextBtn: true,
+          deleteAllBtn: true,
+          customHeight: defaultCustomHeight,
         }}
       />
     </Box>

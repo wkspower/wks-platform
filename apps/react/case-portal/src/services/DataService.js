@@ -20,6 +20,7 @@ export const DataService = {
   getAllCatalyst,
 
   saveShutdownData,
+  saveText,
   saveAOPConsumptionNorm,
   saveSlowdownData,
   saveTurnAroundData,
@@ -74,10 +75,38 @@ export const DataService = {
   getSlowdownMonths,
   getUsersData,
   getUserRoles,
+<<<<<<< Updated upstream
   getUserAllData,
 
   getAopyears,
+=======
+  updateUserAttributes,
+  getUserBySearch,
+  getUserScreen,
+  // CheckIsTokenExp,
+  updateUserPlants,
+>>>>>>> Stashed changes
 }
+
+// async function CheckIsTokenExp(keycloak) {
+//   if (keycloak.isTokenExpired()) {
+//     keycloak.logout({ redirectUri: window.location.origin })
+//   }
+
+//   const headers = {
+//     Authorization: `Bearer ${keycloak.token}`,
+//   }
+
+//   var url = `${Config.CaseEngineUrl}/business-demand`
+
+//   try {
+//     const resp = await fetch(url, { headers })
+//     return json(keycloak, resp)
+//   } catch (err) {
+//     console.log(err)
+//     return await Promise.reject(err)
+//   }
+// }
 
 async function handleRefresh(year, plantId, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/handleRefresh?year=${year}&plantId=${plantId}`
@@ -364,12 +393,6 @@ async function handleCalculateMaintenance(plantId, year, keycloak) {
 }
 
 async function deleteSlowdownData(maintenanceId, keycloak) {
-  // var plantId = ''
-  // const storedPlant = localStorage.getItem('selectedPlant')
-  // if (storedPlant) {
-  //   const parsedPlant = JSON.parse(storedPlant)
-  //   plantId = parsedPlant.id
-  // }
   const url = `${Config.CaseEngineUrl}/task/deleteSlowdownData/${maintenanceId}`
 
   const headers = {
@@ -396,13 +419,7 @@ async function deleteSlowdownData(maintenanceId, keycloak) {
   }
 }
 async function deleteShutdownData(maintenanceId, keycloak) {
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/deleteShutdownData/${maintenanceId}/${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/deleteShutdownData/${maintenanceId}`
 
   const headers = {
     Accept: 'application/json',
@@ -428,13 +445,7 @@ async function deleteShutdownData(maintenanceId, keycloak) {
   }
 }
 async function deleteTurnAroundData(maintenanceId, keycloak) {
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/deleteTurnaroundData/${maintenanceId}?plantId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/deleteTurnaroundData/${maintenanceId}`
 
   const headers = {
     Accept: 'application/json',
@@ -664,7 +675,63 @@ async function getUserRoles(keycloak) {
     return await Promise.reject(e)
   }
 }
-async function getUserAllData(keycloak, userId) {
+async function getUserScreen(keycloak, verticalId) {
+  const url = `${Config.CaseEngineUrl}/task/screen-mapping?verticalId=${verticalId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+// async function getUserBySearch(keycloak, searchKey) {
+//   const url = `${Config.CaseEngineUrl}/task/users/search?search=${searchKey}`
+//   const headers = {
+//     Accept: 'application/json',
+//     'Content-Type': 'application/json',
+//     Authorization: `Bearer ${keycloak.token}`,
+//   }
+
+//   try {
+//     const resp = await fetch(url, { method: 'GET', headers })
+//     return json(keycloak, resp)
+//   } catch (e) {
+//     console.log(e)
+//     return await Promise.reject(e)
+//   }
+// }
+async function getUserBySearch(keycloak, searchKey) {
+  const url = `${Config.CaseEngineUrl}/task/users/search?search=${encodeURIComponent(searchKey)}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+
+    // Optional: check response directly here
+    if (!resp.ok) {
+      throw new Error(`API Error: ${resp.status} ${resp.statusText}`)
+    }
+
+    return await resp.json()
+    // OR return await json(keycloak, resp) if using a wrapper
+  } catch (e) {
+    console.error('Search user API failed:', e)
+    return Promise.reject(e)
+  }
+}
+
+async function updateUserAttributes(keycloak, userId) {
   const url = `${Config.CaseEngineUrl}/task/users/${userId}`
   const headers = {
     Accept: 'application/json',
@@ -897,6 +964,27 @@ async function saveShutdownData(plantId, shutdownDetails, keycloak) {
     return await Promise.reject(e)
   }
 }
+async function saveText(submitedText, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/saveText`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(submitedText),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
 
 async function saveAOPConsumptionNorm(plantId, shutdownDetails, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/saveAOPConsumptionNorm`
@@ -967,6 +1055,31 @@ async function updateSlowdownData(maintenanceId, slowDownDetails, keycloak) {
     return await resp.json() // Ensure proper response handling
   } catch (e) {
     console.error('Error updating slowdown data:', e)
+    return Promise.reject(e)
+  }
+}
+async function updateUserPlants(keycloak, payload) {
+  const url = `${Config.CaseEngineUrl}/task/users`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(payload),
+    })
+
+    if (!resp.ok) {
+      throw new Error(`API Error: ${resp.status} ${resp.statusText}`)
+    }
+
+    return await resp.json()
+  } catch (e) {
+    console.error('Update user plants API failed:', e)
     return Promise.reject(e)
   }
 }

@@ -16,24 +16,24 @@ const DashboardDefault = () => {
         <DashboardCard
           title={t('pages.dashboard.cards.wipcases.label')}
           icon={<IconArchive />}
-          to='/'
-          // to='/case-list/wip-cases'
+          // to='/'
+          to='/case-list/wip-cases'
         />
       </Grid>
       <Grid item xs={12} sm={6} md={4} lg={3}>
         <DashboardCard
           title={t('pages.dashboard.cards.caselist.label')}
           icon={<IconSquareAsterisk />}
-          to='/'
-          // to='/case-list/cases'
+          // to='/'
+          to='/case-list/cases'
         />
       </Grid>
       <Grid item xs={12} sm={6} md={4} lg={3}>
         <DashboardCard
           title={t('pages.dashboard.cards.tasklist.label')}
           icon={<IconList />}
-          to='/'
-          // to='/task-list'
+          // to='/'
+          to='/task-list'
         />
       </Grid>
 

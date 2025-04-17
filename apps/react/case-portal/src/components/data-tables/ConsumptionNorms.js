@@ -533,7 +533,7 @@ const NormalOpNormsScreen = () => {
           showAction: true,
           addButton: false,
           deleteButton: false,
-          editButton: true,
+          editButton: false,
           showUnit: false,
           units: ['TPH', 'TPD'],
           saveWithRemark: true,

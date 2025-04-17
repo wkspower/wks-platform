@@ -517,7 +517,7 @@ const SlowDown = ({ permissions }) => {
     {
       field: 'durationInHrs',
       headerName: 'Duration (hrs)',
-      editable: true,
+      editable: false,
       minWidth: 100,
       renderEditCell: TimeInputCell,
       align: 'left',
@@ -653,7 +653,7 @@ const SlowDown = ({ permissions }) => {
           showAction: permissions?.showAction ?? true,
           addButton: permissions?.addButton ?? true,
           deleteButton: permissions?.deleteButton ?? true,
-          editButton: permissions?.editButton ?? true,
+          editButton: permissions?.editButton ?? false,
           showUnit: permissions?.showUnit ?? false,
           saveWithRemark: permissions?.saveWithRemark ?? true,
           saveBtn: permissions?.saveBtn ?? true,
