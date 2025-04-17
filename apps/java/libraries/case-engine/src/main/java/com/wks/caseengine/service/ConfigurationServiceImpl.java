@@ -128,11 +128,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 			if (verticalName.equalsIgnoreCase("PE")) {
 				configurationDTO.setLossCategory(row[17] != null ? row[17].toString() : "");
-				configurationDTO.setNormType(row[18] != null ? row[18].toString() : "");
+				configurationDTO.setNormType(row[18] != null ? toSpacedWords(row[18].toString()) : "");
 			}
 
 			if (verticalName.equalsIgnoreCase("MEG")) {
-				configurationDTO.setNormType(row[17] != null ? row[17].toString() : "");
+				configurationDTO.setNormType(row[17] != null ? toSpacedWords(row[17].toString()) : "");
 			}
 
 			configurationDTOList.add(configurationDTO);
@@ -143,6 +143,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 
 		return configurationDTOList;
+	}
+
+	private String toSpacedWords(String input) {
+	    if (input == null || input.isEmpty()) {
+	        return "";
+	    }
+	    // Insert space before each capital letter, except the first one
+	    String result = input.replaceAll("([a-z])([A-Z])", "$1 $2")
+	                         .replaceAll("([A-Z])([A-Z][a-z])", "$1 $2");
+	    // Capitalize the first letter of the result
+	    return result.substring(0, 1).toUpperCase() + result.substring(1);
 	}
 
 	/**
