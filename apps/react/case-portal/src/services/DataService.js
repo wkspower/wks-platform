@@ -83,6 +83,8 @@ export const DataService = {
   getUserScreen,
   // CheckIsTokenExp,
   updateUserPlants,
+  getCaseId,
+  saveworkflow
 }
 
 // async function CheckIsTokenExp(keycloak) {
@@ -982,6 +984,69 @@ async function saveText(submitedText, keycloak) {
     return await Promise.reject(e)
   }
 }
+
+async function saveworkflow(data, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/saveWorkflow`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getCaseId(keycloak){ 
+ var year = localStorage.getItem('year')
+  var plantId = ''
+  var siteId ='';
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  const storedSite = localStorage.getItem('selectedSite')
+  if (storedSite) {
+    const parsedSite = JSON.parse(storedSite)
+    siteId = parsedSite.id
+  }
+
+  const verticalId = localStorage.getItem('verticalId')
+
+
+
+  const url = `${Config.CaseEngineUrl}/task/getCaseId?plantId=${plantId}&year=${year}&siteId=${siteId}&verticalId=${verticalId}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
 
 async function saveAOPConsumptionNorm(plantId, shutdownDetails, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/saveAOPConsumptionNorm`

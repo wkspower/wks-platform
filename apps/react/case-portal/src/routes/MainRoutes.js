@@ -31,7 +31,7 @@ import UserForm from 'components/user-management/UserForm'
 import UserManagementTable from 'components/user-management/UserManagementTable'
 import AssessmentForm from 'components/data-tables/AssesmentForm/AssessmentContext'
 import SlowdownNorms from 'components/data-tables/NormsScreens/SlowdownNorms'
-import TextSubmitComponent from 'components/user-management/textSubmitComponent'
+import TextSubmitComponent from 'components/user-management/TextSubmitComponent'
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
