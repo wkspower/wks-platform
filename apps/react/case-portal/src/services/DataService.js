@@ -75,17 +75,14 @@ export const DataService = {
   getSlowdownMonths,
   getUsersData,
   getUserRoles,
-<<<<<<< Updated upstream
-  getUserAllData,
+  // getUserAllData,
 
   getAopyears,
-=======
   updateUserAttributes,
   getUserBySearch,
   getUserScreen,
   // CheckIsTokenExp,
   updateUserPlants,
->>>>>>> Stashed changes
 }
 
 // async function CheckIsTokenExp(keycloak) {

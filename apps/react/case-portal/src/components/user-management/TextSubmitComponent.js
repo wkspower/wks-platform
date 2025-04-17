@@ -8,7 +8,7 @@ const TextSubmitMUI = () => {
   const handleSubmit = async () => {
     try {
       if (!text.trim()) {
-        alert('Please enter a message!')
+        console.log('Please enter a message!')
         return
       }
       const result = await DataService.saveText(text)

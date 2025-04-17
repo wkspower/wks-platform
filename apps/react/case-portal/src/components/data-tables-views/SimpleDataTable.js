@@ -167,7 +167,7 @@ const SimpleDataTable = () => {
       </Typography>
 
       <DataGrid
-        rows={rows}
+        rows={rows || []}
         columns={productionColumns.map((col) => ({
           ...col,
           filterable: false,
