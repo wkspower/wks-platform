@@ -33,5 +33,9 @@ public class ConfigurationDTO {
     private String UOM;
     private String lossCategory;
     private String normType;
+    private String ConfigTypeDisplayName;
+    private String TypeDisplayName;
+    private String ConfigTypeName;
+    private String TypeName;
 
 }

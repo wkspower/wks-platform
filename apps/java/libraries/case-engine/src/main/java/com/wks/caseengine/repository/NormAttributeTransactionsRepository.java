@@ -1,4 +1,5 @@
 package com.wks.caseengine.repository;
+
 import com.wks.caseengine.entity.NormAttributeTransactions;
 
 import java.util.List;
@@ -12,112 +13,98 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 @Repository
-public interface NormAttributeTransactionsRepository extends JpaRepository<NormAttributeTransactions, UUID>{
-	
+public interface NormAttributeTransactionsRepository extends JpaRepository<NormAttributeTransactions, UUID> {
+
 	@Modifying
 	@Query("UPDATE NormAttributeTransactions nat SET nat.attributeValue = :attributeValue " +
-	       "WHERE nat.aopMonth = :month AND nat.normParameterFKId = :normParameterFKId AND nat.auditYear = :auditYear")
-	int updateNormAttributeTransactions(@Param("attributeValue") String attributeValue,  
-	                                    @Param("month") Integer month,  
-	                                    @Param("normParameterFKId") UUID normParameterFKId,  
-	                                    @Param("auditYear") String auditYear);
-	
+			"WHERE nat.aopMonth = :month AND nat.normParameterFKId = :normParameterFKId AND nat.auditYear = :auditYear")
+	int updateNormAttributeTransactions(@Param("attributeValue") String attributeValue,
+			@Param("month") Integer month,
+			@Param("normParameterFKId") UUID normParameterFKId,
+			@Param("auditYear") String auditYear);
+
 	@Modifying
 	@Transactional
 	@Query("UPDATE NormAttributeTransactions nat " +
-	       "SET nat.attributeValue = :attributeValue, " +  // Updating attributeValue
-	       "    nat.remarks = :remarks " +  // Updating remarks
-	       "WHERE nat.aopMonth = :month " +
-	       "AND nat.auditYear = :auditYear " +
-	       "AND nat.normParameterFKId = :normParameterFKId ")
-	void updateCatalystData(@Param("attributeValue") String attributeValue, 
-	                        @Param("remarks") String remarks,  // Added remarks parameter
-	                        @Param("month") Integer month, 
-	                        @Param("auditYear") String auditYear, 
-	                        @Param("normParameterFKId") UUID normParameterFKId);
+			"SET nat.attributeValue = :attributeValue, " + // Updating attributeValue
+			"    nat.remarks = :remarks " + // Updating remarks
+			"WHERE nat.aopMonth = :month " +
+			"AND nat.auditYear = :auditYear " +
+			"AND nat.normParameterFKId = :normParameterFKId ")
+	void updateCatalystData(@Param("attributeValue") String attributeValue,
+			@Param("remarks") String remarks, // Added remarks parameter
+			@Param("month") Integer month,
+			@Param("auditYear") String auditYear,
+			@Param("normParameterFKId") UUID normParameterFKId);
 
-	
 	@Modifying
 	@Transactional
 	@Query("DELETE FROM NormAttributeTransactions nat " +
-	       "WHERE nat.attributeValue = :attributeValue " +
-	       "AND nat.aopMonth = :month " +  // Added missing AND
-	       "AND nat.auditYear = :auditYear " +
-	       "AND nat.normParameterFKId = :normParameterFKId ")
-	void deleteCatalystData(@Param("attributeValue") String attributeValue, 
-	                        @Param("month") Integer month, 
-	                        @Param("auditYear") String auditYear, 
-	                        @Param("normParameterFKId") UUID normParameterFKId);
-	
+			"WHERE nat.attributeValue = :attributeValue " +
+			"AND nat.aopMonth = :month " + // Added missing AND
+			"AND nat.auditYear = :auditYear " +
+			"AND nat.normParameterFKId = :normParameterFKId ")
+	void deleteCatalystData(@Param("attributeValue") String attributeValue,
+			@Param("month") Integer month,
+			@Param("auditYear") String auditYear,
+			@Param("normParameterFKId") UUID normParameterFKId);
+
 	@Modifying
 	@Transactional
 	@Query("DELETE FROM NormAttributeTransactions nat " +
-	       "WHERE nat.attributeValue = :attributeValue " +
-	       "AND nat.aopMonth = :month " +  // Added missing AND
-	       "AND nat.auditYear = :auditYear " +
-	       "AND nat.normParameterFKId = :normParameterFKId")
-	void deleteBusinessDemandData(@Param("attributeValue") String attributeValue, 
-	                        @Param("month") Integer month, 
-	                        @Param("auditYear") String auditYear, 
-	                        @Param("normParameterFKId") UUID normParameterFKId);
-
+			"WHERE nat.attributeValue = :attributeValue " +
+			"AND nat.aopMonth = :month " + // Added missing AND
+			"AND nat.auditYear = :auditYear " +
+			"AND nat.normParameterFKId = :normParameterFKId")
+	void deleteBusinessDemandData(@Param("attributeValue") String attributeValue,
+			@Param("month") Integer month,
+			@Param("auditYear") String auditYear,
+			@Param("normParameterFKId") UUID normParameterFKId);
 
 	@Query(value = """
 				         SELECT
-			NP.Id AS NormParameter_FK_Id,
+    NP.NormParameter_FK_Id AS NormParameter_FK_Id,
+    MAX(CASE WHEN NAT.AOPMonth = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan,
+    MAX(CASE WHEN NAT.AOPMonth = '2' THEN NAT.AttributeValue ELSE NULL END) AS Feb,
+    MAX(CASE WHEN NAT.AOPMonth = '3' THEN NAT.AttributeValue ELSE NULL END) AS Mar,
+    MAX(CASE WHEN NAT.AOPMonth = '4' THEN NAT.AttributeValue ELSE NULL END) AS Apr,
+    MAX(CASE WHEN NAT.AOPMonth = '5' THEN NAT.AttributeValue ELSE NULL END) AS May,
+    MAX(CASE WHEN NAT.AOPMonth = '6' THEN NAT.AttributeValue ELSE NULL END) AS Jun,
+    MAX(CASE WHEN NAT.AOPMonth = '7' THEN NAT.AttributeValue ELSE NULL END) AS Jul,
+    MAX(CASE WHEN NAT.AOPMonth = '8' THEN NAT.AttributeValue ELSE NULL END) AS Aug,
+    MAX(CASE WHEN NAT.AOPMonth = '9' THEN NAT.AttributeValue ELSE NULL END) AS Sep,
+    MAX(CASE WHEN NAT.AOPMonth = '10' THEN NAT.AttributeValue ELSE NULL END) AS Oct,
+    MAX(CASE WHEN NAT.AOPMonth = '11' THEN NAT.AttributeValue ELSE NULL END) AS Nov,
+    MAX(CASE WHEN NAT.AOPMonth = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec,
+    MAX(NAT.Remarks) AS Remarks,
+    MAX(NAT.Id) AS NormAttributeTransaction_Id,
+    MAX(NAT.AuditYear) AS AuditYear,
+    MAX(NP.UOM) AS UOM,
 
-			MAX(CASE WHEN NAT.AOPMonth = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan,
-			MAX(CASE WHEN NAT.AOPMonth = '2' THEN NAT.AttributeValue ELSE NULL END) AS Feb,
-			MAX(CASE WHEN NAT.AOPMonth = '3' THEN NAT.AttributeValue ELSE NULL END) AS Mar,
-			MAX(CASE WHEN NAT.AOPMonth = '4' THEN NAT.AttributeValue ELSE NULL END) AS Apr,
-			MAX(CASE WHEN NAT.AOPMonth = '5' THEN NAT.AttributeValue ELSE NULL END) AS May,
-			MAX(CASE WHEN NAT.AOPMonth = '6' THEN NAT.AttributeValue ELSE NULL END) AS Jun,
-			MAX(CASE WHEN NAT.AOPMonth = '7' THEN NAT.AttributeValue ELSE NULL END) AS Jul,
-			MAX(CASE WHEN NAT.AOPMonth = '8' THEN NAT.AttributeValue ELSE NULL END) AS Aug,
-			MAX(CASE WHEN NAT.AOPMonth = '9' THEN NAT.AttributeValue ELSE NULL END) AS Sep,
-			MAX(CASE WHEN NAT.AOPMonth = '10' THEN NAT.AttributeValue ELSE NULL END) AS Oct,
-			MAX(CASE WHEN NAT.AOPMonth = '11' THEN NAT.AttributeValue ELSE NULL END) AS Nov,
-			MAX(CASE WHEN NAT.AOPMonth = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec,
+	NP.ConfigTypeDisplayName AS ConfigTypeDisplayName,
+    NP.TypeDisplayName AS TypeDisplayName,
+    NP.ConfigTypeName AS ConfigTypeName,
+    NP.TypeName AS TypeName,
 
-			MAX(NAT.Remarks) AS Remarks,
-			MAX(NAT.Id) AS NormAttributeTransaction_Id,
-			MAX(NAT.AuditYear) AS AuditYear,
-			MAX(NP.UOM) AS UOM,
 
-			-- Categorizing as LossCategory
-			CASE
-			WHEN NP.Name LIKE '%.StartupLosses.%' THEN 'StartupLosses'
-			WHEN NP.Name LIKE '%.Otherlosses.%' THEN 'Otherlosses'
-			WHEN NP.Name LIKE '%.ShutdownNorms.%' THEN 'ShutdownNorms'
-			ELSE 'Unknown'
-			END AS LossCategory,
+FROM vwScrnPEGetConfigTypes NP
+JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id
+LEFT JOIN NormAttributeTransactions NAT ON NAT.NormParameter_FK_Id = NP.NormParameter_FK_Id
+    AND NAT.AuditYear = :year
+WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant')
+  AND NP.Plant_FK_Id = :plantFKId
+GROUP BY 
+    NP.NormParameter_FK_Id,
+    NP.TypeDisplayName,
+	NP.TypeDisplayOrder,
+	NP.ConfigTypeDisplayName
+	NP.ConfigTypeName
+	NP.TypeName
+ORDER BY
+    NP.TypeDisplayOrder;
 
-			-- Extracting NormType (First part before the first dot)
-			CASE
-			WHEN CHARINDEX('.', NP.Name) > 0
-			THEN LEFT(NP.Name, CHARINDEX('.', NP.Name) - 1)
-			ELSE NP.Name -- If no dot exists, return the whole name
-			END AS NormType
 
-			FROM NormParameters NP
-			JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id
-			LEFT JOIN NormAttributeTransactions NAT
-			ON NAT.NormParameter_FK_Id = NP.Id
-			AND NAT.AuditYear = :year
-			WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant')
-			AND NP.Plant_FK_Id = :plantFKId
-			GROUP BY NP.Id, NP.Name
-			HAVING
-			(CASE
-			WHEN NP.Name LIKE '%.StartupLosses.%' THEN 'StartupLosses'
-			WHEN NP.Name LIKE '%.Otherlosses.%' THEN 'Otherlosses'
-			WHEN NP.Name LIKE '%.ShutdownNorms.%' THEN 'ShutdownNorms'
-			ELSE 'Unknown'
-			END) IN ('StartupLosses', 'Otherlosses', 'ShutdownNorms')
-			ORDER BY
-			LossCategory,
-			NormType,
-			NP.Id;
+
 				 """, nativeQuery = true)
 	List<Object[]> findByYearAndPlantFkIdPE(@Param("year") String year, @Param("plantFKId") UUID plantFKId);
 
