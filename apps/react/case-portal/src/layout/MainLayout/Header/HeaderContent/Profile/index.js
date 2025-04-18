@@ -19,7 +19,6 @@ import MainCard from 'components/MainCard'
 import ProfileTab from './ProfileTab'
 import LogoutOutlined from '@ant-design/icons/LogoutOutlined'
 import UserOutlined from '@ant-design/icons/UserOutlined'
-import avatar2 from 'assets/images/users/generic.png'
 
 function TabPanel({ children, value, index, ...other }) {
   return (
@@ -90,11 +89,9 @@ const Profile = ({ keycloak }) => {
         onClick={handleToggle}
       >
         <Stack direction='row' spacing={2} alignItems='center' sx={{ p: 0.5 }}>
-          <Avatar
-            alt='profile user'
-            src={avatar2}
-            sx={{ width: 32, height: 32 }}
-          />
+          <Avatar alt='profile user' sx={{ width: 32, height: 32 }}>
+            <UserOutlined />
+          </Avatar>
           <Typography variant='subtitle1'>
             {keycloak.idTokenParsed.given_name}
           </Typography>
@@ -148,9 +145,10 @@ const Profile = ({ keycloak }) => {
                           >
                             <Avatar
                               alt='profile user'
-                              src={avatar2}
                               sx={{ width: 32, height: 32 }}
-                            />
+                            >
+                              <UserOutlined />
+                            </Avatar>
                             <Stack>
                               <Typography variant='h6'>
                                 {keycloak.idTokenParsed.name}
