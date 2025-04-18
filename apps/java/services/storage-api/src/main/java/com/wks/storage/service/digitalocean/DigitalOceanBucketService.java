@@ -57,4 +57,10 @@ public class DigitalOceanBucketService implements BucketService {
 		this.config = config;
 	}
 
+	@Override
+	public String createObjectWithNestedPath(String vertical, String site, String plant, String fileName) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'createObjectWithNestedPath'");
+	}
+
 }

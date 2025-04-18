@@ -14,7 +14,7 @@ public class PlantMaintenanceTransaction {
     @Column(name = "Id", columnDefinition = "uniqueidentifier")
     private UUID id;
 
-    @Column(name = "Name", nullable = false, length = 255)
+    @Column(name = "Name")
     private String name;
 
     @Column(name = "Discription", nullable = false, length = 500)

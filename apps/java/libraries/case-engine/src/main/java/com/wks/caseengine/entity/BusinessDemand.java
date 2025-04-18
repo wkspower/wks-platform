@@ -78,9 +78,5 @@ public class BusinessDemand {
     @Column(name="Vertical_FK_Id")
     private UUID verticalFKId;
     
-    @Column(name="isEditable")
-    private Boolean isEditable;
-    
-    @Column(name="isVisible")
-    private Boolean isVisible;
+
 }

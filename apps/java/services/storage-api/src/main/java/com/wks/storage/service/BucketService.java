@@ -17,4 +17,6 @@ public interface BucketService {
 
 	String createObjectWithPath(String dir, String fileName);
 
+	String createObjectWithNestedPath(String vertical, String site, String plant, String fileName);
+
 }

@@ -127,10 +127,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			configurationDTO.setUOM(row[16] != null ? row[16].toString() : "");
 
 			if (verticalName.equalsIgnoreCase("PE")) {
-				configurationDTO.ConfigTypeDisplayName(row[17] != null ? row[17].toString() : "");
-				configurationDTO.TypeDisplayName(row[18] != null ? row[18].toString() : "");
-				configurationDTO.ConfigTypeName(row[19] != null ? row[19].toString() : "");
-				configurationDTO.TypeName(row[20] != null ? row[20].toString() : "");
+				configurationDTO.setConfigTypeDisplayName(row[17] != null ? row[17].toString() : "");
+configurationDTO.setTypeDisplayName(row[18] != null ? row[18].toString() : "");
+configurationDTO.setConfigTypeName(row[19] != null ? row[19].toString() : "");
+configurationDTO.setTypeName(row[20] != null ? row[20].toString() : "");
+
 			}
 
 

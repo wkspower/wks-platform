@@ -24,4 +24,7 @@ public interface DownloadService {
 
 	ResponseEntity<InputStreamResource> downloadObj(String dir, String fileName, String contentType);
 
+	ResponseEntity<InputStreamResource> downloadFile(String vertical, String site, String plant, String fileName,
+			String contentType);
+
 }

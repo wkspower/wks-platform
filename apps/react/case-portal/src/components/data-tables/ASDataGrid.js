@@ -614,7 +614,7 @@ const DataGridTable = ({
 
       <Box
         sx={{
-          height: `calc(${otherHeight ?? (permissions.customHeight2 ? '95%' : '102%')} - 120px)`,
+          height: `calc(${otherHeight ?? (permissions.customHeight2 ? '95%' : '95%')} - 120px)`,
           width: '100%',
           marginBottom: 0,
           padding: 0,
@@ -698,11 +698,15 @@ const DataGridTable = ({
             },
           }}
           getRowClassName={(params) => {
-            return params.row.Particulars || params.row.Particulars2
-              ? 'no-border-row'
-              : params.row.isEditable == false
-                ? 'odd-row'
-                : 'even-row'
+            if (params.row.Particulars || params.row.Particulars2) {
+              return 'no-border-row'
+            }
+
+            if (params.row.isEditable === false) {
+              return permissions?.noColor === true ? 'even-row' : 'odd-row'
+            }
+
+            return 'even-row'
           }}
           sx={{
             borderRadius: '0px',
@@ -791,12 +795,26 @@ const DataGridTable = ({
               backgroundColor: '#FAFAFC',
               color: '#3E4E75',
               fontSize: '0.8rem',
-              // fontWeight: 600,
               fontWeight: 'bold',
-              borderBottom: `2px solid ${'#DAE0EF'}`,
+              borderBottom: `2px solid #DAE0EF`,
               borderTopLeftRadius: '0px',
               borderTopRightRadius: '0px',
+              minHeight: '45px',
+              maxHeight: '45px',
             },
+            '& .MuiDataGrid-columnHeader': {
+              minHeight: '45px',
+              maxHeight: '45px',
+              lineHeight: '45px', // ensure text is vertically aligned
+              paddingTop: '0px',
+              paddingBottom: '0px',
+            },
+            '& .MuiDataGrid-columnHeaderTitle': {
+              lineHeight: '45px', // aligns text better
+              fontSize: '0.75rem',
+              fontWeight: 'bold', // Ensure column titles are bold
+            },
+
             '& .MuiDataGrid-cell': {
               // borderRight: `1px solid ${jioColors.border}`,
               borderBottom: `1px solid ${'#DAE0EF'}`,
@@ -820,7 +838,7 @@ const DataGridTable = ({
             '& .odd-row': {
               opacity: 0.9,
               pointerEvents: 'none',
-              backgroundColor: 'rgba(200, 200, 200, 0.3)',
+              backgroundColor: 'rgba(145, 145, 145, 0.3)',
               color: 'rgba(0, 0, 0, 0.6)',
             },
             '& .MuiDataGrid-toolbarContainer': {
@@ -836,9 +854,6 @@ const DataGridTable = ({
             // '& .MuiDataGrid-cell.last-column-cell': {
             //   paddingRight: '16px',
             // },
-            '& .MuiDataGrid-columnHeaderTitle': {
-              fontWeight: 'bold', // Ensure column titles are bold
-            },
 
             // '& .MuiDataGrid-columnHeader[data-field="Particulars"] .MuiDataGrid-columnHeaderTitle':
             //   {

@@ -33,7 +33,7 @@ const ConfigurationTable = () => {
           idFromApi: item.id,
           id: index,
           originalRemark: item.remarks,
-          // normType: index % 2 === 0 ? 'Production' : 'Consumption',
+          // TypeName: index % 2 === 0 ? 'Production' : 'Consumption',
         }))
 
         const productionData = formattedData
@@ -54,19 +54,19 @@ const ConfigurationTable = () => {
         setConsumptionRows(consumptionData)
         setRows(formattedData) // Optional: if you still need all rows
       } else {
-        // Group data by lossCategory and then by normType.
         const groups = new Map()
+
         data.forEach((item) => {
-          const lossCategory = item.lossCategory
-          const normType = item.normType
-          if (!groups.has(lossCategory)) {
-            groups.set(lossCategory, new Map())
+          const ConfigTypeName = item.ConfigTypeName
+          const TypeName = item.TypeDisplayName
+          if (!groups.has(ConfigTypeName)) {
+            groups.set(ConfigTypeName, new Map())
           }
-          const normGroup = groups.get(lossCategory)
-          if (!normGroup.has(normType)) {
-            normGroup.set(normType, [])
+          const normGroup = groups.get(ConfigTypeName)
+          if (!normGroup.has(TypeName)) {
+            normGroup.set(TypeName, [])
           }
-          normGroup.get(normType).push(item)
+          normGroup.get(TypeName).push(item)
         })
 
         let groupId = 0
@@ -75,33 +75,34 @@ const ConfigurationTable = () => {
         let otherLossRows = []
 
         // Build the final grouped arrays.
-        groups.forEach((normGroup, lossCategory) => {
+        groups.forEach((normGroup, ConfigTypeName) => {
           let rowsForThisCategory = []
-          // For shutdown norms, include the lossCategory header.
-          if (lossCategory.toLowerCase() === 'shutdownnorms') {
+          // For shutdown norms, include the ConfigTypeName header.
+          if (ConfigTypeName === 'ShutdownNorms') {
             rowsForThisCategory.push({
               id: groupId++,
-              Particulars: lossCategory,
+              Particulars: ConfigTypeName,
               isGroupHeader: true,
             })
           }
-          // For each normType group within this lossCategory:
-          normGroup.forEach((items, normType) => {
+          // For each TypeName group within this ConfigTypeName:
+          normGroup.forEach((items, TypeName) => {
             // For shutdown norms, add a sub-group header.
-            // For others, use normType as the main header (since we don't want the lossCategory header).
-            if (lossCategory.toLowerCase() === 'shutdownnorms') {
+            // For others, use TypeName as the main header (since we don't want the ConfigTypeName header).
+            if (ConfigTypeName === 'ShutdownNorms') {
               rowsForThisCategory.push({
                 id: groupId++,
-                Particulars2: normType,
+                Particulars2: TypeName,
                 isSubGroupHeader: true,
               })
             } else {
               rowsForThisCategory.push({
                 id: groupId++,
-                Particulars: normType,
+                Particulars: TypeName,
                 isGroupHeader: true,
               })
             }
+
             // Append each item.
             items.forEach((item) => {
               rowsForThisCategory.push({
@@ -112,12 +113,12 @@ const ConfigurationTable = () => {
             })
           })
 
-          // Separate arrays based on lossCategory (case-insensitive)
-          if (lossCategory.toLowerCase() === 'shutdownnorms') {
+          // Separate arrays based on ConfigTypeName (case-insensitive)
+          if (ConfigTypeName == 'ShutdownNorms') {
             shutdownRows = rowsForThisCategory
-          } else if (lossCategory.toLowerCase() === 'startuplosses') {
+          } else if (ConfigTypeName == 'StartupLosses') {
             startUpRows = rowsForThisCategory
-          } else if (lossCategory.toLowerCase() === 'otherlosses') {
+          } else if (ConfigTypeName == 'Otherlosses') {
             otherLossRows = rowsForThisCategory
           }
         })
@@ -255,7 +256,7 @@ const ConfigurationTable = () => {
             fetchData={fetchData}
             setRows={setStartUpRows}
             defaultCustomHeight={defaultCustomHeight}
-            configType={'startupLosses'}
+            configType={'StartupLosses'}
           />
         )}
         {tabIndex === 1 && (
@@ -265,7 +266,7 @@ const ConfigurationTable = () => {
             fetchData={fetchData}
             setRows={setOtherLossRows}
             defaultCustomHeight={defaultCustomHeight}
-            configType={'otherLosses'}
+            configType={'Otherlosses'}
           />
         )}
         {tabIndex === 2 && (
@@ -276,7 +277,7 @@ const ConfigurationTable = () => {
             fetchData={fetchData}
             defaultCustomHeight={defaultCustomHeight}
             tabIndex={2}
-            configType={'shutdownNorms'}
+            configType={'ShutdownNorms'}
           />
         )}
         {tabIndex === 3 && (

@@ -49,4 +49,9 @@ public class MinioBucketService implements BucketService {
 		return String.format("%s/%s", dir, fileName);
 	}
 
+	@Override
+	public String createObjectWithNestedPath(String vertical, String site, String plant, String fileName) {
+		return String.format("%s/%s/%s/%s", vertical, site, plant, fileName);
+	}
+
 }

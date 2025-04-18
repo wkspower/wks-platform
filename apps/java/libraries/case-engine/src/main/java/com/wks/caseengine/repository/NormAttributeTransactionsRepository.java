@@ -84,7 +84,7 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	NP.ConfigTypeDisplayName AS ConfigTypeDisplayName,
     NP.TypeDisplayName AS TypeDisplayName,
     NP.ConfigTypeName AS ConfigTypeName,
-    NP.TypeName AS TypeName,
+    NP.TypeName AS TypeName
 
 
 FROM vwScrnPEGetConfigTypes NP
@@ -97,8 +97,8 @@ GROUP BY
     NP.NormParameter_FK_Id,
     NP.TypeDisplayName,
 	NP.TypeDisplayOrder,
-	NP.ConfigTypeDisplayName
-	NP.ConfigTypeName
+	NP.ConfigTypeDisplayName,
+	NP.ConfigTypeName,
 	NP.TypeName
 ORDER BY
     NP.TypeDisplayOrder;

@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import { Box } from '@mui/material'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
+import { DataGrid } from '@mui/x-data-grid'
+import getEnhancedProductionColDefsView from 'components/data-tables/CommonHeader/ProductionVolumeHeaderView'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-import { Box, Typography } from '@mui/material'
-import { DataGrid, GridToolbar } from '@mui/x-data-grid'
-import { useSelector } from 'react-redux'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import getEnhancedProductionColDefsView from 'components/data-tables/CommonHeader/ProductionVolumeHeaderView'
 
 const SimpleDataTable = () => {
   const keycloak = useSession()
@@ -157,15 +157,6 @@ const SimpleDataTable = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <Typography
-        variant='h6'
-        gutterBottom
-        fontWeight='bold'
-        sx={{ marginTop: 2, marginBottom: 3 }}
-      >
-        Production Volume Data
-      </Typography>
-
       <DataGrid
         rows={rows}
         columns={productionColumns.map((col) => ({
@@ -288,16 +279,6 @@ const SimpleDataTable = () => {
             borderRight: `1px solid ${jioColors.border}`,
           },
 
-          '& .MuiDataGrid-columnHeaders': {
-            backgroundColor: '#FAFAFC',
-            color: '#3E4E75',
-            fontSize: '0.8rem',
-            // fontWeight: 600,
-            fontWeight: 'bold',
-            borderBottom: `2px solid ${'#DAE0EF'}`,
-            borderTopLeftRadius: '0px',
-            borderTopRightRadius: '0px',
-          },
           '& .MuiDataGrid-cell': {
             // borderRight: `1px solid ${jioColors.border}`,
             borderBottom: `1px solid ${'#DAE0EF'}`,
@@ -328,45 +309,40 @@ const SimpleDataTable = () => {
             paddingRight: 2,
             alignSelf: 'flex-end',
           },
-          // '& .MuiDataGrid-columnHeaders .last-column-header': {
-          //   paddingRight: '16px',
-          // },
-          // '& .MuiDataGrid-cell.last-column-cell': {
-          //   paddingRight: '16px',
-          // },
-          '& .MuiDataGrid-columnHeaderTitle': {
-            fontWeight: 'bold', // Ensure column titles are bold
-          },
-
-          // '& .MuiDataGrid-columnHeader[data-field="Particulars"] .MuiDataGrid-columnHeaderTitle':
-          //   {
-          //     color: 'red',
-          //   },
 
           '& .disabled-cell': {
-            // color: '#A9A9A9 !important', // Grey color for disabled text
-            // backgroundColor: '#F0F0F0 !important', // Light grey background
-            // cursor: 'not-allowed !important', // Indicate it's not interactive
-            // Optional: Add a border or other visual cues
-            // border: '1px solid #ccc !important',
             opacity: 0.7, // Reduce opacity for a faded look
           },
           '& .disabled-header': {
             color: '#A9A9A9 !important', // Fade the header text color
             opacity: 0.7, // Optionally fade the header opacity as well
-            // You might want to adjust other header styles if needed
+          },
+
+          '& .MuiDataGrid-columnHeaders': {
+            backgroundColor: '#FAFAFC',
+            color: '#3E4E75',
+            fontSize: '0.8rem',
+            fontWeight: 'bold',
+            borderBottom: `2px solid #DAE0EF`,
+            borderTopLeftRadius: '0px',
+            borderTopRightRadius: '0px',
+            minHeight: '45px',
+            maxHeight: '45px',
+          },
+          '& .MuiDataGrid-columnHeader': {
+            minHeight: '45px',
+            maxHeight: '45px',
+            lineHeight: '45px', // ensure text is vertically aligned
+            paddingTop: '0px',
+            paddingBottom: '0px',
+          },
+          '& .MuiDataGrid-columnHeaderTitle': {
+            lineHeight: '45px', // aligns text better
+            fontSize: '0.75rem',
+            fontWeight: 'bold', // Ensure column titles are bold
           },
         }}
       />
-
-      <Typography
-        variant='h6'
-        gutterBottom
-        fontWeight='bold'
-        sx={{ marginTop: 3 }}
-      >
-        Business Demand Data
-      </Typography>
     </Box>
   )
 }

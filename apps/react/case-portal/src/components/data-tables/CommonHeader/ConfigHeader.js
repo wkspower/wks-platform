@@ -14,11 +14,11 @@ const getConfigByType = (configType) => {
   switch (configType) {
     case 'meg':
       return productionColumns
-    case 'startupLosses':
+    case 'StartupLosses':
       return productionColumnsPE1
-    case 'otherLosses':
+    case 'Otherlosses':
       return productionColumnsPE2
-    case 'shutdownNorms':
+    case 'ShutdownNorms':
       return productionColumnsPE3
     case 'grades':
       return productionColumnsPE4
@@ -202,6 +202,13 @@ const getEnhancedAOPColDefs = ({
         renderEditCell: NumericInputOnly,
       }
     }
+
+    // if (col.field === 'srNo') {
+    //   return {
+    //     ...col,
+    //     renderCell: (params) => params.id + 1,
+    //   }
+    // }
 
     if (col.field === 'Particulars' || col.field === 'Particulars2') {
       return {

@@ -12,11 +12,39 @@ import { validateFields } from 'utils/validationUtils'
 import TextField from '@mui/material/TextField'
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
+
+import Accordion from '@mui/material/Accordion'
+import AccordionSummary from '@mui/material/AccordionSummary'
+import AccordionDetails from '@mui/material/AccordionDetails'
+import Typography from '@mui/material/Typography'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { Box } from '@mui/material'
+import { Button } from '@mui/material'
+
+const jioColors = {
+  primaryBlue: '#387ec3',
+  // primaryBlue: 'red',
+  accentRed: '#E31C3D',
+  background: '#FFFFFF',
+  headerBg: '#0F3CC9',
+  rowEven: '#FFFFFF',
+  rowOdd: '#E8F1FF',
+  textPrimary: '#2D2D2D',
+  border: '#D0D0D0',
+  darkTransparentBlue: 'rgba(127, 147, 206, 0.8)',
+}
+
 const NormalOpNormsScreen = () => {
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [rowModesModel, setRowModesModel] = useState({})
+
+  const [isAccordionExpanded, setIsAccordionExpanded] = useState(true)
+
+  const handleAccordionChange = (event, isExpanded) => {
+    setIsAccordionExpanded(isExpanded)
+  }
 
   const [open1, setOpen1] = useState(false)
 
@@ -489,6 +517,8 @@ const NormalOpNormsScreen = () => {
     }
   }
 
+  const defaultCustomHeight = { mainBox: '50vh', otherBox: '112%' }
+
   return (
     <div>
       <Backdrop
@@ -497,51 +527,162 @@ const NormalOpNormsScreen = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <DataGridTable
-        columns={productionColumns}
-        rows={rows}
-        setRows={setRows}
-        getRowId={(row) => row.id}
-        title='Consumption AOP'
-        paginationOptions={[100, 200, 300]}
-        processRowUpdate={processRowUpdate}
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={onRowModesModelChange}
-        saveChanges={saveChanges}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        apiRef={apiRef}
-        // deleteId={deleteId}
-        open1={open1}
-        // setDeleteId={setDeleteId}
-        setOpen1={setOpen1}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        // handleDeleteClick={handleDeleteClick}
-        handleCalculate={handleCalculate}
-        handleRemarkCellClick={handleRemarkCellClick}
-        fetchData={fetchData}
-        onProcessRowUpdateError={onProcessRowUpdateError}
-        handleUnitChange={handleUnitChange}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        unsavedChangesRef={unsavedChangesRef}
-        permissions={{
-          showAction: true,
-          addButton: false,
-          deleteButton: false,
-          editButton: true,
-          showUnit: false,
-          units: ['TPH', 'TPD'],
-          saveWithRemark: true,
-          saveBtn: false,
-          showCalculate: true,
-          showRefresh: false,
+
+      <div>
+        {(lowerVertName === 'meg' || lowerVertName === 'pe') && (
+          <Accordion
+            defaultExpanded
+            disableGutters
+            onChange={handleAccordionChange}
+            // sx={{ margin: '0px 5px 5px 0px', marginLeft: '13px' }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls='meg-grid-content'
+              id='meg-grid-header'
+            >
+              <Typography component='span' sx={{ fontWeight: 'bold' }}>
+                Consumption AOP
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box
+                sx={{
+                  width: '100%',
+                  padding: '0px ',
+                  margin: '0px',
+                  backgroundColor: '#F2F3F8',
+                  borderRadius: 0,
+                  borderBottom: 'none',
+                }}
+              >
+                <DataGridTable
+                  columns={productionColumns}
+                  rows={rows}
+                  setRows={setRows}
+                  getRowId={(row) => row.id}
+                  title='Consumption AOP'
+                  paginationOptions={[100, 200, 300]}
+                  processRowUpdate={processRowUpdate}
+                  rowModesModel={rowModesModel}
+                  onRowModesModelChange={onRowModesModelChange}
+                  saveChanges={saveChanges}
+                  snackbarData={snackbarData}
+                  snackbarOpen={snackbarOpen}
+                  apiRef={apiRef}
+                  // deleteId={deleteId}
+                  open1={open1}
+                  // setDeleteId={setDeleteId}
+                  setOpen1={setOpen1}
+                  setSnackbarOpen={setSnackbarOpen}
+                  setSnackbarData={setSnackbarData}
+                  // handleDeleteClick={handleDeleteClick}
+                  handleCalculate={handleCalculate}
+                  handleRemarkCellClick={handleRemarkCellClick}
+                  fetchData={fetchData}
+                  onProcessRowUpdateError={onProcessRowUpdateError}
+                  handleUnitChange={handleUnitChange}
+                  remarkDialogOpen={remarkDialogOpen}
+                  setRemarkDialogOpen={setRemarkDialogOpen}
+                  currentRemark={currentRemark}
+                  setCurrentRemark={setCurrentRemark}
+                  currentRowId={currentRowId}
+                  unsavedChangesRef={unsavedChangesRef}
+                  permissions={{
+                    showAction: true,
+                    addButton: false,
+                    deleteButton: false,
+                    editButton: true,
+                    showUnit: false,
+                    units: ['TPH', 'TPD'],
+                    saveWithRemark: true,
+                    saveBtn: false,
+                    showCalculate: true,
+                    showRefresh: false,
+                    noColor: true,
+                    ShowSummary: true,
+                    // customHeight2: true,
+                    customHeight: defaultCustomHeight, // use default height
+                  }}
+                />
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+        )}
+      </div>
+      <Typography
+        component='div'
+        sx={{ fontWeight: 'bold', ml: '5px', mt: '25px' }}
+      >
+        Consumption AOP Summary
+      </Typography>
+
+      <TextField
+        label='Summary'
+        multiline
+        minRows={isAccordionExpanded ? 4 : 20}
+        fullWidth
+        margin='normal'
+        variant='outlined'
+        sx={{
+          '& .MuiInputBase-root': {
+            backgroundColor: '#ffffff',
+            borderRadius: '8px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            padding: '8px',
+          },
+          '& label': {
+            fontSize: '1rem',
+            color: '#666',
+            lineHeight: '1.2',
+            transform: 'translate(14px, 12px) scale(1)',
+          },
+          '& .MuiInputLabel-shrink': {
+            transform: 'translate(14px, -6px) scale(0.75)',
+          },
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#ccc',
+          },
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#999',
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#1976d2',
+          },
+          '& .MuiInputBase-input': {
+            resize: 'vertical',
+          },
         }}
       />
+
+      <Button
+        variant='contained'
+        sx={{
+          backgroundColor: jioColors.primaryBlue,
+          color: jioColors.background,
+          borderRadius: 1,
+          padding: '8px 24px',
+          textTransform: 'none',
+          fontSize: '0.875rem',
+          fontWeight: 500,
+          minWidth: 120,
+          '&:hover': {
+            backgroundColor: '#143B6F',
+            boxShadow: 'none',
+          },
+          '&.Mui-disabled': {
+            backgroundColor: jioColors.primaryBlue,
+            color: jioColors.background,
+            opacity: 0.7,
+          },
+        }}
+        // onClick={saveModalOpen}
+        // disabled={isButtonDisabled}
+        // loading={loading} // Use the loading prop to trigger loading state
+        // loadingposition='start' // Use loadingPosition to control where the spinner appears
+      >
+        Save
+      </Button>
     </div>
   )
 }

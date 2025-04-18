@@ -21,6 +21,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   const vertName = verticalChange?.selectedVertical
   const plantName = JSON.parse(localStorage.getItem('selectedPlant'))?.name
   const siteName = JSON.parse(localStorage.getItem('selectedSite'))?.name
+  const verticalId = localStorage.getItem('verticalId')
   const verticalName = JSON.parse(
     localStorage.getItem('selectedVertical'),
   )?.name
@@ -34,8 +35,45 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     severity: 'info',
   })
 
+  function getRoleName(verticalId, screenId) {
+    const roleMapping = {
+      '5CC84A47-9717-4142-8E66-B60EBE0CF703': {
+        'product-demand': 'CTS Engineer',
+        'product-mcu-val': 'Plant Manager',
+        'shutdown-plan': 'Plant Manager',
+        'slowdown-plan': 'Plant Manager',
+        'maintenance-details': 'Plant Manager',
+        'production-norms': 'CTS Engineer',
+        'catalyst-selectivity': 'CTS Engineer',
+        'normal-op-norms': 'Plant Manager',
+        'shutdown-norms': 'Plant Manager',
+        'slowdown-norms': 'Plant Manager',
+        'consumption-norms': 'Plant Manager',
+        'feed-stock': 'Plant Manager',
+      },
+      'BF5D7508-96EB-496E-BEB0-4828CB1A1B11': {
+        'product-demand': 'CTS Engineer',
+        'product-mcu-val': 'Plant Manager',
+        'shutdown-plan': 'Plant Manager',
+        'slowdown-plan': 'Plant Manager',
+        'maintenance-details': 'Plant Manager',
+        'production-norms': 'CTS Engineer',
+        'catalyst-selectivity': 'CTS Engineer',
+        'normal-op-norms': 'Plant Manager',
+        'shutdown-norms': 'Plant Manager',
+        'slowdown-norms': 'Plant Manager',
+        'consumption-norms': 'Plant Manager',
+      },
+    }
+
+    const verticalRoleMap = roleMapping[verticalId]
+    return verticalRoleMap?.[screenId]
+      ? `Role : ${verticalRoleMap[screenId]}`
+      : 'Role : N/A'
+  }
+
   async function handleOpenPdf(title) {
-    const url = `${Config.StorageUrl}/storage/files1/newFile/downloads/${title}_${vertName}_${plantName}.pdf?content-type=application/pdf`
+    const url = `${Config.StorageUrl}/storage/files/${vertName}/${siteName}/${plantName}/downloads/${title}.pdf?content-type=application/pdf`
     const headers = {
       Authorization: `Bearer ${keycloak.token}`,
     }
@@ -166,7 +204,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
               },
               padding: '6px', // Slightly increase padding for better spacing
             }}
-            onClick={() => handleOpenPdf(item.title)}
+            onClick={() => handleOpenPdf(item?.id)}
           >
             <InfoIcon
               fontSize='medium'
@@ -224,21 +262,45 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
               </MuiBreadcrumbs>
             </Grid> */}
 
-            <Grid item sx={{ ml: 1.5 }}>
-              <Typography
-                component='div'
-                sx={{
-                  textDecoration: 'none',
-                  fontWeight: 800,
-                  color: 'black',
-                  fontSize: '1rem',
-                  display: 'flex', // Use flex to align items inline
-                  alignItems: 'center', // Vertically align items in the center (optional)
-                }}
-              >
-                {verticalName} / {siteName} / {plantName}
-                {itemContent} {/* The icon will now appear next to the text */}
-              </Typography>
+            <Grid
+              container
+              sx={{ ml: 1.5 }}
+              justifyContent='space-between'
+              alignItems='center'
+            >
+              <Grid item>
+                <Typography
+                  component='div'
+                  sx={{
+                    textDecoration: 'none',
+                    fontWeight: 800,
+                    color: 'black',
+                    fontSize: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  {verticalName} / {siteName} / {plantName}
+                  {itemContent}
+                </Typography>
+              </Grid>
+
+              <Grid item>
+                <Typography
+                  component='span'
+                  sx={{
+                    textDecoration: 'none',
+                    fontWeight: 800,
+                    color: 'black',
+                    display: 'flex',
+                    alignItems: 'center',
+                    margin: '12px',
+                    textShadow: '0.5px 0.5px 0px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  {getRoleName(verticalId, item?.id)}
+                </Typography>
+              </Grid>
             </Grid>
 
             {/* HIDE THE TITLE NAME */}

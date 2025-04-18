@@ -184,7 +184,7 @@ const SlowdownNorms = () => {
     const getSlowdownMonths = async () => {
       try {
         const data = await DataService.getSlowdownMonths(keycloak, null)
-        if (data && data?.ok == 200) setSlowdownMonths(data)
+        if (data) setSlowdownMonths(data)
       } catch (error) {
         console.error('Error fetching months:', error)
       } finally {
