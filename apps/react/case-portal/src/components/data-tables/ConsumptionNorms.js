@@ -79,11 +79,11 @@ const NormalOpNormsScreen = () => {
     setRemarkDialogOpen(true)
   }
 
-  const getProductDisplayName = (id) => {
-    if (!id) return
-    const product = allProducts.find((p) => p.id === id)
-    return product ? product.displayName : ''
-  }
+  // const getProductDisplayName = (id) => {
+  //   if (!id) return
+  //   const product = allProducts.find((p) => p.id === id)
+  //   return product ? product.displayName : ''
+  // }
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
@@ -527,7 +527,6 @@ const NormalOpNormsScreen = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-<<<<<<< HEAD
 
       <div>
         {(lowerVertName === 'meg' || lowerVertName === 'pe') && (
@@ -653,51 +652,6 @@ const NormalOpNormsScreen = () => {
           '& .MuiInputBase-input': {
             resize: 'vertical',
           },
-=======
-      <DataGridTable
-        columns={productionColumns}
-        rows={rows}
-        setRows={setRows}
-        getRowId={(row) => row.id}
-        title='Consumption AOP'
-        paginationOptions={[100, 200, 300]}
-        processRowUpdate={processRowUpdate}
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={onRowModesModelChange}
-        saveChanges={saveChanges}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        apiRef={apiRef}
-        // deleteId={deleteId}
-        open1={open1}
-        // setDeleteId={setDeleteId}
-        setOpen1={setOpen1}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        // handleDeleteClick={handleDeleteClick}
-        handleCalculate={handleCalculate}
-        handleRemarkCellClick={handleRemarkCellClick}
-        fetchData={fetchData}
-        onProcessRowUpdateError={onProcessRowUpdateError}
-        handleUnitChange={handleUnitChange}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        unsavedChangesRef={unsavedChangesRef}
-        permissions={{
-          showAction: true,
-          addButton: false,
-          deleteButton: false,
-          editButton: false,
-          showUnit: false,
-          units: ['TPH', 'TPD'],
-          saveWithRemark: true,
-          saveBtn: false,
-          showCalculate: true,
-          showRefresh: false,
->>>>>>> c360da7a1a95aa4137489b7672a68ad2a69134fd
         }}
       />
 

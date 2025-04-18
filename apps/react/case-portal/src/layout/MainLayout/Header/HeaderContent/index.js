@@ -1,477 +1,220 @@
 import { useState, useEffect } from 'react'
 import {
   Box,
-  useMediaQuery,
+  Typography,
+  FormControl,
   Select,
   MenuItem,
-  FormControl,
   Stack,
-  Typography,
+  useMediaQuery,
 } from '@mui/material'
-import MobileSection from './MobileSection'
-import Profile from './Profile'
-import Search from './Search'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   setAopYear,
-  setSitePlantChange,
-  setVerticalChange,
   setYearChange,
+  setVerticalChange,
+  setSitePlantChange,
 } from 'store/reducers/dataGridStore'
 import { DataService } from 'services/DataService'
-import honLogo from 'assets/images/hon_white.png' //WHITE COLOR
-import { useSelector } from 'react-redux'
+import Search from './Search'
+import Profile from './Profile/index'
+import MobileSection from './MobileSection'
 
-const HeaderContent = ({ keycloak }) => {
-  const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
-  const [selectedPlant, setSelectedPlant] = useState('')
-  const [selectedSite, setSelectedSite] = useState('')
-  const [selectedVertical, setSelectedVertical] = useState('')
-  const [verticals, setVerticals] = useState([])
-  // const [allowedVerticals, setAllowedVerticals] = useState([])
-  const [sites, setSites] = useState([])
-  // const [allSites, setAllSites] = useState([])
-  // const [userSites, setUserSites] = useState([])
-  const [plants, setPlants] = useState([])
-  const [allPlants, setAllPlants] = useState([])
-  const dispatch = useDispatch()
-  const [year, setYear] = useState('')
-
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { screenTitle } = dataGridStore
-  const screenTitleName = screenTitle?.title
-  const [selectedYear, setSelectedYear] = useState('2025-26')
-  const [aopYears, setAopYears] = useState([])
-
-  // Helper: Extract allowed site IDs and allowed plant IDs from Keycloak token
-  const getAllowedFilter = () => {
-    try {
-      const parsed = JSON.parse(keycloak.idTokenParsed.plants)
-      const { verticalIds, siteIds, plantIds } = extractIds(parsed)
-      // console.log('Vertical IDs:', verticalIds)
-      // console.log('Site IDs:', siteIds)
-      // console.log('Plant IDs:', plantIds)
-      // console.log(parsed)
-      let allowedSiteIds = []
-      let allowedPlantIds = []
-      parsed.forEach((obj) => {
-        Object.keys(obj).forEach((siteId) => {
-          allowedSiteIds.push(siteId)
-          allowedPlantIds = allowedPlantIds.concat(obj[siteId])
-        })
-      })
-      return {
-        allowedSiteIds: siteIds,
-        allowedPlantIds: plantIds,
-        allowedVert: verticalIds,
-      }
-    } catch (err) {
-      console.error('Error parsing keycloak token:', err)
-      return { allowedSiteIds: [], allowedPlantIds: [] }
-    }
-  }
-
-  // Function to extract IDs from the data
-  function extractIds(data) {
-    // Use Set to keep lists unique.
-    const verticalIds = new Set()
-    const siteIds = new Set()
-    const plantIds = new Set()
-
-    // Iterate over each object in the array.
-    data.forEach((verticalObj) => {
-      // verticalObj's keys are the vertical IDs.
-      Object.keys(verticalObj).forEach((verticalId) => {
-        verticalIds.add(verticalId)
-        const sitesObj = verticalObj[verticalId]
-        // In sitesObj, each key is a site ID.
-        Object.keys(sitesObj).forEach((siteId) => {
-          siteIds.add(siteId)
-          const plantsArray = sitesObj[siteId]
-          // Each item in plantsArray is a plant ID.
-          plantsArray.forEach((plantId) => {
-            plantIds.add(plantId)
-          })
-        })
-      })
+// Utility to parse the Keycloak “allowed” JSON
+function parseAllowed(raw) {
+  const map = {}
+  raw.forEach((vObj) => {
+    const vid = Object.keys(vObj)[0]
+    map[vid] = {}
+    vObj[vid].forEach((siteObj) => {
+      const sid = Object.keys(siteObj)[0]
+      map[vid][sid] = siteObj[sid]
     })
+  })
+  return map
+}
 
-    // Return arrays converted from sets.
-    return {
-      verticalIds: Array.from(verticalIds),
-      siteIds: Array.from(siteIds),
-      plantIds: Array.from(plantIds),
-    }
-  }
+export default function HeaderContent({ keycloak }) {
+  const dispatch = useDispatch()
+  const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
 
-  // Usage:
-  // const { verticalIds, siteIds, plantIds } = extractIds(data)
-  // console.log('Vertical IDs:', verticalIds)
-  // console.log('Site IDs:', siteIds)
-  // console.log('Plant IDs:', plantIds)
+  // --- 1. Year logic state
+  const [aopYears, setAopYears] = useState([])
+  const [selectedYear, setSelectedYear] = useState('')
 
-  const getPlantAndSite = async () => {
+  // --- 2. screenTitleName from Redux
+  const screenTitle = useSelector((s) => s.dataGridStore.screenTitle)
+  const screenTitleName = screenTitle?.title || 'Honeywell Digital AOP'
+
+  // allowed/full data
+  const [allowedMap, setAllowedMap] = useState({})
+  const [fullDetails, setFullDetails] = useState([])
+
+  // dropdowns
+  const [verticals, setVerticals] = useState([])
+  const [sites, setSites] = useState([])
+  const [plants, setPlants] = useState([])
+
+  const [selectedVertical, setSelectedVertical] = useState('')
+  const [selectedSite, setSelectedSite] = useState('')
+  const [selectedPlant, setSelectedPlant] = useState('')
+
+  // 1?? parse Keycloak allowed once
+  useEffect(() => {
+    let parsed = []
     try {
-      const response = await DataService.getAllSites(keycloak)
-      if (response) {
-        // Get allowed filter arrays.
-        const { allowedSiteIds, allowedPlantIds, allowedVert } =
-          getAllowedFilter()
-        const filteredVerticals = response.filter((vertical) =>
-          allowedVert.includes(vertical.id),
-        )
-        setVerticals(filteredVerticals)
-        // console.log(response)
-        // setUserSites(keycloak.idTokenParsed.plants)
+      parsed = JSON.parse(keycloak.idTokenParsed.plants)
+    } catch (e) {
+      console.error('Token parse error', e)
+    }
+    setAllowedMap(parseAllowed(parsed))
+  }, [keycloak])
 
-        // Flatten verticals into sites and plants arrays.
-        const sitesData = []
-        const plantsData = []
-        response.forEach((vertical) => {
-          if (vertical.sites && vertical.sites.length) {
-            vertical.sites.forEach((site) => {
-              // Include site id for filtering.
-              const siteWithVertical = {
-                id: site.id,
-                name: site.name,
-                verticalName: vertical.name,
-              }
-              sitesData.push(siteWithVertical)
-              if (site.plants && site.plants.length) {
-                site.plants.forEach((plant) => {
-                  //console.log('plant', plant)
+  // 2?? fetch full details once
+  useEffect(() => {
+    DataService.getAllSites(keycloak)
+      .then((data) => setFullDetails(data || []))
+      .catch((err) => {
+        console.error('Error fetching sites', err)
+        setFullDetails([])
+      })
+  }, [keycloak])
 
-                  plantsData.push({
-                    id: plant.id,
-                    name: plant.name,
-                    siteName: site.name,
-                    siteId: site.id,
-                    verticalId: vertical.id,
-                    verticalName: vertical.name,
-                  })
-                })
-              }
-            })
-          }
-        })
+  // 3?? build verticals list & default ? localStorage + Redux
+  useEffect(() => {
+    if (!fullDetails.length || !Object.keys(allowedMap).length) return
 
-        dispatch(
-          setVerticalChange({
-            selectedPlant,
-            selectedSite,
-            selectedVertical,
-          }),
-        )
-        // setAllSites(sitesData)
-        setAllPlants(plantsData)
+    const avail = fullDetails
+      .filter((v) => allowedMap[v.id])
+      .map((v) => ({ id: v.id, name: v.displayName }))
+    setVerticals(avail)
 
-        // Filter plants based on allowed plant IDs.
-        const filteredPlantsData = plantsData.filter((plant) =>
-          allowedPlantIds.includes(plant.id),
-        )
+    if (!selectedVertical && avail.length) {
+      const defV = avail[0]
+      setSelectedVertical(defV.id)
 
-        // Filter sites based on allowed site IDs.
-        // const filteredSitesData = plantsData.filter((site) =>
-        //   allowedVert.includes(site),
-        // )
+      // persist vertical default
+      localStorage.setItem('verticalId', defV.id)
+      localStorage.setItem(
+        'selectedVertical',
+        JSON.stringify({ id: defV.id, name: defV.name }),
+      )
+      console.log(defV.name)
+      // dispatch Redux
+      dispatch(
+        setVerticalChange({
+          selectedVertical: defV.name,
+          selectedSite: '',
+          selectedPlant: '',
+        }),
+      )
+    }
+  }, [fullDetails, allowedMap, selectedVertical, dispatch])
 
-        // Set default selections based on the first available allowed plant.
-        if (filteredPlantsData.length > 0) {
-          const defaultPlant = filteredPlantsData[0]
-          setSelectedPlant(defaultPlant.name)
-          setSelectedVertical(defaultPlant.verticalName)
+  // 4?? update sites when vertical changes ? localStorage + Redux
+  useEffect(() => {
+    if (!selectedVertical) {
+      setSites([])
+      setSelectedSite('')
+      return
+    }
+    const vertObj = fullDetails.find((v) => v.id === selectedVertical)
+    const allowedSites = allowedMap[selectedVertical] || {}
+    const list = (vertObj?.sites || [])
+      .filter((s) => allowedSites[s.id])
+      .map((s) => ({ id: s.id, name: s.displayName }))
+    setSites(list)
 
-          // Find the vertical data for the default vertical.
-          const defaultVerticalData = response.find(
-            (v) => v.name === defaultPlant.verticalName,
-          )
-          // Filter vertical's sites using allowed site IDs.
-          const allowedSites = defaultVerticalData
-            ? defaultVerticalData.sites.filter((site) =>
-                allowedSiteIds.includes(site.id),
-              )
-            : []
-          const siteAvailable = allowedSites.map((site) => site.name)
+    if (list.length) {
+      const defS = list[0]
+      setSelectedSite(defS.id)
 
-          setSites(siteAvailable)
-          setSelectedSite(siteAvailable[0] || '')
+      localStorage.setItem(
+        'selectedSite',
+        JSON.stringify({ id: defS.id, name: defS.name }),
+      )
+      localStorage.setItem('selectedSiteId', JSON.stringify({ id: defS.id }))
+      dispatch(setSitePlantChange({ sitePlantChange: true }))
+    }
+  }, [selectedVertical, fullDetails, allowedMap, dispatch])
 
-          // Filter plants for the default vertical and first allowed site.
-          const finalFilteredPlants = filteredPlantsData.filter(
-            (plant) =>
-              plant.siteName === (siteAvailable[0] || '') &&
-              plant.verticalName === defaultPlant.verticalName,
-          )
-          setPlants(finalFilteredPlants)
+  // 5?? update plants when site changes ? localStorage + Redux
+  useEffect(() => {
+    if (!selectedSite) {
+      setPlants([])
+      setSelectedPlant('')
+      return
+    }
+    const vertObj = fullDetails.find((v) => v.id === selectedVertical)
+    const siteObj = vertObj?.sites.find((s) => s.id === selectedSite)
+    const allowedPlants = allowedMap[selectedVertical]?.[selectedSite] || []
+    const list = (siteObj?.plants || [])
+      .filter((p) => allowedPlants.includes(p.id))
+      .map((p) => ({ id: p.id, name: p.displayName }))
+    setPlants(list)
 
-          // console.log('defaultPlant', defaultPlant)
-          // console.log('defaultPlant.verticalId', defaultPlant.verticalId)
-          localStorage.setItem('verticalId', defaultPlant.verticalId)
+    if (list.length) {
+      const defP = list[0]
+      setSelectedPlant(defP.id)
 
-          localStorage.setItem(
-            'selectedPlant',
-            JSON.stringify({ id: defaultPlant.id, name: defaultPlant.name }),
-          )
-          localStorage.setItem(
-            'selectedSite',
-            JSON.stringify({
-              id: defaultPlant.siteId,
-              name: defaultPlant.siteName,
-            }),
-          )
-          localStorage.setItem(
-            'selectedVertical',
-            JSON.stringify({
-              id: defaultPlant.verticalId,
-              name: defaultPlant.verticalName,
-            }),
-          )
+      localStorage.setItem(
+        'selectedPlant',
+        JSON.stringify({ id: defP.id, name: defP.name }),
+      )
+      dispatch(setSitePlantChange({ sitePlantChange: true }))
+    }
+  }, [selectedSite, selectedVertical, fullDetails, allowedMap, dispatch])
+
+  // 6?? fetch AOP years on mount ? localStorage + Redux
+  useEffect(() => {
+    async function fetchYears() {
+      try {
+        const resp = await DataService.getAopyears(keycloak)
+        if (resp?.length) {
+          setAopYears(resp)
+          const firstYear = resp[0].AOPYear
+          setSelectedYear(firstYear)
+
+          localStorage.setItem('year', firstYear)
+          dispatch(setAopYear({ selectedYear: firstYear }))
         }
+      } catch (err) {
+        console.error('Error fetching AOP years', err)
       }
-    } catch (error) {
-      console.error('Error fetching plant and site data:', error)
     }
-  }
-  const getAopYears = async () => {
-    try {
-      var response = await DataService.getAopyears(keycloak)
-      if (response && response.length > 0) {
-        // response = [
-        //   { AOPDisplayYear: '2025-26', AOPYear: '2025-26' },
-        //   { AOPDisplayYear: '2026-27', AOPYear: '2026-27' },
-        // ]
-        setAopYears(response)
-        setSelectedYear(response[0].AOPYear)
-        localStorage.setItem('year', response[0].AOPYear)
-        var selectedYear = response[0].AOPYear
-        dispatch(
-          setAopYear({
-            selectedYear,
-          }),
-        )
-      } else {
-        console.warn('No AOP years found in the response.')
-      }
-    } catch (error) {
-      console.error('Error fetching AOP years:', error)
-    }
-  }
-  useEffect(() => {
-    setYear(year)
-    getPlantAndSite()
-    getAopYears()
-  }, [])
+    fetchYears()
+  }, [keycloak, dispatch])
 
-  const handleYearChange = (event) => {
-    const newYear = event.target.value
+  // Handler for year change ? localStorage + Redux
+  const handleYearChange = (e) => {
+    const newYear = e.target.value
+    setSelectedYear(newYear)
+
+    localStorage.setItem('year', newYear)
     dispatch(setYearChange({ yearChanged: true }))
-    setSelectedYear(newYear)
-    dispatch(
-      setAopYear({
-        selectedYear,
-      }),
-    )
-
-    localStorage.setItem('year', newYear)
-    // Handle year change logic here (e.g., refetch data based on the new year)
-    console.log('Selected Year:', newYear)
+    dispatch(setAopYear({ selectedYear: newYear }))
   }
+  // inside HeaderContent, above the return
+  const handlePlantChange = (e) => {
+    const newPlantId = e.target.value
+    setSelectedPlant(newPlantId)
 
-  const handleSiteChange = (event) => {
-    dispatch(setSitePlantChange({ sitePlantChange: true }))
-    const siteName = event.target.value
-    setSelectedSite(siteName)
-    const { allowedPlantIds } = getAllowedFilter()
-    // Filter plants for the selected site and vertical using allowed plant IDs.
-    const filteredPlants = allPlants.filter(
-      (plant) =>
-        plant.siteName === siteName &&
-        plant.verticalName === selectedVertical &&
-        allowedPlantIds.includes(plant.id),
-    )
-    if (filteredPlants.length > 0) {
-      setPlants(filteredPlants)
-      setSelectedPlant(filteredPlants[0].name)
-
+    // find the selected plant object from your plants array
+    const plantObj = plants.find((p) => p.id === newPlantId)
+    if (plantObj) {
+      // persist exactly the same key & shape you've used elsewhere:
       localStorage.setItem(
         'selectedPlant',
-        JSON.stringify({
-          id: filteredPlants[0]?.id,
-          name: filteredPlants[0].name,
-        }),
+        JSON.stringify({ id: plantObj.id, name: plantObj.name }),
       )
-
-      localStorage.setItem('selectedSite', JSON.stringify({ name: siteName }))
-      localStorage.setItem(
-        'selectedSiteId',
-        JSON.stringify({ id: filteredPlants[0].siteId }),
-      )
+      // notify Redux that plant (or site/plant combination) changed:
+      dispatch(setSitePlantChange({ sitePlantChange: true }))
     }
-  }
-
-  const handlePlantChange = (event) => {
-    dispatch(setSitePlantChange({ sitePlantChange: true }))
-    const plantName = event.target.value
-    setSelectedPlant(plantName)
-    const { allowedPlantIds } = getAllowedFilter()
-    const selectedPlantData = allPlants.find(
-      (plant) => plant.name === plantName && allowedPlantIds.includes(plant.id),
-    )
-    if (selectedPlantData) {
-      localStorage.setItem(
-        'selectedPlant',
-        JSON.stringify({
-          id: selectedPlantData.id,
-          name: selectedPlantData.name,
-        }),
-      )
-    }
-  }
-
-  const handleVerticalChange = (event) => {
-    // dispatch(setSitePlantChange({ sitePlantChange: true }))
-    const verticalName = event.target.value
-    setSelectedVertical(verticalName)
-    const verticalData = verticals.find((v) => v.name === verticalName)
-    // console.log(verticalData)
-    localStorage.setItem('verticalId', verticalData?.id)
-
-    if (verticalData) {
-      const { allowedSiteIds, allowedPlantIds } = getAllowedFilter()
-      // Filter the vertical's sites using allowed site IDs.
-      const allowedSites = verticalData.sites.filter((site) =>
-        allowedSiteIds.includes(site.id),
-      )
-      const siteAvailable = allowedSites.map((site) => site.name)
-      setSites(siteAvailable)
-      setSelectedSite(siteAvailable[0] || '')
-
-      // Filter plants for the selected vertical and first allowed site.
-      const filteredPlants = allPlants.filter(
-        (plant) =>
-          plant.siteName === (siteAvailable[0] || '') &&
-          plant.verticalName === verticalName &&
-          allowedPlantIds.includes(plant.id),
-      )
-      if (filteredPlants.length > 0) {
-        setPlants(filteredPlants)
-        setSelectedPlant(filteredPlants[0].name)
-        localStorage.setItem(
-          'selectedPlant',
-          JSON.stringify({
-            id: filteredPlants[0]?.id,
-            name: filteredPlants[0].name,
-          }),
-        )
-        // console.log(siteAvailable)
-        localStorage.setItem(
-          'selectedSite',
-          JSON.stringify({ name: siteAvailable[0] }),
-        )
-      } else {
-        setPlants([])
-        setSelectedPlant('')
-      }
-    }
-  }
-
-  // Sync selected site when plant changes.
-  useEffect(() => {
-    // console.log('test--->', keycloak.idTokenParsed.plants)
-    const { allowedPlantIds } = getAllowedFilter()
-    if (!selectedPlant || !allPlants) return
-    const selectedPlantData = allPlants.find(
-      (plant) =>
-        plant.name === selectedPlant && allowedPlantIds.includes(plant.id),
-    )
-    if (!selectedPlantData) return
-    setSelectedSite(selectedPlantData.siteName)
-    localStorage.setItem(
-      'selectedVertical',
-      JSON.stringify({ name: selectedVertical }),
-      // JSON.stringify({ name: selectedPlantData.siteName }),
-    )
-
-    dispatch(
-      setVerticalChange({
-        selectedPlant,
-        selectedSite,
-        selectedVertical,
-      }),
-    )
-  }, [selectedPlant, allPlants])
-
-  // Update sites whenever verticals or selectedVertical changes.
-  useEffect(() => {
-    if (verticals.length === 0 || !selectedVertical) return
-    const verticalData = verticals.find((v) => v.name === selectedVertical)
-    if (!verticalData) return
-    const { allowedSiteIds } = getAllowedFilter()
-    const allowedSites = verticalData.sites.filter((site) =>
-      allowedSiteIds.includes(site.id),
-    )
-    // console.log(allowedSites)
-    const siteAvailable = allowedSites.map((site) => ({
-      name: site.name,
-      id: site.id,
-    }))
-
-    // console.log(siteAvailable)
-    // console.log(siteAvailable[0]?.name)
-    // console.log(siteAvailable?.map((n) => n.name))
-    setSites(siteAvailable?.map((n) => n.name))
-    setSelectedSite(siteAvailable[0]?.name || '')
-    //  console.log(selectedVertical)
-    localStorage.setItem(
-      'selectedSiteId',
-      JSON.stringify({ id: siteAvailable[0]?.id }),
-    )
-    dispatch(
-      setVerticalChange({
-        selectedPlant,
-        selectedSite,
-        selectedVertical,
-      }),
-    )
-  }, [verticals, selectedVertical])
-
-  const handleYearChange1 = (event) => {
-    const newYear = event.target.value
-    setSelectedYear(newYear)
-    dispatch(
-      setAopYear({
-        selectedYear,
-      }),
-    )
-    dispatch(
-      setAopYear({
-        selectedYear,
-      }),
-    )
-    localStorage.setItem('year', newYear)
-    // Handle year change logic here (e.g., refetch data based on the new year)
-    console.log('Selected Year:', newYear)
   }
 
   return (
     <>
-      {/* HIDE HONEYWELL LOGO */}
-      {/* <Box sx={{ ml: 3, mt: 1 }}>
-        {' '}
-        <img
-          src={honLogo}
-          alt='Digital AOP'
-          style={{
-            width: '164px',
-            height: 'auto',
-            objectFit: 'contain',
-            display: 'block',
-          }}
-        />
-      </Box> */}
-
       <Box sx={{ ml: 3, mt: 1 }}>
-        {' '}
         <Typography
           variant='body1'
           color='white'
@@ -481,96 +224,93 @@ const HeaderContent = ({ keycloak }) => {
         </Typography>
       </Box>
 
-      {matchesXs && <Search />}
-      {!matchesXs && <Box sx={{ width: '100%', ml: 1 }} />}
+      {matchesXs ? <Search /> : <Box sx={{ width: '100%', ml: 1 }} />}
 
       <Stack direction='row' spacing={2} alignItems='center'>
+        {/* Year Selector */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant='body1' color='white'>
             Year:
           </Typography>
           <FormControl sx={{ minWidth: 120 }}>
-            {' '}
             <Select
               value={selectedYear}
               onChange={handleYearChange}
               sx={{ color: 'white' }}
             >
-              {aopYears.map((yearItem) => (
-                <MenuItem key={yearItem.AOPYear} value={yearItem.AOPYear}>
-                  {yearItem.AOPDisplayYear}
+              {aopYears.map((y) => (
+                <MenuItem key={y.AOPYear} value={y.AOPYear}>
+                  {y.AOPDisplayYear}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
         </Box>
 
-        {/* Vertical Selector */}
+        {/* Vertical */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant='body1' color='white'>
             Vertical:
           </Typography>
           <FormControl sx={{ minWidth: 150 }}>
             <Select
-              value={selectedVertical || ''}
-              onChange={handleVerticalChange}
+              value={selectedVertical}
+              onChange={(e) => setSelectedVertical(e.target.value)}
               sx={{ color: 'white' }}
             >
-              {Array.isArray(verticals) &&
-                verticals.map((vertical, index) => (
-                  <MenuItem key={index} value={vertical.name}>
-                    {vertical.name}
-                  </MenuItem>
-                ))}
+              {verticals.map((v) => (
+                <MenuItem key={v.id} value={v.id}>
+                  {v.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Box>
 
-        {/* Site Selector */}
+        {/* Site */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant='body1' color='white'>
             Site:
           </Typography>
           <FormControl sx={{ minWidth: 150 }}>
             <Select
-              value={selectedSite || ''}
-              onChange={handleSiteChange}
+              value={selectedSite}
+              onChange={(e) => setSelectedSite(e.target.value)}
+              disabled={!sites.length}
               sx={{ color: 'white' }}
-              // disabled={sites.length <= 1}
             >
-              {sites.map((site, index) => (
-                <MenuItem key={index} value={site}>
-                  {site}
+              {sites.map((s) => (
+                <MenuItem key={s.id} value={s.id}>
+                  {s.name}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
         </Box>
-        {/* Plant Selector */}
+
+        {/* Plant */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant='body1' color='white'>
             Plant:
           </Typography>
           <FormControl sx={{ minWidth: 150 }}>
             <Select
-              value={selectedPlant || ''}
+              value={selectedPlant}
               onChange={handlePlantChange}
+              disabled={!plants.length}
               sx={{ color: 'white' }}
-              // disabled={plants.length <= 1}
             >
-              {plants.map((plant, index) => (
-                <MenuItem key={index} value={plant.name}>
-                  {plant.name}
+              {plants.map((p) => (
+                <MenuItem key={p.id} value={p.id}>
+                  {p.name}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
         </Box>
       </Stack>
-      {!matchesXs && <Profile keycloak={keycloak} />}
-      {matchesXs && <MobileSection />}
+
+      {!matchesXs ? <Profile keycloak={keycloak} /> : <MobileSection />}
     </>
   )
 }
-
-export default HeaderContent

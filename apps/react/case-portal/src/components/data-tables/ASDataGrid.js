@@ -75,6 +75,7 @@ const DataGridTable = ({
   handleAddPlantSite = () => {},
   selectedUsers = [],
   setSelectedUsers = () => {},
+  columnGroupingModel,
 }) => {
   const [resizedColumns, setResizedColumns] = useState({})
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
@@ -377,9 +378,9 @@ const DataGridTable = ({
     setSelectedUsers([])
     setRows([])
   }
-  console.log(selectedUsers?.length)
+  // console.log(selectedUsers?.length)
   const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
-  console.log(showDeleteAll)
+  // console.log(showDeleteAll)
 
   return (
     <Box
@@ -720,11 +721,33 @@ const DataGridTable = ({
 
             return 'even-row'
           }}
+          columnGroupingModel={columnGroupingModel}
           sx={{
             borderRadius: '0px',
             border: `1px solid ${jioColors.border}`,
             backgroundColor: jioColors.background,
             fontSize: '0.8rem',
+            '& .MuiDataGrid-columnHeaderGroup': {
+              justifyContent: 'center !important',
+            },
+
+            '& .vertical-center .MuiDataGrid-columnHeaderTitleContainer': {
+              display: 'flex',
+              alignItems: 'center', // vertical
+              justifyContent: 'center', // horizontal
+              height: '100%', // fill the two-row header
+            },
+            '& .MuiDataGrid-columnHeaderTitle': {
+              textAlign: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              display: 'flex',
+            },
+
+            '& .MuiDataGrid-columnHeaderGroup .MuiDataGrid-columnHeaderTitle': {
+              textAlign: 'center',
+              width: '100%',
+            },
             ' & .MuiDataGrid-columnHeaderTitleContainer:last-child:after .MuiDataGrid-columnHeaderTitleContainer:after':
               {
                 bordeRight: 'none !important',
@@ -811,8 +834,6 @@ const DataGridTable = ({
               borderBottom: `2px solid #DAE0EF`,
               borderTopLeftRadius: '0px',
               borderTopRightRadius: '0px',
-              minHeight: '45px',
-              maxHeight: '45px',
             },
             '& .MuiDataGrid-columnHeader': {
               minHeight: '45px',
@@ -866,6 +887,9 @@ const DataGridTable = ({
             // '& .MuiDataGrid-cell.last-column-cell': {
             //   paddingRight: '16px',
             // },
+            '& .MuiDataGrid-columnHeaderTitle': {
+              fontWeight: 'bold', // Ensure column titles are bold
+            },
 
             // '& .MuiDataGrid-columnHeader[data-field="Particulars"] .MuiDataGrid-columnHeaderTitle':
             //   {

@@ -27,6 +27,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   )?.name
   const dispatch = useDispatch()
 
+  console.log(verticalName, siteName, plantName, vertName)
   // const siteName = JSON.parse(localStorage.getItem('selectedSite'))?.name;
 
   const [notification, setNotification] = useState({

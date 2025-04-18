@@ -8,6 +8,8 @@ import {
   Step,
   StepLabel,
 } from '@mui/material'
+import { DataGrid } from '@mui/x-data-grid'
+
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
   Button,
@@ -24,6 +26,10 @@ import ProductionvolumeData from '../ProductionVoluemData'
 import ShutDown from '../ShutDown'
 import SlowDown from '../Slowdown'
 import AuditTrail from './AuditTrail'
+import './jio-grid-style.css'
+import DataGridTable from '../ASDataGrid'
+
+// import DataGridTable from '../ASDataGrid'
 const FiveTables = () => {
   const [activeStep, setActiveStep] = useState(0)
   const [expanded, setExpanded] = useState(0)
@@ -38,8 +44,160 @@ const FiveTables = () => {
     'Final Approval O2C AOP',
     // 'Closed',
   ]
+  const columns = [
+    {
+      field: 'particulars',
+      headerName: 'Particulars',
+      minWidth: 300,
+      // custom header renderer
+      renderHeader: (params) => (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center', // vertical centering
+            justifyContent: 'center', // horizontal centering
+            height: '100%', // span the full header height
+            width: '100%',
+          }}
+        >
+          {params.colDef.headerName}
+        </div>
+      ),
+    },
+    {
+      field: 'UOM',
+      headerName: 'UOM',
+      minWidth: 100,
+      renderHeader: (params) => (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            width: '100%',
+          }}
+        >
+          {params.colDef.headerName}
+        </div>
+      ),
+    },
+    // grouped children can skip renderHeader:
+    { field: 'aop_2025_26', headerName: 'FY 2025-26 AOP', minWidth: 150 },
+    { field: 'actual_2025_26', headerName: 'FY 2025-26 Actual', minWidth: 150 },
+    { field: 'aop_2026_27', headerName: 'FY 2026-27 AOP', minWidth: 150 },
+    {
+      field: 'remarks',
+      headerName: 'Remarks',
+      minWidth: 200,
+      renderHeader: (params) => (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            width: '100%',
+          }}
+        >
+          {params.colDef.headerName}
+        </div>
+      ),
+    },
+  ]
 
-  const defaultCustomHeight = { mainBox: '60vh', otherBox: '124%' }
+  const columnGroupingModel = [
+    {
+      groupId: 'annualAOP',
+      headerName: 'Annual AOP Cost',
+      children: [
+        { field: 'aop_2025_26' },
+        { field: 'actual_2025_26' },
+        { field: 'aop_2026_27' },
+      ],
+    },
+  ]
+  const rows = [
+    {
+      id: 1,
+      site: 'HMD',
+      plant: 'MEG1',
+      particulars: 'Raw Material Cost',
+      UOM: 'Rs/MT',
+      aop_2025_26: 9999,
+      actual_2025_26: 9999,
+      aop_2026_27: 9999,
+      remarks: '',
+    },
+    {
+      id: 2,
+      site: 'HMD',
+      plant: 'MEG1',
+      particulars: 'By Product Cost',
+      UOM: 'Rs/MT',
+      aop_2025_26: 9999,
+      actual_2025_26: 9999,
+      aop_2026_27: 9999,
+      remarks: 'Lower due to',
+    },
+    {
+      id: 3,
+      site: 'HMD',
+      plant: 'MEG1',
+      particulars: 'Utility Cost',
+      UOM: 'Rs/MT',
+      aop_2025_26: 9999,
+      actual_2025_26: 9999,
+      aop_2026_27: 9999,
+      remarks: 'Improved due to',
+    },
+    {
+      id: 4,
+      site: 'HMD',
+      plant: 'MEG1',
+      particulars: 'Cat-Chem Cost',
+      UOM: 'Rs/MT',
+      aop_2025_26: 9999,
+      actual_2025_26: 9999,
+      aop_2026_27: 9999,
+      remarks: '',
+    },
+    {
+      id: 5,
+      site: 'HMD',
+      plant: 'MEG1',
+      particulars: 'RM Net of By Product Cost',
+      UOM: 'Rs/MT',
+      aop_2025_26: 9999,
+      actual_2025_26: 9999,
+      aop_2026_27: 9999,
+      remarks: '',
+    },
+    {
+      id: 6,
+      site: 'HMD',
+      plant: 'MEG1',
+      particulars: 'Conversion Cost',
+      UOM: 'Rs/MT',
+      aop_2025_26: 9999,
+      actual_2025_26: 9999,
+      aop_2026_27: 9999,
+      remarks: '',
+    },
+    {
+      id: 7,
+      site: 'HMD',
+      plant: 'MEG1',
+      particulars: 'Variable Cost',
+      UOM: 'Rs/MT',
+      aop_2025_26: 9999,
+      actual_2025_26: 9999,
+      aop_2026_27: 9999,
+      remarks: '',
+    },
+  ]
+
+  const defaultCustomHeight = { mainBox: '60vh', otherBox: '114%' }
 
   const tables = [
     {
@@ -244,7 +402,7 @@ const FiveTables = () => {
         </DialogActions>
       </Dialog>
 
-      {
+      {false &&
         tables.map((table, index) => (
           <Accordion
             key={index}
@@ -271,27 +429,39 @@ const FiveTables = () => {
               {table.component}
             </AccordionDetails>
           </Accordion>
-        ))
-        // ) : (
-        //   <Accordion
-        //     expanded={true}
-        //     sx={{
-        //       mb: '5px',
-        //       '&.Mui-expanded': {
-        //         margin: 0,
-        //         padding: 0,
-        //       },
-        //     }}
-        //   >
-        //     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        //       Audit Trail
-        //     </AccordionSummary>
-        //     <AccordionDetails>
-        //       <AuditTrail />
-        //     </AccordionDetails>
-        //   </Accordion>
-        // )
-      }
+        ))}
+      <DataGridTable
+        columns={columns}
+        rows={rows}
+        columnGroupingModel={columnGroupingModel}
+        className='jio-data-grid'
+        permissions={{
+          customHeight: defaultCustomHeight,
+        }}
+
+        // sx={{
+        //   '& .MuiDataGrid-columnHeaderTitle': {
+        //     fontWeight: 'bold',
+        //   },
+        //   '& .MuiDataGrid-columnHeaderGroup': {
+        //     justifyContent: 'center',
+        //     border: '1px solid #ccc', // border for group header
+        //   },
+        //   '& .MuiDataGrid-columnHeadersInner': {
+        //     borderBottom: '2px solid #ccc',
+        //   },
+        //   '& .MuiDataGrid-columnHeader': {
+        //     borderRight: '1px solid #eee',
+        //   },
+        //   '& .MuiDataGrid-cell': {
+        //     borderRight: '1px solid #eee',
+        //   },
+        //   '& .MuiDataGrid-columnHeaderGroup--filled': {
+        //     justifyContent: 'center',
+        //   },
+        // }}
+      />
+
       {/* Audit Trail Popup Dialog */}
       <Dialog
         open={openAuditPopup}
