@@ -127,16 +127,21 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			configurationDTO.setUOM(row[16] != null ? row[16].toString() : "");
 
 			if (verticalName.equalsIgnoreCase("PE")) {
+<<<<<<< HEAD
 				configurationDTO.setConfigTypeDisplayName(row[17] != null ? row[17].toString() : "");
 configurationDTO.setTypeDisplayName(row[18] != null ? row[18].toString() : "");
 configurationDTO.setConfigTypeName(row[19] != null ? row[19].toString() : "");
 configurationDTO.setTypeName(row[20] != null ? row[20].toString() : "");
 
+=======
+				configurationDTO.setLossCategory(row[17] != null ? row[17].toString() : "");
+				configurationDTO.setNormType(row[18] != null ? toSpacedWords(row[18].toString()) : "");
+>>>>>>> c360da7a1a95aa4137489b7672a68ad2a69134fd
 			}
 
 
 			if (verticalName.equalsIgnoreCase("MEG")) {
-				configurationDTO.setNormType(row[17] != null ? row[17].toString() : "");
+				configurationDTO.setNormType(row[17] != null ? toSpacedWords(row[17].toString()) : "");
 			}
 
 			configurationDTOList.add(configurationDTO);
@@ -147,6 +152,17 @@ configurationDTO.setTypeName(row[20] != null ? row[20].toString() : "");
 		}
 
 		return configurationDTOList;
+	}
+
+	private String toSpacedWords(String input) {
+	    if (input == null || input.isEmpty()) {
+	        return "";
+	    }
+	    // Insert space before each capital letter, except the first one
+	    String result = input.replaceAll("([a-z])([A-Z])", "$1 $2")
+	                         .replaceAll("([A-Z])([A-Z][a-z])", "$1 $2");
+	    // Capitalize the first letter of the result
+	    return result.substring(0, 1).toUpperCase() + result.substring(1);
 	}
 
 	/**

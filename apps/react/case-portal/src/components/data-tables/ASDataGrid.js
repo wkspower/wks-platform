@@ -73,6 +73,8 @@ const DataGridTable = ({
   unsavedChangesRef = { current: { unsavedRows: {}, rowsBeforeChange: {} } },
   deleteRowData = () => {},
   handleAddPlantSite = () => {},
+  selectedUsers = [],
+  setSelectedUsers = () => {},
 }) => {
   const [resizedColumns, setResizedColumns] = useState({})
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
@@ -87,6 +89,8 @@ const DataGridTable = ({
   const handleSearchChange = (event) => {
     setSearchText(event.target.value)
   }
+  // const navigate = useNavigate()
+
   // const [rowModesModel, setRowModesModel] = useState({})
   // const [changedRowIds, setChangedRowIds] = useState([])
   // const [columnFilters, setColumnFilters] = useState({})
@@ -210,7 +214,7 @@ const DataGridTable = ({
 
   const columns = useMemo(() => [
     ...defaultColumns,
-    ...(permissions?.showAction && permissions?.deleteButton
+    ...(permissions?.showAction
       ? [
           {
             field: 'actions',
@@ -269,7 +273,7 @@ const DataGridTable = ({
                     className='textPrimary'
                     onClick={handleEditClick(row)}
                     color='inherit'
-                    sx={{ display: 'none' }}
+                    // sx={{ display: 'none' }}
                   />
                 ),
                 permissions?.deleteButton && (
@@ -369,14 +373,22 @@ const DataGridTable = ({
   const boxHeight = permissions?.customHeight?.mainBox
   const otherHeight = permissions?.customHeight?.otherBox
   // console.log(boxHeight)
+  const handleDeleteAll = () => {
+    setSelectedUsers([])
+    setRows([])
+  }
+  console.log(selectedUsers?.length)
+  const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
+  console.log(showDeleteAll)
+
   return (
     <Box
       sx={{
         height: `${boxHeight ?? (permissions.customHeight2 ? '50vh' : '80vh')}`,
 
         width: '100%',
-        padding: '0px 5px',
-        margin: '0px 5px 0px',
+        padding: '0px 0px',
+        margin: '0px 0px 0px',
         backgroundColor: '#F2F3F8',
         // backgroundColor: '#fff',
         borderRadius: 0,
@@ -884,7 +896,6 @@ const DataGridTable = ({
           }}
         />
       </Box>
-
       {(permissions?.allAction ?? true) && (
         <Box
           sx={{
@@ -988,9 +999,43 @@ const DataGridTable = ({
               Next
             </Button>
           )}
+          {showDeleteAll && (
+            <Button
+              variant='contained'
+              sx={{
+                backgroundColor: jioColors.primaryBlue,
+                color: jioColors.background,
+                borderRadius: 1,
+                padding: '8px 24px',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                minWidth: 120,
+                '&:hover': {
+                  backgroundColor: '#143B6F',
+                  boxShadow: 'none',
+                },
+                '&.Mui-disabled': {
+                  backgroundColor: jioColors.primaryBlue,
+                  color: jioColors.background,
+                  opacity: 0.7,
+                },
+              }}
+              onClick={() => {
+                // Write any additional logic here before navigating.
+                // console.log('Navigating to dashboard')
+                // navigate('/user-form')
+                handleDeleteAll()
+              }}
+              disabled={isButtonDisabled}
+              loading={loading} // Use the loading prop to trigger loading state
+              loadingposition='start' // Use loadingPosition to control where the spinner appears
+            >
+              Delete
+            </Button>
+          )}
         </Box>
       )}
-
       {(permissions?.allAction ?? true) && (
         <Notification
           open={snackbarOpen}
@@ -999,7 +1044,6 @@ const DataGridTable = ({
           onClose={() => setSnackbarOpen(false)}
         />
       )}
-
       <Dialog
         open={openDeleteDialogeBox}
         onClose={closeDeleteDialogeBox}

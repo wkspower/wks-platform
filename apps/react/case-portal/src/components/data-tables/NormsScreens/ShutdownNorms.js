@@ -426,7 +426,7 @@ const ShutdownNorms = () => {
       field: 'remarks',
       headerName: 'Remark',
       minWidth: 150,
-      editable: false,
+      editable: true,
       renderCell: (params) => {
         const displayText = truncateRemarks(params.value)
         const isEditable = !params.row.Particulars
