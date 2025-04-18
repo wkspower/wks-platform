@@ -18,7 +18,6 @@ import Transitions from 'components/@extended/Transitions'
 import MainCard from 'components/MainCard'
 import ProfileTab from './ProfileTab'
 import LogoutOutlined from '@ant-design/icons/LogoutOutlined'
-import SettingOutlined from '@ant-design/icons/SettingOutlined'
 import UserOutlined from '@ant-design/icons/UserOutlined'
 import avatar2 from 'assets/images/users/generic.png'
 

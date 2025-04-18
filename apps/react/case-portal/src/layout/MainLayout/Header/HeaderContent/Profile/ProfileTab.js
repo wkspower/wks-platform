@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import { useTheme } from '@mui/material/styles'
 import { List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material'
 import LogoutOutlined from '@ant-design/icons/LogoutOutlined'
-import UserOutlined from '@ant-design/icons/UserOutlined'
 
 const ProfileTab = ({ handleLogout }) => {
   const theme = useTheme()
