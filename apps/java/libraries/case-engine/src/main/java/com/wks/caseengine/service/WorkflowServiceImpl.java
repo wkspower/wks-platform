@@ -1,4 +1,5 @@
 package com.wks.caseengine.service;
+
 import java.util.ArrayList;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -15,52 +16,85 @@ import com.wks.caseengine.dto.WorkflowDTO;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.WorkflowRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 @Service
-public class WorkflowServiceImpl implements WorkflowService{
+public class WorkflowServiceImpl implements WorkflowService {
 
-    
-    @Autowired
+	@Autowired
 	private WorkflowRepository workflowRepository;
 
-    @Override
-    public List<WorkflowDTO> getCaseId(String year, String plantId, String siteId, String verticalId) {
-         
-       List<Workflow> list = workflowRepository.findAllByYearAndPlantFKIdAndSiteFKIdAndVerticalFKId(year, UUID.fromString(plantId), UUID.fromString(siteId), UUID.fromString(verticalId));
+	@PersistenceContext
+	private EntityManager entityManager;
 
-       List<WorkflowDTO> dtoList = new ArrayList<>();
-       for(Workflow workflow: list){
-             WorkflowDTO dto = new WorkflowDTO();
-             dto.setId(workflow.getId().toString());
-             dto.setCaseDefId(workflow.getCaseDefId());
-             dto.setCaseId(workflow.getCaseId());
-             dto.setPlantFkId(workflow.getPlantFKId().toString());
-             dto.setVerticalFKId(workflow.getVerticalFKId().toString());
-             dto.setSiteFKId(workflow.getSiteFKId().toString());
-             dto.setYear(workflow.getYear());
-             dto.setIsDeleted(workflow.getIsDeleted());
-             dtoList.add(dto);
+	@Override
+	public List<WorkflowDTO> getCaseId(String year, String plantId, String siteId, String verticalId) {
 
-       }
-       return dtoList;
-    }
+		List<Workflow> list = workflowRepository.findAllByYearAndPlantFKIdAndSiteFKIdAndVerticalFKId(year,
+				UUID.fromString(plantId), UUID.fromString(siteId), UUID.fromString(verticalId));
 
-    @Override
-    public WorkflowDTO saveWorkFlow(WorkflowDTO workflowDTO) {
-          Workflow workFlow = new Workflow();
-          workFlow.setCaseDefId(workflowDTO.getCaseDefId());
-          workFlow.setCaseId(workflowDTO.getCaseId());
-          workFlow.setPlantFKId(UUID.fromString( workflowDTO.getPlantFkId()));
-          workFlow.setSiteFKId(UUID.fromString( workflowDTO.getSiteFKId()));
-          workFlow.setVerticalFKId(UUID.fromString( workflowDTO.getVerticalFKId()));
-          workFlow.setYear(workflowDTO.getYear());
-          workflowRepository.save(workFlow);
-          if(workFlow.getId()!=null){
-            workflowDTO.setId(workFlow.getId().toString());
-          }
-          return workflowDTO;
+		List<WorkflowDTO> dtoList = new ArrayList<>();
+		for (Workflow workflow : list) {
+			WorkflowDTO dto = new WorkflowDTO();
+			dto.setId(workflow.getId().toString());
+			dto.setCaseDefId(workflow.getCaseDefId());
+			dto.setCaseId(workflow.getCaseId());
+			dto.setPlantFkId(workflow.getPlantFKId().toString());
+			dto.setVerticalFKId(workflow.getVerticalFKId().toString());
+			dto.setSiteFKId(workflow.getSiteFKId().toString());
+			dto.setYear(workflow.getYear());
+			dto.setIsDeleted(workflow.getIsDeleted());
+			dtoList.add(dto);
 
-    }
+		}
+		return dtoList;
+	}
 
-    
+	@Override
+	public WorkflowDTO saveWorkFlow(WorkflowDTO workflowDTO) {
+		Workflow workFlow = new Workflow();
+		workFlow.setCaseDefId(workflowDTO.getCaseDefId());
+		workFlow.setCaseId(workflowDTO.getCaseId());
+		workFlow.setPlantFKId(UUID.fromString(workflowDTO.getPlantFkId()));
+		workFlow.setSiteFKId(UUID.fromString(workflowDTO.getSiteFKId()));
+		workFlow.setVerticalFKId(UUID.fromString(workflowDTO.getVerticalFKId()));
+		workFlow.setYear(workflowDTO.getYear());
+		workflowRepository.save(workFlow);
+		if (workFlow.getId() != null) {
+			workflowDTO.setId(workFlow.getId().toString());
+		}
+		return workflowDTO;
+
+	}
+
+	@Override
+	public List<WorkflowDTO> getWorkFlow(String plantId) {
+	    String viewName = "vwScrnWorkFlow";
+	    String sql = "SELECT Id, Particulars, UOM, FirstYear, SecondYear, ThirdYear, Remarks FROM " + viewName;
+
+	    Query query = entityManager.createNativeQuery(sql);
+	    List<Object[]> results = query.getResultList();
+
+	    List<WorkflowDTO> workflowList = new ArrayList<>();
+	    for (Object[] row : results) {
+	        WorkflowDTO dto = new WorkflowDTO();
+
+	        dto.setId(row[0] != null ? row[0].toString() : null);
+	        dto.setParticulars(row[1] != null ? row[1].toString() : null);
+	        dto.setUOM(row[2] != null ? row[2].toString() : null);
+	        dto.setFirstYear(row[3] != null ? row[3].toString() : null);
+	        dto.setSecondYear(row[4] != null ? row[4].toString() : null);
+	        dto.setThirdYear(row[5] != null ? row[5].toString() : null);
+	        dto.setRemarks(row[6] != null ? row[6].toString() : null);
+
+	        workflowList.add(dto);
+	    }
+
+	    return workflowList;
+	}
+
+
+
 }
