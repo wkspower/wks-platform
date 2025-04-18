@@ -111,11 +111,13 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					plantMaintenanceTransaction
 							.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1);
 				}
+				System.out.println("plantMaintenanceTransaction.getMaintForMonth()"+plantMaintenanceTransaction.getMaintForMonth());
+				
 				System.out.println("shutDownPlanDTO.getCreatedOn()" + shutDownPlanDTO.getCreatedOn());
 
 				plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
 				plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
-				// plantMaintenanceTransaction.setName("Default Name");
+				//plantMaintenanceTransaction.setName("Default Name");
 				plantMaintenanceTransaction.setVersion("V1");
 				plantMaintenanceTransaction.setUser("system");
 				if (shutDownPlanDTO.getProductId() != null) {
@@ -130,15 +132,15 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				}
 				slowdownPlanRepository.save(plantMaintenanceTransaction);
 			} else {
-
+				
 				Optional<PlantMaintenanceTransaction> plantMaintenance = slowdownPlanRepository
 						.findById(UUID.fromString(shutDownPlanDTO.getId()));
 				PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
 				plantMaintenanceTransaction.setId(UUID.fromString(shutDownPlanDTO.getId()));
-
+				System.out.println("At start name is:"+plantMaintenanceTransaction.getName());
 				// Set mandatory fields with default values if missing
-				plantMaintenanceTransaction.setDiscription(
-						shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription()
+				plantMaintenanceTransaction
+						.setDiscription(shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription()
 								: "Default Description");
 
 				if (shutDownPlanDTO.getDurationInHrs() != null) {
@@ -150,22 +152,20 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				} else {
 					plantMaintenanceTransaction.setDurationInMins(0);
 				}
-				// plantMaintenanceTransaction.setDurationInMins(
-				// shutDownPlanDTO.getDurationInMins() != null ?
-				// shutDownPlanDTO.getDurationInMins().intValue() : 0
-				// );
+				
 				plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 				plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 				plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1);
+				System.out.println("plantMaintenanceTransaction.getMaintForMonth()"+plantMaintenanceTransaction.getMaintForMonth());
 				plantMaintenanceTransaction.setUser("system");
-				// plantMaintenanceTransaction.setName("Default Name");
+				//plantMaintenanceTransaction.setName("Default Name");
 				plantMaintenanceTransaction.setVersion("V1");
 				System.out.println("shutDownPlanDTO.getCreatedOn()" + shutDownPlanDTO.getCreatedOn());
 				if (shutDownPlanDTO.getCreatedOn() == null) {
 					plantMaintenanceTransaction.setCreatedOn(new Date());
 				} else {
 					plantMaintenanceTransaction.setCreatedOn(shutDownPlanDTO.getCreatedOn());
-					// plantMaintenanceTransaction.setName(shutDownPlanDTO.getPlantMaintenanceTransactionName());
+					//plantMaintenanceTransaction.setName(shutDownPlanDTO.getPlantMaintenanceTransactionName());
 				}
 				plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
 				plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
@@ -177,7 +177,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				}
 
 				plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
-
+				System.out.println("At end name is:"+plantMaintenanceTransaction.getName());
 				// Save new record
 				slowdownPlanRepository.save(plantMaintenanceTransaction);
 
@@ -202,6 +202,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 			if (shutDownPlanDTO.getMaintStartDateTime() != null) {
 				plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1);
 			}
+			System.out.println("plantMaintenanceTransaction.getMaintForMonth()"+plantMaintenanceTransaction.getMaintForMonth());
 			plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
 			plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 			// Save entity

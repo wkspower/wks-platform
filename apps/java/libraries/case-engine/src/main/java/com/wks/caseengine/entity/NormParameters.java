@@ -49,6 +49,12 @@ public class NormParameters {
     
     @Column(name = "DisplayOrder")
     private Integer displayOrder;
+    
+    @Column(name="isEditable")
+    private Boolean isEditable;
+    
+    @Column(name="isVisible")
+    private Boolean isVisible;
 
 }
 
