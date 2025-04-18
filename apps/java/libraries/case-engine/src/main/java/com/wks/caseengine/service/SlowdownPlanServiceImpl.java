@@ -133,10 +133,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				slowdownPlanRepository.save(plantMaintenanceTransaction);
 			} else {
 				
-				Optional<PlantMaintenanceTransaction> plantMaintenance = slowdownPlanRepository
-						.findById(UUID.fromString(shutDownPlanDTO.getId()));
-				PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
-				plantMaintenanceTransaction.setId(UUID.fromString(shutDownPlanDTO.getId()));
+				PlantMaintenanceTransaction plantMaintenanceTransaction = slowdownPlanRepository
+						.findById(UUID.fromString(shutDownPlanDTO.getId())).get();
 				System.out.println("At start name is:"+plantMaintenanceTransaction.getName());
 				// Set mandatory fields with default values if missing
 				plantMaintenanceTransaction
@@ -161,15 +159,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				//plantMaintenanceTransaction.setName("Default Name");
 				plantMaintenanceTransaction.setVersion("V1");
 				System.out.println("shutDownPlanDTO.getCreatedOn()" + shutDownPlanDTO.getCreatedOn());
-				if (shutDownPlanDTO.getCreatedOn() == null) {
-					plantMaintenanceTransaction.setCreatedOn(new Date());
-				} else {
-					plantMaintenanceTransaction.setCreatedOn(shutDownPlanDTO.getCreatedOn());
-					//plantMaintenanceTransaction.setName(shutDownPlanDTO.getPlantMaintenanceTransactionName());
-				}
+				
 				plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
 				plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
-
 				plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 
 				if (shutDownPlanDTO.getProductId() != null) {
