@@ -21,7 +21,7 @@ import SettingTab from './SettingTab'
 import LogoutOutlined from '@ant-design/icons/LogoutOutlined'
 import SettingOutlined from '@ant-design/icons/SettingOutlined'
 import UserOutlined from '@ant-design/icons/UserOutlined'
-import avatar2 from 'assets/images/users/avatar-2.png'
+import avatar2 from 'assets/images/users/generic.png' 
 
 function TabPanel({ children, value, index, ...other }) {
   return (
