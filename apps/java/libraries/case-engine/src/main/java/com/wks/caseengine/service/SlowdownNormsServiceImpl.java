@@ -52,9 +52,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			} else if (vertical.getName().equalsIgnoreCase("MEG")) {
 				objList = getSlowdownNorms(year, plant.getId(), "vwScrnSlowdownNorms");
 			}
-			// List<Object[]> objList = shutdownNormsRepository.findByYearAndPlantFkId(year,
-			// UUID.fromString(plantId));
-			System.out.println("obj.size(): " + objList.size());
+			
 			List<SlowdownNormsValueDTO> slowdownNormsValueDTOList = new ArrayList<>();
 			for (Object[] row : objList) {
 				SlowdownNormsValueDTO slowdownNormsValueDTO = new SlowdownNormsValueDTO();
@@ -75,7 +73,6 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 				slowdownNormsValueDTO.setJanuary(row[14] != null ? Float.parseFloat(row[14].toString()) : null);
 				slowdownNormsValueDTO.setFebruary(row[15] != null ? Float.parseFloat(row[15].toString()) : null);
 				slowdownNormsValueDTO.setMarch(row[16] != null ? Float.parseFloat(row[16].toString()) : null);
-
 				slowdownNormsValueDTO.setFinancialYear(row[17] != null ? row[17].toString() : null);
 				slowdownNormsValueDTO.setRemarks(row[18] != null ? row[18].toString() : " ");
 				slowdownNormsValueDTO.setCreatedOn(row[19] != null ? (Date) row[19] : null);
@@ -85,12 +82,6 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 				slowdownNormsValueDTO.setNormParameterTypeId(row[23] != null ? row[23].toString() : null);
 				slowdownNormsValueDTO.setNormParameterTypeName(row[24] != null ? row[24].toString() : null);
 				slowdownNormsValueDTO.setNormParameterTypeDisplayName(row[25] != null ? row[25].toString() : null);
-
-				// shutdownNormsValueDTO.setNormTypeDisplayOrder(row[26] != null ?
-				// row[26].toString() : null);
-				// shutdownNormsValueDTO.setMaterialDisplayOrder(row[27] != null ?
-				// row[27].toString() : null);
-
 				slowdownNormsValueDTO.setUOM(row[28] != null ? row[28].toString() : null);
 				slowdownNormsValueDTO.setIsEditable(row[29] != null ? Boolean.valueOf(row[29].toString()) : null);
 				slowdownNormsValueDTOList.add(slowdownNormsValueDTO);

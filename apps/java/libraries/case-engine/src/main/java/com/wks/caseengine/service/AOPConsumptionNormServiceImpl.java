@@ -17,6 +17,7 @@ import com.wks.caseengine.entity.AOPConsumptionNorm;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
+import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.repository.AOPConsumptionNormRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
@@ -77,10 +78,11 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			}
 
 			return aOPConsumptionNormDTOList;
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
 		}
-		return null;
 	}
 
 	@Override
@@ -160,10 +162,9 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			}
 			// TODO Auto-generated method stub
 			return aOPConsumptionNormDTOList;
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to save data", ex);
 		}
-		return null;
 	}
 
 	@Override
@@ -251,10 +252,11 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			// return
 			// results.stream().map(this::mapToAopDataDTO).collect(Collectors.toList());
 			return listDTO;
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
 		}
-		return null;
 	}
 
 	@Transactional
@@ -271,10 +273,11 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			query.setParameter("finYear", finYear);
 
 			return query.getResultList();
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
 		}
-		return null;
 	}
 
 	@Transactional
@@ -291,10 +294,11 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			query.setParameter("aopYear", aopYear);
 
 			return query.getResultList(); // Later you can map this to a
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
 		}
-		return null;
 	}
 
 }
