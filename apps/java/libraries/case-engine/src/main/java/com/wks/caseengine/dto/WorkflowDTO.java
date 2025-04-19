@@ -27,10 +27,5 @@ public class WorkflowDTO {
 	private String siteFKId;
 	private String verticalFKId;
 	private Boolean isDeleted;
-	private String particulates;
-	private String UOM;
-	private String FY202425AOP;
-	private String FY202425Actual;
-	private String FY202526AOP;
-	private String remarks;
+	
 }
