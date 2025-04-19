@@ -23,7 +23,7 @@ import com.wks.caseengine.repository.AOPRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
-import com.wks.caseengine.rest.entity.Vertical;
+import com.wks.caseengine.entity.Vertical;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
