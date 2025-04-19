@@ -80,25 +80,21 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 	@Override
-	public List<WorkflowDTO> getWorkFlow(String plantId) {
+	public List<WorkflowDTO> getWorkFlow(String plantId,String year) {
 		try {
-			String viewName = "vwScrnWorkFlow";
-			String sql = "SELECT Id, Particulars, UOM, FirstYear, SecondYear, ThirdYear, Remarks FROM " + viewName;
-
-			Query query = entityManager.createNativeQuery(sql);
-			List<Object[]> results = query.getResultList();
+			List<Object[]> results = getData(plantId,year);
 
 			List<WorkflowDTO> workflowList = new ArrayList<>();
 			for (Object[] row : results) {
 				WorkflowDTO dto = new WorkflowDTO();
 
-				dto.setId(row[0] != null ? row[0].toString() : null);
-				dto.setParticulars(row[1] != null ? row[1].toString() : null);
-				dto.setUOM(row[2] != null ? row[2].toString() : null);
-				dto.setFirstYear(row[3] != null ? row[3].toString() : null);
-				dto.setSecondYear(row[4] != null ? row[4].toString() : null);
-				dto.setThirdYear(row[5] != null ? row[5].toString() : null);
-				dto.setRemarks(row[6] != null ? row[6].toString() : null);
+				
+				dto.setParticulates(row[0] != null ? row[0].toString() : null);
+				dto.setUOM(row[1] != null ? row[1].toString() : null);
+				dto.setFY202425AOP(row[2] != null ? row[2].toString() : null);
+				dto.setFY202425Actual(row[3] != null ? row[3].toString() : null);
+				dto.setFY202526AOP(row[4] != null ? row[4].toString() : null);
+				dto.setRemarks(row[5] != null ? row[5].toString() : null);
 
 				workflowList.add(dto);
 			}
@@ -110,5 +106,30 @@ public class WorkflowServiceImpl implements WorkflowService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	
+	public List<Object[]> getData(String plantId, String aopYear) {
+	    try {
+	        // Stored procedure name
+	        String procedureName = "GetAnnualAOPCost";
+
+	        // Prepare native SQL call with parameters
+	        String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear";
+
+	        Query query = entityManager.createNativeQuery(sql);
+
+	        // Set parameters
+	        query.setParameter("plantId", plantId);
+	        query.setParameter("aopYear", aopYear);
+
+	        return query.getResultList();
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid UUID format ", e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
+	}
+
+
 
 }

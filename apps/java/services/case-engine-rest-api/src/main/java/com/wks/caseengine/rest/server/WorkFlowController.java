@@ -35,8 +35,8 @@ public class WorkFlowController {
 	}
     
     @GetMapping(value="/work-flow")
-    public ResponseEntity<List<WorkflowDTO>> getWorkflowData( @RequestParam String plantId){
-    	List<WorkflowDTO> data= workflowService.getWorkFlow(plantId);
+    public ResponseEntity<List<WorkflowDTO>> getWorkflowData( @RequestParam String plantId,@RequestParam String year){
+    	List<WorkflowDTO> data= workflowService.getWorkFlow(plantId,year);
     	return ResponseEntity.ok(data);
     }
     
