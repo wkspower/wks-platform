@@ -106,8 +106,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 				dto.setFy202425AOP(row[2] != null ? row[2].toString() : null);
 				dto.setFy202425Actual(row[3] != null ? row[3].toString() : null);
 				dto.setFy202526AOP(row[4] != null ? row[4].toString() : null);
-				dto.setRemarks(row[5] != null ? row[5].toString() : null);
-
+				dto.setRemark(row[5] != null ? row[5].toString() : null);
 				workflowList.add(dto);
 			}
 			List<String> headers=getHeaders(plantId,year);
