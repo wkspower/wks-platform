@@ -37,9 +37,10 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 	@PersistenceContext
 	private EntityManager entityManager;
+	
+	 @Autowired
+	 private DataSource dataSource;
 
-	@Autowired
-	private DataSource dataSource;
 
 	@Override
 	public List<WorkflowDTO> getCaseId(String year, String plantId, String siteId, String verticalId) {
@@ -91,15 +92,15 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 	@Override
-	public Map<String, Object> getWorkFlow(String plantId, String year) {
+	public Map<String, Object> getWorkFlow(String plantId,String year) {
 		Map<String, Object> map = new HashMap<>();
 
 		try {
-			List<Object[]> results = getData(plantId, year);
+			List<Object[]> results = getData(plantId,year);
 
 			List<WorkflowYearDTO> workflowList = new ArrayList<>();
 			for (Object[] row : results) {
-				WorkflowYearDTO dto = new WorkflowYearDTO();
+				WorkflowYearDTO dto = new WorkflowYearDTO();	
 				dto.setParticulates(row[0] != null ? row[0].toString() : null);
 				dto.setUom(row[1] != null ? row[1].toString() : null);
 				dto.setFy202425AOP(row[2] != null ? row[2].toString() : null);
@@ -108,10 +109,10 @@ public class WorkflowServiceImpl implements WorkflowService {
 				dto.setRemark(row[5] != null ? row[5].toString() : null);
 				workflowList.add(dto);
 			}
-			List<String> headers = getHeaders(plantId, year);
+			List<String> headers=getHeaders(plantId,year);
 			List<String> keys = new ArrayList<>();
 			for (Field field : WorkflowYearDTO.class.getDeclaredFields()) {
-				keys.add(field.getName());
+			    keys.add(field.getName());
 			}
 			map.put("headers", headers);
 			map.put("keys", keys);
@@ -123,58 +124,57 @@ public class WorkflowServiceImpl implements WorkflowService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-
+	
+	
 	public List<Object[]> getData(String plantId, String aopYear) {
-		try {
-			// Stored procedure name
-			String procedureName = "GetAnnualAOPCost";
+	    try {
+	        // Stored procedure name
+	        String procedureName = "GetAnnualAOPCost";
 
-			// Prepare native SQL call with parameters
-			// String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear =
-			// :aopYear";
-			String sql = "EXEC " + procedureName + " @plantId = :plantId";
+	        // Prepare native SQL call with parameters
+	        String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear";
 
-			Query query = entityManager.createNativeQuery(sql);
+	        Query query = entityManager.createNativeQuery(sql);
 
-			// Set parameters
-			query.setParameter("plantId", plantId);
-			// query.setParameter("aopYear", aopYear);
+	        // Set parameters
+	        query.setParameter("plantId", plantId);
+	        query.setParameter("aopYear", aopYear);
 
-			return query.getResultList();
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format ", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
+	        return query.getResultList();
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid UUID format ", e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
 	}
 
 	public List<String> getHeaders(String plantId, String aopYear) {
-		List<String> headers = new ArrayList<>();
+        List<String> headers = new ArrayList<>();
 
-		try (Connection conn = dataSource.getConnection();
-				CallableStatement stmt = conn.prepareCall("{call GetAnnualAOPCost(?)}")) {
+        try (Connection conn = dataSource.getConnection();
+             CallableStatement stmt = conn.prepareCall("{call GetAnnualAOPCost(?, ?)}")) {
 
-			stmt.setString(1, plantId);
-			// stmt.setString(2, aopYear);
+            stmt.setString(1, plantId);
+            stmt.setString(2, aopYear);
 
-			boolean hasResultSet = stmt.execute();
+            boolean hasResultSet = stmt.execute();
 
-			if (hasResultSet) {
-				try (ResultSet rs = stmt.getResultSet()) {
-					ResultSetMetaData metaData = rs.getMetaData();
-					int columnCount = metaData.getColumnCount();
+            if (hasResultSet) {
+                try (ResultSet rs = stmt.getResultSet()) {
+                    ResultSetMetaData metaData = rs.getMetaData();
+                    int columnCount = metaData.getColumnCount();
 
-					for (int i = 1; i <= columnCount; i++) {
-						headers.add(metaData.getColumnLabel(i));
-					}
-				}
-			}
+                    for (int i = 1; i <= columnCount; i++) {
+                        headers.add(metaData.getColumnLabel(i));
+                    }
+                }
+            }
 
-		} catch (SQLException e) {
-			throw new RuntimeException("Failed to fetch headers", e);
-		}
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch headers", e);
+        }
 
-		return headers;
-	}
+        return headers;
+    }
 
 }
