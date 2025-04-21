@@ -21,7 +21,7 @@ export function nop(keycloak, resp) {
 }
 
 function forceLogoutWhenTokenExpired(keycloak, resp) {
-  if (keycloak.isTokenExpired()) {
+  if (keycloak.isTokenExpired) {
     console.error(resp)
     keycloak.logout({ redirectUri: window.location.origin })
   }

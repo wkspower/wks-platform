@@ -138,7 +138,7 @@ export const CaseDefFormEventsForm = ({
                   onChange={(e) => setProcessDefKey(e.target.value)}
                   sx={styles.typeSelect}
                 >
-                  {processesDefinitions.map((processDefinition) => {
+                  {processesDefinitions?.map((processDefinition) => {
                     return (
                       <MenuItem
                         key={processDefinition.key}

@@ -81,10 +81,11 @@ export const DataService = {
   updateUserAttributes,
   getUserBySearch,
   getUserScreen,
-  // CheckIsTokenExp,
+  getScreenbyPlant,
+  getWorkflowData,
   updateUserPlants,
   getCaseId,
-  saveworkflow
+  saveworkflow,
 }
 
 // async function CheckIsTokenExp(keycloak) {
@@ -690,6 +691,39 @@ async function getUserScreen(keycloak, verticalId) {
     return await Promise.reject(e)
   }
 }
+async function getScreenbyPlant(keycloak, verticalId, plantId) {
+  const url = `${Config.CaseEngineUrl}/task/user/screen?verticalId=${verticalId}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getWorkflowData(keycloak, plantId) {
+  let year = localStorage.getItem('year')
+  const url = `${Config.CaseEngineUrl}/task/work-flow?plantId=${plantId}&year=${year}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
 // async function getUserBySearch(keycloak, searchKey) {
 //   const url = `${Config.CaseEngineUrl}/task/users/search?search=${searchKey}`
 //   const headers = {
@@ -1007,10 +1041,10 @@ async function saveworkflow(data, keycloak) {
   }
 }
 
-async function getCaseId(keycloak){ 
- var year = localStorage.getItem('year')
+async function getCaseId(keycloak) {
+  var year = localStorage.getItem('year')
   var plantId = ''
-  var siteId ='';
+  var siteId = ''
   const storedPlant = localStorage.getItem('selectedPlant')
   if (storedPlant) {
     const parsedPlant = JSON.parse(storedPlant)
@@ -1025,8 +1059,6 @@ async function getCaseId(keycloak){
 
   const verticalId = localStorage.getItem('verticalId')
 
-
-
   const url = `${Config.CaseEngineUrl}/task/getCaseId?plantId=${plantId}&year=${year}&siteId=${siteId}&verticalId=${verticalId}`
 
   const headers = {
@@ -1038,7 +1070,7 @@ async function getCaseId(keycloak){
   try {
     const resp = await fetch(url, {
       method: 'GET',
-      headers
+      headers,
     })
     return json(keycloak, resp)
   } catch (e) {
@@ -1046,7 +1078,6 @@ async function getCaseId(keycloak){
     return await Promise.reject(e)
   }
 }
-
 
 async function saveAOPConsumptionNorm(plantId, shutdownDetails, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/saveAOPConsumptionNorm`
@@ -1798,22 +1829,51 @@ async function getProcessInstanceVariables(keycloak, processInstanceId) {
   }
 }
 
-async function completeTask(keycloak, taskId, payload) {
+// async function completeTask(keycloak, taskId, payload) {
+//   const url = `${Config.CaseEngineUrl}/task/${taskId}/complete`
+//   const headers = {
+//     Accept: 'application/json',
+//     'Content-Type': 'application/json',
+//     Authorization: `Bearer ${keycloak.token}`,
+//   }
+//   try {
+//     const resp = await fetch(url, {
+//       method: 'POST',
+//       headers,
+//       body: JSON.stringify(payload),
+//     })
+//     return json(keycloak, resp)
+//   } catch (e) {
+//     console.log(e)
+//     return await Promise.reject(e)
+//   }
+// }
+async function completeTask(keycloak, taskId, attributes) {
   const url = `${Config.CaseEngineUrl}/task/${taskId}/complete`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
+
+  // 1. Ensure token is fresh before every request
+  await keycloak.updateToken(30)
+
+  // 2. Execute the POST
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${keycloak.token}`,
+    },
+    body: JSON.stringify(attributes),
+  })
+
+  // 3. 204 = success (no JSON body)
+  if (resp.status === 204) return true
+
+  // 4. Any other non‑OK status → read text & throw
+  if (!resp.ok) {
+    const text = await resp.text().catch(() => '')
+    throw new Error(`Server error ${resp.status}: ${text}`.trim())
   }
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-    })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
+
+  // 5. If 2xx with a body, parse it
+  const data = await resp.json()
+  return Boolean(data)
 }

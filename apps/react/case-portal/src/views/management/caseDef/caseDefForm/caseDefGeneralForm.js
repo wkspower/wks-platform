@@ -80,7 +80,7 @@ export const CaseDefGeneralForm = ({ caseDef, setCaseDef }) => {
             <MenuItem key='processDefEmptyOptionKey' value='null'>
               &nbsp;
             </MenuItem>
-            {processesDefinitions.map((processDefinition) => {
+            {processesDefinitions?.map((processDefinition) => {
               return (
                 <MenuItem
                   key={processDefinition.key}

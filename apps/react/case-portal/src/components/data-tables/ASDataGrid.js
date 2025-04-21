@@ -731,18 +731,18 @@ const DataGridTable = ({
               justifyContent: 'center !important',
             },
 
-            '& .vertical-center .MuiDataGrid-columnHeaderTitleContainer': {
-              display: 'flex',
-              alignItems: 'center', // vertical
-              justifyContent: 'center', // horizontal
-              height: '100%', // fill the two-row header
-            },
-            '& .MuiDataGrid-columnHeaderTitle': {
-              textAlign: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              display: 'flex',
-            },
+            // '& .vertical-center .MuiDataGrid-columnHeaderTitleContainer': {
+            //   display: 'flex',
+            //   alignItems: 'center', // vertical
+            //   justifyContent: 'center', // horizontal
+            //   height: '100%', // fill the two-row header
+            // },
+            // '& .MuiDataGrid-columnHeaderTitle': {
+            //   textAlign: 'center',
+            //   justifyContent: 'center',
+            //   width: '100%',
+            //   display: 'flex',
+            // },
 
             '& .MuiDataGrid-columnHeaderGroup .MuiDataGrid-columnHeaderTitle': {
               textAlign: 'center',
@@ -842,11 +842,11 @@ const DataGridTable = ({
               paddingTop: '0px',
               paddingBottom: '0px',
             },
-            '& .MuiDataGrid-columnHeaderTitle': {
-              lineHeight: '45px', // aligns text better
-              fontSize: '0.75rem',
-              fontWeight: 'bold', // Ensure column titles are bold
-            },
+            // '& .MuiDataGrid-columnHeaderTitle': {
+            //   lineHeight: '45px', // aligns text better
+            //   fontSize: '0.75rem',
+            //   fontWeight: 'bold', // Ensure column titles are bold
+            // },
 
             '& .MuiDataGrid-cell': {
               // borderRight: `1px solid ${jioColors.border}`,

@@ -2,7 +2,7 @@ import { useEffect, useState, lazy, Suspense } from 'react'
 import { ThemeRoutes } from './routes'
 import ThemeCustomization from './themes'
 import { SessionStoreProvider } from './SessionStoreContext'
-// import { CaseService, RecordService } from 'services'
+import { CaseService, RecordService } from 'services'
 import menuItemsDefs from './menu'
 import { RegisterInjectUserSession, RegisteOptions } from './plugins'
 import { accountStore, sessionStore } from './store'
@@ -17,7 +17,7 @@ const App = () => {
   const [keycloak, setKeycloak] = useState({})
   const [authenticated, setAuthenticated] = useState(null)
   // const [recordsTypes, setRecordsTypes] = useState([])
-  // const [casesDefinitions, setCasesDefinitions] = useState([])
+  const [casesDefinitions, setCasesDefinitions] = useState([])
   const [menu, setMenu] = useState({ items: [] })
 
   useEffect(() => {
@@ -146,17 +146,54 @@ const App = () => {
       }
       return item
     })
-    // console.log(menu)
+
+    // const recordTypes = await RecordService.getAllRecordTypes(keycloak)
+    // setRecordsTypes(recordTypes)
+
+    // recordTypes.forEach((element) => {
+    //   const recordListMenu = menu.items[1].children.find(
+    //     (menu) => menu.id === 'record-list',
+    //   )
+    //   recordListMenu?.children.push({
+    //     id: element.id,
+    //     title: element.id,
+    //     type: 'item',
+    //     url: `/record-list/${element.id}`,
+    //     breadcrumbs: true,
+    //   })
+    // })
+
+    // Fetch Case Definitions and update menu
+    const caseDefinitions = await CaseService.getCaseDefinitions(keycloak)
+    setCasesDefinitions(caseDefinitions)
+    console.log(caseDefinitions)
+    caseDefinitions.forEach((element) => {
+      const caseListMenu = menu.items[1].children.find(
+        (menu) => menu.id === 'case-list',
+      )
+      caseListMenu?.children.push({
+        id: element.id,
+        title: element.name,
+        type: 'item',
+        url: `/case-list/${element.id}`,
+        breadcrumbs: true,
+      })
+    })
+
+    console.log(menu)
     // Safely determine if the user is a manager.
     // If keycloak.hasRealmRole is not a function, default to false.
-    const isManagerUser =
-      typeof keycloak.hasRealmRole === 'function'
-        ? keycloak.hasRealmRole('manager')
-        : false
-
-    if (!isManagerUser) {
+    if (!accountStore.isManagerUser(keycloak)) {
       delete menu.items[3]
     }
+    // const isManagerUser =
+    //   typeof keycloak.hasRealmRole === 'function'
+    //     ? keycloak.hasRealmRole('manager')
+    //     : false
+
+    // if (!isManagerUser) {
+    //   delete menu.items[3]
+    // }
 
     return setMenu(menu)
   }
@@ -172,7 +209,7 @@ const App = () => {
                 keycloak={keycloak}
                 authenticated={authenticated}
                 // recordsTypes={recordsTypes}
-                // casesDefinitions={casesDefinitions}
+                casesDefinitions={casesDefinitions}
               />
             </SessionStoreProvider>
           </ScrollTop>

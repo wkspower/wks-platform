@@ -14,6 +14,7 @@ const AOP_ROLES = [
   'technology_vertical_head',
   'engineering_head',
   'business_head',
+  'site_planner',
   'site_head',
   'gms_head',
 ]

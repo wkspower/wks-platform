@@ -27,7 +27,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   )?.name
   const dispatch = useDispatch()
 
-  console.log(verticalName, siteName, plantName, vertName)
+  // console.log(verticalName, siteName, plantName, vertName, verticalId)
   // const siteName = JSON.parse(localStorage.getItem('selectedSite'))?.name;
 
   const [notification, setNotification] = useState({
@@ -70,7 +70,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     const verticalRoleMap = roleMapping[verticalId]
     return verticalRoleMap?.[screenId]
       ? `Role : ${verticalRoleMap[screenId]}`
-      : 'Role : N/A'
+      : ' '
   }
 
   async function handleOpenPdf(title) {

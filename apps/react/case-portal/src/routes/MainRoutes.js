@@ -8,15 +8,15 @@ import BusinessDemand from 'components/data-tables/BusinessDemand'
 import ShutDown from 'components/data-tables/ShutDown'
 import SlowDown from 'components/data-tables/Slowdown'
 
-// import { CaseStatus } from 'common/caseStatus'
-// import { CaseList } from 'views/caseList/caseList'
+import { CaseStatus } from 'common/caseStatus'
+import { CaseList } from 'views/caseList/caseList'
 // import { RecordList } from 'views/record/recordList'
-// import { TaskList } from 'views/taskList/taskList'
-// import { CaseDefList } from 'views/management/caseDef/caseDefList/caseDefList'
-// import { ProcessDefList } from 'views/management/processDef/processDefList'
-// import { FormList } from 'views/management/form/formList'
-// import { RecordTypeList } from 'views/management/recordType/recordTypeList'
-// import { QueueList } from 'views/management/queue/queueList'
+import { TaskList } from 'views/taskList/taskList'
+import { CaseDefList } from 'views/management/caseDef/caseDefList/caseDefList'
+import { ProcessDefList } from 'views/management/processDef/processDefList'
+import { FormList } from 'views/management/form/formList'
+import { RecordTypeList } from 'views/management/recordType/recordTypeList'
+import { QueueList } from 'views/management/queue/queueList'
 import FeedStockAvailability from 'components/data-tables/FeedStockavailability'
 import NormalOpNormsScreen from 'components/data-tables/NormsScreens/NormalOpNorms'
 import ShutdownNorms from 'components/data-tables/NormsScreens/ShutdownNorms'
@@ -24,7 +24,7 @@ import MaintenanceTable from 'components/data-tables/MaintenanceTable'
 import ConsumptionNorms from 'components/data-tables/ConsumptionNorms'
 import ProductionNorms from 'components/data-tables/ProductionNorms'
 // import SelectivityData from 'components/data-tables/SelectivityData'
-import FiveTables from 'components/data-tables/AOPWorkFlow/ProductMixTable'
+// import FiveTables from 'components/data-tables/AOPWorkFlow/ProductMixTable'
 import ConfigurationTable from 'components/data-tables/ConfigurationTable/index'
 // import UserManagement from 'components/user-management/UserManagementTable'
 import UserForm from 'components/user-management/UserForm'
@@ -32,6 +32,7 @@ import UserManagementTable from 'components/user-management/UserManagementTable'
 import AssessmentForm from 'components/data-tables/AssesmentForm/AssessmentContext'
 import SlowdownNorms from 'components/data-tables/NormsScreens/SlowdownNorms'
 import TextSubmitComponent from 'components/user-management/TextSubmitComponent'
+import WorkFlowMerge from 'components/data-tables/AOPWorkFlow/WorkFlowMerge'
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
@@ -39,7 +40,7 @@ export const MainRoutes = (
   keycloak,
   authenticated,
   // recordsTypes,
-  // casesDefinitions,
+  casesDefinitions,
 ) => {
   let routes = {
     path: '/',
@@ -54,35 +55,35 @@ export const MainRoutes = (
         path: 'home',
         element: <DashboardDefault />,
       },
-      // {
-      //   path: 'case-list',
-      //   children: [
-      //     {
-      //       path: 'cases',
-      //       element: <CaseList />,
-      //     },
-      //     {
-      //       path: 'wip-cases',
-      //       element: <CaseList status={CaseStatus.WipCaseStatus.description} />,
-      //     },
-      //     {
-      //       path: 'closed-cases',
-      //       element: (
-      //         <CaseList status={CaseStatus.ClosedCaseStatus.description} />
-      //       ),
-      //     },
-      //     {
-      //       path: 'archived-cases',
-      //       element: (
-      //         <CaseList status={CaseStatus.ArchivedCaseStatus.description} />
-      //       ),
-      //     },
-      //   ],
-      // },
-      // {
-      //   path: 'task-list',
-      //   element: <TaskList />,
-      // },
+      {
+        path: 'case-list',
+        children: [
+          {
+            path: 'cases',
+            element: <CaseList />,
+          },
+          {
+            path: 'wip-cases',
+            element: <CaseList status={CaseStatus.WipCaseStatus.description} />,
+          },
+          {
+            path: 'closed-cases',
+            element: (
+              <CaseList status={CaseStatus.ClosedCaseStatus.description} />
+            ),
+          },
+          {
+            path: 'archived-cases',
+            element: (
+              <CaseList status={CaseStatus.ArchivedCaseStatus.description} />
+            ),
+          },
+        ],
+      },
+      {
+        path: 'task-list',
+        element: <TaskList />,
+      },
       {
         path: 'system',
         children: [
@@ -93,31 +94,31 @@ export const MainRoutes = (
         ],
       },
 
-      // {
-      //   path: 'case-life-cycle',
-      //   children: [
-      //     {
-      //       path: 'process-definition',
-      //       element: <ProcessDefList />,
-      //     },
-      //     {
-      //       path: 'case-definition',
-      //       element: <CaseDefList />,
-      //     },
-      //     {
-      //       path: 'record-type',
-      //       element: <RecordTypeList />,
-      //     },
-      //     {
-      //       path: 'form',
-      //       element: <FormList />,
-      //     },
-      //     {
-      //       path: 'queue',
-      //       element: <QueueList />,
-      //     },
-      //   ],
-      // },
+      {
+        path: 'case-life-cycle',
+        children: [
+          {
+            path: 'process-definition',
+            element: <ProcessDefList />,
+          },
+          {
+            path: 'case-definition',
+            element: <CaseDefList />,
+          },
+          {
+            path: 'record-type',
+            element: <RecordTypeList />,
+          },
+          {
+            path: 'form',
+            element: <FormList />,
+          },
+          {
+            path: 'queue',
+            element: <QueueList />,
+          },
+        ],
+      },
 
       {
         path: 'production-norms-plan',
@@ -200,7 +201,8 @@ export const MainRoutes = (
       },
       {
         path: 'workflow',
-        element: <FiveTables />,
+        element: <WorkFlowMerge />,
+        // element: <FiveTables />,
       },
       {
         path: 'user-management',
@@ -217,12 +219,12 @@ export const MainRoutes = (
     ],
   }
 
-  // casesDefinitions.forEach((element) => {
-  //   routes.children.push({
-  //     path: 'case-list/' + element.id,
-  //     element: <CaseList caseDefId={element.id} />,
-  //   })
-  // })
+  casesDefinitions?.forEach((element) => {
+    routes.children.push({
+      path: 'case-list/' + element.id,
+      element: <CaseList caseDefId={element.id} />,
+    })
+  })
 
   // recordsTypes.forEach((element) => {
   //   routes.children.push({
