@@ -238,10 +238,10 @@ const WorkFlowMerge = () => {
       // 4. Find first task whose assignee matches any role
       let matchingTask = tasks.find((task) => roles.includes(task.assignee))
       // 2. If none, try matching by name
-      if (!matchingTask) {
-        const name = 'PC and I head'
-        matchingTask = tasks.find((task) => name.includes(task.name))
-      }
+      // if (!matchingTask) {
+      //   const name = 'PC and I head'
+      //   matchingTask = tasks.find((task) => name.includes(task.name))
+      // }
 
       console.log(matchingTask)
       if (matchingTask) {
@@ -520,7 +520,7 @@ const WorkFlowMerge = () => {
           <TextField
             autoFocus
             margin='dense'
-            label='Rejection Reason'
+            label='Remark'
             type='text'
             fullWidth
             sx={{ width: '100%', minWidth: '600px' }}

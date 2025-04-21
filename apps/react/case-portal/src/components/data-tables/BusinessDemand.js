@@ -417,7 +417,7 @@ const BusinessDemand = ({ permissions }) => {
         handleRemarkCellClick={handleRemarkCellClick}
         deleteRowData={deleteRowData}
         permissions={{
-          showAction: permissions?.showAction ?? true,
+          showAction: permissions?.showAction ?? false,
           addButton: permissions?.addButton ?? false,
           deleteButton: permissions?.deleteButton ?? false,
           editButton: permissions?.editButton ?? false,

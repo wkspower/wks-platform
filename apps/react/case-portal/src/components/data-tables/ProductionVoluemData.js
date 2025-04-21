@@ -450,7 +450,7 @@ const ProductionvolumeData = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         handleCalculate={handleCalculate}
         permissions={{
-          showAction: permissions?.showAction ?? true,
+          showAction: permissions?.showAction ?? false,
           addButton: permissions?.addButton ?? false,
           deleteButton: permissions?.deleteButton ?? false,
           editButton: permissions?.editButton ?? false,
