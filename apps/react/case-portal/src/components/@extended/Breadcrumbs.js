@@ -13,6 +13,8 @@ import Config from 'consts/index'
 import { useSelector } from 'react-redux'
 import { useDispatch } from 'react-redux'
 import { setScreenTitle } from 'store/reducers/dataGridStore'
+import Chip from '@mui/material/Chip'
+import Stack from '@mui/material/Stack'
 
 const Breadcrumbs = ({ navigation, title, ...others }) => {
   const keycloak = useSession()
@@ -92,6 +94,33 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
         })
         return
       }
+      const blob = await resp.blob()
+      const fileURL = window.URL.createObjectURL(blob)
+      window.open(fileURL, '_blank')
+      return true
+    } catch (e) {
+      console.error('Error fetching PDF:', e)
+      return Promise.reject(e)
+    }
+  }
+
+  async function handleOpenPdfTemp(title) {
+    const url = `/files/${title}.pdf`
+
+    try {
+      const resp = await fetch(url, {
+        method: 'GET',
+      })
+
+      if (!resp.ok) {
+        setNotification({
+          open: true,
+          message: 'Basis not found! Please try again later.',
+          severity: 'info',
+        })
+        return
+      }
+
       const blob = await resp.blob()
       const fileURL = window.URL.createObjectURL(blob)
       window.open(fileURL, '_blank')
@@ -286,22 +315,21 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                 </Typography>
               </Grid>
 
-              <Grid item>
-                <Typography
-                  component='span'
-                  sx={{
-                    textDecoration: 'none',
-                    fontWeight: 800,
-                    color: 'black',
-                    display: 'flex',
-                    alignItems: 'center',
-                    margin: '12px',
-                    textShadow: '0.5px 0.5px 0px rgba(0, 0, 0, 0.1)',
-                  }}
-                >
-                  {getRoleName(verticalId, item?.id)}
-                </Typography>
-              </Grid>
+              <Stack spacing={1} sx={{ alignItems: 'center' }}>
+                <Grid item>
+                  <Chip
+                    color='primary'
+                    variant='outlined'
+                    label={getRoleName(verticalId, item?.id)}
+                    sx={{
+                      fontWeight: 800,
+                      color: 'black',
+                      textShadow: '0.5px 0.5px 0px rgba(0, 0, 0, 0.1)',
+                      margin: '12px',
+                    }}
+                  />
+                </Grid>
+              </Stack>
             </Grid>
 
             {/* HIDE THE TITLE NAME */}

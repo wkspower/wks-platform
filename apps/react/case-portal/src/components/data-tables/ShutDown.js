@@ -420,7 +420,7 @@ const ShutDown = ({ permissions }) => {
     {
       field: 'durationInHrs',
       headerName: 'Duration (hrs)',
-      editable: false,
+      editable: true,
       minWidth: 100,
       renderEditCell: TimeInputCell,
       align: 'left',
