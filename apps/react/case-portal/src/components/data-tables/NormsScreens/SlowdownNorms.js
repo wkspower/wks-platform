@@ -784,10 +784,10 @@ const SlowdownNorms = () => {
         handleRemarkCellClick={handleRemarkCellClick}
         handleCalculate={handleCalculate}
         permissions={{
-          showAction: true,
+          showAction: false,
           addButton: false,
           deleteButton: false,
-          editButton: true,
+          editButton: false,
           showUnit: false,
           units: ['TPH', 'TPD'],
           saveWithRemark: false,

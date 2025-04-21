@@ -542,7 +542,7 @@ const ShutDown = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         deleteRowData={deleteRowData}
         permissions={{
-          showAction: permissions?.showAction ?? false,
+          showAction: permissions?.showAction ?? true,
           addButton: permissions?.addButton ?? true,
           deleteButton: permissions?.deleteButton ?? true,
           editButton: permissions?.editButton ?? false,

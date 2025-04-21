@@ -2,7 +2,10 @@ import { useEffect, useState, lazy, Suspense } from 'react'
 import { ThemeRoutes } from './routes'
 import ThemeCustomization from './themes'
 import { SessionStoreProvider } from './SessionStoreContext'
-import { CaseService, RecordService } from 'services'
+import {
+  CaseService,
+  //  RecordService
+} from 'services'
 import menuItemsDefs from './menu'
 import { RegisterInjectUserSession, RegisteOptions } from './plugins'
 import { accountStore, sessionStore } from './store'
@@ -72,15 +75,15 @@ const App = () => {
     if (keycloak && verticalChange) {
       buildMenuItems(keycloak)
     }
-    // console.log(verticalChange)
+  //console.log(verticalChange)
   }, [verticalChange, keycloak])
 
   async function buildMenuItems(keycloak) {
     let allowedLinked = []
     const verticals = keycloak?.idTokenParsed?.verticals
-    const selectedVertical = localStorage.getItem('verticalId').toLowerCase()
+    const selectedVertical = localStorage.getItem('verticalId')?.toLowerCase()
 
-    // console.log('keycloak', verticals)
+  //console.log('keycloak', verticals)
     if (verticals) {
       try {
         allowedLinked = JSON.parse(verticals)
@@ -166,7 +169,7 @@ const App = () => {
     // Fetch Case Definitions and update menu
     const caseDefinitions = await CaseService.getCaseDefinitions(keycloak)
     setCasesDefinitions(caseDefinitions)
-    console.log(caseDefinitions)
+    // console.log(caseDefinitions)
     caseDefinitions.forEach((element) => {
       const caseListMenu = menu.items[1].children.find(
         (menu) => menu.id === 'case-list',
@@ -180,7 +183,7 @@ const App = () => {
       })
     })
 
-    console.log(menu)
+    // console.log(menu)
     // Safely determine if the user is a manager.
     // If keycloak.hasRealmRole is not a function, default to false.
     if (!accountStore.isManagerUser(keycloak)) {

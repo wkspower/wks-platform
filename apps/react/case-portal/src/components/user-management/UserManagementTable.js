@@ -199,11 +199,6 @@ const UserManagementTable = ({ keycloak }) => {
             .map((p) => p.displayName)
             .join(', ')
 
-          // Optionally update these states if needed.
-          setAllPlants(mappedPlants)
-          setAllSites(mappedSites)
-          setAllVerts(mappedVerticals)
-
           return {
             id: index,
             userId: item?.user?.id,
@@ -216,8 +211,11 @@ const UserManagementTable = ({ keycloak }) => {
             screen: item.user.attributes?.verticals || '',
           }
         })
-
-        console.log('Mapped Rows: ', mappedRows)
+        // Optionally update these states if needed.
+        setAllPlants(mappedRows.plants)
+        setAllSites(mappedRows.sites)
+        setAllVerts(mappedRows.verticals)
+        console.log('Mapped Rows: ', mappedRows.verticals)
         // Optionally, uncomment if you want to show API users by default:
         // setRows(mappedRows);
       } catch (error) {

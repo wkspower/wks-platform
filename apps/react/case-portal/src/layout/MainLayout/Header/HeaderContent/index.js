@@ -211,6 +211,38 @@ export default function HeaderContent({ keycloak }) {
       dispatch(setSitePlantChange({ sitePlantChange: true }))
     }
   }
+  const handleVertChange = (e) => {
+    const newVId = e.target.value
+    setSelectedVertical(newVId)
+
+    const vert = verticals.find((v) => v.id === newVId)
+    if (vert) {
+      localStorage.setItem('verticalId', vert.id)
+      localStorage.setItem('selectedVertical', JSON.stringify(vert))
+      dispatch(
+        setVerticalChange({
+          selectedVertical: vert.name,
+          selectedSite: '',
+          selectedPlant: '',
+        }),
+      )
+    }
+  }
+  useEffect(() => {
+    if (!selectedVertical) return
+    const vert = verticals.find((v) => v.id === selectedVertical)
+    if (!vert) return
+
+    localStorage.setItem('verticalId', vert.id)
+    localStorage.setItem('selectedVertical', JSON.stringify(vert))
+    dispatch(
+      setVerticalChange({
+        selectedVertical: vert.name,
+        selectedSite: '',
+        selectedPlant: '',
+      }),
+    )
+  }, [selectedVertical, verticals, dispatch])
 
   return (
     <>
@@ -255,7 +287,7 @@ export default function HeaderContent({ keycloak }) {
           <FormControl sx={{ minWidth: 150 }}>
             <Select
               value={selectedVertical}
-              onChange={(e) => setSelectedVertical(e.target.value)}
+              onChange={handleVertChange}
               sx={{ color: 'white' }}
             >
               {verticals.map((v) => (
