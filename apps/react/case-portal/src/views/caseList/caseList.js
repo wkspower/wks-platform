@@ -331,7 +331,7 @@ export const CaseList = ({ status, caseDefId }) => {
             <div style={{ paddingTop: 15 }}>Rows per page:</div>
           }
           rowsPerPage={filter.limit}
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rowsPerPageOptions={[2,5, 10, 25, 50]}
           getItemAriaLabel={() => ''}
           labelDisplayedRows={() => ''}
           onPageChange={(e, type) => {
