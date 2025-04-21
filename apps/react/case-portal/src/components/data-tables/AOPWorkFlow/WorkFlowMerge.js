@@ -94,9 +94,9 @@ const WorkFlowMerge = () => {
       groupId: 'annualAOP',
       headerName: 'Annual AOP Cost',
       children: [
-        { field: 'aop_2025_26' },
-        { field: 'actual_2025_26' },
-        { field: 'aop_2026_27' },
+        { field: 'fy202425AOP' },
+        { field: 'fy202425Actual' },
+        { field: 'fy202526AOP' },
       ],
     },
   ]
@@ -277,6 +277,8 @@ const WorkFlowMerge = () => {
         message: 'Workflow instance created successfully',
         severity: 'success',
       })
+
+    //getCaseId()
     } catch (error) {
       console.error('Error creating workflow:', error)
       setSnackbarData({
@@ -290,50 +292,6 @@ const WorkFlowMerge = () => {
       setSnackbarOpen(true)
     }
   }
-
-  // const createCase = async () => {
-  //   try {
-  //     const result = await DataService.createCase(keycloak, caseData)
-  //     // console.log('Response:', result)
-  //     //   setBusinessKey(result?.businessKey)
-  //     var year = localStorage.getItem('year')
-  //     var plantId = ''
-  //     var siteId = ''
-  //     const storedPlant = localStorage.getItem('selectedPlant')
-  //     if (storedPlant) {
-  //       const parsedPlant = JSON.parse(storedPlant)
-  //       plantId = parsedPlant.id
-  //     }
-
-  //     const storedSite = localStorage.getItem('selectedSite')
-  //     if (storedSite) {
-  //       const parsedSite = JSON.parse(storedSite)
-  //       siteId = parsedSite.id
-  //     }
-
-  //     const verticalId = localStorage.getItem('verticalId')
-
-  //     let workflowData = {
-  //       year: year,
-  //       plantFkId: plantId,
-  //       caseDefId: caseData.caseDefinitionId,
-  //       caseId: result.businessKey,
-  //       siteFKId: siteId,
-  //       verticalFKId: verticalId,
-  //     }
-
-  //     const workFlowResult = await DataService.saveworkflow(
-  //       workflowData,
-  //       keycloak,
-  //     )
-  //     console.log(workFlowResult)
-  //     getCaseId()
-  //     // alert('Submitted successfully!')
-  //   } catch (error) {
-  //     console.error('Error submitting:', error)
-  //     // alert('Something went wrong!')
-  //   }
-  // }
 
   const handleSubmit = async () => {
     // 1. Don’t submit empty text
@@ -420,7 +378,7 @@ const WorkFlowMerge = () => {
         direction='row'
         spacing={1}
         justifyContent='right'
-        sx={{ mt: 2, mb: 1 }}
+        sx={{ mt: 2, mb: 0 }}
       >
         {showTextBox && (
           <>

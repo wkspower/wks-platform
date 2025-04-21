@@ -29,11 +29,11 @@
       <bpmn:incoming>Flow_0ai0s9l</bpmn:incoming>
       <bpmn:outgoing>Flow_0yrepz2</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask camunda:candidateGroups="pc_and_i_head" camunda:formKey="approval-form" id="Activity_0pdzfnu" name="PC and I head">
+    <bpmn:userTask camunda:assignee="pci_head" camunda:formKey="approval-form" id="Activity_0pdzfnu" name="PC and I head">
       <bpmn:incoming>Flow_0uz4357</bpmn:incoming>
       <bpmn:outgoing>Flow_00dvvij</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask camunda:assignee="mm_and_c_head" camunda:formKey="approval-form" id="Activity_1qb4p9n" name="MM  and  C Head">
+    <bpmn:userTask camunda:assignee="mmc_head" camunda:formKey="approval-form" id="Activity_1qb4p9n" name="MM  and  C Head">
       <bpmn:incoming>Flow_0izwtkz</bpmn:incoming>
       <bpmn:outgoing>Flow_0ktdu4o</bpmn:outgoing>
     </bpmn:userTask>
@@ -76,7 +76,7 @@
     <bpmn:sequenceFlow id="Flow_0yrepz2" sourceRef="Activity_1r31jz8" targetRef="Gateway_1raevu3" />
     <bpmn:sequenceFlow id="Flow_00dvvij" sourceRef="Activity_0pdzfnu" targetRef="Gateway_1raevu3" />
     <bpmn:sequenceFlow id="Flow_0ktdu4o" sourceRef="Activity_1qb4p9n" targetRef="Gateway_1raevu3" />
-    <bpmn:userTask camunda:assignee="s_and_or_head" camunda:formKey="approval-form" id="Activity_02qtcry" name="S and  OR Head">
+    <bpmn:userTask camunda:assignee="sor_head" camunda:formKey="approval-form" id="Activity_02qtcry" name="S and  OR Head">
       <bpmn:incoming>Flow_1o6g8jd</bpmn:incoming>
       <bpmn:outgoing>Flow_02iw0ln</bpmn:outgoing>
     </bpmn:userTask>
@@ -88,11 +88,11 @@
       <bpmn:incoming>Flow_14yuxcl</bpmn:incoming>
       <bpmn:outgoing>Flow_16n5b96</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask camunda:assignee="pc_and_i_head" camunda:formKey="approval-form" id="Activity_0swkuh3" name="PC and I head">
+    <bpmn:userTask camunda:assignee="pci_head" camunda:formKey="approval-form" id="Activity_0swkuh3" name="PC and I head">
       <bpmn:incoming>Flow_0jrm71a</bpmn:incoming>
       <bpmn:outgoing>Flow_00w0hth</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask camunda:assignee="mm_and_c_head" camunda:formKey="approval-form" id="Activity_1w9i2y4" name="MM  and C Head">
+    <bpmn:userTask camunda:assignee="mmc_head" camunda:formKey="approval-form" id="Activity_1w9i2y4" name="MM  and C Head">
       <bpmn:incoming>Flow_0i8f3ph</bpmn:incoming>
       <bpmn:outgoing>Flow_0zph58v</bpmn:outgoing>
     </bpmn:userTask>
