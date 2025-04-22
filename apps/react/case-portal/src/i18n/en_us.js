@@ -12,7 +12,7 @@ const defs = {
     home: 'Dashboard',
     case: 'Cases',
     task: 'Tasks',
-    workspace: 'Worlspace',
+    workspace: 'Workspace',
     record: 'Records',
     system: 'System',
     settings: 'Settings',
