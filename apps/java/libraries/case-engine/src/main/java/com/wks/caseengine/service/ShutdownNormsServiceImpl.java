@@ -49,11 +49,12 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			// Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			if (vertical.getName().equalsIgnoreCase("PE")) {
-				objList = getShutdownNorms(year, plant.getId(), "vwScrnPEShutdownNorms");
-			} else if (vertical.getName().equalsIgnoreCase("MEG")) {
+			if (vertical.getName().equalsIgnoreCase("MEG")) {
 				objList = getShutdownNorms(year, plant.getId(), "vwScrnShutdownNorms");
-			}
+			}else {
+				String viewName="vwScrn"+vertical.getName()+"ShutdownNorms";
+				objList = getShutdownNorms(year, plant.getId(), viewName);
+			} 
 			// List<Object[]> objList = shutdownNormsRepository.findByYearAndPlantFkId(year,
 			// UUID.fromString(plantId));
 			System.out.println("obj.size(): " + objList.size());
