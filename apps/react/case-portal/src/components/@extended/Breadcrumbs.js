@@ -42,29 +42,36 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
       '5CC84A47-9717-4142-8E66-B60EBE0CF703': {
         'product-demand': 'CTS Engineer',
         'product-mcu-val': 'Plant Manager',
-        'shutdown-plan': 'Plant Manager',
-        'slowdown-plan': 'Plant Manager',
-        'maintenance-details': 'Plant Manager',
-        'production-norms': 'CTS Engineer',
+
+        'shutdown-plan': 'Maintenance Engineer',
+        'slowdown-plan': 'Maintenance Engineer',
+        'maintenance-details': 'Maintenance Engineer',
+
+        'production-norms': 'Plant Manager',
         'catalyst-selectivity': 'CTS Engineer',
         'normal-op-norms': 'Plant Manager',
-        'shutdown-norms': 'Plant Manager',
-        'slowdown-norms': 'Plant Manager',
+        'shutdown-norms': 'Maintenance Engineer',
+        'slowdown-norms': 'Maintenance Engineer',
         'consumption-norms': 'Plant Manager',
         'feed-stock': 'Plant Manager',
+        workflow: 'Plant Manager',
       },
       'BF5D7508-96EB-496E-BEB0-4828CB1A1B11': {
         'product-demand': 'CTS Engineer',
         'product-mcu-val': 'Plant Manager',
-        'shutdown-plan': 'Plant Manager',
-        'slowdown-plan': 'Plant Manager',
-        'maintenance-details': 'Plant Manager',
-        'production-norms': 'CTS Engineer',
+
+        'shutdown-plan': 'Maintenance Engineer',
+        'slowdown-plan': 'Maintenance Engineer',
+        'maintenance-details': 'Maintenance Engineer',
+
+        'production-norms': 'Plant Manager',
         'catalyst-selectivity': 'CTS Engineer',
         'normal-op-norms': 'Plant Manager',
-        'shutdown-norms': 'Plant Manager',
-        'slowdown-norms': 'Plant Manager',
+        'shutdown-norms': 'Maintenance Engineer',
+        'slowdown-norms': 'Maintenance Engineer',
         'consumption-norms': 'Plant Manager',
+
+        workflow: 'Plant Manager',
       },
     }
 
@@ -135,13 +142,26 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   const [item, setItem] = useState()
 
   useEffect(() => {
-    var title = item?.title
+    let title = item?.title
+
+    const verticalName = JSON.parse(
+      localStorage.getItem('selectedVertical'),
+    )?.name?.toLowerCase()
+
+    if (title === 'Business Demand') {
+      if (verticalName === 'meg') {
+        title = 'Business Demand (Percentage)'
+      } else if (verticalName === 'pe') {
+        title = 'Business Demand (Absolute)'
+      }
+    }
+
     dispatch(
       setScreenTitle({
         title,
       }),
     )
-  }, [item])
+  }, [item, vertName])
 
   // set active item state
   const getCollapse = (menu) => {

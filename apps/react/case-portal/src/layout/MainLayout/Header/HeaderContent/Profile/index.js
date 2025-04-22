@@ -83,7 +83,7 @@ const Profile = ({ keycloak }) => {
           p: 0.25,
           bgcolor: open ? iconBackColorOpen : 'transparent',
           borderRadius: 1,
-          '&:hover': { bgcolor: '#3f93dc' },
+          '&:hover': { bgcolor: '#0100cb' },
         }}
         aria-label='open profile'
         ref={anchorRef}

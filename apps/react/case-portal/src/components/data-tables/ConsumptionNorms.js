@@ -20,19 +20,8 @@ import Typography from '@mui/material/Typography'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Box } from '@mui/material'
 import { Button } from '@mui/material'
-
-const jioColors = {
-  primaryBlue: '#387ec3',
-  // primaryBlue: 'red',
-  accentRed: '#E31C3D',
-  background: '#FFFFFF',
-  headerBg: '#0F3CC9',
-  rowEven: '#FFFFFF',
-  rowOdd: '#E8F1FF',
-  textPrimary: '#2D2D2D',
-  border: '#D0D0D0',
-  darkTransparentBlue: 'rgba(127, 147, 206, 0.8)',
-}
+import './data-grid-css.css'
+import './extra-css.css'
 
 const NormalOpNormsScreen = () => {
   const keycloak = useSession()
@@ -655,32 +644,7 @@ const NormalOpNormsScreen = () => {
         }}
       />
 
-      <Button
-        variant='contained'
-        sx={{
-          backgroundColor: jioColors.primaryBlue,
-          color: jioColors.background,
-          borderRadius: 1,
-          padding: '8px 24px',
-          textTransform: 'none',
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          minWidth: 120,
-          '&:hover': {
-            backgroundColor: '#143B6F',
-            boxShadow: 'none',
-          },
-          '&.Mui-disabled': {
-            backgroundColor: jioColors.primaryBlue,
-            color: jioColors.background,
-            opacity: 0.7,
-          },
-        }}
-        // onClick={saveModalOpen}
-        // disabled={isButtonDisabled}
-        // loading={loading} // Use the loading prop to trigger loading state
-        // loadingposition='start' // Use loadingPosition to control where the spinner appears
-      >
+      <Button variant='contained' className='btn-save'>
         Save
       </Button>
     </div>

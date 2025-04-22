@@ -1,0 +1,47 @@
+.btn-save {
+  background-color: #0100cb;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 8px 24px;
+  text-transform: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-width: 120px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-save:hover {
+  background-color: #143b6f;
+  box-shadow: none;
+}
+
+.btn-save:disabled {
+  background-color: #0100cb;
+  color: #ffffff;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.action-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.action-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.unit-chip {
+  border-radius: 4px;
+  padding: 8px 24px;
+  text-transform: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  height: 40px;
+}

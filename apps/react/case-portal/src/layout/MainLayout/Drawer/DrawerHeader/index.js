@@ -20,4 +20,8 @@ DrawerHeader.propTypes = {
   open: PropTypes.bool,
 }
 
+DrawerHeader.defaultProps = {
+  open: false,
+}
+
 export default DrawerHeader

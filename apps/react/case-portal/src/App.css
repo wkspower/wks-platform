@@ -3,7 +3,7 @@ legend {
 }
 
 header {
-  background-color: #3f93dc !important ; /* Example: Light gray background */
+  background-color: #0100cb !important ; /* Example: Light gray background */
   /* background-color: #0f3cc9 !important ; Example: Light gray background */
 }
 /* .css-1ynvhpv-MuiButtonBase-root-MuiListItemButton-root:hover,
@@ -13,33 +13,33 @@ header {
 } */
 
 .css-h404g3-MuiButtonBase-root-MuiListItemButton-root.Mui-selected:hover {
-  background-color: #3f93dc; /* Example: Light gray background */
+  background-color: #0100cb; /* Example: Light gray background */
   /* color: white; */
 }
 .css-5zfvd5-MuiButtonBase-root-MuiListItemButton-root:hover {
-  background-color: #3f93dc; /* Example: Light gray background */
+  background-color: #0100cb; /* Example: Light gray background */
   color: white !important;
 }
 
 .css-1ynvhpv-MuiButtonBase-root-MuiListItemButton-root.Mui-selected {
-  background-color: #3f93dc; /* Example: Light gray background */
+  background-color: #0100cb; /* Example: Light gray background */
   /* color: white; */
 }
 
 .css-1ynvhpv-MuiButtonBase-root-MuiListItemButton-root.Mui-selected:hover {
-  background-color: #3f93dc; /* Example: Light gray background */
+  background-color: #0100cb; /* Example: Light gray background */
   /* color: white; */
 }
 .css-qztmtg-MuiTypography-root:hover {
   color: white;
-  background-color: #3f93dc;
+  background-color: #0100cb;
 }
 
 .css-hd56dl-MuiTypography-root {
   color: #ffffff; /* Example: Light gray background */
 }
 .css-h404g3-MuiButtonBase-root-MuiListItemButton-root.Mui-selected {
-  background-color: #3f93dc; /* Example: Light gray background */
+  background-color: #0100cb; /* Example: Light gray background */
   /* background-color: #0f3cc9; Example: Light gray background */
   color: white;
 }
@@ -83,4 +83,11 @@ header {
 
 .css-1imnto4-MuiPaper-root-MuiCard-root {
   margin-bottom: 0px;
+}
+
+:root {
+  --jio-border: #dae0ef;
+  --jio-background: #ffffff;
+  --jio-row-odd: #f9f9f9;
+  --jio-row-even: #ffffff;
 }

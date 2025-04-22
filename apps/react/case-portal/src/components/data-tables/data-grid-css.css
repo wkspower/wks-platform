@@ -1,0 +1,204 @@
+/* DataGrid Styles - apply .custom-data-grid to your DataGrid component */
+/* Define these CSS variables in your :root or a parent scope:
+   --jio-border, --jio-background, --jio-row-odd, --jio-row-even */
+
+.custom-data-grid {
+  border-radius: 0;
+  border: 1px solid #d0d0d0;
+  background-color: #ffffff;
+  font-size: 0.8rem;
+}
+
+.custom-data-grid .MuiDataGrid-columnHeaderGroup {
+  justify-content: center !important;
+}
+
+.custom-data-grid
+  .MuiDataGrid-columnHeaderGroup
+  .MuiDataGrid-columnHeaderTitle {
+  text-align: center;
+  width: 100%;
+}
+
+.custom-data-grid
+  .MuiDataGrid-columnHeaderTitleContainer:last-child:after
+  .MuiDataGrid-columnHeaderTitleContainer:after {
+  border-right: none !important;
+}
+
+.custom-data-grid .MuiDataGrid-cell:last-child:after {
+  border-right: none;
+}
+
+.custom-data-grid .MuiDataGrid-columnHeader:last-child:after {
+  border-right: none;
+}
+
+.custom-data-grid
+  .MuiDataGrid-columnHeader:last-child
+  .MuiDataGrid-columnHeaderTitleContainer:after {
+  border-right: none;
+}
+
+.custom-data-grid
+  .MuiDataGrid-columnHeader:last-child
+  .MuiDataGrid-columnHeaderTitleContainer {
+  border-right: none;
+}
+
+.custom-data-grid .MuiDataGrid-cell.last-column,
+.custom-data-grid .MuiDataGrid-columnHeaderTitleContainer.last-column,
+.custom-data-grid .MuiDataGrid-columnHeader.last-column {
+  border-right: none;
+}
+
+.custom-data-grid .MuiDataGrid-root .MuiDataGrid-cell {
+  font-size: 0.8rem;
+  color: #a9a9a9;
+}
+
+.custom-data-grid .MuiDataGrid-root {
+  border-radius: 0;
+}
+
+.custom-data-grid .MuiDataGrid-footerContainer {
+  display: none;
+}
+
+.custom-data-grid .MuiDataGrid-cell,
+.custom-data-grid
+  .MuiDataGrid-columnHeaders
+  .MuiDataGrid-columnHeaderTitleContainer {
+  border-right: none;
+  position: relative;
+}
+
+.custom-data-grid .MuiDataGrid-cell:after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  border-right: 1px solid #d0d0d0;
+}
+
+.custom-data-grid .MuiDataGrid-row.no-border-row .MuiDataGrid-cell:after {
+  background-color: '#E8F1FF';
+  border-right: none !important;
+}
+
+.custom-data-grid .MuiDataGrid-columnHeaders:after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  border-right: 1px solid #d0d0d0;
+}
+
+.custom-data-grid .MuiDataGrid-columnHeaderTitleContainer:after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  border-right: 1px solid #d0d0d0;
+}
+
+.custom-data-grid .MuiDataGrid-columnHeaders {
+  background-color: #fafafc;
+  color: #3e4e75;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-bottom: 2px solid #dae0ef;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.custom-data-grid .MuiDataGrid-columnHeader {
+  min-height: 45px;
+  max-height: 45px;
+  line-height: 45px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.custom-data-grid .MuiDataGrid-cell {
+  border-bottom: 1px solid #dae0ef;
+  color: #3e4e75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.custom-data-grid .MuiDataGrid-row {
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.custom-data-grid .even-row {
+  background-color: #ffffff;
+}
+
+.custom-data-grid .no-border-row {
+  background-color: #e8f1ff;
+}
+
+.custom-data-grid .odd-row {
+  opacity: 0.7;
+  pointer-events: none;
+  background-color: rgba(100, 100, 100, 0.2);
+  color: rgba(0, 0, 0, 0.5);
+  filter: grayscale(10%);
+  cursor: not-allowed;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.custom-data-grid .MuiDataGrid-toolbarContainer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-right: 16px;
+  align-self: flex-end;
+}
+
+.custom-data-grid .MuiDataGrid-columnHeaderTitle {
+  font-weight: bold;
+}
+
+.custom-data-grid .disabled-cell {
+  background-color: rgba(233, 233, 233, 0.3);
+  border-radius: 0;
+  border: 1px solid #d0d0d0;
+}
+
+.custom-data-grid .disabled-cell1 {
+  opacity: 0.2;
+  filter: grayscale(1);
+  background-color: rgba(235, 224, 224, 0.3);
+}
+
+.custom-data-grid .disabled-header {
+  color: #a9a9a9 !important;
+  opacity: 0.7;
+}
+
+.custom-data-grid .MuiInputBase-input,
+.custom-data-grid input,
+.custom-data-grid textarea,
+.custom-data-grid .MuiDataGrid-editInputCell,
+.custom-data-grid .MuiDataGrid-editCell {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+.custom-data-grid .MuiDataGrid-root,
+.custom-data-grid .MuiDataGrid-cell,
+.custom-data-grid .MuiDataGrid-columnHeaders,
+.custom-data-grid .MuiDataGrid-columnHeader,
+.custom-data-grid .MuiDataGrid-columnHeaderTitleContainer {
+  font-family: 'Roboto', sans-serif !important;
+}

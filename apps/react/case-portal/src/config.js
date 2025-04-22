@@ -1,14 +1,22 @@
 const config = {
   basename: '/',
   defaultPath: '/production-norms-plan/business-demand',
-  fontFamily: "'Public Sans', sans-serif",
+  fontFamily: "'SF-Pro-Text-Regular', Roboto ,Sans-Serif ",
   i18n: 'en',
   miniDrawer: false,
   container: true,
   mode: 'light',
   presetColor: 'default',
   themeDirection: 'ltr',
+  fontColor: 'red',
 }
+
+// font-family: '', '',  !important;
+//     overflow-y: scroll;
+//     overflow-x: auto;
+//     scroll-behavior: smooth;
+//     font-size: 14px !important;
+//     font-weight: 400;
 
 export default config
 export const drawerWidth = 280

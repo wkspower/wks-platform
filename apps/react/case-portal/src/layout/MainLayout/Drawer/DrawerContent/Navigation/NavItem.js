@@ -86,28 +86,28 @@ const NavItem = ({ item, level }) => {
           py: !drawerOpen && level === 1 ? 1.25 : 1,
           ...(drawerOpen && {
             '&:hover': {
-              bgcolor: '#3f93dc',
+              bgcolor: '#0100cb',
               color: 'white',
             },
             '&.Mui-selected': {
-              bgcolor: '#3f93dc',
+              bgcolor: '#0100cb',
               borderRight: `2px solid ${theme.palette.primary.main}`,
               color: 'white',
               borderRadius: 0,
               '&:hover': {
-                bgcolor: '#3f93dc',
+                bgcolor: '#0100cb',
                 color: 'white',
               },
             },
           }),
           ...(!drawerOpen && {
             '&:hover': {
-              bgcolor: '#3f93dc',
+              bgcolor: '#0100cb',
             },
             '&.Mui-selected': {
-              bgcolor: '#3f93dc',
+              bgcolor: '#0100cb',
               '&:hover': {
-                bgcolor: '#3f93dc',
+                bgcolor: '#0100cb',
               },
             },
           }),
@@ -130,9 +130,9 @@ const NavItem = ({ item, level }) => {
               }),
               ...(!drawerOpen &&
                 isSelected && {
-                  bgcolor: '#3f93dc',
+                  bgcolor: '#0100cb',
                   '&:hover': {
-                    bgcolor: '#3f93dc',
+                    bgcolor: '#0100cb',
                   },
                 }),
             }}
@@ -149,7 +149,7 @@ const NavItem = ({ item, level }) => {
                   color: isSelected ? 'white' : textColor,
                   '&:hover': {
                     color: 'white',
-                    bgcolor: '#3f93dc',
+                    bgcolor: '#0100cb',
                   },
                 }}
               >

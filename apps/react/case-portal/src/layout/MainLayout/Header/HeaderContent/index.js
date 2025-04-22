@@ -20,6 +20,7 @@ import Search from './Search'
 import Profile from './Profile/index'
 import MobileSection from './MobileSection'
 
+// Utility to parse the Keycloak ?allowed? JSON
 function parseAllowed(raw) {
   const map = {}
   raw.forEach((vObj) => {
@@ -36,6 +37,7 @@ function parseAllowed(raw) {
 export default function HeaderContent({ keycloak }) {
   const dispatch = useDispatch()
   const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
+  const { drawerOpen } = useSelector((state) => state.menu) // Get drawer state
 
   // --- 1. Year logic state
   const [aopYears, setAopYears] = useState([])
@@ -43,7 +45,7 @@ export default function HeaderContent({ keycloak }) {
 
   // --- 2. screenTitleName from Redux
   const screenTitle = useSelector((s) => s.dataGridStore.screenTitle)
-  const screenTitleName = screenTitle?.title || 'Honeywell Digital AOP'
+  const screenTitleName = screenTitle?.title || 'Digital AOP'
 
   // allowed/full data
   const [allowedMap, setAllowedMap] = useState({})
@@ -266,13 +268,15 @@ export default function HeaderContent({ keycloak }) {
   return (
     <>
       <Box sx={{ ml: 3, mt: 1 }}>
-        <Typography
-          variant='body1'
-          color='white'
-          sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: '1rem' }}
-        >
-          {screenTitleName}
-        </Typography>
+        {!drawerOpen && (
+          <Typography
+            variant='body1'
+            color='white'
+            sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: '1rem' }}
+          >
+            {screenTitleName}
+          </Typography>
+        )}
       </Box>
 
       {matchesXs ? <Search /> : <Box sx={{ width: '100%', ml: 1 }} />}

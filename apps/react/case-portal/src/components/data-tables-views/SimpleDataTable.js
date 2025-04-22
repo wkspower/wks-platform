@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
+import '../data-tables/data-grid-css.css'
+import '../data-tables/extra-css.css'
 
 const SimpleDataTable = () => {
   const keycloak = useSession()
@@ -20,18 +22,6 @@ const SimpleDataTable = () => {
   const [loading, setLoading] = useState(false)
 
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
-
-  const jioColors = {
-    primaryBlue: '#387ec3',
-    accentRed: '#E31C3D',
-    background: '#FFFFFF',
-    headerBg: '#0F3CC9',
-    rowEven: '#FFFFFF',
-    rowOdd: '#E8F1FF',
-    textPrimary: '#2D2D2D',
-    border: '#D0D0D0',
-    darkTransparentBlue: 'rgba(127, 147, 206, 0.8)',
-  }
 
   const fetchData = async () => {
     try {
@@ -159,6 +149,7 @@ const SimpleDataTable = () => {
 
       <DataGrid
         rows={rows || []}
+        className='custom-data-grid'
         columns={productionColumns.map((col) => ({
           ...col,
           filterable: false,
@@ -195,152 +186,6 @@ const SimpleDataTable = () => {
             : params.indexRelativeToCurrentPage % 2 === 0
               ? 'even-row'
               : 'even-row'
-        }}
-        sx={{
-          borderRadius: '0px',
-          border: `1px solid ${jioColors.border}`,
-          backgroundColor: jioColors.background,
-          fontSize: '0.8rem',
-          ' & .MuiDataGrid-columnHeaderTitleContainer:last-child:after .MuiDataGrid-columnHeaderTitleContainer:after':
-            {
-              bordeRight: 'none !important',
-            },
-
-          '& .MuiDataGrid-cell:last-child:after': {
-            borderRight: 'none',
-          },
-          '& .MuiDataGrid-columnHeader:last-child:after': {
-            borderRight: 'none',
-          },
-          '& .MuiDataGrid-columnHeader:last-child .MuiDataGrid-columnHeaderTitleContainer:after':
-            {
-              borderRight: 'none',
-            },
-          // Added direct rule for the title container without the pseudo-element:
-          '& .MuiDataGrid-columnHeader:last-child .MuiDataGrid-columnHeaderTitleContainer':
-            {
-              borderRight: 'none',
-            },
-          '& .MuiDataGrid-cell.last-column, & .MuiDataGrid-columnHeaderTitleContainer.last-column & .MuiDataGrid-columnHeader.last-column':
-            {
-              borderRight: 'none',
-            },
-
-          // borderRight: `1px solid ${jioColors.border}`,
-          '& .MuiDataGrid-root .MuiDataGrid-cell': {
-            fontSize: '0.8rem',
-            color: '#A9A9A9',
-          },
-          '& .MuiDataGrid-root': {
-            borderRadius: '0px',
-          },
-          '& .MuiDataGrid-footerContainer': {
-            display: 'none',
-          },
-          // Remove the direct right border from cells and headers
-          '& .MuiDataGrid-cell, & .MuiDataGrid-columnHeaders & .MuiDataGrid-columnHeaderTitleContainer':
-            {
-              borderRight: 'none',
-              position: 'relative',
-            },
-          // Apply a pseudo-element for a short right border on cells
-          '& .MuiDataGrid-cell:after': {
-            content: '""',
-            position: 'absolute',
-            right: 0,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            height: '60%',
-            borderRight: `1px solid ${jioColors.border}`,
-          },
-          //Do not remove this prop (for Grouped row it can be usefull !!!!!)
-          '& .MuiDataGrid-row.no-border-row .MuiDataGrid-cell:after': {
-            backgroundColor: jioColors.rowOdd,
-            borderRight: 'none !important',
-          },
-
-          // Apply a similar pseudo-element for header cells
-          '& .MuiDataGrid-columnHeaders:after': {
-            content: '""',
-            position: 'absolute',
-            right: 0,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            height: '60%', // Adjust as needed
-            borderRight: `1px solid ${jioColors.border}`,
-          },
-          '& .MuiDataGrid-columnHeaderTitleContainer:after': {
-            content: '""',
-            position: 'absolute',
-            right: 0,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            height: '60%', // Adjust as needed
-            borderRight: `1px solid ${jioColors.border}`,
-          },
-
-          '& .MuiDataGrid-cell': {
-            // borderRight: `1px solid ${jioColors.border}`,
-            borderBottom: `1px solid ${'#DAE0EF'}`,
-            color: '#3E4E75',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            fontSize: '0.8rem',
-            cursor: 'pointer',
-          },
-          '& .MuiDataGrid-row': {
-            borderBottom: `1px solid ${jioColors.border}`,
-          },
-          '& .even-row': {
-            backgroundColor: jioColors.rowEven,
-          },
-          '& .no-border-row': {
-            backgroundColor: jioColors.rowOdd,
-          },
-
-          '& .odd-row': {
-            backgroundColor: jioColors.rowOdd,
-          },
-          '& .MuiDataGrid-toolbarContainer': {
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: 1,
-            paddingRight: 2,
-            alignSelf: 'flex-end',
-          },
-
-          '& .disabled-cell': {
-            opacity: 0.7, // Reduce opacity for a faded look
-          },
-          '& .disabled-header': {
-            color: '#A9A9A9 !important', // Fade the header text color
-            opacity: 0.7, // Optionally fade the header opacity as well
-          },
-
-          '& .MuiDataGrid-columnHeaders': {
-            backgroundColor: '#FAFAFC',
-            color: '#3E4E75',
-            fontSize: '0.8rem',
-            fontWeight: 'bold',
-            borderBottom: `2px solid #DAE0EF`,
-            borderTopLeftRadius: '0px',
-            borderTopRightRadius: '0px',
-            minHeight: '45px',
-            maxHeight: '45px',
-          },
-          '& .MuiDataGrid-columnHeader': {
-            minHeight: '45px',
-            maxHeight: '45px',
-            lineHeight: '45px', // ensure text is vertically aligned
-            paddingTop: '0px',
-            paddingBottom: '0px',
-          },
-          '& .MuiDataGrid-columnHeaderTitle': {
-            lineHeight: '45px', // aligns text better
-            fontSize: '0.75rem',
-            fontWeight: 'bold', // Ensure column titles are bold
-          },
         }}
       />
     </Box>

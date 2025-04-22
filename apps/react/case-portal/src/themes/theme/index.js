@@ -4,7 +4,7 @@ const Theme = (colors) => {
   const { red, gold, cyan, green, grey } = colors
 
   const blue = [
-    '#3f93dc',
+    '#0100cb',
     // '#e8faff',
     '#bfefff',
     '#96e1ff',
