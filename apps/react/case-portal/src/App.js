@@ -4,7 +4,7 @@ import ThemeCustomization from './themes'
 import { SessionStoreProvider } from './SessionStoreContext'
 // import {
 //   CaseService,
-  //  RecordService
+//   //  RecordService
 // } from 'services'
 import menuItemsDefs from './menu'
 import { RegisterInjectUserSession, RegisteOptions } from './plugins'
@@ -75,7 +75,7 @@ const App = () => {
     if (keycloak && verticalChange) {
       buildMenuItems(keycloak)
     }
-  //console.log(verticalChange)
+    //console.log(verticalChange)
   }, [verticalChange, keycloak])
 
   async function buildMenuItems(keycloak) {
@@ -83,7 +83,7 @@ const App = () => {
     const verticals = keycloak?.idTokenParsed?.verticals
     const selectedVertical = localStorage.getItem('verticalId')?.toLowerCase()
 
-  //console.log('keycloak', verticals)
+    //console.log('keycloak', verticals)
     if (verticals) {
       try {
         allowedLinked = JSON.parse(verticals)
@@ -166,10 +166,10 @@ const App = () => {
     //   })
     // })
 
-    // Fetch Case Definitions and update menu
+    // // Fetch Case Definitions and update menu
     // const caseDefinitions = await CaseService.getCaseDefinitions(keycloak)
     // setCasesDefinitions(caseDefinitions)
-    // console.log(caseDefinitions)
+    // // console.log(caseDefinitions)
     // caseDefinitions.forEach((element) => {
     //   const caseListMenu = menu.items[1].children.find(
     //     (menu) => menu.id === 'case-list',
@@ -186,22 +186,18 @@ const App = () => {
     // console.log(menu)
     // Safely determine if the user is a manager.
     // If keycloak.hasRealmRole is not a function, default to false.
+    //toggle
     // if (!accountStore.isManagerUser(keycloak)) {
+    //   delete menu.items[3]
+    // }
     const isManagerUser =
       typeof keycloak.hasRealmRole === 'function'
         ? keycloak.hasRealmRole('manager')
         : false
+
     if (!isManagerUser) {
       delete menu.items[3]
     }
-    // const isManagerUser =
-    //   typeof keycloak.hasRealmRole === 'function'
-    //     ? keycloak.hasRealmRole('manager')
-    //     : false
-
-    // if (!isManagerUser) {
-    //   delete menu.items[3]
-    // }
 
     return setMenu(menu)
   }

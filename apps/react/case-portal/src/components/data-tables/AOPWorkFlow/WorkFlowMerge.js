@@ -90,17 +90,17 @@ const WorkFlowMerge = () => {
   //   },
   // ]
 
-  const columnGroupingModel = [
-    {
-      groupId: 'annualAOP',
-      headerName: 'Annual AOP Cost',
-      children: [
-        { field: 'fy202425AOP' },
-        { field: 'fy202425Actual' },
-        { field: 'fy202526AOP' },
-      ],
-    },
-  ]
+  // const columnGroupingModel = [
+  //   {
+  //     groupId: 'annualAOP',
+  //     headerName: 'Annual AOP Cost',
+  //     children: [
+  //       { field: 'fy202425AOP' },
+  //       { field: 'fy202425Actual' },
+  //       { field: 'fy202526AOP' },
+  //     ],
+  //   },
+  // ]
 
   const fetchData = async () => {
     setLoading(true)
@@ -128,19 +128,19 @@ const WorkFlowMerge = () => {
           headerName: header,
           minWidth: idx === 0 ? 300 : 150,
           // Optional: center headers except the first
-          align: idx === 0 ? 'left' : 'center',
-          headerAlign: idx === 0 ? 'left' : 'center',
+          // align: idx === 0 ? 'left' : 'center',
+          // headerAlign: idx === 0 ? 'left' : 'center',
           // Optional: custom header renderer for the first column
           ...(idx === 0 && {
             renderHeader: (params) => (
               <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '100%',
-                  height: '100%',
-                }}
+              // style={{
+              //   display: 'flex',
+              //   alignItems: 'center',
+              //   justifyContent: 'center',
+              //   width: '100%',
+              //   height: '100%',
+              // }}
               >
                 {params.colDef.headerName}
               </div>
@@ -545,15 +545,12 @@ const WorkFlowMerge = () => {
         rows={rows}
         loading={loading}
         setRows={setRows}
-        columnGroupingModel={columnGroupingModel}
+        // columnGroupingModel={columnGroupingModel}
         className='jio-data-grid'
         permissions={{
           customHeight: defaultCustomHeight,
         }}
       />
-      {(keycloak?.tokenParsed?.realm_access?.roles ?? []).includes(
-        'plant_manager',
-      ) && (
         <Button
           variant='contained'
           color='primary'
@@ -573,7 +570,6 @@ const WorkFlowMerge = () => {
         >
           {isCreatingCase ? 'Submitting…' : 'Submit for Approval'}
         </Button>
-      )}
       {/* <Button
         variant='contained'
         color='primary'

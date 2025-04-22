@@ -242,6 +242,26 @@ export default function HeaderContent({ keycloak }) {
       }),
     )
   }, [selectedVertical, verticals, dispatch])
+  const handleSiteChange = (e) => {
+    const newSiteId = e.target.value
+    setSelectedSite(newSiteId)
+    const site = sites.find((s) => s.id === newSiteId)
+    if (site) {
+      localStorage.setItem(
+        'selectedSite',
+        JSON.stringify({ id: site.id, name: site.name }),
+      )
+      localStorage.setItem('selectedSiteId', site.id)
+      setSelectedPlant('')
+      dispatch(
+        setSitePlantChange({
+          selectedSite: site.name,
+          selectedPlant: '',
+          sitePlantChange: true,
+        }),
+      )
+    }
+  }
 
   return (
     <>
@@ -306,7 +326,7 @@ export default function HeaderContent({ keycloak }) {
           <FormControl sx={{ minWidth: 150 }}>
             <Select
               value={selectedSite}
-              onChange={(e) => setSelectedSite(e.target.value)}
+              onChange={handleSiteChange}
               disabled={!sites.length}
               sx={{ color: 'white' }}
             >
