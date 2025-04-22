@@ -12,6 +12,7 @@ const defs = {
     home: 'Dashboard',
     case: 'Casos',
     task: 'Tarefas',
+    workspace: 'Area de Trabalho',
     record: 'Registros',
     system: 'Sistema',
     settings: 'Configurações',
