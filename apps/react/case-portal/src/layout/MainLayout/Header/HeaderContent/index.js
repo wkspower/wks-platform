@@ -20,7 +20,6 @@ import Search from './Search'
 import Profile from './Profile/index'
 import MobileSection from './MobileSection'
 
-// Utility to parse the Keycloak “allowed” JSON
 function parseAllowed(raw) {
   const map = {}
   raw.forEach((vObj) => {

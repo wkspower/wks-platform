@@ -186,7 +186,7 @@ const SimpleDataTable = () => {
           toolbar: { setRows },
           loadingOverlay: {
             variant: 'linear-progress',
-            noRowsVariant: 'skeleton',
+            norowsvariant: 'skeleton',
           },
         }}
         getRowClassName={(params) => {

@@ -1879,7 +1879,7 @@ async function completeTask(keycloak, taskId, attributes) {
   // 3. 204 = success (no JSON body)
   if (resp.status === 204) return true
 
-  // 4. Any other non‑OK status → read text & throw
+  // 4. Any other non-OK status ? read text & throw
   if (!resp.ok) {
     const text = await resp.text().catch(() => '')
     throw new Error(`Server error ${resp.status}: ${text}`.trim())

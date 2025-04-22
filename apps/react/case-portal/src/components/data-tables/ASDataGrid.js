@@ -707,7 +707,7 @@ const DataGridTable = ({
             toolbar: { setRows, GridToolbar },
             loadingOverlay: {
               variant: 'linear-progress',
-              noRowsVariant: 'skeleton',
+              norowsvariant: 'skeleton',
             },
           }}
           getRowClassName={(params) => {
