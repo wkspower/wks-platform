@@ -42,4 +42,8 @@ public class CaseComment {
 
 	private String caseId;
 
+	private String role;
+
+	private String status;
+
 }

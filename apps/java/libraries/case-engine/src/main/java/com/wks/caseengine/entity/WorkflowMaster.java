@@ -7,43 +7,28 @@ import java.util.UUID;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
-@Table(name = "Workflow")
+@Table(name = "WorkflowMaster")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Workflow {
+public class WorkflowMaster {
     
      @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "Id", nullable = false, updatable = false)
     private UUID id;
-    
-       
-    @Column(name = "Year", length = 9, nullable = false)
-    private String year;
+
+    @Column(name = "WorkflowId",  nullable = false)
+    private String workflowId;
 
     @Column(name = "case_Def_Id",  nullable = false)
     private String caseDefId;
 
-    @Column(name = "case_Id",  nullable = false)
-    private String caseId;
-
-    @Column(name = "ProcessInstanceId",  nullable = false)
-    private String processInstanceId;
-    
-    @Column(name = "Plant_FK_Id", nullable = false)
-    private UUID plantFKId;
-    
-   
-    @Column(name="Site_FK_Id")
-    private UUID siteFKId;
-    
     @Column(name="Vertical_FK_Id")
     private UUID verticalFKId;
     
-    @Column(name="isDeleted")
-    private Boolean isDeleted;
+   
 }

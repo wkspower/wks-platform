@@ -1,5 +1,6 @@
 package com.wks.caseengine.dto;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.context.annotation.Configuration;
@@ -15,18 +16,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Data
-public class WorkflowDTO {
+public class WorkflowPageDTO {
 
-	private String id;
+	List<WorkflowDTO> workflowList;
 
-	private String year;
-	private String plantFkId;
-	private String caseDefId;
-	private String caseId;
-	private String plantId;
-	private String siteFKId;
-	private String verticalFKId;
-	private Boolean isDeleted;
-	private String processInstanceId;
+    WorkflowMasterDTO workflowMasterDTO;
 	
 }

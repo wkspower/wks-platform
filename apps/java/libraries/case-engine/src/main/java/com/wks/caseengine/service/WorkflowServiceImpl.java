@@ -8,9 +8,16 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.IntStream;
+
 import com.wks.caseengine.entity.BusinessDemand;
 import com.wks.caseengine.entity.Workflow;
+import com.wks.caseengine.entity.WorkflowMaster;
+import com.wks.caseengine.entity.WorkflowStepsMaster;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.process.instance.ProcessInstanceService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import java.lang.reflect.Field;
@@ -21,13 +28,27 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
+
+import com.wks.bpm.engine.model.spi.ActivityInstance;
+import com.wks.bpm.engine.model.spi.Task;
+import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.service.CaseInstanceService;
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
 import com.wks.caseengine.dto.WorkflowDTO;
+import com.wks.caseengine.dto.WorkflowMasterDTO;
+import com.wks.caseengine.dto.WorkflowPageDTO;
+import com.wks.caseengine.dto.WorkflowStepsMasterDTO;
+import com.wks.caseengine.dto.WorkflowSubmitDTO;
 import com.wks.caseengine.dto.WorkflowYearDTO;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.WorkflowMasterRepository;
 import com.wks.caseengine.repository.WorkflowRepository;
+import com.wks.caseengine.repository.WorkflowStepsMasterRepository;
+import com.wks.caseengine.tasks.TaskService;
 
 @Service
 public class WorkflowServiceImpl implements WorkflowService {
@@ -35,16 +56,36 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@Autowired
 	private WorkflowRepository workflowRepository;
 
+	@Autowired
+	private CaseInstanceService caseInstanceService;
+
+
+	@Autowired
+	private WorkflowMasterRepository workflowMasterRepository;
+
+	@Autowired
+	private WorkflowStepsMasterRepository workflowStepsMasterRepository;
+
+
+
 	@PersistenceContext
 	private EntityManager entityManager;
 	
 	 @Autowired
 	 private DataSource dataSource;
 
+	 @Autowired
+	private ProcessInstanceService processInstanceService;
+
+	@Autowired
+	private TaskService taskService;
+
+
 
 	@Override
-	public List<WorkflowDTO> getCaseId(String year, String plantId, String siteId, String verticalId) {
+	public WorkflowPageDTO getCaseId(String year, String plantId, String siteId, String verticalId) {
 		try {
+			WorkflowPageDTO workflowPageDTO = new WorkflowPageDTO();
 			List<Workflow> list = workflowRepository.findAllByYearAndPlantFKIdAndSiteFKIdAndVerticalFKId(year,
 					UUID.fromString(plantId), UUID.fromString(siteId), UUID.fromString(verticalId));
 
@@ -59,10 +100,60 @@ public class WorkflowServiceImpl implements WorkflowService {
 				dto.setSiteFKId(workflow.getSiteFKId().toString());
 				dto.setYear(workflow.getYear());
 				dto.setIsDeleted(workflow.getIsDeleted());
+				dto.setProcessInstanceId(workflow.getProcessInstanceId());
 				dtoList.add(dto);
-
 			}
-			return dtoList;
+
+         
+			workflowPageDTO.setWorkflowList(dtoList);
+			List<WorkflowMaster>  wmlist =  workflowMasterRepository.findAllByVerticalFKId(UUID.fromString(verticalId));
+
+			if(wmlist.size()>0){
+				WorkflowMasterDTO wmDTO = new WorkflowMasterDTO();
+				wmDTO.setId(wmlist.get(0).getId().toString());
+				wmDTO.setCasedefId(wmlist.get(0).getCaseDefId());
+				wmDTO.setVerticalFKId(wmlist.get(0).getVerticalFKId().toString());
+                wmDTO.setWorkflowId(wmlist.get(0).getWorkflowId());
+
+				List<Object[]>  wsmlist	=workflowStepsMasterRepository.findAllByWorkflowMasterFKId(wmlist.get(0).getId());
+                
+				List<WorkflowStepsMasterDTO> steps = new ArrayList<>();
+				for(Object[] wsm : wsmlist){
+					WorkflowStepsMasterDTO dto = new WorkflowStepsMasterDTO();
+                    dto.setId(wsm[0]!=null?wsm[0].toString():null);
+					dto.setName(wsm[1]!=null?wsm[1].toString():null);
+					dto.setDisplayName(wsm[2]!=null?wsm[2].toString():null);
+					dto.setSequence(wsm[3]!=null?Integer.parseInt(wsm[3].toString()):null);
+					System.out.println("boolean");
+					System.out.println(wsm[4]);
+					dto.setIsRemarksDisabled(wsm[4]!=null?Boolean.parseBoolean(wsm[4].toString()):false);
+					dto.setWorkflowMasterFKId(wsm[5]!=null?wsm[5].toString():null);
+					steps.add(dto);  
+				}
+				if((dtoList==null || dtoList.isEmpty())  ){
+					if(steps.size()>0){
+                        steps.get(0).setStatus("inprogress");
+					}
+				}else{
+                  List<ActivityInstance> actiList = processInstanceService.getActivityInstances(dtoList.get(0).getProcessInstanceId());
+                  if(actiList!=null && actiList.size()>0){
+					String status =actiList.get(0).getActivityId().split("-")[0];
+                    for(WorkflowStepsMasterDTO  dto: steps){
+						if(dto.getName().equalsIgnoreCase(status)){
+							System.out.println("in in progress status"+ status);
+							dto.setStatus("inprogress");
+						}
+					} 
+				    steps = updateStatuses(steps);
+				  }
+				}
+
+				wmDTO.setSteps(steps);
+				workflowPageDTO.setWorkflowMasterDTO(wmDTO);
+			}
+
+			
+			return workflowPageDTO;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid data format", e);
 		} catch (Exception ex) {
@@ -80,7 +171,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 			workFlow.setSiteFKId(UUID.fromString(workflowDTO.getSiteFKId()));
 			workFlow.setVerticalFKId(UUID.fromString(workflowDTO.getVerticalFKId()));
 			workFlow.setYear(workflowDTO.getYear());
+			workFlow.setProcessInstanceId(workflowDTO.getProcessInstanceId());
 			workflowRepository.save(workFlow);
+
 			if (workFlow.getId() != null) {
 				workflowDTO.setId(workFlow.getId().toString());
 			}
@@ -176,5 +269,54 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         return headers;
     }
+
+
+	public List<WorkflowStepsMasterDTO> updateStatuses(List<WorkflowStepsMasterDTO> items) {
+    AtomicBoolean inProgressFound = new AtomicBoolean(false);
+
+    // Looping with index-like logic via stream
+    IntStream.range(0, items.size())
+            .forEach(i -> {
+                WorkflowStepsMasterDTO item = items.get(i);
+                if ("inprogress".equalsIgnoreCase(item.getStatus())) {
+                    inProgressFound.set(true);
+                }
+                if (!inProgressFound.get() && !"completed".equalsIgnoreCase(item.getStatus())) {
+                    item.setStatus("completed");
+                }
+            });
+			return items;
+
+		}
+
+
+
+		@Override
+		public WorkflowDTO submitWorkflow(WorkflowSubmitDTO workflowSubmitDTO) {
+			CaseInstance caseInstance = caseInstanceService.startWithValues(workflowSubmitDTO.getCaseInstance());
+			System.out.println("case created");
+
+			List<Task> tasks = taskService.find(Optional.ofNullable(caseInstance.getBusinessKey()));
+
+			System.out.println("tasks cound");
+			taskService.complete(tasks.get(0).getId(),workflowSubmitDTO.getVariables());
+			System.out.println("tasks completed");
+
+			workflowSubmitDTO.getWorkflowDTO().setProcessInstanceId(tasks.get(0).getProcessInstanceId());
+			return saveWorkFlow(workflowSubmitDTO.getWorkflowDTO());
+
+		}
+
+
+        @Override
+		public void completeTaskWithComment(WorkflowSubmitDTO workflowSubmitDTO){
+
+			taskService.complete(workflowSubmitDTO.getTaskId(),workflowSubmitDTO.getVariables());
+            caseInstanceService.saveComment(workflowSubmitDTO.getWorkflowDTO().getCaseId(), workflowSubmitDTO.getCaseComment());
+            
+
+
+		}
+
 
 }
