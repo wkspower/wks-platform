@@ -8,10 +8,12 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Snackbar from '@mui/material/Snackbar'
-import TablePagination from '@mui/material/TablePagination'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Tooltip from '@mui/material/Tooltip'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import Typography from '@mui/material/Typography'
 import { useSession } from 'SessionStoreContext'
 import MainCard from 'components/MainCard'
 import React, {
@@ -68,6 +70,10 @@ export const CaseList = ({ status, caseDefId }) => {
     hasPrevious: false,
     hasNext: false,
   })
+
+  const [anchorEl, setAnchorEl] = useState(null)
+  const open = Boolean(anchorEl)
+  const pageSizeOptions = [5, 10, 25, 50]
 
   useEffect(() => {
     fetchCases(
@@ -277,101 +283,100 @@ export const CaseList = ({ status, caseDefId }) => {
       })
   }
 
-  function TablePaginationActions(props) {
-    const theme = useTheme()
-    const filter = useContext(PaginationContext)
-    const { onPageChange } = props
-
-    const handleBackButtonClick = (event) => {
-      onPageChange(event, 'back')
-    }
-
-    const handleNextButtonClick = (event) => {
-      onPageChange(event, 'next')
-    }
-
-    const { hasPrevious, hasNext } = filter
-
-    return (
-      <Box sx={{ flexShrink: 0, ml: 2.5 }}>
-        <IconButton
-          onClick={handleBackButtonClick}
-          disabled={!hasPrevious}
-          aria-label='previous page'
-        >
-          {theme.direction === 'rtl' ? (
-            <KeyboardArrowRight />
-          ) : (
-            <KeyboardArrowLeft />
-          )}
-        </IconButton>
-        <IconButton
-          onClick={handleNextButtonClick}
-          disabled={!hasNext}
-          aria-label='next page'
-        >
-          {theme.direction === 'rtl' ? (
-            <KeyboardArrowLeft />
-          ) : (
-            <KeyboardArrowRight />
-          )}
-        </IconButton>
-      </Box>
-    )
+  const handlePageSizeClick = (event) => {
+    setAnchorEl(event.currentTarget)
   }
 
-  const CustomPagination = () => {
+  const handlePageSizeClose = () => {
+    setAnchorEl(null)
+  }
+
+  const handlePageSizeSelect = (pageSize) => {
+    setFetching(true)
+
+    CaseService.filterCase(keycloak, caseDefId, status, { limit: pageSize })
+      .then((resp) => {
+        const { data, paging } = resp
+
+        setCases(data)
+        setFilter({
+          ...filter,
+          limit: pageSize,
+          cursors: paging.cursors,
+          hasPrevious: paging.hasPrevious,
+          hasNext: paging.hasNext,
+        })
+      })
+      .finally(() => {
+        setFetching(false)
+      })
+
+    handlePageSizeClose()
+  }
+
+  const CustomPaginationFooter = () => {
     return (
-      <PaginationContext.Provider value={filter}>
-        <TablePagination
-          component='div'
-          count={-1}
-          page={0}
-          labelRowsPerPage={
-            <div style={{ paddingTop: 15 }}>Rows per page:</div>
-          }
-          rowsPerPage={filter.limit}
-          rowsPerPageOptions={[5, 10, 25, 50]}
-          getItemAriaLabel={() => ''}
-          labelDisplayedRows={() => ''}
-          onPageChange={(e, type) => {
-            const action = {
-              next: handlerNextPage,
-              back: handlerPriorPage,
-            }
-            action[type]()
-          }}
-          onRowsPerPageChange={(e) => {
-            setFetching(true)
+      <Box
+        sx={{
+          padding: '16px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderTop: '1px solid rgba(224, 224, 224, 1)',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography variant='body2' sx={{ mr: 2 }}>
+            Rows per page:
+          </Typography>
+          <Button
+            aria-controls={open ? 'page-size-menu' : undefined}
+            aria-haspopup='true'
+            aria-expanded={open ? 'true' : undefined}
+            onClick={handlePageSizeClick}
+            variant='text'
+            size='small'
+            endIcon={<KeyboardArrowRight />}
+            sx={{ minWidth: '75px' }}
+          >
+            {filter.limit}
+          </Button>
+          <Menu
+            id='page-size-menu'
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handlePageSizeClose}
+            MenuListProps={{
+              'aria-labelledby': 'page-size-button',
+            }}
+          >
+            {pageSizeOptions.map((option) => (
+              <MenuItem
+                key={option}
+                onClick={() => handlePageSizeSelect(option)}
+                selected={filter.limit === option}
+              >
+                {option}
+              </MenuItem>
+            ))}
+          </Menu>
+        </Box>
 
-            CaseService.filterCase(keycloak, caseDefId, status, {
-              limit: e.target.value,
-            })
-              .then((resp) => {
-                const { data, paging } = resp
-
-                setCases(data)
-                setFilter({
-                  ...filter,
-                  limit: e.target.value,
-                  cursors: paging.cursors,
-                  hasPrevious: paging.hasPrevious,
-                  hasNext: paging.hasNext,
-                })
-              })
-              .finally(() => {
-                setFetching(false)
-              })
-          }}
-          SelectProps={{
-            inputProps: {
-              'aria-label': 'rows per page',
-            },
-            native: true,
-          }}
-          ActionsComponent={TablePaginationActions}
-        />
-      </PaginationContext.Provider>
+        <Box>
+          <IconButton
+            onClick={handlerPriorPage}
+            disabled={!filter.hasPrevious || fetching}
+          >
+            <KeyboardArrowLeft />
+          </IconButton>
+          <IconButton
+            onClick={handlerNextPage}
+            disabled={!filter.hasNext || fetching}
+          >
+            <KeyboardArrowRight />
+          </IconButton>
+        </Box>
+      </Box>
     )
   }
 
@@ -423,19 +428,104 @@ export const CaseList = ({ status, caseDefId }) => {
           {view === 'list' && (
             <div>
               <Suspense fallback={<div>Loading...</div>}>
-                <DataGrid
+                <Box
                   sx={{
                     height: 500,
                     width: '100%',
-                    backgroundColor: '#ffffff',
-                    mt: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
                   }}
-                  rows={cases}
-                  columns={makeColumns()}
-                  getRowId={(row) => row.businessKey}
-                  loading={fetching}
-                  components={{ Pagination: CustomPagination }}
-                />
+                >
+                  <DataGrid
+                    sx={{
+                      flex: 1,
+                      width: '100%',
+                      backgroundColor: '#ffffff',
+                      mt: 1,
+                      '& .MuiDataGrid-main': { flex: 1 },
+                      '& .MuiDataGrid-footerContainer': {
+                        display: 'none',
+                      },
+                    }}
+                    rows={cases}
+                    columns={makeColumns()}
+                    getRowId={(row) => row.businessKey}
+                    loading={fetching}
+                    hideFooter={true}
+                    disableSelectionOnClick
+                  />
+
+                  <Box
+                    sx={{
+                      padding: '16px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      borderTop: '1px solid rgba(224, 224, 224, 1)',
+                      backgroundColor: '#ffffff',
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Typography variant='body2' sx={{ mr: 2 }}>
+                        Rows per page:
+                      </Typography>
+                      <Button
+                        aria-controls={open ? 'page-size-menu' : undefined}
+                        aria-haspopup='true'
+                        aria-expanded={open ? 'true' : undefined}
+                        onClick={handlePageSizeClick}
+                        variant='text'
+                        size='small'
+                        endIcon={<KeyboardArrowRight />}
+                        sx={{ minWidth: '75px' }}
+                      >
+                        {filter.limit}
+                      </Button>
+                      <Menu
+                        id='page-size-menu'
+                        anchorEl={anchorEl}
+                        open={open}
+                        onClose={handlePageSizeClose}
+                        MenuListProps={{
+                          'aria-labelledby': 'page-size-button',
+                        }}
+                      >
+                        {pageSizeOptions.map((option) => (
+                          <MenuItem
+                            key={option}
+                            onClick={() => handlePageSizeSelect(option)}
+                            selected={filter.limit === option}
+                          >
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </Menu>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Typography variant='body2' sx={{ mx: 2 }}>
+                        {cases.length > 0
+                          ? filter.hasNext
+                            ? `1-${cases.length} of more than ${cases.length}`
+                            : `1-${cases.length} of ${cases.length}`
+                          : '0-0 of 0'}
+                      </Typography>
+
+                      <IconButton
+                        onClick={handlerPriorPage}
+                        disabled={!filter.hasPrevious || fetching}
+                      >
+                        <KeyboardArrowLeft />
+                      </IconButton>
+                      <IconButton
+                        onClick={handlerNextPage}
+                        disabled={!filter.hasNext || fetching}
+                      >
+                        <KeyboardArrowRight />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                </Box>
               </Suspense>
             </div>
           )}
@@ -486,6 +576,7 @@ export const CaseList = ({ status, caseDefId }) => {
     </div>
   )
 }
+
 function fetchCases(
   setFetching,
   keycloak,
