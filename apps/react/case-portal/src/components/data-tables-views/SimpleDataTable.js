@@ -131,13 +131,22 @@ const SimpleDataTable = () => {
     findAvg,
   })
 
+  // const defaultCustomHeight = { mainBox: '60vh', otherBox: '124%' }
+
+  const boxHeight = '60vh'
+  const otherHeight = '124%'
+
   return (
     <Box
       sx={{
-        // height: '120px',
+        height: '228px',
+
         width: '100%',
-        marginBottom: 0,
-        padding: 0,
+        padding: '0px 0px',
+        margin: '0px 0px 0px',
+        backgroundColor: '#F2F3F8',
+        borderRadius: 0,
+        borderBottom: 'none',
       }}
     >
       <Backdrop

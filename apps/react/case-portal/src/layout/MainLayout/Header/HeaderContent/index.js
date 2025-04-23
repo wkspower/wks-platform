@@ -14,11 +14,15 @@ import {
   setYearChange,
   setVerticalChange,
   setSitePlantChange,
+  setCurrentYear,
 } from 'store/reducers/dataGridStore'
 import { DataService } from 'services/DataService'
 import Search from './Search'
 import Profile from './Profile/index'
 import MobileSection from './MobileSection'
+
+// import Logo from '../../../assets/images/ril-logo2.png'
+import Logo from 'assets/images/ril-logo2.png'
 
 // Utility to parse the Keycloak ?allowed? JSON
 function parseAllowed(raw) {
@@ -170,14 +174,43 @@ export default function HeaderContent({ keycloak }) {
   useEffect(() => {
     async function fetchYears() {
       try {
-        const resp = await DataService.getAopyears(keycloak)
+        var resp = await DataService.getAopyears(keycloak)
+
+        // resp1 = [
+        //   {
+        //     AOPDisplayYear: '2024-25',
+        //     AOPYear: '2024-25',
+        //     currentYear: '0',
+        //   },
+        //   {
+        //     AOPDisplayYear: '2025-26',
+        //     AOPYear: '2025-26',
+        //     currentYear: '1',
+        //   },
+        //   {
+        //     AOPDisplayYear: '2026-27',
+        //     AOPYear: '2026-27',
+        //     currentYear: '0',
+        //   },
+        //   {
+        //     AOPDisplayYear: '2028-29',
+        //     AOPYear: '2028-29',
+        //     currentYear: '0',
+        //   },
+        // ]
+
         if (resp?.length) {
           setAopYears(resp)
-          const firstYear = resp[0].AOPYear
-          setSelectedYear(firstYear)
 
-          localStorage.setItem('year', firstYear)
-          dispatch(setAopYear({ selectedYear: firstYear }))
+          const currentYear = resp.find(
+            (item) => item.currentYear == 1,
+          )?.AOPYear
+
+          if (currentYear) {
+            setSelectedYear(currentYear)
+            localStorage.setItem('year', currentYear)
+            dispatch(setAopYear({ selectedYear: currentYear }))
+          }
         }
       } catch (err) {
         console.error('Error fetching AOP years', err)
@@ -194,6 +227,12 @@ export default function HeaderContent({ keycloak }) {
     localStorage.setItem('year', newYear)
     dispatch(setYearChange({ yearChanged: true }))
     dispatch(setAopYear({ selectedYear: newYear }))
+
+    // Find the selected year object to determine if it's the current year
+    const selectedYearObj = aopYears.find((y) => y.AOPYear === newYear)
+    const isCurrentYear = selectedYearObj?.currentYear == 1
+
+    dispatch(setCurrentYear({ currentYear: isCurrentYear ? 1 : 0 }))
   }
   // inside HeaderContent, above the return
   const handlePlantChange = (e) => {
@@ -267,12 +306,15 @@ export default function HeaderContent({ keycloak }) {
 
   return (
     <>
-      <Box sx={{ ml: 3, mt: 1 }}>
-        {!drawerOpen && (
+      <Box sx={{ ml: 3, mt: 0 }}>
+        {true && <img src={Logo} alt='RIL Logo' style={{ height: 40 }} />}
+      </Box>
+      <Box sx={{ ml: 1, mt: 0 }}>
+        {true && (
           <Typography
             variant='body1'
             color='white'
-            sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: '1rem' }}
+            className='custom-title-font'
           >
             {screenTitleName}
           </Typography>
@@ -284,14 +326,14 @@ export default function HeaderContent({ keycloak }) {
       <Stack direction='row' spacing={2} alignItems='center'>
         {/* Year Selector */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant='body1' color='white'>
+          <Typography variant='body1' className='custom-title-dropdown'>
             Year:
           </Typography>
-          <FormControl sx={{ minWidth: 120 }}>
+          <FormControl sx={{ minWidth: 100 }}>
             <Select
               value={selectedYear}
               onChange={handleYearChange}
-              sx={{ color: 'white' }}
+              className='custom-title-dropdown-content'
             >
               {aopYears.map((y) => (
                 <MenuItem key={y.AOPYear} value={y.AOPYear}>
@@ -304,14 +346,14 @@ export default function HeaderContent({ keycloak }) {
 
         {/* Vertical */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant='body1' color='white'>
+          <Typography variant='body1' className='custom-title-dropdown'>
             Vertical:
           </Typography>
-          <FormControl sx={{ minWidth: 150 }}>
+          <FormControl sx={{ minWidth: 100 }}>
             <Select
               value={selectedVertical}
               onChange={handleVertChange}
-              sx={{ color: 'white' }}
+              className='custom-title-dropdown-content'
             >
               {verticals.map((v) => (
                 <MenuItem key={v.id} value={v.id}>
@@ -324,15 +366,15 @@ export default function HeaderContent({ keycloak }) {
 
         {/* Site */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant='body1' color='white'>
+          <Typography variant='body1' className='custom-title-dropdown'>
             Site:
           </Typography>
-          <FormControl sx={{ minWidth: 150 }}>
+          <FormControl sx={{ minWidth: 100 }}>
             <Select
               value={selectedSite}
               onChange={handleSiteChange}
               disabled={!sites.length}
-              sx={{ color: 'white' }}
+              className='custom-title-dropdown-content'
             >
               {sites.map((s) => (
                 <MenuItem key={s.id} value={s.id}>
@@ -345,15 +387,15 @@ export default function HeaderContent({ keycloak }) {
 
         {/* Plant */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant='body1' color='white'>
+          <Typography variant='body1' className='custom-title-dropdown'>
             Plant:
           </Typography>
-          <FormControl sx={{ minWidth: 150 }}>
+          <FormControl sx={{ minWidth: 100 }}>
             <Select
               value={selectedPlant}
               onChange={handlePlantChange}
               disabled={!plants.length}
-              sx={{ color: 'white' }}
+              className='custom-title-dropdown-content'
             >
               {plants.map((p) => (
                 <MenuItem key={p.id} value={p.id}>

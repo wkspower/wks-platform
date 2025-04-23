@@ -18,6 +18,44 @@ import AccordionDetails from '@mui/material/AccordionDetails'
 import Typography from '@mui/material/Typography'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
+import { styled } from '@mui/material/styles'
+import MuiAccordion, { AccordionProps } from '@mui/material/Accordion'
+import MuiAccordionSummary, {
+  AccordionSummaryProps,
+} from '@mui/material/AccordionSummary'
+import MuiAccordionDetails from '@mui/material/AccordionDetails'
+
+// Customized Accordion
+const CustomAccordion = styled((props) => (
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(() => ({
+  position: 'unset',
+  border: 'none',
+  boxShadow: 'none',
+  margin: '0px',
+  '&:before': {
+    display: 'none',
+  },
+}))
+
+// Customized Accordion Summary
+const CustomAccordionSummary = styled((props) => (
+  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
+))(() => ({
+  backgroundColor: '#fff',
+  padding: '0px 12px',
+  minHeight: '40px',
+  '& .MuiAccordionSummary-content': {
+    margin: '8px 0',
+  },
+}))
+
+// Customized Accordion Details
+const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
+  padding: '0px 0px 12px',
+  backgroundColor: '#F2F3F8',
+}))
+
 const BusinessDemand = ({ permissions }) => {
   const [rowModesModel, setRowModesModel] = useState({})
   const keycloak = useSession()
@@ -343,42 +381,25 @@ const BusinessDemand = ({ permissions }) => {
 
       <div>
         {(lowerVertName === 'meg' || lowerVertName === 'pe') && (
-          <Accordion
-            defaultExpanded
-            disableGutters
-            // sx={{ margin: '0px 5px 5px 0px', marginLeft: '13px' }}
-          >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
+          <CustomAccordion defaultExpanded disableGutters>
+            <CustomAccordionSummary
               aria-controls='meg-grid-content'
               id='meg-grid-header'
             >
-              <Typography component='span' sx={{ fontWeight: 'bold' }}>
+              <Typography component='span' className='grid-title'>
                 Production Volume Data
               </Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Box
-                sx={{
-                  width: '100%',
-                  padding: '0px ',
-                  margin: '0px',
-                  backgroundColor: '#F2F3F8',
-                  borderRadius: 0,
-                  borderBottom: 'none',
-                }}
-              >
+            </CustomAccordionSummary>
+            <CustomAccordionDetails>
+              <Box sx={{ width: '100%', margin: 0 }}>
                 <SimpleDataTable />
               </Box>
-            </AccordionDetails>
-          </Accordion>
+            </CustomAccordionDetails>
+          </CustomAccordion>
         )}
       </div>
 
-      <Typography
-        component='div'
-        sx={{ fontWeight: 'bold', ml: '5px', mt: '25px' }}
-      >
+      <Typography component='div' className='grid-title'>
         Business Demand Data
       </Typography>
 

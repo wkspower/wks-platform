@@ -3,8 +3,13 @@ import { AppBar, IconButton, Toolbar, useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import AppBarStyled from './AppBarStyled'
 import HeaderContent from './HeaderContent'
-import MenuFoldOutlined from '@ant-design/icons/MenuFoldOutlined'
-import MenuUnfoldOutlined from '@ant-design/icons/MenuUnfoldOutlined'
+import MenuOutlined from '@ant-design/icons/MenuOutlined'
+import CloseOutlined from '@ant-design/icons/CloseOutlined'
+
+{
+  /* <MenuOutlined /> */
+  // <CloseOutlined />
+}
 
 const Header = ({ open, handleDrawerToggle, keycloak }) => {
   const theme = useTheme()
@@ -21,12 +26,12 @@ const Header = ({ open, handleDrawerToggle, keycloak }) => {
         edge='start'
         color='secondary'
         sx={{
-          color: 'text.primary',
-          bgcolor: open ? iconBackColorOpen : iconBackColor,
+          color: '#FFFFFF',
+          fontSize: '1.5rem',
           ml: { xs: 0, lg: -2 },
         }}
       >
-        {!open ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+        {!open ? <MenuOutlined /> : <CloseOutlined />}
       </IconButton>
       <HeaderContent keycloak={keycloak} />
     </Toolbar>
@@ -54,9 +59,9 @@ const Header = ({ open, handleDrawerToggle, keycloak }) => {
   )
 }
 
-Header.propTypes = {
-  open: PropTypes.bool,
-  handleDrawerToggle: PropTypes.func,
-}
+// Header.propTypes = {
+//   open: PropTypes.bool,
+//   handleDrawerToggle: PropTypes.func,
+// }
 
 export default Header

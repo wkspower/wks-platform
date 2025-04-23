@@ -28,6 +28,8 @@ const MainDrawer = ({ open, handleDrawerToggle, window }) => {
         onClose={handleDrawerToggle}
         ModalProps={{
           keepMounted: true,
+
+          BackdropProps: { invisible: true },
         }}
         sx={{
           '& .MuiDrawer-paper': {

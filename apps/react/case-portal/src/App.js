@@ -11,6 +11,7 @@ import { RegisterInjectUserSession, RegisteOptions } from './plugins'
 import { accountStore, sessionStore } from './store'
 import './App.css'
 import { useSelector } from 'react-redux'
+import Layout from 'layout/FooterLayout/index'
 
 const ScrollTop = lazy(() => import('./components/ScrollTop'))
 
@@ -206,18 +207,20 @@ const App = () => {
     keycloak &&
     authenticated && (
       <ThemeCustomization>
-        <Suspense fallback={<div>Loading...</div>}>
-          <ScrollTop>
-            <SessionStoreProvider value={{ keycloak, menu }}>
-              <ThemeRoutes
-                keycloak={keycloak}
-                authenticated={authenticated}
-                // recordsTypes={recordsTypes}
-                // casesDefinitions={casesDefinitions}
-              />
-            </SessionStoreProvider>
-          </ScrollTop>
-        </Suspense>
+        <Layout>
+          <Suspense fallback={<div>Loading...</div>}>
+            <ScrollTop>
+              <SessionStoreProvider value={{ keycloak, menu }}>
+                <ThemeRoutes
+                  keycloak={keycloak}
+                  authenticated={authenticated}
+                  // recordsTypes={recordsTypes}
+                  // casesDefinitions={casesDefinitions}
+                />
+              </SessionStoreProvider>
+            </ScrollTop>
+          </Suspense>
+        </Layout>
       </ThemeCustomization>
     )
   )

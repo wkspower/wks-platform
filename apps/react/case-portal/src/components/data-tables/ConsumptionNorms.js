@@ -23,6 +23,44 @@ import { Button } from '@mui/material'
 import './data-grid-css.css'
 import './extra-css.css'
 
+import { styled } from '@mui/material/styles'
+import MuiAccordion, { AccordionProps } from '@mui/material/Accordion'
+import MuiAccordionSummary, {
+  AccordionSummaryProps,
+} from '@mui/material/AccordionSummary'
+import MuiAccordionDetails from '@mui/material/AccordionDetails'
+
+// Customized Accordion
+const CustomAccordion = styled((props) => (
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(() => ({
+  position: 'unset',
+  border: 'none',
+  boxShadow: 'none',
+  margin: '0px',
+  '&:before': {
+    display: 'none',
+  },
+}))
+
+// Customized Accordion Summary
+const CustomAccordionSummary = styled((props) => (
+  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
+))(() => ({
+  backgroundColor: '#fff',
+  padding: '0px 12px',
+  minHeight: '40px',
+  '& .MuiAccordionSummary-content': {
+    margin: '8px 0',
+  },
+}))
+
+// Customized Accordion Details
+const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
+  padding: '0px 0px 12px',
+  backgroundColor: '#F2F3F8',
+}))
+
 const NormalOpNormsScreen = () => {
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
@@ -506,7 +544,7 @@ const NormalOpNormsScreen = () => {
     }
   }
 
-  const defaultCustomHeight = { mainBox: '50vh', otherBox: '112%' }
+  const defaultCustomHeight = { mainBox: '55vh', otherBox: '112%' }
 
   return (
     <div>
@@ -519,22 +557,20 @@ const NormalOpNormsScreen = () => {
 
       <div>
         {(lowerVertName === 'meg' || lowerVertName === 'pe') && (
-          <Accordion
+          <CustomAccordion
             defaultExpanded
             disableGutters
             onChange={handleAccordionChange}
-            // sx={{ margin: '0px 5px 5px 0px', marginLeft: '13px' }}
           >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
+            <CustomAccordionSummary
               aria-controls='meg-grid-content'
               id='meg-grid-header'
             >
-              <Typography component='span' sx={{ fontWeight: 'bold' }}>
+              <Typography component='span' className='grid-title'>
                 Consumption AOP
               </Typography>
-            </AccordionSummary>
-            <AccordionDetails>
+            </CustomAccordionSummary>
+            <CustomAccordionDetails>
               <Box
                 sx={{
                   width: '100%',
@@ -595,8 +631,8 @@ const NormalOpNormsScreen = () => {
                   }}
                 />
               </Box>
-            </AccordionDetails>
-          </Accordion>
+            </CustomAccordionDetails>
+          </CustomAccordion>
         )}
       </div>
       <Typography

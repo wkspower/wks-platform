@@ -1,14 +1,13 @@
 const config = {
   basename: '/',
   defaultPath: '/production-norms-plan/business-demand',
-  fontFamily: "'SF-Pro-Text-Regular', Roboto ,Sans-Serif ",
+  fontFamily: "'Public Sans', sans-serif",
   i18n: 'en',
   miniDrawer: false,
   container: true,
   mode: 'light',
   presetColor: 'default',
   themeDirection: 'ltr',
-  fontColor: 'red',
 }
 
 // font-family: '', '',  !important;

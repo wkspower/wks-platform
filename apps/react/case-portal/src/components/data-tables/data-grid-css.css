@@ -110,12 +110,13 @@
 
 .custom-data-grid .MuiDataGrid-columnHeaders {
   background-color: #fafafc;
-  color: #3e4e75;
+  color: black;
   font-size: 0.8rem;
   font-weight: bold;
   border-bottom: 2px solid #dae0ef;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+  padding-left: 6px;
 }
 
 .custom-data-grid .MuiDataGrid-columnHeader {
@@ -128,7 +129,7 @@
 
 .custom-data-grid .MuiDataGrid-cell {
   border-bottom: 1px solid #dae0ef;
-  color: #3e4e75;
+  color: black;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -144,8 +145,14 @@
   background-color: #ffffff;
 }
 
-.custom-data-grid .no-border-row {
-  background-color: #e8f1ff;
+/* .custom-data-grid .no-border-row:hover {
+  background-color: #bfbfbf !important;
+  cursor: default !important;
+} */
+
+.custom-data-grid .no-border-row:hover {
+  background-color: #bfbfbf !important;
+  pointer-events: none;
 }
 
 .custom-data-grid .odd-row {
@@ -185,6 +192,11 @@
 .custom-data-grid .disabled-header {
   color: #a9a9a9 !important;
   opacity: 0.7;
+}
+
+.custom-data-grid .no-border-row {
+  background-color: #bfbfbf;
+  color: white !important;
 }
 
 .custom-data-grid .MuiInputBase-input,

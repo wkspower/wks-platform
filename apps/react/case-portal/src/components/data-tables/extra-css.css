@@ -1,12 +1,12 @@
 .btn-save {
   background-color: #0100cb;
   color: #ffffff;
-  border-radius: 4px;
-  padding: 8px 24px;
+  border-radius: 20px;
+  padding: 6px 22px;
   text-transform: none;
   font-size: 0.875rem;
   font-weight: 500;
-  min-width: 120px;
+  min-width: 100px;
   border: none;
   cursor: pointer;
 }
@@ -17,7 +17,7 @@
 }
 
 .btn-save:disabled {
-  background-color: #0100cb;
+  background-color: #8d8dec;
   color: #ffffff;
   opacity: 0.7;
   cursor: not-allowed;
@@ -27,7 +27,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 16px;
+  margin-top: 0px;
   margin-bottom: 8px;
 }
 

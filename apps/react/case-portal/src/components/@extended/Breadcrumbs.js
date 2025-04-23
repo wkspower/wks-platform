@@ -247,18 +247,15 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
             size='medium'
             sx={{
               ml: 1,
-              backgroundColor: 'transparent', // Transparent background
+              backgroundColor: 'transparent',
               '&:hover': {
-                backgroundColor: 'rgba(0, 0, 0, 0.1)', // Light hover effect
+                backgroundColor: 'rgba(0, 0, 0, 0.1)',
               },
-              padding: '6px', // Slightly increase padding for better spacing
+              padding: '6px',
             }}
             onClick={() => handleOpenPdf(item?.id)}
           >
-            <InfoIcon
-              fontSize='medium'
-              sx={{ opacity: 0.7, color: '#1976d2' }}
-            />
+            <InfoIcon fontSize='medium' sx={{ color: '#0100cb' }} />
           </IconButton>
         </Tooltip>
       </Typography>
@@ -279,6 +276,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
             justifyContent='flex-start'
             alignItems='flex-start'
             spacing={1}
+            sx={{ marginTop: '-18px' }}
           >
             {/* <Grid item sx={{ ml: 1.5, display: none }}> */}
             {/* <MuiBreadcrumbs aria-label='breadcrumb'> */}
@@ -334,18 +332,14 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                 </Typography>
               </Grid>
 
-              <Stack spacing={1} sx={{ alignItems: 'center' }}>
+              <Stack spacing={0.5} sx={{ alignItems: 'center' }}>
                 <Grid item>
                   <Chip
                     color='primary'
                     variant='outlined'
                     label={getRoleName(verticalId, item?.id)}
-                    sx={{
-                      fontWeight: 800,
-                      color: 'black',
-                      textShadow: '0.5px 0.5px 0px rgba(0, 0, 0, 0.1)',
-                      margin: '12px',
-                    }}
+                    className='role-name'
+                    sx={{ border: 'none' }} // Remove the border
                   />
                 </Grid>
               </Stack>
@@ -353,7 +347,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
 
             {/* HIDE THE TITLE NAME */}
             {title && (
-              <Grid item sx={{ mt: 2 }}>
+              <Grid item sx={{ mt: 0.5 }}>
                 <Typography variant='h5'>{item.title}</Typography>
               </Grid>
             )}

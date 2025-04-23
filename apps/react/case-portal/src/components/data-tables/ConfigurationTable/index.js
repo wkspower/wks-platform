@@ -152,7 +152,7 @@ const ConfigurationTable = () => {
           sx={{
             borderBottom: '0px solid #ccc',
             '.MuiTabs-indicator': { display: 'none' },
-            margin: '0px 0px -22px 1%',
+            margin: '-35px 0px -15px 0%',
           }}
           textColor='primary'
           indicatorColor='primary'
@@ -214,7 +214,7 @@ const ConfigurationTable = () => {
         sx={{
           borderBottom: '0px solid #ccc',
           '.MuiTabs-indicator': { display: 'none' },
-          margin: '0px 0px -22px 1%',
+          margin: '-35px 0px -15px 0%',
         }}
         textColor='primary'
         indicatorColor='primary'

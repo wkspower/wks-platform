@@ -38,7 +38,7 @@
 /* Header */
 .jio-data-grid .MuiDataGrid-columnHeaders {
   background-color: #fafafc;
-  color: #3e4e75;
+  color: black;
   font-size: 0.8rem;
   font-weight: bold;
   border-bottom: 2px solid #dae0ef;
@@ -66,7 +66,7 @@
 /* Cell */
 .jio-data-grid .MuiDataGrid-cell {
   border-bottom: 1px solid #dae0ef;
-  color: #3e4e75;
+  color: black;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
