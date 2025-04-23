@@ -340,6 +340,7 @@ public class AOPServiceImpl implements AOPService {
 				Map<String, String> map = new HashMap<>();
 				map.put("AOPYear", row[0] != null ? row[0].toString() : null);
 				map.put("AOPDisplayYear", row[1] != null ? row[1].toString() : null);
+				map.put("currentYear", row[2] != null ? row[2].toString() : null);
 				aopYears.add(map);
 			}
 
