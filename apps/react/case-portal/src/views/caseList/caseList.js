@@ -17,7 +17,6 @@ import { useSession } from 'SessionStoreContext'
 import MainCard from 'components/MainCard'
 import React, {
   Suspense,
-  createContext,
   lazy,
   useEffect,
   useState,
