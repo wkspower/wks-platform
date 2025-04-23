@@ -3,7 +3,6 @@ import CloseIcon from '@mui/icons-material/Close'
 import ViewKanbanIcon from '@mui/icons-material/ViewKanban'
 import ViewListIcon from '@mui/icons-material/ViewList'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import { useTheme } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
@@ -20,7 +19,6 @@ import React, {
   Suspense,
   createContext,
   lazy,
-  useContext,
   useEffect,
   useState,
 } from 'react'
@@ -47,7 +45,6 @@ const NewCaseForm = lazy(() =>
 )
 
 export const CaseList = ({ status, caseDefId }) => {
-  const PaginationContext = createContext()
   const { t } = useTranslation()
   const [stages, setStages] = useState([])
   const [cases, setCases] = useState([])
@@ -312,72 +309,6 @@ export const CaseList = ({ status, caseDefId }) => {
       })
 
     handlePageSizeClose()
-  }
-
-  const CustomPaginationFooter = () => {
-    return (
-      <Box
-        sx={{
-          padding: '16px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          borderTop: '1px solid rgba(224, 224, 224, 1)',
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant='body2' sx={{ mr: 2 }}>
-            Rows per page:
-          </Typography>
-          <Button
-            aria-controls={open ? 'page-size-menu' : undefined}
-            aria-haspopup='true'
-            aria-expanded={open ? 'true' : undefined}
-            onClick={handlePageSizeClick}
-            variant='text'
-            size='small'
-            endIcon={<KeyboardArrowRight />}
-            sx={{ minWidth: '75px' }}
-          >
-            {filter.limit}
-          </Button>
-          <Menu
-            id='page-size-menu'
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handlePageSizeClose}
-            MenuListProps={{
-              'aria-labelledby': 'page-size-button',
-            }}
-          >
-            {pageSizeOptions.map((option) => (
-              <MenuItem
-                key={option}
-                onClick={() => handlePageSizeSelect(option)}
-                selected={filter.limit === option}
-              >
-                {option}
-              </MenuItem>
-            ))}
-          </Menu>
-        </Box>
-
-        <Box>
-          <IconButton
-            onClick={handlerPriorPage}
-            disabled={!filter.hasPrevious || fetching}
-          >
-            <KeyboardArrowLeft />
-          </IconButton>
-          <IconButton
-            onClick={handlerNextPage}
-            disabled={!filter.hasNext || fetching}
-          >
-            <KeyboardArrowRight />
-          </IconButton>
-        </Box>
-      </Box>
-    )
   }
 
   return (
