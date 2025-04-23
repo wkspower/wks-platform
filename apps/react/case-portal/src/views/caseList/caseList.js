@@ -15,12 +15,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
 import { useSession } from 'SessionStoreContext'
 import MainCard from 'components/MainCard'
-import React, {
-  Suspense,
-  lazy,
-  useEffect,
-  useState,
-} from 'react'
+import React, { Suspense, lazy, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CaseService } from '../../services'
 
