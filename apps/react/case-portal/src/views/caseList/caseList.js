@@ -53,7 +53,7 @@ export const CaseList = ({ status, caseDefId }) => {
   const [caseDefs, setCaseDefs] = useState([])
   const [fetching, setFetching] = useState(false)
   const [filter, setFilter] = useState({
-    sort: '',
+    sort: 'desc',
     limit: 10,
     after: '',
     before: '',
@@ -223,7 +223,7 @@ export const CaseList = ({ status, caseDefId }) => {
   )
 
   const handlerNextPage = () => {
-    setFetching(true)
+    setFetching(true) / setCases([])
 
     const next = {
       sort: filter.sort,
@@ -250,6 +250,8 @@ export const CaseList = ({ status, caseDefId }) => {
 
   const handlerPriorPage = () => {
     setFetching(true)
+
+    setCases([])
 
     const prior = {
       sort: filter.sort,
@@ -285,7 +287,12 @@ export const CaseList = ({ status, caseDefId }) => {
   const handlePageSizeSelect = (pageSize) => {
     setFetching(true)
 
-    CaseService.filterCase(keycloak, caseDefId, status, { limit: pageSize })
+    setCases([])
+
+    CaseService.filterCase(keycloak, caseDefId, status, {
+      sort: filter.sort,
+      limit: pageSize,
+    })
       .then((resp) => {
         const { data, paging } = resp
 
@@ -304,6 +311,11 @@ export const CaseList = ({ status, caseDefId }) => {
 
     handlePageSizeClose()
   }
+
+  const processedCases = cases.map((caseItem, index) => ({
+    ...caseItem,
+    tempId: `${caseItem.businessKey}-${index}`,
+  }))
 
   return (
     <div style={{ height: 650, width: '100%' }}>
@@ -372,9 +384,9 @@ export const CaseList = ({ status, caseDefId }) => {
                         display: 'none',
                       },
                     }}
-                    rows={cases}
+                    rows={processedCases}
                     columns={makeColumns()}
-                    getRowId={(row) => row.businessKey}
+                    getRowId={(row) => row.id || row.tempId || row.businessKey}
                     loading={fetching}
                     hideFooter={true}
                     disableSelectionOnClick
@@ -458,7 +470,7 @@ export const CaseList = ({ status, caseDefId }) => {
             <Suspense fallback={<div>Loading...</div>}>
               <Kanban
                 stages={stages}
-                cases={cases}
+                cases={processedCases}
                 caseDefId={caseDefId}
                 kanbanConfig={fetchKanbanConfig()}
                 setACase={setACase}
@@ -513,6 +525,8 @@ function fetchCases(
   setFilter,
 ) {
   setFetching(true)
+
+  setCases([])
 
   CaseService.getCaseDefinitionsById(keycloak, caseDefId)
     .then((resp) => {
