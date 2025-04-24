@@ -91,7 +91,7 @@ async function filterCase(keycloak, caseDefId, status, cursor) {
   url = url + (caseDefId ? `&caseDefinitionId=${caseDefId}` : '')
   url = url + `&before=${cursor.before || ''}`
   url = url + `&after=${cursor.after || ''}`
-  url = url + `&sort=${cursor.sort || 'asc'}`
+  url = url + `&sort=${cursor.sort || 'desc'}`
   url = url + `&limit=${cursor.limit || 10}`
 
   const headers = {
@@ -259,12 +259,17 @@ function mapperToCase(resp) {
     return mapper[status] || '-'
   }
 
-  const toCase = data.map((element) => {
+  const toCase = data.map((element, index) => {
     const createdAt = element?.attributes?.find(
       (attribute) => attribute.name === 'createdAt',
     )
     element.createdAt = createdAt ? createdAt.value : ''
     element.statusDescription = toStatus(element.status)
+
+    if (!element.id) {
+      element.tempId = `${element.businessKey}-${index}`
+    }
+
     return element
   })
 
