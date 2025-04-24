@@ -1,6 +1,7 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,50 +31,78 @@ public class VerticalScreenMappingServiceImpl implements VerticalScreenMappingSe
 	
 	@Override
 	public Map<String, Object> getVerticalScreenMapping(String verticalId) throws Exception {
-		Map<String, Object> result = new HashMap<String, Object>();
+	    Map<String, Object> result = new HashMap<>();
+	    Map<String, Object> verticalData = new HashMap<>();
+	    List<Map<String, Object>> children = new ArrayList<>();
 
-		List<VerticalScreenMappingDTO> verticalScreenMappingDTOList = new ArrayList<>();
-		try {
-			List<VerticalScreenMapping> list = verticalScreenMappingRepository
-				    .findAllByVerticalFKIdOrderBySequence(UUID.fromString(verticalId));
+	    try {
+	        List<VerticalScreenMapping> list = verticalScreenMappingRepository
+	                .findAllByVerticalFKIdOrderBySequence(UUID.fromString(verticalId));
 
-				// Extract all unique group IDs to fetch in batch
-				Set<UUID> groupIds = list.stream()
-				    .map(VerticalScreenMapping::getGroupId)
-				    .filter(Objects::nonNull)
-				    .collect(Collectors.toSet());
+	        // Extract all unique group IDs to fetch in batch
+	        Set<UUID> groupIds = list.stream()
+	                .map(VerticalScreenMapping::getGroupId)
+	                .filter(Objects::nonNull)
+	                .collect(Collectors.toSet());
 
-				// Fetch all groups in one query
-				Map<UUID, GroupMaster> groupMap = groupMasterRepository.findAllById(groupIds)
-				    .stream()
-				    .collect(Collectors.toMap(GroupMaster::getId, Function.identity()));
+	        // Fetch all groups in one query
+	        Map<UUID, GroupMaster> groupMap = groupMasterRepository.findAllById(groupIds)
+	                .stream()
+	                .collect(Collectors.toMap(GroupMaster::getId, Function.identity()));
 
-				verticalScreenMappingDTOList = list.stream()
-				    .map(mapping -> {
-				        VerticalScreenMappingDTO dto = new VerticalScreenMappingDTO();
-				        dto.setScreenDisplayName(mapping.getScreenDisplayName());
-				        dto.setScreenCode(mapping.getScreenCode());
-				        dto.setType(mapping.getType());
-				        dto.setRoute(mapping.getRoute());
-				        dto.setIcon(mapping.getIcon());
-				        dto.setBreadCrumbs(mapping.getBreadCrumbs());
+	        // Assuming you have a way to fetch the VerticalMaster based on verticalId
+	        // Replace this with your actual logic to get the VerticalMaster
+	        // For now, let's create a placeholder
+	        // VerticalMaster verticalMaster = verticalMasterRepository.findById(UUID.fromString(verticalId)).orElse(null);
+	        String verticalCode = "utilities"; // Placeholder - replace with actual vertical code
+	        String verticalTitle = "";        // Placeholder - replace with actual vertical title
 
-				        if (mapping.getGroupId() != null) {
-				            dto.setGroup(groupMap.get(mapping.getGroupId()));
-				        }
+	        verticalData.put("id", verticalCode.toLowerCase().replace(" ", "-")); // Example: "Production Norms Plan" -> "production-norms-plan"
+	        verticalData.put("title", verticalTitle);
+	        verticalData.put("type", "group");
+	        verticalData.put("children", children);
 
-				        return dto;
-				    })
-				    .collect(Collectors.toList());
-				
-				result.put("status", 200);
-				result.put("message", "Screens list by verticalId " + verticalId + ".");
-				result.put("data", verticalScreenMappingDTOList);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			throw new Exception("Failed to fetch screens by vertical: " + ex.getMessage(), ex);
-		}
-		return result;
+	        Map<UUID, Map<String, Object>> groupWiseScreens = new HashMap<>();
+
+	        list.forEach(mapping -> {
+	            Map<String, Object> screenItem = new HashMap<>();
+	            screenItem.put("id", mapping.getScreenCode());
+	            screenItem.put("title", mapping.getScreenDisplayName());
+	            screenItem.put("type", "item");
+	            screenItem.put("url", mapping.getRoute());
+	            screenItem.put("icon", mapping.getIcon());
+	            screenItem.put("breadcrumbs", mapping.getBreadCrumbs());
+
+	            if (mapping.getGroupId() != null) {
+	                GroupMaster group = groupMap.get(mapping.getGroupId());
+	                if (group != null) {
+	                    UUID groupId = group.getId();
+	                    if (!groupWiseScreens.containsKey(groupId)) {
+	                        Map<String, Object> groupData = new HashMap<>();
+	                        groupData.put("id", group.getGroupCode());
+	                        groupData.put("title", group.getGroupName());
+	                        groupData.put("type", "collapse");
+	                        groupData.put("icon", group.getIcon()); // Assuming GroupMaster has an icon field
+	                        groupData.put("children", new ArrayList<>());
+	                        groupWiseScreens.put(groupId, groupData);
+	                        children.add(groupData);
+	                    }
+	                    ((List<Map<String, Object>>) groupWiseScreens.get(groupId).get("children")).add(screenItem);
+	                } else {
+	                    children.add(screenItem); // If no group, add directly to the vertical's children
+	                }
+	            } else {
+	                children.add(screenItem); // If no group ID, add directly to the vertical's children
+	            }
+	        });
+
+	        result.put("status", 200);
+	        result.put("message", "Screens list by verticalId " + verticalId + ".");
+	        result.put("data", Arrays.asList(verticalData)); // Wrap the verticalData in a list to match the outer structure
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	        throw new Exception("Failed to fetch screens by vertical: " + ex.getMessage(), ex);
+	    }
+	    return result;
 	}
-
 }
