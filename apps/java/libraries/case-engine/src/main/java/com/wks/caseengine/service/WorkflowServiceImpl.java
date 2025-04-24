@@ -59,28 +59,23 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@Autowired
 	private CaseInstanceService caseInstanceService;
 
-
 	@Autowired
 	private WorkflowMasterRepository workflowMasterRepository;
 
 	@Autowired
 	private WorkflowStepsMasterRepository workflowStepsMasterRepository;
 
-
-
 	@PersistenceContext
 	private EntityManager entityManager;
-	
-	 @Autowired
-	 private DataSource dataSource;
 
-	 @Autowired
+	@Autowired
+	private DataSource dataSource;
+
+	@Autowired
 	private ProcessInstanceService processInstanceService;
 
 	@Autowired
 	private TaskService taskService;
-
-
 
 	@Override
 	public WorkflowPageDTO getCaseId(String year, String plantId, String siteId, String verticalId) {
@@ -104,55 +99,55 @@ public class WorkflowServiceImpl implements WorkflowService {
 				dtoList.add(dto);
 			}
 
-         
 			workflowPageDTO.setWorkflowList(dtoList);
-			List<WorkflowMaster>  wmlist =  workflowMasterRepository.findAllByVerticalFKId(UUID.fromString(verticalId));
+			List<WorkflowMaster> wmlist = workflowMasterRepository.findAllByVerticalFKId(UUID.fromString(verticalId));
 
-			if(wmlist.size()>0){
+			if (wmlist.size() > 0) {
 				WorkflowMasterDTO wmDTO = new WorkflowMasterDTO();
 				wmDTO.setId(wmlist.get(0).getId().toString());
 				wmDTO.setCasedefId(wmlist.get(0).getCaseDefId());
 				wmDTO.setVerticalFKId(wmlist.get(0).getVerticalFKId().toString());
-                wmDTO.setWorkflowId(wmlist.get(0).getWorkflowId());
+				wmDTO.setWorkflowId(wmlist.get(0).getWorkflowId());
 
-				List<Object[]>  wsmlist	=workflowStepsMasterRepository.findAllByWorkflowMasterFKId(wmlist.get(0).getId());
-                
+				List<Object[]> wsmlist = workflowStepsMasterRepository
+						.findAllByWorkflowMasterFKId(wmlist.get(0).getId());
+
 				List<WorkflowStepsMasterDTO> steps = new ArrayList<>();
-				for(Object[] wsm : wsmlist){
+				for (Object[] wsm : wsmlist) {
 					WorkflowStepsMasterDTO dto = new WorkflowStepsMasterDTO();
-                    dto.setId(wsm[0]!=null?wsm[0].toString():null);
-					dto.setName(wsm[1]!=null?wsm[1].toString():null);
-					dto.setDisplayName(wsm[2]!=null?wsm[2].toString():null);
-					dto.setSequence(wsm[3]!=null?Integer.parseInt(wsm[3].toString()):null);
+					dto.setId(wsm[0] != null ? wsm[0].toString() : null);
+					dto.setName(wsm[1] != null ? wsm[1].toString() : null);
+					dto.setDisplayName(wsm[2] != null ? wsm[2].toString() : null);
+					dto.setSequence(wsm[3] != null ? Integer.parseInt(wsm[3].toString()) : null);
 					System.out.println("boolean");
 					System.out.println(wsm[4]);
-					dto.setIsRemarksDisabled(wsm[4]!=null?Boolean.parseBoolean(wsm[4].toString()):false);
-					dto.setWorkflowMasterFKId(wsm[5]!=null?wsm[5].toString():null);
-					steps.add(dto);  
+					dto.setIsRemarksDisabled(wsm[4] != null ? Boolean.parseBoolean(wsm[4].toString()) : false);
+					dto.setWorkflowMasterFKId(wsm[5] != null ? wsm[5].toString() : null);
+					steps.add(dto);
 				}
-				if((dtoList==null || dtoList.isEmpty())  ){
-					if(steps.size()>0){
-                        steps.get(0).setStatus("inprogress");
+				if ((dtoList == null || dtoList.isEmpty())) {
+					if (steps.size() > 0) {
+						steps.get(0).setStatus("inprogress");
 					}
-				}else{
-                  List<ActivityInstance> actiList = processInstanceService.getActivityInstances(dtoList.get(0).getProcessInstanceId());
-                  if(actiList!=null && actiList.size()>0){
-					String status =actiList.get(0).getActivityId().split("-")[0];
-                    for(WorkflowStepsMasterDTO  dto: steps){
-						if(dto.getName().equalsIgnoreCase(status)){
-							System.out.println("in in progress status"+ status);
-							dto.setStatus("inprogress");
+				} else {
+					List<ActivityInstance> actiList = processInstanceService
+							.getActivityInstances(dtoList.get(0).getProcessInstanceId());
+					if (actiList != null && actiList.size() > 0) {
+						String status = actiList.get(0).getActivityId().split("-")[0];
+						for (WorkflowStepsMasterDTO dto : steps) {
+							if (dto.getName().equalsIgnoreCase(status)) {
+								System.out.println("in in progress status" + status);
+								dto.setStatus("inprogress");
+							}
 						}
-					} 
-				    steps = updateStatuses(steps);
-				  }
+						steps = updateStatuses(steps);
+					}
 				}
 
 				wmDTO.setSteps(steps);
 				workflowPageDTO.setWorkflowMasterDTO(wmDTO);
 			}
 
-			
 			return workflowPageDTO;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid data format", e);
@@ -185,15 +180,15 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 	@Override
-	public Map<String, Object> getWorkFlow(String plantId,String year) {
+	public Map<String, Object> getWorkFlow(String plantId, String year) {
 		Map<String, Object> map = new HashMap<>();
 
 		try {
-			List<Object[]> results = getData(plantId,year);
+			List<Object[]> results = getData(plantId, year);
 
 			List<WorkflowYearDTO> workflowList = new ArrayList<>();
 			for (Object[] row : results) {
-				WorkflowYearDTO dto = new WorkflowYearDTO();	
+				WorkflowYearDTO dto = new WorkflowYearDTO();
 				dto.setParticulates(row[0] != null ? row[0].toString() : null);
 				dto.setUom(row[1] != null ? row[1].toString() : null);
 				dto.setFy202425AOP(row[2] != null ? row[2].toString() : null);
@@ -202,10 +197,10 @@ public class WorkflowServiceImpl implements WorkflowService {
 				dto.setRemark(row[5] != null ? row[5].toString() : null);
 				workflowList.add(dto);
 			}
-			List<String> headers=getHeaders(plantId,year);
+			List<String> headers = getHeaders(plantId, year);
 			List<String> keys = new ArrayList<>();
 			for (Field field : WorkflowYearDTO.class.getDeclaredFields()) {
-			    keys.add(field.getName());
+				keys.add(field.getName());
 			}
 			map.put("headers", headers);
 			map.put("keys", keys);
@@ -217,106 +212,105 @@ public class WorkflowServiceImpl implements WorkflowService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-	
-	
+
 	public List<Object[]> getData(String plantId, String aopYear) {
-	    try {
-	        // Stored procedure name
-	        String procedureName = "GetAnnualAOPCost";
+		try {
+			// Stored procedure name
+			String procedureName = "GetAnnualAOPCost";
 
-	        // Prepare native SQL call with parameters
-	        String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear";
+			// Prepare native SQL call with parameters
+			String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear";
 
-	        Query query = entityManager.createNativeQuery(sql);
+			Query query = entityManager.createNativeQuery(sql);
 
-	        // Set parameters
-	        query.setParameter("plantId", plantId);
-	        query.setParameter("aopYear", aopYear);
+			// Set parameters
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
 
-	        return query.getResultList();
-	    } catch (IllegalArgumentException e) {
-	        throw new RestInvalidArgumentException("Invalid UUID format ", e);
-	    } catch (Exception ex) {
-	        throw new RuntimeException("Failed to fetch data", ex);
-	    }
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
 	}
 
 	public List<String> getHeaders(String plantId, String aopYear) {
-        List<String> headers = new ArrayList<>();
+		List<String> headers = new ArrayList<>();
 
-        try (Connection conn = dataSource.getConnection();
-             CallableStatement stmt = conn.prepareCall("{call GetAnnualAOPCost(?, ?)}")) {
+		try (Connection conn = dataSource.getConnection();
+				CallableStatement stmt = conn.prepareCall("{call GetAnnualAOPCost(?, ?)}")) {
 
-            stmt.setString(1, plantId);
-            stmt.setString(2, aopYear);
+			stmt.setString(1, plantId);
+			stmt.setString(2, aopYear);
 
-            boolean hasResultSet = stmt.execute();
+			boolean hasResultSet = stmt.execute();
 
-            if (hasResultSet) {
-                try (ResultSet rs = stmt.getResultSet()) {
-                    ResultSetMetaData metaData = rs.getMetaData();
-                    int columnCount = metaData.getColumnCount();
+			// Move forward until we find a result set
+			while (!hasResultSet && stmt.getUpdateCount() != -1) {
+				hasResultSet = stmt.getMoreResults();
+			}
 
-                    for (int i = 1; i <= columnCount; i++) {
-                        headers.add(metaData.getColumnLabel(i));
-                    }
-                }
-            }
+			// If a result set is found, get metadata and headers
+			if (hasResultSet) {
+				try (ResultSet rs = stmt.getResultSet()) {
+					ResultSetMetaData metaData = rs.getMetaData();
+					int columnCount = metaData.getColumnCount();
 
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to fetch headers", e);
-        }
+					for (int i = 1; i <= columnCount; i++) {
+						headers.add(metaData.getColumnLabel(i));
+					}
+				}
+			}
 
-        return headers;
-    }
+		} catch (SQLException e) {
+			throw new RuntimeException("Failed to fetch headers", e);
+		}
 
+		return headers;
+	}
 
 	public List<WorkflowStepsMasterDTO> updateStatuses(List<WorkflowStepsMasterDTO> items) {
-    AtomicBoolean inProgressFound = new AtomicBoolean(false);
+		AtomicBoolean inProgressFound = new AtomicBoolean(false);
 
-    // Looping with index-like logic via stream
-    IntStream.range(0, items.size())
-            .forEach(i -> {
-                WorkflowStepsMasterDTO item = items.get(i);
-                if ("inprogress".equalsIgnoreCase(item.getStatus())) {
-                    inProgressFound.set(true);
-                }
-                if (!inProgressFound.get() && !"completed".equalsIgnoreCase(item.getStatus())) {
-                    item.setStatus("completed");
-                }
-            });
-			return items;
+		// Looping with index-like logic via stream
+		IntStream.range(0, items.size())
+				.forEach(i -> {
+					WorkflowStepsMasterDTO item = items.get(i);
+					if ("inprogress".equalsIgnoreCase(item.getStatus())) {
+						inProgressFound.set(true);
+					}
+					if (!inProgressFound.get() && !"completed".equalsIgnoreCase(item.getStatus())) {
+						item.setStatus("completed");
+					}
+				});
+		return items;
 
-		}
+	}
 
+	@Override
+	public WorkflowDTO submitWorkflow(WorkflowSubmitDTO workflowSubmitDTO) {
+		CaseInstance caseInstance = caseInstanceService.startWithValues(workflowSubmitDTO.getCaseInstance());
+		System.out.println("case created");
 
+		List<Task> tasks = taskService.find(Optional.ofNullable(caseInstance.getBusinessKey()));
 
-		@Override
-		public WorkflowDTO submitWorkflow(WorkflowSubmitDTO workflowSubmitDTO) {
-			CaseInstance caseInstance = caseInstanceService.startWithValues(workflowSubmitDTO.getCaseInstance());
-			System.out.println("case created");
+		System.out.println("tasks cound");
+		taskService.complete(tasks.get(0).getId(), workflowSubmitDTO.getVariables());
+		System.out.println("tasks completed");
 
-			List<Task> tasks = taskService.find(Optional.ofNullable(caseInstance.getBusinessKey()));
+		workflowSubmitDTO.getWorkflowDTO().setProcessInstanceId(tasks.get(0).getProcessInstanceId());
+		return saveWorkFlow(workflowSubmitDTO.getWorkflowDTO());
 
-			System.out.println("tasks cound");
-			taskService.complete(tasks.get(0).getId(),workflowSubmitDTO.getVariables());
-			System.out.println("tasks completed");
+	}
 
-			workflowSubmitDTO.getWorkflowDTO().setProcessInstanceId(tasks.get(0).getProcessInstanceId());
-			return saveWorkFlow(workflowSubmitDTO.getWorkflowDTO());
+	@Override
+	public void completeTaskWithComment(WorkflowSubmitDTO workflowSubmitDTO) {
 
-		}
+		taskService.complete(workflowSubmitDTO.getTaskId(), workflowSubmitDTO.getVariables());
+		caseInstanceService.saveComment(workflowSubmitDTO.getWorkflowDTO().getCaseId(),
+				workflowSubmitDTO.getCaseComment());
 
-
-        @Override
-		public void completeTaskWithComment(WorkflowSubmitDTO workflowSubmitDTO){
-
-			taskService.complete(workflowSubmitDTO.getTaskId(),workflowSubmitDTO.getVariables());
-            caseInstanceService.saveComment(workflowSubmitDTO.getWorkflowDTO().getCaseId(), workflowSubmitDTO.getCaseComment());
-            
-
-
-		}
-
+	}
 
 }
