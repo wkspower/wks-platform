@@ -76,7 +76,7 @@ const DataGridTable = ({
   handleAddPlantSite = () => {},
   selectedUsers = [],
   setSelectedUsers = () => {},
-  columnGroupingModel,
+  // columnGroupingModel,
 }) => {
   const [resizedColumns, setResizedColumns] = useState({})
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
@@ -661,7 +661,7 @@ const DataGridTable = ({
 
             return 'even-row'
           }}
-          columnGroupingModel={columnGroupingModel}
+          // columnGroupingModel={columnGroupingModel}
         />
       </Box>
       {(permissions?.allAction ?? true) && (

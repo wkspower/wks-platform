@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-
-import { Stepper, Step, StepLabel } from '@mui/material'
-
 import {
+  Stepper,
+  Step,
+  StepLabel,
   Button,
   Dialog,
   DialogActions,
@@ -10,194 +10,66 @@ import {
   DialogTitle,
   Stack,
   TextField,
-} from '../../../../node_modules/@mui/material/index'
-
+} from '@mui/material'
 import AuditTrail from './AuditTrail'
-import './jio-grid-style.css'
 import DataGridTable from '../ASDataGrid'
 import { DataService } from 'services/DataService'
-import Notification from 'components/Utilities/Notification'
 import { CaseService } from 'services/CaseService'
 import { TaskService } from 'services/TaskService'
 import { useSession } from 'SessionStoreContext'
+import { remarkColumn } from 'components/Utilities/remarkColumn'
+import Notification from 'components/Utilities/Notification'
+import './jio-grid-style.css'
+import { usePlan } from 'menu/new-plan'
+import { useScreens } from 'menu/userscreen'
 
-const jioColors = {
-  primaryBlue: '#387ec3',
-  // primaryBlue: 'red',
-  accentRed: '#E31C3D',
-  background: '#FFFFFF',
-  headerBg: '#0F3CC9',
-  rowEven: '#FFFFFF',
-  rowOdd: '#E8F1FF',
-  textPrimary: '#2D2D2D',
-  border: '#D0D0D0',
-  darkTransparentBlue: 'rgba(127, 147, 206, 0.8)',
-}
-
-// import DataGridTable from '../ASDataGrid'
 const WorkFlowMerge = () => {
   const keycloak = useSession()
+  const [steps, setSteps] = useState([])
   const [activeStep, setActiveStep] = useState(0)
-  const [openRejectDialog, setOpenRejectDialog] = useState(false)
-  const [status, setStatus] = useState('')
-  const [text, setText] = useState('')
-  const [role, setRole] = useState('plant_manager')
-  const [showTextBox, setShowTextBox] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
   const [columns, setColumns] = useState([])
-  const [showCreateCasebutton, setShowCreateCasebutton] = useState(false)
-  const [taskId, setTaskId] = useState('')
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  // const verticalId = localStorage.getItem('verticalId')
-  // const siteName = JSON.parse(localStorage.getItem('selectedSite'))?.name
-  const [businessKey, setBusinessKey] = useState('')
+  const [loading, setLoading] = useState(false)
   const [isCreatingCase, setIsCreatingCase] = useState(false)
+  const [showCreateCasebutton, setShowCreateCasebutton] = useState(false)
+
+  // remark dialog state
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remark || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
+  // audit trail state
+  const [openAuditPopup, setOpenAuditPopup] = useState(false)
+  const handleAuditOpen = () => setOpenAuditPopup(true)
+  const handleAuditClose = () => setOpenAuditPopup(false)
+
+  // reject flow state
+  const [openRejectDialog, setOpenRejectDialog] = useState(false)
   const [actionDisabled, setActionDisabled] = useState(false)
+  const [text, setText] = useState('')
+  const [taskId, setTaskId] = useState('')
+
+  // case + comment state
+  const [businessKey, setBusinessKey] = useState('')
+  const [masterSteps, setMasterSteps] = useState([])
+  const [workflowDto, setWorkFlowDto] = useState({})
+
+  // UI feedback
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
-  const steps = [
-    'Submit Plant AOP',
-    'Validate Plant AOP',
-    'Review Plant AOP',
-    'Approve AOP',
-    'Final Approval O2C AOP',
-    // 'Closed',
-  ]
-  // const columns = [
-  //   {
-  //     field: 'particulars',
-  //     headerName: 'Particulars',
-  //     minWidth: 300,
-  //     // custom header renderer
-  //   },
-  //   {
-  //     field: 'UOM',
-  //     headerName: 'UOM',
-  //     minWidth: 100,
-  //   },
-  //   // grouped children can skip renderHeader:
-  //   { field: 'firstYear', headerName: 'FY 2025-26 AOP', minWidth: 150 },
-  //   { field: 'secondYear', headerName: 'FY 2025-26 Actual', minWidth: 150 },
-  //   { field: 'thirdYear', headerName: 'FY 2026-27 AOP', minWidth: 150 },
-  //   {
-  //     field: 'remarks',
-  //     headerName: 'Remarks',
-  //     minWidth: 200,
-  //   },
-  // ]
 
-  // const columnGroupingModel = [
-  //   {
-  //     groupId: 'annualAOP',
-  //     headerName: 'Annual AOP Cost',
-  //     children: [
-  //       { field: 'fy202425AOP' },
-  //       { field: 'fy202425Actual' },
-  //       { field: 'fy202526AOP' },
-  //     ],
-  //   },
-  // ]
-
-  const fetchData = async () => {
-    setLoading(true)
-    try {
-      var data = await DataService.getWorkflowData(keycloak, plantId)
-      // console.log(data)
-      const formattedRows = data.results.map((row, id) => {
-        // build a new row, formatting only the numeric fields
-        const newRow = { id }
-        Object.entries(row).forEach(([key, val]) => {
-          // if val is a number string, format it
-          if (!isNaN(val) && val !== '') {
-            newRow[key] = Number(val).toFixed(2) // "9999.00" :contentReference[oaicite:0]{index=0}
-          } else {
-            newRow[key] = val
-          }
-        })
-        return newRow
-      })
-      setRows(formattedRows)
-      // setColumns(data?.headers)
-      const generateColumns = ({ headers, keys }) => {
-        return headers.map((header, idx) => ({
-          field: keys[idx],
-          headerName: header,
-          minWidth: idx === 0 ? 300 : 150,
-          // Optional: center headers except the first
-          // align: idx === 0 ? 'left' : 'center',
-          // headerAlign: idx === 0 ? 'left' : 'center',
-          // Optional: custom header renderer for the first column
-          ...(idx === 0 && {
-            renderHeader: (params) => (
-              <div
-              // style={{
-              //   display: 'flex',
-              //   alignItems: 'center',
-              //   justifyContent: 'center',
-              //   width: '100%',
-              //   height: '100%',
-              // }}
-              >
-                {params.colDef.headerName}
-              </div>
-            ),
-          }),
-        }))
-      }
-
-      // 2. Use it in your component
-      setColumns(generateColumns(data))
-      setLoading(false) // Hide loading
-    } catch (error) {
-      console.error('Error fetching Business Demand data:', error)
-      setRows([]) // Clear rows on error
-      setLoading(false) // Hide loading
-    }
-  }
-  useEffect(() => {
-    fetchData()
-  }, [plantId])
-  const defaultCustomHeight = { mainBox: '60vh', otherBox: '114%' }
-
-  const handleRejectClick = () => {
-    setActionDisabled(true)
-    setOpenRejectDialog(true)
-  }
-  // const [audit, setAudit] = useState(true)
-  const [openAuditPopup, setOpenAuditPopup] = useState(false)
-  // const handleAudit = () => {
-  //   setAudit((prev) => !prev)
-  // }
-
-  // Updated Audit handler: open popup dialog
-  const handleAuditOpen = () => {
-    setOpenAuditPopup(true)
-  }
-
-  const handleAuditClose = () => {
-    setOpenAuditPopup(false)
-  }
-
-  //   const handleRejectSubmit = () => {
-  //     // Perform rejection logic here (e.g., API call with rejectReason)
-  //     setOpenRejectDialog(false)
-  //     setRejectReason('')
-  //   }
-
-  const handleRejectCancel = () => {
-    setActionDisabled(false)
-
-    setOpenRejectDialog(false)
-    // setRejectReason('')
-    setText()
-  }
-
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
   const caseData = {
-    caseDefinitionId: 'aopv3',
+    caseDefinitionId: 'aopv5',
     owner: {
       id: keycloak.subject || '',
       name: keycloak.idTokenParsed.name || '',
@@ -210,399 +82,288 @@ const WorkFlowMerge = () => {
       { name: 'submit1', value: false, type: 'String' },
     ],
   }
-
-  useEffect(() => {
-    // console.log('in the case id')
-    // showCreateCasebutton = false;
-
-    getCaseId()
-  }, [])
-  const getActivityPrefix = (activityId) => {
-    return activityId?.split('-')[0] || ''
+  const screens = useScreens()
+  console.log(screens)
+  // generate columns including remark column
+  const generateColumns = (data) => {
+    const cols = data.headers.map((header, i) => ({
+      field: data.keys[i],
+      headerName: header,
+      minWidth: i === 0 ? 300 : 150,
+      ...(i === 0 && { renderHeader: (p) => <div>{p.colDef.headerName}</div> }),
+    }))
+    const remarkIdx = cols.findIndex(
+      (col) => col.field === 'body' || col.field === 'remark',
+    )
+    if (remarkIdx !== -1) cols[remarkIdx] = remarkColumn(handleRemarkCellClick)
+    return cols
   }
-  const getActivityStatus = async (activityId) => {
-    try {
-      // 1. Fetch existing cases
-      const status = await TaskService.getActivityInstancesById(
-        keycloak,
-        activityId,
-      )
 
-      const prefix = getActivityPrefix(status[0]?.activityId)
-      setStatus(prefix)
-      const stepIndex = steps.findIndex((step) =>
-        step.toLowerCase().includes(prefix.toLowerCase()),
-      )
-      if (stepIndex !== -1) {
-        setActiveStep(stepIndex)
-      }
-      // if (!status?.length) {
-      //   setShowCreateCasebutton(true)
-      //   return
-      // }
-    } catch (error) {
-      console.error('Error fetching case/tasks:', error)
+  // fetch workflow data for grid
+  const fetchData = async () => {
+    setLoading(true)
+    try {
+      const data = await DataService.getWorkflowData(keycloak, plantId)
+      const formatted = data.results.map((row, idx) => {
+        const out = { id: idx }
+        Object.entries(row).forEach(([k, v]) => {
+          out[k] = !isNaN(v) && v !== '' ? Number(v).toFixed(2) : v
+        })
+        return out
+      })
+      // console.log(formatted)
+      setRows(formatted)
+      setColumns(generateColumns(data))
+    } catch (err) {
+      console.error('Error fetching grid', err)
+      setRows([])
+    } finally {
+      setLoading(false)
     }
   }
 
+  // fetch case, steps, and determine active step
   const getCaseId = async () => {
     try {
-      // 1. Fetch existing cases
       const cases = await DataService.getCaseId(keycloak)
-      // console.log(cases)
-      if (!cases?.length) {
+
+      if (!cases?.workflowList.length) {
         setShowCreateCasebutton(true)
-        return
+        // return
+      } else {
+        setShowCreateCasebutton(false)
       }
+      setTaskId(cases?.taskId)
+      setWorkFlowDto(cases?.workflowList[0])
+      // console.log(cases)
+      const master = cases?.workflowMasterDTO
 
-      // 2. Fetch tasks for the first case
-      const { caseId } = cases[0]
-      // console.log(caseId)
-      setBusinessKey(caseId)
-      const tasks = await DataService.getTasksByBusinessKey(keycloak, caseId)
-      // console.log(tasks)
-      getActivityStatus(tasks[0]?.processInstanceId)
+      setMasterSteps(master?.steps)
+      // console.log(master?.steps, 'masterSteps')
+      // auto-pick the in-progress or next step
+      setSteps(cases?.workflowMasterDTO?.steps.map((i) => i.displayName))
 
-      // 3. Grab realm roles (array of strings)
-      const roles = keycloak.tokenParsed?.realm_access?.roles || []
+      const activeIdx = master.steps.findIndex((s) => s.status === 'inprogress')
+      // console.log(activeIdx, 'activeIdx')
+      setActiveStep(
+        activeIdx > -1
+          ? activeIdx
+          : master.steps.findIndex((s) => s.status !== 'completed'),
+      )
 
-      let matchingTask = tasks.find((task) => roles.includes(task.assignee))
+      // const tasks = await DataService.getTasksByBusinessKey(
+      //   keycloak,
+      //   cases[0].caseId,
+      // )
+      // if (!tasks?.length) return
 
-      setRole(matchingTask?.assignee)
-
-      // setTaskId(matchingTask.id)
-
-      // console.log(matchingTask)
-      if (matchingTask) {
-        setShowTextBox(true)
-        setTaskId(matchingTask.id)
-        // setTimeout(() => {
-        //   if (tasks[0].id) handleCompleteSubmit()
-        // }, 2000)
-      }
-    } catch (error) {
-      console.error('Error fetching case/tasks:', error)
+      // who can act now?
+      // const roles = keycloak.tokenParsed?.realm_access?.roles || []
+      // const match = tasks.find((t) => roles.includes(t.assignee))
+      // if (match) {
+      //   setActionDisabled(false)
+      //   setTaskId(match.id)
+      // }
+    } catch (err) {
+      console.error('Error fetching case', err)
     }
   }
+  // console.log(activeStep, 'activeStep')
+  // console.log(masterSteps, 'masterSteps')
+
   const createCase = async () => {
     // 1. Prevent double‐submit
     setIsCreatingCase(true)
 
     try {
       // 2. Create case + save workflow
-      const result = await DataService.createCase(keycloak, caseData)
-      await DataService.saveworkflow(
-        {
+      const payload = {
+        caseInstance: {
+          caseDefinitionId: 'aopv5',
+          owner: {
+            id: keycloak.subject || '',
+            name: keycloak.idTokenParsed.name || '',
+            email: keycloak.idTokenParsed.email || '',
+            phone: keycloak.idTokenParsed.phone || '',
+          },
+          attributes: [
+            { name: 'textField', value: '9', type: 'String' },
+            { name: 'submit', value: false, type: 'String' },
+            { name: 'submit1', value: false, type: 'String' },
+          ],
+        },
+        workflowDTO: {
           year: localStorage.getItem('year'),
           plantFkId:
             JSON.parse(localStorage.getItem('selectedPlant'))?.id || '',
           caseDefId: caseData.caseDefinitionId,
-          caseId: result.businessKey,
+          // caseId: result.businessKey,
           siteFKId: JSON.parse(localStorage.getItem('selectedSite'))?.id || '',
           verticalFKId: localStorage.getItem('verticalId'),
         },
-        keycloak,
-      )
-      getCaseId()
-      // setTimeout(() => {
-      //   if (taskId) handleCompleteSubmit()
-      // }, 2000)
-
-      // 3. Success feedback
+        variables: caseData.attributes,
+        // taskId: taskId,
+      }
+      const result = await DataService.submitWorkFlow(payload, keycloak)
+      console.log(result)
       setSnackbarData({
         message: 'Workflow instance created successfully',
         severity: 'success',
       })
+      getCaseId()
     } catch (error) {
       console.error('Error creating workflow:', error)
       setSnackbarData({
         message: error.message || 'Failed to create workflow',
         severity: 'error',
       })
-      setIsCreatingCase(false)
     } finally {
       // 5. Show snackbar regardless
       setSnackbarOpen(true)
+      setIsCreatingCase(false)
     }
   }
 
-  // // 1. Complete Task (Submit)
-  // const handleCompleteSubmit = async () => {
-  //   try {
-  //     const taskDone = await DataService.completeTask(
-  //       keycloak,
-  //       taskId,
-  //       caseData.attributes,
-  //     )
+  useEffect(() => {
+    getCaseId()
+    fetchData()
+  }, [plantId, year])
 
-  //     if (!taskDone) throw new Error('Unexpected response completing task')
+  // handle reject click
+  const handleRejectClick = () => {
+    setActionDisabled(true)
+    setOpenRejectDialog(true)
+  }
+  const handleRejectCancel = () => {
+    setActionDisabled(false)
+    setOpenRejectDialog(false)
+    setText('')
+  }
 
-  //     setSnackbarData({
-  //       message: 'Workflow instance created successfully',
-  //       severity: 'success',
-  //     })
-  //   } catch (err) {
-  //     console.error('Error completing task:', err)
-  //     setSnackbarData({
-  //       message: err.message || 'Failed to complete task',
-  //       severity: 'error',
-  //     })
-  //   } finally {
-  //     setSnackbarOpen(true)
-  //     // you can reset or leave other state here
-  //   }
-  // }
-
-  // // 2. Post Comment
-  // const handleCommentSubmit = async () => {
-  //   // 1. Validation
-  //   if (!text.trim()) {
-  //     setSnackbarData({
-  //       message: 'Please enter a comment!',
-  //       severity: 'warning',
-  //     })
-  //     setSnackbarOpen(true)
-  //     return
-  //   }
-
-  //   try {
-  //     // Fetch businessKey once (or reuse if stored)
-  //     const cases = await DataService.getCaseId(keycloak)
-  //     const businessKey = cases[0].caseId
-
-  //     const commentPosted = await CaseService.addComment(
-  //       keycloak,
-  //       text,
-  //       '', // parentId
-  //       businessKey, // businessKey
-  //       role,
-  //       steps[activeStep], // status
-  //     )
-  //     if (!commentPosted) throw new Error('Failed to post comment')
-
-  //     // setSnackbarData({
-  //     //   message: 'Comment added successfully! 🎉',
-  //     //   severity: 'success',
-  //     // })
-  //   } catch (err) {
-  //     console.error('Error posting comment:', err)
-  //     setSnackbarData({
-  //       message: err.message || 'Failed to post comment',
-  //       severity: 'error',
-  //     })
-  //   } finally {
-  //     setSnackbarOpen(true)
-  //     setText('')
-  //   }
-  // }
-  // const handleSubmit = () => {
-  //   // 1. Don’t submit empty text
-  //   handleCompleteSubmit()
-  //   handleCommentSubmit()
-  // }
+  // complete task and post comment
   const handleSubmit = async () => {
-    // 1. Don’t submit empty text
-
     try {
-      // 2. Complete the task (204 = success)
-      // console.log(taskId)
-      const taskDone = await DataService.completeTask(
-        keycloak,
-        taskId,
-        caseData.attributes,
-      )
-
-      if (!taskDone) {
-        throw new Error('Unexpected response completing task')
+      const comment = {
+        body: text,
+        parentId: '',
+        userId: keycloak.tokenParsed.preferred_username,
+        userName: keycloak.tokenParsed.given_name,
+        caseId: businessKey,
+        role: '',
+        status: '',
       }
-      // console.log(taskDone)
-      // if (
-      //   (keycloak?.tokenParsed?.realm_access?.roles ?? []).includes(
-      //     'plant_manager',
-      //   )
-      // ) {
-      //   return
-      // } else {
-      // 3. Now post your comment
-      // 1. Fetch existing cases
-      const cases = await DataService.getCaseId(keycloak)
-      // if (!cases?.length) {
-      //   setShowCreateCasebutton(true)
-      //   return
-      // }
-      if (
-        (keycloak?.tokenParsed?.realm_access?.roles ?? []).includes(
-          'plant_manager',
-        )
-      ) {
-        // setShowCreateCasebutton(true)
-        return
+      const payloadOfCompleteTask = {
+        taskId: taskId,
+        CaseComment: comment,
+        variables: caseData.attributes,
+        workflowDto: workflowDto,
       }
-      if (!text.trim()) {
-        setSnackbarData({
-          message: 'Please enter a message!',
-          severity: 'warning',
-        })
-        setSnackbarOpen(true)
-        return
-      }
-      // 2. Fetch tasks for the first case
-      const { caseId } = cases[0]
-      //    parentId can be null or a comment id if you're replying
-      console.log(caseId)
-      let businessKey = caseId
-      const commentPosted = await CaseService.addComment(
-        keycloak,
-        text,
-        '', // parentId, // e.g. null or some existing comment ID
-        businessKey, // your business key
-        role,
-        status || steps[activeStep], // status
-      )
-
-      if (!commentPosted) {
-        throw new Error('Failed to post comment')
-      }
-
-      // 4. Both succeeded!
+      await DataService.completeTask(keycloak, payloadOfCompleteTask)
+      // await CaseService.addComment(keycloak, text, '', businessKey)
       setSnackbarData({
-        message: 'Task completed and comment added! 🎉',
+        message: 'Task completed and comment added!',
         severity: 'success',
       })
-      // }
     } catch (err) {
-      console.error('Error submitting:', err)
-      setSnackbarData({
-        message: err.message || 'Something went wrong!',
-        severity: 'error',
-      })
+      console.error('Error submitting', err)
+      setSnackbarData({ message: err.message, severity: 'error' })
     } finally {
       setSnackbarOpen(true)
       setOpenRejectDialog(false)
       setText('')
     }
   }
+  const defaultCustomHeight = { mainBox: '67vh', otherBox: '100%' }
 
   return (
     <div
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '5px',
-        marginTop: '20px',
+        gap: 5,
+        marginTop: 20,
       }}
     >
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label, index) => (
-          <Step key={label} onClick={() => setActiveStep(index)}>
+      {/* <Stepper activeStep={activeStep} alternativeLabel>
+        {steps.map((label) => (
+          <Step key={label}>
             <StepLabel>{label}</StepLabel>
           </Step>
         ))}
-      </Stepper>{' '}
+      </Stepper> */}
+      <Stepper activeStep={activeStep} alternativeLabel>
+        {masterSteps.map((step) => (
+          <Step key={step.displayName} completed={step.status === 'completed'}>
+            <StepLabel error={step.status === 'error'}>
+              {step.displayName}
+            </StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+
       <Stack
         direction='row'
         spacing={1}
-        justifyContent='right'
-        sx={{ mt: 2, mb: 0 }}
+        justifyContent='flex-end'
+        sx={{ mt: 2 }}
       >
-        {showTextBox && (
-          <>
-            <Button
-              variant='contained'
-              color='primary'
-              sx={{ fontWeight: 'bold', textTransform: 'none', px: 3 }}
-              onClick={handleRejectClick}
-              disabled={actionDisabled}
-            >
-              Accept
-            </Button>
-            <Button
-              variant='outlined'
-              color='secondary'
-              sx={{ fontWeight: 'bold', textTransform: 'none', px: 3 }}
-              onClick={handleRejectClick}
-              disabled={actionDisabled}
-            >
-              Reject
-            </Button>
-          </>
-        )}
-        {!(keycloak?.tokenParsed?.realm_access?.roles ?? []).includes(
-          'plant_manager',
-        ) && (
-          <Button
-            variant='outlined'
-            color='primary'
-            sx={{ fontWeight: 'bold', textTransform: 'none', px: 3 }}
-            onClick={handleAuditOpen}
-          >
-            Audit Trail
-          </Button>
-        )}
-      </Stack>
-      <DataGridTable
-        columns={columns}
-        rows={rows}
-        loading={loading}
-        setRows={setRows}
-        // columnGroupingModel={columnGroupingModel}
-        className='jio-data-grid'
-        permissions={{
-          customHeight: defaultCustomHeight,
-        }}
-      />
         <Button
           variant='contained'
-          color='primary'
+          className='btn-save'
+          onClick={handleRejectClick}
+          disabled={actionDisabled}
+        >
+          Accept
+        </Button>
+        <Button
+          variant='outlined'
+          className='btn-save2'
+          sx={{ color: '#0100cb', border: '1px solid ' }}
+          onClick={handleAuditOpen}
+          disabled={actionDisabled}
+        >
+          Audit Trail
+        </Button>
+      </Stack>
+
+      <DataGridTable
+        rows={rows}
+        columns={columns}
+        loading={loading}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={setCurrentRowId}
+        permission={{ customHeight: defaultCustomHeight }}
+      />
+      {showCreateCasebutton && (
+        <Button
+          variant='contained'
           onClick={createCase}
           disabled={!showCreateCasebutton || isCreatingCase}
+          className='btn-save'
           sx={{
-            backgroundColor: jioColors.primaryBlue,
-            color: jioColors.background,
-            borderRadius: 1,
-            padding: '8px 24px',
-            textTransform: 'none',
-            fontSize: '0.875rem',
-            fontWeight: 500,
+            // backgroundColor: jioColors.primaryBlue,
+            // color: jioColors.background,
+
+            // borderRadius: 1,
+            // padding: '8px 24px',
+            // textTransform: 'none',
+            // fontSize: '0.875rem',
+            // fontWeight: 500,
             width: '200px',
             '&:hover': { backgroundColor: '#143B6F', boxShadow: 'none' },
           }}
         >
           {isCreatingCase ? 'Submitting…' : 'Submit for Approval'}
         </Button>
-      {/* <Button
-        variant='contained'
-        color='primary'
-        onClick={createCase}
-        // sx={{ mt: 2, width: '200px' }}
-        sx={{
-          // marginTop: 2,
-          backgroundColor: jioColors.primaryBlue,
-          color: jioColors.background,
-          borderRadius: 1,
-          padding: '8px 24px',
-          textTransform: 'none',
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          minWidth: '200px',
-          width: '200px',
-          '&:hover': {
-            backgroundColor: '#143B6F',
-            boxShadow: 'none',
-          },
-          // '&.Mui-disabled': {
-          //   backgroundColor: jioColors.primaryBlue,
-          //   color: jioColors.background,
-          //   opacity: 0.7,
-          // },
-        }}
-        disabled={!showCreateCasebutton}
-      >
-        Submit for Approval
-      </Button> */}
-      {/* Reject Dialog */}
+      )}
+
+      {/* Reject Dialog (Comments) */}
       <Dialog open={openRejectDialog} onClose={handleRejectCancel}>
-        <DialogTitle>Please provide remarks on the changes?</DialogTitle>
+        <DialogTitle>Provide remarks on the changes?</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -610,32 +371,26 @@ const WorkFlowMerge = () => {
             label='Remark'
             type='text'
             fullWidth
-            sx={{ width: '100%', minWidth: '600px' }}
             multiline
             rows={8}
+            sx={{ width: '100%', minWidth: '600px' }}
             value={text}
-            // value={rejectReason}
             onChange={(e) => setText(e.target.value)}
-            // onChange={(e) => setRejectReason(e.target.value)}
-            variant='outlined'
           />
         </DialogContent>
-        <DialogActions sx={{ justifyContent: 'flex-end' }}>
-          <Button onClick={handleRejectCancel} color='primary'>
-            Cancel
-          </Button>
+        <DialogActions>
+          <Button onClick={handleRejectCancel}>Cancel</Button>
           <Button
             onClick={handleSubmit}
-            color='primary'
             variant='contained'
-            disabled={!text?.trim()}
-            // disabled={!rejectReason?.trim()}
+            disabled={!text.trim()}
           >
             Submit
           </Button>
         </DialogActions>
       </Dialog>
-      {/* Audit Trail Popup Dialog */}
+
+      {/* Audit Trail Dialog */}
       <Dialog
         open={openAuditPopup}
         onClose={handleAuditClose}
@@ -647,15 +402,14 @@ const WorkFlowMerge = () => {
           <AuditTrail keycloak={keycloak} businessKey={businessKey} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleAuditClose} color='primary'>
-            Close
-          </Button>
+          <Button onClick={handleAuditClose}>Close</Button>
         </DialogActions>
       </Dialog>
+
       <Notification
         open={snackbarOpen}
-        message={snackbarData?.message || ''}
-        severity={snackbarData?.severity || 'info'}
+        message={snackbarData.message}
+        severity={snackbarData.severity}
         onClose={() => setSnackbarOpen(false)}
       />
     </div>

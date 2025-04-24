@@ -10,6 +10,15 @@
   border: none;
   cursor: pointer;
 }
+.btn-save2 {
+  border-radius: 20px;
+  padding: 6px 22px;
+  text-transform: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-width: 100px;
+  cursor: pointer;
+}
 
 .btn-save:hover {
   background-color: #143b6f;

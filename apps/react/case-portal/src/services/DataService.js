@@ -86,6 +86,7 @@ export const DataService = {
   updateUserPlants,
   getCaseId,
   saveworkflow,
+  submitWorkFlow,
 }
 
 // async function CheckIsTokenExp(keycloak) {
@@ -1052,6 +1053,25 @@ async function saveworkflow(data, keycloak) {
     return await Promise.reject(e)
   }
 }
+async function submitWorkFlow(data, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/submitWorkflow`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
 
 async function getCaseId(keycloak) {
   var year = localStorage.getItem('year')
@@ -1860,8 +1880,8 @@ async function getProcessInstanceVariables(keycloak, processInstanceId) {
 //     return await Promise.reject(e)
 //   }
 // }
-async function completeTask(keycloak, taskId, attributes) {
-  const url = `${Config.CaseEngineUrl}/task/${taskId}/complete`
+async function completeTask(keycloak, payload) {
+  const url = `${Config.CaseEngineUrl}/task/completetask`
 
   // 1. Ensure token is fresh before every request
   await keycloak.updateToken(30)
@@ -1873,7 +1893,7 @@ async function completeTask(keycloak, taskId, attributes) {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${keycloak.token}`,
     },
-    body: JSON.stringify(attributes),
+    body: JSON.stringify(payload),
   })
 
   // 3. 204 = success (no JSON body)
