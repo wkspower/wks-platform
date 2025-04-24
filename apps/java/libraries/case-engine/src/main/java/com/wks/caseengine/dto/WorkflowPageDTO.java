@@ -21,5 +21,7 @@ public class WorkflowPageDTO {
 	List<WorkflowDTO> workflowList;
 
     WorkflowMasterDTO workflowMasterDTO;
+
+    String taskId;
 	
 }

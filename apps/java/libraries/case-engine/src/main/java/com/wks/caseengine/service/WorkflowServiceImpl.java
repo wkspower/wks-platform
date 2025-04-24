@@ -1,6 +1,7 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import jakarta.persistence.EntityManager;
@@ -19,6 +20,10 @@ import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Repository;
 import java.lang.reflect.Field;
 import javax.sql.DataSource;
@@ -31,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.Task;
@@ -48,6 +54,7 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.WorkflowMasterRepository;
 import com.wks.caseengine.repository.WorkflowRepository;
 import com.wks.caseengine.repository.WorkflowStepsMasterRepository;
+import com.wks.caseengine.rest.entity.OwnerDetails;
 import com.wks.caseengine.tasks.TaskService;
 
 @Service
@@ -89,10 +96,22 @@ public class WorkflowServiceImpl implements WorkflowService {
 				WorkflowDTO dto = new WorkflowDTO();
 				dto.setId(workflow.getId().toString());
 				dto.setCaseDefId(workflow.getCaseDefId());
-				if(workflow.getCaseId()!=null && workflow.getProcessInstanceId()==null){
+				if(workflow.getCaseId()!=null){
 					//could not get tasks while submitting the aop report due to transactional policies. Hence writing here
+					List<String> rolesList =extractRoles();
 					List<Task> tasks = taskService.find(Optional.ofNullable(workflow.getCaseId()));
-			        workflow.setProcessInstanceId(tasks.get(0).getProcessInstanceId());
+					for(Task task :tasks){
+                        for(String role: rolesList){
+							System.out.println("roles "+role + "assignee "+task.getAssignee() );
+							if(task.getAssignee().equalsIgnoreCase(role)){
+								workflowPageDTO.setTaskId(task.getId());
+								break;
+							}
+						}
+					}
+					if(workflow.getProcessInstanceId()==null){
+						workflow.setProcessInstanceId(tasks.get(0).getProcessInstanceId());
+					}
 					workflowRepository.save(workflow);
 				}
 				dto.setCaseId(workflow.getCaseId());
@@ -386,7 +405,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 
-
+        @Transactional
 		@Override
 		public WorkflowDTO submitWorkflow(WorkflowSubmitDTO workflowSubmitDTO) {
 			CaseInstance caseInstance = caseInstanceService.startWithValues(workflowSubmitDTO.getCaseInstance());
@@ -408,5 +427,46 @@ public class WorkflowServiceImpl implements WorkflowService {
             
 
 	}
+
+
+	public static List<String> extractRoles() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+		if (authentication instanceof JwtAuthenticationToken) {
+		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
+		    Jwt jwt = jwtAuth.getToken();
+		    
+		    String userId = jwt.getClaimAsString("sub"); // or "preferred_username"
+		    Map<String, Object> claims = jwt.getClaims();
+		    
+		    System.out.println("userId: " + userId);
+		    System.out.println("Claims: " + claims);
+		    
+		    claims.entrySet().stream()
+		    .forEach(entry -> System.out.println(entry.getKey() + " : " + entry.getValue()));
+		
+		
+		Object realmAccessObj = claims.get("realm_access");
+
+
+
+
+        if (realmAccessObj instanceof Map<?, ?>) {
+            Map<?, ?> realmAccessMap = (Map<?, ?>) realmAccessObj;
+            Object rolesObj = realmAccessMap.get("roles");
+
+            if (rolesObj instanceof List<?>) {
+                // Safe cast with filtering
+                List<?> rawList = (List<?>) rolesObj;
+                return rawList.stream()
+                        .filter(item -> item instanceof String)
+                        .map(String.class::cast)
+                        .toList();
+            }
+        }
+	}
+
+        return Collections.emptyList(); // Return empty list if roles not found
+    }
 
 }
