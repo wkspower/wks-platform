@@ -213,10 +213,66 @@ public class WorkflowServiceImpl implements WorkflowService {
 		}
 	}
 
+	@Override
+	public Map<String, Object> getProductionAOPWorkflowData(String plantId, String year) {
+		Map<String, Object> map = new HashMap<>();
+
+		try {
+			List<Object[]> results = getProductionWorkflowData(plantId, year);
+
+			List<WorkflowYearDTO> workflowList = new ArrayList<>();
+			for (Object[] row : results) {
+				WorkflowYearDTO dto = new WorkflowYearDTO();
+				dto.setParticulates(row[0] != null ? row[0].toString() : null);
+				dto.setUom(row[1] != null ? row[1].toString() : null);
+				dto.setFy202425AOP(row[2] != null ? row[2].toString() : null);
+				dto.setFy202425Actual(row[3] != null ? row[3].toString() : null);
+				dto.setFy202526AOP(row[4] != null ? row[4].toString() : null);
+				dto.setRemark(row[5] != null ? row[5].toString() : null);
+				workflowList.add(dto);
+			}
+			List<String> headers = getProductionWorkflowHeaders(plantId, year);
+			List<String> keys = new ArrayList<>();
+			for (Field field : WorkflowYearDTO.class.getDeclaredFields()) {
+				keys.add(field.getName());
+			}
+			map.put("headers", headers);
+			map.put("keys", keys);
+			map.put("results", workflowList);
+			return map;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 	public List<Object[]> getData(String plantId, String aopYear) {
 		try {
 			// Stored procedure name
 			String procedureName = "GetAnnualAOPCost";
+
+			// Prepare native SQL call with parameters
+			String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			// Set parameters
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	public List<Object[]> getProductionWorkflowData(String plantId, String aopYear) {
+		try {
+			// Stored procedure name
+			String procedureName = "GetAnnualProductionCost";
 
 			// Prepare native SQL call with parameters
 			String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear";
@@ -240,6 +296,41 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 		try (Connection conn = dataSource.getConnection();
 				CallableStatement stmt = conn.prepareCall("{call GetAnnualAOPCost(?, ?)}")) {
+
+			stmt.setString(1, plantId);
+			stmt.setString(2, aopYear);
+
+			boolean hasResultSet = stmt.execute();
+
+			// Move forward until we find a result set
+			while (!hasResultSet && stmt.getUpdateCount() != -1) {
+				hasResultSet = stmt.getMoreResults();
+			}
+
+			// If a result set is found, get metadata and headers
+			if (hasResultSet) {
+				try (ResultSet rs = stmt.getResultSet()) {
+					ResultSetMetaData metaData = rs.getMetaData();
+					int columnCount = metaData.getColumnCount();
+
+					for (int i = 1; i <= columnCount; i++) {
+						headers.add(metaData.getColumnLabel(i));
+					}
+				}
+			}
+
+		} catch (SQLException e) {
+			throw new RuntimeException("Failed to fetch headers", e);
+		}
+
+		return headers;
+	}
+
+	public List<String> getProductionWorkflowHeaders(String plantId, String aopYear) {
+		List<String> headers = new ArrayList<>();
+
+		try (Connection conn = dataSource.getConnection();
+				CallableStatement stmt = conn.prepareCall("{call GetAnnualProductionCost(?, ?)}")) {
 
 			stmt.setString(1, plantId);
 			stmt.setString(2, aopYear);

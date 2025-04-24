@@ -43,6 +43,12 @@ public class WorkFlowController {
     	return data;
     }
     
+    @GetMapping(value="/production-aop/work-flow")
+    public Map<String, Object> getProductionAOPWorkflowData( @RequestParam String plantId,@RequestParam String year){
+    	Map<String, Object> data= workflowService.getProductionAOPWorkflowData(plantId,year);
+    	return data;
+    }
+    
 
 	@PostMapping(value="/submitWorkflow")
 	public 	WorkflowDTO submitWorkflow(@RequestBody WorkflowSubmitDTO workflowSubmitDTO) {
