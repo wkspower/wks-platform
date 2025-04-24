@@ -89,6 +89,12 @@ public class WorkflowServiceImpl implements WorkflowService {
 				WorkflowDTO dto = new WorkflowDTO();
 				dto.setId(workflow.getId().toString());
 				dto.setCaseDefId(workflow.getCaseDefId());
+				if(workflow.getCaseId()!=null && workflow.getProcessInstanceId()==null){
+					//could not get tasks while submitting the aop report due to transactional policies. Hence writing here
+					List<Task> tasks = taskService.find(Optional.ofNullable(workflow.getCaseId()));
+			        workflow.setProcessInstanceId(tasks.get(0).getProcessInstanceId());
+					workflowRepository.save(workflow);
+				}
 				dto.setCaseId(workflow.getCaseId());
 				dto.setPlantFkId(workflow.getPlantFKId().toString());
 				dto.setVerticalFKId(workflow.getVerticalFKId().toString());
@@ -379,28 +385,27 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 	}
 
-	@Override
-	public WorkflowDTO submitWorkflow(WorkflowSubmitDTO workflowSubmitDTO) {
-		CaseInstance caseInstance = caseInstanceService.startWithValues(workflowSubmitDTO.getCaseInstance());
-		System.out.println("case created");
 
-		List<Task> tasks = taskService.find(Optional.ofNullable(caseInstance.getBusinessKey()));
 
-		System.out.println("tasks cound");
-		taskService.complete(tasks.get(0).getId(), workflowSubmitDTO.getVariables());
-		System.out.println("tasks completed");
+		@Override
+		public WorkflowDTO submitWorkflow(WorkflowSubmitDTO workflowSubmitDTO) {
+			CaseInstance caseInstance = caseInstanceService.startWithValues(workflowSubmitDTO.getCaseInstance());
+			System.out.println("case created "+ caseInstance.getBusinessKey());
+            
+			//System.out.println("tasks found2" + tasks2.size());
+			System.out.println("tasks completed");
+			workflowSubmitDTO.getWorkflowDTO().setCaseId(caseInstance.getBusinessKey());
+			return saveWorkFlow(workflowSubmitDTO.getWorkflowDTO());
+			//return workflowSubmitDTO.getWorkflowDTO();
+		}
 
-		workflowSubmitDTO.getWorkflowDTO().setProcessInstanceId(tasks.get(0).getProcessInstanceId());
-		return saveWorkFlow(workflowSubmitDTO.getWorkflowDTO());
 
-	}
+        @Override
+		public void completeTaskWithComment(WorkflowSubmitDTO workflowSubmitDTO){
 
-	@Override
-	public void completeTaskWithComment(WorkflowSubmitDTO workflowSubmitDTO) {
-
-		taskService.complete(workflowSubmitDTO.getTaskId(), workflowSubmitDTO.getVariables());
-		caseInstanceService.saveComment(workflowSubmitDTO.getWorkflowDTO().getCaseId(),
-				workflowSubmitDTO.getCaseComment());
+			taskService.complete(workflowSubmitDTO.getTaskId(),workflowSubmitDTO.getVariables());
+            caseInstanceService.saveComment(workflowSubmitDTO.getWorkflowDTO().getCaseId(), workflowSubmitDTO.getCaseComment());
+            
 
 	}
 

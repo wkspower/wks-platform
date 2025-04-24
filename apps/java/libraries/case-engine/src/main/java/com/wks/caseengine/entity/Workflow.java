@@ -31,7 +31,7 @@ public class Workflow {
     @Column(name = "case_Id",  nullable = false)
     private String caseId;
 
-    @Column(name = "ProcessInstanceId",  nullable = false)
+    @Column(name = "ProcessInstanceId",  nullable = true)
     private String processInstanceId;
     
     @Column(name = "Plant_FK_Id", nullable = false)
