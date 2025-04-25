@@ -82,8 +82,8 @@ const WorkFlowMerge = () => {
       { name: 'submit1', value: false, type: 'String' },
     ],
   }
-  const screens = useScreens()
-  console.log(screens)
+  // const screens = useScreens()
+  // console.log(screens)
   // generate columns including remark column
   const generateColumns = (data) => {
     const cols = data.headers.map((header, i) => ({
@@ -292,7 +292,7 @@ const WorkFlowMerge = () => {
         ))}
       </Stepper> */}
       <Stepper activeStep={activeStep} alternativeLabel>
-        {masterSteps.map((step) => (
+        {masterSteps?.map((step) => (
           <Step key={step.displayName} completed={step.status === 'completed'}>
             <StepLabel error={step.status === 'error'}>
               {step.displayName}
