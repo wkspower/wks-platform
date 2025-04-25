@@ -22,10 +22,10 @@ public class AOPReportServiceImpl implements AOPReportService{
 	private EntityManager entityManager;
 
 	@Override
-	public AOPMessageVM getAnnualAOPReport(String plantId, String year, String reportType) {
+	public AOPMessageVM getAnnualAOPReport(String plantId, String year, String reportType,String AopYearFilter) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			List<Object[]> results = getAnnualAOPReportData(plantId, year,reportType);
+			List<Object[]> results = getAnnualAOPReportData(plantId, year,reportType,AopYearFilter);
 
 			List<AOPReportDTO> aopReportDTOList = new ArrayList<>();
 			for (Object[] row : results) {
@@ -60,13 +60,13 @@ public class AOPReportServiceImpl implements AOPReportService{
 
 	}
 	
-	public List<Object[]> getAnnualAOPReportData(String plantId, String aopYear,String reportType) {
+	public List<Object[]> getAnnualAOPReportData(String plantId, String aopYear,String reportType,String AopYearFilter) {
 		try {
 			// Stored procedure name
 			String procedureName = "AnnualCostAopReport";
 
 			// Prepare native SQL call with parameters
-			String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
+			String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType, @AopYearFilter = :AopYearFilter";
 
 			Query query = entityManager.createNativeQuery(sql);
 
@@ -74,6 +74,7 @@ public class AOPReportServiceImpl implements AOPReportService{
 			query.setParameter("plantId", plantId);
 			query.setParameter("aopYear", aopYear);
 			query.setParameter("reportType", reportType);
+			query.setParameter("AopYearFilter", AopYearFilter);
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
