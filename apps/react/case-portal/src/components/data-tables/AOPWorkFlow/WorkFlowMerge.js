@@ -342,9 +342,7 @@ const WorkFlowMerge = () => {
           variant='contained'
           className='btn-save'
           onClick={handleRejectClick}
-          disabled={
-            actionDisabled || !masterSteps[activeStep]?.isRemarksDisabled
-          }
+          disabled={actionDisabled}
         >
           Accept
         </Button>
@@ -353,9 +351,7 @@ const WorkFlowMerge = () => {
           className='btn-save2'
           sx={{ color: '#0100cb', border: '1px solid ' }}
           onClick={handleAuditOpen}
-          disabled={
-            actionDisabled || !masterSteps[activeStep]?.isRemarksDisabled
-          }
+          disabled={actionDisabled}
         >
           Audit Trail
         </Button>
