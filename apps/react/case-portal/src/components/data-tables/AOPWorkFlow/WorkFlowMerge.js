@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Stepper,
   Step,
@@ -22,6 +22,7 @@ import Notification from 'components/Utilities/Notification'
 import './jio-grid-style.css'
 import { usePlan } from 'menu/new-plan'
 import { useScreens } from 'menu/userscreen'
+import { Box } from '../../../../node_modules/@mui/material/index'
 
 const WorkFlowMerge = () => {
   const keycloak = useSession()
@@ -38,6 +39,7 @@ const WorkFlowMerge = () => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const handleRemarkCellClick = (row) => {
+    console.log(row)
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
@@ -65,9 +67,29 @@ const WorkFlowMerge = () => {
     message: '',
     severity: 'info',
   })
-
+  const unsavedChangesRef = React.useRef({
+    unsavedRows: {},
+    rowsBeforeChange: {},
+  })
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
+  const processRowUpdate = React.useCallback((newRow, oldRow) => {
+    const rowId = newRow.id
+    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
+
+    // Keep track of original values before editing
+    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
+      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
+    }
+
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === newRow.id ? { ...newRow, isNew: false } : row,
+      ),
+    )
+
+    return newRow
+  }, [])
   const caseData = {
     caseDefinitionId: 'aopv5',
     owner: {
@@ -104,6 +126,7 @@ const WorkFlowMerge = () => {
     setLoading(true)
     try {
       const data = await DataService.getWorkflowData(keycloak, plantId)
+      console.log(data)
       const formatted = data.results.map((row, idx) => {
         const out = { id: idx }
         Object.entries(row).forEach(([k, v]) => {
@@ -111,7 +134,7 @@ const WorkFlowMerge = () => {
         })
         return out
       })
-      // console.log(formatted)
+      console.log(formatted)
       setRows(formatted)
       setColumns(generateColumns(data))
     } catch (err) {
@@ -210,17 +233,24 @@ const WorkFlowMerge = () => {
         message: 'Workflow instance created successfully',
         severity: 'success',
       })
-      getCaseId()
+      setLoading(true)
+      setTimeout(() => {
+        getCaseId()
+        setLoading(false)
+      }, 4000)
+      setActionDisabled(true)
     } catch (error) {
       console.error('Error creating workflow:', error)
       setSnackbarData({
         message: error.message || 'Failed to create workflow',
         severity: 'error',
       })
+      setActionDisabled(false)
     } finally {
       // 5. Show snackbar regardless
       setSnackbarOpen(true)
       setIsCreatingCase(false)
+      // setActionDisabled(true)
     }
   }
 
@@ -264,25 +294,27 @@ const WorkFlowMerge = () => {
         message: 'Task completed and comment added!',
         severity: 'success',
       })
+      setActionDisabled(true)
     } catch (err) {
       console.error('Error submitting', err)
       setSnackbarData({ message: err.message, severity: 'error' })
+      setActionDisabled(false)
     } finally {
       setSnackbarOpen(true)
       setOpenRejectDialog(false)
       setText('')
     }
   }
-  const defaultCustomHeight = { mainBox: '67vh', otherBox: '100%' }
+  const defaultCustomHeight = { mainBox: '62vh', otherBox: '100%' }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 5,
-        marginTop: 20,
-      }}
+    <Box
+    // style={{
+    //   display: 'flex',
+    //   flexDirection: 'column',
+    //   gap: 5,
+    //   marginTop: 20,
+    // }}
     >
       {/* <Stepper activeStep={activeStep} alternativeLabel>
         {steps.map((label) => (
@@ -300,7 +332,6 @@ const WorkFlowMerge = () => {
           </Step>
         ))}
       </Stepper>
-
       <Stack
         direction='row'
         spacing={1}
@@ -311,7 +342,9 @@ const WorkFlowMerge = () => {
           variant='contained'
           className='btn-save'
           onClick={handleRejectClick}
-          disabled={actionDisabled}
+          disabled={
+            actionDisabled || !masterSteps[activeStep]?.isRemarksDisabled
+          }
         >
           Accept
         </Button>
@@ -320,29 +353,41 @@ const WorkFlowMerge = () => {
           className='btn-save2'
           sx={{ color: '#0100cb', border: '1px solid ' }}
           onClick={handleAuditOpen}
-          disabled={actionDisabled}
+          disabled={
+            actionDisabled || !masterSteps[activeStep]?.isRemarksDisabled
+          }
         >
           Audit Trail
         </Button>
       </Stack>
 
-      <DataGridTable
-        rows={rows}
-        columns={columns}
-        loading={loading}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={setCurrentRowId}
-        permission={{ customHeight: defaultCustomHeight }}
-      />
+      <Box
+        sx={{
+          height: '52vh',
+          width: '100%',
+          marginBottom: 0,
+          padding: 0,
+        }}
+      >
+        <DataGridTable
+          rows={rows}
+          columns={columns}
+          loading={loading}
+          processRowUpdate={processRowUpdate}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          setCurrentRowId={setCurrentRowId}
+          permissions={{ customHeight: defaultCustomHeight }}
+        />
+      </Box>
       {showCreateCasebutton && (
         <Button
           variant='contained'
           onClick={createCase}
-          disabled={!showCreateCasebutton || isCreatingCase}
+          disabled={!showCreateCasebutton || isCreatingCase || actionDisabled}
           className='btn-save'
           sx={{
             // backgroundColor: jioColors.primaryBlue,
@@ -412,7 +457,7 @@ const WorkFlowMerge = () => {
         severity={snackbarData.severity}
         onClose={() => setSnackbarOpen(false)}
       />
-    </div>
+    </Box>
   )
 }
 

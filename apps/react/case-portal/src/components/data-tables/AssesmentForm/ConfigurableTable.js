@@ -757,7 +757,7 @@ const ASDataGrid1 = ({
           },
           loadingOverlay: {
             variant: 'skeleton',
-            noRowsVariant: 'skeleton',
+            norowsvariant: 'skeleton',
           },
           columnsManagement: {
             getTogglableColumns,
