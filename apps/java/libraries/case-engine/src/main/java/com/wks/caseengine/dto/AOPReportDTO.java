@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 public class AOPReportDTO {
 	
 	private String norm;
-	private String materialFKId;
 	private Float january;
     private Float february;
     private Float march;
@@ -28,5 +27,9 @@ public class AOPReportDTO {
     private Float october;
     private Float november;
     private Float december;
- 
+    private String particulars;
+    private Float total;
+    private String displayName;
+    private Integer displayOrder;
+    private Integer cost;
 }

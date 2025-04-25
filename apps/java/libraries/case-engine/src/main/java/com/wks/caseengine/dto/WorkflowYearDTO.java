@@ -23,5 +23,6 @@ public class WorkflowYearDTO {
 	private String fy202425Actual;
 	private String fy202526AOP;
 	private String remark;
+	private String aopType;
 
 }
