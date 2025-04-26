@@ -54,7 +54,7 @@ public class AOPReportServiceImpl implements AOPReportService{
 
 	            } else if (reportType.equalsIgnoreCase("aopYearFilter")) {
 
-	                map.put("norm", row[0]);
+	                map.put("name", row[0]);
 	                map.put("displayName", row[1]);
 	                map.put("displayOrder", row[2]);
 
