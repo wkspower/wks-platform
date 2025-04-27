@@ -87,15 +87,20 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	@Override
 	public void update(final String businessKey, final CaseInstance caseInstance)
 			throws DatabaseRecordNotFoundException {
-		Bson filter = Filters.eq("businessKey", businessKey);
-		Bson update = Updates.combine(Updates.set("status", caseInstance.getStatus()),
-				Updates.set("stage", caseInstance.getStage()), Updates.set("attributes", caseInstance.getAttributes()),
-				Updates.set("documents", caseInstance.getDocuments()),
-				Updates.set("queueId", caseInstance.getQueueId()), Updates.set("comments", caseInstance.getComments()));
-
-		CaseInstance updatedCaseInstance = getCollection().findOneAndUpdate(filter, update);
-		if (updatedCaseInstance == null) {
-			throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
+		System.out.println("in CaseInstanceRepositoryImpl update businessKey"+businessKey);
+		if(businessKey!=null && businessKey!="" && !businessKey.isEmpty() && !businessKey.isBlank()){
+			Bson filter = Filters.eq("businessKey", businessKey);
+			Bson update = Updates.combine(Updates.set("status", caseInstance.getStatus()),
+					Updates.set("stage", caseInstance.getStage()), Updates.set("attributes", caseInstance.getAttributes()),
+					Updates.set("documents", caseInstance.getDocuments()),
+					Updates.set("queueId", caseInstance.getQueueId()), Updates.set("comments", caseInstance.getComments()));
+	
+			CaseInstance updatedCaseInstance = getCollection().findOneAndUpdate(filter, update);
+			if (updatedCaseInstance == null) {
+				throw new DatabaseRecordNotFoundException("CaseInstance", "businessKey", businessKey);
+			}
+		}else{
+           System.out.println("found empty business key in in CaseInstanceRepositoryImpl update");
 		}
 
 	}

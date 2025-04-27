@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
-@Table(name = "Workflow")
+@Table(name = "WorkflowInstances")
 @Getter
 @Setter
 @NoArgsConstructor

@@ -11,6 +11,9 @@
  */
 package com.wks.caseengine.cases.instance.service;
 
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseDocument;
 import com.wks.caseengine.cases.instance.CaseInstance;
@@ -22,7 +25,8 @@ public interface CaseInstanceService {
 	PageResult<CaseInstance> find(CaseInstanceFilter filters);
 
 	CaseInstance get(final String businessKey);
-
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	///@Transactional
 	CaseInstance startWithValues(final CaseInstance caseInstance);
 
 	void saveWithValues(final CaseInstance caseInstance);

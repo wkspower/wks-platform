@@ -96,22 +96,38 @@ public class WorkflowServiceImpl implements WorkflowService {
 				WorkflowDTO dto = new WorkflowDTO();
 				dto.setId(workflow.getId().toString());
 				dto.setCaseDefId(workflow.getCaseDefId());
+				List<Task> tasks = new ArrayList<>();
 				if(workflow.getCaseId()!=null){
 					//could not get tasks while submitting the aop report due to transactional policies. Hence writing here
-					List<String> rolesList =extractRoles();
-					List<Task> tasks = taskService.find(Optional.ofNullable(workflow.getCaseId()));
+					List<String> rolesList = extractRoles();
+					System.out.println("processInsatance Id "+workflow.getProcessInstanceId());
+					if(workflow.getProcessInstanceId()==null){
+					    while(tasks.size()==0){
+							System.out.println("in while loop");
+							Thread.sleep(2000); 
+							tasks = taskService.find(Optional.ofNullable(workflow.getCaseId()));
+							 
+						}
+						workflow.setProcessInstanceId(tasks.get(0).getProcessInstanceId());
+					}else{
+						tasks = taskService.find(Optional.ofNullable(workflow.getCaseId()));
+					}
+					
+					
+					
 					for(Task task :tasks){
                         for(String role: rolesList){
+							workflowPageDTO.setRole(role);
 							System.out.println("roles "+role + "assignee "+task.getAssignee() );
 							if(task.getAssignee().equalsIgnoreCase(role)){
 								workflowPageDTO.setTaskId(task.getId());
+								workflowPageDTO.setRole(role);
+								
 								break;
 							}
 						}
 					}
-					if(workflow.getProcessInstanceId()==null){
-						workflow.setProcessInstanceId(tasks.get(0).getProcessInstanceId());
-					}
+					
 					workflowRepository.save(workflow);
 				}
 				dto.setCaseId(workflow.getCaseId());
@@ -159,6 +175,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 							.getActivityInstances(dtoList.get(0).getProcessInstanceId());
 					if (actiList != null && actiList.size() > 0) {
 						String status = actiList.get(0).getActivityId().split("-")[0];
+						workflowPageDTO.setStatus(status);
 						for (WorkflowStepsMasterDTO dto : steps) {
 							if (dto.getName().equalsIgnoreCase(status)) {
 								System.out.println("in in progress status" + status);
@@ -393,6 +410,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		IntStream.range(0, items.size())
 				.forEach(i -> {
 					WorkflowStepsMasterDTO item = items.get(i);
+					System.out.println("getstatus"+item.getStatus());
 					if ("inprogress".equalsIgnoreCase(item.getStatus())) {
 						inProgressFound.set(true);
 					}
@@ -424,8 +442,6 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 			taskService.complete(workflowSubmitDTO.getTaskId(),workflowSubmitDTO.getVariables());
             caseInstanceService.saveComment(workflowSubmitDTO.getWorkflowDTO().getCaseId(), workflowSubmitDTO.getCaseComment());
-            
-
 	}
 
 

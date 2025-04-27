@@ -23,5 +23,7 @@ public class WorkflowPageDTO {
     WorkflowMasterDTO workflowMasterDTO;
 
     String taskId;
+    String role;
+    String status;
 	
 }

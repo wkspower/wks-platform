@@ -14,19 +14,20 @@ import {
 import AuditTrail from './AuditTrail'
 import DataGridTable from '../ASDataGrid'
 import { DataService } from 'services/DataService'
-import { CaseService } from 'services/CaseService'
-import { TaskService } from 'services/TaskService'
+// import { CaseService } from 'services/CaseService'
+// import { TaskService } from 'services/TaskService'
 import { useSession } from 'SessionStoreContext'
 import { remarkColumn } from 'components/Utilities/remarkColumn'
 import Notification from 'components/Utilities/Notification'
 import './jio-grid-style.css'
-import { usePlan } from 'menu/new-plan'
-import { useScreens } from 'menu/userscreen'
+// import { usePlan } from 'menu/new-plan'
+// import { useScreens } from 'menu/userscreen'
 import { Box } from '../../../../node_modules/@mui/material/index'
+import { stubArray } from 'lodash'
 
 const WorkFlowMerge = () => {
   const keycloak = useSession()
-  const [steps, setSteps] = useState([])
+  // const [steps, setSteps] = useState([])
   const [activeStep, setActiveStep] = useState(0)
   const [rows, setRows] = useState([])
   const [columns, setColumns] = useState([])
@@ -60,7 +61,8 @@ const WorkFlowMerge = () => {
   const [businessKey, setBusinessKey] = useState('')
   const [masterSteps, setMasterSteps] = useState([])
   const [workflowDto, setWorkFlowDto] = useState({})
-
+  const [status, setStatus] = useState('')
+  const [role, setRole] = useState('')
   // UI feedback
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -126,7 +128,6 @@ const WorkFlowMerge = () => {
     setLoading(true)
     try {
       const data = await DataService.getWorkflowData(keycloak, plantId)
-      console.log(data)
       const formatted = data.results.map((row, idx) => {
         const out = { id: idx }
         Object.entries(row).forEach(([k, v]) => {
@@ -134,7 +135,7 @@ const WorkFlowMerge = () => {
         })
         return out
       })
-      console.log(formatted)
+      // console.log(formatted)
       setRows(formatted)
       setColumns(generateColumns(data))
     } catch (err) {
@@ -149,22 +150,31 @@ const WorkFlowMerge = () => {
   const getCaseId = async () => {
     try {
       const cases = await DataService.getCaseId(keycloak)
-
+      setLoading(false)
       if (!cases?.workflowList.length) {
         setShowCreateCasebutton(true)
         // return
       } else {
         setShowCreateCasebutton(false)
       }
-      setTaskId(cases?.taskId)
+      setTaskId(cases?.taskId || '')
+      setStatus(cases?.status || '')
+      setRole(cases?.role || '')
+      // if (!cases?.taskId) setActionDisabled(true)
       setWorkFlowDto(cases?.workflowList[0])
+      if(cases?.workflowList.length>0){
+        console.log("businessky in getcaseId "+cases?.workflowList[0].caseId);
+        setBusinessKey(cases?.workflowList[0].caseId)
+      }
+      
+
       // console.log(cases)
       const master = cases?.workflowMasterDTO
 
       setMasterSteps(master?.steps)
       // console.log(master?.steps, 'masterSteps')
       // auto-pick the in-progress or next step
-      setSteps(cases?.workflowMasterDTO?.steps.map((i) => i.displayName))
+      // setSteps(cases?.workflowMasterDTO?.steps.map((i) => i.displayName))
 
       const activeIdx = master.steps.findIndex((s) => s.status === 'inprogress')
       // console.log(activeIdx, 'activeIdx')
@@ -234,23 +244,20 @@ const WorkFlowMerge = () => {
         severity: 'success',
       })
       setLoading(true)
-      setTimeout(() => {
-        getCaseId()
-        setLoading(false)
-      }, 4000)
-      setActionDisabled(true)
+      // setTimeout(() => {
+      getCaseId()
+      //   setLoading(false)
+      // }, 4000)
     } catch (error) {
       console.error('Error creating workflow:', error)
       setSnackbarData({
         message: error.message || 'Failed to create workflow',
         severity: 'error',
       })
-      setActionDisabled(false)
     } finally {
       // 5. Show snackbar regardless
       setSnackbarOpen(true)
       setIsCreatingCase(false)
-      // setActionDisabled(true)
     }
   }
 
@@ -279,14 +286,14 @@ const WorkFlowMerge = () => {
         userId: keycloak.tokenParsed.preferred_username,
         userName: keycloak.tokenParsed.given_name,
         caseId: businessKey,
-        role: '',
-        status: '',
+        role: role,
+        status: status,
       }
       const payloadOfCompleteTask = {
         taskId: taskId,
         CaseComment: comment,
         variables: caseData.attributes,
-        workflowDto: workflowDto,
+        workflowDTO: workflowDto,
       }
       await DataService.completeTask(keycloak, payloadOfCompleteTask)
       // await CaseService.addComment(keycloak, text, '', businessKey)
@@ -295,6 +302,7 @@ const WorkFlowMerge = () => {
         severity: 'success',
       })
       setActionDisabled(true)
+      getCaseId()
     } catch (err) {
       console.error('Error submitting', err)
       setSnackbarData({ message: err.message, severity: 'error' })
@@ -332,20 +340,23 @@ const WorkFlowMerge = () => {
           </Step>
         ))}
       </Stepper>
+
       <Stack
         direction='row'
         spacing={1}
         justifyContent='flex-end'
         sx={{ mt: 2 }}
       >
-        <Button
-          variant='contained'
-          className='btn-save'
-          onClick={handleRejectClick}
-          disabled={actionDisabled}
-        >
-          Accept
-        </Button>
+        {taskId && (
+          <Button
+            variant='contained'
+            className='btn-save'
+            onClick={handleRejectClick}
+            disabled={actionDisabled}
+          >
+            Accept
+          </Button>
+        )}
         <Button
           variant='outlined'
           className='btn-save2'
@@ -383,7 +394,7 @@ const WorkFlowMerge = () => {
         <Button
           variant='contained'
           onClick={createCase}
-          disabled={!showCreateCasebutton || isCreatingCase || actionDisabled}
+          disabled={!showCreateCasebutton || isCreatingCase}
           className='btn-save'
           sx={{
             // backgroundColor: jioColors.primaryBlue,
