@@ -5,6 +5,9 @@ import java.util.UUID;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.aggregation.ConditionalOperators.Switch;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Data
+@JsonInclude(Include.ALWAYS)
 public class WorkflowYearDTO {
 
 	private String particulates;
