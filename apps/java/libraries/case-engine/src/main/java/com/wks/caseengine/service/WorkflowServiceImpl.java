@@ -93,10 +93,6 @@ public class WorkflowServiceImpl implements WorkflowService {
 	private TaskService taskService;
 		@Autowired
 		private PlantsRepository plantsRepository;
-
-		@Autowired
-		private SiteRepository siteRepository;
-
 		@Autowired
 		private VerticalsRepository verticalRepository;
 
@@ -502,12 +498,10 @@ public class WorkflowServiceImpl implements WorkflowService {
 	public int calculateExpressionWorkFlow(String year, String plantId) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
-			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			String storedProcedure = vertical.getName() + "_HMD_LoadAnnualAOPCost";
 			System.out.println(storedProcedure);
-			return executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
-					vertical.getId().toString(), year);
+			return executeDynamicUpdateProcedure(storedProcedure, plantId, year);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -518,17 +512,15 @@ public class WorkflowServiceImpl implements WorkflowService {
         return Collections.emptyList(); // Return empty list if roles not found
     }
 	
-		@Transactional
-	public int executeDynamicUpdateProcedure(String procedureName, String plantId, String siteId, String verticalId,
-			String finYear) {
+	@Transactional
+	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
+			String aopYear) {
 		try {
 			String sql = "EXEC " + procedureName
-					+ " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear";
+					+ " @plantId = :plantId, @aopYear = :aopYear";
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("plantId", plantId);
-			query.setParameter("siteId", siteId);
-			query.setParameter("verticalId", verticalId);
-			query.setParameter("finYear", finYear);
+			query.setParameter("aopYear", aopYear);
 
 			return query.executeUpdate();
 		} catch (Exception e) {
