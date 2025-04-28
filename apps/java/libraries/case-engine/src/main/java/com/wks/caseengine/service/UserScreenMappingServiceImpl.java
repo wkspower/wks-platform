@@ -43,10 +43,17 @@ public class UserScreenMappingServiceImpl implements UserScreenMappingService {
 	    List<Map<String, Object>> children = new ArrayList<>();
 
 	    try {
-	        List<VerticalScreenMapping> list = verticalScreenMappingRepository.findByScreenCodeIn(userScreens);
+	    	List<VerticalScreenMapping> screenMappingsWithDuplicates = verticalScreenMappingRepository.findByScreenCodeIn(userScreens);
+	    	Map<String, VerticalScreenMapping> uniqueScreenMappingMap = new HashMap<>();
+
+	    	for (VerticalScreenMapping mapping : screenMappingsWithDuplicates) {
+	    	    uniqueScreenMappingMap.putIfAbsent(mapping.getScreenCode(), mapping);
+	    	}
+
+	    	List<VerticalScreenMapping> uniqueScreenMappings = new ArrayList<>(uniqueScreenMappingMap.values());
 
 	        // Extract all unique group IDs to fetch in batch
-	        Set<UUID> groupIds = list.stream()
+	        Set<UUID> groupIds = uniqueScreenMappings.stream()
 	                .map(VerticalScreenMapping::getGroupId)
 	                .filter(Objects::nonNull)
 	                .collect(Collectors.toSet());
@@ -70,7 +77,7 @@ public class UserScreenMappingServiceImpl implements UserScreenMappingService {
 
 	        Map<UUID, Map<String, Object>> groupWiseScreens = new HashMap<>();
 
-	        list.forEach(mapping -> {
+	        uniqueScreenMappings.forEach(mapping -> {
 	            Map<String, Object> screenItem = new HashMap<>();
 	            screenItem.put("id", mapping.getScreenCode());
 	            screenItem.put("title", mapping.getScreenDisplayName());
