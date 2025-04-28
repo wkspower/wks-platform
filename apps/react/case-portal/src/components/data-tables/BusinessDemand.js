@@ -1,7 +1,7 @@
 import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import ASDataGrid from './ASDataGrid'
@@ -12,20 +12,19 @@ import { validateFields } from 'utils/validationUtils'
 import SimpleDataTable from 'components/data-tables-views/SimpleDataTable'
 import { Box } from '@mui/material'
 
-import Accordion from '@mui/material/Accordion'
-import AccordionSummary from '@mui/material/AccordionSummary'
-import AccordionDetails from '@mui/material/AccordionDetails'
+// import Accordion from '@mui/material/Accordion'
+// import AccordionSummary from '@mui/material/AccordionSummary'
+// import AccordionDetails from '@mui/material/AccordionDetails'
 import Typography from '@mui/material/Typography'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import { styled } from '@mui/material/styles'
-import MuiAccordion, { AccordionProps } from '@mui/material/Accordion'
-import MuiAccordionSummary, {
-  AccordionSummaryProps,
-} from '@mui/material/AccordionSummary'
+import MuiAccordion from '@mui/material/Accordion' // { AccordionProps }
+import MuiAccordionSummary from '@mui/material/AccordionSummary' // } //   AccordionSummaryProps, // , {
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
 
-// Customized Accordion
+// import { useScreens } from 'menu/userscreen'
+// import { usePlan } from 'menu/userscreen'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -68,11 +67,11 @@ const BusinessDemand = ({ permissions }) => {
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
-  const [rows2, setRows2] = useState()
+  // const [rows2, setRows2] = useState()
 
   // console.log('yearyear', year)
 
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const headerMap = generateHeaderNames(localStorage.getItem('year') || year)
 
   const [snackbarData, setSnackbarData] = useState({
     message: '',

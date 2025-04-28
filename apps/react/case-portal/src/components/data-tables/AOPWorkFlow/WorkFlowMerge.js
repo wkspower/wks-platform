@@ -23,7 +23,6 @@ import './jio-grid-style.css'
 // import { usePlan } from 'menu/new-plan'
 // import { useScreens } from 'menu/userscreen'
 import { Box } from '../../../../node_modules/@mui/material/index'
-import { stubArray } from 'lodash'
 
 const WorkFlowMerge = () => {
   const keycloak = useSession()
@@ -125,7 +124,6 @@ const WorkFlowMerge = () => {
 
   // fetch workflow data for grid
   const fetchData = async () => {
-    setLoading(true)
     try {
       const data = await DataService.getWorkflowData(keycloak, plantId)
       const formatted = data.results.map((row, idx) => {
@@ -141,8 +139,6 @@ const WorkFlowMerge = () => {
     } catch (err) {
       console.error('Error fetching grid', err)
       setRows([])
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -163,7 +159,7 @@ const WorkFlowMerge = () => {
       // if (!cases?.taskId) setActionDisabled(true)
       setWorkFlowDto(cases?.workflowList[0])
       if(cases?.workflowList.length>0){
-        console.log("businessky in getcaseId "+cases?.workflowList[0].caseId);
+        console.log('businessky in getcaseId ' + cases?.workflowList[0].caseId)
         setBusinessKey(cases?.workflowList[0].caseId)
       }
       
