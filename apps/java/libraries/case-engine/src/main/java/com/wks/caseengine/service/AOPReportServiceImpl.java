@@ -36,100 +36,99 @@ public class AOPReportServiceImpl implements AOPReportService{
 	 @Autowired
 	 private DataSource dataSource;
 
-	@Override
-	public AOPMessageVM getAnnualAOPReport(String plantId, String year, String reportType, String AopYearFilter) {
-	    AOPMessageVM aopMessageVM = new AOPMessageVM();
-	    Map<String, Object> map = new HashMap<>();
-	    List<AOPReportDTO> aopReportDTOList = new ArrayList<>();
-	    try {
-	        List<Object[]> results = getAnnualAOPReportData(plantId, year, reportType, AopYearFilter);
-	        List<String> headers=null;
-	        List<String> keys=null;
-	        	        
-	        List<Map<String, Object>> aopReportList = new ArrayList<>();
-	        for (Object[] row : results) {
-	           
+	 @Override
+	 public AOPMessageVM getAnnualAOPReport(String plantId, String year, String reportType, String AopYearFilter) {
+	     AOPMessageVM aopMessageVM = new AOPMessageVM();
+	     List<AOPReportDTO> aopReportDTOList = new ArrayList<>();
+	     List<Map<String, Object>> aopReportList = new ArrayList<>();
+	     try {
+	         List<Object[]> results = getAnnualAOPReportData(plantId, year, reportType, AopYearFilter);
+	         List<String> headers = null;
+	         List<String> keys = null;
 
-	            if (reportType.equalsIgnoreCase("Quantity") || reportType.equalsIgnoreCase("Production")
-	                    ||  reportType.equalsIgnoreCase("Norm")) {
+	         for (Object[] row : results) {
+	             Map<String, Object> map = new HashMap<>(); // Create a new map for each row
 
-	                map.put("norm", row[0]);
-	                map.put("particulars", row[1]);
-	                map.put("april", row[2]);
-	                map.put("may", row[3]);
-	                map.put("june", row[4]);
-	                map.put("july", row[5]);
-	                map.put("august", row[6]);
-	                map.put("september", row[7]);
-	                map.put("october", row[8]);
-	                map.put("november", row[9]);
-	                map.put("december", row[10]);
-	                map.put("january", row[11]);
-	                map.put("february", row[12]);
-	                map.put("march", row[13]);
-	                map.put("total", row[14]);
+	             if (reportType.equalsIgnoreCase("Quantity") || reportType.equalsIgnoreCase("Production")
+	                     || reportType.equalsIgnoreCase("Norm")) {
 
-	            }else if (reportType.equalsIgnoreCase("Price")) {
-	            	AOPReportDTO aOPReportDTO=new AOPReportDTO();
-	            	Map<String, Object> dataMap = new HashMap<>();
-	            	aOPReportDTO.setNorm(row[0] != null ? row[0].toString() : null);
-	            	aOPReportDTO.setParticulars(row[1] != null ? row[1].toString() : null);
-	            	aOPReportDTO.setApril(row[2] != null ? Float.parseFloat(row[2].toString()) : null);
-	            	aOPReportDTO.setMay(row[3] != null ? Float.parseFloat(row[3].toString()) : null);
-	            	aOPReportDTO.setJune(row[4] != null ? Float.parseFloat(row[4].toString()) : null);
-	            	aOPReportDTO.setJuly(row[5] != null ? Float.parseFloat(row[5].toString()) : null);
-	            	aOPReportDTO.setAugust(row[6] != null ? Float.parseFloat(row[6].toString()) : null);
-	            	aOPReportDTO.setSeptember(row[7] != null ? Float.parseFloat(row[7].toString()) : null);
-	            	aOPReportDTO.setOctober(row[8] != null ? Float.parseFloat(row[8].toString()) : null);
-	            	aOPReportDTO.setNovember(row[9] != null ? Float.parseFloat(row[9].toString()) : null);
-	            	aOPReportDTO.setDecember(row[10] != null ? Float.parseFloat(row[10].toString()) : null);
-	            	aOPReportDTO.setJanuary(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
-	            	aOPReportDTO.setFebruary(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
-	            	aOPReportDTO.setMarch(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
-	            	aOPReportDTO.setTotal(row[14] != null ? Float.parseFloat(row[14].toString()) : null);
-	            	aopReportDTOList.add(aOPReportDTO);
+	                 map.put("norm", row[0]);
+	                 map.put("particulars", row[1]);
+	                 map.put("april", row[2]);
+	                 map.put("may", row[3]);
+	                 map.put("june", row[4]);
+	                 map.put("july", row[5]);
+	                 map.put("august", row[6]);
+	                 map.put("september", row[7]);
+	                 map.put("october", row[8]);
+	                 map.put("november", row[9]);
+	                 map.put("december", row[10]);
+	                 map.put("january", row[11]);
+	                 map.put("february", row[12]);
+	                 map.put("march", row[13]);
+	                 map.put("total", row[14]);
+	                 aopReportList.add(map); // Add the map to the list here
 
-	            } else if (reportType.equalsIgnoreCase("aopYearFilter")) {
+	             } else if (reportType.equalsIgnoreCase("Price")) {
+	                 AOPReportDTO aOPReportDTO = new AOPReportDTO();
+	                 aOPReportDTO.setNorm(row[0] != null ? row[0].toString() : null);
+	                 aOPReportDTO.setParticulars(row[1] != null ? row[1].toString() : null);
+	                 aOPReportDTO.setApril(row[2] != null ? Float.parseFloat(row[2].toString()) : null);
+	                 aOPReportDTO.setMay(row[3] != null ? Float.parseFloat(row[3].toString()) : null);
+	                 aOPReportDTO.setJune(row[4] != null ? Float.parseFloat(row[4].toString()) : null);
+	                 aOPReportDTO.setJuly(row[5] != null ? Float.parseFloat(row[5].toString()) : null);
+	                 aOPReportDTO.setAugust(row[6] != null ? Float.parseFloat(row[6].toString()) : null);
+	                 aOPReportDTO.setSeptember(row[7] != null ? Float.parseFloat(row[7].toString()) : null);
+	                 aOPReportDTO.setOctober(row[8] != null ? Float.parseFloat(row[8].toString()) : null);
+	                 aOPReportDTO.setNovember(row[9] != null ? Float.parseFloat(row[9].toString()) : null);
+	                 aOPReportDTO.setDecember(row[10] != null ? Float.parseFloat(row[10].toString()) : null);
+	                 aOPReportDTO.setJanuary(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
+	                 aOPReportDTO.setFebruary(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
+	                 aOPReportDTO.setMarch(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
+	                 aOPReportDTO.setTotal(row[14] != null ? Float.parseFloat(row[14].toString()) : null);
+	                 aopReportDTOList.add(aOPReportDTO);
 
-	                map.put("name", row[0]);
-	                map.put("displayName", row[1]);
-	                map.put("displayOrder", row[2]);
+	             } else if (reportType.equalsIgnoreCase("aopYearFilter")) {
 
-	            } else if (reportType.equalsIgnoreCase("NormCost")) {
+	                 map.put("name", row[0]);
+	                 map.put("displayName", row[1]);
+	                 map.put("displayOrder", row[2]);
+	                 aopReportList.add(map); // Add the map to the list here
 
-	                map.put("norm", row[0]);
-	                map.put("particulars", row[1]);
-	                map.put("cost", row[2]);
+	             } else if (reportType.equalsIgnoreCase("NormCost")) {
 
-	            }
+	                 map.put("norm", row[0]);
+	                 map.put("particulars", row[1]);
+	                 map.put("cost", row[2]);
+	                 aopReportList.add(map); // Add the map to the list here
 
-	            
-	        }
-	        if(reportType.equalsIgnoreCase("Price")) {
-	        	 headers =getAnnualAOPReportHeaders(plantId, year, reportType, AopYearFilter);
-	        	  keys = new ArrayList<>();
-	 			for (Field field : AOPReportDTO.class.getDeclaredFields()) {
-	 				keys.add(field.getName());
-	 			}
-           	 map.put("headers", headers);
-                map.put("keys", keys);
-                map.put("results", aopReportDTOList);
-               
-	        }
+	             }
+	         }
 
-	        aopReportList.add(map);
-	        aopMessageVM.setCode(200);
-	        aopMessageVM.setMessage("Data fetched successfully");
-	        aopMessageVM.setData(aopReportList);
-	        return aopMessageVM;
+	         if (reportType.equalsIgnoreCase("Price")) {
+	             headers = getAnnualAOPReportHeaders(plantId, year, reportType, AopYearFilter);
+	             keys = new ArrayList<>();
+	             for (Field field : AOPReportDTO.class.getDeclaredFields()) {
+	                 keys.add(field.getName());
+	             }
+	             Map<String, Object> priceMap = new HashMap<>();
+	             priceMap.put("headers", headers);
+	             priceMap.put("keys", keys);
+	             priceMap.put("results", aopReportDTOList);
+	             aopReportList.add(priceMap); // Add the price-specific map
+	         }
 
-	    } catch (IllegalArgumentException e) {
-	        throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
-	    } catch (Exception ex) {
-	        throw new RuntimeException("Failed to fetch data", ex);
-	    }
-	}
-	
+	         aopMessageVM.setCode(200);
+	         aopMessageVM.setMessage("Data fetched successfully");
+	         aopMessageVM.setData(aopReportList);
+	         return aopMessageVM;
+
+	     } catch (IllegalArgumentException e) {
+	         throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+	     } catch (Exception ex) {
+	         throw new RuntimeException("Failed to fetch data", ex);
+	     }
+	 }	
 	public List<String> getAnnualAOPReportHeaders(String plantId, String aopYear, String reportType, String AopYearFilter) {
 		List<String> headers = new ArrayList<>();
 
