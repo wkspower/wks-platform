@@ -29,7 +29,5 @@ public class AOPReportDTO {
     private Float december;
     private String particulars;
     private Float total;
-    private String displayName;
-    private Integer displayOrder;
-    private Integer cost;
+   
 }
