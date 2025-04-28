@@ -16,6 +16,7 @@ import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeRequestDTO;
 import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.ConfigurationService;
 
 @RestController
@@ -28,6 +29,11 @@ public class ConfigurationController {
 	@GetMapping(value="/getConfigurationData")
 	public List<ConfigurationDTO> getConfigurationData(@RequestParam String year,@RequestParam UUID plantFKId) {
 		return configurationService.getConfigurationData(year,plantFKId);
+	}
+	
+	@GetMapping(value="/configuration/intermediate-values")
+	public AOPMessageVM getConfigurationIntermediateValues(@RequestParam String year,@RequestParam UUID plantFKId) {
+		return configurationService.getConfigurationIntermediateValues(year,plantFKId);
 	}
 	
 	@PostMapping(value="/saveConfigurationData")
