@@ -7,12 +7,17 @@ import java.util.HashMap;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
 import com.wks.caseengine.entity.BusinessDemand;
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.entity.Workflow;
 import com.wks.caseengine.entity.WorkflowMaster;
 import com.wks.caseengine.entity.WorkflowStepsMaster;
@@ -51,6 +56,8 @@ import com.wks.caseengine.dto.WorkflowSubmitDTO;
 import com.wks.caseengine.dto.WorkflowYearDTO;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.SiteRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.repository.WorkflowMasterRepository;
 import com.wks.caseengine.repository.WorkflowRepository;
 import com.wks.caseengine.repository.WorkflowStepsMasterRepository;
@@ -80,9 +87,19 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 	@Autowired
 	private ProcessInstanceService processInstanceService;
+	
 
 	@Autowired
 	private TaskService taskService;
+		@Autowired
+		private PlantsRepository plantsRepository;
+
+		@Autowired
+		private SiteRepository siteRepository;
+
+		@Autowired
+		private VerticalsRepository verticalRepository;
+
 
 	@Override
 	public WorkflowPageDTO getCaseId(String year, String plantId, String siteId, String verticalId) {
@@ -480,9 +497,44 @@ public class WorkflowServiceImpl implements WorkflowService {
                         .toList();
             }
         }
+	@Override
+	@Transactional
+	public int calculateExpressionWorkFlow(String year, String plantId) {
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String storedProcedure = vertical.getName() + "_HMD_LoadAnnualAOPCost";
+			System.out.println(storedProcedure);
+			return executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
+					vertical.getId().toString(), year);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
 	}
 
         return Collections.emptyList(); // Return empty list if roles not found
     }
+	
+		@Transactional
+	public int executeDynamicUpdateProcedure(String procedureName, String plantId, String siteId, String verticalId,
+			String finYear) {
+		try {
+			String sql = "EXEC " + procedureName
+					+ " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear";
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("siteId", siteId);
+			query.setParameter("verticalId", verticalId);
+			query.setParameter("finYear", finYear);
+
+			return query.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
 
 }
