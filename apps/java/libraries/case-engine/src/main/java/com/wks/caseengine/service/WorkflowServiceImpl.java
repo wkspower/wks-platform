@@ -3,11 +3,12 @@ package com.wks.caseengine.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -87,15 +88,13 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 	@Autowired
 	private ProcessInstanceService processInstanceService;
-	
 
 	@Autowired
 	private TaskService taskService;
-		@Autowired
-		private PlantsRepository plantsRepository;
-		@Autowired
-		private VerticalsRepository verticalRepository;
-
+	@Autowired
+	private PlantsRepository plantsRepository;
+	@Autowired
+	private VerticalsRepository verticalRepository;
 
 	@Override
 	public WorkflowPageDTO getCaseId(String year, String plantId, String siteId, String verticalId) {
@@ -104,43 +103,44 @@ public class WorkflowServiceImpl implements WorkflowService {
 			List<Workflow> list = workflowRepository.findAllByYearAndPlantFKIdAndSiteFKIdAndVerticalFKId(year,
 					UUID.fromString(plantId), UUID.fromString(siteId), UUID.fromString(verticalId));
 
+			String taskDefinitionKey = "";
 			List<WorkflowDTO> dtoList = new ArrayList<>();
 			for (Workflow workflow : list) {
 				WorkflowDTO dto = new WorkflowDTO();
 				dto.setId(workflow.getId().toString());
 				dto.setCaseDefId(workflow.getCaseDefId());
 				List<Task> tasks = new ArrayList<>();
-				if(workflow.getCaseId()!=null){
-					//could not get tasks while submitting the aop report due to transactional policies. Hence writing here
+				if (workflow.getCaseId() != null) {
+					// could not get tasks while submitting the aop report due to transactional
+					// policies. Hence writing here
 					List<String> rolesList = extractRoles();
-					System.out.println("processInsatance Id "+workflow.getProcessInstanceId());
-					if(workflow.getProcessInstanceId()==null){
-					    while(tasks.size()==0){
+					System.out.println("processInsatance Id " + workflow.getProcessInstanceId());
+					if (workflow.getProcessInstanceId() == null) {
+						while (tasks.size() == 0) {
 							System.out.println("in while loop");
-							Thread.sleep(2000); 
+							Thread.sleep(2000);
 							tasks = taskService.find(Optional.ofNullable(workflow.getCaseId()));
-							 
+
 						}
 						workflow.setProcessInstanceId(tasks.get(0).getProcessInstanceId());
-					}else{
+					} else {
 						tasks = taskService.find(Optional.ofNullable(workflow.getCaseId()));
 					}
-					
-					
-					
-					for(Task task :tasks){
-                        for(String role: rolesList){
-							workflowPageDTO.setRole(role);
-							System.out.println("roles "+role + "assignee "+task.getAssignee() );
-							if(task.getAssignee().equalsIgnoreCase(role)){
+
+					for (Task task : tasks) {
+						for (String role : rolesList) {
+							// workflowPageDTO.setRole(role);
+							System.out.println("roles " + role + "assignee " + task.getAssignee());
+							if (task.getAssignee().equalsIgnoreCase(role)) {
 								workflowPageDTO.setTaskId(task.getId());
 								workflowPageDTO.setRole(role);
-								
+
 								break;
 							}
 						}
+						taskDefinitionKey = task.getTaskDefinitionKey();
 					}
-					
+
 					workflowRepository.save(workflow);
 				}
 				dto.setCaseId(workflow.getCaseId());
@@ -184,19 +184,20 @@ public class WorkflowServiceImpl implements WorkflowService {
 						steps.get(0).setStatus("inprogress");
 					}
 				} else {
-					List<ActivityInstance> actiList = processInstanceService
-							.getActivityInstances(dtoList.get(0).getProcessInstanceId());
-					if (actiList != null && actiList.size() > 0) {
-						String status = actiList.get(0).getActivityId().split("-")[0];
-						workflowPageDTO.setStatus(status);
-						for (WorkflowStepsMasterDTO dto : steps) {
-							if (dto.getName().equalsIgnoreCase(status)) {
-								System.out.println("in in progress status" + status);
-								dto.setStatus("inprogress");
-							}
+					// List<ActivityInstance> actiList = processInstanceService
+					// .getActivityInstances(dtoList.get(0).getProcessInstanceId());
+					// if (actiList != null && actiList.size() > 0) {
+
+					String status = taskDefinitionKey.split("-")[0];
+					workflowPageDTO.setStatus(status);
+					for (WorkflowStepsMasterDTO dto : steps) {
+						if (dto.getName().equalsIgnoreCase(status)) {
+							System.out.println("in in progress status" + status);
+							dto.setStatus("inprogress");
 						}
-						steps = updateStatuses(steps);
 					}
+					steps = updateStatuses(steps);
+					// }
 				}
 
 				wmDTO.setSteps(steps);
@@ -246,10 +247,10 @@ public class WorkflowServiceImpl implements WorkflowService {
 				WorkflowYearDTO dto = new WorkflowYearDTO();
 				dto.setParticulates(row[0] != null ? row[0].toString() : null);
 				dto.setUom(row[1] != null ? row[1].toString() : null);
-				dto.setFy202425AOP(row[2] != null ? row[2].toString() : null);
-				dto.setFy202425Actual(row[3] != null ? row[3].toString() : null);
-				dto.setFy202526AOP(row[4] != null ? row[4].toString() : null);
-				dto.setRemark(row[5] != null ? row[5].toString() : null);
+				dto.setFyAop(row[2] != null ? row[2].toString() : null);
+				dto.setFyActual(row[3] != null ? row[3].toString() : null);
+				dto.setSyAop(row[4] != null ? row[4].toString() : null);
+				dto.setRemark(row[5] != null ? row[5].toString() : "");
 				workflowList.add(dto);
 			}
 			List<String> headers = getHeaders(plantId, year);
@@ -280,9 +281,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 				WorkflowYearDTO dto = new WorkflowYearDTO();
 				dto.setParticulates(row[0] != null ? row[0].toString() : null);
 				dto.setUom(row[1] != null ? row[1].toString() : null);
-				dto.setFy202425AOP(row[2] != null ? row[2].toString() : null);
-				dto.setFy202425Actual(row[3] != null ? row[3].toString() : null);
-				dto.setFy202526AOP(row[4] != null ? row[4].toString() : null);
+				dto.setFyAop(row[2] != null ? row[2].toString() : null);
+				dto.setFyActual(row[3] != null ? row[3].toString() : null);
+				dto.setSyAop(row[4] != null ? row[4].toString() : null);
 				dto.setRemark(row[5] != null ? row[5].toString() : null);
 				workflowList.add(dto);
 			}
@@ -423,7 +424,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		IntStream.range(0, items.size())
 				.forEach(i -> {
 					WorkflowStepsMasterDTO item = items.get(i);
-					System.out.println("getstatus"+item.getStatus());
+					System.out.println("getstatus" + item.getStatus());
 					if ("inprogress".equalsIgnoreCase(item.getStatus())) {
 						inProgressFound.set(true);
 					}
@@ -435,64 +436,64 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 	}
 
+	@Transactional
+	@Override
+	public WorkflowDTO submitWorkflow(WorkflowSubmitDTO workflowSubmitDTO) {
+		CaseInstance caseInstance = caseInstanceService.startWithValues(workflowSubmitDTO.getCaseInstance());
+		System.out.println("case created " + caseInstance.getBusinessKey());
 
-        @Transactional
-		@Override
-		public WorkflowDTO submitWorkflow(WorkflowSubmitDTO workflowSubmitDTO) {
-			CaseInstance caseInstance = caseInstanceService.startWithValues(workflowSubmitDTO.getCaseInstance());
-			System.out.println("case created "+ caseInstance.getBusinessKey());
-            
-			//System.out.println("tasks found2" + tasks2.size());
-			System.out.println("tasks completed");
-			workflowSubmitDTO.getWorkflowDTO().setCaseId(caseInstance.getBusinessKey());
-			return saveWorkFlow(workflowSubmitDTO.getWorkflowDTO());
-			//return workflowSubmitDTO.getWorkflowDTO();
-		}
-
-
-        @Override
-		public void completeTaskWithComment(WorkflowSubmitDTO workflowSubmitDTO){
-
-			taskService.complete(workflowSubmitDTO.getTaskId(),workflowSubmitDTO.getVariables());
-            caseInstanceService.saveComment(workflowSubmitDTO.getWorkflowDTO().getCaseId(), workflowSubmitDTO.getCaseComment());
+		// System.out.println("tasks found2" + tasks2.size());
+		System.out.println("tasks completed");
+		workflowSubmitDTO.getWorkflowDTO().setCaseId(caseInstance.getBusinessKey());
+		return saveWorkFlow(workflowSubmitDTO.getWorkflowDTO());
+		// return workflowSubmitDTO.getWorkflowDTO();
 	}
 
+	@Override
+	public void completeTaskWithComment(WorkflowSubmitDTO workflowSubmitDTO) {
+
+		taskService.complete(workflowSubmitDTO.getTaskId(), workflowSubmitDTO.getVariables());
+		caseInstanceService.saveComment(workflowSubmitDTO.getWorkflowDTO().getCaseId(),
+				workflowSubmitDTO.getCaseComment());
+	}
 
 	public static List<String> extractRoles() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		
+
 		if (authentication instanceof JwtAuthenticationToken) {
-		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
-		    Jwt jwt = jwtAuth.getToken();
-		    
-		    String userId = jwt.getClaimAsString("sub"); // or "preferred_username"
-		    Map<String, Object> claims = jwt.getClaims();
-		    
-		    System.out.println("userId: " + userId);
-		    System.out.println("Claims: " + claims);
-		    
-		    claims.entrySet().stream()
-		    .forEach(entry -> System.out.println(entry.getKey() + " : " + entry.getValue()));
-		
-		
-		Object realmAccessObj = claims.get("realm_access");
+			JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
+			Jwt jwt = jwtAuth.getToken();
 
+			String userId = jwt.getClaimAsString("sub"); // or "preferred_username"
+			Map<String, Object> claims = jwt.getClaims();
 
+			System.out.println("userId: " + userId);
+			System.out.println("Claims: " + claims);
 
+			claims.entrySet().stream()
+					.forEach(entry -> System.out.println(entry.getKey() + " : " + entry.getValue()));
 
-        if (realmAccessObj instanceof Map<?, ?>) {
-            Map<?, ?> realmAccessMap = (Map<?, ?>) realmAccessObj;
-            Object rolesObj = realmAccessMap.get("roles");
+			Object realmAccessObj = claims.get("realm_access");
 
-            if (rolesObj instanceof List<?>) {
-                // Safe cast with filtering
-                List<?> rawList = (List<?>) rolesObj;
-                return rawList.stream()
-                        .filter(item -> item instanceof String)
-                        .map(String.class::cast)
-                        .toList();
-            }
-        }
+			if (realmAccessObj instanceof Map<?, ?>) {
+				Map<?, ?> realmAccessMap = (Map<?, ?>) realmAccessObj;
+				Object rolesObj = realmAccessMap.get("roles");
+
+				if (rolesObj instanceof List<?>) {
+					// Safe cast with filtering
+					List<?> rawList = (List<?>) rolesObj;
+					return rawList.stream()
+							.filter(item -> item instanceof String)
+							.map(String.class::cast)
+							.toList();
+				}
+			}
+
+		}
+
+		return Collections.emptyList(); // Return empty list if roles not found
+	}
+
 	@Override
 	@Transactional
 	public int calculateExpressionWorkFlow(String year, String plantId) {
@@ -507,11 +508,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		}
 		return 0;
 	}
-	}
 
-        return Collections.emptyList(); // Return empty list if roles not found
-    }
-	
 	@Transactional
 	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
 			String aopYear) {
