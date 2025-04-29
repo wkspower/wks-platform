@@ -79,10 +79,10 @@ const App = () => {
   // }, [])
 
   async function buildMenuItems(menuItems) {
-    console.log(menuItems)
+    // console.log(menuItems)
     const menu = { items: [...menuItems] }
     // …filter by roles, inject dynamic screens, etc…
-    console.log(menu)
+    // console.log(menu)
 
     const isManagerUser =
       typeof keycloak.hasRealmRole === 'function'

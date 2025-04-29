@@ -87,14 +87,20 @@ export function usePlanMenu() {
   const keycloak = useSession()
 
   const verticalId = localStorage.getItem('verticalId')
-  console.log(verticalId, verticalChange)
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  // console.log(verticalId, verticalChange)
   useEffect(() => {
     if (!keycloak?.token || !verticalId) return
 
     const fetchScreens = async () => {
       try {
-        const res = await DataService.getUserScreen(keycloak, verticalId)
-        console.log('[useScreens] API response:', res)
+        const res = await DataService.getScreenbyPlant(
+          keycloak,
+          verticalId,
+          plantId,
+        )
+        // const res = await DataService.getUserScreen(keycloak, verticalId)
+        // console.log('[useScreens] API response:', res)
         setScreens(res.data)
       } catch (error) {
         console.error('Error fetching menu:', error)
@@ -104,7 +110,7 @@ export function usePlanMenu() {
     fetchScreens()
   }, [keycloak, verticalId, verticalChange])
 
-  console.log(screens)
+  // console.log(screens)
   // const screens = [
   //   {
   //     id: 'utilities',

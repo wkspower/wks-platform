@@ -597,7 +597,7 @@ const DataGridTable = ({
         </Backdrop>
 
         <DataGrid
-          loading={loading}
+          // loading={loading}
           className='custom-data-grid'
           apiRef={apiRef}
           rows={filteredRows}

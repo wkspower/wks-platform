@@ -242,62 +242,6 @@ const UserManagementTable = ({ keycloak }) => {
     <Box sx={{ height: 600, width: '100%', p: 2 }}>
       {/* Autocomplete for selecting multiple users */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr: 1 }}>
-        {/* <Autocomplete
-          multiple
-          disableCloseOnSelect
-          id='user-autocomplete'
-          options={searchOptions.filter(
-            (option) =>
-              !tempSelectedUsers.some((selected) => selected.id === option.id),
-          )}
-          getOptionLabel={(option) => option.username}
-          value={tempSelectedUsers}
-          onInputChange={(event, inputValue) => {
-            handleSearchChange(event, inputValue)
-          }}
-          onChange={handleTempSelectionChange}
-          loading={loading}
-          noOptionsText='No users found'
-          sx={{ width: '100%' }}
-          renderOption={(props, option, { selected }) => {
-            if (option.id === 'confirm') {
-              return (
-                <li
-                  {...props}
-                  onClick={(event) => {
-                    // Prevent selecting "confirm" as a user.
-                    finalizeSelection(tempSelectedUsers)
-                    event.stopPropagation()
-                  }}
-                  style={{ fontWeight: 'bold', backgroundColor: '#f0f0f0' }}
-                >
-                  {option.username}
-                </li>
-              )
-            }
-            return (
-              <li {...props}>
-                <Checkbox style={{ marginRight: 8 }} checked={selected} />
-                <ListItemText primary={option.username} />
-              </li>
-            )
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label='Select Users'
-              variant='outlined'
-              // When the user presses Enter, finalize the selection
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  finalizeSelection(tempSelectedUsers)
-                  e.preventDefault()
-                }
-              }}
-            />
-          )}
-        />
-      </Box> */}
         <Autocomplete
           multiple // enable array of selections :contentReference[oaicite:0]{index=0}
           disableCloseOnSelect // popper stays open on each click :contentReference[oaicite:1]{index=1}

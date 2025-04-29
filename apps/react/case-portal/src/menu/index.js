@@ -17,7 +17,7 @@ import workspace from './workspace'
 
 export default function useMenuItems() {
   const plan = usePlanMenu()
-  console.log(plan)
+  // console.log(plan)
   return {
     items: [plan, workspace],
   }

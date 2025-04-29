@@ -207,7 +207,11 @@ const UserAccessForm = ({ keycloak }) => {
           )
           if (response) {
             // Map the response data to get the display names of screens.
-            setScreens(response.data.map((item) => item.screenDisplayName))
+            setScreens(
+              response.data[0].children[0].children[0].map(
+                (item) => item.title,
+              ),
+            )
           }
         } catch (error) {
           console.error('Error fetching screens:', error)

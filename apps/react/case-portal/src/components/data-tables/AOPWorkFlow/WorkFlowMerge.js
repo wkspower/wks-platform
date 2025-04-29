@@ -33,17 +33,12 @@ const WorkFlowMerge = () => {
   const [loading, setLoading] = useState(false)
   const [isCreatingCase, setIsCreatingCase] = useState(false)
   const [showCreateCasebutton, setShowCreateCasebutton] = useState(false)
+  const [isEdit, setIsEdit] = useState(false)
 
   // remark dialog state
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const handleRemarkCellClick = (row) => {
-    console.log(row)
-    setCurrentRemark(row.remark || '')
-    setCurrentRowId(row.id)
-    setRemarkDialogOpen(true)
-  }
 
   // audit trail state
   const [openAuditPopup, setOpenAuditPopup] = useState(false)
@@ -61,6 +56,7 @@ const WorkFlowMerge = () => {
   const [masterSteps, setMasterSteps] = useState([])
   const [workflowDto, setWorkFlowDto] = useState({})
   const [status, setStatus] = useState('')
+  const [caseId, setCaseId] = useState('')
   const [role, setRole] = useState('')
   // UI feedback
   const [snackbarOpen, setSnackbarOpen] = useState(false)
@@ -72,10 +68,24 @@ const WorkFlowMerge = () => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+  const [rowModesModel, setRowModesModel] = useState({})
+  const onRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel)
+  }
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
+  const handleRemarkCellClick = (row) => {
+    console.log(row)
+    setCurrentRemark(row.remark || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+  console.log(unsavedChangesRef.current, 'unsavedChangesRef')
+  console.log(rows)
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
+    console.log(newRow)
+    console.log(oldRow)
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
     // Keep track of original values before editing
@@ -115,9 +125,7 @@ const WorkFlowMerge = () => {
       minWidth: i === 0 ? 300 : 150,
       ...(i === 0 && { renderHeader: (p) => <div>{p.colDef.headerName}</div> }),
     }))
-    const remarkIdx = cols.findIndex(
-      (col) => col.field === 'body' || col.field === 'remark',
-    )
+    const remarkIdx = cols.findIndex((col) => col.field === 'remark')
     if (remarkIdx !== -1) cols[remarkIdx] = remarkColumn(handleRemarkCellClick)
     return cols
   }
@@ -139,6 +147,8 @@ const WorkFlowMerge = () => {
     } catch (err) {
       console.error('Error fetching grid', err)
       setRows([])
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -146,20 +156,16 @@ const WorkFlowMerge = () => {
   const getCaseId = async () => {
     try {
       const cases = await DataService.getCaseId(keycloak)
-      setLoading(false)
-      if (!cases?.workflowList.length) {
-        setShowCreateCasebutton(true)
-        // return
-      } else {
-        setShowCreateCasebutton(false)
-      }
+      setCaseId(cases?.workflowMasterDTO?.casedefId || '')
+      // console.log(cases?.workflowList?.length === 0)
+      setShowCreateCasebutton(cases?.workflowList?.length === 0)
       setTaskId(cases?.taskId || '')
       setStatus(cases?.status || '')
       setRole(cases?.role || '')
       // if (!cases?.taskId) setActionDisabled(true)
       setWorkFlowDto(cases?.workflowList[0])
       if(cases?.workflowList.length>0){
-        console.log('businessky in getcaseId ' + cases?.workflowList[0].caseId)
+        // console.log('businessky in getcaseId ' + cases?.workflowList[0].caseId)
         setBusinessKey(cases?.workflowList[0].caseId)
       }
       
@@ -195,6 +201,8 @@ const WorkFlowMerge = () => {
       // }
     } catch (err) {
       console.error('Error fetching case', err)
+    } finally {
+      setLoading(false)
     }
   }
   // console.log(activeStep, 'activeStep')
@@ -208,7 +216,7 @@ const WorkFlowMerge = () => {
       // 2. Create case + save workflow
       const payload = {
         caseInstance: {
-          caseDefinitionId: 'aopv5',
+          caseDefinitionId: caseId || caseData.caseDefinitionId,
           owner: {
             id: keycloak.subject || '',
             name: keycloak.idTokenParsed.name || '',
@@ -225,7 +233,7 @@ const WorkFlowMerge = () => {
           year: localStorage.getItem('year'),
           plantFkId:
             JSON.parse(localStorage.getItem('selectedPlant'))?.id || '',
-          caseDefId: caseData.caseDefinitionId,
+          caseDefId: caseId || caseData.caseDefinitionId,
           // caseId: result.businessKey,
           siteFKId: JSON.parse(localStorage.getItem('selectedSite'))?.id || '',
           verticalFKId: localStorage.getItem('verticalId'),
@@ -250,10 +258,11 @@ const WorkFlowMerge = () => {
         message: error.message || 'Failed to create workflow',
         severity: 'error',
       })
+      setIsCreatingCase(false)
     } finally {
       // 5. Show snackbar regardless
       setSnackbarOpen(true)
-      setIsCreatingCase(false)
+      // setIsCreatingCase(false)
     }
   }
 
@@ -312,21 +321,13 @@ const WorkFlowMerge = () => {
   const defaultCustomHeight = { mainBox: '62vh', otherBox: '100%' }
 
   return (
-    <Box
+    <Box>
     // style={{
     //   display: 'flex',
     //   flexDirection: 'column',
     //   gap: 5,
     //   marginTop: 20,
     // }}
-    >
-      {/* <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper> */}
       <Stepper activeStep={activeStep} alternativeLabel>
         {masterSteps?.map((step) => (
           <Step key={step.displayName} completed={step.status === 'completed'}>
@@ -358,7 +359,7 @@ const WorkFlowMerge = () => {
           className='btn-save2'
           sx={{ color: '#0100cb', border: '1px solid ' }}
           onClick={handleAuditOpen}
-          disabled={actionDisabled}
+          // disabled={actionDisabled}
         >
           Audit Trail
         </Button>
@@ -374,15 +375,20 @@ const WorkFlowMerge = () => {
       >
         <DataGridTable
           rows={rows}
+          setRows={setRows}
+          onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
           columns={columns}
           loading={loading}
           processRowUpdate={processRowUpdate}
           remarkDialogOpen={remarkDialogOpen}
+          unsavedChangesRef={unsavedChangesRef}
           setRemarkDialogOpen={setRemarkDialogOpen}
           currentRemark={currentRemark}
           setCurrentRemark={setCurrentRemark}
           currentRowId={currentRowId}
           setCurrentRowId={setCurrentRowId}
+          rowModesModel={rowModesModel}
+          onRowModesModelChange={onRowModesModelChange}
           permissions={{ customHeight: defaultCustomHeight }}
         />
       </Box>
@@ -390,7 +396,7 @@ const WorkFlowMerge = () => {
         <Button
           variant='contained'
           onClick={createCase}
-          disabled={!showCreateCasebutton || isCreatingCase}
+          disabled={isCreatingCase || !showCreateCasebutton}
           className='btn-save'
           sx={{
             // backgroundColor: jioColors.primaryBlue,

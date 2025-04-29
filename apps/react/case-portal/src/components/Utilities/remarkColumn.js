@@ -3,7 +3,7 @@ import { truncateRemarks } from 'utils/remarksUtils'
 
 export function remarkColumn(handleRemarkCellClick) {
   return {
-    field: 'body' || 'remark', // your data field
+    field: 'remark', // your data field
     headerName: 'Remark',
     width: 150,
     renderCell: (params) => {

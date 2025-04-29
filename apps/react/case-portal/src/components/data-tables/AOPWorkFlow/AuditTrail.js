@@ -2,13 +2,14 @@
 import { Box } from '@mui/material'
 // import { useNavigate } from 'react-router-dom'
 import DataGridTable from 'components/data-tables/ASDataGrid'
-import { remarkColumn } from 'components/Utilities/remarkColumn'
+// import { remarkColumn } from 'components/Utilities/remarkColumn'
 import { useEffect, useState } from 'react'
 import { CaseService } from 'services/CaseService'
-
-// const rows = [
-//   {
-//     id: 1,
+import { truncateRemarks } from 'utils/remarksUtils'
+import {
+  Tooltip,
+  Typography,
+} from '../../../../node_modules/@mui/material/index'
 //     username: 'user1',
 //     // firstName: 'Pavan',
 //     // lastName: 'Pophale',
@@ -36,22 +37,16 @@ const AuditTrail = ({ keycloak, businessKey }) => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const handleRemarkCellClick = (row) => {
+  const openRemarkPopup = (text) => {
     // console.log(row, newRow)
-    setCurrentRemark(row.remark || '')
-    setCurrentRowId(row.id)
+    setCurrentRemark(text || '')
     setRemarkDialogOpen(true)
   }
   // const [columns, setColumns] = useState([])
-  const handleAddPlantSite = () => {
     // Navigate to our dedicated form screen.
-    // navigate('/user-form', {
     //   state: row,
     // })
-    console.log('handleAdd')
-  }
 
-  const defaultCustomHeight = { mainBox: '72vh', otherBox: '118%' }
   const columns = [
     { field: 'userName', headerName: 'Username', width: 150 },
     //   {
@@ -62,14 +57,38 @@ const AuditTrail = ({ keycloak, businessKey }) => {
     //   { field: 'lastName', headerName: 'Last Name', width: 150 },
     { field: 'role', headerName: 'User Role', width: 150 },
     { field: 'status', headerName: 'Status', width: 150 },
+    { field: 'createdAt', headerName: 'Date And Time', width: 150 },
     {
-      field: 'createdAt',
-      headerName: 'Date And Time',
+      field: 'body',
+      headerName: 'Remark',
       width: 150,
+      sortable: false, // no sorting (optional)
+      editable: false, // disable edit-on-click
+      renderCell: (params) => {
+        const text = params.value || ''
+        return (
+          <Tooltip title='Click to view full remark'>
+            <Typography
+              noWrap
+              sx={{
+                cursor: text ? 'pointer' : 'default',
+                color: text ? 'inherit' : 'gray',
+              }}
+              onClick={() => text && openRemarkPopup(text)}
+            >
+              {truncateRemarks(text)}
+            </Typography>
+          </Tooltip>
+        )
+      },
     },
     // { field: 'body', headerName: 'Remark', width: 150 },
-    remarkColumn(handleRemarkCellClick),
   ]
+  const handleAddPlantSite = () => {
+    // navigate('/user-form', {
+    console.log('handleAdd')
+  }
+  const defaultCustomHeight = { mainBox: '72vh', otherBox: '118%' }
   const fetchData = async () => {
     setLoading(true)
     try {
