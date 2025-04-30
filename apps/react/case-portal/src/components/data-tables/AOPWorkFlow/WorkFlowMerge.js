@@ -253,7 +253,9 @@ const WorkFlowMerge = () => {
           verticalFKId: localStorage.getItem('verticalId'),
         },
         variables: caseData.attributes,
-        // taskId: taskId,
+        //taskId: taskId,
+        workflowYearDTO: rows
+
       }
       const result = await DataService.submitWorkFlow(payload, keycloak)
       console.log(result)

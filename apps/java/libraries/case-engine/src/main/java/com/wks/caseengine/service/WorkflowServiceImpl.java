@@ -98,11 +98,10 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 	@Autowired
 	private TaskService taskService;
-		@Autowired
-		private PlantsRepository plantsRepository;
-		@Autowired
-		private VerticalsRepository verticalRepository;
-
+	@Autowired
+	private PlantsRepository plantsRepository;
+	@Autowired
+	private VerticalsRepository verticalRepository;
 
 	@Override
 	public WorkflowPageDTO getCaseId(String year, String plantId, String siteId, String verticalId) {
@@ -517,7 +516,12 @@ public class WorkflowServiceImpl implements WorkflowService {
 						Optional<AnnualAOPCost> AnnualAOPCostOp = annualAOPCostRepository.findById(id);
 						if (AnnualAOPCostOp != null) {
 							AnnualAOPCost annualAOPCost = AnnualAOPCostOp.get();
-							annualAOPCost.setRemark(workflowYearDTO.getRemark());
+							if(workflowYearDTO.getRemark()!=null && workflowYearDTO.getRemark().isBlank()){
+                                annualAOPCost.setRemark(null);
+							}else{
+								annualAOPCost.setRemark(workflowYearDTO.getRemark());
+							}
+							
 							annualAOPCostRepository.save(annualAOPCost);
 						}
 				}
