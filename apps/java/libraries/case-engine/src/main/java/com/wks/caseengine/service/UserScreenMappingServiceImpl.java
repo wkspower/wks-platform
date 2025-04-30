@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -44,19 +45,32 @@ public class UserScreenMappingServiceImpl implements UserScreenMappingService {
 	    List<Map<String, Object>> children = new ArrayList<>();
 
 	    try {
-	    	List<VerticalScreenMapping> screenMappingsWithDuplicates = verticalScreenMappingRepository.findByScreenDisplayNameInOrderBySequence(userScreens);
-	    	Map<String, VerticalScreenMapping> uniqueScreenMappingMap = new HashMap<>();
+	    	List<VerticalScreenMapping> screenMappingsWithDuplicates =
+	    	        verticalScreenMappingRepository.findByScreenDisplayNameInOrderBySequence(userScreens);
 
+	    	// Step 1: Remove duplicates by screenCode
+	    	Map<String, VerticalScreenMapping> screenCodeMap = new LinkedHashMap<>();
 	    	for (VerticalScreenMapping mapping : screenMappingsWithDuplicates) {
-	    	    uniqueScreenMappingMap.putIfAbsent(mapping.getScreenCode(), mapping);
+	    	    screenCodeMap.putIfAbsent(mapping.getScreenCode(), mapping);
 	    	}
+	    	List<VerticalScreenMapping> uniqueByScreenCode = new ArrayList<>(screenCodeMap.values());
 
-	    	List<VerticalScreenMapping> uniqueScreenMappings = new ArrayList<>(uniqueScreenMappingMap.values());
-	    	uniqueScreenMappings.sort(Comparator.comparing(VerticalScreenMapping::getSequence, Comparator.nullsLast(Integer::compareTo)));
+	    	// Step 2: Sort by sequence
+	    	uniqueByScreenCode.sort(Comparator.comparing(VerticalScreenMapping::getSequence, Comparator.nullsLast(Integer::compareTo)));
+
+	    	// Step 3: Enforce uniqueness again by URL after sorting
+	    	Map<String, VerticalScreenMapping> urlMap = new LinkedHashMap<>();
+	    	for (VerticalScreenMapping mapping : uniqueByScreenCode) {
+	    	    String url = mapping.getRoute();
+	    	    if (!urlMap.containsKey(url)) {
+	    	        urlMap.put(url, mapping);
+	    	    }
+	    	}
+	    	List<VerticalScreenMapping> finalResult = new ArrayList<>(urlMap.values());
 
 
 	        // Extract all unique group IDs to fetch in batch
-	        Set<UUID> groupIds = uniqueScreenMappings.stream()
+	        Set<UUID> groupIds = finalResult.stream()
 	                .map(VerticalScreenMapping::getGroupId)
 	                .filter(Objects::nonNull)
 	                .collect(Collectors.toSet());
@@ -80,7 +94,7 @@ public class UserScreenMappingServiceImpl implements UserScreenMappingService {
 
 	        Map<UUID, Map<String, Object>> groupWiseScreens = new HashMap<>();
 
-	        uniqueScreenMappings.forEach(mapping -> {
+	        finalResult.forEach(mapping -> {
 	            Map<String, Object> screenItem = new HashMap<>();
 	            screenItem.put("id", mapping.getScreenCode());
 	            screenItem.put("title", mapping.getScreenDisplayName());
