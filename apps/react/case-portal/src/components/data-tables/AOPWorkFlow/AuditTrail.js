@@ -7,6 +7,12 @@ import { useEffect, useState } from 'react'
 import { CaseService } from 'services/CaseService'
 import { truncateRemarks } from 'utils/remarksUtils'
 import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
   Tooltip,
   Typography,
 } from '../../../../node_modules/@mui/material/index'
@@ -36,7 +42,7 @@ const AuditTrail = ({ keycloak, businessKey }) => {
   const [rows, setRows] = useState([])
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
-  const [currentRowId, setCurrentRowId] = useState(null)
+  // const [currentRowId, setCurrentRowId] = useState(null)
   const openRemarkPopup = (text) => {
     // console.log(row, newRow)
     setCurrentRemark(text || '')
@@ -120,12 +126,12 @@ const AuditTrail = ({ keycloak, businessKey }) => {
         rows={rows}
         loading={loading}
         handleAddPlantSite={handleAddPlantSite}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={setCurrentRowId}
+        // remarkDialogOpen={remarkDialogOpen}
+        // setRemarkDialogOpen={setRemarkDialogOpen}
+        // currentRemark={currentRemark}
+        // setCurrentRemark={setCurrentRemark}
+        // currentRowId={currentRowId}
+        // setCurrentRowId={setCurrentRowId}
         permissions={{
           showAction: false,
           addButton: false,
@@ -138,6 +144,34 @@ const AuditTrail = ({ keycloak, businessKey }) => {
           customHeight: defaultCustomHeight,
         }}
       />
+      <Dialog
+        open={!!remarkDialogOpen}
+        onClose={() => setRemarkDialogOpen(false)}
+      >
+        <DialogTitle>Add Remark</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin='dense'
+            id='remark'
+            label='Remark'
+            type='text'
+            fullWidth
+            variant='outlined'
+            sx={{ width: '100%', minWidth: '600px' }}
+            value={currentRemark || ''}
+            onChange={(e) => setCurrentRemark(e.target.value)}
+            multiline
+            rows={8}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRemarkDialogOpen(false)}>Cancel</Button>
+          {/* <Button onClick={handleCloseRemark}>Cancel</Button> */}
+          {/* <Button onClick={handleRemarkSave} disabled={!currentRemark?.trim()}>
+                </Button> */}
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

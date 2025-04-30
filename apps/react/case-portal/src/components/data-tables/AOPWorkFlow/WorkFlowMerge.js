@@ -74,14 +74,21 @@ const WorkFlowMerge = () => {
   }
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-  const handleRemarkCellClick = (row) => {
-    console.log(row)
+  const handleRemarkCellClick = async (row) => {
+    try {
+      const cases = await DataService.getCaseId(keycloak)
+      console.log(cases?.workflowList?.length === 0)
+      // console.log(isEdit)
+      if (cases?.workflowList?.length !== 0) return
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
+    } catch (err) {
+      console.error('Error fetching case', err)
+    }
   }
-  console.log(unsavedChangesRef.current, 'unsavedChangesRef')
-  console.log(rows)
+  // console.log(unsavedChangesRef.current, 'unsavedChangesRef')
+  // console.log(rows)
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     console.log(newRow)
@@ -205,6 +212,13 @@ const WorkFlowMerge = () => {
       setLoading(false)
     }
   }
+  useEffect(() => {
+    if (showCreateCasebutton) {
+      setIsEdit(true)
+    } else {
+      setIsEdit(false)
+    }
+  }, [showCreateCasebutton])
   // console.log(activeStep, 'activeStep')
   // console.log(masterSteps, 'masterSteps')
 
@@ -267,8 +281,8 @@ const WorkFlowMerge = () => {
   }
 
   useEffect(() => {
-    getCaseId()
     fetchData()
+    getCaseId()
   }, [plantId, year])
 
   // handle reject click
