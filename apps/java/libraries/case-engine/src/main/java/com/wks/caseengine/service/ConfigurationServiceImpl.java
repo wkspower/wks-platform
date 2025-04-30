@@ -76,13 +76,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			System.out.println("GET CofigurationDataService==============================>");
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 			List<Object[]> obj = new ArrayList<>();
-			if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
-				String viewName="vwScrn"+verticalName+"GetConfigTypes";
-				
-				obj = findByYearAndPlantFkId(year, plantFKId,viewName);
-			} else if (verticalName.equalsIgnoreCase("MEG")) {
+			if (verticalName.equalsIgnoreCase("MEG")) {
 				obj = normAttributeTransactionsRepository.findByYearAndPlantFkIdMEG(year, plantFKId);
 			}
+			else{
+				String viewName="vwScrn"+verticalName+"GetConfigTypes";
+				obj = findByYearAndPlantFkId(year, plantFKId,viewName);
+			}  
 
 			List<ConfigurationDTO> configurationDTOList = new ArrayList<>();
 			int i = 0;

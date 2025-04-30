@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.ShutDownPlanDTO;
+import com.wks.caseengine.dto.SlowDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.exception.RestInvalidArgumentException;

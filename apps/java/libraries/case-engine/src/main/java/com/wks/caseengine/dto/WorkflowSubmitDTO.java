@@ -24,5 +24,5 @@ public class WorkflowSubmitDTO {
     List<ProcessVariable> variables;
    com.wks.caseengine.cases.instance.CaseComment CaseComment;
     String taskId;
-
+    List<WorkflowYearDTO> workflowYearDTO;
 }

@@ -1,5 +1,6 @@
 package com.wks.caseengine.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,15 +15,11 @@ public interface AnnualAOPCostRepository extends JpaRepository<AnnualAOPCost,UUI
 	@Query(
 		    value = "SELECT Id FROM dbo.AnnualAOPCost " +
 		            "WHERE Particulates = :particulates " +
-		            "AND AOPYear = :aopYear " +
-		            "AND AOPType = :aopType " +
 		            "AND Plant_FK_ID = :plantFkId",
 		    nativeQuery = true
 		)
-		UUID findIdByParticulatesAndAopYearAndAopTypeAndPlantFkId(
+		List<UUID> findIdByParticulatesAndPlantFkId(
 		        @Param("particulates") String particulates,
-		        @Param("aopYear") String aopYear,
-		        @Param("aopType") String aopType,
 		        @Param("plantFkId") UUID plantFkId
 		);
 

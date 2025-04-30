@@ -12,6 +12,8 @@ import jakarta.persistence.Query;
 
 import java.util.List;
 import java.util.UUID;
+
+import com.wks.caseengine.entity.AnnualAOPCost;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
@@ -55,6 +57,7 @@ import com.wks.caseengine.dto.WorkflowPageDTO;
 import com.wks.caseengine.dto.WorkflowStepsMasterDTO;
 import com.wks.caseengine.dto.WorkflowSubmitDTO;
 import com.wks.caseengine.dto.WorkflowYearDTO;
+import com.wks.caseengine.repository.AnnualAOPCostRepository;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
@@ -85,16 +88,21 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 	@Autowired
 	private DataSource dataSource;
+	
+	 @Autowired
+	 private AnnualAOPCostRepository annualAOPCostRepository;
 
 	@Autowired
 	private ProcessInstanceService processInstanceService;
+	
 
 	@Autowired
 	private TaskService taskService;
-	@Autowired
-	private PlantsRepository plantsRepository;
-	@Autowired
-	private VerticalsRepository verticalRepository;
+		@Autowired
+		private PlantsRepository plantsRepository;
+		@Autowired
+		private VerticalsRepository verticalRepository;
+
 
 	@Override
 	public WorkflowPageDTO getCaseId(String year, String plantId, String siteId, String verticalId) {
@@ -439,6 +447,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@Transactional
 	@Override
 	public WorkflowDTO submitWorkflow(WorkflowSubmitDTO workflowSubmitDTO) {
+		saveWorkflowData(workflowSubmitDTO.getWorkflowDTO().getPlantFkId(),workflowSubmitDTO.getWorkflowYearDTO());
 		CaseInstance caseInstance = caseInstanceService.startWithValues(workflowSubmitDTO.getCaseInstance());
 		System.out.println("case created " + caseInstance.getBusinessKey());
 
@@ -492,6 +501,34 @@ public class WorkflowServiceImpl implements WorkflowService {
 		}
 
 		return Collections.emptyList(); // Return empty list if roles not found
+	}
+	
+	@Override
+	public WorkflowYearDTO saveWorkflowData(String plantId, List<WorkflowYearDTO> workflowYearDTOList) {
+		try {
+			for (WorkflowYearDTO workflowYearDTO : workflowYearDTOList) {
+				System.out.println("workflowYearDTO.getParticulates()"+workflowYearDTO.getParticulates());
+				System.out.println("workflowYearDTO.getFyAop()"+workflowYearDTO.getFyAop());
+				List<UUID> ids = annualAOPCostRepository.findIdByParticulatesAndPlantFkId(
+						workflowYearDTO.getParticulates(),
+						 UUID.fromString(plantId));
+				for(UUID id:ids) {
+					System.out.println("id:"+id);
+						Optional<AnnualAOPCost> AnnualAOPCostOp = annualAOPCostRepository.findById(id);
+						if (AnnualAOPCostOp != null) {
+							AnnualAOPCost annualAOPCost = AnnualAOPCostOp.get();
+							annualAOPCost.setRemark(workflowYearDTO.getRemark());
+							annualAOPCostRepository.save(annualAOPCost);
+						}
+				}
+				
+				 
+			}
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to save data", ex);
+		}
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
