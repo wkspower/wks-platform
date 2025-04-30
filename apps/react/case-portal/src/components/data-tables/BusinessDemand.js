@@ -23,8 +23,6 @@ import MuiAccordion from '@mui/material/Accordion' // { AccordionProps }
 import MuiAccordionSummary from '@mui/material/AccordionSummary' // } //   AccordionSummaryProps, // , {
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
 
-// import { useScreens } from 'menu/userscreen'
-// import { usePlan } from 'menu/userscreen'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({

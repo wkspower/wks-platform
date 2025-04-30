@@ -33,7 +33,7 @@ const WorkFlowMerge = () => {
   const [loading, setLoading] = useState(false)
   const [isCreatingCase, setIsCreatingCase] = useState(false)
   const [showCreateCasebutton, setShowCreateCasebutton] = useState(false)
-  const [isEdit, setIsEdit] = useState(false)
+  // const [isEdit, setIsEdit] = useState(false)
 
   // remark dialog state
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
@@ -212,13 +212,13 @@ const WorkFlowMerge = () => {
       setLoading(false)
     }
   }
-  useEffect(() => {
-    if (showCreateCasebutton) {
-      setIsEdit(true)
-    } else {
-      setIsEdit(false)
-    }
-  }, [showCreateCasebutton])
+  // useEffect(() => {
+  //   if (showCreateCasebutton) {
+  //     setIsEdit(true)
+  //   } else {
+  //     setIsEdit(false)
+  //   }
+  // }, [showCreateCasebutton])
   // console.log(activeStep, 'activeStep')
   // console.log(masterSteps, 'masterSteps')
 
