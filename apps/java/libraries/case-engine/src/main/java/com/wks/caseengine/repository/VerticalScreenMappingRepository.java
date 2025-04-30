@@ -13,7 +13,7 @@ import com.wks.caseengine.entity.VerticalScreenMapping;
 public interface VerticalScreenMappingRepository extends JpaRepository<VerticalScreenMapping,Long>{
 	
 	List<VerticalScreenMapping> findAllByVerticalFKIdOrderBySequence(@Param("verticalFKId") UUID verticalFKId);
-	List<VerticalScreenMapping> findByScreenCodeIn(List<String> screenCodes);
+	List<VerticalScreenMapping> findByScreenDisplayNameInOrderBySequence(List<String> screenDisplayName);
 
 
 }

@@ -2,6 +2,7 @@ package com.wks.caseengine.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,7 @@ public class UserScreenMappingServiceImpl implements UserScreenMappingService {
 	    List<Map<String, Object>> children = new ArrayList<>();
 
 	    try {
-	    	List<VerticalScreenMapping> screenMappingsWithDuplicates = verticalScreenMappingRepository.findByScreenCodeIn(userScreens);
+	    	List<VerticalScreenMapping> screenMappingsWithDuplicates = verticalScreenMappingRepository.findByScreenDisplayNameInOrderBySequence(userScreens);
 	    	Map<String, VerticalScreenMapping> uniqueScreenMappingMap = new HashMap<>();
 
 	    	for (VerticalScreenMapping mapping : screenMappingsWithDuplicates) {
@@ -51,6 +52,8 @@ public class UserScreenMappingServiceImpl implements UserScreenMappingService {
 	    	}
 
 	    	List<VerticalScreenMapping> uniqueScreenMappings = new ArrayList<>(uniqueScreenMappingMap.values());
+	    	uniqueScreenMappings.sort(Comparator.comparing(VerticalScreenMapping::getSequence, Comparator.nullsLast(Integer::compareTo)));
+
 
 	        // Extract all unique group IDs to fetch in batch
 	        Set<UUID> groupIds = uniqueScreenMappings.stream()

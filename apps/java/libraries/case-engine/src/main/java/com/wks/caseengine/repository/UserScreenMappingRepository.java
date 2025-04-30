@@ -12,7 +12,7 @@ import com.wks.caseengine.entity.UserScreenMapping;
 @Repository
 public interface UserScreenMappingRepository extends JpaRepository<UserScreenMapping, UUID>{
 
-	@Query(value="SELECT ScreenCode"
+	@Query(value="SELECT Distinct ScreenCode"
 			+ "  FROM [dbo].[UserScreenMapping] where UserId=:userId and PlantFKId=:plantId and VerticalFKId=:verticalId GROUP BY ScreenCode", nativeQuery=true)
 	List<String> findByVerticalFKIdAndPlantFKIdandUserId(@Param("verticalId") String verticalId, @Param("plantId") String plantId, @Param("userId") String userId);
 
