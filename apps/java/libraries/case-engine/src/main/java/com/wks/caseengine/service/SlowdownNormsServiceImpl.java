@@ -12,6 +12,7 @@ import com.wks.caseengine.dto.SlowdownNormsValueDTO;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ShutdownNormsValue;
 import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.SlowdownNormsValue;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.repository.PlantsRepository;
@@ -100,10 +101,10 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	public List<SlowdownNormsValueDTO> saveSlowdownNormsData(List<SlowdownNormsValueDTO> slowdownNormsValueDTOList) {
 		try {
 			for (SlowdownNormsValueDTO slowdownNormsValueDTO : slowdownNormsValueDTOList) {
-				ShutdownNormsValue shutdownNormsValue = new ShutdownNormsValue();
+				SlowdownNormsValue slowdownNormsValue = new SlowdownNormsValue();
 				if (slowdownNormsValueDTO.getId() != null && !slowdownNormsValueDTO.getId().isEmpty()) {
-					shutdownNormsValue.setId(UUID.fromString(slowdownNormsValueDTO.getId()));
-					shutdownNormsValue.setModifiedOn(new Date());
+					slowdownNormsValue.setId(UUID.fromString(slowdownNormsValueDTO.getId()));
+					slowdownNormsValue.setModifiedOn(new Date());
 				} else {
 					UUID plantId = null;
 					UUID siteId = null;
@@ -124,47 +125,47 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 					UUID Id = slowdownNormsRepository.findIdByFilters(plantId, siteId, verticalId, materialId,
 							slowdownNormsValueDTO.getFinancialYear());
 					if (Id != null) {
-						shutdownNormsValue.setId(Id);
+						slowdownNormsValue.setId(Id);
 					}
 
-					shutdownNormsValue.setCreatedOn(new Date());
+					slowdownNormsValue.setCreatedOn(new Date());
 				}
-				shutdownNormsValue.setApril(Optional.ofNullable(slowdownNormsValueDTO.getApril()).orElse(0.0f));
-				shutdownNormsValue.setMay(Optional.ofNullable(slowdownNormsValueDTO.getMay()).orElse(0.0f));
-				shutdownNormsValue.setJune(Optional.ofNullable(slowdownNormsValueDTO.getJune()).orElse(0.0f));
-				shutdownNormsValue.setJuly(Optional.ofNullable(slowdownNormsValueDTO.getJuly()).orElse(0.0f));
-				shutdownNormsValue.setAugust(Optional.ofNullable(slowdownNormsValueDTO.getAugust()).orElse(0.0f));
-				shutdownNormsValue.setSeptember(Optional.ofNullable(slowdownNormsValueDTO.getSeptember()).orElse(0.0f));
-				shutdownNormsValue.setOctober(Optional.ofNullable(slowdownNormsValueDTO.getOctober()).orElse(0.0f));
-				shutdownNormsValue.setNovember(Optional.ofNullable(slowdownNormsValueDTO.getNovember()).orElse(0.0f));
-				shutdownNormsValue.setDecember(Optional.ofNullable(slowdownNormsValueDTO.getDecember()).orElse(0.0f));
-				shutdownNormsValue.setJanuary(Optional.ofNullable(slowdownNormsValueDTO.getJanuary()).orElse(0.0f));
-				shutdownNormsValue.setFebruary(Optional.ofNullable(slowdownNormsValueDTO.getFebruary()).orElse(0.0f));
-				shutdownNormsValue.setMarch(Optional.ofNullable(slowdownNormsValueDTO.getMarch()).orElse(0.0f));
+				slowdownNormsValue.setApril(Optional.ofNullable(slowdownNormsValueDTO.getApril()).orElse(0.0f));
+				slowdownNormsValue.setMay(Optional.ofNullable(slowdownNormsValueDTO.getMay()).orElse(0.0f));
+				slowdownNormsValue.setJune(Optional.ofNullable(slowdownNormsValueDTO.getJune()).orElse(0.0f));
+				slowdownNormsValue.setJuly(Optional.ofNullable(slowdownNormsValueDTO.getJuly()).orElse(0.0f));
+				slowdownNormsValue.setAugust(Optional.ofNullable(slowdownNormsValueDTO.getAugust()).orElse(0.0f));
+				slowdownNormsValue.setSeptember(Optional.ofNullable(slowdownNormsValueDTO.getSeptember()).orElse(0.0f));
+				slowdownNormsValue.setOctober(Optional.ofNullable(slowdownNormsValueDTO.getOctober()).orElse(0.0f));
+				slowdownNormsValue.setNovember(Optional.ofNullable(slowdownNormsValueDTO.getNovember()).orElse(0.0f));
+				slowdownNormsValue.setDecember(Optional.ofNullable(slowdownNormsValueDTO.getDecember()).orElse(0.0f));
+				slowdownNormsValue.setJanuary(Optional.ofNullable(slowdownNormsValueDTO.getJanuary()).orElse(0.0f));
+				slowdownNormsValue.setFebruary(Optional.ofNullable(slowdownNormsValueDTO.getFebruary()).orElse(0.0f));
+				slowdownNormsValue.setMarch(Optional.ofNullable(slowdownNormsValueDTO.getMarch()).orElse(0.0f));
 				if (slowdownNormsValueDTO.getSiteFkId() != null) {
-					shutdownNormsValue.setSiteFkId(UUID.fromString(slowdownNormsValueDTO.getSiteFkId()));
+					slowdownNormsValue.setSiteFkId(UUID.fromString(slowdownNormsValueDTO.getSiteFkId()));
 				}
 				if (slowdownNormsValueDTO.getPlantFkId() != null) {
-					shutdownNormsValue.setPlantFkId(UUID.fromString(slowdownNormsValueDTO.getPlantFkId()));
+					slowdownNormsValue.setPlantFkId(UUID.fromString(slowdownNormsValueDTO.getPlantFkId()));
 				}
 				if (slowdownNormsValueDTO.getVerticalFkId() != null) {
-					shutdownNormsValue.setVerticalFkId(UUID.fromString(slowdownNormsValueDTO.getVerticalFkId()));
+					slowdownNormsValue.setVerticalFkId(UUID.fromString(slowdownNormsValueDTO.getVerticalFkId()));
 				}
 				if (slowdownNormsValueDTO.getMaterialFkId() != null) {
-					shutdownNormsValue.setMaterialFkId(UUID.fromString(slowdownNormsValueDTO.getMaterialFkId()));
+					slowdownNormsValue.setMaterialFkId(UUID.fromString(slowdownNormsValueDTO.getMaterialFkId()));
 				}
 				if (slowdownNormsValueDTO.getNormParameterTypeId() != null) {
-					shutdownNormsValue
+					slowdownNormsValue
 							.setNormParameterTypeFkId(UUID.fromString(slowdownNormsValueDTO.getNormParameterTypeId()));
 				}
 
-				shutdownNormsValue.setFinancialYear(slowdownNormsValueDTO.getFinancialYear());
-				shutdownNormsValue.setRemarks(slowdownNormsValueDTO.getRemarks());
-				shutdownNormsValue.setMcuVersion("V1");
-				shutdownNormsValue.setUpdatedBy("System");
+				slowdownNormsValue.setFinancialYear(slowdownNormsValueDTO.getFinancialYear());
+				slowdownNormsValue.setRemarks(slowdownNormsValueDTO.getRemarks());
+				slowdownNormsValue.setMcuVersion("V1");
+				slowdownNormsValue.setUpdatedBy("System");
 
 				System.out.println("Data Saved Succussfully");
-				slowdownNormsRepository.save(shutdownNormsValue);
+				slowdownNormsRepository.save(slowdownNormsValue);
 			}
 			// TODO Auto-generated method stub
 			return slowdownNormsValueDTOList;
@@ -180,7 +181,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			String storedProcedure = vertical.getName() + "_HMD_CalculateShutdownNorms";
+			String storedProcedure = vertical.getName() + "_HMD_CalculateSlowdownNorms";
 			List<Object[]> list = getCalculatedSlowdownNormsSP(storedProcedure, year, plant.getId().toString(),
 					site.getId().toString(), vertical.getId().toString());
 			List<SlowdownNormsValueDTO> slowdownNormsValueDTOList = new ArrayList<>();

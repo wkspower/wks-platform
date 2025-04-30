@@ -8,9 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.wks.caseengine.entity.ShutdownNormsValue;
+import com.wks.caseengine.entity.SlowdownNormsValue;
 
 @Repository
-public interface SlowdownNormsRepository extends JpaRepository<ShutdownNormsValue,UUID>{
+public interface SlowdownNormsRepository extends JpaRepository<SlowdownNormsValue,UUID>{
 	
 	@Query(value = """
 		    SELECT TOP (1000) [Id]
@@ -42,12 +43,12 @@ public interface SlowdownNormsRepository extends JpaRepository<ShutdownNormsValu
       ,[NormTypeDisplayOrder]
       ,[MaterialDisplayOrder]
       ,[UOM]
-  FROM [dbo].[vwScrnShutdownNorms]
+  FROM [dbo].[vwScrnSlowdownNorms]
 		    WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL) ORDER BY NormTypeDisplayOrder
 		    """, nativeQuery = true)
 		List<Object[]> findByYearAndPlantFkId(@Param("year") String year, @Param("plantId") UUID plantId);
 		
-		@Query(value = "SELECT TOP 1 Id FROM ShutdownNormsValue " +
+		@Query(value = "SELECT TOP 1 Id FROM SlowdownNormsValue " +
                 "WHERE Plant_FK_Id = :plantId " +
                 "AND Site_FK_Id = :siteId " +
                 "AND Vertical_FK_Id = :verticalId " +
