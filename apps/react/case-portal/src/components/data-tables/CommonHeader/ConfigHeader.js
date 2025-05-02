@@ -52,7 +52,7 @@ const getEnhancedAOPColDefs = ({
     ]
     allGradesReciepes?.forEach((field) => {
       config.push({
-        field: field?.id.toUpperCase(),
+        field: field?.id?.toUpperCase(),
         headerName: field?.id,
         editable: true,
         align: 'left',

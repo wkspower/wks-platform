@@ -34,6 +34,8 @@ const ConfigurationTable = () => {
           idFromApi: item.id,
           id: index,
           originalRemark: item.remarks,
+          srNo: index + 1,
+
           // TypeName: index % 2 === 0 ? 'Production' : 'Consumption',
         }))
 
@@ -58,7 +60,8 @@ const ConfigurationTable = () => {
             srNo: index + 1,
           }))
 
-        setProductionRows(productionData)
+        // setProductionRows(productionData)
+        setProductionRows(formattedData)
         setConsumptionRows(consumptionData)
         setConsumptionRows2(consumptionData2)
         setRows(formattedData) // Optional: if you still need all rows
@@ -185,7 +188,7 @@ const ConfigurationTable = () => {
           marginTop: '20px',
         }}
       >
-        <Tabs
+        {/* <Tabs
           value={tabIndex}
           onChange={(event, newIndex) => setTabIndex(newIndex)}
           sx={{
@@ -217,20 +220,20 @@ const ConfigurationTable = () => {
               borderBottom: '1px solid',
             }}
           />
-        </Tabs>
+        </Tabs> */}
 
         <Box>
-          {tabIndex === 0 && (
-            <SelectivityData
-              rows={productionRows}
-              loading={loading}
-              fetchData={fetchData}
-              setRows={setProductionRows}
-              defaultCustomHeight={defaultCustomHeight}
-              configType={'production'}
-            />
-          )}
-          {tabIndex === 1 && (
+          {/* {tabIndex === 0 && ( */}
+          <SelectivityData
+            rows={productionRows}
+            loading={loading}
+            fetchData={fetchData}
+            setRows={setProductionRows}
+            defaultCustomHeight={defaultCustomHeight}
+            configType={'production'}
+          />
+          {/* )} */}
+          {/* {tabIndex === 1 && (
             <SelectivityData
               rows={consumptionRows}
               loading={loading}
@@ -249,7 +252,7 @@ const ConfigurationTable = () => {
               defaultCustomHeight={defaultCustomHeight}
               configType={'Calculated Intermediate Values'}
             />
-          )}
+          )} */}
         </Box>
       </div>
     )

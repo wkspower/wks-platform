@@ -196,7 +196,7 @@
 .custom-data-grid .disabled-cell {
   background-color: rgba(233, 233, 233, 0.3);
   border-radius: 0;
-  border: 1px #d0d0d0;
+  border: 1px;
 }
 
 .custom-data-grid .disabled-cell1 {

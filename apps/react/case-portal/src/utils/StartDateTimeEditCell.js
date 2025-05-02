@@ -79,9 +79,13 @@ export const StartDateTimeEditCell = ({ id, field, value, api }) => {
           },
           popper: {
             onMouseLeave: () => {
-              // console.log('Hovered out of DatePicker popper')
-              api.stopRowEditMode({ id })
+              try {
+                api.stopRowEditMode({ id })
+              } catch (error) {
+                // Optional: console.log('Row not in edit mode:', error.message)
+              }
             },
+
             sx: {
               '& .MuiPaper-root': {
                 transform: 'scale(0.70)',
