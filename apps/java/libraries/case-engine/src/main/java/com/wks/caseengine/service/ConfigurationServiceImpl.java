@@ -149,7 +149,67 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				}
 
 			}
+			if (verticalName.equalsIgnoreCase("MEG")) {
+				obj =findConfigurationIntermediateValues(year,plantFKId);
+				 i = 0;
+					for (Object[] row : obj) {
+						ConfigurationDTO configurationDTO = new ConfigurationDTO();
+						configurationDTO.setId(row[0] != null ? row[0].toString() : i + "#");
 
+						configurationDTO.setNormParameterFKId(row[1] != null ? row[1].toString() : "");
+						configurationDTO.setJan(
+								(row[1] != null && !row[2].toString().trim().isEmpty()) ? Float.parseFloat(row[2].toString())
+										: null);
+						configurationDTO.setFeb(
+								(row[2] != null && !row[3].toString().trim().isEmpty()) ? Float.parseFloat(row[3].toString())
+										: null);
+						configurationDTO.setMar(
+								(row[3] != null && !row[4].toString().trim().isEmpty()) ? Float.parseFloat(row[4].toString())
+										: null);
+						configurationDTO.setApr(
+								(row[4] != null && !row[6].toString().trim().isEmpty()) ? Float.parseFloat(row[6].toString())
+										: null);
+						configurationDTO.setMay(
+								(row[5] != null && !row[7].toString().trim().isEmpty()) ? Float.parseFloat(row[7].toString())
+										: null);
+						configurationDTO.setJun(
+								(row[6] != null && !row[8].toString().trim().isEmpty()) ? Float.parseFloat(row[8].toString())
+										: null);
+						configurationDTO.setJul(
+								(row[7] != null && !row[8].toString().trim().isEmpty()) ? Float.parseFloat(row[8].toString())
+										: null);
+						configurationDTO.setAug(
+								(row[8] != null && !row[9].toString().trim().isEmpty()) ? Float.parseFloat(row[9].toString())
+										: null);
+						configurationDTO.setSep(
+								(row[9] != null && !row[10].toString().trim().isEmpty()) ? Float.parseFloat(row[10].toString())
+										: null);
+						configurationDTO.setOct(
+								(row[10] != null && !row[11].toString().trim().isEmpty()) ? Float.parseFloat(row[11].toString())
+										: null);
+						configurationDTO.setNov(
+								(row[11] != null && !row[12].toString().trim().isEmpty()) ? Float.parseFloat(row[12].toString())
+										: null);
+						configurationDTO.setDec(
+								(row[12] != null && !row[13].toString().trim().isEmpty()) ? Float.parseFloat(row[13].toString())
+										: null);
+						configurationDTO.setRemarks((row[14] != null ? row[14].toString() : ""));
+						//configurationDTO.setId(row[14] != null ? row[14].toString() : i + "#");
+						configurationDTO.setAuditYear(row[15] != null ? row[15].toString() : "");
+						configurationDTO.setUOM(row[16] != null ? row[16].toString() : "");
+						configurationDTO.setNormType(row[17] != null ? row[17].toString() : "");
+
+						configurationDTOList.add(configurationDTO);
+						if (row[14] == null) {
+							i++;
+						}
+
+					}
+
+			}
+
+			//List<ConfigurationDTO> configurationDTOList = new ArrayList<>();
+						System.out.println("Total"+configurationDTOList.size());
 			return configurationDTOList;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
