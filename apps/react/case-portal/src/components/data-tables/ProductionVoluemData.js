@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
+import { Typography } from '../../../node_modules/@mui/material/index'
 
 const ProductionvolumeData = ({ permissions }) => {
   const keycloak = useSession()
@@ -22,14 +23,13 @@ const ProductionvolumeData = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
-  //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
-
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [rows, setRows] = useState()
+  const [rows2, setRows2] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -307,12 +307,51 @@ const ProductionvolumeData = ({ permissions }) => {
           }),
         }
       })
+      // console.log(formattedData)
+      // console.log(data)
+      const formulatedData = normalizeAllRows(formattedData)
+      // console.log(formulatedData)
+      setRows2(formulatedData)
       setRows(formattedData)
       setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)
       setLoading(false)
     }
+  }
+  function normalizeAllRows(grid) {
+    const monthKeys = [
+      'april',
+      'may',
+      'june',
+      'july',
+      'august',
+      'september',
+      'october',
+      'november',
+      'december',
+      'january',
+      'february',
+      'march',
+    ]
+
+    return grid?.map((row) => {
+      // 1. Find this row’s max month value
+      const vals = monthKeys?.map((k) => Number(row[k]))
+      const maxVal = Math.max(...vals)
+
+      // 2. Shallow-clone the entire row (carries over id, remarks, all FKs, etc.)
+      const newRow = { ...row }
+
+      // 3. Overwrite only the month fields:
+      monthKeys.forEach((key) => {
+        const orig = Number(row[key] || 0)
+        const pct = maxVal ? (orig / maxVal) * 100 : 0
+        newRow[key] = Number(pct.toFixed(2))
+      })
+
+      return newRow
+    })
   }
 
   useEffect(() => {
@@ -416,6 +455,7 @@ const ProductionvolumeData = ({ permissions }) => {
       console.error('Error!', error)
     }
   }
+  const defaultCustomHeight = { mainBox: '36vh', otherBox: '112%' }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
@@ -432,7 +472,6 @@ const ProductionvolumeData = ({ permissions }) => {
       showCalculate: false,
     }
   }
-
   const adjustedPermissions = getAdjustedPermissions(
     {
       showAction: permissions?.showAction ?? false,
@@ -444,13 +483,12 @@ const ProductionvolumeData = ({ permissions }) => {
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
       saveBtn: permissions?.saveBtn ?? false,
       units: ['TPH', 'TPD'],
-      customHeight: permissions?.customHeight,
+      customHeight: permissions?.customHeight ?? defaultCustomHeight,
       showCalculate:
         permissions?.showCalculate ?? lowerVertName == 'meg' ? true : false,
     },
     isOldYear,
   )
-
   return (
     <div>
       <Backdrop
@@ -495,21 +533,46 @@ const ProductionvolumeData = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         handleCalculate={handleCalculate}
         permissions={adjustedPermissions}
-
-        // permissions={{
-        //   showAction: permissions?.showAction ?? false,
-        //   addButton: permissions?.addButton ?? false,
-        //   deleteButton: permissions?.deleteButton ?? false,
-        //   editButton: permissions?.editButton ?? false,
-        //   showUnit: permissions?.showUnit ?? true,
-        //   saveWithRemark: permissions?.saveWithRemark ?? true,
-        //   showRefreshBtn: permissions?.showRefreshBtn ?? true,
-        //   saveBtn: permissions?.saveBtn ?? false,
-        //   units: ['TPH', 'TPD'],
-        //   customHeight: permissions?.customHeight,
-        //   showCalculate:
-        //     permissions?.showCalculate ?? lowerVertName == 'meg' ? true : false,
-        // }}
+      />
+      <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
+        Percentage Summary
+      </Typography>
+      <ASDataGrid
+        setRows={setRows2}
+        columns={productionColumns}
+        rows={rows2}
+        title='Production Volume Data'
+        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
+        onDeleteRow={(id) => console.log('Row Deleted:', id)}
+        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
+        paginationOptions={[100, 200, 300]}
+        processRowUpdate={processRowUpdate}
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={onRowModesModelChange}
+        saveChanges={saveChanges}
+        snackbarData={snackbarData}
+        snackbarOpen={snackbarOpen}
+        setSnackbarOpen={setSnackbarOpen}
+        setSnackbarData={setSnackbarData}
+        apiRef={apiRef}
+        // deleteId={deleteId}
+        // setDeleteId={setDeleteId}
+        // setOpen1={setOpen1}
+        // open1={open1}
+        // handleDeleteClick={handleDeleteClick}
+        fetchData={fetchData}
+        // onRowEditStop={handleRowEditStop}
+        onProcessRowUpdateError={onProcessRowUpdateError}
+        handleUnitChange={handleUnitChange}
+        experimentalFeatures={{ newEditingApi: true }}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        unsavedChangesRef={unsavedChangesRef}
+        handleCalculate={handleCalculate}
+        permissions={{ customHeight: defaultCustomHeight }}
       />
     </div>
   )

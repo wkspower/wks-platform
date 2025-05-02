@@ -22,15 +22,12 @@ import { Box } from '@mui/material'
 import { Button } from '@mui/material'
 //import './data-grid-css.css'
 //import './extra-css.css'
-
 import { styled } from '@mui/material/styles'
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion'
 import MuiAccordionSummary, {
   AccordionSummaryProps,
 } from '@mui/material/AccordionSummary'
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
-
-// Customized Accordion
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -42,8 +39,6 @@ const CustomAccordion = styled((props) => (
     display: 'none',
   },
 }))
-
-// Customized Accordion Summary
 const CustomAccordionSummary = styled((props) => (
   <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
 ))(() => ({
@@ -54,8 +49,6 @@ const CustomAccordionSummary = styled((props) => (
     margin: '8px 0',
   },
 }))
-
-// Customized Accordion Details
 const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
   padding: '0px 0px 12px',
   backgroundColor: '#F2F3F8',
@@ -79,7 +72,6 @@ const NormalOpNormsScreen = () => {
 
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
-  //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
@@ -553,8 +545,8 @@ const NormalOpNormsScreen = () => {
       setLoading(false)
     }
   }
-  const defaultCustomHeight = { mainBox: '55vh', otherBox: '112%' }
 
+  const defaultCustomHeight = { mainBox: '55vh', otherBox: '112%' }
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -570,7 +562,6 @@ const NormalOpNormsScreen = () => {
       showCalculate: false,
     }
   }
-
   const adjustedPermissions = getAdjustedPermissions(
     {
       showAction: false,
@@ -585,7 +576,6 @@ const NormalOpNormsScreen = () => {
       showRefresh: false,
       noColor: true,
       ShowSummary: true,
-      // customHeight2: true,
       customHeight: defaultCustomHeight,
     },
     isOldYear,
@@ -606,6 +596,7 @@ const NormalOpNormsScreen = () => {
             defaultExpanded
             disableGutters
             onChange={handleAccordionChange}
+            // sx={{ margin: '0px 5px 5px 0px', marginLeft: '13px' }}
           >
             <CustomAccordionSummary
               aria-controls='meg-grid-content'
@@ -659,7 +650,6 @@ const NormalOpNormsScreen = () => {
                   currentRowId={currentRowId}
                   unsavedChangesRef={unsavedChangesRef}
                   permissions={adjustedPermissions}
-
                   // permissions={{
                   //   showAction: false,
                   //   addButton: false,
@@ -673,7 +663,7 @@ const NormalOpNormsScreen = () => {
                   //   showRefresh: false,
                   //   noColor: true,
                   //   ShowSummary: true,
-                  //   // customHeight2: true,
+                  // customHeight2: true,
                   //   customHeight: defaultCustomHeight, // use default height
                   // }}
                 />

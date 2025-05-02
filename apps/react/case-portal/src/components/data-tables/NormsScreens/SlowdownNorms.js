@@ -25,9 +25,7 @@ const SlowdownNorms = () => {
 
   const [slowdownMonths, setSlowdownMonths] = useState([])
   const { sitePlantChange, yearChanged, oldYear } = menu
-  //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
-
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
@@ -103,7 +101,7 @@ const SlowdownNorms = () => {
             return
           }
 
-          saveShutDownNormsData(data)
+          saveSlowdownNormsData(data)
           unsavedChangesRef.current = {
             unsavedRows: {},
             rowsBeforeChange: {},
@@ -156,9 +154,9 @@ const SlowdownNorms = () => {
               return
             }
 
-            saveShutDownNormsData(editedData)
+            saveSlowdownNormsData(editedData)
           } else {
-            saveShutDownNormsData(updatedRows)
+            saveSlowdownNormsData(updatedRows)
           }
         } catch (error) {
           console.log('Error saving changes:', error)
@@ -493,7 +491,7 @@ const SlowdownNorms = () => {
     return newRow
   }, [])
 
-  const saveShutDownNormsData = async (newRows) => {
+  const saveSlowdownNormsData = async (newRows) => {
     setLoading(true)
     try {
       let plantId = ''
@@ -538,7 +536,7 @@ const SlowdownNorms = () => {
       if (businessData.length > 0) {
         // console.log(title)
 
-        const response = await DataService.saveShutDownNormsData(
+        const response = await DataService.saveSlowdownNormsData(
           plantId,
           businessData,
           keycloak,
@@ -769,7 +767,6 @@ const SlowdownNorms = () => {
       noColor: true,
     }
   }
-
   const adjustedPermissions = getAdjustedPermissions(
     {
       showAction: false,
@@ -785,7 +782,6 @@ const SlowdownNorms = () => {
     },
     isOldYear,
   )
-
   return (
     <div>
       <Backdrop
@@ -827,7 +823,6 @@ const SlowdownNorms = () => {
         handleRemarkCellClick={handleRemarkCellClick}
         handleCalculate={handleCalculate}
         permissions={adjustedPermissions}
-
         // permissions={{
         //   showAction: false,
         //   addButton: false,

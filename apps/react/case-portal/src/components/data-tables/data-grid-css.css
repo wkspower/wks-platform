@@ -149,7 +149,6 @@
   background-color: #bfbfbf !important;
   cursor: default !important;
 } */
-
 .custom-data-grid .no-border-row:hover {
   background-color: #e9e9e9 !important;
   pointer-events: none;
@@ -164,12 +163,10 @@
   cursor: not-allowed;
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
-
 .custom-data-grid .odd-row-disabled {
   pointer-events: none;
   cursor: not-allowed;
 }
-
 .custom-data-grid .odd-row-disabled :hover {
   pointer-events: none;
 }
@@ -189,7 +186,7 @@
 .custom-data-grid .disabled-cell {
   background-color: rgba(233, 233, 233, 0.3);
   border-radius: 0;
-  border: 1px solid #d0d0d0;
+  border: 1px #d0d0d0;
 }
 
 .custom-data-grid .disabled-cell1 {
@@ -207,7 +204,6 @@
   background-color: #e9e9e9;
   color: white !important;
 }
-
 .custom-data-grid .MuiInputBase-input,
 .custom-data-grid input,
 .custom-data-grid textarea,

@@ -1,8 +1,18 @@
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { Box, Step, StepLabel, Stepper } from '@mui/material'
+import MuiAccordion from '@mui/material/Accordion'
+import MuiAccordionDetails from '@mui/material/AccordionDetails'
+import MuiAccordionSummary from '@mui/material/AccordionSummary'
+import { styled } from '@mui/material/styles'
+import Typography from '@mui/material/Typography'
+import Notification from 'components/Utilities/Notification'
 import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { CaseService } from 'services/CaseService'
+import { DataService } from 'services/DataService'
+import { TaskService } from 'services/TaskService'
+import { useSession } from 'SessionStoreContext'
 import {
-  Stepper,
-  Step,
-  StepLabel,
   Button,
   Dialog,
   DialogActions,
@@ -10,24 +20,56 @@ import {
   DialogTitle,
   Stack,
   TextField,
-} from '@mui/material'
+} from '../../../../node_modules/@mui/material/index'
 import AuditTrail from './AuditTrail'
 import DataGridTable from '../ASDataGrid'
-import { DataService } from 'services/DataService'
+// import '../data-tables/data-grid-css.css'
 // import { CaseService } from 'services/CaseService'
 // import { TaskService } from 'services/TaskService'
-import { useSession } from 'SessionStoreContext'
+// import { useSession } from 'SessionStoreContext'
 import { remarkColumn } from 'components/Utilities/remarkColumn'
-import Notification from 'components/Utilities/Notification'
+// import Notification from 'components/Utilities/Notification'
 import './jio-grid-style.css'
 // import { usePlan } from 'menu/new-plan'
 // import { useScreens } from 'menu/userscreen'
-import { Box } from '../../../../node_modules/@mui/material/index'
+// import { Box } from '../../../../node_modules/@mui/material/index'
+import ProductionAopView from 'components/data-tables-views/DataTable-production-aop'
+const CustomAccordion = styled((props) => (
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(() => ({
+  position: 'unset',
+  border: 'none',
+  boxShadow: 'none',
+  margin: '0px',
+  '&:before': {
+    display: 'none',
+  },
+}))
+const CustomAccordionSummary = styled((props) => (
+  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
+))(() => ({
+  backgroundColor: '#fff',
+  padding: '0px 12px',
+  minHeight: '40px',
+  '& .MuiAccordionSummary-content': {
+    margin: '8px 0',
+  },
+}))
+const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
+  padding: '0px 0px 12px',
+  backgroundColor: '#F2F3F8',
+}))
 
 const WorkFlowMerge = () => {
   const keycloak = useSession()
   // const [steps, setSteps] = useState([])
   const [activeStep, setActiveStep] = useState(0)
+  // const [openRejectDialog, setOpenRejectDialog] = useState(false)
+  // const [status, setStatus] = useState('')
+  // const [text, setText] = useState('')
+  // const [role, setRole] = useState('plant_manager')
+  // const [showTextBox, setShowTextBox] = useState(false)
+  // const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
   const [columns, setColumns] = useState([])
   const [loading, setLoading] = useState(false)
@@ -50,8 +92,13 @@ const WorkFlowMerge = () => {
   const [actionDisabled, setActionDisabled] = useState(false)
   const [text, setText] = useState('')
   const [taskId, setTaskId] = useState('')
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
 
-  // case + comment state
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+    dataGridStore
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [businessKey, setBusinessKey] = useState('')
   const [masterSteps, setMasterSteps] = useState([])
   const [workflowDto, setWorkFlowDto] = useState({})
@@ -72,13 +119,68 @@ const WorkFlowMerge = () => {
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
   }
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  useEffect(() => {
+    fetchData()
+  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  const handleCalculate = () => {
+    if (lowerVertName == 'meg') {
+      handleCalculateMeg()
+    } else {
+      // handleCalculatePe()
+    }
+  }
+  // const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
+  const handleCalculateMeg = async () => {
+    try {
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const year = localStorage.getItem('year')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      var plantId = plantId
+      const data = await DataService.handleCalculateProductionVolData2(
+        plantId,
+        year,
+        keycloak,
+      )
+
+      if (data || data == 0) {
+        // dispatch(setIsBlocked(true))
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data refreshed successfully!',
+          severity: 'success',
+        })
+        fetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refresh Falied!',
+          severity: 'error',
+        })
+      }
+
+      return data
+    } catch (error) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: error.message || 'An error occurred',
+        severity: 'error',
+      })
+      console.error('Error!', error)
+    }
+  }
+
   const handleRemarkCellClick = async (row) => {
     try {
       const cases = await DataService.getCaseId(keycloak)
+      // setCaseId(cases?.workflowMasterDTO?.casedefId || '')
       console.log(cases?.workflowList?.length === 0)
       // console.log(isEdit)
+      // console.log(showCreateCasebutton)
       if (cases?.workflowList?.length !== 0) return
       setCurrentRemark(row.remark || '')
       setCurrentRowId(row.id)
@@ -89,13 +191,13 @@ const WorkFlowMerge = () => {
   }
   // console.log(unsavedChangesRef.current, 'unsavedChangesRef')
   // console.log(rows)
+
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     console.log(newRow)
     console.log(oldRow)
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
-    // Keep track of original values before editing
+    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
@@ -158,7 +260,7 @@ const WorkFlowMerge = () => {
       setLoading(false)
     }
   }
-
+  // console.log(columns, 'columns')
   // fetch case, steps, and determine active step
   const getCaseId = async () => {
     try {
@@ -175,7 +277,6 @@ const WorkFlowMerge = () => {
         // console.log('businessky in getcaseId ' + cases?.workflowList[0].caseId)
         setBusinessKey(cases?.workflowList[0].caseId)
       }
-
       // console.log(cases)
       const master = cases?.workflowMasterDTO
 
@@ -191,20 +292,6 @@ const WorkFlowMerge = () => {
           ? activeIdx
           : master.steps.findIndex((s) => s.status !== 'completed'),
       )
-
-      // const tasks = await DataService.getTasksByBusinessKey(
-      //   keycloak,
-      //   cases[0].caseId,
-      // )
-      // if (!tasks?.length) return
-
-      // who can act now?
-      // const roles = keycloak.tokenParsed?.realm_access?.roles || []
-      // const match = tasks.find((t) => roles.includes(t.assignee))
-      // if (match) {
-      //   setActionDisabled(false)
-      //   setTaskId(match.id)
-      // }
     } catch (err) {
       console.error('Error fetching case', err)
     } finally {
@@ -218,8 +305,10 @@ const WorkFlowMerge = () => {
   //     setIsEdit(false)
   //   }
   // }, [showCreateCasebutton])
+
   // console.log(activeStep, 'activeStep')
   // console.log(masterSteps, 'masterSteps')
+  // console.log(rows)
 
   const createCase = async () => {
     // 1. Prevent double‐submit
@@ -252,7 +341,7 @@ const WorkFlowMerge = () => {
           verticalFKId: localStorage.getItem('verticalId'),
         },
         variables: caseData.attributes,
-        //taskId: taskId,
+        // allData: rows,
         workflowYearDTO: rows,
       }
       const result = await DataService.submitWorkFlow(payload, keycloak)
@@ -262,10 +351,8 @@ const WorkFlowMerge = () => {
         severity: 'success',
       })
       setLoading(true)
-      // setTimeout(() => {
       getCaseId()
-      //   setLoading(false)
-      // }, 4000)
+      fetchData()
     } catch (error) {
       console.error('Error creating workflow:', error)
       setSnackbarData({
@@ -281,7 +368,7 @@ const WorkFlowMerge = () => {
   }
 
   useEffect(() => {
-    fetchData()
+    // fetchData()
     getCaseId()
   }, [plantId, year])
 
@@ -332,7 +419,7 @@ const WorkFlowMerge = () => {
       setText('')
     }
   }
-  const defaultCustomHeight = { mainBox: '62vh', otherBox: '100%' }
+  const defaultCustomHeight = { mainBox: '43vh', otherBox: '129%' }
 
   return (
     <Box>
@@ -345,12 +432,11 @@ const WorkFlowMerge = () => {
           </Step>
         ))}
       </Stepper>
-
       <Stack
         direction='row'
         spacing={1}
         justifyContent='flex-end'
-        sx={{ mt: 2 }}
+        sx={{ mt: 2, mb: 1 }}
       >
         {taskId && (
           <Button
@@ -372,20 +458,33 @@ const WorkFlowMerge = () => {
           Audit Trail
         </Button>
       </Stack>
-
-      <Box
-        sx={{
-          height: '52vh',
-          width: '100%',
-          marginBottom: 0,
-          padding: 0,
-        }}
-      >
+      <div>
+        <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordionSummary
+            aria-controls='meg-grid-content'
+            id='meg-grid-header'
+          >
+            <Typography component='span' className='grid-title'>
+              Production Data
+            </Typography>
+          </CustomAccordionSummary>
+          <CustomAccordionDetails>
+            <Box>
+              <ProductionAopView />
+            </Box>
+          </CustomAccordionDetails>
+        </CustomAccordion>
+      </div>
+      <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
+        Annual AOP Cost
+      </Typography>
+      <div style={{ minHeight: 'fit-content', maxHeight: 'max-content' }}>
         <DataGridTable
           rows={rows}
           setRows={setRows}
           onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
           columns={columns}
+          className='jio-data-grid'
           loading={loading}
           processRowUpdate={processRowUpdate}
           remarkDialogOpen={remarkDialogOpen}
@@ -397,9 +496,14 @@ const WorkFlowMerge = () => {
           setCurrentRowId={setCurrentRowId}
           rowModesModel={rowModesModel}
           onRowModesModelChange={onRowModesModelChange}
-          permissions={{ customHeight: defaultCustomHeight }}
+          permissions={{
+            customHeight: defaultCustomHeight,
+            // saveBtn: true,
+            // showCalculate: true,
+            // approveBtn: false,
+          }}
         />
-      </Box>
+      </div>
       {showCreateCasebutton && (
         <Button
           variant='contained'
@@ -425,7 +529,7 @@ const WorkFlowMerge = () => {
 
       {/* Reject Dialog (Comments) */}
       <Dialog open={openRejectDialog} onClose={handleRejectCancel}>
-        <DialogTitle>Provide remarks on the changes?</DialogTitle>
+        <DialogTitle>Please provide remarks on the changes?</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -438,14 +542,18 @@ const WorkFlowMerge = () => {
             sx={{ width: '100%', minWidth: '600px' }}
             value={text}
             onChange={(e) => setText(e.target.value)}
+            variant='outlined'
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleRejectCancel}>Cancel</Button>
+        <DialogActions sx={{ justifyContent: 'flex-end' }}>
+          <Button onClick={handleRejectCancel} color='primary'>
+            Cancel
+          </Button>
           <Button
             onClick={handleSubmit}
+            color='primary'
             variant='contained'
-            disabled={!text.trim()}
+            disabled={!text?.trim()}
           >
             Submit
           </Button>

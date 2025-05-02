@@ -1,7 +1,7 @@
 import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import ASDataGrid from './ASDataGrid'
@@ -17,15 +17,12 @@ import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import Typography from '@mui/material/Typography'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-
 import { styled } from '@mui/material/styles'
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion'
 import MuiAccordionSummary, {
   AccordionSummaryProps,
 } from '@mui/material/AccordionSummary'
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
-
-// Customized Accordion
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -37,8 +34,6 @@ const CustomAccordion = styled((props) => (
     display: 'none',
   },
 }))
-
-// Customized Accordion Summary
 const CustomAccordionSummary = styled((props) => (
   <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
 ))(() => ({
@@ -49,8 +44,6 @@ const CustomAccordionSummary = styled((props) => (
     margin: '8px 0',
   },
 }))
-
-// Customized Accordion Details
 const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
   padding: '0px 0px 12px',
   backgroundColor: '#F2F3F8',
@@ -65,7 +58,6 @@ const BusinessDemand = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
-  //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
@@ -73,8 +65,8 @@ const BusinessDemand = ({ permissions }) => {
   const [rows, setRows] = useState()
   const [rows2, setRows2] = useState()
 
-  // console.log('yearyear', year)
-
+  // const screens = useScreens()
+  // console.log('yearyear', screens)
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   const [snackbarData, setSnackbarData] = useState({
@@ -93,6 +85,7 @@ const BusinessDemand = ({ permissions }) => {
   })
 
   const fetchData = async () => {
+    // fetchData2()
     setLoading(true)
     try {
       var data = await DataService.getBDData(keycloak)
@@ -149,7 +142,6 @@ const BusinessDemand = ({ permissions }) => {
 
   // console.log(verticalChange)
   useEffect(() => {
-    // console.log('oldYear', oldYear?.oldYear)
     const getAllProducts = async () => {
       try {
         var data = []
@@ -185,9 +177,8 @@ const BusinessDemand = ({ permissions }) => {
         // handleMenuClose();
       }
     }
-
     fetchData()
-    // fetchData2()
+
     getAllProducts()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
@@ -403,9 +394,6 @@ const BusinessDemand = ({ permissions }) => {
     },
     isOldYear,
   )
-
-  // permissions={adjustedPermissions}
-
   return (
     <div>
       <Backdrop
@@ -414,6 +402,7 @@ const BusinessDemand = ({ permissions }) => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
+
 
       <Typography component='div' className='grid-title'>
         Business Demand Data
@@ -466,7 +455,6 @@ const BusinessDemand = ({ permissions }) => {
         //   customHeight: permissions?.customHeight || defaultCustomHeight,
         // }}
       />
-
       <div>
         {(lowerVertName === 'meg' || lowerVertName === 'pe') && (
           <CustomAccordion defaultExpanded disableGutters>

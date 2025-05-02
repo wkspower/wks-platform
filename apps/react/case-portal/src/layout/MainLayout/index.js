@@ -7,12 +7,15 @@ import Drawer from './Drawer'
 import Header from './Header'
 import { openDrawer } from 'store/reducers/menu'
 import { useMenu } from 'SessionStoreContext'
+import useMenuItems from 'menu/index'
 
 const MainLayout = ({ keycloak, authenticated }) => {
   const dispatch = useDispatch()
   const { drawerOpen } = useSelector((state) => state.menu)
   const [open, setOpen] = useState(false)
-  const menu = useMenu()
+  // const menu = useMenu()
+  const { items: menuItems } = useMenuItems()
+  const menu = { items: [...menuItems] }
 
   const handleDrawerToggle = () => {
     setOpen(!open)

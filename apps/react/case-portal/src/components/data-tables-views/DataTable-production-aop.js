@@ -27,7 +27,7 @@ const ProductionAopView = () => {
     val && !isNaN(val) ? Math.round(val) : val
 
   const fetchData = async () => {
-    setLoading(true)
+    // setLoading(true)
     try {
       var data = await DataService.getWorkflowDataProduction(keycloak, plantId)
       const formattedRows = data.results.map((row, id) => {
@@ -53,7 +53,7 @@ const ProductionAopView = () => {
         }))
       }
       setColumns(generateColumns(data))
-      setLoading(false)
+      // setLoading(false)
     } catch (error) {
       console.error('Error fetching Business Demand data:', error)
       setRows([])

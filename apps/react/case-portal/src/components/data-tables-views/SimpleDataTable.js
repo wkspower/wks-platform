@@ -8,8 +8,8 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-import '../data-tables/data-grid-css.css'
-import '../data-tables/extra-css.css'
+// import '../data-tables/data-grid-css.css'
+// import '../data-tables/extra-css.css'
 
 const SimpleDataTable = () => {
   const keycloak = useSession()

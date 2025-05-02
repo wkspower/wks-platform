@@ -31,6 +31,7 @@ export const DataService = {
   saveBusinessDemandData,
   saveNormalOperationNormsData,
   saveShutDownNormsData,
+  saveSlowdownNormsData,
   editAOPMCCalculatedData,
 
   updateSlowdownData,
@@ -350,9 +351,6 @@ async function handleCalculateProductionVolData(plantId, year, keycloak) {
     return Promise.reject(e)
   }
 }
-
-// @GetMapping(value="/handle/calculate/work-flow")
-
 async function handleCalculateProductionVolData2(plantId, year, keycloak) {
   const year1 = localStorage.getItem('year')
   const url = `${Config.CaseEngineUrl}/task/handle/calculate/work-flow?year=${year1}&plantId=${plantId}`
@@ -407,12 +405,6 @@ async function handleCalculateMaintenance(plantId, year, keycloak) {
 }
 
 async function deleteSlowdownData(maintenanceId, keycloak) {
-  // var plantId = ''
-  // const storedPlant = localStorage.getItem('selectedPlant')
-  // if (storedPlant) {
-  //   const parsedPlant = JSON.parse(storedPlant)
-  //   plantId = parsedPlant.id
-  // }
   const url = `${Config.CaseEngineUrl}/task/deleteSlowdownData/${maintenanceId}`
 
   const headers = {
@@ -756,7 +748,6 @@ async function getWorkflowData(keycloak, plantId) {
     return await Promise.reject(e)
   }
 }
-//http://localhost:8081/task/report/annual-aop?plantId=AACDBE12-C5F6-4B79-9C88-751169815B42&year=2026-27&reportType='production'
 
 async function getAnnualCostAopReport(
   keycloak,
@@ -997,7 +988,6 @@ async function getCatalystSelectivityData(keycloak) {
     return await Promise.reject(e)
   }
 }
-
 async function getCatalystSelectivityDataIV(keycloak) {
   var plantId = ''
 
@@ -1154,11 +1144,13 @@ async function saveworkflow(data, keycloak) {
 }
 async function submitWorkFlow(data, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/submitWorkflow`
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
   }
+
   try {
     const resp = await fetch(url, {
       method: 'POST',
@@ -1491,6 +1483,27 @@ async function saveNormalOperationNormsData(
 }
 async function saveShutDownNormsData(plantId, turnAroundDetails, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/shutdownNorms`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(turnAroundDetails),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function saveSlowdownNormsData(plantId, turnAroundDetails, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/slowdownNorms`
 
   const headers = {
     Accept: 'application/json',

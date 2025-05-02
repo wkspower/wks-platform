@@ -30,12 +30,7 @@ import { useEffect, useState } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { DataService } from 'services/DataService'
 import { useSelector } from 'react-redux'
-// import { DataService } from 'services/DataService'
-// import { useEffect, useState } from 'react'
-// import { useSession } from 'SessionStoreContext'
-// import { useSelector } from 'react-redux'
 
-// Mirror your original icon imports
 const icons = {
   FolderOutlined,
   IconFileInvoice,
@@ -97,7 +92,6 @@ export function usePlanMenu() {
           plantId,
         )
         // const res = await DataService.getUserScreen(keycloak, verticalId)
-        // console.log('[useScreens] API response:', res)
         setScreens(res.data)
       } catch (error) {
         console.error('Error fetching menu:', error)
@@ -105,7 +99,7 @@ export function usePlanMenu() {
     }
 
     fetchScreens()
-  }, [keycloak, verticalId, verticalChange])
+  }, [keycloak, verticalId, verticalChange, plantId])
 
   const utilities = screens.find((g) => g.id === 'utilities') || {}
   const collapseGroup = Array.isArray(utilities.children)

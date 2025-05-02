@@ -421,7 +421,6 @@ const DataGridTable = ({
               />
             )}
           </Box>
-
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {permissions?.showTitle && (
               <Typography component='div' className='grid-title'>
@@ -651,18 +650,14 @@ const DataGridTable = ({
           }}
           getRowClassName={(params) => {
             const classes = []
-
             if (permissions?.isOldYear == 1) {
               classes.push('odd-row-disabled')
             }
-
             if (params.row.Particulars || params.row.Particulars2) {
               classes.push('no-border-row')
             }
 
             if (params.row.isEditable === false) {
-              // console.log('params.row.isEditable', params.row)
-
               return [
                 ...classes,
                 permissions?.noColor === true ? 'even-row' : 'odd-row',
@@ -674,7 +669,6 @@ const DataGridTable = ({
           // columnGroupingModel={columnGroupingModel}
         />
       </Box>
-
       {(permissions?.allAction ?? true) && (
         <Box
           sx={{
@@ -683,7 +677,7 @@ const DataGridTable = ({
             gap: 2,
           }}
         >
-          {permissions.addButton && (
+          {permissions?.addButton && (
             <Button
               variant='contained'
               className='btn-save'
@@ -694,7 +688,7 @@ const DataGridTable = ({
             </Button>
           )}
 
-          {permissions.saveBtn && (
+          {permissions?.saveBtn && (
             <Button
               variant='contained'
               className='btn-save'
@@ -706,8 +700,7 @@ const DataGridTable = ({
               Save
             </Button>
           )}
-
-          {permissions.approveBtn && (
+          {permissions?.approveBtn && (
             <Button
               variant='contained'
               className='btn-save'
@@ -755,7 +748,6 @@ const DataGridTable = ({
           )}
         </Box>
       )}
-
       {(permissions?.allAction ?? true) && (
         <Notification
           open={snackbarOpen}
@@ -764,7 +756,6 @@ const DataGridTable = ({
           onClose={() => setSnackbarOpen(false)}
         />
       )}
-
       <Dialog
         open={openDeleteDialogeBox}
         onClose={closeDeleteDialogeBox}
