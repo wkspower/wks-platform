@@ -14,7 +14,11 @@ import CircularProgress from '@mui/material/CircularProgress'
 
 const TurnaroundPlanTable = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+    dataGridStore
+  //const isOldYear = oldYear?.oldYear
+  const isOldYear = oldYear?.oldYear
+
   const vertName = verticalChange?.selectedVertical
   const [rowModesModel, setRowModesModel] = useState({})
 
@@ -195,7 +199,14 @@ const TurnaroundPlanTable = () => {
     }
     fetchData()
     getAllProducts()
-  }, [sitePlantChange, yearChanged, keycloak, verticalChange, lowerVertName])
+  }, [
+    sitePlantChange,
+    oldYear,
+    yearChanged,
+    keycloak,
+    verticalChange,
+    lowerVertName,
+  ])
 
   const findDuration = (value, row) => {
     if (row && row.maintStartDateTime && row.maintEndDateTime) {
@@ -439,6 +450,34 @@ const TurnaroundPlanTable = () => {
     }
   }
 
+  const getAdjustedPermissions = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      isOldYear: isOldYear,
+    }
+  }
+
+  const adjustedPermissions = getAdjustedPermissions(
+    {
+      showAction: true,
+      addButton: true,
+      deleteButton: true,
+      editButton: true,
+      showUnit: false,
+      saveWithRemark: true,
+      saveBtn: true,
+    },
+    isOldYear,
+  )
+
   return (
     <div>
       <Backdrop
@@ -482,15 +521,17 @@ const TurnaroundPlanTable = () => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         deleteRowData={deleteRowData}
-        permissions={{
-          showAction: true,
-          addButton: true,
-          deleteButton: true,
-          editButton: true,
-          showUnit: false,
-          saveWithRemark: true,
-          saveBtn: true,
-        }}
+        permissions={adjustedPermissions}
+
+        // permissions={{
+        //   showAction: true,
+        //   addButton: true,
+        //   deleteButton: true,
+        //   editButton: true,
+        //   showUnit: false,
+        //   saveWithRemark: true,
+        //   saveBtn: true,
+        // }}
       />
     </div>
   )

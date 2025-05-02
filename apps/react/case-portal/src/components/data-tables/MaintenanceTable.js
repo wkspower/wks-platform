@@ -22,7 +22,11 @@ const MaintenanceTable = () => {
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+    dataGridStore
+  //const isOldYear = oldYear?.oldYear
+  const isOldYear = oldYear?.oldYear
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
@@ -96,7 +100,7 @@ const MaintenanceTable = () => {
 
   useEffect(() => {
     fetchData()
-  }, [sitePlantChange, yearChanged, keycloak, lowerVertName])
+  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   const productionColumns = [
     {
@@ -193,6 +197,35 @@ const MaintenanceTable = () => {
     },
   ]
 
+  const getAdjustedPermissions = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      isOldYear: isOldYear,
+    }
+  }
+
+  const adjustedPermissions = getAdjustedPermissions(
+    {
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      showRefresh: false,
+    },
+    isOldYear,
+  )
+
   return (
     <div>
       <Backdrop
@@ -221,16 +254,18 @@ const MaintenanceTable = () => {
         setSnackbarData={setSnackbarData}
         deleteId={deleteId}
         open1={open1}
-        permissions={{
-          showAction: false,
-          addButton: false,
-          deleteButton: false,
-          editButton: false,
-          showUnit: false,
-          saveWithRemark: false,
-          saveBtn: false,
-          showRefresh: false,
-        }}
+        permissions={adjustedPermissions}
+
+        // permissions={{
+        //   showAction: false,
+        //   addButton: false,
+        //   deleteButton: false,
+        //   editButton: false,
+        //   showUnit: false,
+        //   saveWithRemark: false,
+        //   saveBtn: false,
+        //   showRefresh: false,
+        // }}
       />
     </div>
   )

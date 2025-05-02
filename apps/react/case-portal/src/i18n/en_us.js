@@ -52,7 +52,7 @@ const defs = {
     functions: 'Functions', // New addition
     reliability: 'Reliability', // New addition
     reports: 'Reports', // New addition
-    contributionReport: 'Contribution Report', // New addition
+    annualAopCostReport: 'Annual AOP Basis', // New addition
     previousFYAOPResult: 'Previous FY AOP Result', // New addition
     matBalSheet: 'MAT Bal Sheet', // New addition
     workflow: 'AOP Approval Flow', // New addition
@@ -209,7 +209,7 @@ const defs = {
         safety: 'Safety', // New addition
         reliability: 'Reliability', // New addition
         reports: 'Reports', // New addition
-        contributionReport: 'Contribution Report', // New addition
+        annualAopCostReport: 'Annual AOP Basis', // New addition
         previousFYAOPResult: 'Previous FY AOP Result', // New addition
         matBalSheet: 'MAT Bal Sheet', // New addition
         userManage: 'User Management', // New addition

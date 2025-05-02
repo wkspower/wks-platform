@@ -100,38 +100,38 @@ const workspace = {
     //   icon: icons.IconList,
     //   breadcrumbs: true,
     // },
-    // {
-    //   id: 'reports',
-    //   title: i18n.t('menu.reports'),
-    //   type: 'collapse',
-    //   icon: icons.IconReport, // You can choose an appropriate icon
-    //   children: [
-    //     {
-    //       id: 'contribution-report',
-    //       title: i18n.t('menu.contributionReport'),
-    //       type: 'item',
-    //       url: '/reports/contribution-report',
-    //       icon: icons.IconFile,
-    //       breadcrumbs: true,
-    //     },
-    //     {
-    //       id: 'previous-fy-aop-result',
-    //       title: i18n.t('menu.previousFYAOPResult'),
-    //       type: 'item',
-    //       url: '/reports/previous-fy-aop-result',
-    //       icon: icons.IconFileText,
-    //       breadcrumbs: true,
-    //     },
-    //     {
-    //       id: 'mat-bal-sheet',
-    //       title: i18n.t('menu.matBalSheet'),
-    //       type: 'item',
-    //       url: '/reports/mat-bal-sheet',
-    //       icon: icons.IconFileCheck,
-    //       breadcrumbs: true,
-    //     },
-    //   ],
-    // },
+    {
+      id: 'reports',
+      title: i18n.t('menu.reports'),
+      type: 'collapse',
+      icon: icons.IconReport, // You can choose an appropriate icon
+      children: [
+        {
+          id: 'aop-annual-cost-report',
+          title: i18n.t('menu.annualAopCostReport'),
+          type: 'item',
+          url: '/reports/aop-annual-cost-report',
+          icon: icons.IconFile,
+          breadcrumbs: true,
+        },
+        // {
+        //   id: 'previous-fy-aop-result',
+        //   title: i18n.t('menu.previousFYAOPResult'),
+        //   type: 'item',
+        //   url: '/reports/previous-fy-aop-result',
+        //   icon: icons.IconFileText,
+        //   breadcrumbs: true,
+        // },
+        // {
+        //   id: 'mat-bal-sheet',
+        //   title: i18n.t('menu.matBalSheet'),
+        //   type: 'item',
+        //   url: '/reports/mat-bal-sheet',
+        //   icon: icons.IconFileCheck,
+        //   breadcrumbs: true,
+        // },
+      ],
+    },
     {
       id: 'workflow',
       title: i18n.t('menu.workflow'),

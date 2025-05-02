@@ -48,7 +48,7 @@ const defs = {
     safety: 'Segurança', // New addition
     reliability: 'Confiabilidade', // New addition
     reports: 'Relatórios', // New addition
-    contributionReport: 'Relatório de Contribuição', // New addition
+    annualAopCostReport: 'Relatório de Contribuição', // New addition
     previousFYAOPResult: 'Resultado AOP do Ano Fiscal Anterior', // New addition
     matBalSheet: 'Balanço de MAT', // New addition
     workflow: 'Fluxo de Trabalho', // New addition
@@ -203,7 +203,7 @@ const defs = {
         safety: 'Segurança', // New addition
         reliability: 'Confiabilidade', // New addition
         reports: 'Relatórios', // New addition
-        contributionReport: 'Relatório de Contribuição', // New addition
+        annualAopCostReport: 'Relatório de Contribuição', // New addition
         previousFYAOPResult: 'Resultado AOP do Ano Fiscal Anterior', // New addition
         matBalSheet: 'Balanço de MAT', // New addition
         workflow: 'Fluxo de Trabalho', // New addition

@@ -15,8 +15,12 @@ const getEnhancedColDefs = ({
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
-  const formatValueToThreeDecimals = (params) =>
-    params ? parseFloat(params).toFixed(3) : ''
+  // const formatValueToThreeDecimals = (params) =>
+  //   params ? parseFloat(params).toFixed(3) : ''
+
+  const formatValueToThreeDecimals = (params) => {
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+  }
 
   const getProductDisplayName = (id) => {
     if (!id) return

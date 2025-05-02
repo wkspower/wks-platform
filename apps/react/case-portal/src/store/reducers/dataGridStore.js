@@ -7,6 +7,7 @@ const initialState = {
   year: null,
   yearChanged: false,
   currentYear: null,
+  oldYear: null,
 }
 
 const dataGridStore = createSlice({
@@ -34,6 +35,9 @@ const dataGridStore = createSlice({
     setCurrentYear(state, action) {
       state.currentYear = action.payload
     },
+    setOldYear(state, action) {
+      state.oldYear = action.payload
+    },
   },
 })
 
@@ -47,4 +51,5 @@ export const {
   setAopYear,
   setYearChange,
   setCurrentYear,
+  setOldYear,
 } = dataGridStore.actions

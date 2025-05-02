@@ -80,9 +80,9 @@ const WorkFlowMerge = () => {
       console.log(cases?.workflowList?.length === 0)
       // console.log(isEdit)
       if (cases?.workflowList?.length !== 0) return
-    setCurrentRemark(row.remark || '')
-    setCurrentRowId(row.id)
-    setRemarkDialogOpen(true)
+      setCurrentRemark(row.remark || '')
+      setCurrentRowId(row.id)
+      setRemarkDialogOpen(true)
     } catch (err) {
       console.error('Error fetching case', err)
     }
@@ -171,11 +171,10 @@ const WorkFlowMerge = () => {
       setRole(cases?.role || '')
       // if (!cases?.taskId) setActionDisabled(true)
       setWorkFlowDto(cases?.workflowList[0])
-      if(cases?.workflowList.length>0){
+      if (cases?.workflowList.length > 0) {
         // console.log('businessky in getcaseId ' + cases?.workflowList[0].caseId)
         setBusinessKey(cases?.workflowList[0].caseId)
       }
-      
 
       // console.log(cases)
       const master = cases?.workflowMasterDTO
@@ -254,8 +253,7 @@ const WorkFlowMerge = () => {
         },
         variables: caseData.attributes,
         //taskId: taskId,
-        workflowYearDTO: rows
-
+        workflowYearDTO: rows,
       }
       const result = await DataService.submitWorkFlow(payload, keycloak)
       console.log(result)
@@ -338,12 +336,6 @@ const WorkFlowMerge = () => {
 
   return (
     <Box>
-    // style={{
-    //   display: 'flex',
-    //   flexDirection: 'column',
-    //   gap: 5,
-    //   marginTop: 20,
-    // }}
       <Stepper activeStep={activeStep} alternativeLabel>
         {masterSteps?.map((step) => (
           <Step key={step.displayName} completed={step.status === 'completed'}>

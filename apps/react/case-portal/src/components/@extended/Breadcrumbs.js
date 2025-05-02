@@ -55,6 +55,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
         'consumption-norms': 'Plant Manager',
         'feed-stock': 'Plant Manager',
         workflow: 'Plant Manager',
+        'aop-annual-cost-report': 'Plant Manager',
       },
       'BF5D7508-96EB-496E-BEB0-4828CB1A1B11': {
         'product-demand': 'CTS Engineer',
@@ -72,6 +73,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
         'consumption-norms': 'Plant Manager',
 
         workflow: 'Plant Manager',
+        'aop-annual-cost-report': 'Plant Manager',
       },
     }
 
@@ -148,13 +150,13 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
       localStorage.getItem('selectedVertical'),
     )?.name?.toLowerCase()
 
-    if (title === 'Business Demand') {
-      if (verticalName === 'meg') {
-        title = 'Business Demand (Percentage)'
-      } else if (verticalName === 'pe') {
-        title = 'Business Demand (Absolute)'
-      }
-    }
+    // if (title === 'Business Demand') {
+    //   if (verticalName === 'meg') {
+    //     title = 'Business Demand (Percentage)'
+    //   } else if (verticalName === 'pe') {
+    //     title = 'Business Demand (Absolute)'
+    //   }
+    // }
 
     dispatch(
       setScreenTitle({

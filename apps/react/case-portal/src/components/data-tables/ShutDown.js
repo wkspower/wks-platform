@@ -18,7 +18,11 @@ import TimeInputCell from 'utils/TimeInputCell'
 
 const ShutDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+    dataGridStore
+  //const isOldYear = oldYear?.oldYear
+  const isOldYear = oldYear?.oldYear
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   // const [shutdownData, setShutdownData] = useState([])
@@ -259,7 +263,14 @@ const ShutDown = ({ permissions }) => {
 
   useEffect(() => {
     fetchData()
-  }, [sitePlantChange, yearChanged, keycloak, verticalChange, lowerVertName])
+  }, [
+    sitePlantChange,
+    oldYear,
+    yearChanged,
+    keycloak,
+    verticalChange,
+    lowerVertName,
+  ])
 
   const findDuration1 = (value, row) => {
     if (row && row.maintStartDateTime && row.maintEndDateTime) {
@@ -497,6 +508,35 @@ const ShutDown = ({ permissions }) => {
     }
   }
 
+  const getAdjustedPermissions = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      isOldYear: isOldYear,
+    }
+  }
+
+  const adjustedPermissions = getAdjustedPermissions(
+    {
+      showAction: permissions?.showAction ?? true,
+      addButton: permissions?.addButton ?? true,
+      deleteButton: permissions?.deleteButton ?? true,
+      editButton: permissions?.editButton ?? false,
+      showUnit: permissions?.showUnit ?? false,
+      saveWithRemark: permissions?.saveWithRemark ?? true,
+      saveBtn: permissions?.saveBtn ?? true,
+      customHeight: permissions?.customHeight,
+    },
+    isOldYear,
+  )
+
   return (
     <div>
       <Backdrop
@@ -541,16 +581,18 @@ const ShutDown = ({ permissions }) => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         deleteRowData={deleteRowData}
-        permissions={{
-          showAction: permissions?.showAction ?? true,
-          addButton: permissions?.addButton ?? true,
-          deleteButton: permissions?.deleteButton ?? true,
-          editButton: permissions?.editButton ?? false,
-          showUnit: permissions?.showUnit ?? false,
-          saveWithRemark: permissions?.saveWithRemark ?? true,
-          saveBtn: permissions?.saveBtn ?? true,
-          customHeight: permissions?.customHeight,
-        }}
+        permissions={adjustedPermissions}
+
+        // permissions={{
+        //   showAction: permissions?.showAction ?? true,
+        //   addButton: permissions?.addButton ?? true,
+        //   deleteButton: permissions?.deleteButton ?? true,
+        //   editButton: permissions?.editButton ?? false,
+        //   showUnit: permissions?.showUnit ?? false,
+        //   saveWithRemark: permissions?.saveWithRemark ?? true,
+        //   saveBtn: permissions?.saveBtn ?? true,
+        //   customHeight: permissions?.customHeight,
+        // }}
       />
     </div>
   )

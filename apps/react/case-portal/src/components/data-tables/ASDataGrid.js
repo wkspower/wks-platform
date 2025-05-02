@@ -20,8 +20,8 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { GridActionsCellItem, GridRowModes } from '@mui/x-data-grid'
 import Notification from 'components/Utilities/Notification'
-import './data-grid-css.css'
-import './extra-css.css'
+//import './data-grid-css.css'
+//import './extra-css.css'
 
 import { MenuItem } from '../../../node_modules/@mui/material/index'
 
@@ -29,6 +29,7 @@ import {
   FileDownload,
   FileUpload,
 } from '../../../node_modules/@mui/icons-material/index'
+import Typography from 'themes/overrides/Typography'
 
 const jioColors = {
   primaryBlue: '#387ec3',
@@ -257,7 +258,6 @@ const DataGridTable = ({
                 permissions?.viewBtn && (
                   <GridActionsCellItem
                     key={`view-${id}`}
-                    // icon={<EditIcon sx={{ color: jioColors.primaryBlue }} />}
                     icon={<VisibilityIcon />}
                     label='View'
                     className='textPrimary'
@@ -269,7 +269,6 @@ const DataGridTable = ({
                 permissions?.editButton && (
                   <GridActionsCellItem
                     key={`edit-${id}`}
-                    // icon={<EditIcon sx={{ color: jioColors.primaryBlue }} />}
                     icon={<EditIcon />}
                     label='Edit'
                     className='textPrimary'
@@ -281,21 +280,20 @@ const DataGridTable = ({
                 permissions?.deleteButton && (
                   <GridActionsCellItem
                     key={`delete-${id}`}
-                    // icon={<DeleteIcon sx={{ color: jioColors.accentRed }} />}
                     icon={<DeleteIcon />}
                     label='Delete'
                     onClick={() => handleDeleteClick(id, params)}
                     color='inherit'
                   />
                 ),
-              ].filter(Boolean) // Remove `null` values if permission is false
+              ].filter(Boolean)
             },
             minWidth: 70,
             maxWidth: 100,
             headerClassName: 'last-column-header',
           },
         ]
-      : []), // If no permissions, hide the Actions column
+      : []),
   ])
 
   const handleRemarkSave = () => {
@@ -325,12 +323,6 @@ const DataGridTable = ({
 
     setRemarkDialogOpen(false)
   }
-
-  // const handleCellClick = (params) => {}
-
-  // const handleCloseSnackbar = () => {
-  //   setSnackbarOpen(false)
-  // }
 
   const filteredRows = useMemo(() => {
     if (!Array.isArray(rows)) return []
@@ -431,6 +423,11 @@ const DataGridTable = ({
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {permissions?.showTitle && (
+              <Typography component='div' className='grid-title'>
+                Annual AOP Cost
+              </Typography>
+            )}
             {permissions?.showCalculate && (
               <Button
                 variant='contained'
@@ -597,7 +594,7 @@ const DataGridTable = ({
         </Backdrop>
 
         <DataGrid
-          // loading={loading}
+          loading={loading}
           className='custom-data-grid'
           apiRef={apiRef}
           rows={filteredRows}
@@ -632,6 +629,8 @@ const DataGridTable = ({
             isEditable: false,
             period: false,
           }}
+          disableColumnSelector
+          disableColumnSorting
           rowHeight={35}
           processRowUpdate={processRowUpdate}
           onProcessRowUpdateError={onProcessRowUpdateError}
@@ -645,25 +644,37 @@ const DataGridTable = ({
           deleteRowData={deleteRowData}
           slotProps={{
             toolbar: { setRows, GridToolbar },
-            loadingOverlay: {
-              variant: 'linear-progress',
-              norowsvariant: 'skeleton',
-            },
+            // loadingOverlay: {
+            //   variant: 'linear-progress',
+            //   norowsvariant: 'skeleton',
+            // },
           }}
           getRowClassName={(params) => {
+            const classes = []
+
+            if (permissions?.isOldYear == 1) {
+              classes.push('odd-row-disabled')
+            }
+
             if (params.row.Particulars || params.row.Particulars2) {
-              return 'no-border-row'
+              classes.push('no-border-row')
             }
 
             if (params.row.isEditable === false) {
-              return permissions?.noColor === true ? 'even-row' : 'odd-row'
+              // console.log('params.row.isEditable', params.row)
+
+              return [
+                ...classes,
+                permissions?.noColor === true ? 'even-row' : 'odd-row',
+              ].join(' ')
             }
 
-            return 'even-row'
+            return [...classes, 'even-row'].join(' ')
           }}
           // columnGroupingModel={columnGroupingModel}
         />
       </Box>
+
       {(permissions?.allAction ?? true) && (
         <Box
           sx={{
@@ -693,6 +704,19 @@ const DataGridTable = ({
               loadingposition='start'
             >
               Save
+            </Button>
+          )}
+
+          {permissions.approveBtn && (
+            <Button
+              variant='contained'
+              className='btn-save'
+              onClick={saveModalOpen}
+              disabled={isButtonDisabled}
+              loading={loading}
+              loadingposition='start'
+            >
+              Approve
             </Button>
           )}
           {permissions?.nextBtn && (
@@ -731,6 +755,7 @@ const DataGridTable = ({
           )}
         </Box>
       )}
+
       {(permissions?.allAction ?? true) && (
         <Notification
           open={snackbarOpen}
@@ -739,6 +764,7 @@ const DataGridTable = ({
           onClose={() => setSnackbarOpen(false)}
         />
       )}
+
       <Dialog
         open={openDeleteDialogeBox}
         onClose={closeDeleteDialogeBox}

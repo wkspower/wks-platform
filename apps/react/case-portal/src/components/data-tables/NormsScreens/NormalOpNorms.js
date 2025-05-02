@@ -20,6 +20,7 @@ const NormalOpNormsScreen = () => {
   const [allProducts, setAllProducts] = useState([])
   // const [bdData, setBDData] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
+
   // const { sitePlantChange } = menu
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
@@ -35,7 +36,11 @@ const NormalOpNormsScreen = () => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [loading, setLoading] = useState(false)
-  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+    dataGridStore
+  //const isOldYear = oldYear?.oldYear
+  const isOldYear = oldYear?.oldYear
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const dispatch = useDispatch()
@@ -57,26 +62,7 @@ const NormalOpNormsScreen = () => {
     setLoading(true)
     try {
       var data = []
-      // const data = await DataService.getNormalOperationNormsData(keycloak)
       data = await DataService.getNormalOperationNormsData(keycloak)
-
-      // data = data.filter(
-      //   (item) => item.normParameterTypeDisplayName !== 'Configuration',
-      // )
-
-      // const customOrder = [
-      //   'Raw Material',
-      //   'By Products',
-      //   'Cat Chem',
-      //   'Utility Consumption',
-      //   'Configuration',
-      // ]
-
-      // const data = data1.sort(
-      //   (a, b) =>
-      //     customOrder.indexOf(a.normParameterTypeDisplayName) -
-      //     customOrder.indexOf(b.normParameterTypeDisplayName),
-      // )
 
       const groupedRows = []
       const groups = new Map()
@@ -132,10 +118,11 @@ const NormalOpNormsScreen = () => {
       fetchData()
     }, 450)
     getAllProducts()
-  }, [sitePlantChange, yearChanged, keycloak, lowerVertName])
+  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
-  const formatValueToThreeDecimals = (params) =>
-    params ? parseFloat(params).toFixed(3) : ''
+  const formatValueToThreeDecimals = (params) => {
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+  }
 
   const colDefs = [
     {
@@ -226,7 +213,7 @@ const NormalOpNormsScreen = () => {
 
     {
       field: 'UOM',
-      headerName: 'UOM',
+      headerName: 'UOM / MT',
       width: 100,
       editable: false,
     },
@@ -572,6 +559,36 @@ const NormalOpNormsScreen = () => {
     }
   }
 
+  const getAdjustedPermissions = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      isOldYear: isOldYear,
+      showCalculate: false,
+    }
+  }
+
+  const adjustedPermissions = getAdjustedPermissions(
+    {
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: true,
+      showUnit: false,
+      saveWithRemark: true,
+      saveBtn: true,
+      showCalculate: lowerVertName == 'meg' ? true : false,
+    },
+    isOldYear,
+  )
+
   return (
     <div>
       <Backdrop
@@ -611,16 +628,18 @@ const NormalOpNormsScreen = () => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         handleRemarkCellClick={handleRemarkCellClick}
-        permissions={{
-          showAction: false,
-          addButton: false,
-          deleteButton: false,
-          editButton: true,
-          showUnit: false,
-          saveWithRemark: true,
-          saveBtn: true,
-          showCalculate: lowerVertName == 'meg' ? true : false,
-        }}
+        permissions={adjustedPermissions}
+
+        // permissions={{
+        //   showAction: false,
+        //   addButton: false,
+        //   deleteButton: false,
+        //   editButton: true,
+        //   showUnit: false,
+        //   saveWithRemark: true,
+        //   saveBtn: true,
+        //   showCalculate: lowerVertName == 'meg' ? true : false,
+        // }}
       />
     </div>
   )

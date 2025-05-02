@@ -15,6 +15,7 @@ import {
   setVerticalChange,
   setSitePlantChange,
   setCurrentYear,
+  setOldYear,
 } from 'store/reducers/dataGridStore'
 import { DataService } from 'services/DataService'
 import Search from './Search'
@@ -176,7 +177,7 @@ export default function HeaderContent({ keycloak }) {
       try {
         var resp = await DataService.getAopyears(keycloak)
 
-        // resp1 = [
+        // resp = [
         //   {
         //     AOPDisplayYear: '2024-25',
         //     AOPYear: '2024-25',
@@ -185,12 +186,12 @@ export default function HeaderContent({ keycloak }) {
         //   {
         //     AOPDisplayYear: '2025-26',
         //     AOPYear: '2025-26',
-        //     currentYear: '1',
+        //     currentYear: '0',
         //   },
         //   {
         //     AOPDisplayYear: '2026-27',
         //     AOPYear: '2026-27',
-        //     currentYear: '0',
+        //     currentYear: '1',
         //   },
         //   {
         //     AOPDisplayYear: '2028-29',
@@ -232,7 +233,21 @@ export default function HeaderContent({ keycloak }) {
     const selectedYearObj = aopYears.find((y) => y.AOPYear === newYear)
     const isCurrentYear = selectedYearObj?.currentYear == 1
 
+    const currentYear = aopYears.find((y) => y.currentYear == 1)
+
     dispatch(setCurrentYear({ currentYear: isCurrentYear ? 1 : 0 }))
+
+    let isOldYear = 0
+    let currentYear1 = currentYear?.AOPYear
+
+    const [currentStartYear] = currentYear1.split('-').map(Number)
+    const [selectedStartYear] = newYear.split('-').map(Number)
+
+    if (selectedStartYear < currentStartYear) {
+      isOldYear = 1
+    }
+
+    dispatch(setOldYear({ oldYear: isOldYear }))
   }
   // inside HeaderContent, above the return
   const handlePlantChange = (e) => {

@@ -12,17 +12,20 @@ import { validateFields } from 'utils/validationUtils'
 import SimpleDataTable from 'components/data-tables-views/SimpleDataTable'
 import { Box } from '@mui/material'
 
-// import Accordion from '@mui/material/Accordion'
-// import AccordionSummary from '@mui/material/AccordionSummary'
-// import AccordionDetails from '@mui/material/AccordionDetails'
+import Accordion from '@mui/material/Accordion'
+import AccordionSummary from '@mui/material/AccordionSummary'
+import AccordionDetails from '@mui/material/AccordionDetails'
 import Typography from '@mui/material/Typography'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import { styled } from '@mui/material/styles'
-import MuiAccordion from '@mui/material/Accordion' // { AccordionProps }
-import MuiAccordionSummary from '@mui/material/AccordionSummary' // } //   AccordionSummaryProps, // , {
+import MuiAccordion, { AccordionProps } from '@mui/material/Accordion'
+import MuiAccordionSummary, {
+  AccordionSummaryProps,
+} from '@mui/material/AccordionSummary'
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
 
+// Customized Accordion
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -60,16 +63,19 @@ const BusinessDemand = ({ permissions }) => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, year } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+    dataGridStore
+  //const isOldYear = oldYear?.oldYear
+  const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
-  // const [rows2, setRows2] = useState()
+  const [rows2, setRows2] = useState()
 
   // console.log('yearyear', year)
 
-  const headerMap = generateHeaderNames(localStorage.getItem('year') || year)
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -143,6 +149,7 @@ const BusinessDemand = ({ permissions }) => {
 
   // console.log(verticalChange)
   useEffect(() => {
+    // console.log('oldYear', oldYear?.oldYear)
     const getAllProducts = async () => {
       try {
         var data = []
@@ -178,10 +185,11 @@ const BusinessDemand = ({ permissions }) => {
         // handleMenuClose();
       }
     }
+
     fetchData()
     // fetchData2()
     getAllProducts()
-  }, [sitePlantChange, yearChanged, keycloak, lowerVertName])
+  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   // useEffect(()=>{
   //   console.log('this is test for api call ')
@@ -367,6 +375,37 @@ const BusinessDemand = ({ permissions }) => {
 
   const defaultCustomHeight = { mainBox: '50vh', otherBox: '112%' }
 
+  const getAdjustedPermissions = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      isOldYear: isOldYear,
+    }
+  }
+  const adjustedPermissions = getAdjustedPermissions(
+    {
+      showAction: permissions?.showAction ?? false,
+      addButton: permissions?.addButton ?? false,
+      deleteButton: permissions?.deleteButton ?? false,
+      editButton: permissions?.editButton ?? false,
+      showUnit: permissions?.showUnit ?? false,
+      saveWithRemark: permissions?.saveWithRemark ?? true,
+      saveBtn: permissions?.saveBtn ?? true,
+      units: ['TPH', 'TPD'],
+      customHeight: permissions?.customHeight || defaultCustomHeight,
+    },
+    isOldYear,
+  )
+
+  // permissions={adjustedPermissions}
+
   return (
     <div>
       <Backdrop
@@ -375,26 +414,6 @@ const BusinessDemand = ({ permissions }) => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-
-      <div>
-        {(lowerVertName === 'meg' || lowerVertName === 'pe') && (
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                Production Volume Data
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <SimpleDataTable />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        )}
-      </div>
 
       <Typography component='div' className='grid-title'>
         Business Demand Data
@@ -434,18 +453,39 @@ const BusinessDemand = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         handleRemarkCellClick={handleRemarkCellClick}
         deleteRowData={deleteRowData}
-        permissions={{
-          showAction: permissions?.showAction ?? false,
-          addButton: permissions?.addButton ?? false,
-          deleteButton: permissions?.deleteButton ?? false,
-          editButton: permissions?.editButton ?? false,
-          showUnit: permissions?.showUnit ?? false,
-          saveWithRemark: permissions?.saveWithRemark ?? true,
-          saveBtn: permissions?.saveBtn ?? true,
-          units: ['TPH', 'TPD'],
-          customHeight: permissions?.customHeight || defaultCustomHeight,
-        }}
+        permissions={adjustedPermissions}
+        // permissions={{
+        //   showAction: permissions?.showAction ?? false,
+        //   addButton: permissions?.addButton ?? false,
+        //   deleteButton: permissions?.deleteButton ?? false,
+        //   editButton: permissions?.editButton ?? false,
+        //   showUnit: permissions?.showUnit ?? false,
+        //   saveWithRemark: permissions?.saveWithRemark ?? true,
+        //   saveBtn: permissions?.saveBtn ?? true,
+        //   units: ['TPH', 'TPD'],
+        //   customHeight: permissions?.customHeight || defaultCustomHeight,
+        // }}
       />
+
+      <div>
+        {(lowerVertName === 'meg' || lowerVertName === 'pe') && (
+          <CustomAccordion defaultExpanded disableGutters>
+            <CustomAccordionSummary
+              aria-controls='meg-grid-content'
+              id='meg-grid-header'
+            >
+              <Typography component='span' className='grid-title'>
+                Production Volume Data (MT)
+              </Typography>
+            </CustomAccordionSummary>
+            <CustomAccordionDetails>
+              <Box sx={{ width: '100%', margin: 0 }}>
+                <SimpleDataTable />
+              </Box>
+            </CustomAccordionDetails>
+          </CustomAccordion>
+        )}
+      </div>
     </div>
   )
 }

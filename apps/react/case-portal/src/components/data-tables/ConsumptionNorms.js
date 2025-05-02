@@ -20,8 +20,8 @@ import Typography from '@mui/material/Typography'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Box } from '@mui/material'
 import { Button } from '@mui/material'
-import './data-grid-css.css'
-import './extra-css.css'
+//import './data-grid-css.css'
+//import './extra-css.css'
 
 import { styled } from '@mui/material/styles'
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion'
@@ -77,7 +77,10 @@ const NormalOpNormsScreen = () => {
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
 
-  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+    dataGridStore
+  //const isOldYear = oldYear?.oldYear
+  const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
@@ -392,7 +395,14 @@ const NormalOpNormsScreen = () => {
 
     getAllProducts()
     fetchData()
-  }, [sitePlantChange, yearChanged, keycloak, selectedUnit, lowerVertName])
+  }, [
+    sitePlantChange,
+    oldYear,
+    yearChanged,
+    keycloak,
+    selectedUnit,
+    lowerVertName,
+  ])
 
   const productionColumns = getEnhancedColDefs({
     allProducts,
@@ -543,8 +553,43 @@ const NormalOpNormsScreen = () => {
       setLoading(false)
     }
   }
-
   const defaultCustomHeight = { mainBox: '55vh', otherBox: '112%' }
+
+  const getAdjustedPermissions = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      isOldYear: isOldYear,
+      showCalculate: false,
+    }
+  }
+
+  const adjustedPermissions = getAdjustedPermissions(
+    {
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      units: ['TPH', 'TPD'],
+      saveWithRemark: true,
+      saveBtn: false,
+      showCalculate: true,
+      showRefresh: false,
+      noColor: true,
+      ShowSummary: true,
+      // customHeight2: true,
+      customHeight: defaultCustomHeight,
+    },
+    isOldYear,
+  )
 
   return (
     <div>
@@ -613,22 +658,24 @@ const NormalOpNormsScreen = () => {
                   setCurrentRemark={setCurrentRemark}
                   currentRowId={currentRowId}
                   unsavedChangesRef={unsavedChangesRef}
-                  permissions={{
-                    showAction: false,
-                    addButton: false,
-                    deleteButton: false,
-                    editButton: false,
-                    showUnit: false,
-                    units: ['TPH', 'TPD'],
-                    saveWithRemark: true,
-                    saveBtn: false,
-                    showCalculate: true,
-                    showRefresh: false,
-                    noColor: true,
-                    ShowSummary: true,
-                    // customHeight2: true,
-                    customHeight: defaultCustomHeight, // use default height
-                  }}
+                  permissions={adjustedPermissions}
+
+                  // permissions={{
+                  //   showAction: false,
+                  //   addButton: false,
+                  //   deleteButton: false,
+                  //   editButton: false,
+                  //   showUnit: false,
+                  //   units: ['TPH', 'TPD'],
+                  //   saveWithRemark: true,
+                  //   saveBtn: false,
+                  //   showCalculate: true,
+                  //   showRefresh: false,
+                  //   noColor: true,
+                  //   ShowSummary: true,
+                  //   // customHeight2: true,
+                  //   customHeight: defaultCustomHeight, // use default height
+                  // }}
                 />
               </Box>
             </CustomAccordionDetails>
@@ -649,6 +696,7 @@ const NormalOpNormsScreen = () => {
         fullWidth
         margin='normal'
         variant='outlined'
+        disabled={isOldYear == 1}
         sx={{
           '& .MuiInputBase-root': {
             backgroundColor: '#ffffff',
@@ -679,10 +727,11 @@ const NormalOpNormsScreen = () => {
           },
         }}
       />
-
-      <Button variant='contained' className='btn-save'>
-        Save
-      </Button>
+      {isOldYear !== 1 && (
+        <Button variant='contained' className='btn-save'>
+          Save
+        </Button>
+      )}
     </div>
   )
 }

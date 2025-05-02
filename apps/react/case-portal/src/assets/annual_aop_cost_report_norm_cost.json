@@ -1,0 +1,22 @@
+[
+  {
+    "field": "norm",
+    "headerName": "Norm",
+    "editable": false,
+    "flex": 1
+  },
+  {
+    "field": "particulars",
+    "headerName": "Particulars",
+    "editable": false,
+    "flex": 2
+  },
+  {
+    "field": "cost",
+    "headerName": "Cost",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left",
+    "flex": 1
+  }
+]

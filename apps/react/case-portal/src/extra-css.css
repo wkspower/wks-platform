@@ -1,0 +1,73 @@
+.btn-save {
+  background-color: #0100cb;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 6px 22px;
+  text-transform: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-width: 100px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-save:hover {
+  background-color: #143b6f;
+  box-shadow: none;
+}
+
+.btn-save:disabled {
+  background-color: #8d8dec;
+  color: #ffffff;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+/* Float the button to the right */
+.btn-approve {
+  background-color: #0100cb;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 6px 22px;
+  text-transform: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-width: 100px;
+  border: none;
+  cursor: pointer;
+  float: right; /* Align button to the right */
+}
+
+.btn-approve:hover {
+  background-color: #143b6f;
+  box-shadow: none;
+}
+
+.btn-approve:disabled {
+  background-color: #8d8dec;
+  color: #ffffff;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.action-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0px;
+  margin-bottom: 8px;
+}
+
+.action-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.unit-chip {
+  border-radius: 4px;
+  padding: 8px 24px;
+  text-transform: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  height: 40px;
+}

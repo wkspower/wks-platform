@@ -1,0 +1,123 @@
+/* Root Grid Styles */
+.jio-data-grid {
+  border-radius: 0px;
+  border: 1px solid #d0d0d0;
+  background-color: #ffffff;
+  font-size: 0.8rem;
+}
+
+/* Cell and Header Text */
+.jio-data-grid .MuiDataGrid-cell,
+.jio-data-grid .MuiDataGrid-columnHeaderTitleContainer {
+  border-right: none;
+  position: relative;
+}
+
+/* Cell Borders */
+.jio-data-grid .MuiDataGrid-cell::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60vh;
+  border-right: 1px solid #d0d0d0;
+}
+
+.jio-data-grid .MuiDataGrid-columnHeaderTitleContainer::after,
+.jio-data-grid .MuiDataGrid-columnHeaders::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60vh;
+  border-right: 1px solid #d0d0d0;
+}
+
+/* Header */
+.jio-data-grid .MuiDataGrid-columnHeaders {
+  background-color: #fafafc;
+  color: black;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-bottom: 2px solid #dae0ef;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+/* Group Header (NEWLY ADDED) */
+.jio-data-grid .MuiDataGrid-columnHeaderGroup {
+  justify-content: center;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  background-color: #f0f2f5;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+/* Optional extra style if "filled" class is used */
+.jio-data-grid .MuiDataGrid-columnHeaderGroup--filled {
+  justify-content: center;
+  background-color: #e6e6e6;
+}
+
+/* Cell */
+.jio-data-grid .MuiDataGrid-cell {
+  border-bottom: 1px solid #dae0ef;
+  color: black;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+/* Row */
+.jio-data-grid .MuiDataGrid-row {
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.jio-data-grid .even-row {
+  background-color: #ffffff;
+}
+
+.jio-data-grid .no-border-row {
+  background-color: #e8f1ff;
+}
+
+.jio-data-grid .odd-row {
+  opacity: 0.9;
+  pointer-events: none;
+  background-color: rgba(200, 200, 200, 0.3);
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Header Title */
+.jio-data-grid .MuiDataGrid-columnHeaderTitle {
+  font-weight: bold;
+}
+
+/* Toolbar */
+.jio-data-grid .MuiDataGrid-toolbarContainer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-right: 2rem;
+  align-self: flex-end;
+}
+
+/* Disabled cell */
+.jio-data-grid .disabled-cell {
+  background-color: rgba(233, 233, 233, 0.3);
+  border-radius: 0px;
+  border: 1px solid #d0d0d0;
+}
+
+.jio-data-grid .MuiDataGrid-footerContainer {
+  display: none;
+}
+/* .MuiBox-root.css-19tbgwt {
+  margin-top: 8px !important;
+} */

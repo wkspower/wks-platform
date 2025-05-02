@@ -20,7 +20,11 @@ const ProductionvolumeData = ({ permissions }) => {
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+    dataGridStore
+  //const isOldYear = oldYear?.oldYear
+  const isOldYear = oldYear?.oldYear
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
@@ -334,7 +338,14 @@ const ProductionvolumeData = ({ permissions }) => {
 
     getAllProducts()
     fetchData()
-  }, [sitePlantChange, yearChanged, keycloak, selectedUnit, lowerVertName])
+  }, [
+    sitePlantChange,
+    oldYear,
+    yearChanged,
+    keycloak,
+    selectedUnit,
+    lowerVertName,
+  ])
 
   const productionColumns = getEnhancedProductionColDefs({
     headerMap,
@@ -406,6 +417,40 @@ const ProductionvolumeData = ({ permissions }) => {
     }
   }
 
+  const getAdjustedPermissions = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      isOldYear: isOldYear,
+      showCalculate: false,
+    }
+  }
+
+  const adjustedPermissions = getAdjustedPermissions(
+    {
+      showAction: permissions?.showAction ?? false,
+      addButton: permissions?.addButton ?? false,
+      deleteButton: permissions?.deleteButton ?? false,
+      editButton: permissions?.editButton ?? false,
+      showUnit: permissions?.showUnit ?? true,
+      saveWithRemark: permissions?.saveWithRemark ?? true,
+      showRefreshBtn: permissions?.showRefreshBtn ?? true,
+      saveBtn: permissions?.saveBtn ?? false,
+      units: ['TPH', 'TPD'],
+      customHeight: permissions?.customHeight,
+      showCalculate:
+        permissions?.showCalculate ?? lowerVertName == 'meg' ? true : false,
+    },
+    isOldYear,
+  )
+
   return (
     <div>
       <Backdrop
@@ -449,22 +494,22 @@ const ProductionvolumeData = ({ permissions }) => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         handleCalculate={handleCalculate}
-        permissions={{
-          showAction: permissions?.showAction ?? false,
-          addButton: permissions?.addButton ?? false,
-          deleteButton: permissions?.deleteButton ?? false,
-          editButton: permissions?.editButton ?? false,
-          showUnit: permissions?.showUnit ?? true,
-          saveWithRemark: permissions?.saveWithRemark ?? true,
-          showRefreshBtn: permissions?.showRefreshBtn ?? true,
-          saveBtn: permissions?.saveBtn ?? false,
-          // permissions?.saveBtn ?? lowerVertName == 'meg' ? false : true,
-          units: ['TPH', 'TPD'],
-          customHeight: permissions?.customHeight,
-          showCalculate:
-            // permissions?.showCalculate ?? false,
-            permissions?.showCalculate ?? lowerVertName == 'meg' ? true : false,
-        }}
+        permissions={adjustedPermissions}
+
+        // permissions={{
+        //   showAction: permissions?.showAction ?? false,
+        //   addButton: permissions?.addButton ?? false,
+        //   deleteButton: permissions?.deleteButton ?? false,
+        //   editButton: permissions?.editButton ?? false,
+        //   showUnit: permissions?.showUnit ?? true,
+        //   saveWithRemark: permissions?.saveWithRemark ?? true,
+        //   showRefreshBtn: permissions?.showRefreshBtn ?? true,
+        //   saveBtn: permissions?.saveBtn ?? false,
+        //   units: ['TPH', 'TPD'],
+        //   customHeight: permissions?.customHeight,
+        //   showCalculate:
+        //     permissions?.showCalculate ?? lowerVertName == 'meg' ? true : false,
+        // }}
       />
     </div>
   )

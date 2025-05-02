@@ -25,7 +25,11 @@ const ProductionNorms = ({ permissions }) => {
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+    dataGridStore
+  //const isOldYear = oldYear?.oldYear
+  const isOldYear = oldYear?.oldYear
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [loading, setLoading] = useState(false)
@@ -538,7 +542,14 @@ const ProductionNorms = ({ permissions }) => {
 
     fetchData()
     getAllProducts()
-  }, [sitePlantChange, yearChanged, keycloak, selectedUnit, lowerVertName])
+  }, [
+    sitePlantChange,
+    oldYear,
+    yearChanged,
+    keycloak,
+    selectedUnit,
+    lowerVertName,
+  ])
 
   const productionColumns = getEnhancedColDefs({
     allProducts,
@@ -559,6 +570,38 @@ const ProductionNorms = ({ permissions }) => {
     setSelectedUnit(unit)
   }
   const isCellEditable = (params) => params.row.id !== 'total'
+
+  const getAdjustedPermissions = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      showCalculate: false,
+      isOldYear: isOldYear,
+    }
+  }
+
+  const adjustedPermissions = getAdjustedPermissions(
+    {
+      showAction: permissions?.showAction ?? false,
+      addButton: permissions?.addButton ?? false,
+      deleteButton: permissions?.deleteButton ?? false,
+      editButton: permissions?.editButton ?? false,
+      showUnit: permissions?.showUnit ?? true,
+      saveWithRemark: permissions?.saveWithRemark ?? true,
+      showCalculate: permissions?.showCalculate ?? true,
+      saveBtn: permissions?.saveBtn ?? false,
+      units: ['MT', 'KT'],
+      customHeight: permissions?.customHeight,
+    },
+    isOldYear,
+  )
 
   return (
     <div>
@@ -601,20 +644,20 @@ const ProductionNorms = ({ permissions }) => {
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
-        permissions={{
-          showAction: permissions?.showAction ?? false,
-          addButton: permissions?.addButton ?? false,
-          deleteButton: permissions?.deleteButton ?? false,
-          editButton: permissions?.editButton ?? false,
-          showUnit: permissions?.showUnit ?? true,
-          saveWithRemark: permissions?.saveWithRemark ?? true,
-          showCalculate: permissions?.showCalculate ?? true,
-          saveBtn: permissions?.saveBtn ?? false,
-          // UOM: 'MT',
-          units: ['MT', 'KT'],
-          customHeight: permissions?.customHeight,
-          // UnitToShow: 'Values/MT',
-        }}
+        permissions={adjustedPermissions}
+
+        // permissions={{
+        //   showAction: permissions?.showAction ?? false,
+        //   addButton: permissions?.addButton ?? false,
+        //   deleteButton: permissions?.deleteButton ?? false,
+        //   editButton: permissions?.editButton ?? false,
+        //   showUnit: permissions?.showUnit ?? true,
+        //   saveWithRemark: permissions?.saveWithRemark ?? true,
+        //   showCalculate: permissions?.showCalculate ?? true,
+        //   saveBtn: permissions?.saveBtn ?? false,
+        //   units: ['MT', 'KT'],
+        //   customHeight: permissions?.customHeight,
+        // }}
       />
     </div>
   )

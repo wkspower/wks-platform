@@ -10,7 +10,12 @@ import { SessionStoreProvider } from './SessionStoreContext'
 import { RegisterInjectUserSession, RegisteOptions } from './plugins'
 import { accountStore, sessionStore } from './store'
 import './App.css'
-// import { useSelector } from 'react-redux'
+
+import './extra-css.css'
+import './data-grid-css.css'
+import './jio-grid-style.css'
+
+import { useSelector } from 'react-redux'
 import Layout from 'layout/FooterLayout/index'
 import useMenuItems from 'menu/index'
 
@@ -119,4 +124,5 @@ const App = () => {
     )
   )
 }
+
 export default App

@@ -12,7 +12,11 @@ import getEnhancedAOPColDefs from './CommonHeader/ConfigHeader'
 
 const SelectivityData = (props) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged } = dataGridStore
+  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+    dataGridStore
+  //const isOldYear = oldYear?.oldYear
+  const isOldYear = oldYear?.oldYear
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const keycloak = useSession()
@@ -253,7 +257,7 @@ const SelectivityData = (props) => {
       props.fetchData()
     }
     if (props?.configType === 'grades') fetchConfigData()
-  }, [sitePlantChange, yearChanged, keycloak, lowerVertName])
+  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   const [columnConfig, setColumnConfig] = useState([])
 
@@ -286,6 +290,36 @@ const SelectivityData = (props) => {
     configType: props?.configType,
     columnConfig,
   })
+
+  const getAdjustedPermissions = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      isOldYear: isOldYear,
+    }
+  }
+
+  const adjustedPermissions = getAdjustedPermissions(
+    {
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: true,
+      saveBtn: true,
+      customHeight:
+        lowerVertName === 'meg' ? undefined : props.defaultCustomHeight,
+    },
+    isOldYear,
+  )
 
   return (
     <div>
@@ -324,17 +358,19 @@ const SelectivityData = (props) => {
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
-        permissions={{
-          showAction: false,
-          addButton: false,
-          deleteButton: false,
-          editButton: false,
-          showUnit: false,
-          saveWithRemark: true,
-          saveBtn: true,
-          customHeight:
-            lowerVertName === 'meg' ? undefined : props.defaultCustomHeight,
-        }}
+        permissions={adjustedPermissions}
+
+        // permissions={{
+        //   showAction: false,
+        //   addButton: false,
+        //   deleteButton: false,
+        //   editButton: false,
+        //   showUnit: false,
+        //   saveWithRemark: true,
+        //   saveBtn: true,
+        //   customHeight:
+        //     lowerVertName === 'meg' ? undefined : props.defaultCustomHeight,
+        // }}
       />
     </div>
   )

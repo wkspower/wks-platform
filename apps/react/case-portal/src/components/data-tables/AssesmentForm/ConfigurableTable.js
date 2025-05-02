@@ -227,7 +227,7 @@ const ASDataGrid1 = ({
 
   const getDefaultFilter = (field) => ({ field, operator: 'equals' })
   const transformLabel = (value) =>
-    value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
+    value?.charAt(0)?.toUpperCase() + value.slice(1).toLowerCase()
 
   const AdminFilter = (props) => {
     // eslint-disable-next-line react/prop-types
@@ -610,7 +610,7 @@ const ASDataGrid1 = ({
       const ws = utils.json_to_sheet(filteredRows)
 
       const headerRow = Object.values(columnHeaders)?.map((header) =>
-        header.toUpperCase(),
+        header?.toUpperCase(),
       )
       utils.sheet_add_aoa(ws, [headerRow], { origin: 'A1' })
 

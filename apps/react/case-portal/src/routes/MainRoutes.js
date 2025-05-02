@@ -33,6 +33,7 @@ import AssessmentForm from 'components/data-tables/AssesmentForm/AssessmentConte
 import SlowdownNorms from 'components/data-tables/NormsScreens/SlowdownNorms'
 import TextSubmitComponent from 'components/user-management/TextSubmitComponent'
 import WorkFlowMerge from 'components/data-tables/AOPWorkFlow/WorkFlowMerge'
+import AnnualAopCost from 'components/data-tables/Reports/AnnualAopCost'
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
@@ -55,6 +56,31 @@ export const MainRoutes = (
         path: 'home',
         element: <DashboardDefault />,
       },
+      // {
+      //   path: 'case-list',
+      //   children: [
+      //     {
+      //       path: 'cases',
+      //       element: <CaseList />,
+      //     },
+      //     {
+      //       path: 'wip-cases',
+      //       element: <CaseList status={CaseStatus.WipCaseStatus.description} />,
+      //     },
+      //     {
+      //       path: 'closed-cases',
+      //       element: (
+      //         <CaseList status={CaseStatus.ClosedCaseStatus.description} />
+      //       ),
+      //     },
+      //     {
+      //       path: 'archived-cases',
+      //       element: (
+      //         <CaseList status={CaseStatus.ArchivedCaseStatus.description} />
+      //       ),
+      //     },
+      //   ],
+      // },
       {
         path: 'case-list',
         children: [
@@ -193,7 +219,7 @@ export const MainRoutes = (
       {
         path: 'reports',
         children: [
-          { path: 'contribution-report', element: <DashboardDefault /> },
+          { path: 'aop-annual-cost-report', element: <AnnualAopCost /> },
           { path: 'previous-fy-aop-result', element: <DashboardDefault /> },
           { path: 'previous-fy-aop-result', element: <DashboardDefault /> },
           { path: 'mat-bal-sheet', element: <DashboardDefault /> },

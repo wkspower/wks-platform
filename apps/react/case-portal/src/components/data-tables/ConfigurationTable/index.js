@@ -20,6 +20,7 @@ const ConfigurationTable = () => {
   const [shutdownNormsRows, setShutdownRows] = useState([])
   const [productionRows, setProductionRows] = useState([])
   const [consumptionRows, setConsumptionRows] = useState([])
+  const [consumptionRows2, setConsumptionRows2] = useState([])
   const [gradeData, setGradeData] = useState([])
 
   const fetchData = async () => {
@@ -50,8 +51,16 @@ const ConfigurationTable = () => {
             srNo: index + 1, // Consumption srNo starts from 1
           }))
 
+        const consumptionData2 = formattedData
+          .filter((item) => item.normType === 'Calculated Intermediate Values')
+          .map((item, index) => ({
+            ...item,
+            srNo: index + 1,
+          }))
+
         setProductionRows(productionData)
         setConsumptionRows(consumptionData)
+        setConsumptionRows2(consumptionData2)
         setRows(formattedData) // Optional: if you still need all rows
       } else {
         const groups = new Map()
@@ -133,6 +142,36 @@ const ConfigurationTable = () => {
       setLoading(false)
     }
   }
+  const fetchDataIV = async () => {
+    setLoading(true)
+    try {
+      const data = await DataService.getCatalystSelectivityDataIV(keycloak)
+
+      if (lowerVertName === 'meg') {
+        const formattedData = data?.data.map((item, index) => ({
+          ...item,
+          idFromApi: item.id,
+          id: index,
+          originalRemark: item.remarks,
+        }))
+
+        const consumptionData2 = formattedData.map((item, index) => ({
+          ...item,
+          srNo: index + 1,
+        }))
+
+        // setProductionRows(productionData)
+        // setConsumptionRows(consumptionData)
+        setConsumptionRows2(consumptionData2)
+        // setRows(formattedData) // Optional: if you still need all rows
+      }
+
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      setLoading(false)
+    }
+  }
 
   const defaultCustomHeight = { mainBox: '64vh', otherBox: '125%' }
 
@@ -171,6 +210,13 @@ const ConfigurationTable = () => {
               borderBottom: '1px solid',
             }}
           />
+          <Tab
+            label='Calculated Intermediate Values'
+            sx={{
+              border: tabIndex === 2 ? '1px solid ' : 'none',
+              borderBottom: '1px solid',
+            }}
+          />
         </Tabs>
 
         <Box>
@@ -192,6 +238,16 @@ const ConfigurationTable = () => {
               setRows={setConsumptionRows}
               defaultCustomHeight={defaultCustomHeight}
               configType={'consumption'}
+            />
+          )}
+          {tabIndex === 2 && (
+            <SelectivityData
+              rows={consumptionRows2}
+              loading={loading}
+              fetchData={fetchDataIV}
+              setRows={setConsumptionRows2}
+              defaultCustomHeight={defaultCustomHeight}
+              configType={'Calculated Intermediate Values'}
             />
           )}
         </Box>

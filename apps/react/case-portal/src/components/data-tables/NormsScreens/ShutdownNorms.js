@@ -23,7 +23,10 @@ const ShutdownNorms = () => {
   const menu = useSelector((state) => state.dataGridStore)
   const [allProducts, setAllProducts] = useState([])
   const [shutdownMonths, setShutdownMonths] = useState([])
-  const { sitePlantChange, yearChanged } = menu
+  const { sitePlantChange, yearChanged, oldYear } = menu
+  //const isOldYear = oldYear?.oldYear
+  const isOldYear = oldYear?.oldYear
+
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
@@ -194,7 +197,14 @@ const ShutdownNorms = () => {
     fetchData()
     getAllProducts()
     getShutdownMonths()
-  }, [sitePlantChange, yearChanged, keycloak, selectedUnit, lowerVertName])
+  }, [
+    sitePlantChange,
+    oldYear,
+    yearChanged,
+    keycloak,
+    selectedUnit,
+    lowerVertName,
+  ])
 
   const formatValueToThreeDecimals = (params) =>
     params ? parseFloat(params).toFixed(3) : ''
@@ -454,10 +464,10 @@ const ShutdownNorms = () => {
       field: 'idFromApi',
       headerName: 'idFromApi',
     },
-    {
-      field: 'isEditable',
-      headerName: 'isEditable',
-    },
+    // {
+    //   field: 'isEditable',
+    //   headerName: 'isEditable',
+    // },
   ]
 
   const handleRemarkCellClick = (row) => {
@@ -742,6 +752,39 @@ const ShutdownNorms = () => {
     setRowModesModel(newRowModesModel)
   }
 
+  const getAdjustedPermissions = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      isOldYear: isOldYear,
+      showCalculate: false,
+      noColor: true,
+    }
+  }
+
+  const adjustedPermissions = getAdjustedPermissions(
+    {
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      units: ['TPH', 'TPD'],
+      saveWithRemark: false,
+      saveBtn: true,
+      showCalculate: lowerVertName == 'meg' ? false : true,
+      noColor: true,
+    },
+    isOldYear,
+  )
+
   return (
     <div>
       <Backdrop
@@ -782,17 +825,18 @@ const ShutdownNorms = () => {
         unsavedChangesRef={unsavedChangesRef}
         handleRemarkCellClick={handleRemarkCellClick}
         handleCalculate={handleCalculate}
-        permissions={{
-          showAction: false,
-          addButton: false,
-          deleteButton: false,
-          editButton: false,
-          showUnit: false,
-          units: ['TPH', 'TPD'],
-          saveWithRemark: false,
-          saveBtn: true,
-          showCalculate: lowerVertName == 'meg' ? false : true,
-        }}
+        // permissions={{
+        //   showAction: false,
+        //   addButton: false,
+        //   deleteButton: false,
+        //   editButton: false,
+        //   showUnit: false,
+        //   units: ['TPH', 'TPD'],
+        //   saveWithRemark: false,
+        //   saveBtn: true,
+        //   showCalculate: lowerVertName == 'meg' ? false : true,
+        // }}
+        permissions={adjustedPermissions}
       />
     </div>
   )

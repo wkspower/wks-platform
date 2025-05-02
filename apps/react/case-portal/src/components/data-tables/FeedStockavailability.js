@@ -166,14 +166,14 @@ const FeedStockAvailability = () => {
         // handleDeleteClick={handleDeleteClick}
         // fetchData={fetchData}
         permissions={{
-          showAction: true,
-          addButton: true,
-          deleteButton: true,
-          editButton: true,
+          showAction: false,
+          addButton: false,
+          deleteButton: false,
+          editButton: false,
           showUnit: true,
           units: ['TPH', 'TPD'],
           saveWithRemark: false,
-          saveBtn: true,
+          saveBtn: false,
         }}
       />
     </div>

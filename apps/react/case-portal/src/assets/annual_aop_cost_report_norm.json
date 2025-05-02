@@ -1,27 +1,21 @@
 [
   {
-    "field": "Particulars",
-    "headerName": "Type",
-    "minWidth": 140,
-    "groupable": true
+    "field": "norm",
+    "headerName": "Norm",
+    "minWidth": 125,
+    "editable": false
   },
   {
-    "field": "NormParametersId",
+    "field": "particulars",
     "headerName": "Particulars",
-    "minWidth": 225,
+    "minWidth": 150,
     "editable": false
   },
-  {
-    "field": "UOM",
-    "headerName": "UOM / MT",
-    "minWidth": 50,
-    "editable": false
-  },
+
   {
     "field": "april",
     "headerName": 4,
     "editable": false,
-
     "align": "left",
     "headerAlign": "left"
   },
@@ -29,7 +23,6 @@
     "field": "may",
     "headerName": 5,
     "editable": false,
-
     "align": "left",
     "headerAlign": "left"
   },
@@ -37,7 +30,6 @@
     "field": "june",
     "headerName": 6,
     "editable": false,
-
     "align": "left",
     "headerAlign": "left"
   },
@@ -45,63 +37,55 @@
     "field": "july",
     "headerName": 7,
     "editable": false,
-
     "align": "left",
     "headerAlign": "left"
   },
   {
-    "field": "aug",
+    "field": "august",
     "headerName": 8,
     "editable": false,
-
     "align": "left",
     "headerAlign": "left"
   },
   {
-    "field": "sep",
+    "field": "september",
     "headerName": 9,
     "editable": false,
-
     "align": "left",
     "headerAlign": "left"
   },
   {
-    "field": "oct",
+    "field": "october",
     "headerName": 10,
     "editable": false,
-
     "align": "left",
     "headerAlign": "left"
   },
   {
-    "field": "nov",
+    "field": "november",
     "headerName": 11,
     "editable": false,
-
     "align": "left",
     "headerAlign": "left"
   },
   {
-    "field": "dec",
+    "field": "december",
     "headerName": 12,
     "editable": false,
-
     "align": "left",
     "headerAlign": "left"
   },
   {
-    "field": "jan",
+    "field": "january",
     "headerName": 1,
     "editable": false,
-
     "align": "left",
     "headerAlign": "left"
   },
   {
-    "field": "feb",
+    "field": "february",
     "headerName": 2,
     "editable": false,
-
     "align": "left",
     "headerAlign": "left"
   },
@@ -109,12 +93,12 @@
     "field": "march",
     "headerName": 3,
     "editable": false,
-
     "align": "left",
     "headerAlign": "left"
   },
   {
-    "field": "isEditable",
-    "headerName": "isEditable"
+    "field": "total",
+    "headerName": "Total",
+    "editable": false
   }
 ]
