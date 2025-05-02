@@ -13,9 +13,9 @@ const MainLayout = ({ keycloak, authenticated }) => {
   const dispatch = useDispatch()
   const { drawerOpen } = useSelector((state) => state.menu)
   const [open, setOpen] = useState(false)
-  // const menu = useMenu()
-  const { items: menuItems } = useMenuItems()
-  const menu = { items: [...menuItems] }
+  const menu = useMenu()
+  // const { items: menuItems } = useMenuItems()
+  // const menu = { items: [...menuItems] }
 
   const handleDrawerToggle = () => {
     setOpen(!open)

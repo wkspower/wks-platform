@@ -6,7 +6,7 @@ import { SessionStoreProvider } from './SessionStoreContext'
 //   CaseService,
 //   //  RecordService
 // } from 'services'
-// import menuItemsDefs from './menu'
+import menuItemsDefs from './menu'
 import { RegisterInjectUserSession, RegisteOptions } from './plugins'
 import { accountStore, sessionStore } from './store'
 import './App.css'
@@ -15,7 +15,8 @@ import './data-grid-css.css'
 import './jio-grid-style.css'
 // import { useSelector } from 'react-redux'
 import Layout from 'layout/FooterLayout/index'
-import useMenuItems from 'menu/index'
+import { useSelector } from 'react-redux'
+// import useMenuItems from 'menu/index'
 
 const ScrollTop = lazy(() => import('./components/ScrollTop'))
 
@@ -27,7 +28,9 @@ const App = () => {
   // const [recordsTypes, setRecordsTypes] = useState([])
   // const [casesDefinitions, setCasesDefinitions] = useState([])
   const [menu, setMenu] = useState({ items: [] })
-  const { items: menuItems } = useMenuItems()
+  // const { items: menuItems } = useMenuItems()
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { verticalChange } = dataGridStore
 
   useEffect(() => {
     const { keycloak } = sessionStore.bootstrap()
@@ -35,7 +38,8 @@ const App = () => {
     keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
       setKeycloak(keycloak)
       setAuthenticated(authenticated)
-      buildMenuItems(menuItems)
+      // buildMenuItems(menuItems)
+      buildMenuItems(keycloak)
       RegisterInjectUserSession(keycloak)
       RegisteOptions(keycloak)
       forceLogoutIfUserNoMinimalRoleForSystem(keycloak)
@@ -80,13 +84,68 @@ const App = () => {
   // useEffect(() => {
   //   console.log(keycloak)
   // }, [])
+  useEffect(() => {
+    if (keycloak && verticalChange) {
+      buildMenuItems(keycloak)
+    }
+    // console.log(verticalChange)
+  }, [verticalChange, keycloak])
 
-  async function buildMenuItems(menuItems) {
-    // console.log(menuItems)
-    const menu = { items: [...menuItems] }
-    // …filter by roles, inject dynamic screens, etc…
-    // console.log(menu)
+  async function buildMenuItems(keycloak) {
+    let rawAllowedVerticals = []
+    const verticals = keycloak?.idTokenParsed?.verticals
 
+    if (verticals) {
+      try {
+        rawAllowedVerticals = JSON.parse(verticals)
+      } catch (error) {
+        console.error('Error parsing verticals JSON:', error)
+        rawAllowedVerticals = []
+      }
+    } else {
+      // console.log('No verticals found in idTokenParsed')
+    }
+
+    const allowedVerticalsMapping = rawAllowedVerticals.reduce((acc, obj) => {
+      return { ...acc, ...obj }
+    }, {})
+
+    // console.log(allowedVerticalsMapping)
+    // console.log(verticalChange)
+
+    const selectedVertical = verticalChange?.selectedVertical?.toLowerCase()
+    const allowedChildIds =
+      (selectedVertical && allowedVerticalsMapping[selectedVertical]) || []
+
+    // Build the menu based on allowed verticals
+    const menu = {
+      items: [...menuItemsDefs.items],
+    }
+
+    menu.items = menu.items.map((item) => {
+      if (item.id === 'utilities') {
+        return {
+          ...item,
+          children: item.children.map((group) => {
+            if (group.id === 'production-norms-plan') {
+              return {
+                ...group,
+                children: group.children.filter((child) =>
+                  allowedChildIds.length > 0
+                    ? allowedChildIds.includes(child.id)
+                    : true,
+                ),
+              }
+            }
+            return group
+          }),
+        }
+      }
+      return item
+    })
+
+    // Safely determine if the user is a manager.
+    // If keycloak.hasRealmRole is not a function, default to false.
     const isManagerUser =
       typeof keycloak.hasRealmRole === 'function'
         ? keycloak.hasRealmRole('manager')
@@ -96,9 +155,29 @@ const App = () => {
       delete menu.items[3]
     }
 
-    //   return setMenu(menu)
-    setMenu(menu)
+    return setMenu(menu)
   }
+  // async function buildMenuItems(keycloak) {
+  //   // console.log(menuItems)
+  //   // const menu = { items: [...menuItems] }
+  //   const menu = {
+  //     items: [...menuItemsDefs.items],
+  //   }
+  //   // …filter by roles, inject dynamic screens, etc…
+  //   // console.log(menu)
+
+  //   const isManagerUser =
+  //     typeof keycloak.hasRealmRole === 'function'
+  //       ? keycloak.hasRealmRole('manager')
+  //       : false
+
+  //   if (!isManagerUser) {
+  //     delete menu.items[3]
+  //   }
+
+  //   //   return setMenu(menu)
+  //   setMenu(menu)
+  // }
 
   return (
     keycloak &&
