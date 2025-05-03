@@ -73,14 +73,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId) {
 		try {
+			
 			System.out.println("GET CofigurationDataService==============================>");
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
+			String viewName="vwScrn"+verticalName+"GetConfigTypes";
 			List<Object[]> obj = new ArrayList<>();
 			if (verticalName.equalsIgnoreCase("MEG")) {
-				obj = normAttributeTransactionsRepository.findByYearAndPlantFkIdMEG(year, plantFKId);
+				obj = findByYearAndPlantFkIdMEG(year, plantFKId,viewName);
 			}
-			else{
-				String viewName="vwScrn"+verticalName+"GetConfigTypes";
+			else{				
 				obj = findByYearAndPlantFkId(year, plantFKId,viewName);
 			}  
 
@@ -588,6 +589,22 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	        
 	        Query query = entityManager.createNativeQuery(sql);
 	        
+	        return query.getResultList();
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
+	}
+	
+	public List<Object[]> findByYearAndPlantFkIdMEG(String year, UUID plantFKId, String viewName) {
+	    try {
+	        String sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = :plantFKId AND AuditYear = :year"; 
+
+	        Query query = entityManager.createNativeQuery(sql);
+	        query.setParameter("year", year);
+	        query.setParameter("plantFKId", plantFKId);
+
 	        return query.getResultList();
 	    } catch (IllegalArgumentException e) {
 	        throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
