@@ -53,6 +53,8 @@ const defs = {
     reliability: 'Reliability', // New addition
     reports: 'Reports', // New addition
     annualAopCostReport: 'Annual AOP Basis', // New addition
+    plantsProduction: 'Plants Production Summary', // New addition
+    monthwise: 'Monthwise Production Plan',
     previousFYAOPResult: 'Previous FY AOP Result', // New addition
     matBalSheet: 'MAT Bal Sheet', // New addition
     workflow: 'AOP Approval Flow', // New addition
@@ -210,6 +212,8 @@ const defs = {
         reliability: 'Reliability', // New addition
         reports: 'Reports', // New addition
         annualAopCostReport: 'Annual AOP Basis', // New addition
+        plantsProduction: 'Plants Production Summary',
+        monthwise: 'Monthwise Production Plan',
         previousFYAOPResult: 'Previous FY AOP Result', // New addition
         matBalSheet: 'MAT Bal Sheet', // New addition
         userManage: 'User Management', // New addition

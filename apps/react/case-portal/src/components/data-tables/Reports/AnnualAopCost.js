@@ -7,7 +7,7 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { styled } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
-import AopCostReportView from 'components/data-tables-views/AopCostReportView'
+import AopCostReportView from 'components/data-tables-views/ReportDataGrid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -125,7 +125,7 @@ const AnnualAopCost = ({ permissions }) => {
 
   // const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
-  const year = extractYear(selectedUnit)
+  const year = extractYear(selectedUnit) || '2025-26'
   const headerMap = generateHeaderNames(year)
 
   function extractYear(dropdownValue) {
@@ -236,7 +236,7 @@ const AnnualAopCost = ({ permissions }) => {
               <Box sx={{ width: '100%', margin: 0 }}>
                 <AopCostReportView
                   rows={rowsProduction}
-                  cols={colsProduction}
+                  columns={colsProduction}
                   height='93px'
                 />
               </Box>
@@ -257,7 +257,7 @@ const AnnualAopCost = ({ permissions }) => {
               <Box sx={{ width: '100%', margin: 0 }}>
                 <AopCostReportView
                   rows={rowsPrice}
-                  cols={colsPrice}
+                  columns={colsPrice}
                   height='340px'
                 />
               </Box>
@@ -278,7 +278,7 @@ const AnnualAopCost = ({ permissions }) => {
               <Box sx={{ width: '100%', margin: 0 }}>
                 <AopCostReportView
                   rows={rowsNorm}
-                  cols={colsNorm}
+                  columns={colsNorm}
                   height='340px'
                 />
               </Box>
@@ -299,7 +299,7 @@ const AnnualAopCost = ({ permissions }) => {
               <Box sx={{ width: '100%', margin: 0 }}>
                 <AopCostReportView
                   rows={rowsQuantity}
-                  cols={colsQuantity}
+                  columns={colsQuantity}
                   height='340px'
                 />
               </Box>
@@ -320,7 +320,7 @@ const AnnualAopCost = ({ permissions }) => {
               <Box sx={{ width: '100%', margin: 0 }}>
                 <AopCostReportView
                   rows={rowsNormCost}
-                  cols={colsNormCost}
+                  columns={colsNormCost}
                   height='340px'
                 />
               </Box>

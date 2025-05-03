@@ -34,6 +34,8 @@ import SlowdownNorms from 'components/data-tables/NormsScreens/SlowdownNorms'
 import TextSubmitComponent from 'components/user-management/TextSubmitComponent'
 import WorkFlowMerge from 'components/data-tables/AOPWorkFlow/WorkFlowMerge'
 import AnnualAopCost from 'components/data-tables/Reports/AnnualAopCost'
+import PlantsProductionSummary from 'components/data-tables/Reports/PlantsProductionData'
+import MonthwiseProduction from 'components/data-tables/Reports/MonthWiseProduction'
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
@@ -220,6 +222,14 @@ export const MainRoutes = (
         path: 'reports',
         children: [
           { path: 'aop-annual-cost-report', element: <AnnualAopCost /> },
+          {
+            path: 'plants-production',
+            element: <PlantsProductionSummary />,
+          },
+          {
+            path: 'monthwise-production',
+            element: <MonthwiseProduction />,
+          },
           { path: 'previous-fy-aop-result', element: <DashboardDefault /> },
           { path: 'previous-fy-aop-result', element: <DashboardDefault /> },
           { path: 'mat-bal-sheet', element: <DashboardDefault /> },
