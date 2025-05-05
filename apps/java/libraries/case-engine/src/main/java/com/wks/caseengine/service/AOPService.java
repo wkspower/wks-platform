@@ -12,6 +12,10 @@ public interface AOPService {
 	public List<AOPDTO> getAOPData(String plantId, String year);
     public AOPMessageVM calculateData(String plantId, String year);
     public List<Map<String, String>> getAOPYears();
-	Integer executeDynamicMaintenanceCalculation(String verticalName, String plantId, String siteId, String verticalId, String aopYear);
+	public List<Object[]> executeDynamicMaintenanceCalculationPE(String verticalName, String plantId, String siteId,
+			String verticalId, String aopYear);
+	public Integer executeDynamicMaintenanceCalculationMEG(String verticalName, String plantId, String siteId,
+			String verticalId, String aopYear);
+	public List<AOPDTO> calculateDataForPE(String plantId, String year);
 
 }

@@ -250,68 +250,95 @@ public class AOPServiceImpl implements AOPService {
 		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		String verticalName = plantsRepository.findVerticalNameByPlantId(plant.getId());
+		if(verticalName.equalsIgnoreCase("MEG")) {
+			Integer result= executeDynamicMaintenanceCalculationMEG(verticalName, plant.getId().toString(),
+					site.getId().toString(), vertical.getId().toString(), year);
+			aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("Data fetched successfully");
+	        aopMessageVM.setData(result);
+		}else if(verticalName.equalsIgnoreCase("PE")) {
+			List<AOPDTO> result= calculateDataForPE(plant.getId().toString(),year);
+			aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("Data fetched successfully");
+	        aopMessageVM.setData(result);
+		}
 		
-		Integer result= executeDynamicMaintenanceCalculation(verticalName, plant.getId().toString(),
-				site.getId().toString(), vertical.getId().toString(), year);
-		aopMessageVM.setCode(200);
-        aopMessageVM.setMessage("Data fetched successfully");
-        aopMessageVM.setData(result);
         return aopMessageVM;
 	}
 
-	/*
-	 * @Override public List<AOPDTO> calculateData(String plantId, String year) {
-	 * 
-	 * List<AOPDTO> dtoList = new ArrayList<>(); try {
-	 * 
-	 * List<Object[]> maintainsData =
-	 * aopRepository.CheckIfMaintainanceDataExists(plantId, year); //
-	 * if(maintainsData!=null && maintainsData.size()>0){ if (1 == 1) { Plants plant
-	 * = plantsRepository.findById(UUID.fromString(plantId)).get(); Sites site =
-	 * siteRepository.findById(plant.getSiteFkId()).get(); Verticals vertical =
-	 * verticalRepository.findById(plant.getVerticalFKId()).get(); String
-	 * verticalName = plantsRepository.findVerticalNameByPlantId(plant.getId());
-	 * 
-	 * List<Object[]> list = executeDynamicMaintenanceCalculation(verticalName,
-	 * plant.getId().toString(), site.getId().toString(),
-	 * vertical.getId().toString(), year); System.out.println("list" + list);
-	 * System.out.println("listTo String" + list.toString());
-	 * 
-	 * List<AOP> objList = aopRepository.findAllByAopYearAndPlantFkId(year,
-	 * UUID.fromString(plantId));
-	 * 
-	 * System.out.println("objList" + objList); System.out.println("objList String"
-	 * + objList.toString());
-	 * 
-	 * for (Object[] obj : list) { System.out.println("obj" + obj.toString());
-	 * System.out.println("obj[0].toString()" + obj[0].toString());
-	 * System.out.println("obj[0]" + obj[0]); AOPDTO aopDto = new AOPDTO();
-	 * aopDto.setAopCaseId(""); aopDto.setAopRemarks(""); aopDto.setId("");
-	 * aopDto.setPlantFKId(plantId); aopDto.setAopStatus("Draft");
-	 * aopDto.setAopYear(year); aopDto.setMaterialFKId(obj[0] != null ?
-	 * (obj[0].toString()) : null); aopDto.setSiteFKId(site.getId().toString());
-	 * aopDto.setJan(obj[3] != null ? (Float.parseFloat(obj[3].toString())) : null);
-	 * aopDto.setFeb(obj[4] != null ? (Float.parseFloat(obj[4].toString())) : null);
-	 * aopDto.setMarch(obj[5] != null ? (Float.parseFloat(obj[5].toString())) :
-	 * null); aopDto.setApril(obj[6] != null ? (Float.parseFloat(obj[6].toString()))
-	 * : null); aopDto.setMay(obj[7] != null ? (Float.parseFloat(obj[7].toString()))
-	 * : null); aopDto.setJune(obj[8] != null ?
-	 * (Float.parseFloat(obj[8].toString())) : null); aopDto.setJuly(obj[9] != null
-	 * ? (Float.parseFloat(obj[9].toString())) : null); aopDto.setAug(obj[10] !=
-	 * null ? (Float.parseFloat(obj[10].toString())) : null); aopDto.setSep(obj[11]
-	 * != null ? (Float.parseFloat(obj[11].toString())) : null);
-	 * aopDto.setOct(obj[12] != null ? (Float.parseFloat(obj[12].toString())) :
-	 * null); aopDto.setNov(obj[13] != null ? (Float.parseFloat(obj[13].toString()))
-	 * : null); aopDto.setDec(obj[14] != null ?
-	 * (Float.parseFloat(obj[14].toString())) : null); dtoList.add(aopDto); } }
-	 * 
-	 * return dtoList; } catch (IllegalArgumentException e) { throw new
-	 * RestInvalidArgumentException("Invalid UUID format for Plant ID", e); } catch
-	 * (Exception ex) { throw new RuntimeException("Failed to fetch data", ex); } }
-	 */
+	
+	@Override
+	public List<AOPDTO> calculateDataForPE(String plantId, String year) {
+	    List<AOPDTO> dtoList = new ArrayList<>();
+	    try {
+	        List<Object[]> maintainsData = aopRepository.CheckIfMaintainanceDataExists(plantId, year);
+
+	        // if(maintainsData!=null && maintainsData.size()>0){
+	        if (1 == 1) {
+	            Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+	            Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+	            Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+	            String verticalName = plantsRepository.findVerticalNameByPlantId(plant.getId());
+
+	            List<Object[]> list = executeDynamicMaintenanceCalculationPE(
+	                verticalName,
+	                plant.getId().toString(),
+	                site.getId().toString(),
+	                vertical.getId().toString(),
+	                year
+	            );
+
+	            System.out.println("list" + list);
+	            System.out.println("listTo String" + list.toString());
+
+	            List<AOP> objList = aopRepository.findAllByAopYearAndPlantFkId(year, UUID.fromString(plantId));
+	            System.out.println("objList" + objList);
+	            System.out.println("objList String" + objList.toString());
+
+	            for (Object[] obj : list) {
+	                System.out.println("obj" + obj.toString());
+	                System.out.println("obj[0].toString()" + obj[0].toString());
+	                System.out.println("obj[0]" + obj[0]);
+
+	                AOPDTO aopDto = new AOPDTO();
+	                aopDto.setAopCaseId("");
+	                aopDto.setAopRemarks("");
+	                aopDto.setId("");
+	                aopDto.setPlantFKId(plantId);
+	                aopDto.setAopStatus("Draft");
+	                aopDto.setAopYear(year);
+	                aopDto.setMaterialFKId(obj[0] != null ? obj[0].toString() : null);
+	                aopDto.setSiteFKId(site.getId().toString());
+
+	                aopDto.setJan(obj[3] != null ? Float.parseFloat(obj[3].toString()) : null);
+	                aopDto.setFeb(obj[4] != null ? Float.parseFloat(obj[4].toString()) : null);
+	                aopDto.setMarch(obj[5] != null ? Float.parseFloat(obj[5].toString()) : null);
+	                aopDto.setApril(obj[6] != null ? Float.parseFloat(obj[6].toString()) : null);
+	                aopDto.setMay(obj[7] != null ? Float.parseFloat(obj[7].toString()) : null);
+	                aopDto.setJune(obj[8] != null ? Float.parseFloat(obj[8].toString()) : null);
+	                aopDto.setJuly(obj[9] != null ? Float.parseFloat(obj[9].toString()) : null);
+	                aopDto.setAug(obj[10] != null ? Float.parseFloat(obj[10].toString()) : null);
+	                aopDto.setSep(obj[11] != null ? Float.parseFloat(obj[11].toString()) : null);
+	                aopDto.setOct(obj[12] != null ? Float.parseFloat(obj[12].toString()) : null);
+	                aopDto.setNov(obj[13] != null ? Float.parseFloat(obj[13].toString()) : null);
+	                aopDto.setDec(obj[14] != null ? Float.parseFloat(obj[14].toString()) : null);
+
+	                dtoList.add(aopDto);
+	            }
+	        }
+
+	        return dtoList;
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
+	}
+
+	
 	@Override
 	@Transactional
-	public Integer executeDynamicMaintenanceCalculation(String verticalName, String plantId, String siteId,
+	public Integer executeDynamicMaintenanceCalculationMEG(String verticalName, String plantId, String siteId,
 			String verticalId, String aopYear) {
 		try {
 
@@ -331,6 +358,35 @@ public class AOPServiceImpl implements AOPService {
 			query.setParameter("aopYear", aopYear);
 
 			return query.executeUpdate();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	@Override
+	@Transactional
+	public List<Object[]> executeDynamicMaintenanceCalculationPE(String verticalName, String plantId, String siteId,
+			String verticalId, String aopYear) {
+		try {
+
+			// Construct dynamic stored procedure name
+			String procedureName = verticalName + "_HMD_MaintenanceCalculation";
+
+			// Create a native query to execute the stored procedure
+			String sql = "EXEC " + procedureName
+					+ " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @aopYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			// Set parameters
+			query.setParameter("plantId", plantId);
+			query.setParameter("siteId", siteId);
+			query.setParameter("verticalId", verticalId);
+			query.setParameter("aopYear", aopYear);
+
+			return query.getResultList();
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format ", e);
 		} catch (Exception ex) {
