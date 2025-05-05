@@ -13,27 +13,14 @@ import lombok.NoArgsConstructor;
 @Configuration
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Data
-public class BusinessDemandDTO {
+public class BusinessDemandDTO extends MonthsDTO{
 	
 	private String id;
     private String remarks;
     private String normParameterId;
     private String catalystId;
     private String type;
-    private Float jan;
-    private Float feb;
-    private Float march;
-    private Float april;
-    private Float may;
-    private Float june;
-    private Float july;
-    private Float aug;
-    private Float sep;
-    private Float oct;
-    private Float nov;
-    private Float dec;
     private String year;
     private String plantFkId;
     private Float TPH;

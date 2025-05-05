@@ -17,23 +17,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 @JsonInclude(Include.ALWAYS)
-public class BusinessDemandDataDTO {
+public class BusinessDemandDataDTO extends MonthsDTO{
 	
 	private String id;
     private String remark;
     private String normParameterId;
-    private Float jan;
-    private Float feb;
-    private Float march;
-    private Float april;
-    private Float may;
-    private Float june;
-    private Float july;
-    private Float aug;
-    private Float sep;
-    private Float oct;
-    private Float nov;
-    private Float dec;
     private String year;
     private String plantId;
     private Float avgTph;
