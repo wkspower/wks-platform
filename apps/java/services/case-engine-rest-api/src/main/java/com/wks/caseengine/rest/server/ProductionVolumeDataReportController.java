@@ -22,5 +22,4 @@ public class ProductionVolumeDataReportController {
 		AOPMessageVM response	=productionVolumeDataReportService.getReportForProductionVolumnData(plantId,year,type,filter);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
-
 }
