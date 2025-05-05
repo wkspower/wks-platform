@@ -37,5 +37,6 @@ public class ConfigurationDTO {
     private String TypeDisplayName;
     private String ConfigTypeName;
     private String TypeName;
+    private Boolean isEditable;
 
 }

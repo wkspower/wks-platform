@@ -142,6 +142,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 				if (verticalName.equalsIgnoreCase("MEG")) {
 					configurationDTO.setNormType(row[17] != null ? row[17].toString() : "");
+					configurationDTO.setIsEditable(
+						    row[18] != null ? ((Integer) row[18]) == 1 : null
+						);
+;
 				}
 
 				configurationDTOList.add(configurationDTO);
@@ -199,6 +203,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						configurationDTO.setAuditYear(row[15] != null ? row[15].toString() : "");
 						configurationDTO.setUOM(row[16] != null ? row[16].toString() : "");
 						configurationDTO.setNormType(row[17] != null ? row[17].toString() : "");
+						configurationDTO.setIsEditable(
+							    row[18] != null ? (Boolean) row[18] : null
+							);
 
 						configurationDTOList.add(configurationDTO);
 						if (row[14] == null) {
