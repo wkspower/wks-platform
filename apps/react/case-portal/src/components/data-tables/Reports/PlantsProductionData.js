@@ -499,7 +499,7 @@ const PlantsProductionSummary = () => {
   }
 
   const apiCols = dataAPI.columns
-  const rows = dataAPI.rows
+  // const rows = dataAPI.rows
 
   // 1. Flat columns for rendering as before
   const columns = useMemo(() => {

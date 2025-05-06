@@ -365,7 +365,7 @@ const ProductionNorms = ({ permissions }) => {
         }
 
         const finalData = [...formattedData, totalRows]
-
+     // console.log(finalData)
         if (lowerVertName == 'pe') {
           setRows(finalData)
         }
@@ -456,6 +456,9 @@ const ProductionNorms = ({ permissions }) => {
       }
       if (lowerVertName == 'meg') {
         setRows(formattedData)
+      }
+      if (permissions?.needTotal) {
+        setRows(finalData)
       } else {
         setRows(finalData)
       }

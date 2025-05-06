@@ -1,28 +1,43 @@
 import { Box } from '@mui/material'
 // import DataGridTable from '../ASDataGrid'
 import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
+import {
+  Backdrop,
+  CircularProgress,
+  Typography,
+} from '../../../../node_modules/@mui/material/index'
+import ProductionNorms from '../ProductionNorms'
+import { useEffect, useMemo, useState } from 'react'
+import { DataService } from 'services/DataService'
+import { useSession } from 'SessionStoreContext'
 
 const MonthwiseProduction = () => {
+  const keycloak = useSession()
   const columns = [
     {
-      field: 'slNo',
+      field: 'sno',
       headerName: 'Sl. No.',
       width: 90,
       headerAlign: 'left',
       align: 'left',
     },
-    { field: 'month', headerName: 'Month', width: 120, headerAlign: 'left' },
+    {
+      field: 'month',
+      headerName: 'Month',
+      width: 120,
+      headerAlign: 'left',
+    },
 
     // Current Year → EOE Production
     {
-      field: 'eoeBudgetCY',
+      field: 'productionBudget', // was eoeBudgetCY
       headerName: 'Budget',
       width: 100,
       headerAlign: 'left',
       align: 'left',
     },
     {
-      field: 'eoeActualCY',
+      field: 'productionActual', // was eoeActualCY
       headerName: 'Actual',
       width: 100,
       headerAlign: 'left',
@@ -31,14 +46,14 @@ const MonthwiseProduction = () => {
 
     // Current Year → Operating Hours
     {
-      field: 'opBudgetCY',
+      field: 'operatingBudget', // was opBudgetCY
       headerName: 'Budget',
       width: 100,
       headerAlign: 'left',
       align: 'left',
     },
     {
-      field: 'opActualCY',
+      field: 'operatingActual', // was opActualCY
       headerName: 'Actual',
       width: 100,
       headerAlign: 'left',
@@ -47,15 +62,14 @@ const MonthwiseProduction = () => {
 
     // Current Year → Throughput
     {
-      field: 'thrBudgetCY',
+      field: 'throughputBudget', // was thrBudgetCY
       headerName: 'Budget',
       width: 100,
       headerAlign: 'left',
       align: 'left',
-      textAlign: 'left',
     },
     {
-      field: 'thrActualCY',
+      field: 'throughputActual', // was thrActualCY
       headerName: 'Actual',
       width: 100,
       headerAlign: 'left',
@@ -64,44 +78,42 @@ const MonthwiseProduction = () => {
 
     // Budget Year single values
     {
-      field: 'opBudgetBY',
+      field: 'operatingHours', // was opBudgetBY
       headerName: 'Operating Hours',
       width: 140,
       headerAlign: 'left',
       align: 'left',
     },
     {
-      field: 'megTPH',
+      field: 'megThroughput', // was megTPH
       headerName: 'MEG Throughput, TPH',
       width: 160,
       headerAlign: 'left',
       align: 'left',
     },
     {
-      field: 'eoTPH',
+      field: 'eoThroughput', // was eoTPH
       headerName: 'EO Throughput, TPH',
       width: 160,
       headerAlign: 'left',
       align: 'left',
-      textAlign: 'left',
     },
     {
-      field: 'eoeTPH',
+      field: 'eoeThroughput', // was eoeTPH
       headerName: 'EOE Throughput, TPH',
       width: 160,
       headerAlign: 'left',
       align: 'left',
-      textAlign: 'left',
     },
     {
-      field: 'totalEoeMT',
+      field: 'totalEOE', // was totalEoeMT
       headerName: 'Total EOE, MT',
       width: 140,
       headerAlign: 'left',
       align: 'left',
-      textAlign: 'left',
     },
 
+    // (Optional) you can keep Remarks if you plan to add that later
     {
       field: 'remarks',
       headerName: 'Remarks',
@@ -111,286 +123,122 @@ const MonthwiseProduction = () => {
     },
   ]
 
-  // 2) Column grouping model
   const columnGroupingModel = [
     {
       groupId: 'currentYear',
-      headerName: 'Current Year ',
+      headerName: 'Current Year',
       children: [
         {
           groupId: 'cy-eoe',
           headerName: 'EOE Production, MT',
-          children: [{ field: 'eoeBudgetCY' }, { field: 'eoeActualCY' }],
+          children: [
+            { field: 'productionBudget' }, // was eoeBudgetCY
+            { field: 'productionActual' }, // was eoeActualCY
+          ],
         },
         {
           groupId: 'cy-op',
           headerName: 'Operating Hours',
-          children: [{ field: 'opBudgetCY' }, { field: 'opActualCY' }],
+          children: [
+            { field: 'operatingBudget' }, // was opBudgetCY
+            { field: 'operatingActual' }, // was opActualCY
+          ],
         },
         {
           groupId: 'cy-thr',
           headerName: 'Throughput, TPH',
-          children: [{ field: 'thrBudgetCY' }, { field: 'thrActualCY' }],
+          children: [
+            { field: 'throughputBudget' }, // was thrBudgetCY
+            { field: 'throughputActual' }, // was thrActualCY
+          ],
         },
       ],
     },
     {
       groupId: 'budgetYear',
-      headerName: 'Budget Year ',
+      headerName: 'Budget Year',
       children: [
-        { field: 'opBudgetBY' },
-        { field: 'megTPH' },
-        { field: 'eoTPH' },
-        { field: 'eoeTPH' },
-        { field: 'totalEoeMT' },
+        { field: 'operatingHours' }, // was opBudgetBY
+        { field: 'megThroughput' }, // was megTPH
+        { field: 'eoThroughput' }, // was eoTPH
+        { field: 'eoeThroughput' }, // was eoeTPH
+        { field: 'totalEOE' }, // was totalEoeMT
       ],
     },
-    // {
-    //   groupId: 'rem',
-    //   headerName: 'Remarks',
-    //   children: [{ field: 'remarks' }],
-    // },
   ]
 
-  const rows = [
-    {
-      id: 1,
-      slNo: 1,
-      month: 'April',
-      eoeBudgetCY: 150,
-      eoeActualCY: 140,
-      opBudgetCY: 720,
-      opActualCY: 700,
-      thrBudgetCY: 50,
-      thrActualCY: 48,
-      opBudgetBY: 730,
-      megTPH: 45,
-      eoTPH: 40,
-      eoeTPH: 55,
-      totalEoeMT: 145,
-      remarks: '',
-    },
-    {
-      id: 2,
-      slNo: 2,
-      month: 'May',
-      eoeBudgetCY: 160,
-      eoeActualCY: 155,
-      opBudgetCY: 710,
-      opActualCY: 705,
-      thrBudgetCY: 52,
-      thrActualCY: 50,
-      opBudgetBY: 720,
-      megTPH: 47,
-      eoTPH: 42,
-      eoeTPH: 57,
-      totalEoeMT: 152,
-      remarks: '',
-    },
-    {
-      id: 3,
-      slNo: 3,
-      month: 'June',
-      eoeBudgetCY: 155,
-      eoeActualCY: 150,
-      opBudgetCY: 730,
-      opActualCY: 725,
-      thrBudgetCY: 51,
-      thrActualCY: 49,
-      opBudgetBY: 740,
-      megTPH: 46,
-      eoTPH: 41,
-      eoeTPH: 56,
-      totalEoeMT: 150,
-      remarks: '',
-    },
-    {
-      id: 4,
-      slNo: 4,
-      month: 'July',
-      eoeBudgetCY: 148,
-      eoeActualCY: 145,
-      opBudgetCY: 700,
-      opActualCY: 695,
-      thrBudgetCY: 49,
-      thrActualCY: 47,
-      opBudgetBY: 710,
-      megTPH: 44,
-      eoTPH: 39,
-      eoeTPH: 54,
-      totalEoeMT: 143,
-      remarks: 'Catalyst swap',
-    },
-    {
-      id: 5,
-      slNo: 5,
-      month: 'August',
-      eoeBudgetCY: 162,
-      eoeActualCY: 160,
-      opBudgetCY: 740,
-      opActualCY: 735,
-      thrBudgetCY: 53,
-      thrActualCY: 52,
-      opBudgetBY: 750,
-      megTPH: 48,
-      eoTPH: 43,
-      eoeTPH: 58,
-      totalEoeMT: 158,
-      remarks: '',
-    },
-    {
-      id: 6,
-      slNo: 6,
-      month: 'September',
-      eoeBudgetCY: 158,
-      eoeActualCY: 155,
-      opBudgetCY: 730,
-      opActualCY: 725,
-      thrBudgetCY: 52,
-      thrActualCY: 50,
-      opBudgetBY: 740,
-      megTPH: 47,
-      eoTPH: 42,
-      eoeTPH: 56,
-      totalEoeMT: 154,
-      remarks: '',
-    },
-    {
-      id: 7,
-      slNo: 7,
-      month: 'October',
-      eoeBudgetCY: 150,
-      eoeActualCY: 148,
-      opBudgetCY: 720,
-      opActualCY: 715,
-      thrBudgetCY: 50,
-      thrActualCY: 49,
-      opBudgetBY: 730,
-      megTPH: 45,
-      eoTPH: 40,
-      eoeTPH: 55,
-      totalEoeMT: 146,
-      remarks: '',
-    },
-    {
-      id: 8,
-      slNo: 8,
-      month: 'November',
-      eoeBudgetCY: 145,
-      eoeActualCY: 140,
-      opBudgetCY: 710,
-      opActualCY: 705,
-      thrBudgetCY: 48,
-      thrActualCY: 46,
-      opBudgetBY: 720,
-      megTPH: 44,
-      eoTPH: 39,
-      eoeTPH: 54,
-      totalEoeMT: 142,
-      remarks: '',
-    },
-    {
-      id: 9,
-      slNo: 9,
-      month: 'December',
-      eoeBudgetCY: 155,
-      eoeActualCY: 150,
-      opBudgetCY: 720,
-      opActualCY: 715,
-      thrBudgetCY: 51,
-      thrActualCY: 49,
-      opBudgetBY: 730,
-      megTPH: 46,
-      eoTPH: 41,
-      eoeTPH: 56,
-      totalEoeMT: 151,
-      remarks: '',
-    },
-    {
-      id: 10,
-      slNo: 10,
-      month: 'January',
-      eoeBudgetCY: 160,
-      eoeActualCY: 158,
-      opBudgetCY: 730,
-      opActualCY: 725,
-      thrBudgetCY: 52,
-      thrActualCY: 51,
-      opBudgetBY: 740,
-      megTPH: 47,
-      eoTPH: 42,
-      eoeTPH: 57,
-      totalEoeMT: 156,
-      remarks: '',
-    },
-    {
-      id: 11,
-      slNo: 11,
-      month: 'February',
-      eoeBudgetCY: 158,
-      eoeActualCY: 155,
-      opBudgetCY: 725,
-      opActualCY: 720,
-      thrBudgetCY: 51,
-      thrActualCY: 50,
-      opBudgetBY: 735,
-      megTPH: 46,
-      eoTPH: 41,
-      eoeTPH: 56,
-      totalEoeMT: 154,
-      remarks: '',
-    },
-    {
-      id: 12,
-      slNo: 12,
-      month: 'March',
-      eoeBudgetCY: 152,
-      eoeActualCY: 150,
-      opBudgetCY: 715,
-      opActualCY: 710,
-      thrBudgetCY: 50,
-      thrActualCY: 49,
-      opBudgetBY: 725,
-      megTPH: 45,
-      eoTPH: 40,
-      eoeTPH: 55,
-      totalEoeMT: 148,
-      remarks: '',
-    },
-    {
-      id: 13,
-      slNo: '',
-      month: 'Total',
-      eoeBudgetCY: 1863,
-      eoeActualCY: 1731,
-      opBudgetCY: 8705,
-      opActualCY: 8575,
-      thrBudgetCY: 608,
-      thrActualCY: 588,
-      opBudgetBY: 8790,
-      megTPH: 565,
-      eoTPH: 465,
-      eoeTPH: 668,
-      totalEoeMT: 1762,
-      remarks: '',
-    },
-  ]
+  const defaultCustomHeight = { mainBox: '38vh', otherBox: '90%' }
 
-  const defaultCustomHeight = { mainBox: '84vh', otherBox: '90%' }
+  //api call
+  const [row, setRow] = useState()
+  const [loading, setLoading] = useState(false)
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        var res = await DataService.getMonthWiseSummary(keycloak)
+
+        console.log(res)
+        if (res?.code == 200) {
+          res = res?.data?.data.map((item, index) => ({
+            ...item,
+            id: index,
+          }))
+
+          setRow(res)
+        } else {
+          setRow([])
+        }
+      } catch (err) {
+        console.log(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [year, plantId])
 
   return (
     <Box sx={{ height: 500, width: '100%' }}>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={!!loading}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
       <ReportDataGrid
-        rows={rows}
+        rows={row}
         title='Monthwise Production Summary'
         columns={columns}
-        permissions={{ customHeight: defaultCustomHeight, saveBtn: true }}
+        permissions={{
+          customHeight: defaultCustomHeight,
+          textAlignment: 'center',
+        }}
         treeData
         getTreeDataPath={(row) => row.path}
         defaultGroupingExpansionDepth={1} // expand only first level by default
         disableSelectionOnClick
         columnGroupingModel={columnGroupingModel}
         experimentalFeatures
+      />
+      <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
+        Main Products - Production for the budget year{' '}
+      </Typography>
+      <ProductionNorms
+        permissions={{
+          showAction: false,
+          addButton: false,
+          deleteButton: false,
+          editButton: false,
+          showUnit: false,
+          saveWithRemark: false,
+          saveBtn: false,
+          showCalculate: false,
+          customHeight: defaultCustomHeight,
+          needTotal: true,
+        }}
       />
     </Box>
   )
