@@ -159,7 +159,7 @@
   pointer-events: none; /* Disables any interaction */
   background-color: #ebebeb; /* Light background instead of grey */
   color: rgba(0, 0, 0, 0.4); /* Slightly faded text color */
-  border: 2px solid rgba(0, 0, 0, 0.2); /* Softer border */
+  border: 1px solid rgba(0, 0, 0, 0.2); /* Softer border */
   cursor: not-allowed; /* Shows the "not-allowed" cursor */
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1); /* Adds a soft inner shadow for a disabled feel */
   border-radius: 8px; /* Slightly rounded corners for a modern touch */

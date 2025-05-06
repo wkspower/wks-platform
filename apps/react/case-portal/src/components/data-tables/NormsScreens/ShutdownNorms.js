@@ -543,7 +543,7 @@ const ShutdownNorms = () => {
           businessData,
           keycloak,
         )
-        dispatch(setIsBlocked(true))
+        // dispatch(setIsBlocked(true))
 
         setSnackbarOpen(true)
         setSnackbarData({
@@ -726,7 +726,7 @@ const ShutdownNorms = () => {
         })
 
         setRows(groupedRows)
-        dispatch(setIsBlocked(true))
+        // dispatch(setIsBlocked(true))
         setLoading(false)
       } else {
         setSnackbarOpen(true)

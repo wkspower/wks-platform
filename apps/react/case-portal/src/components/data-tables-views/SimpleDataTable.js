@@ -38,6 +38,7 @@ const SimpleDataTable = () => {
           idFromApi: item?.id,
           normParametersFKId: item?.materialFKId.toLowerCase(),
           id: index,
+          isEditable: false,
           ...(isTPH && {
             april: item.april
               ? (item.april * 24).toFixed(2)
@@ -182,6 +183,7 @@ const SimpleDataTable = () => {
           aopStatus: false,
           idFromApi: false,
           period: false,
+          isEditable: false,
         }}
         rowHeight={35}
         slotProps={{
@@ -192,11 +194,11 @@ const SimpleDataTable = () => {
           },
         }}
         getRowClassName={(params) => {
-          return params.row.Particulars || params.row.Particulars2
-            ? 'no-border-row'
-            : params.indexRelativeToCurrentPage % 2 === 0
-              ? 'even-row'
-              : 'even-row'
+          const classes = []
+          if (params.row.isEditable === false) {
+            return [...classes, 'odd-row'].join(' ')
+          }
+          return [...classes, 'even-row'].join(' ')
         }}
       />
     </Box>

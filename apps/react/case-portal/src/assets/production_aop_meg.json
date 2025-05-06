@@ -117,5 +117,10 @@
     "editable": false
   },
 
+  {
+    "field": "isEditable",
+    "headerName": "isEditable"
+  },
+
   { "field": "aopStatus", "headerName": "aopStatus", "editable": false }
 ]

@@ -3,6 +3,8 @@ import { Box, Typography, Stack } from '@mui/material'
 import honLogo from '../../../assets/images/hon.svg'
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear()
+
   return (
     <Box
       component='footer'
@@ -20,7 +22,7 @@ const Footer = () => {
         spacing={1}
       >
         <Typography variant='body2' color='textSecondary'>
-          Powered by Honeywell © 2025
+          Powered by Honeywell © {currentYear}
         </Typography>
 
         <Box

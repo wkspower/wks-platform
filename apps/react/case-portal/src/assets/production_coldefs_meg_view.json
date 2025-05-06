@@ -113,5 +113,9 @@
     "field": "avgTph",
     "headerName": "AVG",
     "editable": false
+  },
+  {
+    "field": "isEditable",
+    "headerName": "isEditable"
   }
 ]

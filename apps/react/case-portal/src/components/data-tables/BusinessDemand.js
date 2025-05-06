@@ -403,6 +403,24 @@ const BusinessDemand = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
+      <div>
+        <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordionSummary
+            aria-controls='meg-grid-content'
+            id='meg-grid-header'
+          >
+            <Typography component='span' className='grid-title'>
+              Production Volume Data (MT) (For reference to enter Business
+              Demand Value )
+            </Typography>
+          </CustomAccordionSummary>
+          <CustomAccordionDetails>
+            <Box sx={{ width: '100%', margin: 0 }}>
+              <SimpleDataTable />
+            </Box>
+          </CustomAccordionDetails>
+        </CustomAccordion>
+      </div>
 
       <Typography component='div' className='grid-title'>
         Business Demand Data
@@ -443,37 +461,7 @@ const BusinessDemand = ({ permissions }) => {
         handleRemarkCellClick={handleRemarkCellClick}
         deleteRowData={deleteRowData}
         permissions={adjustedPermissions}
-        // permissions={{
-        //   showAction: permissions?.showAction ?? false,
-        //   addButton: permissions?.addButton ?? false,
-        //   deleteButton: permissions?.deleteButton ?? false,
-        //   editButton: permissions?.editButton ?? false,
-        //   showUnit: permissions?.showUnit ?? false,
-        //   saveWithRemark: permissions?.saveWithRemark ?? true,
-        //   saveBtn: permissions?.saveBtn ?? true,
-        //   units: ['TPH', 'TPD'],
-        //   customHeight: permissions?.customHeight || defaultCustomHeight,
-        // }}
       />
-      <div>
-        {(lowerVertName === 'meg' || lowerVertName === 'pe') && (
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                Production Volume Data (MT)
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <SimpleDataTable />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        )}
-      </div>
     </div>
   )
 }

@@ -296,7 +296,7 @@ const ProductionNorms = ({ permissions }) => {
   }
 
   const handleCalculate = async () => {
-    dispatch(setIsBlocked(true))
+    // dispatch(setIsBlocked(true))
 
     setCalculatebtnClicked(true)
     setLoading(true)
@@ -311,15 +311,28 @@ const ProductionNorms = ({ permissions }) => {
       var plantId = plantId
       const data = await DataService.handleCalculate(plantId, year, keycloak)
 
-      if (data) {
+      if (lowerVertName == 'meg' && data?.code == 200) {
+        fetchData()
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data refreshed successfully!',
           severity: 'success',
         })
-        // setLoading(false)
+        setLoading(false)
+        return
+      }
 
-        const formattedData = data.map((item, index) => {
+      let res = data?.data
+
+      if (res) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data refreshed successfully!',
+          severity: 'success',
+        })
+        setLoading(false)
+
+        const formattedData = res.map((item, index) => {
           const isKiloTon = selectedUnit != 'MT'
 
           return {
@@ -357,7 +370,7 @@ const ProductionNorms = ({ permissions }) => {
           setRows(finalData)
         }
         if (lowerVertName == 'meg') {
-          setRows(formattedData)
+          // setRows(formattedData)
         } else {
           setRows(finalData)
         }
@@ -377,7 +390,7 @@ const ProductionNorms = ({ permissions }) => {
         setLoading(false)
       }
 
-      return data
+      return res
     } catch (error) {
       console.error('Error saving refresh data:', error)
       setLoading(false)
@@ -395,6 +408,7 @@ const ProductionNorms = ({ permissions }) => {
           ...product,
           normParametersFKId: product.materialFKId,
           originalRemark: product.aopRemarks,
+          isEditable: false,
 
           ...(product.materialFKId !== undefined
             ? { materialFKId: undefined }

@@ -496,10 +496,11 @@ const WorkFlowMerge = () => {
           setCurrentRowId={setCurrentRowId}
           rowModesModel={rowModesModel}
           onRowModesModelChange={onRowModesModelChange}
+          handleCalculate={handleCalculate}
           permissions={{
             customHeight: defaultCustomHeight,
             // saveBtn: true,
-            // showCalculate: true,
+            showCalculate: true,
             // approveBtn: false,
           }}
         />
@@ -510,20 +511,8 @@ const WorkFlowMerge = () => {
           onClick={createCase}
           disabled={isCreatingCase || !showCreateCasebutton}
           className='btn-save'
-          sx={{
-            // backgroundColor: jioColors.primaryBlue,
-            // color: jioColors.background,
-
-            // borderRadius: 1,
-            // padding: '8px 24px',
-            // textTransform: 'none',
-            // fontSize: '0.875rem',
-            // fontWeight: 500,
-            width: '200px',
-            '&:hover': { backgroundColor: '#143B6F', boxShadow: 'none' },
-          }}
         >
-          {isCreatingCase ? 'Submitting…' : 'Submit for Approval'}
+          {isCreatingCase ? 'Submitting…' : 'Submit'}
         </Button>
       )}
 

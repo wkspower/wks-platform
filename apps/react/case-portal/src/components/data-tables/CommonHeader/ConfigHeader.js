@@ -220,12 +220,12 @@ const getEnhancedAOPColDefs = ({
 
     if (col.isGradeHeader === 'true') {
       const matchedGrade = allGradesReciepes?.find(
-        (item) => item.id.toLowerCase() === col.field.toLowerCase(),
+        (item) => item?.id?.toLowerCase() === col?.field?.toLowerCase(),
       )
 
       return {
         ...col,
-        headerName: matchedGrade?.displayName ?? col.headerName,
+        headerName: matchedGrade?.displayName ?? col?.headerName,
         renderEditCell: NumericInputOnly,
       }
     }

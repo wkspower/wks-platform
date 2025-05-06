@@ -54,13 +54,13 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 0px;
-  margin-bottom: 8px;
+  margin-bottom: 1px;
 }
 
 .action-inner {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 1px;
 }
 
 .unit-chip {

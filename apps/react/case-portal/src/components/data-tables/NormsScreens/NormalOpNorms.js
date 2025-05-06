@@ -526,8 +526,7 @@ const NormalOpNormsScreen = () => {
       )
 
       if (data == 0 || data) {
-        dispatch(setIsBlocked(true))
-
+        // dispatch(setIsBlocked(true))
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data refreshed successfully!',

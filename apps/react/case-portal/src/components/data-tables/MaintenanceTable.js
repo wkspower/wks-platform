@@ -46,6 +46,7 @@ const MaintenanceTable = () => {
           ...item,
           idFromApi: item.id,
           id: index,
+          isEditable: false,
         }))
       }
       setRows(formattedData)
@@ -194,6 +195,10 @@ const MaintenanceTable = () => {
       headerName: headerMap[3],
       align: 'left',
       headerAlign: 'left',
+    },
+    {
+      field: 'isEditable',
+      headerName: 'isEditable',
     },
   ]
 

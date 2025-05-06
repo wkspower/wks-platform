@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class CalculatedConsumptionNormsDTO extends MonthsDTO{
+public class CalculatedConsumptionNormsDTO {
 	
 	 private UUID id;
 	    private UUID siteFkId;
@@ -13,6 +13,18 @@ public class CalculatedConsumptionNormsDTO extends MonthsDTO{
 	    private String aopStatus;
 	    private String aopRemarks;
 	    private UUID materialFkId;
+	    private float jan;
+	    private float feb;
+	    private float march;
+	    private float april;
+	    private float may;
+	    private float june;
+	    private float july;
+	    private float aug;
+	    private float sep;
+	    private float oct;
+	    private float nov;
+	    private float dec;
 	    private String aopYear;
 	    private UUID plantFkId;
 	    private String normParameterTypeDisplayName;
@@ -63,73 +75,73 @@ public class CalculatedConsumptionNormsDTO extends MonthsDTO{
 		public void setMaterialFkId(UUID materialFkId) {
 			this.materialFkId = materialFkId;
 		}
-		public Float getJan() {
+		public float getJan() {
 			return jan;
 		}
-		public void setJan(Float jan) {
+		public void setJan(float jan) {
 			this.jan = jan;
 		}
-		public Float getFeb() {
+		public float getFeb() {
 			return feb;
 		}
 		public void setFeb(float feb) {
 			this.feb = feb;
 		}
-		public Float getMarch() {
+		public float getMarch() {
 			return march;
 		}
 		public void setMarch(float march) {
 			this.march = march;
 		}
-		public Float getApril() {
+		public float getApril() {
 			return april;
 		}
 		public void setApril(float april) {
 			this.april = april;
 		}
-		public Float getMay() {
+		public float getMay() {
 			return may;
 		}
 		public void setMay(float may) {
 			this.may = may;
 		}
-		public Float getJune() {
+		public float getJune() {
 			return june;
 		}
 		public void setJune(float june) {
 			this.june = june;
 		}
-		public Float getJuly() {
+		public float getJuly() {
 			return july;
 		}
 		public void setJuly(float july) {
 			this.july = july;
 		}
-		public Float getAug() {
+		public float getAug() {
 			return aug;
 		}
 		public void setAug(float aug) {
 			this.aug = aug;
 		}
-		public Float getSep() {
+		public float getSep() {
 			return sep;
 		}
 		public void setSep(float sep) {
 			this.sep = sep;
 		}
-		public Float getOct() {
+		public float getOct() {
 			return oct;
 		}
 		public void setOct(float oct) {
 			this.oct = oct;
 		}
-		public Float getNov() {
+		public float getNov() {
 			return nov;
 		}
 		public void setNov(float nov) {
 			this.nov = nov;
 		}
-		public Float getDec() {
+		public float getDec() {
 			return dec;
 		}
 		public void setDec(float dec) {

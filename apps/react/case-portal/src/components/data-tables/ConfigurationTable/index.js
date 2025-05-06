@@ -24,47 +24,85 @@ const ConfigurationTable = () => {
   const [gradeData, setGradeData] = useState([])
 
   const fetchData = async () => {
+    setRows([])
+    setProductionRows([])
+
     setLoading(true)
     try {
-      const data = await DataService.getCatalystSelectivityData(keycloak)
+      var data = await DataService.getCatalystSelectivityData(keycloak)
 
       if (lowerVertName === 'meg') {
-        const formattedData = data.map((item, index) => ({
-          ...item,
-          idFromApi: item.id,
-          id: index,
-          originalRemark: item.remarks,
-          srNo: index + 1,
+        setLoading(true)
 
-          // TypeName: index % 2 === 0 ? 'Production' : 'Consumption',
-        }))
+        data = data.sort((a, b) => b.normType.localeCompare(a.normType))
 
-        const productionData = formattedData
-          .filter((item) => item.normType === 'Production')
-          .map((item, index) => ({
+        const groupedRows = []
+        const groups = new Map()
+        let groupId = 0
+        // let formattedItem = []
+
+        data.forEach((item, index) => {
+          const formattedItem = {
             ...item,
-            srNo: index + 1, // Production srNo starts from 1
-          }))
-
-        const consumptionData = formattedData
-          .filter((item) => item.normType === 'Consumption')
-          .map((item, index) => ({
-            ...item,
-            srNo: index + 1, // Consumption srNo starts from 1
-          }))
-
-        const consumptionData2 = formattedData
-          .filter((item) => item.normType === 'Calculated Intermediate Values')
-          .map((item, index) => ({
-            ...item,
+            idFromApi: item.id,
+            id: groupId++,
+            originalRemark: item.remarks,
             srNo: index + 1,
-          }))
+          }
+
+          // if (lowerVertName !== 'pe') {
+          const groupKey = item.normType
+
+          if (!groups.has(groupKey)) {
+            groups.set(groupKey, [])
+            groupedRows.push({
+              id: groupId++,
+              Particulars: groupKey,
+              isGroupHeader: true,
+            })
+          }
+
+          groups.get(groupKey).push(formattedItem)
+          // }
+
+          groupedRows.push(formattedItem)
+          setProductionRows(groupedRows)
+          setRows(groupedRows) // Optional: if you still need all rows
+        })
+
+        // const formattedItem = data.map((item, index) => ({
+        //   ...item,
+        //   idFromApi: item.id,
+        //   id: index,
+        //   originalRemark: item.remarks,
+        // }))
+
+        // const productionData = formattedItem
+        //   .filter((item) => item.normType === 'Production')
+        //   .map((item, index) => ({
+        //     ...item,
+        //     srNo: index + 1, // Production srNo starts from 1
+        //   }))
+
+        // const consumptionData = formattedItem
+        //   .filter((item) => item.normType === 'Consumption')
+        //   .map((item, index) => ({
+        //     ...item,
+        //     srNo: index + 1, // Consumption srNo starts from 1
+        //   }))
+
+        // const consumptionData2 = formattedItem
+        //   .filter((item) => item.normType === 'Calculated Intermediate Values')
+        //   .map((item, index) => ({
+        //     ...item,
+        //     srNo: index + 1,
+        //   }))
 
         // setProductionRows(productionData)
-        setProductionRows(formattedData)
-        setConsumptionRows(consumptionData)
-        setConsumptionRows2(consumptionData2)
-        setRows(formattedData) // Optional: if you still need all rows
+        // setProductionRows(formattedItem)
+        // setConsumptionRows(consumptionData)
+        // setConsumptionRows2(consumptionData2)
+        // setRows(formattedItem) // Optional: if you still need all rows
       } else {
         const groups = new Map()
 

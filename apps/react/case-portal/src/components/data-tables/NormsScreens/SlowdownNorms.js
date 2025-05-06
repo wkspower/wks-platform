@@ -25,7 +25,9 @@ const SlowdownNorms = () => {
 
   const [slowdownMonths, setSlowdownMonths] = useState([])
   const { sitePlantChange, yearChanged, oldYear } = menu
+  //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
+
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
@@ -541,7 +543,7 @@ const SlowdownNorms = () => {
           businessData,
           keycloak,
         )
-        dispatch(setIsBlocked(true))
+        // dispatch(setIsBlocked(true))
 
         setSnackbarOpen(true)
         setSnackbarData({
@@ -725,7 +727,7 @@ const SlowdownNorms = () => {
         })
 
         setRows(groupedRows)
-        dispatch(setIsBlocked(true))
+        // dispatch(setIsBlocked(true))
         setLoading(false)
       } else {
         setSnackbarOpen(true)
@@ -767,6 +769,7 @@ const SlowdownNorms = () => {
       noColor: true,
     }
   }
+
   const adjustedPermissions = getAdjustedPermissions(
     {
       showAction: false,
@@ -782,6 +785,7 @@ const SlowdownNorms = () => {
     },
     isOldYear,
   )
+
   return (
     <div>
       <Backdrop
@@ -823,6 +827,7 @@ const SlowdownNorms = () => {
         handleRemarkCellClick={handleRemarkCellClick}
         handleCalculate={handleCalculate}
         permissions={adjustedPermissions}
+
         // permissions={{
         //   showAction: false,
         //   addButton: false,

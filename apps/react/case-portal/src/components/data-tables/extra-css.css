@@ -32,12 +32,20 @@
   cursor: not-allowed;
 }
 
+/* .action-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0px;
+  margin-bottom: 1px;
+} */
+
 .action-box {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 0px;
-  margin-bottom: 8px;
+  margin-bottom: 1px;
 }
 
 .action-inner {

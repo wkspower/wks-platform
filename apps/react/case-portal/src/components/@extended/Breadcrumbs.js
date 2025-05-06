@@ -324,12 +324,13 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                     textDecoration: 'none',
                     fontWeight: 800,
                     color: 'black',
-                    fontSize: '1rem',
+                    fontSize: '0.8rem',
                     display: 'flex',
                     alignItems: 'center',
                   }}
                 >
-                  {verticalName} / {siteName} / {plantName}
+                  {verticalName} / {siteName} / {plantName} |{' '}
+                  {getRoleName(verticalId, item?.id)}
                   {itemContent}
                 </Typography>
               </Grid>
@@ -339,7 +340,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                   <Chip
                     color='primary'
                     variant='outlined'
-                    label={getRoleName(verticalId, item?.id)}
+                    // label={getRoleName(verticalId, item?.id)}
                     className='role-name'
                     sx={{ border: 'none' }} // Remove the border
                   />

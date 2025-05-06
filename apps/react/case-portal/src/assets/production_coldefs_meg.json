@@ -116,5 +116,9 @@
     "headerName": "AVG",
     "minWidth": 150,
     "editable": false
+  },
+  {
+    "field": "isEditable",
+    "headerName": "isEditable"
   }
 ]

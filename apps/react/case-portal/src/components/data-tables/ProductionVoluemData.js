@@ -23,7 +23,9 @@ const ProductionvolumeData = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
+  //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
@@ -311,8 +313,14 @@ const ProductionvolumeData = ({ permissions }) => {
       // console.log(data)
       const formulatedData = normalizeAllRows(formattedData)
       // console.log(formulatedData)
-      setRows2(formulatedData)
-      setRows(formattedData)
+
+      const nonEditableRows = formulatedData.map((item) => ({
+        ...item,
+        isEditable: false,
+      }))
+
+      setRows2(nonEditableRows)
+      setRows(nonEditableRows)
       setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -336,7 +344,7 @@ const ProductionvolumeData = ({ permissions }) => {
     ]
 
     return grid?.map((row) => {
-      // 1. Find this row’s max month value
+      // 1. Find this row?s max month value
       const vals = monthKeys?.map((k) => Number(row[k]))
       const maxVal = Math.max(...vals)
 
@@ -430,7 +438,7 @@ const ProductionvolumeData = ({ permissions }) => {
       )
 
       if (data || data == 0) {
-        dispatch(setIsBlocked(true))
+        // dispatch(setIsBlocked(true))
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data refreshed successfully!',
@@ -472,6 +480,7 @@ const ProductionvolumeData = ({ permissions }) => {
       showCalculate: false,
     }
   }
+
   const adjustedPermissions = getAdjustedPermissions(
     {
       showAction: permissions?.showAction ?? false,
@@ -489,6 +498,7 @@ const ProductionvolumeData = ({ permissions }) => {
     },
     isOldYear,
   )
+
   return (
     <div>
       <Backdrop
