@@ -124,8 +124,8 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 			// Combine both into a result map
 			Map<String, Object> finalResult = new HashMap<>();
-			finalResult.put("typeOneData", typeOneDataList);
-			finalResult.put("typeSecondData", typeSecondDataList);
+			finalResult.put("firstTable", typeOneDataList);
+			finalResult.put("secondTable", typeSecondDataList);
 
 			// Set in response
 			aopMessageVM.setCode(200);
@@ -140,19 +140,18 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 	}
 
-	public List<Object[]> getMonthWiseProductionData(String plantId, String year, String type, String filter) {
+	public List<Object[]> getMonthWiseProductionData(String plantId, String aopYear, String reportType, String filter) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
-			String storedProcedure = verticalName + "_HMD_ProductionVolumeReport";
+			String storedProcedure = "MonthWiseProduction";
 			String sql = "EXEC " + storedProcedure
-					+ " @plantId = :plantId, @year = :year, @type = :type, @filter = :filter";
+					+ " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
 
 			Query query = entityManager.createNativeQuery(sql);
 
 			query.setParameter("plantId", plantId);
-			query.setParameter("year", year);
-			query.setParameter("type", type);
-			query.setParameter("filter", filter);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("reportType", reportType);
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
