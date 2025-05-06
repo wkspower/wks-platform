@@ -24,8 +24,8 @@ public class ProductionVolumeDataReportController {
 	}
 	
 	@GetMapping(value="/report/month-wise/production")
-	public ResponseEntity<AOPMessageVM> getReportForMonthWiseProductionData(@RequestParam String plantId,@RequestParam String year,@RequestParam(required = false) String typeOne,@RequestParam(required = false) String typeSecond,@RequestParam(required = false) String filter){
-		AOPMessageVM response	=productionVolumeDataReportService.getReportForMonthWiseProductionData(plantId,year,typeOne,typeSecond,filter);
+	public ResponseEntity<AOPMessageVM> getReportForMonthWiseProductionData(@RequestParam String plantId,@RequestParam String year){
+		AOPMessageVM response	=productionVolumeDataReportService.getReportForMonthWiseProductionData(plantId,year);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 }

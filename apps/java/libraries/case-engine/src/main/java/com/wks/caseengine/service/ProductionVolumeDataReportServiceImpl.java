@@ -73,14 +73,14 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	}
 
 	@Override
-	public AOPMessageVM getReportForMonthWiseProductionData(String plantId, String year, String typeOne,
-			String typeSecond, String filter) {
+	public AOPMessageVM getReportForMonthWiseProductionData(String plantId, String year
+			 ) {
 		try {
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			List<Map<String, Object>> typeOneDataList = new ArrayList<>();
 			List<Map<String, Object>> typeSecondDataList = new ArrayList<>();
 
-			List<Object[]> obj = getMonthWiseProductionData(plantId, year, typeOne, filter);
+			List<Object[]> obj = getMonthWiseProductionData(plantId, year);
 			for (Object[] row : obj) {
 				Map<String, Object> map = new HashMap<>();
 				map.put("sno", row[0]);
@@ -99,31 +99,11 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 				typeOneDataList.add(map);
 			}
 
-			List<Object[]> obj1 = getMonthWiseProductionData(plantId, year, typeSecond, filter);
-			for (Object[] row : obj1) {
-				Map<String, Object> map = new HashMap<>();
-				map.put("sno", row[0]);
-				map.put("material", row[1]);
-				map.put("april", row[2]);
-				map.put("may", row[3]);
-				map.put("june", row[4]);
-				map.put("july", row[5]);
-				map.put("august", row[6]);
-				map.put("september", row[7]);
-				map.put("october", row[8]);
-				map.put("november", row[9]);
-				map.put("december", row[10]);
-				map.put("january", row[11]);
-				map.put("february", row[12]);
-				map.put("march", row[13]);
-				map.put("total", row[14]);
-				typeSecondDataList.add(map);
-			}
+			
 
 			// Combine both into a result map
 			Map<String, Object> finalResult = new HashMap<>();
-			finalResult.put("firstTable", typeOneDataList);
-			finalResult.put("secondTable", typeSecondDataList);
+			finalResult.put("data", typeOneDataList);
 
 			// Set in response
 			aopMessageVM.setCode(200);
@@ -138,18 +118,18 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 	}
 
-	public List<Object[]> getMonthWiseProductionData(String plantId, String aopYear, String reportType, String filter) {
+	public List<Object[]> getMonthWiseProductionData(String plantId, String aopYear) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 			String storedProcedure = "MonthWiseProduction";
 			String sql = "EXEC " + storedProcedure
-					+ " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
+					+ " @plantId = :plantId, @aopYear = :aopYear";
 
 			Query query = entityManager.createNativeQuery(sql);
 
 			query.setParameter("plantId", plantId);
 			query.setParameter("aopYear", aopYear);
-			query.setParameter("reportType", reportType);
+			
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
