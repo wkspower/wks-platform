@@ -23,6 +23,12 @@ public class AOPReportController {
 		AOPMessageVM response	=aopReportService.getAnnualAOPReport(plantId,year,reportType,aopYearFilter);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
+	
+	@GetMapping(value="/report/production-volume-aop")
+	public ResponseEntity<AOPMessageVM> getReportForProductionVolumnData(@RequestParam String plantId,@RequestParam String year,@RequestParam String reportType){
+		AOPMessageVM response	=aopReportService.getReportForProductionVolumnData(plantId,year,reportType);
+		return ResponseEntity.status(response.getCode()).body(response);
+	}
 
 
 }

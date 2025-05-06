@@ -22,6 +22,7 @@ import com.wks.caseengine.dto.AOPReportDTO;
 import com.wks.caseengine.dto.WorkflowYearDTO;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.PlantsRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -35,6 +36,9 @@ public class AOPReportServiceImpl implements AOPReportService{
 	
 	 @Autowired
 	 private DataSource dataSource;
+	 
+	 @Autowired
+	 private PlantsRepository plantsRepository;
 
 	 @Override
 	 public AOPMessageVM getAnnualAOPReport(String plantId, String year, String reportType, String AopYearFilter) {
@@ -193,7 +197,111 @@ public class AOPReportServiceImpl implements AOPReportService{
 	        throw new RuntimeException("Failed to fetch data", ex);
 	    }
 	}
+	
+	public List<Object[]> getProductionVolumnDataReport(String plantId, String aopYear, String reportType,String verticalName) {
+	    try {
+	    	
+	        String procedureName = verticalName+"_HMD_ProductionVolumnDataReport";
+	        String sql = "EXEC " + procedureName +
+	                     " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
 
+	        Query query = entityManager.createNativeQuery(sql);
 
+	        query.setParameter("plantId", plantId);
+	        query.setParameter("aopYear", aopYear);
+	        query.setParameter("reportType", reportType);
+
+	        return query.getResultList();
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid UUID format ", e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
+	}
+
+	
+	@Override
+	public AOPMessageVM getReportForProductionVolumnData(String plantId, String year, String reportType) {
+		 AOPMessageVM aopMessageVM = new AOPMessageVM();
+		 List<Map<String, Object>> productionVolumnDataReportList = new ArrayList<>();
+		 try {
+			 String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			 
+	         List<Object[]> results = getProductionVolumnDataReport(plantId, year, reportType,verticalName);
+	         List<String> headers = null;
+	         List<String> keys = null;
+
+	         for (Object[] row : results) {
+	             Map<String, Object> map = new HashMap<>(); // Create a new map for each row
+	             if (reportType.equalsIgnoreCase("RowData")) {
+	                 map.put("material", row[0]);
+	                 map.put("actualQty", row[1]);
+	                 map.put("dateTime", row[2]);
+	                 productionVolumnDataReportList.add(map); // Add the map to the list here
+	             }
+	             else if(reportType.equalsIgnoreCase("Calculated Data")) {
+	            	 map.put("id", row[0]);
+	                 map.put("site", row[1]);
+	                 map.put("plant", row[2]);
+	                 map.put("material", row[3]);
+	                 map.put("financialYear", row[4]);
+	                 map.put("monthDisplayName", row[5]);
+	                 map.put("avgValue", row[6]);
+	                 map.put("maxValue", row[7]);
+	                 map.put("minValue", row[8]);
+	                 map.put("startDate", row[9]);
+	                 map.put("endDate", row[10]);
+	                 productionVolumnDataReportList.add(map); // Add the map to the list here
+	             }else if(reportType.equalsIgnoreCase("MC Yearwise")) {
+	            	 map.put("site", row[0]);
+	                 map.put("plant", row[1]);
+	                 map.put("material", row[2]);
+	                 map.put("financialYear", row[3]);
+	                 map.put("april", row[4]);
+	                 map.put("may", row[5]);
+	                 map.put("june", row[6]);
+	                 map.put("july", row[7]);
+	                 map.put("august", row[8]);
+	                 map.put("september", row[9]);
+	                 map.put("october", row[10]);
+	                 map.put("november", row[11]);
+	                 map.put("december", row[12]);
+	                 map.put("january", row[13]);
+	                 map.put("february", row[14]);
+	                 map.put("march", row[15]);
+	                 productionVolumnDataReportList.add(map); // Add the map to the list here
+	             }else if(reportType.equalsIgnoreCase("MC")) {
+	            	 map.put("site", row[0]);
+	                 map.put("plant", row[1]);
+	                 map.put("material", row[2]);
+	                 map.put("april", row[3]);
+	                 map.put("may", row[4]);
+	                 map.put("june", row[5]);
+	                 map.put("july", row[6]);
+	                 map.put("august", row[7]);
+	                 map.put("september", row[8]);
+	                 map.put("october", row[9]);
+	                 map.put("november", row[10]);
+	                 map.put("december", row[11]);
+	                 map.put("january", row[12]);
+	                 map.put("february", row[13]);
+	                 map.put("march", row[14]);
+	                 productionVolumnDataReportList.add(map); // Add the map to the list here
+	             }
+	         }
+	         aopMessageVM.setCode(200);
+	         aopMessageVM.setMessage("Data fetched successfully");
+	         aopMessageVM.setData(productionVolumnDataReportList);
+	         return aopMessageVM;
+
+	     } catch (IllegalArgumentException e) {
+	         throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+	     } catch (Exception ex) {
+	         throw new RuntimeException("Failed to fetch data", ex);
+	     }
+
+		// TODO Auto-generated method stub
+		
+	}
 
 }
