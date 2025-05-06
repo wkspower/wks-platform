@@ -18,8 +18,8 @@ public class ProductionVolumeDataReportController {
 	private ProductionVolumeDataReportService productionVolumeDataReportService;
 	
 	@GetMapping(value="/report/production-summary")
-	public ResponseEntity<AOPMessageVM> getReportForProductionVolumnData(@RequestParam String plantId,@RequestParam String year,@RequestParam(required = false) String type,@RequestParam(required = false) String filter){
-		AOPMessageVM response	=productionVolumeDataReportService.getReportForProductionVolumnData(plantId,year,type,filter);
+	public ResponseEntity<AOPMessageVM> getReportForProductionVolumnData(@RequestParam String plantId,@RequestParam String year){
+		AOPMessageVM response	=productionVolumeDataReportService.getReportForProductionVolumnData(plantId,year);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 	

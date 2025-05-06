@@ -26,10 +26,10 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	private PlantsRepository plantsRepository;
 
 	@Override
-	public AOPMessageVM getReportForProductionVolumnData(String plantId, String year, String type, String filter) {
+	public AOPMessageVM getReportForProductionVolumnData(String plantId, String year) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<Map<String, Object>> productionVolumeReportList = new ArrayList<>();
-		List<Object[]> obj = getProductionVolumnDataReport(plantId, year, type, filter);
+		List<Object[]> obj = getProductionVolumnDataReport(plantId, year);
 
 		for (Object[] row : obj) {
 			Map<String, Object> map = new HashMap<>();
@@ -52,19 +52,17 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		return aopMessageVM;
 	}
 
-	public List<Object[]> getProductionVolumnDataReport(String plantId, String year, String type, String filter) {
+	public List<Object[]> getProductionVolumnDataReport(String plantId, String year) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 			String storedProcedure = verticalName + "_HMD_ProductionVolumeReport";
 			String sql = "EXEC " + storedProcedure
-					+ " @plantId = :plantId, @year = :year, @type = :type, @filter = :filter";
+					+ " @plantId = :plantId, @year = :year";
 
 			Query query = entityManager.createNativeQuery(sql);
 
 			query.setParameter("plantId", plantId);
 			query.setParameter("year", year);
-			query.setParameter("type", type);
-			query.setParameter("filter", filter);
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
