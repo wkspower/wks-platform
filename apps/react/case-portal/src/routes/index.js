@@ -7,6 +7,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
+import { usePlanMenu } from 'menu/new-plan'
 
 export const ThemeRoutes = ({
   keycloak,
@@ -17,6 +18,7 @@ export const ThemeRoutes = ({
   // Get the isBlocked flag from Redux
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { isBlocked } = dataGridStore
+  const { menuGroup } = usePlanMenu()
 
   const location = useLocation()
   const navigate = useNavigate()
@@ -82,7 +84,13 @@ export const ThemeRoutes = ({
       </Dialog>
 
       {useRoutes([
-        MainRoutes(keycloak, authenticated, recordsTypes, casesDefinitions),
+        MainRoutes(
+          keycloak,
+          authenticated,
+          recordsTypes,
+          casesDefinitions,
+          menuGroup,
+        ),
       ])}
     </>
   )

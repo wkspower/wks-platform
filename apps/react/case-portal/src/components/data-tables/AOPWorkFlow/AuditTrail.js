@@ -16,26 +16,7 @@ import {
   Tooltip,
   Typography,
 } from '../../../../node_modules/@mui/material/index'
-//     username: 'user1',
-//     // firstName: 'Pavan',
-//     // lastName: 'Pophale',
-//     role: 'Head',
-//     status: ['Submit Plan AOP'],
-//     dateTime: ['09/04/2025'],
-//     comments: ['Remark1'],
-//   },
-//   {
-//     id: 2,
-//     username: 'user2',
-//     // firstName: 'John',
-//     // lastName: 'Doe',
-//     role: 'Head',
-//     status: 'Validate Plan AOP',
-//     dateTime: ['10/04/2025'],
-//     comments: ['Remark2'],
-//   },
-// ]
-
+import moment from 'moment'
 const AuditTrail = ({ keycloak, businessKey }) => {
   // const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
@@ -44,26 +25,25 @@ const AuditTrail = ({ keycloak, businessKey }) => {
   const [currentRemark, setCurrentRemark] = useState('')
   // const [currentRowId, setCurrentRowId] = useState(null)
   const openRemarkPopup = (text) => {
-    // console.log(row, newRow)
     setCurrentRemark(text || '')
     setRemarkDialogOpen(true)
   }
-  // const [columns, setColumns] = useState([])
-    // Navigate to our dedicated form screen.
-    //   state: row,
-    // })
 
   const columns = [
     { field: 'userName', headerName: 'Username', width: 150 },
-    //   {
-    //     field: 'firstName',
-    //     headerName: 'First Name',
-    //     width: 150,
-    //   },
-    //   { field: 'lastName', headerName: 'Last Name', width: 150 },
     { field: 'role', headerName: 'User Role', width: 150 },
     { field: 'status', headerName: 'Status', width: 150 },
-    { field: 'createdAt', headerName: 'Date And Time', width: 150 },
+    {
+      field: 'createdAt',
+      headerName: 'Date And Time',
+      width: 180,
+      valueFormatter: (params) => {
+        // assume backend sends ISO or UTC string
+        const utc = moment.utc(params.value)
+        const local = utc.local() // convert to user’s local timezone
+        return local.format('LL, h:mm:ss A') // or whatever format you like
+      },
+    },
     {
       field: 'body',
       headerName: 'Remark',
@@ -88,7 +68,6 @@ const AuditTrail = ({ keycloak, businessKey }) => {
         )
       },
     },
-    // { field: 'body', headerName: 'Remark', width: 150 },
   ]
   const handleAddPlantSite = () => {
     // navigate('/user-form', {

@@ -2,11 +2,16 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import NavGroup from './NavGroup'
 import { useMenu } from 'SessionStoreContext'
+import useMenuItems from 'menu/index'
+// import { usePlanMenu } from 'menu/new-plan'
 // import useMenuItems from 'menu/index'
 // import LogoBottom from 'components/Logo/LogoBottom'
 
 const Navigation = () => {
-  const menu = useMenu()
+  // const menu = useMenu()
+  const { items: menuItems } = useMenuItems()
+  const menu = { items: [...menuItems] }
+
   // const { items: menuItems } = useMenuItems()
   // const menu = { items: [...menuItems] }
   // console.log(menu)

@@ -14,6 +14,7 @@ const ReportDataGrid = ({
   getTreeDataPath,
   defaultGroupingExpansionDepth,
   columnGroupingModel,
+  permissions,
   // loading
 }) => {
   const keycloak = useSession()
@@ -29,11 +30,10 @@ const ReportDataGrid = ({
   useEffect(() => {
     // fetchData1()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
-
   return (
     <Box
       sx={{
-        height: height || '240px',
+        height: height || permissions?.customHeight?.mainBox || '240px',
         width: '100%',
         padding: '0px 0px',
         margin: '0px 0px 0px',
@@ -94,11 +94,11 @@ const ReportDataGrid = ({
           },
           '& .MuiDataGrid-columnHeaderTitleContainer': {
             borderTop: '1px solid rgba(224,224,224,1)',
-            justifyContent: 'center',
+            justifyContent: `${permissions?.textAlignment}` || 'left',
           },
           '& .MuiDataGrid-columnHeader, .MuiDataGrid-columnGroupHeader': {
-            justifyContent: 'center',
-            textAlign: 'center',
+            justifyContent: `${permissions?.textAlignment}` || 'left',
+            textAlign: `${permissions?.textAlignment}` || 'left',
             padding: '0 8px',
           },
           '& .MuiDataGrid-columnHeader:before, .MuiDataGrid-columnGroupHeader:before':

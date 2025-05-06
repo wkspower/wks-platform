@@ -53,6 +53,7 @@ const defs = {
     reliability: 'Reliability', // New addition
     reports: 'Reports', // New addition
     annualAopCostReport: 'Annual AOP Basis', // New addition
+    productionVolumeDataBasis: 'Production Volume Basis', // New addition
     plantsProduction: 'Plants Production Summary', // New addition
     monthwise: 'Monthwise Production Plan',
     previousFYAOPResult: 'Previous FY AOP Result', // New addition
@@ -212,6 +213,7 @@ const defs = {
         reliability: 'Reliability', // New addition
         reports: 'Reports', // New addition
         annualAopCostReport: 'Annual AOP Basis', // New addition
+        productionVolumeDataBasis: 'Production Volume Basis', // New addition
         plantsProduction: 'Plants Production Summary',
         monthwise: 'Monthwise Production Plan',
         previousFYAOPResult: 'Previous FY AOP Result', // New addition

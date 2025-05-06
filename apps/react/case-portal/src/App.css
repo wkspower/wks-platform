@@ -16,6 +16,7 @@ header {
   background-color: #0100cb; /* Example: Light gray background */
   /* color: white; */
 }
+
 .css-5zfvd5-MuiButtonBase-root-MuiListItemButton-root:hover {
   background-color: #0100cb; /* Example: Light gray background */
   color: white !important;
@@ -84,21 +85,18 @@ header {
 .css-1imnto4-MuiPaper-root-MuiCard-root {
   margin-bottom: 0px;
 }
-
 :root {
   --jio-border: #dae0ef;
   --jio-background: #ffffff;
   --jio-row-odd: #f9f9f9;
   --jio-row-even: #ffffff;
 }
-
 .custom-title-font {
   font-family: 'Roboto', sans-serif !important;
   font-weight: bold;
   white-space: nowrap;
   font-size: 1rem;
 }
-
 .custom-title-dropdown {
   font-family: 'Roboto', sans-serif !important;
   font-weight: bold;
@@ -110,7 +108,6 @@ header {
   white-space: nowrap;
   color: white;
 }
-
 .role-name {
   /* font-weight: 800; */
   font-family: 'Roboto', sans-serif !important;
@@ -118,7 +115,6 @@ header {
   text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.1);
   margin: 12px;
 }
-
 .grid-title {
   /* font-weight: 800; */
   font-family: 'Roboto', sans-serif !important;
@@ -126,4 +122,8 @@ header {
   margin-left: 5px;
   /* margin-top: 25px; */
   text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.1);
+}
+
+.MuiSelect-icon {
+  color: 'white';
 }

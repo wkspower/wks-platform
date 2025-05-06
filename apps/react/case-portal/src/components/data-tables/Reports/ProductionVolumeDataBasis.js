@@ -47,7 +47,7 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
   backgroundColor: '#F2F3F8',
 }))
 
-const AnnualAopCost = () => {
+const ProductionVolumeDataBasis = () => {
   const keycloak = useSession()
   const [rowsProduction, setRowsProduction] = useState([])
   const [rowsPrice, setRowsPrice] = useState([])
@@ -63,7 +63,7 @@ const AnnualAopCost = () => {
     dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-
+  const [expandedPanel, setExpandedPanel] = useState('panel1')
   const [unit, setUnit] = useState([])
   const [selectedUnit, setSelectedUnit] = useState('')
   const [loading, setLoading] = useState(false)
@@ -186,6 +186,9 @@ const AnnualAopCost = () => {
     keycloak,
     lowerVertName,
   ])
+  const handleChange = (panel) => (event, isExpanded) => {
+    setExpandedPanel(isExpanded ? panel : false)
+  }
 
   return (
     <div>
@@ -223,13 +226,18 @@ const AnnualAopCost = () => {
         </Box>
 
         <div>
-          <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordion
+            expanded={expandedPanel === 'panel1'} // ← controlled prop
+            onChange={handleChange('panel1')}
+            disableGutters
+          >
             <CustomAccordionSummary
               aria-controls='meg-grid-content'
               id='meg-grid-header'
+              expandIcon={<ExpandMoreIcon />}
             >
               <Typography component='span' className='grid-title'>
-                Production
+                MC
               </Typography>
             </CustomAccordionSummary>
             <CustomAccordionDetails>
@@ -244,13 +252,18 @@ const AnnualAopCost = () => {
           </CustomAccordion>
         </div>
         <div>
-          <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordion
+            expanded={expandedPanel === 'panel2'} // ← controlled prop
+            onChange={handleChange('panel2')}
+            disableGutters
+          >
             <CustomAccordionSummary
               aria-controls='meg-grid-content'
               id='meg-grid-header'
+              expandIcon={<ExpandMoreIcon />}
             >
               <Typography component='span' className='grid-title'>
-                Price
+                MC Yearwise
               </Typography>
             </CustomAccordionSummary>
             <CustomAccordionDetails>
@@ -265,13 +278,18 @@ const AnnualAopCost = () => {
           </CustomAccordion>
         </div>
         <div>
-          <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordion
+            expanded={expandedPanel === 'panel3'} // ← controlled prop
+            onChange={handleChange('panel3')}
+            disableGutters
+          >
             <CustomAccordionSummary
               aria-controls='meg-grid-content'
               id='meg-grid-header'
+              expandIcon={<ExpandMoreIcon />}
             >
               <Typography component='span' className='grid-title'>
-                Norm
+                Calculated Data
               </Typography>
             </CustomAccordionSummary>
             <CustomAccordionDetails>
@@ -286,13 +304,18 @@ const AnnualAopCost = () => {
           </CustomAccordion>
         </div>
         <div>
-          <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordion
+            expanded={expandedPanel === 'panel4'} // ← controlled prop
+            onChange={handleChange('panel4')}
+            disableGutters
+          >
             <CustomAccordionSummary
               aria-controls='meg-grid-content'
               id='meg-grid-header'
+              expandIcon={<ExpandMoreIcon />}
             >
               <Typography component='span' className='grid-title'>
-                Quantity (EOE Production * Individual Particluars Norms Value)
+                Row Data
               </Typography>
             </CustomAccordionSummary>
             <CustomAccordionDetails>
@@ -306,7 +329,7 @@ const AnnualAopCost = () => {
             </CustomAccordionDetails>
           </CustomAccordion>
         </div>
-        <div>
+        {/* <div>
           <CustomAccordion defaultExpanded disableGutters>
             <CustomAccordionSummary
               aria-controls='meg-grid-content'
@@ -326,10 +349,10 @@ const AnnualAopCost = () => {
               </Box>
             </CustomAccordionDetails>
           </CustomAccordion>
-        </div>
+        </div> */}
       </Box>
     </div>
   )
 }
 
-export default AnnualAopCost
+export default ProductionVolumeDataBasis
