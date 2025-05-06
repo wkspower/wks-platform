@@ -8,9 +8,9 @@ import useMenuItems from 'menu/index'
 // import LogoBottom from 'components/Logo/LogoBottom'
 
 const Navigation = () => {
-  // const menu = useMenu()
-  const { items: menuItems } = useMenuItems()
-  const menu = { items: [...menuItems] }
+  const menu = useMenu()
+  // const { items: menuItems } = useMenuItems()
+  // const menu = { items: [...menuItems] }
 
   // const { items: menuItems } = useMenuItems()
   // const menu = { items: [...menuItems] }

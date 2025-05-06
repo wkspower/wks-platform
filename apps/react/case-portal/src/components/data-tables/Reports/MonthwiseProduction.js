@@ -13,6 +13,14 @@ import { useSession } from 'SessionStoreContext'
 
 const MonthwiseProduction = () => {
   const keycloak = useSession()
+
+  const thisYear = localStorage.getItem('year')
+
+  let oldYear = ''
+  if (thisYear && thisYear.includes('-')) {
+    const [start, end] = thisYear.split('-').map(Number)
+    oldYear = `${start - 1}-${(end - 1).toString().slice(-2)}`
+  }
   const columns = [
     {
       field: 'sno',
@@ -126,7 +134,7 @@ const MonthwiseProduction = () => {
   const columnGroupingModel = [
     {
       groupId: 'currentYear',
-      headerName: 'Current Year',
+      headerName: oldYear,
       children: [
         {
           groupId: 'cy-eoe',
@@ -156,7 +164,7 @@ const MonthwiseProduction = () => {
     },
     {
       groupId: 'budgetYear',
-      headerName: 'Budget Year',
+      headerName: thisYear,
       children: [
         { field: 'operatingHours' }, // was opBudgetBY
         { field: 'megThroughput' }, // was megTPH
@@ -167,7 +175,7 @@ const MonthwiseProduction = () => {
     },
   ]
 
-  const defaultCustomHeight = { mainBox: '38vh', otherBox: '90%' }
+  const defaultCustomHeight = { mainBox: '38vh', otherBox: '130%' }
 
   //api call
   const [row, setRow] = useState()

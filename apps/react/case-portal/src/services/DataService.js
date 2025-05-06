@@ -786,7 +786,7 @@ async function getPlantProductionSummary(
 ) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/report/production-summary?plantId=${plantId}&year=${year}&type=${reportType}&filter=${aopYearFilter1}`
+const url = `${Config.CaseEngineUrl}/task/report/production-summary?plantId=${plantId}&year=${year}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

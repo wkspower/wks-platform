@@ -19,6 +19,8 @@ import {
   DialogContent,
   DialogTitle,
   Stack,
+  Tab,
+  Tabs,
   TextField,
 } from '../../../../node_modules/@mui/material/index'
 import AuditTrail from './AuditTrail'
@@ -34,6 +36,8 @@ import './jio-grid-style.css'
 // import { useScreens } from 'menu/userscreen'
 // import { Box } from '../../../../node_modules/@mui/material/index'
 import ProductionAopView from 'components/data-tables-views/DataTable-production-aop'
+import PlantsProductionSummary from '../Reports/PlantsProductionData'
+import MonthwiseProduction from '../Reports/MonthwiseProduction'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -419,159 +423,239 @@ const WorkFlowMerge = () => {
       setText('')
     }
   }
-  const defaultCustomHeight = { mainBox: '43vh', otherBox: '129%' }
+  const defaultCustomHeight = { mainBox: '43vh', otherBox: '118%' }
+  const [tabIndex, setTabIndex] = useState(0)
 
   return (
-    <Box>
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {masterSteps?.map((step) => (
-          <Step key={step.displayName} completed={step.status === 'completed'}>
-            <StepLabel error={step.status === 'error'}>
-              {step.displayName}
-            </StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-      <Stack
-        direction='row'
-        spacing={1}
-        justifyContent='flex-end'
-        sx={{ mt: 2, mb: 1 }}
-      >
-        {taskId && (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '5px',
+        marginTop: '20px',
+      }}
+    >
+      <Box>
+        <Stepper activeStep={activeStep} alternativeLabel>
+          {masterSteps?.map((step) => (
+            <Step
+              key={step.displayName}
+              completed={step.status === 'completed'}
+            >
+              <StepLabel error={step.status === 'error'}>
+                {step.displayName}
+              </StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+        <Stack
+          direction='row'
+          spacing={1}
+          justifyContent='flex-end'
+          sx={{ mt: 2, mb: 1 }}
+        >
+          {taskId && (
+            <Button
+              variant='contained'
+              className='btn-save'
+              onClick={handleRejectClick}
+              disabled={actionDisabled}
+            >
+              Accept
+            </Button>
+          )}
           <Button
-            variant='contained'
-            className='btn-save'
-            onClick={handleRejectClick}
-            disabled={actionDisabled}
-          >
-            Accept
-          </Button>
-        )}
-        <Button
-          variant='outlined'
-          className='btn-save2'
-          sx={{ color: '#0100cb', border: '1px solid ' }}
-          onClick={handleAuditOpen}
-          // disabled={actionDisabled}
-        >
-          Audit Trail
-        </Button>
-      </Stack>
-      <div>
-        <CustomAccordion defaultExpanded disableGutters>
-          <CustomAccordionSummary
-            aria-controls='meg-grid-content'
-            id='meg-grid-header'
-          >
-            <Typography component='span' className='grid-title'>
-              Production Data
-            </Typography>
-          </CustomAccordionSummary>
-          <CustomAccordionDetails>
-            <Box>
-              <ProductionAopView />
-            </Box>
-          </CustomAccordionDetails>
-        </CustomAccordion>
-      </div>
-      <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
-        Annual AOP Cost
-      </Typography>
-      <div style={{ minHeight: 'fit-content', maxHeight: 'max-content' }}>
-        <DataGridTable
-          rows={rows}
-          setRows={setRows}
-          onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-          columns={columns}
-          className='jio-data-grid'
-          loading={loading}
-          processRowUpdate={processRowUpdate}
-          remarkDialogOpen={remarkDialogOpen}
-          unsavedChangesRef={unsavedChangesRef}
-          setRemarkDialogOpen={setRemarkDialogOpen}
-          currentRemark={currentRemark}
-          setCurrentRemark={setCurrentRemark}
-          currentRowId={currentRowId}
-          setCurrentRowId={setCurrentRowId}
-          rowModesModel={rowModesModel}
-          onRowModesModelChange={onRowModesModelChange}
-          handleCalculate={handleCalculate}
-          permissions={{
-            customHeight: defaultCustomHeight,
-            // saveBtn: true,
-            showCalculate: true,
-            // approveBtn: false,
-          }}
-        />
-      </div>
-      {showCreateCasebutton && (
-        <Button
-          variant='contained'
-          onClick={createCase}
-          disabled={isCreatingCase || !showCreateCasebutton}
-          className='btn-save'
-        >
-          {isCreatingCase ? 'Submitting…' : 'Submit'}
-        </Button>
-      )}
-
-      {/* Reject Dialog (Comments) */}
-      <Dialog open={openRejectDialog} onClose={handleRejectCancel}>
-        <DialogTitle>Please provide remarks on the changes?</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin='dense'
-            label='Remark'
-            type='text'
-            fullWidth
-            multiline
-            rows={8}
-            sx={{ width: '100%', minWidth: '600px' }}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
             variant='outlined'
-          />
-        </DialogContent>
-        <DialogActions sx={{ justifyContent: 'flex-end' }}>
-          <Button onClick={handleRejectCancel} color='primary'>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            color='primary'
-            variant='contained'
-            disabled={!text?.trim()}
+            className='btn-save2'
+            sx={{ color: '#0100cb', border: '1px solid ' }}
+            onClick={handleAuditOpen}
+            // disabled={actionDisabled}
           >
-            Submit
+            Audit Trail
           </Button>
-        </DialogActions>
-      </Dialog>
+        </Stack>
 
-      {/* Audit Trail Dialog */}
-      <Dialog
-        open={openAuditPopup}
-        onClose={handleAuditClose}
-        maxWidth='lg'
-        fullWidth
-      >
-        <DialogTitle>Audit Trail</DialogTitle>
-        <DialogContent dividers>
-          <AuditTrail keycloak={keycloak} businessKey={businessKey} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleAuditClose}>Close</Button>
-        </DialogActions>
-      </Dialog>
+        <Tabs
+          value={tabIndex}
+          onChange={(event, newIndex) => setTabIndex(newIndex)}
+          sx={{
+            borderBottom: '0px solid #ccc',
+            '.MuiTabs-indicator': { display: 'none' },
+            margin: '-35px 0px 0px 0%',
+          }}
+          textColor='primary'
+          indicatorColor='primary'
+        >
+          <Tab
+            label='AOP Cost'
+            sx={{
+              border: tabIndex === 0 ? '1px solid ' : 'none',
+              borderBottom: '1px solid',
+            }}
+          />
+          <Tab
+            label='Plant Production Summary'
+            sx={{
+              border: tabIndex === 1 ? '1px solid ' : 'none',
+              borderBottom: '1px solid',
+            }}
+          />
+          <Tab
+            label='Month Wise Production Plan'
+            sx={{
+              border: tabIndex === 2 ? '1px solid ' : 'none',
+              borderBottom: '1px solid',
+            }}
+          />
+          {/* <Tab
+              label='Other Losses'
+              sx={{
+                border: tabIndex === 1 ? '1px solid ' : 'none',
+                borderBottom: '1px solid',
+              }}
+            />
+            <Tab
+              label='Constants'
+              sx={{
+                border: tabIndex === 2 ? '1px solid ' : 'none',
+                borderBottom: '1px solid',
+              }}
+            />
+            <Tab
+              label='Receipes'
+              sx={{
+                border: tabIndex === 3 ? '1px solid ' : 'none',
+                borderBottom: '1px solid',
+              }}
+            /> */}
+        </Tabs>
 
-      <Notification
-        open={snackbarOpen}
-        message={snackbarData.message}
-        severity={snackbarData.severity}
-        onClose={() => setSnackbarOpen(false)}
-      />
-    </Box>
+        {tabIndex === 0 && (
+          <div>
+            <div>
+              <CustomAccordion defaultExpanded disableGutters>
+                <CustomAccordionSummary
+                  aria-controls='meg-grid-content'
+                  id='meg-grid-header'
+                >
+                  <Typography component='span' className='grid-title'>
+                    Production Data
+                  </Typography>
+                </CustomAccordionSummary>
+                <CustomAccordionDetails>
+                  <Box>
+                    <ProductionAopView />
+                  </Box>
+                </CustomAccordionDetails>
+              </CustomAccordion>
+            </div>
+            <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
+              Annual AOP Cost
+            </Typography>
+            <div style={{ minHeight: 'fit-content', maxHeight: 'max-content' }}>
+              <DataGridTable
+                rows={rows}
+                setRows={setRows}
+                onRowUpdate={(updatedRow) =>
+                  console.log('Row Updated:', updatedRow)
+                }
+                columns={columns}
+                className='jio-data-grid'
+                loading={loading}
+                processRowUpdate={processRowUpdate}
+                remarkDialogOpen={remarkDialogOpen}
+                unsavedChangesRef={unsavedChangesRef}
+                setRemarkDialogOpen={setRemarkDialogOpen}
+                currentRemark={currentRemark}
+                setCurrentRemark={setCurrentRemark}
+                currentRowId={currentRowId}
+                setCurrentRowId={setCurrentRowId}
+                rowModesModel={rowModesModel}
+                onRowModesModelChange={onRowModesModelChange}
+                handleCalculate={handleCalculate}
+                permissions={{
+                  customHeight: defaultCustomHeight,
+                  // saveBtn: true,
+                  showCalculate: true,
+                  // approveBtn: false,
+                }}
+              />
+            </div>
+
+            {showCreateCasebutton && (
+              <Button
+                variant='contained'
+                onClick={createCase}
+                disabled={isCreatingCase || !showCreateCasebutton}
+                className='btn-save'
+              >
+                {isCreatingCase ? 'Submitting…' : 'Submit'}
+              </Button>
+            )}
+
+            {/* Reject Dialog (Comments) */}
+            <Dialog open={openRejectDialog} onClose={handleRejectCancel}>
+              <DialogTitle>Please provide remarks on the changes?</DialogTitle>
+              <DialogContent>
+                <TextField
+                  autoFocus
+                  margin='dense'
+                  label='Remark'
+                  type='text'
+                  fullWidth
+                  multiline
+                  rows={8}
+                  sx={{ width: '100%', minWidth: '600px' }}
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  variant='outlined'
+                />
+              </DialogContent>
+              <DialogActions sx={{ justifyContent: 'flex-end' }}>
+                <Button onClick={handleRejectCancel} color='primary'>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSubmit}
+                  color='primary'
+                  variant='contained'
+                  disabled={!text?.trim()}
+                >
+                  Submit
+                </Button>
+              </DialogActions>
+            </Dialog>
+
+            {/* Audit Trail Dialog */}
+            <Dialog
+              open={openAuditPopup}
+              onClose={handleAuditClose}
+              maxWidth='lg'
+              fullWidth
+            >
+              <DialogTitle>Audit Trail</DialogTitle>
+              <DialogContent dividers>
+                <AuditTrail keycloak={keycloak} businessKey={businessKey} />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleAuditClose}>Close</Button>
+              </DialogActions>
+            </Dialog>
+
+            <Notification
+              open={snackbarOpen}
+              message={snackbarData.message}
+              severity={snackbarData.severity}
+              onClose={() => setSnackbarOpen(false)}
+            />
+          </div>
+        )}
+
+        {tabIndex === 1 && <PlantsProductionSummary />}
+
+        {tabIndex === 2 && <MonthwiseProduction />}
+      </Box>
+    </div>
   )
 }
 

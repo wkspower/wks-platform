@@ -52,8 +52,8 @@ const defs = {
     functions: 'Functions', // New addition
     reliability: 'Reliability', // New addition
     reports: 'Reports', // New addition
-    annualAopCostReport: 'Annual AOP Basis', // New addition
-    productionVolumeDataBasis: 'Production Volume Basis', // New addition
+    annualAopCostReport: 'Annual AOP Cost Basis', // New addition
+    productionVolumeDataBasis: 'Production Volume Data Basis', // New addition
     plantsProduction: 'Plants Production Summary', // New addition
     monthwise: 'Monthwise Production Plan',
     previousFYAOPResult: 'Previous FY AOP Result', // New addition
@@ -212,8 +212,8 @@ const defs = {
         safety: 'Safety', // New addition
         reliability: 'Reliability', // New addition
         reports: 'Reports', // New addition
-        annualAopCostReport: 'Annual AOP Basis', // New addition
-        productionVolumeDataBasis: 'Production Volume Basis', // New addition
+        annualAopCostReport: 'Annual AOP Cost Basis', // New addition
+        productionVolumeDataBasis: 'Production Volume Data Basis', // New addition
         plantsProduction: 'Plants Production Summary',
         monthwise: 'Monthwise Production Plan',
         previousFYAOPResult: 'Previous FY AOP Result', // New addition

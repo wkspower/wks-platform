@@ -55,7 +55,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	public List<Object[]> getProductionVolumnDataReport(String plantId, String year) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
-			String storedProcedure = verticalName + "_HMD_ProductionVolumeReport";
+			String storedProcedure = "PlantProductionSummaryReport";
 			String sql = "EXEC " + storedProcedure
 					+ " @plantId = :plantId, @year = :year";
 
@@ -73,8 +73,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	}
 
 	@Override
-	public AOPMessageVM getReportForMonthWiseProductionData(String plantId, String year
-			 ) {
+	public AOPMessageVM getReportForMonthWiseProductionData(String plantId, String year) {
 		try {
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			List<Map<String, Object>> typeOneDataList = new ArrayList<>();
