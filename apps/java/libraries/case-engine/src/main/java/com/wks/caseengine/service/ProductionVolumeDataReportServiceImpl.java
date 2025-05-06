@@ -17,11 +17,11 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
 @Service
-public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDataReportService{
-	
+public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDataReportService {
+
 	@PersistenceContext
 	private EntityManager entityManager;
-	
+
 	@Autowired
 	private PlantsRepository plantsRepository;
 
@@ -29,51 +29,137 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	public AOPMessageVM getReportForProductionVolumnData(String plantId, String year, String type, String filter) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<Map<String, Object>> productionVolumeReportList = new ArrayList<>();
-		List<Object[]> obj= getProductionVolumnDataReport(plantId,year,type,filter);
-		
-		for(Object[] row : obj) {
+		List<Object[]> obj = getProductionVolumnDataReport(plantId, year, type, filter);
+
+		for (Object[] row : obj) {
 			Map<String, Object> map = new HashMap<>();
 			map.put("sno", row[0]);
-            map.put("item", row[1]);
-            map.put("unit", row[2]);
-            map.put("part1Budget", row[3]);
-            map.put("part1Actual", row[4]);
-            map.put("part2Budget", row[5]);
-            map.put("part1VarBudgetMT", row[6]);
-            map.put("part2VarBudgetPct", row[7]);
-            map.put("varActualMT", row[8]);
-            map.put("varActualPct", row[9]);
-            map.put("remarks", row[10]);
-            productionVolumeReportList.add(map); // Add the map to the list here
-
+			map.put("item", row[1]);
+			map.put("unit", row[2]);
+			map.put("part1Budget", row[3]);
+			map.put("part1Actual", row[4]);
+			map.put("part2Budget", row[5]);
+			map.put("varBudgetMT", row[6]);
+			map.put("varBudgetPct", row[7]);
+			map.put("varActualMT", row[8]);
+			map.put("varActualPct", row[9]);
+			map.put("remarks", row[10]);
+			productionVolumeReportList.add(map); // Add the map to the list here
 		}
 		aopMessageVM.setCode(200);
-        aopMessageVM.setMessage("Data fetched successfully");
-        aopMessageVM.setData(productionVolumeReportList);
-        return aopMessageVM;
+		aopMessageVM.setMessage("Data fetched successfully");
+		aopMessageVM.setData(productionVolumeReportList);
+		return aopMessageVM;
 	}
-	
+
 	public List<Object[]> getProductionVolumnDataReport(String plantId, String year, String type, String filter) {
-	    try {
-	    	String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+		try {
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 			String storedProcedure = verticalName + "_HMD_ProductionVolumeReport";
-	        String sql = "EXEC " + storedProcedure +
-	                     " @plantId = :plantId, @year = :year, @type = :type, @filter = :filter";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @year = :year, @type = :type, @filter = :filter";
 
-	        Query query = entityManager.createNativeQuery(sql);
+			Query query = entityManager.createNativeQuery(sql);
 
-	        query.setParameter("plantId", plantId);
-	        query.setParameter("year", year);
-	        query.setParameter("type", type);
-	        query.setParameter("filter", filter);
+			query.setParameter("plantId", plantId);
+			query.setParameter("year", year);
+			query.setParameter("type", type);
+			query.setParameter("filter", filter);
 
-	        return query.getResultList();
-	    } catch (IllegalArgumentException e) {
-	        throw new RestInvalidArgumentException("Invalid UUID format ", e);
-	    } catch (Exception ex) {
-	        throw new RuntimeException("Failed to fetch data", ex);
-	    }
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
 	}
 
+	@Override
+	public AOPMessageVM getReportForMonthWiseProductionData(String plantId, String year, String typeOne,
+			String typeSecond, String filter) {
+		try {
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			List<Map<String, Object>> typeOneDataList = new ArrayList<>();
+			List<Map<String, Object>> typeSecondDataList = new ArrayList<>();
+
+			List<Object[]> obj = getMonthWiseProductionData(plantId, year, typeOne, filter);
+			for (Object[] row : obj) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("sno", row[0]);
+				map.put("month", row[1]);
+				map.put("productionBudget", row[2]);
+				map.put("productionActual", row[3]);
+				map.put("operatingBudget", row[4]);
+				map.put("operatingActual", row[5]);
+				map.put("throughputBudget", row[6]);
+				map.put("throughputActual", row[7]);
+				map.put("operatingHours", row[8]);
+				map.put("megThroughput", row[9]);
+				map.put("eoThroughput", row[10]);
+				map.put("eoeThroughput", row[11]);
+				map.put("totalEOE", row[12]);
+				typeOneDataList.add(map);
+			}
+
+			List<Object[]> obj1 = getMonthWiseProductionData(plantId, year, typeSecond, filter);
+			for (Object[] row : obj1) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("sno", row[0]);
+				map.put("material", row[1]);
+				map.put("april", row[2]);
+				map.put("may", row[3]);
+				map.put("june", row[4]);
+				map.put("july", row[5]);
+				map.put("august", row[6]);
+				map.put("september", row[7]);
+				map.put("october", row[8]);
+				map.put("november", row[9]);
+				map.put("december", row[10]);
+				map.put("january", row[11]);
+				map.put("february", row[12]);
+				map.put("march", row[13]);
+				map.put("total", row[14]);
+				typeSecondDataList.add(map);
+			}
+
+			// Combine both into a result map
+			Map<String, Object> finalResult = new HashMap<>();
+			finalResult.put("typeOneData", typeOneDataList);
+			finalResult.put("typeSecondData", typeSecondDataList);
+
+			// Set in response
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(finalResult);
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+
+	public List<Object[]> getMonthWiseProductionData(String plantId, String year, String type, String filter) {
+		try {
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			String storedProcedure = verticalName + "_HMD_ProductionVolumeReport";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @year = :year, @type = :type, @filter = :filter";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("year", year);
+			query.setParameter("type", type);
+			query.setParameter("filter", filter);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
 
 }
