@@ -33,17 +33,17 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 		for (Object[] row : obj) {
 			Map<String, Object> map = new HashMap<>();
-			map.put("sno", row[0]);
-			map.put("item", row[1]);
-			map.put("unit", row[2]);
-			map.put("part1Budget", row[3]);
-			map.put("part1Actual", row[4]);
-			map.put("part2Budget", row[5]);
-			map.put("varBudgetMT", row[6]);
-			map.put("varBudgetPct", row[7]);
-			map.put("varActualMT", row[8]);
-			map.put("varActualPct", row[9]);
-			map.put("remarks", row[10]);
+			map.put("RowNo", row[0]);
+			map.put("Particulates", row[1]);
+			map.put("UOM", row[2]);
+			map.put("BudgetPrevYear", row[3]);
+			map.put("ActualPrevYear", row[4]);
+			map.put("BudgetCurrentYear", row[5]);
+			map.put("VarBudgetMT", row[6]);
+			map.put("VarBudgetPer", row[7]);
+			map.put("VarActualMT", row[8]);
+			map.put("VarActualPer", row[9]);
+			map.put("Remark", row[10]);
 			productionVolumeReportList.add(map); // Add the map to the list here
 		}
 		aopMessageVM.setCode(200);
