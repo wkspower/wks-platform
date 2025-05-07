@@ -28,5 +28,6 @@ public class WorkflowDTO {
 	private String verticalFKId;
 	private Boolean isDeleted;
 	private String processInstanceId;
+	private String processDefinitionId;
 	
 }

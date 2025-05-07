@@ -93,7 +93,7 @@ allow {
 
 allow {
     input.path = "process-definition"
-    input.method in ["POST", "OPTION", "HEAD"]
+    input.method in ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTION", "HEAD"]
 	check_origin_request    
     is_user_profile
 }

@@ -146,6 +146,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 							}
 						}
 						taskDefinitionKey = task.getTaskDefinitionKey();
+						dto.setProcessDefinitionId(task.getProcessDefinitionId());
 					}
 
 					workflowRepository.save(workflow);
