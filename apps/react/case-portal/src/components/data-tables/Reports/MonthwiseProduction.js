@@ -232,7 +232,7 @@ const MonthwiseProduction = () => {
     },
   ]
 
-  const defaultCustomHeight = { mainBox: '35vh', otherBox: '110%' }
+  const defaultCustomHeight = { mainBox: '33vh', otherBox: '110%' }
 
   //api call
   const [rows, setRows] = useState()

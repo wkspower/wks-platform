@@ -2,11 +2,13 @@ import { Box } from '@mui/material'
 
 import { DataGrid } from '@mui/x-data-grid'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import {
+  Backdrop,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -25,20 +27,23 @@ const ReportDataGrid = ({
   columnGroupingModel,
   permissions,
   processRowUpdate = (row) => row,
-
+  handleCalculate = () => {},
   remarkDialogOpen = false,
   setRemarkDialogOpen = () => {},
   currentRemark = '',
   setCurrentRemark = () => {},
   currentRowId = null,
   unsavedChangesRef = { current: { unsavedRows: {}, rowsBeforeChange: {} } },
-  // loading
+  loading,
+  rowModesModel: rowModesModel,
+  onRowModesModelChange = () => {},
 }) => {
   const keycloak = useSession()
   // const [allProducts, setAllProducts] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false)
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
@@ -48,7 +53,7 @@ const ReportDataGrid = ({
     // fetchData1()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
   const handleRemarkSave = () => {
-    console.log(currentRemark)
+    // console.log(currentRemark)
     setRows((prevRows) => {
       let updatedRow = null
 
@@ -60,7 +65,7 @@ const ReportDataGrid = ({
             'remark',
             'Remark',
           ].filter((key) => key in row)
-          console.log(row)
+          // console.log(row)
           const keyToUpdate = keysToUpdate[0] || 'remark'
           //          console.log([keyToUpdate])
           updatedRow = { ...row, [keyToUpdate]: currentRemark }
@@ -78,6 +83,13 @@ const ReportDataGrid = ({
 
     setRemarkDialogOpen(false)
   }
+  const handleCalculateBtn = async () => {
+    setIsButtonDisabled(true)
+    handleCalculate()
+    setTimeout(() => {
+      setIsButtonDisabled(false)
+    }, 500)
+  }
 
   return (
     <Box
@@ -91,20 +103,45 @@ const ReportDataGrid = ({
         borderBottom: 'none',
       }}
     >
-      {/* <Backdrop
+      <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={false}
+        open={!!loading}
       >
         <CircularProgress color='inherit' />
-      </Backdrop> */}
+      </Backdrop>
+      {(permissions?.allAction ?? true) && (
+        <Box className='action-box'>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {permissions?.showCalculate && (
+              <Button
+                variant='contained'
+                onClick={handleCalculateBtn}
+                disabled={isButtonDisabled}
+                className='btn-save'
+              >
+                Calculate
+              </Button>
+            )}
+          </Box>
+        </Box>
+      )}
 
       <DataGrid
         rows={rows || []}
         className='custom-data-grid'
-        columns={columns?.map((col) => ({
+        columns={columns.map((col) => ({
           ...col,
-          filterable: true,
-          // sortable: true,
+          cellClassName: (params) => {
+            // if (col.isDisabled) {
+            if (params.row.Particulars) {
+              return undefined
+            } else {
+              return 'disabled-cell'
+            }
+            // }
+            // return undefined
+          },
+          headerClassName: col.isDisabled ? 'disabled-header' : undefined,
         }))}
         disableColumnSelector
         processRowUpdate={processRowUpdate}
@@ -126,9 +163,7 @@ const ReportDataGrid = ({
         rowHeight={35}
         getRowClassName={(params) => {
           const classes = []
-          // if () {
-          //   return '' // No class for remark column
-          // }
+
           if (params.row.isEditable === false) {
             return [
               ...classes,
@@ -143,6 +178,9 @@ const ReportDataGrid = ({
         treeData={treeData}
         getTreeDataPath={getTreeDataPath}
         defaultGroupingExpansionDepth={defaultGroupingExpansionDepth}
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={onRowModesModelChange}
+        handleCalculate={handleCalculate}
         sx={{
           '& .MuiDataGrid-columnHeader': {
             justifyContent: 'left',
@@ -165,6 +203,9 @@ const ReportDataGrid = ({
             },
           '& .MuiDataGrid-columnGroupHeader': {
             borderBottom: '1px solid rgba(224,224,224,1)',
+          },
+          '& .MuiDataGrid-cellEmpty': {
+            display: 'none',
           },
         }}
       />

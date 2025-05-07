@@ -38,6 +38,7 @@ import './jio-grid-style.css'
 import ProductionAopView from 'components/data-tables-views/DataTable-production-aop'
 import PlantsProductionSummary from '../Reports/PlantsProductionData'
 import MonthwiseProduction from '../Reports/MonthwiseProduction'
+import MonthwiseRawMaterial from '../Reports/MonthwiseRawMaterial'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -520,6 +521,13 @@ const WorkFlowMerge = () => {
               borderBottom: '1px solid',
             }}
           />
+          <Tab
+            label='Month Wise Raw Data'
+            sx={{
+              border: tabIndex === 3 ? '1px solid ' : 'none',
+              borderBottom: '1px solid',
+            }}
+          />
           {/* <Tab
               label='Other Losses'
               sx={{
@@ -667,6 +675,7 @@ const WorkFlowMerge = () => {
         {tabIndex === 1 && <PlantsProductionSummary />}
 
         {tabIndex === 2 && <MonthwiseProduction />}
+        {tabIndex === 3 && <MonthwiseRawMaterial />}
       </Box>
     </div>
   )

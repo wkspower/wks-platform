@@ -13,24 +13,15 @@ import { useSession } from 'SessionStoreContext'
 
 const MonthwiseRawMaterial = () => {
   const keycloak = useSession()
-  const columns1 = [
+  const columnDefs = [
     { field: 'id', headerName: 'ID' },
     {
-      field: 'aopCaseId',
-      headerName: 'Case ID',
-      minWidth: 120,
-      editable: false,
+      field: 'Particulars',
+      headerName: 'Type',
+      groupable: true,
+      renderCell: (params) => <strong>{params.value}</strong>,
     },
-    { field: 'aopType', headerName: 'Type', minWidth: 80 },
-    { field: 'aopYear', headerName: 'Year', minWidth: 80 },
-    { field: 'plantFkId', headerName: 'Plant ID', minWidth: 80 },
-    {
-      field: 'parameters',
-      headerName: 'Particulars',
-      editable: false,
-      minWidth: 125,
-      filterOperators: [{ label: 'contains', value: 'contains' }],
-    },
+    { field: 'particulars', headerName: 'Particulars' },
     {
       field: 'unit',
       headerName: 'Unit',
@@ -48,199 +39,151 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'april',
       headerName: 'Apr-25',
-      editable: false,
       align: 'right',
       headerAlign: 'left',
     },
-    {
-      field: 'may',
-      headerName: 'May-25',
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
+    { field: 'may', headerName: 'May-25', align: 'right', headerAlign: 'left' },
     {
       field: 'june',
       headerName: 'Jun-25',
-      editable: false,
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'july',
       headerName: 'Jul-25',
-      editable: false,
       align: 'right',
       headerAlign: 'left',
     },
     {
-      field: 'aug',
+      field: 'august',
       headerName: 'Aug-25',
-      editable: false,
       align: 'right',
       headerAlign: 'left',
     },
     {
-      field: 'sep',
+      field: 'september',
       headerName: 'Sep-25',
-      editable: false,
       align: 'right',
       headerAlign: 'left',
     },
     {
-      field: 'oct',
+      field: 'october',
       headerName: 'Oct-25',
-      editable: false,
       align: 'right',
       headerAlign: 'left',
     },
     {
-      field: 'nov',
+      field: 'november',
       headerName: 'Nov-25',
-      editable: false,
       align: 'right',
       headerAlign: 'left',
     },
     {
-      field: 'dec',
+      field: 'december',
       headerName: 'Dec-25',
-      editable: false,
       align: 'right',
       headerAlign: 'left',
     },
     {
-      field: 'jan',
+      field: 'january',
       headerName: 'Jan-26',
-      editable: false,
       align: 'right',
       headerAlign: 'left',
     },
     {
-      field: 'feb',
+      field: 'february',
       headerName: 'Feb-26',
-      editable: false,
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'march',
       headerName: 'Mar-26',
-      editable: false,
       align: 'right',
       headerAlign: 'left',
     },
-    // { field: 'averageTPH', headerName: 'Total', editable: false },
-    // { field: 'isEditable', headerName: 'isEditable' },
-    { field: 'aopStatus', headerName: 'aopStatus', editable: false },
-    { field: 'remark', headerName: 'Remark', editable: true },
-  ]
-  const rows1 = [
-    {
-      id: 1,
-      aopCaseId: 'CASE-2001',
-      aopType: 'RawMaterial',
-      aopYear: '2025-26',
-      plantFkId: 'PLANT-A',
-      parameters: 'EOE Feedstock',
-      unit: 'MT',
-      spec: '≥99.5%',
-      april: 1200,
-      may: 1150,
-      june: 1180,
-      july: 1220,
-      aug: 1190,
-      sep: 1210,
-      oct: 1230,
-      nov: 1175,
-      dec: 1240,
-      jan: 1250,
-      feb: 1225,
-      march: 1215,
-      aopStatus: 'Open',
-      remark: 'Check purity',
-    },
-    {
-      id: 2,
-      aopCaseId: 'CASE-2002',
-      aopType: 'RawMaterial',
-      aopYear: '2025-26',
-      plantFkId: 'PLANT-B',
-      parameters: 'MEG Feedstock',
-      unit: 'MT',
-      spec: '≥99.0%',
-      april: 900,
-      may: 950,
-      june: 920,
-      july: 940,
-      aug: 930,
-      sep: 910,
-      oct: 925,
-      nov: 935,
-      dec: 945,
-      jan: 955,
-      feb: 965,
-      march: 975,
-      aopStatus: 'Closed',
-      remark: '',
-    },
-    {
-      id: 3,
-      aopCaseId: 'CASE-2003',
-      aopType: 'RawMaterial',
-      aopYear: '2025-26',
-      plantFkId: 'PLANT-C',
-      parameters: 'EO Feedstock',
-      unit: 'MT',
-      spec: '≥98.5%',
-      april: 800,
-      may: 820,
-      june: 810,
-      july: 830,
-      aug: 840,
-      sep: 850,
-      oct: 860,
-      nov: 870,
-      dec: 880,
-      jan: 890,
-      feb: 900,
-      march: 910,
-      aopStatus: 'Open',
-      remark: 'Low stock in June',
-    },
+    { field: 'total', headerName: 'Total', align: 'right' },
   ]
 
-  const defaultCustomHeight = { mainBox: '38vh', otherBox: '100%' }
+  const defaultCustomHeight = { mainBox: '32vh', otherBox: '100%' }
 
-  // //api call
-  // const [rows, setRows] = useState()
-  // const [loading, setLoading] = useState(false)
-  // const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  // const year = localStorage.getItem('year')
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       setLoading(true)
-  //       var res = await DataService.getMonthWiseSummary(keycloak)
+  //api call
+  const [row, setRow] = useState()
+  const [row2, setRow2] = useState()
+  const [loading, setLoading] = useState(false)
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        var res = await DataService.getAnnualCostAopReport(
+          keycloak,
+          'quantity',
+          'FY 2025-26 AOP',
+        )
+        var res2 = await DataService.getMonthwiseRawData(keycloak)
 
-  //       console.log(res)
-  //       if (res?.code == 200) {
-  //         res = res?.data?.data.map((item, index) => ({
-  //           ...item,
-  //           id: index,
-  //         }))
+        // FY%202025-26%20AOP
+        console.log(res)
+        if (res2?.code == 200) {
+          res2 = res2?.data?.consumptionSummary.map((item, index) => ({
+            ...item,
+            id: index,
+          }))
 
-  //         setRow(res)
-  //       } else {
-  //         setRow([])
-  //       }
-  //     } catch (err) {
-  //       console.log(err)
-  //     } finally {
-  //       setLoading(false)
-  //     }
-  //   }
-  //   fetchData()
-  // }, [year, plantId])
+          setRow2(res2)
+        }
+        if (res?.code == 200) {
+          res = res?.data?.map((item, index) => ({
+            ...item,
+            id: index,
+          }))
+
+          const groupedRows = []
+          const groups = new Map()
+          let groupId = 0
+
+          res.forEach((item) => {
+            const groupKey = item.norm
+
+            if (!groups.has(groupKey)) {
+              groups.set(groupKey, [])
+              groupedRows.push({
+                id: groupId++,
+                Particulars: groupKey,
+                isGroupHeader: true,
+              })
+            }
+            const formattedItem = {
+              ...item,
+              idFromApi: item.id,
+              // originalRemark: item.remarks,
+              id: groupId++,
+            }
+
+            groups.get(groupKey).push(formattedItem)
+            groupedRows.push(formattedItem)
+          })
+
+          console.log(groupedRows)
+          setRow(groupedRows)
+
+          // setRow(res)
+          // setRow(res)
+        } else {
+          setRow([])
+        }
+      } catch (err) {
+        console.log(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [year, plantId])
 
   const dummyAPI1 = {
     status: 200,
@@ -249,10 +192,10 @@ const MonthwiseRawMaterial = () => {
       columns: [
         { field: 'id', headerName: 'ID' },
         {
-          field: 'parameters',
+          field: 'parameter',
           headerName: 'Parameters',
           editable: false,
-          minWidth: 225,
+          flex: 2,
           filterOperators: [{ label: 'contains', value: 'contains' }],
         },
         {
@@ -414,15 +357,15 @@ const MonthwiseRawMaterial = () => {
 
   return (
     <Box sx={{ height: 500, width: '100%' }}>
-      {/* <Backdrop
+      <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={!!loading}
       >
         <CircularProgress color='inherit' />
-      </Backdrop> */}
+      </Backdrop>
 
       <ReportDataGrid
-        rows={rows}
+        rows={row2}
         columns={columns}
         permissions={{
           customHeight: defaultCustomHeight,
@@ -433,19 +376,13 @@ const MonthwiseRawMaterial = () => {
         Raw Materials
       </Typography>
       <ReportDataGrid
-        rows={rows1}
+        rows={row}
         title='Monthwise Production Summary'
-        columns={columns1}
+        columns={columnDefs}
         permissions={{
           customHeight: defaultCustomHeight,
           textAlignment: 'center',
         }}
-        // treeData
-        // getTreeDataPath={(row) => row.path}
-        // defaultGroupingExpansionDepth={1} // expand only first level by default
-        // disableSelectionOnClick
-        // columnGroupingModel={columnGroupingModel}
-        // experimentalFeatures
       />
     </Box>
   )

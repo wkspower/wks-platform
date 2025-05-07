@@ -89,6 +89,7 @@ export const DataService = {
   getWorkflowDataProduction,
   getAnnualCostAopReport,
   getPlantProductionSummary,
+  getMonthwiseRawData,
   getMonthWiseSummary,
   updateUserPlants,
   getCaseId,
@@ -779,14 +780,28 @@ async function getAnnualCostAopReport(
     return await Promise.reject(e)
   }
 }
-async function getPlantProductionSummary(
-  keycloak,
-  reportType = 'null',
-  aopYearFilter1 = 'null',
-) {
+async function getPlantProductionSummary(keycloak) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-const url = `${Config.CaseEngineUrl}/task/report/production-summary?plantId=${plantId}&year=${year}`
+  const url = `${Config.CaseEngineUrl}/task/report/production-summary?plantId=${plantId}&year=${year}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getMonthwiseRawData(keycloak) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+  const url = `${Config.CaseEngineUrl}/task/report/month-wise/consumption-summary?plantId=${plantId}&year=${year}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
