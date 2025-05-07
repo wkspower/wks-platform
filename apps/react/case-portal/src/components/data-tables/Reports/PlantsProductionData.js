@@ -315,18 +315,18 @@ const PlantsProductionSummary = () => {
     })
   }, [apiCols])
 
-  // console.log(rows)
   const unsavedChangesRef = React.useRef({
-    unsavedrow: {},
-    rowBeforeChange: {},
+    unsavedRows: {},
+    rowsBeforeChange: {},
   })
+
   const defaultCustomHeight = { mainBox: '64vh', otherBox: '90%' }
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
 
-    unsavedChangesRef.current.unsavedrow[rowId || 0] = newRow
-    if (!unsavedChangesRef.current.rowBeforeChange[rowId]) {
-      unsavedChangesRef.current.rowBeforeChange[rowId] = oldRow
+    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
+    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
+      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
     }
 
     setRows((prevrow) =>
