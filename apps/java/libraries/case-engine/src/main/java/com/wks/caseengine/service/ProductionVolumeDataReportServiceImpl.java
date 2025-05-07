@@ -73,7 +73,8 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	}
 
 	@Override
-	public AOPMessageVM getReportForMonthWiseProductionData(String plantId, String year) {
+	public AOPMessageVM getReportForMonthWiseProductionData(String plantId, String year
+			 ) {
 		try {
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			List<Map<String, Object>> typeOneDataList = new ArrayList<>();
@@ -82,19 +83,19 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			List<Object[]> obj = getMonthWiseProductionData(plantId, year);
 			for (Object[] row : obj) {
 				Map<String, Object> map = new HashMap<>();
-				map.put("sno", row[0]);
-				map.put("month", row[1]);
-				map.put("productionBudget", row[2]);
-				map.put("productionActual", row[3]);
-				map.put("operatingBudget", row[4]);
-				map.put("operatingActual", row[5]);
-				map.put("throughputBudget", row[6]);
-				map.put("throughputActual", row[7]);
-				map.put("operatingHours", row[8]);
-				map.put("megThroughput", row[9]);
-				map.put("eoThroughput", row[10]);
-				map.put("eoeThroughput", row[11]);
-				map.put("totalEOE", row[12]);
+				map.put("RowNo", row[0]);
+				map.put("Month", row[1]);
+				map.put("EOEProdBudget", row[2]);
+				map.put("EOEProdActual", row[3]);
+				map.put("OpHrsBudget", row[4]);
+				map.put("OpHrsActual", row[5]);
+				map.put("ThroughputBudget", row[6]);
+				map.put("ThroughputActual", row[7]);
+				map.put("OperatingHours", row[8]);
+				map.put("MEGThroughput", row[9]);
+				map.put("EOThroughput", row[10]);
+				map.put("EOEThroughput", row[11]);
+				map.put("TotalEOE", row[12]);
 				typeOneDataList.add(map);
 			}
 
