@@ -28,4 +28,12 @@ public class ProductionVolumeDataReportController {
 		AOPMessageVM response	=productionVolumeDataReportService.getReportForMonthWiseProductionData(plantId,year);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
+
+	@GetMapping(value="/report/month-wise/consumption-summary")
+	public ResponseEntity<AOPMessageVM> getReportForMonthWiseConsumptionSummaryData(@RequestParam String plantId,@RequestParam String year){
+		AOPMessageVM response	=productionVolumeDataReportService.getReportForMonthWiseConsumptionSummaryData(plantId,year);
+		return ResponseEntity.status(response.getCode()).body(response);
+	}
+
+
 }
