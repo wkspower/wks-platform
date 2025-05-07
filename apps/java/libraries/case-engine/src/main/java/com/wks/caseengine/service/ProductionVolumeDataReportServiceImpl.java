@@ -96,6 +96,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 				map.put("EOThroughput", row[10]);
 				map.put("EOEThroughput", row[11]);
 				map.put("TotalEOE", row[12]);
+				map.put("Remark", row[13]);
 				typeOneDataList.add(map);
 			}
 
@@ -121,7 +122,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	public List<Object[]> getMonthWiseProductionData(String plantId, String aopYear) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
-			String storedProcedure = "MonthWiseProduction";
+			String storedProcedure = "MonthWiseProductionPlanReport";
 			String sql = "EXEC " + storedProcedure
 					+ " @plantId = :plantId, @aopYear = :aopYear";
 
