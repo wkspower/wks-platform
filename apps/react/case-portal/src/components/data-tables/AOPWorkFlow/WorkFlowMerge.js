@@ -25,14 +25,11 @@ import {
 } from '../../../../node_modules/@mui/material/index'
 import AuditTrail from './AuditTrail'
 import DataGridTable from '../ASDataGrid'
-import { ProcessDiagram } from 'views/bpmnViewer/ProcessDiagram'
 // import '../data-tables/data-grid-css.css'
 // import { CaseService } from 'services/CaseService'
 // import { TaskService } from 'services/TaskService'
 // import { useSession } from 'SessionStoreContext'
 import { remarkColumn } from 'components/Utilities/remarkColumn'
-import MainCard from 'components/MainCard'
-
 // import Notification from 'components/Utilities/Notification'
 import './jio-grid-style.css'
 // import { usePlan } from 'menu/new-plan'
@@ -80,7 +77,6 @@ const WorkFlowMerge = () => {
   const [rows, setRows] = useState([])
   const [columns, setColumns] = useState([])
   const [loading, setLoading] = useState(false)
-  
   const [isCreatingCase, setIsCreatingCase] = useState(false)
   const [showCreateCasebutton, setShowCreateCasebutton] = useState(false)
   // const [isEdit, setIsEdit] = useState(false)
@@ -113,7 +109,6 @@ const WorkFlowMerge = () => {
   const [status, setStatus] = useState('')
   const [caseId, setCaseId] = useState('')
   const [role, setRole] = useState('')
-  const [activityInstances, setActivityInstances] = useState(null)
   // UI feedback
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -285,11 +280,6 @@ const WorkFlowMerge = () => {
       if (cases?.workflowList.length > 0) {
         // console.log('businessky in getcaseId ' + cases?.workflowList[0].caseId)
         setBusinessKey(cases?.workflowList[0].caseId)
-         TaskService.getActivityInstancesById(keycloak, cases?.workflowList[0].processInstanceId).then(
-              (data) => {
-                setActivityInstances(data)
-              },
-            )
       }
       // console.log(cases)
       const master = cases?.workflowMasterDTO
@@ -442,7 +432,7 @@ const WorkFlowMerge = () => {
         display: 'flex',
         flexDirection: 'column',
         gap: '5px',
-        marginTop: '20px',
+        marginTop: '0px',
       }}
     >
       <Box>
@@ -452,7 +442,15 @@ const WorkFlowMerge = () => {
               key={step.displayName}
               completed={step.status === 'completed'}
             >
-              <StepLabel error={step.status === 'error'}>
+              <StepLabel
+                error={step.status === 'error'}
+                StepIconProps={{
+                  sx: {
+                    color: step.status === 'completed' ? '#0100cb' : 'grey',
+                  },
+                }}
+              >
+                {' '}
                 {step.displayName}
               </StepLabel>
             </Step>
@@ -462,7 +460,7 @@ const WorkFlowMerge = () => {
           direction='row'
           spacing={1}
           justifyContent='flex-end'
-          sx={{ mt: 2, mb: 1 }}
+          sx={{ mt: 0, mb: 0 }}
         >
           {taskId && (
             <Button
@@ -664,17 +662,6 @@ const WorkFlowMerge = () => {
         {tabIndex === 1 && <PlantsProductionSummary />}
 
         {tabIndex === 2 && <MonthwiseProduction />}
-
-        <Box>
-                  <MainCard sx={{ mt: 2 }} content={false}>
-                    {workflowDto?.processDefinitionId && activityInstances && (
-                      <ProcessDiagram
-                        processDefinitionId={workflowDto?.processDefinitionId}
-                        activityInstances={activityInstances}
-                      />
-                    )}
-                  </MainCard>
-                </Box>
       </Box>
     </div>
   )

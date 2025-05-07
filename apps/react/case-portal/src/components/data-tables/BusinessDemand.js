@@ -156,13 +156,14 @@ const BusinessDemand = ({ permissions }) => {
         var productList = []
         if (lowerVertName === 'meg') {
           productList = data
-            .filter((product) =>
-              ['EO', 'EOE', 'MEG', 'CO2'].includes(product.displayName),
-            )
-            .map((product) => ({
-              id: product.id,
-              displayName: product.displayName,
-            }))
+
+          // .filter((product) =>
+          //   ['EO', 'EOE', 'MEG', 'CO2'].includes(product.displayName),
+          // )
+          // .map((product) => ({
+          //   id: product.id,
+          //   displayName: product.displayName,
+          // }))
         } else {
           productList = data.map((product) => ({
             id: product.id,

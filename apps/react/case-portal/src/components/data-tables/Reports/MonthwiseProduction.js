@@ -45,7 +45,7 @@ const MonthwiseProduction = () => {
       align: 'left',
     },
     {
-      field: 'productionActual', // was eoeActualCY
+      field: 'EOEProdActual', // was eoeActualCY
       headerName: 'Actual',
       flex: 1,
       headerAlign: 'left',

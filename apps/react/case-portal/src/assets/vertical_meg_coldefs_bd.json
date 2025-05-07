@@ -10,7 +10,7 @@
   {
     "field": "normParameterId",
     "headerName": "Particulars",
-    "editable": true,
+    "editable": false,
     "minWidth": 150
   },
   {
