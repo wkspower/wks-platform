@@ -145,7 +145,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					configurationDTO.setUOM(row[15] != null ? row[15].toString() : "");
 					configurationDTO.setNormType(row[16] != null ? row[16].toString() : "");
 					configurationDTO.setIsEditable(
-							row[17] != null ? ((Integer) row[17]) == 1 : null);
+							row[17] != null ? ((Boolean) row[17]).booleanValue() : null);
 					;
 				}
 

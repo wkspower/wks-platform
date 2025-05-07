@@ -6,5 +6,6 @@ public interface ProductionVolumeDataReportService {
 	
 	public AOPMessageVM getReportForProductionVolumnData(String plantId,String year);
 	public AOPMessageVM getReportForMonthWiseProductionData(String plantId,String year);
+    public AOPMessageVM getReportForMonthWiseConsumptionSummaryData(String plantId, String year);
 
 }

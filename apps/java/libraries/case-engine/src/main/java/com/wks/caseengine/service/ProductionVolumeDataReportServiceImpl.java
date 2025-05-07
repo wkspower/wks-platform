@@ -140,4 +140,73 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		}
 	}
 
+
+	@Override
+	public AOPMessageVM getReportForMonthWiseConsumptionSummaryData(String plantId, String year
+			 ) {
+		try {
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			List<Map<String, Object>> summaryData = new ArrayList<>();
+
+			List<Object[]> obj = getMonthWiseConsumptionData(plantId, year);
+			for (Object[] row : obj) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("parameter", row[0]);
+				map.put("april", row[1]);
+				map.put("may", row[2]);
+				map.put("june", row[3]);
+				map.put("july", row[4]);
+				map.put("aug", row[5]);
+				map.put("sep", row[6]);
+				map.put("oct", row[7]);
+				map.put("nov", row[8]);
+				map.put("dec", row[9]);
+				map.put("jan", row[10]);
+				map.put("feb", row[11]);
+				map.put("march", row[12]);
+				summaryData.add(map);
+			}
+
+			
+
+			// Combine both into a result map
+			Map<String, Object> finalResult = new HashMap<>();
+			finalResult.put("consumptionSummary", summaryData);
+
+			// Set in response
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(finalResult);
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+
+	public List<Object[]> getMonthWiseConsumptionData(String plantId, String year) {
+		try {
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			String storedProcedure = "PlantConsumptionSummaryReport";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @year = :year";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("year", year);
+			
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+
+
 }
