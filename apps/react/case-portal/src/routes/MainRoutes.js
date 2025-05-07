@@ -38,6 +38,7 @@ import PlantsProductionSummary from 'components/data-tables/Reports/PlantsProduc
 // import MonthwiseProduction from 'components/data-tables/Reports/MonthWiseProduction'
 import ProductionVolumeDataBasis from 'components/data-tables/Reports/ProductionVolumeDataBasis'
 import MonthwiseProduction from 'components/data-tables/Reports/MonthwiseProduction'
+import MonthwiseRawMaterial from 'components/data-tables/Reports/MonthwiseRawMaterial'
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
@@ -230,6 +231,10 @@ export const MainRoutes = (
           {
             path: 'monthwise-production',
             element: <MonthwiseProduction />,
+          },
+          {
+            path: 'monthwise-raw-material',
+            element: <MonthwiseRawMaterial />,
           },
           { path: 'previous-fy-aop-result', element: <DashboardDefault /> },
           { path: 'previous-fy-aop-result', element: <DashboardDefault /> },

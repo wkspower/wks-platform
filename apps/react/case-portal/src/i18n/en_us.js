@@ -56,6 +56,7 @@ const defs = {
     productionVolumeDataBasis: 'Production Volume Data Basis', // New addition
     plantsProduction: 'Plants Production Summary', // New addition
     monthwise: 'Monthwise Production Plan',
+    monthwiseRawMaterial: 'Monthwise Raw Material',
     previousFYAOPResult: 'Previous FY AOP Result', // New addition
     matBalSheet: 'MAT Bal Sheet', // New addition
     workflow: 'AOP Approval Flow', // New addition
@@ -216,6 +217,7 @@ const defs = {
         productionVolumeDataBasis: 'Production Volume Data Basis', // New addition
         plantsProduction: 'Plants Production Summary',
         monthwise: 'Monthwise Production Plan',
+        monthwiseRawMaterial: 'Monthwise Raw Material',
         previousFYAOPResult: 'Previous FY AOP Result', // New addition
         matBalSheet: 'MAT Bal Sheet', // New addition
         userManage: 'User Management', // New addition

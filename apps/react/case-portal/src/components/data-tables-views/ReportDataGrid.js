@@ -5,9 +5,18 @@ import { DataGrid } from '@mui/x-data-grid'
 import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+} from '../../../node_modules/@mui/material/index'
 
 const ReportDataGrid = ({
   rows,
+  setRows,
   columns,
   height,
   treeData,
@@ -15,6 +24,14 @@ const ReportDataGrid = ({
   defaultGroupingExpansionDepth,
   columnGroupingModel,
   permissions,
+  processRowUpdate = (row) => row,
+
+  remarkDialogOpen = false,
+  setRemarkDialogOpen = () => {},
+  currentRemark = '',
+  setCurrentRemark = () => {},
+  currentRowId = null,
+  unsavedChangesRef = { current: { unsavedRows: {}, rowsBeforeChange: {} } },
   // loading
 }) => {
   const keycloak = useSession()
@@ -30,6 +47,38 @@ const ReportDataGrid = ({
   useEffect(() => {
     // fetchData1()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  const handleRemarkSave = () => {
+    console.log(currentRemark)
+    setRows((prevRows) => {
+      let updatedRow = null
+
+      const updatedRows = prevRows.map((row) => {
+        if (row.id === currentRowId) {
+          const keysToUpdate = [
+            'aopRemarks',
+            'remarks',
+            'remark',
+            'Remark',
+          ].filter((key) => key in row)
+          console.log(row)
+          const keyToUpdate = keysToUpdate[0] || 'remark'
+          //          console.log([keyToUpdate])
+          updatedRow = { ...row, [keyToUpdate]: currentRemark }
+          return updatedRow
+        }
+        return row
+      })
+
+      if (updatedRow) {
+        unsavedChangesRef.current.unsavedRows[currentRowId] = updatedRow
+      }
+
+      return updatedRows
+    })
+
+    setRemarkDialogOpen(false)
+  }
+
   return (
     <Box
       sx={{
@@ -58,6 +107,8 @@ const ReportDataGrid = ({
           // sortable: true,
         }))}
         disableColumnSelector
+        processRowUpdate={processRowUpdate}
+        disableColumnSeparator
         disableColumnSorting
         columnVisibilityModel={{
           maintenanceId: false,
@@ -74,11 +125,18 @@ const ReportDataGrid = ({
         }}
         rowHeight={35}
         getRowClassName={(params) => {
-          return params.row.Particulars || params.row.Particulars2
-            ? 'no-border-row'
-            : params.indexRelativeToCurrentPage % 2 === 0
-              ? 'even-row'
-              : 'even-row'
+          const classes = []
+          // if () {
+          //   return '' // No class for remark column
+          // }
+          if (params.row.isEditable === false) {
+            return [
+              ...classes,
+              permissions?.noColor === true ? 'even-row' : 'odd-row',
+            ].join(' ')
+          }
+
+          return [...classes, 'even-row'].join(' ')
         }}
         experimentalFeatures={{ newEditingApi: true, columnGrouping: true }}
         columnGroupingModel={columnGroupingModel}
@@ -89,9 +147,9 @@ const ReportDataGrid = ({
           '& .MuiDataGrid-columnHeader': {
             justifyContent: 'left',
           },
-          '& .MuiDataGrid-cell--textRight': {
-            textAlign: 'left',
-          },
+          // '& .MuiDataGrid-cell--textRight': {
+          //   textAlign: 'left',
+          // },
           '& .MuiDataGrid-columnHeaderTitleContainer': {
             borderTop: '1px solid rgba(224,224,224,1)',
             justifyContent: `${permissions?.textAlignment}` || 'left',
@@ -110,6 +168,36 @@ const ReportDataGrid = ({
           },
         }}
       />
+      <Dialog
+        open={!!remarkDialogOpen}
+        onClose={() => setRemarkDialogOpen(false)}
+      >
+        <DialogTitle>Add Remark</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin='dense'
+            id='remark'
+            label='Remark'
+            type='text'
+            fullWidth
+            variant='outlined'
+            sx={{ width: '100%', minWidth: '600px' }}
+            value={currentRemark || ''}
+            // value={remark}
+            onChange={(e) => setCurrentRemark(e.target.value)}
+            multiline
+            rows={8}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRemarkDialogOpen(false)}>Cancel</Button>
+          {/* <Button onClick={handleCloseRemark}>Cancel</Button> */}
+          <Button onClick={handleRemarkSave} disabled={!currentRemark?.trim()}>
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

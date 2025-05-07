@@ -182,7 +182,6 @@ const WorkFlowMerge = () => {
     try {
       const cases = await DataService.getCaseId(keycloak)
       // setCaseId(cases?.workflowMasterDTO?.casedefId || '')
-      console.log(cases?.workflowList?.length === 0)
       // console.log(isEdit)
       // console.log(showCreateCasebutton)
       if (cases?.workflowList?.length !== 0) return
@@ -247,7 +246,7 @@ const WorkFlowMerge = () => {
   const fetchData = async () => {
     try {
       const data = await DataService.getWorkflowData(keycloak, plantId)
-      const formatted = data.results.map((row, idx) => {
+      var formatted = data.results.map((row, idx) => {
         const out = { id: idx }
         Object.entries(row).forEach(([k, v]) => {
           out[k] = !isNaN(v) && v !== '' ? Number(v).toFixed(2) : v
@@ -255,6 +254,12 @@ const WorkFlowMerge = () => {
         return out
       })
       // console.log(formatted)
+
+      formatted = formatted?.map((item) => ({
+        ...item,
+        isEditable: false,
+      }))
+
       setRows(formatted)
       setColumns(generateColumns(data))
     } catch (err) {

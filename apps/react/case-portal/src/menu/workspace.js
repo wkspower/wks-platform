@@ -138,6 +138,14 @@ const workspace = {
         //   icon: icons.IconFileText,
         //   breadcrumbs: true,
         // },
+        {
+          id: 'monthwise-raw-material',
+          title: i18n.t('menu.monthwiseRawMaterial'),
+          type: 'item',
+          url: '/reports/monthwise-raw-material',
+          icon: icons.IconFileText,
+          breadcrumbs: true,
+        },
         //     {
         //       id: 'previous-fy-aop-result',
         //       title: i18n.t('menu.previousFYAOPResult'),
