@@ -121,7 +121,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	public List<Object[]> getMonthWiseProductionData(String plantId, String aopYear) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
-			String storedProcedure = "MonthWiseProductionPlanReport";
+			String storedProcedure = "MonthWiseProduction";
 			String sql = "EXEC " + storedProcedure
 					+ " @plantId = :plantId, @aopYear = :aopYear";
 

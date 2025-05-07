@@ -23,100 +23,100 @@ const MonthwiseProduction = () => {
   }
   const columns = [
     {
-      field: 'sno',
+      field: 'RowNo',
       headerName: 'Sl. No.',
-      width: 90,
+      flex: 1,
       headerAlign: 'left',
       align: 'left',
     },
     {
-      field: 'month',
+      field: 'Month',
       headerName: 'Month',
-      width: 120,
+      flex: 1,
       headerAlign: 'left',
     },
 
     // Current Year → EOE Production
     {
-      field: 'productionBudget', // was eoeBudgetCY
+      field: 'EOEProdBudget', // was eoeBudgetCY
       headerName: 'Budget',
-      width: 100,
+      flex: 1,
       headerAlign: 'left',
       align: 'left',
     },
     {
       field: 'productionActual', // was eoeActualCY
       headerName: 'Actual',
-      width: 100,
+      flex: 1,
       headerAlign: 'left',
       align: 'left',
     },
 
     // Current Year → Operating Hours
     {
-      field: 'operatingBudget', // was opBudgetCY
+      field: 'OpHrsBudget', // was opBudgetCY
       headerName: 'Budget',
-      width: 100,
+      flex: 1,
       headerAlign: 'left',
       align: 'left',
     },
     {
-      field: 'operatingActual', // was opActualCY
+      field: 'OpHrsActual', // was opActualCY
       headerName: 'Actual',
-      width: 100,
+      flex: 1,
       headerAlign: 'left',
       align: 'left',
     },
 
     // Current Year → Throughput
     {
-      field: 'throughputBudget', // was thrBudgetCY
+      field: 'ThroughputBudget', // was thrBudgetCY
       headerName: 'Budget',
-      width: 100,
+      flex: 1,
       headerAlign: 'left',
       align: 'left',
     },
     {
-      field: 'throughputActual', // was thrActualCY
+      field: 'ThroughputActual', // was thrActualCY
       headerName: 'Actual',
-      width: 100,
+      flex: 1,
       headerAlign: 'left',
       align: 'left',
     },
 
     // Budget Year single values
     {
-      field: 'operatingHours', // was opBudgetBY
+      field: 'OperatingHours', // was opBudgetBY
       headerName: 'Operating Hours',
-      width: 140,
+      flex: 2,
       headerAlign: 'left',
       align: 'left',
     },
     {
-      field: 'megThroughput', // was megTPH
+      field: 'MEGThroughput', // was megTPH
       headerName: 'MEG Throughput, TPH',
-      width: 160,
+      flex: 2,
       headerAlign: 'left',
       align: 'left',
     },
     {
-      field: 'eoThroughput', // was eoTPH
+      field: 'EOThroughput', // was eoTPH
       headerName: 'EO Throughput, TPH',
-      width: 160,
+      flex: 2,
       headerAlign: 'left',
       align: 'left',
     },
     {
-      field: 'eoeThroughput', // was eoeTPH
+      field: 'EOEThroughput', // was eoeTPH
       headerName: 'EOE Throughput, TPH',
-      width: 160,
+      flex: 2,
       headerAlign: 'left',
       align: 'left',
     },
     {
-      field: 'totalEOE', // was totalEoeMT
+      field: 'TotalEOE', // was totalEoeMT
       headerName: 'Total EOE, MT',
-      width: 140,
+      flex: 2,
       headerAlign: 'left',
       align: 'left',
     },
@@ -125,8 +125,8 @@ const MonthwiseProduction = () => {
     {
       field: 'remarks',
       headerName: 'Remarks',
-      flex: 1,
-      minWidth: 200,
+      flex: 2,
+      // minWidth: 200,
       headerAlign: 'left',
     },
   ]
@@ -140,7 +140,7 @@ const MonthwiseProduction = () => {
           groupId: 'cy-eoe',
           headerName: 'EOE Production, MT',
           children: [
-            { field: 'productionBudget' }, // was eoeBudgetCY
+            { field: 'EOEProdBudget' }, // was eoeBudgetCY
             { field: 'productionActual' }, // was eoeActualCY
           ],
         },
@@ -148,16 +148,16 @@ const MonthwiseProduction = () => {
           groupId: 'cy-op',
           headerName: 'Operating Hours',
           children: [
-            { field: 'operatingBudget' }, // was opBudgetCY
-            { field: 'operatingActual' }, // was opActualCY
+            { field: 'OpHrsBudget' }, // was opBudgetCY
+            { field: 'OpHrsActual' }, // was opActualCY
           ],
         },
         {
           groupId: 'cy-thr',
           headerName: 'Throughput, TPH',
           children: [
-            { field: 'throughputBudget' }, // was thrBudgetCY
-            { field: 'throughputActual' }, // was thrActualCY
+            { field: 'ThroughputBudget' }, // was thrBudgetCY
+            { field: 'ThroughputActual' }, // was thrActualCY
           ],
         },
       ],
@@ -166,16 +166,16 @@ const MonthwiseProduction = () => {
       groupId: 'budgetYear',
       headerName: thisYear,
       children: [
-        { field: 'operatingHours' }, // was opBudgetBY
-        { field: 'megThroughput' }, // was megTPH
-        { field: 'eoThroughput' }, // was eoTPH
-        { field: 'eoeThroughput' }, // was eoeTPH
-        { field: 'totalEOE' }, // was totalEoeMT
+        { field: 'OperatingHours' }, // was opBudgetBY
+        { field: 'MEGThroughput' }, // was megTPH
+        { field: 'EOThroughput' }, // was eoTPH
+        { field: 'EOEThroughput' }, // was eoeTPH
+        { field: 'TotalEOE' }, // was totalEoeMT
       ],
     },
   ]
 
-  const defaultCustomHeight = { mainBox: '38vh', otherBox: '130%' }
+  const defaultCustomHeight = { mainBox: '35vh', otherBox: '110%' }
 
   //api call
   const [row, setRow] = useState()
