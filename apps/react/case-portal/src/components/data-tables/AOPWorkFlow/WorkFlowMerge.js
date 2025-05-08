@@ -39,6 +39,7 @@ import ProductionAopView from 'components/data-tables-views/DataTable-production
 import PlantsProductionSummary from '../Reports/PlantsProductionData'
 import MonthwiseProduction from '../Reports/MonthwiseProduction'
 import MonthwiseRawMaterial from '../Reports/MonthwiseRawMaterial'
+import AnnualProductionPlan from '../Reports/AnnualProductionPlan'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -528,27 +529,13 @@ const WorkFlowMerge = () => {
               borderBottom: '1px solid',
             }}
           />
-          {/* <Tab
-              label='Other Losses'
-              sx={{
-                border: tabIndex === 1 ? '1px solid ' : 'none',
-                borderBottom: '1px solid',
-              }}
-            />
-            <Tab
-              label='Constants'
-              sx={{
-                border: tabIndex === 2 ? '1px solid ' : 'none',
-                borderBottom: '1px solid',
-              }}
-            />
-            <Tab
-              label='Receipes'
-              sx={{
-                border: tabIndex === 3 ? '1px solid ' : 'none',
-                borderBottom: '1px solid',
-              }}
-            /> */}
+          <Tab
+            label='Annual Production Plan'
+            sx={{
+              border: tabIndex === 4 ? '1px solid ' : 'none',
+              borderBottom: '1px solid',
+            }}
+          />
         </Tabs>
 
         {tabIndex === 0 && (
@@ -677,6 +664,8 @@ const WorkFlowMerge = () => {
 
         {tabIndex === 2 && <MonthwiseProduction />}
         {tabIndex === 3 && <MonthwiseRawMaterial />}
+
+        {tabIndex === 4 && <AnnualProductionPlan />}
       </Box>
     </div>
   )

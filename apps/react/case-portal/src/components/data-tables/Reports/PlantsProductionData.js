@@ -442,7 +442,7 @@ const PlantsProductionSummary = () => {
   }, [])
 
   return (
-    <Box sx={{ height: ' 635px', width: '100%' }}>
+    <Box sx={{ height: 'auto', width: '100%' }}>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={!!loading}

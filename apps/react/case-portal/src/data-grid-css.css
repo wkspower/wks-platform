@@ -104,7 +104,7 @@
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  height: 60%;
+  height: 80%;
   border-right: 1px solid #d0d0d0;
 }
 
@@ -114,14 +114,16 @@
   font-size: 0.8rem;
   font-weight: bold;
   border-bottom: 2px solid #dae0ef;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  padding-left: 6px;
+  /* border-top-left-radius: 0; */
+  /* border-top-right-radius: 0; */
+  padding-left: auto;
+  padding-right: auto;
+  margin-left: 5px;
 }
 
 .custom-data-grid .MuiDataGrid-columnHeader {
-  min-height: 45px;
-  max-height: 45px;
+  min-height: 35px;
+  max-height: 35px;
   line-height: 45px;
   padding-top: 0;
   padding-bottom: 0;

@@ -383,8 +383,8 @@ const DataGridTable = ({
   return (
     <Box
       sx={{
-        height: `${boxHeight ?? (permissions.customHeight2 ? '50vh' : '80vh')}`,
-
+        // height: `${boxHeight ?? (permissions.customHeight2 ? '50vh' : '80vh')}`,
+        height: 'auto',
         width: '100%',
         padding: '0px 0px',
         margin: '0px 0px 0px',

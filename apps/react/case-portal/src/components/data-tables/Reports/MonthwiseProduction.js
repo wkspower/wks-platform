@@ -1,6 +1,6 @@
 import { Box } from '@mui/material'
 // import DataGridTable from '../ASDataGrid'
-import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
+import ReportDataGrid from 'components/data-tables-views/ReportDataGrid2'
 import {
   Backdrop,
   CircularProgress,

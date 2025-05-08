@@ -94,7 +94,8 @@ const ReportDataGrid = ({
   return (
     <Box
       sx={{
-        height: height || permissions?.customHeight?.mainBox || '240px',
+        // height: height || permissions?.customHeight?.mainBox || '240px',
+        height: 'auto',
         width: '100%',
         padding: '0px 0px',
         margin: '0px 0px 0px',
@@ -173,18 +174,7 @@ const ReportDataGrid = ({
           period: false,
         }}
         rowHeight={35}
-        getRowClassName={(params) => {
-          const classes = []
-
-          if (params.row.isEditable === false) {
-            return [
-              ...classes,
-              permissions?.noColor === true ? 'even-row' : 'odd-row',
-            ].join(' ')
-          }
-
-          return [...classes, 'even-row'].join(' ')
-        }}
+        columnGroupHeaderHeight={20}
         experimentalFeatures={{ newEditingApi: true, columnGrouping: true }}
         columnGroupingModel={columnGroupingModel}
         treeData={treeData}

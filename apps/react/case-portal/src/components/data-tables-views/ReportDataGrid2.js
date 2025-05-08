@@ -94,7 +94,7 @@ const ReportDataGrid = ({
   return (
     <Box
       sx={{
-        height: height || permissions?.customHeight?.mainBox || '240px',
+        height: 'auto',
         width: '100%',
         padding: '0px 0px',
         margin: '0px 0px 0px',
