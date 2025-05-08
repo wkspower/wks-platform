@@ -501,7 +501,7 @@ const WorkFlowMerge = () => {
           indicatorColor='primary'
         >
           <Tab
-            label='AOP Cost'
+            label='Annual AOP Cost'
             sx={{
               border: tabIndex === 0 ? '1px solid ' : 'none',
               borderBottom: '1px solid',
@@ -598,6 +598,7 @@ const WorkFlowMerge = () => {
                   customHeight: defaultCustomHeight,
                   // saveBtn: true,
                   showCalculate: true,
+                  remarksEditable: true,
                   // approveBtn: false,
                 }}
               />

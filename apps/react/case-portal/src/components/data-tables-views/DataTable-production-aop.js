@@ -30,7 +30,7 @@ const ProductionAopView = () => {
     // setLoading(true)
     try {
       var data = await DataService.getWorkflowDataProduction(keycloak, plantId)
-      const formattedRows = data.results.map((row, id) => {
+      var formattedRows = data.results.map((row, id) => {
         const newRow = { id }
         Object.entries(row).forEach(([key, val]) => {
           if (!isNaN(val) && val !== '') {
@@ -41,6 +41,12 @@ const ProductionAopView = () => {
         })
         return newRow
       })
+
+      formattedRows = formattedRows?.map((item) => ({
+        ...item,
+        isEditable: false,
+      }))
+
       setRows(formattedRows)
       const generateColumns = ({ headers, keys }) => {
         return headers.map((header, idx) => ({
@@ -66,6 +72,8 @@ const ProductionAopView = () => {
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   const defaultCustomHeight = { mainBox: '22vh', otherBox: '114%' }
+  const lastColumnField = columns[columns.length - 1]?.field
+  //console.log('lastColumnField', lastColumnField)
 
   return (
     <Box
@@ -91,8 +99,26 @@ const ProductionAopView = () => {
         className='custom-data-grid'
         columns={columns.map((col) => ({
           ...col,
-          filterable: false,
-          sortable: true,
+          filterable: true,
+          editable: (params) => {
+            if (
+              params.row.isEditable === false &&
+              col.field !== lastColumnField
+            ) {
+              return false
+            }
+            return col.field === lastColumnField
+          },
+          cellClassName: (params) => {
+            if (
+              params.row.isEditable === false &&
+              col.field !== lastColumnField
+            ) {
+              return 'odd-cell'
+            }
+            return undefined
+          },
+          headerClassName: col.isDisabled ? 'disabled-header' : undefined,
         }))}
         disableColumnMenu
         disableColumnFilter

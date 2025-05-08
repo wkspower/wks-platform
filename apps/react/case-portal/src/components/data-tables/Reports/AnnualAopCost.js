@@ -93,6 +93,7 @@ const AnnualAopCost = () => {
         const rowsWithId = data?.data?.map((item, index) => ({
           ...item,
           id: index,
+          isEditable: false,
         }))
         setLoading(false)
 
@@ -107,6 +108,7 @@ const AnnualAopCost = () => {
           const rowsWithId2 = data?.data[0]?.results?.map((item, index) => ({
             ...item,
             id: index,
+            isEditable: false,
           }))
           setState(rowsWithId2)
         } else {

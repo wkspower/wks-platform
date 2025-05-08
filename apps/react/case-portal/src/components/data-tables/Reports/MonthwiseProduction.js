@@ -39,7 +39,7 @@ const MonthwiseProduction = () => {
   const columns = [
     {
       field: 'RowNo',
-      headerName: 'Sl. No.',
+      headerName: 'SL.No',
       flex: 1,
       headerAlign: 'left',
       align: 'left',
@@ -55,7 +55,7 @@ const MonthwiseProduction = () => {
     {
       field: 'EOEProdBudget', // was eoeBudgetCY
       headerName: 'Budget',
-      flex: 1,
+      flex: 2,
       headerAlign: 'left',
       align: 'right',
     },
@@ -137,27 +137,6 @@ const MonthwiseProduction = () => {
     },
 
     // (Optional) you can keep Remarks if you plan to add that later
-    // {
-    //   field: 'remarks',
-    //   headerName: 'Remark',
-    //   flex: 2,
-    //   // minWidth: 200,
-    //   headerAlign: 'left',
-    // },
-    // {
-    //   field: 'Remark',
-    //   headerName: 'Remark',
-    //   flex: 2,
-    //   headerAlign: 'left',
-    //   renderCell: (params) => (
-    //     <span
-    //       // style={{ cursor: 'pointer', textDecoration: 'underline' }}
-    //       onClick={() => handleRemarkCellClick(params.rows)}
-    //     >
-    //       {params.value}
-    //     </span>
-    //   ),
-    // },
     {
       field: 'Remark',
       headerName: 'Remark',
@@ -231,11 +210,18 @@ const MonthwiseProduction = () => {
       ],
     },
   ]
+  const [rows, setRows] = useState()
 
-  const defaultCustomHeight = { mainBox: '33vh', otherBox: '110%' }
+  const defaultCustomHeightGrid1 = {
+    mainBox: `${15 + (rows?.length || 0) * 5}vh`,
+    otherBox: `${100 + (rows?.length || 0) * 5}%`,
+  }
+  const defaultCustomHeightGrid2 = {
+    mainBox: `${15 + (rows?.length || 0) * 5}vh`,
+    otherBox: `${100 + (rows?.length || 0) * 5}%`,
+  }
 
   //api call
-  const [rows, setRows] = useState()
   const [loading, setLoading] = useState(false)
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
@@ -250,6 +236,7 @@ const MonthwiseProduction = () => {
           res = res?.data?.data.map((item, index) => ({
             ...item,
             id: index,
+            isEditable: false,
           }))
 
           setRows(res)
@@ -294,7 +281,7 @@ const MonthwiseProduction = () => {
         title='Monthwise Production Summary'
         columns={columns}
         permissions={{
-          customHeight: defaultCustomHeight,
+          customHeight: defaultCustomHeightGrid1,
           textAlignment: 'center',
         }}
         treeData
@@ -324,7 +311,8 @@ const MonthwiseProduction = () => {
           saveWithRemark: false,
           saveBtn: false,
           showCalculate: false,
-          customHeight: defaultCustomHeight,
+          // customHeight: defaultCustomHeight,
+          dynamicGridHeight: true,
           needTotal: true,
         }}
       />

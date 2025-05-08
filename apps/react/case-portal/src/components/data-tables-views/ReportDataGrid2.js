@@ -129,29 +129,17 @@ const ReportDataGrid = ({
       <DataGrid
         rows={rows || []}
         className='custom-data-grid'
-        columns={columns?.map((col) => ({
+        columns={columns.map((col) => ({
           ...col,
-          filterable: true,
-          editable: (params) => {
-            if (
-              params.row.isEditable === false &&
-              col.field !== 'Remark' &&
-              col.field !== 'remarks'
-            ) {
-              return false
-            }
-            return true
-          },
           cellClassName: (params) => {
-            if (
-              params.row.isEditable === false &&
-              col.field !== 'Remark' &&
-              col.field !== 'remarks'
-            ) {
-              return 'odd-cell'
+            // if (col.isDisabled) {
+            if (params.row.Particulars) {
+              return undefined
+            } else {
+              return 'disabled-cell'
             }
-
-            return undefined
+            // }
+            // return undefined
           },
           headerClassName: col.isDisabled ? 'disabled-header' : undefined,
         }))}
@@ -173,6 +161,18 @@ const ReportDataGrid = ({
           period: false,
         }}
         rowHeight={35}
+        getRowClassName={(params) => {
+          const classes = []
+
+          if (params.row.isEditable === false) {
+            return [
+              ...classes,
+              permissions?.noColor === true ? 'even-row' : 'odd-row',
+            ].join(' ')
+          }
+
+          return [...classes, 'even-row'].join(' ')
+        }}
         experimentalFeatures={{ newEditingApi: true, columnGrouping: true }}
         columnGroupingModel={columnGroupingModel}
         treeData={treeData}

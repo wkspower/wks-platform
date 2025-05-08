@@ -264,7 +264,7 @@ const ProductionvolumeData = ({ permissions }) => {
     try {
       setLoading(true)
       const data = await DataService.getAOPMCCalculatedData(keycloak)
-      const formattedData = data.map((item, index) => {
+      var formattedData = data.map((item, index) => {
         const isTPH = selectedUnit == 'TPD'
         return {
           ...item,
@@ -318,9 +318,13 @@ const ProductionvolumeData = ({ permissions }) => {
         ...item,
         isEditable: false,
       }))
+      formattedData = formattedData.map((item) => ({
+        ...item,
+        isEditable: false,
+      }))
 
       setRows2(nonEditableRows)
-      setRows(nonEditableRows)
+      setRows(formattedData)
       setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)

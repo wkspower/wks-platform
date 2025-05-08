@@ -1,6 +1,6 @@
 import { Box } from '@mui/material'
 // import DataGridTable from '../ASDataGrid'
-import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
+import ReportDataGrid from 'components/data-tables-views/ReportDataGrid2'
 import {
   Backdrop,
   CircularProgress,
@@ -13,20 +13,26 @@ import { useSession } from 'SessionStoreContext'
 
 const MonthwiseRawMaterial = () => {
   const keycloak = useSession()
+
+  const formatValueToThreeDecimals = (params) => {
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+  }
   const columnDefs = [
     { field: 'id', headerName: 'ID' },
     {
       field: 'Particulars',
       headerName: 'Type',
       groupable: true,
+      flex: 3,
       renderCell: (params) => <strong>{params.value}</strong>,
     },
-    { field: 'particulars', headerName: 'Particulars' },
+    { field: 'particulars', headerName: 'Particulars', flex: 3 },
     {
       field: 'unit',
       headerName: 'Unit',
       editable: false,
       align: 'left',
+
       headerAlign: 'left',
     },
     {
@@ -41,72 +47,95 @@ const MonthwiseRawMaterial = () => {
       headerName: 'Apr-25',
       align: 'right',
       headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
     },
-    { field: 'may', headerName: 'May-25', align: 'right', headerAlign: 'left' },
+    {
+      field: 'may',
+      headerName: 'May-25',
+      align: 'right',
+      headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
+    },
     {
       field: 'june',
       headerName: 'Jun-25',
       align: 'right',
       headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'july',
       headerName: 'Jul-25',
       align: 'right',
       headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'august',
       headerName: 'Aug-25',
       align: 'right',
       headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'september',
       headerName: 'Sep-25',
       align: 'right',
       headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'october',
       headerName: 'Oct-25',
       align: 'right',
       headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'november',
       headerName: 'Nov-25',
       align: 'right',
       headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'december',
       headerName: 'Dec-25',
       align: 'right',
       headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'january',
       headerName: 'Jan-26',
       align: 'right',
       headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'february',
       headerName: 'Feb-26',
       align: 'right',
       headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'march',
       headerName: 'Mar-26',
       align: 'right',
       headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
     },
-    { field: 'total', headerName: 'Total', align: 'right' },
+    {
+      field: 'total',
+      headerName: 'Total',
+      align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
+    },
   ]
 
   const defaultCustomHeight = { mainBox: '32vh', otherBox: '100%' }
+  const defaultCustomHeightGrid2 = { mainBox: '40vh', otherBox: '100%' }
 
   //api call
   const [row, setRow] = useState()
@@ -195,7 +224,7 @@ const MonthwiseRawMaterial = () => {
           field: 'parameter',
           headerName: 'Parameters',
           editable: false,
-          flex: 2,
+          flex: 1,
           filterOperators: [{ label: 'contains', value: 'contains' }],
         },
         {
@@ -373,14 +402,13 @@ const MonthwiseRawMaterial = () => {
       />
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         {' '}
-        Raw Materials
       </Typography>
       <ReportDataGrid
         rows={row}
         title='Monthwise Production Summary'
         columns={columnDefs}
         permissions={{
-          customHeight: defaultCustomHeight,
+          customHeight: defaultCustomHeightGrid2,
           textAlignment: 'center',
         }}
       />

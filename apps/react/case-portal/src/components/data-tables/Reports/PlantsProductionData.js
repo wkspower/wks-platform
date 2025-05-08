@@ -182,11 +182,45 @@ const PlantsProductionSummary = () => {
           res = res?.data.map((Particulates, index) => ({
             ...Particulates,
             id: index,
+            isEditable: false,
+
+            VarBudgetPer:
+              Particulates.VarBudgetPer != null
+                ? Number(Number(Particulates.VarBudgetPer).toFixed(1))
+                : '',
+
+            VarActualPer:
+              Particulates.VarActualPer != null
+                ? Number(Number(Particulates.VarActualPer).toFixed(1))
+                : '',
+
+            // Round to nearest whole number
+            VarBudgetMT:
+              Particulates.VarBudgetMT != null
+                ? Math.round(Number(Particulates.VarBudgetMT))
+                : '',
+
+            VarActualMT:
+              Particulates.VarActualMT != null
+                ? Math.round(Number(Particulates.VarActualMT))
+                : '',
+
+            BudgetPrevYear:
+              Particulates.BudgetPrevYear != null
+                ? Math.round(Number(Particulates.BudgetPrevYear))
+                : '',
+
+            BudgetCurrentYear:
+              Particulates.BudgetCurrentYear != null
+                ? Math.round(Number(Particulates.BudgetCurrentYear))
+                : '',
+
+            ActualPrevYear:
+              Particulates.ActualPrevYear != null
+                ? Math.round(Number(Particulates.ActualPrevYear))
+                : '',
           }))
-          // res = res?.map((item) => ({
-          //   ...item,
-          //   isEditable: false,
-          // }))
+
           setRows(res)
         } else {
           setRows([])
@@ -199,6 +233,75 @@ const PlantsProductionSummary = () => {
     }
     fetchData()
   }, [year, plantId])
+  // const columns = useMemo(() => {
+  //   if (!rows || rows.length === 0) return []
+
+  //   // helper to detect numeric column across all rows
+  //   const detectNumber = (field) =>
+  //     rows.every((r) => typeof r[field] === 'number')
+
+  //   return apiCols.flatMap((col) => {
+  //     // handle grouped children
+  //     if (col.children) {
+  //       return col.children.map((child) => {
+  //         const isNum = detectNumber(child.field)
+  //         return {
+  //           field: child.field,
+  //           headerName: child.header,
+  //           type: isNum ? 'number' : 'string',
+  //           align: isNum ? 'right' : 'left',
+  //           headerAlign: isNum ? 'right' : 'left',
+  //           flex: 1,
+  //           minWidth: 100,
+  //         }
+  //       })
+  //     }
+
+  //     // leaf column
+  //     const isNum = detectNumber(col.field)
+  //     const base = {
+  //       field: col.field,
+  //       headerName: col.header,
+  //       type: isNum ? 'number' : 'string',
+  //       align: isNum ? 'right' : 'left',
+  //       headerAlign: isNum ? 'right' : 'left',
+
+  //       // your width/flex logic
+  //       width: col.field === 'RowNo' ? 80 : col.field === 'UOM' ? 100 : 250,
+  //       flex: col.field === 'Particulates' ? 2 : undefined,
+  //       minWidth: col.field === 'Particulates' ? 120 : undefined,
+  //     }
+
+  //     // for Remark column, inject custom renderer
+  //     if (col.field === 'Remark') {
+  //       return {
+  //         ...base,
+  //         renderCell: (params) => {
+  //           const txt = params.value || ''
+  //           const display = truncateRemarks(txt, 15)
+  //           return (
+  //             <Tooltip title={txt} arrow>
+  //               <div
+  //                 style={{
+  //                   cursor: 'pointer',
+  //                   overflow: 'hidden',
+  //                   textOverflow: 'ellipsis',
+  //                   whiteSpace: 'nowrap',
+  //                   maxWidth: 140,
+  //                 }}
+  //                 onClick={() => handleRemarkCellClick(params.rows)}
+  //               >
+  //                 {display || 'Click to add remark'}
+  //               </div>
+  //             </Tooltip>
+  //           )
+  //         },
+  //       }
+  //     }
+
+  //     return base
+  //   })
+  // }, [apiCols, rows, handleRemarkCellClick])
   const columns = useMemo(() => {
     if (!rows || rows.length === 0) return []
 
@@ -339,7 +442,7 @@ const PlantsProductionSummary = () => {
   }, [])
 
   return (
-    <Box>
+    <Box sx={{ height: ' 635px', width: '100%' }}>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={!!loading}

@@ -375,6 +375,9 @@ const DataGridTable = ({
   const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
   // console.log(showDeleteAll)
 
+  const lastColumnField = columns[columns.length - 1]?.field
+
+
   return (
     <Box
       sx={{
@@ -602,6 +605,16 @@ const DataGridTable = ({
           checkboxSelection={permissions?.showCheckBox}
           columns={columns.map((col) => ({
             ...col,
+            editable: (params) => {
+              if (
+                permissions?.remarksEditable &&
+                params.row.isEditable === false &&
+                col.field !== lastColumnField
+              ) {
+                return false
+              }
+              return col.field === lastColumnField
+            },
             cellClassName: (params) => {
               if (col.isDisabled) {
                 if (params.row.Particulars) {
@@ -609,6 +622,13 @@ const DataGridTable = ({
                 } else {
                   return 'disabled-cell'
                 }
+              }
+              if (
+                permissions?.remarksEditable &&
+                params.row.isEditable === false &&
+                col.field !== lastColumnField
+              ) {
+                return 'odd-cell'
               }
               return undefined
             },
@@ -657,7 +677,10 @@ const DataGridTable = ({
               classes.push('no-border-row')
             }
 
-            if (params.row.isEditable === false) {
+            if (
+              params.row.isEditable === false &&
+              !permissions?.remarksEditable
+            ) {
               return [
                 ...classes,
                 permissions?.noColor === true ? 'even-row' : 'odd-row',
