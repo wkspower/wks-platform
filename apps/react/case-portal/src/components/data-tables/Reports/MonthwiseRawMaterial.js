@@ -23,7 +23,7 @@ const MonthwiseRawMaterial = () => {
       field: 'Particulars',
       headerName: 'Type',
       groupable: true,
-      flex: 3,
+      flex: 2,
       renderCell: (params) => <strong>{params.value}</strong>,
     },
     { field: 'particulars', headerName: 'Particulars', flex: 3 },
@@ -32,8 +32,8 @@ const MonthwiseRawMaterial = () => {
       headerName: 'Unit',
       editable: false,
       align: 'left',
-
       headerAlign: 'left',
+      flex: 1,
     },
     {
       field: 'spec',
@@ -41,12 +41,14 @@ const MonthwiseRawMaterial = () => {
       editable: false,
       align: 'left',
       headerAlign: 'left',
+      flex: 1,
     },
     {
       field: 'april',
       headerName: 'Apr-25',
       align: 'right',
       headerAlign: 'left',
+      flex: 1,
       valueFormatter: formatValueToThreeDecimals,
     },
     {
@@ -55,6 +57,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      flex: 1,
     },
     {
       field: 'june',
@@ -62,6 +65,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      flex: 1,
     },
     {
       field: 'july',
@@ -69,6 +73,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      flex: 1,
     },
     {
       field: 'august',
@@ -76,6 +81,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      flex: 1,
     },
     {
       field: 'september',
@@ -83,6 +89,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      flex: 1,
     },
     {
       field: 'october',
@@ -90,6 +97,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      flex: 1,
     },
     {
       field: 'november',
@@ -97,6 +105,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      flex: 1,
     },
     {
       field: 'december',
@@ -104,6 +113,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      flex: 1,
     },
     {
       field: 'january',
@@ -111,6 +121,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      flex: 1,
     },
     {
       field: 'february',
@@ -118,6 +129,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      flex: 1,
     },
     {
       field: 'march',
@@ -125,12 +137,14 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
+      flex: 1,
     },
     {
       field: 'total',
       headerName: 'Total',
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      flex: 1,
     },
   ]
 
@@ -143,15 +157,18 @@ const MonthwiseRawMaterial = () => {
     const fetchData = async () => {
       try {
         setLoading(true)
+
+        const label = `FY ${year} AOP`
+
         var res = await DataService.getAnnualCostAopReport(
           keycloak,
           'quantity',
-          'FY 2025-26 AOP',
+          label,
         )
         var res2 = await DataService.getMonthwiseRawData(keycloak)
 
         // FY%202025-26%20AOP
-        console.log(res)
+        // console.log(res)
         if (res2?.code == 200) {
           res2 = res2?.data?.consumptionSummary.map((item, index) => ({
             ...item,
@@ -192,7 +209,7 @@ const MonthwiseRawMaterial = () => {
             groupedRows.push(formattedItem)
           })
 
-          console.log(groupedRows)
+          // console.log(groupedRows)
           setRow(groupedRows)
 
           // setRow(res)

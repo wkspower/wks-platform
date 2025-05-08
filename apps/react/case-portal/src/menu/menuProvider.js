@@ -24,7 +24,7 @@ export function MenuProvider({ children }) {
       .then((res) => {
         const dynamic = Array.isArray(res.data) ? res.data.map(mapScreen) : []
         if (dynamic.length) {
-          setMenuItems(dynamic)
+          setMenuItems(staticMenu)
         }
       })
       .catch((err) => {

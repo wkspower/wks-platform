@@ -109,41 +109,41 @@ const AnnualProductionPlan = () => {
   ]
 
   const columnsProductionPerformance = [
-    { field: 'sno', headerName: 'SL.No', editable: true, minWidth: 50 },
+    { field: 'sno', headerName: 'SL.No', editable: false, minWidth: 50 },
     { field: 'Item', headerName: 'Item', editable: false, flex: 1 },
 
-    //this is a parent ->  2023-24
-    //its child
-    { field: 'Budget1', headerName: 'Budget 1', editable: false, flex: 1 },
-    { field: 'Actual1', headerName: 'Actual 1', editable: false, flex: 1 },
-    //this is a parent ->  2024-25
-    //its child
-    { field: 'Budget2', headerName: 'Budget 2', editable: false, flex: 1 },
-    { field: 'Actual2', headerName: 'Actual 2', editable: false, flex: 1 },
-    //this is a parent ->  2025-26
-    //its child
-    { field: 'Budget3', headerName: 'Budget 3', editable: false, flex: 1 },
-    { field: 'Actual3', headerName: 'Actual 3', editable: false, flex: 1 },
-    //this is a parent ->  2027
-    //its child
-    { field: 'Budget4', headerName: 'Budget 4', editable: false, flex: 1 },
+    { field: 'Budget1', headerName: 'Budget', editable: false, flex: 1 },
+    { field: 'Actual1', headerName: 'Actual', editable: false, flex: 1 },
+
+    { field: 'Budget2', headerName: 'Budget', editable: false, flex: 1 },
+    { field: 'Actual2', headerName: 'Actual', editable: false, flex: 1 },
+
+    { field: 'Budget3', headerName: 'Budget', editable: false, flex: 1 },
+    { field: 'Actual3', headerName: 'Actual', editable: false, flex: 1 },
+
+    { field: 'Budget4', headerName: 'Budget', editable: false, flex: 1 },
   ]
+
+  const year4 = localStorage.getItem('year')
+  const year3 = `${+year4.split('-')[0] - 1}-${+year4.split('-')[1] - 1}`
+  const year2 = `${+year3.split('-')[0] - 1}-${+year3.split('-')[1] - 1}`
+  const year1 = `${+year2.split('-')[0] - 1}-${+year2.split('-')[1] - 1}`
 
   const columnGroupingModel = [
     {
-      groupId: '2023-24',
+      groupId: year1,
       children: [{ field: 'Budget1' }, { field: 'Actual1' }],
     },
     {
-      groupId: '2024-25',
+      groupId: year2,
       children: [{ field: 'Budget2' }, { field: 'Actual2' }],
     },
     {
-      groupId: '2025-26',
+      groupId: year3,
       children: [{ field: 'Budget3' }, { field: 'Actual3' }],
     },
     {
-      groupId: '2026-27',
+      groupId: year4,
       children: [{ field: 'Budget4' }],
     },
   ]
