@@ -173,6 +173,18 @@ const ReportDataGrid = ({
           period: false,
         }}
         rowHeight={35}
+        getRowClassName={(params) => {
+          const classes = []
+
+          if (params.row.isEditable === false) {
+            return [
+              ...classes,
+              permissions?.noColor === true ? 'even-row' : 'odd-row',
+            ].join(' ')
+          }
+
+          return [...classes, 'even-row'].join(' ')
+        }}
         experimentalFeatures={{ newEditingApi: true, columnGrouping: true }}
         columnGroupingModel={columnGroupingModel}
         treeData={treeData}

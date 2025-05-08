@@ -105,7 +105,7 @@ export default function HeaderContent({ keycloak }) {
         'selectedVertical',
         JSON.stringify({ id: defV.id, name: defV.name }),
       )
-      console.log(defV.name)
+      // console.log(defV.name)
       // dispatch Redux
       dispatch(
         setVerticalChange({
@@ -176,30 +176,6 @@ export default function HeaderContent({ keycloak }) {
     async function fetchYears() {
       try {
         var resp = await DataService.getAopyears(keycloak)
-
-        // resp = [
-        //   {
-        //     AOPDisplayYear: '2024-25',
-        //     AOPYear: '2024-25',
-        //     currentYear: '0',
-        //   },
-        //   {
-        //     AOPDisplayYear: '2025-26',
-        //     AOPYear: '2025-26',
-        //     currentYear: '0',
-        //   },
-        //   {
-        //     AOPDisplayYear: '2026-27',
-        //     AOPYear: '2026-27',
-        //     currentYear: '1',
-        //   },
-        //   {
-        //     AOPDisplayYear: '2028-29',
-        //     AOPYear: '2028-29',
-        //     currentYear: '0',
-        //   },
-        // ]
-
         if (resp?.length) {
           setAopYears(resp)
 
@@ -234,19 +210,14 @@ export default function HeaderContent({ keycloak }) {
     const isCurrentYear = selectedYearObj?.currentYear == 1
 
     const currentYear = aopYears.find((y) => y.currentYear == 1)
-
     dispatch(setCurrentYear({ currentYear: isCurrentYear ? 1 : 0 }))
-
     let isOldYear = 0
     let currentYear1 = currentYear?.AOPYear
-
     const [currentStartYear] = currentYear1.split('-').map(Number)
     const [selectedStartYear] = newYear.split('-').map(Number)
-
     if (selectedStartYear < currentStartYear) {
       isOldYear = 1
     }
-
     dispatch(setOldYear({ oldYear: isOldYear }))
   }
   // inside HeaderContent, above the return

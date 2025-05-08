@@ -1,131 +1,138 @@
-// new-plan.js
-import FolderOutlined from '@ant-design/icons/FolderOutlined'
-import {
-  IconArchive,
-  IconFileCheck,
-  IconFileInvoice,
-  IconList,
-  IconSquareAsterisk,
-  IconDatabase,
-  IconChartBar,
-  IconSettings,
-  IconPower,
-  IconTrendingDown,
-  IconTools,
-  IconShield,
-  IconFunction,
-  IconReport,
-  IconFile,
-  IconFileText,
-  IconCalendarCog,
-  IconFilter,
-  IconSwitch,
-  IconBarrierBlock,
-  IconChartHistogram,
-  IconPackages,
-  IconTrafficCone,
-} from '@tabler/icons-react'
-import i18n from '../i18n'
-import { useEffect, useState } from 'react'
-import { useSession } from 'SessionStoreContext'
-import { DataService } from 'services/DataService'
-import { useSelector } from 'react-redux'
+// // new-plan.js
+// import FolderOutlined from '@ant-design/icons/FolderOutlined'
+// import {
+//   IconArchive,
+//   IconFileCheck,
+//   IconFileInvoice,
+//   IconList,
+//   IconSquareAsterisk,
+//   IconDatabase,
+//   IconChartBar,
+//   IconSettings,
+//   IconPower,
+//   IconTrendingDown,
+//   IconTools,
+//   IconShield,
+//   IconFunction,
+//   IconReport,
+//   IconFile,
+//   IconFileText,
+//   IconCalendarCog,
+//   IconFilter,
+//   IconSwitch,
+//   IconBarrierBlock,
+//   IconChartHistogram,
+//   IconPackages,
+//   IconTrafficCone,
+// } from '@tabler/icons-react'
+// import i18n from '../i18n'
+// import { useEffect, useState } from 'react'
+// import { useSession } from 'SessionStoreContext'
+// import { DataService } from 'services/DataService'
+// import { useSelector } from 'react-redux'
 
-const icons = {
-  FolderOutlined,
-  IconFileInvoice,
-  IconFileCheck,
-  IconArchive,
-  IconSquareAsterisk,
-  IconList,
-  IconDatabase,
-  IconChartBar,
-  IconSettings,
-  IconPower,
-  IconTrendingDown,
-  IconTools,
-  IconShield,
-  IconFunction,
-  IconReport,
-  IconFile,
-  IconFileText,
-  IconCalendarCog,
-  IconFilter,
-  IconSwitch,
-  IconBarrierBlock,
-  IconChartHistogram,
-  IconPackages,
-  IconTrafficCone,
-}
+// const icons = {
+//   FolderOutlined,
+//   IconFileInvoice,
+//   IconFileCheck,
+//   IconArchive,
+//   IconSquareAsterisk,
+//   IconList,
+//   IconDatabase,
+//   IconChartBar,
+//   IconSettings,
+//   IconPower,
+//   IconTrendingDown,
+//   IconTools,
+//   IconShield,
+//   IconFunction,
+//   IconReport,
+//   IconFile,
+//   IconFileText,
+//   IconCalendarCog,
+//   IconFilter,
+//   IconSwitch,
+//   IconBarrierBlock,
+//   IconChartHistogram,
+//   IconPackages,
+//   IconTrafficCone,
+// }
 
-function mapScreen(item = {}) {
-  return {
-    id: item.id || '',
-    title: i18n.t(item.title || ''),
-    type: item.type || 'item',
-    icon: icons[item.icon] || undefined,
-    url: item.url || '',
-    breadcrumbs: Boolean(item.breadcrumbs),
-    children: Array.isArray(item.children) ? item.children.map(mapScreen) : [],
-  }
-}
+// function mapScreen(item = {}) {
+//   return {
+//     id: item.id || '',
+//     title: i18n.t(item.title || ''),
+//     type: item.type || 'item',
+//     icon: icons[item.icon] || undefined,
+//     url: item.url || '',
+//     breadcrumbs: Boolean(item.breadcrumbs),
+//     children: Array.isArray(item.children) ? item.children.map(mapScreen) : [],
+//   }
+// }
 
-export function usePlanMenu() {
-  // ==== REPLACED with a literal array ====
+// export function usePlanMenu() {
+//   // ==== REPLACED with a literal array ====
 
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange } = dataGridStore
-  const [screens, setScreens] = useState([])
-  const keycloak = useSession()
+//   const dataGridStore = useSelector((state) => state.dataGridStore)
+//   const { verticalChange } = dataGridStore
+//   const [screens, setScreens] = useState([])
+//   const keycloak = useSession()
 
-  const verticalId = localStorage.getItem('verticalId')
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  // console.log(verticalId, verticalChange)
-  useEffect(() => {
-    if (!keycloak?.token || !verticalId) return
+//   const verticalId = localStorage.getItem('verticalId')
+//   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+//   // console.log(verticalId, verticalChange)
+//   useEffect(() => {
+//     if (!keycloak?.token || !verticalId) return
 
-    const fetchScreens = async () => {
-      try {
-        const res = await DataService.getScreenbyPlant(
-          keycloak,
-          verticalId,
-          plantId,
-        )
-        // const res = await DataService.getUserScreen(keycloak, verticalId)
-        setScreens(res.data)
-      } catch (error) {
-        console.error('Error fetching menu:', error)
-      }
-    }
+//     const fetchScreens = async () => {
+//       try {
+//         const res = await DataService.getScreenbyPlant(
+//           keycloak,
+//           verticalId,
+//           plantId,
+//         )
+//         const mappedScreens = Array.isArray(res.data)
+//           ? res.data.map(mapScreen)
+//           : []
 
-    fetchScreens()
-  }, [keycloak, verticalId, verticalChange, plantId])
+//         setScreens(mappedScreens)
+//         // console.log('res.data:', res.data)
 
-  const utilities = screens.find((g) => g.id === 'utilities') || {}
-  const collapseGroup = Array.isArray(utilities.children)
-    ? utilities.children[0] || {}
-    : {}
+//         // const res = await DataService.getUserScreen(keycloak, verticalId)
+//         // setScreens(res.data)
+//       } catch (error) {
+//         console.error('Error fetching menu:', error)
+//       }
+//     }
 
-  // No more “icons.” prefix left, but if you did have it, you’d strip it here:
-  const rawIcon = collapseGroup.icon || ''
-  const cleanedIcon = rawIcon.startsWith('icons.')
-    ? rawIcon.slice('icons.'.length)
-    : rawIcon
+//     fetchScreens()
+//   }, [keycloak, verticalId, verticalChange, plantId])
 
-  return {
-    id: utilities.id || 'utilities',
-    title: i18n.t(utilities.title || ''),
-    type: utilities.type || 'group',
-    children: [
-      {
-        id: collapseGroup.id || 'production-norms-plan',
-        title: i18n.t(collapseGroup.title || ''),
-        type: collapseGroup.type || 'collapse',
-        icon: icons[cleanedIcon] || IconArchive,
-        children: Array.isArray(collapseGroup.children)
-          ? collapseGroup.children.map(mapScreen)
-          : [],
-      },
-    ],
-  }
-}
+//   const utilities = screens.find((g) => g.id === 'utilities') || {}
+//   const collapseGroup = Array.isArray(utilities.children)
+//     ? utilities.children[0] || {}
+//     : {}
+
+//   // No more “icons.” prefix left, but if you did have it, you’d strip it here:
+//   const rawIcon = collapseGroup.icon || ''
+//   const cleanedIcon = rawIcon.startsWith('icons.')
+//     ? rawIcon.slice('icons.'.length)
+//     : rawIcon
+
+//   return {
+//     id: utilities.id || 'utilities',
+//     title: i18n.t(utilities.title || ''),
+//     type: utilities.type || 'group',
+//     children: [
+//       {
+//         id: collapseGroup.id || 'production-norms-plan',
+//         title: i18n.t(collapseGroup.title || ''),
+//         type: collapseGroup.type || 'collapse',
+//         icon: icons[cleanedIcon] || IconArchive,
+//         children: Array.isArray(collapseGroup.children)
+//           ? collapseGroup.children.map(mapScreen)
+//           : [],
+//       },
+//     ],
+//   }
+// }

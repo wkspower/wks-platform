@@ -6,7 +6,7 @@ import { SessionStoreProvider } from './SessionStoreContext'
 //   CaseService,
 //   //  RecordService
 // } from 'services'
-import menuItemsDefs from './menu'
+// import menuItemsDefs from './menu'
 import { RegisterInjectUserSession, RegisteOptions } from './plugins'
 import { accountStore, sessionStore } from './store'
 import './App.css'
@@ -15,8 +15,9 @@ import './data-grid-css.css'
 import './jio-grid-style.css'
 // import { useSelector } from 'react-redux'
 import Layout from 'layout/FooterLayout/index'
-import { useSelector } from 'react-redux'
-import useMenuItems from 'menu/index'
+// import { useSelector } from 'react-redux'
+// import useMenuItems from 'menu/index'
+import { MenuProvider } from 'menu/menuProvider'
 // import useMenuItems from 'menu/index'
 
 const ScrollTop = lazy(() => import('./components/ScrollTop'))
@@ -28,10 +29,10 @@ const App = () => {
   const [authenticated, setAuthenticated] = useState(null)
   // const [recordsTypes, setRecordsTypes] = useState([])
   // const [casesDefinitions, setCasesDefinitions] = useState([])
-  const [menu, setMenu] = useState({ items: [] })
+  // const [menu, setMenu] = useState({ items: [] })
   // const { items: menuItems } = useMenuItems()
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange } = dataGridStore
+  // const dataGridStore = useSelector((state) => state.dataGridStore)
+  // const { verticalChange } = dataGridStore
 
   useEffect(() => {
     const { keycloak } = sessionStore.bootstrap()
@@ -39,8 +40,7 @@ const App = () => {
     keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
       setKeycloak(keycloak)
       setAuthenticated(authenticated)
-      // buildMenuItems(menuItems)
-      buildMenuItems(keycloak)
+      // buildMenuItems(keycloak)
       RegisterInjectUserSession(keycloak)
       RegisteOptions(keycloak)
       forceLogoutIfUserNoMinimalRoleForSystem(keycloak)
@@ -82,83 +82,80 @@ const App = () => {
     }
   }
 
-  useEffect(() => {
-    if (keycloak && verticalChange) {
-      buildMenuItems(keycloak)
-    }
-    // console.log(verticalChange)
-  }, [verticalChange, keycloak])
-  // const plan = usePlanMenu()
-  // console.log(plan)
+  // useEffect(() => {
+  //   if (keycloak && verticalChange) {
+  //     buildMenuItems(keycloak)
+  //   }
+  //   // console.log(verticalChange)
+  // }, [verticalChange, keycloak])
 
-  async function buildMenuItems(keycloak) {
-    let rawAllowedVerticals = []
-    const verticals = keycloak?.idTokenParsed?.verticals
+  // async function buildMenuItems(keycloak) {
+  //   let rawAllowedVerticals = []
+  //   const verticals = keycloak?.idTokenParsed?.verticals
 
-    if (verticals) {
-      try {
-        rawAllowedVerticals = JSON.parse(verticals)
-      } catch (error) {
-        console.error('Error parsing verticals JSON:', error)
-        rawAllowedVerticals = []
-      }
-    } else {
-      // console.log('No verticals found in idTokenParsed')
-    }
+  //   if (verticals) {
+  //     try {
+  //       rawAllowedVerticals = JSON.parse(verticals)
+  //     } catch (error) {
+  //       console.error('Error parsing verticals JSON:', error)
+  //       rawAllowedVerticals = []
+  //     }
+  //   } else {
+  //     // console.log('No verticals found in idTokenParsed')
+  //   }
 
-    const allowedVerticalsMapping = rawAllowedVerticals.reduce((acc, obj) => {
-      return { ...acc, ...obj }
-    }, {})
+  //   const allowedVerticalsMapping = rawAllowedVerticals.reduce((acc, obj) => {
+  //     return { ...acc, ...obj }
+  //   }, {})
 
-    // console.log(allowedVerticalsMapping)
-    // console.log(verticalChange)
+  //   // console.log(allowedVerticalsMapping)
+  //   // console.log(verticalChange)
 
-    const selectedVertical = verticalChange?.selectedVertical?.toLowerCase()
-    const allowedChildIds =
-      (selectedVertical && allowedVerticalsMapping[selectedVertical]) || []
+  //   const selectedVertical = verticalChange?.selectedVertical?.toLowerCase()
+  //   const allowedChildIds =
+  //     (selectedVertical && allowedVerticalsMapping[selectedVertical]) || []
 
-    // Build the menu based on allowed verticals
-    const menu = {
-      items: [...menuItemsDefs.items],
-    }
-    // console.log(menu)
+  //   // Build the menu based on allowed verticals
+  //   const menu = {
+  //     items: [...menuItemsDefs.items],
+  //   }
+  //   // console.log(menu)
 
-    menu.items = menu.items.map((item) => {
-      if (item.id === 'utilities') {
-        return {
-          ...item,
-          children: item.children.map((group) => {
-            if (group.id === 'production-norms-plan') {
-              return {
-                ...group,
-                children: group.children.filter((child) =>
-                  allowedChildIds.length > 0
-                    ? allowedChildIds.includes(child.id)
-                    : true,
-                ),
-              }
-            }
-            return group
-          }),
-        }
-      }
-      return item
-    })
+  //   menu.items = menu.items.map((item) => {
+  //     if (item.id === 'utilities') {
+  //       return {
+  //         ...item,
+  //         children: item.children.map((group) => {
+  //           if (group.id === 'production-norms-plan') {
+  //             return {
+  //               ...group,
+  //               children: group.children.filter((child) =>
+  //                 allowedChildIds.length > 0
+  //                   ? allowedChildIds.includes(child.id)
+  //                   : true,
+  //               ),
+  //             }
+  //           }
+  //           return group
+  //         }),
+  //       }
+  //     }
+  //     return item
+  //   })
 
-    // Safely determine if the user is a manager.
-    // If keycloak.hasRealmRole is not a function, default to false.
-    const isManagerUser =
-      typeof keycloak.hasRealmRole === 'function'
-        ? keycloak.hasRealmRole('manager')
-        : false
+  //   // Safely determine if the user is a manager.
+  //   // If keycloak.hasRealmRole is not a function, default to false.
+  //   const isManagerUser =
+  //     typeof keycloak.hasRealmRole === 'function'
+  //       ? keycloak.hasRealmRole('manager')
+  //       : false
 
-    if (!isManagerUser) {
-      delete menu.items[3]
-    }
+  //   if (!isManagerUser) {
+  //     delete menu.items[3]
+  //   }
 
-    return setMenu(menu)
-  }
-
+  //   return setMenu(menu)
+  // }
   // async function buildMenuItems(keycloak) {
   //   // console.log(menuItems)
   //   const menu = { items: [...menuItems] }
@@ -182,14 +179,16 @@ const App = () => {
         <Layout>
           <Suspense fallback={<div>Loading...</div>}>
             <ScrollTop>
-              <SessionStoreProvider value={{ keycloak, menu }}>
-                <ThemeRoutes
-                  keycloak={keycloak}
-                  authenticated={authenticated}
+              <SessionStoreProvider value={{ keycloak }}>
+                <MenuProvider>
+                  <ThemeRoutes
+                    keycloak={keycloak}
+                    authenticated={authenticated}
 
-                  // recordsTypes={recordsTypes}
-                  // casesDefinitions={casesDefinitions}
-                />
+                    // recordsTypes={recordsTypes}
+                    // casesDefinitions={casesDefinitions}
+                  />
+                </MenuProvider>
               </SessionStoreProvider>
             </ScrollTop>
           </Suspense>

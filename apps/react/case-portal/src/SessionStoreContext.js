@@ -20,10 +20,10 @@ export const useSession = () => {
   return attrs['keycloak']
 }
 
-export const useMenu = () => {
-  const attrs = useContext(SessionStoreContext)
-  return attrs['menu']
-}
+// export const useMenu = () => {
+//   const attrs = useContext(SessionStoreContext)
+//   return attrs['menu']
+// }
 
 export const useBpmEngine = () => {
   const attrs = useContext(SessionStoreContext)

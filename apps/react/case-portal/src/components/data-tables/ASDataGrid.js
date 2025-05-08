@@ -30,6 +30,7 @@ import {
   FileUpload,
 } from '../../../node_modules/@mui/icons-material/index'
 import Typography from 'themes/overrides/Typography'
+import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 
 const jioColors = {
   primaryBlue: '#387ec3',
@@ -89,6 +90,8 @@ const DataGridTable = ({
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeDeleteDialogeBox = () => setOpenDeleteDialogeBox(false)
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
+  const localApiRef = useGridApiRef()
+  const finalExternalApiRef = apiRef ?? localApiRef
   const handleSearchChange = (event) => {
     setSearchText(event.target.value)
   }
@@ -377,7 +380,6 @@ const DataGridTable = ({
 
   const lastColumnField = columns[columns.length - 1]?.field
 
-
   return (
     <Box
       sx={{
@@ -598,7 +600,7 @@ const DataGridTable = ({
         <DataGrid
           loading={loading}
           className='custom-data-grid'
-          apiRef={apiRef}
+          apiRef={finalExternalApiRef}
           rows={filteredRows}
           sortingOrder={[]}
           disableSelectionOnClick
@@ -717,8 +719,9 @@ const DataGridTable = ({
               className='btn-save'
               onClick={saveModalOpen}
               disabled={isButtonDisabled}
-              loading={loading}
-              loadingposition='start'
+              // loading={loading}
+              // loadingposition='start'
+              {...(loading ? {} : {})}
             >
               Save
             </Button>

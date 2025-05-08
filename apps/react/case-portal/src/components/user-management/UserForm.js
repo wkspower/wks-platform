@@ -196,32 +196,84 @@ const UserAccessForm = ({ keycloak }) => {
   // --- Dynamic Fetching of Screens ---
   // Whenever selectedVerticals changes, fetch the available screens
   // For simplicity, we use the first selected vertical.
-  useEffect(() => {
-    const fetchScreensForActiveVertical = async () => {
-      if (selectedVerticals.length > 0) {
-        const activeVerticalId = selectedVerticals[0]
-        try {
-          const response = await DataService.getUserScreen(
-            keycloak,
-            activeVerticalId,
-          )
-          if (response) {
-            // Map the response data to get the display names of screens.
-            // setScreens(
-            //   response.data[0].children[0].children[0].map(
-            const screenTitles = response.data[0].children[0].children.map(
-                (item) => item.title,
-            )
-            setScreens(screenTitles)
-          }
-        } catch (error) {
-          console.error('Error fetching screens:', error)
+  // useEffect(() => {
+  //   const fetchScreensForActiveVertical = async () => {
+  //     if (selectedVerticals.length > 0) {
+  //       const activeVerticalId = selectedVerticals[0]
+  //       try {
+  //         const response = await DataService.getUserScreen(
+  //           keycloak,
+  //           activeVerticalId,
+  //         )
+  //         if (response) {
+  //           // Map the response data to get the display names of screens.
+  //           // setScreens(
+  //           //   response.data[0].children[0].children[0].map(
+  //           //     (item) => item.title,
+  //           //   ),
+  //           // )
+  //           const screenTitles = response.data[0].children[0].children.map(
+  //             (item) => item.title,
+  //           )
+  //           setScreens(screenTitles)
+  //         }
+  //       } catch (error) {
+  //         console.error('Error fetching screens:', error)
+  //       }
+  //     }
+  //   }
+
+  //   fetchScreensForActiveVertical()
+  // }, [selectedVerticals, keycloak])
+  function extractScreens(nodes) {
+    const result = []
+
+    function recurse(list) {
+      for (const node of list) {
+        if (node.type === 'item' && node.url) {
+          result.push({
+            id: node.id,
+            title: node.title,
+            url: node.url,
+            icon: node.icon || '',
+          })
+        }
+        if (Array.isArray(node.children)) {
+          recurse(node.children)
         }
       }
     }
 
-    fetchScreensForActiveVertical()
+    recurse(nodes)
+    return result
+  }
+  useEffect(() => {
+    async function fetchScreens() {
+      if (!selectedVerticals.length) return
+      try {
+        const activeVerticalId = selectedVerticals[0]
+        const response = await DataService.getUserScreen(
+          keycloak,
+          activeVerticalId,
+        )
+        const groups = response.data
+
+        // Flatten all “item” nodes under all children/groups:
+        const screens = extractScreens(groups)
+
+        // e.g. setScreens to an array of titles:
+        setScreens(screens.map((s) => s.title))
+
+        // If you want to store full metadata:
+        // setScreensMetadata(screens)
+      } catch (err) {
+        console.error('Error fetching screens', err)
+      }
+    }
+
+    fetchScreens()
   }, [selectedVerticals, keycloak])
+
   // --- End of Dynamic Fetching of Screens ---
 
   // Default screen options: if not fetched or provided in navigation data.
@@ -458,7 +510,7 @@ const UserAccessForm = ({ keycloak }) => {
       },
     }
 
-    // console.log('Saved JSON:', JSON.stringify(result, null, 2))
+    //console.log('Saved JSON:', JSON.stringify(result, null, 2))
     try {
       setLoading(true)
       const res = await DataService.updateUserPlants(keycloak, result)
