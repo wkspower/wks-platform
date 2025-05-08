@@ -1,50 +1,72 @@
+# Understanding Process Instances in WKS
+
+A **process instance** represents a single execution of a business process within the WKS Platform. It is created when a process is triggered and contains all the data, context, and state relevant to that specific run. Each process instance follows the logic defined in a BPMN (Business Process Model and Notation) diagram.
+
 ---
-id: process-instance
-title: Process Instance
+
+## 🔍 What Is a Process Instance?
+
+In simple terms, a process instance is a "live" or historical execution of a workflow. For every time a process is started, whether automatically or manually, a new, uniquely identifiable process instance is created to track its execution from start to finish.
+
 ---
 
-A process instance represents a single execution of a business process. It is created when a new instance of a process is started and contains all the data and information related to that specific execution of the process. Each process instance follows the defined sequence of activities, events, and decisions outlined in the BPMN (Business Process Model and Notation) diagram.
+## 📌 Key Characteristics
 
-#### Characteristics of Process Instance:
+| Attribute           | Description                                                                 |
+|---------------------|-----------------------------------------------------------------------------|
+| **Unique ID**        | Each instance has a unique **Process Instance ID** to distinguish it from others. |
+| **Execution Context**| Stores all relevant variables, data inputs, and outputs needed during the execution. |
+| **Lifecycle**        | Follows stages from initiation to completion (or termination), progressing through tasks, events, and gateways. |
+| **State**            | Indicates current status—such as `active`, `suspended`, `completed`, or `terminated`. |
+| **Audit Trail**      | Captures a detailed execution log, enabling full traceability of actions and decisions. |
 
-1.  **Unique Identifier:** Each process instance is assigned a unique identifier (Process Instance ID) to distinguish it from other instances.
-    
-2.  **Execution Context:** Contains all the data, variables, and context necessary for executing the process, including input data, intermediate results, and output data.
-    
-3.  **Lifecycle:** Starts when the process is initiated and progresses through various stages (e.g., tasks, gateways, events) until it reaches completion or termination.
-    
-4.  **State:** Represents the current state or status of the process instance, indicating whether it is active, suspended, completed, or terminated.
-    
-5.  **Audit Trail:** Records the history of activities and events executed during the process instance, providing visibility into its execution path and outcomes.
-    
+---
 
-#### Monitoring and Managing Process Instances with Camunda Cockpit
+## 🛠 Monitoring & Managing Process Instances with Camunda Cockpit
 
-Camunda Cockpit is a web-based application provided by Camunda BPM for monitoring and managing business processes and process instances. It offers various features and functionalities for analyzing, tracking, and controlling process executions. Here's how process instances can be monitored and managed using Camunda Cockpit:
+WKS integrates with **Camunda Cockpit**, a powerful web-based tool for real-time visibility and control over process executions. With it, you can monitor, troubleshoot, and optimize your workflows.
 
-1.  **Dashboard Overview:** Camunda Cockpit provides a dashboard overview of all active process instances, displaying key metrics such as total instances, active instances, completed instances, and running instances.
-    
-2.  **Instance List:** Users can view a list of all process instances, filter and search for specific instances based on criteria such as process definition, instance ID, start time, and state.
-    
-3.  **Instance Details:** Users can drill down into individual process instances to view detailed information, including execution history, variables, task assignments, and current state.
-    
-4.  **Instance Diagram:** Camunda Cockpit displays a visual representation of the process instance's execution path, highlighting the sequence of activities, events, and decisions completed or pending.
-    
-5.  **Lifecycle Management:** Users can manage the lifecycle of process instances by starting, suspending, resuming, or terminating instances as needed. This allows for manual intervention and control over process executions.
-    
-6.  **Error Handling:** Camunda Cockpit provides features for handling errors and exceptions encountered during process execution, allowing users to view error details, retry failed tasks, or take corrective actions.
-    
-7.  **Performance Monitoring:** Users can monitor the performance of process instances by analyzing metrics such as execution time, waiting time, and throughput, identifying bottlenecks and areas for optimization.
-    
-8.  **Historical Data:** Camunda Cockpit maintains a historical record of process instances, allowing users to analyze past executions, trends, and patterns for continuous improvement.
-    
+### Core Features of Camunda Cockpit:
 
-#### Benefits of Monitoring and Managing Process Instances with Camunda Cockpit:
+- **📊 Dashboard Overview**  
+  View summaries of active, completed, and failed process instances in a centralised dashboard.
 
--   **Visibility:** Provides real-time visibility into the status and progress of process instances, facilitating better decision-making and resource allocation.
-    
--   **Control:** Enables users to monitor, analyze, and intervene in process executions as needed, ensuring compliance, efficiency, and quality.
-    
--   **Insights:** Offers insights into process performance, execution patterns, and areas for improvement, driving continuous optimization and innovation.
-    
--   **Auditability:** Maintains an audit trail of process instances, ensuring traceability and accountability for compliance and regulatory requirements.
+- **🔎 Instance List & Filtering**  
+  Search and filter instances by definition, state, start time, or instance ID.
+
+- **📁 Instance Details**  
+  Access full execution details, including variables, tasks, user assignments, and history.
+
+- **🗺 Execution Diagram**  
+  Visualise the current or completed path of the instance over the BPMN model, with highlights for each executed element.
+
+- **▶ Lifecycle Controls**  
+  Start, suspend, resume, or cancel process instances to manage workflows in real time.
+
+- **❗ Error Handling**  
+  Identify and resolve incidents, retry failed jobs, or inspect stack traces for deeper troubleshooting.
+
+- **📈 Performance Metrics**  
+  Analyse execution time, waiting durations, and throughput to find and fix bottlenecks.
+
+- **🕒 Historical Insights**  
+  Review completed instances to support audits, reporting, and continuous improvement.
+
+---
+
+## ✅ Benefits of Process Instance Monitoring
+
+- **Real-Time Visibility**  
+  Gain instant insights into where each process stands, what tasks are pending, and how long steps are taking.
+
+- **Operational Control**  
+  Empower teams to intervene, restart, or manage instances as needed, without development overhead.
+
+- **Compliance & Transparency**  
+  Maintain a full audit log of actions and decisions to support compliance and accountability.
+
+---
+
+## 🚀 Summary
+
+Process instances are a foundational concept in WKS-based automation. With Camunda Cockpit, you gain visibility, control, and insights to ensure your business processes run efficiently, transparently, and in line with organizational goals.
