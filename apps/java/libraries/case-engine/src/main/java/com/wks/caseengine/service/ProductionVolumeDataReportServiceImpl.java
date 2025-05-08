@@ -166,9 +166,6 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 				map.put("march", row[12]);
 				summaryData.add(map);
 			}
-
-			
-
 			// Combine both into a result map
 			Map<String, Object> finalResult = new HashMap<>();
 			finalResult.put("consumptionSummary", summaryData);
@@ -198,6 +195,106 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			query.setParameter("plantId", plantId);
 			query.setParameter("year", year);
 			
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	
+	@Override
+	public AOPMessageVM getReportForPlantProductionPlanData(String plantId, String year, String reportType) {
+		try {
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			List<Map<String, Object>> plantProductionData = new ArrayList<>();
+
+			List<Object[]> obj = getPlantProductionData(plantId, year,reportType);
+			if(reportType.equalsIgnoreCase("assumptions")) {
+				for (Object[] row : obj) {
+					Map<String, Object> map = new HashMap<>();
+					map.put("sno", row[0]);
+					map.put("part1", row[1]);
+					plantProductionData.add(map);
+				}
+			}
+			if(reportType.equalsIgnoreCase("maxRate")) {
+				for (Object[] row : obj) {
+					Map<String, Object> map = new HashMap<>();
+					map.put("sno", row[0]);
+					map.put("part1", row[1]);
+					map.put("part2", row[2]);
+					map.put("part3", row[3]);
+					plantProductionData.add(map);
+				}
+			}
+			if(reportType.equalsIgnoreCase("OperatingHrs")) {
+				for (Object[] row : obj) {
+					Map<String, Object> map = new HashMap<>();
+					map.put("sno", row[0]);
+					map.put("part1", row[1]);
+					map.put("part2", row[2]);
+					map.put("part3", row[3]);
+					plantProductionData.add(map);
+				}
+			}
+			if(reportType.equalsIgnoreCase("AverageHourlyRate")) {
+				for (Object[] row : obj) {
+					Map<String, Object> map = new HashMap<>();
+					map.put("sno", row[0]);
+					map.put("Throughput", row[1]);
+					map.put("HourlyRate", row[2]);
+					map.put("OperatingHrs", row[3]);
+					map.put("PeriodFrom", row[4]);
+					map.put("PeriodTo", row[5]);
+					plantProductionData.add(map);
+				}
+			}
+			if(reportType.equalsIgnoreCase("ProductionPerformance")) {
+				for (Object[] row : obj) {
+					Map<String, Object> map = new HashMap<>();
+					map.put("sno", row[0]);
+					map.put("Item", row[1]);
+					map.put("Budget1", row[2]);
+					map.put("Actual1", row[3]);
+					map.put("Budget2", row[4]);
+					map.put("Actual2", row[5]);
+					map.put("Budget3", row[6]);
+					map.put("Actual3", row[7]);
+					map.put("Budget4", row[8]);
+					plantProductionData.add(map);
+				}
+			}
+			// Combine both into a result map
+			Map<String, Object> finalResult = new HashMap<>();
+			finalResult.put("plantProductionData", plantProductionData);
+
+			// Set in response
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(finalResult);
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	public List<Object[]> getPlantProductionData(String plantId, String aopYear,String reportType) {
+		try {
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			String storedProcedure = "annualProductionPlan";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("reportType", reportType);
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
