@@ -605,16 +605,16 @@ const DataGridTable = ({
           checkboxSelection={permissions?.showCheckBox}
           columns={columns.map((col) => ({
             ...col,
-            editable: (params) => {
-              if (
-                permissions?.remarksEditable &&
-                params.row.isEditable === false &&
-                col.field !== lastColumnField
-              ) {
-                return false
-              }
-              return col.field === lastColumnField
-            },
+            // editable: (params) => {
+            //   if (
+            //     permissions?.remarksEditable &&
+            //     params.row.isEditable === false &&
+            //     col.field !== lastColumnField
+            //   ) {
+            //     return false
+            //   }
+            //   return col.field === lastColumnField
+            // },
             cellClassName: (params) => {
               if (col.isDisabled) {
                 if (params.row.Particulars) {
