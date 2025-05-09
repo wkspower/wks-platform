@@ -44,7 +44,7 @@ public class TurnAroundDataReportServiceImpl  implements TurnAroundDataReportSer
                         Map<String, Object> map = new HashMap<>();
                         map.put("sno", row[0]);
                         map.put("activity", row[1]);
-                        map.put("fromData", row[2]);
+                        map.put("fromDate", row[2]);
                         map.put("toDate", row[3]);
                         map.put("durationInHrs", row[4]);
                         map.put("remarks", row[5]);

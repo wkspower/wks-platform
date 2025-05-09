@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { Box } from '@mui/material'
 import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
 import {
@@ -6,6 +6,8 @@ import {
   Typography,
 } from '../../../../node_modules/@mui/material/index'
 import { truncateRemarks } from 'utils/remarksUtils'
+import { DataService } from 'services/DataService'
+import { useSession } from 'SessionStoreContext'
 
 const TurnaroundReport = () => {
   const unsavedChangesRef = React.useRef({
@@ -16,28 +18,32 @@ const TurnaroundReport = () => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
-  // 2️⃣ Click‐handler to launch the dialog
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remark || row.Remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
 
-  // 1️⃣ Column definitions
   const columns = [
-    { field: 'srNo', headerName: 'Sr No' },
+    { field: 'sno', headerName: 'Sr No' },
     { field: 'activity', headerName: 'Activities', flex: 2 },
-    { field: 'from', headerName: 'From' },
-    { field: 'to', headerName: 'To' },
+    { field: 'fromDate', headerName: 'From' },
+    { field: 'toDate', headerName: 'To' },
     {
-      field: 'duration',
+      field: 'durationInHrs',
       headerName: 'Duration, hrs',
       align: 'right',
       headerAlign: 'right',
-      // flex: ,
     },
+    // {
+    //   field: 'periodInMonths',
+    //   headerName: 'Period in Months',
+    //   flex: 1,
+    //   align: 'right',
+    //   headerAlign: 'right',
+    // },
     {
-      field: 'remark',
+      field: 'remarks',
       headerName: 'Remark',
       flex: 2,
       renderCell: (params) => (
@@ -58,26 +64,25 @@ const TurnaroundReport = () => {
     },
   ]
   const columnsGrid2 = [
-    { field: 'srNo', headerName: 'Sr No' },
+    { field: 'sno', headerName: 'Sr No' },
     { field: 'activity', headerName: 'Activities', flex: 2 },
+    { field: 'fromDate', headerName: 'From' },
+    { field: 'toDate', headerName: 'To' },
     {
-      field: 'duration',
+      field: 'durationInHrs',
       headerName: 'Duration, hrs',
-      // flex: 1,
       align: 'right',
       headerAlign: 'right',
     },
-    { field: 'from', headerName: 'From' },
-    { field: 'to', headerName: 'To' },
     {
-      field: 'periodMonths',
-      headerName: 'Period in Months.',
+      field: 'periodInMonths',
+      headerName: 'Period in Months',
       flex: 1,
       align: 'right',
       headerAlign: 'right',
     },
     {
-      field: 'Remark',
+      field: 'remarks',
       headerName: 'Remark',
       flex: 2,
       renderCell: (params) => (
@@ -98,61 +103,59 @@ const TurnaroundReport = () => {
     },
   ]
 
-  // 2️⃣ Grouping model for “Turnaround period”
   const columnGroupingModel = [
     {
       groupId: 'turnaround',
       headerName: 'Turnaround period',
-      children: [{ field: 'from' }, { field: 'to' }],
+      children: [{ field: 'fromDate' }, { field: 'toDate' }],
     },
   ]
 
-  // 3️⃣ Hard-coded rows JSON
   const grid1 = [
     {
       id: 1,
-      srNo: 1,
+      sno: 1,
       activity: 'Blowdown Prep',
-      from: '06/01/2025',
-      to: '06/01/2025',
-      duration: 2,
-      remark: 'OK',
+      fromDate: '06/01/2025',
+      toDate: '06/01/2025',
+      durationInHrs: 2,
+      remarks: 'OK',
     },
     {
       id: 2,
-      srNo: 2,
+      sno: 2,
       activity: 'Shutdown',
-      from: '06/02/2025',
-      to: '06/02/2025',
-      duration: 3,
+      fromDate: '06/02/2025',
+      toDate: '06/02/2025',
+      durationInHrs: 3,
       remark: 'Pending',
     },
     {
       id: 3,
-      srNo: 3,
+      sno: 3,
       activity: 'Line Draining',
-      from: '06/03/2025',
-      to: '06/03/2025',
-      duration: 4,
-      remark: 'Check',
+      fromDate: '06/03/2025',
+      toDate: '06/03/2025',
+      durationInHrs: 4,
+      remarks: 'Check',
     },
     {
       id: 4,
-      srNo: 4,
+      sno: 4,
       activity: 'Mechanical Check',
-      from: '06/04/2025',
-      to: '06/04/2025',
-      duration: 5,
-      remark: 'OK',
+      fromDate: '06/04/2025',
+      toDate: '06/04/2025',
+      durationInHrs: 5,
+      remarks: 'OK',
     },
     {
       id: 5,
-      srNo: 5,
+      sno: 5,
       activity: 'Electrical Audit',
-      from: '06/05/2025',
-      to: '06/05/2025',
-      duration: 6,
-      remark: 'OK',
+      fromDate: '06/05/2025',
+      toDate: '06/05/2025',
+      durationInHrs: 6,
+      remarks: 'OK',
     },
   ]
 
@@ -205,7 +208,7 @@ const TurnaroundReport = () => {
       activity: 'Total turnaround duration (based on Critical activity)',
       from: '', // leave blank or you can span via custom render
       to: '',
-      duration: 42, // your computed total
+      durationInHrs: 42, // your computed total
       periodMonths: '',
       Remark: '',
       isTotal: true, // flag so you can style it differently
@@ -216,16 +219,16 @@ const TurnaroundReport = () => {
       activity: 'Total turnaround duration (based on table 15)',
       from: '',
       to: '',
-      duration: 56, // another computed total
+      durationInHrs: 56, // another computed total
       periodMonths: '',
       Remark: '',
       isTotal: true,
     },
   ]
 
-  const [rows, setRows] = useState(() => [...grid1, ...totalRows])
-  const [rows2, setRows2] = useState(grid2)
-  // 4️⃣ Handle cell edits
+  const [rows, setRows] = useState()
+  const [rows2, setRows2] = useState()
+
   const processRowUpdate = useCallback((newRow) => {
     unsavedChangesRef.current = true
     setRows((prev) => prev.map((r) => (r.id === newRow.id ? newRow : r)))
@@ -236,6 +239,53 @@ const TurnaroundReport = () => {
     setRows2((prev) => prev.map((r) => (r.id === newRow.id ? newRow : r)))
     return newRow
   }, [])
+  const [loading, setLoading] = useState(false)
+  const keycloak = useSession()
+
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        // let type =
+        var res = await DataService.getTurnaroundReportData(
+          keycloak,
+          'currentYear',
+        )
+        var res2 = await DataService.getTurnaroundReportData(
+          keycloak,
+          'previousYear',
+        )
+
+        // console.log(res)
+        if (res?.code == 200) {
+          res = res?.data?.plantTurnAroundReportData.map((item, index) => ({
+            ...item,
+            id: index,
+            isEditable: false,
+          }))
+
+          setRows(res)
+        }
+        if (res2?.code == 200) {
+          res2 = res2?.data?.plantTurnAroundReportData.map((item, index) => ({
+            ...item,
+            id: index,
+            isEditable: false,
+          }))
+
+          setRows2(res2)
+        }
+      } catch (err) {
+        console.log(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [year, plantId])
+
   return (
     <Box>
       <ReportDataGrid
@@ -253,6 +303,7 @@ const TurnaroundReport = () => {
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
         setCurrentRowId={setCurrentRowId}
+        loading={loading}
         permissions={{
           customHeight: { mainBox: '32vh', otherBox: '100%' },
           textAlignment: 'center',
@@ -276,6 +327,7 @@ const TurnaroundReport = () => {
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
         setCurrentRowId={setCurrentRowId}
+        loading={loading}
         permissions={{
           customHeight: { mainBox: '32vh', otherBox: '100%' },
           textAlignment: 'center',

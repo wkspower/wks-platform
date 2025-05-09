@@ -89,6 +89,7 @@ export const DataService = {
   getWorkflowDataProduction,
   getAnnualCostAopReport,
   getAnnualProductionPlanReportData,
+  getTurnaroundReportData,
   getPlantProductionSummary,
   getMonthwiseRawData,
   getMonthWiseSummary,
@@ -786,6 +787,25 @@ async function getAnnualProductionPlanReportData(keycloak, type) {
   const year = localStorage.getItem('year')
 
   const url = `${Config.CaseEngineUrl}/task/report/plant/production/plan?plantId=${plantId}&year=${year}&reportType=${type}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getTurnaroundReportData(keycloak, type) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+
+  const url = `${Config.CaseEngineUrl}/task/report/turn-around?plantId=${plantId}&year=${year}&reportType=${type}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
