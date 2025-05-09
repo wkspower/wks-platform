@@ -331,6 +331,7 @@ const ProductionvolumeData = ({ permissions }) => {
       setLoading(false)
     }
   }
+
   function normalizeAllRows(grid) {
     const monthKeys = [
       'april',
@@ -467,6 +468,7 @@ const ProductionvolumeData = ({ permissions }) => {
       console.error('Error!', error)
     }
   }
+
   const defaultCustomHeight = { mainBox: '36vh', otherBox: '112%' }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
@@ -548,46 +550,53 @@ const ProductionvolumeData = ({ permissions }) => {
         handleCalculate={handleCalculate}
         permissions={adjustedPermissions}
       />
-      <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
-        Percentage Summary
-      </Typography>
-      <ASDataGrid
-        setRows={setRows2}
-        columns={productionColumns}
-        rows={rows2}
-        title='Production Volume Data'
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-        paginationOptions={[100, 200, 300]}
-        processRowUpdate={processRowUpdate}
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={onRowModesModelChange}
-        saveChanges={saveChanges}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        apiRef={apiRef}
-        // deleteId={deleteId}
-        // setDeleteId={setDeleteId}
-        // setOpen1={setOpen1}
-        // open1={open1}
-        // handleDeleteClick={handleDeleteClick}
-        fetchData={fetchData}
-        // onRowEditStop={handleRowEditStop}
-        onProcessRowUpdateError={onProcessRowUpdateError}
-        handleUnitChange={handleUnitChange}
-        experimentalFeatures={{ newEditingApi: true }}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        unsavedChangesRef={unsavedChangesRef}
-        handleCalculate={handleCalculate}
-        permissions={{ customHeight: defaultCustomHeight }}
-      />
+
+      {!permissions?.hideSummary && (
+        <>
+          <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
+            Percentage Summary
+          </Typography>
+          <ASDataGrid
+            setRows={setRows2}
+            columns={productionColumns}
+            rows={rows2}
+            title='Production Volume Data'
+            onAddRow={(newRow) => console.log('New Row Added:', newRow)}
+            onDeleteRow={(id) => console.log('Row Deleted:', id)}
+            onRowUpdate={(updatedRow) =>
+              console.log('Row Updated:', updatedRow)
+            }
+            paginationOptions={[100, 200, 300]}
+            processRowUpdate={processRowUpdate}
+            rowModesModel={rowModesModel}
+            onRowModesModelChange={onRowModesModelChange}
+            saveChanges={saveChanges}
+            snackbarData={snackbarData}
+            snackbarOpen={snackbarOpen}
+            setSnackbarOpen={setSnackbarOpen}
+            setSnackbarData={setSnackbarData}
+            apiRef={apiRef}
+            // deleteId={deleteId}
+            // setDeleteId={setDeleteId}
+            // setOpen1={setOpen1}
+            // open1={open1}
+            // handleDeleteClick={handleDeleteClick}
+            fetchData={fetchData}
+            // onRowEditStop={handleRowEditStop}
+            onProcessRowUpdateError={onProcessRowUpdateError}
+            handleUnitChange={handleUnitChange}
+            experimentalFeatures={{ newEditingApi: true }}
+            remarkDialogOpen={remarkDialogOpen}
+            setRemarkDialogOpen={setRemarkDialogOpen}
+            currentRemark={currentRemark}
+            setCurrentRemark={setCurrentRemark}
+            currentRowId={currentRowId}
+            unsavedChangesRef={unsavedChangesRef}
+            handleCalculate={handleCalculate}
+            permissions={{ customHeight: defaultCustomHeight }}
+          />
+        </>
+      )}
     </div>
   )
 }

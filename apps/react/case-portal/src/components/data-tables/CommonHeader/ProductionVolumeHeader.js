@@ -124,8 +124,8 @@ const getEnhancedProductionColDefs = ({
         ...col,
         renderEditCell: NumericInputOnly,
         valueFormatter: formatValueToThreeDecimals,
-
         headerName: headerMap[col.headerName],
+        align: 'right',
       }
     }
 

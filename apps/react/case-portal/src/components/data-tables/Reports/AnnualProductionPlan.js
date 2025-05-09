@@ -1,17 +1,14 @@
 import { Box } from '@mui/material'
 // import DataGridTable from '../ASDataGrid'
 import ReportDataGrid from 'components/data-tables-views/ReportDataGrid2'
+import { useEffect, useState } from 'react'
+import { DataService } from 'services/DataService'
+import { useSession } from 'SessionStoreContext'
 import {
   Backdrop,
   CircularProgress,
-  Tooltip,
   Typography,
 } from '../../../../node_modules/@mui/material/index'
-import ProductionNorms from '../ProductionNorms'
-import React, { useEffect, useState } from 'react'
-import { DataService } from 'services/DataService'
-import { useSession } from 'SessionStoreContext'
-import { truncateRemarks } from 'utils/remarksUtils'
 
 const AnnualProductionPlan = () => {
   const keycloak = useSession()
@@ -33,11 +30,11 @@ const AnnualProductionPlan = () => {
     const [start, end] = oldYear2.split('-').map(Number)
     oldYear2 = `${start - 1}-${(end - 1).toString().slice(-2)}`
   }
-  let oldYear4 = ''
-  if (oldYear3 && oldYear3.includes('-')) {
-    const [start, end] = oldYear3.split('-').map(Number)
-    oldYear2 = `${start - 1}-${(end - 1).toString().slice(-2)}`
-  }
+  // let oldYear4 = ''
+  // if (oldYear3 && oldYear3.includes('-')) {
+  //   const [start, end] = oldYear3.split('-').map(Number)
+  //   oldYear2 = `${start - 1}-${(end - 1).toString().slice(-2)}`
+  // }
 
   const [rowsAssumptions, setRowsassumptions] = useState([])
   const [rowsMaxRate, setRowsMaxRate] = useState([])
@@ -46,7 +43,13 @@ const AnnualProductionPlan = () => {
   const [rowsProductionPerformance, setRowsProductionPerformance] = useState([])
 
   const columnsAssumptions = [
-    { field: 'sno', headerName: 'SL.No', editable: true, minWidth: 20 },
+    {
+      field: 'sno',
+      headerName: 'SL.No',
+      editable: true,
+      minWidth: 20,
+      align: 'right',
+    },
     {
       field: 'part1',
       headerName: 'Assumptions & remarks',
@@ -56,31 +59,67 @@ const AnnualProductionPlan = () => {
   ]
 
   const columnsMaxRate = [
-    { field: 'sno', headerName: 'SL.No', editable: true, minWidth: 50 },
+    {
+      field: 'sno',
+      headerName: 'SL.No',
+      editable: true,
+      minWidth: 50,
+      align: 'right',
+    },
     {
       field: 'part1',
       headerName: 'Max hourly rate achieved',
       editable: false,
       flex: 1,
     },
-    { field: 'part2', headerName: 'Value', editable: false, flex: 1 },
+    {
+      field: 'part2',
+      headerName: 'Value',
+      editable: false,
+      flex: 1,
+      align: 'right',
+    },
     { field: 'part3', headerName: 'UOM', editable: false, flex: 1 },
   ]
 
   const columnsOperatingHrs = [
-    { field: 'sno', headerName: 'SL.No', editable: true, minWidth: 50 },
+    {
+      field: 'sno',
+      headerName: 'SL.No',
+      editable: true,
+      minWidth: 50,
+      align: 'right',
+    },
     {
       field: 'part1',
       headerName: 'Calculation of Operating hours',
       editable: false,
       flex: 1,
     },
-    { field: 'part2', headerName: 'Value', editable: false, flex: 1 },
-    { field: 'part3', headerName: 'Hours', editable: false, flex: 1 },
+    {
+      field: 'part2',
+      headerName: 'Value',
+      editable: false,
+      flex: 1,
+      align: 'right',
+    },
+    {
+      field: 'part3',
+      headerName: 'Hours',
+      editable: false,
+      flex: 1,
+      align: 'right',
+    },
   ]
 
   const columnsAverageHourlyRate = [
-    { field: 'sno', headerName: 'SL.No', editable: true, minWidth: 50 },
+    {
+      field: 'sno',
+      headerName: 'SL.No',
+      editable: true,
+      minWidth: 50,
+      align: 'right',
+    },
     {
       field: 'Throughput',
       headerName: 'Throughput  limiting causes',
@@ -92,12 +131,14 @@ const AnnualProductionPlan = () => {
       headerName: 'Achievable Hourly rate',
       editable: false,
       flex: 1,
+      align: 'right',
     },
     {
       field: 'HourlyRate',
       headerName: 'Op. Hrs',
       editable: false,
       flex: 1,
+      align: 'right',
     },
     {
       field: 'PeriodFrom',
@@ -109,19 +150,67 @@ const AnnualProductionPlan = () => {
   ]
 
   const columnsProductionPerformance = [
-    { field: 'sno', headerName: 'SL.No', editable: false, minWidth: 50 },
+    {
+      field: 'sno',
+      headerName: 'SL.No',
+      editable: false,
+      minWidth: 50,
+      align: 'right',
+    },
     { field: 'Item', headerName: 'Item', editable: false, flex: 1 },
 
-    { field: 'Budget1', headerName: 'Budget', editable: false, flex: 1 },
-    { field: 'Actual1', headerName: 'Actual', editable: false, flex: 1 },
+    {
+      field: 'Budget1',
+      headerName: 'Budget',
+      editable: false,
+      flex: 1,
+      align: 'right',
+    },
+    {
+      field: 'Actual1',
+      headerName: 'Actual',
+      editable: false,
+      flex: 1,
+      align: 'right',
+    },
 
-    { field: 'Budget2', headerName: 'Budget', editable: false, flex: 1 },
-    { field: 'Actual2', headerName: 'Actual', editable: false, flex: 1 },
+    {
+      field: 'Budget2',
+      headerName: 'Budget',
+      editable: false,
+      flex: 1,
+      align: 'right',
+    },
+    {
+      field: 'Actual2',
+      headerName: 'Actual',
+      editable: false,
+      flex: 1,
+      align: 'right',
+    },
 
-    { field: 'Budget3', headerName: 'Budget', editable: false, flex: 1 },
-    { field: 'Actual3', headerName: 'Actual', editable: false, flex: 1 },
+    {
+      field: 'Budget3',
+      headerName: 'Budget',
+      editable: false,
+      flex: 1,
+      align: 'right',
+    },
+    {
+      field: 'Actual3',
+      headerName: 'Actual',
+      editable: false,
+      flex: 1,
+      align: 'right',
+    },
 
-    { field: 'Budget4', headerName: 'Budget', editable: false, flex: 1 },
+    {
+      field: 'Budget4',
+      headerName: 'Budget',
+      editable: false,
+      flex: 1,
+      align: 'right',
+    },
   ]
 
   const year4 = localStorage.getItem('year')

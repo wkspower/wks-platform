@@ -193,6 +193,7 @@ const getEnhancedAOPColDefs = ({
         ...col,
         renderEditCell: NumericInputOnly,
         headerName: headerMap[col.headerName],
+        align: 'right',
       }
     }
 

@@ -233,38 +233,60 @@ const WorkFlowMerge = () => {
   // const screens = useScreens()
   // console.log(screens)
   // generate columns including remark column
-  const generateColumns = (data) => {
-    const cols = data.headers.map((header, i) => ({
-      field: data.keys[i],
-      headerName: header,
-      minWidth: i === 0 ? 300 : 150,
-      ...(i === 0 && { renderHeader: (p) => <div>{p.colDef.headerName}</div> }),
-    }))
+  const generateColumns = (data, numericKeys) => {
+    const cols = data.headers.map((header, i) => {
+      const key = data.keys[i]
+      return {
+        field: key,
+        headerName: header,
+        minWidth: i === 0 ? 300 : 150,
+        ...(i === 0 && {
+          renderHeader: (p) => <div>{p.colDef.headerName}</div>,
+        }),
+        ...(numericKeys.includes(key) && { align: 'right' }),
+      }
+    })
+
     const remarkIdx = cols.findIndex((col) => col.field === 'remark')
     if (remarkIdx !== -1) cols[remarkIdx] = remarkColumn(handleRemarkCellClick)
+
     return cols
   }
 
-  // fetch workflow data for grid
+  function getNumericKeysInAllRows(data) {
+    if (!Array.isArray(data) || data.length === 0) return []
+
+    const keys = Object.keys(data[0])
+
+    return keys.filter((key) =>
+      data.every((row) => {
+        const value = row[key]
+        // The column is considered numeric if:
+        // - It's a valid number (including empty values)
+        return value === '' || !isNaN(Number(value))
+      }),
+    )
+  }
+
   const fetchData = async () => {
     try {
       const data = await DataService.getWorkflowData(keycloak, plantId)
-      var formatted = data.results.map((row, idx) => {
+      const numericKeys = getNumericKeysInAllRows(data?.results)
+      let formatted = data.results.map((row, idx) => {
         const out = { id: idx }
         Object.entries(row).forEach(([k, v]) => {
           out[k] = !isNaN(v) && v !== '' ? Number(v).toFixed(2) : v
         })
         return out
       })
-      // console.log(formatted)
 
-      formatted = formatted?.map((item) => ({
+      formatted = formatted.map((item) => ({
         ...item,
         isEditable: false,
       }))
 
       setRows(formatted)
-      setColumns(generateColumns(data))
+      setColumns(generateColumns(data, numericKeys)) // pass numericKeys
     } catch (err) {
       console.error('Error fetching grid', err)
       setRows([])
@@ -272,24 +294,19 @@ const WorkFlowMerge = () => {
       setLoading(false)
     }
   }
-  // console.log(columns, 'columns')
-  // fetch case, steps, and determine active step
+
   const getCaseId = async () => {
     try {
       const cases = await DataService.getCaseId(keycloak)
       setCaseId(cases?.workflowMasterDTO?.casedefId || '')
-      // console.log(cases?.workflowList?.length === 0)
       setShowCreateCasebutton(cases?.workflowList?.length === 0)
       setTaskId(cases?.taskId || '')
       setStatus(cases?.status || '')
       setRole(cases?.role || '')
-      // if (!cases?.taskId) setActionDisabled(true)
       setWorkFlowDto(cases?.workflowList[0])
       if (cases?.workflowList.length > 0) {
-        // console.log('businessky in getcaseId ' + cases?.workflowList[0].caseId)
         setBusinessKey(cases?.workflowList[0].caseId)
       }
-      // console.log(cases)
       const master = cases?.workflowMasterDTO
 
       setMasterSteps(master?.steps)
@@ -654,7 +671,7 @@ const WorkFlowMerge = () => {
         {tabIndex === 2 && <MonthwiseProduction />}
         {tabIndex === 3 && <MonthwiseRawMaterial />}
         {tabIndex === 4 && <TurnaroundReport />}
-           {tabIndex === 5&& <AnnualProductionPlan />}
+        {tabIndex === 5 && <AnnualProductionPlan />}
       </Box>
     </div>
   )

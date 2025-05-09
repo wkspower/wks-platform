@@ -1,28 +1,22 @@
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { Box } from '@mui/material'
+import MuiAccordion from '@mui/material/Accordion'
+import MuiAccordionDetails from '@mui/material/AccordionDetails'
+import MuiAccordionSummary from '@mui/material/AccordionSummary'
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
+import { styled } from '@mui/material/styles'
+import Typography from '@mui/material/Typography'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
+import { validateFields } from 'utils/validationUtils'
 import ASDataGrid from './ASDataGrid'
 import getEnhancedColDefs from './CommonHeader/index'
-import Backdrop from '@mui/material/Backdrop'
-import CircularProgress from '@mui/material/CircularProgress'
-import { validateFields } from 'utils/validationUtils'
-import SimpleDataTable from 'components/data-tables-views/SimpleDataTable'
-import { Box } from '@mui/material'
-
-import Accordion from '@mui/material/Accordion'
-import AccordionSummary from '@mui/material/AccordionSummary'
-import AccordionDetails from '@mui/material/AccordionDetails'
-import Typography from '@mui/material/Typography'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { styled } from '@mui/material/styles'
-import MuiAccordion, { AccordionProps } from '@mui/material/Accordion'
-import MuiAccordionSummary, {
-  AccordionSummaryProps,
-} from '@mui/material/AccordionSummary'
-import MuiAccordionDetails from '@mui/material/AccordionDetails'
+import ProductionvolumeData from './ProductionVoluemData'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -64,11 +58,7 @@ const BusinessDemand = ({ permissions }) => {
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
   const [rows2, setRows2] = useState()
-
-  // const screens = useScreens()
-  // console.log('yearyear', screens)
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
-
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -78,14 +68,11 @@ const BusinessDemand = ({ permissions }) => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
-
   const fetchData = async () => {
-    // fetchData2()
     setLoading(true)
     try {
       var data = await DataService.getBDData(keycloak)
@@ -248,6 +235,7 @@ const BusinessDemand = ({ permissions }) => {
         const requiredFields = ['normParameterId', 'remark']
 
         const validationMessage = validateFields(data, requiredFields)
+
         if (validationMessage) {
           setSnackbarOpen(true)
           setSnackbarData({
@@ -305,16 +293,12 @@ const BusinessDemand = ({ permissions }) => {
         id: row.idFromApi || null,
       }))
 
-      // if (businessData.length > 0) {
       const response = await DataService.saveBusinessDemandData(
         plantId,
         businessData,
         keycloak,
       )
 
-      // console.log(response)
-
-      // if (response.status == 200) {
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Business Demand data Saved Successfully!',
@@ -417,7 +401,19 @@ const BusinessDemand = ({ permissions }) => {
           </CustomAccordionSummary>
           <CustomAccordionDetails>
             <Box sx={{ width: '100%', margin: 0 }}>
-              <SimpleDataTable />
+              <ProductionvolumeData
+                permissions={{
+                  showAction: false,
+                  addButton: false,
+                  deleteButton: false,
+                  editButton: false,
+                  showUnit: false,
+                  saveWithRemark: false,
+                  showCalculate: false,
+                  saveBtn: false,
+                  hideSummary: true,
+                }}
+              />
             </Box>
           </CustomAccordionDetails>
         </CustomAccordion>

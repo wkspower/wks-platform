@@ -114,8 +114,9 @@ const MaintenanceTable = () => {
     {
       field: 'April',
       headerName: headerMap[4],
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
+
       // valueGetter: convertUnits,
     },
 
@@ -123,42 +124,42 @@ const MaintenanceTable = () => {
       field: 'May',
       headerName: headerMap[5],
 
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'June',
       headerName: headerMap[6],
 
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'July',
       headerName: headerMap[7],
 
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Aug',
       headerName: headerMap[8],
 
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Sep',
       headerName: headerMap[9],
 
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Oct',
       headerName: headerMap[10],
 
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
     },
 
@@ -166,34 +167,34 @@ const MaintenanceTable = () => {
       field: 'Nov',
       headerName: headerMap[11],
 
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Dec',
       headerName: headerMap[12],
 
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Jan',
       headerName: headerMap[1],
 
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Feb',
       headerName: headerMap[2],
 
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Mar',
       headerName: headerMap[3],
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
     },
     {

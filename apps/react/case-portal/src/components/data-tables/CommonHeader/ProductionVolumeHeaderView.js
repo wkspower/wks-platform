@@ -38,6 +38,7 @@ const getEnhancedProductionColDefsView = ({
         valueFormatter: formatValueToThreeDecimals,
         headerName: headerMap[col.headerName],
         flex: 1,
+        align: 'right',
       }
     }
     return updatedCol

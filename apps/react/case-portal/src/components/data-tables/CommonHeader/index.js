@@ -157,6 +157,7 @@ const getEnhancedColDefs = ({
         ...col,
         renderEditCell: NumericInputOnly,
         headerName: headerMap[col.headerName],
+        align: 'right',
       }
     }
     if (col.field === 'Particulars') {

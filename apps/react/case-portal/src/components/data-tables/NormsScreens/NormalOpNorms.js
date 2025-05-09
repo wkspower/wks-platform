@@ -20,6 +20,7 @@ const NormalOpNormsScreen = () => {
   const [allProducts, setAllProducts] = useState([])
   // const [bdData, setBDData] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
+
   // const { sitePlantChange } = menu
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
@@ -37,6 +38,7 @@ const NormalOpNormsScreen = () => {
   const [loading, setLoading] = useState(false)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
+  //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
 
   const vertName = verticalChange?.selectedVertical
@@ -221,7 +223,7 @@ const NormalOpNormsScreen = () => {
       headerName: headerMap[4],
       editable: true,
       renderEditCell: NumericInputOnly,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
     },
@@ -230,7 +232,7 @@ const NormalOpNormsScreen = () => {
       headerName: headerMap[5],
       editable: true,
       renderEditCell: NumericInputOnly,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
     },
@@ -239,7 +241,7 @@ const NormalOpNormsScreen = () => {
       headerName: headerMap[6],
       editable: true,
       renderEditCell: NumericInputOnly,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
     },
@@ -248,7 +250,7 @@ const NormalOpNormsScreen = () => {
       headerName: headerMap[7],
       editable: true,
       renderEditCell: NumericInputOnly,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
     },
@@ -258,7 +260,7 @@ const NormalOpNormsScreen = () => {
       headerName: headerMap[8],
       editable: true,
       renderEditCell: NumericInputOnly,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
     },
@@ -267,7 +269,7 @@ const NormalOpNormsScreen = () => {
       headerName: headerMap[9],
       editable: true,
       renderEditCell: NumericInputOnly,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
     },
@@ -276,7 +278,7 @@ const NormalOpNormsScreen = () => {
       headerName: headerMap[10],
       editable: true,
       renderEditCell: NumericInputOnly,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
     },
@@ -285,7 +287,7 @@ const NormalOpNormsScreen = () => {
       headerName: headerMap[11],
       editable: true,
       renderEditCell: NumericInputOnly,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
     },
@@ -294,7 +296,7 @@ const NormalOpNormsScreen = () => {
       headerName: headerMap[12],
       editable: true,
       renderEditCell: NumericInputOnly,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
     },
@@ -303,7 +305,7 @@ const NormalOpNormsScreen = () => {
       headerName: headerMap[1],
       editable: true,
       renderEditCell: NumericInputOnly,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
     },
@@ -312,7 +314,7 @@ const NormalOpNormsScreen = () => {
       headerName: headerMap[2],
       editable: true,
       renderEditCell: NumericInputOnly,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
     },
@@ -321,7 +323,7 @@ const NormalOpNormsScreen = () => {
       headerName: headerMap[3],
       editable: true,
       renderEditCell: NumericInputOnly,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
     },
@@ -585,6 +587,7 @@ const NormalOpNormsScreen = () => {
     },
     isOldYear,
   )
+
   return (
     <div>
       <Backdrop
@@ -625,6 +628,7 @@ const NormalOpNormsScreen = () => {
         unsavedChangesRef={unsavedChangesRef}
         handleRemarkCellClick={handleRemarkCellClick}
         permissions={adjustedPermissions}
+
         // permissions={{
         //   showAction: false,
         //   addButton: false,

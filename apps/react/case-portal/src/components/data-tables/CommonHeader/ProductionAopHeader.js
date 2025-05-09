@@ -1,3 +1,4 @@
+// import { useSelector } from 'react-redux'
 import { useSelector } from 'react-redux'
 import productionColDefs from '../../../assets/production_aop_meg.json' // Adjust path as needed
 import productionColDefsPE from '../../../assets/production_aop_pe.json' // Adjust path as needed
@@ -171,6 +172,7 @@ const getEnhancedColDefs = ({
         headerName: headerMap[col.headerName],
         valueFormatter: formatValueToThreeDecimals,
         renderEditCell: NumericInputOnly,
+        align: 'right',
       }
     }
 

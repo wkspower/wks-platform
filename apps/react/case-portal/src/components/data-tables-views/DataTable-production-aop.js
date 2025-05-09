@@ -26,6 +26,21 @@ const ProductionAopView = () => {
   const formatValueToNoDecimals = (val) =>
     val && !isNaN(val) ? Math.round(val) : val
 
+  function getNumericKeysInAllRows(data) {
+    if (!Array.isArray(data) || data.length === 0) return []
+
+    const keys = Object.keys(data[0])
+
+    return keys.filter((key) =>
+      data.every((row) => {
+        const value = row[key]
+        // The column is considered numeric if:
+        // - It's a valid number (including empty values)
+        return value === '' || !isNaN(Number(value))
+      }),
+    )
+  }
+
   const fetchData = async () => {
     // setLoading(true)
     try {
@@ -48,20 +63,28 @@ const ProductionAopView = () => {
       }))
 
       setRows(formattedRows)
+
+      const results = data?.results
+      const numericKeys = getNumericKeysInAllRows(results)
+
       const generateColumns = ({ headers, keys }) => {
-        return headers.map((header, idx) => ({
-          field: keys[idx],
-          headerName: header,
-          flex: 1,
-          ...(idx === 0 && {
-            renderHeader: (params) => <div>{params.colDef.headerName}</div>,
-          }),
-        }))
+        return headers.map((header, idx) => {
+          const key = keys[idx]
+          return {
+            field: key,
+            headerName: header,
+            flex: 1,
+            ...(idx === 0 && {
+              renderHeader: (params) => <div>{params.colDef.headerName}</div>,
+            }),
+            ...(numericKeys.includes(key) && { align: 'right' }),
+          }
+        })
       }
+
       setColumns(generateColumns(data))
-      // setLoading(false)
     } catch (error) {
-      console.error('Error fetching Business Demand data:', error)
+      console.error('Error fetching data:', error)
       setRows([])
       setLoading(false)
     }
@@ -71,9 +94,7 @@ const ProductionAopView = () => {
     fetchData()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
-  const defaultCustomHeight = { mainBox: '22vh', otherBox: '114%' }
   const lastColumnField = columns[columns.length - 1]?.field
-  //console.log('lastColumnField', lastColumnField)
 
   return (
     <Box
@@ -100,15 +121,7 @@ const ProductionAopView = () => {
         columns={columns.map((col) => ({
           ...col,
           filterable: true,
-          editable: (params) => {
-            if (
-              params.row.isEditable === false &&
-              col.field !== lastColumnField
-            ) {
-              return false
-            }
-            return col.field === lastColumnField
-          },
+
           cellClassName: (params) => {
             if (
               params.row.isEditable === false &&

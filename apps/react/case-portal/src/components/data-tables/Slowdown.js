@@ -524,7 +524,7 @@ const SlowDown = ({ permissions }) => {
       editable: true,
       minWidth: 100,
       renderEditCell: TimeInputCell,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
       // valueGetter: (params) => params?.durationInHrs || 0,
       valueGetter: findDuration,
@@ -536,7 +536,7 @@ const SlowDown = ({ permissions }) => {
       editable: true,
       minWidth: 75,
       renderEditCell: NumericInputOnly,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
     },
 

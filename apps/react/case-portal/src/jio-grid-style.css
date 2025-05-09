@@ -88,10 +88,14 @@
 }
 
 .jio-data-grid .odd-row {
-  opacity: 0.9;
-  pointer-events: none;
-  background-color: rgba(200, 200, 200, 0.3);
-  color: rgba(0, 0, 0, 0.6);
+  pointer-events: none; /* Disables any interaction */
+  background-color: #ebebeb; /* Light background instead of grey */
+  color: rgba(0, 0, 0, 0.4); /* Slightly faded text color */
+  border: 1px solid rgba(0, 0, 0, 0.2); /* Softer border */
+  cursor: not-allowed; /* Shows the "not-allowed" cursor */
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1); /* Adds a soft inner shadow for a disabled feel */
+
+  transition: all 0.3s ease; /* Smooth transition for all changes */
 }
 
 /* Header Title */

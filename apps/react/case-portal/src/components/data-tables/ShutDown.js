@@ -434,7 +434,7 @@ const ShutDown = ({ permissions }) => {
       editable: true,
       minWidth: 100,
       renderEditCell: TimeInputCell,
-      align: 'left',
+      align: 'right',
       headerAlign: 'left',
       // valueGetter: (params) => params?.durationInHrs || 0,
       valueGetter: findDuration,

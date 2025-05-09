@@ -37,8 +37,6 @@ const getEnhancedAnnualAopCostReport = ({
 
   if (type == 'Price') {
     // console.log('annual_aop_cost_report', annual_aop_cost_report)
-    // console.log('headers2', headers2)
-    // console.log('keys2', keys2)
 
     var keys23 = [
       'norm',
@@ -103,6 +101,7 @@ const getEnhancedAnnualAopCostReport = ({
         valueFormatter: formatValueToThreeDecimals,
         headerName: headerMap[col.headerName],
         flex: 1,
+        align: 'right',
       }
     }
 

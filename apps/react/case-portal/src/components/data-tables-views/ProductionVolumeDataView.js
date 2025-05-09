@@ -8,16 +8,14 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-// import '../data-tables/data-grid-css.css'
-// import '../data-tables/extra-css.css'
 
-const SimpleDataTable = () => {
+const ProductionVolumeDataView = () => {
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
-  //const isOldYear = oldYear?.oldYear
+
   const isOldYear = oldYear?.oldYear
 
   const vertName = verticalChange?.selectedVertical
@@ -135,17 +133,11 @@ const SimpleDataTable = () => {
     findAvg,
   })
 
-  // const defaultCustomHeight = { mainBox: '60vh', otherBox: '124%' }
-
-  const boxHeight = '60vh'
-  const otherHeight = '124%'
-
   return (
     <Box
       sx={{
         height: 'auto',
         width: '100%',
-        padding: '0px 0px',
         margin: '0px 0px 0px',
         backgroundColor: '#F2F3F8',
         borderRadius: 0,
@@ -206,4 +198,4 @@ const SimpleDataTable = () => {
   )
 }
 
-export default SimpleDataTable
+export default ProductionVolumeDataView

@@ -278,8 +278,9 @@ export default function HeaderContent({ keycloak }) {
         'selectedSite',
         JSON.stringify({ id: site.id, name: site.name }),
       )
-      localStorage.setItem('selectedSiteId', JSON.stringify({ id: site.id }))
       // localStorage.setItem('selectedSiteId', site.id)
+      localStorage.setItem('selectedSiteId', JSON.stringify({ id: site?.id }))
+
       setSelectedPlant('')
       dispatch(
         setSitePlantChange({

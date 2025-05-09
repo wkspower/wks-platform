@@ -157,37 +157,24 @@
   pointer-events: none;
 }
 .custom-data-grid .odd-row {
-  opacity: 0.6; /* Reduced opacity for a disabled feel */
   pointer-events: none; /* Disables any interaction */
   background-color: #ebebeb; /* Light background instead of grey */
   color: rgba(0, 0, 0, 0.4); /* Slightly faded text color */
   border: 1px solid rgba(0, 0, 0, 0.2); /* Softer border */
   cursor: not-allowed; /* Shows the "not-allowed" cursor */
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1); /* Adds a soft inner shadow for a disabled feel */
-  border-radius: 8px; /* Slightly rounded corners for a modern touch */
-  background-image: linear-gradient(
-    45deg,
-    rgba(244, 244, 244, 0.8),
-    rgba(255, 255, 255, 0.6)
-  ); /* Soft gradient effect */
-  /* filter: blur(1px); Slight blur effect on the text */
+
   transition: all 0.3s ease; /* Smooth transition for all changes */
 }
 
 .odd-cell {
-  opacity: 0.6;
+  /* opacity: 0.6; */
   pointer-events: none;
   background-color: #ebebeb;
   color: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(0, 0, 0, 0.2);
   cursor: not-allowed;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-  /* border-radius: 8px; */
-  background-image: linear-gradient(
-    45deg,
-    rgba(244, 244, 244, 0.8),
-    rgba(255, 255, 255, 0.6)
-  );
   transition: all 0.3s ease;
 }
 
