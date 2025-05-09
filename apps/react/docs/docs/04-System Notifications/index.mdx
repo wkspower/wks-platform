@@ -35,3 +35,36 @@ This demonstration showcases the integration of [Novu](https://novu.co/) into th
 WKS Platform, built on the Camunda workflow automation engine, offers adaptive case management capabilities for handling complex processes efficiently.
 
 [Novu](https://novu.co/), an open-source notification infrastructure, provides simple components and APIs to manage various communication channels such as email, SMS, direct messaging, in-app notifications, and push notifications in one centralized platform.
+
+# System Notifications in the WKS Platform
+
+The WKS platform now includes a powerful **system notifications feature**, designed to improve user experience and streamline process communication without cluttering core BPM workflows.
+
+## Overview
+
+The new notifications system addresses a long-standing user need: ensuring case workers and stakeholders receive timely updates on case-related events, while minimizing disruption to their workflow. Instead of embedding notification logic within BPMN processes, WKS delegates this responsibility to a scalable, dedicated notification infrastructure powered by **Kafka** and **Novu**.
+
+---
+
+## Why Notifications Matter
+
+Process participants, such as case workers, need to stay informed about relevant events, including:
+
+- New case creation
+- Comments added to a case
+- Tasks created, assigned, or completed
+- Documents uploaded
+- Case status or stage updates
+
+Embedding notifications directly into BPMN flows often results in unnecessary process complexity. By decoupling this concern, the WKS approach enables scalability and clarity.
+
+---
+
+## Key Requirements Addressed
+
+- ✅ Notify users of key events without interrupting their workflow
+- ✅ Maintain process clarity and separation of concerns
+- ✅ Support for **asynchronous** and **scalable** event processing
+- ✅ Integration with multiple channels: Email, SMS, Slack, Microsoft Teams, In-App, and more
+
+---
