@@ -174,7 +174,19 @@ const ReportDataGrid = ({
           period: false,
         }}
         rowHeight={35}
-        columnGroupHeaderHeight={20}
+        getRowClassName={(params) => {
+          // If this is a “total” row, pin it
+          if (params.row.isTotal) {
+            return 'pinned-row'
+          }
+
+          // Otherwise apply your existing odd/even logic
+          if (params.row.isEditable === false) {
+            return permissions?.noColor === true ? 'even-row' : 'odd-row'
+          }
+
+          return 'even-row'
+        }}
         experimentalFeatures={{ newEditingApi: true, columnGrouping: true }}
         columnGroupingModel={columnGroupingModel}
         treeData={treeData}
@@ -184,6 +196,13 @@ const ReportDataGrid = ({
         onRowModesModelChange={onRowModesModelChange}
         handleCalculate={handleCalculate}
         sx={{
+          '& .pinned-row': {
+            position: 'sticky',
+            bottom: 0,
+            bgcolor: 'background.paper', // keep it opaque
+            fontWeight: 'bold',
+            zIndex: 1, // sit above normal rows
+          },
           '& .MuiDataGrid-columnHeader': {
             justifyContent: 'left',
           },
@@ -206,9 +225,9 @@ const ReportDataGrid = ({
           '& .MuiDataGrid-columnGroupHeader': {
             borderBottom: '1px solid rgba(224,224,224,1)',
           },
-          '& .MuiDataGrid-cellEmpty': {
-            display: 'none',
-          },
+          // '& .MuiDataGrid-cellEmpty': {
+          //   display: 'none',
+          // },
         }}
       />
       <Dialog

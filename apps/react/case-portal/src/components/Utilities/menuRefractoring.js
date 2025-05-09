@@ -23,9 +23,11 @@ import {
   IconChartHistogram,
   IconPackages,
   IconTrafficCone,
+  IconSettingsAutomation,
+  IconUserCog,
 } from '@tabler/icons-react'
+
 import i18n from 'i18n/index'
-// import i18n from '../i18n'
 
 // Icon mapping object
 export const icons = {
@@ -53,13 +55,10 @@ export const icons = {
   IconChartHistogram,
   IconPackages,
   IconTrafficCone,
+  IconSettingsAutomation,
+  IconUserCog,
 }
 
-/**
- * Recursively maps raw menu items to the shape your app expects.
- * @param {Object} item - Raw menu item
- * @returns {Object} Mapped menu item
- */
 export function mapScreen(item = {}) {
   const {
     id = '',
@@ -81,15 +80,3 @@ export function mapScreen(item = {}) {
     children: Array.isArray(children) ? children.map(mapScreen) : [],
   }
 }
-
-// export function mapScreen(item = {}) {
-//   return {
-//     id: item.id || '',
-//     title: i18n.t(item.title || ''),
-//     type: item.type || 'item',
-//     icon: icons[item.icon] || undefined,
-//     url: item.url || '',
-//     breadcrumbs: Boolean(item.breadcrumbs),
-//     children: Array.isArray(item.children) ? item.children.map(mapScreen) : [],
-//   }
-// }

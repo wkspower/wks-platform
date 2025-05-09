@@ -100,7 +100,15 @@ const ProductionAopView = () => {
         columns={columns.map((col) => ({
           ...col,
           filterable: true,
-
+          editable: (params) => {
+            if (
+              params.row.isEditable === false &&
+              col.field !== lastColumnField
+            ) {
+              return false
+            }
+            return col.field === lastColumnField
+          },
           cellClassName: (params) => {
             if (
               params.row.isEditable === false &&

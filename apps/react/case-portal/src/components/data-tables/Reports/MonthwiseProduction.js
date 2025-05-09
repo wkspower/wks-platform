@@ -267,8 +267,10 @@ const MonthwiseProduction = () => {
 
     return newRow
   }, [])
+  const defaultCustomHeight = { mainBox: '34vh', otherBox: '112%' }
+
   return (
-    <Box sx={{ height: 500, width: '100%' }}>
+    <Box>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={!!loading}
@@ -311,8 +313,8 @@ const MonthwiseProduction = () => {
           saveWithRemark: false,
           saveBtn: false,
           showCalculate: false,
-          // customHeight: defaultCustomHeight,
-          dynamicGridHeight: true,
+          customHeight: defaultCustomHeight,
+          // dynamicGridHeight: true,
           needTotal: true,
         }}
       />

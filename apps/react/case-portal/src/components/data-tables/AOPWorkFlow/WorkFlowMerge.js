@@ -39,6 +39,7 @@ import ProductionAopView from 'components/data-tables-views/DataTable-production
 import PlantsProductionSummary from '../Reports/PlantsProductionData'
 import MonthwiseProduction from '../Reports/MonthwiseProduction'
 import MonthwiseRawMaterial from '../Reports/MonthwiseRawMaterial'
+import TurnaroundReport from '../Reports/TurnaroundReport'
 import AnnualProductionPlan from '../Reports/AnnualProductionPlan'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -463,80 +464,68 @@ const WorkFlowMerge = () => {
             </Step>
           ))}
         </Stepper>
+
         <Stack
           direction='row'
-          spacing={1}
-          justifyContent='flex-end'
-          sx={{ mt: 0, mb: 0 }}
+          alignItems='center'
+          justifyContent='space-between' // push children to extremes
+          sx={{ mt: 0, mb: '-5px' }}
         >
-          {taskId && (
-            <Button
-              variant='contained'
-              className='btn-save'
-              onClick={handleRejectClick}
-              disabled={actionDisabled}
-            >
-              Accept
-            </Button>
-          )}
-          <Button
-            variant='outlined'
-            className='btn-save2'
-            sx={{ color: '#0100cb', border: '1px solid ' }}
-            onClick={handleAuditOpen}
-            // disabled={actionDisabled}
+          {/* LEFT: Tabs */}
+          <Tabs
+            value={tabIndex}
+            onChange={(e, newIndex) => setTabIndex(newIndex)}
+            sx={{
+              borderBottom: 0,
+              '.MuiTabs-indicator': { display: 'none' },
+              // you can tweak px/margin if you need more breathing room
+            }}
+            textColor='primary'
+            indicatorColor='primary'
           >
-            Audit Trail
-          </Button>
-        </Stack>
+            {[
+              'Annual AOP Cost',
+              'Plant Production Summary',
+              'Month Wise Production Plan',
+              'Month Wise Raw Data',
+              'Turnaround Report',
+              'Annual Production Plan'
+            ].map((label, idx) => (
+              <Tab
+                key={idx}
+                label={label}
+                sx={{
+                  border: tabIndex === idx ? '1px solid' : 'none',
+                  borderBottom: '1px solid',
+                  mr: 1, // small gap between tabs
+                  minWidth: '150px', // optional for consistent width
+                }}
+              />
+            ))}
+          </Tabs>
 
-        <Tabs
-          value={tabIndex}
-          onChange={(event, newIndex) => setTabIndex(newIndex)}
-          sx={{
-            borderBottom: '0px solid #ccc',
-            '.MuiTabs-indicator': { display: 'none' },
-            margin: '-35px 0px 0px 0%',
-          }}
-          textColor='primary'
-          indicatorColor='primary'
-        >
-          <Tab
-            label='Annual AOP Cost'
-            sx={{
-              border: tabIndex === 0 ? '1px solid ' : 'none',
-              borderBottom: '1px solid',
-            }}
-          />
-          <Tab
-            label='Plant Production Summary'
-            sx={{
-              border: tabIndex === 1 ? '1px solid ' : 'none',
-              borderBottom: '1px solid',
-            }}
-          />
-          <Tab
-            label='Month Wise Production Plan'
-            sx={{
-              border: tabIndex === 2 ? '1px solid ' : 'none',
-              borderBottom: '1px solid',
-            }}
-          />
-          <Tab
-            label='Month Wise Raw Data'
-            sx={{
-              border: tabIndex === 3 ? '1px solid ' : 'none',
-              borderBottom: '1px solid',
-            }}
-          />
-          <Tab
-            label='Annual Production Plan'
-            sx={{
-              border: tabIndex === 4 ? '1px solid ' : 'none',
-              borderBottom: '1px solid',
-            }}
-          />
-        </Tabs>
+          {/* RIGHT: Buttons */}
+          <Stack direction='row' spacing={1}>
+            {taskId && (
+              <Button
+                variant='contained'
+                className='btn-save'
+                onClick={handleRejectClick}
+                disabled={actionDisabled}
+              >
+                Accept
+              </Button>
+            )}
+            <Button
+              variant='outlined'
+              className='btn-save2'
+              sx={{ color: '#0100cb', border: '1px solid' }}
+              onClick={handleAuditOpen}
+            >
+              Audit Trail
+            </Button>
+          </Stack>
+        </Stack>
 
         {tabIndex === 0 && (
           <div>
@@ -664,8 +653,8 @@ const WorkFlowMerge = () => {
 
         {tabIndex === 2 && <MonthwiseProduction />}
         {tabIndex === 3 && <MonthwiseRawMaterial />}
-
-        {tabIndex === 4 && <AnnualProductionPlan />}
+        {tabIndex === 4 && <TurnaroundReport />}
+           {tabIndex === 5&& <AnnualProductionPlan />}
       </Box>
     </div>
   )

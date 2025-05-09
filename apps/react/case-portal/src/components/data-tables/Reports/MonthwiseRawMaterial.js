@@ -148,6 +148,10 @@ const MonthwiseRawMaterial = () => {
     },
   ]
 
+  const defaultCustomHeight = { mainBox: 'fit-content', otherBox: '100%' }
+  const defaultCustomHeightGrid2 = { mainBox: '36vh', otherBox: '100%' }
+
+  //api call
   const [row, setRow] = useState()
   const [row2, setRow2] = useState()
   const [loading, setLoading] = useState(false)
@@ -398,7 +402,7 @@ const MonthwiseRawMaterial = () => {
   } = dummyAPI1
 
   return (
-    <Box sx={{ height: 'auto', width: '100%' }}>
+    <Box>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={!!loading}
@@ -406,7 +410,13 @@ const MonthwiseRawMaterial = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <ReportDataGrid rows={row2} columns={columns} />
+      <ReportDataGrid
+        rows={row2}
+        columns={columns}
+        permissions={{
+          customHeight: defaultCustomHeight,
+        }}
+      />
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         {' '}
       </Typography>
@@ -415,7 +425,8 @@ const MonthwiseRawMaterial = () => {
         title='Monthwise Production Summary'
         columns={columnDefs}
         permissions={{
-          textAlignment: 'center',
+          customHeight: defaultCustomHeightGrid2,
+          // textAlignment: 'center',
         }}
       />
     </Box>
