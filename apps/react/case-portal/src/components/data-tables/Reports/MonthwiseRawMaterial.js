@@ -10,9 +10,11 @@ import ProductionNorms from '../ProductionNorms'
 import { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 
 const MonthwiseRawMaterial = () => {
   const keycloak = useSession()
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   const formatValueToThreeDecimals = (params) => {
     return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
@@ -24,7 +26,17 @@ const MonthwiseRawMaterial = () => {
       headerName: 'Type',
       groupable: true,
       flex: 2,
-      renderCell: (params) => <strong>{params.value}</strong>,
+      renderCell: (params) => (
+        <div
+          style={{
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            lineHeight: 1.4,
+          }}
+        >
+          <strong>{params.value}</strong>
+        </div>
+      ),
     },
     { field: 'particulars', headerName: 'Particulars', flex: 3 },
     {
@@ -45,7 +57,8 @@ const MonthwiseRawMaterial = () => {
     },
     {
       field: 'april',
-      headerName: 'Apr-25',
+      headerName: headerMap[4],
+
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -53,7 +66,7 @@ const MonthwiseRawMaterial = () => {
     },
     {
       field: 'may',
-      headerName: 'May-25',
+      headerName: headerMap[5],
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
@@ -61,7 +74,8 @@ const MonthwiseRawMaterial = () => {
     },
     {
       field: 'june',
-      headerName: 'Jun-25',
+      headerName: headerMap[6],
+
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
@@ -69,7 +83,8 @@ const MonthwiseRawMaterial = () => {
     },
     {
       field: 'july',
-      headerName: 'Jul-25',
+      headerName: headerMap[7],
+
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
@@ -77,7 +92,8 @@ const MonthwiseRawMaterial = () => {
     },
     {
       field: 'august',
-      headerName: 'Aug-25',
+      headerName: headerMap[8],
+
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
@@ -85,7 +101,8 @@ const MonthwiseRawMaterial = () => {
     },
     {
       field: 'september',
-      headerName: 'Sep-25',
+      headerName: headerMap[9],
+
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
@@ -93,7 +110,8 @@ const MonthwiseRawMaterial = () => {
     },
     {
       field: 'october',
-      headerName: 'Oct-25',
+      headerName: headerMap[10],
+
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
@@ -101,7 +119,8 @@ const MonthwiseRawMaterial = () => {
     },
     {
       field: 'november',
-      headerName: 'Nov-25',
+      headerName: headerMap[11],
+
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
@@ -109,7 +128,8 @@ const MonthwiseRawMaterial = () => {
     },
     {
       field: 'december',
-      headerName: 'Dec-25',
+      headerName: headerMap[12],
+
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
@@ -117,7 +137,8 @@ const MonthwiseRawMaterial = () => {
     },
     {
       field: 'january',
-      headerName: 'Jan-26',
+      headerName: headerMap[1],
+
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
@@ -125,7 +146,8 @@ const MonthwiseRawMaterial = () => {
     },
     {
       field: 'february',
-      headerName: 'Feb-26',
+      headerName: headerMap[2],
+
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
@@ -133,7 +155,8 @@ const MonthwiseRawMaterial = () => {
     },
     {
       field: 'march',
-      headerName: 'Mar-26',
+      headerName: headerMap[3],
+
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
@@ -241,92 +264,104 @@ const MonthwiseRawMaterial = () => {
           field: 'parameter',
           headerName: 'Parameters',
           editable: false,
-          flex: 1,
+          flex: 2,
           filterOperators: [{ label: 'contains', value: 'contains' }],
         },
         {
           field: 'april',
-          headerName: 'Apr-25',
+          headerName: headerMap[4],
           editable: false,
           align: 'right',
           headerAlign: 'left',
+          flex: 1,
         },
         {
           field: 'may',
-          headerName: 'May-25',
+          headerName: headerMap[5],
           editable: false,
           align: 'right',
           headerAlign: 'left',
+          flex: 1,
         },
         {
           field: 'june',
-          headerName: 'Jun-25',
+          headerName: headerMap[6],
           editable: false,
           align: 'right',
           headerAlign: 'left',
+          flex: 1,
         },
         {
           field: 'july',
-          headerName: 'Jul-25',
+          headerName: headerMap[7],
           editable: false,
           align: 'right',
           headerAlign: 'left',
+          flex: 1,
         },
         {
           field: 'aug',
-          headerName: 'Aug-25',
+          headerName: headerMap[8],
           editable: false,
           align: 'right',
           headerAlign: 'left',
+          flex: 1,
         },
         {
           field: 'sep',
-          headerName: 'Sep-25',
+          headerName: headerMap[9],
           editable: false,
           align: 'right',
           headerAlign: 'left',
+          flex: 1,
         },
         {
           field: 'oct',
-          headerName: 'Oct-25',
+          headerName: headerMap[10],
           editable: false,
           align: 'right',
           headerAlign: 'left',
+          flex: 1,
         },
         {
           field: 'nov',
-          headerName: 'Nov-25',
+          headerName: headerMap[11],
           editable: false,
           align: 'right',
           headerAlign: 'left',
+          flex: 1,
         },
         {
           field: 'dec',
-          headerName: 'Dec-25',
+          headerName: headerMap[12],
           editable: false,
           align: 'right',
           headerAlign: 'left',
+          flex: 1,
         },
         {
           field: 'jan',
-          headerName: 'Jan-26',
+          headerName: headerMap[1],
           editable: false,
           align: 'right',
           headerAlign: 'left',
+          flex: 1,
         },
         {
           field: 'feb',
-          headerName: 'Feb-26',
+          headerName: headerMap[2],
           editable: false,
           align: 'right',
           headerAlign: 'left',
+          flex: 1,
         },
         {
           field: 'march',
-          headerName: 'Mar-26',
+          headerName: headerMap[3],
           editable: false,
           align: 'right',
           headerAlign: 'left',
+          flex: 1,
         },
       ],
       rows: [

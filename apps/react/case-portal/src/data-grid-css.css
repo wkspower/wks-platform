@@ -137,8 +137,8 @@
   text-overflow: ellipsis;
   font-size: 0.8rem;
   cursor: pointer;
-  padding-left: 4px !important; /* minimal left padding */
-  padding-right: 4px !important; /* minimal right padding */
+  padding-left: 3px !important;
+  padding-right: 4px !important;
 
   display: flex;
   align-items: center;
@@ -165,19 +165,16 @@
   background-color: #ebebeb; /* Light background instead of grey */
   color: rgba(0, 0, 0, 0.4); /* Slightly faded text color */
   border: 1px solid rgba(0, 0, 0, 0.2); /* Softer border */
-
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1); /* Adds a soft inner shadow for a disabled feel */
-
   transition: all 0.3s ease; /* Smooth transition for all changes */
 }
 
 .odd-cell {
   /* opacity: 0.6; */
-  pointer-events: none;
+  /* pointer-events: none; */
   background-color: #ebebeb;
   color: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(0, 0, 0, 0.2);
-
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
@@ -237,6 +234,19 @@
 .custom-data-grid .MuiDataGrid-columnHeader,
 .custom-data-grid .MuiDataGrid-columnHeaderTitleContainer {
   font-family: 'Roboto', sans-serif !important;
+  text-align: left;
+}
+
+.custom-data-grid .MuiDataGrid-columnHeaderTitle {
+  white-space: normal; /* Allows wrapping */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Limit to 2 lines */
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  padding: 0 !important; /* Remove all padding */
+  line-height: 1.2; /* Optional: tighten line spacing */
+  font-weight: bold; /* Keep bold styling */
 }
 
 .custom-data-grid .MuiDataGrid-row.Mui-selected {

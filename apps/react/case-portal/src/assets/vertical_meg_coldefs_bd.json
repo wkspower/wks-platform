@@ -2,7 +2,7 @@
   {
     "field": "Particulars",
     "headerName": "Type",
-    "minWidth": 125,
+    "minWidth": 100,
     "groupable": true,
     "headerClass": "bold-header",
     "filterable": "false"
@@ -11,7 +11,7 @@
     "field": "normParameterId",
     "headerName": "Particulars",
     "editable": false,
-    "minWidth": 150
+    "minWidth": 125
   },
   {
     "field": "UOM",

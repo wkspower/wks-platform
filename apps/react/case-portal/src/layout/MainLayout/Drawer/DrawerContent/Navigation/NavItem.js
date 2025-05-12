@@ -16,6 +16,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import { useSafeNavigate } from './useSafeNavigate'
+import { Tooltip } from '../../../../../../node_modules/@mui/material/index'
 // import { setIsBlocked } from 'store/reducers/dataGridStore'
 
 const NavItem = ({ item, level }) => {
@@ -82,7 +83,8 @@ const NavItem = ({ item, level }) => {
         selected={isSelected}
         sx={{
           zIndex: 1201,
-          pl: drawerOpen ? `${level * 28}px` : 1.5,
+          // pl: drawerOpen ? `${level * 28}px` : 1.5,
+          pl: 2.5,
           py: !drawerOpen && level === 1 ? 1.25 : 1,
           ...(drawerOpen && {
             '&:hover': {
@@ -143,6 +145,7 @@ const NavItem = ({ item, level }) => {
         {(drawerOpen || (!drawerOpen && level !== 1)) && (
           <ListItemText
             primary={
+              // <Tooltip title={item.title} arrow>
               <Typography
                 variant='h6'
                 sx={{
@@ -151,10 +154,18 @@ const NavItem = ({ item, level }) => {
                     color: 'white',
                     bgcolor: '#0100cb',
                   },
+                  whiteSpace: 'normal', // Allows the text to wrap
+                  wordBreak: 'break-word', // Breaks long words
+                  display: '-webkit-box', // Uses a flexible box layout for text
+                  WebkitLineClamp: 2, // Limits to 2 lines of text
+                  WebkitBoxOrient: 'vertical', // Makes the text vertical
+                  overflow: 'hidden', // Hides overflowing text
+                  textOverflow: 'ellipsis', // Adds ellipsis (...) for overflowed text
                 }}
               >
                 {item.title}
               </Typography>
+              // </Tooltip>
             }
           />
         )}

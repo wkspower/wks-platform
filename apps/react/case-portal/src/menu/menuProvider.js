@@ -18,19 +18,21 @@ export function MenuProvider({ children }) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
 
   useEffect(() => {
-    if (!keycloak?.token || !verticalId) return
+    // if (!keycloak?.token || !verticalId) return
+    setMenuItems(staticMenu)
 
-    DataService.getScreenbyPlant(keycloak, verticalId, plantId)
-      .then((res) => {
-        const dynamic = Array.isArray(res.data) ? res.data.map(mapScreen) : []
-        if (dynamic.length) {
-          setMenuItems(staticMenu)
-        }
-      })
-      .catch((err) => {
-        console.error('Menu API failed, using static menu', err)
-        setMenuItems(staticMenu)
-      })
+    // DataService.getScreenbyPlant(keycloak, verticalId, plantId)
+    //   .then((res) => {
+    //     const dynamic = Array.isArray(res.data) ? res.data.map(mapScreen) : []
+    //     if (dynamic.length) {
+    //       setMenuItems(dynamic)
+
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     console.error('Menu API failed, using static menu', err)
+    //     setMenuItems(staticMenu)
+    //   })
   }, [keycloak, verticalChange, verticalId, plantId])
   const menuValue = useMemo(() => ({ items: menuItems }), [menuItems])
 

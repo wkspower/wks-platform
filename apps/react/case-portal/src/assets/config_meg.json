@@ -2,7 +2,7 @@
   {
     "field": "Particulars",
     "headerName": "Type",
-    "minWidth": 200,
+    "minWidth": 125,
     "groupable": true,
     "headerClass": "bold-header",
     "filterable": "false"

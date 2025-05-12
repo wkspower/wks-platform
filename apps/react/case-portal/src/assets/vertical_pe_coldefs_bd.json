@@ -2,7 +2,7 @@
   {
     "field": "Particulars",
     "headerName": "Type",
-    "minWidth": 125,
+    "minWidth": 100,
     "groupable": true,
     "headerClass": "bold-header"
   },
@@ -10,7 +10,7 @@
     "field": "normParameterId",
     "headerName": "Particulars",
     "editable": false,
-    "minWidth": 150
+    "minWidth": 125
   },
   {
     "field": "april",

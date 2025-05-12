@@ -23,7 +23,7 @@ header {
 
 .css-1ynvhpv-MuiButtonBase-root-MuiListItemButton-root.Mui-selected {
   background-color: #0100cb; /* Example: Light gray background */
-  /* color: white; */
+  color: white;
 }
 
 .css-1ynvhpv-MuiButtonBase-root-MuiListItemButton-root.Mui-selected:hover {
@@ -38,10 +38,10 @@ header {
 .css-hd56dl-MuiTypography-root {
   color: #ffffff; /* Example: Light gray background */
 }
-.css-h404g3-MuiButtonBase-root-MuiListItemButton-root.Mui-selected {
+.MuiButtonBase-root-MuiListItemButton-root.Mui-selected {
   background-color: #0100cb; /* Example: Light gray background */
   /* background-color: #0f3cc9; Example: Light gray background */
-  /* color: white; */
+  color: white;
 }
 /* .css-h404g3-MuiButtonBase-root-MuiListItemButton-root:hover {
   background-color: #fff; 
@@ -136,13 +136,13 @@ header {
   overflow: hidden;
 }
 
-footer {
+/* footer {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   margin: 0 auto;
-}
+} */
 
 .MuiButtonBase-root.MuiListItemButton-root.MuiListItemButton-gutters.MuiListItemButton-root:hover
   h6 {
@@ -165,4 +165,8 @@ footer {
 .red-first-cell {
   color: rgb(156, 83, 0) !important;
   font-weight: bold;
+}
+
+main.MuiBox-root.css-vognfw {
+  padding: 12px !important;
 }

@@ -140,7 +140,7 @@ const MonthwiseProduction = () => {
     {
       field: 'Remark',
       headerName: 'Remark',
-      minWidth: 250,
+      minWidth: 150,
       editable: false,
       renderCell: (params) => {
         const displayText = truncateRemarks(params.value)

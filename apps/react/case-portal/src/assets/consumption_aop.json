@@ -2,19 +2,19 @@
   {
     "field": "Particulars",
     "headerName": "Type",
-    "minWidth": 140,
+    "minWidth": 120,
     "groupable": true
   },
   {
     "field": "NormParametersId",
     "headerName": "Particulars",
-    "minWidth": 225,
+    "minWidth": 175,
     "editable": false
   },
   {
     "field": "UOM",
     "headerName": "UOM / MT",
-    "minWidth": 50,
+    "minWidth": 75,
     "editable": false
   },
   {

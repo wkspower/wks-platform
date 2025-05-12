@@ -221,7 +221,17 @@ const getEnhancedAOPColDefs = ({
     if (col.field === 'Particulars' || col.field === 'Particulars2') {
       return {
         ...col,
-        renderCell: (params) => <strong>{params?.value}</strong>,
+        renderCell: (params) => (
+          <div
+            style={{
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+              lineHeight: 1.4,
+            }}
+          >
+            <strong>{params.value}</strong>
+          </div>
+        ),
         filterable: false,
       }
     }

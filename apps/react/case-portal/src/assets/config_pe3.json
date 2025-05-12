@@ -2,7 +2,7 @@
   {
     "field": "Particulars",
     "headerName": "Constant",
-    "minWidth": 125,
+    "minWidth": 100,
     "groupable": true,
     "flex": 1
   },

@@ -216,15 +216,25 @@ const SlowdownNorms = () => {
     {
       field: 'Particulars',
       headerName: 'Type',
-      minWidth: 140,
+      minWidth: 100,
       groupable: true,
-      renderCell: (params) => <strong>{params.value}</strong>,
+      renderCell: (params) => (
+        <div
+          style={{
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            lineHeight: 1.4,
+          }}
+        >
+          <strong>{params.value}</strong>
+        </div>
+      ),
     },
 
     {
       field: 'materialFkId',
       headerName: 'Particulars',
-      minWidth: 160,
+      minWidth: 150,
       editable: false,
       valueGetter: (params) => params || '',
       valueFormatter: (params) => {
@@ -432,7 +442,7 @@ const SlowdownNorms = () => {
     {
       field: 'remarks',
       headerName: 'Remark',
-      minWidth: 150,
+      minWidth: 125,
       editable: false,
       renderCell: (params) => {
         const displayText = truncateRemarks(params.value)

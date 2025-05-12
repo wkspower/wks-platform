@@ -546,14 +546,14 @@ const WorkFlowMerge = () => {
                 Accept
               </Button>
             )}
-            <Button
+            {/* <Button
               variant='outlined'
               className='btn-save2'
               sx={{ color: '#0100cb', border: '1px solid' }}
               onClick={handleAuditOpen}
             >
               Audit Trail
-            </Button>
+            </Button> */}
           </Stack>
         </Stack>
 

@@ -13,7 +13,7 @@
     "field": "normParametersFKId",
     "headerName": "Particulars",
     "editable": false,
-    "minWidth": 225
+    "minWidth": 175
   },
   {
     "field": "april",

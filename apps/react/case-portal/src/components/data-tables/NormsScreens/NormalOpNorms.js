@@ -129,15 +129,25 @@ const NormalOpNormsScreen = () => {
     {
       field: 'Particulars',
       headerName: 'Type',
-      minWidth: 140,
+      minWidth: 110,
       groupable: true,
-      renderCell: (params) => <strong>{params.value}</strong>,
+      renderCell: (params) => (
+        <div
+          style={{
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            lineHeight: 1.4,
+          }}
+        >
+          <strong>{params.value}</strong>
+        </div>
+      ),
     },
     {
       field: 'materialFkId',
       // headerName: 'Particulars',
       headerName: lowerVertName === 'meg' ? 'Particulars' : 'Particulars',
-      minWidth: 160,
+      minWidth: 120,
       valueGetter: (params) => params || '',
       valueFormatter: (params) => {
         const product = allProducts.find((p) => p.id === params)
@@ -215,7 +225,7 @@ const NormalOpNormsScreen = () => {
     {
       field: 'UOM',
       headerName: 'UOM / MT',
-      width: 100,
+      minWidth: 80,
       editable: false,
     },
 
@@ -331,7 +341,7 @@ const NormalOpNormsScreen = () => {
     {
       field: 'remarks',
       headerName: 'Remark',
-      minWidth: 150,
+      minWidth: 125,
       editable: false,
       renderCell: (params) => {
         const displayText = truncateRemarks(params.value)
