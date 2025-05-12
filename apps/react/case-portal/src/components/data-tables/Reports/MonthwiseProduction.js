@@ -317,6 +317,7 @@ const MonthwiseProduction = () => {
         permissions={{
           customHeight: defaultCustomHeightGrid1,
           textAlignment: 'center',
+          remarksEditable: true,
         }}
         treeData
         getTreeDataPath={(rows) => rows.path}

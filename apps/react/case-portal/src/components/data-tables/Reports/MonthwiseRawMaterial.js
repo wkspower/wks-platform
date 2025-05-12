@@ -7,7 +7,7 @@ import {
   Typography,
 } from '../../../../node_modules/@mui/material/index'
 import ProductionNorms from '../ProductionNorms'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'

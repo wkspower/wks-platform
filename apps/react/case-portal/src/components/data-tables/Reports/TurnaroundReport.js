@@ -146,19 +146,16 @@ const TurnaroundReport = () => {
     }
     return newRow
   }, [])
-
   const processRowUpdate2 = useCallback((newRow) => {
     unsavedChangesRef.current = true
     setRows2((prev) => prev.map((r) => (r.id === newRow.id ? newRow : r)))
     return newRow
   }, [])
-
   const [loading, setLoading] = useState(false)
   const keycloak = useSession()
 
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -222,6 +219,7 @@ const TurnaroundReport = () => {
         permissions={{
           customHeight: { mainBox: '32vh', otherBox: '100%' },
           textAlignment: 'center',
+          remarksEditable: true,
         }}
       />
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
@@ -246,6 +244,7 @@ const TurnaroundReport = () => {
         permissions={{
           customHeight: { mainBox: '32vh', otherBox: '100%' },
           textAlignment: 'center',
+          remarksEditable: true,
         }}
       />
     </Box>

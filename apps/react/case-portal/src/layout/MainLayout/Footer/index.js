@@ -1,4 +1,3 @@
-import React from 'react'
 import { Box, Typography, Stack } from '@mui/material'
 import honLogo from '../../../assets/images/hon.svg'
 

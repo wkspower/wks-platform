@@ -90,6 +90,7 @@ const ReportDataGrid = ({
       setIsButtonDisabled(false)
     }, 500)
   }
+  const lastColumnField = columns[columns.length - 1]?.field
 
   return (
     <Box
@@ -139,8 +140,14 @@ const ReportDataGrid = ({
             } else {
               return 'disabled-cell'
             }
-            // }
-            // return undefined
+            if (
+              permissions?.remarksEditable &&
+              params.row.isEditable === false &&
+              col.field !== lastColumnField
+            ) {
+              return 'odd-cell'
+            }
+            return undefined
           },
           headerClassName: col.isDisabled ? 'disabled-header' : undefined,
         }))}
@@ -164,8 +171,17 @@ const ReportDataGrid = ({
         rowHeight={35}
         getRowClassName={(params) => {
           const classes = []
+          if (permissions?.isOldYear == 1) {
+            classes.push('odd-row-disabled')
+          }
+          if (params.row.Particulars || params.row.Particulars2) {
+            classes.push('no-border-row')
+          }
 
-          if (params.row.isEditable === false) {
+          if (
+            params.row.isEditable === false &&
+            !permissions?.remarksEditable
+          ) {
             return [
               ...classes,
               permissions?.noColor === true ? 'even-row' : 'odd-row',

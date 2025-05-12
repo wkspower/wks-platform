@@ -101,7 +101,9 @@ public class UserScreenMappingServiceImpl implements UserScreenMappingService {
 	                parentGroup.put("title", mapping.getScreenDisplayName());
 	                parentGroup.put("type",mapping.getType());
 	                parentGroup.put("icon", mapping.getIcon());
-	                parentGroup.put("children", new ArrayList<>());
+					  parentGroup.put("url", mapping.getRoute());
+					    parentGroup.put("breadcrumbs", mapping.getBreadCrumbs());
+	                // parentGroup.put("children", new ArrayList<>());
 	                children.add(parentGroup); // Add directly to the vertical's children
 	            } else {
 	                // Treat as a regular screen item

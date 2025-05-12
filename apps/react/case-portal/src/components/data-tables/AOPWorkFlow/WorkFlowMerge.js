@@ -41,6 +41,7 @@ import MonthwiseProduction from '../Reports/MonthwiseProduction'
 import MonthwiseRawMaterial from '../Reports/MonthwiseRawMaterial'
 import TurnaroundReport from '../Reports/TurnaroundReport'
 import AnnualProductionPlan from '../Reports/AnnualProductionPlan'
+import PlantContribution from '../Reports/PlantContribution'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -505,12 +506,12 @@ const WorkFlowMerge = () => {
           <Tabs
             value={tabIndex}
             onChange={(e, newIndex) => setTabIndex(newIndex)}
-            variant='scrollable'
-            scrollButtons='auto'
+            variant='scrollable' 
+            scrollButtons='auto' 
             sx={{
               borderBottom: 0,
               '.MuiTabs-indicator': { display: 'none' },
-              maxWidth: '100%',
+              maxWidth: '100%', 
             }}
             textColor='primary'
             indicatorColor='primary'
@@ -522,6 +523,7 @@ const WorkFlowMerge = () => {
               'Month Wise Raw Data',
               'Turnaround Report',
               'Annual Production Plan',
+              'Plant Contribution',
             ].map((label, idx) => (
               <Tab
                 key={idx}
@@ -550,14 +552,14 @@ const WorkFlowMerge = () => {
                 Accept
               </Button>
             )}
-            {/* <Button
+            <Button
               variant='outlined'
               className='btn-save2'
               sx={{ color: '#0100cb', border: '1px solid' }}
               onClick={handleAuditOpen}
             >
               Audit Trail
-            </Button> */}
+            </Button>
           </Stack>
         </Stack>
 
@@ -690,6 +692,7 @@ const WorkFlowMerge = () => {
         {tabIndex === 3 && <MonthwiseRawMaterial />}
         {tabIndex === 4 && <TurnaroundReport />}
         {tabIndex === 5 && <AnnualProductionPlan />}
+        {tabIndex === 6 && <PlantContribution />}
       </Box>
     </div>
   )
