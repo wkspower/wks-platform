@@ -505,10 +505,12 @@ const WorkFlowMerge = () => {
           <Tabs
             value={tabIndex}
             onChange={(e, newIndex) => setTabIndex(newIndex)}
+            variant='scrollable' 
+            scrollButtons='auto' 
             sx={{
               borderBottom: 0,
               '.MuiTabs-indicator': { display: 'none' },
-              // you can tweak px/margin if you need more breathing room
+              maxWidth: '100%', 
             }}
             textColor='primary'
             indicatorColor='primary'
@@ -527,8 +529,10 @@ const WorkFlowMerge = () => {
                 sx={{
                   border: tabIndex === idx ? '1px solid' : 'none',
                   borderBottom: '1px solid',
-                  mr: 1, // small gap between tabs
-                  minWidth: '150px', // optional for consistent width
+                  mr: 0.5, 
+                  minWidth: 'auto', 
+                  paddingX: 1, 
+                  fontSize: '0.75rem', 
                 }}
               />
             ))}

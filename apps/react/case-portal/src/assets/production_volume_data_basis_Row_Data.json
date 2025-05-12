@@ -1,0 +1,20 @@
+[
+  {
+    "field": "material",
+    "headerName": "Particulars",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "dateTime",
+    "headerName": "Date-Time",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "actualQty",
+    "headerName": "Actual Qty",
+    "flex": 2,
+    "editable": false
+  }
+]

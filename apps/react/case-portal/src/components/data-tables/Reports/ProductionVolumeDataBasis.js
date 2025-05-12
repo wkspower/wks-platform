@@ -13,106 +13,67 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-import {
-  MenuItem,
-  TextField,
-} from '../../../../node_modules/@mui/material/index'
-import getEnhancedAnnualAopCostReport from '../CommonHeader/AopCostReportHeader'
 
-const CustomAccordion = styled((props) => (
-  <MuiAccordion disableGutters elevation={0} square {...props} />
-))(() => ({
-  position: 'unset',
-  border: 'none',
-  boxShadow: 'none',
-  margin: '0px',
-  '&:before': {
-    display: 'none',
-  },
-}))
+import getEnhancedProductionVolDataBasis from '../CommonHeader/MCHeaders'
 
-const CustomAccordionSummary = styled((props) => (
-  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
-))(() => ({
-  backgroundColor: '#fff',
-  padding: '0px 12px',
-  minHeight: '40px',
-  '& .MuiAccordionSummary-content': {
-    margin: '8px 0',
-  },
-}))
+// const CustomAccordion = styled((props) => (
+//   <MuiAccordion disableGutters elevation={0} square {...props} />
+// ))(() => ({
+//   position: 'unset',
+//   border: 'none',
+//   boxShadow: 'none',
+//   margin: '0px',
+//   '&:before': {
+//     display: 'none',
+//   },
+// }))
 
-const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
-  padding: '0px 0px 12px',
-  backgroundColor: '#F2F3F8',
-}))
+// const CustomAccordionSummary = styled((props) => (
+//   <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
+// ))(() => ({
+//   backgroundColor: '#fff',
+//   padding: '0px 12px',
+//   minHeight: '40px',
+//   '& .MuiAccordionSummary-content': {
+//     margin: '8px 0',
+//   },
+// }))
+
+// const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
+//   padding: '0px 0px 12px',
+//   backgroundColor: '#F2F3F8',
+// }))
 
 const ProductionVolumeDataBasis = () => {
   const keycloak = useSession()
-  const [rowsProduction, setRowsProduction] = useState([])
-  const [rowsPrice, setRowsPrice] = useState([])
-  const [rowsNorm, setRowsNorm] = useState([])
-  const [rowsQuantity, setRowsQuantity] = useState([])
-  const [rowsNormCost, setRowsNormCost] = useState([])
 
-  const [headers2, setHeaders2] = useState([])
-  const [keys2, setKeys2] = useState([])
+  const [rowsMC, setRowsMC] = useState([])
+  const [rowsMCYearWise, setRowsMCYearWise] = useState([])
+  const [rowsCalculatedData, setRowsCalculatedData] = useState([])
+  const [rowsRawData, setRowsRowData] = useState([])
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-  const [expandedPanel, setExpandedPanel] = useState('panel1')
-  const [unit, setUnit] = useState([])
-  const [selectedUnit, setSelectedUnit] = useState('')
+
   const [loading, setLoading] = useState(false)
 
-  const handleUnitChange = (event) => {
-    setSelectedUnit(event)
-  }
-
-  useEffect(() => {
-    if (unit?.length > 0) {
-      setSelectedUnit(unit[0].name)
-    }
-  }, [unit])
-
-  const fetchData = async (reportType, setState, selectedDropdown) => {
+  const fetchData = async (reportType, setState) => {
     try {
       setLoading(true)
       var data = []
-
-      data = await DataService.getAnnualCostAopReport(
-        keycloak,
-        reportType,
-        selectedDropdown,
-      )
+      data = await DataService.getProductionVolDataBasis(keycloak, reportType)
 
       if (data?.code === 200) {
         const rowsWithId = data?.data?.map((item, index) => ({
           ...item,
           id: index,
+          isEditable: false,
         }))
         setLoading(false)
-
-        if (reportType == 'aopYearFilter') {
-          setUnit(data?.data)
-          setSelectedUnit(data?.data[0]?.name)
-        } else if (reportType == 'price') {
-          const headers2 = data?.data[0]?.headers
-          setHeaders2(headers2)
-          const keys2 = data?.data[0]?.keys
-          setKeys2(keys2)
-          const rowsWithId2 = data?.data[0]?.results?.map((item, index) => ({
-            ...item,
-            id: index,
-          }))
-          setState(rowsWithId2)
-        } else {
-          setState(rowsWithId)
-        }
-        // setLoading(false)
+        setState(rowsWithId)
       } else {
         console.error(`Error fetching ${reportType} data`)
         setLoading(false)
@@ -123,72 +84,35 @@ const ProductionVolumeDataBasis = () => {
     }
   }
 
-  // const headerMap = generateHeaderNames(localStorage.getItem('year'))
-
-  const year = extractYear(selectedUnit) || '2025-26'
+  const year = localStorage.getItem('year')
   const headerMap = generateHeaderNames(year)
 
-  function extractYear(dropdownValue) {
-    if (!dropdownValue) return ''
-    const parts = dropdownValue.trim().split(' ')
-    return parts.length > 1 ? parts[1] : ''
-  }
-
-  const colsProduction = getEnhancedAnnualAopCostReport({
+  const colsMC = getEnhancedProductionVolDataBasis({
     headerMap,
-    type: 'Production',
+    type: 'MC',
   })
 
-  // const colsPrice = getEnhancedAnnualAopCostReport({
-  //   headerMap,
-  //   type: 'Price',
-  // })
-
-  const colsPrice = getEnhancedAnnualAopCostReport({
+  const colsMCYearwise = getEnhancedProductionVolDataBasis({
     headerMap,
-    type: 'Price',
-    headers2,
-    keys2,
+    type: 'MC Yearwise',
   })
 
-  const colsNorm = getEnhancedAnnualAopCostReport({
+  const colsCalculatedData = getEnhancedProductionVolDataBasis({
     headerMap,
-    type: 'Norm',
+    type: 'Calculated Data',
   })
 
-  const colsQuantity = getEnhancedAnnualAopCostReport({
+  const colsRowData = getEnhancedProductionVolDataBasis({
     headerMap,
-    type: 'Quantity',
-  })
-
-  const colsNormCost = getEnhancedAnnualAopCostReport({
-    headerMap,
-    type: 'NormCost',
+    type: 'RowData',
   })
 
   useEffect(() => {
-    fetchData('aopYearFilter', setUnit)
+    fetchData('MC', setRowsMC)
+    fetchData('MC Yearwise', setRowsMCYearWise)
+    fetchData('Calculated Data', setRowsCalculatedData)
+    fetchData('RowData', setRowsRowData)
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
-
-  useEffect(() => {
-    if (selectedUnit) {
-      fetchData('production', setRowsProduction, selectedUnit)
-      fetchData('price', setRowsPrice, selectedUnit)
-      fetchData('norm', setRowsNorm, selectedUnit)
-      fetchData('quantity', setRowsQuantity, selectedUnit)
-      fetchData('normCost', setRowsNormCost, selectedUnit)
-    }
-  }, [
-    selectedUnit,
-    sitePlantChange,
-    oldYear,
-    yearChanged,
-    keycloak,
-    lowerVertName,
-  ])
-  const handleChange = (panel) => (event, isExpanded) => {
-    setExpandedPanel(isExpanded ? panel : false)
-  }
 
   return (
     <div>
@@ -200,156 +124,89 @@ const ProductionVolumeDataBasis = () => {
       </Backdrop>
 
       <Box display='flex' flexDirection='column' gap={2}>
-        <Box display='flex' justifyContent='flex-end'>
-          <TextField
-            select
-            value={selectedUnit}
-            onChange={(e) => {
-              const value = e.target.value
-              setSelectedUnit(value)
-              handleUnitChange(value)
-            }}
-            sx={{ width: '200px', backgroundColor: '#FFFFFF' }}
-            variant='outlined'
-            label='Select AOP Year'
-          >
-            <MenuItem value='' disabled>
-              Select AOP Year
-            </MenuItem>
-
-            {unit?.map((unit) => (
-              <MenuItem key={unit?.name} value={unit?.name}>
-                {unit?.displayName}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Box>
+        <div>
+          {/* <CustomAccordion defaultExpanded disableGutters>
+            <CustomAccordionSummary
+              aria-controls='meg-grid-content'
+              id='meg-grid-header'
+            > */}
+          <Typography component='span' className='grid-title'>
+            MC
+          </Typography>
+          {/* </CustomAccordionSummary> */}
+          {/* <CustomAccordionDetails> */}
+          <Box sx={{ width: '100%', margin: 0 }}>
+            <AopCostReportView rows={rowsMC} columns={colsMC} height='93px' />
+          </Box>
+          {/* </CustomAccordionDetails> */}
+          {/* </CustomAccordion> */}
+        </div>
 
         <div>
-          <CustomAccordion
-            expanded={expandedPanel === 'panel1'} // ← controlled prop
-            onChange={handleChange('panel1')}
-            disableGutters
-          >
-            <CustomAccordionSummary
+          {/* <CustomAccordion defaultExpanded disableGutters> */}
+          {/* <CustomAccordionSummary
               aria-controls='meg-grid-content'
               id='meg-grid-header'
-              expandIcon={<ExpandMoreIcon />}
-            >
-              <Typography component='span' className='grid-title'>
-                MC
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <AopCostReportView
-                  rows={rowsProduction}
-                  columns={colsProduction}
-                  height='93px'
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
+            > */}
+          <Typography component='span' className='grid-title'>
+            MC Yearwise
+          </Typography>
+          {/* </CustomAccordionSummary> */}
+          {/* <CustomAccordionDetails> */}
+          <Box sx={{ width: '100%', margin: 0 }}>
+            <AopCostReportView
+              rows={rowsMCYearWise}
+              columns={colsMCYearwise}
+              height='340px'
+            />
+          </Box>
+          {/* </CustomAccordionDetails> */}
+          {/* </CustomAccordion> */}
         </div>
+
         <div>
-          <CustomAccordion
-            expanded={expandedPanel === 'panel2'} // ← controlled prop
-            onChange={handleChange('panel2')}
-            disableGutters
-          >
+          {/* <CustomAccordion defaultExpanded disableGutters>
             <CustomAccordionSummary
               aria-controls='meg-grid-content'
               id='meg-grid-header'
-              expandIcon={<ExpandMoreIcon />}
-            >
-              <Typography component='span' className='grid-title'>
-                MC Yearwise
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <AopCostReportView
-                  rows={rowsPrice}
-                  columns={colsPrice}
-                  height='340px'
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
+            > */}
+          <Typography component='span' className='grid-title'>
+            Calculated Data
+          </Typography>
+          {/* </CustomAccordionSummary> */}
+          {/* <CustomAccordionDetails> */}
+          <Box sx={{ width: '100%', margin: 0 }}>
+            <AopCostReportView
+              rows={rowsCalculatedData}
+              columns={colsCalculatedData}
+              height='340px'
+            />
+          </Box>
+          {/* </CustomAccordionDetails>
+          </CustomAccordion> */}
         </div>
+
         <div>
-          <CustomAccordion
-            expanded={expandedPanel === 'panel3'} // ← controlled prop
-            onChange={handleChange('panel3')}
-            disableGutters
-          >
+          {/* <CustomAccordion defaultExpanded disableGutters>
             <CustomAccordionSummary
               aria-controls='meg-grid-content'
               id='meg-grid-header'
-              expandIcon={<ExpandMoreIcon />}
-            >
-              <Typography component='span' className='grid-title'>
-                Calculated Data
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <AopCostReportView
-                  rows={rowsNorm}
-                  columns={colsNorm}
-                  height='340px'
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
+            > */}
+          <Typography component='span' className='grid-title'>
+            Raw Data
+          </Typography>
+          {/* </CustomAccordionSummary> */}
+          {/* <CustomAccordionDetails> */}
+          <Box sx={{ width: '100%', margin: 0 }}>
+            <AopCostReportView
+              rows={rowsRawData}
+              columns={colsRowData}
+              height='340px'
+            />
+          </Box>
+          {/* </CustomAccordionDetails>
+          </CustomAccordion> */}
         </div>
-        <div>
-          <CustomAccordion
-            expanded={expandedPanel === 'panel4'} // ← controlled prop
-            onChange={handleChange('panel4')}
-            disableGutters
-          >
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-              expandIcon={<ExpandMoreIcon />}
-            >
-              <Typography component='span' className='grid-title'>
-                Row Data
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <AopCostReportView
-                  rows={rowsQuantity}
-                  columns={colsQuantity}
-                  height='340px'
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
-        {/* <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                Annual AOP Cost ((Total Quantity * AvgPrice)/Total Production)
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <AopCostReportView
-                  rows={rowsNormCost}
-                  columns={colsNormCost}
-                  height='340px'
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div> */}
       </Box>
     </div>
   )

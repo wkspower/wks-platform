@@ -1,0 +1,50 @@
+[
+  {
+    "field": "material",
+    "headerName": "Particulars",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "financialYear",
+    "headerName": "Financial Year",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "monthDisplayName",
+    "headerName": "Month",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "avgValue",
+    "headerName": "Avg Value",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "maxValue",
+    "headerName": "Max Value",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "minValue",
+    "headerName": "Min Value",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "startDate",
+    "headerName": "Start Date",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "endDate",
+    "headerName": "End Date",
+    "flex": 2,
+    "editable": false
+  }
+]
