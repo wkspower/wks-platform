@@ -137,6 +137,11 @@
   text-overflow: ellipsis;
   font-size: 0.8rem;
   cursor: pointer;
+  padding-left: 4px !important; /* minimal left padding */
+  padding-right: 4px !important; /* minimal right padding */
+
+  display: flex;
+  align-items: center;
 }
 
 .custom-data-grid .MuiDataGrid-row {
@@ -154,14 +159,13 @@
 
 .custom-data-grid .no-border-row:hover {
   background-color: #d6d4d4 !important;
-  pointer-events: none;
 }
 .custom-data-grid .odd-row {
-  pointer-events: none; /* Disables any interaction */
+  /* pointer-events: none; Disables any interaction */
   background-color: #ebebeb; /* Light background instead of grey */
   color: rgba(0, 0, 0, 0.4); /* Slightly faded text color */
   border: 1px solid rgba(0, 0, 0, 0.2); /* Softer border */
-  cursor: not-allowed; /* Shows the "not-allowed" cursor */
+
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1); /* Adds a soft inner shadow for a disabled feel */
 
   transition: all 0.3s ease; /* Smooth transition for all changes */
@@ -173,14 +177,13 @@
   background-color: #ebebeb;
   color: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(0, 0, 0, 0.2);
-  cursor: not-allowed;
+
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
 .custom-data-grid .odd-row-disabled {
   pointer-events: none;
-  cursor: not-allowed;
 }
 
 .custom-data-grid .odd-row-disabled :hover {
@@ -218,7 +221,6 @@
 
 .custom-data-grid .no-border-row {
   background-color: #e9e9e9;
-  color: white !important;
 }
 
 .custom-data-grid .MuiInputBase-input,
@@ -235,4 +237,19 @@
 .custom-data-grid .MuiDataGrid-columnHeader,
 .custom-data-grid .MuiDataGrid-columnHeaderTitleContainer {
   font-family: 'Roboto', sans-serif !important;
+}
+
+.custom-data-grid .MuiDataGrid-row.Mui-selected {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+/* Preserve odd row background when selected */
+.custom-data-grid .MuiDataGrid-row.odd-row.Mui-selected {
+  background-color: #ebebeb !important;
+}
+
+/* Preserve even row background when selected */
+.custom-data-grid .MuiDataGrid-row.even-row.Mui-selected {
+  background-color: #ffffff !important;
 }

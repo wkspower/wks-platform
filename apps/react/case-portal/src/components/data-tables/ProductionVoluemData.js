@@ -14,6 +14,8 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { Typography } from '../../../node_modules/@mui/material/index'
 
 const ProductionvolumeData = ({ permissions }) => {
+  const [modifiedCells, setModifiedCells] = React.useState({})
+
   const keycloak = useSession()
   // const [productNormData, setProductNormData] = useState([])
   const [rowModesModel, setRowModesModel] = useState({})
@@ -160,6 +162,16 @@ const ProductionvolumeData = ({ permissions }) => {
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
+    const updatedFields = []
+    for (const key in newRow) {
+      if (
+        Object.prototype.hasOwnProperty.call(newRow, key) &&
+        newRow[key] !== oldRow[key]
+      ) {
+        updatedFields.push(key)
+      }
+    }
+
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
@@ -169,6 +181,12 @@ const ProductionvolumeData = ({ permissions }) => {
         row.id === newRow.id ? { ...newRow, isNew: false } : row,
       ),
     )
+    if (updatedFields.length > 0) {
+      setModifiedCells((prevModifiedCells) => ({
+        ...prevModifiedCells,
+        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+      }))
+    }
     return newRow
   }, [])
 
@@ -249,6 +267,7 @@ const ProductionvolumeData = ({ permissions }) => {
         } else {
           editAOPMCCalculatedData(data)
         }
+        setModifiedCells({})
 
         unsavedChangesRef.current = {
           unsavedRows: {},
@@ -514,6 +533,7 @@ const ProductionvolumeData = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <ASDataGrid
+        modifiedCells={modifiedCells}
         setRows={setRows}
         columns={productionColumns}
         rows={rows}

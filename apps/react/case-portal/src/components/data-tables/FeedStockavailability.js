@@ -9,6 +9,8 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import getEnhancedColDefs from './CommonHeader/feedstockHeaders'
 
 const FeedStockAvailability = () => {
+  const [modifiedCells, setModifiedCells] = React.useState({})
+
   // const [productOptions, setProductOptions] = useState([])
   // const [productionData, setProductionData] = useState([])
   // const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -42,6 +44,16 @@ const FeedStockAvailability = () => {
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
+    const updatedFields = []
+    for (const key in newRow) {
+      if (
+        Object.prototype.hasOwnProperty.call(newRow, key) &&
+        newRow[key] !== oldRow[key]
+      ) {
+        updatedFields.push(key)
+      }
+    }
+
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
@@ -53,6 +65,13 @@ const FeedStockAvailability = () => {
         row.id === newRow.id ? { ...newRow, isNew: false } : row,
       ),
     )
+
+    if (updatedFields.length > 0) {
+      setModifiedCells((prevModifiedCells) => ({
+        ...prevModifiedCells,
+        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+      }))
+    }
 
     return newRow
   }, [])
@@ -95,6 +114,8 @@ const FeedStockAvailability = () => {
         //   })
         //   return
         // }
+        setModifiedCells({})
+
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},
@@ -142,6 +163,7 @@ const FeedStockAvailability = () => {
   return (
     <div>
       <ASDataGrid
+        modifiedCells={modifiedCells}
         columns={productionColumns}
         rows={rows}
         setRows={setRows}

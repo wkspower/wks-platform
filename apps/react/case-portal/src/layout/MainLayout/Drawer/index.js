@@ -7,45 +7,42 @@ import DrawerHeader from './DrawerHeader'
 import DrawerContent from './DrawerContent'
 import { drawerWidth } from 'config'
 
-const MainDrawer = ({ open, handleDrawerToggle, window }) => {
+const MainDrawer = ({ open }) => {
   const theme = useTheme()
-  const container =
-    window !== undefined ? () => window().document.body : undefined
 
   const drawerContent = useMemo(() => <DrawerContent />, [])
   const drawerHeader = useMemo(() => <DrawerHeader open={open} />, [open])
 
   return (
-    <Box
-      component='nav'
-      sx={{ flexShrink: 0, zIndex: 1300 }}
-      aria-label='sidebar'
+    <Drawer
+      variant='persistent'
+      open={open}
+      sx={{
+        width: open ? drawerWidth : 0,
+        flexShrink: 0,
+        whiteSpace: 'nowrap',
+        transition: theme.transitions.create('width', {
+          easing: theme.transitions.easing.easeOut, // Using easeOut for smoother deceleration
+          duration: theme.transitions.duration.standard,
+        }),
+        '& .MuiDrawer-paper': {
+          width: open ? drawerWidth : 0,
+          transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.easeOut, // Consistent easing for the paper
+            duration: theme.transitions.duration.standard,
+          }),
+          boxSizing: 'border-box',
+          borderRight: `1px solid ${theme.palette.divider}`,
+          backgroundImage: 'none',
+          boxShadow: theme.shadows[6],
+          overflowX: 'hidden',
+        },
+      }}
     >
-      <Drawer
-        container={container}
-        variant='temporary'
-        open={open}
-        onClose={handleDrawerToggle}
-        ModalProps={{
-          keepMounted: true,
-
-          BackdropProps: { invisible: true },
-        }}
-        sx={{
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-            borderRight: `1px solid ${theme.palette.divider}`,
-            backgroundImage: 'none',
-            boxShadow: theme.shadows[6],
-            overflowX: 'hidden',
-          },
-        }}
-      >
+      {open && (
         <Box
           sx={{
             height: '100vh',
-
             overflowY: 'auto',
             overflowX: 'hidden',
           }}
@@ -54,15 +51,13 @@ const MainDrawer = ({ open, handleDrawerToggle, window }) => {
           {drawerHeader}
           {drawerContent}
         </Box>
-      </Drawer>
-    </Box>
+      )}
+    </Drawer>
   )
 }
 
 MainDrawer.propTypes = {
-  open: PropTypes.bool,
-  handleDrawerToggle: PropTypes.func,
-  window: PropTypes.object,
+  open: PropTypes.bool.isRequired,
 }
 
 export default MainDrawer

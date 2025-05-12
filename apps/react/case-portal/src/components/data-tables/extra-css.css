@@ -9,6 +9,7 @@
   min-width: 100px;
   border: none;
   cursor: pointer;
+  margin-bottom: 2px;
 }
 .btn-save2 {
   border-radius: 20px;

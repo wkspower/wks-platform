@@ -64,6 +64,16 @@ const UserManagementTable = ({ keycloak }) => {
 
   const processRowUpdate = useCallback((newRow, oldRow) => {
     const rowId = newRow.id
+    const updatedFields = []
+    for (const key in newRow) {
+      if (
+        Object.prototype.hasOwnProperty.call(newRow, key) &&
+        newRow[key] !== oldRow[key]
+      ) {
+        updatedFields.push(key)
+      }
+    }
+
     unsavedChangesRef.current.unsavedRows[rowId] = newRow
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
@@ -73,6 +83,12 @@ const UserManagementTable = ({ keycloak }) => {
         row.id === newRow.id ? { ...newRow, isNew: false } : row,
       ),
     )
+    if (updatedFields.length > 0) {
+      setModifiedCells((prevModifiedCells) => ({
+        ...prevModifiedCells,
+        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+      }))
+    }
     return newRow
   }, [])
 

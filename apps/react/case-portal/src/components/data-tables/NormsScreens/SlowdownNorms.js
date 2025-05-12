@@ -19,6 +19,7 @@ import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 
 const SlowdownNorms = () => {
+  const [modifiedCells, setModifiedCells] = React.useState({})
   const [loading, setLoading] = useState(false)
   const menu = useSelector((state) => state.dataGridStore)
   const [allProducts, setAllProducts] = useState([])
@@ -104,10 +105,6 @@ const SlowdownNorms = () => {
           }
 
           saveSlowdownNormsData(data)
-          unsavedChangesRef.current = {
-            unsavedRows: {},
-            rowsBeforeChange: {},
-          }
         } catch (error) {
           /* empty */
           setLoading(false)
@@ -478,6 +475,16 @@ const SlowdownNorms = () => {
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
+    const updatedFields = []
+    for (const key in newRow) {
+      if (
+        Object.prototype.hasOwnProperty.call(newRow, key) &&
+        newRow[key] !== oldRow[key]
+      ) {
+        updatedFields.push(key)
+      }
+    }
+
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
@@ -489,6 +496,13 @@ const SlowdownNorms = () => {
         row.id === newRow.id ? { ...newRow, isNew: false } : row,
       ),
     )
+
+    if (updatedFields.length > 0) {
+      setModifiedCells((prevModifiedCells) => ({
+        ...prevModifiedCells,
+        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+      }))
+    }
 
     return newRow
   }, [])
@@ -550,6 +564,12 @@ const SlowdownNorms = () => {
           message: `Shutdown Norms Saved Successfully!`,
           severity: 'success',
         })
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+        setModifiedCells({})
+
         setLoading(false)
         setCalculatebtnClicked(false)
 
@@ -795,6 +815,7 @@ const SlowdownNorms = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <DataGridTable
+        modifiedCells={modifiedCells}
         isCellEditable={isCellEditable}
         title='Shutdown Norms'
         columns={colDefs}

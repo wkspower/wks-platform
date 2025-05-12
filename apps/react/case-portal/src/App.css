@@ -41,7 +41,7 @@ header {
 .css-h404g3-MuiButtonBase-root-MuiListItemButton-root.Mui-selected {
   background-color: #0100cb; /* Example: Light gray background */
   /* background-color: #0f3cc9; Example: Light gray background */
-  color: white;
+  /* color: white; */
 }
 /* .css-h404g3-MuiButtonBase-root-MuiListItemButton-root:hover {
   background-color: #fff; 
@@ -151,4 +151,18 @@ footer {
 .MuiButtonBase-root.MuiListItemButton-root.MuiListItemButton-gutters.MuiListItemButton-root:hover
   svg {
   color: #fff;
+}
+
+.MuiButtonBase-root.MuiListItemButton-root:hover {
+  background-color: #0100cb;
+  color: #fff;
+}
+
+.even-row.MuiDataGrid-row.Mui-selected.MuiDataGrid-row--editable {
+  background-color: transparent;
+}
+
+.red-first-cell {
+  color: rgb(156, 83, 0) !important;
+  font-weight: bold;
 }

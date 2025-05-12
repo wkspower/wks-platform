@@ -85,9 +85,26 @@ export const CaseDefFormStages = ({ caseDef, setCaseDef }) => {
   }
 
   const processRowUpdate = (newRow) => {
+    const updatedFields = []
+    for (const key in newRow) {
+      if (
+        Object.prototype.hasOwnProperty.call(newRow, key) &&
+        newRow[key] !== oldRow[key]
+      ) {
+        updatedFields.push(key)
+      }
+    }
+
     let newCaseDefStages = [...caseDef.stages]
     newCaseDefStages[newRow.id] = newRow
     setCaseDef({ ...caseDef, stages: newCaseDefStages })
+
+    if (updatedFields.length > 0) {
+      setModifiedCells((prevModifiedCells) => ({
+        ...prevModifiedCells,
+        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+      }))
+    }
     return newRow
   }
 

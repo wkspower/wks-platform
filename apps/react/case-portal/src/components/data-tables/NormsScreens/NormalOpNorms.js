@@ -17,6 +17,7 @@ import { setIsBlocked } from 'store/reducers/dataGridStore'
 import TextField from '@mui/material/TextField'
 
 const NormalOpNormsScreen = () => {
+  const [modifiedCells, setModifiedCells] = React.useState({})
   const [allProducts, setAllProducts] = useState([])
   // const [bdData, setBDData] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -374,6 +375,16 @@ const NormalOpNormsScreen = () => {
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
+    const updatedFields = []
+    for (const key in newRow) {
+      if (
+        Object.prototype.hasOwnProperty.call(newRow, key) &&
+        newRow[key] !== oldRow[key]
+      ) {
+        updatedFields.push(key)
+      }
+    }
+
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
@@ -385,6 +396,13 @@ const NormalOpNormsScreen = () => {
         row.id === newRow.id ? { ...newRow, isNew: false } : row,
       ),
     )
+
+    if (updatedFields.length > 0) {
+      setModifiedCells((prevModifiedCells) => ({
+        ...prevModifiedCells,
+        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+      }))
+    }
 
     return newRow
   }, [])
@@ -479,6 +497,8 @@ const NormalOpNormsScreen = () => {
             message: `Normal Operations Norms Saved Successfully!`,
             severity: 'success',
           })
+          setModifiedCells({})
+
           unsavedChangesRef.current = {
             unsavedRows: {},
             rowsBeforeChange: {},

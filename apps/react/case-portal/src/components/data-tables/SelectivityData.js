@@ -11,6 +11,8 @@ import { validateFields } from 'utils/validationUtils'
 import getEnhancedAOPColDefs from './CommonHeader/ConfigHeader'
 
 const SelectivityData = (props) => {
+  const [modifiedCells, setModifiedCells] = React.useState({})
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
@@ -57,6 +59,16 @@ const SelectivityData = (props) => {
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
+    const updatedFields = []
+    for (const key in newRow) {
+      if (
+        Object.prototype.hasOwnProperty.call(newRow, key) &&
+        newRow[key] !== oldRow[key]
+      ) {
+        updatedFields.push(key)
+      }
+    }
+
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
       unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
@@ -66,6 +78,12 @@ const SelectivityData = (props) => {
         row.id === newRow.id ? { ...newRow, isNew: false } : row,
       ),
     )
+    if (updatedFields.length > 0) {
+      setModifiedCells((prevModifiedCells) => ({
+        ...prevModifiedCells,
+        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+      }))
+    }
     return newRow
   }, [])
 
@@ -150,6 +168,8 @@ const SelectivityData = (props) => {
           message: 'Configuration data Saved Successfully!',
           severity: 'success',
         })
+        setModifiedCells({})
+
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},
@@ -330,6 +350,7 @@ const SelectivityData = (props) => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <ASDataGrid
+        modifiedCells={modifiedCells}
         columns={productionColumns}
         rows={props?.rows}
         setRows={props?.setRows}

@@ -62,6 +62,8 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 }))
 
 const NormalOpNormsScreen = () => {
+  const [modifiedCells, setModifiedCells] = React.useState({})
+
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
@@ -117,6 +119,16 @@ const NormalOpNormsScreen = () => {
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
+    const updatedFields = []
+
+    for (const key in newRow) {
+      if (
+        Object.prototype.hasOwnProperty.call(newRow, key) &&
+        newRow[key] !== oldRow[key]
+      ) {
+        updatedFields.push(key)
+      }
+    }
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
     if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
@@ -128,6 +140,13 @@ const NormalOpNormsScreen = () => {
         row.id === newRow.id ? { ...newRow, isNew: false } : row,
       ),
     )
+
+    if (updatedFields.length > 0) {
+      setModifiedCells((prevModifiedCells) => ({
+        ...prevModifiedCells,
+        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+      }))
+    }
 
     return newRow
   }, [])
@@ -183,6 +202,8 @@ const NormalOpNormsScreen = () => {
       //
 
       setLoading(false)
+      setModifiedCells({})
+
       unsavedChangesRef.current = {
         unsavedRows: {},
         rowsBeforeChange: {},
@@ -628,6 +649,7 @@ const NormalOpNormsScreen = () => {
                 }}
               >
                 <DataGridTable
+                  modifiedCells={modifiedCells}
                   columns={productionColumns}
                   rows={rows}
                   setRows={setRows}
@@ -693,7 +715,8 @@ const NormalOpNormsScreen = () => {
       <TextField
         label='Summary'
         multiline
-        minRows={isAccordionExpanded ? 4 : 20}
+        // minRows={isAccordionExpanded ? 4 : 20}
+        minRows={4}
         fullWidth
         margin='normal'
         variant='outlined'

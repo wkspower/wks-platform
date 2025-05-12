@@ -230,8 +230,25 @@ const TurnaroundReport = () => {
   const [rows2, setRows2] = useState()
 
   const processRowUpdate = useCallback((newRow) => {
+    const updatedFields = []
+    for (const key in newRow) {
+      if (
+        Object.prototype.hasOwnProperty.call(newRow, key) &&
+        newRow[key] !== oldRow[key]
+      ) {
+        updatedFields.push(key)
+      }
+    }
+
     unsavedChangesRef.current = true
     setRows((prev) => prev.map((r) => (r.id === newRow.id ? newRow : r)))
+
+    if (updatedFields.length > 0) {
+      setModifiedCells((prevModifiedCells) => ({
+        ...prevModifiedCells,
+        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+      }))
+    }
     return newRow
   }, [])
   const processRowUpdate2 = useCallback((newRow) => {

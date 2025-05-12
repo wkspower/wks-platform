@@ -31,6 +31,10 @@ const getConfigByType = (configType) => {
   }
 }
 
+const formatValueToThreeDecimals = (params) => {
+  return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+}
+
 const getEnhancedAOPColDefs = ({
   allGradesReciepes,
   allProducts,
@@ -193,6 +197,8 @@ const getEnhancedAOPColDefs = ({
         ...col,
         renderEditCell: NumericInputOnly,
         headerName: headerMap[col.headerName],
+        valueFormatter: formatValueToThreeDecimals,
+
         align: 'right',
       }
     }
@@ -201,6 +207,7 @@ const getEnhancedAOPColDefs = ({
       return {
         ...col,
         renderEditCell: NumericInputOnly,
+        valueFormatter: formatValueToThreeDecimals,
       }
     }
 

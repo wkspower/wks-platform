@@ -66,6 +66,7 @@ const DataGridTable = ({
   handleCalculate = () => {},
   setRows = () => {},
   rows = [],
+  modifiedCells = [],
   loading = false,
   remarkDialogOpen = false,
   onRowModesModelChange = () => {},
@@ -426,6 +427,7 @@ const DataGridTable = ({
               />
             )}
           </Box>
+
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {permissions?.showTitle && (
               <Typography component='div' className='grid-title'>
@@ -618,6 +620,10 @@ const DataGridTable = ({
             //   return col.field === lastColumnField
             // },
             cellClassName: (params) => {
+              if (modifiedCells[params.row.id]?.includes(params.field)) {
+                return 'red-first-cell '
+              }
+
               if (col.isDisabled) {
                 if (params.row.Particulars) {
                   return undefined
@@ -672,9 +678,11 @@ const DataGridTable = ({
           }}
           getRowClassName={(params) => {
             const classes = []
+
             if (permissions?.isOldYear == 1) {
               classes.push('odd-row-disabled')
             }
+
             if (params.row.Particulars || params.row.Particulars2) {
               classes.push('no-border-row')
             }
@@ -694,6 +702,7 @@ const DataGridTable = ({
           // columnGroupingModel={columnGroupingModel}
         />
       </Box>
+
       {(permissions?.allAction ?? true) && (
         <Box
           sx={{
@@ -774,6 +783,7 @@ const DataGridTable = ({
           )}
         </Box>
       )}
+
       {(permissions?.allAction ?? true) && (
         <Notification
           open={snackbarOpen}
@@ -782,6 +792,7 @@ const DataGridTable = ({
           onClose={() => setSnackbarOpen(false)}
         />
       )}
+
       <Dialog
         open={openDeleteDialogeBox}
         onClose={closeDeleteDialogeBox}

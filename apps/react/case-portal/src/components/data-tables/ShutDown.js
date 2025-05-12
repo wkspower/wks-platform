@@ -17,6 +17,8 @@ import { validateFields } from 'utils/validationUtils'
 import TimeInputCell from 'utils/TimeInputCell'
 
 const ShutDown = ({ permissions }) => {
+  const [modifiedCells, setModifiedCells] = React.useState({})
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
@@ -66,6 +68,16 @@ const ShutDown = ({ permissions }) => {
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
+    const updatedFields = []
+    for (const key in newRow) {
+      if (
+        Object.prototype.hasOwnProperty.call(newRow, key) &&
+        newRow[key] !== oldRow[key]
+      ) {
+        updatedFields.push(key)
+      }
+    }
+
     const durationChanged = newRow.durationInHrs !== oldRow.durationInHrs
     if (durationChanged) {
       newRow.maintEndDateTime = null
@@ -106,6 +118,13 @@ const ShutDown = ({ permissions }) => {
         row.id === updatedRow.id ? { ...updatedRow, isNew: false } : row,
       ),
     )
+
+    if (updatedFields.length > 0) {
+      setModifiedCells((prevModifiedCells) => ({
+        ...prevModifiedCells,
+        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+      }))
+    }
 
     return updatedRow
   }, [])
@@ -198,6 +217,8 @@ const ShutDown = ({ permissions }) => {
         unsavedRows: {},
         rowsBeforeChange: {},
       }
+      setModifiedCells({})
+
       setLoading(false)
       return response
     } catch (error) {
@@ -547,6 +568,7 @@ const ShutDown = ({ permissions }) => {
       </Backdrop>
 
       <ASDataGrid
+        modifiedCells={modifiedCells}
         setRows={setRows}
         columns={colDefs}
         rows={rows}

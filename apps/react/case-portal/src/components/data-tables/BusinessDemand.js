@@ -44,6 +44,8 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 }))
 
 const BusinessDemand = ({ permissions }) => {
+  const [modifiedCells, setModifiedCells] = React.useState({})
+
   const [rowModesModel, setRowModesModel] = useState({})
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
@@ -193,6 +195,18 @@ const BusinessDemand = ({ permissions }) => {
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
+
+    const updatedFields = []
+
+    for (const key in newRow) {
+      if (
+        Object.prototype.hasOwnProperty.call(newRow, key) &&
+        newRow[key] !== oldRow[key]
+      ) {
+        updatedFields.push(key)
+      }
+    }
+
     unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
     // Keep track of original values before editing
@@ -205,6 +219,13 @@ const BusinessDemand = ({ permissions }) => {
         row.id === newRow.id ? { ...newRow, isNew: false } : row,
       ),
     )
+
+    if (updatedFields.length > 0) {
+      setModifiedCells((prevModifiedCells) => ({
+        ...prevModifiedCells,
+        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+      }))
+    }
 
     return newRow
   }, [])
@@ -304,6 +325,8 @@ const BusinessDemand = ({ permissions }) => {
         message: 'Business Demand data Saved Successfully!',
         severity: 'success',
       })
+      setModifiedCells({})
+
       unsavedChangesRef.current = {
         unsavedRows: {},
         rowsBeforeChange: {},
@@ -424,6 +447,7 @@ const BusinessDemand = ({ permissions }) => {
       </Typography>
 
       <ASDataGrid
+        modifiedCells={modifiedCells}
         setRows={setRows}
         columns={colDefs}
         rows={rows || []}

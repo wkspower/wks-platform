@@ -17,6 +17,8 @@ import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 
 const ProductionNorms = ({ permissions }) => {
+  const [modifiedCells, setModifiedCells] = React.useState({})
+
   const keycloak = useSession()
   // const [csData, setCsData] = useState([])
   const [allProducts, setAllProducts] = useState([])
@@ -62,6 +64,16 @@ const ProductionNorms = ({ permissions }) => {
   }
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
+    const updatedFields = []
+    for (const key in newRow) {
+      if (
+        Object.prototype.hasOwnProperty.call(newRow, key) &&
+        newRow[key] !== oldRow[key]
+      ) {
+        updatedFields.push(key)
+      }
+    }
+
     if (newRow.id === 'total') {
       return newRow
     }
@@ -75,6 +87,13 @@ const ProductionNorms = ({ permissions }) => {
         row.id === newRow.id ? { ...newRow, isNew: false } : row,
       ),
     )
+
+    if (updatedFields.length > 0) {
+      setModifiedCells((prevModifiedCells) => ({
+        ...prevModifiedCells,
+        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+      }))
+    }
 
     return newRow
   }, [])
@@ -264,6 +283,8 @@ const ProductionNorms = ({ permissions }) => {
 
         setCalculatebtnClicked(false)
         setLoading(false)
+        setModifiedCells({})
+
         unsavedChangesRef.current = {
           unsavedRows: {},
           rowsBeforeChange: {},
@@ -365,7 +386,7 @@ const ProductionNorms = ({ permissions }) => {
         }
 
         const finalData = [...formattedData, totalRows]
-     // console.log(finalData)
+        // console.log(finalData)
         if (lowerVertName == 'pe') {
           setRows(finalData)
         }
@@ -630,6 +651,7 @@ const ProductionNorms = ({ permissions }) => {
       </Backdrop>
 
       <ASDataGrid
+        modifiedCells={modifiedCells}
         columns={productionColumns}
         rows={rows}
         setRows={setRows}
