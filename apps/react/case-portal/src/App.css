@@ -132,9 +132,9 @@ header {
   color: 'white';
 }
 
-.MuiDataGrid-scrollbar--vertical {
+/* .MuiDataGrid-scrollbar--vertical {
   overflow: hidden;
-}
+} */
 
 /* footer {
   position: fixed;

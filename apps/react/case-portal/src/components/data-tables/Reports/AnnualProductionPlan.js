@@ -42,6 +42,10 @@ const AnnualProductionPlan = () => {
   const [rowsAverageHourlyRate, setRowsAverageHourlyRate] = useState([])
   const [rowsProductionPerformance, setRowsProductionPerformance] = useState([])
 
+  const formatValueToThreeDecimals = (params) => {
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+  }
+
   const columnsAssumptions = [
     {
       field: 'sno',
@@ -78,6 +82,7 @@ const AnnualProductionPlan = () => {
       editable: false,
       flex: 1,
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     { field: 'part3', headerName: 'UOM', editable: false, flex: 1 },
   ]
@@ -102,6 +107,7 @@ const AnnualProductionPlan = () => {
       editable: false,
       flex: 1,
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'part3',
@@ -132,6 +138,7 @@ const AnnualProductionPlan = () => {
       editable: false,
       flex: 1,
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'HourlyRate',
@@ -139,6 +146,7 @@ const AnnualProductionPlan = () => {
       editable: false,
       flex: 1,
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'PeriodFrom',
@@ -165,6 +173,7 @@ const AnnualProductionPlan = () => {
       editable: false,
       flex: 1,
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'Actual1',
@@ -172,6 +181,7 @@ const AnnualProductionPlan = () => {
       editable: false,
       flex: 1,
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
 
     {
@@ -180,6 +190,7 @@ const AnnualProductionPlan = () => {
       editable: false,
       flex: 1,
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'Actual2',
@@ -187,6 +198,7 @@ const AnnualProductionPlan = () => {
       editable: false,
       flex: 1,
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
 
     {
@@ -195,6 +207,7 @@ const AnnualProductionPlan = () => {
       editable: false,
       flex: 1,
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'Actual3',
@@ -202,6 +215,7 @@ const AnnualProductionPlan = () => {
       editable: false,
       flex: 1,
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
 
     {
@@ -210,6 +224,7 @@ const AnnualProductionPlan = () => {
       editable: false,
       flex: 1,
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
   ]
 

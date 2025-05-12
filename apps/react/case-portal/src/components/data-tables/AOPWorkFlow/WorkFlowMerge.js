@@ -505,12 +505,12 @@ const WorkFlowMerge = () => {
           <Tabs
             value={tabIndex}
             onChange={(e, newIndex) => setTabIndex(newIndex)}
-            variant='scrollable' 
-            scrollButtons='auto' 
+            variant='scrollable'
+            scrollButtons='auto'
             sx={{
               borderBottom: 0,
               '.MuiTabs-indicator': { display: 'none' },
-              maxWidth: '100%', 
+              maxWidth: '100%',
             }}
             textColor='primary'
             indicatorColor='primary'
@@ -529,10 +529,10 @@ const WorkFlowMerge = () => {
                 sx={{
                   border: tabIndex === idx ? '1px solid' : 'none',
                   borderBottom: '1px solid',
-                  mr: 0.5, 
-                  minWidth: 'auto', 
-                  paddingX: 1, 
-                  fontSize: '0.75rem', 
+                  mr: 0.5,
+                  minWidth: 'auto',
+                  paddingX: 1,
+                  fontSize: '0.75rem',
                 }}
               />
             ))}
@@ -585,6 +585,7 @@ const WorkFlowMerge = () => {
             </Typography>
             <div style={{ minHeight: 'fit-content', maxHeight: 'max-content' }}>
               <DataGridTable
+                autoHeight={true}
                 rows={rows}
                 setRows={setRows}
                 onRowUpdate={(updatedRow) =>

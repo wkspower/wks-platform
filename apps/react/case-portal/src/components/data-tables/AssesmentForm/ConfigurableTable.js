@@ -723,6 +723,7 @@ const ASDataGrid1 = ({
 
       <DataGrid
         apiRef={apiRef}
+        autoHeight={true}
         columns={modifiedColumns}
         rows={processedRows}
         // filterModel={filterModel}
@@ -731,7 +732,6 @@ const ASDataGrid1 = ({
         // }
         checkboxSelection={checkboxSelection}
         disableSelectionOnClick={disableSelectionOnClick}
-        autoHeight={autoHeight}
         headerFilters={showHeaderFilters}
         slots={{
           toolbar: CustomToolbar,

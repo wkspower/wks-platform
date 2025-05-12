@@ -127,6 +127,7 @@ const ReportDataGrid = ({
       )}
 
       <DataGrid
+        autoHeight={true}
         rows={rows || []}
         className='custom-data-grid'
         columns={columns.map((col) => ({

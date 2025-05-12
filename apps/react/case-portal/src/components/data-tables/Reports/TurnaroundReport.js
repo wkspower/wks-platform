@@ -24,16 +24,22 @@ const TurnaroundReport = () => {
     setRemarkDialogOpen(true)
   }
 
+  const formatValueToThreeDecimals = (params) => {
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+  }
+
   const columns = [
-    { field: 'sno', headerName: 'SL.No' },
+    { field: 'sno', headerName: 'SL.No', flex: 1 },
     { field: 'activity', headerName: 'Activities', flex: 2 },
-    { field: 'fromDate', headerName: 'From' },
-    { field: 'toDate', headerName: 'To' },
+    { field: 'fromDate', headerName: 'From', flex: 2 },
+    { field: 'toDate', headerName: 'To', flex: 2 },
     {
       field: 'durationInHrs',
       headerName: 'Duration, hrs',
       align: 'right',
       headerAlign: 'right',
+      valueFormatter: formatValueToThreeDecimals,
+      flex: 2,
     },
     // {
     //   field: 'periodInMonths',
@@ -63,16 +69,19 @@ const TurnaroundReport = () => {
       ),
     },
   ]
+
   const columnsGrid2 = [
-    { field: 'sno', headerName: 'SL.No' },
-    { field: 'activity', headerName: 'Activities', flex: 2 },
-    { field: 'fromDate', headerName: 'From' },
-    { field: 'toDate', headerName: 'To' },
+    { field: 'sno', headerName: 'SL.No', flex: 1 },
+    { field: 'activity', headerName: 'Activities', flex: 3 },
+    { field: 'fromDate', headerName: 'From', flex: 2 },
+    { field: 'toDate', headerName: 'To', flex: 2 },
     {
       field: 'durationInHrs',
       headerName: 'Duration, hrs',
       align: 'right',
       headerAlign: 'right',
+      valueFormatter: formatValueToThreeDecimals,
+      flex: 1,
     },
     {
       field: 'periodInMonths',
@@ -80,6 +89,7 @@ const TurnaroundReport = () => {
       flex: 1,
       align: 'right',
       headerAlign: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'remarks',
@@ -111,121 +121,6 @@ const TurnaroundReport = () => {
     },
   ]
 
-  const grid1 = [
-    {
-      id: 1,
-      sno: 1,
-      activity: 'Blowdown Prep',
-      fromDate: '06/01/2025',
-      toDate: '06/01/2025',
-      durationInHrs: 2,
-      remarks: 'OK',
-    },
-    {
-      id: 2,
-      sno: 2,
-      activity: 'Shutdown',
-      fromDate: '06/02/2025',
-      toDate: '06/02/2025',
-      durationInHrs: 3,
-      remark: 'Pending',
-    },
-    {
-      id: 3,
-      sno: 3,
-      activity: 'Line Draining',
-      fromDate: '06/03/2025',
-      toDate: '06/03/2025',
-      durationInHrs: 4,
-      remarks: 'Check',
-    },
-    {
-      id: 4,
-      sno: 4,
-      activity: 'Mechanical Check',
-      fromDate: '06/04/2025',
-      toDate: '06/04/2025',
-      durationInHrs: 5,
-      remarks: 'OK',
-    },
-    {
-      id: 5,
-      sno: 5,
-      activity: 'Electrical Audit',
-      fromDate: '06/05/2025',
-      toDate: '06/05/2025',
-      durationInHrs: 6,
-      remarks: 'OK',
-    },
-  ]
-
-  const grid2 = [
-    {
-      id: 1,
-      srNo: 1,
-      activity: 'Blowdown Prep',
-      duration: 2,
-      from: '06/01/2025',
-      to: '06/01/2025',
-      periodMonths: 12,
-      Remark: 'OK',
-    },
-    {
-      id: 2,
-      srNo: 2,
-      activity: 'Shutdown',
-      duration: 3,
-      from: '06/02/2025',
-      to: '06/02/2025',
-      periodMonths: 11,
-      Remark: 'Pending',
-    },
-    {
-      id: 3,
-      srNo: 3,
-      activity: 'Line Draining',
-      duration: 4,
-      from: '06/03/2025',
-      to: '06/03/2025',
-      periodMonths: 10,
-      Remark: 'Check',
-    },
-    {
-      id: 4,
-      srNo: 4,
-      activity: 'Mechanical Check',
-      duration: 5,
-      from: '06/04/2025',
-      to: '06/04/2025',
-      periodMonths: 9,
-      Remark: 'OK',
-    },
-  ]
-  const totalRows = [
-    {
-      id: 'total-critical',
-      srNo: '',
-      activity: 'Total turnaround duration (based on Critical activity)',
-      from: '', // leave blank or you can span via custom render
-      to: '',
-      durationInHrs: 42, // your computed total
-      periodMonths: '',
-      Remark: '',
-      isTotal: true, // flag so you can style it differently
-    },
-    {
-      id: 'total-table15',
-      srNo: '',
-      activity: 'Total turnaround duration (based on table 15)',
-      from: '',
-      to: '',
-      durationInHrs: 56, // another computed total
-      periodMonths: '',
-      Remark: '',
-      isTotal: true,
-    },
-  ]
-
   const [rows, setRows] = useState()
   const [rows2, setRows2] = useState()
 
@@ -251,16 +146,19 @@ const TurnaroundReport = () => {
     }
     return newRow
   }, [])
+
   const processRowUpdate2 = useCallback((newRow) => {
     unsavedChangesRef.current = true
     setRows2((prev) => prev.map((r) => (r.id === newRow.id ? newRow : r)))
     return newRow
   }, [])
+
   const [loading, setLoading] = useState(false)
   const keycloak = useSession()
 
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
+
   useEffect(() => {
     const fetchData = async () => {
       try {

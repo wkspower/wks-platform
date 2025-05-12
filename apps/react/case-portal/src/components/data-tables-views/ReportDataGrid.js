@@ -128,6 +128,7 @@ const ReportDataGrid = ({
       )}
 
       <DataGrid
+        autoHeight={true}
         rows={rows || []}
         className='custom-data-grid'
         columns={columns?.map((col) => ({
@@ -175,12 +176,9 @@ const ReportDataGrid = ({
         }}
         rowHeight={35}
         getRowClassName={(params) => {
-          // If this is a “total” row, pin it
           if (params.row.isTotal) {
             return 'pinned-row'
           }
-
-          // Otherwise apply your existing odd/even logic
           if (params.row.isEditable === false) {
             return permissions?.noColor === true ? 'even-row' : 'odd-row'
           }

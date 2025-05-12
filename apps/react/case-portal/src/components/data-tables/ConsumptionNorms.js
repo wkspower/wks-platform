@@ -649,6 +649,7 @@ const NormalOpNormsScreen = () => {
                 }}
               >
                 <DataGridTable
+                  autoHeight={true}
                   modifiedCells={modifiedCells}
                   columns={productionColumns}
                   rows={rows}

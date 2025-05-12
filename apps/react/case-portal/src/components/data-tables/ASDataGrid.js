@@ -600,6 +600,7 @@ const DataGridTable = ({
         </Backdrop>
 
         <DataGrid
+          autoHeight={true}
           loading={loading}
           className='custom-data-grid'
           apiRef={finalExternalApiRef}

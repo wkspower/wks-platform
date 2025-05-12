@@ -24,6 +24,10 @@ const getEnhancedColDefs = ({
     return product ? product.displayName : ''
   }
 
+  const formatValueToThreeDecimals = (params) => {
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+  }
+
   const enhancedColDefs = (
     lowerVertName === 'meg' ? vertical_meg_coldefs_bd : vertical_pe_coldefs_bd
   ).map((col) => {
@@ -158,6 +162,7 @@ const getEnhancedColDefs = ({
         renderEditCell: NumericInputOnly,
         headerName: headerMap[col.headerName],
         align: 'right',
+        valueFormatter: formatValueToThreeDecimals,
       }
     }
     if (col.field === 'Particulars') {

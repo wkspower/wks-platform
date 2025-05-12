@@ -36,6 +36,11 @@ const MonthwiseProduction = () => {
     const [start, end] = thisYear.split('-').map(Number)
     oldYear = `${start - 1}-${(end - 1).toString().slice(-2)}`
   }
+
+  const formatValueToThreeDecimals = (params) => {
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+  }
+
   const columns = [
     {
       field: 'RowNo',
@@ -49,6 +54,7 @@ const MonthwiseProduction = () => {
       headerName: 'Month',
       flex: 1,
       headerAlign: 'left',
+      valueFormatter: formatValueToThreeDecimals,
     },
 
     // Current Year → EOE Production
@@ -58,6 +64,7 @@ const MonthwiseProduction = () => {
       flex: 2,
       headerAlign: 'left',
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'EOEProdActual', // was eoeActualCY
@@ -65,6 +72,7 @@ const MonthwiseProduction = () => {
       flex: 1,
       headerAlign: 'left',
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
 
     // Current Year → Operating Hours
@@ -74,6 +82,7 @@ const MonthwiseProduction = () => {
       flex: 1,
       headerAlign: 'left',
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'OpHrsActual', // was opActualCY
@@ -81,6 +90,7 @@ const MonthwiseProduction = () => {
       flex: 1,
       headerAlign: 'left',
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
 
     // Current Year → Throughput
@@ -90,6 +100,7 @@ const MonthwiseProduction = () => {
       flex: 1,
       headerAlign: 'left',
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'ThroughputActual', // was thrActualCY
@@ -97,6 +108,7 @@ const MonthwiseProduction = () => {
       flex: 1,
       headerAlign: 'left',
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
 
     // Budget Year single values
@@ -106,6 +118,7 @@ const MonthwiseProduction = () => {
       flex: 2,
       headerAlign: 'left',
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'MEGThroughput', // was megTPH
@@ -113,6 +126,7 @@ const MonthwiseProduction = () => {
       flex: 2,
       headerAlign: 'left',
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'EOThroughput', // was eoTPH
@@ -120,6 +134,7 @@ const MonthwiseProduction = () => {
       flex: 2,
       headerAlign: 'left',
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'EOEThroughput', // was eoeTPH
@@ -127,6 +142,7 @@ const MonthwiseProduction = () => {
       flex: 2,
       headerAlign: 'left',
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
     {
       field: 'TotalEOE', // was totalEoeMT
@@ -134,6 +150,7 @@ const MonthwiseProduction = () => {
       flex: 2,
       headerAlign: 'left',
       align: 'right',
+      valueFormatter: formatValueToThreeDecimals,
     },
 
     // (Optional) you can keep Remarks if you plan to add that later
