@@ -18,7 +18,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Data
-@JsonInclude(Include.ALWAYS)
+//@JsonInclude(Include.ALWAYS)
+@JsonInclude(JsonInclude.Include.ALWAYS)
 public class WorkflowYearDTO {
 
 	private String particulates;
