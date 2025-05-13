@@ -40,6 +40,12 @@ public class ProductionVolumeDataReportController {
 		AOPMessageVM response	=productionVolumeDataReportService.getReportForPlantProductionPlanData(plantId,year,reportType);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
+	
+	@GetMapping(value="/report/plant/contribution/year-wise/plan")
+	public ResponseEntity<AOPMessageVM> getReportForPlantContributionYearWise(@RequestParam String plantId,@RequestParam String year,@RequestParam String reportType){
+		AOPMessageVM response	=productionVolumeDataReportService.getReportForPlantContributionYearWise(plantId,year,reportType);
+		return ResponseEntity.status(response.getCode()).body(response);
+	}
 
 
 }
