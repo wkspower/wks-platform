@@ -1,0 +1,51 @@
+[
+  {
+    "field": "srNo",
+    "headerName": "SL No.",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "norms",
+    "headerName": "Norms",
+
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "materialName",
+    "headerName": "Particulars",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "aopMonth",
+    "headerName": "AOP Month",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "normValue",
+    "headerName": "Value",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "actualQuantity",
+    "headerName": "Actual Quantity",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "normDateTime",
+    "headerName": "Norm Date Time",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "normsUom",
+    "headerName": "UOM",
+    "flex": 2,
+    "editable": false
+  }
+]

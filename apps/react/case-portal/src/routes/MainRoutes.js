@@ -39,6 +39,7 @@ import PlantsProductionSummary from 'components/data-tables/Reports/PlantsProduc
 import ProductionVolumeDataBasis from 'components/data-tables/Reports/ProductionVolumeDataBasis'
 import MonthwiseProduction from 'components/data-tables/Reports/MonthwiseProduction'
 import MonthwiseRawMaterial from 'components/data-tables/Reports/MonthwiseRawMaterial'
+import NormsHistorianBasis from 'components/data-tables/Reports/NormsHistorianBasis'
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
@@ -191,6 +192,11 @@ export const MainRoutes = (
             path: 'slowdown-norms',
             element: <SlowdownNorms />,
           },
+          // {
+          //   path: 'slowdown-norms',
+          //   element: <SlowdownNorms />,
+          // },
+
           {
             path: 'shutdown-plan',
             element: <ShutDown />,
@@ -223,6 +229,10 @@ export const MainRoutes = (
           {
             path: 'production-volume-basis',
             element: <ProductionVolumeDataBasis />,
+          },
+          {
+            path: 'norms-historian-basis',
+            element: <NormsHistorianBasis />,
           },
           {
             path: 'plants-production',

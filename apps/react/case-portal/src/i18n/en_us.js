@@ -54,6 +54,7 @@ const defs = {
     reports: 'Reports', // New addition
     annualAopCostReport: 'Annual AOP Cost Basis', // New addition
     productionVolumeDataBasis: 'Production Volume Data Basis', // New addition
+    normsHistorianBasis: 'Norms Historian Basis', // New addition
     plantsProduction: 'Plants Production Summary', // New addition
     monthwise: 'Monthwise Production Plan',
     monthwiseRawMaterial: 'Monthwise Raw Material',
@@ -215,6 +216,8 @@ const defs = {
         reports: 'Reports', // New addition
         annualAopCostReport: 'Annual AOP Cost Basis', // New addition
         productionVolumeDataBasis: 'Production Volume Data Basis', // New addition
+        normsHistorianBasis: 'Norms Historian Basis', // New addition
+
         plantsProduction: 'Plants Production Summary',
         monthwise: 'Monthwise Production Plan',
         monthwiseRawMaterial: 'Monthwise Raw Material',

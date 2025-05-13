@@ -119,7 +119,15 @@ const workspace = {
           title: i18n.t('menu.productionVolumeDataBasis'),
           type: 'item',
           url: '/reports/production-volume-basis',
-          icon: icons.IconFile,
+          icon: icons.IconFileText,
+          breadcrumbs: true,
+        },
+        {
+          id: 'norms-historian-basis',
+          title: i18n.t('menu.productionVolumeDataBasis'),
+          type: 'item',
+          url: '/reports/norms-historian-basis',
+          icon: icons.IconReport,
           breadcrumbs: true,
         },
         // {

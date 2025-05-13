@@ -54,7 +54,7 @@ const MonthwiseProduction = () => {
       headerName: 'Month',
       flex: 1,
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      // valueFormatter: formatValueToThreeDecimals,
     },
 
     // Current Year → EOE Production

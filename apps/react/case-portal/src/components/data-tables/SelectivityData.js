@@ -12,11 +12,10 @@ import getEnhancedAOPColDefs from './CommonHeader/ConfigHeader'
 
 const SelectivityData = (props) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
-
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
-  //const isOldYear = oldYear?.oldYear
+
   const isOldYear = oldYear?.oldYear
 
   const vertName = verticalChange?.selectedVertical
@@ -259,6 +258,7 @@ const SelectivityData = (props) => {
         // handleMenuClose();
       }
     }
+
     const getAllGrades = async () => {
       try {
         const data = await DataService.getAllGrades(keycloak)
@@ -272,6 +272,7 @@ const SelectivityData = (props) => {
 
     getAllProducts()
     getAllGrades()
+
     // getAllCatalyst()
     if (props?.configType !== 'grades') {
       props.fetchData()
@@ -335,8 +336,6 @@ const SelectivityData = (props) => {
       showUnit: false,
       saveWithRemark: true,
       saveBtn: true,
-      customHeight:
-        lowerVertName === 'meg' ? undefined : props.defaultCustomHeight,
     },
     isOldYear,
   )
