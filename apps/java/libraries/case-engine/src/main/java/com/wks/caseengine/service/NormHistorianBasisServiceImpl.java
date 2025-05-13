@@ -71,10 +71,10 @@ public class NormHistorianBasisServiceImpl  implements NormHistorianBasisService
                         map.put("siteName", row[4]);
                         map.put("plantName", row[5]);
                         map.put("normValue", row[6]);
-                        map.put("actualQuantity", row[5]);
-                        map.put("normDateTime", row[7]);
-                       map.put("dateTime", row[8]);
-                       map.put("normsUom", row[9]);
+                        map.put("actualQuantity", row[7]);
+                        map.put("normDateTime", row[8]);
+                       map.put("dateTime", row[9]);
+                       map.put("normsUom", row[10]);
                         normHistoricBasisData.add(map);
                     }
                 }
