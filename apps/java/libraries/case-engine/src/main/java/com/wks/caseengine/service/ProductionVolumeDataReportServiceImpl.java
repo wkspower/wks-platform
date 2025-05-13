@@ -312,11 +312,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 	        List<Object[]> obj = getPlantContributionData(plantId, year, reportType);
 
-	        if (reportType.equalsIgnoreCase("ProductMixAndProduction") ||
-	            reportType.equalsIgnoreCase("CatChem") ||
-	            reportType.equalsIgnoreCase("Utilities") || 
-	        	reportType.equalsIgnoreCase("ByProducts"))
-	        {
+	        if (reportType.equalsIgnoreCase("ProductMixAndProduction")) {
 	            for (Object[] row : obj) {
 	                Map<String, Object> map = new HashMap<>();
 	                map.put("SrNo", row[0]);
@@ -324,8 +320,26 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	                map.put("Price", row[2]);
 	                map.put("PrevYearNormBudget", row[3]);
 	                map.put("PrevYearNormActual", row[4]);
-	                map.put("PrevYearCostBudget", row[5]);
-	                map.put("PrevYearCostActual", row[6]);
+	                map.put("NextYearCostBudget", row[5]);
+	                map.put("Unit", row[6]);
+	                plantProductionData.add(map);
+	            }
+	        } else if (reportType.equalsIgnoreCase("CatChem") || 
+	                   reportType.equalsIgnoreCase("RawMaterial") || 
+	                   reportType.equalsIgnoreCase("ByProducts") ||
+	                   reportType.equalsIgnoreCase("Utilities")) {
+	            for (Object[] row : obj) {
+	                Map<String, Object> map = new HashMap<>();
+	                map.put("SrNo", row[0]);
+	                map.put("ByProductName", row[1]);
+	                map.put("Price", row[2]);
+	                map.put("PrevYearNormBudget", row[3]);
+	                map.put("PrevYearNormActual", row[4]);
+	                map.put("NextYearNormActual", row[5]);
+	                map.put("PrevYearCostBudget", row[6]);
+	                map.put("PrevYearCostActual", row[7]);
+	                map.put("NextYearCostActual", row[8]);
+	                map.put("Unit", row[9]);
 	                plantProductionData.add(map);
 	            }
 	        } else if (reportType.equalsIgnoreCase("OtherVariableCost")) {
@@ -346,7 +360,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	                map.put("ProductionCostCalculations", row[1]);
 	                map.put("PrevYearBudget", row[2]);
 	                map.put("PrevYearActual", row[3]);
-	                map.put("CurrentYearBudget", row[4]);
+	                map.put("NextYearBudget", row[4]);
 	                plantProductionData.add(map);
 	            }
 	        } else {
