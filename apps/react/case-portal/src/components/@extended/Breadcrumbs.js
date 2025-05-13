@@ -15,6 +15,8 @@ import { useDispatch } from 'react-redux'
 import { setScreenTitle } from 'store/reducers/dataGridStore'
 import Chip from '@mui/material/Chip'
 import Stack from '@mui/material/Stack'
+import StepperNav from 'components/Utilities/StepperNav'
+import { Box } from '../../../node_modules/@mui/material/index'
 
 const Breadcrumbs = ({ navigation, title, ...others }) => {
   const keycloak = useSession()
@@ -272,6 +274,11 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
           {...others}
           content={false}
         >
+          {location?.pathname.startsWith('/production-norms-plan') && (
+            <Box sx={{ m: '10px -10px 16px' }}>
+              <StepperNav />
+            </Box>
+          )}
           <Grid
             container
             direction='column'

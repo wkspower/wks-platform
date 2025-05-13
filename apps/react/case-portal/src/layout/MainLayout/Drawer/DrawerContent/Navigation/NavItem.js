@@ -18,7 +18,7 @@ import Button from '@mui/material/Button'
 import { useSafeNavigate } from './useSafeNavigate'
 import { Tooltip } from '../../../../../../node_modules/@mui/material/index'
 // import { setIsBlocked } from 'store/reducers/dataGridStore'
-
+import { useLocation } from 'react-router-dom'
 const NavItem = ({ item, level }) => {
   const theme = useTheme()
   const dispatch = useDispatch()
@@ -26,6 +26,7 @@ const NavItem = ({ item, level }) => {
   const { drawerOpen, openItem } = menu
   const { safeNavigate, confirmLeave, setDialogOpen, dialogOpen, itemHandler } =
     useSafeNavigate()
+  const location = useLocation()
 
   // const [openDialog, setOpenDialog] = useState(false)
 
@@ -34,6 +35,7 @@ const NavItem = ({ item, level }) => {
     if (item.requiresConfirmation) {
       setDialogOpen(true)
     } else {
+      dispatch(activeItem({ openItem: [id] }))
       itemHandler(id)
       safeNavigate(item.url)
     }
@@ -56,11 +58,11 @@ const NavItem = ({ item, level }) => {
   const itemIcon = Icon ? (
     <Icon style={{ fontSize: drawerOpen ? '1rem' : '1.25rem' }} />
   ) : null
-
+  console.log(openItem)
   const isSelected = openItem.findIndex((id) => id === item.id) > -1
 
   useEffect(() => {
-    const currentIndex = document.location.pathname
+    const currentIndex = location.pathname
       .toString()
       .split('/')
       .findIndex((id) => id === item.id)
@@ -68,6 +70,12 @@ const NavItem = ({ item, level }) => {
       dispatch(activeItem({ openItem: [item.id] }))
     }
   }, [])
+  useEffect(() => {
+    // runs on every URL change
+    if (location.pathname.split('/').includes(item.id)) {
+      dispatch(activeItem({ openItem: [item.id] }))
+    }
+  }, [location.pathname, item.id, dispatch])
 
   const textColor = 'text.primary'
 
@@ -83,8 +91,8 @@ const NavItem = ({ item, level }) => {
         selected={isSelected}
         sx={{
           zIndex: 1201,
-          // pl: drawerOpen ? `${level * 28}px` : 1.5,
-          pl: 2.5,
+          pl: drawerOpen ? `${level * 28}px` : 1.5,
+          // pl: 2.5,
           py: !drawerOpen && level === 1 ? 1.25 : 1,
           ...(drawerOpen && {
             '&:hover': {

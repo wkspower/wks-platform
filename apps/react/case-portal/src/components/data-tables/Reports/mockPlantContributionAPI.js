@@ -1,29 +1,41 @@
+// src/services/MockReportService.js
+
+//  current FY
+const currFY = localStorage.getItem('year') || ''
+
+// Compute previous FY (prevFY)
+let prevFY = ''
+if (currFY.includes('-')) {
+  const [start, end] = currFY.split('-').map(Number)
+  prevFY = `${start - 1}-${(end - 1).toString().padStart(2, '0')}`
+}
+
 export const MockReportService = {
   async getReport({ category }) {
-    // You can log or inspect plantId/year if you need
     switch (category) {
-      case 'ProductMix':
+      // ==== A. Product mix and production ====
+      case 'ProductMixAndProduction':
         return {
           columns: [
-            { field: 'sno', headerName: 'SL.No', align: 'right' },
-            { field: 'productName', headerName: 'Product name', flex: 2 },
-            { field: 'unit', headerName: 'Unit' },
-            { field: 'rsPerMt', headerName: 'Rs/MT', flex: 2, align: 'right' },
+            { field: 'SrNo', headerName: 'SL.No', align: 'right' },
+            { field: 'ByProductName', headerName: 'Product name', flex: 2 },
+            { field: 'Unit', headerName: 'Unit' },
+            { field: 'Price', headerName: 'Rs/MT', flex: 2, align: 'right' },
             {
-              field: 'prodBudget',
+              field: 'PrevYearNormBudget',
               headerName: 'Budget',
               flex: 2,
               align: 'right',
             },
             {
-              field: 'prodActual',
+              field: 'PrevYearNormActual',
               headerName: 'Actual',
               flex: 2,
               align: 'right',
             },
             {
-              field: 'prodNext',
-              headerName: 'Forecast',
+              field: 'NextYearCostBudget',
+              headerName: 'Budget',
               flex: 2,
               align: 'right',
             },
@@ -31,8 +43,8 @@ export const MockReportService = {
           columnGrouping: [
             {
               groupId: 'costing',
-              headerName: 'Costing',
-              children: [{ field: 'rsPerMt' }],
+              headerName: 'Price',
+              children: [{ field: 'Price' }],
             },
             {
               groupId: 'production',
@@ -40,106 +52,65 @@ export const MockReportService = {
               children: [
                 {
                   groupId: 'current',
-                  headerName: 'Current',
-                  children: [{ field: 'prodBudget' }, { field: 'prodActual' }],
+                  // lone "Current"  use prevFY
+                  headerName: prevFY,
+                  children: [
+                    { field: 'PrevYearNormBudget' },
+                    { field: 'PrevYearNormActual' },
+                  ],
                 },
                 {
                   groupId: 'forecast',
-                  headerName: 'Forecast',
-                  children: [{ field: 'prodNext' }],
+                  // lone "Forecast" use currFY
+                  headerName: currFY,
+                  children: [{ field: 'NextYearCostBudget' }],
                 },
               ],
             },
           ],
-          rows: [
-            {
-              id: 1,
-              sno: 1,
-              productName: 'EOE',
-              unit: 'MT',
-              rsPerMt: 25000,
-              prodBudget: 942,
-              prodActual: 783,
-              prodNext: 895,
-            },
-            {
-              id: 2,
-              sno: 2,
-              productName: 'MEG',
-              unit: 'MT',
-              rsPerMt: 22000,
-              prodBudget: 723,
-              prodActual: 631,
-              prodNext: 804,
-            },
-            {
-              id: 3,
-              sno: 3,
-              productName: 'EO',
-              unit: 'MT',
-              rsPerMt: 23000,
-              prodBudget: 657,
-              prodActual: 523,
-              prodNext: 642,
-            },
-            {
-              id: 4,
-              sno: 4,
-              productName: 'NSR',
-              unit: 'Rs/MT',
-              rsPerMt: null,
-              prodBudget: 2112,
-              prodActual: 2056,
-              prodNext: 2190,
-            },
-          ],
         }
 
+      // ==== B. By products ====
       case 'ByProducts':
         return {
           columns: [
-            { field: 'sno', headerName: 'SL.No', align: 'right', flex: 0.5 },
-            { field: 'byProductName', headerName: 'By product name', flex: 2 },
-            { field: 'unit', headerName: 'Unit', flex: 1 },
+            { field: 'SrNo', headerName: 'SL.No', align: 'right', flex: 0.5 },
+            { field: 'ByProductName', headerName: 'By product name', flex: 2 },
+            { field: 'Unit', headerName: 'Unit', flex: 1 },
+            { field: 'Price', headerName: 'Rs/MT', flex: 1, align: 'right' },
             {
-              field: 'priceRsMt',
-              headerName: 'Rs/MT',
-              flex: 1,
-              align: 'right',
-            },
-            {
-              field: 'normBudget',
+              field: 'PrevYearNormBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'normActual',
+              field: 'PrevYearNormActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'normForecast',
-              headerName: 'Forecast',
-              flex: 1,
-              align: 'right',
-            },
-            {
-              field: 'costBudget',
+              field: 'NextYearNormActual',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'costActual',
+              field: 'PrevYearCostBudget',
+              headerName: 'Budget',
+              flex: 1,
+              align: 'right',
+            },
+            {
+              field: 'PrevYearCostActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'costForecast',
-              headerName: 'Forecast',
+              field: 'NextYearCostActual',
+              headerName: 'Budget',
               flex: 1,
               align: 'right',
             },
@@ -148,21 +119,25 @@ export const MockReportService = {
             {
               groupId: 'price',
               headerName: 'Price',
-              children: [{ field: 'priceRsMt' }],
+              children: [{ field: 'Price' }],
             },
             {
               groupId: 'norm',
+              // "Norm Unit/MT" unchanged
               headerName: 'Norm Unit/MT',
               children: [
                 {
                   groupId: 'normDtl',
-                  headerName: 'Norm Details',
-                  children: [{ field: 'normBudget' }, { field: 'normActual' }],
+                  headerName: prevFY, // was "Current"
+                  children: [
+                    { field: 'PrevYearNormBudget' },
+                    { field: 'PrevYearNormActual' },
+                  ],
                 },
                 {
                   groupId: 'normDtl2',
-                  headerName: 'Norm Forecast',
-                  children: [{ field: 'normForecast' }],
+                  headerName: currFY, // was "Forecast"
+                  children: [{ field: 'NextYearNormActual' }],
                 },
               ],
             },
@@ -172,132 +147,67 @@ export const MockReportService = {
               children: [
                 {
                   groupId: 'costDtl',
-                  headerName: 'Cost Details',
-                  children: [{ field: 'costBudget' }, { field: 'costActual' }],
+                  headerName: prevFY, // "Current"  prevFY
+                  children: [
+                    { field: 'PrevYearCostBudget' },
+                    { field: 'PrevYearCostActual' },
+                  ],
                 },
                 {
                   groupId: 'costDtl2',
-                  headerName: 'Cost Forecast',
-                  children: [{ field: 'costForecast' }],
+                  headerName: currFY, // "Forecast"  currFY
+                  children: [{ field: 'NextYearCostActual' }],
                 },
               ],
             },
           ],
-          rows: [
-            {
-              id: 1,
-              sno: 1,
-              byProductName: 'Methanol',
-              unit: 'MT',
-              priceRsMt: 21000,
-              normBudget: 1.2,
-              normActual: 1.1,
-              normForecast: 1.3,
-              costBudget: 25000,
-              costActual: 24500,
-              costForecast: 25500,
-            },
-            {
-              id: 2,
-              sno: 2,
-              byProductName: 'Ethanol',
-              unit: 'MT',
-              priceRsMt: 18000,
-              normBudget: 0.8,
-              normActual: 0.9,
-              normForecast: 0.85,
-              costBudget: 22000,
-              costActual: 21500,
-              costForecast: 22500,
-            },
-            {
-              id: 3,
-              sno: 3,
-              byProductName: 'Isopropanol',
-              unit: 'MT',
-              priceRsMt: 24000,
-              normBudget: 1.0,
-              normActual: 0.95,
-              normForecast: 1.05,
-              costBudget: 26000,
-              costActual: 25500,
-              costForecast: 26500,
-            },
-            {
-              id: 4,
-              sno: 4,
-              byProductName: 'Acetone',
-              unit: 'MT',
-              priceRsMt: 20000,
-              normBudget: 1.5,
-              normActual: 1.4,
-              normForecast: 1.45,
-              costBudget: 23000,
-              costActual: 22500,
-              costForecast: 23500,
-            },
-            {
-              id: 5,
-              sno: 5,
-              byProductName: 'Phenol',
-              unit: 'MT',
-              priceRsMt: 27000,
-              normBudget: 0.6,
-              normActual: 0.65,
-              normForecast: 0.7,
-              costBudget: 28000,
-              costActual: 27500,
-              costForecast: 28500,
-            },
-          ],
         }
 
+      // ==== C. Raw material ====
       case 'RawMaterial':
-        // copy same shape as ByProducts but swap prefixes to 'raw'
         return {
           columns: [
-            { field: 'sno', headerName: 'SL.No', align: 'right', flex: 0.5 },
-            { field: 'rawName', headerName: 'Raw material', flex: 2 },
-            { field: 'unit', headerName: 'Unit', flex: 1 },
+            { field: 'SrNo', headerName: 'SL.No', align: 'right', flex: 0.5 },
             {
-              field: 'rawPriceRsMt',
-              headerName: 'Rs/MT',
-              flex: 1,
-              align: 'right',
+              field: 'ByProductName',
+              headerName: 'Raw material name',
+              flex: 2,
             },
+            { field: 'Unit', headerName: 'Unit', flex: 1 },
+            { field: 'Price', headerName: 'Rs/MT', flex: 1, align: 'right' },
             {
-              field: 'rawNormBudget',
+              field: 'PrevYearNormBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'rawNormActual',
+              field: 'PrevYearNormActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'rawNormForecast',
-              headerName: 'Forecast',
-              flex: 1,
-              align: 'right',
-            },
-            {
-              field: 'rawCostBudget',
+              field: 'NextYearNormActual',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'rawCostActual',
+              field: 'PrevYearCostBudget',
+              headerName: 'Budget',
+              flex: 1,
+              align: 'right',
+            },
+            {
+              field: 'PrevYearCostActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'rawCostForecast',
-              headerName: 'Forecast',
+              field: 'NextYearCostActual',
+              headerName: 'Budget',
               flex: 1,
               align: 'right',
             },
@@ -306,135 +216,90 @@ export const MockReportService = {
             {
               groupId: 'price',
               headerName: 'Price',
-              children: [{ field: 'rawPriceRsMt' }],
+              children: [{ field: 'Price' }],
             },
             {
               groupId: 'norm',
-              headerName: 'Norm Unit/MT',
+              headerName: 'Norm Unit/MT', // was "Norm Unit/MT" but contains "Previous Year"
               children: [
                 {
                   groupId: 'normDtl',
-                  headerName: 'Norm Details',
+                  headerName: prevFY,
                   children: [
-                    { field: 'rawNormBudget' },
-                    { field: 'rawNormActual' },
+                    { field: 'PrevYearNormBudget' },
+                    { field: 'PrevYearNormActual' },
                   ],
                 },
                 {
                   groupId: 'normDtl2',
-                  headerName: 'Norm Forecast',
-                  children: [{ field: 'rawNormForecast' }],
+                  headerName: currFY,
+                  children: [{ field: 'NextYearNormActual' }],
                 },
               ],
             },
             {
               groupId: 'cost',
-              headerName: 'Cost Rs/MT',
+              headerName: 'Cost Rs/MT', // "Previous Year Cost"
               children: [
                 {
                   groupId: 'costDtl',
-                  headerName: 'Cost Details',
+                  headerName: prevFY,
                   children: [
-                    { field: 'rawCostBudget' },
-                    { field: 'rawCostActual' },
+                    { field: 'PrevYearCostBudget' },
+                    { field: 'PrevYearCostActual' },
                   ],
                 },
                 {
                   groupId: 'costDtl2',
-                  headerName: 'Cost Forecast',
-                  children: [{ field: 'rawCostForecast' }],
+                  headerName: currFY,
+                  children: [{ field: 'NextYearCostActual' }],
                 },
               ],
             },
           ],
-          rows: [
-            {
-              id: 1,
-              sno: 1,
-              rawName: 'Naphtha',
-              unit: 'MT',
-              rawPriceRsMt: 28000,
-              rawNormBudget: 1.1,
-              rawNormActual: 1.0,
-              rawNormForecast: 1.2,
-              rawCostBudget: 30800,
-              rawCostActual: 30000,
-              rawCostForecast: 31500,
-            },
-            {
-              id: 2,
-              sno: 2,
-              rawName: 'Propylene',
-              unit: 'MT',
-              rawPriceRsMt: 34000,
-              rawNormBudget: 0.9,
-              rawNormActual: 0.85,
-              rawNormForecast: 0.95,
-              rawCostBudget: 30600,
-              rawCostActual: 28900,
-              rawCostForecast: 32300,
-            },
-            {
-              id: 3,
-              sno: 3,
-              rawName: 'Ethylene',
-              unit: 'MT',
-              rawPriceRsMt: 31000,
-              rawNormBudget: 1.2,
-              rawNormActual: 1.15,
-              rawNormForecast: 1.25,
-              rawCostBudget: 37200,
-              rawCostActual: 35650,
-              rawCostForecast: 38750,
-            },
-          ],
         }
 
+      // ==== D. Cat chem ====
       case 'CatChem':
         return {
           columns: [
-            { field: 'sno', headerName: 'SL.No', align: 'right', flex: 0.5 },
-            { field: 'catalystName', headerName: 'Catalyst', flex: 2 },
-            { field: 'unit', headerName: 'Unit', flex: 1 },
+            { field: 'SrNo', headerName: 'SL.No', align: 'right', flex: 0.5 },
+            { field: 'ByProductName', headerName: 'Catalyst name', flex: 2 },
+            { field: 'Unit', headerName: 'Unit', flex: 1 },
+            { field: 'Price', headerName: 'Rs/MT', flex: 1, align: 'right' },
             {
-              field: 'catPriceRsMt',
-              headerName: 'Rs/MT',
-              flex: 1,
-              align: 'right',
-            },
-            {
-              field: 'catNormBudget',
+              field: 'PrevYearNormBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'catNormActual',
+              field: 'PrevYearNormActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'catNormForecast',
-              headerName: 'Forecast',
-              flex: 1,
-              align: 'right',
-            },
-            {
-              field: 'catCostBudget',
+              field: 'NextYearNormActual',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'catCostActual',
+              field: 'PrevYearCostBudget',
+              headerName: 'Budget',
+              flex: 1,
+              align: 'right',
+            },
+            {
+              field: 'PrevYearCostActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'catCostForecast',
-              headerName: 'Forecast',
+              field: 'NextYearCostActual',
+              headerName: 'Budget',
               flex: 1,
               align: 'right',
             },
@@ -443,7 +308,7 @@ export const MockReportService = {
             {
               groupId: 'price',
               headerName: 'Price',
-              children: [{ field: 'catPriceRsMt' }],
+              children: [{ field: 'Price' }],
             },
             {
               groupId: 'norm',
@@ -451,16 +316,16 @@ export const MockReportService = {
               children: [
                 {
                   groupId: 'normDtl',
-                  headerName: 'Norm Details',
+                  headerName: prevFY,
                   children: [
-                    { field: 'catNormBudget' },
-                    { field: 'catNormActual' },
+                    { field: 'PrevYearNormBudget' },
+                    { field: 'PrevYearNormActual' },
                   ],
                 },
                 {
                   groupId: 'normDtl2',
-                  headerName: 'Norm Forecast',
-                  children: [{ field: 'catNormForecast' }],
+                  headerName: currFY,
+                  children: [{ field: 'NextYearNormActual' }],
                 },
               ],
             },
@@ -470,95 +335,63 @@ export const MockReportService = {
               children: [
                 {
                   groupId: 'costDtl',
-                  headerName: 'Cost Details',
+                  headerName: prevFY,
                   children: [
-                    { field: 'catCostBudget' },
-                    { field: 'catCostActual' },
+                    { field: 'PrevYearCostBudget' },
+                    { field: 'PrevYearCostActual' },
                   ],
                 },
                 {
                   groupId: 'costDtl2',
-                  headerName: 'Cost Forecast',
-                  children: [{ field: 'catCostForecast' }],
+                  headerName: currFY,
+                  children: [{ field: 'NextYearCostActual' }],
                 },
               ],
             },
           ],
-          rows: [
-            {
-              id: 1,
-              sno: 1,
-              catalystName: 'Zeolite-Y',
-              unit: 'Kg',
-              catPriceRsMt: 50000,
-              catNormBudget: 0.005,
-              catNormActual: 0.0045,
-              catNormForecast: 0.0052,
-              catCostBudget: 250,
-              catCostActual: 225,
-              catCostForecast: 260,
-            },
-            {
-              id: 2,
-              sno: 2,
-              catalystName: 'FCC Catalyst',
-              unit: 'Kg',
-              catPriceRsMt: 60000,
-              catNormBudget: 0.006,
-              catNormActual: 0.0058,
-              catNormForecast: 0.0061,
-              catCostBudget: 360,
-              catCostActual: 348,
-              catCostForecast: 366,
-            },
-          ],
         }
 
+      // ==== E. Utilities ====
       case 'Utilities':
         return {
           columns: [
-            { field: 'sno', headerName: 'SL.No', align: 'right', flex: 0.5 },
-            { field: 'utilName', headerName: 'Utility', flex: 2 },
-            { field: 'unit', headerName: 'Unit', flex: 1 },
+            { field: 'SrNo', headerName: 'SL.No', align: 'right', flex: 0.5 },
+            { field: 'ByProductName', headerName: 'Utility name', flex: 2 },
+            { field: 'Unit', headerName: 'Unit', flex: 1 },
+            { field: 'Price', headerName: 'Rs/MT', flex: 1, align: 'right' },
             {
-              field: 'utilPriceRsMt',
-              headerName: 'Rs/MT',
-              flex: 1,
-              align: 'right',
-            },
-            {
-              field: 'utilNormBudget',
+              field: 'PrevYearNormBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'utilNormActual',
+              field: 'PrevYearNormActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'utilNormForecast',
-              headerName: 'Forecast',
-              flex: 1,
-              align: 'right',
-            },
-            {
-              field: 'utilCostBudget',
+              field: 'NextYearNormActual',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'utilCostActual',
+              field: 'PrevYearCostBudget',
+              headerName: 'Budget',
+              flex: 1,
+              align: 'right',
+            },
+            {
+              field: 'PrevYearCostActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'utilCostForecast',
-              headerName: 'Forecast',
+              field: 'NextYearCostActual',
+              headerName: 'Budget',
               flex: 1,
               align: 'right',
             },
@@ -567,7 +400,7 @@ export const MockReportService = {
             {
               groupId: 'price',
               headerName: 'Price',
-              children: [{ field: 'utilPriceRsMt' }],
+              children: [{ field: 'Price' }],
             },
             {
               groupId: 'norm',
@@ -575,16 +408,16 @@ export const MockReportService = {
               children: [
                 {
                   groupId: 'normDtl',
-                  headerName: 'Norm Details',
+                  headerName: prevFY,
                   children: [
-                    { field: 'utilNormBudget' },
-                    { field: 'utilNormActual' },
+                    { field: 'PrevYearNormBudget' },
+                    { field: 'PrevYearNormActual' },
                   ],
                 },
                 {
                   groupId: 'normDtl2',
-                  headerName: 'Norm Forecast',
-                  children: [{ field: 'utilNormForecast' }],
+                  headerName: currFY,
+                  children: [{ field: 'NextYearNormActual' }],
                 },
               ],
             },
@@ -594,137 +427,43 @@ export const MockReportService = {
               children: [
                 {
                   groupId: 'costDtl',
-                  headerName: 'Cost Details',
+                  headerName: prevFY,
                   children: [
-                    { field: 'utilCostBudget' },
-                    { field: 'utilCostActual' },
+                    { field: 'PrevYearCostBudget' },
+                    { field: 'PrevYearCostActual' },
                   ],
                 },
                 {
                   groupId: 'costDtl2',
-                  headerName: 'Cost Forecast',
-                  children: [{ field: 'utilCostForecast' }],
+                  headerName: currFY,
+                  children: [{ field: 'NextYearCostActual' }],
                 },
               ],
             },
           ],
-          rows: [
-            {
-              id: 1,
-              sno: 1,
-              utilName: 'Steam',
-              unit: 'MT',
-              utilPriceRsMt: 3500,
-              utilNormBudget: 0.4,
-              utilNormActual: 0.38,
-              utilNormForecast: 0.42,
-              utilCostBudget: 1400,
-              utilCostActual: 1330,
-              utilCostForecast: 1470,
-            },
-            {
-              id: 2,
-              sno: 2,
-              utilName: 'Electricity',
-              unit: 'kWh',
-              utilPriceRsMt: 7,
-              utilNormBudget: 25,
-              utilNormActual: 24,
-              utilNormForecast: 26,
-              utilCostBudget: 175,
-              utilCostActual: 168,
-              utilCostForecast: 182,
-            },
-          ],
         }
 
-      case 'OtherVars':
+      // ==== F. Other Variable Cost ====
+      case 'OtherVariableCost':
         return {
           columns: [
-            { field: 'sno', headerName: 'SL.No', align: 'right' },
-            { field: 'description', headerName: 'Description', flex: 2 },
-            { field: 'unit', headerName: 'Unit' },
+            { field: 'SrNo', headerName: 'SL.No', align: 'right' },
+            { field: 'OtherCost', headerName: 'Other cost', flex: 2 },
+            { field: 'Unit', headerName: 'Unit' },
             {
-              field: 'ovcBudget',
+              field: 'PrevYearBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'ovcActual',
+              field: 'PrevYearActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
             },
             {
-              field: 'ovcBudget2',
-              headerName: 'Budget2',
-              flex: 1,
-              align: 'right',
-            },
-          ],
-          columnGrouping: [
-            {
-              groupId: 'cost',
-              headerName: 'Cost Rs/MT',
-              children: [{ field: 'ovcBudget' }, { field: 'ovcActual' }],
-            },
-            {
-              groupId: 'cost2',
-              headerName: 'Cost2 Rs/MT',
-              children: [{ field: 'ovcBudget2' }],
-            },
-          ],
-          rows: [
-            {
-              id: 1,
-              sno: 1,
-              description: 'Lab charges',
-              unit: 'MT',
-              ovcBudget: 15,
-              ovcActual: 14,
-              ovcBudget2: 15,
-            },
-            {
-              id: 2,
-              sno: 2,
-              description: 'Maintenance spares',
-              unit: 'MT',
-              ovcBudget: 25,
-              ovcActual: 27,
-              ovcBudget2: 25,
-            },
-            {
-              id: 3,
-              sno: 3,
-              description: 'One-time setup',
-              unit: 'MT',
-              ovcBudget: 100,
-              ovcActual: 90,
-              ovcBudget2: 100,
-            },
-          ],
-        }
-
-      case 'ProdCalc':
-        return {
-          columns: [
-            { field: 'sno', headerName: 'SL.No', align: 'right' },
-            { field: 'description', headerName: 'Metric', flex: 2 },
-            {
-              field: 'rateBudget',
-              headerName: 'Budget',
-              flex: 1,
-              align: 'right',
-            },
-            {
-              field: 'rateActual',
-              headerName: 'Actual',
-              flex: 1,
-              align: 'right',
-            },
-            {
-              field: 'valueBudget',
+              field: 'CurrentYearBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
@@ -732,40 +471,65 @@ export const MockReportService = {
           ],
           columnGrouping: [
             {
-              groupId: 'rate',
-              headerName: 'Rate Rs/MT',
-              children: [{ field: 'rateBudget' }, { field: 'rateActual' }],
+              groupId: 'previous',
+              // literal “Previous Year” prevFY
+              headerName: prevFY,
+              children: [
+                { field: 'PrevYearBudget' },
+                { field: 'PrevYearActual' },
+              ],
             },
             {
-              groupId: 'value',
-              headerName: 'Value Rs Cr',
-              children: [{ field: 'valueBudget' }],
+              groupId: 'current',
+              // literal “Current Year”  currFY
+              headerName: currFY,
+              children: [{ field: 'CurrentYearBudget' }],
             },
           ],
-          rows: [
+        }
+
+      // ==== G. Production Cost Calculations ====
+      case 'ProductionCostCalculations':
+        return {
+          columns: [
+            { field: 'SrNo', headerName: 'SL.No', align: 'right' },
             {
-              id: 1,
-              sno: 1,
-              description: 'Total conversion cost',
-              rateBudget: 250,
-              rateActual: 255,
-              valueBudget: 500,
+              field: 'ProductionCostCalculations',
+              headerName: 'Production cost calculations',
+              flex: 2,
             },
             {
-              id: 2,
-              sno: 2,
-              description: 'Total variable cost',
-              rateBudget: 400,
-              rateActual: 390,
-              valueBudget: 800,
+              field: 'PrevYearBudget',
+              headerName: 'Budget',
+              flex: 1,
+              align: 'right',
             },
             {
-              id: 3,
-              sno: 3,
-              description: 'Total contribution',
-              rateBudget: 650,
-              rateActual: 645,
-              valueBudget: 1300,
+              field: 'PrevYearActual',
+              headerName: 'Actual',
+              flex: 1,
+              align: 'right',
+            },
+            {
+              field: 'NextYearBudget',
+              headerName: 'Budget',
+              flex: 1,
+              align: 'right',
+            },
+          ],
+          columnGrouping: [
+            {
+              groupId: 'previous',
+              headerName: prevFY,
+              children: [
+                { field: 'PrevYearBudget' },
+                { field: 'PrevYearActual' },
+              ],
+            },
+            {
+              groupId: 'next',
+              headerName: currFY,
+              children: [{ field: 'NextYearBudget' }],
             },
           ],
         }

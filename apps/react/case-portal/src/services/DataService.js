@@ -92,6 +92,7 @@ export const DataService = {
   getProductionVolDataBasis,
   getAnnualProductionPlanReportData,
   getPlantProductionSummary,
+  getPlantContributionYearWisePlan,
   getMonthwiseRawData,
   getMonthWiseSummary,
   updateUserPlants,
@@ -822,6 +823,25 @@ async function getAnnualProductionPlanReportData(keycloak, type) {
     return await Promise.reject(e)
   }
 }
+async function getPlantContributionYearWisePlan(keycloak, type) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+
+  const url = `${Config.CaseEngineUrl}/task/report/plant/contribution/year-wise/plan?plantId=${plantId}&year=${year}&reportType=${type}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
 async function getPlantProductionSummary(keycloak) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
@@ -840,6 +860,7 @@ async function getPlantProductionSummary(keycloak) {
     return await Promise.reject(e)
   }
 }
+
 async function getMonthwiseRawData(keycloak) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
