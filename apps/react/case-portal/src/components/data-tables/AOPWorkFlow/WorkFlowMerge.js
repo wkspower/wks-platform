@@ -388,7 +388,7 @@ const WorkFlowMerge = () => {
         workflowYearDTO: rows,
       }
       const result = await DataService.submitWorkFlow(payload, keycloak)
-      console.log(result)
+      // console.log(result)
       setSnackbarData({
         message: 'Workflow instance created successfully',
         severity: 'success',
@@ -506,12 +506,12 @@ const WorkFlowMerge = () => {
           <Tabs
             value={tabIndex}
             onChange={(e, newIndex) => setTabIndex(newIndex)}
-            variant='scrollable' 
-            scrollButtons='auto' 
+            variant='scrollable'
+            scrollButtons='auto'
             sx={{
               borderBottom: 0,
               '.MuiTabs-indicator': { display: 'none' },
-              maxWidth: '100%', 
+              maxWidth: '100%',
             }}
             textColor='primary'
             indicatorColor='primary'

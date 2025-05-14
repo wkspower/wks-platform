@@ -7,11 +7,11 @@ import { useSession } from 'SessionStoreContext'
 import { DataService } from 'services/DataService'
 
 const categories = [
-  { key: 'ProductMixAndProduction', title: 'A. Product mix and production' },
-  { key: 'ByProducts', title: 'B. By products' },
-  { key: 'RawMaterial', title: 'C. Raw material' },
-  { key: 'CatChem', title: 'D. Cat chem' },
-  { key: 'Utilities', title: 'E. Utilities' },
+  { key: 'ProductMixAndProduction', title: 'Product mix and production' },
+  { key: 'ByProducts', title: 'By products' },
+  { key: 'RawMaterial', title: 'Raw material' },
+  { key: 'CatChem', title: 'Cat chem' },
+  { key: 'Utilities', title: 'Utilities' },
   { key: 'OtherVariableCost', title: 'Other Variable Cost' },
   { key: 'ProductionCostCalculations', title: 'Production Cost Calculation' },
 ]
@@ -39,7 +39,7 @@ export default function PlantContribution() {
             key,
           )
           let rows = apiResp.data?.plantProductionData || [] // adapt if resp shape differs
-          console.log(apiResp)
+          // console.log(apiResp)
           if (apiResp?.code == 200) {
             rows = apiResp?.data?.plantProductionData.map((item, index) => ({
               ...item,

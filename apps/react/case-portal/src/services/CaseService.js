@@ -193,7 +193,7 @@ async function addDocuments(keycloak, businessKey, document) {
 }
 
 async function addComment(keycloak, text, parentId, businessKey, role, status) {
-  console.log(businessKey)
+  // console.log(businessKey)
   const url = `${Config.CaseEngineUrl}/case/${businessKey}/comment`
 
   const comment = {

@@ -231,7 +231,7 @@ const UserManagementTable = ({ keycloak }) => {
         setAllPlants(mappedRows.plants)
         setAllSites(mappedRows.sites)
         setAllVerts(mappedRows.verticals)
-        console.log('Mapped Rows: ', mappedRows.verticals)
+        // console.log('Mapped Rows: ', mappedRows.verticals)
         // Optionally, uncomment if you want to show API users by default:
         // setRows(mappedRows);
       } catch (error) {

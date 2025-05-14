@@ -68,7 +68,7 @@ const StepperNav = () => {
 
   const currentPath = location.pathname.split('/').pop()
   const activeStep = steps.findIndex((step) => step.path === currentPath)
-  console.log(menuValue)
+  // console.log(menuValue)
 
   const handleStepClick = (index) => {
     navigate(`/production-norms-plan/${steps[index].path}`)

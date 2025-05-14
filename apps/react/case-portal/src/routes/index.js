@@ -51,13 +51,13 @@ export const ThemeRoutes = ({
   }, [location, isBlocked, navigate])
 
   const handleStay = () => {
-    console.log('true block')
+    // console.log('true block')
     setOpen(false)
     // setIsBlocked(true)
   }
 
   const handleLeave = () => {
-    console.log('go anyway')
+    // console.log('go anyway')
     dispatch(setIsBlocked(false))
     setOpen(false)
     if (pendingLocation) {

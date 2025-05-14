@@ -122,7 +122,7 @@ const TurnaroundPlanTable = () => {
         turnAroundDetails,
         keycloak,
       )
-      console.log(response)
+      // console.log(response)
       // if (response.ok && response.length < 0) {
       //   const errorData = await response.json() // Get the actual error message
       //   throw new Error(errorData.errorMessage || 'Failed to save data')

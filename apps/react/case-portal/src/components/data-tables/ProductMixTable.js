@@ -239,7 +239,7 @@ const FiveTables = () => {
   }
   const handleRejectSubmit = () => {
     // Perform rejection logic here (e.g., API call with rejectReason)
-    console.log('Rejected with reason:', rejectReason)
+    // console.log('Rejected with reason:', rejectReason)
     setOpenRejectDialog(false)
     setRejectReason('')
   }

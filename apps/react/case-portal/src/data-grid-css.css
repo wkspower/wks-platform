@@ -145,7 +145,7 @@
 }
 
 .custom-data-grid .MuiDataGrid-row {
-  border-bottom: 1px solid #d0d0d0;
+  border-bottom: 2px solid #bbbbbb;
 }
 
 .custom-data-grid .even-row {
@@ -161,11 +161,11 @@
   background-color: #d6d4d4 !important;
 }
 .custom-data-grid .odd-row {
-  background-color: #ebebeb; /* Light background instead of grey */
-  color: rgba(0, 0, 0, 0.4); /* Slightly faded text color */
+  background-color: #ebebeb;
+  color: rgba(0, 0, 0, 0.4);
 
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1); /* Adds a soft inner shadow for a disabled feel */
-  transition: all 0.3s ease; /* Smooth transition for all changes */
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .odd-cell {
@@ -176,6 +176,7 @@
   border: 1px solid rgba(0, 0, 0, 0.2);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  border-bottom: 2px solid #bbbbbb;
 }
 
 /* .custom-data-grid .odd-row-disabled {

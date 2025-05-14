@@ -43,7 +43,7 @@ const TextSubmitMUI = () => {
           keycloak,
           data[0].caseId,
         )
-        console.log('taskList', taskList)
+        // console.log('taskList', taskList)
         for (var i = 0; i < taskList.length; i++) {
           if (taskList[i].assignee === 'maintenance_head') {
             setShowTextBox(true)
@@ -62,7 +62,7 @@ const TextSubmitMUI = () => {
   const createCase = async () => {
     try {
       const result = await DataService.createCase(keycloak, caseData)
-      console.log('Response:', result)
+      // console.log('Response:', result)
 
       var year = localStorage.getItem('year')
       var plantId = ''
@@ -94,7 +94,7 @@ const TextSubmitMUI = () => {
         workflowData,
         keycloak,
       )
-      console.log(workFlowResult)
+      // console.log(workFlowResult)
 
       // alert('Submitted successfully!')
     } catch (error) {
@@ -105,7 +105,7 @@ const TextSubmitMUI = () => {
   const handleSubmit = async () => {
     try {
       if (!text.trim()) {
-        console.log('Please enter a message!')
+        // console.log('Please enter a message!')
         return
       }
       const result = await DataService.completeTask(

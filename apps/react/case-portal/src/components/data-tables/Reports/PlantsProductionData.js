@@ -23,7 +23,7 @@ const PlantsProductionSummary = () => {
   const [rows, setRows] = useState()
 
   const handleRemarkCellClick = (row) => {
-    console.log(row)
+    // console.log(row)
     setCurrentRemark(row.Remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)

@@ -67,15 +67,6 @@ const plan = {
       icon: icons.IconArchive, // You can choose an appropriate icon
       children: [
         {
-          id: 'product-demand',
-          title: i18n.t('menu.productDemand'),
-          type: 'item',
-          url: '/production-norms-plan/business-demand',
-          icon: icons.IconChartBar,
-          breadcrumbs: true,
-        },
-
-        {
           id: 'catalyst-selectivity',
           title: i18n.t('menu.catalystSelectivity'),
           type: 'item',
@@ -92,6 +83,16 @@ const plan = {
           icon: icons.IconSettings,
           breadcrumbs: true,
         },
+
+        {
+          id: 'product-demand',
+          title: i18n.t('menu.productDemand'),
+          type: 'item',
+          url: '/production-norms-plan/business-demand',
+          icon: icons.IconChartBar,
+          breadcrumbs: true,
+        },
+
         {
           id: 'shutdown-plan',
           title: i18n.t('menu.shutdownPlan'),

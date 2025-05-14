@@ -26,7 +26,7 @@ const MonthwiseProduction = () => {
     rowsBeforeChange: {},
   })
   const handleRemarkCellClick = (row) => {
-    console.log(row)
+    // console.log(row)
     setCurrentRemark(row.Remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
@@ -248,7 +248,7 @@ const MonthwiseProduction = () => {
         setLoading(true)
         var res = await DataService.getMonthWiseSummary(keycloak)
 
-        console.log(res)
+        // console.log(res)
         if (res?.code == 200) {
           res = res?.data?.data.map((item, index) => ({
             ...item,
