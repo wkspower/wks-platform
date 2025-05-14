@@ -2,7 +2,7 @@ import workspace from './workspace'
 import management from './management'
 import externalLinks from './externalLinks'
 
-const items = [workspace, management, externalLinks]
+const items = [externalLinks, workspace, management]
 
 const menuItems = {
   items: items,

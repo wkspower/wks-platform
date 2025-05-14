@@ -25,20 +25,11 @@ const links =
 
 const external = {
   id: 'externallinks',
-  title: i18n.t('menu.externalLinks'),
+  title: '',
   caption: i18n.t('menu.externalLinks'),
   type: 'group',
   external: true,
-  children: [
-    {
-      id: 'externallinks',
-      title: 'Links',
-      type: 'collapse',
-      icon: icons.IconBuilding,
-      children: links,
-      external: true,
-    },
-  ],
+  children: links,
 }
 
 export default external
