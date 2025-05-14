@@ -278,7 +278,14 @@ const SelectivityData = (props) => {
       props.fetchData()
     }
     if (props?.configType === 'grades') fetchConfigData()
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  }, [
+    sitePlantChange,
+    oldYear,
+    yearChanged,
+    keycloak,
+    lowerVertName,
+    props?.configType,
+  ])
 
   const [columnConfig, setColumnConfig] = useState([])
 

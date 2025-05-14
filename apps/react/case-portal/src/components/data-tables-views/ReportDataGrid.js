@@ -53,7 +53,7 @@ const ReportDataGrid = ({
     // fetchData1()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
   const handleRemarkSave = () => {
-    console.log(currentRemark)
+    // console.log(currentRemark)
     setRows((prevRows) => {
       let updatedRow = null
 
@@ -65,9 +65,9 @@ const ReportDataGrid = ({
             'remark',
             'Remark',
           ].filter((key) => key in row)
-          console.log(row)
+          // console.log(row)
           const keyToUpdate = keysToUpdate[0] || 'remark'
-          console.log([keyToUpdate])
+          //          console.log([keyToUpdate])
           updatedRow = { ...row, [keyToUpdate]: currentRemark }
           return updatedRow
         }
@@ -77,7 +77,6 @@ const ReportDataGrid = ({
       if (updatedRow) {
         unsavedChangesRef.current.unsavedRows[currentRowId] = updatedRow
       }
-      console.log(updatedRow)
 
       return updatedRows
     })

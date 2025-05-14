@@ -15,6 +15,7 @@ export const DataService = {
   getCatalystSelectivityData,
   getCatalystSelectivityDataIV,
   getConfigurationTabsMatrix,
+  getConfigurationAvailableTabs,
   getProductionNormsData,
   getConsumptionNormsData,
   getMaintenanceData,
@@ -1146,6 +1147,22 @@ async function getConfigurationTabsMatrix(keycloak) {
 
   const url = `${Config.CaseEngineUrl}/task/access/matrix?plantId=${plantId}&siteId=${siteID}&verticalId=${verticalId}`
 
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getConfigurationAvailableTabs(keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-type-data`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

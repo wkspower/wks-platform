@@ -119,6 +119,7 @@ const MaintenanceTable = () => {
       minWidth: 250,
       renderCell: (params) => (
         <div
+          title={params.value}
           style={{
             whiteSpace: 'normal',
             wordBreak: 'break-word',

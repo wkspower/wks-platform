@@ -26,6 +26,7 @@ const ConfigurationTable = () => {
   const [continiousGradeData, setContiniousGradeData] = useState([])
   const [discontiniousGradeData, setDiscontiniousGradeData] = useState([])
   const [tabs, setTabs] = useState([])
+  const [availableTabs, setAvailableTabs] = useState([])
 
   const fetchData = async () => {
     setRows([])
@@ -33,7 +34,8 @@ const ConfigurationTable = () => {
     setLoading(true)
     try {
       var data = await DataService.getCatalystSelectivityData(keycloak)
-      if (lowerVertName === 'meg') {
+
+      if (tabs.length == 0) {
         setLoading(true)
         data = data.sort((a, b) => b.normType.localeCompare(a.normType))
         const groupedRows = []
@@ -118,9 +120,9 @@ const ConfigurationTable = () => {
             startUpRows = rowsForThisCategory
           } else if (ConfigTypeName == 'Otherlosses') {
             otherLossRows = rowsForThisCategory
-          } else if (ConfigTypeName == 'ContiniousGrades') {
+          } else if (ConfigTypeName == 'ContineGradeChange') {
             continiousGradeRows = rowsForThisCategory
-          } else if (ConfigTypeName == 'DiscontiniousGrades') {
+          } else if (ConfigTypeName == 'DisContineGradeChange') {
             discontiniousGradeRows = rowsForThisCategory
           }
         })
@@ -151,8 +153,8 @@ const ConfigurationTable = () => {
         //   'OtherLosses',
         //   'ShutdownNorms',
         //   'Receipes',
-        //   'ContiniousGrades',
-        //   'DiscontiniousGrades',
+        //   'ContineGradeChange',
+        //   'DisContineGradeChange',
         // ])
         setTabs([])
       }
@@ -164,11 +166,37 @@ const ConfigurationTable = () => {
     }
   }
 
+  const getConfigurationAvailableTabs = async () => {
+    setLoading(true)
+    try {
+      var response = await DataService.getConfigurationAvailableTabs(keycloak)
+
+      if (response?.code == 200) {
+        setAvailableTabs(response?.data?.configurationTypeList)
+      } else {
+        setAvailableTabs([])
+      }
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      setAvailableTabs([])
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     getConfigurationTabsMatrix()
+    getConfigurationAvailableTabs()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
-  if (lowerVertName != 'pe') {
+ 
+
+  const getTheId = (name) => {
+    const tab = availableTabs.find((tab) => tab.name === name)
+    return tab ? tab.id : null
+  }
+
+  if (tabs.length == 0) {
     return (
       <div
         style={{
@@ -211,86 +239,91 @@ const ConfigurationTable = () => {
         value={tabIndex}
         onChange={(e, newIndex) => setTabIndex(newIndex)}
       >
-        {tabs.map((tab, index) => (
-          <Tab
-            sx={{
-              border: '1px solid #ADD8E6',
-              borderBottom: '1px solid #ADD8E6',
-            }}
-            key={tab}
-            label={
-              tab === 'StartupLosses'
-                ? 'Startup Losses'
-                : tab === 'OtherLosses'
-                  ? 'Other Losses'
-                  : tab === 'ShutdownNorms'
-                    ? 'Constants'
-                    : tab === 'Receipes'
-                      ? 'Receipes'
-                      : tab === 'ContiniousGrades'
-                        ? 'Continuous Grade Changes'
-                        : tab === 'DiscontiniousGrades'
-                          ? 'Discontinuous Grade Changes'
-                          : tab
-            }
-          />
-        ))}
+        {tabs.map((tabId, index) => {
+          const tabInfo = availableTabs.find(
+            (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
+          )
+          return (
+            <Tab
+              key={tabId}
+              sx={{
+                border: '1px solid #ADD8E6',
+                borderBottom: '1px solid #ADD8E6',
+              }}
+              label={tabInfo?.displayName || 'N/A'}
+            />
+          )
+        })}
       </Tabs>
 
       <Box>
-        {tabs[tabIndex] === 'StartupLosses' && (
-          <SelectivityData
-            rows={startUpRows}
-            loading={loading}
-            fetchData={fetchData}
-            setRows={setStartUpRows}
-            configType='StartupLosses'
-          />
-        )}
-        {tabs[tabIndex] === 'OtherLosses' && (
-          <SelectivityData
-            rows={otherLossRows}
-            loading={loading}
-            fetchData={fetchData}
-            setRows={setOtherLossRows}
-            configType='Otherlosses'
-          />
-        )}
-        {tabs[tabIndex] === 'ShutdownNorms' && (
-          <SelectivityData
-            rows={shutdownNormsRows}
-            loading={loading}
-            setRows={setShutdownRows}
-            fetchData={fetchData}
-            configType='ShutdownNorms'
-          />
-        )}
-        {tabs[tabIndex] === 'Receipes' && (
-          <SelectivityData
-            rows={gradeData}
-            loading={loading}
-            setRows={setGradeData}
-            configType='grades'
-          />
-        )}
-        {tabs[tabIndex] === 'ContiniousGrades' && (
-          <SelectivityData
-            rows={continiousGradeData}
-            loading={loading}
-            setRows={setContiniousGradeData}
-            fetchData={fetchData}
-            configType='ContiniousGrades'
-          />
-        )}
-        {tabs[tabIndex] === 'DiscontiniousGrades' && (
-          <SelectivityData
-            rows={discontiniousGradeData}
-            loading={loading}
-            setRows={setDiscontiniousGradeData}
-            fetchData={fetchData}
-            configType='DiscontiniousGrades'
-          />
-        )}
+        {(() => {
+          const currentTabId = tabs[tabIndex]?.toLowerCase()
+          switch (currentTabId) {
+            // case 'ac3c9ad7-82b5-4550-b04d-fed0f1fb4908': // StartupLosses
+            case getTheId('StartupLosses'):
+              return (
+                <SelectivityData
+                  rows={startUpRows}
+                  loading={loading}
+                  fetchData={fetchData}
+                  setRows={setStartUpRows}
+                  configType='StartupLosses'
+                />
+              )
+            case getTheId('Otherlosses'): // Otherlosses
+              return (
+                <SelectivityData
+                  rows={otherLossRows}
+                  loading={loading}
+                  fetchData={fetchData}
+                  setRows={setOtherLossRows}
+                  configType='Otherlosses'
+                />
+              )
+            case getTheId('ShutdownNorms'): // ShutdownNorms
+              return (
+                <SelectivityData
+                  rows={shutdownNormsRows}
+                  loading={loading}
+                  setRows={setShutdownRows}
+                  fetchData={fetchData}
+                  configType='ShutdownNorms'
+                />
+              )
+            case getTheId('Receipe'): // Receipe
+              return (
+                <SelectivityData
+                  rows={gradeData}
+                  loading={loading}
+                  setRows={setGradeData}
+                  configType='grades'
+                />
+              )
+            case getTheId('ContineGradeChange'): // ContineGradeChange
+              return (
+                <SelectivityData
+                  rows={continiousGradeData}
+                  loading={loading}
+                  setRows={setContiniousGradeData}
+                  fetchData={fetchData}
+                  configType='ContineGradeChange'
+                />
+              )
+            case getTheId('DisContineGradeChange'): // DisContineGradeChange
+              return (
+                <SelectivityData
+                  rows={discontiniousGradeData}
+                  loading={loading}
+                  setRows={setDiscontiniousGradeData}
+                  fetchData={fetchData}
+                  configType='DisContineGradeChange'
+                />
+              )
+            default:
+              return null
+          }
+        })()}
       </Box>
     </div>
   )
