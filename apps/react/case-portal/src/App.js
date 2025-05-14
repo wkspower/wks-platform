@@ -80,14 +80,9 @@ const App = () => {
     }
   }
 
-  function enableExternalLinkMenuItemIfRequired(menu, keycloak) {
-    if (!accountStore.isManagerUser(keycloak)) {
-      delete menu.items[2]
-      return
-    }
-
-    if (!menu.items[2]?.children[0]?.children?.length) {
-      delete menu.items[2]
+  function enableExternalLinkMenuItemIfRequired(menu) {
+    if (!menu.items[0]?.children?.length) {
+      delete menu.items[0]
     }
   }
 
@@ -96,8 +91,8 @@ const App = () => {
       items: [...menuItemsDefs.items],
     }
 
-    if (menu.items[0].children) {
-      const recordListMenu = menu.items[0].children.find(
+    if (menu.items[1].children) {
+      const recordListMenu = menu.items[1].children.find(
         (menu) => menu.id === 'record-list',
       )
       if (recordListMenu) {
@@ -109,7 +104,7 @@ const App = () => {
       setRecordsTypes(data)
 
       data.forEach((element) => {
-        menu.items[0].children
+        menu.items[1].children
           .filter((menu) => menu.id === 'record-list')[0]
           .children.push({
             id: element.id,
@@ -121,8 +116,8 @@ const App = () => {
       })
     })
 
-    if (menu.items[0].children) {
-      const caseListMenu = menu.items[0].children.find(
+    if (menu.items[1].children) {
+      const caseListMenu = menu.items[1].children.find(
         (menu) => menu.id === 'case-list',
       )
       if (caseListMenu) {
@@ -134,7 +129,7 @@ const App = () => {
       setCasesDefinitions(data)
 
       data.forEach((element) => {
-        menu.items[0].children
+        menu.items[1].children
           .filter((menu) => menu.id === 'case-list')[0]
           .children.push({
             id: element.id,
@@ -147,10 +142,10 @@ const App = () => {
     })
 
     if (!accountStore.isManagerUser(keycloak)) {
-      delete menu.items[1]
+      delete menu.items[2]
     }
 
-    enableExternalLinkMenuItemIfRequired(menu, keycloak)
+    enableExternalLinkMenuItemIfRequired(menu)
 
     return setMenu(menu)
   }
