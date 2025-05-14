@@ -1,17 +1,18 @@
 // src/services/MockReportService.js
 
 //  current FY
-const currFY = localStorage.getItem('year') || ''
+// const currFY = localStorage.getItem('year') || ''
 
 // Compute previous FY (prevFY)
-let prevFY = ''
-if (currFY.includes('-')) {
-  const [start, end] = currFY.split('-').map(Number)
-  prevFY = `${start - 1}-${(end - 1).toString().padStart(2, '0')}`
-}
 
 export const MockReportService = {
-  async getReport({ category }) {
+  async getReport({ category, year }) {
+    const currFY = year || ''
+    let prevFY = ''
+    if (currFY.includes('-')) {
+      const [start, end] = currFY.split('-').map(Number)
+      prevFY = `${start - 1}-${(end - 1).toString().padStart(2, '0')}`
+    }
     switch (category) {
       // ==== A. Product mix and production ====
       case 'ProductMixAndProduction':

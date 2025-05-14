@@ -22,6 +22,7 @@ export default function PlantContribution() {
 
   const [loading, setLoading] = useState(false)
   const [reports, setReports] = useState({})
+  // const currFY = localStorage.getItem('year') || ''
 
   useEffect(() => {
     const loadAll = async () => {
@@ -31,7 +32,7 @@ export default function PlantContribution() {
       await Promise.all(
         categories.map(async ({ key }) => {
           const { columns, columnGrouping } = await MockReportService.getReport(
-            { category: key },
+            { category: key, year },
           )
 
           const apiResp = await DataService.getPlantContributionYearWisePlan(

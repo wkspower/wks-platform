@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 
 // import DataGridTable from 'components/data-tables/ASDataGrid'
-import { DataGrid } from '@mui/x-data-grid'
+// import { DataGrid } from '@mui/x-data-grid'
 import {
   Backdrop,
   Box,
   CircularProgress,
 } from '../../../node_modules/@mui/material/index'
+import { remarkColumn } from 'components/Utilities/remarkColumn'
+import ReportDataGrid from './ReportDataGrid'
 
 const ProductionAopView = () => {
   const keycloak = useSession()
@@ -22,6 +24,15 @@ const ProductionAopView = () => {
     dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
+  // remark dialog state
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+  const unsavedChangesRef = React.useRef({
+    unsavedRows: {},
+    rowsBeforeChange: {},
+  })
+  const [modifiedCells, setModifiedCells] = React.useState({})
 
   const formatValueToNoDecimals = (val) =>
     val && !isNaN(val) ? Math.round(val) : val
@@ -40,7 +51,37 @@ const ProductionAopView = () => {
       }),
     )
   }
+  const processRowUpdate = React.useCallback((newRow, oldRow) => {
+    const rowId = newRow.id
+    const updatedFields = []
+    for (const key in newRow) {
+      if (
+        Object.prototype.hasOwnProperty.call(newRow, key) &&
+        newRow[key] !== oldRow[key]
+      ) {
+        updatedFields.push(key)
+      }
+    }
 
+    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
+    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
+      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
+    }
+
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === newRow.id ? { ...newRow, isNew: false } : row,
+      ),
+    )
+    if (updatedFields.length > 0) {
+      setModifiedCells((prevModifiedCells) => ({
+        ...prevModifiedCells,
+        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+      }))
+    }
+
+    return newRow
+  }, [])
   const fetchData = async () => {
     // setLoading(true)
     try {
@@ -67,8 +108,36 @@ const ProductionAopView = () => {
       const results = data?.results
       const numericKeys = getNumericKeysInAllRows(results)
 
+      // const generateColumns = ({ headers, keys }) => {
+      //   return headers.map((header, idx) => {
+      //     const key = keys[idx]
+      //     return {
+      //       field: key,
+      //       headerName: header,
+      //       flex: 1,
+      //       ...(idx === 0 && {
+      //         renderHeader: (params) => <div>{params.colDef.headerName}</div>,
+      //       }),
+      //       ...(numericKeys.includes(key) && { align: 'right' }),
+      //     }
+      //   })
+
+      // }
+      const handleRemarkCellClick = async (row) => {
+        // do not delete commented code
+        // try {
+        //   const cases = await DataService.getCaseId(keycloak)
+        //   console.log(cases?.workflowList?.length)
+        //   if (cases?.workflowList?.length !== 0) return
+        setCurrentRemark(row.remark || '')
+        setCurrentRowId(row.id)
+        setRemarkDialogOpen(true)
+        // } catch (err) {
+        //   console.error('Error fetching case', err)
+        // }
+      }
       const generateColumns = ({ headers, keys }) => {
-        return headers.map((header, idx) => {
+        const cols = headers.map((header, idx) => {
           const key = keys[idx]
           return {
             field: key,
@@ -80,6 +149,13 @@ const ProductionAopView = () => {
             ...(numericKeys.includes(key) && { align: 'right' }),
           }
         })
+
+        const remarkIdx = cols.findIndex((col) => col.field === 'remark')
+        if (remarkIdx !== -1) {
+          cols[remarkIdx] = remarkColumn(handleRemarkCellClick)
+        }
+
+        return cols
       }
 
       setColumns(generateColumns(data))
@@ -94,7 +170,7 @@ const ProductionAopView = () => {
     fetchData()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
-  const lastColumnField = columns[columns.length - 1]?.field
+  // const lastColumnField = columns[columns.length - 1]?.field
 
   return (
     <Box
@@ -115,57 +191,30 @@ const ProductionAopView = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <DataGrid
-        autoHeight={true}
-        rows={rows || []}
-        className='custom-data-grid'
-        columns={columns.map((col) => ({
-          ...col,
-          filterable: true,
-
-          cellClassName: (params) => {
-            if (
-              params.row.isEditable === false &&
-              col.field !== lastColumnField
-            ) {
-              return 'odd-cell'
-            }
-            return undefined
-          },
-          headerClassName: col.isDisabled ? 'disabled-header' : undefined,
-        }))}
-        disableColumnMenu
-        disableColumnFilter
-        disableColumnSelector
-        disableColumnSorting
-        columnVisibilityModel={{
-          maintenanceId: false,
-          id: false,
-          plantFkId: false,
-          aopCaseId: false,
-          aopType: false,
-          aopYear: false,
-          avgTph: false,
-          NormParameterMonthlyTransactionId: false,
-          aopStatus: false,
-          idFromApi: false,
-          period: false,
+      <ReportDataGrid
+        rows={rows}
+        setRows={setRows}
+        title='Monthwise Production Summary'
+        columns={columns}
+        permissions={{
+          // customHeight: defaultCustomHeightGrid1,
+          textAlignment: 'center',
+          remarksEditable: true,
         }}
-        rowHeight={35}
-        slotProps={{
-          toolbar: { setRows },
-          loadingOverlay: {
-            variant: 'linear-progress',
-            norowsvariant: 'skeleton',
-          },
-        }}
-        getRowClassName={(params) => {
-          return params.row.Particulars || params.row.Particulars2
-            ? 'no-border-row'
-            : params.indexRelativeToCurrentPage % 2 === 0
-              ? 'even-row'
-              : 'even-row'
-        }}
+        treeData
+        getTreeDataPath={(rows) => rows.path}
+        defaultGroupingExpansionDepth={1} // expand only first level by default
+        disableSelectionOnClick
+        // columnGroupingModel={columnGroupingModel}
+        processRowUpdate={processRowUpdate}
+        remarkDialogOpen={remarkDialogOpen}
+        unsavedChangesRef={unsavedChangesRef}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={setCurrentRowId}
+        modifiedCells={modifiedCells}
       />
     </Box>
   )

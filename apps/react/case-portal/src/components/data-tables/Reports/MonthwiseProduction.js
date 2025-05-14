@@ -1,6 +1,6 @@
 import { Box } from '@mui/material'
 // import DataGridTable from '../ASDataGrid'
-import ReportDataGrid from 'components/data-tables-views/ReportDataGrid2'
+import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
 import {
   Backdrop,
   CircularProgress,
@@ -21,6 +21,8 @@ const MonthwiseProduction = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+  const [modifiedCells, setModifiedCells] = React.useState({})
+
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -194,7 +196,7 @@ const MonthwiseProduction = () => {
           headerName: 'EOE Production, MT',
           children: [
             { field: 'EOEProdBudget' }, // was eoeBudgetCY
-            { field: 'productionActual' }, // was eoeActualCY
+            { field: 'EOEProdActual' }, // was eoeActualCY
           ],
         },
         {
@@ -233,10 +235,10 @@ const MonthwiseProduction = () => {
     mainBox: `${15 + (rows?.length || 0) * 5}vh`,
     otherBox: `${100 + (rows?.length || 0) * 5}%`,
   }
-  const defaultCustomHeightGrid2 = {
-    mainBox: `${15 + (rows?.length || 0) * 5}vh`,
-    otherBox: `${100 + (rows?.length || 0) * 5}%`,
-  }
+  // const defaultCustomHeightGrid2 = {
+  //   mainBox: `${15 + (rows?.length || 0) * 5}vh`,
+  //   otherBox: `${100 + (rows?.length || 0) * 5}%`,
+  // }
 
   //api call
   const [loading, setLoading] = useState(false)
@@ -332,6 +334,7 @@ const MonthwiseProduction = () => {
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
         setCurrentRowId={setCurrentRowId}
+        modifiedCells={modifiedCells}
       />
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Main Products - Production for the budget year{' '}

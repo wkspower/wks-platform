@@ -338,7 +338,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                 >
                   {verticalName} / {siteName} / {plantName} |{' '}
                   {/* {getRoleName(verticalId, item?.id)} */}
-                  {keycloak?.realmAccess?.roles[0]}
+                   {keycloak?.realmAccess?.roles[0]}
                   {itemContent}
                 </Typography>
               </Grid>

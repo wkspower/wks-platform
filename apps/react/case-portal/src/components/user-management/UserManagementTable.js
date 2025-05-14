@@ -138,7 +138,7 @@ const UserManagementTable = ({ keycloak }) => {
       setLoading(true)
       try {
         const res = await DataService.getUserBySearch(keycloak, value)
-        setSearchOptions(res.data) // do *not* append “Confirm” here any longer
+        setSearchOptions(res.data)
       } catch (err) {
         console.error(err)
       } finally {
@@ -259,10 +259,10 @@ const UserManagementTable = ({ keycloak }) => {
       {/* Autocomplete for selecting multiple users */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr: 1 }}>
         <Autocomplete
-          multiple // enable array of selections :contentReference[oaicite:0]{index=0}
-          disableCloseOnSelect // popper stays open on each click :contentReference[oaicite:1]{index=1}
-          filterSelectedOptions // hide already‐chosen items cleanly :contentReference[oaicite:2]{index=2}
-          open={open} // optional: full control of open state
+          multiple
+          disableCloseOnSelect
+          filterSelectedOptions
+          open={open}
           onOpen={() => setOpen(true)}
           onClose={() => setOpen(false)}
           options={searchOptions}

@@ -6,8 +6,7 @@ import {
   CircularProgress,
   Typography,
 } from '../../../../node_modules/@mui/material/index'
-import ProductionNorms from '../ProductionNorms'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
@@ -217,6 +216,7 @@ const MonthwiseRawMaterial = () => {
           res2 = res2?.data?.consumptionSummary.map((item, index) => ({
             ...item,
             id: index,
+            isEditable: false,
           }))
 
           setRow2(res2)
@@ -225,6 +225,7 @@ const MonthwiseRawMaterial = () => {
           res = res?.data?.map((item, index) => ({
             ...item,
             id: index,
+            isEditable: false,
           }))
 
           const formattedItems = res.map((item, index) => ({
@@ -291,7 +292,7 @@ const MonthwiseRawMaterial = () => {
           // })
 
           // console.log(groupedRows)
-          setRow(groupedRows)
+          // setRow(groupedRows)
 
           // setRow(res)
           // setRow(res)
@@ -413,84 +414,6 @@ const MonthwiseRawMaterial = () => {
       flex: 1,
     },
   ]
-
-  // const dummyAPI1 = {
-  //   status: 200,
-  //   message: 'OK',
-  //   data: {
-
-  //     rows: [
-  //       {
-  //         id: '1',
-  //         parameters: 'Budgeted Selectivity for current year',
-  //         april: 92,
-  //         may: 95,
-  //         june: 94,
-  //         july: 93,
-  //         aug: 91,
-  //         sep: 96,
-  //         oct: 94,
-  //         nov: 92,
-  //         dec: 95,
-  //         jan: 93,
-  //         feb: 94,
-  //         march: 96,
-  //       },
-  //       {
-  //         id: '2',
-  //         parameters: 'Actual selectivity for current year',
-  //         april: 88,
-  //         may: 90,
-  //         june: 89,
-  //         july: 87,
-  //         aug: 91,
-  //         sep: 90,
-  //         oct: 89,
-  //         nov: 88,
-  //         dec: 90,
-  //         jan: 89,
-  //         feb: 90,
-  //         march: 92,
-  //       },
-  //       {
-  //         id: '3',
-  //         parameters: 'Guaranteed Selectivity for budget year',
-  //         april: 85,
-  //         may: 87,
-  //         june: 86,
-  //         july: 84,
-  //         aug: 88,
-  //         sep: 87,
-  //         oct: 86,
-  //         nov: 85,
-  //         dec: 87,
-  //         jan: 86,
-  //         feb: 87,
-  //         march: 89,
-  //       },
-  //       {
-  //         id: '4',
-  //         parameters: 'Predicted Selectivity for budget year',
-  //         april: 90,
-  //         may: 92,
-  //         june: 91,
-  //         july: 89,
-  //         aug: 93,
-  //         sep: 92,
-  //         oct: 91,
-  //         nov: 90,
-  //         dec: 92,
-  //         jan: 91,
-  //         feb: 92,
-  //         march: 94,
-  //       },
-  //     ],
-  //   },
-  // }
-  // const {
-  //   data: { columns, rows },
-  // } = dummyAPI1
-
   return (
     <Box>
       <Backdrop

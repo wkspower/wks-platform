@@ -9,20 +9,21 @@ export function remarkColumn(handleRemarkCellClick) {
     renderCell: (params) => {
       const displayText = truncateRemarks(params.value)
       // decide whether it’s editable (customize this test if needed)
-      const isEditable = params.value == null || params.value === ''
+      const isEditable = true
+      // params.value == null || params.value === ''
 
       return (
         <Tooltip title={params.value || ''} arrow>
           <div
             style={{
-              cursor: isEditable ? 'pointer' : 'default',
+              // cursor: isEditable ? 'pointer' : 'default',
               color: params.value ? 'inherit' : 'gray',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               maxWidth: 140,
             }}
-            onClick={() => isEditable && handleRemarkCellClick(params.row)}
+            onClick={() => handleRemarkCellClick(params.row)}
           >
             {displayText || (isEditable ? 'Click to add remark' : '')}
           </div>

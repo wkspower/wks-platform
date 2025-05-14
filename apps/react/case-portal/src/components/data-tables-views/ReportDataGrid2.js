@@ -20,7 +20,7 @@ const ReportDataGrid = ({
   rows,
   setRows,
   columns,
-  height,
+
   treeData,
   getTreeDataPath,
   defaultGroupingExpansionDepth,
@@ -91,7 +91,7 @@ const ReportDataGrid = ({
     }, 500)
   }
   const lastColumnField = columns[columns.length - 1]?.field
-
+  // console.log(lastColumnField)
   return (
     <Box
       sx={{
@@ -134,20 +134,23 @@ const ReportDataGrid = ({
         columns={columns.map((col) => ({
           ...col,
           cellClassName: (params) => {
-            // if (col.isDisabled) {
-            if (params.row.Particulars) {
-              return undefined
-            } else {
-              return 'disabled-cell'
+            const classes = []
+
+            // Condition 1: Disable cell if no Particulars
+            if (!params.row.Particulars) {
+              classes.push('disabled-cell')
             }
+
+            // Condition 2: Special styling for remarksEditable
             if (
               permissions?.remarksEditable &&
               params.row.isEditable === false &&
               col.field !== lastColumnField
             ) {
-              return 'odd-cell'
+              classes.push('odd-cell')
             }
-            return undefined
+
+            return classes.join(' ') || undefined
           },
           headerClassName: col.isDisabled ? 'disabled-header' : undefined,
         }))}
@@ -171,9 +174,11 @@ const ReportDataGrid = ({
         rowHeight={35}
         getRowClassName={(params) => {
           const classes = []
+
           if (permissions?.isOldYear == 1) {
             classes.push('odd-row-disabled')
           }
+
           if (params.row.Particulars || params.row.Particulars2) {
             classes.push('no-border-row')
           }
@@ -182,13 +187,12 @@ const ReportDataGrid = ({
             params.row.isEditable === false &&
             !permissions?.remarksEditable
           ) {
-            return [
-              ...classes,
-              permissions?.noColor === true ? 'even-row' : 'odd-row',
-            ].join(' ')
+            classes.push(permissions?.noColor === true ? 'even-row' : 'odd-row')
+          } else {
+            classes.push('even-row')
           }
 
-          return [...classes, 'even-row'].join(' ')
+          return classes.join(' ')
         }}
         experimentalFeatures={{ newEditingApi: true, columnGrouping: true }}
         columnGroupingModel={columnGroupingModel}
@@ -199,31 +203,35 @@ const ReportDataGrid = ({
         onRowModesModelChange={onRowModesModelChange}
         handleCalculate={handleCalculate}
         sx={{
+          '& .pinned-row': {
+            position: 'sticky',
+            bottom: 0,
+            bgcolor: 'background.paper', // keep it opaque
+            fontWeight: 'bold',
+            zIndex: 1, // sit above normal rows
+          },
           '& .MuiDataGrid-columnHeader': {
             justifyContent: 'left',
           },
-          // '& .MuiDataGrid-cell--textRight': {
-          //   textAlign: 'left',
-          // },
           '& .MuiDataGrid-columnHeaderTitleContainer': {
             borderTop: '1px solid rgba(224,224,224,1)',
-            justifyContent: `${permissions?.textAlignment}` || 'left',
+            justifyContent: permissions?.textAlignment || 'left',
           },
           '& .MuiDataGrid-columnHeader, .MuiDataGrid-columnGroupHeader': {
-            justifyContent: `${permissions?.textAlignment}` || 'left',
-            textAlign: `${permissions?.textAlignment}` || 'left',
+            justifyContent: permissions?.textAlignment || 'left',
+            textAlign: permissions?.textAlignment || 'left',
             padding: '0 8px',
           },
           '& .MuiDataGrid-columnHeader:before, .MuiDataGrid-columnGroupHeader:before':
             {
-              display: 'none', // hides the little red triangle corners
+              display: 'none',
             },
           '& .MuiDataGrid-columnGroupHeader': {
             borderBottom: '1px solid rgba(224,224,224,1)',
           },
-          '& .MuiDataGrid-cellEmpty': {
-            display: 'none',
-          },
+          // '& .MuiDataGrid-cellEmpty': {
+          //   display: 'none',
+          // },
         }}
       />
       <Dialog

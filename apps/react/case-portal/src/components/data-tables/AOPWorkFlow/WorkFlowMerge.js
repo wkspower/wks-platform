@@ -8,9 +8,9 @@ import Typography from '@mui/material/Typography'
 import Notification from 'components/Utilities/Notification'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { CaseService } from 'services/CaseService'
+// import { CaseService } from 'services/CaseService'
 import { DataService } from 'services/DataService'
-import { TaskService } from 'services/TaskService'
+// import { TaskService } from 'services/TaskService'
 import { useSession } from 'SessionStoreContext'
 import {
   Button,
@@ -84,6 +84,7 @@ const WorkFlowMerge = () => {
   const [isCreatingCase, setIsCreatingCase] = useState(false)
   const [showCreateCasebutton, setShowCreateCasebutton] = useState(false)
   // const [isEdit, setIsEdit] = useState(false)
+  const [modifiedCells, setModifiedCells] = React.useState({})
 
   // remark dialog state
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
@@ -183,18 +184,17 @@ const WorkFlowMerge = () => {
   }
 
   const handleRemarkCellClick = async (row) => {
-    try {
-      const cases = await DataService.getCaseId(keycloak)
-      // setCaseId(cases?.workflowMasterDTO?.casedefId || '')
-      // console.log(isEdit)
-      // console.log(showCreateCasebutton)
-      if (cases?.workflowList?.length !== 0) return
-      setCurrentRemark(row.remark || '')
-      setCurrentRowId(row.id)
-      setRemarkDialogOpen(true)
-    } catch (err) {
-      console.error('Error fetching case', err)
-    }
+    // do not delete commented code
+    // try {
+    //   const cases = await DataService.getCaseId(keycloak)
+    //   console.log(cases?.workflowList?.length)
+    //   if (cases?.workflowList?.length !== 0) return
+    setCurrentRemark(row.remark || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+    // } catch (err) {
+    //   console.error('Error fetching case', err)
+    // }
   }
   // console.log(unsavedChangesRef.current, 'unsavedChangesRef')
   // console.log(rows)
@@ -587,6 +587,7 @@ const WorkFlowMerge = () => {
             </Typography>
             <div style={{ minHeight: 'fit-content', maxHeight: 'max-content' }}>
               <DataGridTable
+                modifiedCells={modifiedCells}
                 autoHeight={true}
                 rows={rows}
                 setRows={setRows}
