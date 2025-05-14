@@ -2,7 +2,7 @@
   {
     "field": "srNo",
     "headerName": "SL No.",
-    "flex": 2,
+    "flex": 1,
     "editable": false
   },
   {
@@ -39,6 +39,12 @@
   {
     "field": "normDateTime",
     "headerName": "Norm Date Time",
+    "flex": 2,
+    "editable": false
+  },
+  {
+    "field": "dateTime",
+    "headerName": "Date Time",
     "flex": 2,
     "editable": false
   },

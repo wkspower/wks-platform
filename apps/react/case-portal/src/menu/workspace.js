@@ -124,7 +124,7 @@ const workspace = {
         },
         {
           id: 'norms-historian-basis',
-          title: i18n.t('menu.productionVolumeDataBasis'),
+          title: i18n.t('menu.normsHistorianBasis'),
           type: 'item',
           url: '/reports/norms-historian-basis',
           icon: icons.IconReport,

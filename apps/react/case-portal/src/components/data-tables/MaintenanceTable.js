@@ -117,6 +117,17 @@ const MaintenanceTable = () => {
       align: 'left',
       headerAlign: 'left',
       minWidth: 250,
+      renderCell: (params) => (
+        <div
+          style={{
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            lineHeight: 1.4,
+          }}
+        >
+          {params.value}
+        </div>
+      ),
     },
     {
       field: 'April',
