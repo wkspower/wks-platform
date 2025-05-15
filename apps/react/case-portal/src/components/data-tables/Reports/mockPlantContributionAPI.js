@@ -8,6 +8,10 @@
 export const MockReportService = {
   async getReport({ category, year }) {
     const currFY = year || ''
+    const formatValueToThreeDecimals = (params) => {
+      return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+    }
+
     let prevFY = ''
     if (currFY.includes('-')) {
       const [start, end] = currFY.split('-').map(Number)
@@ -21,24 +25,33 @@ export const MockReportService = {
             { field: 'SrNo', headerName: 'SL.No', align: 'right' },
             { field: 'ByProductName', headerName: 'Product name', flex: 2 },
             { field: 'Unit', headerName: 'Unit' },
-            { field: 'Price', headerName: 'Rs/MT', flex: 2, align: 'right' },
+            {
+              field: 'Price',
+              headerName: 'Rs/MT',
+              flex: 2,
+              align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
+            },
             {
               field: 'PrevYearNormBudget',
               headerName: 'Budget',
               flex: 2,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearNormActual',
               headerName: 'Actual',
               flex: 2,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'NextYearCostBudget',
               headerName: 'Budget',
               flex: 2,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
           ],
           columnGrouping: [
@@ -78,42 +91,54 @@ export const MockReportService = {
             { field: 'SrNo', headerName: 'SL.No', align: 'right', flex: 0.5 },
             { field: 'ByProductName', headerName: 'By product name', flex: 2 },
             { field: 'Unit', headerName: 'Unit', flex: 1 },
-            { field: 'Price', headerName: 'Rs/MT', flex: 1, align: 'right' },
+            {
+              field: 'Price',
+              headerName: 'Rs/MT',
+              flex: 1,
+              align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
+            },
             {
               field: 'PrevYearNormBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearNormActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'NextYearNormActual',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearCostBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearCostActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'NextYearCostActual',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
           ],
           columnGrouping: [
@@ -175,42 +200,54 @@ export const MockReportService = {
               flex: 2,
             },
             { field: 'Unit', headerName: 'Unit', flex: 1 },
-            { field: 'Price', headerName: 'Rs/MT', flex: 1, align: 'right' },
+            {
+              field: 'Price',
+              headerName: 'Rs/MT',
+              flex: 1,
+              align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
+            },
             {
               field: 'PrevYearNormBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearNormActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'NextYearNormActual',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearCostBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearCostActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'NextYearCostActual',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
           ],
           columnGrouping: [
@@ -267,42 +304,54 @@ export const MockReportService = {
             { field: 'SrNo', headerName: 'SL.No', align: 'right', flex: 0.5 },
             { field: 'ByProductName', headerName: 'Catalyst name', flex: 2 },
             { field: 'Unit', headerName: 'Unit', flex: 1 },
-            { field: 'Price', headerName: 'Rs/MT', flex: 1, align: 'right' },
+            {
+              field: 'Price',
+              headerName: 'Rs/MT',
+              flex: 1,
+              align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
+            },
             {
               field: 'PrevYearNormBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearNormActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'NextYearNormActual',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearCostBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearCostActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'NextYearCostActual',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
           ],
           columnGrouping: [
@@ -359,42 +408,54 @@ export const MockReportService = {
             { field: 'SrNo', headerName: 'SL.No', align: 'right', flex: 0.5 },
             { field: 'ByProductName', headerName: 'Utility name', flex: 2 },
             { field: 'Unit', headerName: 'Unit', flex: 1 },
-            { field: 'Price', headerName: 'Rs/MT', flex: 1, align: 'right' },
+            {
+              field: 'Price',
+              headerName: 'Rs/MT',
+              flex: 1,
+              align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
+            },
             {
               field: 'PrevYearNormBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearNormActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'NextYearNormActual',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearCostBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearCostActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'NextYearCostActual',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
           ],
           columnGrouping: [
@@ -456,24 +517,27 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'CurrentYearBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
           ],
           columnGrouping: [
             {
               groupId: 'previous',
-              // literal “Previous Year” prevFY
+              // literal ?Previous Year? prevFY
               headerName: prevFY,
               children: [
                 { field: 'PrevYearBudget' },
@@ -482,7 +546,7 @@ export const MockReportService = {
             },
             {
               groupId: 'current',
-              // literal “Current Year”  currFY
+              // literal ?Current Year?  currFY
               headerName: currFY,
               children: [{ field: 'CurrentYearBudget' }],
             },
@@ -504,18 +568,21 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'PrevYearActual',
               headerName: 'Actual',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
             {
               field: 'NextYearBudget',
               headerName: 'Budget',
               flex: 1,
               align: 'right',
+              valueFormatter: formatValueToThreeDecimals,
             },
           ],
           columnGrouping: [

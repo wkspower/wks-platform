@@ -18,6 +18,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { truncateRemarks } from 'utils/remarksUtils'
 import { validateFields } from 'utils/validationUtils'
 import TimeInputCell from 'utils/TimeInputCell'
+import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
 
 const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -404,6 +405,7 @@ const SlowDown = ({ permissions }) => {
       minWidth: 180,
       editable: true,
       flex: 3,
+      renderCell: renderTwoLineEllipsis,
     },
 
     {

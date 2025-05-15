@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
+import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
 
 const MaintenanceTable = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -117,18 +118,7 @@ const MaintenanceTable = () => {
       align: 'left',
       headerAlign: 'left',
       minWidth: 250,
-      renderCell: (params) => (
-        <div
-          title={params.value}
-          style={{
-            whiteSpace: 'normal',
-            wordBreak: 'break-word',
-            lineHeight: 1.4,
-          }}
-        >
-          {params.value}
-        </div>
-      ),
+      renderCell: renderTwoLineEllipsis,
     },
     {
       field: 'April',

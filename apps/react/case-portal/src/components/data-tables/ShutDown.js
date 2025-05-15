@@ -15,6 +15,7 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
 import TimeInputCell from 'utils/TimeInputCell'
+import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
 
 const ShutDown = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -353,6 +354,7 @@ const ShutDown = ({ permissions }) => {
       minWidth: 125,
       editable: true,
       flex: 3,
+      renderCell: renderTwoLineEllipsis,
     },
     {
       field: 'maintenanceId',

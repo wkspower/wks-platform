@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
 
 const MonthwiseRawMaterial = () => {
   const keycloak = useSession()
@@ -42,18 +43,7 @@ const MonthwiseRawMaterial = () => {
       field: 'particulars',
       headerName: 'Particulars',
       flex: 2,
-      renderCell: (params) => (
-        <div
-          style={{
-            whiteSpace: 'normal',
-            wordWrap: 'break-word',
-            lineHeight: 1.4,
-            display: 'block',
-          }}
-        >
-          {params.value}
-        </div>
-      ),
+      renderCell: renderTwoLineEllipsis,
     },
     {
       field: 'unit',

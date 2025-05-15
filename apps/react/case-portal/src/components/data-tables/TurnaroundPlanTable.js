@@ -258,6 +258,18 @@ const TurnaroundPlanTable = () => {
       headerName: 'Activities',
       minWidth: 300,
       editable: true,
+      renderCell: (params) => (
+        <div
+          title={params.value}
+          style={{
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            lineHeight: 1.4,
+          }}
+        >
+          {params.value}
+        </div>
+      ),
     },
 
     {
