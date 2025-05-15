@@ -16,6 +16,7 @@ import com.wks.caseengine.dto.WorkflowPageDTO;
 import com.wks.caseengine.dto.WorkflowSubmitDTO;
 import com.wks.caseengine.service.BusinessDemandDataService;
 import com.wks.caseengine.service.WorkflowService;
+import com.wks.caseengine.dto.WorkflowYearDTO;
 
 @RestController
 @RequestMapping("task")
@@ -35,6 +36,12 @@ public class WorkFlowController {
     @PostMapping(value="/saveWorkflow")
 	public 	WorkflowDTO saveWorkFlow(@RequestBody WorkflowDTO workflowDTO) {
 		return workflowService.saveWorkFlow(workflowDTO);	
+	}
+
+    
+	@PostMapping(value="/annual-aop-data")
+	public 	WorkflowYearDTO saveAnnualAOPData(@RequestParam String plantId, @RequestBody List<WorkflowYearDTO> workflowYearDTOList) {
+		return workflowService.saveAnnualAOPData(plantId, workflowYearDTOList);	
 	}
     
     @GetMapping(value="/work-flow")

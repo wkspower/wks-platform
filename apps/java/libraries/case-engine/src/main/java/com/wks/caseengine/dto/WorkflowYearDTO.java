@@ -29,5 +29,6 @@ public class WorkflowYearDTO {
 	private String syAop;
 	private String remark;
 	private String aopType;
+	private String aopYear;
 
 }

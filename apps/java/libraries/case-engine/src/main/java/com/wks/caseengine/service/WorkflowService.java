@@ -17,5 +17,5 @@ public interface WorkflowService {
 
 public int calculateExpressionWorkFlow(String year,String plantId);
     public void completeTaskWithComment(WorkflowSubmitDTO workflowSubmitDTO);
-	 public WorkflowYearDTO saveWorkflowData( String plantId,List<WorkflowYearDTO> workflowYearDTO);
+	 public WorkflowYearDTO saveAnnualAOPData( String plantId, List<WorkflowYearDTO> workflowYearDTOList);
 }

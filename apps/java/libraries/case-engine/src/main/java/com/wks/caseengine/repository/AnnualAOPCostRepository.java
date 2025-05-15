@@ -23,6 +23,9 @@ public interface AnnualAOPCostRepository extends JpaRepository<AnnualAOPCost,UUI
 		        @Param("plantFkId") UUID plantFkId
 		);
 
+
+		List<AnnualAOPCost> findAllByAopYearAndPlantFkIdAndParticulatesAndAopType(String AOPYear, UUID plantFkId, String particulates, String aopType );
+
 	
 	
 
