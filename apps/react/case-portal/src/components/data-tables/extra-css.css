@@ -17,8 +17,9 @@
   text-transform: none;
   font-size: 0.875rem;
   font-weight: 500;
-  min-width: 100px;
+  width: 7rem;
   cursor: pointer;
+  /* height: 2rem; */
 }
 
 .btn-save:hover {

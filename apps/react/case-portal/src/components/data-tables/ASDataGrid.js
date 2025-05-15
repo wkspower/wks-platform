@@ -79,7 +79,11 @@ const DataGridTable = ({
   handleAddPlantSite = () => {},
   selectedUsers = [],
   setSelectedUsers = () => {},
+  createCase = () => {},
+  isCreatingCase = false,
+  showCreateCasebutton = false,
   // columnGroupingModel,
+  saveWorkflowData = () => {},
 }) => {
   const [resizedColumns, setResizedColumns] = useState({})
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
@@ -171,7 +175,7 @@ const DataGridTable = ({
   }
 
   const saveConfirmation = async () => {
-    saveChanges()
+    permissions?.saveBtnForWorkflow ? saveWorkflowData() : saveChanges()
     setOpenSaveDialogeBox(false)
   }
 
@@ -368,7 +372,7 @@ const DataGridTable = ({
       setIsButtonDisabled(false)
     }, 500)
   }
-  const boxHeight = permissions?.customHeight?.mainBox
+  // const boxHeight = permissions?.customHeight?.mainBox
   const otherHeight = permissions?.customHeight?.otherBox
   // console.log(boxHeight)
   const handleDeleteAll = () => {
@@ -736,6 +740,17 @@ const DataGridTable = ({
               Save
             </Button>
           )}
+          {permissions?.showCreateCasebutton && (
+            <Button
+              variant='contained'
+              onClick={createCase}
+              disabled={isCreatingCase || !showCreateCasebutton}
+              className='btn-save'
+            >
+              {isCreatingCase ? 'Submitting…' : 'Submit'}
+            </Button>
+          )}
+
           {permissions?.approveBtn && (
             <Button
               variant='contained'

@@ -389,6 +389,9 @@ const WorkFlowMerge = () => {
       }
       const result = await DataService.submitWorkFlow(payload, keycloak)
       // console.log(result)
+      if (result) {
+        console.log('Workflow instance created successfully')
+      }
       setSnackbarData({
         message: 'Workflow instance created successfully',
         severity: 'success',
@@ -454,6 +457,26 @@ const WorkFlowMerge = () => {
       getCaseId()
     } catch (err) {
       console.error('Error submitting', err)
+      setSnackbarData({ message: err.message, severity: 'error' })
+      setActionDisabled(false)
+    } finally {
+      setSnackbarOpen(true)
+      setOpenRejectDialog(false)
+      setText('')
+    }
+  }
+  const saveWorkflowData = async () => {
+    try {
+      // console.log(rows, 'workflowDto')
+      await DataService.saveAnnualWorkFlowData(keycloak, rows, plantId)
+      setSnackbarData({
+        message: 'Data Saved Successfully!',
+        severity: 'success',
+      })
+      setActionDisabled(true)
+      // getCaseId()
+    } catch (err) {
+      console.error('Error while save', err)
       setSnackbarData({ message: err.message, severity: 'error' })
       setActionDisabled(false)
     } finally {
@@ -541,13 +564,14 @@ const WorkFlowMerge = () => {
           </Tabs>
 
           {/* RIGHT: Buttons */}
-          <Stack direction='row' spacing={1}>
+          <Stack direction='row' spacing={1} alignItems='center'>
             {taskId && (
               <Button
                 variant='contained'
                 className='btn-save'
                 onClick={handleRejectClick}
                 disabled={actionDisabled}
+                sx={{ height: 'auto' }}
               >
                 Accept
               </Button>
@@ -555,7 +579,12 @@ const WorkFlowMerge = () => {
             <Button
               variant='outlined'
               className='btn-save2'
-              sx={{ color: '#0100cb', border: '1px solid' }}
+              sx={{
+                color: '#0100cb',
+                border: '1px solid',
+                height: 'auto',
+                width: 'fit-content',
+              }}
               onClick={handleAuditOpen}
             >
               Audit Trail
@@ -608,26 +637,21 @@ const WorkFlowMerge = () => {
                 rowModesModel={rowModesModel}
                 onRowModesModelChange={onRowModesModelChange}
                 handleCalculate={handleCalculate}
+                isCreatingCase={isCreatingCase}
+                createCase={createCase}
+                saveWorkflowData={saveWorkflowData}
+                showCreateCasebutton={showCreateCasebutton}
                 permissions={{
                   customHeight: defaultCustomHeight,
-                  // saveBtn: true,
+                  saveBtn: true,
+                  saveBtnForWorkflow: true,
                   showCalculate: true,
                   remarksEditable: true,
+                  showCreateCasebutton: showCreateCasebutton,
                   // approveBtn: false,
                 }}
               />
             </div>
-
-            {showCreateCasebutton && (
-              <Button
-                variant='contained'
-                onClick={createCase}
-                disabled={isCreatingCase || !showCreateCasebutton}
-                className='btn-save'
-              >
-                {isCreatingCase ? 'Submitting…' : 'Submit'}
-              </Button>
-            )}
 
             {/* Reject Dialog (Comments) */}
             <Dialog open={openRejectDialog} onClose={handleRejectCancel}>

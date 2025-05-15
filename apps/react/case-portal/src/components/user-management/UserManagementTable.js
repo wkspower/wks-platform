@@ -18,6 +18,8 @@ const UserManagementTable = ({ keycloak }) => {
   const [plant, setAllPlants] = useState([])
   const [loading, setLoading] = useState(false)
   const [rowModesModel, setRowModesModel] = useState({})
+  const [modifiedCells, setModifiedCells] = useState({})
+
   const unsavedChangesRef = useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -303,6 +305,7 @@ const UserManagementTable = ({ keycloak }) => {
 
       {/* DataGridTable now uses selectedUsers as the rows to show only the confirmed selections */}
       <DataGridTable
+        modifiedCells={modifiedCells}
         columns={columns}
         rows={selectedUsers}
         handleAddPlantSite={handleAddPlantSite}

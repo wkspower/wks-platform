@@ -24,6 +24,7 @@ export const DataService = {
   getAllCatalyst,
 
   saveShutdownData,
+  saveAnnualWorkFlowData,
   saveText,
   saveAOPConsumptionNorm,
   saveSlowdownData,
@@ -1281,6 +1282,28 @@ async function saveShutdownData(plantId, shutdownDetails, keycloak) {
       method: 'POST',
       headers,
       body: JSON.stringify(shutdownDetails),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function saveAnnualWorkFlowData(keycloak, workFlowData) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const url = `${Config.CaseEngineUrl}/task/annual-aop-data?plantId=${plantId}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(workFlowData),
     })
     return json(keycloak, resp)
   } catch (e) {
