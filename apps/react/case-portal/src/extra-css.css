@@ -57,6 +57,13 @@
   margin-top: 0px;
   margin-bottom: 1px;
 }
+.action-box2 {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 0px;
+  margin-bottom: 1px;
+}
 
 .action-inner {
   display: flex;

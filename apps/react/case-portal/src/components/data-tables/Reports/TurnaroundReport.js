@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Box } from '@mui/material'
 import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
 import {
@@ -203,33 +203,32 @@ const TurnaroundReport = () => {
   //   }
   //   fetchData()
   // }, [year, plantId])
-  useEffect(() => {
-    const mapData = (data, tag) =>
-      (data?.data?.plantTurnAroundReportData || []).map((item, i) => ({
-        ...item,
-        id: `${tag}-${i}`,
-        isEditable: false,
-      }))
+  const mapData = (data, tag) =>
+    (data?.data?.plantTurnAroundReportData || []).map((item, i) => ({
+      ...item,
+      id: `${tag}-${i}`,
+      isEditable: false,
+    }))
 
-    const fetchCurrentYear = async () => {
-      setLoading(true)
-      try {
-        const res = await DataService.getTurnaroundReportData(
-          keycloak,
-          'currentYear',
-        )
-        if (res?.code === 200) {
-          setRows(mapData(res, 'CY'))
-        } else {
-          setRows([])
-        }
-      } catch (e) {
-        console.error('Error loading current year:', e)
-      } finally {
-        setLoading(false)
+  const fetchCurrentYear = async () => {
+    setLoading(true)
+    try {
+      const res = await DataService.getTurnaroundReportData(
+        keycloak,
+        'currentYear',
+      )
+      if (res?.code === 200) {
+        setRows(mapData(res, 'CY'))
+      } else {
+        setRows([])
       }
+    } catch (e) {
+      console.error('Error loading current year:', e)
+    } finally {
+      setLoading(false)
     }
-
+  }
+  useEffect(() => {
     fetchCurrentYear()
   }, [keycloak, year, plantId])
 
@@ -325,6 +324,57 @@ const TurnaroundReport = () => {
 
     return newRow
   }, [])
+  const saveRemarkData = async () => {
+    try {
+      // console.log(rows, 'workflowDto')
+      await DataService.saveAnnualWorkFlowData(keycloak, rows, plantId)
+      // setSnackbarData({
+      //   message: 'Data Saved Successfully!',
+      //   severity: 'success',
+      // })
+      // setActionDisabled(true)
+      // getCaseId()
+    } catch (err) {
+      console.error('Error while save', err)
+      // setSnackbarData({ message: err.message, severity: 'error' })
+      // setActionDisabled(false)
+    } finally {
+      // setSnackbarOpen(true)
+      // setOpenRejectDialog(false)
+      // setText('')
+    }
+  }
+  const handleCalculate = () => {
+    handleCalculateMonthwiseAndTurnaround()
+  }
+  const handleCalculateMonthwiseAndTurnaround = async () => {
+    try {
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const year = localStorage.getItem('year')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      var plantId = plantId
+      const data = await DataService.handleCalculateMonthwiseAndTurnaround(
+        plantId,
+        year,
+        keycloak,
+      )
+
+      fetchCurrentYear()
+
+      return data
+    } catch (error) {
+      // setSnackbarOpen(true)
+      // setSnackbarData({
+      //   message: error.message || 'An error occurred',
+      //   severity: 'error',
+      // })
+      console.error('Error!', error)
+    }
+  }
   return (
     <Box>
       <ReportDataGrid
@@ -348,7 +398,13 @@ const TurnaroundReport = () => {
           customHeight: { mainBox: '32vh', otherBox: '100%' },
           textAlignment: 'center',
           remarksEditable: true,
+          showCalculate: true,
+          saveBtnForRemark: true,
+          saveBtn: true,
+          showWorkFlowBtns: true,
         }}
+        saveRemarkData={saveRemarkData}
+        handleCalculate={handleCalculate}
       />
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         II. Turnaround details for the previous years since commissioning{' '}
@@ -374,6 +430,7 @@ const TurnaroundReport = () => {
           customHeight: { mainBox: '32vh', otherBox: '100%' },
           textAlignment: 'center',
           remarksEditable: true,
+          saveBtn: true,
         }}
       />
     </Box>

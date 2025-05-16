@@ -23,7 +23,7 @@ import Notification from 'components/Utilities/Notification'
 //import './data-grid-css.css'
 //import './extra-css.css'
 
-import { MenuItem, Typography } from '../../../node_modules/@mui/material/index'
+import { MenuItem } from '../../../node_modules/@mui/material/index'
 
 import {
   FileDownload,
@@ -46,7 +46,6 @@ const jioColors = {
 
 const DataGridTable = ({
   columns: initialColumns = [],
-  title = '',
   onAddRow = () => {},
   // onDeleteRow = () => {},
   permissions = {},
@@ -80,11 +79,11 @@ const DataGridTable = ({
   handleAddPlantSite = () => {},
   selectedUsers = [],
   setSelectedUsers = () => {},
-  createCase = () => {},
-  isCreatingCase = false,
-  showCreateCasebutton = false,
+  // createCase = () => {},
+  // isCreatingCase = false,
+  // showCreateCasebutton = false,
   // columnGroupingModel,
-  saveWorkflowData = () => {},
+  // saveWorkflowData = () => {},
 }) => {
   const [resizedColumns, setResizedColumns] = useState({})
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
@@ -164,7 +163,7 @@ const DataGridTable = ({
   }
 
   const saveConfirmation = async () => {
-    permissions?.saveBtnForWorkflow ? saveWorkflowData() : saveChanges()
+    saveChanges()
     setOpenSaveDialogeBox(false)
   }
 
@@ -412,23 +411,6 @@ const DataGridTable = ({
       {/* )} */}
       {(permissions?.allAction ?? true) && (
         <Box className='action-box'>
-          <Box
-            className='action-inner'
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 2,
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {permissions?.showTitle && (
-                <Typography component='div' className='grid-title'>
-                  {title}
-                </Typography>
-              )}
-            </Box>
-          </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {permissions?.UnitToShow && (
               <Chip
@@ -742,7 +724,7 @@ const DataGridTable = ({
               Save
             </Button>
           )}
-          {permissions?.showCreateCasebutton && (
+          {/* {permissions?.showCreateCasebutton && (
             <Button
               variant='contained'
               onClick={createCase}
@@ -751,7 +733,7 @@ const DataGridTable = ({
             >
               {isCreatingCase ? 'Submitting…' : 'Submit'}
             </Button>
-          )}
+          )} */}
 
           {permissions?.approveBtn && (
             <Button

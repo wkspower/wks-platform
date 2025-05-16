@@ -42,6 +42,7 @@ import MonthwiseRawMaterial from '../Reports/MonthwiseRawMaterial'
 import TurnaroundReport from '../Reports/TurnaroundReport'
 import AnnualProductionPlan from '../Reports/AnnualProductionPlan'
 import PlantContribution from '../Reports/PlantContribution'
+import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -594,115 +595,62 @@ const WorkFlowMerge = () => {
 
         {tabIndex === 0 && (
           <div>
-            <div>
-              <CustomAccordion defaultExpanded disableGutters>
-                <CustomAccordionSummary
-                  aria-controls='meg-grid-content'
-                  id='meg-grid-header'
-                >
-                  <Typography component='span' className='grid-title'>
-                    Production Data
-                  </Typography>
-                </CustomAccordionSummary>
-                <CustomAccordionDetails>
-                  <Box>
-                    <ProductionAopView />
-                  </Box>
-                </CustomAccordionDetails>
-              </CustomAccordion>
-            </div>
+            <ProductionAopView />
+
             {/* <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
               Annual AOP Cost
             </Typography> */}
-            <div style={{ minHeight: 'fit-content', maxHeight: 'max-content' }}>
-              <DataGridTable
-                title='Annual AOP Cost'
-                modifiedCells={modifiedCells}
-                autoHeight={true}
-                rows={rows}
-                setRows={setRows}
-                onRowUpdate={(updatedRow) =>
-                  console.log('Row Updated:', updatedRow)
-                }
-                columns={columns}
-                className='jio-data-grid'
-                loading={loading}
-                processRowUpdate={processRowUpdate}
-                remarkDialogOpen={remarkDialogOpen}
-                unsavedChangesRef={unsavedChangesRef}
-                setRemarkDialogOpen={setRemarkDialogOpen}
-                currentRemark={currentRemark}
-                setCurrentRemark={setCurrentRemark}
-                currentRowId={currentRowId}
-                setCurrentRowId={setCurrentRowId}
-                rowModesModel={rowModesModel}
-                onRowModesModelChange={onRowModesModelChange}
-                handleCalculate={handleCalculate}
-                isCreatingCase={isCreatingCase}
-                createCase={createCase}
-                saveWorkflowData={saveWorkflowData}
-                showCreateCasebutton={showCreateCasebutton}
-                permissions={{
-                  customHeight: defaultCustomHeight,
-                  saveBtn: true,
-                  saveBtnForWorkflow: true,
-                  showCalculate: true,
-                  remarksEditable: true,
-                  showCreateCasebutton: showCreateCasebutton,
-                  showTitle: true,
-                  // approveBtn: false,
-                }}
-              />
-            </div>
-
-            {/* Reject Dialog (Comments) */}
-            <Dialog open={openRejectDialog} onClose={handleRejectCancel}>
-              <DialogTitle>Please provide remarks on the changes?</DialogTitle>
-              <DialogContent>
-                <TextField
-                  autoFocus
-                  margin='dense'
-                  label='Remark'
-                  type='text'
-                  fullWidth
-                  multiline
-                  rows={8}
-                  sx={{ width: '100%', minWidth: '600px' }}
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  variant='outlined'
-                />
-              </DialogContent>
-              <DialogActions sx={{ justifyContent: 'flex-end' }}>
-                <Button onClick={handleRejectCancel} color='primary'>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSubmit}
-                  color='primary'
-                  variant='contained'
-                  disabled={!text?.trim()}
-                >
-                  Submit
-                </Button>
-              </DialogActions>
-            </Dialog>
-
-            {/* Audit Trail Dialog */}
-            <Dialog
-              open={openAuditPopup}
-              onClose={handleAuditClose}
-              maxWidth='lg'
-              fullWidth
-            >
-              <DialogTitle>Audit Trail</DialogTitle>
-              <DialogContent dividers>
-                <AuditTrail keycloak={keycloak} businessKey={businessKey} />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleAuditClose}>Close</Button>
-              </DialogActions>
-            </Dialog>
+            {/* <div style={{ minHeight: 'fit-content', maxHeight: 'max-content' }}> */}
+            <ReportDataGrid
+              title='Annual AOP Cost'
+              modifiedCells={modifiedCells}
+              autoHeight={true}
+              rows={rows}
+              setRows={setRows}
+              onRowUpdate={(updatedRow) =>
+                console.log('Row Updated:', updatedRow)
+              }
+              columns={columns}
+              // className='jio-data-grid'
+              loading={loading}
+              processRowUpdate={processRowUpdate}
+              remarkDialogOpen={remarkDialogOpen}
+              unsavedChangesRef={unsavedChangesRef}
+              setRemarkDialogOpen={setRemarkDialogOpen}
+              currentRemark={currentRemark}
+              setCurrentRemark={setCurrentRemark}
+              currentRowId={currentRowId}
+              setCurrentRowId={setCurrentRowId}
+              rowModesModel={rowModesModel}
+              onRowModesModelChange={onRowModesModelChange}
+              handleCalculate={handleCalculate}
+              isCreatingCase={isCreatingCase}
+              createCase={createCase}
+              saveWorkflowData={saveWorkflowData}
+              showCreateCasebutton={showCreateCasebutton}
+              permissions={{
+                // customHeight: defaultCustomHeight,
+                saveBtn: true,
+                saveBtnForWorkflow: true,
+                remarksEditable: true,
+                showCreateCasebutton: showCreateCasebutton,
+                showTitle: true,
+                showCalculate: true,
+                showWorkFlowBtns: true,
+                // approveBtn: false,
+              }}
+              openAuditPopup={openAuditPopup}
+              handleAuditOpen={handleAuditOpen}
+              handleAuditClose={handleAuditClose}
+              handleRejectClick={handleRejectClick}
+              openRejectDialog={openRejectDialog}
+              handleRejectCancel={handleRejectCancel}
+              handleSubmit={handleSubmit}
+              taskId={taskId}
+              text={text}
+              setText={setText}
+            />
+            {/* </div> */}
 
             <Notification
               open={snackbarOpen}

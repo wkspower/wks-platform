@@ -325,7 +325,11 @@ const AnnualProductionPlan = () => {
         Assumptions & remarks{' '}
       </Typography>
 
-      <ReportDataGrid rows={rowsAssumptions} columns={columnsAssumptions} />
+      <ReportDataGrid
+        rows={rowsAssumptions}
+        columns={columnsAssumptions}
+        permissions={{ showWorkFlowBtns: true, showCalculate: false }}
+      />
 
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Max hourly rate achieved{' '}

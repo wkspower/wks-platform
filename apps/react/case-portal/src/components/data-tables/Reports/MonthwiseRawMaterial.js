@@ -406,18 +406,15 @@ const MonthwiseRawMaterial = () => {
   ]
   return (
     <Box>
-      <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading}
-      >
-        <CircularProgress color='inherit' />
-      </Backdrop>
-
       <ReportDataGrid
         rows={row2}
         columns={columns}
+        loading={loading}
         permissions={{
-          customHeight: defaultCustomHeight,
+          // customHeight: defaultCustomHeight,
+          // showWorkFlowBtns: flase,
+          showCalculate: false,
+          allAction: false,
         }}
       />
 
@@ -430,6 +427,10 @@ const MonthwiseRawMaterial = () => {
             rows={rows}
             title='Monthwise Production Summary'
             columns={columnDefs}
+            // permissions={{
+            //   // customHeight: defaultCustomHeight,
+            //   showWorkFlowBtns: true,
+            // }}
           />
         </div>
       ))}

@@ -26,6 +26,7 @@ export const DataService = {
 
   saveShutdownData,
   saveAnnualWorkFlowData,
+  saveRemarkData,
   savePlantProductionData,
   saveText,
   saveAOPConsumptionNorm,
@@ -65,6 +66,7 @@ export const DataService = {
   handleCalculateonsumptionNorms,
   handleCalculateProductionVolData,
   handleCalculateProductionVolData2,
+  handleCalculateMonthwiseAndTurnaround,
   handleCalculateMaintenance,
   getNormalOperationNormsData,
   getShutdownNormsData,
@@ -368,6 +370,32 @@ async function handleCalculateProductionVolData(plantId, year, keycloak) {
 async function handleCalculateProductionVolData2(plantId, year, keycloak) {
   const year1 = localStorage.getItem('year')
   const url = `${Config.CaseEngineUrl}/task/handle/calculate/work-flow?year=${year1}&plantId=${plantId}`
+
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+
+    const data = await resp.json() // Parse JSON response
+    return data
+  } catch (e) {
+    console.error('Error fetching calculation data:', e)
+    return Promise.reject(e)
+  }
+}
+async function handleCalculateMonthwiseAndTurnaround(plantId, year, keycloak) {
+  const year1 = localStorage.getItem('year')
+  const url = `${Config.CaseEngineUrl}/task/handle/calculate/monthwise-turnaround?year=${year1}&plantId=${plantId}`
 
   const headers = {
     Accept: 'application/json',
@@ -1323,6 +1351,28 @@ async function saveShutdownData(plantId, shutdownDetails, keycloak) {
 async function saveAnnualWorkFlowData(keycloak, workFlowData) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const url = `${Config.CaseEngineUrl}/task/annual-aop-data?plantId=${plantId}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(workFlowData),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function saveRemarkData(keycloak, workFlowData) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const url = `${Config.CaseEngineUrl}/task/annual-aop-remark?plantId=${plantId}`
 
   const headers = {
     Accept: 'application/json',

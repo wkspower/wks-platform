@@ -14,10 +14,15 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Stack,
   TextField,
+  Typography,
 } from '../../../node_modules/@mui/material/index'
+import AuditTrail from 'components/data-tables/AOPWorkFlow/AuditTrail'
+// import Notification from 'components/Utilities/Notification'
 
 const ReportDataGrid = ({
+  title = '',
   rows,
   setRows,
   columns,
@@ -39,6 +44,22 @@ const ReportDataGrid = ({
   rowModesModel: rowModesModel,
   onRowModesModelChange = () => {},
   saveWorkflowData = () => {},
+  saveRemarkData = () => {},
+  createCase = () => {},
+  isCreatingCase = false,
+  showCreateCasebutton = false,
+  openAuditPopup = false,
+  handleAuditOpen = () => {},
+  handleAuditClose = () => {},
+  handleRejectClick = () => {},
+  openRejectDialog = false,
+  handleRejectCancel = () => {},
+  handleSubmit = () => {},
+  taskId = '',
+  // role = '',
+  businessKey = '',
+  text = '',
+  setText = () => {},
 }) => {
   const keycloak = useSession()
   // const [allProducts, setAllProducts] = useState([])
@@ -101,7 +122,7 @@ const ReportDataGrid = ({
     }, 500)
   }
   const saveConfirmation = async () => {
-    saveWorkflowData()
+    permissions?.saveBtnForRemark ? saveRemarkData() : saveWorkflowData()
     setOpenSaveDialogeBox(false)
   }
   const lastColumnField = columns[columns.length - 1]?.field
@@ -124,8 +145,35 @@ const ReportDataGrid = ({
       >
         <CircularProgress color='inherit' />
       </Backdrop>
+
       {(permissions?.allAction ?? true) && (
-        <Box className='action-box'>
+        <Box
+          className='action-box2'
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '100%', // make sure container is full width
+            p: 1,
+          }}
+        >
+          {/* LEFT: Title – this flexGrow:1 makes it push buttons right */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              flexGrow: 1, // ← key to take up all left space
+            }}
+          >
+            {permissions?.showTitle && (
+              <Typography component='div' className='grid-title'>
+                {title}
+              </Typography>
+            )}
+          </Box>
+
+          {/* RIGHT: Buttons */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {permissions?.showCalculate && (
               <Button
@@ -137,6 +185,22 @@ const ReportDataGrid = ({
                 Calculate
               </Button>
             )}
+            {/* {permissions?.showWorkFlowBtns && (
+              <Stack direction='row' spacing={1} alignItems='center'>
+                {taskId && (
+                  <Button
+                    variant='contained'
+                    onClick={handleRejectClick}
+                    disabled={isButtonDisabled}
+                  >
+                    Accept
+                  </Button>
+                )}
+                <Button variant='outlined' onClick={handleAuditOpen}>
+                  Audit Trail
+                </Button>
+              </Stack>
+            )} */}
           </Box>
         </Box>
       )}
@@ -217,7 +281,7 @@ const ReportDataGrid = ({
         defaultGroupingExpansionDepth={defaultGroupingExpansionDepth}
         rowModesModel={rowModesModel}
         onRowModesModelChange={onRowModesModelChange}
-        handleCalculate={handleCalculate}
+        // handleCalculate={handleCalculate}
         sx={{
           '& .pinned-row': {
             position: 'sticky',
@@ -273,7 +337,71 @@ const ReportDataGrid = ({
             Save
           </Button>
         )}
+        {permissions?.showCreateCasebutton && (
+          <Button
+            variant='contained'
+            onClick={createCase}
+            disabled={isCreatingCase || !showCreateCasebutton}
+            className='btn-save'
+          >
+            {isCreatingCase ? 'Submitting…' : 'Submit'}
+          </Button>
+        )}
       </Box>
+      {/* Reject Dialog (Comments) */}
+      <Dialog open={openRejectDialog} onClose={handleRejectCancel}>
+        <DialogTitle>Please provide remarks on the changes?</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin='dense'
+            label='Remark'
+            type='text'
+            fullWidth
+            multiline
+            rows={8}
+            sx={{ width: '100%', minWidth: '600px' }}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            variant='outlined'
+          />
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'flex-end' }}>
+          <Button onClick={handleRejectCancel} color='primary'>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            color='primary'
+            variant='contained'
+            disabled={!text?.trim()}
+          >
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Audit Trail Dialog */}
+      <Dialog
+        open={openAuditPopup}
+        onClose={handleAuditClose}
+        maxWidth='lg'
+        fullWidth
+      >
+        {/* <Notification
+              open={snackbarOpen}
+              message={snackbarData.message}
+              severity={snackbarData.severity}
+              onClose={() => setSnackbarOpen(false)}
+            /> */}
+        <DialogTitle>Audit Trail</DialogTitle>
+        <DialogContent dividers>
+          <AuditTrail keycloak={keycloak} businessKey={businessKey} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAuditClose}>Close</Button>
+        </DialogActions>
+      </Dialog>
       <Dialog
         open={openSaveDialogeBox}
         onClose={() => setOpenSaveDialogeBox(false)}

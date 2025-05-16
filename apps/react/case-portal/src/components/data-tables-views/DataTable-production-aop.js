@@ -6,14 +6,45 @@ import { useSession } from 'SessionStoreContext'
 // import DataGridTable from 'components/data-tables/ASDataGrid'
 // import { DataGrid } from '@mui/x-data-grid'
 import {
-  Backdrop,
+  // Backdrop,
   Box,
-  CircularProgress,
+  Typography,
+  // CircularProgress,
 } from '../../../node_modules/@mui/material/index'
 import { remarkColumn } from 'components/Utilities/remarkColumn'
 import ReportDataGrid from './ReportDataGrid'
 import Notification from 'components/Utilities/Notification'
+import { styled } from '@mui/material/styles'
+import MuiAccordion from '@mui/material/Accordion'
+import MuiAccordionDetails from '@mui/material/AccordionDetails'
+import MuiAccordionSummary from '@mui/material/AccordionSummary'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
+const CustomAccordion = styled((props) => (
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(() => ({
+  position: 'unset',
+  border: 'none',
+  boxShadow: 'none',
+  margin: '0px',
+  '&:before': {
+    display: 'none',
+  },
+}))
+const CustomAccordionSummary = styled((props) => (
+  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
+))(() => ({
+  backgroundColor: '#fff',
+  padding: '0px 12px',
+  minHeight: '40px',
+  '& .MuiAccordionSummary-content': {
+    margin: '8px 0',
+  },
+}))
+const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
+  padding: '0px 0px 12px',
+  backgroundColor: '#F2F3F8',
+}))
 const ProductionAopView = () => {
   const keycloak = useSession()
   const [loading, setLoading] = useState(false)
@@ -214,40 +245,53 @@ const ProductionAopView = () => {
         borderBottom: 'none',
       }}
     >
-      <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading}
-      >
-        <CircularProgress color='inherit' />
-      </Backdrop>
-
-      <ReportDataGrid
-        rows={rows}
-        setRows={setRows}
-        title='Monthwise Production Summary'
-        columns={columns}
-        saveWorkflowData={saveWorkflowData}
-        permissions={{
-          // customHeight: defaultCustomHeightGrid1,
-          textAlignment: 'center',
-          remarksEditable: true,
-          saveBtn: true,
-        }}
-        treeData
-        getTreeDataPath={(rows) => rows.path}
-        defaultGroupingExpansionDepth={1} // expand only first level by default
-        disableSelectionOnClick
-        // columnGroupingModel={columnGroupingModel}
-        processRowUpdate={processRowUpdate}
-        remarkDialogOpen={remarkDialogOpen}
-        unsavedChangesRef={unsavedChangesRef}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={setCurrentRowId}
-        modifiedCells={modifiedCells}
-      />
+      <div>
+        <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordionSummary
+            aria-controls='meg-grid-content'
+            id='meg-grid-header'
+          >
+            <Typography component='span' className='grid-title'>
+              Production Data
+            </Typography>
+          </CustomAccordionSummary>
+          <CustomAccordionDetails>
+            {/* <Box> */}
+            <ReportDataGrid
+              rows={rows}
+              loading={loading}
+              setRows={setRows}
+              title='Monthwise Production Summary'
+              columns={columns}
+              saveWorkflowData={saveWorkflowData}
+              permissions={{
+                // customHeight: defaultCustomHeightGrid1,
+                textAlignment: 'center',
+                remarksEditable: true,
+                saveBtn: true,
+                allAction: false,
+                // showCalculate: true,
+                // showWorkFlowBtns: true,
+              }}
+              treeData
+              getTreeDataPath={(rows) => rows.path}
+              defaultGroupingExpansionDepth={1} // expand only first level by default
+              disableSelectionOnClick
+              // columnGroupingModel={columnGroupingModel}
+              processRowUpdate={processRowUpdate}
+              remarkDialogOpen={remarkDialogOpen}
+              unsavedChangesRef={unsavedChangesRef}
+              setRemarkDialogOpen={setRemarkDialogOpen}
+              currentRemark={currentRemark}
+              setCurrentRemark={setCurrentRemark}
+              currentRowId={currentRowId}
+              setCurrentRowId={setCurrentRowId}
+              modifiedCells={modifiedCells}
+            />
+            {/* </Box> */}
+          </CustomAccordionDetails>
+        </CustomAccordion>
+      </div>
       <Notification
         open={snackbarOpen}
         message={snackbarData.message}

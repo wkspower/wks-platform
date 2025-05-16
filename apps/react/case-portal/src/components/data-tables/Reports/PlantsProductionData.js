@@ -77,85 +77,9 @@ const PlantsProductionSummary = () => {
       },
       { header: 'Remarks', field: 'Remark', editable: true },
     ],
-    // rows: [
-    //   {
-    //     id: 0,
-    //     RowNo: 1,
-    //     Particulates: 'EOE',
-    //     UOM: 'MT',
-    //     BudgetPrevYear: 1200,
-    //     ActualPrevYear: 1100,
-    //     BudgetCurrentYear: 1250,
-    //     VarBudgetMT: -70,
-    //     VarBudgetPer: '-5.6%',
-    //     VarActualMT: -100,
-    //     VarActualPer: '-8.3%',
-    //     Remark: 'Catalyst replacement due',
-    //   },
-    //   {
-    //     id: 1,
-    //     RowNo: 1,
-    //     Particulates: 'MEG',
-    //     UOM: 'MT',
-    //     BudgetPrevYear: 900,
-    //     ActualPrevYear: 860,
-    //     BudgetCurrentYear: 920,
-    //     VarBudgetMT: -120,
-    //     VarBudgetPer: '-5.6%',
-    //     VarActualMT: -40,
-    //     VarActualPer: '-4.7%',
-    //     Remark: 'Operating at 95% capacity',
-    //   },
-    // ],
   }
 
   const apiCols = dataAPI.columns
-  // const rows = dataAPI.rows
-
-  // 1. Flat columns for rendering as before
-  // const columns = useMemo(() => {
-  //   return apiCols.flatMap(
-  //     (col) =>
-  //       col.children
-  //         ? col.children.map((child) => ({
-  //             field: child.field,
-  //             headerName: child.header,
-  //             // children typically numeric → right align
-  //             // align: 'right',
-  //             // headerAlign: 'right',
-  //             flex: 1, // share leftover space
-  //             minWidth: 100,
-  //             cellClassName: 'rightAlign',
-  //           }))
-  //         : [
-  //             {
-  //               field: col.field,
-  //               headerName: col.header,
-  //               width:
-  //                 col.field === 'RowNo'
-  //                   ? 80
-  //                   : col.field === 'UOM'
-  //                     ? 100 // shrink UOM to 100px
-  //                     : 250,
-  //               flex: col.field === 'Particulates' ? 2 : undefined,
-  //               minWidth: col.field === 'Particulates' ? 120 : undefined,
-  //               // align: col.field === 'UOM' ? 'center' : 'left',
-  //               // headerAlign: col.field === 'UOM' ? 'center' : 'left',
-  //               renderCell:
-  //                 col.field === 'Remark'
-  //                   ? (params) => (
-  //                       <span
-  //                         // style={{ color: 'blue', cursor: 'pointer' }}
-  //                         onClick={() => handleRemarkCellClick(params.rows)}
-  //                       >
-  //                         {params.value}
-  //                       </span>
-  //                     )
-  //                   : undefined,
-  //             },
-  //           ],
-  //   )
-  // }, [apiCols])
 
   // 2. Build a *complete* columnGroupingModel
   const columnGroupingModel = useMemo(() => {
@@ -308,52 +232,6 @@ const PlantsProductionSummary = () => {
       return base
     })
   }, [apiCols, rows, handleRemarkCellClick])
-  // const columns = useMemo(() => {
-  //   if (!rows || rows.length === 0) return []
-
-  //   return apiCols.flatMap((col) => {
-  //     // helper to detect number columns across all rows
-  //     const detectNumber = (field) =>
-  //       rows.every((r) => typeof r[field] === 'number')
-
-  //     if (col.children) {
-  //       return col.children.map((child) => {
-  //         const isNum = detectNumber(child.field)
-  //         return {
-  //           field: child.field,
-  //           headerName: child.header,
-  //           type: isNum ? 'number' : 'string',
-  //           align: isNum ? 'right' : 'left',
-  //           // headerAlign: isNum ? 'right' : 'left',
-  //           flex: 1,
-  //           minWidth: 100,
-  //         }
-  //       })
-  //     }
-
-  //     const isNum = detectNumber(col.field)
-  //     return {
-  //       field: col.field,
-  //       headerName: col.header,
-  //       type: isNum ? 'number' : 'string',
-  //       align: isNum ? 'right' : 'left',
-  //       // headerAlign: isNum ? 'right' : 'left',
-
-  //       width: col.field === 'RowNo' ? 80 : col.field === 'UOM' ? 100 : 250,
-  //       flex: col.field === 'Particulates' ? 2 : undefined,
-  //       minWidth: col.field === 'Particulates' ? 120 : undefined,
-
-  //       renderCell:
-  //         col.field === 'Remark'
-  //           ? (params) => (
-  //               <span onClick={() => handleRemarkCellClick(params.row)}>
-  //                 {params.value}
-  //               </span>
-  //             )
-  //           : undefined,
-  //     }
-  //   })
-  // }, [apiCols])
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -432,6 +310,7 @@ const PlantsProductionSummary = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
+
       <ReportDataGrid
         rows={rows}
         setRows={setRows}
@@ -442,6 +321,9 @@ const PlantsProductionSummary = () => {
           saveBtn: true,
           textAlignment: 'center',
           remarksEditable: true,
+          allAction: false,
+          // showCalculate: false,
+          // showWorkFlowBtns: true,
         }}
         treeData
         getTreeDataPath={(rows) => rows.path}
