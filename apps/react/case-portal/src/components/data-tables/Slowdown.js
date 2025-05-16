@@ -19,6 +19,7 @@ import { truncateRemarks } from 'utils/remarksUtils'
 import { validateFields } from 'utils/validationUtils'
 import TimeInputCell from 'utils/TimeInputCell'
 import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
+import { GridRowModes } from '../../../node_modules/@mui/x-data-grid/models/gridEditRowModel'
 
 const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -55,6 +56,26 @@ const SlowDown = ({ permissions }) => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+
+  const handleCancelClick = (id) => () => {
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
+
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
+
+    // setRowModesModel({
+    //   ...rowModesModel,
+    //   [id]: { mode: GridRowModes.View, ignoreModifications: true },
+    // })
+
+    // const editedRow = rows.find((row) => row.id === id)
+    // if (editedRow.isNew) {
+    //   setRows(rows.filter((row) => row.id !== id))
+    // }
+  }
 
   const handleRemarkCellClick = (row) => {
     const rowsInEditMode = Object.keys(rowModesModel).filter(
@@ -398,6 +419,16 @@ const SlowDown = ({ permissions }) => {
     getAllProducts()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
+  const focusFirstField = async () => {
+    const newRowId = rows.length
+      ? Math.max(...rows.map((row) => row.id)) + 1
+      : 1
+    setRowModesModel((oldModel) => ({
+      ...oldModel,
+      [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
+    }))
+  }
+
   const colDefs = [
     {
       field: 'discription',
@@ -450,7 +481,7 @@ const SlowDown = ({ permissions }) => {
               null
             }
             disableClearable
-            options={filteredOptions}
+            options={allProductOptions}
             getOptionLabel={(option) => option?.label || ''}
             onChange={(event, newValue) => {
               params.api.setEditCellValue({
@@ -708,6 +739,8 @@ const SlowDown = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         deleteRowData={deleteRowData}
         permissions={adjustedPermissions}
+        handleCancelClick={handleCancelClick}
+        focusFirstField={focusFirstField}
 
         // permissions={{
         //   showAction: permissions?.showAction ?? true,

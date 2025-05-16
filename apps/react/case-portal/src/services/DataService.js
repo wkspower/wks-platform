@@ -20,6 +20,7 @@ export const DataService = {
   getConsumptionNormsData,
   getMaintenanceData,
   getTurnaroundReportData,
+  getAopSummary,
 
   getAllCatalyst,
 
@@ -27,6 +28,7 @@ export const DataService = {
   saveAnnualWorkFlowData,
   saveText,
   saveAOPConsumptionNorm,
+  saveSummaryAOPConsumptionNorm,
   saveSlowdownData,
   saveTurnAroundData,
 
@@ -1162,6 +1164,34 @@ async function getConfigurationTabsMatrix(keycloak) {
     return await Promise.reject(e)
   }
 }
+
+async function getAopSummary(keycloak) {
+  let plantId = ''
+
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  let aopYear = localStorage.getItem('year')
+
+  const url = `${Config.CaseEngineUrl}/task/aop-summary?plantId=${plantId}&aopYear=${aopYear}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
 async function getConfigurationAvailableTabs(keycloak) {
   const url = `${Config.CaseEngineUrl}/task/configuration-type-data`
   const headers = {
@@ -1428,6 +1458,32 @@ async function saveAOPConsumptionNorm(plantId, shutdownDetails, keycloak) {
       method: 'POST',
       headers,
       body: JSON.stringify(shutdownDetails),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveSummaryAOPConsumptionNorm(
+  plantId,
+  aopYear,
+  summary,
+  keycloak,
+) {
+  const url = `${Config.CaseEngineUrl}/task/aop-summary?plantId=${plantId}&aopYear=${aopYear}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ summary }), // <-- send JSON object with summary key
     })
     return json(keycloak, resp)
   } catch (e) {

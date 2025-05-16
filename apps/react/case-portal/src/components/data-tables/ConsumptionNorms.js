@@ -63,6 +63,7 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 
 const NormalOpNormsScreen = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [summary, setSummary] = useState('')
 
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
@@ -214,6 +215,49 @@ const NormalOpNormsScreen = () => {
       return response
     } catch (error) {
       console.error('Error saving Consumption AOP!', error)
+    } finally {
+      //
+      setLoading(false)
+    }
+  }
+
+  const saveSummary = async () => {
+    setLoading(true)
+    try {
+      let plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+      let year = localStorage.getItem('year')
+      const response = await DataService.saveSummaryAOPConsumptionNorm(
+        plantId,
+        year,
+        summary,
+        keycloak,
+      )
+
+      if (response?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Summary Saved Successfully!',
+          severity: 'success',
+        })
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Summary Saved Failed!',
+          severity: 'error',
+        })
+      }
+
+      //
+
+      setLoading(false)
+      return response
+    } catch (error) {
+      console.error('Error saving Summary!', error)
     } finally {
       //
       setLoading(false)
@@ -399,6 +443,25 @@ const NormalOpNormsScreen = () => {
       setCalculatebtnClicked(false)
     }
   }
+  const getAopSummary = async () => {
+    setLoading(true)
+    try {
+      var res = await DataService.getAopSummary(keycloak)
+
+      if (res?.code == 200) {
+        setSummary(res?.data?.summary)
+      } else {
+        setSummary('')
+      }
+
+      setLoading(false)
+      setCalculatebtnClicked(false)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      setLoading(false)
+      setCalculatebtnClicked(false)
+    }
+  }
 
   useEffect(() => {
     const getAllProducts = async () => {
@@ -417,6 +480,7 @@ const NormalOpNormsScreen = () => {
 
     getAllProducts()
     fetchData()
+    getAopSummary()
   }, [
     sitePlantChange,
     oldYear,
@@ -577,6 +641,11 @@ const NormalOpNormsScreen = () => {
   }
   const defaultCustomHeight = { mainBox: '55vh', otherBox: '112%' }
 
+  const handleSave = () => {
+    // console.log('Summary:', summary)
+    saveSummary()
+  }
+
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -612,6 +681,11 @@ const NormalOpNormsScreen = () => {
     },
     isOldYear,
   )
+
+  const isCellEditable = (params) => {
+    console.log(params)
+    return !params.row.Particulars
+  }
 
   return (
     <div>
@@ -652,6 +726,7 @@ const NormalOpNormsScreen = () => {
                   autoHeight={true}
                   modifiedCells={modifiedCells}
                   columns={productionColumns}
+                  isCellEditable={isCellEditable}
                   rows={rows}
                   setRows={setRows}
                   getRowId={(row) => row.id}
@@ -722,6 +797,8 @@ const NormalOpNormsScreen = () => {
         margin='normal'
         variant='outlined'
         disabled={isOldYear == 1}
+        value={summary}
+        onChange={(e) => setSummary(e.target.value)}
         sx={{
           '& .MuiInputBase-root': {
             backgroundColor: '#ffffff',
@@ -753,7 +830,7 @@ const NormalOpNormsScreen = () => {
         }}
       />
       {isOldYear !== 1 && (
-        <Button variant='contained' className='btn-save'>
+        <Button variant='contained' className='btn-save' onClick={handleSave}>
           Save
         </Button>
       )}

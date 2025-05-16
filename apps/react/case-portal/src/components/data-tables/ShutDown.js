@@ -16,6 +16,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
 import TimeInputCell from 'utils/TimeInputCell'
 import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
+import { GridRowModes } from '../../../node_modules/@mui/x-data-grid/models/gridEditRowModel'
 
 const ShutDown = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -283,6 +284,16 @@ const ShutDown = ({ permissions }) => {
     }
   }
 
+  const focusFirstField = async () => {
+    const newRowId = rows.length
+      ? Math.max(...rows.map((row) => row.id)) + 1
+      : 1
+    setRowModesModel((oldModel) => ({
+      ...oldModel,
+      [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
+    }))
+  }
+
   useEffect(() => {
     fetchData()
   }, [
@@ -345,6 +356,26 @@ const ShutDown = ({ permissions }) => {
     }
 
     return ''
+  }
+
+  const handleCancelClick = (id) => () => {
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
+
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
+
+    // setRowModesModel({
+    //   ...rowModesModel,
+    //   [id]: { mode: GridRowModes.View, ignoreModifications: true },
+    // })
+
+    // const editedRow = rows.find((row) => row.id === id)
+    // if (editedRow.isNew) {
+    //   setRows(rows.filter((row) => row.id !== id))
+    // }
   }
 
   const colDefs = [
@@ -606,6 +637,8 @@ const ShutDown = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         deleteRowData={deleteRowData}
         permissions={adjustedPermissions}
+        handleCancelClick={handleCancelClick}
+        focusFirstField={focusFirstField}
 
         // permissions={{
         //   showAction: permissions?.showAction ?? true,
