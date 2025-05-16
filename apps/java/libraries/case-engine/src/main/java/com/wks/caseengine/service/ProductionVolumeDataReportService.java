@@ -18,6 +18,7 @@ public interface ProductionVolumeDataReportService {
     public AOPMessageVM getReportForPlantContributionYearWise(String plantId, String year, String reportType);
 
     // New method added
-    AOPMessageVM savePlantProductionData(String plantId, String year, List<PlantProductionDataDTO> dataList);
+    public AOPMessageVM savePlantProductionData(String plantId, String year, List<PlantProductionDataDTO> dataList);
+     AOPMessageVM calculateProductionSummary(String year, String plantId);
 
 }

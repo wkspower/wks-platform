@@ -69,6 +69,19 @@ public class ProductionVolumeDataReportController {
 			@RequestBody List<PlantProductionDataDTO> dataList) {
 		AOPMessageVM response = productionVolumeDataReportService.savePlantProductionData(plantId, year, dataList);
 		return ResponseEntity.status(response.getCode()).body(response);
+
+
 	}
+	@GetMapping("/handle/calculate/plant-production-summary")
+	public ResponseEntity<AOPMessageVM> calculateProductionSummary(
+			@RequestParam String plantId,
+			@RequestParam String year) {
+		AOPMessageVM response =  productionVolumeDataReportService.calculateProductionSummary(year,plantId);
+		return ResponseEntity.status(response.getCode()).body(response);
+
+
+	}
+
+	
 
 }

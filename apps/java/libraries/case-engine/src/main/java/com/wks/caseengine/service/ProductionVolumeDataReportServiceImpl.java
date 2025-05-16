@@ -13,10 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.dto.PlantProductionDataDTO;
 import com.wks.caseengine.entity.PlantProductionSummary;
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantProductionSummaryRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.SiteRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -28,11 +33,19 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	@Autowired
-	private PlantsRepository plantsRepository;
+	
 
 	@Autowired
 	PlantProductionSummaryRepository plantProductionSummaryRepository;
+
+	@Autowired
+	private PlantsRepository plantsRepository;
+	@Autowired
+	private VerticalsRepository verticalRepository;
+
+
+	@Autowired
+	private SiteRepository siteRepository;
 
 	@Override
 	public AOPMessageVM getReportForProductionVolumnData(String plantId, String year) {
@@ -422,5 +435,51 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		response.setCode(200);
 		response.setMessage("Remarks updated successfully.");
 		return response;
+	}
+
+
+
+	@Override
+	@Transactional
+	public AOPMessageVM calculateProductionSummary(String year, String plantId) {
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site 		  = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_"+site.getName()+"_LoadPlantProductionSummaryReport";
+			System.out.println(storedProcedure);
+			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+            Map<String,Integer> map = new HashMap<>();
+			map.put("count" ,count);
+			AOPMessageVM response = new AOPMessageVM();
+			response.setData(map);
+			response.setCode(200);
+			response.setMessage("success");
+			return response;
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+		
+	}
+
+
+	
+
+	@Transactional
+	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
+			String aopYear) {
+		try {
+			String sql = "EXEC " + procedureName
+					+ " @plantId = :plantId, @aopYear = :aopYear";
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+
+			return query.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 }

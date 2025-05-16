@@ -103,6 +103,13 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@Autowired
 	private VerticalsRepository verticalRepository;
 
+
+	@Autowired
+	private SiteRepository siteRepository;
+
+
+
+
 	@Override
 	public WorkflowPageDTO getCaseId(String year, String plantId, String siteId, String verticalId) {
 		try {
@@ -564,7 +571,8 @@ public class WorkflowServiceImpl implements WorkflowService {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			String storedProcedure = vertical.getName() + "_HMD_LoadAnnualAOPCost";
+			Sites site 		  = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_"+site.getName()+"_LoadAnnualAOPCost";
 			System.out.println(storedProcedure);
 			return executeDynamicUpdateProcedure(storedProcedure, plantId, year);
 		} catch (Exception e) {
@@ -572,6 +580,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 		}
 		return 0;
 	}
+
+
+	
 
 	@Transactional
 	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
