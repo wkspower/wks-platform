@@ -20,7 +20,7 @@ public class PlantProductionSummary {
     
 
     @Column(name = "Plant_FK_Id")
-    private UUID siteFkId;
+    private UUID plantFkId;
 
     
     @Column(name = "AOPYear", nullable = false, length = 255)

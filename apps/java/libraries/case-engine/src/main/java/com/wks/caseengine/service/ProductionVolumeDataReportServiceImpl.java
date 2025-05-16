@@ -11,16 +11,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.wks.caseengine.dto.MonthWiseProductionPlanDTO;
 import com.wks.caseengine.dto.PlantProductionDataDTO;
+import com.wks.caseengine.dto.TurnAroundPlanReportDTO;
+import com.wks.caseengine.entity.MonthWiseProductionPlan;
 import com.wks.caseengine.entity.PlantProductionSummary;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.TurnAroundPlan;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.MonthWiseProductionPlanRepository;
 import com.wks.caseengine.repository.PlantProductionSummaryRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
+import com.wks.caseengine.repository.TurnAroundPlanReportRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 
 import jakarta.persistence.EntityManager;
@@ -46,6 +52,14 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 	@Autowired
 	private SiteRepository siteRepository;
+
+
+	@Autowired
+	private TurnAroundPlanReportRepository turnAroundPlanReportRepository;
+
+
+	@Autowired
+	private MonthWiseProductionPlanRepository monthWiseProductionPlanRepository;
 
 	@Override
 	public AOPMessageVM getReportForProductionVolumnData(String plantId, String year) {
@@ -430,6 +444,37 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
             optional.get().setRemark(dto.getRemark());
 			plantProductionSummaryRepository.save(optional.get());
+		}
+		AOPMessageVM response = new AOPMessageVM();
+		response.setCode(200);
+		response.setMessage("Remarks updated successfully.");
+		return response;
+	}
+
+
+	@Override
+	@Transactional
+	public AOPMessageVM savePlanTurnAroundData(String plantId, String year, List<TurnAroundPlanReportDTO> dataList) {
+		for (TurnAroundPlanReportDTO dto : dataList) {
+            Optional<TurnAroundPlan> optional =turnAroundPlanReportRepository.findById(UUID.fromString(dto.getId()));
+
+            optional.get().setRemark(dto.getRemark());
+			turnAroundPlanReportRepository.save(optional.get());
+		}
+		AOPMessageVM response = new AOPMessageVM();
+		response.setCode(200);
+		response.setMessage("Remarks updated successfully.");
+		return response;
+	}
+
+
+	@Override
+	@Transactional
+	public AOPMessageVM saveMonthWiseProductionPlanData(String plantId, String year, List<MonthWiseProductionPlanDTO> dataList) {
+		for (MonthWiseProductionPlanDTO dto : dataList) {
+            Optional<MonthWiseProductionPlan> optional =monthWiseProductionPlanRepository.findById(UUID.fromString(dto.getId()));
+            optional.get().setRemark(dto.getRemark());
+			monthWiseProductionPlanRepository.save(optional.get());
 		}
 		AOPMessageVM response = new AOPMessageVM();
 		response.setCode(200);

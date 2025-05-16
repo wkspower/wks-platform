@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.dto.MonthWiseProductionPlanDTO;
 import com.wks.caseengine.dto.PlantProductionDataDTO;
+import com.wks.caseengine.dto.TurnAroundPlanReportDTO;
 import com.wks.caseengine.entity.PlantProductionRequestDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.ProductionVolumeDataReportService;
@@ -77,6 +79,26 @@ public class ProductionVolumeDataReportController {
 			@RequestParam String plantId,
 			@RequestParam String year) {
 		AOPMessageVM response =  productionVolumeDataReportService.calculateProductionSummary(year,plantId);
+		return ResponseEntity.status(response.getCode()).body(response);
+
+
+	}
+	@PostMapping("/monthwise-production-data")
+	public ResponseEntity<AOPMessageVM> saveMonthWiseProductionPlanData(
+			@RequestParam String plantId,
+			@RequestParam String year,
+			@RequestBody List<MonthWiseProductionPlanDTO> dataList) {
+		AOPMessageVM response = productionVolumeDataReportService.saveMonthWiseProductionPlanData(plantId, year, dataList);
+		return ResponseEntity.status(response.getCode()).body(response);
+
+
+	}
+	@PostMapping("/turnaround-data")
+	public ResponseEntity<AOPMessageVM> savePlanTurnAroundData(
+			@RequestParam String plantId,
+			@RequestParam String year,
+			@RequestBody List<TurnAroundPlanReportDTO> dataList) {
+		AOPMessageVM response = productionVolumeDataReportService.savePlanTurnAroundData(plantId, year, dataList);
 		return ResponseEntity.status(response.getCode()).body(response);
 
 

@@ -2,7 +2,9 @@ package com.wks.caseengine.service;
 
 import java.util.List;
 
+import com.wks.caseengine.dto.MonthWiseProductionPlanDTO;
 import com.wks.caseengine.dto.PlantProductionDataDTO;
+import com.wks.caseengine.dto.TurnAroundPlanReportDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface ProductionVolumeDataReportService {
@@ -21,4 +23,6 @@ public interface ProductionVolumeDataReportService {
     public AOPMessageVM savePlantProductionData(String plantId, String year, List<PlantProductionDataDTO> dataList);
      AOPMessageVM calculateProductionSummary(String year, String plantId);
 
+     AOPMessageVM saveMonthWiseProductionPlanData(String plantId, String year, List<MonthWiseProductionPlanDTO> dataList);
+     AOPMessageVM savePlanTurnAroundData(String plantId, String year, List<TurnAroundPlanReportDTO> dataList);
 }
