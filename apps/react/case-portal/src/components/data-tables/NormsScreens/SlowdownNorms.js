@@ -18,7 +18,6 @@ import TextField from '@mui/material/TextField'
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 
-
 const SlowdownNorms = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [loading, setLoading] = useState(false)
@@ -458,7 +457,7 @@ const SlowdownNorms = () => {
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
-                maxWidth: 140,
+                width: ' 100%',
               }}
               onClick={() => handleRemarkCellClick(params.row)}
             >

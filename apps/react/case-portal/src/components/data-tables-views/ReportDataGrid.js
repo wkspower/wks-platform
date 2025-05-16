@@ -253,19 +253,27 @@ const ReportDataGrid = ({
           // },
         }}
       />
-      {permissions?.saveBtn && (
-        <Button
-          variant='contained'
-          className='btn-save'
-          onClick={saveModalOpen}
-          disabled={isButtonDisabled}
-          // loading={loading}
-          // loadingposition='start'
-          {...(loading ? {} : {})}
-        >
-          Save
-        </Button>
-      )}
+      <Box
+        sx={{
+          marginTop: 2,
+          display: 'flex',
+          gap: 2,
+        }}
+      >
+        {permissions?.saveBtn && (
+          <Button
+            variant='contained'
+            className='btn-save'
+            onClick={saveModalOpen}
+            disabled={isButtonDisabled}
+            // loading={loading}
+            // loadingposition='start'
+            {...(loading ? {} : {})}
+          >
+            Save
+          </Button>
+        )}
+      </Box>
       <Dialog
         open={openSaveDialogeBox}
         onClose={() => setOpenSaveDialogeBox(false)}

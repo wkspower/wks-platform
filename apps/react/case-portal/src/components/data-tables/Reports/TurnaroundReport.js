@@ -62,6 +62,7 @@ const TurnaroundReport = () => {
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
+              width: ' 100%',
             }}
             onClick={() => handleRemarkCellClick(params.row)}
           >
@@ -105,6 +106,7 @@ const TurnaroundReport = () => {
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
+              width: ' 100%',
             }}
             onClick={() => handleRemarkCellClick(params.row)}
           >

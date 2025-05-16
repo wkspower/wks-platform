@@ -123,7 +123,7 @@ const getEnhancedColDefs = ({
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
-                  maxWidth: 200,
+                  width: ' 100%',
                 }}
                 onClick={() => handleRemarkCellClick(params.row)}
               >

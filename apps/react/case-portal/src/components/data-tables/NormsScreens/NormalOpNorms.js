@@ -356,7 +356,7 @@ const NormalOpNormsScreen = () => {
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
-                maxWidth: 140,
+                width: ' 100%',
               }}
               onClick={() => handleRemarkCellClick(params.row)}
             >

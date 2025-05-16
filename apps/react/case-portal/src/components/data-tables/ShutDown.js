@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
-import NumericInputOnly from 'utils/NumericInputOnly'
+// import NumericInputOnly from 'utils/NumericInputOnly'
 import { StartDateTimeEditCell } from 'utils/StartDateTimeEditCell'
 import { EndDateTimeEditCell } from 'utils/EndDateTimeEditCell'
 
@@ -305,40 +305,40 @@ const ShutDown = ({ permissions }) => {
     lowerVertName,
   ])
 
-  const findDuration1 = (value, row) => {
-    if (row && row.maintStartDateTime && row.maintEndDateTime) {
-      const start = new Date(row.maintStartDateTime)
-      const end = new Date(row.maintEndDateTime)
-      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-        const durationInMs = end - start
-        const durationInMinutes = durationInMs / (1000 * 60)
-        const hours = Math.floor(durationInMinutes / 60)
-        const minutes = durationInMinutes % 60
-        const formattedMinutes = minutes.toString().padStart(2, '0')
-        const formattedDuration = `${hours}.${formattedMinutes}`
-        return formattedDuration
-      }
-    }
-    return ''
-  }
+  // const findDuration1 = (value, row) => {
+  //   if (row && row.maintStartDateTime && row.maintEndDateTime) {
+  //     const start = new Date(row.maintStartDateTime)
+  //     const end = new Date(row.maintEndDateTime)
+  //     if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+  //       const durationInMs = end - start
+  //       const durationInMinutes = durationInMs / (1000 * 60)
+  //       const hours = Math.floor(durationInMinutes / 60)
+  //       const minutes = durationInMinutes % 60
+  //       const formattedMinutes = minutes.toString().padStart(2, '0')
+  //       const formattedDuration = `${hours}.${formattedMinutes}`
+  //       return formattedDuration
+  //     }
+  //   }
+  //   return ''
+  // }
 
-  const findDuration2 = (value, row) => {
-    const { maintStartDateTime, maintEndDateTime, durationInHrs } = row
+  // const findDuration2 = (value, row) => {
+  //   const { maintStartDateTime, maintEndDateTime, durationInHrs } = row
 
-    if (maintStartDateTime && maintEndDateTime) {
-      const start = new Date(maintStartDateTime)
-      const end = new Date(maintEndDateTime)
-      if (!isNaN(start) && !isNaN(end)) {
-        const durationInMs = end - start
-        const durationInMinutes = durationInMs / (1000 * 60)
-        const hours = Math.floor(durationInMinutes / 60)
-        const minutes = Math.round(durationInMinutes % 60)
-        return `${hours}.${minutes.toString().padStart(2, '0')}`
-      }
-    }
+  //   if (maintStartDateTime && maintEndDateTime) {
+  //     const start = new Date(maintStartDateTime)
+  //     const end = new Date(maintEndDateTime)
+  //     if (!isNaN(start) && !isNaN(end)) {
+  //       const durationInMs = end - start
+  //       const durationInMinutes = durationInMs / (1000 * 60)
+  //       const hours = Math.floor(durationInMinutes / 60)
+  //       const minutes = Math.round(durationInMinutes % 60)
+  //       return `${hours}.${minutes.toString().padStart(2, '0')}`
+  //     }
+  //   }
 
-    return durationInHrs || ''
-  }
+  //   return durationInHrs || ''
+  // }
   const findDuration = (v, row) => {
     if (row.durationInHrs) return row.durationInHrs
 
@@ -358,7 +358,7 @@ const ShutDown = ({ permissions }) => {
     return ''
   }
 
-  const handleCancelClick = (id) => () => {
+  const handleCancelClick = () => () => {
     const rowsInEditMode = Object.keys(rowModesModel).filter(
       (id) => rowModesModel[id]?.mode === 'edit',
     )
@@ -511,7 +511,7 @@ const ShutDown = ({ permissions }) => {
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
-                maxWidth: 140,
+                width: ' 100%',
               }}
               onClick={() => handleRemarkCellClick(params.row)}
             >
