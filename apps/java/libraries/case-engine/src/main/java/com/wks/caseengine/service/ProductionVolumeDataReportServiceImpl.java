@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.dto.PlantProductionDataDTO;
+import com.wks.caseengine.entity.PlantProductionSummary;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.PlantProductionSummaryRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 
 import jakarta.persistence.EntityManager;
@@ -27,6 +30,9 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 	@Autowired
 	private PlantsRepository plantsRepository;
+
+	@Autowired
+	PlantProductionSummaryRepository plantProductionSummaryRepository;
 
 	@Override
 	public AOPMessageVM getReportForProductionVolumnData(String plantId, String year) {
@@ -407,11 +413,10 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	@Transactional
 	public AOPMessageVM savePlantProductionData(String plantId, String year, List<PlantProductionDataDTO> dataList) {
 		for (PlantProductionDataDTO dto : dataList) {
-			String sql = "UPDATE PlantProductionSummary SET Remark = :remark WHERE Id = :id";
-			Query query = entityManager.createNativeQuery(sql);
-			query.setParameter("remark", dto.getRemark());
-			query.setParameter("id", dto.getId());
-			query.executeUpdate();
+            Optional<PlantProductionSummary> optional =plantProductionSummaryRepository.findById(UUID.fromString(dto.getId()));
+
+            optional.get().setRemark(dto.getRemark());
+			plantProductionSummaryRepository.save(optional.get());
 		}
 		AOPMessageVM response = new AOPMessageVM();
 		response.setCode(200);

@@ -25,6 +25,7 @@ import com.wks.caseengine.entity.Workflow;
 import com.wks.caseengine.entity.WorkflowMaster;
 import com.wks.caseengine.entity.WorkflowStepsMaster;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -505,7 +506,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 	@Override
-	public WorkflowYearDTO saveAnnualAOPData(String plantId, List<WorkflowYearDTO> workflowYearDTOList) {
+	public AOPMessageVM saveAnnualAOPData(String plantId, List<WorkflowYearDTO> workflowYearDTOList) {
 		try {
 			for (WorkflowYearDTO workflowYearDTO : workflowYearDTOList) {
 				System.out.println("workflowYearDTO.getParticulates()" + workflowYearDTO.getParticulates());
@@ -546,12 +547,15 @@ public class WorkflowServiceImpl implements WorkflowService {
 					}
 				}
 			}
+			AOPMessageVM response = new AOPMessageVM();
+			response.setCode(200);
+			response.setMessage("Remarks updated successfully.");
+			return response;
 
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to save data", ex);
 		}
-		// TODO Auto-generated method stub
-		return null;
+		
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import com.wks.caseengine.dto.WorkflowDTO;
 import com.wks.caseengine.dto.WorkflowYearDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.dto.WorkflowPageDTO;
 import com.wks.caseengine.dto.WorkflowSubmitDTO;
 
@@ -17,5 +18,5 @@ public interface WorkflowService {
 
 public int calculateExpressionWorkFlow(String year,String plantId);
     public void completeTaskWithComment(WorkflowSubmitDTO workflowSubmitDTO);
-	 public WorkflowYearDTO saveAnnualAOPData( String plantId, List<WorkflowYearDTO> workflowYearDTOList);
+	 public AOPMessageVM saveAnnualAOPData( String plantId, List<WorkflowYearDTO> workflowYearDTOList);
 }

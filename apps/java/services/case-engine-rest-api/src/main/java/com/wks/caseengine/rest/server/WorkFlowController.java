@@ -17,6 +17,7 @@ import com.wks.caseengine.dto.WorkflowSubmitDTO;
 import com.wks.caseengine.service.BusinessDemandDataService;
 import com.wks.caseengine.service.WorkflowService;
 import com.wks.caseengine.dto.WorkflowYearDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 
 @RestController
 @RequestMapping("task")
@@ -40,7 +41,7 @@ public class WorkFlowController {
 
     
 	@PostMapping(value="/annual-aop-data")
-	public 	WorkflowYearDTO saveAnnualAOPData(@RequestParam String plantId, @RequestBody List<WorkflowYearDTO> workflowYearDTOList) {
+	public 	AOPMessageVM saveAnnualAOPData(@RequestParam String plantId, @RequestBody List<WorkflowYearDTO> workflowYearDTOList) {
 		return workflowService.saveAnnualAOPData(plantId, workflowYearDTOList);	
 	}
     
