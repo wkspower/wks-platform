@@ -611,11 +611,12 @@ const WorkFlowMerge = () => {
                 </CustomAccordionDetails>
               </CustomAccordion>
             </div>
-            <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
+            {/* <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
               Annual AOP Cost
-            </Typography>
+            </Typography> */}
             <div style={{ minHeight: 'fit-content', maxHeight: 'max-content' }}>
               <DataGridTable
+                title='Annual AOP Cost'
                 modifiedCells={modifiedCells}
                 autoHeight={true}
                 rows={rows}
@@ -648,6 +649,7 @@ const WorkFlowMerge = () => {
                   showCalculate: true,
                   remarksEditable: true,
                   showCreateCasebutton: showCreateCasebutton,
+                  showTitle: true,
                   // approveBtn: false,
                 }}
               />

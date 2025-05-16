@@ -18,6 +18,7 @@ const TurnaroundReport = () => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [modifiedCells2, setModifiedCells2] = React.useState({})
 
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
@@ -314,7 +315,7 @@ const TurnaroundReport = () => {
       ),
     )
     if (updatedFields.length > 0) {
-      setModifiedCells((prevModifiedCells) => ({
+      setModifiedCells2((prevModifiedCells) => ({
         ...prevModifiedCells,
         [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
       }))
@@ -351,7 +352,7 @@ const TurnaroundReport = () => {
         II. Turnaround details for the previous years since commissioning{' '}
       </Typography>
       <ReportDataGrid
-        modifiedCells={modifiedCells}
+        modifiedCells={modifiedCells2}
         rows={rows2}
         setRows={setRows2}
         columns={columnsGrid2}

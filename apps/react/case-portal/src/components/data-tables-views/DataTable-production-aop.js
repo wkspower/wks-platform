@@ -12,6 +12,7 @@ import {
 } from '../../../node_modules/@mui/material/index'
 import { remarkColumn } from 'components/Utilities/remarkColumn'
 import ReportDataGrid from './ReportDataGrid'
+import Notification from 'components/Utilities/Notification'
 
 const ProductionAopView = () => {
   const keycloak = useSession()
@@ -31,6 +32,11 @@ const ProductionAopView = () => {
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
+  })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
   })
   const [modifiedCells, setModifiedCells] = React.useState({})
 
@@ -171,7 +177,31 @@ const ProductionAopView = () => {
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   // const lastColumnField = columns[columns.length - 1]?.field
-
+  const saveWorkflowData = async () => {
+    try {
+      // console.log(rows, 'workflowDto')
+      const response = await DataService.saveAnnualWorkFlowData(
+        keycloak,
+        rows,
+        plantId,
+      )
+      console.log(response, 'response')
+      setSnackbarData({
+        message: 'Data Saved Successfully!',
+        severity: 'success',
+      })
+      // setActionDisabled(true)
+      // getCaseId()
+    } catch (err) {
+      console.error('Error while save', err)
+      setSnackbarData({ message: err.message, severity: 'error' })
+      // setActionDisabled(false)
+    } finally {
+      setSnackbarOpen(true)
+      // setOpenRejectDialog(false)
+      // setText('')
+    }
+  }
   return (
     <Box
       sx={{
@@ -196,10 +226,12 @@ const ProductionAopView = () => {
         setRows={setRows}
         title='Monthwise Production Summary'
         columns={columns}
+        saveWorkflowData={saveWorkflowData}
         permissions={{
           // customHeight: defaultCustomHeightGrid1,
           textAlignment: 'center',
           remarksEditable: true,
+          saveBtn: true,
         }}
         treeData
         getTreeDataPath={(rows) => rows.path}
@@ -215,6 +247,12 @@ const ProductionAopView = () => {
         currentRowId={currentRowId}
         setCurrentRowId={setCurrentRowId}
         modifiedCells={modifiedCells}
+      />
+      <Notification
+        open={snackbarOpen}
+        message={snackbarData.message}
+        severity={snackbarData.severity}
+        onClose={() => setSnackbarOpen(false)}
       />
     </Box>
   )

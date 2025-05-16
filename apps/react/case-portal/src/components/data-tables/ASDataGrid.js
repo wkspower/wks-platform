@@ -23,13 +23,12 @@ import Notification from 'components/Utilities/Notification'
 //import './data-grid-css.css'
 //import './extra-css.css'
 
-import { MenuItem } from '../../../node_modules/@mui/material/index'
+import { MenuItem, Typography } from '../../../node_modules/@mui/material/index'
 
 import {
   FileDownload,
   FileUpload,
 } from '../../../node_modules/@mui/icons-material/index'
-import Typography from 'themes/overrides/Typography'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 
 const jioColors = {
@@ -47,7 +46,7 @@ const jioColors = {
 
 const DataGridTable = ({
   columns: initialColumns = [],
-  // title = '',
+  title = '',
   onAddRow = () => {},
   // onDeleteRow = () => {},
   permissions = {},
@@ -56,8 +55,6 @@ const DataGridTable = ({
   saveChanges = () => {},
   apiRef = null,
   rowModesModel: rowModesModel,
-  handleCancelClick: handleCancelClick,
-  focusFirstField: focusFirstField,
   // setRowModesModel,
   snackbarData = { message: '', severity: 'info' },
   snackbarOpen = false,
@@ -133,6 +130,18 @@ const DataGridTable = ({
     // }))
   }
 
+  const handleCancelClick = (id) => () => {
+    // setRowModesModel({
+    //   ...rowModesModel,
+    //   [id]: { mode: GridRowModes.View, ignoreModifications: true },
+    // })
+
+    const editedRow = rows.find((row) => row.id === id)
+    if (editedRow.isNew) {
+      setRows(rows.filter((row) => row.id !== id))
+    }
+  }
+
   // const handleRowModesModelChange = (newRowModesModel) => {
   //   setRowModesModel(newRowModesModel)
   // }
@@ -196,7 +205,6 @@ const DataGridTable = ({
     //   ...oldModel,
     //   [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
     // }))
-    focusFirstField()
     setTimeout(() => {
       setIsButtonDisabled(false)
     }, 500)
@@ -413,21 +421,30 @@ const DataGridTable = ({
       {/* )} */}
       {(permissions?.allAction ?? true) && (
         <Box className='action-box'>
-          <Box className='action-inner'>
+          <Box
+            className='action-inner'
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 2,
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {permissions?.showTitle && (
+                <Typography component='div' className='grid-title'>
+                  {title}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {permissions?.UnitToShow && (
               <Chip
                 label={permissions.UnitToShow}
                 variant='outlined'
                 className='unit-chip'
               />
-            )}
-          </Box>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {permissions?.showTitle && (
-              <Typography component='div' className='grid-title'>
-                Annual AOP Cost
-              </Typography>
             )}
             {permissions?.showCalculate && (
               <Button
@@ -558,6 +575,7 @@ const DataGridTable = ({
                 </span>
               </IconButton>
             )}
+            {/* </Box> */}
           </Box>
         </Box>
       )}
@@ -662,11 +680,9 @@ const DataGridTable = ({
           experimentalFeatures={{ newEditingApi: true }}
           editMode='row'
           rowModesModel={rowModesModel}
-          handleCancelClick={handleCancelClick}
           onRowModesModelChange={onRowModesModelChange}
           handleCalculate={handleCalculate}
           deleteRowData={deleteRowData}
-          focusFirstField={focusFirstField}
           slotProps={{
             toolbar: { setRows, GridToolbar },
             // loadingOverlay: {

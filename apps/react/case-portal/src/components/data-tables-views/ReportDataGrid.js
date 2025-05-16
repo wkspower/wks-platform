@@ -12,6 +12,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   TextField,
 } from '../../../node_modules/@mui/material/index'
@@ -37,6 +38,7 @@ const ReportDataGrid = ({
   loading,
   rowModesModel: rowModesModel,
   onRowModesModelChange = () => {},
+  saveWorkflowData = () => {},
 }) => {
   const keycloak = useSession()
   // const [allProducts, setAllProducts] = useState([])
@@ -44,6 +46,7 @@ const ReportDataGrid = ({
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
+  const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
@@ -89,6 +92,17 @@ const ReportDataGrid = ({
     setTimeout(() => {
       setIsButtonDisabled(false)
     }, 500)
+  }
+  const saveModalOpen = async () => {
+    setIsButtonDisabled(true)
+    setOpenSaveDialogeBox(true)
+    setTimeout(() => {
+      setIsButtonDisabled(false)
+    }, 500)
+  }
+  const saveConfirmation = async () => {
+    saveWorkflowData()
+    setOpenSaveDialogeBox(false)
   }
   const lastColumnField = columns[columns.length - 1]?.field
   // console.log(lastColumnField)
@@ -239,6 +253,38 @@ const ReportDataGrid = ({
           // },
         }}
       />
+      {permissions?.saveBtn && (
+        <Button
+          variant='contained'
+          className='btn-save'
+          onClick={saveModalOpen}
+          disabled={isButtonDisabled}
+          // loading={loading}
+          // loadingposition='start'
+          {...(loading ? {} : {})}
+        >
+          Save
+        </Button>
+      )}
+      <Dialog
+        open={openSaveDialogeBox}
+        onClose={() => setOpenSaveDialogeBox(false)}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      >
+        <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>
+            Are you sure you want to save these changes?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenSaveDialogeBox(false)}>Cancel</Button>
+          <Button onClick={saveConfirmation} autoFocus>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Dialog
         open={!!remarkDialogOpen}
         onClose={() => setRemarkDialogOpen(false)}
