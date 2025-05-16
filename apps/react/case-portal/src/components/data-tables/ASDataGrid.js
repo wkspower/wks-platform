@@ -55,6 +55,8 @@ const DataGridTable = ({
   saveChanges = () => {},
   apiRef = null,
   rowModesModel: rowModesModel,
+  handleCancelClick: handleCancelClick,
+  focusFirstField: focusFirstField,
   // setRowModesModel,
   snackbarData = { message: '', severity: 'info' },
   snackbarOpen = false,
@@ -130,18 +132,6 @@ const DataGridTable = ({
     // }))
   }
 
-  const handleCancelClick = (id) => () => {
-    // setRowModesModel({
-    //   ...rowModesModel,
-    //   [id]: { mode: GridRowModes.View, ignoreModifications: true },
-    // })
-
-    const editedRow = rows.find((row) => row.id === id)
-    if (editedRow.isNew) {
-      setRows(rows.filter((row) => row.id !== id))
-    }
-  }
-
   // const handleRowModesModelChange = (newRowModesModel) => {
   //   setRowModesModel(newRowModesModel)
   // }
@@ -205,6 +195,7 @@ const DataGridTable = ({
     //   ...oldModel,
     //   [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
     // }))
+    focusFirstField()
     setTimeout(() => {
       setIsButtonDisabled(false)
     }, 500)
@@ -680,9 +671,11 @@ const DataGridTable = ({
           experimentalFeatures={{ newEditingApi: true }}
           editMode='row'
           rowModesModel={rowModesModel}
+          handleCancelClick={handleCancelClick}
           onRowModesModelChange={onRowModesModelChange}
           handleCalculate={handleCalculate}
           deleteRowData={deleteRowData}
+          focusFirstField={focusFirstField}
           slotProps={{
             toolbar: { setRows, GridToolbar },
             // loadingOverlay: {

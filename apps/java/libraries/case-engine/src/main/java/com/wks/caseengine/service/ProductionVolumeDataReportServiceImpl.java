@@ -8,6 +8,9 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.wks.caseengine.dto.PlantProductionDataDTO;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantsRepository;
@@ -44,7 +47,8 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			map.put("VarActualMT", row[8]);
 			map.put("VarActualPer", row[9]);
 			map.put("Remark", row[10]);
-			productionVolumeReportList.add(map); // Add the map to the list here
+			map.put("Id", row[11]);
+			productionVolumeReportList.add(map);
 		}
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("Data fetched successfully");
@@ -73,8 +77,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	}
 
 	@Override
-	public AOPMessageVM getReportForMonthWiseProductionData(String plantId, String year
-			 ) {
+	public AOPMessageVM getReportForMonthWiseProductionData(String plantId, String year) {
 		try {
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			List<Map<String, Object>> typeOneDataList = new ArrayList<>();
@@ -99,8 +102,6 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 				map.put("Remark", row[13]);
 				typeOneDataList.add(map);
 			}
-
-			
 
 			// Combine both into a result map
 			Map<String, Object> finalResult = new HashMap<>();
@@ -130,7 +131,6 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 			query.setParameter("plantId", plantId);
 			query.setParameter("aopYear", aopYear);
-			
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
@@ -140,10 +140,8 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		}
 	}
 
-
 	@Override
-	public AOPMessageVM getReportForMonthWiseConsumptionSummaryData(String plantId, String year
-			 ) {
+	public AOPMessageVM getReportForMonthWiseConsumptionSummaryData(String plantId, String year) {
 		try {
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			List<Map<String, Object>> summaryData = new ArrayList<>();
@@ -194,7 +192,6 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 			query.setParameter("plantId", plantId);
 			query.setParameter("year", year);
-			
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
@@ -204,15 +201,14 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		}
 	}
 
-	
 	@Override
 	public AOPMessageVM getReportForPlantProductionPlanData(String plantId, String year, String reportType) {
 		try {
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			List<Map<String, Object>> plantProductionData = new ArrayList<>();
 
-			List<Object[]> obj = getPlantProductionData(plantId, year,reportType);
-			if(reportType.equalsIgnoreCase("assumptions")) {
+			List<Object[]> obj = getPlantProductionData(plantId, year, reportType);
+			if (reportType.equalsIgnoreCase("assumptions")) {
 				for (Object[] row : obj) {
 					Map<String, Object> map = new HashMap<>();
 					map.put("sno", row[0]);
@@ -220,17 +216,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 					plantProductionData.add(map);
 				}
 			}
-			if(reportType.equalsIgnoreCase("maxRate")) {
-				for (Object[] row : obj) {
-					Map<String, Object> map = new HashMap<>();
-					map.put("sno", row[0]);
-					map.put("part1", row[1]);
-					map.put("part2", row[2]);
-					map.put("part3", row[3]);
-					plantProductionData.add(map);
-				}
-			}
-			if(reportType.equalsIgnoreCase("OperatingHrs")) {
+			if (reportType.equalsIgnoreCase("maxRate")) {
 				for (Object[] row : obj) {
 					Map<String, Object> map = new HashMap<>();
 					map.put("sno", row[0]);
@@ -240,7 +226,17 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 					plantProductionData.add(map);
 				}
 			}
-			if(reportType.equalsIgnoreCase("AverageHourlyRate")) {
+			if (reportType.equalsIgnoreCase("OperatingHrs")) {
+				for (Object[] row : obj) {
+					Map<String, Object> map = new HashMap<>();
+					map.put("sno", row[0]);
+					map.put("part1", row[1]);
+					map.put("part2", row[2]);
+					map.put("part3", row[3]);
+					plantProductionData.add(map);
+				}
+			}
+			if (reportType.equalsIgnoreCase("AverageHourlyRate")) {
 				for (Object[] row : obj) {
 					Map<String, Object> map = new HashMap<>();
 					map.put("sno", row[0]);
@@ -252,7 +248,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 					plantProductionData.add(map);
 				}
 			}
-			if(reportType.equalsIgnoreCase("ProductionPerformance")) {
+			if (reportType.equalsIgnoreCase("ProductionPerformance")) {
 				for (Object[] row : obj) {
 					Map<String, Object> map = new HashMap<>();
 					map.put("sno", row[0]);
@@ -283,7 +279,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		}
 	}
 
-	public List<Object[]> getPlantProductionData(String plantId, String aopYear,String reportType) {
+	public List<Object[]> getPlantProductionData(String plantId, String aopYear, String reportType) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 			String storedProcedure = "annualProductionPlan";
@@ -306,87 +302,87 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 	@Override
 	public AOPMessageVM getReportForPlantContributionYearWise(String plantId, String year, String reportType) {
-	    try {
-	        AOPMessageVM aopMessageVM = new AOPMessageVM();
-	        List<Map<String, Object>> plantProductionData = new ArrayList<>();
+		try {
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			List<Map<String, Object>> plantProductionData = new ArrayList<>();
 
-	        List<Object[]> obj = getPlantContributionData(plantId, year, reportType);
+			List<Object[]> obj = getPlantContributionData(plantId, year, reportType);
 
-	        if (reportType.equalsIgnoreCase("ProductMixAndProduction")) {
-	            for (Object[] row : obj) {
-	                Map<String, Object> map = new HashMap<>();
-	                map.put("SrNo", row[0]);
-	                map.put("ByProductName", row[1]);
-	                map.put("Price", row[2]);
-	                map.put("PrevYearNormBudget", row[3]);
-	                map.put("PrevYearNormActual", row[4]);
-	                map.put("NextYearCostBudget", row[5]);
-	                map.put("Unit", row[6]);
-	                plantProductionData.add(map);
-	            }
-	        } else if (reportType.equalsIgnoreCase("CatChem") || 
-	                   reportType.equalsIgnoreCase("RawMaterial") || 
-	                   reportType.equalsIgnoreCase("ByProducts") ||
-	                   reportType.equalsIgnoreCase("Utilities")) {
-	            for (Object[] row : obj) {
-	                Map<String, Object> map = new HashMap<>();
-	                map.put("SrNo", row[0]);
-	                map.put("ByProductName", row[1]);
-	                map.put("Price", row[2]);
-	                map.put("PrevYearNormBudget", row[3]);
-	                map.put("PrevYearNormActual", row[4]);
-	                map.put("NextYearNormActual", row[5]);
-	                map.put("PrevYearCostBudget", row[6]);
-	                map.put("PrevYearCostActual", row[7]);
-	                map.put("NextYearCostActual", row[8]);
-	                map.put("Unit", row[9]);
-	                plantProductionData.add(map);
-	            }
-	        } else if (reportType.equalsIgnoreCase("OtherVariableCost")) {
-	            for (Object[] row : obj) {
-	                Map<String, Object> map = new HashMap<>();
-	                map.put("SrNo", row[0]);
-	                map.put("OtherCost", row[1]);
-	                map.put("Unit", row[2]);
-	                map.put("PrevYearBudget", row[3]);
-	                map.put("PrevYearActual", row[4]);
-	                map.put("CurrentYearBudget", row[5]);
-	                plantProductionData.add(map);
-	            }
-	        } else if (reportType.equalsIgnoreCase("ProductionCostCalculations")) {
-	            for (Object[] row : obj) {
-	                Map<String, Object> map = new HashMap<>();
-	                map.put("SrNo", row[0]);
-	                map.put("ProductionCostCalculations", row[1]);
-	                map.put("PrevYearBudget", row[2]);
-	                map.put("PrevYearActual", row[3]);
-	                map.put("NextYearBudget", row[4]);
-	                plantProductionData.add(map);
-	            }
-	        } else {
-	            Map<String, Object> map = new HashMap<>();
-	            map.put("Message", "Invalid report type");
-	            plantProductionData.add(map);
-	        }
+			if (reportType.equalsIgnoreCase("ProductMixAndProduction")) {
+				for (Object[] row : obj) {
+					Map<String, Object> map = new HashMap<>();
+					map.put("SrNo", row[0]);
+					map.put("ByProductName", row[1]);
+					map.put("Price", row[2]);
+					map.put("PrevYearNormBudget", row[3]);
+					map.put("PrevYearNormActual", row[4]);
+					map.put("NextYearCostBudget", row[5]);
+					map.put("Unit", row[6]);
+					plantProductionData.add(map);
+				}
+			} else if (reportType.equalsIgnoreCase("CatChem") ||
+					reportType.equalsIgnoreCase("RawMaterial") ||
+					reportType.equalsIgnoreCase("ByProducts") ||
+					reportType.equalsIgnoreCase("Utilities")) {
+				for (Object[] row : obj) {
+					Map<String, Object> map = new HashMap<>();
+					map.put("SrNo", row[0]);
+					map.put("ByProductName", row[1]);
+					map.put("Price", row[2]);
+					map.put("PrevYearNormBudget", row[3]);
+					map.put("PrevYearNormActual", row[4]);
+					map.put("NextYearNormActual", row[5]);
+					map.put("PrevYearCostBudget", row[6]);
+					map.put("PrevYearCostActual", row[7]);
+					map.put("NextYearCostActual", row[8]);
+					map.put("Unit", row[9]);
+					plantProductionData.add(map);
+				}
+			} else if (reportType.equalsIgnoreCase("OtherVariableCost")) {
+				for (Object[] row : obj) {
+					Map<String, Object> map = new HashMap<>();
+					map.put("SrNo", row[0]);
+					map.put("OtherCost", row[1]);
+					map.put("Unit", row[2]);
+					map.put("PrevYearBudget", row[3]);
+					map.put("PrevYearActual", row[4]);
+					map.put("CurrentYearBudget", row[5]);
+					plantProductionData.add(map);
+				}
+			} else if (reportType.equalsIgnoreCase("ProductionCostCalculations")) {
+				for (Object[] row : obj) {
+					Map<String, Object> map = new HashMap<>();
+					map.put("SrNo", row[0]);
+					map.put("ProductionCostCalculations", row[1]);
+					map.put("PrevYearBudget", row[2]);
+					map.put("PrevYearActual", row[3]);
+					map.put("NextYearBudget", row[4]);
+					plantProductionData.add(map);
+				}
+			} else {
+				Map<String, Object> map = new HashMap<>();
+				map.put("Message", "Invalid report type");
+				plantProductionData.add(map);
+			}
 
-	        // Final result map
-	        Map<String, Object> finalResult = new HashMap<>();
-	        finalResult.put("plantProductionData", plantProductionData);
+			// Final result map
+			Map<String, Object> finalResult = new HashMap<>();
+			finalResult.put("plantProductionData", plantProductionData);
 
-	        // Set response
-	        aopMessageVM.setCode(200);
-	        aopMessageVM.setMessage("Data fetched successfully");
-	        aopMessageVM.setData(finalResult);
-	        return aopMessageVM;
+			// Set response
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(finalResult);
+			return aopMessageVM;
 
-	    } catch (IllegalArgumentException e) {
-	        throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
-	    } catch (Exception ex) {
-	        throw new RuntimeException("Failed to fetch data", ex);
-	    }
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
 	}
 
-	public List<Object[]> getPlantContributionData(String plantId, String aopYear,String reportType) {
+	public List<Object[]> getPlantContributionData(String plantId, String aopYear, String reportType) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 			String storedProcedure = "PlantContributionReport";
@@ -407,4 +403,19 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		}
 	}
 
+	@Override
+	@Transactional
+	public AOPMessageVM savePlantProductionData(String plantId, String year, List<PlantProductionDataDTO> dataList) {
+		for (PlantProductionDataDTO dto : dataList) {
+			String sql = "UPDATE PlantProductionSummary SET Remark = :remark WHERE Id = :id";
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("remark", dto.getRemark());
+			query.setParameter("id", dto.getId());
+			query.executeUpdate();
+		}
+		AOPMessageVM response = new AOPMessageVM();
+		response.setCode(200);
+		response.setMessage("Remarks updated successfully.");
+		return response;
+	}
 }

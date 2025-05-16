@@ -10,6 +10,7 @@ import {
   Tooltip,
 } from '../../../../node_modules/@mui/material/index'
 import { truncateRemarks } from 'utils/remarksUtils'
+import Notification from 'components/Utilities/Notification'
 
 const PlantsProductionSummary = () => {
   const keycloak = useSession()
@@ -21,6 +22,11 @@ const PlantsProductionSummary = () => {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
   const [rows, setRows] = useState()
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
+  })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
 
   const handleRemarkCellClick = (row) => {
     // console.log(row)
@@ -386,6 +392,38 @@ const PlantsProductionSummary = () => {
     return newRow
   }, [])
 
+  const saveWorkflowData = async () => {
+    try {
+      var data = Object.values(unsavedChangesRef.current.unsavedRows)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
+      }
+
+      const rowsToUpdate = data.map((row) => ({
+        id: row.Id,
+        remark: row.Remark,
+      }))
+      await DataService.savePlantProductionData(keycloak, rowsToUpdate, plantId)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Data Saved Successfully!',
+        severity: 'success',
+      })
+    } catch (err) {
+      console.error('Error while save', err)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: err.message, severity: 'error' })
+    } finally {
+      setSnackbarOpen(true)
+    }
+  }
+
   return (
     <Box>
       <Backdrop
@@ -419,6 +457,14 @@ const PlantsProductionSummary = () => {
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
         setCurrentRowId={setCurrentRowId}
+        saveWorkflowData={saveWorkflowData}
+      />
+
+      <Notification
+        open={snackbarOpen}
+        message={snackbarData.message}
+        severity={snackbarData.severity}
+        onClose={() => setSnackbarOpen(false)}
       />
     </Box>
   )
