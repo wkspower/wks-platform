@@ -39,8 +39,6 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	
-
 	@Autowired
 	PlantProductionSummaryRepository plantProductionSummaryRepository;
 
@@ -49,14 +47,11 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	@Autowired
 	private VerticalsRepository verticalRepository;
 
-
 	@Autowired
 	private SiteRepository siteRepository;
 
-
 	@Autowired
 	private TurnAroundPlanReportRepository turnAroundPlanReportRepository;
-
 
 	@Autowired
 	private MonthWiseProductionPlanRepository monthWiseProductionPlanRepository;
@@ -133,6 +128,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 				map.put("EOEThroughput", row[11]);
 				map.put("TotalEOE", row[12]);
 				map.put("Remark", row[13]);
+				map.put("Id", row[14]);
 				typeOneDataList.add(map);
 			}
 
@@ -440,9 +436,10 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	@Transactional
 	public AOPMessageVM savePlantProductionData(String plantId, String year, List<PlantProductionDataDTO> dataList) {
 		for (PlantProductionDataDTO dto : dataList) {
-            Optional<PlantProductionSummary> optional =plantProductionSummaryRepository.findById(UUID.fromString(dto.getId()));
+			Optional<PlantProductionSummary> optional = plantProductionSummaryRepository
+					.findById(UUID.fromString(dto.getId()));
 
-            optional.get().setRemark(dto.getRemark());
+			optional.get().setRemark(dto.getRemark());
 			plantProductionSummaryRepository.save(optional.get());
 		}
 		AOPMessageVM response = new AOPMessageVM();
@@ -451,14 +448,13 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		return response;
 	}
 
-
 	@Override
 	@Transactional
 	public AOPMessageVM savePlanTurnAroundData(String plantId, String year, List<TurnAroundPlanReportDTO> dataList) {
 		for (TurnAroundPlanReportDTO dto : dataList) {
-            Optional<TurnAroundPlan> optional =turnAroundPlanReportRepository.findById(UUID.fromString(dto.getId()));
+			Optional<TurnAroundPlan> optional = turnAroundPlanReportRepository.findById(UUID.fromString(dto.getId()));
 
-            optional.get().setRemark(dto.getRemark());
+			optional.get().setRemark(dto.getRemark());
 			turnAroundPlanReportRepository.save(optional.get());
 		}
 		AOPMessageVM response = new AOPMessageVM();
@@ -467,13 +463,14 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		return response;
 	}
 
-
 	@Override
 	@Transactional
-	public AOPMessageVM saveMonthWiseProductionPlanData(String plantId, String year, List<MonthWiseProductionPlanDTO> dataList) {
+	public AOPMessageVM saveMonthWiseProductionPlanData(String plantId, String year,
+			List<MonthWiseProductionPlanDTO> dataList) {
 		for (MonthWiseProductionPlanDTO dto : dataList) {
-            Optional<MonthWiseProductionPlan> optional =monthWiseProductionPlanRepository.findById(UUID.fromString(dto.getId()));
-            optional.get().setRemark(dto.getRemark());
+			Optional<MonthWiseProductionPlan> optional = monthWiseProductionPlanRepository
+					.findById(UUID.fromString(dto.getId()));
+			optional.get().setRemark(dto.getRemark());
 			monthWiseProductionPlanRepository.save(optional.get());
 		}
 		AOPMessageVM response = new AOPMessageVM();
@@ -482,20 +479,18 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		return response;
 	}
 
-
-
 	@Override
 	@Transactional
 	public AOPMessageVM calculateProductionSummary(String year, String plantId) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			Sites site 		  = siteRepository.findById(plant.getSiteFkId()).get();
-			String storedProcedure = vertical.getName() + "_"+site.getName()+"_LoadPlantProductionSummaryReport";
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadPlantProductionSummaryReport";
 			System.out.println(storedProcedure);
 			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
-            Map<String,Integer> map = new HashMap<>();
-			map.put("count" ,count);
+			Map<String, Integer> map = new HashMap<>();
+			map.put("count", count);
 			AOPMessageVM response = new AOPMessageVM();
 			response.setData(map);
 			response.setCode(200);
@@ -505,11 +500,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 
-		
 	}
-
-
-	
 
 	@Transactional
 	public int executeDynamicUpdateProcedure(String procedureName, String plantId,

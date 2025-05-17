@@ -73,11 +73,14 @@ const ReportDataGrid = ({
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   // const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    // fetchData1()
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  useEffect(() => {}, [
+    sitePlantChange,
+    oldYear,
+    yearChanged,
+    keycloak,
+    lowerVertName,
+  ])
   const handleRemarkSave = () => {
-    // console.log(currentRemark)
     setRows((prevRows) => {
       let updatedRow = null
 
@@ -126,7 +129,7 @@ const ReportDataGrid = ({
     setOpenSaveDialogeBox(false)
   }
   const lastColumnField = columns[columns.length - 1]?.field
-  // console.log(lastColumnField)
+  // console.log('permissions?.showCalculate', permissions?.showCalculate)
   return (
     <Box
       sx={{
@@ -157,13 +160,13 @@ const ReportDataGrid = ({
             p: 1,
           }}
         >
-          {/* LEFT: Title – this flexGrow:1 makes it push buttons right */}
+          {/* LEFT: Title � this flexGrow:1 makes it push buttons right */}
           <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
               gap: 1,
-              flexGrow: 1, // ← key to take up all left space
+              flexGrow: 1, // ? key to take up all left space
             }}
           >
             {permissions?.showTitle && (
@@ -185,6 +188,7 @@ const ReportDataGrid = ({
                 Calculate
               </Button>
             )}
+
             {/* {permissions?.showWorkFlowBtns && (
               <Stack direction='row' spacing={1} alignItems='center'>
                 {taskId && (
@@ -344,7 +348,7 @@ const ReportDataGrid = ({
             disabled={isCreatingCase || !showCreateCasebutton}
             className='btn-save'
           >
-            {isCreatingCase ? 'Submitting…' : 'Submit'}
+            {isCreatingCase ? 'Submitting�' : 'Submit'}
           </Button>
         )}
       </Box>

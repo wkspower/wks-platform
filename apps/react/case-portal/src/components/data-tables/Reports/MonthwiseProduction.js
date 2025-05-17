@@ -1,6 +1,10 @@
 import { Box } from '@mui/material'
-// import DataGridTable from '../ASDataGrid'
 import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
+import Notification from 'components/Utilities/Notification'
+import React, { useEffect, useState } from 'react'
+import { DataService } from 'services/DataService'
+import { useSession } from 'SessionStoreContext'
+import { truncateRemarks } from 'utils/remarksUtils'
 import {
   Backdrop,
   CircularProgress,
@@ -8,20 +12,21 @@ import {
   Typography,
 } from '../../../../node_modules/@mui/material/index'
 import ProductionNorms from '../ProductionNorms'
-import React, { useEffect, useState } from 'react'
-import { DataService } from 'services/DataService'
-import { useSession } from 'SessionStoreContext'
-import { truncateRemarks } from 'utils/remarksUtils'
 
 const MonthwiseProduction = () => {
   const keycloak = useSession()
-
   const thisYear = localStorage.getItem('year')
-  // 1. Remark dialog state
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [modifiedCells, setModifiedCells] = React.useState({})
+
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
+  })
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -56,10 +61,8 @@ const MonthwiseProduction = () => {
       headerName: 'Month',
       flex: 1,
       headerAlign: 'left',
-      // valueFormatter: formatValueToThreeDecimals,
     },
 
-    // Current Year → EOE Production
     {
       field: 'EOEProdBudget', // was eoeBudgetCY
       headerName: 'Budget',
@@ -235,12 +238,7 @@ const MonthwiseProduction = () => {
     mainBox: `${15 + (rows?.length || 0) * 5}vh`,
     otherBox: `${100 + (rows?.length || 0) * 5}%`,
   }
-  // const defaultCustomHeightGrid2 = {
-  //   mainBox: `${15 + (rows?.length || 0) * 5}vh`,
-  //   otherBox: `${100 + (rows?.length || 0) * 5}%`,
-  // }
 
-  //api call
   const [loading, setLoading] = useState(false)
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
@@ -248,8 +246,6 @@ const MonthwiseProduction = () => {
     try {
       setLoading(true)
       var res = await DataService.getMonthWiseSummary(keycloak)
-
-      // console.log(res)
       if (res?.code == 200) {
         res = res?.data?.data.map((item, index) => ({
           ...item,
@@ -302,24 +298,53 @@ const MonthwiseProduction = () => {
     return newRow
   }, [])
   const defaultCustomHeight = { mainBox: '34vh', otherBox: '112%' }
+
   const saveRemarkData = async () => {
     try {
-      // console.log(rows, 'workflowDto')
-      await DataService.saveAnnualWorkFlowData(keycloak, rows, plantId)
-      // setSnackbarData({
-      //   message: 'Data Saved Successfully!',
-      //   severity: 'success',
-      // })
-      // setActionDisabled(true)
-      // getCaseId()
+      var data = Object.values(unsavedChangesRef.current.unsavedRows)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
+      }
+
+      const rowsToUpdate = data.map((row) => ({
+        id: row.Id,
+        remark: row.Remark,
+      }))
+      const res = await DataService.saveMonthwiseProduction(
+        keycloak,
+        rowsToUpdate,
+        plantId,
+      )
+
+      if (res?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Successfully!',
+          severity: 'success',
+        })
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Failed!',
+          severity: 'error',
+        })
+      }
     } catch (err) {
       console.error('Error while save', err)
-      // setSnackbarData({ message: err.message, severity: 'error' })
-      // setActionDisabled(false)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: err.message, severity: 'error' })
     } finally {
-      // setSnackbarOpen(true)
-      // setOpenRejectDialog(false)
-      // setText('')
+      setSnackbarOpen(true)
     }
   }
   const handleCalculate = () => {
@@ -333,23 +358,15 @@ const MonthwiseProduction = () => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-
       var plantId = plantId
       const data = await DataService.handleCalculateMonthwiseAndTurnaround(
         plantId,
         year,
         keycloak,
       )
-
       fetchData()
-
       return data
     } catch (error) {
-      // setSnackbarOpen(true)
-      // setSnackbarData({
-      //   message: error.message || 'An error occurred',
-      //   severity: 'error',
-      // })
       console.error('Error!', error)
     }
   }
@@ -412,6 +429,12 @@ const MonthwiseProduction = () => {
           // dynamicGridHeight: true,
           needTotal: true,
         }}
+      />
+      <Notification
+        open={snackbarOpen}
+        message={snackbarData.message}
+        severity={snackbarData.severity}
+        onClose={() => setSnackbarOpen(false)}
       />
     </Box>
   )

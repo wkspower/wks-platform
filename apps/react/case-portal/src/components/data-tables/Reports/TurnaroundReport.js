@@ -8,6 +8,7 @@ import {
 import { truncateRemarks } from 'utils/remarksUtils'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
+import Notification from 'components/Utilities/Notification'
 
 const TurnaroundReport = () => {
   const unsavedChangesRef = React.useRef({
@@ -15,10 +16,27 @@ const TurnaroundReport = () => {
     rowsBeforeChange: {},
   })
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [modifiedCells2, setModifiedCells2] = React.useState({})
+
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
+  })
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+
+  const [rows, setRows] = useState()
+  const [rows2, setRows2] = useState()
+
+  const [loading, setLoading] = useState(false)
+  const keycloak = useSession()
+
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
 
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
@@ -125,84 +143,6 @@ const TurnaroundReport = () => {
     },
   ]
 
-  const [rows, setRows] = useState()
-  const [rows2, setRows2] = useState()
-
-  // const processRowUpdate = useCallback((newRow, oldRow) => {
-  //   const rowId = newRow.id
-
-  //   const updatedFields = []
-  //   for (const key in newRow) {
-  //     if (
-  //       Object.prototype.hasOwnProperty.call(newRow, key) &&
-  //       newRow[key] !== oldRow[key]
-  //     ) {
-  //       updatedFields.push(key)
-  //     }
-  //   }
-
-  //   unsavedChangesRef.current = true
-  //   setRows((prev) => prev.map((r) => (r.id === newRow.id ? newRow : r)))
-
-  //   if (updatedFields.length > 0) {
-  //     setModifiedCells((prevModifiedCells) => ({
-  //       ...prevModifiedCells,
-  //       [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-  //     }))
-  //   }
-  //   return newRow
-  // }, [])
-  // const processRowUpdate2 = useCallback((newRow) => {
-  //   unsavedChangesRef.current = true
-  //   setRows2((prev) => prev.map((r) => (r.id === newRow.id ? newRow : r)))
-  //   return newRow
-  // }, [])
-  const [loading, setLoading] = useState(false)
-  const keycloak = useSession()
-
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       setLoading(true)
-  //       // let type =
-  //       var res = await DataService.getTurnaroundReportData(
-  //         keycloak,
-  //         'currentYear',
-  //       )
-  //       var res2 = await DataService.getTurnaroundReportData(
-  //         keycloak,
-  //         'previousYear',
-  //       )
-
-  //       // console.log(res)
-  //       if (res?.code == 200) {
-  //         res = res?.data?.plantTurnAroundReportData.map((item, index) => ({
-  //           ...item,
-  //           id: index,
-  //           isEditable: false,
-  //         }))
-
-  //         setRows(res)
-  //       }
-  //       if (res2?.code == 200) {
-  //         res2 = res2?.data?.plantTurnAroundReportData.map((item, index) => ({
-  //           ...item,
-  //           id: index,
-  //           isEditable: false,
-  //         }))
-
-  //         setRows2(res2)
-  //       }
-  //     } catch (err) {
-  //       console.log(err)
-  //     } finally {
-  //       setLoading(false)
-  //     }
-  //   }
-  //   fetchData()
-  // }, [year, plantId])
   const mapData = (data, tag) =>
     (data?.data?.plantTurnAroundReportData || []).map((item, i) => ({
       ...item,
@@ -228,6 +168,7 @@ const TurnaroundReport = () => {
       setLoading(false)
     }
   }
+
   useEffect(() => {
     fetchCurrentYear()
   }, [keycloak, year, plantId])
@@ -293,6 +234,7 @@ const TurnaroundReport = () => {
 
     return newRow
   }, [])
+
   const processRowUpdate2 = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     const updatedFields = []
@@ -324,24 +266,55 @@ const TurnaroundReport = () => {
 
     return newRow
   }, [])
+
   const saveRemarkData = async () => {
     try {
-      // console.log(rows, 'workflowDto')
-      await DataService.saveAnnualWorkFlowData(keycloak, rows, plantId)
-      // setSnackbarData({
-      //   message: 'Data Saved Successfully!',
-      //   severity: 'success',
-      // })
-      // setActionDisabled(true)
-      // getCaseId()
+      var data = Object.values(unsavedChangesRef.current.unsavedRows)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
+      }
+
+      const rowsToUpdate = data.map((row) => ({
+        id: row.Id,
+        remark: row.remarks,
+      }))
+      const res = await DataService.saveTurnaroundReport(
+        keycloak,
+        rowsToUpdate,
+        plantId,
+      )
+
+      // console.log(res)
+
+      if (res?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Successfully!',
+          severity: 'success',
+        })
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Failed!',
+          severity: 'error',
+        })
+      }
     } catch (err) {
       console.error('Error while save', err)
-      // setSnackbarData({ message: err.message, severity: 'error' })
-      // setActionDisabled(false)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: err.message, severity: 'error' })
     } finally {
-      // setSnackbarOpen(true)
-      // setOpenRejectDialog(false)
-      // setText('')
+      setSnackbarOpen(true)
     }
   }
   const handleCalculate = () => {
@@ -406,9 +379,11 @@ const TurnaroundReport = () => {
         saveRemarkData={saveRemarkData}
         handleCalculate={handleCalculate}
       />
+
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
-        II. Turnaround details for the previous years since commissioning{' '}
+        Turnaround details for the previous years since commissioning{' '}
       </Typography>
+
       <ReportDataGrid
         modifiedCells={modifiedCells2}
         rows={rows2}
@@ -425,13 +400,21 @@ const TurnaroundReport = () => {
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
         setCurrentRowId={setCurrentRowId}
+        saveRemarkData={saveRemarkData}
         loading={loading}
         permissions={{
           customHeight: { mainBox: '32vh', otherBox: '100%' },
           textAlignment: 'center',
           remarksEditable: true,
           saveBtn: true,
+          saveBtnForRemark: true,
         }}
+      />
+      <Notification
+        open={snackbarOpen}
+        message={snackbarData.message}
+        severity={snackbarData.severity}
+        onClose={() => setSnackbarOpen(false)}
       />
     </Box>
   )

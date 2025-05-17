@@ -101,66 +101,66 @@ const PlantsProductionSummary = () => {
     return [...leaves, ...groups]
   }, [apiCols])
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        var res = await DataService.getPlantProductionSummary(keycloak)
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      var res = await DataService.getPlantProductionSummary(keycloak)
 
-        // console.log(res)
-        if (res?.code == 200) {
-          res = res?.data.map((Particulates, index) => ({
-            ...Particulates,
-            id: index,
-            isEditable: false,
+      // console.log(res)
+      if (res?.code == 200) {
+        res = res?.data.map((Particulates, index) => ({
+          ...Particulates,
+          id: index,
+          isEditable: false,
 
-            VarBudgetPer:
-              Particulates.VarBudgetPer != null
-                ? Number(Number(Particulates.VarBudgetPer).toFixed(1))
-                : '',
+          VarBudgetPer:
+            Particulates.VarBudgetPer != null
+              ? Number(Number(Particulates.VarBudgetPer).toFixed(1))
+              : '',
 
-            VarActualPer:
-              Particulates.VarActualPer != null
-                ? Number(Number(Particulates.VarActualPer).toFixed(1))
-                : '',
+          VarActualPer:
+            Particulates.VarActualPer != null
+              ? Number(Number(Particulates.VarActualPer).toFixed(1))
+              : '',
 
-            // Round to nearest whole number
-            VarBudgetMT:
-              Particulates.VarBudgetMT != null
-                ? Math.round(Number(Particulates.VarBudgetMT))
-                : '',
+          // Round to nearest whole number
+          VarBudgetMT:
+            Particulates.VarBudgetMT != null
+              ? Math.round(Number(Particulates.VarBudgetMT))
+              : '',
 
-            VarActualMT:
-              Particulates.VarActualMT != null
-                ? Math.round(Number(Particulates.VarActualMT))
-                : '',
+          VarActualMT:
+            Particulates.VarActualMT != null
+              ? Math.round(Number(Particulates.VarActualMT))
+              : '',
 
-            BudgetPrevYear:
-              Particulates.BudgetPrevYear != null
-                ? Math.round(Number(Particulates.BudgetPrevYear))
-                : '',
+          BudgetPrevYear:
+            Particulates.BudgetPrevYear != null
+              ? Math.round(Number(Particulates.BudgetPrevYear))
+              : '',
 
-            BudgetCurrentYear:
-              Particulates.BudgetCurrentYear != null
-                ? Math.round(Number(Particulates.BudgetCurrentYear))
-                : '',
+          BudgetCurrentYear:
+            Particulates.BudgetCurrentYear != null
+              ? Math.round(Number(Particulates.BudgetCurrentYear))
+              : '',
 
-            ActualPrevYear:
-              Particulates.ActualPrevYear != null
-                ? Math.round(Number(Particulates.ActualPrevYear))
-                : '',
-          }))
+          ActualPrevYear:
+            Particulates.ActualPrevYear != null
+              ? Math.round(Number(Particulates.ActualPrevYear))
+              : '',
+        }))
 
-          setRows(res)
-        } else {
-          setRows([])
-        }
-      } catch (err) {
-        console.log(err)
-      } finally {
-        setLoading(false)
+        setRows(res)
+      } else {
+        setRows([])
       }
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading(false)
     }
+  }
+  useEffect(() => {
     fetchData()
   }, [year, plantId])
   const columns = useMemo(() => {
@@ -287,18 +287,84 @@ const PlantsProductionSummary = () => {
         id: row.Id,
         remark: row.Remark,
       }))
-      await DataService.savePlantProductionData(keycloak, rowsToUpdate, plantId)
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Data Saved Successfully!',
-        severity: 'success',
-      })
+      const res = await DataService.savePlantProductionData(
+        keycloak,
+        rowsToUpdate,
+        plantId,
+      )
+
+      // console.log(res)
+
+      if (res?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Successfully!',
+          severity: 'success',
+        })
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
+        }
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Failed!',
+          severity: 'error',
+        })
+      }
     } catch (err) {
       console.error('Error while save', err)
       setSnackbarOpen(true)
       setSnackbarData({ message: err.message, severity: 'error' })
     } finally {
       setSnackbarOpen(true)
+    }
+  }
+
+  const handleCalculate = () => {
+    handleCalculatePlantProductionData()
+  }
+  const handleCalculatePlantProductionData = async () => {
+    try {
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const year = localStorage.getItem('year')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      var plantId = plantId
+      const res = await DataService.handleCalculatePlantProductionData(
+        plantId,
+        year,
+        keycloak,
+      )
+
+      if (res?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refreshed Successfully!',
+          severity: 'success',
+        })
+        fetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refreshed Faild!',
+          severity: 'error',
+        })
+      }
+
+      // fetchCurrentYear()
+
+      return res?.data
+    } catch (error) {
+      // setSnackbarOpen(true)
+      // setSnackbarData({
+      //   message: error.message || 'An error occurred',
+      //   severity: 'error',
+      // })
+      console.error('Error!', error)
     }
   }
 
@@ -321,7 +387,8 @@ const PlantsProductionSummary = () => {
           saveBtn: true,
           textAlignment: 'center',
           remarksEditable: true,
-          allAction: false,
+          showCalculate: true,
+
           // showCalculate: false,
           // showWorkFlowBtns: true,
         }}
@@ -340,6 +407,7 @@ const PlantsProductionSummary = () => {
         currentRowId={currentRowId}
         setCurrentRowId={setCurrentRowId}
         saveWorkflowData={saveWorkflowData}
+        handleCalculate={handleCalculate}
       />
 
       <Notification
