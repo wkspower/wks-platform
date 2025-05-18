@@ -359,13 +359,28 @@ const MonthwiseProduction = () => {
         plantId = parsedPlant.id
       }
       var plantId = plantId
-      const data = await DataService.handleCalculateMonthwiseAndTurnaround(
+      const res = await DataService.handleCalculateMonthwiseProduction(
         plantId,
         year,
         keycloak,
       )
-      fetchData()
-      return data
+
+      if (res?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refreshed Successfully!',
+          severity: 'success',
+        })
+        fetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refreshed Faild!',
+          severity: 'error',
+        })
+      }
+      // fetchData()
+      return res
     } catch (error) {
       console.error('Error!', error)
     }

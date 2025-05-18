@@ -21,8 +21,24 @@ public interface ProductionVolumeDataReportService {
 
     // New method added
     public AOPMessageVM savePlantProductionData(String plantId, String year, List<PlantProductionDataDTO> dataList);
-     AOPMessageVM calculateProductionSummary(String year, String plantId);
 
-     AOPMessageVM saveMonthWiseProductionPlanData(String plantId, String year, List<MonthWiseProductionPlanDTO> dataList);
-     AOPMessageVM savePlanTurnAroundData(String plantId, String year, List<TurnAroundPlanReportDTO> dataList);
+    AOPMessageVM calculateProductionSummary(String year, String plantId);
+
+    AOPMessageVM calculateMonthwiseProductionData(String year, String plantId);
+    
+    AOPMessageVM calculatePlantConsumptionSummaryReportData(String year, String plantId);
+    AOPMessageVM calculateTurnAroundPlanReportData(String year, String plantId);
+    AOPMessageVM calculateAnnualProductionPlanData(String year, String plantId);
+    AOPMessageVM calculatePlantContributionReportData(String year, String plantId);
+
+    
+// --LoadMonthWiseProductionPlanReport
+// --LoadPlantConsumptionSummaryReport
+// --LoadTurnAroundPlanReport
+// --LoadannualProductionPlan
+// --LoadPlantContributionReport
+
+    AOPMessageVM saveMonthWiseProductionPlanData(String plantId, String year, List<MonthWiseProductionPlanDTO> dataList);
+
+    AOPMessageVM savePlanTurnAroundData(String plantId, String year, List<TurnAroundPlanReportDTO> dataList);
 }

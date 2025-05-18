@@ -83,6 +83,61 @@ public class ProductionVolumeDataReportController {
 
 
 	}
+	@GetMapping("/handle/calculate/monthwise-production-data")
+	public ResponseEntity<AOPMessageVM> calculateMonthwiseProductionData(
+			@RequestParam String plantId,
+			@RequestParam String year) {
+		AOPMessageVM response =  productionVolumeDataReportService.calculateMonthwiseProductionData(year,plantId);
+		return ResponseEntity.status(response.getCode()).body(response);
+
+
+	}
+
+	    
+    // AOPMessageVM calculatePlantConsumptionSummaryReportData(String year, String plantId);
+    // AOPMessageVM calculateTurnAroundPlanReportData(String year, String plantId);
+    // AOPMessageVM calculateAnnualProductionPlanData(String year, String plantId);
+    // AOPMessageVM calculatePlantContributionReportData(String year, String plantId);
+
+		@GetMapping("/handle/calculate/plant-consumption-data")
+	public ResponseEntity<AOPMessageVM> calculatePlantConsumptionSummaryReportData(
+			@RequestParam String plantId,
+			@RequestParam String year) {
+		AOPMessageVM response =  productionVolumeDataReportService.calculatePlantConsumptionSummaryReportData(year,plantId);
+		return ResponseEntity.status(response.getCode()).body(response);
+
+
+	}
+		@GetMapping("/handle/calculate/turnarounf-plan-data")
+	public ResponseEntity<AOPMessageVM> calculateTurnAroundPlanReportData(
+			@RequestParam String plantId,
+			@RequestParam String year) {
+		AOPMessageVM response =  productionVolumeDataReportService.calculateTurnAroundPlanReportData(year,plantId);
+		return ResponseEntity.status(response.getCode()).body(response);
+
+
+	}
+		@GetMapping("/handle/calculate/annual-production-data")
+	public ResponseEntity<AOPMessageVM> calculateAnnualProductionPlanData(
+			@RequestParam String plantId,
+			@RequestParam String year) {
+		AOPMessageVM response =  productionVolumeDataReportService.calculateAnnualProductionPlanData(year,plantId);
+		return ResponseEntity.status(response.getCode()).body(response);
+
+
+	}
+		@GetMapping("/handle/calculate/plan-contribution-data")
+	public ResponseEntity<AOPMessageVM> calculatePlantContributionReportData(
+			@RequestParam String plantId,
+			@RequestParam String year) {
+		AOPMessageVM response =  productionVolumeDataReportService.calculatePlantContributionReportData(year,plantId);
+		return ResponseEntity.status(response.getCode()).body(response);
+
+
+	}
+
+	// ==================
+
 	@PostMapping("/monthwise-production-data")
 	public ResponseEntity<AOPMessageVM> saveMonthWiseProductionPlanData(
 			@RequestParam String plantId,

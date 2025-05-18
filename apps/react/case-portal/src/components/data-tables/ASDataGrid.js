@@ -411,7 +411,16 @@ const DataGridTable = ({
       {/* )} */}
       {(permissions?.allAction ?? true) && (
         <Box className='action-box'>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              width: '100%', // make sure container is full width
+              p: 1,
+              gap: 1,
+            }}
+          >
             {permissions?.UnitToShow && (
               <Chip
                 label={permissions.UnitToShow}
@@ -731,7 +740,7 @@ const DataGridTable = ({
               disabled={isCreatingCase || !showCreateCasebutton}
               className='btn-save'
             >
-              {isCreatingCase ? 'Submitting…' : 'Submit'}
+              {isCreatingCase ? 'Submittingï¿½' : 'Submit'}
             </Button>
           )} */}
 

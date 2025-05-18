@@ -1,6 +1,6 @@
 import { Box } from '@mui/material'
 // import DataGridTable from '../ASDataGrid'
-import ReportDataGrid from 'components/data-tables-views/ReportDataGrid2'
+import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
 import { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
@@ -9,11 +9,17 @@ import {
   CircularProgress,
   Typography,
 } from '../../../../node_modules/@mui/material/index'
+import Notification from 'components/Utilities/Notification'
 
 const AnnualProductionPlan = () => {
   const keycloak = useSession()
 
   const thisYear = localStorage.getItem('year')
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
+  })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
 
   let oldYear1 = ''
   if (thisYear && thisYear.includes('-')) {
@@ -256,61 +262,111 @@ const AnnualProductionPlan = () => {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
 
-  useEffect(() => {
-    const fetchData = async (type) => {
-      try {
-        setLoading(true)
-        var res = await DataService.getAnnualProductionPlanReportData(
-          keycloak,
-          type,
-        )
-        if (res?.code == 200) {
-          res = res?.data?.plantProductionData.map((item, index) => ({
-            ...item,
-            id: index,
-            isEditable: false,
-          }))
+  const fetchData = async (type) => {
+    try {
+      setLoading(true)
+      var res = await DataService.getAnnualProductionPlanReportData(
+        keycloak,
+        type,
+      )
+      if (res?.code == 200) {
+        res = res?.data?.plantProductionData.map((item, index) => ({
+          ...item,
+          id: index,
+          isEditable: false,
+        }))
 
-          switch (type) {
-            case 'assumptions':
-              setRowsassumptions(res)
-              break
+        switch (type) {
+          case 'assumptions':
+            setRowsassumptions(res)
+            break
 
-            case 'maxRate':
-              setRowsMaxRate(res)
-              break
+          case 'maxRate':
+            setRowsMaxRate(res)
+            break
 
-            case 'OperatingHrs':
-              setRowsOperatingHrs(res)
-              break
+          case 'OperatingHrs':
+            setRowsOperatingHrs(res)
+            break
 
-            case 'AverageHourlyRate':
-              setRowsAverageHourlyRate(res)
-              break
+          case 'AverageHourlyRate':
+            setRowsAverageHourlyRate(res)
+            break
 
-            case 'ProductionPerformance':
-              setRowsProductionPerformance(res)
-              break
+          case 'ProductionPerformance':
+            setRowsProductionPerformance(res)
+            break
 
-            default:
-              console.warn('Unknown report type:', type)
-              break
-          }
-        } else {
-          setRows([])
+          default:
+            console.warn('Unknown report type:', type)
+            break
         }
-      } catch (err) {
-        console.log(err)
-      } finally {
-        setLoading(false)
+      } else {
+        setRows([])
       }
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchData('assumptions')
     fetchData('maxRate')
     fetchData('OperatingHrs')
     fetchData('AverageHourlyRate')
     fetchData('ProductionPerformance')
   }, [year, plantId])
+
+  const handleCalculate = () => {
+    handleCalculateMonthwiseAndTurnaround()
+  }
+  const handleCalculateMonthwiseAndTurnaround = async () => {
+    try {
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const year = localStorage.getItem('year')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      var plantId = plantId
+      const res = await DataService.calculateAnnualProductionPlanData(
+        plantId,
+        year,
+        keycloak,
+      )
+
+      if (res?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refreshed Successfully!',
+          severity: 'success',
+        })
+        fetchData('assumptions')
+        fetchData('maxRate')
+        fetchData('OperatingHrs')
+        fetchData('AverageHourlyRate')
+        fetchData('ProductionPerformance')
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refreshed Faild!',
+          severity: 'error',
+        })
+      }
+
+      return res
+    } catch (error) {
+      // setSnackbarOpen(true)
+      // setSnackbarData({
+      //   message: error.message || 'An error occurred',
+      //   severity: 'error',
+      // })
+      console.error('Error!', error)
+    }
+  }
 
   return (
     <Box sx={{ height: 'auto', width: '100%' }}>
@@ -328,7 +384,8 @@ const AnnualProductionPlan = () => {
       <ReportDataGrid
         rows={rowsAssumptions}
         columns={columnsAssumptions}
-        permissions={{ showWorkFlowBtns: true, showCalculate: false }}
+        handleCalculate={handleCalculate}
+        permissions={{ showWorkFlowBtns: true, showCalculate: true }}
       />
 
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
@@ -356,6 +413,13 @@ const AnnualProductionPlan = () => {
         permissions={{
           textAlignment: 'center',
         }}
+      />
+
+      <Notification
+        open={snackbarOpen}
+        message={snackbarData.message}
+        severity={snackbarData.severity}
+        onClose={() => setSnackbarOpen(false)}
       />
     </Box>
   )

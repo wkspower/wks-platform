@@ -502,6 +502,117 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 	}
 
+	@Override
+	@Transactional
+	public AOPMessageVM calculateMonthwiseProductionData(String year, String plantId) {
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadMonthWiseProductionPlanReport";
+			// System.out.println(storedProcedure);
+			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+			Map<String, Integer> map = new HashMap<>();
+			map.put("count", count);
+			AOPMessageVM response = new AOPMessageVM();
+			response.setData(map);
+			response.setCode(200);
+			response.setMessage("success");
+			return response;
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+	@Override
+	@Transactional
+	public AOPMessageVM calculatePlantConsumptionSummaryReportData(String year, String plantId) {
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadMonthWiseProductionPlanReport";
+			// System.out.println(storedProcedure);
+			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+			Map<String, Integer> map = new HashMap<>();
+			map.put("count", count);
+			AOPMessageVM response = new AOPMessageVM();
+			response.setData(map);
+			response.setCode(200);
+			response.setMessage("success");
+			return response;
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+	@Override
+	@Transactional
+	public AOPMessageVM calculateTurnAroundPlanReportData(String year, String plantId) {
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadTurnAroundPlanReport";
+			// System.out.println(storedProcedure);
+			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+			Map<String, Integer> map = new HashMap<>();
+			map.put("count", count);
+			AOPMessageVM response = new AOPMessageVM();
+			response.setData(map);
+			response.setCode(200);
+			response.setMessage("success");
+			return response;
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+	@Override
+	@Transactional
+	public AOPMessageVM calculateAnnualProductionPlanData(String year, String plantId) {
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadannualProductionPlan";
+			// System.out.println(storedProcedure);
+			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+			Map<String, Integer> map = new HashMap<>();
+			map.put("count", count);
+			AOPMessageVM response = new AOPMessageVM();
+			response.setData(map);
+			response.setCode(200);
+			response.setMessage("success");
+			return response;
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+	@Override
+	@Transactional
+	public AOPMessageVM calculatePlantContributionReportData(String year, String plantId) {
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadPlantContributionReport";
+			// System.out.println(storedProcedure);
+			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+			Map<String, Integer> map = new HashMap<>();
+			map.put("count", count);
+			AOPMessageVM response = new AOPMessageVM();
+			response.setData(map);
+			response.setCode(200);
+			response.setMessage("success");
+			return response;
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+
 	@Transactional
 	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
 			String aopYear) {

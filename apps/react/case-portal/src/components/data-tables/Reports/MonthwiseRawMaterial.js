@@ -1,6 +1,6 @@
 import { Box } from '@mui/material'
 // import DataGridTable from '../ASDataGrid'
-import ReportDataGrid from 'components/data-tables-views/ReportDataGrid2'
+import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
 import {
   Backdrop,
   CircularProgress,
@@ -11,11 +11,18 @@ import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
+import Notification from 'components/Utilities/Notification'
 
 const MonthwiseRawMaterial = () => {
   const keycloak = useSession()
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [normRows, setNormRows] = useState({})
+
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
+  })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
 
   const formatValueToThreeDecimals = (params) => {
     return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
@@ -186,116 +193,115 @@ const MonthwiseRawMaterial = () => {
   const [loading, setLoading] = useState(false)
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
+  const fetchData = async () => {
+    try {
+      setLoading(true)
 
-        const label = `FY ${year} AOP`
+      const label = `FY ${year} AOP`
 
-        var res = await DataService.getAnnualCostAopReport(
-          keycloak,
-          'quantity',
-          label,
-        )
-        var res2 = await DataService.getMonthwiseRawData(keycloak)
+      var res = await DataService.getAnnualCostAopReport(
+        keycloak,
+        'quantity',
+        label,
+      )
+      var res2 = await DataService.getMonthwiseRawData(keycloak)
 
-        // FY%202025-26%20AOP
-        // console.log(res)
-        if (res2?.code == 200) {
-          res2 = res2?.data?.consumptionSummary.map((item, index) => ({
-            ...item,
-            id: index,
-            isEditable: false,
-          }))
+      // FY%202025-26%20AOP
+      // console.log(res)
+      if (res2?.code == 200) {
+        res2 = res2?.data?.consumptionSummary.map((item, index) => ({
+          ...item,
+          id: index,
+          isEditable: false,
+        }))
 
-          setRow2(res2)
-        }
-        if (res?.code == 200) {
-          res = res?.data?.map((item, index) => ({
-            ...item,
-            id: index,
-            isEditable: false,
-          }))
+        setRow2(res2)
+      }
+      if (res?.code == 200) {
+        res = res?.data?.map((item, index) => ({
+          ...item,
+          id: index,
+          isEditable: false,
+        }))
 
-          const formattedItems = res.map((item, index) => ({
-            ...item,
-            idFromApi: item.id,
-            id: index,
-          }))
+        const formattedItems = res.map((item, index) => ({
+          ...item,
+          idFromApi: item.id,
+          id: index,
+        }))
 
-          setRow(formattedItems)
+        setRow(formattedItems)
 
-          // Step 2: Group by `norms`
-          const groupedByNorms = formattedItems.reduce((acc, item) => {
-            const key = item?.norm
-            if (!acc[key]) {
-              acc[key] = []
-            }
-            acc[key].push(item)
-            return acc
-          }, {})
+        // Step 2: Group by `norms`
+        const groupedByNorms = formattedItems.reduce((acc, item) => {
+          const key = item?.norm
+          if (!acc[key]) {
+            acc[key] = []
+          }
+          acc[key].push(item)
+          return acc
+        }, {})
 
-          // Add total row per group
-          const groupedWithTotals = {}
+        // Add total row per group
+        const groupedWithTotals = {}
 
-          for (const [norm, items] of Object.entries(groupedByNorms)) {
-            const totalRow = { particulars: 'Total', norm }
+        for (const [norm, items] of Object.entries(groupedByNorms)) {
+          const totalRow = { particulars: 'Total', norm }
 
-            for (const item of items) {
-              for (const [key, value] of Object.entries(item)) {
-                if (
-                  key !== 'particulars' &&
-                  key !== 'norm'
-                  // &&
-                  // typeof value === 'number'
-                ) {
-                  totalRow[key] = (totalRow[key] || 0) + value
-                }
+          for (const item of items) {
+            for (const [key, value] of Object.entries(item)) {
+              if (
+                key !== 'particulars' &&
+                key !== 'norm'
+                // &&
+                // typeof value === 'number'
+              ) {
+                totalRow[key] = (totalRow[key] || 0) + value
               }
             }
-
-            groupedWithTotals[norm] = [...items, totalRow]
           }
 
-          // Set dynamic state
-          setNormRows(groupedWithTotals)
-
-          // const groupedRows = []
-          // const groups = new Map()
-          // let groupId = 0
-
-          // res.forEach((item) => {
-          //   const groupKey = item.norm
-
-          // if (!groups.has(groupKey)) {
-          //   groups.set(groupKey, [])
-          //   groupedRows.push({
-          //     id: groupId++,
-          //     Particulars: groupKey,
-          //     isGroupHeader: true,
-          //   })
-          // }
-
-          // groups.get(groupKey).push(formattedItem)
-          // groupedRows.push(formattedItem)
-          // })
-
-          // console.log(groupedRows)
-          // setRow(groupedRows)
-
-          // setRow(res)
-          // setRow(res)
-        } else {
-          setRow([])
+          groupedWithTotals[norm] = [...items, totalRow]
         }
-      } catch (err) {
-        console.log(err)
-      } finally {
-        setLoading(false)
-      }
-    }
 
+        // Set dynamic state
+        setNormRows(groupedWithTotals)
+
+        // const groupedRows = []
+        // const groups = new Map()
+        // let groupId = 0
+
+        // res.forEach((item) => {
+        //   const groupKey = item.norm
+
+        // if (!groups.has(groupKey)) {
+        //   groups.set(groupKey, [])
+        //   groupedRows.push({
+        //     id: groupId++,
+        //     Particulars: groupKey,
+        //     isGroupHeader: true,
+        //   })
+        // }
+
+        // groups.get(groupKey).push(formattedItem)
+        // groupedRows.push(formattedItem)
+        // })
+
+        // console.log(groupedRows)
+        // setRow(groupedRows)
+
+        // setRow(res)
+        // setRow(res)
+      } else {
+        setRow([])
+      }
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => {
     fetchData()
   }, [year, plantId])
 
@@ -404,17 +410,57 @@ const MonthwiseRawMaterial = () => {
       flex: 1,
     },
   ]
+
+  const handleCalculate = () => {
+    handleCalculateMonthwiseAndTurnaround()
+  }
+  const handleCalculateMonthwiseAndTurnaround = async () => {
+    try {
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const year = localStorage.getItem('year')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+      var plantId = plantId
+      const res = await DataService.handleCalculatePlantConsumptionData(
+        plantId,
+        year,
+        keycloak,
+      )
+
+      if (res?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refreshed Successfully!',
+          severity: 'success',
+        })
+        fetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refreshed Faild!',
+          severity: 'error',
+        })
+      }
+      return res
+    } catch (error) {
+      console.error('Error!', error)
+    }
+  }
+
   return (
     <Box>
       <ReportDataGrid
         rows={row2}
         columns={columns}
         loading={loading}
+        handleCalculate={handleCalculate}
         permissions={{
           // customHeight: defaultCustomHeight,
           // showWorkFlowBtns: flase,
-          showCalculate: false,
-          allAction: false,
+          showCalculate: true,
+          allAction: true,
         }}
       />
 
@@ -427,13 +473,16 @@ const MonthwiseRawMaterial = () => {
             rows={rows}
             title='Monthwise Production Summary'
             columns={columnDefs}
-            // permissions={{
-            //   // customHeight: defaultCustomHeight,
-            //   showWorkFlowBtns: true,
-            // }}
           />
         </div>
       ))}
+
+      <Notification
+        open={snackbarOpen}
+        message={snackbarData.message}
+        severity={snackbarData.severity}
+        onClose={() => setSnackbarOpen(false)}
+      />
     </Box>
   )
 }

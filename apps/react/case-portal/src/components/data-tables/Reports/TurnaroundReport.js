@@ -169,6 +169,25 @@ const TurnaroundReport = () => {
     }
   }
 
+  const fetchPreviousYear = async () => {
+    setLoading(true)
+    try {
+      const res = await DataService.getTurnaroundReportData(
+        keycloak,
+        'previousYear',
+      )
+      if (res?.code === 200) {
+        setRows2(mapData(res, 'PY'))
+      } else {
+        setRows2([])
+      }
+    } catch (e) {
+      console.error('Error loading previous year:', e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     fetchCurrentYear()
   }, [keycloak, year, plantId])
@@ -180,25 +199,6 @@ const TurnaroundReport = () => {
         id: `${tag}-${i}`,
         isEditable: false,
       }))
-
-    const fetchPreviousYear = async () => {
-      setLoading(true)
-      try {
-        const res = await DataService.getTurnaroundReportData(
-          keycloak,
-          'previousYear',
-        )
-        if (res?.code === 200) {
-          setRows2(mapData(res, 'PY'))
-        } else {
-          setRows2([])
-        }
-      } catch (e) {
-        console.error('Error loading previous year:', e)
-      } finally {
-        setLoading(false)
-      }
-    }
 
     fetchPreviousYear()
   }, [keycloak, year, plantId])
@@ -330,15 +330,29 @@ const TurnaroundReport = () => {
       }
 
       var plantId = plantId
-      const data = await DataService.handleCalculateMonthwiseAndTurnaround(
+      const res = await DataService.calculateTurnAroundPlanReportData(
         plantId,
         year,
         keycloak,
       )
 
-      fetchCurrentYear()
+      if (res?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refreshed Successfully!',
+          severity: 'success',
+        })
+        fetchCurrentYear()
+        fetchPreviousYear()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refreshed Faild!',
+          severity: 'error',
+        })
+      }
 
-      return data
+      return res
     } catch (error) {
       // setSnackbarOpen(true)
       // setSnackbarData({
