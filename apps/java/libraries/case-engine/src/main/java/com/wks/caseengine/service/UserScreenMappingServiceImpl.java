@@ -46,7 +46,7 @@ public class UserScreenMappingServiceImpl implements UserScreenMappingService {
 
 	    try {
 	        List<VerticalScreenMapping> screenMappingsWithDuplicates =
-	                verticalScreenMappingRepository.findByScreenDisplayNameInOrderBySequence(userScreens);
+	                verticalScreenMappingRepository.findByScreenDisplayNameInAndVerticalFKIdOrderBySequence(userScreens,UUID.fromString(verticalId));
 
 	        // Step 1: Remove duplicates by screenCode
 	        Map<String, VerticalScreenMapping> screenCodeMap = new LinkedHashMap<>();
