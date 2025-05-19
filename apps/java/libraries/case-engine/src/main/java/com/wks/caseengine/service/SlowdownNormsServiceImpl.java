@@ -181,7 +181,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			String storedProcedure = vertical.getName() + "_HMD_CalculateSlowdownNorms";
+			String storedProcedure = vertical.getName() + "_"+site.getName()+"_CalculateSlowdownNorms";
 			List<Object[]> list = getCalculatedSlowdownNormsSP(storedProcedure, year, plant.getId().toString(),
 					site.getId().toString(), vertical.getId().toString());
 			List<SlowdownNormsValueDTO> slowdownNormsValueDTOList = new ArrayList<>();

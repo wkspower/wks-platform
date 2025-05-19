@@ -41,7 +41,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			String storedProcedure = vertical.getName() + "_HMD_GETMaintenance";
+			String storedProcedure = vertical.getName() + "_"+site.getName()+"_GETMaintenance";
 			List<Object[]> list = executeDynamicStoredProcedure(storedProcedure, plantId, site.getId().toString(),
 					vertical.getId().toString(), year);
 			List<MaintenanceDetailsDTO> maintenanceDetailsDTOList = new ArrayList<>();

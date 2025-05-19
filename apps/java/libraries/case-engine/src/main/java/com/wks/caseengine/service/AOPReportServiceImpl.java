@@ -20,9 +20,13 @@ import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.AOPReportDTO;
 import com.wks.caseengine.dto.WorkflowYearDTO;
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.SiteRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -39,6 +43,9 @@ public class AOPReportServiceImpl implements AOPReportService{
 	 
 	 @Autowired
 	 private PlantsRepository plantsRepository;
+	 
+	 @Autowired
+	 private SiteRepository siteRepository;
 
 	 @Override
 	 public AOPMessageVM getAnnualAOPReport(String plantId, String year, String reportType, String AopYearFilter) {
@@ -200,8 +207,9 @@ public class AOPReportServiceImpl implements AOPReportService{
 	
 	public List<Object[]> getProductionVolumnDataReport(String plantId, String aopYear, String reportType,String verticalName) {
 	    try {
-	    	
-	        String procedureName = verticalName+"_HMD_ProductionVolumnDataReport";
+	    	Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+	        String procedureName = verticalName+"_"+site.getName()+"_ProductionVolumnDataReport";
 	        String sql = "EXEC " + procedureName +
 	                     " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
 

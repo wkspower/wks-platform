@@ -344,7 +344,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).orElseThrow();
 
 			List<NormAttributeTransactionReceipeDTO> listDTO = new ArrayList<>();
-			String storedProcedure = vertical.getName() + "_HMD_ReceipeWiseGradeDetail";
+			String storedProcedure = vertical.getName() + "_"+site.getName()+"_ReceipeWiseGradeDetail";
 			System.out.println("Executing SP: " + storedProcedure);
 
 			List<Object[]> results = getNormAttributeTransactionReceipeSP(storedProcedure, year,

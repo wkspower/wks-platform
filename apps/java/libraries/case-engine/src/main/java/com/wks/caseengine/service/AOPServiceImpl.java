@@ -342,8 +342,9 @@ public class AOPServiceImpl implements AOPService {
 			String verticalId, String aopYear) {
 		try {
 
-			// Construct dynamic stored procedure name
-			String procedureName = verticalName + "_HMD_MaintenanceCalculation";
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+	        String procedureName = verticalName+"_"+site.getName()+"_MaintenanceCalculation";
 
 			// Create a native query to execute the stored procedure
 			String sql = "EXEC " + procedureName
@@ -370,9 +371,10 @@ public class AOPServiceImpl implements AOPService {
 	public List<Object[]> executeDynamicMaintenanceCalculationPE(String verticalName, String plantId, String siteId,
 			String verticalId, String aopYear) {
 		try {
-
-			// Construct dynamic stored procedure name
-			String procedureName = verticalName + "_HMD_MaintenanceCalculation";
+			
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+	        String procedureName = verticalName+"_"+site.getName()+"_MaintenanceCalculation";
 
 			// Create a native query to execute the stored procedure
 			String sql = "EXEC " + procedureName
