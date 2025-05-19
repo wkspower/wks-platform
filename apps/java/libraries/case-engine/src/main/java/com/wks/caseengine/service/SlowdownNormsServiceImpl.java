@@ -43,18 +43,30 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	private VerticalsRepository verticalRepository;
 
 	@Override
+	@Transactional
 	public List<SlowdownNormsValueDTO> getSlowdownNormsData(String year, String plantId) {
 		try {
 			List<Object[]> objList = null;
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+
 			if (vertical.getName().equalsIgnoreCase("MEG")) {
+				String storedProcedure = vertical.getName() + "_" + site.getName() + "_SlowdownNormCalculation";
+
+				int spResult = getSlowdownNormsSPData(
+						storedProcedure,
+						year,
+						plant.getId().toString(),
+						site.getId().toString(),
+						vertical.getId().toString());
+
 				objList = getSlowdownNorms(year, plant.getId(), "vwScrnSlowdownNorms");
-			}else  {
-				String viewName="vwScrn"+vertical.getName()+"SlowdownNorms";
+			} else {
+				String viewName = "vwScrn" + vertical.getName() + "SlowdownNorms";
 				objList = getSlowdownNorms(year, plant.getId(), viewName);
-			} 
-			
+			}
+
 			List<SlowdownNormsValueDTO> slowdownNormsValueDTOList = new ArrayList<>();
 			for (Object[] row : objList) {
 				SlowdownNormsValueDTO slowdownNormsValueDTO = new SlowdownNormsValueDTO();
@@ -95,6 +107,27 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
+	}
+
+	@Transactional
+	public int getSlowdownNormsSPData(String procedureName, String finYear, String plantId,
+			String siteId, String verticalId) {
+		try {
+			String sql = "EXEC " + procedureName
+					+ " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("siteId", siteId);
+			query.setParameter("verticalId", verticalId);
+			query.setParameter("finYear", finYear);
+
+			return query.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
+		return 0;
 	}
 
 	@Override
@@ -181,7 +214,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			String storedProcedure = vertical.getName() + "_"+site.getName()+"_CalculateSlowdownNorms";
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_CalculateSlowdownNorms";
 			List<Object[]> list = getCalculatedSlowdownNormsSP(storedProcedure, year, plant.getId().toString(),
 					site.getId().toString(), vertical.getId().toString());
 			List<SlowdownNormsValueDTO> slowdownNormsValueDTOList = new ArrayList<>();
@@ -266,16 +299,16 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-	
+
 	@Override
 	@Transactional
-     public List getSlowdownMonths(UUID plantId,String maintenanceName){
+	public List getSlowdownMonths(UUID plantId, String maintenanceName) {
 		try {
-			return	slowdownNormsRepository.getSlowdownMonths(plantId,maintenanceName);
-		}catch(Exception e) {
-			e.printStackTrace();		
-		}  
+			return slowdownNormsRepository.getSlowdownMonths(plantId, maintenanceName);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return null;
-	  }
+	}
 
 }

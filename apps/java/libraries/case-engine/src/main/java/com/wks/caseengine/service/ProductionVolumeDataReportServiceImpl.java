@@ -486,7 +486,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadPlantProductionSummaryReport";
+			String storedProcedure = vertical.getName() + "_LoadPlantProductionSummaryReport";
 			System.out.println(storedProcedure);
 			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
 			Map<String, Integer> map = new HashMap<>();
@@ -509,7 +509,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadMonthWiseProductionPlanReport";
+			String storedProcedure = vertical.getName() + "_LoadMonthWiseProductionPlanReport";
 			// System.out.println(storedProcedure);
 			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
 			Map<String, Integer> map = new HashMap<>();
@@ -524,6 +524,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		}
 
 	}
+
 	@Override
 	@Transactional
 	public AOPMessageVM calculatePlantConsumptionSummaryReportData(String year, String plantId) {
@@ -531,7 +532,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadMonthWiseProductionPlanReport";
+			String storedProcedure = vertical.getName() + "_LoadPlantConsumptionSummaryReport";
 			// System.out.println(storedProcedure);
 			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
 			Map<String, Integer> map = new HashMap<>();
@@ -546,6 +547,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		}
 
 	}
+
 	@Override
 	@Transactional
 	public AOPMessageVM calculateTurnAroundPlanReportData(String year, String plantId) {
@@ -553,7 +555,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadTurnAroundPlanReport";
+			String storedProcedure = vertical.getName() + "_LoadTurnAroundPlanReport";
 			// System.out.println(storedProcedure);
 			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
 			Map<String, Integer> map = new HashMap<>();
@@ -568,6 +570,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		}
 
 	}
+
 	@Override
 	@Transactional
 	public AOPMessageVM calculateAnnualProductionPlanData(String year, String plantId) {
@@ -575,7 +578,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadannualProductionPlan";
+			String storedProcedure = vertical.getName() + "_LoadannualProductionPlan";
 			// System.out.println(storedProcedure);
 			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
 			Map<String, Integer> map = new HashMap<>();
@@ -590,6 +593,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		}
 
 	}
+
 	@Override
 	@Transactional
 	public AOPMessageVM calculatePlantContributionReportData(String year, String plantId) {
@@ -597,7 +601,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadPlantContributionReport";
+			String storedProcedure = vertical.getName() + "_LoadPlantContributionReport";
 			// System.out.println(storedProcedure);
 			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
 			Map<String, Integer> map = new HashMap<>();

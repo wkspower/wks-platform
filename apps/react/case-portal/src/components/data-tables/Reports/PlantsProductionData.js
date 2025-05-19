@@ -388,6 +388,7 @@ const PlantsProductionSummary = () => {
           textAlignment: 'center',
           remarksEditable: true,
           showCalculate: true,
+          showTitle: true,
 
           // showCalculate: false,
           // showWorkFlowBtns: true,

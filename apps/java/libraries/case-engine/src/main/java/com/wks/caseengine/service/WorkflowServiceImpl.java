@@ -103,12 +103,8 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@Autowired
 	private VerticalsRepository verticalRepository;
 
-
 	@Autowired
 	private SiteRepository siteRepository;
-
-
-
 
 	@Override
 	public WorkflowPageDTO getCaseId(String year, String plantId, String siteId, String verticalId) {
@@ -562,25 +558,33 @@ public class WorkflowServiceImpl implements WorkflowService {
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to save data", ex);
 		}
-		
+
 	}
 
 	@Override
 	@Transactional
 	public int calculateExpressionWorkFlow(String year, String plantId) {
+		int totalUpdates = 0;
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadAnnualAOPCost";
-			System.out.println(storedProcedure);
-			return executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+
+			// First SP _LoadAnnualAOPCost
+			String LoadAnnualAOPCost = vertical.getName() + "_LoadAnnualAOPCost";
+			totalUpdates += executeDynamicUpdateProcedure(LoadAnnualAOPCost, plantId, year);
+
+			// Second SP _LoadAnnualAOPCost_MIISContribution
+			String LoadAnnualAOPCost_MIISContribution = vertical.getName()
+					+ "_LoadAnnualAOPCost_MIISContribution";
+			totalUpdates += executeDynamicUpdateProcedure(LoadAnnualAOPCost_MIISContribution, plantId, year);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return 0;
+		return totalUpdates;
 	}
-	
+
 	@Transactional
 	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
 			String aopYear) {

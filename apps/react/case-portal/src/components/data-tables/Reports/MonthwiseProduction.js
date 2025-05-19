@@ -396,7 +396,7 @@ const MonthwiseProduction = () => {
       <ReportDataGrid
         rows={rows}
         setRows={setRows}
-        title='Monthwise Production Summary'
+        title='Monthwise Production Plan'
         columns={columns}
         permissions={{
           customHeight: defaultCustomHeightGrid1,
@@ -406,6 +406,7 @@ const MonthwiseProduction = () => {
           saveBtnForRemark: true,
           saveBtn: true,
           showWorkFlowBtns: true,
+          showTitle: true,
         }}
         treeData
         getTreeDataPath={(rows) => rows.path}

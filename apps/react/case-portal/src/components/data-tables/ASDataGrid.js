@@ -20,6 +20,9 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { GridActionsCellItem, GridRowModes } from '@mui/x-data-grid'
 import Notification from 'components/Utilities/Notification'
+//import CalculateOutlinedIcon from '@mui/icons-material/CalculateOutlined'
+//import Tooltip from '@mui/material/Tooltip'
+
 //import './data-grid-css.css'
 //import './extra-css.css'
 
@@ -428,6 +431,29 @@ const DataGridTable = ({
                 className='unit-chip'
               />
             )}
+            {/* {permissions?.showCalculate && (
+              <Tooltip title='Calculate'>
+                <span>
+                  <Button
+                    variant='contained'
+                    onClick={handleCalculateBtn}
+                    disabled={isButtonDisabled}
+                    sx={{
+                      minWidth: '40px',
+                      padding: '8px',
+                      backgroundColor: '#0100cb',
+                      '&:hover': {
+                        backgroundColor: '#0100cb',
+                        opacity: 0.9,
+                      },
+                    }}
+                  >
+                    <CalculateOutlinedIcon sx={{ color: '#fff' }} />
+                  </Button>
+                </span>
+              </Tooltip>
+            )} */}
+
             {permissions?.showCalculate && (
               <Button
                 variant='contained'

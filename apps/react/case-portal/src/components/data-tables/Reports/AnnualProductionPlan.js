@@ -317,7 +317,7 @@ const AnnualProductionPlan = () => {
     fetchData('OperatingHrs')
     fetchData('AverageHourlyRate')
     fetchData('ProductionPerformance')
-  }, [year, plantId])
+  }, [year, keycloak, plantId])
 
   const handleCalculate = () => {
     handleCalculateMonthwiseAndTurnaround()

@@ -386,6 +386,7 @@ const TurnaroundReport = () => {
         currentRowId={currentRowId}
         setCurrentRowId={setCurrentRowId}
         loading={loading}
+        title='Turn Around Report'
         permissions={{
           customHeight: { mainBox: '32vh', otherBox: '100%' },
           textAlignment: 'center',
@@ -394,6 +395,7 @@ const TurnaroundReport = () => {
           saveBtnForRemark: true,
           saveBtn: true,
           showWorkFlowBtns: true,
+          showTitle: true,
         }}
         saveRemarkData={saveRemarkData}
         handleCalculate={handleCalculate}

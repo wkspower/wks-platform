@@ -20,6 +20,7 @@ const categories = [
 export default function PlantContribution() {
   const keycloak = useSession()
   const year = localStorage.getItem('year')
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
 
   const [loading, setLoading] = useState(false)
   const [reports, setReports] = useState({})
@@ -67,7 +68,7 @@ export default function PlantContribution() {
 
   useEffect(() => {
     loadAll()
-  }, [keycloak, year])
+  }, [keycloak, year, plantId])
 
   const handleCalculate = () => {
     handleCalculateMonthwiseAndTurnaround()

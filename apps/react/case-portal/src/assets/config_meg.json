@@ -11,7 +11,7 @@
     "field": "normParameterFKId",
     "headerName": "Particulars",
     "editable": false,
-    "minWidth": 160,
+    "minWidth": 180,
     "valueGetter": "defaultValueGetter",
     "valueFormatter": "productDisplayNameFormatter",
     "renderEditCell": "renderNormParameterSelectCell"

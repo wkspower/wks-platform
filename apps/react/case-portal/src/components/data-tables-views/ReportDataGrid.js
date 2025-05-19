@@ -19,6 +19,8 @@ import {
   Typography,
 } from '../../../node_modules/@mui/material/index'
 import AuditTrail from 'components/data-tables/AOPWorkFlow/AuditTrail'
+//import CalculateOutlinedIcon from '@mui/icons-material/CalculateOutlined'
+//import Tooltip from '@mui/material/Tooltip'
 // import Notification from 'components/Utilities/Notification'
 
 const ReportDataGrid = ({
@@ -178,6 +180,29 @@ const ReportDataGrid = ({
 
           {/* RIGHT: Buttons */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {/* {permissions?.showCalculate && (
+              <Tooltip title='Calculate'>
+                <span>
+                  <Button
+                    variant='contained'
+                    onClick={handleCalculateBtn}
+                    disabled={isButtonDisabled}
+                    sx={{
+                      minWidth: '40px',
+                      padding: '8px',
+                      backgroundColor: '#0100cb',
+                      '&:hover': {
+                        backgroundColor: '#0100cb',
+                        opacity: 0.9,
+                      },
+                    }}
+                  >
+                    <CalculateOutlinedIcon sx={{ color: '#fff' }} />
+                  </Button>
+                </span>
+              </Tooltip>
+            )} */}
+
             {permissions?.showCalculate && (
               <Button
                 variant='contained'

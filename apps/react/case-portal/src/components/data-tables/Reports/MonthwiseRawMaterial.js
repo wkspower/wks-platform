@@ -456,11 +456,13 @@ const MonthwiseRawMaterial = () => {
         columns={columns}
         loading={loading}
         handleCalculate={handleCalculate}
+        title='Month Wise Raw Data'
         permissions={{
           // customHeight: defaultCustomHeight,
           // showWorkFlowBtns: flase,
           showCalculate: true,
           allAction: true,
+          showTitle: true,
         }}
       />
 

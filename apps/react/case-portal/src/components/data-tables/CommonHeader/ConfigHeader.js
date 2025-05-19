@@ -221,17 +221,27 @@ const getEnhancedAOPColDefs = ({
     if (col.field === 'Particulars' || col.field === 'Particulars2') {
       return {
         ...col,
-        renderCell: (params) => (
-          <div
-            style={{
-              whiteSpace: 'normal',
-              wordBreak: 'break-word',
-              lineHeight: 1.4,
-            }}
-          >
-            <strong>{params.value}</strong>
-          </div>
-        ),
+        renderCell: (params) => {
+          const fullValue = params.value || ''
+          const maxLength = 25
+          const isTruncated = fullValue.length > maxLength
+          const displayValue = isTruncated
+            ? `${fullValue.slice(0, maxLength)}...`
+            : fullValue
+
+          return (
+            <div
+              style={{
+                whiteSpace: 'normal',
+                wordBreak: 'break-word',
+                lineHeight: 1.4,
+              }}
+              title={fullValue}
+            >
+              <strong>{displayValue}</strong>
+            </div>
+          )
+        },
         filterable: false,
       }
     }
