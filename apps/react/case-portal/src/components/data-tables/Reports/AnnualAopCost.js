@@ -65,21 +65,22 @@ const AnnualAopCost = () => {
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const [unit, setUnit] = useState([])
-  const [selectedUnit, setSelectedUnit] = useState('')
+  // const [selectedUnit, setSelectedUnit] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleUnitChange = (event) => {
-    setSelectedUnit(event)
-  }
+  // const handleUnitChange = (event) => {
+  //   setSelectedUnit(event)
+  // }
 
-  useEffect(() => {
-    if (unit?.length > 0) {
-      setSelectedUnit(unit[0].name)
-    }
-  }, [unit])
+  // useEffect(() => {
+  //   if (unit?.length > 0) {
+  //     setSelectedUnit(unit[0].name)
+  //   }
+  // }, [unit])
 
   const fetchData = async (reportType, setState, selectedDropdown) => {
     try {
+      selectedDropdown = localStorage.getItem('year')
       setLoading(true)
       var data = []
 
@@ -97,10 +98,12 @@ const AnnualAopCost = () => {
         }))
         setLoading(false)
 
-        if (reportType == 'aopYearFilter') {
-          setUnit(data?.data)
-          setSelectedUnit(data?.data[0]?.name)
-        } else if (reportType == 'price') {
+        // if (reportType == 'aopYearFilter') {
+        //   setUnit(data?.data)
+        //   setSelectedUnit(data?.data[0]?.name)
+        // }
+
+        if (reportType == 'price') {
           const headers2 = data?.data[0]?.headers
           setHeaders2(headers2)
           const keys2 = data?.data[0]?.keys
@@ -125,16 +128,16 @@ const AnnualAopCost = () => {
     }
   }
 
-  // const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
-  const year = extractYear(selectedUnit) || '2025-26'
-  const headerMap = generateHeaderNames(year)
+  // const year = extractYear(selectedUnit)
+  // const headerMap = generateHeaderNames(year)
 
-  function extractYear(dropdownValue) {
-    if (!dropdownValue) return ''
-    const parts = dropdownValue.trim().split(' ')
-    return parts.length > 1 ? parts[1] : ''
-  }
+  // function extractYear(dropdownValue) {
+  //   if (!dropdownValue) return ''
+  //   const parts = dropdownValue.trim().split(' ')
+  //   return parts.length > 1 ? parts[1] : ''
+  // }
 
   const colsProduction = getEnhancedAnnualAopCostReport({
     headerMap,
@@ -169,19 +172,19 @@ const AnnualAopCost = () => {
   })
 
   useEffect(() => {
-    fetchData('aopYearFilter', setUnit)
+    // fetchData('aopYearFilter', setUnit)
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   useEffect(() => {
-    if (selectedUnit) {
-      fetchData('production', setRowsProduction, selectedUnit)
-      fetchData('price', setRowsPrice, selectedUnit)
-      fetchData('norm', setRowsNorm, selectedUnit)
-      fetchData('quantity', setRowsQuantity, selectedUnit)
-      fetchData('normCost', setRowsNormCost, selectedUnit)
-    }
+    // if (selectedUnit) {
+    fetchData('production', setRowsProduction)
+    fetchData('price', setRowsPrice)
+    fetchData('norm', setRowsNorm)
+    fetchData('quantity', setRowsQuantity)
+    fetchData('normCost', setRowsNormCost)
+    // }
   }, [
-    selectedUnit,
+    // selectedUnit,
     sitePlantChange,
     oldYear,
     yearChanged,
@@ -199,7 +202,7 @@ const AnnualAopCost = () => {
       </Backdrop>
 
       <Box display='flex' flexDirection='column' gap={2}>
-        <Box display='flex' justifyContent='flex-end'>
+        {/* <Box display='flex' justifyContent='flex-end'>
           <TextField
             select
             value={selectedUnit}
@@ -222,7 +225,7 @@ const AnnualAopCost = () => {
               </MenuItem>
             ))}
           </TextField>
-        </Box>
+        </Box> */}
 
         <div>
           <CustomAccordion defaultExpanded disableGutters>
