@@ -14,38 +14,8 @@ import {
 import { remarkColumn } from 'components/Utilities/remarkColumn'
 import ReportDataGrid from './ReportDataGrid'
 import Notification from 'components/Utilities/Notification'
-import { styled } from '@mui/material/styles'
-import MuiAccordion from '@mui/material/Accordion'
-import MuiAccordionDetails from '@mui/material/AccordionDetails'
-import MuiAccordionSummary from '@mui/material/AccordionSummary'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
-const CustomAccordion = styled((props) => (
-  <MuiAccordion disableGutters elevation={0} square {...props} />
-))(() => ({
-  position: 'unset',
-  border: 'none',
-  boxShadow: 'none',
-  margin: '0px',
-  '&:before': {
-    display: 'none',
-  },
-}))
-const CustomAccordionSummary = styled((props) => (
-  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
-))(() => ({
-  backgroundColor: '#fff',
-  padding: '0px 12px',
-  minHeight: '40px',
-  '& .MuiAccordionSummary-content': {
-    margin: '8px 0',
-  },
-}))
-const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
-  padding: '0px 0px 12px',
-  backgroundColor: '#F2F3F8',
-}))
-const ProductionAopView = () => {
+const ProductionAopView = ({ handleCalculate, fetchSecondGridData }) => {
   const keycloak = useSession()
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
@@ -202,6 +172,12 @@ const ProductionAopView = () => {
       setLoading(false)
     }
   }
+  const handlecalcualteWithRefreshAll = () => {
+    handleCalculate()
+
+    fetchSecondGridData()
+    fetchData()
+  }
 
   useEffect(() => {
     fetchData()
@@ -211,11 +187,7 @@ const ProductionAopView = () => {
   const saveWorkflowData = async () => {
     try {
       // console.log(rows, 'workflowDto')
-      const response = await DataService.saveAnnualWorkFlowData(
-        keycloak,
-        rows,
-        plantId,
-      )
+      await DataService.saveAnnualWorkFlowData(keycloak, rows, plantId)
       // console.log(response, 'response')
       setSnackbarData({
         message: 'Data Saved Successfully!',
@@ -235,63 +207,56 @@ const ProductionAopView = () => {
   }
   return (
     <Box
-      sx={{
-        height: 'auto',
-        width: '100%',
-        padding: '0px 0px',
-        margin: '0px 0px 0px',
-        backgroundColor: '#F2F3F8',
-        borderRadius: 0,
-        borderBottom: 'none',
-      }}
+    // sx={{
+    //   height: 'auto',
+    //   width: '100%',
+    //   padding: '0px 0px',
+    //   margin: '0px 0px 0px',
+    //   backgroundColor: '#F2F3F8',
+    //   borderRadius: 0,
+    //   borderBottom: 'none',
+    // }}
     >
-      <div>
-        <CustomAccordion defaultExpanded disableGutters>
-          <CustomAccordionSummary
-            aria-controls='meg-grid-content'
-            id='meg-grid-header'
-          >
-            <Typography component='span' className='grid-title'>
-              Production Data
-            </Typography>
-          </CustomAccordionSummary>
-          <CustomAccordionDetails>
-            {/* <Box> */}
-            <ReportDataGrid
-              rows={rows}
-              loading={loading}
-              setRows={setRows}
-              title='Monthwise Production Summary'
-              columns={columns}
-              saveWorkflowData={saveWorkflowData}
-              permissions={{
-                // customHeight: defaultCustomHeightGrid1,
-                textAlignment: 'center',
-                remarksEditable: true,
-                saveBtn: true,
-                allAction: false,
-                // showCalculate: true,
-                // showWorkFlowBtns: true,
-              }}
-              treeData
-              getTreeDataPath={(rows) => rows.path}
-              defaultGroupingExpansionDepth={1} // expand only first level by default
-              disableSelectionOnClick
-              // columnGroupingModel={columnGroupingModel}
-              processRowUpdate={processRowUpdate}
-              remarkDialogOpen={remarkDialogOpen}
-              unsavedChangesRef={unsavedChangesRef}
-              setRemarkDialogOpen={setRemarkDialogOpen}
-              currentRemark={currentRemark}
-              setCurrentRemark={setCurrentRemark}
-              currentRowId={currentRowId}
-              setCurrentRowId={setCurrentRowId}
-              modifiedCells={modifiedCells}
-            />
-            {/* </Box> */}
-          </CustomAccordionDetails>
-        </CustomAccordion>
-      </div>
+      {/* <Typography component='span' className='grid-title'>
+        Production Data
+      </Typography> */}
+
+      {/* <Box> */}
+      <ReportDataGrid
+        rows={rows}
+        loading={loading}
+        setRows={setRows}
+        title='Production Data'
+        columns={columns}
+        saveWorkflowData={saveWorkflowData}
+        permissions={{
+          // customHeight: defaultCustomHeightGrid1,
+          textAlignment: 'center',
+          remarksEditable: true,
+          saveBtn: true,
+          allAction: true,
+          showCalculate: true,
+          showTitle: true,
+          // showWorkFlowBtns: true,
+        }}
+        treeData
+        getTreeDataPath={(rows) => rows.path}
+        defaultGroupingExpansionDepth={1} // expand only first level by default
+        disableSelectionOnClick
+        // columnGroupingModel={columnGroupingModel}
+        processRowUpdate={processRowUpdate}
+        remarkDialogOpen={remarkDialogOpen}
+        unsavedChangesRef={unsavedChangesRef}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={setCurrentRowId}
+        modifiedCells={modifiedCells}
+        handleCalculate={handlecalcualteWithRefreshAll}
+      />
+      {/* </Box> */}
+
       <Notification
         open={snackbarOpen}
         message={snackbarData.message}

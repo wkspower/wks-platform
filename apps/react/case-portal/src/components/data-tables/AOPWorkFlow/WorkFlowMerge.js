@@ -343,17 +343,6 @@ const WorkFlowMerge = () => {
       setLoading(false)
     }
   }
-  // useEffect(() => {
-  //   if (showCreateCasebutton) {
-  //     setIsEdit(true)
-  //   } else {
-  //     setIsEdit(false)
-  //   }
-  // }, [showCreateCasebutton])
-
-  // console.log(activeStep, 'activeStep')
-  // console.log(masterSteps, 'masterSteps')
-  // console.log(rows)
 
   const createCase = async () => {
     // 1. Prevent double‐submit
@@ -596,7 +585,10 @@ const WorkFlowMerge = () => {
 
         {tabIndex === 0 && (
           <div>
-            <ProductionAopView />
+            <ProductionAopView
+              handleCalculate={handleCalculate}
+              fetchSecondGridData={fetchData}
+            />
 
             {/* <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
               Annual AOP Cost
@@ -636,7 +628,7 @@ const WorkFlowMerge = () => {
                 remarksEditable: true,
                 showCreateCasebutton: showCreateCasebutton,
                 showTitle: true,
-                showCalculate: true,
+                // showCalculate: true,
                 showWorkFlowBtns: true,
                 // approveBtn: false,
               }}

@@ -1,5 +1,5 @@
-// StepperNav.jsx
-import { useEffect, useMemo, useState } from 'react'
+// --- StepperNav.jsx ---------------------------------------------------
+import { useEffect, useState } from 'react'
 import { Stepper, Step, StepLabel } from '@mui/material'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useSession } from 'SessionStoreContext'
@@ -8,96 +8,82 @@ import plan from '../../menu/plan'
 import workspace from '../../menu/workspace'
 import { mapScreen } from 'components/Utilities/menuRefractoring'
 
-const steps = [
-  { label: 'Configuration', path: 'configuration' },
-  { label: 'Production Volume', path: 'production-volume-data' },
-  { label: 'Business Demand', path: 'business-demand' },
-  { label: 'Shutdown Plan', path: 'shutdown-plan' },
-  { label: 'Slowdown Plan', path: 'slowdown-plan' },
-  { label: 'Maintenance', path: 'maintenance-details' },
-  { label: 'Production AOP', path: 'production-aop' },
-  { label: 'Normal Ops', path: 'normal-op-norms' },
-  { label: 'Shutdown Norms', path: 'shutdown-norms' },
-  { label: 'Slowdown Norms', path: 'slowdown-norms' },
-  { label: 'Consumption AOP', path: 'consumption-aop' },
-]
+const staticMenu = [plan, workspace]
 
-const StepperNav = () => {
+export default function StepperNav() {
+  // -- Router & Auth -----------------------
   const location = useLocation()
   const navigate = useNavigate()
   const keycloak = useSession()
+
+  // -- IDs from Storage --------------------
   const verticalId = localStorage.getItem('verticalId')
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const staticMenu = [plan, workspace]
-  const [menuItems, setMenuItems] = useState(staticMenu)
 
+  // -- Steps State -------------------------
+  const [steps, setSteps] = useState([])
+
+  // -- Helper to build steps array ---------
+  const buildSteps = (menuArr) => {
+    const planGroup = menuArr
+      .flatMap((m) => m.children || [])
+      .find((c) => c.id === 'production-norms-plan')
+    if (!planGroup?.children) return []
+    return planGroup.children.map((item) => {
+      const slug = item.url.split('/').pop()
+      return { label: item.title, url: item.url, key: slug }
+    })
+  }
+
+  // -- Effect: load steps when verticalId (or auth) changes --
   useEffect(() => {
+    // guard: need auth + vertical
     if (!keycloak?.token || !verticalId) return
 
     DataService.getScreenbyPlant(keycloak, verticalId, plantId)
       .then((res) => {
+        // map API -> menu items
         const dynamic = Array.isArray(res.data) ? res.data.map(mapScreen) : []
+        // choose dynamic if present, else static
+        const sourceMenu = dynamic.length ? dynamic : staticMenu
 
-        if (dynamic.length) {
-          setMenuItems(dynamic)
-          // setMenuItems(staticMenu)
+        // build steps and set state
+        const newSteps = buildSteps(sourceMenu)
+        setSteps(newSteps)
+
+        // navigate to first step whenever verticalId changes
+        if (newSteps.length) {
+          navigate(newSteps[0].url, { replace: true })
         }
       })
       .catch((err) => {
-        console.error('Menu API failed, using static menu', err)
-        setMenuItems(staticMenu)
+        console.error('Menu API failed, fallback to static', err)
+        const newSteps = buildSteps(staticMenu)
+        setSteps(newSteps)
+        if (newSteps.length) {
+          navigate(newSteps[0].url, { replace: true })
+        }
       })
+    // IMPORTANT: include verticalId so this re-runs on vertical change
   }, [keycloak, verticalId, plantId])
-  const menuValue = useMemo(() => ({ items: menuItems }), [menuItems])
-  //   const steps = useMemo(() => {
-  //     // Locate the group
-  //     const planGroup = menuItems
-  //       .flatMap((item) => item.children || [])
-  //       .find((child) => child.id === 'production-norms-plan')
 
-  //     // If not found or no children, return empty
-  //     if (!planGroup?.children) return []
-
-  //     // Map each child to { label, url }
-  //     return planGroup.children.map((item) => ({
-  //       label: item.title,
-  //       url: item.url, // e.g. "/production-norms-plan/business-demand"
-  //       key: item.id, // unique key
-  //     }))
-  //   }, [menuItems])
-
+  // -- Determine active step index ---------
   const currentPath = location.pathname.split('/').pop()
-  const activeStep = steps.findIndex((step) => step.path === currentPath)
-  // console.log(menuValue)
+  const activeStep = steps.findIndex((s) => s.key === currentPath)
 
-  const handleStepClick = (index) => {
-    navigate(`/production-norms-plan/${steps[index].path}`)
-  }
-
+  // -- Render Stepper ----------------------tested
   return (
     <Stepper
-      sx={{
-        // active icon & label
-        // '& .MuiStepIcon-root.Mui-active': { color: 'lightgreen' },
-        '& .MuiStepLabel-label.Mui-active': { color: '#1ba0f2' },
-        // completed icon
-        // '& .MuiStepIcon-root.Mui-completed': { color: 'lightgreen' },
-      }}
       nonLinear
-      activeStep={activeStep >= 0 ? activeStep : 0}
       alternativeLabel
+      activeStep={activeStep >= 0 ? activeStep : 0}
+      sx={{ '& .MuiStepLabel-label.Mui-active': { color: '#1ba0f2' } }}
     >
-      {steps.map((step, index) => (
-        <Step
-          key={step.path}
-          onClick={() => handleStepClick(index)}
-          //   onClick={() => navigate(step.url)}
-        >
+      {steps.map((step) => (
+        <Step key={step.key} onClick={() => navigate(step.url)}>
           <StepLabel>{step.label}</StepLabel>
         </Step>
       ))}
     </Stepper>
   )
 }
-
-export default StepperNav
