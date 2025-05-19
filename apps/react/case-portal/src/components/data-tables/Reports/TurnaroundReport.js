@@ -16,9 +16,11 @@ const TurnaroundReport = () => {
     rowsBeforeChange: {},
   })
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
-
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+  const [remarkDialogOpen2, setRemarkDialogOpen2] = useState(false)
+  const [currentRemark2, setCurrentRemark2] = useState('')
+  const [currentRowId2, setCurrentRowId2] = useState(null)
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [modifiedCells2, setModifiedCells2] = React.useState({})
 
@@ -42,6 +44,11 @@ const TurnaroundReport = () => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
+  }
+  const handleRemarkCellClick2 = (row) => {
+    setCurrentRemark2(row.remarks || '')
+    setCurrentRowId2(row.id)
+    setRemarkDialogOpen2(true)
   }
 
   const formatValueToThreeDecimals = (params) => {
@@ -126,7 +133,7 @@ const TurnaroundReport = () => {
               whiteSpace: 'nowrap',
               width: ' 100%',
             }}
-            onClick={() => handleRemarkCellClick(params.row)}
+            onClick={() => handleRemarkCellClick2(params.row)}
           >
             {truncateRemarks(params.value) || 'Click to add remark'}
           </div>
@@ -168,7 +175,12 @@ const TurnaroundReport = () => {
       setLoading(false)
     }
   }
-
+  const mapData2 = (data, tag) =>
+    (data?.data?.plantTurnAroundReportData || []).map((item, i) => ({
+      ...item,
+      id: `${tag}-${i}`,
+      isEditable: false,
+    }))
   const fetchPreviousYear = async () => {
     setLoading(true)
     try {
@@ -177,7 +189,7 @@ const TurnaroundReport = () => {
         'previousYear',
       )
       if (res?.code === 200) {
-        setRows2(mapData(res, 'PY'))
+        setRows2(mapData2(res, 'PY'))
       } else {
         setRows2([])
       }
@@ -193,13 +205,6 @@ const TurnaroundReport = () => {
   }, [keycloak, year, plantId])
 
   useEffect(() => {
-    const mapData = (data, tag) =>
-      (data?.data?.plantTurnAroundReportData || []).map((item, i) => ({
-        ...item,
-        id: `${tag}-${i}`,
-        isEditable: false,
-      }))
-
     fetchPreviousYear()
   }, [keycloak, year, plantId])
 
@@ -407,13 +412,13 @@ const TurnaroundReport = () => {
         processRowUpdate={processRowUpdate2}
         disableSelectionOnClick
         defaultGroupingExpansionDepth={1}
-        remarkDialogOpen={remarkDialogOpen}
+        remarkDialogOpen={remarkDialogOpen2}
         unsavedChangesRef={unsavedChangesRef}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={setCurrentRowId}
+        setRemarkDialogOpen={setRemarkDialogOpen2}
+        currentRemark={currentRemark2}
+        setCurrentRemark={setCurrentRemark2}
+        currentRowId={currentRowId2}
+        setCurrentRowId={setCurrentRowId2}
         saveRemarkData={saveRemarkData}
         loading={loading}
         permissions={{
