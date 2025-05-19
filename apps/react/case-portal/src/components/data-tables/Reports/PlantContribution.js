@@ -120,20 +120,25 @@ export default function PlantContribution() {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {categories.map(({ key, title }) => {
+      {categories.map(({ key, title }, idx) => {
         const rpt = reports[key] || {}
+        const canCalculate = idx === 0
         return (
-          <Box key={key} sx={{ mt: 2 }}>
-            {/* <Typography variant='h6'>{title}</Typography> */}
-            <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
+          <Box key={key} sx={{ mt: 0 }}>
+            {/* <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
               {title}
-            </Typography>
+            </Typography> */}
             <ReportDataGrid
               columns={rpt.columns || []}
               columnGroupingModel={rpt.columnGrouping || []}
               rows={rpt.rows || []}
               handleCalculate={handleCalculate}
-              permissions={{ textAlignment: 'center', showCalculate: true }}
+              title={title}
+              permissions={{
+                textAlignment: 'center',
+                showCalculate: canCalculate,
+                showTitle: true,
+              }}
             />
           </Box>
         )

@@ -386,6 +386,7 @@ const BusinessDemand = ({ permissions }) => {
       saveWithRemark: false,
       saveBtn: false,
       isOldYear: isOldYear,
+      // showStepper:false,
     }
   }
   const adjustedPermissions = getAdjustedPermissions(
@@ -426,6 +427,7 @@ const BusinessDemand = ({ permissions }) => {
             <Box sx={{ width: '100%', margin: 0 }}>
               <ProductionvolumeData
                 permissions={{
+                  allAction: false,
                   showAction: false,
                   addButton: false,
                   deleteButton: false,

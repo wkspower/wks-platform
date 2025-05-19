@@ -377,15 +377,20 @@ const AnnualProductionPlan = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
+      {/* <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Assumptions & remarks{' '}
-      </Typography>
+      </Typography> */}
 
       <ReportDataGrid
         rows={rowsAssumptions}
         columns={columnsAssumptions}
         handleCalculate={handleCalculate}
-        permissions={{ showWorkFlowBtns: true, showCalculate: true }}
+        title='Assumptions & remarks'
+        permissions={{
+          showWorkFlowBtns: true,
+          showCalculate: true,
+          showTitle: true,
+        }}
       />
 
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>

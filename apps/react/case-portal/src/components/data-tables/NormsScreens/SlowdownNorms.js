@@ -812,6 +812,7 @@ const SlowdownNorms = () => {
       saveBtn: true,
       showCalculate: lowerVertName == 'meg' ? false : false,
       noColor: true,
+      allAction: false,
     },
     isOldYear,
   )

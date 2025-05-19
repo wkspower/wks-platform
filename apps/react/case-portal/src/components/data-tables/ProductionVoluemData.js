@@ -494,6 +494,7 @@ const ProductionvolumeData = ({ permissions }) => {
     if (isOldYear != 1) return permissions
     return {
       ...permissions,
+      allAction: false,
       showAction: false,
       addButton: false,
       deleteButton: false,
@@ -509,6 +510,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const adjustedPermissions = getAdjustedPermissions(
     {
       showAction: permissions?.showAction ?? false,
+      allAction: permissions?.allAction ?? true,
       addButton: permissions?.addButton ?? false,
       deleteButton: permissions?.deleteButton ?? false,
       editButton: permissions?.editButton ?? false,

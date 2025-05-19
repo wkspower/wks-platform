@@ -574,6 +574,7 @@ const ShutDown = ({ permissions }) => {
       saveWithRemark: false,
       saveBtn: false,
       isOldYear: isOldYear,
+      allAction: false,
     }
   }
 
@@ -587,6 +588,7 @@ const ShutDown = ({ permissions }) => {
       saveWithRemark: permissions?.saveWithRemark ?? true,
       saveBtn: permissions?.saveBtn ?? true,
       customHeight: permissions?.customHeight,
+      allAction: false,
     },
     isOldYear,
   )

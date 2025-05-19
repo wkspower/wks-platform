@@ -237,6 +237,7 @@ const MaintenanceTable = () => {
       saveWithRemark: false,
       saveBtn: false,
       isOldYear: isOldYear,
+      allAction: false,
     }
   }
 
@@ -250,6 +251,7 @@ const MaintenanceTable = () => {
       saveWithRemark: false,
       saveBtn: false,
       showRefresh: false,
+      allAction: false,
     },
     isOldYear,
   )

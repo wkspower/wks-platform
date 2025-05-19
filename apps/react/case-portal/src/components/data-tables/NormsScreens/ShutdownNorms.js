@@ -798,6 +798,7 @@ const ShutdownNorms = () => {
       isOldYear: isOldYear,
       showCalculate: false,
       noColor: true,
+      allAction: false,
     }
   }
 
@@ -813,6 +814,7 @@ const ShutdownNorms = () => {
       saveBtn: true,
       showCalculate: lowerVertName == 'meg' ? false : true,
       noColor: true,
+      allAction: false,
     },
     isOldYear,
   )

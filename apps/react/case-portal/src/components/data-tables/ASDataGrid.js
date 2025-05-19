@@ -740,7 +740,7 @@ const DataGridTable = ({
               disabled={isCreatingCase || !showCreateCasebutton}
               className='btn-save'
             >
-              {isCreatingCase ? 'Submitting�' : 'Submit'}
+              {isCreatingCase ? 'Submitting…' : 'Submit'}
             </Button>
           )} */}
 
