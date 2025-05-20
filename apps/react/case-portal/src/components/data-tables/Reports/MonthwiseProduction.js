@@ -352,6 +352,7 @@ const MonthwiseProduction = () => {
   }
   const handleCalculateMonthwiseAndTurnaround = async () => {
     try {
+      setLoading(true)
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
       if (storedPlant) {
@@ -383,6 +384,8 @@ const MonthwiseProduction = () => {
       return res
     } catch (error) {
       console.error('Error!', error)
+    } finally {
+      setLoading(false)
     }
   }
   return (

@@ -81,7 +81,12 @@ const DataGridTable = ({
   deleteRowData = () => {},
   handleAddPlantSite = () => {},
   selectedUsers = [],
-  setSelectedUsers = () => {},
+  // setSelectedUsers = () => {},
+  selectionModel = [],
+  setSelectionModel = () => {},
+  // onSelectionModelChange = () => {},
+  handleDeleteSelected = () => {},
+
   // createCase = () => {},
   // isCreatingCase = false,
   // showCreateCasebutton = false,
@@ -367,10 +372,10 @@ const DataGridTable = ({
   // const boxHeight = permissions?.customHeight?.mainBox
   const otherHeight = permissions?.customHeight?.otherBox
   // console.log(boxHeight)
-  const handleDeleteAll = () => {
-    setSelectedUsers([])
-    setRows([])
-  }
+  // const handleDeleteAll = () => {
+  //   setSelectedUsers([])
+  //   setRows([])
+  // }
   // console.log(selectedUsers?.length)
   const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
   // console.log(showDeleteAll)
@@ -629,18 +634,15 @@ const DataGridTable = ({
           sortingOrder={[]}
           disableSelectionOnClick
           checkboxSelection={permissions?.showCheckBox}
+          selectionModel={selectionModel}
+          onSelectionModelChange={(newSelection) =>
+            setSelectionModel(newSelection)
+          }
+          // onSelectionModelChange={(itm) => console.log(itm)}
+          // onSelectionModelChange={(newModel) => setSelectionModel(newModel)}
           columns={columns.map((col) => ({
             ...col,
-            // editable: (params) => {
-            //   if (
-            //     permissions?.remarksEditable &&
-            //     params.row.isEditable === false &&
-            //     col.field !== lastColumnField
-            //   ) {
-            //     return false
-            //   }
-            //   return col.field === lastColumnField
-            // },
+
             cellClassName: (params) => {
               if (modifiedCells[params.row.id]?.includes(params.field)) {
                 return 'red-first-cell '
@@ -780,8 +782,9 @@ const DataGridTable = ({
               className='btn-save'
               onClick={saveModalOpen}
               disabled={isButtonDisabled}
-              loading={loading}
-              loadingposition='start'
+              // loading={loading}
+              // loadingposition='start'
+              {...(loading ? {} : {})}
             >
               Approve
             </Button>
@@ -807,12 +810,7 @@ const DataGridTable = ({
             <Button
               variant='contained'
               className='btn-save'
-              onClick={() => {
-                // Write any additional logic here before navigating.
-                // console.log('Navigating to dashboard')
-                // navigate('/user-form')
-                handleDeleteAll()
-              }}
+              onClick={handleDeleteSelected}
               disabled={isButtonDisabled}
               loading={loading} // Use the loading prop to trigger loading state
               loadingposition='start' // Use loadingPosition to control where the spinner appears
@@ -823,14 +821,12 @@ const DataGridTable = ({
         </Box>
       )}
 
-      {(permissions?.allActionOfBottomBtns ?? true) && (
-        <Notification
-          open={snackbarOpen}
-          message={snackbarData?.message || ''}
-          severity={snackbarData?.severity || 'info'}
-          onClose={() => setSnackbarOpen(false)}
-        />
-      )}
+      <Notification
+        open={snackbarOpen}
+        message={snackbarData?.message || ''}
+        severity={snackbarData?.severity || 'info'}
+        onClose={() => setSnackbarOpen(false)}
+      />
 
       <Dialog
         open={openDeleteDialogeBox}

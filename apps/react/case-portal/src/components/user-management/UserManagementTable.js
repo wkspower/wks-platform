@@ -55,6 +55,8 @@ const UserManagementTable = ({ keycloak }) => {
   // State for Autocomplete selections.
   // final selections: used for grid rows.
   const [selectedUsers, setSelectedUsers] = useState([])
+  const [selectionModel, setSelectionModel] = useState([])
+
   // temporary state: used for user selection (confirmation required via Enter)
   const [tempSelectedUsers, setTempSelectedUsers] = useState([])
   const [searchOptions, setSearchOptions] = useState([])
@@ -113,28 +115,6 @@ const UserManagementTable = ({ keycloak }) => {
     getPlantAndSite()
   }, [keycloak])
 
-  // Trigger search API for users.
-  // const handleSearchChange = async (event, inputValue) => {
-  //   if (inputValue.length > 2) {
-  //     setLoading(true)
-  //     try {
-  //       const res = await DataService.getUserBySearch(keycloak, inputValue)
-  //       // Assume res.data is an array of user objects.
-  //       const extendedOptions =
-  //         res.data.length > 0
-  //           ? [...res.data, { id: 'confirm', username: 'Confirm Selection' }]
-  //           : []
-  //       setSearchOptions(extendedOptions)
-  //       // setSearchOptions(res.data)
-  //     } catch (error) {
-  //       console.error('Error searching users:', error)
-  //     } finally {
-  //       setLoading(false)
-  //     }
-  //   } else {
-  //     setSearchOptions([])
-  //   }
-  // }
   const handleSearchChange = async (value) => {
     if (value.length > 2) {
       setLoading(true)
@@ -255,7 +235,11 @@ const UserManagementTable = ({ keycloak }) => {
   }, [keycloak, plantSiteData])
 
   const defaultCustomHeight = { mainBox: '60vh', otherBox: '124%' }
-
+  const handleDeleteSelected = () => {
+    console.log(selectionModel)
+    setRows((prev) => prev.filter((row) => !selectionModel.includes(row.id)))
+    setSelectionModel([]) // clear selection
+  }
   return (
     <Box sx={{ height: 600, width: '100%', p: 2 }}>
       {/* Autocomplete for selecting multiple users */}
@@ -277,27 +261,34 @@ const UserManagementTable = ({ keycloak }) => {
               handleSearchChange(newVal)
             }
           }}
-          onChange={(e, newSel) => setTempSelectedUsers(newSel)}
+          onChange={(e, newSel) => {
+            setTempSelectedUsers(newSel)
+            finalizeSelection(newSel)
+            e.preventDefault()
+          }}
           loading={loading}
           noOptionsText='No users found'
           sx={{ width: '100%' }}
-          renderOption={(props, option, { selected }) => (
-            <li {...props}>
-              <Checkbox checked={selected} style={{ marginRight: 8 }} />
-              <ListItemText primary={option.username} />
-            </li>
-          )}
+          renderOption={(props, option, { selected }) => {
+            const { id } = props
+            return (
+              <li key={id} {...props}>
+                <Checkbox checked={selected} style={{ marginRight: 8 }} />
+                <ListItemText primary={option.username} />
+              </li>
+            )
+          }}
           renderInput={(params) => (
             <TextField
               {...params}
               label='Select Users'
               variant='outlined'
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  finalizeSelection(tempSelectedUsers)
-                  e.preventDefault()
-                }
-              }}
+              // onKeyDown={(e) => {
+              //   if (e.key === 'Enter') {
+              //     finalizeSelection(tempSelectedUsers)
+              //     e.preventDefault()
+              //   }
+              // }}
             />
           )}
         />
@@ -319,6 +310,10 @@ const UserManagementTable = ({ keycloak }) => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
+        selectionModel={selectionModel}
+        setSelectionModel={setSelectionModel}
+        setModifiedCells={setModifiedCells}
+        handleDeleteSelected={handleDeleteSelected}
         permissions={{
           showAction: true,
           addButton: false,
@@ -332,6 +327,7 @@ const UserManagementTable = ({ keycloak }) => {
           nextBtn: true,
           deleteAllBtn: true,
           customHeight: defaultCustomHeight,
+          allAction: false,
         }}
       />
     </Box>

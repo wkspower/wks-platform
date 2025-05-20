@@ -75,6 +75,7 @@ export default function PlantContribution() {
   }
   const handleCalculateMonthwiseAndTurnaround = async () => {
     try {
+      setLoading(true)
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
       if (storedPlant) {
@@ -112,6 +113,8 @@ export default function PlantContribution() {
       //   severity: 'error',
       // })
       console.error('Error!', error)
+    } finally {
+      setLoading(false)
     }
   }
 

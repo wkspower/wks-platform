@@ -88,8 +88,12 @@ export default function StepperNav() {
       }}
     >
       {steps.map((step) => (
-        <Step key={step.key} onClick={() => navigate(step.url)}>
-          <StepLabel>{step.label}</StepLabel>
+        <Step
+          sx={{ cursor: 'pointer' }}
+          key={step.key}
+          onClick={() => navigate(step.url)}
+        >
+          <StepLabel sx={{ cursor: 'pointer' }}>{step.label}</StepLabel>
         </Step>
       ))}
     </Stepper>

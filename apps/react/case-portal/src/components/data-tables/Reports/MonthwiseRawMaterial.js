@@ -416,6 +416,8 @@ const MonthwiseRawMaterial = () => {
   }
   const handleCalculateMonthwiseAndTurnaround = async () => {
     try {
+      setLoading(true)
+
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
       if (storedPlant) {
@@ -446,6 +448,8 @@ const MonthwiseRawMaterial = () => {
       return res
     } catch (error) {
       console.error('Error!', error)
+    } finally {
+      setLoading(false)
     }
   }
 

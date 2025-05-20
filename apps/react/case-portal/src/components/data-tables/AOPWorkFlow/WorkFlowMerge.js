@@ -143,6 +143,7 @@ const WorkFlowMerge = () => {
   const year = localStorage.getItem('year')
   const handleCalculateMeg = async () => {
     try {
+      setLoading(true)
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
       if (storedPlant) {
@@ -181,6 +182,8 @@ const WorkFlowMerge = () => {
         severity: 'error',
       })
       console.error('Error!', error)
+    } finally {
+      setLoading(false)
     }
   }
 

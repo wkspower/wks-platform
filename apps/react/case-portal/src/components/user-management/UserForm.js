@@ -193,38 +193,6 @@ const UserAccessForm = ({ keycloak }) => {
   const getVerticalById = (id) =>
     plantSiteData.find((vertical) => vertical.id === id)
 
-  // --- Dynamic Fetching of Screens ---
-  // Whenever selectedVerticals changes, fetch the available screens
-  // For simplicity, we use the first selected vertical.
-  // useEffect(() => {
-  //   const fetchScreensForActiveVertical = async () => {
-  //     if (selectedVerticals.length > 0) {
-  //       const activeVerticalId = selectedVerticals[0]
-  //       try {
-  //         const response = await DataService.getUserScreen(
-  //           keycloak,
-  //           activeVerticalId,
-  //         )
-  //         if (response) {
-  //           // Map the response data to get the display names of screens.
-  //           // setScreens(
-  //           //   response.data[0].children[0].children[0].map(
-  //           //     (item) => item.title,
-  //           //   ),
-  //           // )
-  //           const screenTitles = response.data[0].children[0].children.map(
-  //             (item) => item.title,
-  //           )
-  //           setScreens(screenTitles)
-  //         }
-  //       } catch (error) {
-  //         console.error('Error fetching screens:', error)
-  //       }
-  //     }
-  //   }
-
-  //   fetchScreensForActiveVertical()
-  // }, [selectedVerticals, keycloak])
   function extractScreens(nodes) {
     const result = []
 
@@ -556,6 +524,7 @@ const UserAccessForm = ({ keycloak }) => {
   if (plantSiteData.length === 0) {
     return <div>Loading...</div>
   }
+  const SELECT_ALL = '__SELECT_ALL__'
 
   return (
     <Container
@@ -683,28 +652,29 @@ const UserAccessForm = ({ keycloak }) => {
                           </FormControl>
                         </Grid>
                         {/* Add/Remove Site Entry */}
+
                         <Grid item xs={1}>
-                          <IconButton
-                            onClick={() => addSiteEntry(verticalId)}
-                            color='primary'
-                            sx={{ marginTop: '15px' }}
-                          >
-                            <AddIcon />
-                          </IconButton>
-                        </Grid>
-                        {verticalSites[verticalId].length > 1 && (
-                          <Grid item xs={1}>
+                          {siteIndex === 0 ? (
+                            // Only for the first site
+                            <IconButton
+                              onClick={() => addSiteEntry(verticalId)}
+                              color='primary'
+                              sx={{ marginTop: '25px' }}
+                            >
+                              <AddIcon />
+                            </IconButton>
+                          ) : (
                             <IconButton
                               onClick={() =>
                                 removeSiteEntry(verticalId, siteIndex)
                               }
                               color='secondary'
-                              sx={{ marginTop: '15px' }}
+                              sx={{ marginTop: '25px' }}
                             >
                               <DeleteIcon />
                             </IconButton>
-                          </Grid>
-                        )}
+                          )}
+                        </Grid>
                       </Grid>
 
                       {/* Plant Section */}
@@ -749,13 +719,14 @@ const UserAccessForm = ({ keycloak }) => {
                             </Grid>
                             {/* Add or Remove Plant Entry */}
                             <Grid item xs={1}>
-                              {plantIndex === siteEntry.plants.length - 1 ? (
+                              {plantIndex === 0 ? (
+                                // {plantIndex === siteEntry.plants.length - 1 ? (
                                 <IconButton
                                   onClick={() =>
                                     addPlantEntry(verticalId, siteIndex)
                                   }
                                   color='primary'
-                                  sx={{ marginTop: '8px' }}
+                                  sx={{ marginTop: '22px' }}
                                 >
                                   <AddIcon />
                                 </IconButton>
@@ -769,7 +740,7 @@ const UserAccessForm = ({ keycloak }) => {
                                     )
                                   }
                                   color='secondary'
-                                  sx={{ marginTop: '8px' }}
+                                  sx={{ marginTop: '22px' }}
                                 >
                                   <DeleteIcon />
                                 </IconButton>
@@ -780,7 +751,7 @@ const UserAccessForm = ({ keycloak }) => {
                               <Typography variant='subtitle2'>
                                 Screens
                               </Typography>
-                              <FormControl fullWidth size='small'>
+                              {/* <FormControl fullWidth size='small'>
                                 <Select
                                   multiple
                                   value={plantEntry.screens || []}
@@ -799,6 +770,76 @@ const UserAccessForm = ({ keycloak }) => {
                                       .join(', ')
                                   }
                                 >
+                                  {getAvailableScreens(
+                                    verticalId,
+                                    siteIndex,
+                                    plantIndex,
+                                  ).map((screen) => (
+                                    <MenuItem key={screen} value={screen}>
+                                      <Checkbox
+                                        checked={(
+                                          plantEntry.screens || []
+                                        ).includes(screen)}
+                                      />
+                                      <ListItemText primary={i18n.t(screen)} />
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl> */}
+                              <FormControl fullWidth size='small'>
+                                <Select
+                                  multiple
+                                  value={plantEntry.screens || []}
+                                  onChange={(e) => {
+                                    const allScreens = getAvailableScreens(
+                                      verticalId,
+                                      siteIndex,
+                                      plantIndex,
+                                    )
+                                    const selected = e.target.value
+
+                                    let newSelection
+                                    if (selected.includes(SELECT_ALL)) {
+                                      // If not all selected yet, select all; else clear
+                                      newSelection =
+                                        (plantEntry.screens || []).length ===
+                                        allScreens.length
+                                          ? []
+                                          : allScreens
+                                    } else {
+                                      newSelection = selected
+                                    }
+
+                                    handlePlantChange(
+                                      verticalId,
+                                      siteIndex,
+                                      plantIndex,
+                                      'screens',
+                                      newSelection,
+                                    )
+                                  }}
+                                  renderValue={(selected) =>
+                                    selected
+                                      .map((screen) => i18n.t(screen))
+                                      .join(', ')
+                                  }
+                                >
+                                  {/* 2a. “Select All” menu item */}
+                                  <MenuItem value={SELECT_ALL}>
+                                    <Checkbox
+                                      checked={
+                                        (plantEntry.screens || []).length ===
+                                        getAvailableScreens(
+                                          verticalId,
+                                          siteIndex,
+                                          plantIndex,
+                                        ).length
+                                      }
+                                    />
+                                    <ListItemText primary='Select All' />
+                                  </MenuItem>
+
+                                  {/* 2b. Actual screen items */}
                                   {getAvailableScreens(
                                     verticalId,
                                     siteIndex,

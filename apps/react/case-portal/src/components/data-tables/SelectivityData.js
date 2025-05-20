@@ -98,7 +98,6 @@ const SelectivityData = (props) => {
     setTimeout(() => {
       try {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
-
         if (data.length === 0) {
           setSnackbarOpen(true)
           setSnackbarData({
@@ -125,7 +124,7 @@ const SelectivityData = (props) => {
           handleUpdate(data)
         }
       } catch (error) {
-        console.log('Error saving changes:', error)
+        // Handle error if necessary
       }
     }, 400)
   }, [apiRef, rowModesModel])

@@ -42,7 +42,7 @@ function parseAllowed(raw) {
 export default function HeaderContent({ keycloak }) {
   const dispatch = useDispatch()
   const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
-  const { drawerOpen } = useSelector((state) => state.menu) // Get drawer state
+  // const { drawerOpen } = useSelector((state) => state.menu) // Get drawer state
 
   // --- 1. Year logic state
   const [aopYears, setAopYears] = useState([])
@@ -93,6 +93,7 @@ export default function HeaderContent({ keycloak }) {
     const avail = fullDetails
       .filter((v) => allowedMap[v.id])
       .map((v) => ({ id: v.id, name: v.displayName }))
+      .sort((a, b) => a.name.localeCompare(b.name))
     setVerticals(avail)
 
     if (!selectedVertical && avail.length) {

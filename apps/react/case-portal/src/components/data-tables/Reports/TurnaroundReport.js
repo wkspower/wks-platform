@@ -327,6 +327,7 @@ const TurnaroundReport = () => {
   }
   const handleCalculateMonthwiseAndTurnaround = async () => {
     try {
+      setLoading(true)
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
       if (storedPlant) {
@@ -365,6 +366,8 @@ const TurnaroundReport = () => {
       //   severity: 'error',
       // })
       console.error('Error!', error)
+    } finally {
+      setLoading(false)
     }
   }
   return (
