@@ -1,5 +1,8 @@
 package com.wks.caseengine.service;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -39,6 +42,7 @@ import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeRequestDTO;
 import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
 import com.wks.caseengine.entity.NormAttributeTransactions;
+import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
@@ -46,6 +50,7 @@ import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.NormAttributeTransactionReceipeRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
+import com.wks.caseengine.repository.NormParametersRepository;
 
 @Service
 public class ConfigurationServiceImpl implements ConfigurationService {
@@ -70,6 +75,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+
+	@Autowired
+	NormParametersRepository normParametersRepository;
 
 	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId) {
 		try {
@@ -260,48 +268,148 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@Override
-	public List<ConfigurationDTO> saveConfigurationData(String year, List<ConfigurationDTO> configurationDTOList) {
+	public List<ConfigurationDTO> saveConfigurationData(String year, String plantFKId,
+			List<ConfigurationDTO> configurationDTOList) {
 		try {
+			UUID plantId = UUID.fromString(plantFKId);
 			for (ConfigurationDTO configurationDTO : configurationDTOList) {
 				UUID normParameterFKId = UUID.fromString(configurationDTO.getNormParameterFKId());
+
+				Optional<NormParameters> optionNormParameters = normParametersRepository.findById(normParameterFKId);
 
 				for (int i = 1; i <= 12; i++) {
 					Float attributeValue = getAttributeValue(configurationDTO, i);
 
-					Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
-							.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
+					saveData(normParameterFKId, i, year, attributeValue, configurationDTO);
+					if (attributeValue != null && optionNormParameters.get().getName().equalsIgnoreCase("TST")) {
 
-					NormAttributeTransactions normAttributeTransactions;
+						Optional<NormParameters> optionNormParametersHP = normParametersRepository
+								.findByNameAndPlantFkId("HP.Latent.Heat", plantId);
 
-					if (existingRecord.isPresent()) {
+						List<Object[]> list = normAttributeTransactionsRepository.getPythonScriptName();
 
-						normAttributeTransactions = existingRecord.get();
-						normAttributeTransactions.setModifiedOn(new Date());
-					} else {
+						List<String> commands = new ArrayList<>();
+						for (Object[] row : list) {
+							String command = "";
+							command = ((row[0] != null && !row[0].toString().trim().isEmpty()) ? row[0].toString()
+									: null) + " ";
+							commands.add(command);
+						}
 
-						normAttributeTransactions = new NormAttributeTransactions();
-						// normAttributeTransactions.setId(UUID.randomUUID());
-						normAttributeTransactions.setCreatedOn(new Date());
-						normAttributeTransactions.setAttributeValueVersion("V1");
-						normAttributeTransactions.setUserName("System");
-						normAttributeTransactions.setNormParameterFKId(normParameterFKId);
-						normAttributeTransactions.setAopMonth(i);
-						normAttributeTransactions.setAuditYear(configurationDTO.getAuditYear());
-						normAttributeTransactions.setAuditYear(year);
+						commands.add(attributeValue.toString());
+						Float attributeValueHP = getAttributeValueByPythonScriptFromSP(attributeValue);
+						System.out.println("attributeHP " + attributeValueHP + " " + i);
+						// Float attributeValueHP = getAttributeValueByPythonScript(commands);
 
+						saveData(optionNormParametersHP.get().getId(), i, year, attributeValueHP, configurationDTO);
 					}
 
-					normAttributeTransactions
-							.setAttributeValue(attributeValue != null ? attributeValue.toString() : "0.0");
-					normAttributeTransactions.setRemarks(configurationDTO.getRemarks());
-
-					normAttributeTransactionsRepository.save(normAttributeTransactions);
 				}
 			}
 			return configurationDTOList;
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to save data", ex);
 		}
+	}
+
+	private Float getAttributeValueByPythonScriptFromSP(Float attributeValue) {
+
+		try {
+			// Command to run the Python script with an argument
+			try {
+				String sql = "EXEC " + "Test_Configuration_Update"
+						+ " @value = :attributeValue";
+
+				Query query = entityManager.createNativeQuery(sql);
+				query.setParameter("attributeValue", attributeValue);
+                System.out.println("query results"+ query.getResultList());
+				List<Object> list = query.getResultList();
+				for (Object row : list) {
+					
+					if((row != null && !row.toString().trim().isEmpty())){
+						BigDecimal decimalValue = new BigDecimal(row.toString());
+                        
+						double doubleValue = decimalValue.doubleValue();  // OK, may lose precision
+						Float floatValue = decimalValue.floatValue();
+						System.out.println("fvalue "+ floatValue);
+						System.out.println("dvalue "+ doubleValue);
+						System.out.println("decimalvalue "+ decimalValue);
+						System.out.println("query result "+ row.toString());
+						return floatValue;
+					}
+				}
+
+			} catch (IllegalArgumentException e) {
+				throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+			} catch (Exception ex) {
+				throw new RuntimeException("Failed to fetch data", ex);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			// TODO: handle exception
+		}
+
+		return null;
+
+	}
+
+	private Float getAttributeValueByPythonScript(List<String> commands) {
+		try {
+			// Command to run the Python script with an argument
+			ProcessBuilder processBuilder = new ProcessBuilder(commands);
+			processBuilder.redirectErrorStream(true);
+			Process process = processBuilder.start();
+
+			// Capture the output
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			StringBuilder output = new StringBuilder();
+			String line;
+			while ((line = reader.readLine()) != null) {
+				output.append(line).append("\n");
+			}
+			return Float.parseFloat(output.toString());
+
+			// int exitCode = process.waitFor();
+			// return "Exit code: " + exitCode + "\nOutput:\n" + output;
+		} catch (Exception e) {
+			e.printStackTrace();
+			// TODO: handle exception
+		}
+
+		return null;
+
+	}
+
+	void saveData(UUID normParameterFKId, Integer i, String year, Float attributeValue,
+			ConfigurationDTO configurationDTO) {
+
+		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
+				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
+
+		NormAttributeTransactions normAttributeTransactions;
+
+		if (existingRecord.isPresent()) {
+
+			normAttributeTransactions = existingRecord.get();
+			normAttributeTransactions.setModifiedOn(new Date());
+		} else {
+
+			normAttributeTransactions = new NormAttributeTransactions();
+			// normAttributeTransactions.setId(UUID.randomUUID());
+			normAttributeTransactions.setCreatedOn(new Date());
+			normAttributeTransactions.setAttributeValueVersion("V1");
+			normAttributeTransactions.setUserName("System");
+			normAttributeTransactions.setNormParameterFKId(normParameterFKId);
+			normAttributeTransactions.setAopMonth(i);
+			normAttributeTransactions.setAuditYear(configurationDTO.getAuditYear());
+			normAttributeTransactions.setAuditYear(year);
+		}
+
+		normAttributeTransactions
+				.setAttributeValue(attributeValue != null ? attributeValue.toString() : "0.0");
+		normAttributeTransactions.setRemarks(configurationDTO.getRemarks());
+
+		normAttributeTransactionsRepository.save(normAttributeTransactions);
 	}
 
 	public Float getAttributeValue(ConfigurationDTO configurationDTO, Integer i) {
@@ -344,7 +452,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).orElseThrow();
 
 			List<NormAttributeTransactionReceipeDTO> listDTO = new ArrayList<>();
-			String storedProcedure = vertical.getName() + "_"+site.getName()+"_ReceipeWiseGradeDetail";
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_ReceipeWiseGradeDetail";
 			System.out.println("Executing SP: " + storedProcedure);
 
 			List<Object[]> results = getNormAttributeTransactionReceipeSP(storedProcedure, year,

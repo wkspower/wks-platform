@@ -149,4 +149,13 @@ ORDER BY
 			@Param("normParameterFKId") UUID normParameterFKId,
 			@Param("month") Integer month, @Param("auditYear") String auditYear);
 
+
+			@Query(value = """
+				SELECT Params FROM [dbo].[vwConfigurationUpdate]
+			""", nativeQuery = true)
+
+    List<Object[]> getPythonScriptName();
+
+	
+
 }

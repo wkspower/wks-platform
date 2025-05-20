@@ -37,8 +37,8 @@ public class ConfigurationController {
 	}
 	
 	@PostMapping(value="/saveConfigurationData")
-	public List<ConfigurationDTO> saveConfigurationData(@RequestParam String year, @RequestBody List<ConfigurationDTO> configurationDTOList) {
-		configurationService.saveConfigurationData(year,configurationDTOList);
+	public List<ConfigurationDTO> saveConfigurationData(@RequestParam String year,@RequestParam String plantFKId, @RequestBody List<ConfigurationDTO> configurationDTOList) {
+		configurationService.saveConfigurationData(year,plantFKId,configurationDTOList);
 		return configurationDTOList;
 	}
 	

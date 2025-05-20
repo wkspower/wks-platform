@@ -1,6 +1,7 @@
 package com.wks.caseengine.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,6 +21,10 @@ public interface NormParametersRepository extends JpaRepository<NormParameters, 
 	
 	@Query(value = "SELECT Id FROM NormParameters WHERE Name = :name AND Plant_FK_Id = :plantId", nativeQuery = true)
 	UUID findNormParameterIdByNameAndPlant(@Param("name") String name, @Param("plantId") UUID plantId);
+
+    Optional<NormParameters> findByName(String string);
+
+    Optional<NormParameters> findByNameAndPlantFkId(String string, UUID plantId);
 
 	
 

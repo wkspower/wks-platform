@@ -1973,7 +1973,7 @@ async function saveTurnAroundData(plantId, turnAroundDetails, keycloak) {
 
 async function saveCatalystData(plantId, turnAroundDetails, keycloak) {
   var year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/saveConfigurationData?year=${year}`
+  const url = `${Config.CaseEngineUrl}/task/saveConfigurationData?year=${year}&plantFKId=${plantId}`
 
   const headers = {
     Accept: 'application/json',
