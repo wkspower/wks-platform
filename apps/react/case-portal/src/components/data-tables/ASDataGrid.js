@@ -679,6 +679,10 @@ const DataGridTable = ({
             period: false,
           }}
           disableColumnSelector
+          paginationModel={{ pageSize: 100, page: 0 }}
+          pageSizeOptions={[]}
+          pagination
+          hideFooter={rows.length <= 100}
           disableColumnSorting
           rowHeight={35}
           processRowUpdate={processRowUpdate}
@@ -727,7 +731,7 @@ const DataGridTable = ({
         />
       </Box>
 
-      {(permissions?.allAction ?? true) && (
+      {(permissions?.allActionOfBottomBtns ?? true) && (
         <Box
           sx={{
             marginTop: 2,
@@ -819,7 +823,7 @@ const DataGridTable = ({
         </Box>
       )}
 
-      {(permissions?.allAction ?? true) && (
+      {(permissions?.allActionOfBottomBtns ?? true) && (
         <Notification
           open={snackbarOpen}
           message={snackbarData?.message || ''}

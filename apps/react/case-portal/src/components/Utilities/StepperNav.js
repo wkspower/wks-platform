@@ -77,7 +77,15 @@ export default function StepperNav() {
       nonLinear
       alternativeLabel
       activeStep={activeStep >= 0 ? activeStep : 0}
-      sx={{ '& .MuiStepLabel-label.Mui-active': { color: '#1ba0f2' } }}
+      sx={{
+        '& .MuiStepLabel-label': {
+          color: 'black',
+          fontWeight: 'normal',
+        },
+        '& .MuiStepLabel-label.Mui-active': {
+          fontWeight: 'bold',
+        },
+      }}
     >
       {steps.map((step) => (
         <Step key={step.key} onClick={() => navigate(step.url)}>

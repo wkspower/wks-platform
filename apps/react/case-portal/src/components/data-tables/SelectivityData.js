@@ -98,12 +98,14 @@ const SelectivityData = (props) => {
     setTimeout(() => {
       try {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
+
         if (data.length === 0) {
           setSnackbarOpen(true)
           setSnackbarData({
             message: 'No Records to Save!',
             severity: 'info',
           })
+          setSnackbarOpen(true)
           return
         }
         // console.log(props?.configType)
@@ -123,7 +125,7 @@ const SelectivityData = (props) => {
           handleUpdate(data)
         }
       } catch (error) {
-        // Handle error if necessary
+        console.log('Error saving changes:', error)
       }
     }, 400)
   }, [apiRef, rowModesModel])

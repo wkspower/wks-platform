@@ -62,7 +62,8 @@
 }
 
 .custom-data-grid .MuiDataGrid-footerContainer {
-  display: none;
+  min-height: 30px; /* Reduce height */
+  padding: 4px 8px; /* Reduce padding */
 }
 
 .custom-data-grid .MuiDataGrid-cell,

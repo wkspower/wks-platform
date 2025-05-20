@@ -297,9 +297,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						}
 
 						commands.add(attributeValue.toString());
-						Float attributeValueHP = getAttributeValueByPythonScriptFromSP(attributeValue);
-						System.out.println("attributeHP " + attributeValueHP + " " + i);
-						// Float attributeValueHP = getAttributeValueByPythonScript(commands);
+						// Float attributeValueHP =
+						// getAttributeValueByPythonScriptFromSP(attributeValue);
+						// System.out.println("attributeHP " + attributeValueHP + " " + i);
+						Float attributeValueHP = getAttributeValueByPythonScript(commands);
 
 						saveData(optionNormParametersHP.get().getId(), i, year, attributeValueHP, configurationDTO);
 					}

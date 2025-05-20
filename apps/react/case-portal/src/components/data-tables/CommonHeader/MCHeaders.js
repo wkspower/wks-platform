@@ -84,6 +84,19 @@ const getEnhancedProductionVolDataBasis = ({
     }
 
     // Apply special handling for the 'total' column
+    if (
+      col.field === 'total' ||
+      col.field === 'avgValue' ||
+      col.field === 'maxValue' ||
+      col.field === 'minValue'
+    ) {
+      return {
+        ...updatedCol,
+        valueFormatter: formatValueToThreeDecimals, // Apply 3 decimal formatting for 'total'
+        flex: 1,
+      }
+    }
+
     if (col.field === 'total') {
       return {
         ...updatedCol,

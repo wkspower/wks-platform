@@ -128,6 +128,11 @@ const ReportDataGrid = ({
     permissions?.saveBtnForRemark ? saveRemarkData() : saveWorkflowData()
     setOpenSaveDialogeBox(false)
   }
+
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 100,
+  })
   const lastColumnField = columns[columns.length - 1]?.field
   return (
     <Box
@@ -284,6 +289,12 @@ const ReportDataGrid = ({
         defaultGroupingExpansionDepth={defaultGroupingExpansionDepth}
         rowModesModel={rowModesModel}
         onRowModesModelChange={onRowModesModelChange}
+        // paginationModel={{ pageSize: 100, page: 0 }}
+        pageSizeOptions={[]}
+        paginationModel={paginationModel}
+        onPaginationModelChange={(model) => setPaginationModel(model)}
+        pagination
+        hideFooter={rows.length <= 100}
         // handleCalculate={handleCalculate}
         sx={{
           '& .pinned-row': {
