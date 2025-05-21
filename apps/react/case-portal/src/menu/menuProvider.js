@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect, useContext, useMemo } from 'react'
 import { DataService } from 'services/DataService'
 import { useSession } from '../SessionStoreContext'
-import { useSelector } from 'react-redux'
+// import { useSelector } from 'react-redux'
 import plan from './plan'
 import workspace from './workspace'
 import { icons, mapScreen } from 'components/Utilities/menuRefractoring'
@@ -14,7 +14,7 @@ export function MenuProvider({ children }) {
   const [menuItems, setMenuItems] = useState(staticMenu)
 
   const keycloak = useSession()
-  const { verticalChange } = useSelector((s) => s.dataGridStore)
+  // const { verticalChange } = useSelector((s) => s.dataGridStore)
   const verticalId = localStorage.getItem('verticalId')
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const userMgmtItem = {
@@ -68,7 +68,7 @@ export function MenuProvider({ children }) {
         }
         setMenuItems(base)
       })
-  }, [keycloak, verticalChange, verticalId, plantId])
+  }, [keycloak, plantId])
   // useEffect(() => {
   //   if (!keycloak?.token || !verticalId) return
 

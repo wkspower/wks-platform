@@ -684,7 +684,7 @@ const DataGridTable = ({
           paginationModel={{ pageSize: 100, page: 0 }}
           pageSizeOptions={[]}
           pagination
-          hideFooter={rows.length <= 100}
+          hideFooter={rows?.length <= 100}
           disableColumnSorting
           rowHeight={35}
           processRowUpdate={processRowUpdate}
