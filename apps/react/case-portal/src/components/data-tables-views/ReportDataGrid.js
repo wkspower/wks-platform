@@ -294,7 +294,7 @@ const ReportDataGrid = ({
         paginationModel={paginationModel}
         onPaginationModelChange={(model) => setPaginationModel(model)}
         pagination
-        hideFooter={rows.length <= 100}
+        hideFooter={rows?.length <= 100}
         // handleCalculate={handleCalculate}
         sx={{
           '& .pinned-row': {

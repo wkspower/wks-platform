@@ -88,11 +88,13 @@ const getEnhancedProductionVolDataBasis = ({
       col.field === 'total' ||
       col.field === 'avgValue' ||
       col.field === 'maxValue' ||
-      col.field === 'minValue'
+      col.field === 'minValue' ||
+      col.field === 'actualQty'
     ) {
       return {
         ...updatedCol,
         valueFormatter: formatValueToThreeDecimals, // Apply 3 decimal formatting for 'total'
+        align: 'right',
         flex: 1,
       }
     }
@@ -101,6 +103,7 @@ const getEnhancedProductionVolDataBasis = ({
       return {
         ...updatedCol,
         valueFormatter: formatValueToThreeDecimals, // Apply 3 decimal formatting for 'total'
+        align: 'right',
         flex: 1,
       }
     }

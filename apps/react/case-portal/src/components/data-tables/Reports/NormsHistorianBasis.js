@@ -17,33 +17,33 @@ import { useSession } from 'SessionStoreContext'
 import getEnhancedProductionVolDataBasis from '../CommonHeader/MCHeaders'
 import getEnhancedNormsHistorianBasis from '../CommonHeader/NormsHistorianValuesHeaders'
 
-// const CustomAccordion = styled((props) => (
-//   <MuiAccordion disableGutters elevation={0} square {...props} />
-// ))(() => ({
-//   position: 'unset',
-//   border: 'none',
-//   boxShadow: 'none',
-//   margin: '0px',
-//   '&:before': {
-//     display: 'none',
-//   },
-// }))
+const CustomAccordion = styled((props) => (
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(() => ({
+  position: 'unset',
+  border: 'none',
+  boxShadow: 'none',
+  margin: '0px',
+  '&:before': {
+    display: 'none',
+  },
+}))
 
-// const CustomAccordionSummary = styled((props) => (
-//   <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
-// ))(() => ({
-//   backgroundColor: '#fff',
-//   padding: '0px 12px',
-//   minHeight: '40px',
-//   '& .MuiAccordionSummary-content': {
-//     margin: '8px 0',
-//   },
-// }))
+const CustomAccordionSummary = styled((props) => (
+  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
+))(() => ({
+  backgroundColor: '#fff',
+  padding: '0px 12px',
+  minHeight: '40px',
+  '& .MuiAccordionSummary-content': {
+    margin: '8px 0',
+  },
+}))
 
-// const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
-//   padding: '0px 0px 12px',
-//   backgroundColor: '#F2F3F8',
-// }))
+const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
+  padding: '0px 0px 12px',
+  backgroundColor: '#F2F3F8',
+}))
 
 const NormsHistorianBasis = () => {
   const keycloak = useSession()
@@ -121,67 +121,67 @@ const NormsHistorianBasis = () => {
 
       <Box display='flex' flexDirection='column' gap={2}>
         <div>
-          {/* <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordion defaultExpanded disableGutters>
             <CustomAccordionSummary
               aria-controls='meg-grid-content'
               id='meg-grid-header'
-            > */}
-          <Typography component='span' className='grid-title'>
-            Production Volume Data
-          </Typography>
-          {/* </CustomAccordionSummary> */}
-          {/* <CustomAccordionDetails> */}
-          <Box sx={{ width: '100%', margin: 0 }}>
-            <AopCostReportView
-              rows={rowsProductionVolumeData}
-              columns={colsProductionVolumeData}
-              height='93px'
-            />
-          </Box>
-          {/* </CustomAccordionDetails> */}
-          {/* </CustomAccordion> */}
+            >
+              <Typography component='span' className='grid-title'>
+                Production Volume Data
+              </Typography>
+            </CustomAccordionSummary>
+            <CustomAccordionDetails>
+              <Box sx={{ width: '100%', margin: 0 }}>
+                <AopCostReportView
+                  rows={rowsProductionVolumeData}
+                  columns={colsProductionVolumeData}
+                  height='93px'
+                />
+              </Box>
+            </CustomAccordionDetails>
+          </CustomAccordion>
         </div>
 
         <div>
-          {/* <CustomAccordion defaultExpanded disableGutters> */}
-          {/* <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            > */}
-          <Typography component='span' className='grid-title'>
-            Mcu & Norm
-          </Typography>
-          {/* </CustomAccordionSummary> */}
-          {/* <CustomAccordionDetails> */}
-          <Box sx={{ width: '100%', margin: 0 }}>
-            <AopCostReportView
-              rows={rowsMcuAndNormGrid}
-              columns={colsMcuAndNormGrid}
-            />
-          </Box>
-          {/* </CustomAccordionDetails> */}
-          {/* </CustomAccordion> */}
-        </div>
-
-        <div>
-          {/* <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordion defaultExpanded disableGutters>
             <CustomAccordionSummary
               aria-controls='meg-grid-content'
               id='meg-grid-header'
-            > */}
-          <Typography component='span' className='grid-title'>
-            Historian Values
-          </Typography>
-          {/* </CustomAccordionSummary> */}
-          {/* <CustomAccordionDetails> */}
-          <Box sx={{ width: '100%', margin: 0 }}>
-            <AopCostReportView
-              rows={rowsHistorianValues}
-              columns={colsHistorianValues}
-            />
-          </Box>
-          {/* </CustomAccordionDetails>
-          </CustomAccordion> */}
+            >
+              <Typography component='span' className='grid-title'>
+                Mcu & Norm
+              </Typography>
+            </CustomAccordionSummary>
+            <CustomAccordionDetails>
+              <Box sx={{ width: '100%', margin: 0 }}>
+                <AopCostReportView
+                  rows={rowsMcuAndNormGrid}
+                  columns={colsMcuAndNormGrid}
+                />
+              </Box>
+            </CustomAccordionDetails>
+          </CustomAccordion>
+        </div>
+
+        <div>
+          <CustomAccordion defaultExpanded disableGutters>
+            <CustomAccordionSummary
+              aria-controls='meg-grid-content'
+              id='meg-grid-header'
+            >
+              <Typography component='span' className='grid-title'>
+                Historian Values
+              </Typography>
+            </CustomAccordionSummary>
+            <CustomAccordionDetails>
+              <Box sx={{ width: '100%', margin: 0 }}>
+                <AopCostReportView
+                  rows={rowsHistorianValues}
+                  columns={colsHistorianValues}
+                />
+              </Box>
+            </CustomAccordionDetails>
+          </CustomAccordion>
         </div>
       </Box>
     </div>
