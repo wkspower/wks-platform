@@ -45,13 +45,11 @@ const TurnaroundReport = () => {
   const year = localStorage.getItem('year')
 
   const handleRemarkCellClick = (row) => {
-    console.log(row)
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
   const handleRemarkCellClick2 = (row) => {
-    console.log(row)
     setCurrentRemark2(row.remarks || '')
     setCurrentRowId2(row.id)
     setRemarkDialogOpen2(true)

@@ -162,9 +162,15 @@ header {
   background-color: transparent;
 }
 
-.red-first-cell {
-  color: rgb(156, 83, 0) !important;
+.red-cell {
+  color: rgb(255, 0, 0) !important;
   font-weight: bold;
+}
+
+.red-background-cell {
+  color: rgb(255, 0, 0) !important;
+  font-weight: bold;
+  background-color: #ffeaea !important;
 }
 
 main.MuiBox-root.css-vognfw {

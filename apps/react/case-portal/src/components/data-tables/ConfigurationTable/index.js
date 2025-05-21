@@ -37,7 +37,7 @@ const ConfigurationTable = () => {
 
       if (tabs.length == 0) {
         setLoading(true)
-        data = data.sort((a, b) => b.normType.localeCompare(a.normType))
+        // data = data.sort((a, b) => b.normType.localeCompare(a.normType))
         const groupedRows = []
         const groups = new Map()
         let groupId = 0
@@ -189,7 +189,6 @@ const ConfigurationTable = () => {
     getConfigurationAvailableTabs()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
- 
 
   const getTheId = (name) => {
     const tab = availableTabs.find((tab) => tab.name === name)

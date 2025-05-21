@@ -69,6 +69,7 @@ const DataGridTable = ({
   handleCalculate = () => {},
   setRows = () => {},
   rows = [],
+  allRedCell = [],
   modifiedCells = [],
   loading = false,
   remarkDialogOpen = false,
@@ -382,6 +383,34 @@ const DataGridTable = ({
 
   const lastColumnField = columns[columns.length - 1]?.field
 
+  const monthMap = {
+    1: 'january',
+    2: 'february',
+    3: 'march',
+    4: 'april',
+    5: 'may',
+    6: 'june',
+    7: 'july',
+    8: 'august',
+    9: 'september',
+    10: 'october',
+    11: 'november',
+    12: 'december',
+  }
+
+  // const isRedCellObject = [
+  //   {
+  //     normParameterFKId: '513104DB-94A5-4DCF-9B8F-FCB2CB897C9D',
+  //     month: 4,
+  //     value: 6.5,
+  //   },
+  //   {
+  //     normParameterFKId: '513104DB-94A5-4DCF-9B8F-FCB2CB897C9D',
+  //     month: 12,
+  //     value: 7.5,
+  //   },
+  // ]
+
   return (
     <Box
       sx={{
@@ -644,10 +673,22 @@ const DataGridTable = ({
             ...col,
 
             cellClassName: (params) => {
-              if (modifiedCells[params.row.id]?.includes(params.field)) {
-                return 'red-first-cell '
+              const rowId = params.row.id
+              const field = params.field
+              if (modifiedCells[rowId]?.includes(field)) {
+                // return 'red-background-cell'
+                return 'red-cell'
               }
 
+              const matchedEntry = allRedCell.find(
+                (entry) =>
+                  entry.normParameterFKId === params.row.materialFkId &&
+                  monthMap[entry.month] === field,
+              )
+
+              if (matchedEntry) {
+                return 'red-cell'
+              }
               if (col.isDisabled) {
                 if (params.row.Particulars) {
                   return undefined
@@ -655,10 +696,12 @@ const DataGridTable = ({
                   return 'disabled-cell'
                 }
               }
+
               if (
-                permissions?.remarksEditable &&
-                params.row.isEditable === false &&
-                col.field !== lastColumnField
+                //permissions?.remarksEditable &&
+                params.row.isEditable === false
+                // &&
+                // col.field !== lastColumnField
               ) {
                 return 'odd-cell'
               }

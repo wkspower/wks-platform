@@ -207,7 +207,7 @@ const SlowdownNorms = () => {
     params ? parseFloat(params).toFixed(3) : ''
 
   const isCellEditable = (params) => {
-    return !params.row.Particulars
+    return params.row.isEditable
   }
 
   // const months = slowdownMonths
@@ -478,6 +478,7 @@ const SlowdownNorms = () => {
   ]
 
   const handleRemarkCellClick = (row) => {
+    if (!row?.isEditable) return
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
@@ -796,7 +797,7 @@ const SlowdownNorms = () => {
       saveBtn: false,
       isOldYear: isOldYear,
       showCalculate: false,
-      noColor: true,
+      // noColor: true,
     }
   }
 
@@ -811,7 +812,7 @@ const SlowdownNorms = () => {
       saveWithRemark: false,
       saveBtn: true,
       showCalculate: lowerVertName == 'meg' ? false : false,
-      noColor: true,
+      // noColor: true,
       allAction: false,
     },
     isOldYear,

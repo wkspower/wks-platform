@@ -1,6 +1,7 @@
 package com.wks.caseengine.service;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -297,6 +298,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						}
 
 						commands.add(attributeValue.toString());
+
 						// Float attributeValueHP =
 						// getAttributeValueByPythonScriptFromSP(attributeValue);
 						// System.out.println("attributeHP " + attributeValueHP + " " + i);
@@ -323,19 +325,19 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 				Query query = entityManager.createNativeQuery(sql);
 				query.setParameter("attributeValue", attributeValue);
-                System.out.println("query results"+ query.getResultList());
+				System.out.println("query results" + query.getResultList());
 				List<Object> list = query.getResultList();
 				for (Object row : list) {
-					
-					if((row != null && !row.toString().trim().isEmpty())){
+
+					if ((row != null && !row.toString().trim().isEmpty())) {
 						BigDecimal decimalValue = new BigDecimal(row.toString());
-                        
-						double doubleValue = decimalValue.doubleValue();  // OK, may lose precision
+
+						double doubleValue = decimalValue.doubleValue(); // OK, may lose precision
 						Float floatValue = decimalValue.floatValue();
-						System.out.println("fvalue "+ floatValue);
-						System.out.println("dvalue "+ doubleValue);
-						System.out.println("decimalvalue "+ decimalValue);
-						System.out.println("query result "+ row.toString());
+						System.out.println("fvalue " + floatValue);
+						System.out.println("dvalue " + doubleValue);
+						System.out.println("decimalvalue " + decimalValue);
+						System.out.println("query result " + row.toString());
 						return floatValue;
 					}
 				}
@@ -355,30 +357,83 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	private Float getAttributeValueByPythonScript(List<String> commands) {
-		try {
-			// Command to run the Python script with an argument
-			ProcessBuilder processBuilder = new ProcessBuilder(commands);
-			processBuilder.redirectErrorStream(true);
-			Process process = processBuilder.start();
+		System.out.println("Method started.");
 
-			// Capture the output
+		try {
+			System.out.println("Input command list: " + commands);
+
+			String joinedCommand = String.join(" ", commands);
+			System.out.println("Joined command string: " + joinedCommand);
+
+			ProcessBuilder processBuilder = new ProcessBuilder(commands);
+
+			processBuilder.redirectErrorStream(true);
+			System.out.println("Initialized ProcessBuilder.");
+
+			System.out.println("Starting the Python process...");
+			Process process = processBuilder.start();
+			System.out.println("Process started successfully.");
+
 			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			System.out.println("BufferedReader initialized to read process output.");
+
 			StringBuilder output = new StringBuilder();
 			String line;
-			while ((line = reader.readLine()) != null) {
-				output.append(line).append("\n");
-			}
-			return Float.parseFloat(output.toString());
 
-			// int exitCode = process.waitFor();
-			// return "Exit code: " + exitCode + "\nOutput:\n" + output;
+			System.out.println("Reading output from the Python process:");
+			System.out.println("Reader.TOstring()");
+
+			while ((line = reader.readLine()) != null) {
+				// output.append(line);
+
+				if ((line = reader.readLine()) != null) {
+					System.out.println("Read line: " + line);
+					output.append(line);
+				} else {
+					System.out.println("No output read from the Python process.");
+				}
+
+				break;
+			}
+
+			System.out.println("Finished reading output from process.");
+
+			String outputStr = output.toString().trim();
+
+			System.out.println("Raw output from Python script (trimmed): '" + outputStr + "'");
+
+			if (outputStr.isEmpty()) {
+				System.out.println("Output is empty, returning null.");
+				return null;
+			}
+
+			System.out.println("Parsing float value from output.");
+			Float result = Float.parseFloat(outputStr);
+			System.out.println("Parsed float value: " + result);
+
+			System.out.println("Waiting for process to complete...");
+			int exitCode = process.waitFor();
+			System.out.println("Process exited with code: " + exitCode);
+
+			return result;
+
+		} catch (NumberFormatException nfe) {
+			System.err.println("Failed to parse float from output:");
+			nfe.printStackTrace();
+		} catch (IOException ioe) {
+			System.err.println("IOException during process execution:");
+			ioe.printStackTrace();
+		} catch (InterruptedException ie) {
+			System.err.println("Process was interrupted:");
+			ie.printStackTrace();
+			Thread.currentThread().interrupt(); // Restore interrupt status
 		} catch (Exception e) {
+			System.err.println("Unexpected exception:");
 			e.printStackTrace();
-			// TODO: handle exception
 		}
 
+		System.out.println("Returning null due to error or empty output.");
 		return null;
-
 	}
 
 	void saveData(UUID normParameterFKId, Integer i, String year, Float attributeValue,

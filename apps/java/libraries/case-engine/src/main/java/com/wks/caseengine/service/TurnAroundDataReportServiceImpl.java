@@ -44,7 +44,9 @@ public class TurnAroundDataReportServiceImpl implements TurnAroundDataReportServ
                     map.put("fromDate", row[2]);
                     map.put("toDate", row[3]);
                     map.put("durationInHrs", row[4]);
-                    map.put("remarks", row[5]);
+                    // map.put("remarks", row[5]);
+                    map.put("remarks", row[5] != null ? row[5] : "");
+
                     map.put("periodInMonths", row[6]);
                     map.put("Id", row[7]);
 
@@ -60,7 +62,10 @@ public class TurnAroundDataReportServiceImpl implements TurnAroundDataReportServ
                     map.put("fromDate", row[2]);
                     map.put("toDate", row[3]);
                     map.put("durationInHrs", row[4]);
-                    map.put("remarks", row[5]);
+                    // map.put("remarks", row[5]);
+
+                    map.put("remarks", row[5] != null ? row[5] : "");
+
                     map.put("periodInMonths", row[6]);
                     map.put("Id", row[7]);
 

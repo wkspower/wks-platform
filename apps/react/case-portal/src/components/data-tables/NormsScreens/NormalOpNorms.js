@@ -19,6 +19,7 @@ import TextField from '@mui/material/TextField'
 const NormalOpNormsScreen = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [allProducts, setAllProducts] = useState([])
+  const [allRedCell, setAllRedCell] = useState([])
   // const [bdData, setBDData] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
 
@@ -100,6 +101,33 @@ const NormalOpNormsScreen = () => {
     }
   }
 
+  const getNormTransactions = async () => {
+    try {
+      const res = await DataService.getNormTransactions(keycloak)
+      if (res?.code == 200) {
+        const normalized = res?.data.map((obj) => ({
+          ...obj,
+          normParameterFKId: obj.normParameterFKId.toUpperCase(),
+        }))
+        setAllRedCell(normalized)
+      }
+
+      // const isRedCellObject = [
+      //   {
+      //     normParameterFKId: '513104DB-94A5-4DCF-9B8F-FCB2CB897C9D',
+      //     month: 4,
+      //     value: 6.5,
+      //   },
+      // ]
+
+      // setAllRedCell(isRedCellObject)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    } finally {
+      // handleMenuClose();
+    }
+  }
+
   useEffect(() => {
     const getAllProducts = async () => {
       try {
@@ -119,6 +147,7 @@ const NormalOpNormsScreen = () => {
       fetchData()
     }, 450)
     getAllProducts()
+    getNormTransactions()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   const formatValueToThreeDecimals = (params) => {
@@ -378,6 +407,7 @@ const NormalOpNormsScreen = () => {
   ]
 
   const handleRemarkCellClick = (row) => {
+    if (!row?.isEditable) return
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
@@ -537,8 +567,9 @@ const NormalOpNormsScreen = () => {
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
   }
+
   const isCellEditable = (params) => {
-    return !params.row.Particulars
+    return params.row.isEditable
   }
 
   const handleCalculate = async () => {
@@ -627,6 +658,7 @@ const NormalOpNormsScreen = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <DataGridTable
+        modifiedCells={modifiedCells}
         title='Normal Operations Norms'
         columns={colDefs}
         setRows={setRows}
@@ -658,6 +690,7 @@ const NormalOpNormsScreen = () => {
         unsavedChangesRef={unsavedChangesRef}
         handleRemarkCellClick={handleRemarkCellClick}
         permissions={adjustedPermissions}
+        allRedCell={allRedCell}
 
         // permissions={{
         //   showAction: false,

@@ -8,18 +8,24 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.MCUNormsValueDTO;
+import com.wks.caseengine.entity.AOPSummary;
 import com.wks.caseengine.entity.MCUNormsValue;
+import com.wks.caseengine.entity.NormsTransactions;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.NormalOperationNormsRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
@@ -149,7 +155,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-		String storedProcedure = vertical.getName() + "_"+site.getName()+"_NormsCalculation";
+		String storedProcedure = vertical.getName() + "_" + site.getName() + "_NormsCalculation";
 		System.out.println("storedProcedure" + storedProcedure);
 		return executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
 				vertical.getId().toString(), year);
@@ -202,6 +208,34 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	@Override
+	public AOPMessageVM getNormsTransaction(String plantId, String aopYear) {
+		try {
+			UUID plantUUID = UUID.fromString(plantId);
+
+			List<NormsTransactions> transactions = normalOperationNormsRepository
+					.findTransactionsByPlantAndYear(plantUUID, aopYear);
+
+			List<Map<String, Object>> normsTransactions = transactions.stream().map(tx -> {
+				Map<String, Object> cell = new HashMap<>();
+				cell.put("normParameterFKId", tx.getNormParameterFkId().toString());
+				cell.put("month", tx.getAopMonth());
+				cell.put("value", tx.getAttributeValue());
+				return cell;
+			}).collect(Collectors.toList());
+
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Norms Transactions retrieved successfully.");
+			aopMessageVM.setData(normsTransactions);
+
+			return aopMessageVM;
+
+		} catch (Exception ex) {
+			throw new RestInvalidArgumentException("normsTransaction", ex);
 		}
 	}
 

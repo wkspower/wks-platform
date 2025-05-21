@@ -238,12 +238,19 @@ const SelectivityData = (props) => {
   }
 
   const isCellEditable = (params) => {
-    return !(
-      params.row.Particulars ||
-      params.row.isGroupHeader ||
-      params.row.isSubGroupHeader
-    )
+    if (lowerVertName != 'meg') {
+      return !(
+        params.row.Particulars ||
+        params.row.isGroupHeader ||
+        params.row.isSubGroupHeader
+      )
+    } else {
+      return params.row.isEditable
+    }
   }
+
+  // const isCellEditable = (params) => {
+  // }
 
   useEffect(() => {
     const getAllProducts = async () => {

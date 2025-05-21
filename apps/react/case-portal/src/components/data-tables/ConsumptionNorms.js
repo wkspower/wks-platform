@@ -684,7 +684,7 @@ const NormalOpNormsScreen = () => {
 
   const isCellEditable = (params) => {
     console.log(params)
-    return !params.row.Particulars
+    return params.row.isEditable
   }
 
   return (

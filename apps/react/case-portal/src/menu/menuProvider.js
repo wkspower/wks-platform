@@ -75,7 +75,7 @@ export function MenuProvider({ children }) {
     DataService.getScreenbyPlant(keycloak, verticalId, plantId)
       .then((res) => {
         const dynamic = Array.isArray(res.data) ? res.data.map(mapScreen) : []
-        console.log(dynamic)
+
         if (dynamic.length) {
           setMenuItems(dynamic)
           // setMenuItems(staticMenu)

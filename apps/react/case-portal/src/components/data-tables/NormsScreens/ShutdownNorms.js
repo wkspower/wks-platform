@@ -208,7 +208,7 @@ const ShutdownNorms = () => {
     params ? parseFloat(params).toFixed(3) : ''
 
   const isCellEditable = (params) => {
-    return !params.row.Particulars
+    return params.row.isEditable
   }
 
   // const months = shutdownMonths
@@ -479,6 +479,7 @@ const ShutdownNorms = () => {
   ]
 
   const handleRemarkCellClick = (row) => {
+    if (!row?.isEditable) return
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
@@ -797,7 +798,7 @@ const ShutdownNorms = () => {
       saveBtn: false,
       isOldYear: isOldYear,
       showCalculate: false,
-      noColor: true,
+      // noColor: true,
       allAction: false,
     }
   }
@@ -813,7 +814,7 @@ const ShutdownNorms = () => {
       saveWithRemark: false,
       saveBtn: true,
       showCalculate: lowerVertName == 'meg' ? false : true,
-      noColor: true,
+      // noColor: true,
       allAction: false,
     },
     isOldYear,

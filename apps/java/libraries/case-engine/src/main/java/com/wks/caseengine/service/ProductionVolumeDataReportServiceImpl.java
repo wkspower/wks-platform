@@ -74,7 +74,9 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			map.put("VarBudgetPer", row[7]);
 			map.put("VarActualMT", row[8]);
 			map.put("VarActualPer", row[9]);
-			map.put("Remark", row[10]);
+			// map.put("Remark", row[10]);
+			map.put("Remark", row[10] != null ? row[10] : "");
+
 			map.put("Id", row[11]);
 			productionVolumeReportList.add(map);
 		}
@@ -127,7 +129,8 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 				map.put("EOThroughput", row[10]);
 				map.put("EOEThroughput", row[11]);
 				map.put("TotalEOE", row[12]);
-				map.put("Remark", row[13]);
+				// map.put("Remark", row[13]);
+				map.put("Remark", row[13] != null ? row[13] : "");
 				map.put("Id", row[14]);
 				typeOneDataList.add(map);
 			}

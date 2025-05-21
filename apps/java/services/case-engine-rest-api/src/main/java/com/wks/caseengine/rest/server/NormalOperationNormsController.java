@@ -10,38 +10,46 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.dto.MCUNormsValueDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.NormalOperationNormsService;
 
 @RestController
 @RequestMapping("task")
 public class NormalOperationNormsController {
-	
+
 	@Autowired
 	private NormalOperationNormsService normalOperationNormsService;
-	
-	@GetMapping(value="/normalOperationNorms")
-	public List<MCUNormsValueDTO> getNormalOperationNormsData(@RequestParam String year,@RequestParam String plantId){
-		return	normalOperationNormsService.getNormalOperationNormsData(year, plantId);
+
+	@GetMapping(value = "/normalOperationNorms")
+	public List<MCUNormsValueDTO> getNormalOperationNormsData(@RequestParam String year, @RequestParam String plantId) {
+		return normalOperationNormsService.getNormalOperationNormsData(year, plantId);
 	}
-	
-	@PostMapping(value="/normalOperationNorms")
-	public List<MCUNormsValueDTO> saveNormalOperationNormsData(@RequestBody List<MCUNormsValueDTO> mCUNormsValueDTOList){
+
+	@GetMapping(value = "/norms-transactions")
+	public AOPMessageVM getNormsTransaction(@RequestParam String plantId, @RequestParam String year) {
+		return normalOperationNormsService.getNormsTransaction(plantId, year);
+	}
+
+	@PostMapping(value = "/normalOperationNorms")
+	public List<MCUNormsValueDTO> saveNormalOperationNormsData(
+			@RequestBody List<MCUNormsValueDTO> mCUNormsValueDTOList) {
 		try {
-			return	normalOperationNormsService.saveNormalOperationNormsData(mCUNormsValueDTOList);
-		}catch(Exception e) {
+			return normalOperationNormsService.saveNormalOperationNormsData(mCUNormsValueDTOList);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
-	@GetMapping(value="/handleCalculateNormalOpsNorms")
-	public int getNormalOperationNormsDataFromSP(@RequestParam String year,@RequestParam String plantId){
-		return normalOperationNormsService.calculateExpressionConsumptionNorms(year,plantId);
+
+	@GetMapping(value = "/handleCalculateNormalOpsNorms")
+	public int getNormalOperationNormsDataFromSP(@RequestParam String year, @RequestParam String plantId) {
+		return normalOperationNormsService.calculateExpressionConsumptionNorms(year, plantId);
 	}
-	
+
 	// @GetMapping(value="/getCalculatedNormalOpsNorms")
-	// public List<Object[]> getCalculatedNormalOpsNorms(@RequestParam String year,@RequestParam String plantId){
-	// 	return normalOperationNormsService.getCalculatedNormalOpsNorms(year,plantId);
+	// public List<Object[]> getCalculatedNormalOpsNorms(@RequestParam String
+	// year,@RequestParam String plantId){
+	// return normalOperationNormsService.getCalculatedNormalOpsNorms(year,plantId);
 	// }
 
 }

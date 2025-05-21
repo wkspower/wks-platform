@@ -5,6 +5,7 @@ export const DataService = {
   getProductById,
   getYearWiseProduct,
   getAllSites,
+  getNormTransactions,
   getShutDownPlantData,
   getAllProducts,
   getAllProductsAll,
@@ -2148,6 +2149,28 @@ async function getYearWiseProduct(keycloak) {
 
 async function getAllSites(keycloak) {
   const url = `${Config.CaseEngineUrl}/task/getPlantsAndSidesAndVerticals`
+  // const url = `${Config.CaseEngineUrl}/task/getPlantAndSite`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getNormTransactions(keycloak) {
+  var year = localStorage.getItem('year')
+  const storedPlant = localStorage.getItem('selectedPlant')
+  const parsedPlant = JSON.parse(storedPlant)
+
+  const url = `${Config.CaseEngineUrl}/task/norms-transactions?plantId=${parsedPlant?.id}&year=${year}`
   // const url = `${Config.CaseEngineUrl}/task/getPlantAndSite`
 
   const headers = {

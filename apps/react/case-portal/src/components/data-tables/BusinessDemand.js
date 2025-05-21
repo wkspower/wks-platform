@@ -178,13 +178,14 @@ const BusinessDemand = ({ permissions }) => {
 
   const handleRemarkCellClick = (row) => {
     // console.log(row, newRow)
+    if (!row?.isEditable) return
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
 
   const isCellEditable = (params) => {
-    return !params.row.Particulars
+    return params.row.isEditable
   }
 
   const colDefs = getEnhancedColDefs({

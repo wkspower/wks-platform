@@ -222,7 +222,7 @@ const ReportDataGrid = ({
           cellClassName: (params) => {
             const modsForRow = modifiedCells[params.row.id] || []
             if (modsForRow.includes(params.field)) {
-              return 'red-first-cell'
+              return 'red-cell'
             }
 
             if (col.isDisabled && !params.row.Particulars) {
