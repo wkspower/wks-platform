@@ -720,4 +720,65 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 	}
 
+	@Override
+	public AOPMessageVM getConfigurationIntermediateValuesData(String year, String plantId) {
+		try {
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			List<Map<String, Object>> configurationIntermediateValues = new ArrayList<>();
+			List<Object[]> obj = findConfigurationIntermediateValues(plantId, year);
+			for (Object[] row : obj) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("NormParameterFKId", row[0]);
+				map.put("Jan", row[1]);
+				map.put("Feb", row[2]);
+				map.put("Mar", row[3]);
+				map.put("Apr", row[4]);
+				map.put("May", row[5]);
+				map.put("Jun", row[6]);
+				map.put("Jul", row[7]);
+				map.put("Aug", row[8]);
+				map.put("Sep", row[9]);
+				map.put("Oct", row[10]);
+				map.put("Nov", row[11]);
+				map.put("Dec", row[12]);
+				map.put("Remarks", row[13]);
+				map.put("AuditYear", row[14]);
+				map.put("UOM", row[15]);
+				map.put("NormTypeName", row[16]);
+				map.put("isEditable", row[17]);
+				configurationIntermediateValues.add(map); 
+				
+			}
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(configurationIntermediateValues);
+			return aopMessageVM;
+		}catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public List<Object[]> findConfigurationIntermediateValues(String plantId, String aopYear) {
+	    try {
+	    	Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+	    	Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+	        String procedureName = vertical.getName()+"_GetConfigurationIntermediateValues";
+	        String sql = "EXEC " + procedureName +
+	                     " @plantId = :plantId, @aopYear = :aopYear";
+
+	        Query query = entityManager.createNativeQuery(sql);
+
+	        query.setParameter("plantId", plantId);
+	        query.setParameter("aopYear", aopYear);
+
+	        return query.getResultList();
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid UUID format ", e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
+	}
+
 }

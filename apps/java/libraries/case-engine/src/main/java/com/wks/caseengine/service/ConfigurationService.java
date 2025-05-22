@@ -23,5 +23,5 @@ public interface ConfigurationService {
     public List<ConfigurationDTO> saveConfigurationData( String year, String plantFKId, List<ConfigurationDTO> configurationDTOList);
     public   List<Map<String, Object>>  getNormAttributeTransactionReceipe(String year, String plantId);
     public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms( String year, String plantId,  List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOLists);
-
+    public AOPMessageVM getConfigurationIntermediateValuesData(String year, String plantId);
 }
