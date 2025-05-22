@@ -3,25 +3,74 @@ id: multi-tenancy-concept
 title: Multi-tenancy Concept
 ---
 
-# Multi-tenancy Concept
+# Multi-Tenancy in the WKS Platform
 
-## 🌟 Overview
+## Overview
 
-Multi-tenancy on the WKS Power Platform is designed to provide each tenant with a secure and isolated operational environment, akin to providing separate office suites within a single corporate building. This architecture allows service providers to manage multiple clients efficiently while ensuring that each client's data and operations remain private and secure.
+The WKS Platform supports **multi-tenancy** to provide each client (tenant) with a secure, isolated environment, comparable to giving each tenant their own private suite in a shared office building. This architecture enables service providers to efficiently manage multiple clients while ensuring data separation, operational security, and configurability.
 
-## 🏛️ Architectural Overview
+## Architecture
 
-### Tenant URL Structure 🌐
+WKS implements multi-tenancy through three core components:
 
-- Each tenant accesses their environment through a unique subdomain, following the format tenant_id.somedomain.com (e.g., saasCustomer1.wksplatform.com).
-- This subdomain serves as the dedicated entry point to the tenant’s specific portion of the platform, ensuring direct and secure access.
+- **Tenant-specific subdomains** for environment separation
+- **Keycloak realms** for isolated authentication and authorization
+- **MongoDB databases** for secure, per-tenant data storage
 
-### Keycloak Realms 🔐
+---
 
-- Each tenant has a separate Keycloak realm, providing a dedicated security domain that controls authentication and authorization. This setup ensures that user credentials and permissions are managed locally within each tenant's realm, enhancing security and privacy.
-- Upon onboarding a new tenant, a realm is specifically created and configured with unique security settings and user management protocols tailored to meet the tenant's needs.
+### 1. Tenant Subdomain Structure
 
-### MongoDB Databases 🗃️
+Each tenant is assigned a unique subdomain as their entry point to the platform:
 
-- Each tenant has a separate database to store tenant-specific data securely and maintain complete data isolation between tenants.
-- Creating a dedicated MongoDB database for each new tenant setup, ensuring that data from one tenant is completely inaccessible to another.
+- **Format:** `tenant_id.somedomain.com`
+- **Example:** `saasCustomer1.wksplatform.com`
+
+This structure provides:
+
+- A dedicated namespace for each tenant
+- Easy DNS-level isolation
+- Clear, secure routing of tenant-specific traffic
+
+---
+
+### 2. Keycloak Realms for Identity Management
+
+Each tenant operates within its own [Keycloak](https://www.keycloak.org/) realm:
+
+- **Realm Isolation:** Each realm provides a completely independent identity domain
+- **Local Credential Management:** Users, roles, groups, and permissions are managed within the tenant’s realm
+- **Security Benefits:** No credential overlap or access leakage between tenants
+
+**Tenant Onboarding Workflow:**
+
+1. A new Keycloak realm is automatically provisioned
+2. Tenant-specific identity configurations are applied
+3. Role-based access control (RBAC) is set according to client requirements
+
+---
+
+### 3. MongoDB for Data Isolation
+
+WKS allocates a dedicated MongoDB database for each tenant:
+
+- **Data Isolation:** Ensures strict separation of all tenant records
+- **Security:** No cross-tenant visibility or access
+- **Scalability:** Databases can scale independently based on tenant activity and data volume
+
+**Database Lifecycle:**
+
+- Created automatically during tenant onboarding
+- Tied directly to the tenant’s subdomain and Keycloak realm
+- Managed independently for backups, performance tuning, and maintenance
+
+---
+
+## Benefits of WKS Multi-Tenancy
+
+- 🔐 **Security:** Full isolation of identity and data
+- ⚙️ **Customization:** Each tenant can define their own workflows, roles, and integrations
+- 🚀 **Scalability:** Infrastructure supports growth across multiple tenants without conflict
+- 🧩 **Flexibility:** Tenants operate independently while benefiting from shared platform resources
+
+---
