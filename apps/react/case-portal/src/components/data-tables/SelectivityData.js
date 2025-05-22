@@ -52,6 +52,8 @@ const SelectivityData = (props) => {
   }
 
   const handleRemarkCellClick = (row) => {
+    if (!row?.isEditable) return
+
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
@@ -98,6 +100,7 @@ const SelectivityData = (props) => {
     setTimeout(() => {
       try {
         var data = Object.values(unsavedChangesRef.current.unsavedRows)
+
         if (data.length === 0) {
           setSnackbarOpen(true)
           setSnackbarData({
@@ -107,6 +110,7 @@ const SelectivityData = (props) => {
           setSnackbarOpen(true)
           return
         }
+
         // console.log(props?.configType)
         if (props?.configType !== 'grades') {
           const requiredFields = ['remarks']

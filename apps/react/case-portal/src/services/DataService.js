@@ -80,6 +80,7 @@ export const DataService = {
 
   handleCalculateMaintenance,
   getNormalOperationNormsData,
+  getIntermediateValues,
   getShutdownNormsData,
   getSlowdownNormsData,
 
@@ -1234,6 +1235,35 @@ async function getNormalOperationNormsData(keycloak) {
   //   JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
 
   const url = `${Config.CaseEngineUrl}/task/normalOperationNorms?year=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getIntermediateValues(keycloak) {
+  var year = localStorage.getItem('year')
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  // let siteID =
+  //   JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+
+  // value = '/get/configuration/intermediate-values'
+
+  const url = `${Config.CaseEngineUrl}/task/get/configuration/intermediate-values?year=${year}&plantFKId=${plantId}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

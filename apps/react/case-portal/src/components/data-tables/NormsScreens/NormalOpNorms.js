@@ -16,6 +16,39 @@ import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 import TextField from '@mui/material/TextField'
 
+import MuiAccordion from '@mui/material/Accordion'
+import MuiAccordionDetails from '@mui/material/AccordionDetails'
+import MuiAccordionSummary from '@mui/material/AccordionSummary'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { Box, Typography } from '../../../../node_modules/@mui/material/index'
+import { styled } from '@mui/material/styles'
+
+const CustomAccordion = styled((props) => (
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(() => ({
+  position: 'unset',
+  border: 'none',
+  boxShadow: 'none',
+  margin: '0px',
+  '&:before': {
+    display: 'none',
+  },
+}))
+const CustomAccordionSummary = styled((props) => (
+  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
+))(() => ({
+  backgroundColor: '#fff',
+  padding: '0px 12px',
+  minHeight: '40px',
+  '& .MuiAccordionSummary-content': {
+    margin: '8px 0',
+  },
+}))
+const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
+  padding: '0px 0px 12px',
+  backgroundColor: '#F2F3F8',
+}))
+
 const NormalOpNormsScreen = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [allProducts, setAllProducts] = useState([])
@@ -29,6 +62,7 @@ const NormalOpNormsScreen = () => {
   const apiRef = useGridApiRef()
   const [rowModesModel, setRowModesModel] = useState({})
   const [rows, setRows] = useState()
+  const [rowsIntermediateValues, setRowsIntermediateValues] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -60,6 +94,7 @@ const NormalOpNormsScreen = () => {
   }
 
   const keycloak = useSession()
+
   const fetchData = async () => {
     setLoading(true)
     try {
@@ -101,6 +136,28 @@ const NormalOpNormsScreen = () => {
     }
   }
 
+  const fetchDataIntermediateValues = async () => {
+    setLoading(true)
+    try {
+      const res = await DataService.getIntermediateValues(keycloak)
+      if (res?.code == 200) {
+        const formattedData = res?.data.map((item, index) => {
+          const formattedItem = {
+            ...item,
+            isEditable: false,
+            id: index,
+          }
+          return formattedItem
+        })
+        setRowsIntermediateValues(formattedData)
+        setLoading(false)
+      }
+    } catch (error) {
+      setLoading(false)
+      console.error('Error fetching data:', error)
+    }
+  }
+
   const getNormTransactions = async () => {
     try {
       const res = await DataService.getNormTransactions(keycloak)
@@ -109,7 +166,7 @@ const NormalOpNormsScreen = () => {
           ...obj,
           normParameterFKId: obj.normParameterFKId.toUpperCase(),
         }))
-        setAllRedCell(normalized)
+        // setAllRedCell(normalized)
       }
 
       // const isRedCellObject = [
@@ -145,13 +202,14 @@ const NormalOpNormsScreen = () => {
     }
     setTimeout(() => {
       fetchData()
+      fetchDataIntermediateValues()
     }, 450)
     getAllProducts()
     getNormTransactions()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
-  const formatValueToThreeDecimals = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+  const formatValueToFiveDecimals = (params) => {
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(5) : ''
   }
 
   const colDefs = [
@@ -265,7 +323,7 @@ const NormalOpNormsScreen = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'may',
@@ -274,7 +332,7 @@ const NormalOpNormsScreen = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'june',
@@ -283,7 +341,7 @@ const NormalOpNormsScreen = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'july',
@@ -292,7 +350,7 @@ const NormalOpNormsScreen = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
     },
 
     {
@@ -302,7 +360,7 @@ const NormalOpNormsScreen = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'september',
@@ -311,7 +369,7 @@ const NormalOpNormsScreen = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'october',
@@ -320,7 +378,7 @@ const NormalOpNormsScreen = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'november',
@@ -329,7 +387,7 @@ const NormalOpNormsScreen = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'december',
@@ -338,7 +396,7 @@ const NormalOpNormsScreen = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'january',
@@ -347,7 +405,7 @@ const NormalOpNormsScreen = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'february',
@@ -356,7 +414,7 @@ const NormalOpNormsScreen = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'march',
@@ -365,7 +423,7 @@ const NormalOpNormsScreen = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'remarks',
@@ -396,6 +454,212 @@ const NormalOpNormsScreen = () => {
       },
     },
 
+    {
+      field: 'idFromApi',
+      headerName: 'idFromApi',
+    },
+    {
+      field: 'isEditable',
+      headerName: 'isEditable',
+    },
+  ]
+
+  const colDefsIntermediateValues = [
+    {
+      field: 'NormParameterFKId',
+      // headerName: 'Particulars',
+      headerName: 'Particulars',
+      minWidth: 160,
+      valueGetter: (params) => params || '',
+      valueFormatter: (params) => {
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : ''
+      },
+
+      filterOperators: [
+        {
+          label: 'contains',
+          value: 'contains',
+          getApplyFilterFn: (filterItem) => {
+            if (!filterItem?.value) {
+              return
+            }
+            return (rowId) => {
+              const filterValue = filterItem.value.toLowerCase()
+              if (filterValue) {
+                const productName = getProductDisplayName(rowId)
+                if (productName) {
+                  return productName.toLowerCase().includes(filterValue)
+                }
+              }
+              return true
+            }
+          },
+          InputComponent: ({ item, applyValue, focusElementRef }) => (
+            <TextField
+              autoFocus
+              inputRef={focusElementRef}
+              size='small'
+              label='Contains'
+              value={item.value || ''}
+              onChange={(event) =>
+                applyValue({ ...item, value: event.target.value })
+              }
+              style={{ marginTop: '8px' }}
+            />
+          ),
+        },
+      ],
+
+      renderEditCell: (params) => {
+        const { value, api } = params
+        return (
+          <select
+            value={value || ''}
+            onChange={(event) => {
+              api.setEditCellValue({
+                id: params.id,
+                field: 'NormParameterFKId',
+                value: event.target.value,
+              })
+            }}
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+            }}
+          >
+            <option value='' disabled>
+              Select
+            </option>
+            {allProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.displayName}
+              </option>
+            ))}
+          </select>
+        )
+      },
+    },
+
+    {
+      field: 'UOM',
+      headerName: 'UOM',
+      minWidth: 40,
+      editable: false,
+    },
+
+    {
+      field: 'Apr',
+      headerName: headerMap[4],
+      editable: false,
+      renderEditCell: NumericInputOnly,
+      align: 'right',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
+    {
+      field: 'May',
+      headerName: headerMap[5],
+      editable: false,
+      renderEditCell: NumericInputOnly,
+      align: 'right',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
+    {
+      field: 'Jun',
+      headerName: headerMap[6],
+      editable: false,
+      renderEditCell: NumericInputOnly,
+      align: 'right',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
+    {
+      field: 'Jul',
+      headerName: headerMap[7],
+      editable: false,
+      renderEditCell: NumericInputOnly,
+      align: 'right',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
+
+    {
+      field: 'Aug',
+      headerName: headerMap[8],
+      editable: false,
+      renderEditCell: NumericInputOnly,
+      align: 'right',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
+    {
+      field: 'Sep',
+      headerName: headerMap[9],
+      editable: false,
+      renderEditCell: NumericInputOnly,
+      align: 'right',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
+    {
+      field: 'Oct',
+      headerName: headerMap[10],
+      editable: false,
+      renderEditCell: NumericInputOnly,
+      align: 'right',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
+    {
+      field: 'Nov',
+      headerName: headerMap[11],
+      editable: false,
+      renderEditCell: NumericInputOnly,
+      align: 'right',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
+    {
+      field: 'Dec',
+      headerName: headerMap[12],
+      editable: false,
+      renderEditCell: NumericInputOnly,
+      align: 'right',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
+    {
+      field: 'Jan',
+      headerName: headerMap[1],
+      editable: false,
+      renderEditCell: NumericInputOnly,
+      align: 'right',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
+    {
+      field: 'Feb',
+      headerName: headerMap[2],
+      editable: false,
+      renderEditCell: NumericInputOnly,
+      align: 'right',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
+    {
+      field: 'Mar',
+      headerName: headerMap[3],
+      editable: false,
+      renderEditCell: NumericInputOnly,
+      align: 'right',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
     {
       field: 'idFromApi',
       headerName: 'idFromApi',
@@ -596,6 +860,7 @@ const NormalOpNormsScreen = () => {
           severity: 'success',
         })
         fetchData()
+        fetchDataIntermediateValues()
         setLoading(false)
       } else {
         setSnackbarOpen(true)
@@ -649,6 +914,36 @@ const NormalOpNormsScreen = () => {
     isOldYear,
   )
 
+  const getAdjustedPermissionsIV = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      isOldYear: isOldYear,
+      showCalculate: false,
+    }
+  }
+
+  const adjustedPermissionsIV = getAdjustedPermissionsIV(
+    {
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      showCalculate: false,
+    },
+    isOldYear,
+  )
+
   return (
     <div>
       <Backdrop
@@ -657,6 +952,7 @@ const NormalOpNormsScreen = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
+
       <DataGridTable
         modifiedCells={modifiedCells}
         title='Normal Operations Norms'
@@ -691,18 +987,45 @@ const NormalOpNormsScreen = () => {
         handleRemarkCellClick={handleRemarkCellClick}
         permissions={adjustedPermissions}
         allRedCell={allRedCell}
-
-        // permissions={{
-        //   showAction: false,
-        //   addButton: false,
-        //   deleteButton: false,
-        //   editButton: true,
-        //   showUnit: false,
-        //   saveWithRemark: true,
-        //   saveBtn: true,
-        //   showCalculate: lowerVertName == 'meg' ? true : false,
-        // }}
       />
+
+      <Box sx={{ width: '100%', marginTop: 1 }}>
+        <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordionSummary
+            aria-controls='meg-grid-content'
+            id='meg-grid-header'
+          >
+            <Typography component='span' className='grid-title'>
+              Intermediate Values
+            </Typography>
+          </CustomAccordionSummary>
+          <CustomAccordionDetails>
+            <Box sx={{ width: '100%', margin: 0 }}>
+              <DataGridTable
+                title='Intermediate Values'
+                columns={colDefsIntermediateValues}
+                setRows={setRowsIntermediateValues}
+                rows={rowsIntermediateValues}
+                onAddRow={(newRow) => console.log('New Row Added:', newRow)}
+                onDeleteRow={(id) => console.log('Row Deleted:', id)}
+                onRowUpdate={(updatedRow) =>
+                  console.log('Row Updated:', updatedRow)
+                }
+                paginationOptions={[100, 200, 300]}
+                processRowUpdate={processRowUpdate}
+                rowModesModel={rowModesModel}
+                onRowModesModelChange={onRowModesModelChange}
+                apiRef={apiRef}
+                open1={open1}
+                setOpen1={setOpen1}
+                setSnackbarOpen={setSnackbarOpen}
+                setSnackbarData={setSnackbarData}
+                permissions={adjustedPermissionsIV}
+              />
+            </Box>
+          </CustomAccordionDetails>
+        </CustomAccordion>
+      </Box>
     </div>
   )
 }

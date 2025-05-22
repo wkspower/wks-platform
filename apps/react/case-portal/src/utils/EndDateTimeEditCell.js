@@ -33,8 +33,15 @@ export const EndDateTimeEditCell = ({ id, field, value, api }) => {
   }
 
   const handlePickerClose = () => {
-    // console.log('Date picker closed')
-    api.stopRowEditMode({ id })
+    const rowMode = api.getRowMode(id)
+
+    if (rowMode === 'edit') {
+      api.stopRowEditMode({ id })
+    } else {
+      console.warn(
+        `Row with id=${id} is not in edit mode. Skipping stopRowEditMode.`,
+      )
+    }
   }
 
   const handlePickerKeyDown = (e) => {

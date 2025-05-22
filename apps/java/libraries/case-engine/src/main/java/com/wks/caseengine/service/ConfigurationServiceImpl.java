@@ -299,10 +299,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 						commands.add(attributeValue.toString());
 
-						// Float attributeValueHP =
-						// getAttributeValueByPythonScriptFromSP(attributeValue);
+						Float attributeValueHP = getAttributeValueByPythonScriptFromSP(attributeValue);
 						// System.out.println("attributeHP " + attributeValueHP + " " + i);
-						Float attributeValueHP = getAttributeValueByPythonScript(commands);
+						// Float attributeValueHP = getAttributeValueByPythonScript(commands);
 
 						saveData(optionNormParametersHP.get().getId(), i, year, attributeValueHP, configurationDTO);
 					}
@@ -320,13 +319,16 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		try {
 			// Command to run the Python script with an argument
 			try {
-				String sql = "EXEC " + "Test_Configuration_Update"
-						+ " @value = :attributeValue";
+				String sql = "EXEC " + "LatentHeatCalculation"
+						+ " @pressure = 0"
+						+ " @tempretureInCel = :attributeValue";
 
 				Query query = entityManager.createNativeQuery(sql);
 				query.setParameter("attributeValue", attributeValue);
 				System.out.println("query results" + query.getResultList());
 				List<Object> list = query.getResultList();
+				// log for the getResultSet
+				System.out.println("getResultSet list " + list.toString());
 				for (Object row : list) {
 
 					if ((row != null && !row.toString().trim().isEmpty())) {

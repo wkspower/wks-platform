@@ -25,8 +25,7 @@ public class TurnAroundPlan {
     @Column(name = "Plant_FK_Id")
     private UUID plantFkId;
 
-    
-    @Column(name = "AOPYear", nullable = false, length = 255)
+    @Column(name = "AOPYear", nullable = true, length = 255)
     private String aopYear;
 
     @Column(name = "activity", nullable = false, length = 255)

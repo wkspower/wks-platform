@@ -29,6 +29,9 @@ const getEnhancedColDefs = ({
   const formatValueToThreeDecimals = (params) =>
     params ? parseFloat(params).toFixed(3) : ''
 
+  const formatValueToTwoDecimals = (params) =>
+    params ? parseFloat(params).toFixed(2) : ''
+
   let cols
 
   if (lowerVertName == 'pe') {
@@ -170,7 +173,7 @@ const getEnhancedColDefs = ({
       updatedCol = {
         ...updatedCol,
         headerName: headerMap[col.headerName],
-        valueFormatter: formatValueToThreeDecimals,
+        valueFormatter: formatValueToTwoDecimals,
         renderEditCell: NumericInputOnly,
         align: 'right',
       }

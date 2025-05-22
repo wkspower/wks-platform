@@ -571,11 +571,11 @@ public class WorkflowServiceImpl implements WorkflowService {
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 
 			// First SP _LoadAnnualAOPCost
-			String LoadAnnualAOPCost = vertical.getName() + "_LoadAnnualAOPCost";
+			String LoadAnnualAOPCost = vertical.getName() + "_" + site.getName() + "_LoadAnnualAOPCost";
 			totalUpdates += executeDynamicUpdateProcedure(LoadAnnualAOPCost, plantId, year);
 
 			// Second SP _LoadAnnualAOPCost_MIISContribution
-			String LoadAnnualAOPCost_MIISContribution = vertical.getName()
+			String LoadAnnualAOPCost_MIISContribution = vertical.getName() + "_" + site.getName()
 					+ "_LoadAnnualAOPCost_MIISContribution";
 			totalUpdates += executeDynamicUpdateProcedure(LoadAnnualAOPCost_MIISContribution, plantId, year);
 

@@ -103,9 +103,27 @@ const MaintenanceTable = () => {
     }
   }
 
-  const formatValueToThreeDecimals = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+  const formatValueToTwoDecimals = (params) => {
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
   }
+
+  // const formatValueToTwoDecimals = (params) => {
+  //   if (params === null || params === undefined || params === '') {
+  //     return ''
+  //   }
+  //   const num = parseFloat(params)
+  //   if (isNaN(num)) {
+  //     return ''
+  //   }
+  //   if (num === 0) {
+  //     return 0
+  //   }
+
+  //   if (num % 1 !== 0) {
+  //     return num.toFixed(2)
+  //   }
+  //   return num
+  // }
 
   useEffect(() => {
     fetchData()
@@ -125,7 +143,7 @@ const MaintenanceTable = () => {
       headerName: headerMap[4],
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToTwoDecimals,
 
       // valueGetter: convertUnits,
     },
@@ -133,7 +151,7 @@ const MaintenanceTable = () => {
     {
       field: 'May',
       headerName: headerMap[5],
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToTwoDecimals,
 
       align: 'right',
       headerAlign: 'left',
@@ -141,7 +159,7 @@ const MaintenanceTable = () => {
     {
       field: 'June',
       headerName: headerMap[6],
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToTwoDecimals,
 
       align: 'right',
       headerAlign: 'left',
@@ -149,7 +167,7 @@ const MaintenanceTable = () => {
     {
       field: 'July',
       headerName: headerMap[7],
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToTwoDecimals,
 
       align: 'right',
       headerAlign: 'left',
@@ -157,7 +175,7 @@ const MaintenanceTable = () => {
     {
       field: 'Aug',
       headerName: headerMap[8],
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToTwoDecimals,
 
       align: 'right',
       headerAlign: 'left',
@@ -165,7 +183,7 @@ const MaintenanceTable = () => {
     {
       field: 'Sep',
       headerName: headerMap[9],
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToTwoDecimals,
 
       align: 'right',
       headerAlign: 'left',
@@ -173,7 +191,7 @@ const MaintenanceTable = () => {
     {
       field: 'Oct',
       headerName: headerMap[10],
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToTwoDecimals,
 
       align: 'right',
       headerAlign: 'left',
@@ -182,7 +200,7 @@ const MaintenanceTable = () => {
     {
       field: 'Nov',
       headerName: headerMap[11],
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToTwoDecimals,
 
       align: 'right',
       headerAlign: 'left',
@@ -190,7 +208,7 @@ const MaintenanceTable = () => {
     {
       field: 'Dec',
       headerName: headerMap[12],
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToTwoDecimals,
 
       align: 'right',
       headerAlign: 'left',
@@ -198,7 +216,7 @@ const MaintenanceTable = () => {
     {
       field: 'Jan',
       headerName: headerMap[1],
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToTwoDecimals,
 
       align: 'right',
       headerAlign: 'left',
@@ -206,7 +224,7 @@ const MaintenanceTable = () => {
     {
       field: 'Feb',
       headerName: headerMap[2],
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToTwoDecimals,
 
       align: 'right',
       headerAlign: 'left',
@@ -214,7 +232,7 @@ const MaintenanceTable = () => {
     {
       field: 'Mar',
       headerName: headerMap[3],
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToTwoDecimals,
 
       align: 'right',
       headerAlign: 'left',

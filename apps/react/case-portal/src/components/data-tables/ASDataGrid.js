@@ -698,7 +698,7 @@ const DataGridTable = ({
               }
 
               if (
-                //permissions?.remarksEditable &&
+                permissions?.remarksEditable &&
                 params.row.isEditable === false
                 // &&
                 // col.field !== lastColumnField
