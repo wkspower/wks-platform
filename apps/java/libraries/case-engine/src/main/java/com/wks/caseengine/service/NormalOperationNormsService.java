@@ -5,15 +5,14 @@ import com.wks.caseengine.dto.MCUNormsValueDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface NormalOperationNormsService {
-
-	public List<MCUNormsValueDTO> getNormalOperationNormsData(String year, String plantId);
-
-	public List<MCUNormsValueDTO> saveNormalOperationNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList);
-
-	public int calculateExpressionConsumptionNorms(String year, String plantId);
-
+	
+	public List<MCUNormsValueDTO> getNormalOperationNormsData( String year, String plantId);
+	public List<MCUNormsValueDTO> saveNormalOperationNormsData( List<MCUNormsValueDTO> mCUNormsValueDTOList);
+	public int calculateExpressionConsumptionNorms(String year,String plantId);
+	
 	AOPMessageVM getNormsTransaction(String plantId, String aopYear);
-
+	
+	public AOPMessageVM updateNormalOperationNorms(List<MCUNormsValueDTO> mCUNormsValueDTOList);
 	// public int getCalculatedNormalOpsNorms( String year, String plantId);
 
 }

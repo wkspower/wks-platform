@@ -3,6 +3,7 @@ package com.wks.caseengine.rest.server;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,13 +17,13 @@ import com.wks.caseengine.service.NormalOperationNormsService;
 @RestController
 @RequestMapping("task")
 public class NormalOperationNormsController {
-
+	
 	@Autowired
 	private NormalOperationNormsService normalOperationNormsService;
-
-	@GetMapping(value = "/normalOperationNorms")
-	public List<MCUNormsValueDTO> getNormalOperationNormsData(@RequestParam String year, @RequestParam String plantId) {
-		return normalOperationNormsService.getNormalOperationNormsData(year, plantId);
+	
+	@GetMapping(value="/normalOperationNorms")
+	public List<MCUNormsValueDTO> getNormalOperationNormsData(@RequestParam String year,@RequestParam String plantId){
+		return	normalOperationNormsService.getNormalOperationNormsData(year, plantId);
 	}
 
 	@GetMapping(value = "/norms-transactions")
@@ -45,11 +46,16 @@ public class NormalOperationNormsController {
 	public int getNormalOperationNormsDataFromSP(@RequestParam String year, @RequestParam String plantId) {
 		return normalOperationNormsService.calculateExpressionConsumptionNorms(year, plantId);
 	}
-
+	
+	@GetMapping(value="/update/normal-ops-norms")
+	public ResponseEntity<AOPMessageVM> updateNormalOperationNorms(@RequestBody List<MCUNormsValueDTO> mCUNormsValueDTOList) {
+		AOPMessageVM response = normalOperationNormsService.updateNormalOperationNorms(mCUNormsValueDTOList);
+		return ResponseEntity.status(response.getCode()).body(response);
+	} 
+	
 	// @GetMapping(value="/getCalculatedNormalOpsNorms")
-	// public List<Object[]> getCalculatedNormalOpsNorms(@RequestParam String
-	// year,@RequestParam String plantId){
-	// return normalOperationNormsService.getCalculatedNormalOpsNorms(year,plantId);
+	// public List<Object[]> getCalculatedNormalOpsNorms(@RequestParam String year,@RequestParam String plantId){
+	// 	return normalOperationNormsService.getCalculatedNormalOpsNorms(year,plantId);
 	// }
 
 }

@@ -20,17 +20,22 @@ import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.MCUNormsValueDTO;
 import com.wks.caseengine.entity.AOPSummary;
 import com.wks.caseengine.entity.MCUNormsValue;
-import com.wks.caseengine.entity.NormsTransactions;
+import com.wks.caseengine.entity.NormParameters;
+import com.wks.caseengine.entity.NormsTransaction;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.NormalOperationNormsRepository;
+import com.wks.caseengine.repository.NormsTransactionRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
-
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.*;
 @Service
 public class NormalOperationNormsServiceImpl implements NormalOperationNormsService {
 
@@ -45,6 +50,8 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	SiteRepository siteRepository;
 	@Autowired
 	VerticalsRepository verticalRepository;
+	@Autowired
+	private NormsTransactionRepository normsTransactionRepository;
 
 	@Override
 	public List<MCUNormsValueDTO> getNormalOperationNormsData(String year, String plantId) {
@@ -238,5 +245,72 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			throw new RestInvalidArgumentException("normsTransaction", ex);
 		}
 	}
+
+	@Override
+	public AOPMessageVM updateNormalOperationNorms(List<MCUNormsValueDTO> mCUNormsValueDTOList) {
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    List<NormsTransaction> transactionsToSave = new ArrayList<>();
+
+	    for (MCUNormsValueDTO dto : mCUNormsValueDTOList) {
+	        Optional<MCUNormsValue> optionalValue = normalOperationNormsRepository.findById(UUID.fromString(dto.getId()));
+	        if (optionalValue.isEmpty()) {
+	            continue; // or handle accordingly
+	        }
+	        MCUNormsValue value = optionalValue.get();
+
+	        for (int month = 1; month <= 12; month++) {
+	            Float oldVal = getMonthlyValue(value, month);
+	            Float newVal = getMonthlyValue(dto, month);
+
+	            if (!Objects.equals(oldVal, newVal)) {
+	                NormsTransaction normsTransaction = new NormsTransaction();
+	                normsTransaction.setAopMonth(month);
+	                normsTransaction.setAopYear(value.getFinancialYear());
+	                normsTransaction.setAttributeValue(oldVal != null ? oldVal.doubleValue() : null);
+	                normsTransaction.setNormParameterFkId(value.getMaterialFkId());
+	                normsTransaction.setPlantFkId(value.getPlantFkId());
+	                normsTransaction.setRemark(dto.getRemarks());
+	                normsTransaction.setVersion(1);
+	                normsTransaction.setCreatedDateTime(new Date());
+	                normsTransaction.setCreatedBy("User");
+	                normsTransaction.setMcuNormsValueFKId(UUID.fromString(dto.getId()));
+	                transactionsToSave.add(normsTransaction);
+	            }
+	        }
+	    }
+
+	    normsTransactionRepository.saveAll(transactionsToSave);
+
+	    aopMessageVM.setCode(200);
+	    aopMessageVM.setMessage("Data updated successfully");
+	    aopMessageVM.setData(transactionsToSave);
+	    return aopMessageVM;
+	}
+
+	private Float getMonthlyValue(Object obj, int month) {
+	    try {
+	        String methodName = switch (month) {
+	            case 1 -> "getJanuary";
+	            case 2 -> "getFebruary";
+	            case 3 -> "getMarch";
+	            case 4 -> "getApril";
+	            case 5 -> "getMay";
+	            case 6 -> "getJune";
+	            case 7 -> "getJuly";
+	            case 8 -> "getAugust";
+	            case 9 -> "getSeptember";
+	            case 10 -> "getOctober";
+	            case 11 -> "getNovember";
+	            case 12 -> "getDecember";
+	            default -> throw new IllegalArgumentException("Invalid month: " + month);
+	        };
+	        Method method = obj.getClass().getMethod(methodName);
+	        return (Float) method.invoke(obj);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return null;
+	    }
+	}
+
 
 }
