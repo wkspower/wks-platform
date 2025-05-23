@@ -58,7 +58,7 @@ export default function getKendoColumns({
 
     return rawCols.map((colDef, idx) => {
       const field = finalKeys[idx]
-      const title = headers2[idx] || colDef.headerName || field
+      const title = String(headers2[idx] || colDef.headerName || field)
       const isTextCol = field === 'norm' || field === 'particulars'
 
       return {

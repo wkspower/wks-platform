@@ -21,7 +21,7 @@ export default function getKendoProductionColumns({ headerMap, type }) {
 
   return rawCols.map((colDef) => {
     const field = colDef.field
-    const title = headerMap[colDef.headerName] || colDef.headerName
+    const title = String(headerMap[colDef.headerName] || colDef.headerName)
     const isTextCol = field === 'norm' || field === 'particulars'
 
     return {

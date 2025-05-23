@@ -125,9 +125,25 @@
 .kendo-data-grid .k-grid-content .k-grid-table tr.k-state-selected:not(.k-alt) {
   background-color: #ffffff !important;
 }
-
+/* 
 .kendo-data-grid .disabled-row {
-  background-color: #d3d3d3 !important; /* light gray */
-  color: #666666 !important; /* optional: make text less bright */
-  pointer-events: none; /* makes the row non-interactive */
+  background-color: #d3d3d3 !important;
+  color: #666666 !important; 
+  pointer-events: none; 
+}
+.kendo-data-grid .gray-row {
+  background-color: #f5f5f5 !important;
+} */
+
+/* make every row light gray */
+/* .kendo-data-grid .k-grid-content .k-grid-table tr {
+  background-color: #f5f5f5cd !important;
+} */
+/* Only apply background color to body rows, not header */
+.kendo-data-grid .k-grid-content .k-grid-table tbody tr {
+  background-color: #ebebeb !important;
+}
+
+.k-grid .k-table-row {
+  background-color: #fafafc !important;
 }
