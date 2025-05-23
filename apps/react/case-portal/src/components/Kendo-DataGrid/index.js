@@ -1,36 +1,9 @@
 import React, { useState } from 'react'
-import {
-  Grid,
-  GridColumn as Column,
-  GridColumnMenuWrapper,
-  GridColumnMenuColumnsChooser,
-  GridColumnMenuFilter,
-  GridColumnMenuSort,
-} from '@progress/kendo-react-grid'
+import { Grid, GridColumn as Column } from '@progress/kendo-react-grid'
 import { filterBy } from '@progress/kendo-data-query'
 import '@progress/kendo-theme-default/dist/all.css'
 import PropTypes from 'prop-types'
 import '../../kendo-data-grid.css'
-
-const FullColumnMenu = (props) => {
-  return (
-    <GridColumnMenuWrapper {...props}>
-      {/* Sort tab */}
-      <GridColumnMenuSort {...props} />
-
-      {/* Filter tab */}
-      <GridColumnMenuFilter {...props} />
-
-      {/* Column chooser tab */}
-      <GridColumnMenuColumnsChooser {...props} />
-
-      {/* (optional) any extra buttons here */}
-    </GridColumnMenuWrapper>
-  )
-}
-Grid.defaultProps = {
-  columnMenu: FullColumnMenu,
-}
 
 const KendoDataGrid = ({
   rows,
@@ -56,7 +29,6 @@ const KendoDataGrid = ({
         })
       }
     : undefined
-  const [showHeader, setShowHeader] = useState(true)
   return (
     <div style={{ position: 'relative' }}>
       {loading && (
@@ -67,9 +39,6 @@ const KendoDataGrid = ({
         </div>
       )}
 
-      <div
-        style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}
-      ></div>
       <div className='kendo-data-grid'>
         <Grid
           data={filterBy(rows, filter)}
@@ -81,7 +50,7 @@ const KendoDataGrid = ({
           filter={filter}
           onFilterChange={(e) => setFilter(e.filter)}
           onItemChange={handleItemChange}
-          headerRowHeight={showHeader ? 35 : 0}
+          // headerRowHeight={showHeader ? 35 : 0}
           rowRender={rowRender}
           resizable={true}
         >

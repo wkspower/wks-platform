@@ -1,7 +1,3 @@
-/* KendoReact DataGrid Styles - apply .kendo-data-grid to your Grid component */
-/* Define these CSS variables in :root or parent scope if needed:
-   --jio-border, --jio-background, --jio-row-odd, --jio-row-even */
-
 .kendo-data-grid {
   border-radius: 0;
   border: 1px solid #d0d0d0;
@@ -129,9 +125,9 @@
 .kendo-data-grid .k-grid-content .k-grid-table tr.k-state-selected:not(.k-alt) {
   background-color: #ffffff !important;
 }
-/* Make every disabled-row gray and non-interactive */
+
 .kendo-data-grid .disabled-row {
-  background-color: #881616 !important;
-  color: rgba(0, 0, 0, 0.4);
-  pointer-events: none; /* prevents clicks/hover */
+  background-color: #d3d3d3 !important; /* light gray */
+  color: #666666 !important; /* optional: make text less bright */
+  pointer-events: none; /* makes the row non-interactive */
 }

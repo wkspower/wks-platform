@@ -86,7 +86,13 @@ export default function getKendoColumns({
     return {
       field,
       title: headerName,
-      width: isTextCol ? 200 : 200,
+      width:
+        type !== 'NormCost'
+          ? isTextCol
+            ? 200
+            : 140 // text columns get twice the flex share
+          : undefined,
+      // width: isTextCol ? 200 : 200,
       filterable: true,
       filter: isTextCol ? 'text' : 'numeric',
       format: isTextCol ? undefined : '{0:n3}',

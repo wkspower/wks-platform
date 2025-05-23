@@ -7,15 +7,17 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { styled } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
-import AopCostReportView from 'components/data-tables-views/ReportDataGrid'
+// import KendoDataGrid from 'components/data-tables-views/ReportDataGrid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 
-import getEnhancedProductionVolDataBasis from '../CommonHeader/MCHeaders'
-import getEnhancedNormsHistorianBasis from '../CommonHeader/NormsHistorianValuesHeaders'
+// import getEnhancedProductionVolDataBasis from '../CommonHeader/MCHeaders'
+// import getKendoNormsHistorianColumns from '../CommonHeader/NormsHistorianValuesHeaders'
+import KendoDataGrid from 'components/Kendo-DataGrid/index'
+import getKendoNormsHistorianColumns from '../CommonHeader/KendoNormHistoryHeader'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -89,17 +91,17 @@ const NormsHistorianBasis = () => {
   const year = localStorage.getItem('year')
   const headerMap = generateHeaderNames(year)
 
-  const colsHistorianValues = getEnhancedNormsHistorianBasis({
+  const colsHistorianValues = getKendoNormsHistorianColumns({
     headerMap,
     type: 'HistorianValues',
   })
 
-  const colsMcuAndNormGrid = getEnhancedNormsHistorianBasis({
+  const colsMcuAndNormGrid = getKendoNormsHistorianColumns({
     headerMap,
     type: 'McuAndNormGrid',
   })
 
-  const colsProductionVolumeData = getEnhancedNormsHistorianBasis({
+  const colsProductionVolumeData = getKendoNormsHistorianColumns({
     headerMap,
     type: 'ProductionVolumeData',
   })
@@ -132,7 +134,7 @@ const NormsHistorianBasis = () => {
             </CustomAccordionSummary>
             <CustomAccordionDetails>
               <Box sx={{ width: '100%', margin: 0 }}>
-                <AopCostReportView
+                <KendoDataGrid
                   rows={rowsProductionVolumeData}
                   columns={colsProductionVolumeData}
                   height='93px'
@@ -154,7 +156,7 @@ const NormsHistorianBasis = () => {
             </CustomAccordionSummary>
             <CustomAccordionDetails>
               <Box sx={{ width: '100%', margin: 0 }}>
-                <AopCostReportView
+                <KendoDataGrid
                   rows={rowsMcuAndNormGrid}
                   columns={colsMcuAndNormGrid}
                 />
@@ -175,7 +177,7 @@ const NormsHistorianBasis = () => {
             </CustomAccordionSummary>
             <CustomAccordionDetails>
               <Box sx={{ width: '100%', margin: 0 }}>
-                <AopCostReportView
+                <KendoDataGrid
                   rows={rowsHistorianValues}
                   columns={colsHistorianValues}
                 />
