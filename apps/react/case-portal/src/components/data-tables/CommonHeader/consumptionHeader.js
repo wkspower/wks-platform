@@ -15,11 +15,11 @@ const getEnhancedColDefs = ({
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
-  // const formatValueToThreeDecimals = (params) =>
+  // const formatValueToFiveDecimals = (params) =>
   //   params ? parseFloat(params).toFixed(3) : ''
 
-  const formatValueToThreeDecimals = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+  const formatValueToFiveDecimals = (params) => {
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(5) : ''
   }
 
   const getProductDisplayName = (id) => {
@@ -139,7 +139,7 @@ const getEnhancedColDefs = ({
         ...col,
         headerName: headerMap[col.headerName],
         renderEditCell: NumericInputOnly,
-        valueFormatter: formatValueToThreeDecimals,
+        valueFormatter: formatValueToFiveDecimals,
         align: 'right',
       }
     }

@@ -324,6 +324,14 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'may',
@@ -560,6 +568,7 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
+    
     {
       field: 'May',
       headerName: headerMap[5],
@@ -1006,20 +1015,7 @@ const NormalOpNormsScreen = () => {
                 columns={colDefsIntermediateValues}
                 setRows={setRowsIntermediateValues}
                 rows={rowsIntermediateValues}
-                onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-                onDeleteRow={(id) => console.log('Row Deleted:', id)}
-                onRowUpdate={(updatedRow) =>
-                  console.log('Row Updated:', updatedRow)
-                }
                 paginationOptions={[100, 200, 300]}
-                processRowUpdate={processRowUpdate}
-                rowModesModel={rowModesModel}
-                onRowModesModelChange={onRowModesModelChange}
-                apiRef={apiRef}
-                open1={open1}
-                setOpen1={setOpen1}
-                setSnackbarOpen={setSnackbarOpen}
-                setSnackbarData={setSnackbarData}
                 permissions={adjustedPermissionsIV}
               />
             </Box>

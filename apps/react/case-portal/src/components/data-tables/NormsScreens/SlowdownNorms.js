@@ -203,8 +203,8 @@ const SlowdownNorms = () => {
     lowerVertName,
   ])
 
-  const formatValueToThreeDecimals = (params) =>
-    params ? parseFloat(params).toFixed(3) : ''
+  const formatValueToFiveDecimals = (params) =>
+    params ? parseFloat(params).toFixed(5) : ''
 
   const isCellEditable = (params) => {
     return params.row.isEditable
@@ -319,7 +319,7 @@ const SlowdownNorms = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(4),
       columnClassName: 'first-column',
     },
@@ -331,7 +331,7 @@ const SlowdownNorms = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(5),
       columnClassName: 'first-column',
     },
@@ -343,7 +343,7 @@ const SlowdownNorms = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(6),
     },
     {
@@ -353,7 +353,7 @@ const SlowdownNorms = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(7),
     },
 
@@ -364,7 +364,7 @@ const SlowdownNorms = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(8),
     },
     {
@@ -374,7 +374,7 @@ const SlowdownNorms = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(9),
     },
     {
@@ -384,7 +384,7 @@ const SlowdownNorms = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(10),
     },
     {
@@ -394,7 +394,7 @@ const SlowdownNorms = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(11),
     },
     {
@@ -404,7 +404,7 @@ const SlowdownNorms = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(12),
     },
     {
@@ -414,7 +414,7 @@ const SlowdownNorms = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(1),
     },
     {
@@ -424,7 +424,7 @@ const SlowdownNorms = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(2),
     },
     {
@@ -434,7 +434,7 @@ const SlowdownNorms = () => {
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(3),
     },
 

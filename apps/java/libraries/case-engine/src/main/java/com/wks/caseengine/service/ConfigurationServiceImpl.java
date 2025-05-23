@@ -319,9 +319,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		try {
 			// Command to run the Python script with an argument
 			try {
-				String sql = "EXEC " + "LatentHeatCalculation"
-						+ " @pressure = 0"
-						+ " @tempretureInCel = :attributeValue";
+				// String sql = "EXEC " + "LatentHeatCalculation"
+				// + " @pressure = 0"
+				// + " @tempretureInCel = :attributeValue";
+
+				String sql = "EXEC LatentHeatCalculation @pressure = 0, @tempretureInCel = :attributeValue";
 
 				Query query = entityManager.createNativeQuery(sql);
 				query.setParameter("attributeValue", attributeValue);
