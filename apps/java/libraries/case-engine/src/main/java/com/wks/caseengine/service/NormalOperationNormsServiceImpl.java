@@ -21,7 +21,7 @@ import com.wks.caseengine.dto.MCUNormsValueDTO;
 import com.wks.caseengine.entity.AOPSummary;
 import com.wks.caseengine.entity.MCUNormsValue;
 import com.wks.caseengine.entity.NormParameters;
-import com.wks.caseengine.entity.NormsTransaction;
+import com.wks.caseengine.entity.NormsTransactions;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
@@ -33,8 +33,6 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
 @Service
 public class NormalOperationNormsServiceImpl implements NormalOperationNormsService {
@@ -67,18 +65,18 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValueDTO.setVerticalFkId(row[3].toString());
 				mCUNormsValueDTO.setMaterialFkId(row[4].toString());
 
-				mCUNormsValueDTO.setApril(row[5] != null ? Float.parseFloat(row[5].toString()) : null);
-				mCUNormsValueDTO.setMay(row[6] != null ? Float.parseFloat(row[6].toString()) : null);
-				mCUNormsValueDTO.setJune(row[7] != null ? Float.parseFloat(row[7].toString()) : null);
-				mCUNormsValueDTO.setJuly(row[8] != null ? Float.parseFloat(row[8].toString()) : null);
-				mCUNormsValueDTO.setAugust(row[9] != null ? Float.parseFloat(row[9].toString()) : null);
-				mCUNormsValueDTO.setSeptember(row[10] != null ? Float.parseFloat(row[10].toString()) : null);
-				mCUNormsValueDTO.setOctober(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
-				mCUNormsValueDTO.setNovember(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
-				mCUNormsValueDTO.setDecember(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
-				mCUNormsValueDTO.setJanuary(row[14] != null ? Float.parseFloat(row[14].toString()) : null);
-				mCUNormsValueDTO.setFebruary(row[15] != null ? Float.parseFloat(row[15].toString()) : null);
-				mCUNormsValueDTO.setMarch(row[16] != null ? Float.parseFloat(row[16].toString()) : null);
+				mCUNormsValueDTO.setApril(row[5] != null ? Double.parseDouble(row[5].toString()) : null);
+				mCUNormsValueDTO.setMay(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
+				mCUNormsValueDTO.setJune(row[7] != null ? Double.parseDouble(row[7].toString()) : null);
+				mCUNormsValueDTO.setJuly(row[8] != null ? Double.parseDouble(row[8].toString()) : null);
+				mCUNormsValueDTO.setAugust(row[9] != null ? Double.parseDouble(row[9].toString()) : null);
+				mCUNormsValueDTO.setSeptember(row[10] != null ? Double.parseDouble(row[10].toString()) : null);
+				mCUNormsValueDTO.setOctober(row[11] != null ? Double.parseDouble(row[11].toString()) : null);
+				mCUNormsValueDTO.setNovember(row[12] != null ? Double.parseDouble(row[12].toString()) : null);
+				mCUNormsValueDTO.setDecember(row[13] != null ? Double.parseDouble(row[13].toString()) : null);
+				mCUNormsValueDTO.setJanuary(row[14] != null ? Double.parseDouble(row[14].toString()) : null);
+				mCUNormsValueDTO.setFebruary(row[15] != null ? Double.parseDouble(row[15].toString()) : null);
+				mCUNormsValueDTO.setMarch(row[16] != null ? Double.parseDouble(row[16].toString()) : null);
 
 				mCUNormsValueDTO.setFinancialYear(row[17].toString());
 				mCUNormsValueDTO.setRemarks(row[18] != null ? row[18].toString() : " ");
@@ -105,6 +103,39 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	@Override
 	public List<MCUNormsValueDTO> saveNormalOperationNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList) {
 		try {
+			List<NormsTransactions> transactionsToSave = new ArrayList<>();
+
+		    for (MCUNormsValueDTO dto : mCUNormsValueDTOList) {
+		        Optional<MCUNormsValue> optionalValue = normalOperationNormsRepository.findById(UUID.fromString(dto.getId()));
+		        if (optionalValue.isEmpty()) {
+		            continue; // or handle accordingly
+		        }
+		        MCUNormsValue value = optionalValue.get();
+
+		        for (int month = 1; month <= 12; month++) {
+		            Float oldVal = getMonthlyValue(value, month);
+		            Float newVal = getMonthlyValue(dto, month);
+
+		            if (!Objects.equals(oldVal, newVal)) {
+		                NormsTransactions normsTransactions = new NormsTransactions();
+		                normsTransactions.setAopMonth(month);
+		                normsTransactions.setAopYear(value.getFinancialYear());
+		                normsTransactions.setAttributeValue(oldVal != null ? oldVal.doubleValue() : null);
+		                normsTransactions.setNormParameterFkId(value.getMaterialFkId());
+		                normsTransactions.setPlantFkId(value.getPlantFkId());
+		                normsTransactions.setRemark(dto.getRemarks());
+		                normsTransactions.setVersion(1);
+		                normsTransactions.setCreatedDateTime(new Date());
+		                normsTransactions.setCreatedBy("User");
+		                normsTransactions.setMcuNormsValueFkId((UUID.fromString(dto.getId())));  
+		                
+		                transactionsToSave.add(normsTransactions);
+		            }
+		        }
+		    }
+
+		    normsTransactionRepository.saveAll(transactionsToSave);
+
 			for (MCUNormsValueDTO mCUNormsValueDTO : mCUNormsValueDTOList) {
 				MCUNormsValue mCUNormsValue = new MCUNormsValue();
 				if (mCUNormsValueDTO.getId() != null || !mCUNormsValueDTO.getId().isEmpty()) {
@@ -113,18 +144,18 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				} else {
 					mCUNormsValue.setCreatedOn(new Date());
 				}
-				mCUNormsValue.setApril(Optional.ofNullable(mCUNormsValueDTO.getApril()).orElse(0.0f));
-				mCUNormsValue.setMay(Optional.ofNullable(mCUNormsValueDTO.getMay()).orElse(0.0f));
-				mCUNormsValue.setJune(Optional.ofNullable(mCUNormsValueDTO.getJune()).orElse(0.0f));
-				mCUNormsValue.setJuly(Optional.ofNullable(mCUNormsValueDTO.getJuly()).orElse(0.0f));
-				mCUNormsValue.setAugust(Optional.ofNullable(mCUNormsValueDTO.getAugust()).orElse(0.0f));
-				mCUNormsValue.setSeptember(Optional.ofNullable(mCUNormsValueDTO.getSeptember()).orElse(0.0f));
-				mCUNormsValue.setOctober(Optional.ofNullable(mCUNormsValueDTO.getOctober()).orElse(0.0f));
-				mCUNormsValue.setNovember(Optional.ofNullable(mCUNormsValueDTO.getNovember()).orElse(0.0f));
-				mCUNormsValue.setDecember(Optional.ofNullable(mCUNormsValueDTO.getDecember()).orElse(0.0f));
-				mCUNormsValue.setJanuary(Optional.ofNullable(mCUNormsValueDTO.getJanuary()).orElse(0.0f));
-				mCUNormsValue.setFebruary(Optional.ofNullable(mCUNormsValueDTO.getFebruary()).orElse(0.0f));
-				mCUNormsValue.setMarch(Optional.ofNullable(mCUNormsValueDTO.getMarch()).orElse(0.0f));
+				mCUNormsValue.setApril(Optional.ofNullable(mCUNormsValueDTO.getApril()).orElse(0.0));
+				mCUNormsValue.setMay(Optional.ofNullable(mCUNormsValueDTO.getMay()).orElse(0.0));
+				mCUNormsValue.setJune(Optional.ofNullable(mCUNormsValueDTO.getJune()).orElse(0.0));
+				mCUNormsValue.setJuly(Optional.ofNullable(mCUNormsValueDTO.getJuly()).orElse(0.0));
+				mCUNormsValue.setAugust(Optional.ofNullable(mCUNormsValueDTO.getAugust()).orElse(0.0));
+				mCUNormsValue.setSeptember(Optional.ofNullable(mCUNormsValueDTO.getSeptember()).orElse(0.0));
+				mCUNormsValue.setOctober(Optional.ofNullable(mCUNormsValueDTO.getOctober()).orElse(0.0));
+				mCUNormsValue.setNovember(Optional.ofNullable(mCUNormsValueDTO.getNovember()).orElse(0.0));
+				mCUNormsValue.setDecember(Optional.ofNullable(mCUNormsValueDTO.getDecember()).orElse(0.0));
+				mCUNormsValue.setJanuary(Optional.ofNullable(mCUNormsValueDTO.getJanuary()).orElse(0.0));
+				mCUNormsValue.setFebruary(Optional.ofNullable(mCUNormsValueDTO.getFebruary()).orElse(0.0));
+				mCUNormsValue.setMarch(Optional.ofNullable(mCUNormsValueDTO.getMarch()).orElse(0.0));
 				if (mCUNormsValueDTO.getSiteFkId() != null) {
 					mCUNormsValue.setSiteFkId(UUID.fromString(mCUNormsValueDTO.getSiteFkId()));
 				}
@@ -244,47 +275,6 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		} catch (Exception ex) {
 			throw new RestInvalidArgumentException("normsTransaction", ex);
 		}
-	}
-
-	@Override
-	public AOPMessageVM updateNormalOperationNorms(List<MCUNormsValueDTO> mCUNormsValueDTOList) {
-	    AOPMessageVM aopMessageVM = new AOPMessageVM();
-	    List<NormsTransaction> transactionsToSave = new ArrayList<>();
-
-	    for (MCUNormsValueDTO dto : mCUNormsValueDTOList) {
-	        Optional<MCUNormsValue> optionalValue = normalOperationNormsRepository.findById(UUID.fromString(dto.getId()));
-	        if (optionalValue.isEmpty()) {
-	            continue; // or handle accordingly
-	        }
-	        MCUNormsValue value = optionalValue.get();
-
-	        for (int month = 1; month <= 12; month++) {
-	            Float oldVal = getMonthlyValue(value, month);
-	            Float newVal = getMonthlyValue(dto, month);
-
-	            if (!Objects.equals(oldVal, newVal)) {
-	                NormsTransaction normsTransaction = new NormsTransaction();
-	                normsTransaction.setAopMonth(month);
-	                normsTransaction.setAopYear(value.getFinancialYear());
-	                normsTransaction.setAttributeValue(oldVal != null ? oldVal.doubleValue() : null);
-	                normsTransaction.setNormParameterFkId(value.getMaterialFkId());
-	                normsTransaction.setPlantFkId(value.getPlantFkId());
-	                normsTransaction.setRemark(dto.getRemarks());
-	                normsTransaction.setVersion(1);
-	                normsTransaction.setCreatedDateTime(new Date());
-	                normsTransaction.setCreatedBy("User");
-	                normsTransaction.setMcuNormsValueFKId(UUID.fromString(dto.getId()));
-	                transactionsToSave.add(normsTransaction);
-	            }
-	        }
-	    }
-
-	    normsTransactionRepository.saveAll(transactionsToSave);
-
-	    aopMessageVM.setCode(200);
-	    aopMessageVM.setMessage("Data updated successfully");
-	    aopMessageVM.setData(transactionsToSave);
-	    return aopMessageVM;
 	}
 
 	private Float getMonthlyValue(Object obj, int month) {

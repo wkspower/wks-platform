@@ -47,11 +47,7 @@ public class NormalOperationNormsController {
 		return normalOperationNormsService.calculateExpressionConsumptionNorms(year, plantId);
 	}
 	
-	@GetMapping(value="/update/normal-ops-norms")
-	public ResponseEntity<AOPMessageVM> updateNormalOperationNorms(@RequestBody List<MCUNormsValueDTO> mCUNormsValueDTOList) {
-		AOPMessageVM response = normalOperationNormsService.updateNormalOperationNorms(mCUNormsValueDTOList);
-		return ResponseEntity.status(response.getCode()).body(response);
-	} 
+	
 	
 	// @GetMapping(value="/getCalculatedNormalOpsNorms")
 	// public List<Object[]> getCalculatedNormalOpsNorms(@RequestParam String year,@RequestParam String plantId){

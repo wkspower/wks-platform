@@ -5,6 +5,7 @@ import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -46,10 +47,10 @@ public class NormsTransactions {
 	private String updatedBy;
 
 	@Column(name = "CreatedDateTime")
-	private LocalDateTime createdDateTime;
+	private Date createdDateTime;
 
 	@Column(name = "UpdatedDateTime")
-	private LocalDateTime updatedDateTime;
+	private Date updatedDateTime;
 
 	@Column(name = "MCUNormsValue_FK_Id")
 	private UUID mcuNormsValueFkId;

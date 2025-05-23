@@ -12,7 +12,6 @@ public interface NormalOperationNormsService {
 	
 	AOPMessageVM getNormsTransaction(String plantId, String aopYear);
 	
-	public AOPMessageVM updateNormalOperationNorms(List<MCUNormsValueDTO> mCUNormsValueDTOList);
 	// public int getCalculatedNormalOpsNorms( String year, String plantId);
 
 }
