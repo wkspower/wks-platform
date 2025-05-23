@@ -64,8 +64,7 @@ export default function getKendoColumns({
       return {
         field,
         title,
-        // big width for text cols, small for months/total
-        width: isTextCol ? 200 : 90,
+        width: isTextCol ? 200 : 200,
         filterable: true,
         filter: isTextCol ? 'text' : 'numeric',
         format: isTextCol ? undefined : '{0:n3}',
@@ -87,14 +86,12 @@ export default function getKendoColumns({
     return {
       field,
       title: headerName,
-      width: isTextCol ? 200 : 90,
+      width: isTextCol ? 200 : 200,
       filterable: true,
       filter: isTextCol ? 'text' : 'numeric',
       format: isTextCol ? undefined : '{0:n3}',
       editable: !isTextCol,
-      // columnMenu: true,
       status: 'inactive',
-      // cell: ThreeDecimalCell,
       editor: !isTextCol
         ? (props) => <NumericInputOnly {...props} />
         : undefined,

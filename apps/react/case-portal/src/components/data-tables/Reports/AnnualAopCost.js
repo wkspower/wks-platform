@@ -83,7 +83,7 @@ const AnnualAopCost = () => {
   const fetchData = async (reportType, setState, selectedDropdown) => {
     try {
       selectedDropdown = localStorage.getItem('year')
-      setLoading(true)
+
       var data = []
 
       data = await DataService.getAnnualCostAopReport(
@@ -98,7 +98,6 @@ const AnnualAopCost = () => {
           id: index,
           isEditable: false,
         }))
-        setLoading(false)
 
         // if (reportType == 'aopYearFilter') {
         //   setUnit(data?.data)
@@ -178,21 +177,23 @@ const AnnualAopCost = () => {
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   useEffect(() => {
-    // if (selectedUnit) {
-    fetchData('production', setRowsProduction)
-    fetchData('price', setRowsPrice)
-    fetchData('norm', setRowsNorm)
-    fetchData('quantity', setRowsQuantity)
-    fetchData('normCost', setRowsNormCost)
-    // }
-  }, [
-    // selectedUnit,
-    sitePlantChange,
-    oldYear,
-    yearChanged,
-    keycloak,
-    lowerVertName,
-  ])
+    const fetchAllData = async () => {
+      setLoading(true)
+
+      const allFetches = [
+        fetchData('production', setRowsProduction),
+        fetchData('price', setRowsPrice),
+        fetchData('norm', setRowsNorm),
+        fetchData('quantity', setRowsQuantity),
+        fetchData('normCost', setRowsNormCost),
+      ]
+
+      await Promise.all(allFetches)
+      setLoading(false)
+    }
+
+    fetchAllData()
+  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   return (
     <div>

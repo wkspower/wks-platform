@@ -52,7 +52,7 @@ const SelectivityData = (props) => {
   }
 
   const handleRemarkCellClick = (row) => {
-    if (!row?.isEditable) return
+    // if (!row?.isEditable) return
 
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
