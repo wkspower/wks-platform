@@ -16,6 +16,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.MCUNormsValueDTO;
 import com.wks.caseengine.entity.AOPSummary;
@@ -102,7 +104,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 	@Override
 	public List<MCUNormsValueDTO> saveNormalOperationNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList) {
+		
 		try {
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			String userId = authentication.getName();
 			List<NormsTransactions> transactionsToSave = new ArrayList<>();
 
 		    for (MCUNormsValueDTO dto : mCUNormsValueDTOList) {
@@ -113,20 +118,22 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		        MCUNormsValue value = optionalValue.get();
 
 		        for (int month = 1; month <= 12; month++) {
-		            Float oldVal = getMonthlyValue(value, month);
-		            Float newVal = getMonthlyValue(dto, month);
+		            Double oldVal = getMonthlyValue(value, month);
+		            Double newVal = getMonthlyValue(dto, month);
 
 		            if (!Objects.equals(oldVal, newVal)) {
 		                NormsTransactions normsTransactions = new NormsTransactions();
 		                normsTransactions.setAopMonth(month);
 		                normsTransactions.setAopYear(value.getFinancialYear());
-		                normsTransactions.setAttributeValue(oldVal != null ? oldVal.doubleValue() : null);
+		                normsTransactions.setAttributeValue(newVal != null ? newVal.doubleValue() : null);
 		                normsTransactions.setNormParameterFkId(value.getMaterialFkId());
 		                normsTransactions.setPlantFkId(value.getPlantFkId());
 		                normsTransactions.setRemark(dto.getRemarks());
 		                normsTransactions.setVersion(1);
 		                normsTransactions.setCreatedDateTime(new Date());
-		                normsTransactions.setCreatedBy("User");
+		                
+		        		
+		                normsTransactions.setCreatedBy(userId);
 		                normsTransactions.setMcuNormsValueFkId((UUID.fromString(dto.getId())));  
 		                
 		                transactionsToSave.add(normsTransactions);
@@ -175,7 +182,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValue.setFinancialYear(mCUNormsValueDTO.getFinancialYear());
 				mCUNormsValue.setRemarks(mCUNormsValueDTO.getRemarks());
 				mCUNormsValue.setMcuVersion("V1");
-				mCUNormsValue.setUpdatedBy("System");
+				mCUNormsValue.setUpdatedBy(userId);
 
 				System.out.println("Data Saved Succussfully");
 				normalOperationNormsRepository.save(mCUNormsValue);
@@ -254,16 +261,18 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		try {
 			UUID plantUUID = UUID.fromString(plantId);
 
-			List<NormsTransactions> transactions = normalOperationNormsRepository
-					.findTransactionsByPlantAndYear(plantUUID, aopYear);
+			List<Object[]> transactions = normsTransactionRepository
+				    .findDistinctTransactionsByMonthAndParameter(plantUUID, aopYear);
 
-			List<Map<String, Object>> normsTransactions = transactions.stream().map(tx -> {
-				Map<String, Object> cell = new HashMap<>();
-				cell.put("normParameterFKId", tx.getNormParameterFkId().toString());
-				cell.put("month", tx.getAopMonth());
-				cell.put("value", tx.getAttributeValue());
-				return cell;
-			}).collect(Collectors.toList());
+				List<Map<String, Object>> normsTransactions = transactions.stream()
+				    .map(tx -> {
+				        Map<String, Object> cell = new HashMap<>();
+				        cell.put("month", tx[0]); // AOPMonth
+				        cell.put("normParameterFKId", tx[1].toString()); // NormParameter_FK_Id
+				        cell.put("value", tx[2]); // AttributeValue
+				        return cell;
+				    })
+				    .collect(Collectors.toList());
 
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			aopMessageVM.setCode(200);
@@ -277,7 +286,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		}
 	}
 
-	private Float getMonthlyValue(Object obj, int month) {
+	private Double getMonthlyValue(Object obj, int month) {
 	    try {
 	        String methodName = switch (month) {
 	            case 1 -> "getJanuary";
@@ -295,7 +304,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	            default -> throw new IllegalArgumentException("Invalid month: " + month);
 	        };
 	        Method method = obj.getClass().getMethod(methodName);
-	        return (Float) method.invoke(obj);
+	        return (Double) method.invoke(obj);
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	        return null;

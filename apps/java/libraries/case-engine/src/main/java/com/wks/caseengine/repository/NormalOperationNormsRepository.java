@@ -33,8 +33,6 @@ public interface NormalOperationNormsRepository extends JpaRepository<MCUNormsVa
 	@Query(value = "EXEC MEG_HMD_CalculateShutdownNorms :finYear", nativeQuery = true)
 	int calculateExpressionConsumptionNorms(@Param("finYear") String finYear);
 
-	@Query("SELECT n FROM NormsTransactions n WHERE n.plantFkId = :plantFkId AND n.aopYear = :aopYear")
-	List<NormsTransactions> findTransactionsByPlantAndYear(@Param("plantFkId") UUID plantFkId,
-			@Param("aopYear") String aopYear);
+	
 
 }
