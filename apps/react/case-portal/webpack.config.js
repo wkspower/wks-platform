@@ -3,11 +3,11 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const Dotenv = require('dotenv-webpack')
 
-/*eslint-disable no-undef*/
 module.exports = {
   entry: './src/index.js',
   resolve: {
     modules: [path.resolve(__dirname, 'src'), 'node_modules'],
+    extensions: ['.js', '.jsx', '.mjs'], // <-- added .mjs here
     preferRelative: true,
   },
   output: {
@@ -42,7 +42,7 @@ module.exports = {
         use: ['style-loader', 'css-loader'],
       },
       {
-        test: /\.(png|svg|jpg|gif|svg)$/,
+        test: /\.(png|svg|jpg|gif)$/,
         use: ['file-loader'],
       },
       {
@@ -59,6 +59,12 @@ module.exports = {
             },
           },
         ],
+      },
+      {
+        test: /\.m?js$/, // <-- add rule for .js/.mjs
+        resolve: {
+          fullySpecified: false, // <-- allow no file extension in imports
+        },
       },
     ],
   },

@@ -139,7 +139,7 @@ const ProductionVolumeDataBasis = () => {
                 <AopCostReportView
                   rows={rowsMC}
                   columns={colsMC}
-                  height='93px'
+                  permissions={{ allAction: false }}
                 />
               </Box>
             </CustomAccordionDetails>
@@ -161,7 +161,7 @@ const ProductionVolumeDataBasis = () => {
                 <AopCostReportView
                   rows={rowsMCYearWise}
                   columns={colsMCYearwise}
-                  height='340px'
+                  permissions={{ allAction: false }}
                 />
               </Box>
             </CustomAccordionDetails>
@@ -183,7 +183,7 @@ const ProductionVolumeDataBasis = () => {
                 <AopCostReportView
                   rows={rowsCalculatedData}
                   columns={colsCalculatedData}
-                  height='340px'
+                  permissions={{ allAction: false }}
                 />
               </Box>
             </CustomAccordionDetails>
@@ -205,7 +205,7 @@ const ProductionVolumeDataBasis = () => {
                 <AopCostReportView
                   rows={rowsRawData}
                   columns={colsRowData}
-                  height='340px'
+                  permissions={{ allAction: false }}
                 />
               </Box>
             </CustomAccordionDetails>

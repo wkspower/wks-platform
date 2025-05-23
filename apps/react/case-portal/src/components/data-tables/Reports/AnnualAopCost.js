@@ -18,6 +18,8 @@ import {
   TextField,
 } from '../../../../node_modules/@mui/material/index'
 import getEnhancedAnnualAopCostReport from '../CommonHeader/AopCostReportHeader'
+import KendoDataGrid from 'components/Kendo-DataGrid/index'
+import getKendoColumns from 'components/data-tables/CommonHeader/kendoHeader'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -156,7 +158,7 @@ const AnnualAopCost = () => {
     keys2,
   })
 
-  const colsNorm = getEnhancedAnnualAopCostReport({
+  const colsNorm = getKendoColumns({
     headerMap,
     type: 'Norm',
   })
@@ -202,31 +204,6 @@ const AnnualAopCost = () => {
       </Backdrop>
 
       <Box display='flex' flexDirection='column' gap={2}>
-        {/* <Box display='flex' justifyContent='flex-end'>
-          <TextField
-            select
-            value={selectedUnit}
-            onChange={(e) => {
-              const value = e.target.value
-              setSelectedUnit(value)
-              handleUnitChange(value)
-            }}
-            sx={{ width: '200px', backgroundColor: '#FFFFFF' }}
-            variant='outlined'
-            label='Select AOP Year'
-          >
-            <MenuItem value='' disabled>
-              Select AOP Year
-            </MenuItem>
-
-            {unit?.map((unit) => (
-              <MenuItem key={unit?.name} value={unit?.name}>
-                {unit?.displayName}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Box> */}
-
         <div>
           <CustomAccordion defaultExpanded disableGutters>
             <CustomAccordionSummary
@@ -242,7 +219,7 @@ const AnnualAopCost = () => {
                 <AopCostReportView
                   rows={rowsProduction}
                   columns={colsProduction}
-                  height='93px'
+                  permissions={{ allAction: false }}
                 />
               </Box>
             </CustomAccordionDetails>
@@ -263,7 +240,7 @@ const AnnualAopCost = () => {
                 <AopCostReportView
                   rows={rowsPrice}
                   columns={colsPrice}
-                  height='340px'
+                  permissions={{ allAction: false }}
                 />
               </Box>
             </CustomAccordionDetails>
@@ -281,10 +258,10 @@ const AnnualAopCost = () => {
             </CustomAccordionSummary>
             <CustomAccordionDetails>
               <Box sx={{ width: '100%', margin: 0 }}>
-                <AopCostReportView
+                <KendoDataGrid
                   rows={rowsNorm}
                   columns={colsNorm}
-                  height='340px'
+                  disableColor={true}
                 />
               </Box>
             </CustomAccordionDetails>
@@ -305,7 +282,7 @@ const AnnualAopCost = () => {
                 <AopCostReportView
                   rows={rowsQuantity}
                   columns={colsQuantity}
-                  height='340px'
+                  permissions={{ allAction: false }}
                 />
               </Box>
             </CustomAccordionDetails>
@@ -326,7 +303,7 @@ const AnnualAopCost = () => {
                 <AopCostReportView
                   rows={rowsNormCost}
                   columns={colsNormCost}
-                  height='340px'
+                  permissions={{ allAction: false }}
                 />
               </Box>
             </CustomAccordionDetails>
