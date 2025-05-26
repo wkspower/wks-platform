@@ -2,6 +2,13 @@
   "name": "case-portal",
   "version": "1.0.0",
   "private": true,
+  "overrides": {
+    "@wkspower/camunda-web-modeler": {
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0",
+      "@material-ui/core": "^5.15.20"
+    }
+  },
   "homepage": "https://www.wkspower.com",
   "license": "MIT",
   "dependencies": {
@@ -9,17 +16,13 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@formio/react": "^5.3.0",
-    "@material-ui/pickers": "^3.3.10",
-    "@mui/icons-material": "^5.17.1",
-    "@mui/material": "^5.17.1",
-    "@mui/x-data-grid": "^7.28.2",
-    "@mui/x-data-grid-generator": "^7.27.0",
-    "@mui/x-date-pickers": "^7.28.2",
+    "@mui/icons-material": "^5.15.15",
+    "@mui/material": "^5.15.15",
+    "@mui/x-data-grid": "^8.4.0",
+    "@mui/x-date-pickers": "^7.29.3",
     "@novu/notification-center": "^0.24.2",
     "@progress/kendo-data-query": "^1.7.1",
-    "@progress/kendo-licensing": "^1.6.0",
     "@progress/kendo-react-grid": "^11.0.0",
-    "@progress/kendo-react-tooltip": "^11.0.0",
     "@progress/kendo-theme-default": "^11.0.2",
     "@reduxjs/toolkit": "^2.2.3",
     "@syncfusion/ej2-react-kanban": "^20.4.42",
@@ -47,7 +50,6 @@
     "react-quill": "^2.0.0",
     "react-redux": "^9.1.0",
     "react-router-dom": "^6.22.3",
-    "react-select": "^5.10.1",
     "react-syntax-highlighter": "^15.5.0",
     "redux": "^5.0.1",
     "simplebar": "^6.2.5",
@@ -56,7 +58,7 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "start": "echo 'Starting development server...' && webpack serve --mode=development --port 3001 --host 0.0.0.0",
+    "start": "echo 'Starting development server...' && webpack serve --mode=development --port 3001",
     "build": "echo 'Running ESLint...' && eslint . --ignore-pattern '*.min.js' && echo 'Checking code formatting...' && prettier --check \"**/*.{js,jsx,json,css,scss,md}\" && echo 'Building for production...' && webpack --mode=production",
     "lint:fix": "echo 'Fixing linting issues...' && eslint --fix .",
     "lint:check": "echo 'Checking for linting issues...' && eslint .",
