@@ -1,4 +1,5 @@
 import NumericInputOnly from 'utils/NumericInputOnly'
+import { Tooltip } from '@progress/kendo-react-tooltip'
 
 export default function getKendoNormsHistorianColumns({ headerMap, type }) {
   // load the right JSON asset
@@ -17,23 +18,17 @@ export default function getKendoNormsHistorianColumns({ headerMap, type }) {
       throw new Error(`Unknown type "${type}"`)
   }
 
-  //   // formatter to 3 decimals
-  //   const formatValueToThreeDecimals = (value) => {
-  //     if (value === 0) return '0.000'
-  //     if (value == null) return ''
-  //     return Number(value).toFixed(3)
-  //   }
-
   return rawCols.map((colDef) => {
     const field = colDef.field
+    // console.log('field', field)
     const title = String(headerMap[colDef.headerName] || colDef.headerName)
-
-    // determine if numeric column
-    const isNumeric =
-      field === 'total' || field === 'normValue' || field === 'actualQuantity'
-
-    // text columns (all others) get larger min width
-    const isText = !isNumeric
+    const isTextCol =
+      field === 'material' ||
+      field === 'materialName' ||
+      field === 'norms' ||
+      field === 'particulars' ||
+      field === 'srNo' ||
+      field === 'normDateTime'
 
     return {
       field,
@@ -41,19 +36,41 @@ export default function getKendoNormsHistorianColumns({ headerMap, type }) {
 
       width:
         type !== 'McuAndNormGrid'
-          ? isText
+          ? isTextCol
             ? 200
             : 140 // text columns get twice the flex share
           : undefined,
       filterable: true,
-      filter: isNumeric ? 'numeric' : 'text',
-      // numeric formatting
-      format: isText ? undefined : '{0:n3}',
-      editable: isNumeric,
-      editor: isNumeric
+      filter: isTextCol ? 'text' : 'numeric',
+      format: isTextCol ? undefined : '{0:n3}',
+      ...(isTextCol ? {} : { format: '{0:n3}' }),
+
+      editable: !isTextCol,
+      editor: !isTextCol
         ? (props) => <NumericInputOnly {...props} />
         : undefined,
-      align: isNumeric ? 'right' : 'left',
+      align: isTextCol ? 'left' : 'right',
+
+      cell: (props) => {
+        const rawValue = props.dataItem[props.field]
+        const isText = isTextCol
+        const displayValue = isText
+          ? rawValue
+          : Number(rawValue)?.toLocaleString(undefined, {
+              minimumFractionDigits: 3,
+              maximumFractionDigits: 3,
+            })
+
+        return (
+          <td style={{ textAlign: isText ? 'left' : 'right' }}>
+            <Tooltip anchorElement='target' position='top'>
+              <span style={{ display: 'inline-block', width: '100%' }}>
+                {displayValue}
+              </span>
+            </Tooltip>
+          </td>
+        )
+      },
     }
   })
 }

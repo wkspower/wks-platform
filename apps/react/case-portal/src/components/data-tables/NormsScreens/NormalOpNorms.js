@@ -129,15 +129,15 @@ const NormalOpNormsScreen = () => {
 
       // setBDData(groupedRows)
       setRows(groupedRows)
-      setLoading(false)
+      // setLoading(false)
     } catch (error) {
-      setLoading(false)
+      // setLoading(false)
       console.error('Error fetching Business Demand data:', error)
     }
   }
 
   const fetchDataIntermediateValues = async () => {
-    setLoading(true)
+    // setLoading(true)
     try {
       const res = await DataService.getIntermediateValues(keycloak)
       if (res?.code == 200) {
@@ -150,7 +150,7 @@ const NormalOpNormsScreen = () => {
           return formattedItem
         })
         setRowsIntermediateValues(formattedData)
-        setLoading(false)
+        // setLoading(false)
       }
     } catch (error) {
       setLoading(false)
@@ -166,18 +166,8 @@ const NormalOpNormsScreen = () => {
           ...obj,
           normParameterFKId: obj.normParameterFKId.toUpperCase(),
         }))
-        // setAllRedCell(normalized)
+        setAllRedCell(normalized)
       }
-
-      // const isRedCellObject = [
-      //   {
-      //     normParameterFKId: '513104DB-94A5-4DCF-9B8F-FCB2CB897C9D',
-      //     month: 4,
-      //     value: 6.5,
-      //   },
-      // ]
-
-      // setAllRedCell(isRedCellObject)
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -185,27 +175,43 @@ const NormalOpNormsScreen = () => {
     }
   }
 
-  useEffect(() => {
-    const getAllProducts = async () => {
-      try {
-        const data = await DataService.getAllProducts(keycloak, null)
-        const productList = data.map((product) => ({
-          id: product.id,
-          displayName: product.displayName,
-        }))
-        setAllProducts(productList)
-      } catch (error) {
-        console.error('Error fetching product:', error)
-      } finally {
-        // handleMenuClose();
-      }
+  const getAllProducts = async () => {
+    try {
+      const data = await DataService.getAllProducts(keycloak, null)
+      const productList = data.map((product) => ({
+        id: product.id,
+        displayName: product.displayName,
+      }))
+      setAllProducts(productList)
+    } catch (error) {
+      console.error('Error fetching product:', error)
+    } finally {
+      // handleMenuClose();
     }
-    setTimeout(() => {
-      fetchData()
-      fetchDataIntermediateValues()
-    }, 450)
-    getAllProducts()
-    getNormTransactions()
+  }
+
+  const fetchAllData = async () => {
+    setRows([])
+    setRowsIntermediateValues([])
+    setAllRedCell([])
+    setAllProducts([])
+    setLoading(true)
+    try {
+      await Promise.all([
+        fetchData(),
+        fetchDataIntermediateValues(),
+        getAllProducts(),
+        getNormTransactions(),
+      ])
+    } catch (error) {
+      console.error('Error during data fetching:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchAllData()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   const formatValueToFiveDecimals = (params) => {
@@ -568,7 +574,7 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
-    
+
     {
       field: 'May',
       headerName: headerMap[5],
@@ -811,7 +817,6 @@ const NormalOpNormsScreen = () => {
             severity: 'success',
           })
           setModifiedCells({})
-
           unsavedChangesRef.current = {
             unsavedRows: {},
             rowsBeforeChange: {},
@@ -830,6 +835,7 @@ const NormalOpNormsScreen = () => {
       console.error(`Error saving Normal Operations Norms`, error)
     } finally {
       // fetchData()
+      setLoading(false)
     }
   }
 
@@ -870,6 +876,7 @@ const NormalOpNormsScreen = () => {
         })
         fetchData()
         fetchDataIntermediateValues()
+        getNormTransactions()
         setLoading(false)
       } else {
         setSnackbarOpen(true)
@@ -998,30 +1005,32 @@ const NormalOpNormsScreen = () => {
         allRedCell={allRedCell}
       />
 
-      <Box sx={{ width: '100%', marginTop: 1 }}>
-        <CustomAccordion defaultExpanded disableGutters>
-          <CustomAccordionSummary
-            aria-controls='meg-grid-content'
-            id='meg-grid-header'
-          >
-            <Typography component='span' className='grid-title'>
-              Intermediate Values
-            </Typography>
-          </CustomAccordionSummary>
-          <CustomAccordionDetails>
-            <Box sx={{ width: '100%', margin: 0 }}>
-              <DataGridTable
-                title='Intermediate Values'
-                columns={colDefsIntermediateValues}
-                setRows={setRowsIntermediateValues}
-                rows={rowsIntermediateValues}
-                paginationOptions={[100, 200, 300]}
-                permissions={adjustedPermissionsIV}
-              />
-            </Box>
-          </CustomAccordionDetails>
-        </CustomAccordion>
-      </Box>
+      {lowerVertName === 'meg' && (
+        <Box sx={{ width: '100%', marginTop: 1 }}>
+          <CustomAccordion defaultExpanded disableGutters>
+            <CustomAccordionSummary
+              aria-controls='meg-grid-content'
+              id='meg-grid-header'
+            >
+              <Typography component='span' className='grid-title'>
+                Intermediate Values
+              </Typography>
+            </CustomAccordionSummary>
+            <CustomAccordionDetails>
+              <Box sx={{ width: '100%', margin: 0 }}>
+                <DataGridTable
+                  title='Intermediate Values'
+                  columns={colDefsIntermediateValues}
+                  setRows={setRowsIntermediateValues}
+                  rows={rowsIntermediateValues}
+                  paginationOptions={[100, 200, 300]}
+                  permissions={adjustedPermissionsIV}
+                />
+              </Box>
+            </CustomAccordionDetails>
+          </CustomAccordion>
+        </Box>
+      )}
     </div>
   )
 }

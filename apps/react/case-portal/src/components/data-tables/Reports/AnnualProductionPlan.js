@@ -49,7 +49,17 @@ const AnnualProductionPlan = () => {
   const [rowsProductionPerformance, setRowsProductionPerformance] = useState([])
 
   const formatValueToThreeDecimals = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+    const dateRegex =
+      /^(\d{1,2}[-/ ]\d{1,2}[-/ ]\d{2,4}|\d{1,2} [a-zA-Z]+ \d{4})$/
+
+    if (params === 0) return 0
+
+    if (typeof params === 'string' && dateRegex.test(params.trim())) {
+      return params
+    }
+
+    const num = parseFloat(params)
+    return isNaN(num) ? '' : num.toFixed(3)
   }
 
   const columnsAssumptions = [

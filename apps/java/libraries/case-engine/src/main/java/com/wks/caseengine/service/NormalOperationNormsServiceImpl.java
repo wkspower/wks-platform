@@ -36,6 +36,7 @@ import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import java.lang.reflect.Method;
 import java.util.*;
+
 @Service
 public class NormalOperationNormsServiceImpl implements NormalOperationNormsService {
 
@@ -104,44 +105,46 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 	@Override
 	public List<MCUNormsValueDTO> saveNormalOperationNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList) {
-		
+
 		try {
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			String userId = authentication.getName();
 			List<NormsTransactions> transactionsToSave = new ArrayList<>();
 
-		    for (MCUNormsValueDTO dto : mCUNormsValueDTOList) {
-		        Optional<MCUNormsValue> optionalValue = normalOperationNormsRepository.findById(UUID.fromString(dto.getId()));
-		        if (optionalValue.isEmpty()) {
-		            continue; // or handle accordingly
-		        }
-		        MCUNormsValue value = optionalValue.get();
+			for (MCUNormsValueDTO dto : mCUNormsValueDTOList) {
+				Optional<MCUNormsValue> optionalValue = normalOperationNormsRepository
+						.findById(UUID.fromString(dto.getId()));
 
-		        for (int month = 1; month <= 12; month++) {
-		            Double oldVal = getMonthlyValue(value, month);
-		            Double newVal = getMonthlyValue(dto, month);
+				if (optionalValue.isEmpty()) {
+					continue; // or handle accordingly
+				}
 
-		            if (!Objects.equals(oldVal, newVal)) {
-		                NormsTransactions normsTransactions = new NormsTransactions();
-		                normsTransactions.setAopMonth(month);
-		                normsTransactions.setAopYear(value.getFinancialYear());
-		                normsTransactions.setAttributeValue(newVal != null ? newVal.doubleValue() : null);
-		                normsTransactions.setNormParameterFkId(value.getMaterialFkId());
-		                normsTransactions.setPlantFkId(value.getPlantFkId());
-		                normsTransactions.setRemark(dto.getRemarks());
-		                normsTransactions.setVersion(1);
-		                normsTransactions.setCreatedDateTime(new Date());
-		                
-		        		
-		                normsTransactions.setCreatedBy(userId);
-		                normsTransactions.setMcuNormsValueFkId((UUID.fromString(dto.getId())));  
-		                
-		                transactionsToSave.add(normsTransactions);
-		            }
-		        }
-		    }
+				MCUNormsValue value = optionalValue.get();
 
-		    normsTransactionRepository.saveAll(transactionsToSave);
+				for (int month = 1; month <= 12; month++) {
+					Double oldVal = getMonthlyValue(value, month);
+					Double newVal = getMonthlyValue(dto, month);
+
+					if (newVal != null && !Objects.equals(oldVal, newVal)) {
+						NormsTransactions normsTransactions = new NormsTransactions();
+						normsTransactions.setAopMonth(month);
+						normsTransactions.setAopYear(value.getFinancialYear());
+						normsTransactions.setAttributeValue(newVal != null ? newVal.doubleValue() : null);
+						normsTransactions.setNormParameterFkId(value.getMaterialFkId());
+						normsTransactions.setPlantFkId(value.getPlantFkId());
+						normsTransactions.setRemark(dto.getRemarks());
+						normsTransactions.setVersion(1);
+						normsTransactions.setCreatedDateTime(new Date());
+
+						normsTransactions.setCreatedBy(userId);
+						normsTransactions.setMcuNormsValueFkId((UUID.fromString(dto.getId())));
+
+						transactionsToSave.add(normsTransactions);
+					}
+				}
+			}
+
+			normsTransactionRepository.saveAll(transactionsToSave);
 
 			for (MCUNormsValueDTO mCUNormsValueDTO : mCUNormsValueDTOList) {
 				MCUNormsValue mCUNormsValue = new MCUNormsValue();
@@ -262,17 +265,17 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			UUID plantUUID = UUID.fromString(plantId);
 
 			List<Object[]> transactions = normsTransactionRepository
-				    .findDistinctTransactionsByMonthAndParameter(plantUUID, aopYear);
+					.findDistinctTransactionsByMonthAndParameter(plantUUID, aopYear);
 
-				List<Map<String, Object>> normsTransactions = transactions.stream()
-				    .map(tx -> {
-				        Map<String, Object> cell = new HashMap<>();
-				        cell.put("month", tx[0]); // AOPMonth
-				        cell.put("normParameterFKId", tx[1].toString()); // NormParameter_FK_Id
-				        cell.put("value", tx[2]); // AttributeValue
-				        return cell;
-				    })
-				    .collect(Collectors.toList());
+			List<Map<String, Object>> normsTransactions = transactions.stream()
+					.map(tx -> {
+						Map<String, Object> cell = new HashMap<>();
+						cell.put("month", tx[0]); // AOPMonth
+						cell.put("normParameterFKId", tx[1].toString()); // NormParameter_FK_Id
+						cell.put("value", tx[2]); // AttributeValue
+						return cell;
+					})
+					.collect(Collectors.toList());
 
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			aopMessageVM.setCode(200);
@@ -287,29 +290,28 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	private Double getMonthlyValue(Object obj, int month) {
-	    try {
-	        String methodName = switch (month) {
-	            case 1 -> "getJanuary";
-	            case 2 -> "getFebruary";
-	            case 3 -> "getMarch";
-	            case 4 -> "getApril";
-	            case 5 -> "getMay";
-	            case 6 -> "getJune";
-	            case 7 -> "getJuly";
-	            case 8 -> "getAugust";
-	            case 9 -> "getSeptember";
-	            case 10 -> "getOctober";
-	            case 11 -> "getNovember";
-	            case 12 -> "getDecember";
-	            default -> throw new IllegalArgumentException("Invalid month: " + month);
-	        };
-	        Method method = obj.getClass().getMethod(methodName);
-	        return (Double) method.invoke(obj);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return null;
-	    }
+		try {
+			String methodName = switch (month) {
+				case 1 -> "getJanuary";
+				case 2 -> "getFebruary";
+				case 3 -> "getMarch";
+				case 4 -> "getApril";
+				case 5 -> "getMay";
+				case 6 -> "getJune";
+				case 7 -> "getJuly";
+				case 8 -> "getAugust";
+				case 9 -> "getSeptember";
+				case 10 -> "getOctober";
+				case 11 -> "getNovember";
+				case 12 -> "getDecember";
+				default -> throw new IllegalArgumentException("Invalid month: " + month);
+			};
+			Method method = obj.getClass().getMethod(methodName);
+			return (Double) method.invoke(obj);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
-
 
 }

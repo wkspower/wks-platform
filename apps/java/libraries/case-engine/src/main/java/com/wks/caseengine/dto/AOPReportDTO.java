@@ -13,11 +13,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class AOPReportDTO {
-	
-	private String norm;
-	private Float january;
-    private Float february;
-    private Float march;
+
+    private String norm;
+    private String particulars;
+
     private Float april;
     private Float may;
     private Float june;
@@ -27,7 +26,9 @@ public class AOPReportDTO {
     private Float october;
     private Float november;
     private Float december;
-    private String particulars;
+    private Float january;
+    private Float february;
+    private Float march;
     private Float total;
-   
+
 }

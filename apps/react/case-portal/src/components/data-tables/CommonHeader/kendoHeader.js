@@ -36,35 +36,50 @@ export default function getKendoColumns({
   }
 
   if (type === 'Price') {
-    const finalKeys = keys2.length
-      ? keys2
-      : [
-          'norm',
-          'particulars',
-          'january',
-          'february',
-          'march',
-          'april',
-          'may',
-          'june',
-          'july',
-          'august',
-          'september',
-          'october',
-          'november',
-          'december',
-          'total',
-        ]
+    // const keysFromApi = [
+    //   'norm',
+    //   'particulars',
+    //   'april',
+    //   'may',
+    //   'june',
+    //   'july',
+    //   'august',
+    //   'september',
+    //   'october',
+    //   'november',
+    //   'december',
+    //   'january',
+    //   'february',
+    //   'march',
+    //   'total',
+    // ]
 
-    return rawCols.map((colDef, idx) => {
-      const field = finalKeys[idx]
-      const title = String(headers2[idx] || colDef.headerName || field)
+    // const headersFromApi = [
+    //   'Norm',
+    //   'Particulars',
+    //   'April',
+    //   'May',
+    //   'June',
+    //   'July',
+    //   'August',
+    //   'September',
+    //   'October',
+    //   'November',
+    //   'December',
+    //   'January',
+    //   'February',
+    //   'March',
+    //   'Total',
+    // ]
+
+    return keys2.map((field, idx) => {
+      const title = headers2[idx] || field
       const isTextCol = field === 'norm' || field === 'particulars'
 
       return {
         field,
         title,
-        width: isTextCol ? 200 : 200,
+        width: 200,
         filterable: true,
         filter: isTextCol ? 'text' : 'numeric',
         format: isTextCol ? undefined : '{0:n3}',
