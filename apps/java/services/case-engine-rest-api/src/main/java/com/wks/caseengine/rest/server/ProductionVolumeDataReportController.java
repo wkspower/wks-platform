@@ -41,9 +41,9 @@ public class ProductionVolumeDataReportController {
 
 	@GetMapping(value = "/report/month-wise/consumption-summary")
 	public ResponseEntity<AOPMessageVM> getReportForMonthWiseConsumptionSummaryData(@RequestParam String plantId,
-			@RequestParam String year) {
+			@RequestParam String year,@RequestParam String reportType) {
 		AOPMessageVM response = productionVolumeDataReportService.getReportForMonthWiseConsumptionSummaryData(plantId,
-				year);
+				year,reportType);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 

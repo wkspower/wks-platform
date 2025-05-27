@@ -173,28 +173,52 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	}
 
 	@Override
-	public AOPMessageVM getReportForMonthWiseConsumptionSummaryData(String plantId, String year) {
+	public AOPMessageVM getReportForMonthWiseConsumptionSummaryData(String plantId, String year,String reportType) {
 		try {
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			List<Map<String, Object>> summaryData = new ArrayList<>();
 
-			List<Object[]> obj = getMonthWiseConsumptionData(plantId, year);
+			List<Object[]> obj = getMonthWiseConsumptionData(plantId, year,reportType);
 			for (Object[] row : obj) {
 				Map<String, Object> map = new HashMap<>();
-				map.put("parameter", row[0]);
-				map.put("april", row[1]);
-				map.put("may", row[2]);
-				map.put("june", row[3]);
-				map.put("july", row[4]);
-				map.put("aug", row[5]);
-				map.put("sep", row[6]);
-				map.put("oct", row[7]);
-				map.put("nov", row[8]);
-				map.put("dec", row[9]);
-				map.put("jan", row[10]);
-				map.put("feb", row[11]);
-				map.put("march", row[12]);
-				summaryData.add(map);
+				if (reportType.equalsIgnoreCase("Selectivity")) {
+					map.put("material", row[0]);
+					map.put("april", row[1]);
+					map.put("may", row[2]);
+					map.put("june", row[3]);
+					map.put("july", row[4]);
+					map.put("aug", row[5]);
+					map.put("sep", row[6]);
+					map.put("oct", row[7]);
+					map.put("nov", row[8]);
+					map.put("dec", row[9]);
+					map.put("jan", row[10]);
+					map.put("feb", row[11]);
+					map.put("march", row[12]);
+					map.put("id", row[13]);
+					summaryData.add(map);
+				}else if(reportType.equalsIgnoreCase("NormQuantity")) {
+					map.put("normType", row[0]);
+					map.put("material", row[1]);
+					map.put("UOM", row[2]);
+					map.put("spec", row[3]);
+					map.put("april", row[4]);
+					map.put("may", row[5]);
+					map.put("june", row[6]);
+					map.put("july", row[7]);
+					map.put("aug", row[8]);
+					map.put("sep", row[9]);
+					map.put("oct", row[10]);
+					map.put("nov", row[11]);
+					map.put("dec", row[12]);
+					map.put("jan", row[13]);
+					map.put("feb", row[14]);
+					map.put("march", row[15]);
+					map.put("total", row[16]);
+					map.put("id", row[17]);
+					summaryData.add(map);
+					
+				}
 			}
 			// Combine both into a result map
 			Map<String, Object> finalResult = new HashMap<>();
@@ -213,17 +237,18 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 	}
 
-	public List<Object[]> getMonthWiseConsumptionData(String plantId, String year) {
+	public List<Object[]> getMonthWiseConsumptionData(String plantId, String year,String ReportType) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 			String storedProcedure = "PlantConsumptionSummaryReport";
 			String sql = "EXEC " + storedProcedure
-					+ " @plantId = :plantId, @year = :year";
+					+ " @plantId = :plantId, @year = :year, @ReportType = :ReportType";
 
 			Query query = entityManager.createNativeQuery(sql);
 
 			query.setParameter("plantId", plantId);
 			query.setParameter("year", year);
+			query.setParameter("ReportType", ReportType);
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
