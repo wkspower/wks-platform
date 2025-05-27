@@ -1088,10 +1088,10 @@ async function getPlantProductionSummary(keycloak) {
     return await Promise.reject(e)
   }
 }
-async function getMonthwiseRawData(keycloak) {
+async function getMonthwiseRawData(keycloak, reportType) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/report/month-wise/consumption-summary?plantId=${plantId}&year=${year}`
+  const url = `${Config.CaseEngineUrl}/task/report/month-wise/consumption-summary?plantId=${plantId}&year=${year}&reportType=${reportType}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

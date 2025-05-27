@@ -1,18 +1,10 @@
 package com.wks.caseengine.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +27,11 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import java.lang.reflect.Method;
+import java.sql.CallableStatement;
+import java.sql.SQLException;
 import java.util.*;
+import java.sql.Connection;
+import javax.sql.DataSource;
 
 @Service
 public class NormalOperationNormsServiceImpl implements NormalOperationNormsService {
@@ -53,6 +49,13 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	VerticalsRepository verticalRepository;
 	@Autowired
 	private NormsTransactionRepository normsTransactionRepository;
+
+	private DataSource dataSource;
+
+	// Inject or set your DataSource (e.g., via constructor or setter)
+	public NormalOperationNormsServiceImpl(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
 
 	@Override
 	public List<MCUNormsValueDTO> getNormalOperationNormsData(String year, String plantId) {
@@ -209,27 +212,59 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				vertical.getId().toString(), year);
 	}
 
-	@Transactional
+	// @Transactional
+	// public int executeDynamicUpdateProcedure(String procedureName, String
+	// plantId, String siteId, String verticalId,
+	// String finYear) {
+	// try {
+	// String sql = "EXEC " + procedureName
+	// + " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId,
+	// @finYear = :finYear";
+
+	// Query query = entityManager.createNativeQuery(sql);
+
+	// // Setting all parameters
+	// query.setParameter("plantId", plantId);
+	// query.setParameter("siteId", siteId);
+	// query.setParameter("verticalId", verticalId);
+	// query.setParameter("finYear", finYear);
+
+	// int rowsUpdated = query.executeUpdate();
+
+	// entityManager.flush(); // <-- force JPA to execute SQL immediately
+
+	// return rowsUpdated;
+
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// return 0;
+	// }
+	// }
+
 	public int executeDynamicUpdateProcedure(String procedureName, String plantId, String siteId, String verticalId,
 			String finYear) {
-		try {
-			String sql = "EXEC " + procedureName
-					+ " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear"; // Fixed
-																													// syntax
-																													// for
-																													// SQL
-																													// Server
-			Query query = entityManager.createNativeQuery(sql);
+		String callSql = "{call " + procedureName + "(?, ?, ?, ?)}";
 
-			// Setting all parameters
-			query.setParameter("plantId", plantId);
-			query.setParameter("siteId", siteId);
-			query.setParameter("verticalId", verticalId);
-			query.setParameter("finYear", finYear);
+		try (Connection connection = dataSource.getConnection();
+				CallableStatement stmt = connection.prepareCall(callSql)) {
 
-			return query.executeUpdate();
+			// Set parameters
+			stmt.setString(1, plantId);
+			stmt.setString(2, siteId);
+			stmt.setString(3, verticalId);
+			stmt.setString(4, finYear);
 
-		} catch (Exception e) {
+			// Execute the stored procedure
+			int rowsAffected = stmt.executeUpdate();
+
+			// Optional: commit if auto-commit is off
+			if (!connection.getAutoCommit()) {
+				connection.commit();
+			}
+
+			return rowsAffected;
+
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return 0;
 		}

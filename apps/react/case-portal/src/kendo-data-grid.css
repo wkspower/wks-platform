@@ -1,12 +1,12 @@
-.kendo-data-grid {
+/* .kendo-data-grid {
   border-radius: 0;
   border: 1px solid #d0d0d0;
   background-color: #ffffff;
   font-size: 0.8rem;
-}
-.k-grid-pager {
+} */
+/* .k-grid-pager {
   display: none;
-}
+} */
 /* Header Styling */
 .kendo-data-grid .k-grid-header {
   background-color: #fafafc;
@@ -15,10 +15,10 @@
 }
 /* kendo-data-grid.css */
 .kendo-data-grid .k-grid-table tr {
-  height: 30px; /* or any height you want */
+  height: 30px;
 }
 
-.kendo-data-grid .k-grid-header .k-header {
+/* .kendo-data-grid .k-grid-header .k-header {
   font-weight: bold;
   font-size: 0.8rem;
   color: #000000;
@@ -26,11 +26,10 @@
   padding: 0 6px;
   min-height: 45px;
   line-height: 45px;
-}
-.kendo-data-grid .k-grid-header .k-header:last-child {
-  /* remove extra right border if any */
+} */
+/* .kendo-data-grid .k-grid-header .k-header:last-child {
   border-right: none;
-}
+} */
 
 /* Column Group Header (if using grouping) */
 .kendo-data-grid .k-grid-header .k-column-headers {
@@ -45,18 +44,18 @@
 }
 
 /* Toolbar */
-.kendo-data-grid .k-grid-toolbar {
+/* .kendo-data-grid .k-grid-toolbar {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   padding-right: 16px;
   display: none;
-}
+} */
 
 /* Footer */
-.kendo-data-grid .k-grid-footer {
+/* .kendo-data-grid .k-grid-footer {
   display: none;
-}
+} */
 
 /* Rows and Cells */
 .kendo-data-grid .k-grid-content .k-grid-table tr {
@@ -125,20 +124,7 @@
 .kendo-data-grid .k-grid-content .k-grid-table tr.k-state-selected:not(.k-alt) {
   background-color: #ffffff !important;
 }
-/* 
-.kendo-data-grid .disabled-row {
-  background-color: #d3d3d3 !important;
-  color: #666666 !important; 
-  pointer-events: none; 
-}
-.kendo-data-grid .gray-row {
-  background-color: #f5f5f5 !important;
-} */
 
-/* make every row light gray */
-/* .kendo-data-grid .k-grid-content .k-grid-table tr {
-  background-color: #f5f5f5cd !important;
-} */
 /* Only apply background color to body rows, not header */
 .kendo-data-grid .k-grid-content .k-grid-table tbody tr {
   background-color: #ebebeb !important;

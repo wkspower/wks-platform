@@ -120,9 +120,10 @@ export default function PlantContribution() {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Backdrop open={loading} sx={{ color: '#fff', zIndex: 9 }}>
-        <CircularProgress color='inherit' />
-      </Backdrop>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={!!loading}
+      ></Backdrop>
 
       {categories.map(({ key, title }, idx) => {
         const rpt = reports[key] || {}
