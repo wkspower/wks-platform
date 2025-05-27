@@ -50,7 +50,7 @@ const KendoDataGrid = ({
           filter={filter}
           onFilterChange={(e) => setFilter(e.filter)}
           onItemChange={handleItemChange}
-          
+          // headerRowHeight={showHeader ? 35 : 0}
           rowRender={rowRender}
           resizable={true}
         >

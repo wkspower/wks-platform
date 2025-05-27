@@ -14,7 +14,7 @@ import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 
-import KendoDataGrid from 'components/Kendo-DataGrid/index'
+import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import getKendoProductionColumns from '../CommonHeader/KendoProdVolBHeader'
 
 const CustomAccordion = styled((props) => (

@@ -18,7 +18,7 @@ import { useSession } from 'SessionStoreContext'
 //   TextField,
 // } from '../../../../node_modules/@mui/material/index'
 // import getKendoColumns from '../CommonHeader/AopCostReportHeader'
-import KendoDataGrid from 'components/Kendo-DataGrid/index'
+import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import getKendoColumns from 'components/data-tables/CommonHeader/kendoHeader'
 
 const CustomAccordion = styled((props) => (
@@ -56,8 +56,10 @@ const AnnualAopCost = () => {
   const [rowsNorm, setRowsNorm] = useState([])
   const [rowsQuantity, setRowsQuantity] = useState([])
   const [rowsNormCost, setRowsNormCost] = useState([])
+
   const [headers2, setHeaders2] = useState([])
   const [keys2, setKeys2] = useState([])
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
@@ -104,11 +106,8 @@ const AnnualAopCost = () => {
 
         if (reportType == 'price') {
           const headers2 = data?.data[0]?.headers
-          // console.log('headers2', headers2)
           setHeaders2(headers2)
           const keys2 = data?.data[0]?.keys
-          // console.log('keys2', keys2)
-
           setKeys2(keys2)
           const rowsWithId2 = data?.data[0]?.results?.map((item, index) => ({
             ...item,
@@ -119,7 +118,6 @@ const AnnualAopCost = () => {
         } else {
           setState(rowsWithId)
         }
-
         // setLoading(false)
       } else {
         console.error(`Error fetching ${reportType} data`)

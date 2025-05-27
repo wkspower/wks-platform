@@ -1,10 +1,5 @@
 import NumericInputOnly from 'utils/NumericInputOnly'
-const getEnhancedNormsHistorianBasis = ({
-  headerMap,
-  type,
-  headers2 = [],
-  keys2 = [],
-}) => {
+const getEnhancedNormsHistorianBasis = ({ headerMap, type }) => {
   // console.log('headers2', headers2)
 
   // const formatValueToThreeDecimals = (params) =>
@@ -36,7 +31,6 @@ const getEnhancedNormsHistorianBasis = ({
       updatedCol.headerName = headerMap[col.headerName]
     }
 
-    
     if (
       col.field === 'total' ||
       col.field === 'normValue' ||

@@ -16,7 +16,7 @@ import { useSession } from 'SessionStoreContext'
 
 // import getEnhancedProductionVolDataBasis from '../CommonHeader/MCHeaders'
 // import getKendoNormsHistorianColumns from '../CommonHeader/NormsHistorianValuesHeaders'
-import KendoDataGrid from 'components/Kendo-DataGrid/index'
+import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import getKendoNormsHistorianColumns from '../CommonHeader/KendoNormHistoryHeader'
 
 const CustomAccordion = styled((props) => (

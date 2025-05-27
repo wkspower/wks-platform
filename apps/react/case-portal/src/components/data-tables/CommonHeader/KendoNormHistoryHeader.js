@@ -1,5 +1,4 @@
 import NumericInputOnly from 'utils/NumericInputOnly'
-import { Tooltip } from '@progress/kendo-react-tooltip'
 
 export default function getKendoNormsHistorianColumns({ headerMap, type }) {
   // load the right JSON asset
@@ -50,27 +49,6 @@ export default function getKendoNormsHistorianColumns({ headerMap, type }) {
         ? (props) => <NumericInputOnly {...props} />
         : undefined,
       align: isTextCol ? 'left' : 'right',
-
-      cell: (props) => {
-        const rawValue = props.dataItem[props.field]
-        const isText = isTextCol
-        const displayValue = isText
-          ? rawValue
-          : Number(rawValue)?.toLocaleString(undefined, {
-              minimumFractionDigits: 3,
-              maximumFractionDigits: 3,
-            })
-
-        return (
-          <td style={{ textAlign: isText ? 'left' : 'right' }}>
-            <Tooltip anchorElement='target' position='top'>
-              <span style={{ display: 'inline-block', width: '100%' }}>
-                {displayValue}
-              </span>
-            </Tooltip>
-          </td>
-        )
-      },
     }
   })
 }
