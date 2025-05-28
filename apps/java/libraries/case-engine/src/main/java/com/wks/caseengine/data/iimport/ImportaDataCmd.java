@@ -11,9 +11,12 @@
  */
 package com.wks.caseengine.data.iimport;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.command.DataConnectionExchange;
 
 import lombok.AllArgsConstructor;
 
@@ -28,7 +31,10 @@ public class ImportaDataCmd implements Command<Void> {
 
 	@Override
 	public Void execute(CommandContext commandContext) {
-		commandContext.importToDatabase(data);
+		GsonBuilder gsonBuilder = commandContext.getGsonBuilder();
+		Gson json = gsonBuilder.create();
+		DataConnectionExchange dataConnectionExchange = commandContext.getDataConnectionExchange();
+		dataConnectionExchange.importToDatabase(data, json);
 		return null;
 	}
 

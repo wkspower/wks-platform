@@ -1,9 +1,9 @@
-package com.wks.caseengine.entity;
+package com.wks.caseengine.jpa.entity;
 
 import java.util.UUID;
 
 import com.google.gson.JsonObject;
-import com.wks.caseengine.entity.converter.JsonConverter;
+import com.wks.caseengine.jpa.entity.converter.JsonConverter;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;

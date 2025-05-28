@@ -58,6 +58,10 @@ database.type: mongo
 
 # h2
 # spring:
+#   autoconfigure:
+#     exclude:
+#       - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+#       - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
 #   datasource:
 #     jdbcUrl: jdbc:h2:mem:wks;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
 #     driver-class-name: org.h2.Driver
@@ -85,6 +89,10 @@ database.type: mongo
 
 # postgres
 # spring:
+#   autoconfigure:
+#     exclude:
+#       - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+#       - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
 #   datasource:
 #     jdbcUrl: jdbc:postgresql://localhost:5432/wks
 #     driver-class-name: org.postgresql.Driver
@@ -109,3 +117,5 @@ database.type: mongo
 #     init:
 #       schema-locations: classpath:schema-postgresql.sql
 #       mode: always
+
+      

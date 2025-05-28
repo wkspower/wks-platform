@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
-import com.wks.caseengine.entity.CaseDefinitionEntity;
-import com.wks.caseengine.entity.converter.CaseDefinitionConverter;
+import com.wks.caseengine.jpa.entity.CaseDefinitionEntity;
+import com.wks.caseengine.jpa.entity.converter.CaseDefinitionConverter;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import jakarta.persistence.EntityManager;

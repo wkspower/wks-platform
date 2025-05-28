@@ -1,4 +1,4 @@
-package com.wks.caseengine.entity;
+package com.wks.caseengine.jpa.entity;
 import java.util.List;
 import java.util.UUID;
 
@@ -6,10 +6,10 @@ import com.wks.caseengine.cases.instance.CaseAttribute;
 import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseDocument;
 import com.wks.caseengine.cases.instance.CaseOwner;
-import com.wks.caseengine.entity.converter.CaseCommentListConverter;
-import com.wks.caseengine.entity.converter.CaseDefAttributeConverter;
-import com.wks.caseengine.entity.converter.CaseDocumentListConverter;
-import com.wks.caseengine.entity.converter.CaseOwnerConverter;
+import com.wks.caseengine.jpa.entity.converter.CaseCommentListConverter;
+import com.wks.caseengine.jpa.entity.converter.CaseDefAttributeConverter;
+import com.wks.caseengine.jpa.entity.converter.CaseDocumentListConverter;
+import com.wks.caseengine.jpa.entity.converter.CaseOwnerConverter;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;

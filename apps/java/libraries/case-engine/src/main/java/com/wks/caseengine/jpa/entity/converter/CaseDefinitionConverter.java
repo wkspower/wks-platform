@@ -1,7 +1,7 @@
-package com.wks.caseengine.entity.converter;
+package com.wks.caseengine.jpa.entity.converter;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
-import com.wks.caseengine.entity.CaseDefinitionEntity;
+import com.wks.caseengine.jpa.entity.CaseDefinitionEntity;
 
 public class CaseDefinitionConverter {
 

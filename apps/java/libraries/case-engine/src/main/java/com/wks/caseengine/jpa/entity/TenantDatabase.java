@@ -1,4 +1,4 @@
-package com.wks.caseengine.entity;
+package com.wks.caseengine.jpa.entity;
 
 import java.util.UUID;
 

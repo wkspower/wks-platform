@@ -22,7 +22,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.JsonObject;
-import com.wks.caseengine.entity.RecordTypeInstanceEntity;
+import com.wks.caseengine.jpa.entity.RecordTypeInstanceEntity;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import jakarta.persistence.EntityManager;

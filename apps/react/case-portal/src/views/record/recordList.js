@@ -63,7 +63,7 @@ export const RecordList = ({ recordTypeId }) => {
         console.log(err.message)
       })
 
-      RecordService.getRecordById(keycloak, recordTypeId)
+    RecordService.getRecordById(keycloak, recordTypeId)
       .then((data) => {
         setRecords(data)
       })
@@ -97,7 +97,7 @@ export const RecordList = ({ recordTypeId }) => {
             rowsPerPageOptions={[10]}
             getRowId={(row) => {
               console.log(row._id?.$oid ?? row.id)
-              return row._id?.$oid ?? row.id;
+              return row._id?.$oid ?? row.id
             }}
           />
         </Box>

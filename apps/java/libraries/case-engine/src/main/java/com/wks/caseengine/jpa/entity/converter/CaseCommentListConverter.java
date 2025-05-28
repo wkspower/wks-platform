@@ -1,4 +1,4 @@
-package com.wks.caseengine.entity.converter;
+package com.wks.caseengine.jpa.entity.converter;
 import java.lang.reflect.Type;
 import java.util.List;
 

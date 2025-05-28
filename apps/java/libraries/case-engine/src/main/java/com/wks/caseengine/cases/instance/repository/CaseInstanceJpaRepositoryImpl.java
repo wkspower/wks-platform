@@ -15,7 +15,7 @@ import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceFilter;
-import com.wks.caseengine.entity.CaseInstanceEntity;
+import com.wks.caseengine.jpa.entity.CaseInstanceEntity;
 import com.wks.caseengine.pagination.Cursor;
 import com.wks.caseengine.pagination.PageResult;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;

@@ -59,8 +59,7 @@ export const RecordForm = ({ open, recordType, record, handleClose, mode }) => {
   }
 
   const deleteRecord = () => {
-    // RecordService.deleteRecord(recordType.id, record._id.$oid)
-    RecordService.deleteRecord(recordType.id, record.id)
+    RecordService.deleteRecord(recordType.id, record._id?.$oid ?? record.id)
       .then(() => {
         handleClose()
       })

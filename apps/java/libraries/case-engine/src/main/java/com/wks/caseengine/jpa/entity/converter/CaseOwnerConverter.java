@@ -1,4 +1,4 @@
-package com.wks.caseengine.entity.converter;
+package com.wks.caseengine.jpa.entity.converter;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import com.google.gson.Gson;

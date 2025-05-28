@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import com.wks.caseengine.entity.QueueEntity;
+import com.wks.caseengine.jpa.entity.QueueEntity;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import jakarta.persistence.EntityManager;

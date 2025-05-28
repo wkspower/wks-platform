@@ -11,18 +11,30 @@
  */
 package com.wks.caseengine.data.export;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.command.DataConnectionExchange;
 
 import lombok.AllArgsConstructor;
 
+/**
+ * @author victor.franca
+ *
+ */
 @AllArgsConstructor
 public class ExportDataCmd implements Command<JsonObject> {
 
 	@Override
 	public JsonObject execute(CommandContext commandContext) {
-		return commandContext.exportFromDatabase();
+		Gson gson = commandContext.getGsonBuilder().create();
+
+		DataConnectionExchange dataConnectionExchange = commandContext.getDataConnectionExchange();
+		
+		JsonObject exportedData = dataConnectionExchange.exportFromDatabase(gson);
+
+		return exportedData;
 	}
 
 }

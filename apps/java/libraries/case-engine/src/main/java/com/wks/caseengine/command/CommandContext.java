@@ -17,7 +17,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import com.wks.api.security.context.SecurityContextTenantHolder;
 import com.wks.bpm.engine.client.facade.BpmEngineClientFacade;
 import com.wks.caseengine.cases.businesskey.GenericBusinessKeyGenerator;
@@ -88,13 +87,5 @@ public class CommandContext {
 
 	@Autowired
 	private GsonBuilder gsonBuilder;
-
-	public final JsonObject exportFromDatabase() {
-		return dataConnectionExchange.exportFromDatabase(gsonBuilder.create());
-	}
-
-	public final void importToDatabase(JsonObject data) {
-		dataConnectionExchange.importToDatabase(data, gsonBuilder.create());
-	}
 
 }

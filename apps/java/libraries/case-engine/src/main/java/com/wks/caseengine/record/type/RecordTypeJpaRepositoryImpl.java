@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
-import com.wks.caseengine.entity.RecordTypeEntity;
+import com.wks.caseengine.jpa.entity.RecordTypeEntity;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import jakarta.persistence.EntityManager;

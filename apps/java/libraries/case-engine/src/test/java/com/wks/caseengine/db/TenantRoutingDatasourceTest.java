@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.wks.caseengine.entity.TenantDatabase;
+import com.wks.caseengine.jpa.entity.TenantDatabase;
 import com.zaxxer.hikari.HikariConfig;
 
 @ExtendWith(MockitoExtension.class)

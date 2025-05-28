@@ -1,14 +1,14 @@
-package com.wks.caseengine.entity;
+package com.wks.caseengine.jpa.entity;
 
 import java.util.List;
 import java.util.UUID;
 
 import com.google.gson.JsonObject;
 import com.wks.caseengine.cases.definition.CaseStage;
-import com.wks.caseengine.entity.converter.ActionHookListConverter;
-import com.wks.caseengine.entity.converter.CaseStageListConverter;
-import com.wks.caseengine.entity.converter.JsonConverter;
 import com.wks.caseengine.event.ActionHook;
+import com.wks.caseengine.jpa.entity.converter.ActionHookListConverter;
+import com.wks.caseengine.jpa.entity.converter.CaseStageListConverter;
+import com.wks.caseengine.jpa.entity.converter.JsonConverter;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;

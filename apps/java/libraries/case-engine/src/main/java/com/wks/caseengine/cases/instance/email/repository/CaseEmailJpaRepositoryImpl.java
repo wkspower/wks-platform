@@ -11,7 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.cases.instance.email.CaseEmail;
-import com.wks.caseengine.entity.CaseEmailEntity;
+import com.wks.caseengine.jpa.entity.CaseEmailEntity;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 import com.wks.caseengine.repository.JpaPaginator;
 
