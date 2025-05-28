@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
+// import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import ASDataGrid from './ASDataGrid'
 // Import the catalyst options from the JSON file
 // import catalystOptionsData from '../../assets/Catalyst.json'
@@ -14,11 +14,11 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
 
 const MaintenanceTable = () => {
-  const [modifiedCells, setModifiedCells] = React.useState({})
+  // const [modifiedCells, setModifiedCells] = React.useState({})
 
   const keycloak = useSession()
   const [loading, setLoading] = useState(false)
-  const apiRef = useGridApiRef()
+  // const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const [rows, setRows] = useState()
@@ -106,24 +106,6 @@ const MaintenanceTable = () => {
   const formatValueToTwoDecimals = (params) => {
     return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
   }
-
-  // const formatValueToTwoDecimals = (params) => {
-  //   if (params === null || params === undefined || params === '') {
-  //     return ''
-  //   }
-  //   const num = parseFloat(params)
-  //   if (isNaN(num)) {
-  //     return ''
-  //   }
-  //   if (num === 0) {
-  //     return 0
-  //   }
-
-  //   if (num % 1 !== 0) {
-  //     return num.toFixed(2)
-  //   }
-  //   return num
-  // }
 
   useEffect(() => {
     fetchData()
@@ -283,19 +265,13 @@ const MaintenanceTable = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <ASDataGrid
-        modifiedCells={modifiedCells}
         columns={productionColumns}
         rows={rows}
         setRows={setRows}
-        title='Maintenance Details'
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-        paginationOptions={[100, 200, 300]}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         handleCalculate={handleCalculate}
-        apiRef={apiRef}
+        // apiRef={apiRef}
         setDeleteId={setDeleteId}
         fetchData={fetchData}
         setOpen1={setOpen1}
@@ -304,17 +280,6 @@ const MaintenanceTable = () => {
         deleteId={deleteId}
         open1={open1}
         permissions={adjustedPermissions}
-
-        // permissions={{
-        //   showAction: false,
-        //   addButton: false,
-        //   deleteButton: false,
-        //   editButton: false,
-        //   showUnit: false,
-        //   saveWithRemark: false,
-        //   saveBtn: false,
-        //   showRefresh: false,
-        // }}
       />
     </div>
   )

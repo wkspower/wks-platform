@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-import ASDataGrid from './ASDataGrid'
+import ASDataGrid from '../data-tables/ASDataGrid'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import getEnhancedProductionColDefs from './CommonHeader/ProductionVolumeHeader'
+import getEnhancedProductionColDefs from '../data-tables/CommonHeader/ProductionVolumeHeader'
 
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'

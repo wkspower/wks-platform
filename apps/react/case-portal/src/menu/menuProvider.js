@@ -51,7 +51,6 @@ export function MenuProvider({ children }) {
         //   //   // setMenuItems(dynamic)
         //   //   // return
         // }
-        // Function to check existence
         const containsUserMgmt = (items) =>
           items.some(
             (item) =>
@@ -68,9 +67,7 @@ export function MenuProvider({ children }) {
           setMenuItems(dynamic)
         } else {
           const base = [...staticMenu]
-          // if (!containsUserMgmt(base)) {
-          //   base.push(userMgmtItem)
-          // }
+
           setMenuItems(base)
         }
       })

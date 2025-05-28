@@ -1,25 +1,20 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
-import ASDataGrid from './ASDataGrid'
-// Import the catalyst options from the JSON file
-// import catalystOptionsData from '../../assets/Catalyst.json'
+
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
-import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
+import KendoDataTables from './index'
 
 const MaintenanceTable = () => {
-  const [modifiedCells, setModifiedCells] = React.useState({})
-
   const keycloak = useSession()
   const [loading, setLoading] = useState(false)
-  const apiRef = useGridApiRef()
+  // const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const [rows, setRows] = useState()
@@ -108,24 +103,6 @@ const MaintenanceTable = () => {
     return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
   }
 
-  // const formatValueToTwoDecimals = (params) => {
-  //   if (params === null || params === undefined || params === '') {
-  //     return ''
-  //   }
-  //   const num = parseFloat(params)
-  //   if (isNaN(num)) {
-  //     return ''
-  //   }
-  //   if (num === 0) {
-  //     return 0
-  //   }
-
-  //   if (num % 1 !== 0) {
-  //     return num.toFixed(2)
-  //   }
-  //   return num
-  // }
-
   useEffect(() => {
     fetchData()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
@@ -133,66 +110,72 @@ const MaintenanceTable = () => {
   const productionColumns = [
     {
       field: 'Name',
-      headerName: 'Description',
+      title: 'Description',
       align: 'left',
       headerAlign: 'left',
-      minWidth: 250,
+      width: 250,
       renderCell: renderTwoLineEllipsis,
     },
     {
       field: 'April',
-      headerName: headerMap[4],
+      title: headerMap[4],
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToTwoDecimals,
-
+      width: 150,
       // valueGetter: convertUnits,
     },
 
     {
       field: 'May',
-      headerName: headerMap[5],
+      title: headerMap[5],
       valueFormatter: formatValueToTwoDecimals,
+      width: 150,
 
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'June',
-      headerName: headerMap[6],
+      title: headerMap[6],
       valueFormatter: formatValueToTwoDecimals,
+      width: 150,
 
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'July',
-      headerName: headerMap[7],
+      title: headerMap[7],
       valueFormatter: formatValueToTwoDecimals,
+      width: 150,
 
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Aug',
-      headerName: headerMap[8],
+      title: headerMap[8],
       valueFormatter: formatValueToTwoDecimals,
+      width: 150,
 
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Sep',
-      headerName: headerMap[9],
+      title: headerMap[9],
       valueFormatter: formatValueToTwoDecimals,
+      width: 150,
 
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Oct',
-      headerName: headerMap[10],
+      title: headerMap[10],
       valueFormatter: formatValueToTwoDecimals,
+      width: 150,
 
       align: 'right',
       headerAlign: 'left',
@@ -200,47 +183,52 @@ const MaintenanceTable = () => {
 
     {
       field: 'Nov',
-      headerName: headerMap[11],
+      title: headerMap[11],
       valueFormatter: formatValueToTwoDecimals,
+      width: 150,
 
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Dec',
-      headerName: headerMap[12],
+      title: headerMap[12],
       valueFormatter: formatValueToTwoDecimals,
+      width: 150,
 
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Jan',
-      headerName: headerMap[1],
+      title: headerMap[1],
       valueFormatter: formatValueToTwoDecimals,
+      width: 150,
 
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Feb',
-      headerName: headerMap[2],
+      title: headerMap[2],
       valueFormatter: formatValueToTwoDecimals,
+      width: 150,
 
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Mar',
-      headerName: headerMap[3],
+      title: headerMap[3],
       valueFormatter: formatValueToTwoDecimals,
+      width: 150,
 
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'isEditable',
-      headerName: 'isEditable',
+      title: 'isEditable',
     },
   ]
 
@@ -283,20 +271,14 @@ const MaintenanceTable = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <KendoDataGrid
-        modifiedCells={modifiedCells}
+      <KendoDataTables
         columns={productionColumns}
         rows={rows}
         setRows={setRows}
-        title='Maintenance Details'
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-        paginationOptions={[100, 200, 300]}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         handleCalculate={handleCalculate}
-        apiRef={apiRef}
+        // apiRef={apiRef}
         setDeleteId={setDeleteId}
         fetchData={fetchData}
         setOpen1={setOpen1}
@@ -305,17 +287,6 @@ const MaintenanceTable = () => {
         deleteId={deleteId}
         open1={open1}
         permissions={adjustedPermissions}
-
-        // permissions={{
-        //   showAction: false,
-        //   addButton: false,
-        //   deleteButton: false,
-        //   editButton: false,
-        //   showUnit: false,
-        //   saveWithRemark: false,
-        //   saveBtn: false,
-        //   showRefresh: false,
-        // }}
       />
     </div>
   )

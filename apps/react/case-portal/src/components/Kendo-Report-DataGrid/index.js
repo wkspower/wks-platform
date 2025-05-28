@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
 import '../../kendo-data-grid.css'

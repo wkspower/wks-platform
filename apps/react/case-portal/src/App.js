@@ -6,7 +6,6 @@ import { SessionStoreProvider } from './SessionStoreContext'
 //   CaseService,
 //   //  RecordService
 // } from 'services'
-// import menuItemsDefs from './menu'
 import { RegisterInjectUserSession, RegisteOptions } from './plugins'
 import { accountStore, sessionStore } from './store'
 import './App.css'
@@ -19,24 +18,15 @@ import '@progress/kendo-theme-fluent/dist/all.css'
 
 // import { useSelector } from 'react-redux'
 import Layout from 'layout/FooterLayout/index'
-// import { useSelector } from 'react-redux'
-// import useMenuItems from 'menu/index'
 import { MenuProvider } from 'menu/menuProvider'
-// import useMenuItems from 'menu/index'
 
 const ScrollTop = lazy(() => import('./components/ScrollTop'))
 
 const App = () => {
-  // const dataGridStore = useSelector((state) => state.dataGridStore)
-  // const { verticalChange } = dataGridStore
   const [keycloak, setKeycloak] = useState({})
   const [authenticated, setAuthenticated] = useState(null)
   // const [recordsTypes, setRecordsTypes] = useState([])
   // const [casesDefinitions, setCasesDefinitions] = useState([])
-  // const [menu, setMenu] = useState({ items: [] })
-  // const { items: menuItems } = useMenuItems()
-  // const dataGridStore = useSelector((state) => state.dataGridStore)
-  // const { verticalChange } = dataGridStore
 
   useEffect(() => {
     const { keycloak } = sessionStore.bootstrap()
@@ -85,96 +75,6 @@ const App = () => {
       return keycloak.logout({ redirectUri: window.location.origin })
     }
   }
-
-  // useEffect(() => {
-  //   if (keycloak && verticalChange) {
-  //     buildMenuItems(keycloak)
-  //   }
-  //   // console.log(verticalChange)
-  // }, [verticalChange, keycloak])
-
-  // async function buildMenuItems(keycloak) {
-  //   let rawAllowedVerticals = []
-  //   const verticals = keycloak?.idTokenParsed?.verticals
-
-  //   if (verticals) {
-  //     try {
-  //       rawAllowedVerticals = JSON.parse(verticals)
-  //     } catch (error) {
-  //       console.error('Error parsing verticals JSON:', error)
-  //       rawAllowedVerticals = []
-  //     }
-  //   } else {
-  //     // console.log('No verticals found in idTokenParsed')
-  //   }
-
-  //   const allowedVerticalsMapping = rawAllowedVerticals.reduce((acc, obj) => {
-  //     return { ...acc, ...obj }
-  //   }, {})
-
-  //   // console.log(allowedVerticalsMapping)
-  //   // console.log(verticalChange)
-
-  //   const selectedVertical = verticalChange?.selectedVertical?.toLowerCase()
-  //   const allowedChildIds =
-  //     (selectedVertical && allowedVerticalsMapping[selectedVertical]) || []
-
-  //   // Build the menu based on allowed verticals
-  //   const menu = {
-  //     items: [...menuItemsDefs.items],
-  //   }
-  //   // console.log(menu)
-
-  //   menu.items = menu.items.map((item) => {
-  //     if (item.id === 'utilities') {
-  //       return {
-  //         ...item,
-  //         children: item.children.map((group) => {
-  //           if (group.id === 'production-norms-plan') {
-  //             return {
-  //               ...group,
-  //               children: group.children.filter((child) =>
-  //                 allowedChildIds.length > 0
-  //                   ? allowedChildIds.includes(child.id)
-  //                   : true,
-  //               ),
-  //             }
-  //           }
-  //           return group
-  //         }),
-  //       }
-  //     }
-  //     return item
-  //   })
-
-  //   // Safely determine if the user is a manager.
-  //   // If keycloak.hasRealmRole is not a function, default to false.
-  //   const isManagerUser =
-  //     typeof keycloak.hasRealmRole === 'function'
-  //       ? keycloak.hasRealmRole('manager')
-  //       : false
-
-  //   if (!isManagerUser) {
-  //     delete menu.items[3]
-  //   }
-
-  //   return setMenu(menu)
-  // }
-  // async function buildMenuItems(keycloak) {
-  //   // console.log(menuItems)
-  //   const menu = { items: [...menuItems] }
-
-  //   const isManagerUser =
-  //     typeof keycloak.hasRealmRole === 'function'
-  //       ? keycloak.hasRealmRole('manager')
-  //       : false
-
-  //   if (!isManagerUser) {
-  //     delete menu.items[3]
-  //   }
-
-  //   setMenu(menu)
-  // }
 
   return (
     keycloak &&

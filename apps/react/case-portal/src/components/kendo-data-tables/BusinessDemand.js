@@ -14,9 +14,10 @@ import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { validateFields } from 'utils/validationUtils'
-import getEnhancedColDefs from './CommonHeader/index'
+import getEnhancedColDefs from '../data-tables/CommonHeader/index'
 import ProductionvolumeData from './ProductionVoluemData'
 import KendoDataTables from './index'
+import kendoGetEnhancedColDefs from 'components/data-tables/CommonHeader/kendoBusinessDemColDef'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -59,6 +60,7 @@ const KendoBusinessDemand = ({ permissions }) => {
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
+  // const [updatedRows, setUpdatedRows] = useState()
   // const [rows2, setRows2] = useState()
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [snackbarData, setSnackbarData] = useState({
@@ -101,6 +103,7 @@ const KendoBusinessDemand = ({ permissions }) => {
           idFromApi: item.id,
           id: groupId++,
           originalRemark: item.remark,
+          inEdit: false,
         }
 
         // if (lowerVertName !== 'pe') {
@@ -152,11 +155,13 @@ const KendoBusinessDemand = ({ permissions }) => {
           // .map((product) => ({
           //   id: product.id,
           //   displayName: product.displayName,
+          //   inEdit: false,
           // }))
         } else {
           productList = data.map((product) => ({
             id: product.id,
             displayName: product.displayName,
+            // inEdit: false,
           }))
         }
 
@@ -176,11 +181,11 @@ const KendoBusinessDemand = ({ permissions }) => {
   //   console.log('this is test for api call ')
   // })
 
-  const handleRemarkCellClick = (row) => {
-    // console.log(row, newRow)
-    if (!row?.isEditable) return
-    setCurrentRemark(row.remark || '')
-    setCurrentRowId(row.id)
+  const handleRemarkCellClick = (dataItem) => {
+    // if (!dataItem?.isEditable) return
+    console.log('hiiiiiiii')
+    setCurrentRemark(dataItem.remark || '')
+    setCurrentRowId(dataItem.id)
     setRemarkDialogOpen(true)
   }
 
@@ -188,62 +193,47 @@ const KendoBusinessDemand = ({ permissions }) => {
     return params.row.isEditable
   }
 
-  const colDefs = getEnhancedColDefs({
+  const colDefs = kendoGetEnhancedColDefs({
     allProducts,
     headerMap,
     handleRemarkCellClick,
   })
-
-  const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    const rowId = newRow.id
-
-    const updatedFields = []
-
-    for (const key in newRow) {
-      if (
-        Object.prototype.hasOwnProperty.call(newRow, key) &&
-        newRow[key] !== oldRow[key]
-      ) {
-        updatedFields.push(key)
-      }
-    }
-
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-
-    // Keep track of original values before editing
-    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-    }
-
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === newRow.id ? { ...newRow, isNew: false } : row,
-      ),
-    )
-
-    if (updatedFields.length > 0) {
-      setModifiedCells((prevModifiedCells) => ({
-        ...prevModifiedCells,
-        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-      }))
-    }
-
-    return newRow
-  }, [])
+  // const colDefs = React.useMemo(() => {
+  //   const defs = getEnhancedColDefs({
+  //     allProducts,
+  //     headerMap,
+  //     handleRemarkCellClick,
+  //   })
+  //   console.log(' colDefs →', defs)
+  //   return defs
+  // }, [allProducts, headerMap, handleRemarkCellClick])
 
   const saveChanges = React.useCallback(async () => {
-    setLoading(true)
-    const rowsInEditMode = Object.keys(rowModesModel).filter(
-      (id) => rowModesModel[id]?.mode === 'edit',
-    )
+    // setLoading(true)
+    // const rowsInEditMode = Object.keys(rowModesModel).filter(
+    //   (id) => rowModesModel[id]?.mode === 'edit',
+    // )
 
-    rowsInEditMode.forEach((id) => {
-      apiRef.current.stopRowEditMode({ id })
-    })
+    // rowsInEditMode.forEach((id) => {
+    //   apiRef.current.stopRowEditMode({ id })
+    // })
 
     setTimeout(() => {
       try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        if (Object.keys(modifiedCells).length === 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          setLoading(false)
+          return
+        }
+        // console.log('modifiedCells', modifiedCells)
+        let newRows = modifiedCells.filter((row) => row.isGroupHeader !== true)
+        console.log(newRows)
+        var data = Object.values(newRows)
+        // var data = Object.values(unsavedChangesRef.current.unsavedRows)
         if (data.length == 0) {
           setSnackbarOpen(true)
           setSnackbarData({
@@ -254,25 +244,25 @@ const KendoBusinessDemand = ({ permissions }) => {
           return
         }
 
-        const requiredFields = ['normParameterId', 'remark']
+        // const requiredFields = ['normParameterId', 'remark']
 
-        const validationMessage = validateFields(data, requiredFields)
+        // const validationMessage = validateFields(data, requiredFields)
 
-        if (validationMessage) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: validationMessage,
-            severity: 'error',
-          })
-          setLoading(false)
-          return
-        }
+        // if (validationMessage) {
+        //   setSnackbarOpen(true)
+        //   setSnackbarData({
+        //     message: validationMessage,
+        //     severity: 'error',
+        //   })
+        //   setLoading(false)
+        //   return
+        // }
         saveBusinessDemandData(data)
       } catch (error) {
         console.log('Error saving changes:', error)
       }
     }, 400)
-  }, [apiRef, rowModesModel])
+  }, [apiRef, rowModesModel, modifiedCells])
 
   const saveBusinessDemandData = async (newRows) => {
     try {
@@ -451,18 +441,16 @@ const KendoBusinessDemand = ({ permissions }) => {
 
       <KendoDataTables
         modifiedCells={modifiedCells}
+        setModifiedCells={setModifiedCells}
         setRows={setRows}
+        // updatedRows={updatedRows}
+        // setUpdatedRows={setUpdatedRows}
         columns={colDefs}
         rows={rows || []}
         isCellEditable={isCellEditable}
         title='Business Demand'
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-        paginationOptions={[100, 200, 300]}
-        processRowUpdate={processRowUpdate}
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={onRowModesModelChange}
+        // processRowUpdate={processRowUpdate}
+
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
@@ -481,7 +469,6 @@ const KendoBusinessDemand = ({ permissions }) => {
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
         setCurrentRowId={setCurrentRowId}
-        unsavedChangesRef={unsavedChangesRef}
         handleRemarkCellClick={handleRemarkCellClick}
         deleteRowData={deleteRowData}
         permissions={adjustedPermissions}

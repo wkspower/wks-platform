@@ -64,16 +64,15 @@
 .kendo-data-grid .k-grid-content .k-grid-table tr.even-row {
   background-color: #ffffff;
 }
-.kendo-data-grid .k-grid-content .k-grid-table tr.k-alt,
-.kendo-data-grid .k-grid-content .k-grid-table tr.odd-row {
-  pointer-events: none;
+/* .kendo-data-grid .k-grid-content .k-grid-table tr.k-alt, */
+/* .kendo-data-grid .k-grid-content .k-grid-table tr.odd-row {
   background-color: #ebebeb;
   color: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(0, 0, 0, 0.2);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  border-bottom: 2px solid #bbbbbb;
-}
+  border-bottom: 1px solid #bbbbbb;
+} */
 .kendo-data-grid .k-grid-content .k-grid-table tr.no-border-row {
   background-color: #e9e9e9;
 }
