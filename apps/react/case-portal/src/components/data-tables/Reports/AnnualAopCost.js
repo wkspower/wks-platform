@@ -122,9 +122,13 @@ const AnnualAopCost = () => {
     type: 'NormCost',
   })
 
-//useEffect(() => {
-    // fetchData('aopYearFilter', setUnit)
-//}, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  useEffect(() => {}, [
+    sitePlantChange,
+    oldYear,
+    yearChanged,
+    keycloak,
+    lowerVertName,
+  ])
 
   useEffect(() => {
     const fetchAllData = async () => {

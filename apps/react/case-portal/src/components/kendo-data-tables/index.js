@@ -17,6 +17,7 @@ import {
   TextField,
 } from '../../../node_modules/@mui/material/index'
 import Notification from 'components/Utilities/Notification'
+import { GridColumn } from '../../../node_modules/@progress/kendo-react-grid/index'
 
 const KendoDataTables = ({
   // setUpdatedRows = () => {},
@@ -35,9 +36,11 @@ const KendoDataTables = ({
   unsavedChangesRef = { current: { unsavedRows: {}, rowsBeforeChange: {} } },
   setRemarkDialogOpen = () => {},
   currentRemark = '',
+  editedRows = [],
   setCurrentRemark = () => {},
   currentRowId = null,
   // modifiedCells = [],
+  NormParameterIdCell = () => {},
   setModifiedCells = () => {},
   remarkDialogOpen = false,
   handleDeleteSelected = () => {},
@@ -150,40 +153,12 @@ const KendoDataTables = ({
 
     setRemarkDialogOpen(false)
   }
-  // console.log(rows)
-  // console.log(columns)
-  // const handleAddRow = () => {
-  //   if (isButtonDisabled) return
-  //   setIsButtonDisabled(true)
-  //   const newRowId = rows.length
-  //     ? Math.max(...rows.map((row) => row.id)) + 1
-  //     : 1
-  //   const newRow = {
-  //     id: newRowId,
-  //     isNew: true,
-  //     ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])),
-  //   }
 
-  //   setRows((prevRows) => [newRow, ...prevRows])
-  //   onAddRow?.(newRow)
-  //   // setProduct('')
-  //   // setRowModesModel((oldModel) => ({
-  //   //   ...oldModel,
-  //   //   [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
-  //   // }))
-  //   focusFirstField()
-  //   setTimeout(() => {
-  //     setIsButtonDisabled(false)
-  //   }, 500)
-  // }
   const saveConfirmation = async () => {
     saveChanges()
     setOpenSaveDialogeBox(false)
   }
-  // const handleDeleteClick = async (id, params) => {
-  //   setParamsForDelete(params)
-  //   setOpenDeleteDialogeBox(true)
-  // }
+
   const deleteTheRecord = async () => {
     // deleteRowData(paramsForDelete)
     setOpenDeleteDialogeBox(false)
@@ -210,8 +185,6 @@ const KendoDataTables = ({
     }
   }
   const handleRowClick = (e) => {
-    console.log('22', e)
-
     // setRows(
     //   rows.map((r) => ({
     //     ...r,
@@ -336,76 +309,43 @@ const KendoDataTables = ({
       )}
       <div className='kendo-data-grid'>
         <Grid
-          data={filterBy(rows, filter)}
-          filterable={true}
+          data={rows}
           sortable
           dataItemKey='id'
           pageable={{ pageSizes, buttonCount: 5 }}
           editField='inEdit'
           editable='incell'
-          // onRowClick={handleRowClick}
+          onRowClick={handleRowClick}
           filter={filter}
+          filterable={true}
           onFilterChange={(e) => setFilter(e.filter)}
           onItemChange={itemChange}
           rowRender={rowRender}
-          cellClick={(e) => {
-            console.log('Cell clicked:', e)
-            if (e.field === 'remark') {
-              handleRemarkCellClick(e.dataItem)
-            }
-          }}
           // onCellClick={(e) => {
           //   if (e.field === 'remark') handleRemarkCellClick(e.dataItem)
           // }}
           resizable={true}
         >
-          {columns
-            .filter((col) => !hiddenFields.includes(col.field))
-            .map((col) => {
-              // const isColEditable = !!col.isEditable; // boolean from your JSON
-
-              const common = {
-                key: col.field,
-                field: col.field,
-                title: col.title,
-                width: col.width,
-                filterable: true,
-                editable: true,
-                cell: col.cell,
-              }
-
-              // numeric months
-              if (
-                col.editable &&
-                ['april', 'may', 'june' /*…*/].includes(col.field)
-              ) {
-                return <Column {...common} editor='numeric' key={col.field} />
-              }
-
-              // custom dropdown for normParameterId
-              if (col.field === 'normParameterId') {
-                return (
-                  <Column
-                    {...common}
-                    editCell={col.editCell}
-                    filterCell={col.filterCell}
-                    key={col.field}
-                  />
-                )
-              }
-              if (col.field === 'remark') {
-                return (
-                  <Column
-                    {...common}
-                    width={col.width}
-                    filterable
-                    editor={null}
-                  />
-                )
-              }
-              // default text editor
-              return <Column {...common} editor='text' key={col.field} />
-            })}
+          {columns.map((col) =>
+            col.field === 'normParameterId' ? (
+              <GridColumn
+                key={col.field}
+                field={col.field}
+                title={col.title || col.headerName}
+                width={col.width}
+                cells={{
+                  data: NormParameterIdCell,
+                }}
+              />
+            ) : (
+              <GridColumn
+                key={col.field}
+                field={col.field}
+                title={col.title || col.headerName}
+                width={col.width}
+              />
+            ),
+          )}
         </Grid>
       </div>
       {(permissions?.allActionOfBottomBtns ?? true) && (

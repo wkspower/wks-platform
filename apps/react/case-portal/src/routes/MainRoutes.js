@@ -40,6 +40,7 @@ import ProductionVolumeDataBasis from 'components/data-tables/Reports/Production
 import MonthwiseProduction from 'components/data-tables/Reports/MonthwiseProduction'
 import MonthwiseRawMaterial from 'components/data-tables/Reports/MonthwiseRawMaterial'
 import NormsHistorianBasis from 'components/data-tables/Reports/NormsHistorianBasis'
+import BusinessDemandKendo from 'components/kendo-data-tables/BusinessDemandKendo'
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
@@ -158,6 +159,10 @@ export const MainRoutes = (
           {
             path: 'business-demand',
             element: <BusinessDemand />,
+          },
+          {
+            path: 'business-demand-kendo',
+            element: <BusinessDemandKendo />,
           },
           {
             path: 'configuration',
