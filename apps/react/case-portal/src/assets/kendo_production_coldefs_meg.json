@@ -1,0 +1,136 @@
+[
+  {
+    "field": "idFromApi",
+    "title": "ID"
+  },
+  {
+    "field": "aopCaseId",
+    "title": "Case ID",
+    "width": 120,
+    "editable": false
+  },
+  {
+    "field": "normParametersFKId",
+    "title": "Particulars",
+    "editable": false,
+    "width": 175
+  },
+  {
+    "field": "april",
+    "title": "Apr",
+    "editable": false,
+    "width":120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "may",
+    "title":"May",
+    "editable": false,
+    "width":120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "june",
+    "title": "Jun",
+    "editable": false,
+    "width":120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "july",
+    "title": "Jul",
+    "editable": false,
+    "width":120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "august",
+    "title": "Aug",
+    "editable": false,
+    "width":120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "september",
+    "title": "Sep",
+    "editable": false,
+    "width":120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "october",
+    "title": "Oct",
+    "editable": false,
+    "width":120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "november",
+    "title": "Nov",
+    "editable": false,
+    "width":120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "december",
+    "title": "Dec",
+    "editable": false,
+    "width":120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "january",
+    "title": "Jan",
+    "editable": false,
+    "width":120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "february",
+    "title": "Feb",
+    "editable": false,
+    "width":120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "march",
+    "title": "Mar",
+    "editable": false,
+    "width":120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "avgTph",
+    "title": "AVG",
+    "minWidth": 150,
+    "editable": false
+  },
+  {
+    "field": "isEditable",
+    "title": "isEditable"
+  }
+]

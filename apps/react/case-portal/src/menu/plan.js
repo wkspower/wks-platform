@@ -94,15 +94,6 @@ const plan = {
         },
 
         {
-          id: 'product-demand',
-          title: i18n.t('menu.productDemand'),
-          type: 'item',
-          url: '/production-norms-plan/business-demand-kendo',
-          icon: icons.IconChartBar,
-          breadcrumbs: true,
-        },
-
-        {
           id: 'shutdown-plan',
           title: i18n.t('menu.shutdownPlan'),
           type: 'item',

@@ -7,21 +7,27 @@ import '../../kendo-data-grid.css'
 import {
   Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  MenuItem,
+  TextField,
 } from '../../../node_modules/@mui/material/index'
 import Notification from 'components/Utilities/Notification'
+import { GridColumn } from '../../../node_modules/@progress/kendo-react-grid/index'
 
 const KendoDataTables = ({
-  rows,
+  // setUpdatedRows = () => {},
+  rows = [],
+  // updatedRows = [],
   setRows,
   columns,
   loading = false,
   pageSizes = [10, 20, 50],
-  onRowChange,
+  // onRowChange,
   disableColor = false,
   permissions = {},
   setSnackbarOpen = () => {},
@@ -30,36 +36,95 @@ const KendoDataTables = ({
   unsavedChangesRef = { current: { unsavedRows: {}, rowsBeforeChange: {} } },
   setRemarkDialogOpen = () => {},
   currentRemark = '',
+  editedRows = [],
   setCurrentRemark = () => {},
   currentRowId = null,
   // modifiedCells = [],
+  NormParameterIdCell = () => {},
+  setModifiedCells = () => {},
   remarkDialogOpen = false,
+  handleDeleteSelected = () => {},
+  saveChanges = () => {},
+  // deleteRowData = () => {},
+  handleAddPlantSite = () => {},
   handleCalculate = () => {},
   fetchData = () => {},
   handleUnitChange = () => {},
-  deleteRowData = () => {},
-  handleAddPlantSite = () => {},
+  handleRemarkCellClick = () => {},
   selectedUsers = [],
-  allRedCell = [],
+  // allRedCell = [],
 }) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
-
-  const handleItemChange = (e) => {
+  // const [resizedColumns, setResizedColumns] = useState({})
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false)
+  // const [searchText, setSearchText] = useState('')
+  // const isFilterActive = false
+  const [selectedUnit, setSelectedUnit] = useState()
+  const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
+  // const [paramsForDelete, setParamsForDelete] = useState([])
+  // const closeDeleteDialogeBox = () => setOpenDeleteDialogeBox(false)
+  const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
+  // const localApiRef = useGridApiRef()
+  // const finalExternalApiRef = apiRef ?? localApiRef
+  // const handleSearchChange = (event) => {
+  //   setSearchText(event.target.value)
+  // }
+  // console.log(columns)
+  const rowRender = (trElement, props) => {
+    if (!props.dataItem.isEditable) {
+      return React.cloneElement(trElement, {
+        ...trElement.props,
+        className: (trElement.props.className || '')
+          .split(' ')
+          .concat('disabled-row')
+          .join(' '),
+      })
+    }
+    return trElement
+  }
+  const hiddenFields = [
+    'maintenanceId',
+    'id',
+    'plantFkId',
+    'aopCaseId',
+    'aopType',
+    'aopYear',
+    'avgTph',
+    'NormParameterMonthlyTransactionId',
+    'aopStatus',
+    'idFromApi',
+    'isEditable',
+    'period',
+  ]
+  // //  const toggleColumn = field => {
+  // //   setColumnVisibility(vis => ({
+  //     ...vis,
+  //     [field]: !vis[field],
+  //   }));
+  // };
+  // cell update
+  const itemChange = (e) => {
+    // console.log(rows)
     const updated = rows.map((r) =>
       r.id === e.dataItem.id ? { ...r, [e.field]: e.value } : r,
     )
-    onRowChange?.(updated, e)
+    console.log(updated)
+    setModifiedCells(updated)
+    setRows(updated)
+
+    // onRowChange(e.dataItem, e.field, e.value)
   }
-  const rowRender = disableColor
-    ? (trElement, props) => {
-        const shouldDisable = props.dataItem.status === 'inactive'
-        return React.cloneElement(trElement, {
-          ...trElement.props,
-          className: `${trElement.props.className || ''} ${shouldDisable ? 'disabled-row' : ''}`,
-        })
-      }
-    : undefined
+  // console.log(unsavedChangesRef)
+  // const rowRender = disableColor
+  //   ? (trElement, props) => {
+  //       const shouldDisable = props.dataItem.status === 'inactive'
+  //       return React.cloneElement(trElement, {
+  //         ...trElement.props,
+  //         className: `${trElement.props.className || ''} ${shouldDisable ? 'disabled-row' : ''}`,
+  //       })
+  //     }
+  //   : undefined
 
   const handleRemarkSave = () => {
     setRows((prevRows) => {
@@ -88,37 +153,79 @@ const KendoDataTables = ({
 
     setRemarkDialogOpen(false)
   }
+  // console.log(rows)
+  // console.log(columns)
+  // const handleAddRow = () => {
+  //   if (isButtonDisabled) return
+  //   setIsButtonDisabled(true)
+  //   const newRowId = rows.length
+  //     ? Math.max(...rows.map((row) => row.id)) + 1
+  //     : 1
+  //   const newRow = {
+  //     id: newRowId,
+  //     isNew: true,
+  //     ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])),
+  //   }
 
-  const handleAddRow = () => {
-    if (isButtonDisabled) return
+  //   setRows((prevRows) => [newRow, ...prevRows])
+  //   onAddRow?.(newRow)
+  //   // setProduct('')
+  //   // setRowModesModel((oldModel) => ({
+  //   //   ...oldModel,
+  //   //   [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
+  //   // }))
+  //   focusFirstField()
+  //   setTimeout(() => {
+  //     setIsButtonDisabled(false)
+  //   }, 500)
+  // }
+  const saveConfirmation = async () => {
+    saveChanges()
+    setOpenSaveDialogeBox(false)
+  }
+  // const handleDeleteClick = async (id, params) => {
+  //   setParamsForDelete(params)
+  //   setOpenDeleteDialogeBox(true)
+  // }
+  const deleteTheRecord = async () => {
+    // deleteRowData(paramsForDelete)
+    setOpenDeleteDialogeBox(false)
+  }
+  const saveModalOpen = async () => {
     setIsButtonDisabled(true)
-    const newRowId = rows.length
-      ? Math.max(...rows.map((row) => row.id)) + 1
-      : 1
-    const newRow = {
-      id: newRowId,
-      isNew: true,
-      ...Object.fromEntries(initialColumns.map((col) => [col.field, ''])),
-    }
-
-    setRows((prevRows) => [newRow, ...prevRows])
-    onAddRow?.(newRow)
-    // setProduct('')
-    // setRowModesModel((oldModel) => ({
-    //   ...oldModel,
-    //   [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
-    // }))
-    focusFirstField()
+    setOpenSaveDialogeBox(true)
     setTimeout(() => {
       setIsButtonDisabled(false)
     }, 500)
   }
-
-  const handleDeleteClick = async (id, params) => {
-    setParamsForDelete(params)
-    setOpenDeleteDialogeBox(true)
+  const handleCalculateBtn = async () => {
+    setIsButtonDisabled(true)
+    handleCalculate()
+    setTimeout(() => {
+      setIsButtonDisabled(false)
+    }, 500)
   }
+  const handleRefresh = async () => {
+    try {
+      fetchData()
+    } catch (error) {
+      console.error('Error saving refresh data:', error)
+    }
+  }
+  const handleRowClick = (e) => {
+    console.log('22', e)
 
+    // setRows(
+    //   rows.map((r) => ({
+    //     ...r,
+    //     inEdit: r.id === e.dataItem.id, // only that row goes into edit mode
+    //   })),
+    // )
+    if (columns.some((col) => col.field === 'remark')) {
+      handleRemarkCellClick(e.dataItem)
+    }
+  }
+  const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
   return (
     <div style={{ position: 'relative' }}>
       {loading && (
@@ -128,35 +235,157 @@ const KendoDataTables = ({
           <div className='k-loading-color' />
         </div>
       )}
+      {(permissions?.allAction ?? true) && (
+        <Box className='action-box'>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              width: '100%', // make sure container is full width
+              p: 1,
+              gap: 1,
+            }}
+          >
+            {permissions?.UnitToShow && (
+              <Chip
+                label={permissions.UnitToShow}
+                variant='outlined'
+                className='unit-chip'
+              />
+            )}
+            {/* {permissions?.showCalculate && (
+              <Tooltip title='Calculate'>
+                <span>
+                  <Button
+                    variant='contained'
+                    onClick={handleCalculateBtn}
+                    disabled={isButtonDisabled}
+                    sx={{
+                      minWidth: '40px',
+                      padding: '8px',
+                      backgroundColor: '#0100cb',
+                      '&:hover': {
+                        backgroundColor: '#0100cb',
+                        opacity: 0.9,
+                      },
+                    }}
+                  >
+                    <CalculateOutlinedIcon sx={{ color: '#fff' }} />
+                  </Button>
+                </span>
+              </Tooltip>
+            )} */}
 
+            {permissions?.showCalculate && (
+              <Button
+                variant='contained'
+                onClick={handleCalculateBtn}
+                disabled={isButtonDisabled}
+                className='btn-save'
+              >
+                Calculate
+              </Button>
+            )}
+            {permissions?.showRefresh && (
+              <Button
+                variant='contained'
+                onClick={handleCalculateBtn}
+                disabled={isButtonDisabled}
+                className='btn-save'
+              >
+                Refresh
+              </Button>
+            )}
+
+            {permissions?.showRefreshBtn && false && (
+              <Button
+                variant='contained'
+                onClick={handleRefresh}
+                className='btn-save'
+              >
+                Refresh
+              </Button>
+            )}
+
+            {permissions?.showUnit && (
+              <TextField
+                select
+                value={selectedUnit || permissions?.units?.[0]}
+                onChange={(e) => {
+                  setSelectedUnit(e.target.value)
+                  handleUnitChange(e.target.value)
+                }}
+                sx={{ width: '150px', backgroundColor: '#FFFFFF' }}
+                variant='outlined'
+                label='Select UOM'
+              >
+                <MenuItem value='' disabled>
+                  Select UOM
+                </MenuItem>
+
+                {/* Render the correct unit options dynamically */}
+                {permissions?.units.map((unit) => (
+                  <MenuItem key={unit} value={unit}>
+                    {unit}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
+
+            {/* </Box> */}
+          </Box>
+        </Box>
+      )}
       <div className='kendo-data-grid'>
         <Grid
           data={filterBy(rows, filter)}
-          filterable={true}
           sortable
           dataItemKey='id'
           pageable={{ pageSizes, buttonCount: 5 }}
           editField='inEdit'
+          editable='incell'
+          // onRowClick={handleRowClick}
           filter={filter}
+          filterable={true}
           onFilterChange={(e) => setFilter(e.filter)}
-          onItemChange={handleItemChange}
-          // headerRowHeight={showHeader ? 35 : 0}
+          onItemChange={itemChange}
           rowRender={rowRender}
+          cellClick={(e) => {
+            console.log('Cell clicked:', e)
+            if (e.field === 'remark') {
+              handleRemarkCellClick(e.dataItem)
+            }
+          }}
+          // onCellClick={(e) => {
+          //   if (e.field === 'remark') handleRemarkCellClick(e.dataItem)
+          // }}
           resizable={true}
         >
-          {columns.map(
-            ({ field, title, width, cell, format, filterable = true }) => (
-              <Column
-                key={field}
-                field={field}
-                title={title}
-                width={width}
-                filterable={filterable}
-                cell={cell}
-                format={format}
-              />
-            ),
-          )}
+          {columns
+            .filter((col) => !hiddenFields.includes(col.field))
+            .map((col) =>
+              col.field === 'normParameterId' ||
+              col.field === 'NormParametersId' ||
+              col.field === 'normParametersFKId' ? (
+                <GridColumn
+                  key={col.field}
+                  field={col.field}
+                  title={col.title || col.headerName}
+                  width={col.width}
+                  cells={{
+                    data: NormParameterIdCell,
+                  }}
+                />
+              ) : (
+                <GridColumn
+                  key={col.field}
+                  field={col.field}
+                  title={col.title || col.headerName}
+                  width={col.width}
+                />
+              ),
+            )}
         </Grid>
       </div>
       {(permissions?.allActionOfBottomBtns ?? true) && (
@@ -171,7 +400,7 @@ const KendoDataTables = ({
             <Button
               variant='contained'
               className='btn-save'
-              onClick={handleAddRow}
+              // onClick={handleAddRow}
               disabled={isButtonDisabled}
             >
               Add Item
@@ -256,7 +485,7 @@ const KendoDataTables = ({
 
       <Dialog
         open={openDeleteDialogeBox}
-        onClose={closeDeleteDialogeBox}
+        onClose={() => setOpenDeleteDialogeBox(false)}
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
       >
@@ -268,13 +497,7 @@ const KendoDataTables = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDeleteDialogeBox(false)}>Cancel</Button>
-          <Button
-            onClick={() => {
-              deleteRowData(paramsForDelete)
-              setOpenDeleteDialogeBox(false)
-            }}
-            autoFocus
-          >
+          <Button onClick={deleteTheRecord} autoFocus>
             Delete
           </Button>
         </DialogActions>
@@ -332,32 +555,6 @@ const KendoDataTables = ({
       </Dialog>
     </div>
   )
-}
-
-KendoDataTables.propTypes = {
-  rows: PropTypes.array.isRequired,
-  disableColor: PropTypes.bool,
-  columns: PropTypes.arrayOf(
-    PropTypes.shape({
-      field: PropTypes.string.isRequired,
-      title: PropTypes.string,
-      width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      cell: PropTypes.func,
-      filterable: PropTypes.bool,
-    }),
-  ).isRequired,
-  loading: PropTypes.bool,
-  pageSizes: PropTypes.arrayOf(PropTypes.number),
-  onAddRow: PropTypes.func,
-  onDeleteRow: PropTypes.func,
-  onRowChange: PropTypes.func,
-  toolbarButtons: PropTypes.arrayOf(
-    PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      onClick: PropTypes.func.isRequired,
-      icon: PropTypes.string,
-    }),
-  ),
 }
 
 export default KendoDataTables

@@ -1,0 +1,132 @@
+[
+  {
+    "field": "Particulars",
+    "title": "Type",
+    "width": 120,
+    "groupable": true
+  },
+  {
+    "field": "NormParametersId",
+    "title": "Particulars",
+    "width": 175,
+    "editable": false
+  },
+  {
+    "field": "UOM",
+    "title": "UOM / MT",
+    "width": 90,
+    "editable": false
+  },
+  {
+    "field": "april",
+    "title": "Apr",
+    "editable": false,
+    "width": 120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "may",
+    "title": "May",
+    "editable": false,
+    "width": 120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "june",
+    "title": "Jun",
+    "editable": false,
+    "width": 120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "july",
+    "title": "Jul",
+    "editable": false,
+    "width": 120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "aug",
+    "title": "Aug",
+    "editable": false,
+    "width": 120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "sep",
+    "title": "Sep",
+    "editable": false,
+    "width": 120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "oct",
+    "title": "Oct",
+    "editable": false,
+    "width": 120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "nov",
+    "title": "Nov",
+    "editable": false,
+    "width": 120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "dec",
+    "title": "Dec",
+    "editable": false,
+    "width": 120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "jan",
+    "title": "Jan",
+    "editable": false,
+    "width": 120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "feb",
+    "title": "Feb",
+    "editable": false,
+    "width": 120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "march",
+    "title": "Mar",
+    "editable": false,
+    "width": 120,
+
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "isEditable",
+    "title": "isEditable"
+  }
+]

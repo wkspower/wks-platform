@@ -1,0 +1,121 @@
+[
+  { "field": "idFromApi", "title": "ID" },
+  {
+    "field": "aopCaseId",
+    "title": "Case ID",
+    "width": 120,
+    "editable": false
+  },
+  { "field": "aopType", "title": "Type", "width": 80 },
+  { "field": "aopYear", "title": "Year", "width": 80 },
+  { "field": "plantFkId", "title": "Plant ID", "width": 80 },
+  {
+    "field": "normParametersFKId",
+    "title": "Particulars/Grade",
+    "editable": false,
+    "width": 125
+  },
+  {
+    "field": "april",
+    "title": "4",
+    "editable": false,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "may",
+    "title": "5",
+    "editable": false,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "june",
+    "title": "6",
+    "editable": false,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "july",
+    "title": "7",
+    "editable": false,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "aug",
+    "title": "8",
+    "editable": false,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "sep",
+    "title": "9",
+    "editable": false,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "oct",
+    "title": "10",
+    "editable": false,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "nov",
+    "title": "11",
+    "editable": false,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "dec",
+    "title": "12",
+    "editable": false,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "jan",
+    "title": "1",
+    "editable": false,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "feb",
+    "title": "2",
+    "editable": false,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "march",
+    "title": "3",
+    "editable": false,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+
+  {
+    "field": "isEditable",
+    "title": "isEditable"
+  },
+
+  { "field": "aopStatus", "title": "aopStatus", "editable": false }
+]

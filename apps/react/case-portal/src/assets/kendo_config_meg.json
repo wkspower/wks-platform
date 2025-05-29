@@ -1,0 +1,146 @@
+[
+  {
+    "field": "Particulars",
+    "title": "Type",
+    "width": 125,
+    "groupable": true,
+    "headerClass": "bold-header",
+    "filterable": "false"
+  },
+  {
+    "field": "normParameterFKId",
+    "title": "Particulars",
+    "editable": false,
+    "width": 180,
+    "valueGetter": "defaultValueGetter",
+    "valueFormatter": "productDisplayNameFormatter",
+    "renderEditCell": "renderNormParameterSelectCell"
+  },
+  {
+    "field": "UOM",
+    "title": "UOM",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "apr",
+    "title": 4,
+    "width": 120,
+    "editable": true,
+    "renderEditCell": "NumericInputOnly",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "may",
+    "title": 5,
+    "width": 120,
+    "editable": true,
+    "renderEditCell": "NumericInputOnly",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "jun",
+    "title": 6,
+    "width": 120,
+    "editable": true,
+    "renderEditCell": "NumericInputOnly",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "jul",
+    "title": 7,
+    "width": 120,
+    "editable": true,
+    "renderEditCell": "NumericInputOnly",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "aug",
+    "title": 8,
+    "width": 120,
+    "editable": true,
+    "renderEditCell": "NumericInputOnly",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "sep",
+    "title": 9,
+    "width": 120,
+    "editable": true,
+    "renderEditCell": "NumericInputOnly",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "oct",
+    "title": 10,
+    "width": 120,
+    "editable": true,
+    "renderEditCell": "NumericInputOnly",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "nov",
+    "title": 11,
+    "width": 120,
+    "editable": true,
+    "renderEditCell": "NumericInputOnly",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "dec",
+    "title": 12,
+    "width": 120,
+    "editable": true,
+    "renderEditCell": "NumericInputOnly",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "jan",
+    "title": 1,
+    "width": 120,
+    "editable": true,
+    "renderEditCell": "NumericInputOnly",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "feb",
+    "title": 2,
+    "width": 120,
+    "editable": true,
+    "renderEditCell": "NumericInputOnly",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "mar",
+    "title": 3,
+    "width": 120,
+    "editable": true,
+    "renderEditCell": "NumericInputOnly",
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "remarks",
+    "title": "Remark",
+    "width": 150,
+    "editable": false,
+    "renderCell": "renderRemarkCell"
+  },
+
+  {
+    "field": "isEditable",
+    "title": "isEditable"
+  }
+]

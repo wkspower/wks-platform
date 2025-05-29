@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux'
 import vertical_meg_coldefs_bd from '../../../assets/kendo_businessdata_coldefs.json'
-import vertical_pe_coldefs_bd from '../../../assets/vertical_pe_coldefs_bd.json'
+import vertical_pe_coldefs_bd from '../../../assets/kendo_vertical_pe_coldefs_bd.json'
 import NumericInputOnly from 'utils/NumericInputOnly'
 import Tooltip from '@mui/material/Tooltip'
 import { truncateRemarks } from 'utils/remarksUtils'
@@ -13,10 +13,10 @@ const getEnhancedColDefs = ({
   headerMap,
   handleRemarkCellClick,
 }) => {
-  //   const dataGridStore = useSelector((state) => state.dataGridStore)
-  //   const { verticalChange } = dataGridStore
-  //   const vertName = verticalChange?.selectedVertical
-  //   const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { verticalChange } = dataGridStore
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
   //   console.log(allProducts)
   //   const getProductDisplayName = (id) => {
   //     console.log(id)
@@ -29,7 +29,10 @@ const getEnhancedColDefs = ({
     return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
   }
 
-  const enhancedColDefs = vertical_meg_coldefs_bd.map((col) => {
+  const enhancedColDefs =
+    lowerVertName === 'meg'
+      ? vertical_meg_coldefs_bd
+      : vertical_pe_coldefs_bd.map((col) => {
     if (col.field === 'remark') {
       return {
         ...col,

@@ -22,6 +22,7 @@ import MuiAccordionSummary from '@mui/material/AccordionSummary'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Box, Typography } from '../../../../node_modules/@mui/material/index'
 import { styled } from '@mui/material/styles'
+import FormattedNumberTooltip from 'components/Utilities/FormattedNumberTooltip'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -331,12 +332,13 @@ const NormalOpNormsScreen = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToFiveDecimals(params.value)}</span>
-        </Tooltip>
+        <FormattedNumberTooltip value={params?.value} />
+        //   <Tooltip
+        //     title={params.value != null ? params.value.toString() : ''}
+        //     arrow
+        //   >
+        //     <span>{formatValueToFiveDecimals(params.value)}</span>
+        //   </Tooltip>
       ),
     },
     {
@@ -347,6 +349,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'june',
@@ -356,6 +359,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'july',
@@ -365,6 +369,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
 
     {
@@ -375,6 +380,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'september',
@@ -384,6 +390,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'october',
@@ -393,6 +400,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'november',
@@ -402,6 +410,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'december',
@@ -411,6 +420,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'january',
@@ -420,6 +430,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'february',
@@ -429,6 +440,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'march',
@@ -438,6 +450,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'remarks',
@@ -573,6 +586,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
 
     {
@@ -583,6 +597,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'Jun',
@@ -592,6 +607,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'Jul',
@@ -601,6 +617,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
 
     {
@@ -611,6 +628,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'Sep',
@@ -620,6 +638,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'Oct',
@@ -629,6 +648,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'Nov',
@@ -638,6 +658,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'Dec',
@@ -647,6 +668,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'Jan',
@@ -656,6 +678,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'Feb',
@@ -665,6 +688,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'Mar',
@@ -674,6 +698,7 @@ const NormalOpNormsScreen = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
+      renderCell: (params) => <FormattedNumberTooltip value={params?.value} />,
     },
     {
       field: 'idFromApi',

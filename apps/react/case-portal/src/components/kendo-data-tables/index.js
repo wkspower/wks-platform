@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { Grid, GridColumn as Column } from '@progress/kendo-react-grid'
+import { Grid, GridColumn } from '@progress/kendo-react-grid'
 import { filterBy } from '@progress/kendo-data-query'
 import '@progress/kendo-theme-default/dist/all.css'
-import PropTypes from 'prop-types'
+// import PropTypes from 'prop-types'
 import '../../kendo-data-grid.css'
 import {
   Box,
@@ -17,7 +17,6 @@ import {
   TextField,
 } from '../../../node_modules/@mui/material/index'
 import Notification from 'components/Utilities/Notification'
-import { GridColumn } from '../../../node_modules/@progress/kendo-react-grid/index'
 
 const KendoDataTables = ({
   // setUpdatedRows = () => {},
@@ -28,7 +27,7 @@ const KendoDataTables = ({
   loading = false,
   pageSizes = [10, 20, 50],
   // onRowChange,
-  disableColor = false,
+  // disableColor = false,
   permissions = {},
   setSnackbarOpen = () => {},
   snackbarData = { message: '', severity: 'info' },
@@ -36,7 +35,7 @@ const KendoDataTables = ({
   unsavedChangesRef = { current: { unsavedRows: {}, rowsBeforeChange: {} } },
   setRemarkDialogOpen = () => {},
   currentRemark = '',
-  editedRows = [],
+  // editedRows = [],
   setCurrentRemark = () => {},
   currentRowId = null,
   // modifiedCells = [],
@@ -153,12 +152,40 @@ const KendoDataTables = ({
 
     setRemarkDialogOpen(false)
   }
+  // console.log(rows)
+  // console.log(columns)
+  const handleAddRow = () => {
+    if (isButtonDisabled) return
+    setIsButtonDisabled(true)
+    const newRowId = rows.length
+      ? Math.max(...rows.map((row) => row.id)) + 1
+      : 1
+    const newRow = {
+      id: newRowId,
+      isNew: true,
+      ...Object.fromEntries(columns.map((col) => [col.field, ''])),
+    }
 
+    setRows((prevRows) => [newRow, ...prevRows])
+    // onAddRow?.(newRow)
+    // setProduct('')
+    // setRowModesModel((oldModel) => ({
+    //   ...oldModel,
+    //   [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
+    // }))
+    // focusFirstField()
+    setTimeout(() => {
+      setIsButtonDisabled(false)
+    }, 500)
+  }
   const saveConfirmation = async () => {
     saveChanges()
     setOpenSaveDialogeBox(false)
   }
-
+  // const handleDeleteClick = async (id, params) => {
+  //   setParamsForDelete(params)
+  //   setOpenDeleteDialogeBox(true)
+  // }
   const deleteTheRecord = async () => {
     // deleteRowData(paramsForDelete)
     setOpenDeleteDialogeBox(false)
@@ -185,6 +212,8 @@ const KendoDataTables = ({
     }
   }
   const handleRowClick = (e) => {
+    console.log('22', e)
+
     // setRows(
     //   rows.map((r) => ({
     //     ...r,
@@ -309,7 +338,7 @@ const KendoDataTables = ({
       )}
       <div className='kendo-data-grid'>
         <Grid
-          data={rows}
+          data={filterBy(rows, filter)}
           sortable
           dataItemKey='id'
           pageable={{ pageSizes, buttonCount: 5 }}
@@ -321,31 +350,40 @@ const KendoDataTables = ({
           onFilterChange={(e) => setFilter(e.filter)}
           onItemChange={itemChange}
           rowRender={rowRender}
+          cellClick={(e) => {
+            console.log('Cell clicked:', e)
+            if (e.field === 'remark') {
+              handleRemarkCellClick(e.dataItem)
+            }
+          }}
           // onCellClick={(e) => {
           //   if (e.field === 'remark') handleRemarkCellClick(e.dataItem)
           // }}
           resizable={true}
         >
-          {columns.map((col) =>
-            col.field === 'normParameterId' ? (
-              <GridColumn
-                key={col.field}
-                field={col.field}
-                title={col.title || col.headerName}
-                width={col.width}
-                cells={{
-                  data: NormParameterIdCell,
-                }}
-              />
-            ) : (
-              <GridColumn
-                key={col.field}
-                field={col.field}
-                title={col.title || col.headerName}
-                width={col.width}
-              />
-            ),
-          )}
+          {columns
+            .filter((col) => !hiddenFields.includes(col.field))
+            .map((col) =>
+              col.field === 'normParameterId' ||
+              col.field === 'normParametersFKId' ? (
+                <GridColumn
+                  key={col.field}
+                  field={col.field}
+                  title={col.title || col.headerName}
+                  width={col.width}
+                  cells={{
+                    data: NormParameterIdCell,
+                  }}
+                />
+              ) : (
+                <GridColumn
+                  key={col.field}
+                  field={col.field}
+                  title={col.title || col.headerName}
+                  width={col.width}
+                />
+              ),
+            )}
         </Grid>
       </div>
       {(permissions?.allActionOfBottomBtns ?? true) && (
@@ -360,7 +398,7 @@ const KendoDataTables = ({
             <Button
               variant='contained'
               className='btn-save'
-              // onClick={handleAddRow}
+              onClick={handleAddRow}
               disabled={isButtonDisabled}
             >
               Add Item
@@ -387,7 +425,7 @@ const KendoDataTables = ({
               disabled={isCreatingCase || !showCreateCasebutton}
               className='btn-save'
             >
-              {isCreatingCase ? 'Submitting…' : 'Submit'}
+              {isCreatingCase ? 'Submittingâ€¦' : 'Submit'}
             </Button>
           )} */}
 

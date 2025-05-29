@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-import ASDataGrid from '../data-tables/ASDataGrid'
+// import ASDataGrid from '../data-tables/ASDataGrid'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import getEnhancedProductionColDefs from '../data-tables/CommonHeader/ProductionVolumeHeader'
+// import getEnhancedProductionColDefs from '../data-tables/CommonHeader/ProductionVolumeHeader'
+import getEnhancedProductionColDefs from '../data-tables/CommonHeader/Kendo_ProductionVolumeHeader'
 
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { Typography } from '../../../node_modules/@mui/material/index'
+import KendoDataTables from './index'
 
 const ProductionvolumeData = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -472,7 +474,7 @@ const ProductionvolumeData = ({ permissions }) => {
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Data Refresh Falied!',
+          message: 'Data Refresh Failed!',
           severity: 'error',
         })
       }
@@ -525,6 +527,13 @@ const ProductionvolumeData = ({ permissions }) => {
     },
     isOldYear,
   )
+  const NormParameterIdCell = (props) => {
+    const productId = props.dataItem.normParametersFKId
+    const product = allProducts.find((p) => p.id === productId)
+    const displayName = product?.displayName || ''
+    // console.log(displayName)
+    return <td>{displayName}</td>
+  }
 
   return (
     <div>
@@ -534,7 +543,7 @@ const ProductionvolumeData = ({ permissions }) => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <ASDataGrid
+      <KendoDataTables
         modifiedCells={modifiedCells}
         setRows={setRows}
         columns={productionColumns}
@@ -551,15 +560,10 @@ const ProductionvolumeData = ({ permissions }) => {
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
+        NormParameterIdCell={NormParameterIdCell}
         setSnackbarData={setSnackbarData}
         apiRef={apiRef}
-        // deleteId={deleteId}
-        // setDeleteId={setDeleteId}
-        // setOpen1={setOpen1}
-        // open1={open1}
-        // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
-        // onRowEditStop={handleRowEditStop}
         onProcessRowUpdateError={onProcessRowUpdateError}
         handleUnitChange={handleUnitChange}
         experimentalFeatures={{ newEditingApi: true }}
@@ -571,6 +575,8 @@ const ProductionvolumeData = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         handleCalculate={handleCalculate}
         permissions={adjustedPermissions}
+        selectedUnit={selectedUnit}
+        setSelectedUnit={setSelectedUnit}
       />
 
       {!permissions?.hideSummary && (
@@ -578,7 +584,7 @@ const ProductionvolumeData = ({ permissions }) => {
           <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
             Percentage Summary
           </Typography>
-          <ASDataGrid
+          <KendoDataTables
             setRows={setRows2}
             columns={productionColumns}
             rows={rows2}
@@ -598,14 +604,9 @@ const ProductionvolumeData = ({ permissions }) => {
             setSnackbarOpen={setSnackbarOpen}
             setSnackbarData={setSnackbarData}
             apiRef={apiRef}
-            // deleteId={deleteId}
-            // setDeleteId={setDeleteId}
-            // setOpen1={setOpen1}
-            // open1={open1}
-            // handleDeleteClick={handleDeleteClick}
             fetchData={fetchData}
-            // onRowEditStop={handleRowEditStop}
             onProcessRowUpdateError={onProcessRowUpdateError}
+            NormParameterIdCell={NormParameterIdCell}
             handleUnitChange={handleUnitChange}
             experimentalFeatures={{ newEditingApi: true }}
             remarkDialogOpen={remarkDialogOpen}
@@ -616,6 +617,8 @@ const ProductionvolumeData = ({ permissions }) => {
             unsavedChangesRef={unsavedChangesRef}
             handleCalculate={handleCalculate}
             permissions={{ customHeight: defaultCustomHeight }}
+            selectedUnit={selectedUnit}
+            setSelectedUnit={setSelectedUnit}
           />
         </>
       )}

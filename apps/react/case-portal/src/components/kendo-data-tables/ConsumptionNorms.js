@@ -1,11 +1,11 @@
 import { DataService } from 'services/DataService'
-import DataGridTable from './ASDataGrid'
+//import DataGridTable from './ASDataGrid'
 import React, { useEffect, useState } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
-import getEnhancedColDefs from './CommonHeader/consumptionHeader'
+import getEnhancedColDefs from '../data-tables/CommonHeader/kendoconsumptionHeader'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
@@ -29,6 +29,7 @@ import MuiAccordionSummary, {
   AccordionSummaryProps,
 } from '@mui/material/AccordionSummary'
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
+import KendoDataTables from './kendo-inprogress'
 
 // Customized Accordion
 const CustomAccordion = styled((props) => (
@@ -61,7 +62,7 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
   backgroundColor: '#F2F3F8',
 }))
 
-const NormalOpNormsScreen = () => {
+const ConsumptionNorms = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [summary, setSummary] = useState('')
 
@@ -443,6 +444,7 @@ const NormalOpNormsScreen = () => {
       setCalculatebtnClicked(false)
     }
   }
+
   const getAopSummary = async () => {
     setLoading(true)
     try {
@@ -686,6 +688,13 @@ const NormalOpNormsScreen = () => {
     console.log(params)
     return params.row.isEditable
   }
+  const NormParameterIdCell = (props) => {
+    const productId = props.dataItem.NormParametersId
+    const product = allProducts.find((p) => p.id === productId)
+    const displayName = product?.displayName || ''
+    console.log(displayName)
+    return <td>{displayName}</td>
+  }
 
   return (
     <div>
@@ -722,11 +731,12 @@ const NormalOpNormsScreen = () => {
                   borderBottom: 'none',
                 }}
               >
-                <DataGridTable
+                <KendoDataTables
                   autoHeight={true}
                   modifiedCells={modifiedCells}
                   columns={productionColumns}
                   isCellEditable={isCellEditable}
+                  NormParameterIdCell={NormParameterIdCell}
                   rows={rows}
                   setRows={setRows}
                   getRowId={(row) => row.id}
@@ -838,4 +848,4 @@ const NormalOpNormsScreen = () => {
   )
 }
 
-export default NormalOpNormsScreen
+export default ConsumptionNorms

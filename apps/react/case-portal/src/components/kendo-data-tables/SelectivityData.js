@@ -1,5 +1,5 @@
 import { DataService } from 'services/DataService'
-import ASDataGrid from './ASDataGrid'
+// import ASDataGrid from './ASDataGrid'
 import React, { useEffect, useState } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
@@ -8,8 +8,10 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
-import getEnhancedAOPColDefs from './CommonHeader/ConfigHeader'
+// import getEnhancedAOPColDefs from './CommonHeader/ConfigHeader'
 import { Box } from '../../../node_modules/@mui/material/index'
+import KendoDataTables from './index'
+import getEnhancedAOPColDefs from 'components/data-tables/CommonHeader/ConfigHeader'
 
 const SelectivityData = (props) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -47,10 +49,6 @@ const SelectivityData = (props) => {
     rowsBeforeChange: {},
   })
 
-  const onRowModesModelChange = (newRowModesModel) => {
-    setRowModesModel(newRowModesModel)
-  }
-
   const handleRemarkCellClick = (row) => {
     // if (!row?.isEditable) return
 
@@ -59,48 +57,18 @@ const SelectivityData = (props) => {
     setRemarkDialogOpen(true)
   }
 
-  const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    const rowId = newRow.id
-    const updatedFields = []
-    for (const key in newRow) {
-      if (
-        Object.prototype.hasOwnProperty.call(newRow, key) &&
-        newRow[key] !== oldRow[key]
-      ) {
-        updatedFields.push(key)
-      }
-    }
-
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-    }
-    props.setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === newRow.id ? { ...newRow, isNew: false } : row,
-      ),
-    )
-    if (updatedFields.length > 0) {
-      setModifiedCells((prevModifiedCells) => ({
-        ...prevModifiedCells,
-        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-      }))
-    }
-    return newRow
-  }, [])
-
   const saveChanges = React.useCallback(async () => {
-    const rowsInEditMode = Object.keys(rowModesModel).filter(
-      (id) => rowModesModel[id]?.mode === 'edit',
-    )
+    // const rowsInEditMode = Object.keys(rowModesModel).filter(
+    //   (id) => rowModesModel[id]?.mode === 'edit',
+    // )
 
-    rowsInEditMode.forEach((id) => {
-      apiRef.current.stopRowEditMode({ id })
-    })
+    // rowsInEditMode.forEach((id) => {
+    //   apiRef.current.stopRowEditMode({ id })
+    // })
     setTimeout(() => {
       try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
-
+        let newRows = modifiedCells.filter((row) => row.isGroupHeader !== true)
+        var data = Object.values(newRows)
         if (data.length === 0) {
           setSnackbarOpen(true)
           setSnackbarData({
@@ -113,16 +81,16 @@ const SelectivityData = (props) => {
 
         // console.log(props?.configType)
         if (props?.configType !== 'grades') {
-          const requiredFields = ['remarks']
-          const validationMessage = validateFields(data, requiredFields)
-          if (validationMessage) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: validationMessage,
-              severity: 'error',
-            })
-            return
-          }
+          // const requiredFields = ['remarks']
+          // const validationMessage = validateFields(data, requiredFields)
+          // if (validationMessage) {
+          //   setSnackbarOpen(true)
+          //   setSnackbarData({
+          //     message: validationMessage,
+          //     severity: 'error',
+          //   })
+          //   return
+          // }
           saveCatalystData(data)
         } else {
           handleUpdate(data)
@@ -370,20 +338,15 @@ const SelectivityData = (props) => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <ASDataGrid
+      <KendoDataTables
         modifiedCells={modifiedCells}
+        setModifiedCells={setModifiedCells}
         columns={productionColumns}
         rows={props?.rows}
         setRows={props?.setRows}
         title='Configuration'
         isCellEditable={isCellEditable}
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
-        processRowUpdate={processRowUpdate}
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={onRowModesModelChange}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
@@ -401,18 +364,6 @@ const SelectivityData = (props) => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         permissions={adjustedPermissions}
-
-        // permissions={{
-        //   showAction: false,
-        //   addButton: false,
-        //   deleteButton: false,
-        //   editButton: false,
-        //   showUnit: false,
-        //   saveWithRemark: true,
-        //   saveBtn: true,
-        //   customHeight:
-        //     lowerVertName === 'meg' ? undefined : props.defaultCustomHeight,
-        // }}
       />
     </Box>
   )

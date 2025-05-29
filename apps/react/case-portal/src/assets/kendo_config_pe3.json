@@ -1,0 +1,36 @@
+[
+  {
+    "field": "Particulars",
+    "title": "Constant",
+    "width": 100,
+    "groupable": true,
+    "flex": 1
+  },
+  {
+    "field": "Particulars2",
+    "title": "Type",
+    "width": 125,
+    "groupable": true,
+    "flex": 1
+  },
+  {
+    "field": "normParameterFKId",
+    "title": "Particulars",
+    "editable": false,
+    "width": 160
+  },
+  {
+    "field": "apr",
+    "title": "Values",
+    "editable": true,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "remarks",
+    "title": "Remark",
+    "width": 250,
+    "editable": false,
+    "renderCell": "renderRemarkCell"
+  }
+]

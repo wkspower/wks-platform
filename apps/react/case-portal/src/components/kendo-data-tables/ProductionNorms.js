@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
 
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import ASDataGrid from './ASDataGrid'
+// import ASDataGrid from './ASDataGrid'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -12,9 +12,10 @@ import { useSelector } from 'react-redux'
 // import NumericCellEditor from 'utils/NumericCellEditor'
 // import NumericInputOnly from 'utils/NumericInputOnly'
 import { validateFields } from 'utils/validationUtils'
-import getEnhancedColDefs from './CommonHeader/ProductionAopHeader'
+import getEnhancedColDefs from '../data-tables/CommonHeader/kendo_ProductionAopHeader'
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
+import KendoDataTables from './index'
 
 const ProductionNorms = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -62,41 +63,41 @@ const ProductionNorms = ({ permissions }) => {
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
-  const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    const rowId = newRow.id
-    const updatedFields = []
-    for (const key in newRow) {
-      if (
-        Object.prototype.hasOwnProperty.call(newRow, key) &&
-        newRow[key] !== oldRow[key]
-      ) {
-        updatedFields.push(key)
-      }
-    }
+  // const processRowUpdate = React.useCallback((newRow, oldRow) => {
+  //   const rowId = newRow.id
+  //   const updatedFields = []
+  //   for (const key in newRow) {
+  //     if (
+  //       Object.prototype.hasOwnProperty.call(newRow, key) &&
+  //       newRow[key] !== oldRow[key]
+  //     ) {
+  //       updatedFields.push(key)
+  //     }
+  //   }
 
-    if (newRow.id === 'total') {
-      return newRow
-    }
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-    }
+  //   if (newRow.id === 'total') {
+  //     return newRow
+  //   }
+  //   unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
+  //   if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
+  //     unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
+  //   }
 
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === newRow.id ? { ...newRow, isNew: false } : row,
-      ),
-    )
+  //   setRows((prevRows) =>
+  //     prevRows.map((row) =>
+  //       row.id === newRow.id ? { ...newRow, isNew: false } : row,
+  //     ),
+  //   )
 
-    if (updatedFields.length > 0) {
-      setModifiedCells((prevModifiedCells) => ({
-        ...prevModifiedCells,
-        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-      }))
-    }
+  //   if (updatedFields.length > 0) {
+  //     setModifiedCells((prevModifiedCells) => ({
+  //       ...prevModifiedCells,
+  //       [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+  //     }))
+  //   }
 
-    return newRow
-  }, [])
+  //   return newRow
+  // }, [])
 
   const saveChanges = React.useCallback(async () => {
     const rowsInEditMode = Object.keys(rowModesModel).filter(
@@ -640,7 +641,13 @@ const ProductionNorms = ({ permissions }) => {
     },
     isOldYear,
   )
-
+  const NormParameterIdCell = (props) => {
+    const productId = props.dataItem.normParametersFKId
+    const product = allProducts.find((p) => p.id === productId)
+    const displayName = product?.displayName || ''
+    // console.log(displayName)
+    return <td>{displayName}</td>
+  }
   return (
     <div>
       <Backdrop
@@ -650,11 +657,12 @@ const ProductionNorms = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <ASDataGrid
+      <KendoDataTables
         modifiedCells={modifiedCells}
         columns={productionColumns}
         rows={rows}
         setRows={setRows}
+        NormParameterIdCell={NormParameterIdCell}
         title={'Production AOP'}
         isCellEditable={isCellEditable}
         // title={lowerVertName === 'meg' ? 'Production AOP' : 'Budget Production'}
@@ -663,7 +671,8 @@ const ProductionNorms = ({ permissions }) => {
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
         updateProductNormData={updateProductNormData}
-        processRowUpdate={processRowUpdate}
+        // processRowUpdate={processRowUpdate}
+
         rowModesModel={rowModesModel}
         onRowModesModelChange={onRowModesModelChange}
         // onRowEditStop={handleRowEditStop}
@@ -684,19 +693,6 @@ const ProductionNorms = ({ permissions }) => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         permissions={adjustedPermissions}
-
-        // permissions={{
-        //   showAction: permissions?.showAction ?? false,
-        //   addButton: permissions?.addButton ?? false,
-        //   deleteButton: permissions?.deleteButton ?? false,
-        //   editButton: permissions?.editButton ?? false,
-        //   showUnit: permissions?.showUnit ?? true,
-        //   saveWithRemark: permissions?.saveWithRemark ?? true,
-        //   showCalculate: permissions?.showCalculate ?? true,
-        //   saveBtn: permissions?.saveBtn ?? false,
-        //   units: ['MT', 'KT'],
-        //   customHeight: permissions?.customHeight,
-        // }}
       />
     </div>
   )

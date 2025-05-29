@@ -1,5 +1,4 @@
 import { DataService } from 'services/DataService'
-import ASDataGrid from './ASDataGrid'
 import dayjs from 'dayjs'
 import React, { useState, useEffect } from 'react'
 import { useSession } from 'SessionStoreContext'
@@ -20,21 +19,17 @@ import { validateFields } from 'utils/validationUtils'
 import TimeInputCell from 'utils/TimeInputCell'
 import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
 import { GridRowModes } from '../../../node_modules/@mui/x-data-grid/models/gridEditRowModel'
+import KendoDataTables from './index'
 
 const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
-  //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
-
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-
-  // const [slowDownData, setSlowDownData] = useState([])
   const [rowModesModel, setRowModesModel] = useState({})
   const [modifiedCells, setModifiedCells] = React.useState({})
-
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
@@ -57,7 +52,7 @@ const SlowDown = ({ permissions }) => {
     rowsBeforeChange: {},
   })
 
-  const handleCancelClick = (id) => () => {
+  const handleCancelClick = () => () => {
     const rowsInEditMode = Object.keys(rowModesModel).filter(
       (id) => rowModesModel[id]?.mode === 'edit',
     )
@@ -90,70 +85,6 @@ const SlowDown = ({ permissions }) => {
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
-
-  const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    const rowId = newRow.id
-    const updatedFields = []
-
-    for (const key in newRow) {
-      if (
-        Object.prototype.hasOwnProperty.call(newRow, key) &&
-        newRow[key] !== oldRow[key]
-      ) {
-        updatedFields.push(key)
-      }
-    }
-
-    const durationChanged = newRow.durationInHrs !== oldRow.durationInHrs
-    if (durationChanged) {
-      newRow.maintEndDateTime = null
-    }
-    const updatedRow = { ...newRow }
-    const { maintStartDateTime, maintEndDateTime, durationInHrs } = updatedRow
-    const isValidDate = (d) => d && !isNaN(new Date(d).getTime())
-    if (isValidDate(maintStartDateTime) && isValidDate(maintEndDateTime)) {
-      const start = new Date(maintStartDateTime)
-      const end = new Date(maintEndDateTime)
-      const durationInMinutes = (end - start) / (1000 * 60)
-      if (durationInMinutes >= 0) {
-        const hours = Math.floor(durationInMinutes / 60)
-        const minutes = durationInMinutes % 60
-        updatedRow.durationInHrs = `${hours}.${minutes.toString().padStart(2, '0')}`
-      } else {
-        updatedRow.durationInHrs = ''
-      }
-    } else if (
-      isValidDate(maintStartDateTime) &&
-      durationInHrs &&
-      !isValidDate(maintEndDateTime)
-    ) {
-      const [hrs, mins = '00'] = durationInHrs.split('.')
-      const totalMinutes = parseInt(hrs) * 60 + parseInt(mins)
-      const calculatedEnd = new Date(
-        new Date(maintStartDateTime).getTime() + totalMinutes * 60000,
-      )
-      updatedRow.maintEndDateTime = calculatedEnd.toISOString()
-    }
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = updatedRow
-    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-    }
-
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === updatedRow.id ? { ...updatedRow, isNew: false } : row,
-      ),
-    )
-
-    if (updatedFields.length > 0) {
-      setModifiedCells((prevModifiedCells) => ({
-        ...prevModifiedCells,
-        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-      }))
-    }
-
-    return updatedRow
-  }, [])
 
   function addTimeOffset(dateTime) {
     if (!dateTime) return null
@@ -189,17 +120,17 @@ const SlowDown = ({ permissions }) => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-      const slowDownDetails = newRow.map((row) => ({
-        productId: row.product,
-        discription: row.discription,
-        durationInHrs: parseFloat(findDuration('1', row)),
-        maintEndDateTime: addTimeOffset(row.maintEndDateTime),
-        maintStartDateTime: addTimeOffset(row.maintStartDateTime),
-        remark: row.remark,
-        rate: row.rate,
-        audityear: localStorage.getItem('year'),
-        id: row.idFromApi || null,
-      }))
+      // const slowDownDetails = newRow.map((row) => ({
+      //   productId: row.product,
+      //   discription: row.discription,
+      //   durationInHrs: parseFloat(findDuration('1', row)),
+      //   maintEndDateTime: addTimeOffset(row.maintEndDateTime),
+      //   maintStartDateTime: addTimeOffset(row.maintStartDateTime),
+      //   remark: row.remark,
+      //   rate: row.rate,
+      //   audityear: localStorage.getItem('year'),
+      //   id: row.idFromApi || null,
+      // }))
       const slowDownDetailsMEG = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
@@ -242,16 +173,16 @@ const SlowDown = ({ permissions }) => {
     }
   }
   const saveChanges = React.useCallback(async () => {
-    const rowsInEditMode = Object.keys(rowModesModel).filter(
-      (id) => rowModesModel[id]?.mode === 'edit',
-    )
+    // const rowsInEditMode = Object.keys(rowModesModel).filter(
+    //   (id) => rowModesModel[id]?.mode === 'edit',
+    // )
 
-    rowsInEditMode.forEach((id) => {
-      apiRef.current.stopRowEditMode({ id })
-    })
+    // rowsInEditMode.forEach((id) => {
+    //   apiRef.current.stopRowEditMode({ id })
+    // })
     setTimeout(() => {
       try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        var data = Object.values(modifiedCells)
         if (data.length == 0) {
           setSnackbarOpen(true)
           setSnackbarData({
@@ -261,31 +192,31 @@ const SlowDown = ({ permissions }) => {
           return
         }
 
-        const requiredFields = [
-          'maintStartDateTime',
-          'maintEndDateTime',
-          'discription',
-          'remark',
-          'rate',
-          // 'durationInHrs',
-          'product',
-        ]
-        const validationMessage = validateFields(data, requiredFields)
-        if (validationMessage) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: validationMessage,
-            severity: 'error',
-          })
-          return
-        }
+        // const requiredFields = [
+        //   'maintStartDateTime',
+        //   'maintEndDateTime',
+        //   'discription',
+        //   'remark',
+        //   'rate',
+        //   // 'durationInHrs',
+        //   'product',
+        // ]
+        // const validationMessage = validateFields(data, requiredFields)
+        // if (validationMessage) {
+        //   setSnackbarOpen(true)
+        //   setSnackbarData({
+        //     message: validationMessage,
+        //     severity: 'error',
+        //   })
+        //   return
+        // }
 
         saveSlowDownData(data)
       } catch (error) {
         // setIsSaving(false);
       }
     }, 400)
-  }, [apiRef, rowModesModel])
+  }, [modifiedCells])
 
   const updateSlowdownData = async (newRow) => {
     try {
@@ -383,37 +314,6 @@ const SlowDown = ({ permissions }) => {
       }
     }
 
-    // const saveShutdownData = async () => {
-    //   try {
-    //     // var plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D';
-    //     var plantId = ''
-
-    //     const storedPlant = localStorage.getItem('selectedPlant')
-    //     if (storedPlant) {
-    //       const parsedPlant = JSON.parse(storedPlant)
-    //       plantId = parsedPlant.id
-    //     }
-
-    //     const shutdownDetails = {
-    //       product: 'Oxygen',
-    //       discription: '1 Shutdown maintenance',
-    //       durationInHrs: 120,
-    //       maintEndDateTime: '2025-02-20T18:00:00Z',
-    //       maintStartDateTime: '2025-02-20T16:00:00Z',
-    //     }
-
-    //     const response = await DataService.saveShutdownData(
-    //       plantId,
-    //       shutdownDetails,
-    //       keycloak,
-    //     )
-    //     console.log('Shutdown data Saved Successfully:', response)
-    //     return response
-    //   } catch (error) {
-    //     console.error('Error saving shutdown data:', error)
-    //   }
-    // }
-
     fetchData()
     // saveShutdownData()
     getAllProducts()
@@ -432,8 +332,8 @@ const SlowDown = ({ permissions }) => {
   const colDefs = [
     {
       field: 'discription',
-      headerName: 'Slowdown Desc',
-      minWidth: 180,
+      title: 'Slowdown Desc',
+      //width: 180,
       editable: true,
       flex: 3,
       renderCell: renderTwoLineEllipsis,
@@ -441,16 +341,16 @@ const SlowDown = ({ permissions }) => {
 
     {
       field: 'maintenanceId',
-      headerName: 'maintenanceId',
+      title: 'maintenanceId',
       editable: false,
       hide: true,
     },
 
     {
       field: 'product',
-      headerName: 'Particulars',
+      title: 'Particulars',
       editable: true,
-      minWidth: 150,
+      //width: 150,
       renderEditCell: (params) => {
         const { value, id, api } = params
 
@@ -545,9 +445,9 @@ const SlowDown = ({ permissions }) => {
 
     {
       field: 'maintStartDateTime',
-      headerName: 'SD- From',
+      title: 'SD- From',
       type: 'dateTime',
-      minWidth: 200,
+      //width: 200,
       editable: true,
       renderEditCell: (params) => <StartDateTimeEditCell {...params} />,
       valueFormatter: (params) => {
@@ -560,9 +460,9 @@ const SlowDown = ({ permissions }) => {
 
     {
       field: 'maintEndDateTime',
-      headerName: 'SD- To',
+      title: 'SD- To',
       type: 'dateTime',
-      minWidth: 200,
+      //width: 200,
       editable: true,
       renderEditCell: (params) => <EndDateTimeEditCell {...params} />,
       valueFormatter: (params) => {
@@ -575,9 +475,9 @@ const SlowDown = ({ permissions }) => {
 
     {
       field: 'durationInHrs',
-      headerName: 'Duration (hrs)',
+      title: 'Duration (hrs)',
       editable: true,
-      minWidth: 100,
+      //width: 100,
       renderEditCell: TimeInputCell,
       align: 'right',
       headerAlign: 'left',
@@ -587,9 +487,9 @@ const SlowDown = ({ permissions }) => {
 
     {
       field: 'rate',
-      headerName: 'Rate (TPH)',
+      title: 'Rate (TPH)',
       editable: true,
-      minWidth: 75,
+      //width: 75,
       renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
@@ -597,9 +497,9 @@ const SlowDown = ({ permissions }) => {
 
     {
       field: 'remark',
-      headerName: 'Remarks',
+      title: 'Remarks',
       editable: false,
-      minWidth: 180,
+      //width: 180,
       renderCell: (params) => {
         const displayText = truncateRemarks(params.value)
         const isEditable = !params.row.Particulars
@@ -624,21 +524,6 @@ const SlowDown = ({ permissions }) => {
       },
     },
   ]
-
-  // const handleRowEditStop = (params, event) => {
-  //   setRowModesModel({
-  //     ...rowModesModel,
-  //     [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
-  //   })
-  // }
-
-  const onProcessRowUpdateError = React.useCallback((error) => {
-    console.log(error)
-  }, [])
-
-  const onRowModesModelChange = (newRowModesModel) => {
-    setRowModesModel(newRowModesModel)
-  }
 
   const deleteRowData = async (paramsForDelete) => {
     try {
@@ -704,20 +589,14 @@ const SlowDown = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <ASDataGrid
+      <KendoDataTables
         modifiedCells={modifiedCells}
+        setModifiedCells={setModifiedCells}
         setRows={setRows}
         columns={colDefs}
         rows={rows}
-        title={'Slowdown Activities'}
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
         updateSlowdownData={updateSlowdownData}
-        processRowUpdate={processRowUpdate}
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={onRowModesModelChange}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
@@ -728,11 +607,7 @@ const SlowDown = ({ permissions }) => {
         setDeleteId={setDeleteId}
         setOpen1={setOpen1}
         open1={open1}
-        // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
-        // onRowEditStop={handleRowEditStop}
-        onProcessRowUpdateError={onProcessRowUpdateError}
-        experimentalFeatures={{ newEditingApi: true }}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}
         currentRemark={currentRemark}
@@ -743,17 +618,6 @@ const SlowDown = ({ permissions }) => {
         permissions={adjustedPermissions}
         handleCancelClick={handleCancelClick}
         focusFirstField={focusFirstField}
-
-        // permissions={{
-        //   showAction: permissions?.showAction ?? true,
-        //   addButton: permissions?.addButton ?? true,
-        //   deleteButton: permissions?.deleteButton ?? true,
-        //   editButton: permissions?.editButton ?? false,
-        //   showUnit: permissions?.showUnit ?? false,
-        //   saveWithRemark: permissions?.saveWithRemark ?? true,
-        //   saveBtn: permissions?.saveBtn ?? true,
-        //   customHeight: permissions?.customHeight,
-        // }}
       />
     </div>
   )

@@ -9,7 +9,7 @@ import i18n from 'i18n/index'
 // import { useNavigate } from '../../node_modules/react-router-dom/dist/index'
 
 const MenuContext = createContext()
-const USE_STATIC_MENU = false
+const USE_STATIC_MENU = true
 
 export function MenuProvider({ children }) {
   const staticMenu = [plan, workspace]

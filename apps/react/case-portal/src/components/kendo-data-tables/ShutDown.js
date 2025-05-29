@@ -1,5 +1,4 @@
 import { DataService } from 'services/DataService'
-import ASDataGrid from './ASDataGrid'
 import dayjs from 'dayjs'
 import React, { useState, useEffect } from 'react'
 import { useSession } from 'SessionStoreContext'
@@ -17,6 +16,7 @@ import { validateFields } from 'utils/validationUtils'
 import TimeInputCell from 'utils/TimeInputCell'
 import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
 import { GridRowModes } from '../../../node_modules/@mui/x-data-grid/models/gridEditRowModel'
+import KendoDataTables from './index'
 
 const ShutDown = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -68,80 +68,20 @@ const ShutDown = ({ permissions }) => {
     setRemarkDialogOpen(true)
   }
 
-  const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    const rowId = newRow.id
-    const updatedFields = []
-    for (const key in newRow) {
-      if (
-        Object.prototype.hasOwnProperty.call(newRow, key) &&
-        newRow[key] !== oldRow[key]
-      ) {
-        updatedFields.push(key)
-      }
-    }
-
-    const durationChanged = newRow.durationInHrs !== oldRow.durationInHrs
-    if (durationChanged) {
-      newRow.maintEndDateTime = null
-    }
-    const updatedRow = { ...newRow }
-    const { maintStartDateTime, maintEndDateTime, durationInHrs } = updatedRow
-    const isValidDate = (d) => d && !isNaN(new Date(d).getTime())
-    if (isValidDate(maintStartDateTime) && isValidDate(maintEndDateTime)) {
-      const start = new Date(maintStartDateTime)
-      const end = new Date(maintEndDateTime)
-      const durationInMinutes = (end - start) / (1000 * 60)
-      if (durationInMinutes >= 0) {
-        const hours = Math.floor(durationInMinutes / 60)
-        const minutes = durationInMinutes % 60
-        updatedRow.durationInHrs = `${hours}.${minutes.toString().padStart(2, '0')}`
-      } else {
-        updatedRow.durationInHrs = ''
-      }
-    } else if (
-      isValidDate(maintStartDateTime) &&
-      durationInHrs &&
-      !isValidDate(maintEndDateTime)
-    ) {
-      const [hrs, mins = '00'] = durationInHrs.split('.')
-      const totalMinutes = parseInt(hrs) * 60 + parseInt(mins)
-      const calculatedEnd = new Date(
-        new Date(maintStartDateTime).getTime() + totalMinutes * 60000,
-      )
-      updatedRow.maintEndDateTime = calculatedEnd.toISOString()
-    }
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = updatedRow
-    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-    }
-
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === updatedRow.id ? { ...updatedRow, isNew: false } : row,
-      ),
-    )
-
-    if (updatedFields.length > 0) {
-      setModifiedCells((prevModifiedCells) => ({
-        ...prevModifiedCells,
-        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-      }))
-    }
-
-    return updatedRow
-  }, [])
-
   const saveChanges = React.useCallback(async () => {
-    const rowsInEditMode = Object.keys(rowModesModel).filter(
-      (id) => rowModesModel[id]?.mode === 'edit',
-    )
+    // const rowsInEditMode = Object.keys(rowModesModel).filter(
+    //   (id) => rowModesModel[id]?.mode === 'edit',
+    // )
 
-    rowsInEditMode.forEach((id) => {
-      apiRef.current.stopRowEditMode({ id })
-    })
+    // rowsInEditMode.forEach((id) => {
+    //   apiRef.current.stopRowEditMode({ id })
+    // })
+    // console.log(modifiedCells)
     setTimeout(() => {
       try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        var data = Object.values(modifiedCells)
+        // var data = Object.values(unsavedChangesRef.current.unsavedRows)
+
         if (data.length == 0) {
           setSnackbarOpen(true)
           setSnackbarData({
@@ -151,28 +91,28 @@ const ShutDown = ({ permissions }) => {
           return
         }
 
-        const requiredFields = [
-          'maintStartDateTime',
-          'maintEndDateTime',
-          'discription',
-          'remark',
-        ]
-        const validationMessage = validateFields(data, requiredFields)
-        if (validationMessage) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: validationMessage,
-            severity: 'error',
-          })
-          return
-        }
+        // const requiredFields = [
+        //   'maintStartDateTime',
+        //   'maintEndDateTime',
+        //   'discription',
+        //   'remark',
+        // ]
+        // const validationMessage = validateFields(data, requiredFields)
+        // if (validationMessage) {
+        //   setSnackbarOpen(true)
+        //   setSnackbarData({
+        //     message: validationMessage,
+        //     severity: 'error',
+        //   })
+        //   return
+        // }
 
         saveShutdownData(data)
       } catch (error) {
         console.log('Error saving changes:', error)
       }
     }, 400)
-  }, [apiRef, rowModesModel])
+  }, [modifiedCells])
 
   function addTimeOffset(dateTime) {
     if (!dateTime) return null
@@ -305,40 +245,6 @@ const ShutDown = ({ permissions }) => {
     lowerVertName,
   ])
 
-  // const findDuration1 = (value, row) => {
-  //   if (row && row.maintStartDateTime && row.maintEndDateTime) {
-  //     const start = new Date(row.maintStartDateTime)
-  //     const end = new Date(row.maintEndDateTime)
-  //     if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-  //       const durationInMs = end - start
-  //       const durationInMinutes = durationInMs / (1000 * 60)
-  //       const hours = Math.floor(durationInMinutes / 60)
-  //       const minutes = durationInMinutes % 60
-  //       const formattedMinutes = minutes.toString().padStart(2, '0')
-  //       const formattedDuration = `${hours}.${formattedMinutes}`
-  //       return formattedDuration
-  //     }
-  //   }
-  //   return ''
-  // }
-
-  // const findDuration2 = (value, row) => {
-  //   const { maintStartDateTime, maintEndDateTime, durationInHrs } = row
-
-  //   if (maintStartDateTime && maintEndDateTime) {
-  //     const start = new Date(maintStartDateTime)
-  //     const end = new Date(maintEndDateTime)
-  //     if (!isNaN(start) && !isNaN(end)) {
-  //       const durationInMs = end - start
-  //       const durationInMinutes = durationInMs / (1000 * 60)
-  //       const hours = Math.floor(durationInMinutes / 60)
-  //       const minutes = Math.round(durationInMinutes % 60)
-  //       return `${hours}.${minutes.toString().padStart(2, '0')}`
-  //     }
-  //   }
-
-  //   return durationInHrs || ''
-  // }
   const findDuration = (v, row) => {
     if (row.durationInHrs) return row.durationInHrs
 
@@ -381,75 +287,24 @@ const ShutDown = ({ permissions }) => {
   const colDefs = [
     {
       field: 'discription',
-      headerName: 'Shutdown Desc',
-      minWidth: 125,
+      title: 'Shutdown Desc',
+      //width: 125,
       editable: true,
       flex: 3,
       renderCell: renderTwoLineEllipsis,
     },
     {
       field: 'maintenanceId',
-      headerName: 'maintenanceId',
+      title: 'maintenanceId',
       editable: false,
       hide: true,
     },
 
-    // {
-    //   field: 'product',
-    //   headerName: lowerVertName === 'meg' ? 'Product' : 'Grade Name',
-    //   editable: true,
-    //   minWidth: 125,
-    //   valueGetter: (params) => {
-    //     // console.log('p1', params);
-    //     // console.log('p2', params2);
-    //     return params || ''
-    //   },
-    //   valueFormatter: (params) => {
-    //     // console.log('params valueFormatter ', params)
-    //     const product = allProducts.find((p) => p.id === params)
-    //     return product ? product.displayName : ''
-    //   },
-    //   renderEditCell: (params) => {
-    //     const { value } = params
-    //     // console.log('q1', params);
-    //     // console.log('q2', params2);
-    //     return (
-    //       <select
-    //         value={value || ''}
-    //         onChange={(event) => {
-    //           params.api.setEditCellValue({
-    //             id: params.id,
-    //             field: 'product',
-    //             value: event.target.value,
-    //           })
-    //         }}
-    //         style={{
-    //           width: '100%',
-    //           padding: '5px',
-    //           border: 'none', // Removes border
-    //           outline: 'none', // Removes focus outline
-    //           background: 'transparent', // Keeps background clean
-    //         }}
-    //       >
-    //         {/* Disabled first option */}
-    //         <option value='' disabled>
-    //           Select
-    //         </option>
-    //         {allProducts.map((product) => (
-    //           <option key={product.id} value={product.id}>
-    //             {product.displayName}
-    //           </option>
-    //         ))}
-    //       </select>
-    //     )
-    //   },
-    // },
-
     {
       field: 'maintStartDateTime',
-      headerName: 'SD- From',
+      title: 'SD- From',
       type: 'dateTime',
-      minWidth: 200,
+      //width: 200,
       editable: true,
       // renderEditCell: (params) => <StartDateTimeEditCell {...params} />,
       renderEditCell: (params) => (
@@ -466,9 +321,9 @@ const ShutDown = ({ permissions }) => {
 
     {
       field: 'maintEndDateTime',
-      headerName: 'SD- To',
+      title: 'SD- To',
       type: 'dateTime',
-      minWidth: 200,
+      //width: 200,
       editable: true,
       // renderEditCell: (params) => <EndDateTimeEditCell {...params} />,
       // renderEditCell: (params) => <StartDateTimeEditCell {...params} apiRef={apiRef} />,
@@ -484,9 +339,9 @@ const ShutDown = ({ permissions }) => {
     },
     {
       field: 'durationInHrs',
-      headerName: 'Duration (hrs)',
+      title: 'Duration (hrs)',
       editable: true,
-      minWidth: 100,
+      //width: 100,
       renderEditCell: TimeInputCell,
       align: 'right',
       headerAlign: 'left',
@@ -495,8 +350,8 @@ const ShutDown = ({ permissions }) => {
     },
     {
       field: 'remark',
-      headerName: 'Remark',
-      minWidth: 250,
+      title: 'Remark',
+      //width: 250,
       editable: false,
       renderCell: (params) => {
         const displayText = truncateRemarks(params.value)
@@ -522,21 +377,6 @@ const ShutDown = ({ permissions }) => {
       },
     },
   ]
-
-  // const handleRowEditStop = (params, event) => {
-  //   setRowModesModel({
-  //     ...rowModesModel,
-  //     [params.id]: { mode: GridRowModes.View, ignoreModifications: false },
-  //   })
-  // }
-
-  const onProcessRowUpdateError = React.useCallback((error) => {
-    console.log(error)
-  }, [])
-
-  const onRowModesModelChange = (newRowModesModel) => {
-    setRowModesModel(newRowModesModel)
-  }
 
   const deleteRowData = async (paramsForDelete) => {
     try {
@@ -602,20 +442,14 @@ const ShutDown = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <ASDataGrid
+      <KendoDataTables
         modifiedCells={modifiedCells}
+        setModifiedCells={setModifiedCells}
         setRows={setRows}
         columns={colDefs}
         rows={rows}
-        title={'Shutdown/Turnaround Activities'}
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
         updateShutdownData={updateShutdownData}
-        processRowUpdate={processRowUpdate}
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={onRowModesModelChange}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
@@ -628,9 +462,6 @@ const ShutDown = ({ permissions }) => {
         setSnackbarData={setSnackbarData}
         // handleDeleteClick={handleDeleteClick}
         fetchData={fetchData}
-        // onRowEditStop={handleRowEditStop}
-        onProcessRowUpdateError={onProcessRowUpdateError}
-        experimentalFeatures={{ newEditingApi: true }}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}
         currentRemark={currentRemark}
@@ -641,17 +472,6 @@ const ShutDown = ({ permissions }) => {
         permissions={adjustedPermissions}
         handleCancelClick={handleCancelClick}
         focusFirstField={focusFirstField}
-
-        // permissions={{
-        //   showAction: permissions?.showAction ?? true,
-        //   addButton: permissions?.addButton ?? true,
-        //   deleteButton: permissions?.deleteButton ?? true,
-        //   editButton: permissions?.editButton ?? false,
-        //   showUnit: permissions?.showUnit ?? false,
-        //   saveWithRemark: permissions?.saveWithRemark ?? true,
-        //   saveBtn: permissions?.saveBtn ?? true,
-        //   customHeight: permissions?.customHeight,
-        // }}
       />
     </div>
   )

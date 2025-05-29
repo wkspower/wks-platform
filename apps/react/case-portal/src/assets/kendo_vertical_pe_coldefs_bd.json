@@ -1,0 +1,121 @@
+[
+  {
+    "field": "Particulars",
+    "title": "Type",
+    "width": 100,
+    "groupable": true,
+    "headerClass": "bold-header"
+  },
+  {
+    "field": "normParameterId",
+    "title": "Particulars",
+    "editable": false,
+    "width": 125
+  },
+  {
+    "field": "april",
+    "title": 4,
+    "editable": true,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "may",
+    "title": 5,
+    "editable": true,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "june",
+    "title": 6,
+    "editable": true,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "july",
+    "title": 7,
+    "editable": true,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "aug",
+    "title": 8,
+    "editable": true,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "sep",
+    "title": 9,
+    "editable": true,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "oct",
+    "title": 10,
+    "editable": true,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "nov",
+    "title": 11,
+    "editable": true,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "dec",
+    "title": 12,
+    "editable": true,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "jan",
+    "title": 1,
+    "editable": true,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "feb",
+    "title": 2,
+    "editable": true,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "march",
+    "title": 3,
+    "editable": true,
+    "width": 120,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "remark",
+    "title": "Remark",
+    "width": 180,
+    "editable": false
+  },
+  {
+    "field": "idFromApi",
+    "title": "ID from API"
+  }
+]

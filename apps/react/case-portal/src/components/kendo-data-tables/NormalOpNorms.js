@@ -7,7 +7,8 @@ import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import NumericInputOnly from 'utils/NumericInputOnly'
-import DataGridTable from '../ASDataGrid'
+//import DataGridTable from '../ASDataGrid'
+import KendoDataTables from './kendo-inprogress'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -20,7 +21,7 @@ import MuiAccordion from '@mui/material/Accordion'
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
 import MuiAccordionSummary from '@mui/material/AccordionSummary'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { Box, Typography } from '../../../../node_modules/@mui/material/index'
+import { Box, Typography } from '../../../node_modules/@mui/material/index'
 import { styled } from '@mui/material/styles'
 
 const CustomAccordion = styled((props) => (
@@ -221,8 +222,8 @@ const NormalOpNormsScreen = () => {
   const colDefs = [
     {
       field: 'Particulars',
-      headerName: 'Type',
-      minWidth: 110,
+      title: 'Type',
+      width: 110,
       groupable: true,
       renderCell: (params) => (
         <div
@@ -239,8 +240,8 @@ const NormalOpNormsScreen = () => {
     {
       field: 'materialFkId',
       // headerName: 'Particulars',
-      headerName: lowerVertName === 'meg' ? 'Particulars' : 'Particulars',
-      minWidth: 120,
+      title : lowerVertName === 'meg' ? 'Particulars' : 'Particulars',
+      width: 120,
       valueGetter: (params) => params || '',
       valueFormatter: (params) => {
         const product = allProducts.find((p) => p.id === params)
@@ -317,16 +318,17 @@ const NormalOpNormsScreen = () => {
 
     {
       field: 'UOM',
-      headerName: 'UOM / MT',
-      minWidth: 80,
+      title: 'UOM / MT',
+      width: 100,
       editable: false,
     },
 
     {
       field: 'april',
-      headerName: headerMap[4],
+      title: headerMap[4],
       editable: true,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
@@ -341,27 +343,30 @@ const NormalOpNormsScreen = () => {
     },
     {
       field: 'may',
-      headerName: headerMap[5],
+      title: headerMap[5],
       editable: true,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'june',
-      headerName: headerMap[6],
+      title: headerMap[6],
       editable: true,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'july',
-      headerName: headerMap[7],
+      title: headerMap[7],
       editable: true,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
@@ -369,80 +374,88 @@ const NormalOpNormsScreen = () => {
 
     {
       field: 'august',
-      headerName: headerMap[8],
+      title: headerMap[8],
       editable: true,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'september',
-      headerName: headerMap[9],
+      title: headerMap[9],
       editable: true,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'october',
-      headerName: headerMap[10],
+      title: headerMap[10],
       editable: true,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'november',
-      headerName: headerMap[11],
+      title: headerMap[11],
       editable: true,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'december',
-      headerName: headerMap[12],
+      title: headerMap[12],
       editable: true,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'january',
-      headerName: headerMap[1],
+      title: headerMap[1],
       editable: true,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'february',
-      headerName: headerMap[2],
+      title: headerMap[2],
       editable: true,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'march',
-      headerName: headerMap[3],
+      title: headerMap[3],
       editable: true,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'remarks',
-      headerName: 'Remark',
-      minWidth: 125,
+      title: 'Remark',
+      width: 125,
       editable: false,
       renderCell: (params) => {
         const displayText = truncateRemarks(params.value)
@@ -470,11 +483,11 @@ const NormalOpNormsScreen = () => {
 
     {
       field: 'idFromApi',
-      headerName: 'idFromApi',
+      title: 'idFromApi',
     },
     {
       field: 'isEditable',
-      headerName: 'isEditable',
+      title: 'isEditable',
     },
   ]
 
@@ -482,8 +495,8 @@ const NormalOpNormsScreen = () => {
     {
       field: 'NormParameterFKId',
       // headerName: 'Particulars',
-      headerName: 'Particulars',
-      minWidth: 160,
+      title: 'Particulars',
+      width: 160,
       valueGetter: (params) => params || '',
       valueFormatter: (params) => {
         const product = allProducts.find((p) => p.id === params)
@@ -560,16 +573,17 @@ const NormalOpNormsScreen = () => {
 
     {
       field: 'UOM',
-      headerName: 'UOM',
-      minWidth: 40,
+      title: 'UOM',
+      width: 80,
       editable: false,
     },
 
     {
       field: 'Apr',
-      headerName: headerMap[4],
+      title: headerMap[4],
       editable: false,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
@@ -577,27 +591,30 @@ const NormalOpNormsScreen = () => {
 
     {
       field: 'May',
-      headerName: headerMap[5],
+      title: headerMap[5],
       editable: false,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'Jun',
-      headerName: headerMap[6],
+      title: headerMap[6],
       editable: false,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'Jul',
-      headerName: headerMap[7],
+      title: headerMap[7],
       editable: false,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
@@ -605,83 +622,91 @@ const NormalOpNormsScreen = () => {
 
     {
       field: 'Aug',
-      headerName: headerMap[8],
+      title: headerMap[8],
       editable: false,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'Sep',
-      headerName: headerMap[9],
+      title: headerMap[9],
       editable: false,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'Oct',
-      headerName: headerMap[10],
+      title: headerMap[10],
       editable: false,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'Nov',
-      headerName: headerMap[11],
+      title: headerMap[11],
       editable: false,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'Dec',
-      headerName: headerMap[12],
+      title: headerMap[12],
       editable: false,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'Jan',
-      headerName: headerMap[1],
+      title: headerMap[1],
       editable: false,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'Feb',
-      headerName: headerMap[2],
+      title: headerMap[2],
       editable: false,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'Mar',
-      headerName: headerMap[3],
+      title: headerMap[3],
       editable: false,
       renderEditCell: NumericInputOnly,
+      width: 120,
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
     },
     {
       field: 'idFromApi',
-      headerName: 'idFromApi',
+      title: 'idFromApi',
     },
     {
       field: 'isEditable',
-      headerName: 'isEditable',
+      title: 'isEditable',
     },
   ]
 
@@ -727,17 +752,30 @@ const NormalOpNormsScreen = () => {
   }, [])
 
   const saveChanges = React.useCallback(async () => {
-    const rowsInEditMode = Object.keys(rowModesModel).filter(
-      (id) => rowModesModel[id]?.mode === 'edit',
-    )
+    // const rowsInEditMode = Object.keys(rowModesModel).filter(
+    //   (id) => rowModesModel[id]?.mode === 'edit',
+    // )
 
-    rowsInEditMode.forEach((id) => {
-      apiRef.current.stopRowEditMode({ id })
-    })
+    // rowsInEditMode.forEach((id) => {
+    //   apiRef.current.stopRowEditMode({ id })
+    // })
 
     setTimeout(() => {
       try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        //var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        // if (Object.keys(modifiedCells).length === 0) {
+        //   setSnackbarOpen(true)
+        //   setSnackbarData({
+        //     message: 'No Records to Save!',
+        //     severity: 'info',
+        //   })
+        //   setLoading(false)
+        //   return
+        // }
+        console.log('modifiedCells', modifiedCells)
+        let newRows = modifiedCells.filter((row) => row.isGroupHeader !== true)
+        console.log(newRows)
+        var data = Object.values(newRows)
         if (data.length == 0) {
           setSnackbarOpen(true)
           setSnackbarData({
@@ -747,16 +785,16 @@ const NormalOpNormsScreen = () => {
           return
         }
 
-        const requiredFields = ['materialFkId', 'remarks']
-        const validationMessage = validateFields(data, requiredFields)
-        if (validationMessage) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: validationMessage,
-            severity: 'error',
-          })
-          return
-        }
+        //const requiredFields = ['materialFkId', 'remarks']
+        // const validationMessage = validateFields(data, requiredFields)
+        // if (validationMessage) {
+        //   setSnackbarOpen(true)
+        //   setSnackbarData({
+        //     message: validationMessage,
+        //     severity: 'error',
+        //   })
+        //   return
+        // }
 
         saveNormalOperationNormsData(data)
       } catch (error) {
@@ -969,8 +1007,9 @@ const NormalOpNormsScreen = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <DataGridTable
+      <KendoDataTables
         modifiedCells={modifiedCells}
+        setModifiedCells={setModifiedCells}
         title='Normal Operations Norms'
         columns={colDefs}
         setRows={setRows}
@@ -1018,7 +1057,7 @@ const NormalOpNormsScreen = () => {
             </CustomAccordionSummary>
             <CustomAccordionDetails>
               <Box sx={{ width: '100%', margin: 0 }}>
-                <DataGridTable
+                <KendoDataTables
                   title='Intermediate Values'
                   columns={colDefsIntermediateValues}
                   setRows={setRowsIntermediateValues}
