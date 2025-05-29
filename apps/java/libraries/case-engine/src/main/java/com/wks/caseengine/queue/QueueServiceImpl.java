@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.command.CommandExecutor;
 import com.wks.caseengine.queue.command.CreateQueueCmd;
@@ -30,6 +31,7 @@ public class QueueServiceImpl implements QueueService {
 	private CommandExecutor commandExecutor;
 
 	@Override
+	@Transactional
 	public void save(Queue queue){
 		commandExecutor.execute(new CreateQueueCmd(queue));
 	}
@@ -45,11 +47,13 @@ public class QueueServiceImpl implements QueueService {
 	}
 
 	@Override
+	@Transactional
 	public void delete(String id){
 		commandExecutor.execute(new DeleteQueueCmd(id));
 	}
 
 	@Override
+	@Transactional
 	public void update(String id, Queue queue){
 		commandExecutor.execute(new UpdateQueueCmd(id, queue));
 	}

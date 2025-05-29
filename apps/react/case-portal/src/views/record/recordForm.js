@@ -46,7 +46,7 @@ export const RecordForm = ({ open, recordType, record, handleClose, mode }) => {
       RecordService.updateRecord(
         keycloak,
         recordType.id,
-        record._id.$oid,
+        record._id?.$oid ?? record.id,
         formData.data,
       )
         .then(() => {
@@ -59,7 +59,7 @@ export const RecordForm = ({ open, recordType, record, handleClose, mode }) => {
   }
 
   const deleteRecord = () => {
-    RecordService.deleteRecord(recordType.id, record._id.$oid)
+    RecordService.deleteRecord(recordType.id, record._id?.$oid ?? record.id)
       .then(() => {
         handleClose()
       })

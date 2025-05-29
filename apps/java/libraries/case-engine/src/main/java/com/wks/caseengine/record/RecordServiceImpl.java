@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.JsonObject;
 import com.wks.caseengine.command.CommandExecutor;
@@ -31,6 +32,7 @@ public class RecordServiceImpl implements RecordService {
 	private CommandExecutor commandExecutor;
 
 	@Override
+	@Transactional
 	public void save(final String recordTypeId, final JsonObject record){
 		commandExecutor.execute(new CreasteRecordCmd(recordTypeId, record));
 	}
@@ -46,15 +48,16 @@ public class RecordServiceImpl implements RecordService {
 	}
 
 	@Override
+	@Transactional
 	public void delete(final String recordTypeId, final String id){
 		commandExecutor.execute(new DeleteRecordCmd(recordTypeId, recordTypeId));
 
 	}
 
 	@Override
+	@Transactional
 	public void update(final String recordTypeId, final String id, final JsonObject record){
-		commandExecutor.execute(new UpdateRecordCmd(recordTypeId, recordTypeId, record));
-
+		commandExecutor.execute(new UpdateRecordCmd(recordTypeId, id, record));
 	}
 
 }

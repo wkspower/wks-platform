@@ -13,6 +13,7 @@ package com.wks.caseengine.cases.instance.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseDocument;
@@ -48,41 +49,49 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	}
 
 	@Override
+	@Transactional
 	public CaseInstance startWithValues(final CaseInstance caseInstance) {
 		return commandExecutor.execute(new StartCaseInstanceWithValuesCmd(caseInstance));
 	}
 
 	@Override
+	@Transactional
 	public void saveWithValues(final CaseInstance caseInstance) {
 		commandExecutor.execute(new SaveCaseInstanceWithValuesCmd(caseInstance));
 	}
 
 	@Override
+	@Transactional
 	public CaseInstance patch(final String businessKey, final CaseInstance mergePatch) {
 		return commandExecutor.execute(new PatchCaseInstanceCmd(businessKey, mergePatch));
 	}
 
 	@Override
+	@Transactional
 	public void delete(final String businessKey) {
 		commandExecutor.execute(new DeleteCaseInstanceCmd(businessKey));
 	}
 
 	@Override
+	@Transactional
 	public void saveDocument(final String businessKey, final CaseDocument document) {
 		commandExecutor.execute(new CreateCaseInstanceDocumentCmd(businessKey, document));
 	}
 
 	@Override
+	@Transactional
 	public void saveComment(final String businessKey, final CaseComment comment) {
 		commandExecutor.execute(new CreateCaseInstanceCommentCmd(businessKey, comment));
 	}
 
 	@Override
+	@Transactional
 	public void updateComment(final String businessKey, final String commentId, final String body) {
 		commandExecutor.execute(new UpdateCaseInstanceCommentCmd(businessKey, commentId, body));
 	}
 
 	@Override
+	@Transactional
 	public void deleteComment(final String businessKey, final String commentId) {
 		commandExecutor.execute(new DeleteCaseInstanceCommentCmd(businessKey, commentId));
 	}

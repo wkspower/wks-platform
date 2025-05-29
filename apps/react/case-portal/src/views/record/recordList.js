@@ -95,7 +95,10 @@ export const RecordList = ({ recordTypeId }) => {
             columns={columns}
             pageSize={10}
             rowsPerPageOptions={[10]}
-            getRowId={(row) => row._id.$oid}
+            getRowId={(row) => {
+              console.log(row._id?.$oid ?? row.id)
+              return row._id?.$oid ?? row.id
+            }}
           />
         </Box>
       </MainCard>

@@ -17,7 +17,7 @@ import com.mongodb.client.FindIterable;
 import com.wks.caseengine.cases.instance.CaseInstance;
 
 @Component
-public class Paginator {
+public class MongoPaginator {
 
 	private int page = 0;
 	private int offset = 5;

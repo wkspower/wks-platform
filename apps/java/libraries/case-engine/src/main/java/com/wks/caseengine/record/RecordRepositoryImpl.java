@@ -18,6 +18,8 @@ import org.bson.conversions.Bson;
 import org.bson.json.JsonObject;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -27,7 +29,9 @@ import com.mongodb.client.model.Filters;
 import com.wks.caseengine.db.EngineMongoDataConnection;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
+@Primary
 @Component
+@ConditionalOnProperty(name = "database.type", havingValue = "mongo", matchIfMissing = false)
 public class RecordRepositoryImpl implements RecordRepository {
 
 	@Autowired
@@ -75,7 +79,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 	@Override
 	public void update(final String recordTypeId, final String id, final com.google.gson.JsonObject record)
 			throws DatabaseRecordNotFoundException {
-		Bson filter = Filters.eq("_id", new ObjectId(id));
+;		Bson filter = Filters.eq("_id", new ObjectId(id));
 
 		JsonObject jsonObject = getCollection(recordTypeId).findOneAndReplace(filter,
 				(new JsonObject(gsonBuilder.create().toJson(record))));
