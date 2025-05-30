@@ -17,6 +17,9 @@ import {
   TextField,
 } from '../../../node_modules/@mui/material/index'
 import Notification from 'components/Utilities/Notification'
+import '@progress/kendo-font-icons/dist/index.css'; // Import the Kendo Font Icons CSS
+import { SvgIcon } from '@progress/kendo-react-common';
+import { trashIcon } from '@progress/kendo-svg-icons';
 
 const KendoDataTables = ({
   // setUpdatedRows = () => {},
@@ -40,6 +43,14 @@ const KendoDataTables = ({
   currentRowId = null,
   // modifiedCells = [],
   NormParameterIdCell = () => {},
+  ActionsCell = (props) => {
+    console.log(props.dataItem);
+    return (
+        <td>
+            <SvgIcon icon={trashIcon} themeColor='dark' />
+        </td>
+    );
+  },
   setModifiedCells = () => {},
   remarkDialogOpen = false,
   handleDeleteSelected = () => {},
@@ -384,6 +395,17 @@ const KendoDataTables = ({
                 />
               ),
             )}
+
+            <GridColumn
+                  key='actions'
+                  field='actions'
+                  title="Actions"
+                  width='100px'
+                  filterable={false}
+                  cells={{
+                    data: ActionsCell,
+                  }}
+                />
         </Grid>
       </div>
       {(permissions?.allActionOfBottomBtns ?? true) && (
