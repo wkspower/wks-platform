@@ -200,6 +200,14 @@ const getEnhancedAOPColDefs = ({
         valueFormatter: formatValueToThreeDecimals,
 
         align: 'right',
+        renderCell: (params) => (
+          <Tooltip
+            title={params.value != null ? params.value.toString() : ''}
+            arrow
+          >
+            <span>{formatValueToThreeDecimals(params.value)}</span>
+          </Tooltip>
+        ),
       }
     }
 

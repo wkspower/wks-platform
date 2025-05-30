@@ -203,7 +203,14 @@ const SlowDown = ({ permissions }) => {
       const slowDownDetailsMEG = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
-        durationInHrs: parseFloat(findDuration('1', row)),
+        // durationInHrs: parseFloat(findDuration('1', row)),
+        durationInHrs: (() => {
+          const v = findDuration('1', row)
+          return v
+            ? `${v.split('.')[0]}.${v.split('.')[1]?.padStart(2, '0') || '00'}` *
+                1
+            : null
+        })(),
         maintEndDateTime: addTimeOffset(row.maintEndDateTime),
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         remark: row.remark,
@@ -581,8 +588,15 @@ const SlowDown = ({ permissions }) => {
       renderEditCell: TimeInputCell,
       align: 'right',
       headerAlign: 'left',
-      // valueGetter: (params) => params?.durationInHrs || 0,
       valueGetter: findDuration,
+      valueFormatter: (params) => {
+        const value = params
+        if (!value && value !== 0) return ''
+        const [hoursStr, minutesStr = '0'] = value.toString().split('.')
+        const hours = hoursStr.padStart(2, '0')
+        const minutes = minutesStr.padStart(2, '0')
+        return `${hours}:${minutes}`
+      },
     },
 
     {

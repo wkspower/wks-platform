@@ -141,6 +141,14 @@ const getEnhancedColDefs = ({
         renderEditCell: NumericInputOnly,
         valueFormatter: formatValueToFiveDecimals,
         align: 'right',
+        renderCell: (params) => (
+          <Tooltip
+            title={params.value != null ? params.value.toString() : ''}
+            arrow
+          >
+            <span>{formatValueToFiveDecimals(params.value)}</span>
+          </Tooltip>
+        ),
       }
     }
     if (col.field === 'Particulars') {

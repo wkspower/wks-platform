@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
 import '../../kendo-data-grid.css'
+import { filterIcon } from '@progress/kendo-svg-icons'
+import { ColumnMenu } from 'components/data-tables/Reports/columnMenu'
 
 const KendoDataGrid = ({ rows, columns, onRowChange }) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
@@ -19,31 +21,37 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
   return (
     <div className='kendo-data-grid'>
       <Grid
+        style={{ flex: 1, overflow: 'auto' }}
         data={rows}
         dataItemKey='id'
         autoProcessData={true}
         sortable={true}
-        scrollable='virtual'
-        filterable={true}
+        scrollable='scrollable'
         filter={filter}
         onFilterChange={(e) => setFilter(e.filter)}
         onItemChange={handleItemChange}
         resizable={true}
         defaultSkip={0}
-        defaultTake={10}
-        pageable={{
-          buttonCount: 4,
-          pageSizes: [10, 50, 100],
-        }}
+        defaultTake={100}
+        columnMenuIcon={filterIcon}
+        contextMenu={true}
+        pageable={
+          rows?.length > 100
+            ? {
+                buttonCount: 4,
+                pageSizes: [10, 50, 100],
+              }
+            : false
+        }
       >
         {columns.map(
-          ({ field, title, width, cell, format, filterable = true }) => (
+          ({ field, title, width, cell, format, filterType = 'text' }) => (
             <Column
               key={field}
+              columnMenu={ColumnMenu}
               field={field}
               title={title}
-              width={width}
-              filterable={filterable}
+              // width={width}
               cell={cell}
               format={format}
             />

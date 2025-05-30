@@ -7,6 +7,7 @@ import { useSession } from 'SessionStoreContext'
 import {
   Backdrop,
   CircularProgress,
+  Tooltip,
   Typography,
 } from '../../../../node_modules/@mui/material/index'
 import Notification from 'components/Utilities/Notification'
@@ -99,6 +100,14 @@ const AnnualProductionPlan = () => {
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     { field: 'part3', headerName: 'UOM', editable: false, flex: 1 },
   ]
@@ -124,6 +133,14 @@ const AnnualProductionPlan = () => {
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'part3',
@@ -155,6 +172,14 @@ const AnnualProductionPlan = () => {
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'HourlyRate',
@@ -163,6 +188,14 @@ const AnnualProductionPlan = () => {
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'PeriodFrom',
@@ -190,6 +223,14 @@ const AnnualProductionPlan = () => {
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'Actual1',
@@ -198,6 +239,14 @@ const AnnualProductionPlan = () => {
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     {
@@ -207,6 +256,14 @@ const AnnualProductionPlan = () => {
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'Actual2',
@@ -215,6 +272,14 @@ const AnnualProductionPlan = () => {
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     {
@@ -224,6 +289,14 @@ const AnnualProductionPlan = () => {
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'Actual3',
@@ -232,6 +305,14 @@ const AnnualProductionPlan = () => {
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     {
@@ -241,6 +322,14 @@ const AnnualProductionPlan = () => {
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
   ]
 

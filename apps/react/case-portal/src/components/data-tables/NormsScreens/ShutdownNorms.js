@@ -17,6 +17,7 @@ import { validateFields } from 'utils/validationUtils'
 import TextField from '@mui/material/TextField'
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
+import FormattedNumberTooltip from 'components/Utilities/FormattedNumberTooltip'
 
 const ShutdownNorms = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -323,6 +324,14 @@ const ShutdownNorms = () => {
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !shutdownMonths?.includes(4),
       columnClassName: 'first-column',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     {
@@ -335,6 +344,14 @@ const ShutdownNorms = () => {
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !shutdownMonths?.includes(5),
       columnClassName: 'first-column',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     {
@@ -346,6 +363,14 @@ const ShutdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !shutdownMonths?.includes(6),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'july',
@@ -356,6 +381,14 @@ const ShutdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !shutdownMonths?.includes(7),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     {
@@ -367,6 +400,14 @@ const ShutdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !shutdownMonths?.includes(8),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'september',
@@ -377,6 +418,14 @@ const ShutdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !shutdownMonths?.includes(9),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'october',
@@ -387,6 +436,14 @@ const ShutdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !shutdownMonths?.includes(10),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'november',
@@ -397,6 +454,14 @@ const ShutdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !shutdownMonths?.includes(11),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'december',
@@ -407,6 +472,14 @@ const ShutdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !shutdownMonths?.includes(12),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'january',
@@ -417,6 +490,14 @@ const ShutdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !shutdownMonths?.includes(1),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'february',
@@ -427,6 +508,14 @@ const ShutdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !shutdownMonths?.includes(2),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'march',
@@ -437,6 +526,14 @@ const ShutdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !shutdownMonths?.includes(3),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     // remarks

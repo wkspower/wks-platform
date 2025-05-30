@@ -126,6 +126,14 @@ const getEnhancedProductionColDefs = ({
         valueFormatter: formatValueToThreeDecimals,
         headerName: headerMap[col.headerName],
         align: 'right',
+        renderCell: (params) => (
+          <Tooltip
+            title={params.value != null ? params.value.toString() : ''}
+            arrow
+          >
+            <span>{formatValueToThreeDecimals(params.value)}</span>
+          </Tooltip>
+        ),
       }
     }
 

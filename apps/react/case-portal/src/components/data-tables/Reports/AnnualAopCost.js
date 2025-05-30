@@ -122,9 +122,9 @@ const AnnualAopCost = () => {
     type: 'NormCost',
   })
 
-//useEffect(() => {
-    // fetchData('aopYearFilter', setUnit)
-//}, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  //useEffect(() => {
+  // fetchData('aopYearFilter', setUnit)
+  //}, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -154,7 +154,7 @@ const AnnualAopCost = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <Box display='flex' flexDirection='column' gap={2}>
+      <Box display='flex' flexDirection='column' gap={1}>
         <div>
           <CustomAccordion defaultExpanded disableGutters>
             <CustomAccordionSummary

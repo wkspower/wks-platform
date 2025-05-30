@@ -4,6 +4,7 @@ import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
 import {
   Backdrop,
   CircularProgress,
+  Tooltip,
   Typography,
 } from '../../../../node_modules/@mui/material/index'
 import { useEffect, useState } from 'react'
@@ -76,6 +77,14 @@ const MonthwiseRawMaterial = () => {
       headerAlign: 'left',
       flex: 1,
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'may',
@@ -84,6 +93,14 @@ const MonthwiseRawMaterial = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'june',
@@ -93,6 +110,14 @@ const MonthwiseRawMaterial = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'july',
@@ -102,6 +127,14 @@ const MonthwiseRawMaterial = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'aug',
@@ -111,6 +144,14 @@ const MonthwiseRawMaterial = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'sep',
@@ -120,6 +161,14 @@ const MonthwiseRawMaterial = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'oct',
@@ -129,6 +178,14 @@ const MonthwiseRawMaterial = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'nov',
@@ -138,6 +195,14 @@ const MonthwiseRawMaterial = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'dec',
@@ -147,6 +212,14 @@ const MonthwiseRawMaterial = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'jan',
@@ -156,6 +229,14 @@ const MonthwiseRawMaterial = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'feb',
@@ -165,6 +246,14 @@ const MonthwiseRawMaterial = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'march',
@@ -174,6 +263,14 @@ const MonthwiseRawMaterial = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToThreeDecimals,
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'total',
@@ -181,6 +278,14 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
   ]
 
@@ -309,6 +414,14 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'may',
@@ -317,6 +430,14 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'june',
@@ -325,6 +446,14 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'july',
@@ -333,6 +462,14 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'aug',
@@ -341,6 +478,14 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'sep',
@@ -349,6 +494,14 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'oct',
@@ -357,6 +510,14 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'nov',
@@ -365,6 +526,14 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'dec',
@@ -373,6 +542,14 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'jan',
@@ -381,6 +558,14 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'feb',
@@ -389,6 +574,14 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'march',
@@ -397,6 +590,14 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
   ]
 

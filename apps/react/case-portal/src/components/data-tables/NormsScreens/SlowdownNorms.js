@@ -322,6 +322,14 @@ const SlowdownNorms = () => {
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(4),
       columnClassName: 'first-column',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     {
@@ -334,6 +342,14 @@ const SlowdownNorms = () => {
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(5),
       columnClassName: 'first-column',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     {
@@ -345,6 +361,14 @@ const SlowdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(6),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'july',
@@ -355,6 +379,14 @@ const SlowdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(7),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     {
@@ -366,6 +398,14 @@ const SlowdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(8),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'september',
@@ -376,6 +416,14 @@ const SlowdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(9),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'october',
@@ -386,6 +434,14 @@ const SlowdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(10),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'november',
@@ -396,6 +452,14 @@ const SlowdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(11),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'december',
@@ -406,6 +470,14 @@ const SlowdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(12),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'january',
@@ -416,6 +488,14 @@ const SlowdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(1),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'february',
@@ -426,6 +506,14 @@ const SlowdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(2),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'march',
@@ -436,6 +524,14 @@ const SlowdownNorms = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(3),
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToFiveDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     // remarks

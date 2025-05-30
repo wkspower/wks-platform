@@ -70,6 +70,14 @@ const MonthwiseProduction = () => {
       headerAlign: 'left',
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'EOEProdActual', // was eoeActualCY
@@ -78,6 +86,14 @@ const MonthwiseProduction = () => {
       headerAlign: 'left',
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     // Current Year → Operating Hours
@@ -88,6 +104,14 @@ const MonthwiseProduction = () => {
       headerAlign: 'left',
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'OpHrsActual', // was opActualCY
@@ -96,6 +120,14 @@ const MonthwiseProduction = () => {
       headerAlign: 'left',
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     // Current Year → Throughput
@@ -106,6 +138,14 @@ const MonthwiseProduction = () => {
       headerAlign: 'left',
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'ThroughputActual', // was thrActualCY
@@ -114,6 +154,14 @@ const MonthwiseProduction = () => {
       headerAlign: 'left',
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     // Budget Year single values
@@ -124,6 +172,14 @@ const MonthwiseProduction = () => {
       headerAlign: 'left',
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'MEGThroughput', // was megTPH
@@ -132,6 +188,14 @@ const MonthwiseProduction = () => {
       headerAlign: 'left',
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'EOThroughput', // was eoTPH
@@ -140,6 +204,14 @@ const MonthwiseProduction = () => {
       headerAlign: 'left',
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'EOEThroughput', // was eoeTPH
@@ -148,6 +220,14 @@ const MonthwiseProduction = () => {
       headerAlign: 'left',
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'TotalEOE', // was totalEoeMT
@@ -156,6 +236,14 @@ const MonthwiseProduction = () => {
       headerAlign: 'left',
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     // (Optional) you can keep Remarks if you plan to add that later

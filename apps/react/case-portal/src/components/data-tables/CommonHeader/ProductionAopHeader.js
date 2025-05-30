@@ -176,6 +176,14 @@ const getEnhancedColDefs = ({
         valueFormatter: formatValueToTwoDecimals,
         renderEditCell: NumericInputOnly,
         align: 'right',
+        renderCell: (params) => (
+          <Tooltip
+            title={params.value != null ? params.value.toString() : ''}
+            arrow
+          >
+            <span>{formatValueToTwoDecimals(params.value)}</span>
+          </Tooltip>
+        ),
       }
     }
 

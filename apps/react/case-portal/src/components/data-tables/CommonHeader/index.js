@@ -163,6 +163,14 @@ const getEnhancedColDefs = ({
         headerName: headerMap[col.headerName],
         align: 'right',
         valueFormatter: formatValueToThreeDecimals,
+        renderCell: (params) => (
+          <Tooltip
+            title={params.value != null ? params.value.toString() : ''}
+            arrow
+          >
+            <span>{formatValueToThreeDecimals(params.value)}</span>
+          </Tooltip>
+        ),
       }
     }
     if (col.field === 'Particulars') {

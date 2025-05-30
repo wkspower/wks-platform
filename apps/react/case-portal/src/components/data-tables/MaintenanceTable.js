@@ -12,6 +12,7 @@ import { useSelector } from 'react-redux'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
+import { Tooltip } from '../../../node_modules/@mui/material/index'
 
 const MaintenanceTable = () => {
   // const [modifiedCells, setModifiedCells] = React.useState({})
@@ -126,6 +127,14 @@ const MaintenanceTable = () => {
       align: 'right',
       headerAlign: 'left',
       valueFormatter: formatValueToTwoDecimals,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToTwoDecimals(params.value)}</span>
+        </Tooltip>
+      ),
 
       // valueGetter: convertUnits,
     },
@@ -137,6 +146,14 @@ const MaintenanceTable = () => {
 
       align: 'right',
       headerAlign: 'left',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToTwoDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'June',
@@ -145,6 +162,14 @@ const MaintenanceTable = () => {
 
       align: 'right',
       headerAlign: 'left',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToTwoDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'July',
@@ -153,6 +178,14 @@ const MaintenanceTable = () => {
 
       align: 'right',
       headerAlign: 'left',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToTwoDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'Aug',
@@ -161,6 +194,14 @@ const MaintenanceTable = () => {
 
       align: 'right',
       headerAlign: 'left',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToTwoDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'Sep',
@@ -169,6 +210,14 @@ const MaintenanceTable = () => {
 
       align: 'right',
       headerAlign: 'left',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToTwoDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'Oct',
@@ -177,6 +226,14 @@ const MaintenanceTable = () => {
 
       align: 'right',
       headerAlign: 'left',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToTwoDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
 
     {
@@ -186,6 +243,14 @@ const MaintenanceTable = () => {
 
       align: 'right',
       headerAlign: 'left',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToTwoDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'Dec',
@@ -194,6 +259,14 @@ const MaintenanceTable = () => {
 
       align: 'right',
       headerAlign: 'left',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToTwoDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'Jan',
@@ -202,6 +275,14 @@ const MaintenanceTable = () => {
 
       align: 'right',
       headerAlign: 'left',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToTwoDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'Feb',
@@ -210,6 +291,14 @@ const MaintenanceTable = () => {
 
       align: 'right',
       headerAlign: 'left',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToTwoDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'Mar',
@@ -218,6 +307,14 @@ const MaintenanceTable = () => {
 
       align: 'right',
       headerAlign: 'left',
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToTwoDecimals(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'isEditable',
