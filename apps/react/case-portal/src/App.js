@@ -15,6 +15,7 @@ import './jio-grid-style.css'
 // import '@progress/kendo-theme-default/dist/all.css'
 // import '@progress/kendo-theme-bootstrap/dist/all.css'
 import '@progress/kendo-theme-fluent/dist/all.css'
+import '@progress/kendo-font-icons/dist/index.css'
 
 // import { useSelector } from 'react-redux'
 import Layout from 'layout/FooterLayout/index'
@@ -58,7 +59,7 @@ const App = () => {
                 Math.round(
                   keycloak.tokenParsed.exp +
                     keycloak.timeSkew -
-                    new Date().getTime() / 1000,
+                    new Date()?.getTime() / 1000,
                 ) +
                 ' seconds',
             )

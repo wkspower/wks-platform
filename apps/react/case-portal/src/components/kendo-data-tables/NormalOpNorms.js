@@ -8,7 +8,7 @@ import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import NumericInputOnly from 'utils/NumericInputOnly'
 //import DataGridTable from '../ASDataGrid'
-import KendoDataTables from './kendo-inprogress'
+import KendoDataTables from './index'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -240,7 +240,7 @@ const NormalOpNormsScreen = () => {
     {
       field: 'materialFkId',
       // headerName: 'Particulars',
-      title : lowerVertName === 'meg' ? 'Particulars' : 'Particulars',
+      title: 'Particulars',
       width: 120,
       valueGetter: (params) => params || '',
       valueFormatter: (params) => {
@@ -997,7 +997,20 @@ const NormalOpNormsScreen = () => {
     },
     isOldYear,
   )
-
+  const NormParameterIdCell = (props) => {
+    const productId = props.dataItem.materialFkId
+    const product = allProducts.find((p) => p.id === productId)
+    const displayName = product?.displayName || ''
+    // console.log(displayName)
+    return <td>{displayName}</td>
+  }
+  const NormParameterIdCellForImmidiate = (props) => {
+    const productId = props.dataItem.NormParameterFKId
+    const product = allProducts.find((p) => p.id === productId)
+    const displayName = product?.displayName || ''
+    console.log(displayName)
+    return <td>{displayName}</td>
+  }
   return (
     <div>
       <Backdrop
@@ -1008,6 +1021,7 @@ const NormalOpNormsScreen = () => {
       </Backdrop>
 
       <KendoDataTables
+        NormParameterIdCell={NormParameterIdCell}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         title='Normal Operations Norms'
@@ -1058,6 +1072,9 @@ const NormalOpNormsScreen = () => {
             <CustomAccordionDetails>
               <Box sx={{ width: '100%', margin: 0 }}>
                 <KendoDataTables
+                  NormParameterIdCellForImmidiate={
+                    NormParameterIdCellForImmidiate
+                  }
                   title='Intermediate Values'
                   columns={colDefsIntermediateValues}
                   setRows={setRowsIntermediateValues}

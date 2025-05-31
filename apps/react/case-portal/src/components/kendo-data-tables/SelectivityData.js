@@ -11,7 +11,7 @@ import { validateFields } from 'utils/validationUtils'
 // import getEnhancedAOPColDefs from './CommonHeader/ConfigHeader'
 import { Box } from '../../../node_modules/@mui/material/index'
 import KendoDataTables from './index'
-import getEnhancedAOPColDefs from 'components/data-tables/CommonHeader/ConfigHeader'
+import getEnhancedAOPColDefs from 'components/data-tables/CommonHeader/kendo_ConfigHeader'
 
 const SelectivityData = (props) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -329,7 +329,13 @@ const SelectivityData = (props) => {
     },
     isOldYear,
   )
-
+  const NormParameterIdCell = (props) => {
+    const productId = props.dataItem.normParameterFKId
+    const product = allProducts.find((p) => p.id === productId)
+    const displayName = product?.displayName || ''
+    // console.log(displayName)
+    return <td>{displayName}</td>
+  }
   return (
     <Box>
       <Backdrop
@@ -339,6 +345,7 @@ const SelectivityData = (props) => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <KendoDataTables
+        NormParameterIdCell={NormParameterIdCell}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         columns={productionColumns}

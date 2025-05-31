@@ -692,7 +692,7 @@ const ConsumptionNorms = () => {
     const productId = props.dataItem.NormParametersId
     const product = allProducts.find((p) => p.id === productId)
     const displayName = product?.displayName || ''
-    console.log(displayName)
+    // console.log(displayName)
     return <td>{displayName}</td>
   }
 

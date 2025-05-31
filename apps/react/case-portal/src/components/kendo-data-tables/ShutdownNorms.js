@@ -838,7 +838,13 @@ const ShutdownNorms = () => {
     },
     isOldYear,
   )
-
+  const NormParameterIdCell = (props) => {
+    const productId = props.dataItem.materialFkId
+    const product = allProducts.find((p) => p.id === productId)
+    const displayName = product?.displayName || ''
+    // console.log(displayName)
+    return <td>{displayName}</td>
+  }
   return (
     <div>
       <Backdrop
@@ -848,6 +854,7 @@ const ShutdownNorms = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <KendoDataTables
+        NormParameterIdCell={NormParameterIdCell}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         isCellEditable={isCellEditable}

@@ -12,13 +12,13 @@ const ConfigurationTable = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
-  const isOldYear = oldYear?.oldYear
+  // const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
 
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [tabIndex, setTabIndex] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [rows, setRows] = useState([])
+  // const [rows, setRows] = useState([])
   const [startUpRows, setStartUpRows] = useState([])
   const [otherLossRows, setOtherLossRows] = useState([])
   const [shutdownNormsRows, setShutdownRows] = useState([])
@@ -30,7 +30,7 @@ const ConfigurationTable = () => {
   const [availableTabs, setAvailableTabs] = useState([])
 
   const fetchData = async () => {
-    setRows([])
+    // setRows([])
     setProductionRows([])
     setLoading(true)
     try {
@@ -62,7 +62,7 @@ const ConfigurationTable = () => {
           groups.get(groupKey).push(formattedItem)
           groupedRows.push(formattedItem)
           setProductionRows(groupedRows)
-          setRows(groupedRows)
+          // setRows(groupedRows)
         })
       } else {
         const groups = new Map()
@@ -238,7 +238,7 @@ const ConfigurationTable = () => {
         value={tabIndex}
         onChange={(e, newIndex) => setTabIndex(newIndex)}
       >
-        {tabs.map((tabId, index) => {
+        {tabs.map((tabId) => {
           const tabInfo = availableTabs.find(
             (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
           )

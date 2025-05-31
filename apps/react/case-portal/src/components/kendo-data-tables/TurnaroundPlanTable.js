@@ -384,30 +384,7 @@ const TurnaroundPlanTable = () => {
     {
       field: 'remark',
       headerName: 'Remarks',
-      editable: false,
-      minWidth: 200,
-      renderCell: (params) => {
-        const displayText = truncateRemarks(params.value)
-        const isEditable = !params.row.Particulars
-
-        return (
-          <Tooltip title={params.value || ''} arrow>
-            <div
-              style={{
-                cursor: 'pointer',
-                color: params.value ? 'inherit' : 'gray',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                width: ' 100%',
-              }}
-              onClick={() => handleRemarkCellClick(params.row)}
-            >
-              {displayText || (isEditable ? 'Click to add remark' : '')}
-            </div>
-          </Tooltip>
-        )
-      },
+      editable: true,
     },
   ]
 

@@ -833,6 +833,13 @@ const SlowdownNorms = () => {
     },
     isOldYear,
   )
+  const NormParameterIdCell = (props) => {
+    const productId = props.dataItem.materialFkId
+    const product = allProducts.find((p) => p.id === productId)
+    const displayName = product?.displayName || ''
+    // console.log(displayName)
+    return <td>{displayName}</td>
+  }
 
   return (
     <div>
@@ -844,6 +851,7 @@ const SlowdownNorms = () => {
       </Backdrop>
       <KendoDataTables
         modifiedCells={modifiedCells}
+        NormParameterIdCell={NormParameterIdCell}
         setModifiedCells={setModifiedCells}
         isCellEditable={isCellEditable}
         title='Shutdown Norms'

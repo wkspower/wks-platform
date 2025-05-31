@@ -20,7 +20,7 @@
     "@progress/kendo-date-math": "^1.5.14",
     "@progress/kendo-dateinputs-common": "^0.4.5",
     "@progress/kendo-drawing": "^1.21.2",
-    "@progress/kendo-font-icons": "^4.1.0",
+    "@progress/kendo-font-icons": "^4.3.0",
     "@progress/kendo-inputs-common": "^3.1.1",
     "@progress/kendo-intl": "^3.1.2",
     "@progress/kendo-licensing": "^1.6.0",
