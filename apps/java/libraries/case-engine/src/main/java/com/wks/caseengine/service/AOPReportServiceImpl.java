@@ -84,19 +84,19 @@ public class AOPReportServiceImpl implements AOPReportService {
 					AOPReportDTO aOPReportDTO = new AOPReportDTO();
 					aOPReportDTO.setNorm(row[0] != null ? row[0].toString() : null);
 					aOPReportDTO.setParticulars(row[1] != null ? row[1].toString() : null);
-					aOPReportDTO.setApril(row[2] != null ? Float.parseFloat(row[2].toString()) : null);
-					aOPReportDTO.setMay(row[3] != null ? Float.parseFloat(row[3].toString()) : null);
-					aOPReportDTO.setJune(row[4] != null ? Float.parseFloat(row[4].toString()) : null);
-					aOPReportDTO.setJuly(row[5] != null ? Float.parseFloat(row[5].toString()) : null);
-					aOPReportDTO.setAugust(row[6] != null ? Float.parseFloat(row[6].toString()) : null);
-					aOPReportDTO.setSeptember(row[7] != null ? Float.parseFloat(row[7].toString()) : null);
-					aOPReportDTO.setOctober(row[8] != null ? Float.parseFloat(row[8].toString()) : null);
-					aOPReportDTO.setNovember(row[9] != null ? Float.parseFloat(row[9].toString()) : null);
-					aOPReportDTO.setDecember(row[10] != null ? Float.parseFloat(row[10].toString()) : null);
-					aOPReportDTO.setJanuary(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
-					aOPReportDTO.setFebruary(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
-					aOPReportDTO.setMarch(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
-					aOPReportDTO.setTotal(row[14] != null ? Float.parseFloat(row[14].toString()) : null);
+					aOPReportDTO.setApril(row[2] != null ? Double.parseDouble(row[2].toString()) : null);
+					aOPReportDTO.setMay(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
+					aOPReportDTO.setJune(row[4] != null ? Double.parseDouble(row[4].toString()) : null);
+					aOPReportDTO.setJuly(row[5] != null ? Double.parseDouble(row[5].toString()) : null);
+					aOPReportDTO.setAugust(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
+					aOPReportDTO.setSeptember(row[7] != null ? Double.parseDouble(row[7].toString()) : null);
+					aOPReportDTO.setOctober(row[8] != null ? Double.parseDouble(row[8].toString()) : null);
+					aOPReportDTO.setNovember(row[9] != null ? Double.parseDouble(row[9].toString()) : null);
+					aOPReportDTO.setDecember(row[10] != null ? Double.parseDouble(row[10].toString()) : null);
+					aOPReportDTO.setJanuary(row[11] != null ? Double.parseDouble(row[11].toString()) : null);
+					aOPReportDTO.setFebruary(row[12] != null ? Double.parseDouble(row[12].toString()) : null);
+					aOPReportDTO.setMarch(row[13] != null ? Double.parseDouble(row[13].toString()) : null);
+					aOPReportDTO.setTotal(row[14] != null ? Double.parseDouble(row[14].toString()) : null);
 					aopReportDTOList.add(aOPReportDTO);
 
 				} else if (reportType.equalsIgnoreCase("aopYearFilter")) {

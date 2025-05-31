@@ -30,40 +30,40 @@ public class AOP {
     private String aopType;
 
     @Column(name = "Jan")
-    private Float jan;
+    private Double jan;
 
     @Column(name = "Feb")
-    private Float feb;
+    private Double feb;
 
     @Column(name = "March")
-    private Float march;
+    private Double march;
 
     @Column(name = "April")
-    private Float april;
+    private Double april;
 
     @Column(name = "May")
-    private Float may;
+    private Double may;
 
     @Column(name = "June")
-    private Float june;
+    private Double june;
 
     @Column(name = "July")
-    private Float july;
+    private Double july;
 
     @Column(name = "Aug")
-    private Float aug;
+    private Double aug;
 
     @Column(name = "Sep")
-    private Float sep;
+    private Double sep;
 
     @Column(name = "Oct")
-    private Float oct;
+    private Double oct;
 
     @Column(name = "Nov")
-    private Float nov;
+    private Double nov;
 
     @Column(name = "Dec")
-    private Float dec;
+    private Double dec;
 
     @Column(name = "AOPYear", length = 100)
     private String aopYear;
@@ -72,7 +72,7 @@ public class AOP {
     private UUID plantFkId;
 
     @Column(name = "AvgTPH")
-    private Float avgTPH;
+    private Double avgTPH;
     
     @Column(name="Material_FK_Id")
     private UUID MaterialFKId;

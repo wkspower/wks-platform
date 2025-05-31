@@ -18,17 +18,17 @@ import lombok.NoArgsConstructor;
 @JsonInclude(Include.ALWAYS)
 public class MonthsDTO {
 	
-    protected Float jan;
-    protected Float feb;
-    protected Float march;
-    protected Float april;
-    protected Float may;
-    protected Float june;
-    protected Float july;
-    protected Float aug;
-    protected Float sep;
-    protected Float oct;
-    protected Float nov;
-    protected Float dec;
+    protected Double jan;
+    protected Double feb;
+    protected Double march;
+    protected Double april;
+    protected Double may;
+    protected Double june;
+    protected Double july;
+    protected Double aug;
+    protected Double sep;
+    protected Double oct;
+    protected Double nov;
+    protected Double dec;
 
 }

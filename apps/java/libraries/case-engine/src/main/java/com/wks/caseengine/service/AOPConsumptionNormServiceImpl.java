@@ -18,10 +18,17 @@ import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AOPConsumptionNormRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import javax.sql.DataSource;
+import java.sql.CallableStatement;
+import java.sql.SQLException;
+import java.sql.Connection;
+import jakarta.persistence.Query;
+
 
 @Service
 public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService {
@@ -40,6 +47,13 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 
 	@Autowired
 	private VerticalsRepository verticalRepository;
+	
+	private DataSource dataSource;
+	
+	// Inject or set your DataSource (e.g., via constructor or setter)
+		public AOPConsumptionNormServiceImpl(DataSource dataSource) {
+			this.dataSource = dataSource;
+		}
 
 	@Override
 	public List<AOPConsumptionNormDTO> getAOPConsumptionNorm(String plantId, String year) {
@@ -57,18 +71,18 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 				dto.setAopStatus(row[4] != null ? row[4].toString() : null);
 				dto.setAopRemarks(row[5] != null ? row[5].toString() : null);
 				dto.setMaterialFkId(row[6] != null ? row[6].toString() : null);
-				dto.setJan(row[7] != null ? Float.valueOf(row[7].toString()) : null);
-				dto.setFeb(row[8] != null ? Float.valueOf(row[8].toString()) : null);
-				dto.setMarch(row[9] != null ? Float.valueOf(row[9].toString()) : null);
-				dto.setApril(row[10] != null ? Float.valueOf(row[10].toString()) : null);
-				dto.setMay(row[11] != null ? Float.valueOf(row[11].toString()) : null);
-				dto.setJune(row[12] != null ? Float.valueOf(row[12].toString()) : null);
-				dto.setJuly(row[13] != null ? Float.valueOf(row[13].toString()) : null);
-				dto.setAug(row[14] != null ? Float.valueOf(row[14].toString()) : null);
-				dto.setSep(row[15] != null ? Float.valueOf(row[15].toString()) : null);
-				dto.setOct(row[16] != null ? Float.valueOf(row[16].toString()) : null);
-				dto.setNov(row[17] != null ? Float.valueOf(row[17].toString()) : null);
-				dto.setDec(row[18] != null ? Float.valueOf(row[18].toString()) : null);
+				dto.setJan(row[7] != null ? Double.valueOf(row[7].toString()) : null);
+				dto.setFeb(row[8] != null ? Double.valueOf(row[8].toString()) : null);
+				dto.setMarch(row[9] != null ? Double.valueOf(row[9].toString()) : null);
+				dto.setApril(row[10] != null ? Double.valueOf(row[10].toString()) : null);
+				dto.setMay(row[11] != null ? Double.valueOf(row[11].toString()) : null);
+				dto.setJune(row[12] != null ? Double.valueOf(row[12].toString()) : null);
+				dto.setJuly(row[13] != null ? Double.valueOf(row[13].toString()) : null);
+				dto.setAug(row[14] != null ? Double.valueOf(row[14].toString()) : null);
+				dto.setSep(row[15] != null ? Double.valueOf(row[15].toString()) : null);
+				dto.setOct(row[16] != null ? Double.valueOf(row[16].toString()) : null);
+				dto.setNov(row[17] != null ? Double.valueOf(row[17].toString()) : null);
+				dto.setDec(row[18] != null ? Double.valueOf(row[18].toString()) : null);
 				dto.setAopYear(row[19] != null ? row[19].toString() : null);
 				dto.setPlantFkId(row[20] != null ? row[20].toString() : null);
 				dto.setNormParameterTypeDisplayName(row[21] != null ? row[21].toString() : null);
@@ -168,39 +182,61 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 	}
 
 	@Override
-	@Transactional
-	public int calculateExpressionConsumptionNorms(String year, String plantId) {
+	public AOPMessageVM calculateExpressionConsumptionNorms(String year, String plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			String storedProcedure = vertical.getName() + "_" + site.getName() + "_CalculateConsumptionAOPValues";
 			System.out.println(storedProcedure);
-			return executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
+			Integer result=  executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
 					vertical.getId().toString(), year);
+			aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("SP Executed successfully");
+	        aopMessageVM.setData(result);
+	        return aopMessageVM;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return 0;
+		return aopMessageVM;
 	}
 
-	@Transactional
 	public int executeDynamicUpdateProcedure(String procedureName, String plantId, String siteId, String verticalId,
 			String finYear) {
 		try {
-			String sql = "EXEC " + procedureName
-					+ " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear";
-			Query query = entityManager.createNativeQuery(sql);
-			query.setParameter("plantId", plantId);
-			query.setParameter("siteId", siteId);
-			query.setParameter("verticalId", verticalId);
-			query.setParameter("finYear", finYear);
+			
+			String callSql = "{call " + procedureName + "(?, ?, ?, ?)}";
 
-			return query.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
+	        try (Connection connection = dataSource.getConnection();
+	             CallableStatement stmt = connection.prepareCall(callSql)) {
+
+	            // Set parameters in the correct order
+	            stmt.setString(1, plantId); // @finYear
+	            stmt.setString(2, siteId.toString()); // @plantId
+	            stmt.setString(3, verticalId.toString()); // @verticalId
+	            stmt.setString(4, finYear); // @siteId
+
+	            // Execute the stored procedure
+	            int rowsAffected = stmt.executeUpdate();
+
+	            // Optional: commit if auto-commit is off
+	            if (!connection.getAutoCommit()) {
+	                connection.commit();
+	            }
+
+	            return rowsAffected;
+
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	            return 0;
+	        }
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
 		}
-		return 0;
 	}
 
 	@Override
@@ -228,18 +264,18 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 				dto.setAopRemarks(row[4] != null ? row[4].toString() : "");
 				dto.setMaterialFkId(row[5] != null ? UUID.fromString(row[5].toString()) : null);
 
-				dto.setJan(row[8] != null ? Float.parseFloat(row[8].toString()) : 0.0f);
-				dto.setFeb(row[9] != null ? Float.parseFloat(row[9].toString()) : 0.0f);
-				dto.setMarch(row[10] != null ? Float.parseFloat(row[10].toString()) : 0.0f);
-				dto.setApril(row[11] != null ? Float.parseFloat(row[11].toString()) : 0.0f);
-				dto.setMay(row[12] != null ? Float.parseFloat(row[12].toString()) : 0.0f);
-				dto.setJune(row[13] != null ? Float.parseFloat(row[13].toString()) : 0.0f);
-				dto.setJuly(row[14] != null ? Float.parseFloat(row[14].toString()) : 0.0f);
-				dto.setAug(row[15] != null ? Float.parseFloat(row[15].toString()) : 0.0f);
-				dto.setSep(row[16] != null ? Float.parseFloat(row[16].toString()) : 0.0f);
-				dto.setOct(row[17] != null ? Float.parseFloat(row[17].toString()) : 0.0f);
-				dto.setNov(row[18] != null ? Float.parseFloat(row[18].toString()) : 0.0f);
-				dto.setDec(row[19] != null ? Float.parseFloat(row[19].toString()) : 0.0f);
+				dto.setJan(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0f);
+				dto.setFeb(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0f);
+				dto.setMarch(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0f);
+				dto.setApril(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0f);
+				dto.setMay(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0f);
+				dto.setJune(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0f);
+				dto.setJuly(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0f);
+				dto.setAug(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0f);
+				dto.setSep(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0f);
+				dto.setOct(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0f);
+				dto.setNov(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0f);
+				dto.setDec(row[19] != null ? Double.parseDouble(row[19].toString()) : 0.0f);
 
 				dto.setAopYear(row[20] != null ? row[20].toString() : "N/A");
 				dto.setPlantFkId(row[21] != null ? UUID.fromString(row[21].toString()) : null);

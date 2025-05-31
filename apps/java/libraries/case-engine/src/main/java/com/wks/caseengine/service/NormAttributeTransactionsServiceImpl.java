@@ -74,7 +74,7 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	    	                WHEN 8 THEN 'Aug' WHEN 9 THEN 'Sep' WHEN 10 THEN 'Oct' WHEN 11 THEN 'Nov' 
 	    	                WHEN 12 THEN 'Dec' WHEN 1 THEN 'Jan' WHEN 2 THEN 'Feb' WHEN 3 THEN 'Mar' 
 	    	            END + RIGHT(nat.AuditYear, 2) AS MonthYear,
-	    	            TRY_CAST(nat.AttributeValue AS FLOAT) AS AttributeValue,
+	    	            TRY_CAST(nat.AttributeValue AS Double) AS AttributeValue,
 	    	            nat.Remarks, 
 	    	            nat.CatalystAttribute_FK_Id AS catalystId,  
 	    	            nat.NormParameter_FK_Id AS NormParameterFKId 
@@ -188,7 +188,7 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	public Boolean updateCatalystData(CatalystAttributesDTO catalystAttributesDTO) {
 		
 		for(int i=0;i<12;i++) {
-			Float attributeValue=getAttributeValue(catalystAttributesDTO,(i+1));
+			Double attributeValue=getAttributeValue(catalystAttributesDTO,(i+1));
 			Integer month =i+1;		
 			String auditYear=catalystAttributesDTO.getYear();
 			// if(i<3) {
@@ -240,7 +240,7 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	public Boolean deleteCatalystData(CatalystAttributesDTO catalystAttributesDTO) {
 		
 		for(int i=0;i<12;i++) {
-			Float attributeValue=getAttributeValue(catalystAttributesDTO,(i+1));
+			Double attributeValue=getAttributeValue(catalystAttributesDTO,(i+1));
 			Integer month =i+1;		
 			String auditYear=catalystAttributesDTO.getYear();
 			// if(i<3) {
@@ -255,7 +255,7 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 		return true;
 	}
 	
-	public Float getAttributeValue(CatalystAttributesDTO catalystAttributesDTO,Integer i) {
+	public Double getAttributeValue(CatalystAttributesDTO catalystAttributesDTO,Integer i) {
 		switch(i) {
 			case 1:
 				return catalystAttributesDTO.getJan();

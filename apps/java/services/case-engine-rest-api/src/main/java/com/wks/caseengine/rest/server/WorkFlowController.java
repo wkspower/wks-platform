@@ -73,7 +73,7 @@ public class WorkFlowController {
 	}
 
 	@GetMapping(value="/handle/calculate/work-flow")
-	public int calculateExpressionWorkFlow(@RequestParam String year,@RequestParam String plantId){
+	public AOPMessageVM calculateExpressionWorkFlow(@RequestParam String year,@RequestParam String plantId){
 		return	 workflowService.calculateExpressionWorkFlow(year,plantId);
 		
 	}

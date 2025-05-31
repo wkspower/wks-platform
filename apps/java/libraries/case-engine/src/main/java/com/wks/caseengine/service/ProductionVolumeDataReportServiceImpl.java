@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,9 @@ import com.wks.caseengine.repository.VerticalsRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import java.sql.CallableStatement;
+import java.sql.SQLException;
+import java.sql.Connection;
 
 @Service
 public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDataReportService {
@@ -55,6 +60,13 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 	@Autowired
 	private MonthWiseProductionPlanRepository monthWiseProductionPlanRepository;
+	
+	private DataSource dataSource;
+	
+	// Inject or set your DataSource (e.g., via constructor or setter)
+		public ProductionVolumeDataReportServiceImpl(DataSource dataSource) {
+			this.dataSource = dataSource;
+		}
 
 	@Override
 	public AOPMessageVM getReportForProductionVolumnData(String plantId, String year) {
@@ -508,7 +520,6 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	}
 
 	@Override
-	@Transactional
 	public AOPMessageVM calculateProductionSummary(String year, String plantId) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
@@ -531,7 +542,6 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	}
 
 	@Override
-	@Transactional
 	public AOPMessageVM calculateMonthwiseProductionData(String year, String plantId) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
@@ -554,7 +564,6 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	}
 
 	@Override
-	@Transactional
 	public AOPMessageVM calculatePlantConsumptionSummaryReportData(String year, String plantId) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
@@ -577,7 +586,6 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	}
 
 	@Override
-	@Transactional
 	public AOPMessageVM calculateTurnAroundPlanReportData(String year, String plantId) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
@@ -600,7 +608,6 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	}
 
 	@Override
-	@Transactional
 	public AOPMessageVM calculateAnnualProductionPlanData(String year, String plantId) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
@@ -623,7 +630,6 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	}
 
 	@Override
-	@Transactional
 	public AOPMessageVM calculatePlantContributionReportData(String year, String plantId) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
@@ -645,17 +651,34 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 	}
 
-	@Transactional
 	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
 			String aopYear) {
 		try {
-			String sql = "EXEC " + procedureName
-					+ " @plantId = :plantId, @aopYear = :aopYear";
-			Query query = entityManager.createNativeQuery(sql);
-			query.setParameter("plantId", plantId);
-			query.setParameter("aopYear", aopYear);
+			
+			String callSql = "{call " + procedureName + "(?, ?)}";
 
-			return query.executeUpdate();
+	        try (Connection connection = dataSource.getConnection();
+	             CallableStatement stmt = connection.prepareCall(callSql)) {
+
+	            // Set parameters in the correct order
+	            stmt.setString(1, plantId); 
+	            stmt.setString(2, aopYear); 
+
+	            // Execute the stored procedure
+	            int rowsAffected = stmt.executeUpdate();
+
+	            // Optional: commit if auto-commit is off
+	            if (!connection.getAutoCommit()) {
+	                connection.commit();
+	            }
+
+	            return rowsAffected;
+
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	            return 0;
+	        }
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

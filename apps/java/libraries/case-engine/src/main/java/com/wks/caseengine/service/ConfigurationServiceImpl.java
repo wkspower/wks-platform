@@ -98,40 +98,40 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				ConfigurationDTO configurationDTO = new ConfigurationDTO();
 				configurationDTO.setNormParameterFKId(row[0] != null ? row[0].toString() : "");
 				configurationDTO.setJan(
-						(row[1] != null && !row[1].toString().trim().isEmpty()) ? Float.parseFloat(row[1].toString())
+						(row[1] != null && !row[1].toString().trim().isEmpty()) ? Double.parseDouble(row[1].toString())
 								: null);
 				configurationDTO.setFeb(
-						(row[2] != null && !row[2].toString().trim().isEmpty()) ? Float.parseFloat(row[2].toString())
+						(row[2] != null && !row[2].toString().trim().isEmpty()) ? Double.parseDouble(row[2].toString())
 								: null);
 				configurationDTO.setMar(
-						(row[3] != null && !row[3].toString().trim().isEmpty()) ? Float.parseFloat(row[3].toString())
+						(row[3] != null && !row[3].toString().trim().isEmpty()) ? Double.parseDouble(row[3].toString())
 								: null);
 				configurationDTO.setApr(
-						(row[4] != null && !row[4].toString().trim().isEmpty()) ? Float.parseFloat(row[4].toString())
+						(row[4] != null && !row[4].toString().trim().isEmpty()) ? Double.parseDouble(row[4].toString())
 								: null);
 				configurationDTO.setMay(
-						(row[5] != null && !row[5].toString().trim().isEmpty()) ? Float.parseFloat(row[5].toString())
+						(row[5] != null && !row[5].toString().trim().isEmpty()) ? Double.parseDouble(row[5].toString())
 								: null);
 				configurationDTO.setJun(
-						(row[6] != null && !row[6].toString().trim().isEmpty()) ? Float.parseFloat(row[6].toString())
+						(row[6] != null && !row[6].toString().trim().isEmpty()) ? Double.parseDouble(row[6].toString())
 								: null);
 				configurationDTO.setJul(
-						(row[7] != null && !row[7].toString().trim().isEmpty()) ? Float.parseFloat(row[7].toString())
+						(row[7] != null && !row[7].toString().trim().isEmpty()) ? Double.parseDouble(row[7].toString())
 								: null);
 				configurationDTO.setAug(
-						(row[8] != null && !row[8].toString().trim().isEmpty()) ? Float.parseFloat(row[8].toString())
+						(row[8] != null && !row[8].toString().trim().isEmpty()) ? Double.parseDouble(row[8].toString())
 								: null);
 				configurationDTO.setSep(
-						(row[9] != null && !row[9].toString().trim().isEmpty()) ? Float.parseFloat(row[9].toString())
+						(row[9] != null && !row[9].toString().trim().isEmpty()) ? Double.parseDouble(row[9].toString())
 								: null);
 				configurationDTO.setOct(
-						(row[10] != null && !row[10].toString().trim().isEmpty()) ? Float.parseFloat(row[10].toString())
+						(row[10] != null && !row[10].toString().trim().isEmpty()) ? Double.parseDouble(row[10].toString())
 								: null);
 				configurationDTO.setNov(
-						(row[11] != null && !row[11].toString().trim().isEmpty()) ? Float.parseFloat(row[11].toString())
+						(row[11] != null && !row[11].toString().trim().isEmpty()) ? Double.parseDouble(row[11].toString())
 								: null);
 				configurationDTO.setDec(
-						(row[12] != null && !row[12].toString().trim().isEmpty()) ? Float.parseFloat(row[12].toString())
+						(row[12] != null && !row[12].toString().trim().isEmpty()) ? Double.parseDouble(row[12].toString())
 								: null);
 				configurationDTO.setRemarks((row[13] != null ? row[13].toString() : ""));
 
@@ -189,40 +189,40 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 				configurationDTO.setNormParameterFKId(row[1] != null ? row[1].toString() : "");
 				configurationDTO.setJan(
-						(row[1] != null && !row[2].toString().trim().isEmpty()) ? Float.parseFloat(row[2].toString())
+						(row[1] != null && !row[2].toString().trim().isEmpty()) ? Double.parseDouble(row[2].toString())
 								: null);
 				configurationDTO.setFeb(
-						(row[2] != null && !row[3].toString().trim().isEmpty()) ? Float.parseFloat(row[3].toString())
+						(row[2] != null && !row[3].toString().trim().isEmpty()) ? Double.parseDouble(row[3].toString())
 								: null);
 				configurationDTO.setMar(
-						(row[3] != null && !row[4].toString().trim().isEmpty()) ? Float.parseFloat(row[4].toString())
+						(row[3] != null && !row[4].toString().trim().isEmpty()) ? Double.parseDouble(row[4].toString())
 								: null);
 				configurationDTO.setApr(
-						(row[4] != null && !row[6].toString().trim().isEmpty()) ? Float.parseFloat(row[6].toString())
+						(row[4] != null && !row[6].toString().trim().isEmpty()) ? Double.parseDouble(row[6].toString())
 								: null);
 				configurationDTO.setMay(
-						(row[5] != null && !row[7].toString().trim().isEmpty()) ? Float.parseFloat(row[7].toString())
+						(row[5] != null && !row[7].toString().trim().isEmpty()) ? Double.parseDouble(row[7].toString())
 								: null);
 				configurationDTO.setJun(
-						(row[6] != null && !row[8].toString().trim().isEmpty()) ? Float.parseFloat(row[8].toString())
+						(row[6] != null && !row[8].toString().trim().isEmpty()) ? Double.parseDouble(row[8].toString())
 								: null);
 				configurationDTO.setJul(
-						(row[7] != null && !row[8].toString().trim().isEmpty()) ? Float.parseFloat(row[8].toString())
+						(row[7] != null && !row[8].toString().trim().isEmpty()) ? Double.parseDouble(row[8].toString())
 								: null);
 				configurationDTO.setAug(
-						(row[8] != null && !row[9].toString().trim().isEmpty()) ? Float.parseFloat(row[9].toString())
+						(row[8] != null && !row[9].toString().trim().isEmpty()) ? Double.parseDouble(row[9].toString())
 								: null);
 				configurationDTO.setSep(
-						(row[9] != null && !row[10].toString().trim().isEmpty()) ? Float.parseFloat(row[10].toString())
+						(row[9] != null && !row[10].toString().trim().isEmpty()) ? Double.parseDouble(row[10].toString())
 								: null);
 				configurationDTO.setOct(
-						(row[10] != null && !row[11].toString().trim().isEmpty()) ? Float.parseFloat(row[11].toString())
+						(row[10] != null && !row[11].toString().trim().isEmpty()) ? Double.parseDouble(row[11].toString())
 								: null);
 				configurationDTO.setNov(
-						(row[11] != null && !row[12].toString().trim().isEmpty()) ? Float.parseFloat(row[12].toString())
+						(row[11] != null && !row[12].toString().trim().isEmpty()) ? Double.parseDouble(row[12].toString())
 								: null);
 				configurationDTO.setDec(
-						(row[12] != null && !row[13].toString().trim().isEmpty()) ? Float.parseFloat(row[13].toString())
+						(row[12] != null && !row[13].toString().trim().isEmpty()) ? Double.parseDouble(row[13].toString())
 								: null);
 				configurationDTO.setRemarks((row[14] != null ? row[14].toString() : ""));
 				// configurationDTO.setId(row[14] != null ? row[14].toString() : i + "#");
@@ -279,7 +279,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				Optional<NormParameters> optionNormParameters = normParametersRepository.findById(normParameterFKId);
 
 				for (int i = 1; i <= 12; i++) {
-					Float attributeValue = getAttributeValue(configurationDTO, i);
+					Double attributeValue = getAttributeValue(configurationDTO, i);
 
 					saveData(normParameterFKId, i, year, attributeValue, configurationDTO);
 					if (attributeValue != null && optionNormParameters.get().getName().equalsIgnoreCase("TST")) {
@@ -299,9 +299,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 						commands.add(attributeValue.toString());
 
-						Float attributeValueHP = getAttributeValueByPythonScriptFromSP(attributeValue);
+						Double attributeValueHP = getAttributeValueByPythonScriptFromSP(attributeValue);
 						// System.out.println("attributeHP " + attributeValueHP + " " + i);
-						// Float attributeValueHP = getAttributeValueByPythonScript(commands);
+						// Double attributeValueHP = getAttributeValueByPythonScript(commands);
 
 						saveData(optionNormParametersHP.get().getId(), i, year, attributeValueHP, configurationDTO);
 					}
@@ -314,7 +314,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 	}
 
-	private Float getAttributeValueByPythonScriptFromSP(Float attributeValue) {
+	private Double getAttributeValueByPythonScriptFromSP(Double attributeValue) {
 
 		try {
 			// Command to run the Python script with an argument
@@ -337,12 +337,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						BigDecimal decimalValue = new BigDecimal(row.toString());
 
 						double doubleValue = decimalValue.doubleValue(); // OK, may lose precision
-						Float floatValue = decimalValue.floatValue();
-						System.out.println("fvalue " + floatValue);
+						Double DoubleValue = decimalValue.doubleValue();
+						System.out.println("fvalue " + DoubleValue);
 						System.out.println("dvalue " + doubleValue);
 						System.out.println("decimalvalue " + decimalValue);
 						System.out.println("query result " + row.toString());
-						return floatValue;
+						return DoubleValue;
 					}
 				}
 
@@ -360,7 +360,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	}
 
-	private Float getAttributeValueByPythonScript(List<String> commands) {
+	private Double getAttributeValueByPythonScript(List<String> commands) {
 		System.out.println("Method started.");
 
 		try {
@@ -411,9 +411,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				return null;
 			}
 
-			System.out.println("Parsing float value from output.");
-			Float result = Float.parseFloat(outputStr);
-			System.out.println("Parsed float value: " + result);
+			System.out.println("Parsing Double value from output.");
+			Double result = Double.parseDouble(outputStr);
+			System.out.println("Parsed Double value: " + result);
 
 			System.out.println("Waiting for process to complete...");
 			int exitCode = process.waitFor();
@@ -422,7 +422,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			return result;
 
 		} catch (NumberFormatException nfe) {
-			System.err.println("Failed to parse float from output:");
+			System.err.println("Failed to parse Double from output:");
 			nfe.printStackTrace();
 		} catch (IOException ioe) {
 			System.err.println("IOException during process execution:");
@@ -440,7 +440,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		return null;
 	}
 
-	void saveData(UUID normParameterFKId, Integer i, String year, Float attributeValue,
+	void saveData(UUID normParameterFKId, Integer i, String year, Double attributeValue,
 			ConfigurationDTO configurationDTO) {
 
 		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
@@ -472,7 +472,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		normAttributeTransactionsRepository.save(normAttributeTransactions);
 	}
 
-	public Float getAttributeValue(ConfigurationDTO configurationDTO, Integer i) {
+	public Double getAttributeValue(ConfigurationDTO configurationDTO, Integer i) {
 		switch (i) {
 			case 1:
 				return configurationDTO.getJan();

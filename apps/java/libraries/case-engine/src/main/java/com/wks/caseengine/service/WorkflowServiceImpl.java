@@ -562,44 +562,56 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 	@Override
-	@Transactional
-	public int calculateExpressionWorkFlow(String year, String plantId) {
-		int totalUpdates = 0;
+	public AOPMessageVM calculateExpressionWorkFlow(String year, String plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-
-			// First SP _LoadAnnualAOPCost
-			String LoadAnnualAOPCost = vertical.getName() + "_" + site.getName() + "_LoadAnnualAOPCost";
-			totalUpdates += executeDynamicUpdateProcedure(LoadAnnualAOPCost, plantId, year);
-
-			// Second SP _LoadAnnualAOPCost_MIISContribution
-			String LoadAnnualAOPCost_MIISContribution = vertical.getName() + "_" + site.getName()
-					+ "_LoadAnnualAOPCost_MIISContribution";
-			totalUpdates += executeDynamicUpdateProcedure(LoadAnnualAOPCost_MIISContribution, plantId, year);
-
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadAnnualAOPCost";
+			System.out.println(storedProcedure);
+			Integer result= executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+			aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("SP Executed successfully");
+	        aopMessageVM.setData(result);
+	        return aopMessageVM;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return totalUpdates;
+		return aopMessageVM;
 	}
 
-	@Transactional
 	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
 			String aopYear) {
 		try {
-			String sql = "EXEC " + procedureName
-					+ " @plantId = :plantId, @aopYear = :aopYear";
-			Query query = entityManager.createNativeQuery(sql);
-			query.setParameter("plantId", plantId);
-			query.setParameter("aopYear", aopYear);
+			String callSql = "{call " + procedureName + "(?, ?)}";
 
-			return query.executeUpdate();
+	        try (Connection connection = dataSource.getConnection();
+	             CallableStatement stmt = connection.prepareCall(callSql)) {
+
+	            // Set parameters in the correct order
+	            stmt.setString(1, plantId); // @finYear
+	            stmt.setString(2, aopYear); // @plantId
+	            
+	            // Execute the stored procedure
+	            int rowsAffected = stmt.executeUpdate();
+
+	            // Optional: commit if auto-commit is off
+	            if (!connection.getAutoCommit()) {
+	                connection.commit();
+	            }
+
+	            return rowsAffected;
+
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	            return 0;
+	        }
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return 0;
 	}
-
+	
 }

@@ -31,6 +31,11 @@ import jakarta.persistence.PersistenceContext;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.sql.DataSource;
+import java.sql.CallableStatement;
+import java.sql.SQLException;
+import java.sql.Connection;
 import jakarta.persistence.Query;
 
 @Service
@@ -50,6 +55,13 @@ public class AOPServiceImpl implements AOPService {
 
 	@PersistenceContext
 	private EntityManager entityManager;
+	
+	private DataSource dataSource;
+	
+	// Inject or set your DataSource (e.g., via constructor or setter)
+		public AOPServiceImpl(DataSource dataSource) {
+			this.dataSource = dataSource;
+		}
 
 	@Override
 	public List<AOPDTO> getAOP() {
@@ -105,23 +117,23 @@ public class AOPServiceImpl implements AOPService {
 				aOPDTO.setAopRemarks(row[3] != null ? row[3].toString() : null);
 				aOPDTO.setAopType(row[4] != null ? row[4].toString() : null);
 
-				// Directly parsing float values
-				aOPDTO.setJan(row[5] != null ? Float.valueOf(row[5].toString()) : null);
-				aOPDTO.setFeb(row[6] != null ? Float.valueOf(row[6].toString()) : null);
-				aOPDTO.setMarch(row[7] != null ? Float.valueOf(row[7].toString()) : null);
-				aOPDTO.setApril(row[8] != null ? Float.valueOf(row[8].toString()) : null);
-				aOPDTO.setMay(row[9] != null ? Float.valueOf(row[9].toString()) : null);
-				aOPDTO.setJune(row[10] != null ? Float.valueOf(row[10].toString()) : null);
-				aOPDTO.setJuly(row[11] != null ? Float.valueOf(row[11].toString()) : null);
-				aOPDTO.setAug(row[12] != null ? Float.valueOf(row[12].toString()) : null);
-				aOPDTO.setSep(row[13] != null ? Float.valueOf(row[13].toString()) : null);
-				aOPDTO.setOct(row[14] != null ? Float.valueOf(row[14].toString()) : null);
-				aOPDTO.setNov(row[15] != null ? Float.valueOf(row[15].toString()) : null);
-				aOPDTO.setDec(row[16] != null ? Float.valueOf(row[16].toString()) : null);
+				// Directly parsing Double values
+				aOPDTO.setJan(row[5] != null ? Double.valueOf(row[5].toString()) : null);
+				aOPDTO.setFeb(row[6] != null ? Double.valueOf(row[6].toString()) : null);
+				aOPDTO.setMarch(row[7] != null ? Double.valueOf(row[7].toString()) : null);
+				aOPDTO.setApril(row[8] != null ? Double.valueOf(row[8].toString()) : null);
+				aOPDTO.setMay(row[9] != null ? Double.valueOf(row[9].toString()) : null);
+				aOPDTO.setJune(row[10] != null ? Double.valueOf(row[10].toString()) : null);
+				aOPDTO.setJuly(row[11] != null ? Double.valueOf(row[11].toString()) : null);
+				aOPDTO.setAug(row[12] != null ? Double.valueOf(row[12].toString()) : null);
+				aOPDTO.setSep(row[13] != null ? Double.valueOf(row[13].toString()) : null);
+				aOPDTO.setOct(row[14] != null ? Double.valueOf(row[14].toString()) : null);
+				aOPDTO.setNov(row[15] != null ? Double.valueOf(row[15].toString()) : null);
+				aOPDTO.setDec(row[16] != null ? Double.valueOf(row[16].toString()) : null);
 
 				aOPDTO.setAopYear(row[17] != null ? row[17].toString() : null);
 				aOPDTO.setPlantFKId(row[18] != null ? row[18].toString() : null);
-				aOPDTO.setAvgTPH(row[19] != null ? Float.valueOf(row[19].toString()) : null);
+				aOPDTO.setAvgTPH(row[19] != null ? Double.valueOf(row[19].toString()) : null);
 				aOPDTO.setMaterialFKId(row[20] != null ? row[20].toString() : null);
 
 				// Directly parsing integer value
@@ -310,18 +322,18 @@ public class AOPServiceImpl implements AOPService {
 	                aopDto.setMaterialFKId(obj[0] != null ? obj[0].toString() : null);
 	                aopDto.setSiteFKId(site.getId().toString());
 
-	                aopDto.setJan(obj[3] != null ? Float.parseFloat(obj[3].toString()) : null);
-	                aopDto.setFeb(obj[4] != null ? Float.parseFloat(obj[4].toString()) : null);
-	                aopDto.setMarch(obj[5] != null ? Float.parseFloat(obj[5].toString()) : null);
-	                aopDto.setApril(obj[6] != null ? Float.parseFloat(obj[6].toString()) : null);
-	                aopDto.setMay(obj[7] != null ? Float.parseFloat(obj[7].toString()) : null);
-	                aopDto.setJune(obj[8] != null ? Float.parseFloat(obj[8].toString()) : null);
-	                aopDto.setJuly(obj[9] != null ? Float.parseFloat(obj[9].toString()) : null);
-	                aopDto.setAug(obj[10] != null ? Float.parseFloat(obj[10].toString()) : null);
-	                aopDto.setSep(obj[11] != null ? Float.parseFloat(obj[11].toString()) : null);
-	                aopDto.setOct(obj[12] != null ? Float.parseFloat(obj[12].toString()) : null);
-	                aopDto.setNov(obj[13] != null ? Float.parseFloat(obj[13].toString()) : null);
-	                aopDto.setDec(obj[14] != null ? Float.parseFloat(obj[14].toString()) : null);
+	                aopDto.setJan(obj[3] != null ? Double.parseDouble(obj[3].toString()) : null);
+	                aopDto.setFeb(obj[4] != null ? Double.parseDouble(obj[4].toString()) : null);
+	                aopDto.setMarch(obj[5] != null ? Double.parseDouble(obj[5].toString()) : null);
+	                aopDto.setApril(obj[6] != null ? Double.parseDouble(obj[6].toString()) : null);
+	                aopDto.setMay(obj[7] != null ? Double.parseDouble(obj[7].toString()) : null);
+	                aopDto.setJune(obj[8] != null ? Double.parseDouble(obj[8].toString()) : null);
+	                aopDto.setJuly(obj[9] != null ? Double.parseDouble(obj[9].toString()) : null);
+	                aopDto.setAug(obj[10] != null ? Double.parseDouble(obj[10].toString()) : null);
+	                aopDto.setSep(obj[11] != null ? Double.parseDouble(obj[11].toString()) : null);
+	                aopDto.setOct(obj[12] != null ? Double.parseDouble(obj[12].toString()) : null);
+	                aopDto.setNov(obj[13] != null ? Double.parseDouble(obj[13].toString()) : null);
+	                aopDto.setDec(obj[14] != null ? Double.parseDouble(obj[14].toString()) : null);
 
 	                dtoList.add(aopDto);
 	            }
@@ -337,7 +349,6 @@ public class AOPServiceImpl implements AOPService {
 
 	
 	@Override
-	@Transactional
 	public Integer executeDynamicMaintenanceCalculationMEG(String verticalName, String plantId, String siteId,
 			String verticalId, String aopYear) {
 		try {
@@ -345,20 +356,33 @@ public class AOPServiceImpl implements AOPService {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 	        String procedureName = verticalName+"_"+site.getName()+"_MaintenanceCalculation";
+	        
+	        String callSql = "{call " + procedureName + "(?, ?, ?, ?)}";
 
-			// Create a native query to execute the stored procedure
-			String sql = "EXEC " + procedureName
-					+ " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @aopYear = :aopYear";
+	        try (Connection connection = dataSource.getConnection();
+	             CallableStatement stmt = connection.prepareCall(callSql)) {
 
-			Query query = entityManager.createNativeQuery(sql);
+	            // Set parameters in the correct order
+	            stmt.setString(1, plantId); // @finYear
+	            stmt.setString(2, siteId.toString()); // @plantId
+	            stmt.setString(3, verticalId.toString()); // @verticalId
+	            stmt.setString(4, aopYear); // @siteId
 
-			// Set parameters
-			query.setParameter("plantId", plantId);
-			query.setParameter("siteId", siteId);
-			query.setParameter("verticalId", verticalId);
-			query.setParameter("aopYear", aopYear);
+	            // Execute the stored procedure
+	            int rowsAffected = stmt.executeUpdate();
 
-			return query.executeUpdate();
+	            // Optional: commit if auto-commit is off
+	            if (!connection.getAutoCommit()) {
+	                connection.commit();
+	            }
+
+	            return rowsAffected;
+
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	            return 0;
+	        }
+	
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format ", e);
 		} catch (Exception ex) {

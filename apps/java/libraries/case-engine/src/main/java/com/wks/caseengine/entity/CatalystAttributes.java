@@ -47,7 +47,7 @@ public class CatalystAttributes{
 	private String subAttributeDescription;
 	
 	@Column(name="DefaultValue")
-	private Float defaultValue;
+	private Double defaultValue;
 	
 	@Column(name="NormParameter_FK_Id")
 	private UUID normParameter_FK_Id;

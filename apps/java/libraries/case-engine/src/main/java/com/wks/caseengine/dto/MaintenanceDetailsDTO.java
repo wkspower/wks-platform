@@ -15,17 +15,17 @@ public class MaintenanceDetailsDTO {
 	
 	
 	    private String Name;
-	    private Float April;
-	    private Float May;
-	    private Float June;
-	    private Float July;
-	    private Float Aug;
-	    private Float Sep;
-	    private Float Oct;
-	    private Float Nov;
-	    private Float Dec;
-	    private Float Jan;
-	    private Float Feb;
-	    private Float Mar;
+	    private Double April;
+	    private Double May;
+	    private Double June;
+	    private Double July;
+	    private Double Aug;
+	    private Double Sep;
+	    private Double Oct;
+	    private Double Nov;
+	    private Double Dec;
+	    private Double Jan;
+	    private Double Feb;
+	    private Double Mar;
 	
 }

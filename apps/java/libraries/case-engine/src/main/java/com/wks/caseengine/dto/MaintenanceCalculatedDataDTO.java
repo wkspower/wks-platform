@@ -15,12 +15,12 @@ import com.wks.caseengine.entity.MaintenanceCalculatedData;
 public class MaintenanceCalculatedDataDTO {
     private String id;
     private Integer runningHoursInMonth;
-    private Float shoutdownHrs;
+    private Double shoutdownHrs;
     private Integer nonShoutdownHrs;
-    private Float eoeAvgSlowdownLoadPVT;
-    private Float eoAvgSlowdownLoadPVT; 
-    private Float eoeSlowdownLoadReduction;
-    private Float eoSlowdownLoadReduction;
+    private Double eoeAvgSlowdownLoadPVT;
+    private Double eoAvgSlowdownLoadPVT; 
+    private Double eoeSlowdownLoadReduction;
+    private Double eoSlowdownLoadReduction;
     private Integer eoeEffectiveOperatingHrs;
     private Integer eoEffectiveOperatingHrs;
     private Integer monthNo;

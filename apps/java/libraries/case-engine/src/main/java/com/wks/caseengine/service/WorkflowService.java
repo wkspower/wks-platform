@@ -16,7 +16,7 @@ public interface WorkflowService {
   	public Map<String, Object> getProductionAOPWorkflowData(String plantId,String year);
     public WorkflowDTO submitWorkflow(WorkflowSubmitDTO workflowSubmitDTO);
 
-public int calculateExpressionWorkFlow(String year,String plantId);
+public AOPMessageVM calculateExpressionWorkFlow(String year,String plantId);
     public void completeTaskWithComment(WorkflowSubmitDTO workflowSubmitDTO);
 	 public AOPMessageVM saveAnnualAOPData( String plantId, List<WorkflowYearDTO> workflowYearDTOList);
 }

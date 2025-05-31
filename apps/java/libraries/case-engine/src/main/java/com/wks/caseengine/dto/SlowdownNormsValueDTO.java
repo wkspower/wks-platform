@@ -1,7 +1,6 @@
 package com.wks.caseengine.dto;
 
 import java.util.Date;
-
 import org.springframework.context.annotation.Configuration;
 
 import lombok.AllArgsConstructor;
@@ -21,18 +20,18 @@ public class SlowdownNormsValueDTO {
     private String verticalFkId;
     private String materialFkId;
     private String normParameterTypeFkId;
-    private Float april;
-    private Float may;
-    private Float june;
-    private Float july;
-    private Float august;
-    private Float september;
-    private Float october;
-    private Float november;
-    private Float december;
-    private Float january;
-    private Float february;
-    private Float march;
+    private Double april;
+    private Double may;
+    private Double june;
+    private Double july;
+    private Double august;
+    private Double september;
+    private Double october;
+    private Double november;
+    private Double december;
+    private Double january;
+    private Double february;
+    private Double march;
     private String financialYear;
     private String remarks;
     private Date createdOn;

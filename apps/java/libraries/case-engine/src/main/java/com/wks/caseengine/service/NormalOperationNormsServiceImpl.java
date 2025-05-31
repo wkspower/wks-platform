@@ -1,10 +1,18 @@
 package com.wks.caseengine.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
-
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,25 +116,22 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 	@Override
 	public List<MCUNormsValueDTO> saveNormalOperationNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList) {
-
+		
 		try {
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			String userId = authentication.getName();
 			List<NormsTransactions> transactionsToSave = new ArrayList<>();
 
-			for (MCUNormsValueDTO dto : mCUNormsValueDTOList) {
-				Optional<MCUNormsValue> optionalValue = normalOperationNormsRepository
-						.findById(UUID.fromString(dto.getId()));
+		    for (MCUNormsValueDTO dto : mCUNormsValueDTOList) {
+		        Optional<MCUNormsValue> optionalValue = normalOperationNormsRepository.findById(UUID.fromString(dto.getId()));
+		        if (optionalValue.isEmpty()) {
+		            continue; // or handle accordingly
+		        }
+		        MCUNormsValue value = optionalValue.get();
 
-				if (optionalValue.isEmpty()) {
-					continue; // or handle accordingly
-				}
-
-				MCUNormsValue value = optionalValue.get();
-
-				for (int month = 1; month <= 12; month++) {
-					Double oldVal = getMonthlyValue(value, month);
-					Double newVal = getMonthlyValue(dto, month);
+		        for (int month = 1; month <= 12; month++) {
+		            Double oldVal = getMonthlyValue(value, month);
+		            Double newVal = getMonthlyValue(dto, month);
 
 					if (newVal != null && !Objects.equals(oldVal, newVal)) {
 						NormsTransactions normsTransactions = new NormsTransactions();

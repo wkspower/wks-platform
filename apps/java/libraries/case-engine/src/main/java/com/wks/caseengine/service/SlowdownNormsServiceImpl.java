@@ -75,18 +75,18 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 				slowdownNormsValueDTO.setPlantFkId(row[2] != null ? row[2].toString() : null);
 				slowdownNormsValueDTO.setVerticalFkId(row[3] != null ? row[3].toString() : null);
 				slowdownNormsValueDTO.setMaterialFkId(row[4] != null ? row[4].toString() : null);
-				slowdownNormsValueDTO.setApril(row[5] != null ? Float.parseFloat(row[5].toString()) : null);
-				slowdownNormsValueDTO.setMay(row[6] != null ? Float.parseFloat(row[6].toString()) : null);
-				slowdownNormsValueDTO.setJune(row[7] != null ? Float.parseFloat(row[7].toString()) : null);
-				slowdownNormsValueDTO.setJuly(row[8] != null ? Float.parseFloat(row[8].toString()) : null);
-				slowdownNormsValueDTO.setAugust(row[9] != null ? Float.parseFloat(row[9].toString()) : null);
-				slowdownNormsValueDTO.setSeptember(row[10] != null ? Float.parseFloat(row[10].toString()) : null);
-				slowdownNormsValueDTO.setOctober(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
-				slowdownNormsValueDTO.setNovember(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
-				slowdownNormsValueDTO.setDecember(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
-				slowdownNormsValueDTO.setJanuary(row[14] != null ? Float.parseFloat(row[14].toString()) : null);
-				slowdownNormsValueDTO.setFebruary(row[15] != null ? Float.parseFloat(row[15].toString()) : null);
-				slowdownNormsValueDTO.setMarch(row[16] != null ? Float.parseFloat(row[16].toString()) : null);
+				slowdownNormsValueDTO.setApril(row[5] != null ? Double.parseDouble(row[5].toString()) : null);
+				slowdownNormsValueDTO.setMay(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
+				slowdownNormsValueDTO.setJune(row[7] != null ? Double.parseDouble(row[7].toString()) : null);
+				slowdownNormsValueDTO.setJuly(row[8] != null ? Double.parseDouble(row[8].toString()) : null);
+				slowdownNormsValueDTO.setAugust(row[9] != null ? Double.parseDouble(row[9].toString()) : null);
+				slowdownNormsValueDTO.setSeptember(row[10] != null ? Double.parseDouble(row[10].toString()) : null);
+				slowdownNormsValueDTO.setOctober(row[11] != null ? Double.parseDouble(row[11].toString()) : null);
+				slowdownNormsValueDTO.setNovember(row[12] != null ? Double.parseDouble(row[12].toString()) : null);
+				slowdownNormsValueDTO.setDecember(row[13] != null ? Double.parseDouble(row[13].toString()) : null);
+				slowdownNormsValueDTO.setJanuary(row[14] != null ? Double.parseDouble(row[14].toString()) : null);
+				slowdownNormsValueDTO.setFebruary(row[15] != null ? Double.parseDouble(row[15].toString()) : null);
+				slowdownNormsValueDTO.setMarch(row[16] != null ? Double.parseDouble(row[16].toString()) : null);
 				slowdownNormsValueDTO.setFinancialYear(row[17] != null ? row[17].toString() : null);
 				slowdownNormsValueDTO.setRemarks(row[18] != null ? row[18].toString() : " ");
 				slowdownNormsValueDTO.setCreatedOn(row[19] != null ? (Date) row[19] : null);
@@ -163,18 +163,18 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 
 					slowdownNormsValue.setCreatedOn(new Date());
 				}
-				slowdownNormsValue.setApril(Optional.ofNullable(slowdownNormsValueDTO.getApril()).orElse(0.0f));
-				slowdownNormsValue.setMay(Optional.ofNullable(slowdownNormsValueDTO.getMay()).orElse(0.0f));
-				slowdownNormsValue.setJune(Optional.ofNullable(slowdownNormsValueDTO.getJune()).orElse(0.0f));
-				slowdownNormsValue.setJuly(Optional.ofNullable(slowdownNormsValueDTO.getJuly()).orElse(0.0f));
-				slowdownNormsValue.setAugust(Optional.ofNullable(slowdownNormsValueDTO.getAugust()).orElse(0.0f));
-				slowdownNormsValue.setSeptember(Optional.ofNullable(slowdownNormsValueDTO.getSeptember()).orElse(0.0f));
-				slowdownNormsValue.setOctober(Optional.ofNullable(slowdownNormsValueDTO.getOctober()).orElse(0.0f));
-				slowdownNormsValue.setNovember(Optional.ofNullable(slowdownNormsValueDTO.getNovember()).orElse(0.0f));
-				slowdownNormsValue.setDecember(Optional.ofNullable(slowdownNormsValueDTO.getDecember()).orElse(0.0f));
-				slowdownNormsValue.setJanuary(Optional.ofNullable(slowdownNormsValueDTO.getJanuary()).orElse(0.0f));
-				slowdownNormsValue.setFebruary(Optional.ofNullable(slowdownNormsValueDTO.getFebruary()).orElse(0.0f));
-				slowdownNormsValue.setMarch(Optional.ofNullable(slowdownNormsValueDTO.getMarch()).orElse(0.0f));
+				slowdownNormsValue.setApril(Optional.ofNullable(slowdownNormsValueDTO.getApril()).orElse(0.0));
+				slowdownNormsValue.setMay(Optional.ofNullable(slowdownNormsValueDTO.getMay()).orElse(0.0));
+				slowdownNormsValue.setJune(Optional.ofNullable(slowdownNormsValueDTO.getJune()).orElse(0.0));
+				slowdownNormsValue.setJuly(Optional.ofNullable(slowdownNormsValueDTO.getJuly()).orElse(0.0));
+				slowdownNormsValue.setAugust(Optional.ofNullable(slowdownNormsValueDTO.getAugust()).orElse(0.0));
+				slowdownNormsValue.setSeptember(Optional.ofNullable(slowdownNormsValueDTO.getSeptember()).orElse(0.0));
+				slowdownNormsValue.setOctober(Optional.ofNullable(slowdownNormsValueDTO.getOctober()).orElse(0.0));
+				slowdownNormsValue.setNovember(Optional.ofNullable(slowdownNormsValueDTO.getNovember()).orElse(0.0));
+				slowdownNormsValue.setDecember(Optional.ofNullable(slowdownNormsValueDTO.getDecember()).orElse(0.0));
+				slowdownNormsValue.setJanuary(Optional.ofNullable(slowdownNormsValueDTO.getJanuary()).orElse(0.0));
+				slowdownNormsValue.setFebruary(Optional.ofNullable(slowdownNormsValueDTO.getFebruary()).orElse(0.0));
+				slowdownNormsValue.setMarch(Optional.ofNullable(slowdownNormsValueDTO.getMarch()).orElse(0.0));
 				if (slowdownNormsValueDTO.getSiteFkId() != null) {
 					slowdownNormsValue.setSiteFkId(UUID.fromString(slowdownNormsValueDTO.getSiteFkId()));
 				}
@@ -196,7 +196,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 				slowdownNormsValue.setRemarks(slowdownNormsValueDTO.getRemarks());
 				slowdownNormsValue.setMcuVersion("V1");
 				slowdownNormsValue.setUpdatedBy("System");
-
+				System.out.println(slowdownNormsValue.getApril());
 				System.out.println("Data Saved Succussfully");
 				slowdownNormsRepository.save(slowdownNormsValue);
 			}
@@ -228,18 +228,18 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 				slowdownNormsValueDTO.setAOPStatus(row[5] != null ? row[5].toString() : null);
 				slowdownNormsValueDTO.setRemarks(row[6] != null ? row[6].toString() : "");
 				slowdownNormsValueDTO.setMaterialFkId(row[7] != null ? row[7].toString() : null);
-				slowdownNormsValueDTO.setJanuary(row[8] != null ? Float.parseFloat(row[8].toString()) : null);
-				slowdownNormsValueDTO.setFebruary(row[9] != null ? Float.parseFloat(row[9].toString()) : null);
-				slowdownNormsValueDTO.setMarch(row[10] != null ? Float.parseFloat(row[10].toString()) : null);
-				slowdownNormsValueDTO.setApril(row[11] != null ? Float.parseFloat(row[11].toString()) : null);
-				slowdownNormsValueDTO.setMay(row[12] != null ? Float.parseFloat(row[12].toString()) : null);
-				slowdownNormsValueDTO.setJune(row[13] != null ? Float.parseFloat(row[13].toString()) : null);
-				slowdownNormsValueDTO.setJuly(row[14] != null ? Float.parseFloat(row[14].toString()) : null);
-				slowdownNormsValueDTO.setAugust(row[15] != null ? Float.parseFloat(row[15].toString()) : null);
-				slowdownNormsValueDTO.setSeptember(row[16] != null ? Float.parseFloat(row[16].toString()) : null);
-				slowdownNormsValueDTO.setOctober(row[17] != null ? Float.parseFloat(row[17].toString()) : null);
-				slowdownNormsValueDTO.setNovember(row[18] != null ? Float.parseFloat(row[18].toString()) : null);
-				slowdownNormsValueDTO.setDecember(row[19] != null ? Float.parseFloat(row[19].toString()) : null);
+				slowdownNormsValueDTO.setJanuary(row[8] != null ? Double.parseDouble(row[8].toString()) : null);
+				slowdownNormsValueDTO.setFebruary(row[9] != null ? Double.parseDouble(row[9].toString()) : null);
+				slowdownNormsValueDTO.setMarch(row[10] != null ? Double.parseDouble(row[10].toString()) : null);
+				slowdownNormsValueDTO.setApril(row[11] != null ? Double.parseDouble(row[11].toString()) : null);
+				slowdownNormsValueDTO.setMay(row[12] != null ? Double.parseDouble(row[12].toString()) : null);
+				slowdownNormsValueDTO.setJune(row[13] != null ? Double.parseDouble(row[13].toString()) : null);
+				slowdownNormsValueDTO.setJuly(row[14] != null ? Double.parseDouble(row[14].toString()) : null);
+				slowdownNormsValueDTO.setAugust(row[15] != null ? Double.parseDouble(row[15].toString()) : null);
+				slowdownNormsValueDTO.setSeptember(row[16] != null ? Double.parseDouble(row[16].toString()) : null);
+				slowdownNormsValueDTO.setOctober(row[17] != null ? Double.parseDouble(row[17].toString()) : null);
+				slowdownNormsValueDTO.setNovember(row[18] != null ? Double.parseDouble(row[18].toString()) : null);
+				slowdownNormsValueDTO.setDecember(row[19] != null ? Double.parseDouble(row[19].toString()) : null);
 				slowdownNormsValueDTO.setFinancialYear(row[20] != null ? row[20].toString() : null);
 				slowdownNormsValueDTO.setPlantFkId(row[21] != null ? row[21].toString() : null);
 				slowdownNormsValueDTOList.add(slowdownNormsValueDTO);

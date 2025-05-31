@@ -2,7 +2,7 @@ package com.wks.caseengine.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
+
 import java.util.Date;
 import java.util.UUID;
 
@@ -39,40 +39,40 @@ public class SlowdownNormsValue {
 	private UUID normParameterTypeFkId;
 
 	@Column(name = "April")
-	private Float april;
+	private Double april;
 
 	@Column(name = "May")
-	private Float may;
+	private Double may;
 
 	@Column(name = "June")
-	private Float june;
+	private Double june;
 
 	@Column(name = "July")
-	private Float july;
+	private Double july;
 
 	@Column(name = "August")
-	private Float august;
+	private Double august;
 
 	@Column(name = "September")
-	private Float september;
+	private Double september;
 
 	@Column(name = "October")
-	private Float october;
+	private Double october;
 
 	@Column(name = "November")
-	private Float november;
+	private Double november;
 
 	@Column(name = "December")
-	private Float december;
+	private Double december;
 
 	@Column(name = "January")
-	private Float january;
+	private Double january;
 
 	@Column(name = "February")
-	private Float february;
+	private Double february;
 
 	@Column(name = "March")
-	private Float march;
+	private Double march;
 
 	@Column(name = "FinancialYear")
 	private String financialYear;

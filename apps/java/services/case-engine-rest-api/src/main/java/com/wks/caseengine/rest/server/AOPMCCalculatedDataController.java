@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.AOPMCCalculatedDataService;
 
 @RestController
@@ -31,7 +32,7 @@ public class AOPMCCalculatedDataController {
 	}
 	
 	@GetMapping(value="/getAOPMCCalculatedDataSP")
-	public  int getAOPMCCalculatedDataSP(@RequestParam String plantId, @RequestParam String year){
+	public  AOPMessageVM getAOPMCCalculatedDataSP(@RequestParam String plantId, @RequestParam String year){
 		return aOPMCCalculatedDataService.getAOPMCCalculatedDataSP(plantId,year);
 	}
 }
