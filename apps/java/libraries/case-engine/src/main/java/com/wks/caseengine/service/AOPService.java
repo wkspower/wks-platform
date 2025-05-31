@@ -9,7 +9,7 @@ public interface AOPService {
 	
 	public List<AOPDTO> getAOP();
 	public List<AOPDTO> updateAOP(List<AOPDTO> aOPDTOList);
-	public List<AOPDTO> getAOPData(String plantId, String year);
+	public AOPMessageVM getAOPData(String plantId, String year);
     public AOPMessageVM calculateData(String plantId, String year);
     public List<Map<String, String>> getAOPYears();
 	public List<Object[]> executeDynamicMaintenanceCalculationPE(String verticalName, String plantId, String siteId,

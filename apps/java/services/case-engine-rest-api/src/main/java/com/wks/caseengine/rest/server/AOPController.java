@@ -24,9 +24,8 @@ public class AOPController {
 	private AOPService aopService;
 	
 	@GetMapping(value="/getAOP")
-	public ResponseEntity<List<AOPDTO>> getAOP(@RequestParam String plantId,@RequestParam String year){
-		 List<AOPDTO> aOPList= aopService.getAOPData(plantId,year);
-		 return ResponseEntity.ok(aOPList);
+	public AOPMessageVM getAOP(@RequestParam String plantId,@RequestParam String year){
+		 return  aopService.getAOPData(plantId,year);
 	}
 	
 	@PutMapping(value="/updateAOP")

@@ -1,6 +1,8 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
@@ -14,12 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
 import com.wks.caseengine.entity.AOPMCCalculatedData;
+import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AOPMCCalculatedDataRepository;
+import com.wks.caseengine.repository.AopCalculationRepository;
+
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
@@ -45,14 +50,17 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	
 	private DataSource dataSource;
 	
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
+	
 	// Inject or set your DataSource (e.g., via constructor or setter)
 		public AOPMCCalculatedDataServiceImpl(DataSource dataSource) {
 			this.dataSource = dataSource;
 		}
 
 	@Override
-	public List<AOPMCCalculatedDataDTO> getAOPMCCalculatedData(String plantId, String year) {
-
+	public AOPMessageVM getAOPMCCalculatedData(String plantId, String year) {
+		AOPMessageVM aopMessageVM=new AOPMessageVM();
 		try {
 			List<Object[]> obj = aOPMCCalculatedDataRepository.getDataMCUValuesAllData(year, plantId);
 			List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
@@ -80,8 +88,15 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 				aOPMCCalculatedDataDTO.setVerticalFKId(row[22] != null ? row[22].toString() : null);
 				aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
 			}
-
-			return aOPMCCalculatedDataDTOList;
+			Map<String, Object> map = new HashMap<>(); 
+			
+			List<AopCalculation> aopCalculation=aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"production-volume-data");
+			map.put("aopMCCalculatedDataDTOList", aOPMCCalculatedDataDTOList);
+			map.put("aopCalculation", aopCalculation);
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(map);
+			aopMessageVM.setMessage("Data fetched successfully");
+			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
@@ -161,6 +176,8 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	            if (!connection.getAutoCommit()) {
 	                connection.commit();
 	            }
+	            
+	            aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),finYear,"production-volume-data");
 	            aopMessageVM.setCode(200);
 		        aopMessageVM.setMessage("SP Executed successfully");
 		        aopMessageVM.setData(rowsAffected);

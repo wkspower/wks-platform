@@ -12,12 +12,16 @@ import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.MonthWiseDataDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
+import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
+import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantMaintenanceRepository;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
+import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.ShutDownPlanRepository;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.*;
@@ -44,7 +48,15 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 	@Autowired
 	private NormParametersRepository normParametersRepository;
+	
+	@Autowired
+	private ScreenMappingRepository screenMappingRepository;
+	
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
 
+	String year;
+	
 	@Override
 	public List<ShutDownPlanDTO> findMaintenanceDetailsByPlantIdAndType(UUID plantId, String maintenanceTypeName,
 			String year) {
@@ -155,6 +167,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 			}
 
 			for (ShutDownPlanDTO shutDownPlanDTO : shutDownPlanDTOList) {
+				year=shutDownPlanDTO.getAudityear();
 				if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
 					// Creating a new record
 					PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
@@ -286,6 +299,16 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						throw new RuntimeException("Invalid ID format: " + shutDownPlanDTO.getId(), e);
 					}
 				}
+			}
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("shutdown-plan");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(plantId);
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
 			}
 			return shutDownPlanDTOList;
 		} catch (Exception ex) {

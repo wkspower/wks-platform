@@ -22,7 +22,7 @@ public class NormalOperationNormsController {
 	private NormalOperationNormsService normalOperationNormsService;
 	
 	@GetMapping(value="/normalOperationNorms")
-	public List<MCUNormsValueDTO> getNormalOperationNormsData(@RequestParam String year,@RequestParam String plantId){
+	public AOPMessageVM getNormalOperationNormsData(@RequestParam String year,@RequestParam String plantId){
 		return	normalOperationNormsService.getNormalOperationNormsData(year, plantId);
 	}
 
@@ -43,7 +43,7 @@ public class NormalOperationNormsController {
 	}
 
 	@GetMapping(value = "/handleCalculateNormalOpsNorms")
-	public int getNormalOperationNormsDataFromSP(@RequestParam String year, @RequestParam String plantId) {
+	public AOPMessageVM getNormalOperationNormsDataFromSP(@RequestParam String year, @RequestParam String plantId) {
 		return normalOperationNormsService.calculateExpressionConsumptionNorms(year, plantId);
 	}
 	

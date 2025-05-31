@@ -9,7 +9,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface AOPMCCalculatedDataService {
 	
-	public  List<AOPMCCalculatedDataDTO> getAOPMCCalculatedData(String plantId, String year);
+	public  AOPMessageVM getAOPMCCalculatedData(String plantId, String year);
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList);
 	public  AOPMessageVM getAOPMCCalculatedDataSP(String plantId, String year);
 

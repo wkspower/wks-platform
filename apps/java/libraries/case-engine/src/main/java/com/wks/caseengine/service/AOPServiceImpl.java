@@ -14,6 +14,7 @@ import com.wks.caseengine.dto.AOPDTO;
 import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
 import com.wks.caseengine.entity.AOP;
 import com.wks.caseengine.entity.AOPMCCalculatedData;
+import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
@@ -21,6 +22,7 @@ import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AOPRepository;
+import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
@@ -57,6 +59,9 @@ public class AOPServiceImpl implements AOPService {
 	private EntityManager entityManager;
 	
 	private DataSource dataSource;
+	
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
 	
 	// Inject or set your DataSource (e.g., via constructor or setter)
 		public AOPServiceImpl(DataSource dataSource) {
@@ -103,7 +108,8 @@ public class AOPServiceImpl implements AOPService {
 	}
 
 	@Override
-	public List<AOPDTO> getAOPData(String plantId, String year) {
+	public AOPMessageVM getAOPData(String plantId, String year) {
+		AOPMessageVM aopMessageVM=new AOPMessageVM();
 		List<AOPDTO> aOPDTOList = new ArrayList<>();
 		try {
 			List<Object[]> obj = aopRepository.findByAOPYearAndPlantFkId(year, UUID.fromString(plantId));
@@ -141,8 +147,15 @@ public class AOPServiceImpl implements AOPService {
 
 				aOPDTOList.add(aOPDTO);
 			}
-
-			return aOPDTOList;
+			Map<String, Object> map = new HashMap<>(); 
+			
+			List<AopCalculation> aopCalculation=aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"production-aop");
+			map.put("aopDTOList", aOPDTOList);
+			map.put("aopCalculation", aopCalculation);
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(map);
+			aopMessageVM.setMessage("Data fetched successfully");
+			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
@@ -274,7 +287,7 @@ public class AOPServiceImpl implements AOPService {
 	        aopMessageVM.setMessage("Data fetched successfully");
 	        aopMessageVM.setData(result);
 		}
-		
+		aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"production-aop");
         return aopMessageVM;
 	}
 

@@ -22,7 +22,7 @@ public class AOPMCCalculatedDataController {
 	private AOPMCCalculatedDataService aOPMCCalculatedDataService;
 	
 	@GetMapping(value="/getAOPMCCalculatedData")
-	public  List<AOPMCCalculatedDataDTO> getAOPMCCalculatedData(@RequestParam String plantId, @RequestParam String year){
+	public  AOPMessageVM getAOPMCCalculatedData(@RequestParam String plantId, @RequestParam String year){
 		return aOPMCCalculatedDataService.getAOPMCCalculatedData(plantId,year);
 	}
 	@PutMapping(value="/editAOPMCCalculatedData")

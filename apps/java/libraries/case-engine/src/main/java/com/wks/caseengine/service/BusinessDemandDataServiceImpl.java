@@ -6,14 +6,19 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import java.util.List;
 import java.util.UUID;
+
+import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.BusinessDemand;
+import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
+import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.ScreenMappingRepository;
 
 @Service
 public class BusinessDemandDataServiceImpl implements BusinessDemandDataService {
@@ -29,7 +34,15 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 
 	@PersistenceContext
 	private EntityManager entityManager;
+	
+	@Autowired
+	private ScreenMappingRepository screenMappingRepository;
+	
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
 
+	String year;
+	UUID plantId;
 	@Override
 	public List<BusinessDemandDataDTO> getBusinessDemandData(String year, String plantId) {
 		try {
@@ -115,6 +128,8 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 					businessDemand.setRemark(businessDemandDataDTO.getRemark());
 					businessDemand.setSep(businessDemandDataDTO.getSep());
 					businessDemand.setYear(businessDemandDataDTO.getYear());
+					year=businessDemandDataDTO.getYear();
+					plantId=UUID.fromString(businessDemandDataDTO.getPlantId());
 					if (businessDemandDataDTO.getSiteFKId() != null) {
 						businessDemand.setSiteFKId(UUID.fromString(businessDemandDataDTO.getSiteFKId()));
 					}
@@ -125,6 +140,16 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 
 				}
 			} // TODO Auto-generated method stub
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("business-demand");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(plantId);
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
 			return businessDemandDataDTOList;
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to save data", ex);

@@ -6,9 +6,9 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface NormalOperationNormsService {
 	
-	public List<MCUNormsValueDTO> getNormalOperationNormsData( String year, String plantId);
+	public AOPMessageVM getNormalOperationNormsData( String year, String plantId);
 	public List<MCUNormsValueDTO> saveNormalOperationNormsData( List<MCUNormsValueDTO> mCUNormsValueDTOList);
-	public int calculateExpressionConsumptionNorms(String year,String plantId);
+	public AOPMessageVM calculateExpressionConsumptionNorms(String year,String plantId);
 	
 	AOPMessageVM getNormsTransaction(String plantId, String aopYear);
 	

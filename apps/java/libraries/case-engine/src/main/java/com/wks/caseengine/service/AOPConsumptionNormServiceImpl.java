@@ -1,8 +1,9 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -14,12 +15,14 @@ import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.CalculatedConsumptionNormsDTO;
 import com.wks.caseengine.dto.AOPConsumptionNormDTO;
 import com.wks.caseengine.entity.AOPConsumptionNorm;
+import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AOPConsumptionNormRepository;
+import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
@@ -50,13 +53,17 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 	
 	private DataSource dataSource;
 	
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
+	
 	// Inject or set your DataSource (e.g., via constructor or setter)
 		public AOPConsumptionNormServiceImpl(DataSource dataSource) {
 			this.dataSource = dataSource;
 		}
 
 	@Override
-	public List<AOPConsumptionNormDTO> getAOPConsumptionNorm(String plantId, String year) {
+	public AOPMessageVM getAOPConsumptionNorm(String plantId, String year) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
 			List<Object[]> resultList = getAOPConsumptionNormDataFromView(year, UUID.fromString(plantId));
 			List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList = new ArrayList<>();
@@ -90,8 +97,15 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 				dto.setIsEditable(row[23] != null ? Boolean.valueOf(row[23].toString()) : null);
 				aOPConsumptionNormDTOList.add(dto);
 			}
-
-			return aOPConsumptionNormDTOList;
+			Map<String, Object> map = new HashMap<>(); 
+			
+			List<AopCalculation> aopCalculation=aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"consumption-aop");
+			map.put("aopConsumptionNormDTOList", aOPConsumptionNormDTOList);
+			map.put("aopCalculation", aopCalculation);
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(map);
+			aopMessageVM.setMessage("Data fetched successfully");
+			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
@@ -192,6 +206,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			System.out.println(storedProcedure);
 			Integer result=  executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
 					vertical.getId().toString(), year);
+			aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"consumption-aop");
 			aopMessageVM.setCode(200);
 	        aopMessageVM.setMessage("SP Executed successfully");
 	        aopMessageVM.setData(result);

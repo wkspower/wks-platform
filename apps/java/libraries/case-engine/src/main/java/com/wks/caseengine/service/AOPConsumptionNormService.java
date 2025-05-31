@@ -8,7 +8,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface AOPConsumptionNormService {
 	
-	public List<AOPConsumptionNormDTO> getAOPConsumptionNorm(String plantId,String year);
+	public AOPMessageVM getAOPConsumptionNorm(String plantId,String year);
 	public List<AOPConsumptionNormDTO> saveAOPConsumptionNorm(List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList);
 	public AOPMessageVM calculateExpressionConsumptionNorms(String year,String plantId);
 	public List<CalculatedConsumptionNormsDTO> getCalculatedConsumptionNorms(String year, String plantId);

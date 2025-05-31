@@ -11,13 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
+import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.MCUNormsValue;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.ShutdownNormsValue;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.ShutdownNormsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
@@ -41,6 +45,16 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	SiteRepository siteRepository;
 	@Autowired
 	VerticalsRepository verticalRepository;
+	
+	@Autowired
+	private ScreenMappingRepository screenMappingRepository;
+	
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
+	
+	String year;
+	UUID plantId;
+
 
 	@Override
 	public List<ShutdownNormsValueDTO> getShutdownNormsData(String year, String plantId) {
@@ -106,6 +120,8 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	public List<ShutdownNormsValueDTO> saveShutdownNormsData(List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
 		try {
 			for (ShutdownNormsValueDTO shutdownNormsValueDTO : shutdownNormsValueDTOList) {
+				year=shutdownNormsValueDTO.getFinancialYear();
+				plantId=UUID.fromString(shutdownNormsValueDTO.getPlantFkId());
 				ShutdownNormsValue shutdownNormsValue = new ShutdownNormsValue();
 				if (shutdownNormsValueDTO.getId() != null && !shutdownNormsValueDTO.getId().isEmpty()) {
 					shutdownNormsValue.setId(UUID.fromString(shutdownNormsValueDTO.getId()));
@@ -171,6 +187,17 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 
 				System.out.println("Data Saved Succussfully");
 				shutdownNormsRepository.save(shutdownNormsValue);
+			}
+			
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("shutdown-norms");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(plantId);
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
 			}
 			// TODO Auto-generated method stub
 			return shutdownNormsValueDTOList;

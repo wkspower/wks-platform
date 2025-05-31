@@ -21,17 +21,21 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.MCUNormsValueDTO;
 import com.wks.caseengine.entity.AOPSummary;
+import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.MCUNormsValue;
 import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.NormsTransactions;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.NormalOperationNormsRepository;
 import com.wks.caseengine.repository.NormsTransactionRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import java.lang.reflect.Method;
@@ -57,8 +61,17 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	VerticalsRepository verticalRepository;
 	@Autowired
 	private NormsTransactionRepository normsTransactionRepository;
+	
+	@Autowired
+	private ScreenMappingRepository screenMappingRepository;
+	
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
 
 	private DataSource dataSource;
+	
+	String year;
+	UUID plantId;
 
 	// Inject or set your DataSource (e.g., via constructor or setter)
 	public NormalOperationNormsServiceImpl(DataSource dataSource) {
@@ -66,7 +79,8 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	@Override
-	public List<MCUNormsValueDTO> getNormalOperationNormsData(String year, String plantId) {
+	public AOPMessageVM getNormalOperationNormsData(String year, String plantId) {
+		AOPMessageVM aopMessageVM =new AOPMessageVM();
 		try {
 			List<Object[]> obj = getNormalOperationNormsDataFromView(year, UUID.fromString(plantId));
 			List<MCUNormsValueDTO> mCUNormsValueDTOList = new ArrayList<>();
@@ -105,8 +119,15 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValueDTO.setIsEditable(row[27] != null ? Boolean.valueOf(row[27].toString()) : null);
 				mCUNormsValueDTOList.add(mCUNormsValueDTO);
 			}
-
-			return mCUNormsValueDTOList;
+			Map<String, Object> map = new HashMap<>(); 
+			
+			List<AopCalculation> aopCalculation=aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"normal-op-norms");
+			map.put("mcuNormsValueDTOList", mCUNormsValueDTOList);
+			map.put("aopCalculation", aopCalculation);
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(map);
+			aopMessageVM.setMessage("Data fetched successfully");
+			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
@@ -155,6 +176,8 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			normsTransactionRepository.saveAll(transactionsToSave);
 
 			for (MCUNormsValueDTO mCUNormsValueDTO : mCUNormsValueDTOList) {
+				year=mCUNormsValueDTO.getFinancialYear();
+				plantId=UUID.fromString(mCUNormsValueDTO.getPlantFkId());
 				MCUNormsValue mCUNormsValue = new MCUNormsValue();
 				if (mCUNormsValueDTO.getId() != null || !mCUNormsValueDTO.getId().isEmpty()) {
 					mCUNormsValue.setId(UUID.fromString(mCUNormsValueDTO.getId()));
@@ -198,6 +221,16 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				System.out.println("Data Saved Succussfully");
 				normalOperationNormsRepository.save(mCUNormsValue);
 			}
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("normal-op-norms");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(plantId);
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
 			// TODO Auto-generated method stub
 			return mCUNormsValueDTOList;
 		} catch (Exception ex) {
@@ -207,14 +240,20 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 	@Override
 	@Transactional
-	public int calculateExpressionConsumptionNorms(String year, String plantId) {
+	public AOPMessageVM calculateExpressionConsumptionNorms(String year, String plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		String storedProcedure = vertical.getName() + "_" + site.getName() + "_NormsCalculation";
 		System.out.println("storedProcedure" + storedProcedure);
-		return executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
+		int result= executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
 				vertical.getId().toString(), year);
+		aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"normal-op-norms");
+        aopMessageVM.setCode(200);
+        aopMessageVM.setMessage("SP Executed successfully");
+        aopMessageVM.setData(result);
+        return aopMessageVM;
 	}
 
 	// @Transactional

@@ -41,18 +41,21 @@ import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.ConfigurationDataDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeRequestDTO;
+import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionReceipeRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
-
+import com.wks.caseengine.repository.ScreenMappingRepository;
 @Service
 public class ConfigurationServiceImpl implements ConfigurationService {
 
@@ -78,7 +81,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	private JdbcTemplate jdbcTemplate;
 
 	@Autowired
-	NormParametersRepository normParametersRepository;
+	private NormParametersRepository normParametersRepository;
+	
+	@Autowired
+	private ScreenMappingRepository screenMappingRepository;
+	
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
 
 	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId) {
 		try {
@@ -307,6 +316,16 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					}
 
 				}
+			}
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("configuration");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantFKId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
 			}
 			return configurationDTOList;
 		} catch (Exception ex) {

@@ -9,13 +9,17 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.SlowdownNormsValueDTO;
+import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.ShutdownNormsValue;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.SlowdownNormsValue;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.SlowdownNormsRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
@@ -41,6 +45,15 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 
 	@Autowired
 	private VerticalsRepository verticalRepository;
+	
+	@Autowired
+	private ScreenMappingRepository screenMappingRepository;
+	
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
+
+	String year;
+	UUID plantId;
 
 	@Override
 	@Transactional
@@ -134,6 +147,8 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	public List<SlowdownNormsValueDTO> saveSlowdownNormsData(List<SlowdownNormsValueDTO> slowdownNormsValueDTOList) {
 		try {
 			for (SlowdownNormsValueDTO slowdownNormsValueDTO : slowdownNormsValueDTOList) {
+				year=slowdownNormsValueDTO.getFinancialYear();
+				plantId=UUID.fromString(slowdownNormsValueDTO.getPlantFkId());
 				SlowdownNormsValue slowdownNormsValue = new SlowdownNormsValue();
 				if (slowdownNormsValueDTO.getId() != null && !slowdownNormsValueDTO.getId().isEmpty()) {
 					slowdownNormsValue.setId(UUID.fromString(slowdownNormsValueDTO.getId()));
@@ -199,6 +214,16 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 				System.out.println(slowdownNormsValue.getApril());
 				System.out.println("Data Saved Succussfully");
 				slowdownNormsRepository.save(slowdownNormsValue);
+			}
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("slowdown-norms");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(plantId);
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
 			}
 			// TODO Auto-generated method stub
 			return slowdownNormsValueDTOList;
