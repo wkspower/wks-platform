@@ -207,7 +207,7 @@ const SlowDown = ({ permissions }) => {
         durationInHrs: (() => {
           const v = findDuration('1', row)
           if (!v) return null
-          const [h = '00', m = '00'] = v.split('.')
+          const [h = '00', m = '00'] = String(v).split('.')
           return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
         })(),
 
