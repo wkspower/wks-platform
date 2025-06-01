@@ -21,6 +21,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const [rowModesModel, setRowModesModel] = useState({})
 
   const [allProducts, setAllProducts] = useState([])
+  const [calculationObject, setCalculationObject] = useState([])
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
@@ -282,52 +283,70 @@ const ProductionvolumeData = ({ permissions }) => {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const data = await DataService.getAOPMCCalculatedData(keycloak)
-      var formattedData = data.map((item, index) => {
-        const isTPH = selectedUnit == 'TPD'
-        return {
-          ...item,
-          idFromApi: item?.id,
-          normParametersFKId: item?.materialFKId.toLowerCase(),
-          remarks: item?.remarks?.trim() || null,
-          originalRemark: item?.remarks?.trim() || null,
+      const response = await DataService.getAOPMCCalculatedData(keycloak)
 
-          id: index,
+      if (response?.code != 200) {
+        setRows([])
+        setLoading(false)
 
-          ...(isTPH && {
-            april: item.april
-              ? (item.april * 24).toFixed(2)
-              : item.april || null,
-            may: item.may ? (item.may * 24).toFixed(2) : item.may || null,
-            june: item.june ? (item.june * 24).toFixed(2) : item.june || null,
-            july: item.july ? (item.july * 24).toFixed(2) : item.july || null,
-            august: item.august
-              ? (item.august * 24).toFixed(2)
-              : item.august || null,
-            september: item.september
-              ? (item.september * 24).toFixed(2)
-              : item.september || null,
-            october: item.october
-              ? (item.october * 24).toFixed(2)
-              : item.october || null,
-            november: item.november
-              ? (item.november * 24).toFixed(2)
-              : item.november || null,
-            december: item.december
-              ? (item.december * 24).toFixed(2)
-              : item.december || null,
-            january: item.january
-              ? (item.january * 24).toFixed(2)
-              : item.january || null,
-            february: item.february
-              ? (item.february * 24).toFixed(2)
-              : item.february || null,
-            march: item.march
-              ? (item.march * 24).toFixed(2)
-              : item.march || null,
-          }),
-        }
-      })
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Error fetching data. Please try again.',
+          severity: 'error',
+        })
+
+        return
+      }
+
+      setCalculationObject(response?.data?.aopCalculation)
+
+      var formattedData = response?.data?.aopMCCalculatedDataDTOList.map(
+        (item, index) => {
+          const isTPH = selectedUnit == 'TPD'
+          return {
+            ...item,
+            idFromApi: item?.id,
+            normParametersFKId: item?.materialFKId.toLowerCase(),
+            remarks: item?.remarks?.trim() || null,
+            originalRemark: item?.remarks?.trim() || null,
+
+            id: index,
+
+            ...(isTPH && {
+              april: item.april
+                ? (item.april * 24).toFixed(2)
+                : item.april || null,
+              may: item.may ? (item.may * 24).toFixed(2) : item.may || null,
+              june: item.june ? (item.june * 24).toFixed(2) : item.june || null,
+              july: item.july ? (item.july * 24).toFixed(2) : item.july || null,
+              august: item.august
+                ? (item.august * 24).toFixed(2)
+                : item.august || null,
+              september: item.september
+                ? (item.september * 24).toFixed(2)
+                : item.september || null,
+              october: item.october
+                ? (item.october * 24).toFixed(2)
+                : item.october || null,
+              november: item.november
+                ? (item.november * 24).toFixed(2)
+                : item.november || null,
+              december: item.december
+                ? (item.december * 24).toFixed(2)
+                : item.december || null,
+              january: item.january
+                ? (item.january * 24).toFixed(2)
+                : item.january || null,
+              february: item.february
+                ? (item.february * 24).toFixed(2)
+                : item.february || null,
+              march: item.march
+                ? (item.march * 24).toFixed(2)
+                : item.march || null,
+            }),
+          }
+        },
+      )
       // console.log(formattedData)
       // console.log(data)
       const formulatedData = normalizeAllRows(formattedData)
@@ -521,7 +540,10 @@ const ProductionvolumeData = ({ permissions }) => {
       units: ['TPH', 'TPD'],
       customHeight: permissions?.customHeight ?? defaultCustomHeight,
       showCalculate:
-        permissions?.showCalculate ?? lowerVertName == 'meg' ? true : false,
+        lowerVertName === 'meg' &&
+        Object.keys(calculationObject || {}).length > 0
+          ? true
+          : false,
     },
     isOldYear,
   )

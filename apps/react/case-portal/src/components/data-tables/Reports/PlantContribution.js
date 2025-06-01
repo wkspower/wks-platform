@@ -8,7 +8,10 @@ import { DataService } from 'services/DataService'
 import Notification from 'components/Utilities/Notification'
 
 const categories = [
-  { key: 'ProductMixAndProduction', title: 'Product mix and production' },
+  {
+    key: 'ProductMixAndProduction',
+    title: 'Plant Contribution (T-21)- MEG - Product mix and Production',
+  },
   { key: 'ByProducts', title: 'By products' },
   { key: 'RawMaterial', title: 'Raw material' },
   { key: 'CatChem', title: 'Cat chem' },

@@ -14,6 +14,12 @@ import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import getKendoColumns from 'components/data-tables/CommonHeader/kendoHeader'
+import {
+  ExcelExport,
+  ExcelExportColumn,
+} from '../../../../node_modules/@progress/kendo-react-excel-export/index'
+import { Button } from '../../../../node_modules/@mui/material/index'
+import { useRef } from 'react'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -145,6 +151,35 @@ const AnnualAopCost = () => {
     fetchAllData()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
+  const exportRef1 = useRef(null)
+  const exportRef2 = useRef(null)
+  const exportRef3 = useRef(null)
+  const exportRef4 = useRef(null)
+  const exportRef5 = useRef(null)
+
+  const exportAllGrids = () => {
+    const options1 = exportRef1.current.workbookOptions()
+    const options2 = exportRef2.current.workbookOptions()
+    const options3 = exportRef3.current.workbookOptions()
+    const options4 = exportRef4.current.workbookOptions()
+    const options5 = exportRef5.current.workbookOptions()
+
+    // Add additional sheets to first export
+    options1.sheets[1] = options2.sheets[0]
+    options1.sheets[2] = options3.sheets[0]
+    options1.sheets[3] = options4.sheets[0]
+    options1.sheets[4] = options5.sheets[0]
+
+    // Rename sheets
+    options1.sheets[0].title = 'Production'
+    options1.sheets[1].title = 'Price'
+    options1.sheets[2].title = 'Norms'
+    options1.sheets[3].title = 'Quantity'
+    options1.sheets[4].title = 'Norm Cost'
+
+    exportRef1.current.save(options1)
+  }
+
   return (
     <div>
       <Backdrop
@@ -153,6 +188,68 @@ const AnnualAopCost = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
+
+      {/* Export hidden ExcelExport instances */}
+      <div style={{ display: 'none' }}>
+        <ExcelExport data={rowsProduction} ref={exportRef1}>
+          {colsProduction.map((col) => (
+            <ExcelExportColumn
+              key={col.field}
+              field={col.field}
+              title={col.title}
+            />
+          ))}
+        </ExcelExport>
+
+        <ExcelExport data={rowsPrice} ref={exportRef2}>
+          {colsPrice.map((col) => (
+            <ExcelExportColumn
+              key={col.field}
+              field={col.field}
+              title={col.title}
+            />
+          ))}
+        </ExcelExport>
+
+        <ExcelExport data={rowsNorm} ref={exportRef3}>
+          {colsNorm.map((col) => (
+            <ExcelExportColumn
+              key={col.field}
+              field={col.field}
+              title={col.title}
+            />
+          ))}
+        </ExcelExport>
+        <ExcelExport data={rowsQuantity} ref={exportRef4}>
+          {colsQuantity.map((col) => (
+            <ExcelExportColumn
+              key={col.field}
+              field={col.field}
+              title={col.title}
+            />
+          ))}
+        </ExcelExport>
+
+        <ExcelExport data={rowsNormCost} ref={exportRef5}>
+          {colsNormCost.map((col) => (
+            <ExcelExportColumn
+              key={col.field}
+              field={col.field}
+              title={col.title}
+            />
+          ))}
+        </ExcelExport>
+      </div>
+
+      <Box display='flex' justifyContent='flex-end' mb='2px'>
+        <Button
+          variant='contained'
+          onClick={exportAllGrids}
+          className='btn-save'
+        >
+          Export
+        </Button>
+      </Box>
 
       <Box display='flex' flexDirection='column' gap={1}>
         <div>

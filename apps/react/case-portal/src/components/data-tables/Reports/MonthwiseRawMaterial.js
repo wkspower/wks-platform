@@ -650,7 +650,7 @@ const MonthwiseRawMaterial = () => {
         columns={columns}
         loading={loading}
         handleCalculate={handleCalculate}
-        title='Month Wise Raw Data'
+        title='Monthwise Consumption (T-18)'
         permissions={{
           // customHeight: defaultCustomHeight,
           // showWorkFlowBtns: flase,

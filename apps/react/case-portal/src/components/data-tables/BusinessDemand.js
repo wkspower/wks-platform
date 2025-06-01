@@ -45,7 +45,6 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 
 const BusinessDemand = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
-
   const [rowModesModel, setRowModesModel] = useState({})
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])

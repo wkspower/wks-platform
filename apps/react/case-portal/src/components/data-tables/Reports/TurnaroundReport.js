@@ -439,7 +439,7 @@ const TurnaroundReport = () => {
         currentRowId={currentRowId}
         setCurrentRowId={setCurrentRowId}
         loading={loading}
-        title='Turn Around Report'
+        title='Turnaround Details (T-19A)'
         permissions={{
           customHeight: { mainBox: '32vh', otherBox: '100%' },
           textAlignment: 'center',

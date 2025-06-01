@@ -9,13 +9,18 @@ import { styled } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 // import AopCostReportView from 'components/data-tables-views/ReportDataGrid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 
 import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import getKendoProductionColumns from '../CommonHeader/KendoProdVolBHeader'
+import {
+  ExcelExport,
+  ExcelExportColumn,
+} from '../../../../node_modules/@progress/kendo-react-excel-export/index'
+import { Button } from '../../../../node_modules/@mui/material/index'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -114,6 +119,30 @@ const ProductionVolumeDataBasis = () => {
     fetchData('Calculated Data', setRowsCalculatedData)
     fetchData('RowData', setRowsRowData)
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  const exportRef1 = useRef(null)
+  const exportRef2 = useRef(null)
+  const exportRef3 = useRef(null)
+  const exportRef4 = useRef(null)
+
+  const exportAllGrids = () => {
+    const options1 = exportRef1.current.workbookOptions()
+    const options2 = exportRef2.current.workbookOptions()
+    const options3 = exportRef3.current.workbookOptions()
+    const options4 = exportRef4.current.workbookOptions()
+
+    // Add additional sheets to first export
+    options1.sheets[1] = options2.sheets[0]
+    options1.sheets[2] = options3.sheets[0]
+    options1.sheets[3] = options4.sheets[0]
+
+    // Rename sheets
+    options1.sheets[0].title = 'MC'
+    options1.sheets[1].title = 'MC Yearwise'
+    options1.sheets[2].title = 'Calculated Data'
+    options1.sheets[3].title = 'Raw Data'
+
+    exportRef1.current.save(options1)
+  }
 
   return (
     <div>
@@ -123,6 +152,58 @@ const ProductionVolumeDataBasis = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
+
+      {/* Export hidden ExcelExport instances */}
+      <div style={{ display: 'none' }}>
+        <ExcelExport data={rowsMC} ref={exportRef1}>
+          {colsMC.map((col) => (
+            <ExcelExportColumn
+              key={col.field}
+              field={col.field}
+              title={col.title}
+            />
+          ))}
+        </ExcelExport>
+
+        <ExcelExport data={rowsMCYearWise} ref={exportRef2}>
+          {colsMCYearwise.map((col) => (
+            <ExcelExportColumn
+              key={col.field}
+              field={col.field}
+              title={col.title}
+            />
+          ))}
+        </ExcelExport>
+
+        <ExcelExport data={rowsCalculatedData} ref={exportRef3}>
+          {colsCalculatedData.map((col) => (
+            <ExcelExportColumn
+              key={col.field}
+              field={col.field}
+              title={col.title}
+            />
+          ))}
+        </ExcelExport>
+        <ExcelExport data={rowsRawData} ref={exportRef4}>
+          {colsRowData.map((col) => (
+            <ExcelExportColumn
+              key={col.field}
+              field={col.field}
+              title={col.title}
+            />
+          ))}
+        </ExcelExport>
+      </div>
+
+      <Box display='flex' justifyContent='flex-end' mb='2px'>
+        <Button
+          variant='contained'
+          onClick={exportAllGrids}
+          className='btn-save'
+        >
+          Export
+        </Button>
+      </Box>
 
       <Box display='flex' flexDirection='column' gap={2}>
         <div>

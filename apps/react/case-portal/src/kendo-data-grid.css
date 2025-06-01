@@ -146,7 +146,7 @@
 }
 tr.k-grid-edit-row {
   pointer-events: none; /* block clicks */
-  cursor: not-allowed !important; /* show 🚫 cursor */
+  cursor: not-allowed !important; /* show ?? cursor */
   opacity: 0.5; /* gray it out */
 }
 

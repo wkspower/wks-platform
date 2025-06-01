@@ -487,7 +487,7 @@ const AnnualProductionPlan = () => {
         rows={rowsAssumptions}
         columns={columnsAssumptions}
         handleCalculate={handleCalculate}
-        title='Assumptions & remarks'
+        title='Plant Production Plan (T-15) - Assumptions & remarks'
         permissions={{
           showWorkFlowBtns: true,
           showCalculate: true,

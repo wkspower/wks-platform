@@ -14,6 +14,7 @@ import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { validateFields } from 'utils/validationUtils'
+import getEnhancedColDefs from '../data-tables/CommonHeader/index'
 import ProductionvolumeData from './ProductionVoluemData'
 import KendoDataTables from './index'
 import kendoGetEnhancedColDefs from 'components/data-tables/CommonHeader/kendoBusinessDemColDef'
@@ -47,6 +48,7 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 const KendoBusinessDemand = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
 
+  const [rowModesModel, setRowModesModel] = useState({})
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
   const [open1, setOpen1] = useState(false)
@@ -59,8 +61,7 @@ const KendoBusinessDemand = ({ permissions }) => {
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
-  // const [updatedRows, setUpdatedRows] = useState()
-  // const [rows2, setRows2] = useState()
+
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -75,20 +76,19 @@ const KendoBusinessDemand = ({ permissions }) => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+
   const fetchData = async () => {
     setLoading(true)
     try {
       var data = await DataService.getBDData(keycloak)
 
-      if (lowerVertName !== 'pe') {
-        data = data.sort((a, b) =>
-          b.normParameterTypeDisplayName.localeCompare(
-            a.normParameterTypeDisplayName,
-          ),
-        )
-      }
-
-      // console.log(sortedData)
+      // if (lowerVertName !== 'pe') {
+      //   data = data.sort((a, b) =>
+      //     b.normParameterTypeDisplayName.localeCompare(
+      //       a.normParameterTypeDisplayName,
+      //     ),
+      //   )
+      // }
 
       const formattedData = data.map((item, index) => ({
         ...item,
@@ -101,7 +101,7 @@ const KendoBusinessDemand = ({ permissions }) => {
       }))
 
       setRows(formattedData)
-      console.log('formattedData:', formattedData)
+
       setLoading(false)
     } catch (error) {
       console.error('Error fetching Business Demand data:', error)
@@ -109,7 +109,6 @@ const KendoBusinessDemand = ({ permissions }) => {
     }
   }
 
-  // console.log(verticalChange)
   useEffect(() => {
     const getAllProducts = async () => {
       try {
@@ -125,15 +124,6 @@ const KendoBusinessDemand = ({ permissions }) => {
         var productList = []
         if (lowerVertName === 'meg') {
           productList = data
-
-          // .filter((product) =>
-          //   ['EO', 'EOE', 'MEG', 'CO2'].includes(product.displayName),
-          // )
-          // .map((product) => ({
-          //   id: product.id,
-          //   displayName: product.displayName,
-          //   inEdit: false,
-          // }))
         } else {
           productList = data.map((product) => ({
             id: product.id,
@@ -154,12 +144,7 @@ const KendoBusinessDemand = ({ permissions }) => {
     getAllProducts()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
-  // useEffect(()=>{
-  //   console.log('this is test for api call ')
-  // })
-
   const handleRemarkCellClick = (dataItem) => {
-    // if (!dataItem?.isEditable) return
     setCurrentRemark(dataItem.remark || '')
     setCurrentRowId(dataItem.id)
     setRemarkDialogOpen(true)
@@ -170,41 +155,20 @@ const KendoBusinessDemand = ({ permissions }) => {
   }
 
   const colDefs = kendoGetEnhancedColDefs({
-    // allProducts,
     headerMap,
-    // handleRemarkCellClick,
   })
-  // const colDefs = React.useMemo(() => {
-  //   const defs = getEnhancedColDefs({
-  //     allProducts,
-  //     headerMap,
-  //     handleRemarkCellClick,
-  //   })
-  //   console.log(' colDefs →', defs)
-  //   return defs
-  // }, [allProducts, headerMap, handleRemarkCellClick])
 
   const NormParameterIdCell = (props) => {
     const productId = props.dataItem.normParameterId
     const product = allProducts.find((p) => p.id === productId)
     const displayName = product?.displayName || ''
-    // console.log(displayName)
     return <td>{displayName}</td>
   }
 
   const saveChanges = React.useCallback(async () => {
     setLoading(true)
-    // const rowsInEditMode = Object.keys(rowModesModel).filter(
-    //   (id) => rowModesModel[id]?.mode === 'edit',
-    // )
 
-    // rowsInEditMode.forEach((id) => {
-    //   apiRef.current.stopRowEditMode({ id })
-    // })
-
-    // setTimeout(() => {
     try {
-      console.log('modifiedCells', modifiedCells)
       if (Object.keys(modifiedCells).length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -216,7 +180,7 @@ const KendoBusinessDemand = ({ permissions }) => {
       }
       var rawData = Object.values(modifiedCells)
       const data = rawData.filter((row) => row.inEdit)
-      // var data = Object.values(unsavedChangesRef.current.unsavedRows)
+
       if (data.length == 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -228,7 +192,6 @@ const KendoBusinessDemand = ({ permissions }) => {
       }
 
       const requiredFields = ['normParameterId', 'remark']
-
       const validationMessage = validateFields(data, requiredFields)
 
       if (validationMessage) {
@@ -244,7 +207,6 @@ const KendoBusinessDemand = ({ permissions }) => {
     } catch (error) {
       console.log('Error saving changes:', error)
     }
-    // }, 400)
   }, [modifiedCells])
 
   const saveBusinessDemandData = async (newRows) => {
@@ -370,6 +332,12 @@ const KendoBusinessDemand = ({ permissions }) => {
     },
     isOldYear,
   )
+
+  const groupableColumns = colDefs.filter((col) => col.groupable)
+  const group = groupableColumns.map((col) => ({ field: col.field }))
+
+  console.log('group', group)
+
   return (
     <div>
       <Backdrop
@@ -419,14 +387,10 @@ const KendoBusinessDemand = ({ permissions }) => {
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         setRows={setRows}
-        // updatedRows={updatedRows}
-        // setUpdatedRows={setUpdatedRows}
         columns={colDefs}
         rows={rows || []}
         isCellEditable={isCellEditable}
         title='Business Demand'
-        // processRowUpdate={processRowUpdate}
-
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
@@ -448,7 +412,7 @@ const KendoBusinessDemand = ({ permissions }) => {
         handleRemarkCellClick={handleRemarkCellClick}
         deleteRowData={deleteRowData}
         permissions={adjustedPermissions}
-        groupBy='Particulars'
+        group={group}
       />
     </div>
   )

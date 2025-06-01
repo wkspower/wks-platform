@@ -65,6 +65,8 @@ const NormalOpNormsScreen = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [summary, setSummary] = useState('')
 
+  const [calculationObject, setCalculationObject] = useState([])
+
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
@@ -386,7 +388,22 @@ const NormalOpNormsScreen = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      var data = await DataService.getConsumptionNormsData(keycloak)
+      var response = await DataService.getConsumptionNormsData(keycloak)
+
+      if (response?.code != 200) {
+        setRows([])
+        setLoading(false)
+
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Error fetching data. Please try again.',
+          severity: 'error',
+        })
+
+        return
+      }
+
+      setCalculationObject(response?.data?.aopCalculation)
 
       // const customOrder = [
       //   'Raw Material',
@@ -406,7 +423,7 @@ const NormalOpNormsScreen = () => {
       const groups = new Map()
       let groupId = 0
 
-      data.forEach((item) => {
+      response?.data?.aopConsumptionNormDTOList?.forEach((item) => {
         const groupKey = item.normParameterTypeDisplayName
 
         if (!groups.has(groupKey)) {
@@ -672,7 +689,8 @@ const NormalOpNormsScreen = () => {
       units: ['TPH', 'TPD'],
       saveWithRemark: true,
       saveBtn: false,
-      showCalculate: true,
+      // showCalculate: true,
+      showCalculate: Object.keys(calculationObject).length > 0 ? true : false,
       showRefresh: false,
       noColor: false,
       ShowSummary: true,
@@ -683,7 +701,7 @@ const NormalOpNormsScreen = () => {
   )
 
   const isCellEditable = (params) => {
-    console.log(params)
+    // console.log(params)
     return params.row.isEditable
   }
 

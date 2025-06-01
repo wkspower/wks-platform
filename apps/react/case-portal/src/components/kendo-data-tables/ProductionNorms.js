@@ -20,6 +20,8 @@ import KendoDataTables from './index'
 const ProductionNorms = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
 
+  const [calculationObject, setCalculationObject] = useState([])
+
   const keycloak = useSession()
   // const [csData, setCsData] = useState([])
   const [allProducts, setAllProducts] = useState([])
@@ -423,10 +425,25 @@ const ProductionNorms = ({ permissions }) => {
     try {
       setLoading(true)
 
-      const data1 = await DataService.getAOPData(keycloak)
+      const response = await DataService.getAOPData(keycloak)
 
-      var data = data1
-        .map((product) => ({
+      setCalculationObject(response?.data?.aopCalculation)
+
+      if (response?.code != 200) {
+        setRows([])
+        setLoading(false)
+
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Error fetching data. Please try again.',
+          severity: 'error',
+        })
+
+        return
+      }
+
+      var data = response?.data?.aopDTOList
+        ?.map((product) => ({
           ...product,
           normParametersFKId: product.materialFKId,
           originalRemark: product.aopRemarks,
@@ -634,7 +651,10 @@ const ProductionNorms = ({ permissions }) => {
       editButton: permissions?.editButton ?? false,
       showUnit: permissions?.showUnit ?? true,
       saveWithRemark: permissions?.saveWithRemark ?? true,
-      showCalculate: permissions?.showCalculate ?? true,
+      showCalculate:
+        Object.keys(calculationObject).length > 0
+          ? permissions?.showCalculate ?? true
+          : false,
       saveBtn: permissions?.saveBtn ?? false,
       units: ['MT', 'KT'],
       customHeight: permissions?.customHeight,

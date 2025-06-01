@@ -29,48 +29,50 @@ const ProductionVolumeDataView = () => {
     try {
       setLoading(true)
       const data = await DataService.getAOPMCCalculatedData(keycloak)
-      const formattedData = data.map((item, index) => {
-        const isTPH = false
-        return {
-          ...item,
-          idFromApi: item?.id,
-          normParametersFKId: item?.materialFKId.toLowerCase(),
-          id: index,
-          isEditable: false,
-          ...(isTPH && {
-            april: item.april
-              ? (item.april * 24).toFixed(2)
-              : item.april || null,
-            may: item.may ? (item.may * 24).toFixed(2) : item.may || null,
-            june: item.june ? (item.june * 24).toFixed(2) : item.june || null,
-            july: item.july ? (item.july * 24).toFixed(2) : item.july || null,
-            august: item.august
-              ? (item.august * 24).toFixed(2)
-              : item.august || null,
-            september: item.september
-              ? (item.september * 24).toFixed(2)
-              : item.september || null,
-            october: item.october
-              ? (item.october * 24).toFixed(2)
-              : item.october || null,
-            november: item.november
-              ? (item.november * 24).toFixed(2)
-              : item.november || null,
-            december: item.december
-              ? (item.december * 24).toFixed(2)
-              : item.december || null,
-            january: item.january
-              ? (item.january * 24).toFixed(2)
-              : item.january || null,
-            february: item.february
-              ? (item.february * 24).toFixed(2)
-              : item.february || null,
-            march: item.march
-              ? (item.march * 24).toFixed(2)
-              : item.march || null,
-          }),
-        }
-      })
+      const formattedData = data?.aopMCCalculatedDataDTOList.map(
+        (item, index) => {
+          const isTPH = false
+          return {
+            ...item,
+            idFromApi: item?.id,
+            normParametersFKId: item?.materialFKId.toLowerCase(),
+            id: index,
+            isEditable: false,
+            ...(isTPH && {
+              april: item.april
+                ? (item.april * 24).toFixed(2)
+                : item.april || null,
+              may: item.may ? (item.may * 24).toFixed(2) : item.may || null,
+              june: item.june ? (item.june * 24).toFixed(2) : item.june || null,
+              july: item.july ? (item.july * 24).toFixed(2) : item.july || null,
+              august: item.august
+                ? (item.august * 24).toFixed(2)
+                : item.august || null,
+              september: item.september
+                ? (item.september * 24).toFixed(2)
+                : item.september || null,
+              october: item.october
+                ? (item.october * 24).toFixed(2)
+                : item.october || null,
+              november: item.november
+                ? (item.november * 24).toFixed(2)
+                : item.november || null,
+              december: item.december
+                ? (item.december * 24).toFixed(2)
+                : item.december || null,
+              january: item.january
+                ? (item.january * 24).toFixed(2)
+                : item.january || null,
+              february: item.february
+                ? (item.february * 24).toFixed(2)
+                : item.february || null,
+              march: item.march
+                ? (item.march * 24).toFixed(2)
+                : item.march || null,
+            }),
+          }
+        },
+      )
       setRows(formattedData)
       setLoading(false)
     } catch (error) {

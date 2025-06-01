@@ -57,6 +57,8 @@ const NormalOpNormsScreen = () => {
   // const [bdData, setBDData] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
 
+  const [calculationObject, setCalculationObject] = useState([])
+
   // const { sitePlantChange } = menu
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
@@ -99,14 +101,27 @@ const NormalOpNormsScreen = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      var data = []
-      data = await DataService.getNormalOperationNormsData(keycloak)
+      var response = []
+      response = await DataService.getNormalOperationNormsData(keycloak)
 
+      if (response?.code != 200) {
+        setRows([])
+        setLoading(false)
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Error fetching data. Please try again.',
+          severity: 'error',
+        })
+
+        return
+      }
       const groupedRows = []
       const groups = new Map()
       let groupId = 0
 
-      data.forEach((item) => {
+      setCalculationObject(response?.data?.aopCalculation)
+
+      response?.data?.mcuNormsValueDTOList?.forEach((item) => {
         const groupKey = item.normParameterTypeDisplayName
 
         if (!groups.has(groupKey)) {
@@ -1110,7 +1125,11 @@ const NormalOpNormsScreen = () => {
       showUnit: false,
       saveWithRemark: true,
       saveBtn: true,
-      showCalculate: lowerVertName == 'meg' ? true : false,
+      showCalculate:
+        lowerVertName === 'meg' &&
+        Object.keys(calculationObject || {}).length > 0
+          ? true
+          : false,
     },
     isOldYear,
   )

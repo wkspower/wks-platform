@@ -7,17 +7,19 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { styled } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
-// import KendoDataGrid from 'components/data-tables-views/ReportDataGrid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
+import {
+  ExcelExport,
+  ExcelExportColumn,
+} from '@progress/kendo-react-excel-export'
 
-// import getEnhancedProductionVolDataBasis from '../CommonHeader/MCHeaders'
-// import getKendoNormsHistorianColumns from '../CommonHeader/NormsHistorianValuesHeaders'
 import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import getKendoNormsHistorianColumns from '../CommonHeader/KendoNormHistoryHeader'
+import { Button } from '../../../../node_modules/@mui/material/index'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -112,6 +114,25 @@ const NormsHistorianBasis = () => {
     fetchData('ProductionVolumeData', setProductionVolumeData)
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
+  const exportRef1 = useRef(null)
+  const exportRef2 = useRef(null)
+  const exportRef3 = useRef(null)
+
+  const exportAllGrids = () => {
+    const options1 = exportRef1.current.workbookOptions()
+    const options2 = exportRef2.current.workbookOptions()
+    const options3 = exportRef3.current.workbookOptions()
+
+    options1.sheets[1] = options2.sheets[0]
+    options1.sheets[2] = options3.sheets[0]
+
+    options1.sheets[0].title = 'Production Volume'
+    options1.sheets[1].title = 'MCU & Norm'
+    options1.sheets[2].title = 'Historian Values'
+
+    exportRef1.current.save(options1)
+  }
+
   return (
     <div>
       <Backdrop
@@ -121,70 +142,96 @@ const NormsHistorianBasis = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
+      {/* Export hidden ExcelExport instances */}
+      <div style={{ display: 'none' }}>
+        <ExcelExport data={rowsProductionVolumeData} ref={exportRef1}>
+          {colsProductionVolumeData.map((col) => (
+            <ExcelExportColumn
+              key={col.field}
+              field={col.field}
+              title={col.title}
+            />
+          ))}
+        </ExcelExport>
+
+        <ExcelExport data={rowsMcuAndNormGrid} ref={exportRef2}>
+          {colsMcuAndNormGrid.map((col) => (
+            <ExcelExportColumn
+              key={col.field}
+              field={col.field}
+              title={col.title}
+            />
+          ))}
+        </ExcelExport>
+
+        <ExcelExport data={rowsHistorianValues} ref={exportRef3}>
+          {colsHistorianValues.map((col) => (
+            <ExcelExportColumn
+              key={col.field}
+              field={col.field}
+              title={col.title}
+            />
+          ))}
+        </ExcelExport>
+      </div>
+
+      <Box display='flex' justifyContent='flex-end' mb='2px'>
+        <Button
+          variant='contained'
+          onClick={exportAllGrids}
+          className='btn-save'
+        >
+          Export
+        </Button>
+      </Box>
+
       <Box display='flex' flexDirection='column' gap={2}>
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                Production Volume Data
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid
-                  rows={rowsProductionVolumeData}
-                  columns={colsProductionVolumeData}
-                  height='93px'
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
+        {/* Accordion 1 */}
+        <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordionSummary>
+            <Typography className='grid-title'>
+              Production Volume Data
+            </Typography>
+          </CustomAccordionSummary>
+          <CustomAccordionDetails>
+            <Box sx={{ width: '100%' }}>
+              <KendoDataGrid
+                rows={rowsProductionVolumeData}
+                columns={colsProductionVolumeData}
+              />
+            </Box>
+          </CustomAccordionDetails>
+        </CustomAccordion>
 
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                Mcu & Norm
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid
-                  rows={rowsMcuAndNormGrid}
-                  columns={colsMcuAndNormGrid}
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
+        {/* Accordion 2 */}
+        <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordionSummary>
+            <Typography className='grid-title'>MCU & Norm</Typography>
+          </CustomAccordionSummary>
+          <CustomAccordionDetails>
+            <Box sx={{ width: '100%' }}>
+              <KendoDataGrid
+                rows={rowsMcuAndNormGrid}
+                columns={colsMcuAndNormGrid}
+              />
+            </Box>
+          </CustomAccordionDetails>
+        </CustomAccordion>
 
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                Historian Values
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid
-                  rows={rowsHistorianValues}
-                  columns={colsHistorianValues}
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
+        {/* Accordion 3 */}
+        <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordionSummary>
+            <Typography className='grid-title'>Historian Values</Typography>
+          </CustomAccordionSummary>
+          <CustomAccordionDetails>
+            <Box sx={{ width: '100%' }}>
+              <KendoDataGrid
+                rows={rowsHistorianValues}
+                columns={colsHistorianValues}
+              />
+            </Box>
+          </CustomAccordionDetails>
+        </CustomAccordion>
       </Box>
     </div>
   )
