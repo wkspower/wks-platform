@@ -14,7 +14,6 @@ import KendoDataTables from './index'
 const MaintenanceTable = () => {
   const keycloak = useSession()
   const [loading, setLoading] = useState(false)
-  // const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const [rows, setRows] = useState()
@@ -115,6 +114,7 @@ const MaintenanceTable = () => {
       headerAlign: 'left',
       width: 250,
       renderCell: renderTwoLineEllipsis,
+      editable: false,
     },
     {
       field: 'April',
@@ -123,6 +123,8 @@ const MaintenanceTable = () => {
       headerAlign: 'left',
       valueFormatter: formatValueToTwoDecimals,
       width: 150,
+      editable: false,
+
       // valueGetter: convertUnits,
     },
 
@@ -131,6 +133,7 @@ const MaintenanceTable = () => {
       title: headerMap[5],
       valueFormatter: formatValueToTwoDecimals,
       width: 150,
+      editable: false,
 
       align: 'right',
       headerAlign: 'left',
@@ -140,6 +143,7 @@ const MaintenanceTable = () => {
       title: headerMap[6],
       valueFormatter: formatValueToTwoDecimals,
       width: 150,
+      editable: false,
 
       align: 'right',
       headerAlign: 'left',
@@ -149,6 +153,7 @@ const MaintenanceTable = () => {
       title: headerMap[7],
       valueFormatter: formatValueToTwoDecimals,
       width: 150,
+      editable: false,
 
       align: 'right',
       headerAlign: 'left',
@@ -158,6 +163,7 @@ const MaintenanceTable = () => {
       title: headerMap[8],
       valueFormatter: formatValueToTwoDecimals,
       width: 150,
+      editable: false,
 
       align: 'right',
       headerAlign: 'left',
@@ -167,6 +173,7 @@ const MaintenanceTable = () => {
       title: headerMap[9],
       valueFormatter: formatValueToTwoDecimals,
       width: 150,
+      editable: false,
 
       align: 'right',
       headerAlign: 'left',
@@ -176,6 +183,7 @@ const MaintenanceTable = () => {
       title: headerMap[10],
       valueFormatter: formatValueToTwoDecimals,
       width: 150,
+      editable: false,
 
       align: 'right',
       headerAlign: 'left',
@@ -186,6 +194,7 @@ const MaintenanceTable = () => {
       title: headerMap[11],
       valueFormatter: formatValueToTwoDecimals,
       width: 150,
+      editable: false,
 
       align: 'right',
       headerAlign: 'left',
@@ -195,6 +204,7 @@ const MaintenanceTable = () => {
       title: headerMap[12],
       valueFormatter: formatValueToTwoDecimals,
       width: 150,
+      editable: false,
 
       align: 'right',
       headerAlign: 'left',
@@ -204,6 +214,7 @@ const MaintenanceTable = () => {
       title: headerMap[1],
       valueFormatter: formatValueToTwoDecimals,
       width: 150,
+      editable: false,
 
       align: 'right',
       headerAlign: 'left',
@@ -213,6 +224,7 @@ const MaintenanceTable = () => {
       title: headerMap[2],
       valueFormatter: formatValueToTwoDecimals,
       width: 150,
+      editable: false,
 
       align: 'right',
       headerAlign: 'left',
@@ -222,6 +234,7 @@ const MaintenanceTable = () => {
       title: headerMap[3],
       valueFormatter: formatValueToTwoDecimals,
       width: 150,
+      editable: false,
 
       align: 'right',
       headerAlign: 'left',
@@ -278,7 +291,6 @@ const MaintenanceTable = () => {
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         handleCalculate={handleCalculate}
-        // apiRef={apiRef}
         setDeleteId={setDeleteId}
         fetchData={fetchData}
         setOpen1={setOpen1}

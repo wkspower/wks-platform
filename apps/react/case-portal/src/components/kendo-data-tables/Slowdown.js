@@ -351,62 +351,62 @@ const SlowDown = ({ permissions }) => {
       title: 'Particulars',
       editable: true,
       //width: 150,
-      renderEditCell: (params) => {
-        const { value, id, api } = params
+      // renderEditCell: (params) => {
+      //   const { value, id, api } = params
 
-        const allProductOptions = allProducts.map((product) => ({
-          value: product.id,
-          label: product.displayName,
-        }))
+      //   const allProductOptions = allProducts.map((product) => ({
+      //     value: product.id,
+      //     label: product.displayName,
+      //   }))
 
-        const existingValues = new Set(
-          [...api.getRowModels().values()]
-            .filter((row) => row.id !== id)
-            .map((row) => row.product),
-        )
+      //   const existingValues = new Set(
+      //     [...api.getRowModels().values()]
+      //       .filter((row) => row.id !== id)
+      //       .map((row) => row.product),
+      //   )
 
-        const filteredOptions = allProductOptions.filter(
-          (option) =>
-            option.value === value || !existingValues.has(option.value),
-        )
+      //   const filteredOptions = allProductOptions.filter(
+      //     (option) =>
+      //       option.value === value || !existingValues.has(option.value),
+      //   )
 
-        return (
-          <Autocomplete
-            value={
-              allProductOptions.find((option) => option.value === value) ||
-              (params.row.product &&
-                allProductOptions.find(
-                  (opt) => opt.value === params.row.product,
-                )) ||
-              null
-            }
-            disableClearable
-            options={allProductOptions}
-            getOptionLabel={(option) => option?.label || ''}
-            onChange={(event, newValue) => {
-              params.api.setEditCellValue({
-                id: params.id,
-                field: 'product',
-                value: newValue?.value || '',
-              })
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                variant='outlined'
-                size='small'
-                fullWidth
-                style={{ width: '210px' }}
-              />
-            )}
-          />
-        )
-      },
-      valueGetter: (params) => params || '',
-      valueFormatter: (params) => {
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : ''
-      },
+      //   return (
+      //     <Autocomplete
+      //       value={
+      //         allProductOptions.find((option) => option.value === value) ||
+      //         (params.row.product &&
+      //           allProductOptions.find(
+      //             (opt) => opt.value === params.row.product,
+      //           )) ||
+      //         null
+      //       }
+      //       disableClearable
+      //       options={allProductOptions}
+      //       getOptionLabel={(option) => option?.label || ''}
+      //       onChange={(event, newValue) => {
+      //         params.api.setEditCellValue({
+      //           id: params.id,
+      //           field: 'product',
+      //           value: newValue?.value || '',
+      //         })
+      //       }}
+      //       renderInput={(params) => (
+      //         <TextField
+      //           {...params}
+      //           variant='outlined'
+      //           size='small'
+      //           fullWidth
+      //           style={{ width: '210px' }}
+      //         />
+      //       )}
+      //     />
+      //   )
+      // },
+      // valueGetter: (params) => params || '',
+      // valueFormatter: (params) => {
+      //   const product = allProducts.find((p) => p.id === params)
+      //   return product ? product.displayName : ''
+      // },
       filterOperators: [
         {
           label: 'contains',
@@ -449,13 +449,6 @@ const SlowDown = ({ permissions }) => {
       type: 'dateTime',
       //width: 200,
       editable: true,
-      renderEditCell: (params) => <StartDateTimeEditCell {...params} />,
-      valueFormatter: (params) => {
-        const value = params
-        return value && dayjs(value).isValid()
-          ? dayjs(value).format('DD/MM/YYYY, h:mm:ss A')
-          : ''
-      },
     },
 
     {
@@ -464,35 +457,20 @@ const SlowDown = ({ permissions }) => {
       type: 'dateTime',
       //width: 200,
       editable: true,
-      renderEditCell: (params) => <EndDateTimeEditCell {...params} />,
-      valueFormatter: (params) => {
-        const value = params
-        return value && dayjs(value).isValid()
-          ? dayjs(value).format('DD/MM/YYYY, h:mm:ss A')
-          : ''
-      },
     },
 
     {
       field: 'durationInHrs',
       title: 'Duration (hrs)',
-      editable: true,
-      //width: 100,
-      renderEditCell: TimeInputCell,
-      align: 'right',
-      headerAlign: 'left',
-      // valueGetter: (params) => params?.durationInHrs || 0,
-      valueGetter: findDuration,
+      editable: false,
+      width: 100,
     },
 
     {
       field: 'rate',
       title: 'Rate (TPH)',
       editable: true,
-      //width: 75,
-      renderEditCell: NumericInputOnly,
-      align: 'right',
-      headerAlign: 'left',
+      width: 100,
     },
 
     {
@@ -500,28 +478,6 @@ const SlowDown = ({ permissions }) => {
       title: 'Remarks',
       editable: false,
       //width: 180,
-      renderCell: (params) => {
-        const displayText = truncateRemarks(params.value)
-        const isEditable = !params.row.Particulars
-
-        return (
-          <Tooltip title={params.value || ''} arrow>
-            <div
-              style={{
-                cursor: 'pointer',
-                color: params.value ? 'inherit' : 'gray',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                width: ' 100%',
-              }}
-              onClick={() => handleRemarkCellClick(params.row)}
-            >
-              {displayText || (isEditable ? 'Click to add remark' : '')}
-            </div>
-          </Tooltip>
-        )
-      },
     },
   ]
 
@@ -618,6 +574,7 @@ const SlowDown = ({ permissions }) => {
         permissions={adjustedPermissions}
         handleCancelClick={handleCancelClick}
         focusFirstField={focusFirstField}
+        allProducts={allProducts}
       />
     </div>
   )

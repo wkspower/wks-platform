@@ -2,22 +2,17 @@
   {
     "field": "Particulars",
     "title": "Constant",
-    "width": 100,
-    "groupable": true,
-    "flex": 1
+    "groupable": true
   },
   {
     "field": "Particulars2",
     "title": "Type",
-    "width": 125,
-    "groupable": true,
-    "flex": 1
+    "groupable": true
   },
   {
     "field": "normParameterFKId",
     "title": "Particulars",
-    "editable": false,
-    "width": 160
+    "editable": false
   },
   {
     "field": "apr",
@@ -29,8 +24,8 @@
   {
     "field": "remarks",
     "title": "Remark",
-    "width": 250,
-    "editable": false,
-    "renderCell": "renderRemarkCell"
+    "editable": true,
+    "renderCell": "renderRemarkCell",
+    "width": 400
   }
 ]

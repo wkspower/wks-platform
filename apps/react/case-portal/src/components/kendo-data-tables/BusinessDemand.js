@@ -14,7 +14,6 @@ import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { validateFields } from 'utils/validationUtils'
-import getEnhancedColDefs from '../data-tables/CommonHeader/index'
 import ProductionvolumeData from './ProductionVoluemData'
 import KendoDataTables from './index'
 import kendoGetEnhancedColDefs from 'components/data-tables/CommonHeader/kendoBusinessDemColDef'
@@ -48,7 +47,6 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 const KendoBusinessDemand = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
 
-  const [rowModesModel, setRowModesModel] = useState({})
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
   const [open1, setOpen1] = useState(false)
@@ -162,7 +160,6 @@ const KendoBusinessDemand = ({ permissions }) => {
 
   const handleRemarkCellClick = (dataItem) => {
     // if (!dataItem?.isEditable) return
-    console.log('hiiiiiiii')
     setCurrentRemark(dataItem.remark || '')
     setCurrentRowId(dataItem.id)
     setRemarkDialogOpen(true)
@@ -173,9 +170,9 @@ const KendoBusinessDemand = ({ permissions }) => {
   }
 
   const colDefs = kendoGetEnhancedColDefs({
-    allProducts,
+    // allProducts,
     headerMap,
-    handleRemarkCellClick,
+    // handleRemarkCellClick,
   })
   // const colDefs = React.useMemo(() => {
   //   const defs = getEnhancedColDefs({

@@ -56,13 +56,13 @@ const ShutDown = ({ permissions }) => {
 
   const keycloak = useSession()
   const handleRemarkCellClick = (row) => {
-    const rowsInEditMode = Object.keys(rowModesModel).filter(
-      (id) => rowModesModel[id]?.mode === 'edit',
-    )
+    // const rowsInEditMode = Object.keys(rowModesModel).filter(
+    //   (id) => rowModesModel[id]?.mode === 'edit',
+    // )
 
-    rowsInEditMode.forEach((id) => {
-      apiRef.current.stopRowEditMode({ id })
-    })
+    // rowsInEditMode.forEach((id) => {
+    //   apiRef.current.stopRowEditMode({ id })
+    // })
 
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
@@ -92,21 +92,21 @@ const ShutDown = ({ permissions }) => {
           return
         }
 
-        // const requiredFields = [
-        //   'maintStartDateTime',
-        //   'maintEndDateTime',
-        //   'discription',
-        //   'remark',
-        // ]
-        // const validationMessage = validateFields(data, requiredFields)
-        // if (validationMessage) {
-        //   setSnackbarOpen(true)
-        //   setSnackbarData({
-        //     message: validationMessage,
-        //     severity: 'error',
-        //   })
-        //   return
-        // }
+        const requiredFields = [
+          'maintStartDateTime',
+          'maintEndDateTime',
+          'discription',
+          'remark',
+        ]
+        const validationMessage = validateFields(data, requiredFields)
+        if (validationMessage) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: validationMessage,
+            severity: 'error',
+          })
+          return
+        }
 
         saveShutdownData(data)
       } catch (error) {
@@ -285,64 +285,6 @@ const ShutDown = ({ permissions }) => {
     //   setRows(rows.filter((row) => row.id !== id))
     // }
   }
-  const TwoLineEllipsisCell = (props) => {
-    const value = props.dataItem[props.field] || ''
-    return (
-      <td
-        style={{
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        }}
-      >
-        {value}
-      </td>
-    )
-  }
-
-  const DateTimeEditor = (props) => {
-    const { field, dataItem, onChange } = props
-    const value = dataItem[field] ? new Date(dataItem[field]) : null
-    return (
-      <td>
-        <DateTimePicker
-          value={value}
-          onChange={(e) => {
-            onChange({
-              dataItem,
-              field,
-              syntheticEvent: e.syntheticEvent,
-              value: e.value,
-            })
-          }}
-          format='dd/MM/yyyy hh:mm:ss tt'
-        />
-      </td>
-    )
-  }
-
-  const DurationCell = (props) => {
-    const hrs = findDuration(props.dataItem)
-    return <td style={{ textAlign: 'right' }}>{hrs}</td>
-  }
-
-  // 4) Remark cell with tooltip and click handling
-  const RemarkCell = (props) => {
-    const raw = props.dataItem[props.field] || ''
-    const display = truncateRemarks(raw)
-    const isEditable = !props.dataItem.Particulars
-    return (
-      <td
-        style={{ cursor: raw ? 'pointer' : 'default', position: 'relative' }}
-        onClick={() => isEditable && handleRemarkCellClick(props.dataItem)}
-        title={raw}
-      >
-        {raw ? display : isEditable ? 'Click to add remark' : ''}
-      </td>
-    )
-  }
 
   // 5) Column definitions for KendoReact Grid
   const colDefs = [
@@ -351,7 +293,7 @@ const ShutDown = ({ permissions }) => {
       title: 'Shutdown Desc',
       width: 250,
       editable: true,
-      cell: TwoLineEllipsisCell,
+      // cell: TwoLineEllipsisCell,
     },
     {
       field: 'maintenanceId',
@@ -361,30 +303,19 @@ const ShutDown = ({ permissions }) => {
     },
     {
       field: 'maintStartDateTime',
-      title: 'SD – From',
+      title: 'SD - From',
       editable: true,
-      format: '{0:dd/MM/yyyy hh:mm:ss tt}',
-      editor: DateTimeEditor,
-      type: 'dateTime',
-      cells: (props) => {
-        const value = props.dataItem[props.field]
-        return (
-          <td>{value ? dayjs(value).format('DD/MM/YYYY, h:mm:ss A') : ''}</td>
-        )
-      },
     },
     {
       field: 'maintEndDateTime',
-      title: 'SD – To',
+      title: 'SD - To',
       editable: true,
-      format: '{0:dd/MM/yyyy hh:mm:ss tt}',
-      editor: DateTimeEditor,
     },
     {
       field: 'durationInHrs',
       title: 'Duration (hrs)',
-      editable: true,
-      cell: DurationCell,
+      editable: false,
+      // cell: DurationCell,
     },
     {
       field: 'remark',
@@ -392,100 +323,6 @@ const ShutDown = ({ permissions }) => {
       editable: true,
     },
   ]
-
-  // const colDefs = [
-  //   {
-  //     field: 'discription',
-  //     title: 'Shutdown Desc',
-  //     //width: 125,
-  //     editable: true,
-  //     flex: 3,
-  //     renderCell: renderTwoLineEllipsis,
-  //   },
-  //   {
-  //     field: 'maintenanceId',
-  //     title: 'maintenanceId',
-  //     editable: false,
-  //     hide: true,
-  //   },
-
-  //   {
-  //     field: 'maintStartDateTime',
-  //     title: 'SD- From',
-  //     type: 'dateTime',
-  //     //width: 200,
-  //     editable: true,
-  //     // renderEditCell: (params) => <StartDateTimeEditCell {...params} />,
-  //     renderEditCell: (params) => (
-  //       <StartDateTimeEditCell {...params} apiRef={apiRef} />
-  //     ),
-
-  //     valueFormatter: (params) => {
-  //       const value = params
-  //       return value && dayjs(value).isValid()
-  //         ? dayjs(value).format('DD/MM/YYYY, h:mm:ss A')
-  //         : ''
-  //     },
-  //   },
-
-  //   {
-  //     field: 'maintEndDateTime',
-  //     title: 'SD- To',
-  //     type: 'dateTime',
-  //     //width: 200,
-  //     editable: true,
-  //     // renderEditCell: (params) => <EndDateTimeEditCell {...params} />,
-  //     // renderEditCell: (params) => <StartDateTimeEditCell {...params} apiRef={apiRef} />,
-  //     renderEditCell: (params) => (
-  //       <EndDateTimeEditCell {...params} apiRef={apiRef} />
-  //     ),
-  //     valueFormatter: (params) => {
-  //       const value = params
-  //       return value && dayjs(value).isValid()
-  //         ? dayjs(value).format('DD/MM/YYYY, h:mm:ss A')
-  //         : ''
-  //     },
-  //   },
-  //   {
-  //     field: 'durationInHrs',
-  //     title: 'Duration (hrs)',
-  //     editable: true,
-  //     //width: 100,
-  //     renderEditCell: TimeInputCell,
-  //     align: 'right',
-  //     headerAlign: 'left',
-  //     // valueGetter: (params) => params?.durationInHrs || 0,
-  //     valueGetter: findDuration,
-  //   },
-  //   {
-  //     field: 'remark',
-  //     title: 'Remark',
-  //     //width: 250,
-  //     editable: false,
-  //     renderCell: (params) => {
-  //       const displayText = truncateRemarks(params.value)
-  //       const isEditable = !params.row.Particulars
-
-  //       return (
-  //         <Tooltip title={params.value || ''} arrow>
-  //           <div
-  //             style={{
-  //               cursor: 'pointer',
-  //               color: params.value ? 'inherit' : 'gray',
-  //               overflow: 'hidden',
-  //               textOverflow: 'ellipsis',
-  //               whiteSpace: 'nowrap',
-  //               width: ' 100%',
-  //             }}
-  //             onClick={() => handleRemarkCellClick(params.row)}
-  //           >
-  //             {displayText || (isEditable ? 'Click to add remark' : '')}
-  //           </div>
-  //         </Tooltip>
-  //       )
-  //     },
-  //   },
-  // ]
 
   const deleteRowData = async (paramsForDelete) => {
     console.log(paramsForDelete)
@@ -572,7 +409,7 @@ const ShutDown = ({ permissions }) => {
         setOpen1={setOpen1}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        // handleDeleteClick={handleDeleteClick}
+        handleRemarkCellClick={handleRemarkCellClick}
         fetchData={fetchData}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}

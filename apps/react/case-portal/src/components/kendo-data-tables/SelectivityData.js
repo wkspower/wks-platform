@@ -42,7 +42,7 @@ const SelectivityData = (props) => {
 
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
-  const [rowModesModel, setRowModesModel] = useState({})
+  // const [rowModesModel, setRowModesModel] = useState({})
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -81,16 +81,16 @@ const SelectivityData = (props) => {
 
         // console.log(props?.configType)
         if (props?.configType !== 'grades') {
-          // const requiredFields = ['remarks']
-          // const validationMessage = validateFields(data, requiredFields)
-          // if (validationMessage) {
-          //   setSnackbarOpen(true)
-          //   setSnackbarData({
-          //     message: validationMessage,
-          //     severity: 'error',
-          //   })
-          //   return
-          // }
+          const requiredFields = ['remarks']
+          const validationMessage = validateFields(data, requiredFields)
+          if (validationMessage) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: validationMessage,
+              severity: 'error',
+            })
+            return
+          }
           saveCatalystData(data)
         } else {
           handleUpdate(data)
@@ -99,7 +99,7 @@ const SelectivityData = (props) => {
         // Handle error if necessary
       }
     }, 400)
-  }, [apiRef, rowModesModel])
+  }, [modifiedCells])
 
   const saveCatalystData = async (newRow) => {
     setLoading(true)
@@ -268,7 +268,7 @@ const SelectivityData = (props) => {
     props?.configType,
   ])
 
-  const [columnConfig, setColumnConfig] = useState([])
+  // const [columnConfig, setColumnConfig] = useState([])
 
   // setColumnConfig()
 
@@ -297,7 +297,7 @@ const SelectivityData = (props) => {
     headerMap,
     handleRemarkCellClick,
     configType: props?.configType,
-    columnConfig,
+    // columnConfig,
   })
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
@@ -345,6 +345,7 @@ const SelectivityData = (props) => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <KendoDataTables
+        handleRemarkCellClick={handleRemarkCellClick}
         NormParameterIdCell={NormParameterIdCell}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}

@@ -17,109 +17,97 @@
   },
   {
     "field": "april",
-    "title": "Apr",
+    "title": "4",
     "editable": false,
-    "width":120,
-
+    "width": 120,
     "align": "left",
     "headerAlign": "left"
   },
   {
     "field": "may",
-    "title":"May",
+    "title": "5",
     "editable": false,
-    "width":120,
-
+    "width": 120,
     "align": "left",
     "headerAlign": "left"
   },
   {
     "field": "june",
-    "title": "Jun",
+    "title": "6",
     "editable": false,
-    "width":120,
-
+    "width": 120,
     "align": "left",
     "headerAlign": "left"
   },
   {
     "field": "july",
-    "title": "Jul",
+    "title": "7",
     "editable": false,
-    "width":120,
-
+    "width": 120,
     "align": "left",
     "headerAlign": "left"
   },
   {
     "field": "august",
-    "title": "Aug",
+    "title": "8",
     "editable": false,
-    "width":120,
-
+    "width": 120,
     "align": "left",
     "headerAlign": "left"
   },
   {
     "field": "september",
-    "title": "Sep",
+    "title": "9",
     "editable": false,
-    "width":120,
-
+    "width": 120,
     "align": "left",
     "headerAlign": "left"
   },
   {
     "field": "october",
-    "title": "Oct",
+    "title": "10",
     "editable": false,
-    "width":120,
-
+    "width": 120,
     "align": "left",
     "headerAlign": "left"
   },
   {
     "field": "november",
-    "title": "Nov",
+    "title": "11",
     "editable": false,
-    "width":120,
-
+    "width": 120,
     "align": "left",
     "headerAlign": "left"
   },
   {
     "field": "december",
-    "title": "Dec",
+    "title": "12",
     "editable": false,
-    "width":120,
-
+    "width": 120,
     "align": "left",
     "headerAlign": "left"
   },
   {
     "field": "january",
-    "title": "Jan",
+    "title": "1",
     "editable": false,
-    "width":120,
-
+    "width": 120,
     "align": "left",
     "headerAlign": "left"
   },
   {
     "field": "february",
-    "title": "Feb",
+    "title": "2",
     "editable": false,
-    "width":120,
-
+    "width": 120,
     "align": "left",
     "headerAlign": "left"
   },
   {
     "field": "march",
-    "title": "Mar",
+    "title": "3",
     "editable": false,
-    "width":120,
-
+    "width": 120,
     "align": "left",
     "headerAlign": "left"
   },
