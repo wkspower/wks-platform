@@ -43,7 +43,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
 
-	String year;
+	
 	@Override
 	public List<ShutDownPlanDTO> findSlowdownDetailsByPlantIdAndType(UUID plantId, String maintenanceTypeName,
 			String year) {
@@ -96,6 +96,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 
 	@Override
 	public List<ShutDownPlanDTO> saveShutdownData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
+		String year=null;
 		try {
 			UUID plantMaintenanceId = shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId, "Slowdown");
 			if (plantMaintenanceId == null) {

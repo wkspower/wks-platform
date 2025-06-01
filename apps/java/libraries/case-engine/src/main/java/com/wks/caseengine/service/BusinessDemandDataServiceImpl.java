@@ -41,8 +41,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
 
-	String year;
-	UUID plantId;
+	
 	@Override
 	public List<BusinessDemandDataDTO> getBusinessDemandData(String year, String plantId) {
 		try {
@@ -94,6 +93,8 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 
 	@Override
 	public List<BusinessDemandDataDTO> saveBusinessDemandData(List<BusinessDemandDataDTO> businessDemandDataDTOList) {
+		String year=null;
+		UUID plantId=null;
 		try {
 			for (BusinessDemandDataDTO businessDemandDataDTO : businessDemandDataDTOList) {
 				BusinessDemand businessDemand = new BusinessDemand();

@@ -52,8 +52,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
 
-	String year;
-	UUID plantId;
+	
 
 	@Override
 	@Transactional
@@ -145,6 +144,8 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 
 	@Override
 	public List<SlowdownNormsValueDTO> saveSlowdownNormsData(List<SlowdownNormsValueDTO> slowdownNormsValueDTOList) {
+		String year=null;
+		UUID plantId=null;
 		try {
 			for (SlowdownNormsValueDTO slowdownNormsValueDTO : slowdownNormsValueDTOList) {
 				year=slowdownNormsValueDTO.getFinancialYear();
@@ -154,7 +155,6 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 					slowdownNormsValue.setId(UUID.fromString(slowdownNormsValueDTO.getId()));
 					slowdownNormsValue.setModifiedOn(new Date());
 				} else {
-					UUID plantId = null;
 					UUID siteId = null;
 					UUID verticalId = null;
 					UUID materialId = null;

@@ -70,8 +70,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 	private DataSource dataSource;
 	
-	String year;
-	UUID plantId;
+	
 
 	// Inject or set your DataSource (e.g., via constructor or setter)
 	public NormalOperationNormsServiceImpl(DataSource dataSource) {
@@ -137,7 +136,8 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 	@Override
 	public List<MCUNormsValueDTO> saveNormalOperationNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList) {
-		
+		String year=null;
+		UUID plantId=null;
 		try {
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			String userId = authentication.getName();

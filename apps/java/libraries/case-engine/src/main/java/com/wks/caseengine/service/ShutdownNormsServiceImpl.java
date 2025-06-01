@@ -52,8 +52,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
 	
-	String year;
-	UUID plantId;
+	
 
 
 	@Override
@@ -118,6 +117,8 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 
 	@Override
 	public List<ShutdownNormsValueDTO> saveShutdownNormsData(List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
+		String year=null;
+		UUID plantId=null;
 		try {
 			for (ShutdownNormsValueDTO shutdownNormsValueDTO : shutdownNormsValueDTOList) {
 				year=shutdownNormsValueDTO.getFinancialYear();
@@ -127,7 +128,6 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 					shutdownNormsValue.setId(UUID.fromString(shutdownNormsValueDTO.getId()));
 					shutdownNormsValue.setModifiedOn(new Date());
 				} else {
-					UUID plantId = null;
 					UUID siteId = null;
 					UUID verticalId = null;
 					UUID materialId = null;
