@@ -149,8 +149,8 @@ const SelectivityData = (props) => {
         }
         setLoading(false)
 
-        if (props?.configType !== 'grades') {
-          props.fetchData()
+        if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
+          props?.fetchData()
         }
       } else {
         setSnackbarOpen(true)
@@ -255,8 +255,8 @@ const SelectivityData = (props) => {
     if (verticalChange?.selectedVertical === 'PE') getAllGrades()
 
     // getAllCatalyst()
-    if (props?.configType !== 'grades') {
-      props.fetchData()
+    if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
+      props?.fetchData()
     }
     if (props?.configType === 'grades') fetchConfigData()
   }, [
@@ -330,11 +330,12 @@ const SelectivityData = (props) => {
     isOldYear,
   )
   const NormParameterIdCell = (props) => {
+    console.log(props)
     const productId = props.dataItem.normParameterFKId
     const product = allProducts.find((p) => p.id === productId)
     const displayName = product?.displayName || ''
-    // console.log(displayName)
-    return <td>{displayName}</td>
+    console.log(displayName)
+    return <td>{displayName ? displayName : props?.dataItem?.particulars}</td>
   }
   return (
     <Box>

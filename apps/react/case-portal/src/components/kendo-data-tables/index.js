@@ -29,6 +29,7 @@ import { process } from '@progress/kendo-data-query'
 import DateTimePickerEditor from './Utilities-Kendo/DatePickeronSelectedYr'
 import { updateRowWithDuration } from './Utilities-Kendo/AutoDuration'
 import ProductDropDownEditor from './Utilities-Kendo/DropdownProducts'
+import ProductCell from './Utilities-Kendo/ProductCell'
 
 const KendoDataTables = ({
   // setUpdatedRows = () => {},
@@ -292,7 +293,6 @@ const KendoDataTables = ({
   const RemarkCell = (props) => {
     const { dataItem, field, onRemarkClick, ...tdProps } = props
 
-    // Compute: the truncated display text (or placeholder)
     const rawValue = dataItem[field]
     const displayText = truncateRemarks(rawValue)
     // const editable = Boolean(dataItem.isEditable)
@@ -561,21 +561,32 @@ const KendoDataTables = ({
                     title={col.title || col.headerName || 'Particulars'}
                     width={210}
                     editable={col.editable || true}
-                    editor={(props) => (
-                      <ProductDropDownEditor
-                        {...props}
-                        allProducts={allProducts}
-                        rows={rows}
-                      />
-                    )}
+                    // cells={{
+                    //   data: (props) => (
+                    //     <ProductDropDownEditor
+                    //       {...props}
+                    //       allProducts={allProducts}
+                    //     />
+                    //   ),
+                    // }}
+
+                    // cells={{
+                    //   data: (cellProps) => (
+                    //     <ProductCell {...cellProps} allProducts={allProducts} />
+                    //   ),
+                    // }}
                     cells={{
-                      data: (props) => (
-                        <ProductDropDownEditor
-                          {...props}
-                          allProducts={allProducts}
-                          rows={rows}
-                        />
+                      data: (cellProps) => (
+                        <ProductCell {...cellProps} allProducts={allProducts} />
                       ),
+                      // edit: {
+                      //   data: (editorProps) => (
+                      //     <ProductDropDownEditor
+                      //       {...editorProps}
+                      //       allProducts={allProducts}
+                      //     />
+                      //   ),
+                      // },
                     }}
                     columnMenu={ColumnMenu}
                     // editable is true by default, so no need to set editable={true}
