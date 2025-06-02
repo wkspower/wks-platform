@@ -46,9 +46,12 @@ const KendoDataTables = ({
   snackbarOpen = false,
   setRemarkDialogOpen = () => {},
   currentRemark = '',
+  // editedRows = [],
   setCurrentRemark = () => {},
   currentRowId = null,
+  // modifiedCells = [],
   NormParameterIdCell = () => {},
+
   setModifiedCells = () => {},
   remarkDialogOpen = false,
   handleDeleteSelected = () => {},
@@ -74,6 +77,11 @@ const KendoDataTables = ({
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
+  // const closeDeleteDialogeBox = () => setOpenDeleteDialogeBox(false)
+  // const [resizedColumns, setResizedColumns] = useState({})
+  // const [edit, setEdit] = React.useState({})
+  // const [searchText, setSearchText] = useState('')
+  // const isFilterActive = false
   // const localApiRef = useGridApiRef()
   // const finalExternalApiRef = apiRef ?? localApiRef
   // const handleSearchChange = (event) => {
@@ -254,7 +262,25 @@ const KendoDataTables = ({
     )
   }
 
-
+  // const DateTimePickerEditor = ({ dataItem, field, onChange }) => {
+  //   const value = dataItem[field] ? new Date(dataItem[field]) : null
+  //   return (
+  //     <td>
+  //       <DateTimePicker
+  //         value={value}
+  //         onChange={(e) =>
+  //           onChange({
+  //             dataItem,
+  //             field,
+  //             value: e.value,
+  //             syntheticEvent: e.syntheticEvent,
+  //           })
+  //         }
+  //         format='dd/MM/yyyy hh:mm tt'
+  //       />
+  //     </td>
+  //   )
+  // }
 
   const particulars = [
     'normParameterId',
@@ -290,10 +316,46 @@ const KendoDataTables = ({
     )
   }
 
-    const processedData = useMemo(() => {
+  useEffect(() => {
+    if (rows && rows.length > 0 && groupBy) {
+      setGroup([{ field: groupBy }])
+
+      const initialExpandedState = {}
+      const uniqueValues = [...new Set(rows.map((row) => row[groupBy]))]
+      uniqueValues.forEach((value) => {
+        initialExpandedState[`${groupBy}_${value}`] = true
+      })
+      setExpandedState(initialExpandedState)
+    }
+    // console.log(rows, groupBy, group)
+  }, [rows, groupBy])
+
+  const processedData = useMemo(() => {
     if (!rows || rows.length === 0) return []
+
+    if (group.length > 0) {
+      const result = process(rows, { group })
+
+      // Apply expanded state to the processed data
+      const applyExpandedState = (items) => {
+        return items.map((item) => {
+          // console.log('Inspecting item:', item)
+          if (item.items) {
+            // This is a group item
+            const key = item.field + '_' + item.value
+            // console.log('Using key:', key)
+            item.expanded = expandedState[key] !== false // Default to expanded
+            item.items = applyExpandedState(item.items)
+          }
+          return item
+        })
+      }
+
+      return applyExpandedState(result.data)
+    }
+    // console.log(rows)
     return rows
-  }, [rows])
+  }, [rows, group, expandedState])
   // console.log(processedData)
   return (
     <div style={{ position: 'relative' }}>
@@ -529,8 +591,8 @@ const KendoDataTables = ({
                     title={col.title || col.headerName}
                     width={col.width}
                     editor={true}
-                    editable={col.editable || true}
-                    // editable={{ mode: 'popup' }}
+                    // editable={col.editable || true}
+                    editable={{ mode: 'popup' }}
                     cells={{
                       data: (cellProps) => (
                         <RemarkCell
@@ -551,7 +613,7 @@ const KendoDataTables = ({
                     field={col.field}
                     title={col.title || col.headerName}
                     width={col.width}
-                    // editable={col.editable|| ||false} // make it read‑only
+                    editable={col.editable || false} // make it read‑only
                     columnMenu={ColumnMenu} // if you want columnMenu
                     // optionally format with 2 decimals
                     format='{0:n2}'
@@ -581,7 +643,7 @@ const KendoDataTables = ({
                   field={col.field}
                   title={col.title || col.headerName}
                   width={col.width}
-                  editable={col.editable || true}
+                  editable={true}
                   columnMenu={ColumnMenu}
                 />
               )
