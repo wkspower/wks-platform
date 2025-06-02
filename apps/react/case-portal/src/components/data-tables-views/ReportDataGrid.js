@@ -174,8 +174,12 @@ const ReportDataGrid = ({
             }}
           >
             {permissions?.showTitle && (
-              <Typography component='div' className='grid-title'>
-                {title}
+              <Typography
+                component='div'
+                className='grid-title'
+                style={{ whiteSpace: 'pre-line' }}
+              >
+                {title?.replace(/\\n/g, '\n')}
               </Typography>
             )}
           </Box>

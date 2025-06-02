@@ -10,6 +10,7 @@ import getEnhancedColDefs from './CommonHeader/feedstockHeaders'
 
 const FeedStockAvailability = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 
   // const [productOptions, setProductOptions] = useState([])
   // const [productionData, setProductionData] = useState([])
@@ -40,6 +41,7 @@ const FeedStockAvailability = () => {
 
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
+    setEnableSaveAddBtn(true)
   }
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
@@ -164,6 +166,7 @@ const FeedStockAvailability = () => {
     <div>
       <ASDataGrid
         modifiedCells={modifiedCells}
+        enableSaveAddBtn={enableSaveAddBtn}
         columns={productionColumns}
         rows={rows}
         setRows={setRows}

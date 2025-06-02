@@ -180,6 +180,13 @@ const AnnualAopCost = () => {
     exportRef1.current.save(options1)
   }
 
+  const currentDateTime = new Date()
+    .toISOString()
+    .replace(/T/, ' ')
+    .replace(/:/g, '-')
+    .split('.')[0]
+  const fileName = `Annual AOP Cost ${currentDateTime}.xlsx`
+
   return (
     <div>
       <Backdrop
@@ -191,7 +198,7 @@ const AnnualAopCost = () => {
 
       {/* Export hidden ExcelExport instances */}
       <div style={{ display: 'none' }}>
-        <ExcelExport data={rowsProduction} ref={exportRef1}>
+        <ExcelExport data={rowsProduction} ref={exportRef1} fileName={fileName}>
           {colsProduction.map((col) => (
             <ExcelExportColumn
               key={col.field}

@@ -1,7 +1,7 @@
 [
   {
     "field": "norm",
-    "headerName": "Norm",
+    "headerName": "Type",
     "editable": false,
     "flex": 1
   },

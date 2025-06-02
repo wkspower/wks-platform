@@ -7,7 +7,7 @@
   },
   {
     "field": "norms",
-    "headerName": "Norms",
+    "headerName": "Type",
 
     "flex": 2,
     "editable": false

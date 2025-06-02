@@ -10,7 +10,7 @@ import Notification from 'components/Utilities/Notification'
 const categories = [
   {
     key: 'ProductMixAndProduction',
-    title: 'Plant Contribution (T-21)- MEG - Product mix and Production',
+    title: 'Plant Contribution (T-21)- MEG\nProduct mix and Production',
   },
   { key: 'ByProducts', title: 'By products' },
   { key: 'RawMaterial', title: 'Raw material' },

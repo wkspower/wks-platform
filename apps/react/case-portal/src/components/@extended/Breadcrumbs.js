@@ -336,9 +336,9 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                     alignItems: 'center',
                   }}
                 >
-                  {verticalName} / {siteName} / {plantName} |{' '}
+                  {verticalName} / {siteName} / {plantName}{' '}
                   {/* {getRoleName(verticalId, item?.id)} */}
-                   {keycloak?.realmAccess?.roles[0]}
+                  {/* {keycloak?.realmAccess?.roles[0]} */}
                   {itemContent}
                 </Typography>
               </Grid>

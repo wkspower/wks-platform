@@ -219,7 +219,7 @@ const PlantsProductionSummary = () => {
                     whiteSpace: 'nowrap',
                     width: ' 100%',
                   }}
-                  onClick={() => handleRemarkCellClick(params.row)}
+                  onDoubleClick={() => handleRemarkCellClick(params.row)}
                 >
                   {display || 'Click to add remark'}
                 </div>

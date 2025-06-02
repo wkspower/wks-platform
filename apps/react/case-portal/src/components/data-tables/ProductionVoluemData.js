@@ -15,6 +15,7 @@ import { Typography } from '../../../node_modules/@mui/material/index'
 
 const ProductionvolumeData = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 
   const keycloak = useSession()
   // const [productNormData, setProductNormData] = useState([])
@@ -53,6 +54,13 @@ const ProductionvolumeData = ({ permissions }) => {
     rowsBeforeChange: {},
   })
   const handleRemarkCellClick = (row) => {
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
+
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
     setCurrentRemark(row.remarks ?? row.remark ?? '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
@@ -450,6 +458,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
+    setEnableSaveAddBtn(true)
   }
 
   const handleUnitChange = (unit) => {
@@ -539,7 +548,8 @@ const ProductionvolumeData = ({ permissions }) => {
       saveBtn: permissions?.saveBtn ?? false,
       units: ['TPH', 'TPD'],
       customHeight: permissions?.customHeight ?? defaultCustomHeight,
-      showCalculate:
+      showCalculate: lowerVertName === 'meg' ? true : false,
+      showCalculateVisibility:
         lowerVertName === 'meg' &&
         Object.keys(calculationObject || {}).length > 0
           ? true
@@ -558,6 +568,7 @@ const ProductionvolumeData = ({ permissions }) => {
       </Backdrop>
       <ASDataGrid
         modifiedCells={modifiedCells}
+        enableSaveAddBtn={enableSaveAddBtn}
         setRows={setRows}
         columns={productionColumns}
         rows={rows}

@@ -133,6 +133,13 @@ const NormsHistorianBasis = () => {
     exportRef1.current.save(options1)
   }
 
+  const currentDateTime = new Date()
+    .toISOString()
+    .replace(/T/, ' ')
+    .replace(/:/g, '-')
+    .split('.')[0]
+  const fileName = `Norms Historian Basis ${currentDateTime}.xlsx`
+
   return (
     <div>
       <Backdrop
@@ -144,7 +151,11 @@ const NormsHistorianBasis = () => {
 
       {/* Export hidden ExcelExport instances */}
       <div style={{ display: 'none' }}>
-        <ExcelExport data={rowsProductionVolumeData} ref={exportRef1}>
+        <ExcelExport
+          data={rowsProductionVolumeData}
+          ref={exportRef1}
+          fileName={fileName}
+        >
           {colsProductionVolumeData.map((col) => (
             <ExcelExportColumn
               key={col.field}

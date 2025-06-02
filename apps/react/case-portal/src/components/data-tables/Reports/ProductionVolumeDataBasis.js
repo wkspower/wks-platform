@@ -144,6 +144,13 @@ const ProductionVolumeDataBasis = () => {
     exportRef1.current.save(options1)
   }
 
+  const currentDateTime = new Date()
+    .toISOString()
+    .replace(/T/, ' ')
+    .replace(/:/g, '-')
+    .split('.')[0]
+  const fileName = `Production Volume Data Basis ${currentDateTime}.xlsx`
+
   return (
     <div>
       <Backdrop
@@ -155,7 +162,7 @@ const ProductionVolumeDataBasis = () => {
 
       {/* Export hidden ExcelExport instances */}
       <div style={{ display: 'none' }}>
-        <ExcelExport data={rowsMC} ref={exportRef1}>
+        <ExcelExport data={rowsMC} ref={exportRef1} fileName={fileName}>
           {colsMC.map((col) => (
             <ExcelExportColumn
               key={col.field}

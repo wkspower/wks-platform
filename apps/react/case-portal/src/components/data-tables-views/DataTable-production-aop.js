@@ -40,6 +40,7 @@ const ProductionAopView = ({ handleCalculate, fetchSecondGridData }) => {
     severity: 'info',
   })
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 
   const formatValueToNoDecimals = (val) =>
     val && !isNaN(val) ? Math.round(val) : val
@@ -253,6 +254,7 @@ const ProductionAopView = ({ handleCalculate, fetchSecondGridData }) => {
         currentRowId={currentRowId}
         setCurrentRowId={setCurrentRowId}
         modifiedCells={modifiedCells}
+        enableSaveAddBtn={enableSaveAddBtn}
         handleCalculate={handlecalcualteWithRefreshAll}
       />
       {/* </Box> */}

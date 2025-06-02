@@ -34,6 +34,7 @@ const SlowDown = ({ permissions }) => {
   // const [slowDownData, setSlowDownData] = useState([])
   const [rowModesModel, setRowModesModel] = useState({})
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
@@ -224,12 +225,17 @@ const SlowDown = ({ permissions }) => {
         keycloak,
       )
       //console.log('Slowdown data Saved Successfully:', response)
+
       setSnackbarOpen(true)
       // setSnackbarMessage("Slowdown data Saved Successfully !");
+
       setSnackbarData({
         message: 'Slowdown data Saved Successfully!',
         severity: 'success',
       })
+
+      const maintenanceResponse = await DataService.getMaintenanceData(keycloak)
+
       setModifiedCells({})
 
       unsavedChangesRef.current = {
@@ -340,6 +346,9 @@ const SlowDown = ({ permissions }) => {
         idFromApi: item?.maintenanceId || item?.id,
         id: index,
         originalRemark: item.remark,
+        durationInHrs: item.durationInHrs?.toFixed
+          ? Number(item.durationInHrs).toFixed(2)
+          : item.durationInHrs,
       }))
       // setSlowDownData(formattedData)
       setRows(formattedData)
@@ -629,7 +638,7 @@ const SlowDown = ({ permissions }) => {
                 whiteSpace: 'nowrap',
                 width: ' 100%',
               }}
-              onClick={() => handleRemarkCellClick(params.row)}
+              onDoubleClick={() => handleRemarkCellClick(params.row)}
             >
               {displayText || (isEditable ? 'Click to add remark' : '')}
             </div>
@@ -652,6 +661,7 @@ const SlowDown = ({ permissions }) => {
 
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
+    setEnableSaveAddBtn(true)
   }
 
   const deleteRowData = async (paramsForDelete) => {
@@ -720,6 +730,7 @@ const SlowDown = ({ permissions }) => {
 
       <ASDataGrid
         modifiedCells={modifiedCells}
+        enableSaveAddBtn={enableSaveAddBtn}
         setRows={setRows}
         columns={colDefs}
         rows={rows}

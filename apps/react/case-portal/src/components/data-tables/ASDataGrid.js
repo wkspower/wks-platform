@@ -69,6 +69,7 @@ const DataGridTable = ({
   handleCalculate = () => {},
   setRows = () => {},
   rows = [],
+  enableSaveAddBtn = false,
   allRedCell = [],
   modifiedCells = [],
   loading = false,
@@ -139,10 +140,6 @@ const DataGridTable = ({
     //   [id]: { mode: GridRowModes.View },
     // }))
   }
-
-  // const handleRowModesModelChange = (newRowModesModel) => {
-  //   setRowModesModel(newRowModesModel)
-  // }
 
   useEffect(() => {
     if (rows) setRows(rows)
@@ -446,26 +443,26 @@ const DataGridTable = ({
         </Typography>
       </Box> */}
       {/* )} */}
-      {(permissions?.allAction ?? true) && (
-        <Box className='action-box'>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              width: '100%', // make sure container is full width
-              p: 1,
-              gap: 1,
-            }}
-          >
-            {permissions?.UnitToShow && (
-              <Chip
-                label={permissions.UnitToShow}
-                variant='outlined'
-                className='unit-chip'
-              />
-            )}
-            {/* {permissions?.showCalculate && (
+      {/* {(permissions?.allAction ?? true) && ( */}
+      <Box className='action-box'>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            width: '100%', // make sure container is full width
+            p: 1,
+            gap: 1,
+          }}
+        >
+          {permissions?.UnitToShow && (
+            <Chip
+              label={permissions.UnitToShow}
+              variant='outlined'
+              className='unit-chip'
+            />
+          )}
+          {/* {permissions?.showCalculate && (
               <Tooltip title='Calculate'>
                 <span>
                   <Button
@@ -488,140 +485,171 @@ const DataGridTable = ({
               </Tooltip>
             )} */}
 
-            {permissions?.showCalculate && (
-              <Button
-                variant='contained'
-                onClick={handleCalculateBtn}
-                disabled={isButtonDisabled}
-                className='btn-save'
-              >
-                Calculate
-              </Button>
-            )}
-            {permissions?.showRefresh && (
-              <Button
-                variant='contained'
-                onClick={handleCalculateBtn}
-                disabled={isButtonDisabled}
-                className='btn-save'
-              >
-                Refresh
-              </Button>
-            )}
+          {permissions?.showCalculate}
 
-            {permissions?.showRefreshBtn && false && (
-              <Button
-                variant='contained'
-                onClick={handleRefresh}
-                className='btn-save'
-              >
-                Refresh
-              </Button>
-            )}
+          {permissions?.showCalculate && (
+            <Button
+              variant='contained'
+              onClick={handleCalculateBtn}
+              disabled={
+                rows?.length === 0
+                  ? false
+                  : isButtonDisabled || !permissions?.showCalculateVisibility
+              }
+              className='btn-save'
+            >
+              Calculate
+            </Button>
+          )}
 
-            {permissions?.showUnit && (
-              <TextField
-                select
-                value={selectedUnit || permissions?.units?.[0]}
-                onChange={(e) => {
-                  setSelectedUnit(e.target.value)
-                  handleUnitChange(e.target.value)
-                }}
-                sx={{ width: '150px', backgroundColor: jioColors.background }}
-                variant='outlined'
-                label='Select UOM'
-              >
-                <MenuItem value='' disabled>
-                  Select UOM
+          {permissions?.addButton && (
+            <Button
+              variant='contained'
+              className='btn-save'
+              onClick={handleAddRow}
+              disabled={isButtonDisabled}
+            >
+              Add Item
+            </Button>
+          )}
+
+          {permissions?.saveBtn && (
+            <Button
+              variant='contained'
+              className='btn-save'
+              onClick={saveModalOpen}
+              disabled={isButtonDisabled || !enableSaveAddBtn}
+              // loading={loading}
+              // loadingposition='start'
+              {...(loading ? {} : {})}
+            >
+              Save
+            </Button>
+          )}
+
+          {permissions?.showRefresh && (
+            <Button
+              variant='contained'
+              onClick={handleCalculateBtn}
+              disabled={isButtonDisabled}
+              className='btn-save'
+            >
+              Refresh
+            </Button>
+          )}
+
+          {permissions?.showRefreshBtn && false && (
+            <Button
+              variant='contained'
+              onClick={handleRefresh}
+              className='btn-save'
+            >
+              Refresh
+            </Button>
+          )}
+
+          {permissions?.showUnit && (
+            <TextField
+              select
+              value={selectedUnit || permissions?.units?.[0]}
+              onChange={(e) => {
+                setSelectedUnit(e.target.value)
+                handleUnitChange(e.target.value)
+              }}
+              sx={{ width: '150px', backgroundColor: jioColors.background }}
+              variant='outlined'
+              label='Select UOM'
+            >
+              <MenuItem value='' disabled>
+                Select UOM
+              </MenuItem>
+
+              {/* Render the correct unit options dynamically */}
+              {permissions?.units.map((unit) => (
+                <MenuItem key={unit} value={unit}>
+                  {unit}
                 </MenuItem>
+              ))}
+            </TextField>
+          )}
 
-                {/* Render the correct unit options dynamically */}
-                {permissions?.units.map((unit) => (
-                  <MenuItem key={unit} value={unit}>
-                    {unit}
-                  </MenuItem>
-                ))}
-              </TextField>
-            )}
+          {false && (
+            <TextField
+              variant='outlined'
+              placeholder='Search...'
+              value={searchText}
+              onChange={handleSearchChange}
+              sx={{
+                width: '300px',
+                borderRadius: 1,
+                backgroundColor: jioColors.background,
+                color: '#8A9BC2',
+              }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position='start'>
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          )}
 
-            {false && (
-              <TextField
-                variant='outlined'
-                placeholder='Search...'
-                value={searchText}
-                onChange={handleSearchChange}
-                sx={{
-                  width: '300px',
-                  borderRadius: 1,
-                  backgroundColor: jioColors.background,
-                  color: '#8A9BC2',
-                }}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position='start'>
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            )}
-
-            {false && (
-              <IconButton
-                aria-label='import'
-                onClick={handleImportExport}
-                sx={{
-                  border: `1px solid ${jioColors.border}`,
-                  borderRadius: 1,
-                  padding: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
+          {false && (
+            <IconButton
+              aria-label='import'
+              onClick={handleImportExport}
+              sx={{
+                border: `1px solid ${jioColors.border}`,
+                borderRadius: 1,
+                padding: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
+                color: 'inherit',
+                width: '150px',
+                '&:hover': {
                   backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
-                  color: 'inherit',
-                  width: '150px',
-                  '&:hover': {
-                    backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
-                  },
-                }}
-              >
-                <FileDownload sx={{ color: '#2A3ACD' }} />
-                <span style={{ fontSize: '0.875rem', color: '#2A3ACD' }}>
-                  Import
-                </span>
-              </IconButton>
-            )}
+                },
+              }}
+            >
+              <FileDownload sx={{ color: '#2A3ACD' }} />
+              <span style={{ fontSize: '0.875rem', color: '#2A3ACD' }}>
+                Import
+              </span>
+            </IconButton>
+          )}
 
-            {false && (
-              <IconButton
-                aria-label='export'
-                onClick={handleImportExport}
-                sx={{
-                  border: `1px solid ${jioColors.border}`,
-                  borderRadius: 1,
-                  padding: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
+          {false && (
+            <IconButton
+              aria-label='export'
+              onClick={handleImportExport}
+              sx={{
+                border: `1px solid ${jioColors.border}`,
+                borderRadius: 1,
+                padding: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
+                color: 'inherit',
+                width: '150px',
+                '&:hover': {
                   backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
-                  color: 'inherit',
-                  width: '150px',
-                  '&:hover': {
-                    backgroundColor: isFilterActive ? '#F2F3F8' : '#FFF',
-                  },
-                }}
-              >
-                <FileUpload sx={{ color: '#2A3ACD' }} />
-                <span style={{ fontSize: '0.875rem', color: '#2A3ACD' }}>
-                  Export
-                </span>
-              </IconButton>
-            )}
-            {/* </Box> */}
-          </Box>
+                },
+              }}
+            >
+              <FileUpload sx={{ color: '#2A3ACD' }} />
+              <span style={{ fontSize: '0.875rem', color: '#2A3ACD' }}>
+                Export
+              </span>
+            </IconButton>
+          )}
+          {/* </Box> */}
         </Box>
-      )}
-
+      </Box>
+      {/* )} */}
       <Box
         sx={{
           height: `calc(${otherHeight ?? (permissions.customHeight2 ? '95%' : '95%')} - 120px)`,
@@ -775,40 +803,15 @@ const DataGridTable = ({
           // columnGroupingModel={columnGroupingModel}
         />
       </Box>
-
-      {(permissions?.allActionOfBottomBtns ?? true) && (
-        <Box
-          sx={{
-            marginTop: 2,
-            display: 'flex',
-            gap: 2,
-          }}
-        >
-          {permissions?.addButton && (
-            <Button
-              variant='contained'
-              className='btn-save'
-              onClick={handleAddRow}
-              disabled={isButtonDisabled}
-            >
-              Add Item
-            </Button>
-          )}
-
-          {permissions?.saveBtn && (
-            <Button
-              variant='contained'
-              className='btn-save'
-              onClick={saveModalOpen}
-              disabled={isButtonDisabled}
-              // loading={loading}
-              // loadingposition='start'
-              {...(loading ? {} : {})}
-            >
-              Save
-            </Button>
-          )}
-          {/* {permissions?.showCreateCasebutton && (
+      {/* {(permissions?.allActionOfBottomBtns ?? true) && ( */}
+      <Box
+        sx={{
+          marginTop: 2,
+          display: 'flex',
+          gap: 2,
+        }}
+      >
+        {/* {permissions?.showCreateCasebutton && (
             <Button
               variant='contained'
               onClick={createCase}
@@ -819,58 +822,56 @@ const DataGridTable = ({
             </Button>
           )} */}
 
-          {permissions?.approveBtn && (
-            <Button
-              variant='contained'
-              className='btn-save'
-              onClick={saveModalOpen}
-              disabled={isButtonDisabled}
-              // loading={loading}
-              // loadingposition='start'
-              {...(loading ? {} : {})}
-            >
-              Approve
-            </Button>
-          )}
-          {permissions?.nextBtn && (
-            <Button
-              variant='contained'
-              className='btn-save'
-              onClick={() => {
-                // Write any additional logic here before navigating.
-                // console.log('Navigating to dashboard')
-                // navigate('/user-form')
-                handleAddPlantSite()
-              }}
-              disabled={isButtonDisabled}
-              loading={loading} // Use the loading prop to trigger loading state
-              loadingposition='start' // Use loadingPosition to control where the spinner appears
-            >
-              Next
-            </Button>
-          )}
-          {showDeleteAll && (
-            <Button
-              variant='contained'
-              className='btn-save'
-              onClick={handleDeleteSelected}
-              disabled={isButtonDisabled}
-              loading={loading} // Use the loading prop to trigger loading state
-              loadingposition='start' // Use loadingPosition to control where the spinner appears
-            >
-              Delete
-            </Button>
-          )}
-        </Box>
-      )}
-
+        {permissions?.approveBtn && (
+          <Button
+            variant='contained'
+            className='btn-save'
+            onClick={saveModalOpen}
+            disabled={isButtonDisabled}
+            // loading={loading}
+            // loadingposition='start'
+            {...(loading ? {} : {})}
+          >
+            Approve
+          </Button>
+        )}
+        {permissions?.nextBtn && (
+          <Button
+            variant='contained'
+            className='btn-save'
+            onClick={() => {
+              // Write any additional logic here before navigating.
+              // console.log('Navigating to dashboard')
+              // navigate('/user-form')
+              handleAddPlantSite()
+            }}
+            disabled={isButtonDisabled}
+            loading={loading} // Use the loading prop to trigger loading state
+            loadingposition='start' // Use loadingPosition to control where the spinner appears
+          >
+            Next
+          </Button>
+        )}
+        {showDeleteAll && (
+          <Button
+            variant='contained'
+            className='btn-save'
+            onClick={handleDeleteSelected}
+            disabled={isButtonDisabled}
+            loading={loading} // Use the loading prop to trigger loading state
+            loadingposition='start' // Use loadingPosition to control where the spinner appears
+          >
+            Delete
+          </Button>
+        )}
+      </Box>
+      {/* )} */}
       <Notification
         open={snackbarOpen}
         message={snackbarData?.message || ''}
         severity={snackbarData?.severity || 'info'}
         onClose={() => setSnackbarOpen(false)}
       />
-
       <Dialog
         open={openDeleteDialogeBox}
         onClose={closeDeleteDialogeBox}
@@ -890,7 +891,6 @@ const DataGridTable = ({
           </Button>
         </DialogActions>
       </Dialog>
-
       <Dialog
         open={openSaveDialogeBox}
         onClose={closeSaveDialogeBox}
@@ -910,7 +910,6 @@ const DataGridTable = ({
           </Button>
         </DialogActions>
       </Dialog>
-
       <Dialog
         open={!!remarkDialogOpen}
         onClose={() => setRemarkDialogOpen(false)}

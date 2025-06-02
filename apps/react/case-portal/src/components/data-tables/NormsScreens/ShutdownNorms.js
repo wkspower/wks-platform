@@ -21,6 +21,7 @@ import FormattedNumberTooltip from 'components/Utilities/FormattedNumberTooltip'
 
 const ShutdownNorms = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 
   const [loading, setLoading] = useState(false)
   const menu = useSelector((state) => state.dataGridStore)
@@ -557,7 +558,7 @@ const ShutdownNorms = () => {
                 whiteSpace: 'nowrap',
                 width: ' 100%',
               }}
-              onClick={() => handleRemarkCellClick(params.row)}
+              onDoubleClick={() => handleRemarkCellClick(params.row)}
             >
               {displayText || (isEditable ? 'Click to add remark' : '')}
             </div>
@@ -576,6 +577,13 @@ const ShutdownNorms = () => {
   ]
 
   const handleRemarkCellClick = (row) => {
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
+
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
     if (!row?.isEditable) return
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
@@ -880,6 +888,7 @@ const ShutdownNorms = () => {
 
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
+    setEnableSaveAddBtn(true)
   }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
@@ -927,6 +936,7 @@ const ShutdownNorms = () => {
       </Backdrop>
       <DataGridTable
         modifiedCells={modifiedCells}
+        enableSaveAddBtn={enableSaveAddBtn}
         isCellEditable={isCellEditable}
         title='Shutdown Norms'
         columns={colDefs}

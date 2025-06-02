@@ -1,7 +1,7 @@
 [
   {
     "field": "norm",
-    "headerName": "Norm",
+    "headerName": "Type",
     "minWidth": 125,
     "editable": false
   },

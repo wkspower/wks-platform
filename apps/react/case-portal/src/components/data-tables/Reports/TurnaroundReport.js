@@ -26,6 +26,7 @@ const TurnaroundReport = () => {
   const [currentRemark2, setCurrentRemark2] = useState('')
   const [currentRowId2, setCurrentRowId2] = useState(null)
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
   const [modifiedCells2, setModifiedCells2] = React.useState({})
 
   const [snackbarData, setSnackbarData] = useState({
@@ -93,7 +94,7 @@ const TurnaroundReport = () => {
               whiteSpace: 'nowrap',
               width: ' 100%',
             }}
-            onClick={() => handleRemarkCellClick(params.row)}
+            onDoubleClick={() => handleRemarkCellClick(params.row)}
           >
             {truncateRemarks(params.value) || 'Click to add remark'}
           </div>
@@ -424,6 +425,7 @@ const TurnaroundReport = () => {
     <Box>
       <ReportDataGrid
         modifiedCells={modifiedCells}
+        enableSaveAddBtn={enableSaveAddBtn}
         rows={rows}
         setRows={setRows}
         columns={columns}

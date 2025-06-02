@@ -52,6 +52,7 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 
 const NormalOpNormsScreen = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
   const [allProducts, setAllProducts] = useState([])
   const [allRedCell, setAllRedCell] = useState([])
   // const [bdData, setBDData] = useState([])
@@ -563,7 +564,7 @@ const NormalOpNormsScreen = () => {
                 whiteSpace: 'nowrap',
                 width: ' 100%',
               }}
-              onClick={() => handleRemarkCellClick(params.row)}
+              onDoubleClick={() => handleRemarkCellClick(params.row)}
             >
               {displayText || (isEditable ? 'Click to add remark' : '')}
             </div>
@@ -886,6 +887,13 @@ const NormalOpNormsScreen = () => {
   ]
 
   const handleRemarkCellClick = (row) => {
+    const rowsInEditMode = Object.keys(rowModesModel).filter(
+      (id) => rowModesModel[id]?.mode === 'edit',
+    )
+
+    rowsInEditMode.forEach((id) => {
+      apiRef.current.stopRowEditMode({ id })
+    })
     if (!row?.isEditable) return
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
@@ -1045,6 +1053,7 @@ const NormalOpNormsScreen = () => {
 
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
+    setEnableSaveAddBtn(true)
   }
 
   const isCellEditable = (params) => {
@@ -1125,7 +1134,8 @@ const NormalOpNormsScreen = () => {
       showUnit: false,
       saveWithRemark: true,
       saveBtn: true,
-      showCalculate:
+      showCalculate: lowerVertName === 'meg' ? true : false,
+      showCalculateVisibility:
         lowerVertName === 'meg' &&
         Object.keys(calculationObject || {}).length > 0
           ? true
@@ -1175,6 +1185,7 @@ const NormalOpNormsScreen = () => {
 
       <DataGridTable
         modifiedCells={modifiedCells}
+        enableSaveAddBtn={enableSaveAddBtn}
         title='Normal Operations Norms'
         columns={colDefs}
         setRows={setRows}

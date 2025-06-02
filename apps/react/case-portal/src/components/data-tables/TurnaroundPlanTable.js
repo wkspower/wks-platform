@@ -14,6 +14,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 
 const TurnaroundPlanTable = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
@@ -401,7 +402,7 @@ const TurnaroundPlanTable = () => {
                 whiteSpace: 'nowrap',
                 width: ' 100%',
               }}
-              onClick={() => handleRemarkCellClick(params.row)}
+              onDoubleClick={() => handleRemarkCellClick(params.row)}
             >
               {displayText || (isEditable ? 'Click to add remark' : '')}
             </div>
@@ -455,6 +456,7 @@ const TurnaroundPlanTable = () => {
 
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
+    setEnableSaveAddBtn(true)
   }
 
   const deleteRowData = async (paramsForDelete) => {
@@ -519,6 +521,7 @@ const TurnaroundPlanTable = () => {
       </Backdrop>
       <ASDataGrid
         modifiedCells={modifiedCells}
+        enableSaveAddBtn={enableSaveAddBtn}
         setRows={setRows}
         columns={colDefs}
         rows={rows}

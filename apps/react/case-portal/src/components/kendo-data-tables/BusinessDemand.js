@@ -101,7 +101,7 @@ const KendoBusinessDemand = ({ permissions }) => {
       }))
 
       setRows(formattedData)
-      console.log('formattedData:', formattedData)
+
       setLoading(false)
     } catch (error) {
       console.error('Error fetching Business Demand data:', error)
@@ -386,8 +386,8 @@ const KendoBusinessDemand = ({ permissions }) => {
             id='meg-grid-header'
           >
             <Typography component='span' className='grid-title'>
-              Production Volume Data (MT) (For reference to enter Business
-              Demand Value )
+              Production Volume Data (MT) (This is a reference for entering the
+              Business Demand value)
             </Typography>
           </CustomAccordionSummary>
           <CustomAccordionDetails>

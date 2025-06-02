@@ -16,6 +16,7 @@ import { Tooltip } from '../../../node_modules/@mui/material/index'
 
 const MaintenanceTable = () => {
   // const [modifiedCells, setModifiedCells] = React.useState({})
+  const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 
   const keycloak = useSession()
   const [loading, setLoading] = useState(false)
@@ -105,7 +106,12 @@ const MaintenanceTable = () => {
   }
 
   const formatValueToTwoDecimals = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
+    if (!params && params !== 0) return ''
+
+    const hours = Math.floor(params)
+    const minutes = Math.abs(Math.floor((params - hours) * 60))
+
+    return `${hours}:${minutes.toString().padStart(2, '0')}`
   }
 
   useEffect(() => {

@@ -63,6 +63,7 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 
 const NormalOpNormsScreen = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
   const [summary, setSummary] = useState('')
 
   const [calculationObject, setCalculationObject] = useState([])
@@ -519,6 +520,7 @@ const NormalOpNormsScreen = () => {
 
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
+    setEnableSaveAddBtn(true)
   }
 
   const handleUnitChange = (unit) => {
@@ -689,8 +691,10 @@ const NormalOpNormsScreen = () => {
       units: ['TPH', 'TPD'],
       saveWithRemark: true,
       saveBtn: false,
-      // showCalculate: true,
-      showCalculate: Object.keys(calculationObject).length > 0 ? true : false,
+      showCalculate: true,
+      showCalculateVisibility:
+        Object.keys(calculationObject).length > 0 ? true : false,
+
       showRefresh: false,
       noColor: false,
       ShowSummary: true,
@@ -743,6 +747,7 @@ const NormalOpNormsScreen = () => {
                 <DataGridTable
                   autoHeight={true}
                   modifiedCells={modifiedCells}
+                  enableSaveAddBtn={enableSaveAddBtn}
                   columns={productionColumns}
                   isCellEditable={isCellEditable}
                   rows={rows}

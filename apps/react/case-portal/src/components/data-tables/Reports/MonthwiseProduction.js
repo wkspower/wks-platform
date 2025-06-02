@@ -20,6 +20,7 @@ const MonthwiseProduction = () => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -267,7 +268,7 @@ const MonthwiseProduction = () => {
                 whiteSpace: 'nowrap',
                 width: ' 100%',
               }}
-              onClick={() => handleRemarkCellClick(params.row)}
+              onDoubleClick={() => handleRemarkCellClick(params.row)}
             >
               {displayText || (isEditable ? 'Click to add remark' : '')}
             </div>
@@ -513,6 +514,7 @@ const MonthwiseProduction = () => {
         currentRowId={currentRowId}
         setCurrentRowId={setCurrentRowId}
         modifiedCells={modifiedCells}
+        enableSaveAddBtn={enableSaveAddBtn}
         saveRemarkData={saveRemarkData}
         handleCalculate={handleCalculate}
 
