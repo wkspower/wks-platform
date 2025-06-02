@@ -17,6 +17,7 @@ import com.wks.caseengine.entity.AOPMCCalculatedData;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
@@ -24,6 +25,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AOPRepository;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.rest.entity.Vertical;
@@ -62,6 +64,9 @@ public class AOPServiceImpl implements AOPService {
 	
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
+	
+	@Autowired
+	private ScreenMappingRepository screenMappingRepository;
 	
 	// Inject or set your DataSource (e.g., via constructor or setter)
 		public AOPServiceImpl(DataSource dataSource) {
@@ -288,7 +293,17 @@ public class AOPServiceImpl implements AOPService {
 	        aopMessageVM.setData(result);
 		}
 		aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"production-aop");
-        return aopMessageVM;
+		List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("production-aop");
+		for(ScreenMapping screenMapping:screenMappingList) {
+			AopCalculation aopCalculation=new AopCalculation();
+			aopCalculation.setAopYear(year);
+			aopCalculation.setIsChanged(true);
+			aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+			aopCalculation.setPlantId(UUID.fromString(plantId));
+			aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+			aopCalculationRepository.save(aopCalculation);
+		}
+		return aopMessageVM;
 	}
 
 	

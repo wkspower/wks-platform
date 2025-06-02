@@ -17,6 +17,7 @@ import com.wks.caseengine.dto.AOPConsumptionNormDTO;
 import com.wks.caseengine.entity.AOPConsumptionNorm;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
@@ -24,6 +25,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AOPConsumptionNormRepository;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import javax.sql.DataSource;
@@ -55,6 +57,9 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 	
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
+	
+	@Autowired
+	private ScreenMappingRepository screenMappingRepository;
 	
 	// Inject or set your DataSource (e.g., via constructor or setter)
 		public AOPConsumptionNormServiceImpl(DataSource dataSource) {
@@ -207,6 +212,16 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			Integer result=  executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
 					vertical.getId().toString(), year);
 			aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"consumption-aop");
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("consumption-aop");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
 			aopMessageVM.setCode(200);
 	        aopMessageVM.setMessage("SP Executed successfully");
 	        aopMessageVM.setData(result);
