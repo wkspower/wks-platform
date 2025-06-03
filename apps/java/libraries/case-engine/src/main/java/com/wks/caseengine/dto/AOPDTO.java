@@ -42,4 +42,5 @@ public class AOPDTO {
     private Integer displayOrder;
     private String siteFKId;
     private String verticalFKId;
+    private String normParameterName;
 }

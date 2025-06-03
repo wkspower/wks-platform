@@ -3,6 +3,8 @@ package com.wks.caseengine.rest.server;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.service.ExcelService;
 import com.wks.caseengine.service.ProductionVolumeDataReportExportService;
 
 @RestController
@@ -24,14 +27,18 @@ public class ProductionVolumeDataReportExportController {
 	
 	@Autowired
 	private ProductionVolumeDataReportExportService productionVolumeDataReportExportService;
+
+	@Autowired
+	ExcelService excelService;
 	
-	@GetMapping(value = "/export/report/plant/production/plan")
+	@PostMapping(value = "/export-excel")
 	public ResponseEntity<byte[]> exportPlantProductionPlanReport(
-	        @RequestParam String plantId,
-	        @RequestParam String year,
-	        @RequestParam String reportType) {
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,
+			@RequestBody Map<String, Object> data
+	        ) {
 	    try {
-	        byte[] excelBytes = productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        byte[] excelBytes = excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(

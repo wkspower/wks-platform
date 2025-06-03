@@ -120,6 +120,7 @@ export const DataService = {
   getCaseId,
   saveworkflow,
   submitWorkFlow,
+  getExcel
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -790,6 +791,49 @@ async function updatePeConfigData(keycloak, payload) {
     return Promise.reject(e)
   }
 }
+
+async function getExcel(keycloak, payload) {
+  var year = localStorage.getItem('year')
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+  const url = `${Config.CaseEngineUrl}/task/export-excel?year=${year}&plantId=${plantId}`
+
+ const headers = {
+  'Content-Type': 'application/json',
+  Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  Authorization: `Bearer ${keycloak.token}`,
+ };
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    })
+
+    if (!resp.ok) {
+      throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
+    }
+
+    const blob = await resp.blob();
+    const urlBlob = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = urlBlob;
+    a.download = 'plant_production_plan.xlsx'; // Filename to save
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(urlBlob);
+  } catch (e) {
+    console.error('Error Editing Config data:', e)
+    return Promise.reject(e)
+  }
+}
+
 
 async function getProductById(keycloak) {
   const url = `${Config.CaseEngineUrl}/task/productList`

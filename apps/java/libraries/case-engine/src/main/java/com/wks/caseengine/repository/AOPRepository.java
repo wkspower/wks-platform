@@ -31,7 +31,7 @@ public interface AOPRepository extends JpaRepository<AOP, UUID>{
  	       SELECT AOP.Id, AOP.AOPCaseId, AOP.AOPStatus, AOP.AOPRemarks, 
 		       AOP.AOPType, AOP.Jan, AOP.Feb, AOP.March, AOP.April, AOP.May, AOP.June, 
 		       AOP.July, AOP.Aug, AOP.Sep, AOP.Oct, AOP.Nov, AOP.Dec, AOP.AOPYear, 
-		       AOP.Plant_FK_Id, AOP.AvgTPH, AOP.Material_FK_Id, NP.DisplayOrder
+		       AOP.Plant_FK_Id, AOP.AvgTPH, AOP.Material_FK_Id, NP.DisplayOrder, NP.DisplayName
 		FROM AOP AOP
 		JOIN NormParameters NP ON AOP.Material_FK_Id = NP.Id
 		JOIN NormParameterType NPT ON NPT.Id = NP.NormParameterType_FK_Id
