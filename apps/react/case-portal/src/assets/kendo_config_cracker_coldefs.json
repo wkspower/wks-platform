@@ -6,19 +6,16 @@
     "width": 150
   },
   {
-    "field": "UOM",
+    "field": "uom",
     "title": "UOM",
     "editable": false,
     "width": 120
   },
   {
-    "field": "aprils",
+    "field": "april",
     "title": 4,
     "editable": true,
-    "width": 120,
-    "align": "left",
-    "headerAlign": "left",
-    "type": "number"
+    "width": 120
   },
   {
     "field": "may",
@@ -30,7 +27,7 @@
     "type": "number"
   },
   {
-    "field": "junes",
+    "field": "june",
     "title": 6,
     "editable": true,
     "width": 120,
@@ -39,7 +36,7 @@
     "type": "number"
   },
   {
-    "field": "julys",
+    "field": "july",
     "title": 7,
     "editable": true,
     "width": 120,
@@ -112,7 +109,7 @@
     "type": "number"
   },
   {
-    "field": "marchs",
+    "field": "march",
     "title": 3,
     "editable": true,
     "width": 120,
@@ -121,7 +118,7 @@
     "type": "number"
   },
   {
-    "field": "remark",
+    "field": "remarks",
     "title": "Remark",
     "editable": false,
     "width": 180,
