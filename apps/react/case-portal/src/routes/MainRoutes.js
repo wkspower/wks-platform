@@ -42,7 +42,8 @@ import MonthwiseRawMaterial from 'components/data-tables/Reports/MonthwiseRawMat
 import NormsHistorianBasis from 'components/data-tables/Reports/NormsHistorianBasis'
 import BusinessDemandKendo from 'components/kendo-data-tables/BusinessDemandKendo'
 import CrackerConfig from 'components/kendo-data-tables/KendoConfigCrackerInput'
-import DecokingConfig from 'components/kendo-data-tables/KendoConfigCrackerOuput'
+import DecokingConfig from 'components/kendo-data-tables/KendoConfigCrackerActivities'
+
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
@@ -176,7 +177,7 @@ export const MainRoutes = (
             element: <CrackerConfig />,
           },
           {
-            path: 'spyro-output',
+            path: 'decoking-activities',
             element: <DecokingConfig />,
           },
           {

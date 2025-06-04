@@ -83,10 +83,10 @@ const plan = {
           breadcrumbs: true,
         },
         {
-          id: 'spyro-output',
-          title: i18n.t('menu.spyroOutput'),
+          id: 'decoking-activities',
+          title: i18n.t('menu.decokingActivities'),
           type: 'item',
-          url: '/production-norms-plan/spyro-output',
+          url: '/production-norms-plan/decoking-activities',
           icon: icons.IconFilter,
           breadcrumbs: true,
         },
