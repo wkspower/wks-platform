@@ -1,0 +1,121 @@
+package com.wks.caseengine.service;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.wks.caseengine.dto.AOPReportDTO;
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.Verticals;
+import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.SiteRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+
+@Service
+public class SpyroInputServiceImpl implements SpyroInputService{
+	
+	@PersistenceContext
+	private EntityManager entityManager;
+	
+	@Autowired
+	private PlantsRepository plantsRepository;
+
+	@Autowired
+	private SiteRepository siteRepository;
+
+	@Autowired
+	private VerticalsRepository verticalRepository;
+
+	@Override
+	public AOPMessageVM getSpyroInputData(String year, String plantId,String Mode) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<Map<String, Object>> spyroInputDataList = new ArrayList<>();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+        Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+        String siteId = site.getId().toString();
+        String verticalId = vertical.getId().toString();
+        String procedureName=vertical.getName()+"_"+site.getName()+"_GetSpyroInput";
+		try {
+			List<Object[]> results = getData(plantId, year,siteId,verticalId,Mode,procedureName);
+
+			for (Object[] row : results) {
+				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
+
+					map.put("VerticalFKId", row[0]);
+					map.put("PlantFKId", row[1]);
+					map.put("NormParameterFKID", row[2]);
+					map.put("Particulars", row[3]);
+					map.put("NormParameterTypeName", row[4]);
+					map.put("NormParameterTypeFKID", row[5]);
+					map.put("Type", row[6]);
+					map.put("UOM", row[7]);
+					map.put("AuditYear", row[8]);
+					map.put("Remarks", row[9]);
+					map.put("Jan", row[10]);
+					map.put("Feb", row[11]);
+					map.put("Mar", row[12]);
+					map.put("Apr", row[13]);
+					map.put("May", row[14]);
+					map.put("Jun", row[15]);
+					map.put("Jul", row[16]);
+					map.put("Aug", row[17]);
+					map.put("Sep", row[18]);
+					map.put("Oct", row[19]);
+					map.put("Nov", row[20]);
+					map.put("Dec", row[21]);
+					spyroInputDataList.add(map); // Add the map to the list here
+
+			}
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(spyroInputDataList);
+			return aopMessageVM;
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+	
+	public List<Object[]> getData(String plantId, String AopYear, String siteId,
+			String verticalId,String Mode,String procedureName) {
+		try {
+			
+			String sql = "EXEC " + procedureName +
+					" @plantId = :plantId,@siteId = :siteId,@verticalId = :verticalId, @AopYear = :AopYear, @Mode = :Mode";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("AopYear", AopYear);
+			query.setParameter("siteId", siteId);
+			query.setParameter("verticalId", verticalId);
+			query.setParameter("Mode", Mode);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+
+}
