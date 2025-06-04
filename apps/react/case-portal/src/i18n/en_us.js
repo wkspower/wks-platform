@@ -31,6 +31,8 @@ const defs = {
     // New menu items for "Production / Norms Plan"
     productionNormsPlan: 'Production / Norms Plan',
     productMCUVal: 'Production Volume Data',
+    spyroInput: 'Spyro Input',
+    spyroOutput: 'Spyro Output',
     maintenanceDetails: 'Maintenance Details',
     consumptionNorms: 'Consumption AOP',
     productionNorms: 'Production AOP',

@@ -14,7 +14,6 @@ import {
   Divider,
   Backdrop,
   CircularProgress,
-  // Snackbar,
 } from '@mui/material'
 import { useLocation, useNavigate } from 'react-router-dom'
 import AddIcon from '@mui/icons-material/Add'
@@ -22,7 +21,6 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import { DataService } from 'services/DataService'
 import Notification from 'components/Utilities/Notification'
 import i18n from '../../i18n'
-// import DataGridTable from 'components/data-tables/ASDataGrid'
 
 const UserAccessForm = ({ keycloak }) => {
   const location = useLocation()
@@ -37,7 +35,7 @@ const UserAccessForm = ({ keycloak }) => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
 
-  // User Details State – username is hidden from UI.
+  // User Details State
   const [userDetails, setUserDetails] = useState({
     username: data.username || '',
     firstname: data.firstName || '',
@@ -47,16 +45,16 @@ const UserAccessForm = ({ keycloak }) => {
     userId: data.userId || '',
   })
 
-  // Plant Site Data and Roles from API.
+  // Plant Site Data and Roles from API
   const [plantSiteData, setPlantSiteData] = useState([])
   const [userRoles, setUserRoles] = useState([])
 
-  // Vertical selection state and verticalSites state.
+  // Vertical selection state and verticalSites state
   const [selectedVerticals, setSelectedVerticals] = useState([])
   const [verticalSites, setVerticalSites] = useState({})
 
-  // Screens fetched dynamically (based on active vertical).
-  const [screens, setScreens] = useState([])
+  // Screens fetched per vertical (verticalId → [titles])
+  const [screensByVertical, setScreensByVertical] = useState({})
 
   // Check if data from navigation is empty. Redirect if so.
   useEffect(() => {
@@ -73,7 +71,7 @@ const UserAccessForm = ({ keycloak }) => {
     }
   }, [data, navigate])
 
-  // Fetch Plant Site Data and User Roles.
+  // Fetch Plant Site Data and User Roles
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -92,7 +90,7 @@ const UserAccessForm = ({ keycloak }) => {
     fetchData()
   }, [keycloak])
 
-  // Helper to create the initial verticalSites structure.
+  // Helper to create the initial verticalSites structure
   const getInitialVerticalSites = (plantData) => {
     return plantData.reduce((acc, vertical) => {
       acc[vertical.id] = [
@@ -111,7 +109,7 @@ const UserAccessForm = ({ keycloak }) => {
     }, {})
   }
 
-  // Initialize verticalSites & default vertical selection when plantSiteData loads.
+  // Initialize verticalSites & default vertical selection when plantSiteData loads
   useEffect(() => {
     if (plantSiteData.length > 0) {
       if (selectedVerticals.length === 0) {
@@ -121,7 +119,7 @@ const UserAccessForm = ({ keycloak }) => {
     }
   }, [plantSiteData])
 
-  // Prepopulate vertical selections from navigation data if available.
+  // Prepopulate vertical selections from navigation data if available
   useEffect(() => {
     if (plantSiteData.length > 0 && data && data.verticals) {
       const newSelectedVerticals = plantSiteData
@@ -189,10 +187,11 @@ const UserAccessForm = ({ keycloak }) => {
     }
   }, [plantSiteData, data])
 
-  // Helper: Retrieve a vertical by ID.
+  // Helper: Retrieve a vertical by ID
   const getVerticalById = (id) =>
     plantSiteData.find((vertical) => vertical.id === id)
 
+  // Extract screens from nested groups
   function extractScreens(nodes) {
     const result = []
 
@@ -215,77 +214,94 @@ const UserAccessForm = ({ keycloak }) => {
     recurse(nodes)
     return result
   }
+
+  // Fetch screens for all selected verticals and remove stale ones
   useEffect(() => {
-    async function fetchScreens() {
-      if (!selectedVerticals.length) return
-      try {
-        const activeVerticalId = selectedVerticals[0]
-        const response = await DataService.getUserScreen(
-          keycloak,
-          activeVerticalId,
-        )
-        const groups = response.data
+    async function fetchScreensForVerticals() {
+      const newMap = { ...screensByVertical }
 
-        // Flatten all “item” nodes under all children/groups:
-        const screens = extractScreens(groups)
+      // 1. Fetch screens for any newly selected verticals
+      const fetchPromises = selectedVerticals.map(async (verticalId) => {
+        if (!newMap[verticalId]) {
+          try {
+            const response = await DataService.getUserScreen(
+              keycloak,
+              verticalId,
+            )
+            const groups = response.data
+            const screens = extractScreens(groups).map((s) => s.title)
+            newMap[verticalId] = screens
+          } catch (err) {
+            console.error(
+              `Error fetching screens for vertical ${verticalId}`,
+              err,
+            )
+            newMap[verticalId] = []
+          }
+        }
+      })
 
-        // e.g. setScreens to an array of titles:
-        setScreens(screens.map((s) => s.title))
+      // 2. Remove data for any deselected verticals
+      Object.keys(newMap).forEach((vId) => {
+        if (!selectedVerticals.includes(vId)) {
+          delete newMap[vId]
+        }
+      })
 
-        // If you want to store full metadata:
-        // setScreensMetadata(screens)
-      } catch (err) {
-        console.error('Error fetching screens', err)
-      }
+      // 3. Wait for all fetches to complete, then update state
+      await Promise.all(fetchPromises)
+      setScreensByVertical(newMap)
     }
 
-    fetchScreens()
+    if (selectedVerticals.length) {
+      fetchScreensForVerticals()
+    }
   }, [selectedVerticals, keycloak])
 
-  // --- End of Dynamic Fetching of Screens ---
+  // Default screen options if API hasn’t returned for this vertical yet
+  const screenOptions = [
+    'product-demand',
+    'product-mcu-val',
+    'shutdown-plan',
+    'slowdown-plan',
+    'maintenance-details',
+    'production-norms',
+    'catalyst-selectivity',
+    'normal-op-norms',
+    'shutdown-norms',
+    'consumption-norms',
+    'feed-stock',
+  ]
 
-  // Default screen options: if not fetched or provided in navigation data.
-  const screenOptions = screens.length
-    ? screens
-    : [
-        'product-demand',
-        'product-mcu-val',
-        'shutdown-plan',
-        'slowdown-plan',
-        'maintenance-details',
-        'production-norms',
-        'catalyst-selectivity',
-        'normal-op-norms',
-        'shutdown-norms',
-        'consumption-norms',
-        'feed-stock',
-      ]
-
-  // Retrieve available screens for a given plant block.
+  // Retrieve available screens for a given plant block (per vertical)
   const getAvailableScreens = (verticalId, siteIndex, plantIndex) => {
+    const verticalScreens = screensByVertical[verticalId] || screenOptions
     const verticalData = verticalSites[verticalId]
-    if (!verticalData) return screenOptions
-    const siteEntry = verticalData[siteIndex]
-    if (!siteEntry || !siteEntry.plants) return screenOptions
-    const currentPlantBlock = siteEntry.plants[plantIndex]
-    if (!currentPlantBlock) return screenOptions
-    if (!currentPlantBlock.plantId) return screenOptions
+    if (!verticalData) return verticalScreens
 
-    // Gather screens from duplicate plant blocks (same plantId) in the same site.
+    const siteEntry = verticalData[siteIndex]
+    if (!siteEntry || !siteEntry.plants) return verticalScreens
+
+    const currentPlantBlock = siteEntry.plants[plantIndex]
+    if (!currentPlantBlock || !currentPlantBlock.plantId) return verticalScreens
+
+    // Prevent duplicates within the same plant block
     const duplicateScreens = siteEntry.plants
       .filter(
         (_, idx) =>
           idx !== plantIndex && _.plantId === currentPlantBlock.plantId,
       )
       .reduce((acc, block) => acc.concat(block.screens || []), [])
+
     const currentSelected = currentPlantBlock.screens || []
-    return screenOptions.filter(
+
+    return verticalScreens.filter(
       (screen) =>
         currentSelected.includes(screen) || !duplicateScreens.includes(screen),
     )
   }
 
-  // Retrieve available sites for a vertical, excluding already selected ones.
+  // Retrieve available sites for a vertical, excluding already chosen ones
   const getAvailableSites = (verticalId, currentIndex) => {
     const vertical = getVerticalById(verticalId)
     if (!vertical) return []
@@ -296,7 +312,7 @@ const UserAccessForm = ({ keycloak }) => {
     return vertical.sites.filter((site) => !selectedSiteIds.includes(site.id))
   }
 
-  // Retrieve available plants for a given site entry, disallowing duplicate selection.
+  // Retrieve available plants for a given site entry, disallowing duplicates
   const getAvailablePlants = (vertical, siteEntry, currentPlantIndex) => {
     if (siteEntry.site) {
       const siteObj = vertical.sites.find((s) => s.id === siteEntry.site)
@@ -309,12 +325,12 @@ const UserAccessForm = ({ keycloak }) => {
     return []
   }
 
-  // Handler for user details.
+  // Handler for user details
   const handleUserDetailChange = (e) => {
     setUserDetails({ ...userDetails, [e.target.name]: e.target.value })
   }
 
-  // Handler for vertical multi‑select change.
+  // Handler for vertical multi‑select change
   const handleVerticalChange = (e) => {
     const { value } = e.target
     const newValue = typeof value === 'string' ? value.split(',') : value
@@ -341,7 +357,7 @@ const UserAccessForm = ({ keycloak }) => {
     })
   }
 
-  // Handler for updating a site-level field.
+  // Handler for updating a site-level field
   const handleSiteChange = (verticalId, siteIndex, field, newValue) => {
     setVerticalSites((prev) => {
       const updatedSites = [...prev[verticalId]]
@@ -353,7 +369,7 @@ const UserAccessForm = ({ keycloak }) => {
     })
   }
 
-  // Handler for updating a plant-level field.
+  // Handler for updating a plant-level field
   const handlePlantChange = (
     verticalId,
     siteIndex,
@@ -377,7 +393,7 @@ const UserAccessForm = ({ keycloak }) => {
     })
   }
 
-  // Handlers to add or remove site and plant entries.
+  // Handlers to add or remove site and plant entries
   const addSiteEntry = (verticalId) => {
     setVerticalSites((prev) => ({
       ...prev,
@@ -436,7 +452,7 @@ const UserAccessForm = ({ keycloak }) => {
     })
   }
 
-  // Helper: Transform permissions object into the required permission array.
+  // Helper: Transform permissions object into the required array
   const transformPermissions = (permissions) => {
     const perm = []
     if (permissions.read && permissions.write) {
@@ -449,10 +465,11 @@ const UserAccessForm = ({ keycloak }) => {
     return perm
   }
 
-  // Save handler that builds the payload in the required structure and calls the API.
+  // Save handler building payload & calling API
   const handleSave = async () => {
-    // Build payload from state:
-    const userIds = data.map((user) => user.userId)
+    const userIds = Array.isArray(data)
+      ? data.map((user) => user.userId)
+      : [data.userId]
     const result = {
       role: userDetails.role,
       userIds: userIds,
@@ -462,11 +479,11 @@ const UserAccessForm = ({ keycloak }) => {
           return {
             verticalId,
             sites: verticalData
-              .filter((entry) => entry.site) // only include entries with a selected site.
+              .filter((entry) => entry.site)
               .map((entry) => ({
                 siteId: entry.site,
                 plants: entry.plants
-                  .filter((plantEntry) => plantEntry.plantId) // only include entries with a selected plant.
+                  .filter((plantEntry) => plantEntry.plantId)
                   .map((plantEntry) => ({
                     plantId: plantEntry.plantId,
                     screens: plantEntry.screens || [],
@@ -478,7 +495,6 @@ const UserAccessForm = ({ keycloak }) => {
       },
     }
 
-    //console.log('Saved JSON:', JSON.stringify(result, null, 2))
     try {
       setLoading(true)
       const res = await DataService.updateUserPlants(keycloak, result)
@@ -490,7 +506,6 @@ const UserAccessForm = ({ keycloak }) => {
         message: 'User Data Updated successfully!',
         severity: 'success',
       })
-      // alert('User Data Updated successfully!')
       navigate('/user-management', {
         state: 'success',
       })
@@ -506,7 +521,7 @@ const UserAccessForm = ({ keycloak }) => {
     }
   }
 
-  // Reset handler to restore initial state.
+  // Reset handler to restore initial state
   const handleReset = () => {
     setUserDetails({
       username: '',
@@ -518,6 +533,7 @@ const UserAccessForm = ({ keycloak }) => {
     if (plantSiteData.length > 0) {
       setSelectedVerticals([plantSiteData[0].id])
       setVerticalSites(getInitialVerticalSites(plantSiteData))
+      setScreensByVertical({})
     }
   }
 
@@ -652,10 +668,8 @@ const UserAccessForm = ({ keycloak }) => {
                           </FormControl>
                         </Grid>
                         {/* Add/Remove Site Entry */}
-
                         <Grid item xs={1}>
                           {siteIndex === 0 ? (
-                            // Only for the first site
                             <IconButton
                               onClick={() => addSiteEntry(verticalId)}
                               color='primary'
@@ -720,7 +734,6 @@ const UserAccessForm = ({ keycloak }) => {
                             {/* Add or Remove Plant Entry */}
                             <Grid item xs={1}>
                               {plantIndex === 0 ? (
-                                // {plantIndex === siteEntry.plants.length - 1 ? (
                                 <IconButton
                                   onClick={() =>
                                     addPlantEntry(verticalId, siteIndex)
@@ -751,41 +764,7 @@ const UserAccessForm = ({ keycloak }) => {
                               <Typography variant='subtitle2'>
                                 Screens
                               </Typography>
-                              {/* <FormControl fullWidth size='small'>
-                                <Select
-                                  multiple
-                                  value={plantEntry.screens || []}
-                                  onChange={(e) =>
-                                    handlePlantChange(
-                                      verticalId,
-                                      siteIndex,
-                                      plantIndex,
-                                      'screens',
-                                      e.target.value,
-                                    )
-                                  }
-                                  renderValue={(selected) =>
-                                    selected
-                                      .map((screen) => i18n.t(screen))
-                                      .join(', ')
-                                  }
-                                >
-                                  {getAvailableScreens(
-                                    verticalId,
-                                    siteIndex,
-                                    plantIndex,
-                                  ).map((screen) => (
-                                    <MenuItem key={screen} value={screen}>
-                                      <Checkbox
-                                        checked={(
-                                          plantEntry.screens || []
-                                        ).includes(screen)}
-                                      />
-                                      <ListItemText primary={i18n.t(screen)} />
-                                    </MenuItem>
-                                  ))}
-                                </Select>
-                              </FormControl> */}
+
                               <FormControl fullWidth size='small'>
                                 <Select
                                   multiple
@@ -800,7 +779,6 @@ const UserAccessForm = ({ keycloak }) => {
 
                                     let newSelection
                                     if (selected.includes(SELECT_ALL)) {
-                                      // If not all selected yet, select all; else clear
                                       newSelection =
                                         (plantEntry.screens || []).length ===
                                         allScreens.length
@@ -824,7 +802,6 @@ const UserAccessForm = ({ keycloak }) => {
                                       .join(', ')
                                   }
                                 >
-                                  {/* 2a. “Select All” menu item */}
                                   <MenuItem value={SELECT_ALL}>
                                     <Checkbox
                                       checked={
@@ -839,7 +816,6 @@ const UserAccessForm = ({ keycloak }) => {
                                     <ListItemText primary='Select All' />
                                   </MenuItem>
 
-                                  {/* 2b. Actual screen items */}
                                   {getAvailableScreens(
                                     verticalId,
                                     siteIndex,

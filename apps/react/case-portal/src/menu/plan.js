@@ -74,6 +74,22 @@ const plan = {
           icon: icons.IconFilter,
           breadcrumbs: true,
         },
+        {
+          id: 'spyro-input',
+          title: i18n.t('menu.spyroInput'),
+          type: 'item',
+          url: '/production-norms-plan/spyro-input',
+          icon: icons.IconFilter,
+          breadcrumbs: true,
+        },
+        {
+          id: 'spyro-output',
+          title: i18n.t('menu.spyroOutput'),
+          type: 'item',
+          url: '/production-norms-plan/spyro-output',
+          icon: icons.IconFilter,
+          breadcrumbs: true,
+        },
 
         {
           id: 'product-mcu-val',

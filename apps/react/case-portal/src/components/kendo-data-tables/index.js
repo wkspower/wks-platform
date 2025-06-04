@@ -75,6 +75,7 @@ const KendoDataTables = ({
   const [group, setGroup] = useState([])
   const [expandedState, setExpandedState] = useState({})
   const [selectedUnit, setSelectedUnit] = useState()
+  const [selectMode, setSelectMode] = useState()
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
@@ -263,26 +264,6 @@ const KendoDataTables = ({
     )
   }
 
-  // const DateTimePickerEditor = ({ dataItem, field, onChange }) => {
-  //   const value = dataItem[field] ? new Date(dataItem[field]) : null
-  //   return (
-  //     <td>
-  //       <DateTimePicker
-  //         value={value}
-  //         onChange={(e) =>
-  //           onChange({
-  //             dataItem,
-  //             field,
-  //             value: e.value,
-  //             syntheticEvent: e.syntheticEvent,
-  //           })
-  //         }
-  //         format='dd/MM/yyyy hh:mm tt'
-  //       />
-  //     </td>
-  //   )
-  // }
-
   const particulars = [
     'normParameterId',
     'normParametersFKId',
@@ -317,7 +298,7 @@ const KendoDataTables = ({
   }
 
   useEffect(() => {
-    if (rows && rows.length > 0 && groupBy) {
+    if (Array.isArray(rows) && rows.length > 0 && groupBy) {
       setGroup([{ field: groupBy }])
 
       const initialExpandedState = {}
@@ -326,36 +307,33 @@ const KendoDataTables = ({
         initialExpandedState[`${groupBy}_${value}`] = true
       })
       setExpandedState(initialExpandedState)
+    } else {
+      setGroup([])
+      setExpandedState({})
     }
-    // console.log(rows, groupBy, group)
   }, [rows, groupBy])
 
   const processedData = useMemo(() => {
-    if (!rows || rows.length === 0) return []
+    if (!Array.isArray(rows) || rows.length === 0) return []
 
     if (group.length > 0) {
       const result = process(rows, { group })
-
-      // Apply expanded state to the processed data
       const applyExpandedState = (items) => {
         return items.map((item) => {
-          // console.log('Inspecting item:', item)
           if (item.items) {
-            // This is a group item
-            const key = item.field + '_' + item.value
-            // console.log('Using key:', key)
-            item.expanded = expandedState[key] !== false // Default to expanded
+            const key = `${item.field}_${item.value}`
+            item.expanded = expandedState[key] !== false // default to expanded
             item.items = applyExpandedState(item.items)
           }
           return item
         })
       }
-
       return applyExpandedState(result.data)
     }
-    // console.log(rows)
+
     return rows
   }, [rows, group, expandedState])
+
   // console.log(processedData)
   return (
     <div style={{ position: 'relative' }}>
@@ -366,7 +344,7 @@ const KendoDataTables = ({
           <div className='k-loading-color' />
         </div>
       )}
-      {(permissions?.allAction ?? true) && (
+      {(permissions?.allAction ?? false) && (
         <Box className='action-box'>
           <Box
             sx={{
@@ -457,6 +435,30 @@ const KendoDataTables = ({
 
                 {/* Render the correct unit options dynamically */}
                 {permissions?.units.map((unit) => (
+                  <MenuItem key={unit} value={unit}>
+                    {unit}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
+            {permissions?.showModes && (
+              <TextField
+                select
+                value={selectMode || permissions?.modes?.[0]}
+                onChange={(e) => {
+                  setSelectMode(e.target.value)
+                  fetchData()
+                }}
+                sx={{ width: '150px', backgroundColor: '#FFFFFF' }}
+                variant='outlined'
+                label='Select Modes'
+              >
+                <MenuItem value='' disabled>
+                  Select Modes
+                </MenuItem>
+
+                {/* Render the correct unit options dynamically */}
+                {permissions?.modes.map((unit) => (
                   <MenuItem key={unit} value={unit}>
                     {unit}
                   </MenuItem>
@@ -570,26 +572,12 @@ const KendoDataTables = ({
                     //   ),
                     // }}
 
-                    // cells={{
-                    //   data: (cellProps) => (
-                    //     <ProductCell {...cellProps} allProducts={allProducts} />
-                    //   ),
-                    // }}
                     cells={{
                       data: (cellProps) => (
                         <ProductCell {...cellProps} allProducts={allProducts} />
                       ),
-                      // edit: {
-                      //   data: (editorProps) => (
-                      //     <ProductDropDownEditor
-                      //       {...editorProps}
-                      //       allProducts={allProducts}
-                      //     />
-                      //   ),
-                      // },
                     }}
                     columnMenu={ColumnMenu}
-                    // editable is true by default, so no need to set editable={true}
                   />
                 )
               }

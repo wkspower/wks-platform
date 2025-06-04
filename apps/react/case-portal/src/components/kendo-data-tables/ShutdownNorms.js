@@ -629,91 +629,42 @@ const ShutdownNorms = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
+
+      // Fetch data from API
       const data = await DataService.getShutdownNormsData(keycloak)
+      const isTPD = selectedUnit === 'TPD'
 
-      // const customOrder = [
-      //   'Raw Material',
-      //   'By Products',
-      //   'Cat Chem',
-      //   'Utility Consumption',
-      //   'Configuration',
-      // ]
+      const formattedData = data.map((item, index) => {
+        const baseItem = {
+          ...item,
+          idFromApi: item.id,
+          id: index,
+          remarks: item?.remarks?.trim() || null,
+          originalRemark: item?.remarks?.trim(),
+          materialFkId: item?.materialFkId?.toLowerCase(),
+          Particulars: item.normParameterTypeDisplayName || 'By Products',
+        }
 
-      // const data = data1.sort(
-      //   (a, b) =>
-      //     customOrder.indexOf(a.normParameterTypeDisplayName) -
-      //     customOrder.indexOf(b.normParameterTypeDisplayName),
-      // )
+        if (isTPD) {
+          const months = [
+            'april', 'may', 'june', 'july', 'august', 'september',
+            'october', 'november', 'december', 'january', 'february', 'march',
+          ]
 
-      const groupedRows = []
-      const groups = new Map()
-      let groupId = 0
-      const isTPD = selectedUnit == 'TPD'
-
-      data.forEach((item) => {
-        const groupKey = item.normParameterTypeDisplayName || 'By Products'
-
-        if (!groups.has(groupKey)) {
-          groups.set(groupKey, [])
-          groupedRows.push({
-            id: groupId++,
-            Particulars: groupKey,
-            isGroupHeader: true,
+          months.forEach((month) => {
+            const value = item[month]
+            baseItem[month] = value ? (value / 24).toFixed(2) : value || null
           })
         }
 
-        const formattedItem = {
-          ...item,
-          idFromApi: item.id,
-          id: groupId++,
-          remarks: item?.remarks?.trim() || null,
-          originalRemark: item?.remarks?.trim(),
-          materialFkId: item?.materialFkId.toLowerCase(),
-
-          ...(isTPD && {
-            april: item.april
-              ? (item.april / 24).toFixed(2)
-              : item.april || null,
-            may: item.may ? (item.may / 24).toFixed(2) : item.may || null,
-            june: item.june ? (item.june / 24).toFixed(2) : item.june || null,
-            july: item.july ? (item.july / 24).toFixed(2) : item.july || null,
-            august: item.august
-              ? (item.august / 24).toFixed(2)
-              : item.august || null,
-            september: item.september
-              ? (item.september / 24).toFixed(2)
-              : item.september || null,
-            october: item.october
-              ? (item.october / 24).toFixed(2)
-              : item.october || null,
-            november: item.november
-              ? (item.november / 24).toFixed(2)
-              : item.november || null,
-            december: item.december
-              ? (item.december / 24).toFixed(2)
-              : item.december || null,
-            january: item.january
-              ? (item.january / 24).toFixed(2)
-              : item.january || null,
-            february: item.february
-              ? (item.february / 24).toFixed(2)
-              : item.february || null,
-            march: item.march
-              ? (item.march / 24).toFixed(2)
-              : item.march || null,
-          }),
-        }
-
-        groups.get(groupKey).push(formattedItem)
-        groupedRows.push(formattedItem)
+        return baseItem
       })
 
-      // setBDData(groupedRows);
-      setRows(groupedRows)
+      setRows(formattedData)
       setLoading(false)
     } catch (error) {
-      setLoading(false)
       console.error('Error fetching data:', error)
+      setLoading(false)
     }
   }
 
@@ -888,6 +839,7 @@ const ShutdownNorms = () => {
         unsavedChangesRef={unsavedChangesRef}
         handleRemarkCellClick={handleRemarkCellClick}
         handleCalculate={handleCalculate}
+        groupBy= 'Particulars'
         // permissions={{
         //   showAction: false,
         //   addButton: false,

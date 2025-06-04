@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import SelectivityData from './SelectivityData'
-import CrackerConfig from './KendoConfigCracker'
+// import CrackerConfig from './KendoConfigCracker'
 
 const ConfigurationTable = () => {
   const keycloak = useSession()
@@ -39,31 +39,18 @@ const ConfigurationTable = () => {
       if (tabs.length == 0) {
         setLoading(true)
         // data = data.sort((a, b) => b.normType.localeCompare(a.normType))
-        const groupedRows = []
-        const groups = new Map()
-        let groupId = 0
-        data.forEach((item, index) => {
-          const formattedItem = {
-            ...item,
-            idFromApi: item.id,
-            id: groupId++,
-            originalRemark: item.remarks,
-            srNo: index + 1,
-          }
-          const groupKey = item.normType
-          if (!groups.has(groupKey)) {
-            groups.set(groupKey, [])
-            groupedRows.push({
-              id: groupId++,
-              Particulars: groupKey,
-              isGroupHeader: true,
-            })
-          }
-          groups.get(groupKey).push(formattedItem)
-          groupedRows.push(formattedItem)
-          setProductionRows(groupedRows)
-          // setRows(groupedRows)
-        })
+        
+        const formattedData = data.map((item, index) => ({
+          ...item,
+          idFromApi: item.id,
+          id: index,
+          originalRemark: item.remarks,
+          srNo: index + 1,
+          Particulars: item.normType,
+        }))
+        
+        setProductionRows(formattedData)
+        // setRows(formattedData)
       } else {
         const groups = new Map()
         data.forEach((item) => {
@@ -86,27 +73,7 @@ const ConfigurationTable = () => {
         let discontiniousGradeRows = []
         groups.forEach((normGroup, ConfigTypeName) => {
           let rowsForThisCategory = []
-          if (ConfigTypeName === 'ShutdownNorms') {
-            rowsForThisCategory.push({
-              id: groupId++,
-              Particulars: ConfigTypeName,
-              isGroupHeader: true,
-            })
-          }
           normGroup.forEach((items, TypeName) => {
-            if (ConfigTypeName === 'ShutdownNorms') {
-              rowsForThisCategory.push({
-                id: groupId++,
-                Particulars2: TypeName,
-                isSubGroupHeader: true,
-              })
-            } else {
-              rowsForThisCategory.push({
-                id: groupId++,
-                Particulars: TypeName,
-                isGroupHeader: true,
-              })
-            }
             items.forEach((item) => {
               rowsForThisCategory.push({
                 ...item,
@@ -205,12 +172,6 @@ const ConfigurationTable = () => {
           setRows={setProductionRows}
           configType='production'
         />
-      </Box>
-    )
-  } else if (lowerVertName === 'cracker') {
-    return (
-      <Box sx={{ marginTop: '20px' }}>
-        <CrackerConfig />
       </Box>
     )
   }

@@ -99,57 +99,38 @@ const NormalOpNormsScreen = () => {
   const keycloak = useSession()
 
   const fetchData = async () => {
-    setLoading(true)
     try {
-      var response = []
-      response = await DataService.getNormalOperationNormsData(keycloak)
+      setLoading(true)
 
-      if (response?.code != 200) {
+      // Fetch data from API
+      const response = await DataService.getNormalOperationNormsData(keycloak)
+
+      if (response?.code !== 200) {
         setRows([])
-        setLoading(false)
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Error fetching data. Please try again.',
           severity: 'error',
         })
-
+        setLoading(false)
         return
       }
 
       setCalculationObject(response?.data?.aopCalculation)
 
-      const groupedRows = []
-      const groups = new Map()
-      let groupId = 0
+      const formattedData = response?.data?.mcuNormsValueDTOList.map((item, index) => ({
+        ...item,
+        idFromApi: item.id,
+        id: index,
+        originalRemark: item.remarks,
+        Particulars: item.normParameterTypeDisplayName,
+      }))
 
-      response?.data?.mcuNormsValueDTOList.forEach((item) => {
-        const groupKey = item.normParameterTypeDisplayName
-
-        if (!groups.has(groupKey)) {
-          groups.set(groupKey, [])
-          groupedRows.push({
-            id: groupId++,
-            Particulars: groupKey,
-            isGroupHeader: true,
-          })
-        }
-        const formattedItem = {
-          ...item,
-          idFromApi: item.id,
-          originalRemark: item.remarks,
-          id: groupId++,
-        }
-
-        groups.get(groupKey).push(formattedItem)
-        groupedRows.push(formattedItem)
-      })
-
-      // setBDData(groupedRows)
-      setRows(groupedRows)
-      // setLoading(false)
+      setRows(formattedData)
+      setLoading(false)
     } catch (error) {
-      // setLoading(false)
       console.error('Error fetching Business Demand data:', error)
+      setLoading(false)
     }
   }
 
@@ -1076,6 +1057,7 @@ const NormalOpNormsScreen = () => {
         handleRemarkCellClick={handleRemarkCellClick}
         permissions={adjustedPermissions}
         allRedCell={allRedCell}
+        groupBy= 'Particulars'
       />
 
       {lowerVertName === 'meg' && (

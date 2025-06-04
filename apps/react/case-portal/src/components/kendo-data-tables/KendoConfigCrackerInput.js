@@ -1,10 +1,35 @@
 // CrackerConfig.jsx
 import { Box, Tab, Tabs } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
-import SelectivityData from './SelectivityData'
+import { useSelector } from 'react-redux'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import getEnhancedAOPColDefs from 'components/data-tables/CommonHeader/kendo_ConfigHeader'
+import KendoDataTables from './index'
 
 const CrackerConfig = () => {
-  // Cracker’s own tabs
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { verticalChange, oldYear } = dataGridStore
+  const isOldYear = oldYear?.oldYear
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  //   const [snackbarData, setSnackbarData] = useState({
+  //     message: '',
+  //     severity: 'info',
+  //   })
+  // const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+  const handleRemarkCellClick = (row) => {
+    // if (!row?.isEditable) return
+
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+  // const [allProducts, setAllProducts] = useState([])
+
   const rawTabs = [
     'feed',
     'composition',
@@ -181,8 +206,10 @@ const CrackerConfig = () => {
   ]
 
   const compositionRows = [
+    // —— C2/C3 (existing) ——
     {
       id: 1,
+      ParticularsType: 'C2/C3',
       particulars: 'Methane',
       uom: 'Wt%',
       remarks: 'Manual Entry / Lab Tag for the current year',
@@ -201,6 +228,7 @@ const CrackerConfig = () => {
     },
     {
       id: 2,
+      ParticularsType: 'C2/C3',
       particulars: 'Ethane',
       uom: 'Wt%',
       remarks: 'Manual Entry',
@@ -219,6 +247,7 @@ const CrackerConfig = () => {
     },
     {
       id: 3,
+      ParticularsType: 'C2/C3',
       particulars: 'Propane',
       uom: 'Wt%',
       remarks: 'Manual Entry',
@@ -237,6 +266,7 @@ const CrackerConfig = () => {
     },
     {
       id: 4,
+      ParticularsType: 'C2/C3',
       particulars: 'i-C4',
       uom: 'Wt%',
       remarks: 'Manual Entry',
@@ -255,6 +285,7 @@ const CrackerConfig = () => {
     },
     {
       id: 5,
+      ParticularsType: 'C2/C3',
       particulars: 'n-C4',
       uom: 'Wt%',
       remarks: 'Manual Entry',
@@ -273,7 +304,419 @@ const CrackerConfig = () => {
     },
     {
       id: 6,
+      ParticularsType: 'C2/C3',
       particulars: 'C5',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+
+    // —— Hexene Purge Gas ——
+    {
+      id: 7,
+      ParticularsType: 'Hexene Purge Gas',
+      particulars: 'Ethane',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 8,
+      ParticularsType: 'Hexene Purge Gas',
+      particulars: 'Ethylene',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+
+    // —— Import Propane ——
+    {
+      id: 9,
+      ParticularsType: 'Import Propane',
+      particulars: 'Methane',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 10,
+      ParticularsType: 'Import Propane',
+      particulars: 'Propylene',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 11,
+      ParticularsType: 'Import Propane',
+      particulars: 'Ethane',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 12,
+      ParticularsType: 'Import Propane',
+      particulars: 'Propane',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 13,
+      ParticularsType: 'Import Propane',
+      particulars: 'i-C4',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 14,
+      ParticularsType: 'Import Propane',
+      particulars: 'n-C4',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 15,
+      ParticularsType: 'Import Propane',
+      particulars: 'C5',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+
+    // —— BPCL Kochi Propylene ——
+    {
+      id: 16,
+      ParticularsType: 'BPCL Kochi Propylene',
+      particulars: 'Propylene',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+
+    // —— FCC C3 ——
+    {
+      id: 17,
+      ParticularsType: 'FCC C3',
+      particulars: 'Propane',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 18,
+      ParticularsType: 'FCC C3',
+      particulars: 'Propylene',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+
+    // —— LDPE Off Gas ——
+    {
+      id: 19,
+      ParticularsType: 'LDPE Off Gas',
+      particulars: 'C2H4 Content',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 20,
+      ParticularsType: 'LDPE Off Gas',
+      particulars: 'C2H6 Content',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 21,
+      ParticularsType: 'LDPE Off Gas',
+      particulars: 'Propane',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 22,
+      ParticularsType: 'LDPE Off Gas',
+      particulars: 'Propylene',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+
+    // —— Additional Feed (Default Composition) ——
+    {
+      id: 23,
+      ParticularsType: 'Additional Feed (Default Composition)',
+      particulars: 'H2',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 24,
+      ParticularsType: 'Additional Feed (Default Composition)',
+      particulars: 'C1',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 25,
+      ParticularsType: 'Additional Feed (Default Composition)',
+      particulars: 'C2',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 26,
+      ParticularsType: 'Additional Feed (Default Composition)',
+      particulars: 'C3',
+      uom: 'Wt%',
+      remarks: 'Manual Entry',
+      jan: 100.0,
+      feb: 100.0,
+      march: 100.0,
+      april: 200.0,
+      may: 100.0,
+      june: 100.0,
+      july: 100.0,
+      aug: 100.0,
+      sep: 100.0,
+      oct: 100.0,
+      nov: 100.0,
+      dec: 100.0,
+    },
+    {
+      id: 27,
+      ParticularsType: 'Additional Feed (Default Composition)',
+      particulars: 'C4',
       uom: 'Wt%',
       remarks: 'Manual Entry',
       jan: 100.0,
@@ -811,7 +1254,57 @@ const CrackerConfig = () => {
     const currentTab = rawTabs[rawTabIndex]
     fetchCrackerRows(currentTab)
   }, [rawTabIndex, fetchCrackerRows])
+  const getAdjustedPermissions = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      showModes: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      isOldYear: isOldYear,
+      allAction: false,
+    }
+  }
 
+  const adjustedPermissions = getAdjustedPermissions(
+    {
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      showModes: lowerVertName === 'cracker' ? true : false,
+      saveWithRemark: true,
+      saveBtn: true,
+      allAction: lowerVertName === 'cracker' ? true : false,
+      modes: ['5F', '4F', '4F+D'],
+    },
+    isOldYear,
+  )
+  const NormParameterIdCell = (props) => {
+    // console.log(props)
+    // const productId = props.dataItem.normParameterFKId
+    // const product = allProducts.find((p) => p.id === productId)
+    // const displayName = product?.displayName || ''
+    // console.log(displayName)
+    return <td>{props?.dataItem?.particulars}</td>
+  }
+
+  const productionColumns = getEnhancedAOPColDefs({
+    // allGradesReciepes,
+    // allProducts,
+    headerMap,
+    handleRemarkCellClick,
+    configType:
+      rawTabs[rawTabIndex] === 'composition'
+        ? 'cracker_composition'
+        : 'cracker', // columnConfig,
+  })
   return (
     <Box>
       <Tabs
@@ -844,11 +1337,20 @@ const CrackerConfig = () => {
             case 'feed':
               return (
                 <Box>
-                  <SelectivityData
+                  <KendoDataTables
                     rows={feedRowsDummy}
                     setRows={setFeedRows}
                     fetchData={() => fetchCrackerRows('feed')}
                     configType='cracker'
+                    handleRemarkCellClick={handleRemarkCellClick}
+                    NormParameterIdCell={NormParameterIdCell}
+                    columns={productionColumns}
+                    remarkDialogOpen={remarkDialogOpen}
+                    setRemarkDialogOpen={setRemarkDialogOpen}
+                    currentRemark={currentRemark}
+                    setCurrentRemark={setCurrentRemark}
+                    currentRowId={currentRowId}
+                    permissions={adjustedPermissions}
                   />
                 </Box>
               )
@@ -856,11 +1358,21 @@ const CrackerConfig = () => {
             case 'composition':
               return (
                 <Box>
-                  <SelectivityData
+                  <KendoDataTables
                     rows={compositionRowsDummy}
                     setRows={setCompositionRows}
                     fetchData={() => fetchCrackerRows('composition')}
-                    configType='cracker'
+                    configType='cracker_composition'
+                    groupBy='ParticularsType'
+                    handleRemarkCellClick={handleRemarkCellClick}
+                    NormParameterIdCell={NormParameterIdCell}
+                    columns={productionColumns}
+                    remarkDialogOpen={remarkDialogOpen}
+                    setRemarkDialogOpen={setRemarkDialogOpen}
+                    currentRemark={currentRemark}
+                    setCurrentRemark={setCurrentRemark}
+                    currentRowId={currentRowId}
+                    permissions={adjustedPermissions}
                   />
                 </Box>
               )
@@ -868,11 +1380,20 @@ const CrackerConfig = () => {
             case 'hydrogenation':
               return (
                 <Box>
-                  <SelectivityData
+                  <KendoDataTables
                     rows={hydrogenationRowsDummy}
                     setRows={setHydrogenationRows}
                     fetchData={() => fetchCrackerRows('hydrogenation')}
                     configType='cracker'
+                    handleRemarkCellClick={handleRemarkCellClick}
+                    NormParameterIdCell={NormParameterIdCell}
+                    columns={productionColumns}
+                    remarkDialogOpen={remarkDialogOpen}
+                    setRemarkDialogOpen={setRemarkDialogOpen}
+                    currentRemark={currentRemark}
+                    setCurrentRemark={setCurrentRemark}
+                    currentRowId={currentRowId}
+                    permissions={adjustedPermissions}
                   />
                 </Box>
               )
@@ -880,11 +1401,20 @@ const CrackerConfig = () => {
             case 'recovery':
               return (
                 <Box>
-                  <SelectivityData
+                  <KendoDataTables
                     rows={recoveryRowsDummy}
                     setRows={setRecoveryRows}
                     fetchData={() => fetchCrackerRows('recovery')}
                     configType='cracker'
+                    handleRemarkCellClick={handleRemarkCellClick}
+                    NormParameterIdCell={NormParameterIdCell}
+                    columns={productionColumns}
+                    remarkDialogOpen={remarkDialogOpen}
+                    setRemarkDialogOpen={setRemarkDialogOpen}
+                    currentRemark={currentRemark}
+                    setCurrentRemark={setCurrentRemark}
+                    currentRowId={currentRowId}
+                    permissions={adjustedPermissions}
                   />
                 </Box>
               )
@@ -892,11 +1422,20 @@ const CrackerConfig = () => {
             case 'optimizing':
               return (
                 <Box>
-                  <SelectivityData
+                  <KendoDataTables
                     rows={optimizingRowsDummy}
                     setRows={setOptimizingRows}
                     fetchData={() => fetchCrackerRows('optimizing')}
                     configType='cracker'
+                    handleRemarkCellClick={handleRemarkCellClick}
+                    NormParameterIdCell={NormParameterIdCell}
+                    columns={productionColumns}
+                    remarkDialogOpen={remarkDialogOpen}
+                    setRemarkDialogOpen={setRemarkDialogOpen}
+                    currentRemark={currentRemark}
+                    setCurrentRemark={setCurrentRemark}
+                    currentRowId={currentRowId}
+                    permissions={adjustedPermissions}
                   />
                 </Box>
               )
@@ -904,11 +1443,20 @@ const CrackerConfig = () => {
             case 'furnace':
               return (
                 <Box>
-                  <SelectivityData
+                  <KendoDataTables
                     rows={furnaceRowsDummy}
                     setRows={setFurnaceRows}
                     fetchData={() => fetchCrackerRows('furnace')}
                     configType='cracker'
+                    handleRemarkCellClick={handleRemarkCellClick}
+                    NormParameterIdCell={NormParameterIdCell}
+                    columns={productionColumns}
+                    remarkDialogOpen={remarkDialogOpen}
+                    setRemarkDialogOpen={setRemarkDialogOpen}
+                    currentRemark={currentRemark}
+                    setCurrentRemark={setCurrentRemark}
+                    currentRowId={currentRowId}
+                    permissions={adjustedPermissions}
                   />
                 </Box>
               )

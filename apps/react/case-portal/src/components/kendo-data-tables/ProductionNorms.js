@@ -65,41 +65,6 @@ const ProductionNorms = ({ permissions }) => {
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
-  // const processRowUpdate = React.useCallback((newRow, oldRow) => {
-  //   const rowId = newRow.id
-  //   const updatedFields = []
-  //   for (const key in newRow) {
-  //     if (
-  //       Object.prototype.hasOwnProperty.call(newRow, key) &&
-  //       newRow[key] !== oldRow[key]
-  //     ) {
-  //       updatedFields.push(key)
-  //     }
-  //   }
-
-  //   if (newRow.id === 'total') {
-  //     return newRow
-  //   }
-  //   unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-  //   if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-  //     unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-  //   }
-
-  //   setRows((prevRows) =>
-  //     prevRows.map((row) =>
-  //       row.id === newRow.id ? { ...newRow, isNew: false } : row,
-  //     ),
-  //   )
-
-  //   if (updatedFields.length > 0) {
-  //     setModifiedCells((prevModifiedCells) => ({
-  //       ...prevModifiedCells,
-  //       [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-  //     }))
-  //   }
-
-  //   return newRow
-  // }, [])
 
   const saveChanges = React.useCallback(async () => {
     const rowsInEditMode = Object.keys(rowModesModel).filter(
@@ -614,14 +579,6 @@ const ProductionNorms = ({ permissions }) => {
     findSum,
   })
 
-  const onProcessRowUpdateError = React.useCallback((error) => {
-    console.log(error)
-  }, [])
-
-  const onRowModesModelChange = (newRowModesModel) => {
-    setRowModesModel(newRowModesModel)
-  }
-
   const handleUnitChange = (unit) => {
     setSelectedUnit(unit)
   }
@@ -694,7 +651,7 @@ const ProductionNorms = ({ permissions }) => {
         // processRowUpdate={processRowUpdate}
 
         rowModesModel={rowModesModel}
-        onRowModesModelChange={onRowModesModelChange}
+        // onRowModesModelChange={onRowModesModelChange}
         // onRowEditStop={handleRowEditStop}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
@@ -704,7 +661,7 @@ const ProductionNorms = ({ permissions }) => {
         handleCalculate={handleCalculate}
         apiRef={apiRef}
         fetchData={fetchData}
-        onProcessRowUpdateError={onProcessRowUpdateError}
+        // onProcessRowUpdateError={onProcessRowUpdateError}
         handleUnitChange={handleUnitChange}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}

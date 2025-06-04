@@ -330,11 +330,11 @@ const SelectivityData = (props) => {
     isOldYear,
   )
   const NormParameterIdCell = (props) => {
-    console.log(props)
+    // console.log(props)
     const productId = props.dataItem.normParameterFKId
     const product = allProducts.find((p) => p.id === productId)
     const displayName = product?.displayName || ''
-    console.log(displayName)
+    // console.log(displayName)
     return <td>{displayName ? displayName : props?.dataItem?.particulars}</td>
   }
   return (

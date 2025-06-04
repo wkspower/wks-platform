@@ -41,7 +41,7 @@ const getEnhancedAOPColDefs = ({
   headerMap,
   handleRemarkCellClick,
   configType,
-  columnConfig,
+  // columnConfig,
 }) => {
   var config = []
   if (configType == 'grades') {
