@@ -63,7 +63,7 @@ const DateTimePickerEditor = ({ dataItem, field, onChange }) => {
         value={currentDate}
         min={finalMin}
         max={finalMax}
-        format='dd/MM/yyyy hh:mm tt'
+        format='dd/MM/yyyy hh:mm a'
         onChange={(e) =>
           onChange({
             dataItem,

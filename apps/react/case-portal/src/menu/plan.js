@@ -75,20 +75,36 @@ const plan = {
           breadcrumbs: true,
         },
         {
-          id: 'spyro-input',
-          title: i18n.t('menu.spyroInput'),
-          type: 'item',
-          url: '/production-norms-plan/spyro-input',
-          icon: icons.IconFilter,
-          breadcrumbs: true,
-        },
-        {
-          id: 'decoking-activities',
-          title: i18n.t('menu.decokingActivities'),
-          type: 'item',
-          url: '/production-norms-plan/decoking-activities',
-          icon: icons.IconFilter,
-          breadcrumbs: true,
+          id: 'spyro-menu',
+          title: i18n.t('menu.spyroMenu'),
+          type: 'collapse',
+          icon: icons.IconArchive, // You can choose an appropriate icon
+          children: [
+            {
+              id: 'spyro-input',
+              title: i18n.t('menu.spyroInput'),
+              type: 'item',
+              url: '/production-norms-plan/spyro-menu/spyro-input',
+              icon: icons.IconFilter,
+              breadcrumbs: true,
+            },
+            {
+              id: 'spyro-output',
+              title: i18n.t('menu.spyroOutput'),
+              type: 'item',
+              url: '/production-norms-plan/spyro-menu/spyro-output',
+              icon: icons.IconFilter,
+              breadcrumbs: true,
+            },
+            {
+              id: 'decoking-activities',
+              title: i18n.t('menu.decokingActivities'),
+              type: 'item',
+              url: '/production-norms-plan/spyro-menu/decoking-activities',
+              icon: icons.IconFilter,
+              breadcrumbs: true,
+            },
+          ],
         },
 
         {

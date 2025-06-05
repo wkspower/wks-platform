@@ -11,7 +11,7 @@
   { "field": "plantFkId", "title": "Plant ID", "width": 80 },
   {
     "field": "normParametersFKId",
-    "title": "Particulars/Grade",
+    "title": "Particulars",
     "editable": false,
     "width": 125
   },

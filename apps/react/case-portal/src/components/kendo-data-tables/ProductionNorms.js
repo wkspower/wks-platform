@@ -618,12 +618,63 @@ const ProductionNorms = ({ permissions }) => {
     },
     isOldYear,
   )
+  const rowData = [
+    {
+      idFromApi: null,
+      aopCaseId: null,
+      aopType: null,
+      aopYear: null,
+      plantFkId: null,
+      normParametersFKId: 'Ethyelene',
+      uom: 'MT/Month',
+      april: 13420,
+      may: 12875,
+      june: 14210,
+      july: 13750,
+      aug: 12995,
+      sep: 14130,
+      oct: 13580,
+      nov: 13045,
+      dec: 13670,
+      jan: 13920,
+      feb: 13105,
+      march: 13840,
+      averageTPH: '',
+      isEditable: false,
+      aopStatus: '',
+    },
+    {
+      idFromApi: null,
+      aopCaseId: null,
+      aopType: null,
+      aopYear: null,
+      plantFkId: null,
+      normParametersFKId: 'Propylene',
+      uom: 'MT/Month',
+      april: 9450,
+      may: 10235,
+      june: 11090,
+      july: 10720,
+      aug: 11560,
+      sep: 10985,
+      oct: 11340,
+      nov: 10575,
+      dec: 11120,
+      jan: 11280,
+      feb: 10850,
+      march: 11430,
+      averageTPH: '',
+      isEditable: false,
+      aopStatus: '',
+    },
+  ]
   const NormParameterIdCell = (props) => {
     const productId = props.dataItem.normParametersFKId
     const product = allProducts.find((p) => p.id === productId)
     const displayName = product?.displayName || ''
-    // console.log(displayName)
-    return <td>{displayName}</td>
+    return (
+      <td>{displayName ? displayName : props.dataItem.normParametersFKId}</td>
+    )
   }
   return (
     <div>
@@ -637,7 +688,7 @@ const ProductionNorms = ({ permissions }) => {
       <KendoDataTables
         modifiedCells={modifiedCells}
         columns={productionColumns}
-        rows={rows}
+        rows={lowerVertName === 'cracker' ? rowData : rows}
         setRows={setRows}
         NormParameterIdCell={NormParameterIdCell}
         title={'Production AOP'}

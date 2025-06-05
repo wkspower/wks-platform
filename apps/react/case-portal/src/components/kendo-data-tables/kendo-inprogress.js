@@ -4,7 +4,7 @@ import { filterBy } from '@progress/kendo-data-query'
 import '@progress/kendo-theme-default/dist/all.css'
 import '@progress/kendo-font-icons/dist/index.css'
 import { filterIcon } from '@progress/kendo-svg-icons'
-import { ColumnMenu } from 'components/data-tables/Reports/columnMenu'
+import { ColumnMenu } from 'components/@extended/columnMenu'
 // import { EditDescriptor } from '@progress/kendo-react-data-tools'
 
 // import PropTypes from 'prop-types'

@@ -1,23 +1,13 @@
 import { DataService } from 'services/DataService'
-import dayjs from 'dayjs'
 import React, { useState, useEffect } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import { useSelector } from 'react-redux'
-import NumericInputOnly from 'utils/NumericInputOnly'
-import { StartDateTimeEditCell } from 'utils/StartDateTimeEditCell'
-import { EndDateTimeEditCell } from 'utils/EndDateTimeEditCell'
-import Tooltip from '@mui/material/Tooltip'
 
-import Autocomplete from '@mui/material/Autocomplete'
-import TextField from '@mui/material/TextField'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
-import { truncateRemarks } from 'utils/remarksUtils'
-import { validateFields } from 'utils/validationUtils'
-import TimeInputCell from 'utils/TimeInputCell'
-import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
+
 import { GridRowModes } from '../../../node_modules/@mui/x-data-grid/models/gridEditRowModel'
 import KendoDataTables from './index'
 
@@ -274,11 +264,6 @@ const SlowDown = ({ permissions }) => {
     }
   }
 
-  const getProductDisplayName = (id) => {
-    if (!id) return
-    const product = allProducts.find((p) => p.id === id)
-    return product ? product.displayName : ''
-  }
 
   useEffect(() => {
     const getAllProducts = async () => {

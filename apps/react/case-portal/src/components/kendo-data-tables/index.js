@@ -3,8 +3,8 @@ import { Grid, GridColumn } from '@progress/kendo-react-grid'
 import { filterBy } from '@progress/kendo-data-query'
 import '@progress/kendo-theme-default/dist/all.css'
 import '@progress/kendo-font-icons/dist/index.css'
-import { filterIcon } from '@progress/kendo-svg-icons'
-import { ColumnMenu } from 'components/data-tables/Reports/columnMenu'
+// import { filterIcon } from '@progress/kendo-svg-icons'
+
 // import { EditDescriptor } from '@progress/kendo-react-data-tools'
 
 // import PropTypes from 'prop-types'
@@ -30,6 +30,7 @@ import DateTimePickerEditor from './Utilities-Kendo/DatePickeronSelectedYr'
 import { updateRowWithDuration } from './Utilities-Kendo/AutoDuration'
 import ProductDropDownEditor from './Utilities-Kendo/DropdownProducts'
 import ProductCell from './Utilities-Kendo/ProductCell'
+import { ColumnMenu } from 'components/@extended/columnMenu'
 
 const KendoDataTables = ({
   // setUpdatedRows = () => {},
@@ -38,6 +39,7 @@ const KendoDataTables = ({
   setRows,
   columns,
   loading = false,
+  typeRank = {},
   // pageSizes = [10, 20, 50],
   // onRowChange,
   // disableColor = false,
@@ -66,6 +68,8 @@ const KendoDataTables = ({
   selectedUsers = [],
   groupBy = null,
   allProducts = [],
+  selectMode,
+  setSelectMode = () => {},
   // allRedCell = [],
 }) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
@@ -75,7 +79,6 @@ const KendoDataTables = ({
   const [group, setGroup] = useState([])
   const [expandedState, setExpandedState] = useState({})
   const [selectedUnit, setSelectedUnit] = useState()
-  const [selectMode, setSelectMode] = useState()
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
@@ -299,8 +302,21 @@ const KendoDataTables = ({
 
   useEffect(() => {
     if (Array.isArray(rows) && rows.length > 0 && groupBy) {
-      setGroup([{ field: groupBy }])
-
+      if (typeRank) {
+        setGroup([
+          {
+            field: groupBy,
+            dir: 'asc',
+            compare: (a, b) => {
+              const rankA = typeRank[a.value] ?? 99
+              const rankB = typeRank[b.value] ?? 99
+              return rankA - rankB
+            },
+          },
+        ])
+      } else {
+        // setGroup([{ field: groupBy }])
+      }
       const initialExpandedState = {}
       const uniqueValues = [...new Set(rows.map((row) => row[groupBy]))]
       uniqueValues.forEach((value) => {
@@ -447,7 +463,7 @@ const KendoDataTables = ({
                 value={selectMode || permissions?.modes?.[0]}
                 onChange={(e) => {
                   setSelectMode(e.target.value)
-                  fetchData()
+                  // fetchData()
                 }}
                 sx={{ width: '150px', backgroundColor: '#FFFFFF' }}
                 variant='outlined'
@@ -494,7 +510,7 @@ const KendoDataTables = ({
           resizable={true}
           defaultSkip={0}
           defaultTake={100}
-          columnMenuIcon={filterIcon}
+          // columnMenuIcon={filterIcon}
           contextMenu={true}
           pageable={
             rows?.length > 100
@@ -535,7 +551,16 @@ const KendoDataTables = ({
             .map((col) => {
               // console.log(col.editable)
               if (
-                ['maintStartDateTime', 'maintEndDateTime'].includes(col.field)
+                [
+                  'maintStartDateTime',
+                  'maintEndDateTime',
+                  'endDateTA',
+                  'startDateTA',
+                  'endDateSD',
+                  'startDateSD',
+                  'endDateIBR',
+                  'startDateIBR',
+                ].includes(col.field)
               ) {
                 return (
                   <GridColumn
@@ -544,7 +569,7 @@ const KendoDataTables = ({
                     title={col.title || col.headerName}
                     width={col.width}
                     filter='date'
-                    format='{0:dd/MM/yyyy hh:mm tt}'
+                    format='{0:dd/MM/yyyy hh:mm a}'
                     cells={{
                       edit: {
                         date: DateTimePickerEditor,

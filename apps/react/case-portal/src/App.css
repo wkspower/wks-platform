@@ -176,3 +176,10 @@ header {
 main.MuiBox-root.css-vognfw {
   padding: 12px !important;
 }
+.MuiButtonBase-root-MuiListItemButton-root.Mui-selected {
+  background-color: rgba(27, 160, 242, 0.08) !important;
+}
+.MuiButtonBase-root.MuiListItemButton-root:hover {
+  background-color: #0100cb !important;
+  color: #fff;
+}

@@ -11,12 +11,44 @@ export default function StepperNav() {
 
   const { items: menuItems } = useMenuContext()
 
+  // const buildSteps = (menuArr) => {
+  //   const planGroup = menuArr
+  //     .flatMap((m) => m.children || [])
+  //     .find((c) => c.id === 'production-norms-plan')
+  //   if (!planGroup?.children) return []
+  //   return planGroup.children.map((item) => {
+  //     const slug = item.url.split('/').pop()
+  //     return { label: item.title, url: item.url, key: slug }
+  //   })
+  // }
   const buildSteps = (menuArr) => {
+    // 1. Find the “production-norms-plan” group under all menus
     const planGroup = menuArr
       .flatMap((m) => m.children || [])
       .find((c) => c.id === 'production-norms-plan')
+
     if (!planGroup?.children) return []
-    return planGroup.children.map((item) => {
+
+    // 2. Prepare an array to collect “step items”
+    const stepItems = []
+
+    planGroup.children.forEach((child) => {
+      // 2.a If the child itself is a leaf item (has a valid `url`), include it
+      if (typeof child.url === 'string') {
+        stepItems.push({ title: child.title, url: child.url })
+      }
+      // 2.b Otherwise, if it’s a collapse and has children, include each grandchild
+      else if (Array.isArray(child.children)) {
+        child.children.forEach((grandChild) => {
+          if (typeof grandChild.url === 'string') {
+            stepItems.push({ title: grandChild.title, url: grandChild.url })
+          }
+        })
+      }
+    })
+
+    // 3. Map each collected item into the shape { label, url, key }
+    return stepItems.map((item) => {
       const slug = item.url.split('/').pop()
       return { label: item.title, url: item.url, key: slug }
     })

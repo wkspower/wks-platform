@@ -43,6 +43,7 @@ import NormsHistorianBasis from 'components/data-tables/Reports/NormsHistorianBa
 import BusinessDemandKendo from 'components/kendo-data-tables/BusinessDemandKendo'
 import CrackerConfig from 'components/kendo-data-tables/KendoConfigCrackerInput'
 import DecokingConfig from 'components/kendo-data-tables/KendoConfigCrackerActivities'
+import CrackerConfigOutput from 'components/kendo-data-tables/KendoConfigCrackerOutput'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -173,12 +174,21 @@ export const MainRoutes = (
             // element: <SelectivityData />,
           },
           {
+            path: 'spyro-menu',
+            children: [
+              {
             path: 'spyro-input',
-            element: <CrackerConfig />,
+                element: <CrackerConfig keycloak={keycloak} />,
+              },
+              {
+                path: 'spyro-output',
+                element: <CrackerConfigOutput />,
           },
           {
             path: 'decoking-activities',
             element: <DecokingConfig />,
+              },
+            ],
           },
           {
             path: 'production-volume-data',

@@ -57,6 +57,7 @@ export const DataService = {
   completeTask,
 
   getAOPData,
+  getSpyroInputData,
   getAOPMCCalculatedData,
 
   deleteSlowdownData,
@@ -120,7 +121,7 @@ export const DataService = {
   getCaseId,
   saveworkflow,
   submitWorkFlow,
-  getExcel
+  getExcel,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -802,11 +803,11 @@ async function getExcel(keycloak, payload) {
   }
   const url = `${Config.CaseEngineUrl}/task/export-excel?year=${year}&plantId=${plantId}`
 
- const headers = {
-  'Content-Type': 'application/json',
-  Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  Authorization: `Bearer ${keycloak.token}`,
- };
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
 
   try {
     const resp = await fetch(url, {
@@ -819,21 +820,20 @@ async function getExcel(keycloak, payload) {
       throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
     }
 
-    const blob = await resp.blob();
-    const urlBlob = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = urlBlob;
-    a.download = 'plant_production_plan.xlsx'; // Filename to save
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(urlBlob);
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = 'plant_production_plan.xlsx' // Filename to save
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
     console.error('Error Editing Config data:', e)
     return Promise.reject(e)
   }
 }
-
 
 async function getProductById(keycloak) {
   const url = `${Config.CaseEngineUrl}/task/productList`
@@ -2487,6 +2487,30 @@ async function getAOPData(keycloak) {
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
+  }
+}
+async function getSpyroInputData(keycloak, mode) {
+  const year = localStorage.getItem('year')
+  let plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  const url = `${Config.CaseEngineUrl}/task/spyro-input?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&Mode=${encodeURIComponent(mode)}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Failed to fetch spyro-input data', e)
+    return Promise.reject(e)
   }
 }
 
