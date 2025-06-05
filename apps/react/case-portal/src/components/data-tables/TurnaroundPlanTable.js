@@ -169,6 +169,7 @@ const TurnaroundPlanTable = () => {
     try {
       var data = Object.values(unsavedChangesRef.current.unsavedRows)
       saveTurnAroundData(data)
+      setEnableSaveAddBtn(false)
       setModifiedCells({})
 
       unsavedChangesRef.current = {

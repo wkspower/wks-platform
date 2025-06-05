@@ -14,6 +14,7 @@ const getEnhancedColDefs = ({
   headerMap,
   handleRemarkCellClick,
   findSum,
+  roundOffDecimals,
 }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange } = dataGridStore
@@ -30,7 +31,13 @@ const getEnhancedColDefs = ({
     params ? parseFloat(params).toFixed(3) : ''
 
   const formatValueToTwoDecimals = (params) =>
-    params ? parseFloat(params).toFixed(2) : ''
+    roundOffDecimals
+      ? params
+        ? parseFloat(params).toFixed(0)
+        : ''
+      : params
+        ? parseFloat(params).toFixed(2)
+        : ''
 
   let cols
 

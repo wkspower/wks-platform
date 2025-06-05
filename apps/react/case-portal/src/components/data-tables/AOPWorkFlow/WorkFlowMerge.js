@@ -12,6 +12,8 @@ import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 // import { TaskService } from 'services/TaskService'
 import { useSession } from 'SessionStoreContext'
+import postmanData from '../../../assets/postmandata.json'
+
 import {
   Button,
   Dialog,
@@ -139,6 +141,9 @@ const WorkFlowMerge = () => {
       // handleCalculatePe()
     }
   }
+  const handleExport = () => {
+    handleExportAll()
+  }
   // const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
   const handleCalculateMeg = async () => {
@@ -146,20 +151,41 @@ const WorkFlowMerge = () => {
       setLoading(true)
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
+      let plantId = null
+
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
 
-      var plantId = plantId
-      const data = await DataService.handleCalculateProductionVolData2(
-        plantId,
-        year,
-        keycloak,
+      if (!plantId || !year) {
+        throw new Error('Plant ID or year not found in localStorage')
+      }
+
+      // Wait for all API calls to complete
+      const [data, res1, res2, res3, res4, res5, res6] = await Promise.all([
+        DataService.handleCalculateProductionVolData2(plantId, year, keycloak),
+        DataService.handleCalculatePlantProductionData(plantId, year, keycloak),
+        DataService.handleCalculateMonthwiseProduction(plantId, year, keycloak),
+        DataService.calculateTurnAroundPlanReportData(plantId, year, keycloak),
+        DataService.calculateAnnualProductionPlanData(plantId, year, keycloak),
+        DataService.handleCalculatePlantConsumptionData(
+          plantId,
+          year,
+          keycloak,
+        ),
+        DataService.calculatePlantContributionReportData(
+          plantId,
+          year,
+          keycloak,
+        ),
+      ])
+
+      const allSuccess = [data, res1, res2, res3, res4, res5, res6].every(
+        (res) => res !== null && res !== undefined,
       )
 
-      if (data || data == 0) {
-        // dispatch(setIsBlocked(true))
+      if (allSuccess) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data refreshed successfully!',
@@ -169,10 +195,51 @@ const WorkFlowMerge = () => {
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Data Refresh Falied!',
+          message: 'Data Refresh Failed!',
           severity: 'error',
         })
       }
+
+      return data
+    } catch (error) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: error.message || 'An error occurred',
+        severity: 'error',
+      })
+      console.error('Error!', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleExportAll = async () => {
+    try {
+      setLoading(true)
+
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const year = localStorage.getItem('year')
+      let plantId = null
+
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      if (!plantId || !year) {
+        throw new Error('Plant ID or year not found in localStorage')
+      }
+
+      const payload = postmanData
+
+      // Await the API call here to ensure completion
+      const data = await DataService.getExcel(keycloak, payload)
+
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Report downloaded successfully!',
+        severity: 'success',
+      })
 
       return data
     } catch (error) {
@@ -570,7 +637,8 @@ const WorkFlowMerge = () => {
                 Accept
               </Button>
             )}
-            <Button
+
+            {/* <Button
               variant='outlined'
               className='btn-save2'
               sx={{
@@ -582,7 +650,7 @@ const WorkFlowMerge = () => {
               onClick={handleAuditOpen}
             >
               Audit Trail
-            </Button>
+            </Button> */}
           </Stack>
         </Stack>
 
@@ -590,6 +658,7 @@ const WorkFlowMerge = () => {
           <div>
             <ProductionAopView
               handleCalculate={handleCalculate}
+              handleExport={handleExport}
               fetchSecondGridData={fetchData}
             />
 
@@ -620,6 +689,7 @@ const WorkFlowMerge = () => {
               rowModesModel={rowModesModel}
               onRowModesModelChange={onRowModesModelChange}
               handleCalculate={handleCalculate}
+              handleExport={handleExport}
               isCreatingCase={isCreatingCase}
               createCase={createCase}
               saveWorkflowData={saveWorkflowData}

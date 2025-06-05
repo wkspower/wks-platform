@@ -46,7 +46,10 @@ const MonthwiseProduction = () => {
   }
 
   const formatValueToThreeDecimals = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
+  }
+  const formatValueToThreeDecimalsZero = (params) => {
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
   }
 
   const columns = [
@@ -70,13 +73,13 @@ const MonthwiseProduction = () => {
       flex: 2,
       headerAlign: 'left',
       align: 'right',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToThreeDecimalsZero,
       renderCell: (params) => (
         <Tooltip
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimalsZero(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -86,13 +89,13 @@ const MonthwiseProduction = () => {
       flex: 1,
       headerAlign: 'left',
       align: 'right',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToThreeDecimalsZero,
       renderCell: (params) => (
         <Tooltip
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimalsZero(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -104,13 +107,13 @@ const MonthwiseProduction = () => {
       flex: 1,
       headerAlign: 'left',
       align: 'right',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToThreeDecimalsZero,
       renderCell: (params) => (
         <Tooltip
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimalsZero(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -120,13 +123,13 @@ const MonthwiseProduction = () => {
       flex: 1,
       headerAlign: 'left',
       align: 'right',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToThreeDecimalsZero,
       renderCell: (params) => (
         <Tooltip
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimalsZero(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -172,13 +175,13 @@ const MonthwiseProduction = () => {
       flex: 2,
       headerAlign: 'left',
       align: 'right',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToThreeDecimalsZero,
       renderCell: (params) => (
         <Tooltip
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimalsZero(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -236,13 +239,13 @@ const MonthwiseProduction = () => {
       flex: 2,
       headerAlign: 'left',
       align: 'right',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToThreeDecimalsZero,
       renderCell: (params) => (
         <Tooltip
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimalsZero(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -494,7 +497,7 @@ const MonthwiseProduction = () => {
           customHeight: defaultCustomHeightGrid1,
           textAlignment: 'center',
           remarksEditable: true,
-          showCalculate: true,
+          showCalculate: false,
           saveBtnForRemark: true,
           saveBtn: true,
           showWorkFlowBtns: true,
@@ -537,6 +540,7 @@ const MonthwiseProduction = () => {
           customHeight: defaultCustomHeight,
           // dynamicGridHeight: true,
           needTotal: true,
+          roundOffDecimals: true,
         }}
       />
       <Notification

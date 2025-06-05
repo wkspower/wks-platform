@@ -115,39 +115,42 @@ const PlantsProductionSummary = () => {
 
           VarBudgetPer:
             Particulates.VarBudgetPer != null
-              ? Number(Number(Particulates.VarBudgetPer).toFixed(1))
+              ? Number(Particulates.VarBudgetPer.toFixed(1))
               : '',
 
           VarActualPer:
             Particulates.VarActualPer != null
-              ? Number(Number(Particulates.VarActualPer).toFixed(1))
+              ? Number(Particulates.VarActualPer.toFixed(1))
               : '',
 
           // Round to nearest whole number
           VarBudgetMT:
             Particulates.VarBudgetMT != null
-              ? Math.round(Number(Particulates.VarBudgetMT))
+              ? Number(Particulates.VarBudgetMT.toFixed(0))
               : '',
 
           VarActualMT:
             Particulates.VarActualMT != null
-              ? Math.round(Number(Particulates.VarActualMT))
+              ? Number(Particulates.VarActualMT.toFixed(0))
               : '',
 
           BudgetPrevYear:
-            Particulates.BudgetPrevYear != null
-              ? Math.round(Number(Particulates.BudgetPrevYear))
-              : '',
+            Particulates.BudgetPrevYear != null &&
+            Particulates.Particulates !== 'ProductionRate'
+              ? Number(Particulates.BudgetPrevYear.toFixed(0))
+              : Number(Particulates.BudgetPrevYear.toFixed(2)),
 
           BudgetCurrentYear:
-            Particulates.BudgetCurrentYear != null
-              ? Math.round(Number(Particulates.BudgetCurrentYear))
-              : '',
+            Particulates.BudgetCurrentYear != null &&
+            Particulates.Particulates !== 'ProductionRate'
+              ? Number(Particulates.BudgetCurrentYear.toFixed(0))
+              : Number(Particulates.BudgetPrevYear.toFixed(2)),
 
           ActualPrevYear:
-            Particulates.ActualPrevYear != null
-              ? Math.round(Number(Particulates.ActualPrevYear))
-              : '',
+            Particulates.ActualPrevYear != null &&
+            Particulates.Particulates !== 'ProductionRate'
+              ? Number(Particulates.ActualPrevYear.toFixed(0))
+              : Number(Particulates.BudgetPrevYear.toFixed(2)),
         }))
 
         setRows(res)
@@ -327,7 +330,6 @@ const PlantsProductionSummary = () => {
   const handleCalculatePlantProductionData = async () => {
     try {
       setLoading(true)
-
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
       if (storedPlant) {
@@ -391,7 +393,7 @@ const PlantsProductionSummary = () => {
           saveBtn: true,
           textAlignment: 'center',
           remarksEditable: true,
-          showCalculate: true,
+          showCalculate: false,
           showTitle: true,
 
           // showCalculate: false,

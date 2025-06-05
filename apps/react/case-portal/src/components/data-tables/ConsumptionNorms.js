@@ -206,6 +206,7 @@ const NormalOpNormsScreen = () => {
       //
 
       setLoading(false)
+      setEnableSaveAddBtn(false)
       setModifiedCells({})
 
       unsavedChangesRef.current = {

@@ -10,8 +10,17 @@ import { Tooltip } from '../../../../node_modules/@mui/material/index'
 export const MockReportService = {
   async getReport({ category, year }) {
     const currFY = year || ''
-    const formatValueToThreeDecimals = (params) => {
-      return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+    const formatValueToThreeDecimalsTwo = (params) => {
+      return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
+    }
+    const formatValueToThreeDecimalsZero = (params) => {
+      return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
+    }
+    const formatValueToThreeDecimalsOne = (params) => {
+      return params === 0 ? 0 : params ? parseFloat(params).toFixed(1) : ''
+    }
+    const formatValueToThreeDecimalsFour = (params) => {
+      return params === 0 ? 0 : params ? parseFloat(params).toFixed(4) : ''
     }
 
     let prevFY = ''
@@ -32,13 +41,13 @@ export const MockReportService = {
               headerName: 'Rs/MT',
               flex: 2,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsTwo,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsTwo(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -47,13 +56,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 2,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsTwo,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsTwo(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -62,13 +71,13 @@ export const MockReportService = {
               headerName: 'Actual',
               flex: 2,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsTwo,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsTwo(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -77,13 +86,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 2,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsZero,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsZero(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -130,13 +139,13 @@ export const MockReportService = {
               headerName: 'Rs/MT',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsZero,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsZero(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -145,13 +154,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsFour,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsFour(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -160,13 +169,13 @@ export const MockReportService = {
               headerName: 'Actual',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsFour,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsFour(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -175,13 +184,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsFour,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsFour(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -190,13 +199,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsOne,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsOne(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -205,13 +214,13 @@ export const MockReportService = {
               headerName: 'Actual',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsOne,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsOne(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -220,13 +229,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsOne,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsOne(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -295,13 +304,13 @@ export const MockReportService = {
               headerName: 'Rs/MT',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsZero,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsZero(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -310,13 +319,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsFour,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsFour(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -325,13 +334,13 @@ export const MockReportService = {
               headerName: 'Actual',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsFour,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsFour(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -340,13 +349,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsFour,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsFour(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -355,13 +364,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsOne,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsOne(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -370,13 +379,13 @@ export const MockReportService = {
               headerName: 'Actual',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsOne,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsOne(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -385,13 +394,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsOne,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsOne(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -455,13 +464,13 @@ export const MockReportService = {
               headerName: 'Rs/MT',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsZero,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsZero(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -470,13 +479,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsFour,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsFour(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -485,13 +494,13 @@ export const MockReportService = {
               headerName: 'Actual',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsFour,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsFour(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -500,13 +509,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsFour,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsFour(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -515,13 +524,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsOne,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsOne(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -530,13 +539,13 @@ export const MockReportService = {
               headerName: 'Actual',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsOne,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsOne(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -545,13 +554,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsOne,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsOne(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -615,13 +624,13 @@ export const MockReportService = {
               headerName: 'Rs/MT',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsZero,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsZero(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -630,13 +639,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsFour,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsFour(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -645,13 +654,13 @@ export const MockReportService = {
               headerName: 'Actual',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsFour,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsFour(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -660,13 +669,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsFour,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsFour(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -675,13 +684,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsOne,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsOne(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -690,13 +699,13 @@ export const MockReportService = {
               headerName: 'Actual',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsOne,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsOne(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -705,13 +714,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsOne,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsOne(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -775,13 +784,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsZero,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsZero(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -790,13 +799,13 @@ export const MockReportService = {
               headerName: 'Actual',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsZero,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsZero(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -805,13 +814,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsZero,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsZero(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -850,13 +859,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsZero,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsZero(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -865,13 +874,13 @@ export const MockReportService = {
               headerName: 'Actual',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsZero,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsZero(params.value)}</span>
                 </Tooltip>
               ),
             },
@@ -880,13 +889,13 @@ export const MockReportService = {
               headerName: 'Budget',
               flex: 1,
               align: 'right',
-              valueFormatter: formatValueToThreeDecimals,
+              valueFormatter: formatValueToThreeDecimalsZero,
               renderCell: (params) => (
                 <Tooltip
                   title={params.value != null ? params.value.toString() : ''}
                   arrow
                 >
-                  <span>{formatValueToThreeDecimals(params.value)}</span>
+                  <span>{formatValueToThreeDecimalsZero(params.value)}</span>
                 </Tooltip>
               ),
             },

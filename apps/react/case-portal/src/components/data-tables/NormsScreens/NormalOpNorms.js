@@ -974,6 +974,7 @@ const NormalOpNormsScreen = () => {
   }, [apiRef, rowModesModel])
 
   const saveNormalOperationNormsData = async (newRows) => {
+    setLoading(true)
     try {
       let plantId = ''
       const storedPlant = localStorage.getItem('selectedPlant')
@@ -1024,18 +1025,23 @@ const NormalOpNormsScreen = () => {
             message: `Normal Operations Norms Saved Successfully!`,
             severity: 'success',
           })
+          setEnableSaveAddBtn(false)
           setModifiedCells({})
           unsavedChangesRef.current = {
             unsavedRows: {},
             rowsBeforeChange: {},
           }
+          setLoading(false)
           fetchData()
+          fetchDataIntermediateValues()
+          getNormTransactions()
         } else {
           setSnackbarOpen(true)
           setSnackbarData({
             message: `Normal Operations Norms not saved!`,
             severity: 'error',
           })
+          setLoading(false)
         }
         return response
       }
@@ -1084,8 +1090,9 @@ const NormalOpNormsScreen = () => {
           severity: 'success',
         })
         fetchData()
-        fetchDataIntermediateValues()
         getNormTransactions()
+        fetchDataIntermediateValues()
+
         setLoading(false)
       } else {
         setSnackbarOpen(true)

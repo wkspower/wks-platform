@@ -684,6 +684,7 @@ const SlowdownNorms = () => {
           unsavedRows: {},
           rowsBeforeChange: {},
         }
+        setEnableSaveAddBtn(false)
         setModifiedCells({})
 
         setLoading(false)

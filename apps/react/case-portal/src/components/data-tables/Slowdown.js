@@ -235,7 +235,7 @@ const SlowDown = ({ permissions }) => {
       })
 
       const maintenanceResponse = await DataService.getMaintenanceData(keycloak)
-
+      setEnableSaveAddBtn(false)
       setModifiedCells({})
 
       unsavedChangesRef.current = {

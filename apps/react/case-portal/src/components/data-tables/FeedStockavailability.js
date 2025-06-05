@@ -116,6 +116,7 @@ const FeedStockAvailability = () => {
         //   })
         //   return
         // }
+        setEnableSaveAddBtn(false)
         setModifiedCells({})
 
         unsavedChangesRef.current = {

@@ -34,6 +34,7 @@ const ReportDataGrid = ({
   permissions,
   processRowUpdate = (row) => row,
   handleCalculate = () => {},
+  handleExport = () => {},
   remarkDialogOpen = false,
   setRemarkDialogOpen = () => {},
   currentRemark = '',
@@ -186,6 +187,20 @@ const ReportDataGrid = ({
 
           {/* RIGHT: Buttons */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {permissions?.saveBtn && (
+              <Button
+                variant='contained'
+                className='btn-save'
+                onClick={saveModalOpen}
+                disabled={isButtonDisabled}
+                // loading={loading}
+                // loadingposition='start'
+                {...(loading ? {} : {})}
+              >
+                Save
+              </Button>
+            )}
+
             {permissions?.showCalculate && (
               <Button
                 variant='contained'
@@ -194,6 +209,26 @@ const ReportDataGrid = ({
                 className='btn-save'
               >
                 Calculate
+              </Button>
+            )}
+            {permissions?.showCalculate && (
+              <Button
+                variant='contained'
+                onClick={handleExport}
+                disabled={isButtonDisabled}
+                className='btn-save'
+              >
+                Export
+              </Button>
+            )}
+            {permissions?.showFinalSubmit && (
+              <Button
+                variant='contained'
+                // onClick={handleExport}
+                // disabled={isButtonDisabled}
+                className='btn-save'
+              >
+                Submit
               </Button>
             )}
 
@@ -335,26 +370,13 @@ const ReportDataGrid = ({
           // },
         }}
       />
-      <Box
+      {/* <Box
         sx={{
           marginTop: 2,
           display: 'flex',
           gap: 2,
         }}
       >
-        {permissions?.saveBtn && (
-          <Button
-            variant='contained'
-            className='btn-save'
-            onClick={saveModalOpen}
-            disabled={isButtonDisabled}
-            // loading={loading}
-            // loadingposition='start'
-            {...(loading ? {} : {})}
-          >
-            Save
-          </Button>
-        )}
         {permissions?.showCreateCasebutton && (
           <Button
             variant='contained'
@@ -365,7 +387,7 @@ const ReportDataGrid = ({
             {isCreatingCase ? 'Submitting…' : 'Submit'}
           </Button>
         )}
-      </Box>
+      </Box> */}
       {/* Reject Dialog (Comments) */}
       <Dialog open={openRejectDialog} onClose={handleRejectCancel}>
         <DialogTitle>Please provide remarks on the changes?</DialogTitle>

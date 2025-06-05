@@ -681,6 +681,7 @@ const ShutdownNorms = () => {
           message: `Shutdown Norms Saved Successfully!`,
           severity: 'success',
         })
+        setEnableSaveAddBtn(false)
         setModifiedCells({})
 
         unsavedChangesRef.current = {

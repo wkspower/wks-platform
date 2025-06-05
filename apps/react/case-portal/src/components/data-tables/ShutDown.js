@@ -230,6 +230,7 @@ const ShutDown = ({ permissions }) => {
         unsavedRows: {},
         rowsBeforeChange: {},
       }
+      setEnableSaveAddBtn(false)
       setModifiedCells({})
 
       setLoading(false)

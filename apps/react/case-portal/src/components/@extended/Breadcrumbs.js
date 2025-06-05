@@ -115,7 +115,13 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   }
 
   async function handleOpenPdfTemp(title) {
-    const url = `/files/${title}.pdf`
+    // console.log('titletitle', title)
+    var url = ''
+    if (title != 'production-norms')
+      url = `${window.location.origin}/files/DTC.xlsx`
+    else {
+      url = `${window.location.origin}/files/Blue Print.docx`
+    }
 
     try {
       const resp = await fetch(url, {
@@ -237,33 +243,39 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
       title1 = 'Business Demand (Absolute)'
     }
 
-    itemContent = (
-      <Typography
-        variant='subtitle1'
-        color='textPrimary'
-        display='flex'
-        alignItems='center'
-      >
-        {/* HIDE THE TITLE NAME  */}
-        {/* {title1} */}
-        <Tooltip title={`Basis for ${itemTitle}`}>
-          <IconButton
-            size='medium'
-            sx={{
-              ml: 1,
-              backgroundColor: 'transparent',
-              '&:hover': {
-                backgroundColor: 'rgba(0, 0, 0, 0.1)',
-              },
-              padding: '6px',
-            }}
-            onClick={() => handleOpenPdf(item?.id)}
-          >
-            <InfoIcon fontSize='medium' sx={{ color: '#0100cb' }} />
-          </IconButton>
-        </Tooltip>
-      </Typography>
-    )
+    const normalizedTitle = itemTitle?.toLowerCase().replace(/\s/g, '')
+
+    if (['productionaop', 'consumptionaop'].includes(normalizedTitle)) {
+      itemContent = (
+        <Typography
+          variant='subtitle1'
+          color='textPrimary'
+          display='flex'
+          alignItems='center'
+        >
+          {/* HIDE THE TITLE NAME  */}
+          {/* {title1} */}
+          <Tooltip title={`Basis for ${itemTitle}`}>
+            <IconButton
+              size='medium'
+              sx={{
+                ml: 1,
+                backgroundColor: 'transparent',
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                },
+                padding: '6px',
+              }}
+              onClick={() => handleOpenPdfTemp(item?.id)}
+            >
+              <InfoIcon fontSize='medium' sx={{ color: '#0100cb' }} />
+            </IconButton>
+          </Tooltip>
+        </Typography>
+      )
+    } else {
+      itemContent = null
+    }
 
     // main
     if (item.breadcrumbs !== false) {

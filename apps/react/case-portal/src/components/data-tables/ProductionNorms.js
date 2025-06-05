@@ -293,6 +293,7 @@ const ProductionNorms = ({ permissions }) => {
 
         setCalculatebtnClicked(false)
         setLoading(false)
+        setEnableSaveAddBtn(false)
         setModifiedCells({})
 
         unsavedChangesRef.current = {
@@ -614,11 +615,14 @@ const ProductionNorms = ({ permissions }) => {
     lowerVertName,
   ])
 
+  const roundOffDecimals = permissions?.roundOffDecimals
+
   const productionColumns = getEnhancedColDefs({
     allProducts,
     headerMap,
     handleRemarkCellClick,
     findSum,
+    roundOffDecimals,
   })
 
   const onProcessRowUpdateError = React.useCallback((error) => {

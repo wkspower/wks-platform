@@ -485,23 +485,6 @@ const DataGridTable = ({
               </Tooltip>
             )} */}
 
-          {permissions?.showCalculate}
-
-          {permissions?.showCalculate && (
-            <Button
-              variant='contained'
-              onClick={handleCalculateBtn}
-              disabled={
-                rows?.length === 0
-                  ? false
-                  : isButtonDisabled || !permissions?.showCalculateVisibility
-              }
-              className='btn-save'
-            >
-              Calculate
-            </Button>
-          )}
-
           {permissions?.addButton && (
             <Button
               variant='contained'
@@ -524,6 +507,21 @@ const DataGridTable = ({
               {...(loading ? {} : {})}
             >
               Save
+            </Button>
+          )}
+
+          {permissions?.showCalculate && (
+            <Button
+              variant='contained'
+              onClick={handleCalculateBtn}
+              disabled={
+                rows?.length === 0
+                  ? false
+                  : isButtonDisabled || !permissions?.showCalculateVisibility
+              }
+              className='btn-save'
+            >
+              Calculate
             </Button>
           )}
 

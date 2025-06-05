@@ -59,6 +59,9 @@ const TurnaroundReport = () => {
   const formatValueToThreeDecimals = (params) => {
     return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
   }
+  const formatValueToThreeDecimalsZero = (params) => {
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
+  }
 
   const columns = [
     { field: 'sno', headerName: 'SL.No', flex: 1 },
@@ -70,7 +73,7 @@ const TurnaroundReport = () => {
       headerName: 'Duration, hrs',
       align: 'right',
       headerAlign: 'right',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToThreeDecimalsZero,
       flex: 2,
     },
     // {
@@ -113,7 +116,7 @@ const TurnaroundReport = () => {
       headerName: 'Duration, hrs',
       align: 'right',
       headerAlign: 'right',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToThreeDecimalsZero,
       flex: 1,
     },
     {
@@ -122,7 +125,7 @@ const TurnaroundReport = () => {
       flex: 1,
       align: 'right',
       headerAlign: 'right',
-      valueFormatter: formatValueToThreeDecimals,
+      valueFormatter: formatValueToThreeDecimalsZero,
     },
     {
       field: 'remarks',
@@ -446,7 +449,7 @@ const TurnaroundReport = () => {
           customHeight: { mainBox: '32vh', otherBox: '100%' },
           textAlignment: 'center',
           remarksEditable: true,
-          showCalculate: true,
+          showCalculate: false,
           saveBtnForRemark: true,
           saveBtn: true,
           showWorkFlowBtns: true,

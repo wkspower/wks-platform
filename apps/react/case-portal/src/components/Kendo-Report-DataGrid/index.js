@@ -3,7 +3,7 @@ import { Grid, GridColumn as Column } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
 import '../../kendo-data-grid.css'
 import { filterIcon } from '@progress/kendo-svg-icons'
-import { ColumnMenu } from 'components/@extended/columnMenu'
+import { ColumnMenu } from 'components/data-tables/Reports/columnMenu'
 
 const KendoDataGrid = ({ rows, columns, onRowChange }) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })

@@ -15,7 +15,11 @@ import { remarkColumn } from 'components/Utilities/remarkColumn'
 import ReportDataGrid from './ReportDataGrid'
 import Notification from 'components/Utilities/Notification'
 
-const ProductionAopView = ({ handleCalculate, fetchSecondGridData }) => {
+const ProductionAopView = ({
+  handleCalculate,
+  fetchSecondGridData,
+  handleExport,
+}) => {
   const keycloak = useSession()
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
@@ -175,7 +179,6 @@ const ProductionAopView = ({ handleCalculate, fetchSecondGridData }) => {
   }
   const handlecalcualteWithRefreshAll = () => {
     handleCalculate()
-
     fetchSecondGridData()
     fetchData()
   }
@@ -256,6 +259,7 @@ const ProductionAopView = ({ handleCalculate, fetchSecondGridData }) => {
         modifiedCells={modifiedCells}
         enableSaveAddBtn={enableSaveAddBtn}
         handleCalculate={handlecalcualteWithRefreshAll}
+        handleExport={handleExport}
       />
       {/* </Box> */}
 

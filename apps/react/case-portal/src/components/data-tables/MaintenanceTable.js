@@ -105,13 +105,17 @@ const MaintenanceTable = () => {
     }
   }
 
-  const formatValueToTwoDecimals = (params) => {
-    if (!params && params !== 0) return ''
+  const formatValueToTwoDecimals = (params, row) => {
+    const rowsWithPercentage = row?.Name?.includes('%')
 
-    const hours = Math.floor(params)
-    const minutes = Math.abs(Math.floor((params - hours) * 60))
-
-    return `${hours}:${minutes.toString().padStart(2, '0')}`
+    if (rowsWithPercentage) {
+      return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+    } else {
+      if (!params && params !== 0) return ''
+      const hours = Math.floor(params)
+      const minutes = Math.abs(Math.floor((params - hours) * 60))
+      return `${hours}:${minutes.toString().padStart(2, '0')}`
+    }
   }
 
   useEffect(() => {
@@ -138,7 +142,7 @@ const MaintenanceTable = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToTwoDecimals(params.value)}</span>
+          <span>{formatValueToTwoDecimals(params.value, params.row)}</span>
         </Tooltip>
       ),
 
@@ -157,7 +161,7 @@ const MaintenanceTable = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToTwoDecimals(params.value)}</span>
+          <span>{formatValueToTwoDecimals(params.value, params.row)}</span>
         </Tooltip>
       ),
     },
@@ -173,7 +177,7 @@ const MaintenanceTable = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToTwoDecimals(params.value)}</span>
+          <span>{formatValueToTwoDecimals(params.value, params.row)}</span>
         </Tooltip>
       ),
     },
@@ -189,7 +193,7 @@ const MaintenanceTable = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToTwoDecimals(params.value)}</span>
+          <span>{formatValueToTwoDecimals(params.value, params.row)}</span>
         </Tooltip>
       ),
     },
@@ -205,7 +209,7 @@ const MaintenanceTable = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToTwoDecimals(params.value)}</span>
+          <span>{formatValueToTwoDecimals(params.value, params.row)}</span>
         </Tooltip>
       ),
     },
@@ -221,7 +225,7 @@ const MaintenanceTable = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToTwoDecimals(params.value)}</span>
+          <span>{formatValueToTwoDecimals(params.value, params.row)}</span>
         </Tooltip>
       ),
     },
@@ -237,7 +241,7 @@ const MaintenanceTable = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToTwoDecimals(params.value)}</span>
+          <span>{formatValueToTwoDecimals(params.value, params.row)}</span>
         </Tooltip>
       ),
     },
@@ -254,7 +258,7 @@ const MaintenanceTable = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToTwoDecimals(params.value)}</span>
+          <span>{formatValueToTwoDecimals(params.value, params.row)}</span>
         </Tooltip>
       ),
     },
@@ -270,7 +274,7 @@ const MaintenanceTable = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToTwoDecimals(params.value)}</span>
+          <span>{formatValueToTwoDecimals(params.value, params.row)}</span>
         </Tooltip>
       ),
     },
@@ -286,7 +290,7 @@ const MaintenanceTable = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToTwoDecimals(params.value)}</span>
+          <span>{formatValueToTwoDecimals(params.value, params.row)}</span>
         </Tooltip>
       ),
     },
@@ -302,7 +306,7 @@ const MaintenanceTable = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToTwoDecimals(params.value)}</span>
+          <span>{formatValueToTwoDecimals(params.value, params.row)}</span>
         </Tooltip>
       ),
     },
@@ -318,7 +322,7 @@ const MaintenanceTable = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToTwoDecimals(params.value)}</span>
+          <span>{formatValueToTwoDecimals(params.value, params.row)}</span>
         </Tooltip>
       ),
     },

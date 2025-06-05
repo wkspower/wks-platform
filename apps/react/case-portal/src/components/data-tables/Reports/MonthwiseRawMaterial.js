@@ -26,7 +26,13 @@ const MonthwiseRawMaterial = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
 
   const formatValueToThreeDecimals = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
+  }
+  const formatValueToThreeDecimals4 = (params) => {
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(4) : ''
+  }
+  const formatValueToThreeDecimals2 = (params) => {
+    return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
   }
   const columnDefs = [
     { field: 'id', headerName: 'ID' },
@@ -64,10 +70,19 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'spec',
       headerName: 'Spec',
-      editable: false,
-      align: 'left',
+
+      align: 'right',
       headerAlign: 'left',
       flex: 1,
+      valueFormatter: formatValueToThreeDecimals4,
+      renderCell: (params) => (
+        <Tooltip
+          title={params.value != null ? params.value.toString() : ''}
+          arrow
+        >
+          <span>{formatValueToThreeDecimals4(params.value)}</span>
+        </Tooltip>
+      ),
     },
     {
       field: 'april',
@@ -419,7 +434,7 @@ const MonthwiseRawMaterial = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimals2(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -435,7 +450,7 @@ const MonthwiseRawMaterial = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimals2(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -451,7 +466,7 @@ const MonthwiseRawMaterial = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimals2(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -467,7 +482,7 @@ const MonthwiseRawMaterial = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimals2(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -483,7 +498,7 @@ const MonthwiseRawMaterial = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimals2(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -499,7 +514,7 @@ const MonthwiseRawMaterial = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimals2(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -515,7 +530,7 @@ const MonthwiseRawMaterial = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimals2(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -531,7 +546,7 @@ const MonthwiseRawMaterial = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimals2(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -547,7 +562,7 @@ const MonthwiseRawMaterial = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimals2(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -563,7 +578,7 @@ const MonthwiseRawMaterial = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimals2(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -579,7 +594,7 @@ const MonthwiseRawMaterial = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimals2(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -595,7 +610,7 @@ const MonthwiseRawMaterial = () => {
           title={params.value != null ? params.value.toString() : ''}
           arrow
         >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
+          <span>{formatValueToThreeDecimals2(params.value)}</span>
         </Tooltip>
       ),
     },
@@ -654,7 +669,7 @@ const MonthwiseRawMaterial = () => {
         permissions={{
           // customHeight: defaultCustomHeight,
           // showWorkFlowBtns: flase,
-          showCalculate: true,
+          showCalculate: false,
           allAction: true,
           showTitle: true,
         }}
