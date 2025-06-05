@@ -113,11 +113,21 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 	@Transactional
 	@Override
-	public void deletePlanData(UUID plantMaintenanceTransactionId) {
+	public void deletePlanData(UUID plantMaintenanceTransactionId,UUID plantId) {
 		try {
 			Optional<PlantMaintenanceTransaction> plantMaintenanceTransaction = plantMaintenanceTransactionRepository
 					.findById(plantMaintenanceTransactionId);
 			plantMaintenanceTransactionRepository.delete(plantMaintenanceTransaction.get());
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("slowdown-plan");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(plantMaintenanceTransaction.get().getAuditYear());
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(plantId);
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to delete data", ex);
 		}
@@ -144,8 +154,18 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						plantMaintenanceTransaction.get().getId().toString());
 				System.out.println("updatedRows = " + updatedRows);
 			}
-
+			String year=plantMaintenanceTransaction.get().getAuditYear();
 			plantMaintenanceTransactionRepository.delete(plantMaintenanceTransaction.get());
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("shutdown-plan");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(plantId);
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to delete data", ex);
 		}
