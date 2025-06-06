@@ -2,20 +2,27 @@ package com.wks.caseengine.service;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.AOPReportDTO;
+import com.wks.caseengine.dto.ConfigurationDTO;
+import com.wks.caseengine.dto.SpyroInputDTO;
+import com.wks.caseengine.entity.NormAttributeTransactions;
+import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
@@ -38,6 +45,9 @@ public class SpyroInputServiceImpl implements SpyroInputService{
 
 	@Autowired
 	private VerticalsRepository verticalRepository;
+	
+	@Autowired
+	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
 
 	@Override
 	public AOPMessageVM getSpyroInputData(String year, String plantId,String Mode) {
@@ -116,6 +126,97 @@ public class SpyroInputServiceImpl implements SpyroInputService{
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+
+	@Override
+	public AOPMessageVM updateSpyroInputData(List<SpyroInputDTO> spyroInputDTOList) {
+		AOPMessageVM aopMessageVM=new AOPMessageVM();
+		try {
+			for (SpyroInputDTO spyroInputDTO : spyroInputDTOList) {
+				UUID normParameterFKId = UUID.fromString(spyroInputDTO.getNormParameterFKID());
+
+				for (int i = 1; i <= 12; i++) {
+					Double attributeValue = getAttributeValue(spyroInputDTO, i);
+		
+					saveData(normParameterFKId, i, attributeValue, spyroInputDTO);
+				}
+			}
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data updated successfully");
+			aopMessageVM.setData(spyroInputDTOList);
+			return aopMessageVM;
+		
+		
+
+	} catch (IllegalArgumentException e) {
+		throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+	} catch (Exception ex) {
+		throw new RuntimeException("Failed to fetch data", ex);
+	}
+		
+	}
+	
+	public Double getAttributeValue(SpyroInputDTO spyroInputDTO, Integer i) {
+		switch (i) {
+			case 1:
+				return spyroInputDTO.getJan();
+			case 2:
+				return spyroInputDTO.getFeb();
+			case 3:
+				return spyroInputDTO.getMar();
+			case 4:
+				return spyroInputDTO.getApr();
+			case 5:
+				return spyroInputDTO.getMay();
+			case 6:
+				return spyroInputDTO.getJun();
+			case 7:
+				return spyroInputDTO.getJul();
+			case 8:
+				return spyroInputDTO.getAug();
+			case 9:
+				return spyroInputDTO.getSep();
+			case 10:
+				return spyroInputDTO.getOct();
+			case 11:
+				return spyroInputDTO.getNov();
+			case 12:
+				return spyroInputDTO.getDec();
+
+		}
+		return spyroInputDTO.getJan();
+	}
+	
+	void saveData(UUID normParameterFKId, Integer i, Double attributeValue,SpyroInputDTO spyroInputDTO) {
+			
+
+		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
+				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, spyroInputDTO.getAuditYear());
+
+		NormAttributeTransactions normAttributeTransactions;
+
+		if (existingRecord.isPresent()) {
+
+			normAttributeTransactions = existingRecord.get();
+			normAttributeTransactions.setModifiedOn(new Date());
+		} else {
+
+			normAttributeTransactions = new NormAttributeTransactions();
+			normAttributeTransactions.setCreatedOn(new Date());
+			normAttributeTransactions.setAttributeValueVersion("V1");
+			normAttributeTransactions.setUserName("System");
+			normAttributeTransactions.setNormParameterFKId(normParameterFKId);
+			normAttributeTransactions.setAopMonth(i);
+			normAttributeTransactions.setAuditYear(spyroInputDTO.getAuditYear());
+		}
+
+		normAttributeTransactions
+				.setAttributeValue(attributeValue != null ? attributeValue.toString() : "0.0");
+		normAttributeTransactions.setRemarks(spyroInputDTO.getRemarks());
+
+		normAttributeTransactionsRepository.save(normAttributeTransactions);
+	}
+
+
 
 
 }

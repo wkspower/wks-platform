@@ -1,11 +1,14 @@
 package com.wks.caseengine.service;
 
-import org.springframework.web.bind.annotation.RequestParam;
+import java.util.List;
 
+import com.wks.caseengine.dto.SpyroInputDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface SpyroInputService {
 	
-	public AOPMessageVM getSpyroInputData(@RequestParam String year,@RequestParam String plantId,@RequestParam String Mode);
+	public AOPMessageVM getSpyroInputData( String year, String plantId, String Mode);
+	
+	public AOPMessageVM updateSpyroInputData(  List<SpyroInputDTO> spyroInputDTOList);
 
 }
