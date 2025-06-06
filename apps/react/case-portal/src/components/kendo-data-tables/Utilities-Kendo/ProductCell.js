@@ -21,7 +21,7 @@ const ProductCellEditor = (props) => {
       onChange({
         dataItem,
         field,
-        value: e.value?.label,
+        value: e.value?.value, 
       })
     }
 

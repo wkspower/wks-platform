@@ -40,6 +40,7 @@ export const DataService = {
   saveCatalystData,
 
   saveBusinessDemandData,
+  saveSpyroInput,
   saveNormalOperationNormsData,
   saveShutDownNormsData,
   saveSlowdownNormsData,
@@ -2083,6 +2084,25 @@ async function saveBusinessDemandData(plantId, turnAroundDetails, keycloak) {
       method: 'POST',
       headers,
       body: JSON.stringify(turnAroundDetails),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function saveSpyroInput(payload, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/spyro-input`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
     })
     return json(keycloak, resp)
   } catch (e) {

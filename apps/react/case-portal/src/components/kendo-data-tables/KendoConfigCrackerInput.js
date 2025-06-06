@@ -1,27 +1,43 @@
 // CrackerConfig.jsx
 import { Box, Tab, Tabs } from '@mui/material'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import getEnhancedAOPColDefs from 'components/data-tables/CommonHeader/kendo_ConfigHeader'
 import KendoDataTables from './index'
 import { DataService } from 'services/DataService'
+import { validateFields } from 'utils/validationUtils'
 
 const CrackerConfig = ({ keycloak }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange, oldYear } = dataGridStore
   const isOldYear = oldYear?.oldYear
-  const vertName = verticalChange?.selectedVertical || ''
-  const lowerVertName = vertName.toLowerCase() || 'meg'
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
   //   const [snackbarData, setSnackbarData] = useState({
   //     message: '',
   //     severity: 'info',
   //   })
   // const [snackbarOpen, setSnackbarOpen] = useState(false)
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
+  })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [modifiedCells, setModifiedCells] = useState({})
+  const [loading, setLoading] = useState(false)
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+  const handleRemarkCellClick = (row) => {
     // if (!row?.isEditable) return
 
-  // ── Tab names & “static” data placeholders ──
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
   // const [allProducts, setAllProducts] = useState([])
 
   const rawTabs = [
@@ -32,22 +48,18 @@ const CrackerConfig = ({ keycloak }) => {
     'optimizing',
     'furnace',
   ]
-  const allModes = ['5F', '4F', '4F+D']
   const [rawTabIndex, setRawTabIndex] = useState(0)
 
-    // —— C2/C3 (existing) ——
-
+  const [feedRowsDummy, setFeedRows] = useState([])
+  const [compositionRowsDummy, setCompositionRows] = useState([])
     // —— Hexene Purge Gas ——
 
     // —— Import Propane ——
-  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
-  const [currentRemark, setCurrentRemark] = useState('')
-  const [currentRowId, setCurrentRowId] = useState(null)
-  const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remarks || '')
-    setCurrentRowId(row.id)
-    setRemarkDialogOpen(true)
-  }
+  const [hydrogenationRowsDummy, setHydrogenationRows] = useState([])
+  const [recoveryRowsDummy, setRecoveryRows] = useState([])
+  const [optimizingRowsDummy, setOptimizingRows] = useState([])
+  const [furnaceRowsDummy, setFurnaceRows] = useState([])
+  const allModes = ['5F', '4F', '4F+D']
 
     // —— BPCL Kochi Propylene ——
   const [selectMode, setSelectMode] = useState(allModes[0])
@@ -57,85 +69,66 @@ const CrackerConfig = ({ keycloak }) => {
     // —— LDPE Off Gas ——
 
     // —— Additional Feed (Default Composition) ——
-  const [rowsByTab, setRowsByTab] = useState({
-    feed: [],
-    composition: [],
 
-    hydrogenation: [],
 
-    recovery: [],
 
-    optimizing: [],
-    furnace: [],
-  })
 
   // ── Helper to update only one slice of rowsByTab ──
-  const setRowsForTab = useCallback((tabName, newRows) => {
-    setRowsByTab((prev) => ({ ...prev, [tabName]: newRows }))
-  }, [])
 
   // ── Single “fetch” function that fills rowsByTab.feed … etc. ──
   const fetchCrackerRows = useCallback(
-    async (tabName, mode) => {
-      if (tabName) {
+    async (tab, mode) => {
         try {
           // Call the backend once; assume it returns an object like:
           // { feed: [...], composition: [...], hydrogenation: [...], …, furnace: [...] }
           const spyroVM = await DataService.getSpyroInputData(keycloak, mode)
 
           // If spyroVM.data doesn't exist or is missing, default to empty arrays:
-          const payload = spyroVM.data || {}
-
-          setRowsByTab({
-            feed: payload || [],
-            composition: payload || [],
-            hydrogenation: payload || [],
-            recovery: payload || [],
-            optimizing: payload || [],
-            furnace: payload || [],
-          })
+        switch (tab) {
+          case 'feed':
+            setFeedRows(spyroVM.data || [])
+            break
+          case 'composition':
+            setCompositionRows(spyroVM.data)
+            break
+          case 'hydrogenation':
+            setHydrogenationRows(spyroVM.data)
+            break
+          case 'recovery':
+            setRecoveryRows(spyroVM.data)
+            break
+          case 'optimizing':
+            setOptimizingRows(spyroVM.data)
+            break
+          case 'furnace':
+            setFurnaceRows(spyroVM.data)
+            break
+          default:
+            break
+        }
         } catch (err) {
           console.error('Error loading Spyro‑Input data:', err)
           // Fallback: leave “feed” unchanged or set to empty
-          setRowsForTab('feed', rowsByTab.feed)
-        }
-      } else {
 
 
     // Simulate network delay
-    setTimeout(() => {
-          const staticData = {
-            composition: [
               /* … your compositionRows here … */
-            ],
-            hydrogenation: [
               /* … your hydrogenationRows here … */
-            ],
-            recovery: [
               /* … your recoveryRows here … */
-            ],
-            optimizing: [
               /* … your optimizingRows here … */
-            ],
-            furnace: [
               /* … your furnaceRows here … */
-            ],
-      }
-          setRowsForTab(tabName, staticData[tabName] || [])
-    }, 500) // 500ms delay to mimic async
       }
     },
-    [keycloak, rowsByTab, setRowsByTab],
+    [keycloak],
   )
 
   // 5️⃣ Whenever the selected tab changes, reload that tab’s rows
   useEffect(() => {
-    const activeTab = rawTabs[rawTabIndex]
-    fetchCrackerRows(activeTab, selectMode)
-    console.log(selectMode)
-  }, [rawTabIndex, selectMode, plantId])
-  const getAdjustedPermissions = (permissions, isOldFlag) => {
-    if (isOldFlag !== 1) return permissions
+    const currentTab = rawTabs[rawTabIndex]
+    fetchCrackerRows(currentTab, selectMode)
+  }, [rawTabIndex, fetchCrackerRows, selectMode, plantId])
+  const getAdjustedPermissions = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
     return {
       ...permissions,
       showAction: false,
@@ -146,7 +139,7 @@ const CrackerConfig = ({ keycloak }) => {
       showModes: false,
       saveWithRemark: false,
       saveBtn: false,
-      isOldYear: true,
+      isOldYear: isOldYear,
       allAction: false,
     }
   }
@@ -158,23 +151,22 @@ const CrackerConfig = ({ keycloak }) => {
       deleteButton: false,
       editButton: false,
       showUnit: false,
-      showModes: lowerVertName === 'cracker',
+      showModes: lowerVertName === 'cracker' ? true : false,
       saveWithRemark: true,
       saveBtn: true,
-      allAction: lowerVertName === 'cracker',
+      allAction: lowerVertName === 'cracker' ? true : false,
       modes: allModes,
     },
     isOldYear,
   )
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
-  const productionColumns = useMemo(() => {
+  const NormParameterIdCell = (props) => {
     // console.log(props)
-    // const productId = props.dataItem.normParameterFKId
-    // const product = allProducts.find((p) => p.id === productId)
+    return <td>{props?.dataItem?.particulars}</td>
+  }
     // const displayName = product?.displayName || ''
     // console.log(displayName)
 
-    return getEnhancedAOPColDefs({
+  const productionColumns = getEnhancedAOPColDefs({
     // allGradesReciepes,
     // allProducts,
     headerMap,
@@ -184,51 +176,142 @@ const CrackerConfig = ({ keycloak }) => {
         ? 'cracker_composition'
         : 'cracker', // columnConfig,
   })
-  }, [headerMap, rawTabIndex])
-  const NormParameterIdCell = (props) => <td>{props.dataItem.particulars}</td>
+  const saveChanges = useCallback(async () => {
+    try {
+      console.log('modifiedCells', modifiedCells)
+      if (Object.keys(modifiedCells).length === 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
+      }
+      var rawData = Object.values(modifiedCells)
+      const data = rawData.filter((row) => row.inEdit)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
+      }
+      const requiredFields = ['NormParameterTypeFKID', 'Remarks']
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
+      saveBusinessDemandData(data)
+    } catch (error) {
+      console.log('Error saving changes:', error)
+    }
+  }, [modifiedCells])
+  const saveBusinessDemandData = async (newRows) => {
+    try {
+      let plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+      let verticalId = localStorage.getItem('verticalId')
+      const SpyroInputData = newRows.map((row) => ({
+        VerticalFKId: verticalId,
+        PlantFKId: plantId,
+        NormParameterFKID: row.NormParameterFKID ?? null,
+        Particulars: row.Particulars ?? null,
+        NormParameterTypeName: row.NormParameterTypeName ?? null,
+        NormParameterTypeFKID: row.NormParameterTypeFKID ?? null,
+        Type: row.Type ?? null,
+        UOM: row.UOM ?? null,
+        AuditYear: row.AuditYear ?? null,
+        Remarks: row.Remarks ?? null,
+        Jan: row.Jan ?? null,
+        Feb: row.Feb ?? null,
+        Mar: row.Mar ?? null,
+        Apr: row.Apr ?? null,
+        May: row.May ?? null,
+        Jun: row.Jun ?? null,
+        Jul: row.Jul ?? null,
+        Aug: row.Aug ?? null,
+        Sep: row.Sep ?? null,
+        Oct: row.Oct ?? null,
+        Nov: row.Nov ?? null,
+        Dec: row.Dec ?? null,
+        id: row.idFromApi ?? null,
+        inEdit: row.inEdit || false,
+      }))
+      const response = await DataService.saveSpyroInput(
+        SpyroInputData,
+        keycloak,
+      )
+      if (response?.status === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Spyro Input data Saved Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        fetchCrackerRows()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Error saving Spyro Input data!',
+          severity: 'error',
+        })
+      }
+      return response
+    } catch (error) {
+      console.error('Error saving Spyro Input data!', error)
+    } finally {
+    }
+  }
   return (
     <Box>
-      {/* ─── Tabs ─── */}
       <Tabs
         sx={{
-          borderBottom: '1px solid #ccc',
+          borderBottom: '0px solid #ccc',
           '.MuiTabs-indicator': { display: 'none' },
           // margin: '-35px 0px -8px 0%',
         }}
         textColor='primary'
         indicatorColor='primary'
         value={rawTabIndex}
-        onChange={(_, newIndex) => setRawTabIndex(newIndex)}
+        onChange={(e, newIndex) => setRawTabIndex(newIndex)}
       >
         {rawTabs.map((tabId) => (
           <Tab
             key={tabId}
-            label={tabId}
             sx={{
-              textTransform: 'capitalize',
               border: '1px solid #ADD8E6',
               borderBottom: '1px solid #ADD8E6',
+              textTransform: 'capitalize',
             }}
+            label={tabId}
           />
         ))}
       </Tabs>
 
-      {/* ─── Only one KendoDataTables instance, depending on active tab ─── */}
-      <Box sx={{ marginTop: 2 }}>
-        {rawTabs.map((tabName, idx) => {
-          if (idx !== rawTabIndex) return null
+      <Box>
+        {(() => {
+          switch (rawTabs[rawTabIndex]) {
+            case 'feed':
               return (
+                <Box>
                   <KendoDataTables
-              key={tabName}
-              rows={rowsByTab[tabName]}
-              setRows={(newArr) => setRowsForTab(tabName, newArr)}
-              fetchData={() => fetchCrackerRows(tabName, selectMode)}
-              configType={
-                tabName === 'composition' ? 'cracker_composition' : 'cracker'
-              }
-              groupBy={
-                tabName === 'composition' ? 'ParticularsType' : undefined
-              }
+                    rows={feedRowsDummy}
+                    setRows={setFeedRows}
+                    fetchData={() => fetchCrackerRows('feed')}
+                    configType='cracker'
                     handleRemarkCellClick={handleRemarkCellClick}
                     NormParameterIdCell={NormParameterIdCell}
                     columns={productionColumns}
@@ -240,131 +323,181 @@ const CrackerConfig = ({ keycloak }) => {
                     permissions={adjustedPermissions}
               selectMode={selectMode}
               setSelectMode={setSelectMode}
+                    saveChanges={saveChanges}
+                    snackbarData={snackbarData}
+                    snackbarOpen={snackbarOpen}
+                    setSnackbarOpen={setSnackbarOpen}
+                    setSnackbarData={setSnackbarData}
+                    loading={loading}
+                    modifiedCells={modifiedCells}
+                    setModifiedCells={setModifiedCells}
                   />
-          )
-        })}
                 </Box>
-    </Box>
               )
+
+            case 'composition':
+              return (
+                <Box>
+                  <KendoDataTables
+                    rows={compositionRowsDummy}
+                    setRows={setCompositionRows}
+                    fetchData={() => fetchCrackerRows('composition')}
+                    configType='cracker_composition'
+                    groupBy='ParticularsType'
+                    handleRemarkCellClick={handleRemarkCellClick}
+                    NormParameterIdCell={NormParameterIdCell}
+                    columns={productionColumns}
+                    remarkDialogOpen={remarkDialogOpen}
+                    setRemarkDialogOpen={setRemarkDialogOpen}
+                    currentRemark={currentRemark}
+                    setCurrentRemark={setCurrentRemark}
+                    currentRowId={currentRowId}
+                    permissions={adjustedPermissions}
+                    selectMode={selectMode}
+                    setSelectMode={setSelectMode}
+                    saveChanges={saveChanges}
+                    snackbarData={snackbarData}
+                    snackbarOpen={snackbarOpen}
+                    setSnackbarOpen={setSnackbarOpen}
+                    setSnackbarData={setSnackbarData}
+                    loading={loading}
+                    modifiedCells={modifiedCells}
+                    setModifiedCells={setModifiedCells}
+                  />
+                </Box>
+              )
+
+            case 'hydrogenation':
+              return (
+                <Box>
+                  <KendoDataTables
+                    rows={hydrogenationRowsDummy}
+                    setRows={setHydrogenationRows}
+                    fetchData={() => fetchCrackerRows('hydrogenation')}
+                    configType='cracker'
+                    handleRemarkCellClick={handleRemarkCellClick}
+                    NormParameterIdCell={NormParameterIdCell}
+                    columns={productionColumns}
+                    remarkDialogOpen={remarkDialogOpen}
+                    setRemarkDialogOpen={setRemarkDialogOpen}
+                    currentRemark={currentRemark}
+                    setCurrentRemark={setCurrentRemark}
+                    currentRowId={currentRowId}
+                    permissions={adjustedPermissions}
+                    selectMode={selectMode}
+                    setSelectMode={setSelectMode}
+                    saveChanges={saveChanges}
+                    snackbarData={snackbarData}
+                    snackbarOpen={snackbarOpen}
+                    setSnackbarOpen={setSnackbarOpen}
+                    setSnackbarData={setSnackbarData}
+                    loading={loading}
+                    modifiedCells={modifiedCells}
+                    setModifiedCells={setModifiedCells}
+                  />
+                </Box>
+              )
+
+            case 'recovery':
+              return (
+                <Box>
+                  <KendoDataTables
+                    rows={recoveryRowsDummy}
+                    setRows={setRecoveryRows}
+                    fetchData={() => fetchCrackerRows('recovery')}
+                    configType='cracker'
+                    handleRemarkCellClick={handleRemarkCellClick}
+                    NormParameterIdCell={NormParameterIdCell}
+                    columns={productionColumns}
+                    remarkDialogOpen={remarkDialogOpen}
+                    setRemarkDialogOpen={setRemarkDialogOpen}
+                    currentRemark={currentRemark}
+                    setCurrentRemark={setCurrentRemark}
+                    currentRowId={currentRowId}
+                    permissions={adjustedPermissions}
+                    selectMode={selectMode}
+                    setSelectMode={setSelectMode}
+                    saveChanges={saveChanges}
+                    snackbarData={snackbarData}
+                    snackbarOpen={snackbarOpen}
+                    setSnackbarOpen={setSnackbarOpen}
+                    setSnackbarData={setSnackbarData}
+                    loading={loading}
+                    modifiedCells={modifiedCells}
+                    setModifiedCells={setModifiedCells}
+                  />
+                </Box>
+              )
+
+            case 'optimizing':
+              return (
+                <Box>
+                  <KendoDataTables
+                    rows={optimizingRowsDummy}
+                    setRows={setOptimizingRows}
+                    fetchData={() => fetchCrackerRows('optimizing')}
+                    configType='cracker'
+                    handleRemarkCellClick={handleRemarkCellClick}
+                    NormParameterIdCell={NormParameterIdCell}
+                    columns={productionColumns}
+                    remarkDialogOpen={remarkDialogOpen}
+                    setRemarkDialogOpen={setRemarkDialogOpen}
+                    currentRemark={currentRemark}
+                    setCurrentRemark={setCurrentRemark}
+                    currentRowId={currentRowId}
+                    permissions={adjustedPermissions}
+                    selectMode={selectMode}
+                    setSelectMode={setSelectMode}
+                    saveChanges={saveChanges}
+                    snackbarData={snackbarData}
+                    snackbarOpen={snackbarOpen}
+                    setSnackbarOpen={setSnackbarOpen}
+                    setSnackbarData={setSnackbarData}
+                    loading={loading}
+                    modifiedCells={modifiedCells}
+                    setModifiedCells={setModifiedCells}
+                  />
+                </Box>
+              )
+
+            case 'furnace':
+              return (
+                <Box>
+                  <KendoDataTables
+                    rows={furnaceRowsDummy}
+                    setRows={setFurnaceRows}
+                    fetchData={() => fetchCrackerRows('furnace')}
+                    configType='cracker'
+                    handleRemarkCellClick={handleRemarkCellClick}
+                    NormParameterIdCell={NormParameterIdCell}
+                    columns={productionColumns}
+                    remarkDialogOpen={remarkDialogOpen}
+                    setRemarkDialogOpen={setRemarkDialogOpen}
+                    currentRemark={currentRemark}
+                    setCurrentRemark={setCurrentRemark}
+                    currentRowId={currentRowId}
+                    permissions={adjustedPermissions}
+                    selectMode={selectMode}
+                    setSelectMode={setSelectMode}
+                    saveChanges={saveChanges}
+                    snackbarData={snackbarData}
+                    snackbarOpen={snackbarOpen}
+                    setSnackbarOpen={setSnackbarOpen}
+                    setSnackbarData={setSnackbarData}
+                    loading={loading}
+                    modifiedCells={modifiedCells}
+                    setModifiedCells={setModifiedCells}
+                  />
+                </Box>
+              )
+
+            default:
+              return null
+          }
+        })()}
+      </Box>
+    </Box>
+  )
 }
 
 export default CrackerConfig
-// import { Box, Tab, Tabs } from '@mui/material'
-// import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-// import KendoDataTables from './index'
-//   //       case 'composition':
-//   return (
-//     <Box>
-//                   <KendoDataTables
-//                     rows={compositionRowsDummy}
-//                     setRows={setCompositionRows}
-//                     fetchData={() => fetchCrackerRows('composition')}
-//                     configType='cracker_composition'
-//                     groupBy='ParticularsType'
-//                     handleRemarkCellClick={handleRemarkCellClick}
-//                     NormParameterIdCell={NormParameterIdCell}
-//                     columns={productionColumns}
-//                     remarkDialogOpen={remarkDialogOpen}
-//                     setRemarkDialogOpen={setRemarkDialogOpen}
-//                     currentRemark={currentRemark}
-//                     setCurrentRemark={setCurrentRemark}
-//                     currentRowId={currentRowId}
-//                     permissions={adjustedPermissions}
-//                     selectMode={selectMode}
-//                     setSelectMode={setSelectMode}
-//                   />
-
-//             case 'hydrogenation':
-//               return (
-//                 <Box>
-//                   <KendoDataTables
-//                     rows={hydrogenationRowsDummy}
-//                     setRows={setHydrogenationRows}
-//                     fetchData={() => fetchCrackerRows('hydrogenation')}
-//                     configType='cracker'
-//                     handleRemarkCellClick={handleRemarkCellClick}
-//                     NormParameterIdCell={NormParameterIdCell}
-//                     columns={productionColumns}
-//                     remarkDialogOpen={remarkDialogOpen}
-//                     setRemarkDialogOpen={setRemarkDialogOpen}
-//                     currentRemark={currentRemark}
-//                     setCurrentRemark={setCurrentRemark}
-//                     currentRowId={currentRowId}
-//                     permissions={adjustedPermissions}
-//                     selectMode={selectMode}
-//                     setSelectMode={setSelectMode}
-//                   />
-
-//             case 'recovery':
-//               return (
-//                 <Box>
-//                   <KendoDataTables
-//                     rows={recoveryRowsDummy}
-//                     setRows={setRecoveryRows}
-//                     fetchData={() => fetchCrackerRows('recovery')}
-//                     configType='cracker'
-//                     handleRemarkCellClick={handleRemarkCellClick}
-//                     NormParameterIdCell={NormParameterIdCell}
-//                     columns={productionColumns}
-//                     remarkDialogOpen={remarkDialogOpen}
-//                     setRemarkDialogOpen={setRemarkDialogOpen}
-//                     currentRemark={currentRemark}
-//                     setCurrentRemark={setCurrentRemark}
-//                     currentRowId={currentRowId}
-//                     permissions={adjustedPermissions}
-//                     selectMode={selectMode}
-//                     setSelectMode={setSelectMode}
-//                   />
-
-//             case 'optimizing':
-//               return (
-//                 <Box>
-//                   <KendoDataTables
-//                     rows={optimizingRowsDummy}
-//                     setRows={setOptimizingRows}
-//                     fetchData={() => fetchCrackerRows('optimizing')}
-//                     configType='cracker'
-//                     handleRemarkCellClick={handleRemarkCellClick}
-//                     NormParameterIdCell={NormParameterIdCell}
-//                     columns={productionColumns}
-//                     remarkDialogOpen={remarkDialogOpen}
-//                     setRemarkDialogOpen={setRemarkDialogOpen}
-//                     currentRemark={currentRemark}
-//                     setCurrentRemark={setCurrentRemark}
-//                     currentRowId={currentRowId}
-//                     permissions={adjustedPermissions}
-//                     selectMode={selectMode}
-//                     setSelectMode={setSelectMode}
-//                   />
-
-//             case 'furnace':
-//               return (
-//                 <Box>
-//                   <KendoDataTables
-//                     rows={furnaceRowsDummy}
-//                     setRows={setFurnaceRows}
-//                     fetchData={() => fetchCrackerRows('furnace')}
-//                     configType='cracker'
-//                     handleRemarkCellClick={handleRemarkCellClick}
-//                     NormParameterIdCell={NormParameterIdCell}
-//                     columns={productionColumns}
-//                     remarkDialogOpen={remarkDialogOpen}
-//                     setRemarkDialogOpen={setRemarkDialogOpen}
-//                     currentRemark={currentRemark}
-//                     setCurrentRemark={setCurrentRemark}
-//                     currentRowId={currentRowId}
-//                     permissions={adjustedPermissions}
-//                     selectMode={selectMode}
-//                     setSelectMode={setSelectMode}
-//                   />
-
-//             default:
-//               return null
-//           }
-//         })()}
-//       </Box>
-//     </Box>
-//   )
-// }
-
-// export default CrackerConfig

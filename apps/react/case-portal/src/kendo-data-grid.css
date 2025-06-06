@@ -126,31 +126,46 @@
 
 /* Only apply background color to body rows, not header */
 .kendo-data-grid .k-grid-content .k-grid-table tbody tr {
+  background-color: #fff !important;
+}
+.kendo-data-grid .k-grid .k-grid-content .k-grid-table tbody tr.k-disabled {
   background-color: #ebebeb !important;
 }
 
 .k-grid .k-table-row {
   background-color: #fafafc !important;
 }
-/* 
-.kendo-data-grid tr.disabled-row {
-  pointer-events: none;
-  cursor: not-allowed; 
-  opacity: 0.5; 
-  user-select: none; 
+
+/* 1. Input box styling */
+.k-custom-dtp .k-picker-wrap {
+  /* Mimic MUI’s readOnly input: disable typing, just open calendar on click */
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+/* Increase the font-size inside the input */
+.k-custom-dtp .k-input {
+  font-size: 1.5rem;
+  /* If you want it truly read-only (no caret), you could also do pointer-events: none; but usually you just suppress typing via onKeyDown in props. */
 }
 
-.kendo-data-grid tr.disabled-row td {
-  cursor: not-allowed !important;
-}
-tr.k-grid-edit-row {
-  pointer-events: none;
-  cursor: not-allowed !important; 
-  opacity: 0.5; 
+/* 2. Popup (calendar) container */
+.k-custom-dtp-popup .k-calendar {
+  /* Scale the calendar dropdown to 70% */
+  transform: scale(0.7);
+  transform-origin: top left;
 }
 
-td.k-grid-edit-cell {
-  background-color: rgba(233, 233, 233, 0.3) !important;
-  cursor: not-allowed !important;
-  pointer-events: none !important;
-} */
+/* 3. Adjust typography inside the popup to match your MUI sizes */
+.k-custom-dtp-popup .k-calendar th, /* Weekday labels */
+.k-custom-dtp-popup .k-calendar .k-header, /* Month header */
+.k-custom-dtp-popup .k-calendar .k-content td, /* Day cells */
+.k-custom-dtp-popup .k-time-list .k-item /* Time dropdown items */ {
+  font-size: 1rem;
+}
+
+/* 4. If you need to style the “Now” / “Today” / “Time” buttons at the bottom */
+.k-custom-dtp-popup .k-footer .k-button {
+  font-size: 1rem;
+}

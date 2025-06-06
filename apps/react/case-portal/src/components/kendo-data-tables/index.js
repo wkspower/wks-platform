@@ -28,10 +28,31 @@ import { truncateRemarks } from 'utils/remarksUtils'
 import { process } from '@progress/kendo-data-query'
 import DateTimePickerEditor from './Utilities-Kendo/DatePickeronSelectedYr'
 import { updateRowWithDuration } from './Utilities-Kendo/AutoDuration'
-import ProductDropDownEditor from './Utilities-Kendo/DropdownProducts'
+// import ProductDropDownEditor from './Utilities-Kendo/DropdownProducts'
 import ProductCell from './Utilities-Kendo/ProductCell'
 import { ColumnMenu } from 'components/@extended/columnMenu'
 
+export const particulars = [
+  'normParameterId',
+  'normParametersFKId',
+  'NormParameterFKId',
+  'materialFkId',
+  'normParameterFKId',
+]
+export const hiddenFields = [
+  'maintenanceId',
+  'id',
+  'plantFkId',
+  'aopCaseId',
+  'aopType',
+  'aopYear',
+  'avgTph',
+  'NormParameterMonthlyTransactionId',
+  'aopStatus',
+  'idFromApi',
+  'isEditable',
+  'period',
+]
 const KendoDataTables = ({
   // setUpdatedRows = () => {},
   rows = [],
@@ -84,7 +105,7 @@ const KendoDataTables = ({
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
   // const closeDeleteDialogeBox = () => setOpenDeleteDialogeBox(false)
   // const [resizedColumns, setResizedColumns] = useState({})
-  // const [edit, setEdit] = React.useState({})
+  const [edit, setEdit] = useState({})
   // const [searchText, setSearchText] = useState('')
   // const isFilterActive = false
   // const localApiRef = useGridApiRef()
@@ -93,34 +114,29 @@ const KendoDataTables = ({
   //   setSearchText(event.target.value)
   // }
   // // console.log(columns)
-  // const handleEditChange = (e) => {
+  const handleEditChange = useCallback((e) => {
   //   console.log(e)
-  //   setEdit(e.edit)
+    setEdit(e.edit)
   // }
-
-  const hiddenFields = [
-    'maintenanceId',
-    'id',
-    'plantFkId',
-    'aopCaseId',
-    'aopType',
-    'aopYear',
-    'avgTph',
-    'NormParameterMonthlyTransactionId',
-    'aopStatus',
-    'idFromApi',
-    'isEditable',
-    'period',
-  ]
+  }, [])
+  const handleRowClick = (e) => {
+    console.log('22', e.dataItem?.isEditable)
+    if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
+      setEdit({})
+      return
+    }
 
   // const itemChange = (e) => {
   //   let updated = rows.map((r) =>
   //     r.id === e.dataItem.id ? { ...r, [e.field]: e.value } : r,
   //   )
-  //   setRows(updated)
-  //   setModifiedCells((updated = updated.filter((row) => row.inEdit == true)))
-
-  // }
+    setRows(
+      rows.map((r) => ({
+        ...r,
+        inEdit: r.id === e.dataItem.id, // only that row goes into edit mode
+      })),
+    )
+  }
   const itemChange = useCallback(
     (e) => {
       const { dataItem, field, value } = e
@@ -139,19 +155,6 @@ const KendoDataTables = ({
     [setRows, setModifiedCells],
   )
 
-  const rowRender = (trElement, props) => {
-    console.log(props.dataItem)
-    if (!props.dataItem.isEditable) {
-      return React.cloneElement(trElement, {
-        ...trElement.props,
-        className: (trElement.props.className || '')
-          .split(' ')
-          .concat('disabled-row')
-          .join(' '),
-      })
-    }
-    return trElement
-  }
 
   const handleRemarkSave = () => {
     setRows((prevRows) => {
@@ -214,6 +217,7 @@ const KendoDataTables = ({
   const saveConfirmation = async () => {
     saveChanges()
     setOpenSaveDialogeBox(false)
+    setEdit({})
   }
   const handleDeleteClick = async (params) => {
     setParamsForDelete(params)
@@ -255,25 +259,9 @@ const KendoDataTables = ({
       console.error('Error saving refresh data:', error)
     }
   }
-  const handleRowClick = (e) => {
     // console.log('22', e.dataItem.isEditable)
-    if (!e.dataItem?.isEditable) return
 
-    setRows(
-      rows.map((r) => ({
-        ...r,
-        inEdit: r.id === e.dataItem.id, // only that row goes into edit mode
-      })),
-    )
-  }
 
-  const particulars = [
-    'normParameterId',
-    'normParametersFKId',
-    'NormParameterFKId',
-    'materialFkId',
-    'normParameterFKId',
-  ]
   const RemarkCell = (props) => {
     const { dataItem, field, onRemarkClick, ...tdProps } = props
 
@@ -293,6 +281,7 @@ const KendoDataTables = ({
         }}
         onClick={() => {
           onRemarkClick(dataItem)
+          setEdit({})
         }}
       >
         {displayText || 'Click to add remark'}
@@ -350,7 +339,17 @@ const KendoDataTables = ({
     return rows
   }, [rows, group, expandedState])
 
+  const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
   // console.log(processedData)
+    const isDisabled =
+      !dataItem.isEditable && dataItem?.isEditable !== undefined
+    const rowClassName = isDisabled ? `k-disabled` : className
+    return (
+      <tr {...rest?.trProps} className={rowClassName}>
+        {rest.children}
+      </tr>
+    )
+  }, [])
   return (
     <div style={{ position: 'relative' }}>
       {loading && (
@@ -489,11 +488,12 @@ const KendoDataTables = ({
       <div className='kendo-data-grid'>
         <Grid
           data={filterBy(processedData, filter)}
+          rows={{ data: CustomRow }}
           sortable
           dataItemKey='id'
           editField='inEdit'
           // editable={{ mode: 'incell' }}
-          editable='incell'
+          editable={{ mode: 'incell' }}
           // onRowClick={(e) => {
           //   const id = e.dataItem.id
           //   setRows(rows.map((r) => (r.id === id ? { ...r, inEdit: true } : r)))
@@ -502,11 +502,12 @@ const KendoDataTables = ({
           // autoProcessData={true}
           // edit={edit}
           // scrollable='scrollable'
+          onEditChange={handleEditChange}
+          edit={edit}
           filter={filter}
           // filterable={true}
           onFilterChange={(e) => setFilter(e.filter)}
           onItemChange={itemChange}
-          rowRender={rowRender}
           resizable={true}
           defaultSkip={0}
           defaultTake={100}

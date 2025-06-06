@@ -13,9 +13,6 @@ import TextField from '@mui/material/TextField'
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 
-import Accordion from '@mui/material/Accordion'
-import AccordionSummary from '@mui/material/AccordionSummary'
-import AccordionDetails from '@mui/material/AccordionDetails'
 import Typography from '@mui/material/Typography'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Box } from '@mui/material'
@@ -24,12 +21,10 @@ import { Button } from '@mui/material'
 //import './extra-css.css'
 
 import { styled } from '@mui/material/styles'
-import MuiAccordion, { AccordionProps } from '@mui/material/Accordion'
-import MuiAccordionSummary, {
-  AccordionSummaryProps,
-} from '@mui/material/AccordionSummary'
+import MuiAccordion from '@mui/material/Accordion'
+import MuiAccordionSummary from '@mui/material/AccordionSummary'
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
-import KendoDataTables from './kendo-inprogress'
+import KendoDataTables from './index'
 
 // Customized Accordion
 const CustomAccordion = styled((props) => (
@@ -406,7 +401,8 @@ const ConsumptionNorms = () => {
 
       setCalculationObject(response?.data?.aopCalculation)
 
-      const formattedData = response?.data?.aopConsumptionNormDTOList?.map((item, index) => ({
+      const formattedData = response?.data?.aopConsumptionNormDTOList?.map(
+        (item, index) => ({
         ...item,
         idFromApi: item.id,
         NormParametersId: item.materialFkId.toLowerCase(),
@@ -414,7 +410,8 @@ const ConsumptionNorms = () => {
         id: index,
         isEditable: false,
         Particulars: item.normParameterTypeDisplayName,
-      }))
+        }),
+      )
 
       setRows(formattedData)
 
