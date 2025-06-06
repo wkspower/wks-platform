@@ -90,37 +90,63 @@ public class UserScreenMappingServiceImpl implements UserScreenMappingService {
 	        verticalData.put("id", verticalCode.toLowerCase().replace(" ", "-")); // Example: "Production Norms Plan" -> "production-norms-plan"
 	        verticalData.put("title", verticalTitle);
 	        verticalData.put("type", "group");
-
+	        
 	        Map<UUID, Map<String, Object>> groupWiseScreens = new HashMap<>();
+	        Map<UUID, Map<String, Object>> nestedGroupItems = new HashMap<>();
 
 	        finalResult.forEach(mapping -> {
-	            if ("collapse".equals(mapping.getType())) {
-	                // Treat as a parent group directly under the vertical
-	                Map<String, Object> parentGroup = new HashMap<>();
-	                parentGroup.put("id", mapping.getScreenCode()); // Assuming ScreenCode can act as a unique ID
-	                parentGroup.put("title", mapping.getScreenDisplayName());
-	                parentGroup.put("type",mapping.getType());
-	                parentGroup.put("icon", mapping.getIcon());
-					  parentGroup.put("url", mapping.getRoute());
-					    parentGroup.put("breadcrumbs", mapping.getBreadCrumbs());
-	                // parentGroup.put("children", new ArrayList<>());
-	                children.add(parentGroup); // Add directly to the vertical's children
-	            } else {
-	                // Treat as a regular screen item
-	                Map<String, Object> screenItem = new HashMap<>();
-	                screenItem.put("id", mapping.getScreenCode());
-	                screenItem.put("title", mapping.getScreenDisplayName());
-	                screenItem.put("type", mapping.getType());
-	                screenItem.put("url", mapping.getRoute());
-	                screenItem.put("icon", mapping.getIcon());
-	                screenItem.put("breadcrumbs", mapping.getBreadCrumbs());
+	            // Create a regular screen item
+	            Map<String, Object> screenItem = new HashMap<>();
+	            screenItem.put("id", mapping.getScreenCode());
+	            screenItem.put("title", mapping.getScreenDisplayName());
+	            screenItem.put("type", mapping.getType());
+	            screenItem.put("url", mapping.getRoute());
+	            screenItem.put("icon", mapping.getIcon());
+	            screenItem.put("breadcrumbs", mapping.getBreadCrumbs());
 
-	                if (mapping.getGroupId() != null) {
-	                    GroupMaster group = groupMap.get(mapping.getGroupId());
-	                    if (group != null) {
-	                        UUID groupId = group.getId();
-	                        if (!groupWiseScreens.containsKey(groupId)) {
-	                            Map<String, Object> groupData = new HashMap<>();
+	            if (mapping.getGroupId() != null) {
+	                GroupMaster group = groupMap.get(mapping.getGroupId());
+	                if (group != null) {
+	                    UUID groupId = group.getId();
+	                    UUID parentGroupId = group.getParentId();
+
+	                    if (parentGroupId != null) {
+	                        // Handle nested parent-child groupings (3rd level)
+	                        Map<String, Object> parentGroup = groupWiseScreens.get(parentGroupId);
+	                        if (parentGroup == null) {
+	                            // Create parent group if not already created
+	                            parentGroup = new HashMap<>();
+	                            GroupMaster parentGroupData = groupMap.get(parentGroupId);
+	                            parentGroup.put("id", parentGroupData.getGroupCode());
+	                            parentGroup.put("title", parentGroupData.getGroupName());
+	                            parentGroup.put("type", "collapse");
+	                            parentGroup.put("icon", parentGroupData.getIcon());
+	                            parentGroup.put("children", new ArrayList<>());
+	                            groupWiseScreens.put(parentGroupId, parentGroup);
+	                            children.add(parentGroup);
+	                        }
+
+	                        // Add the current group within the parent group
+	                        Map<String, Object> currentGroup = nestedGroupItems.get(groupId);
+	                        if (currentGroup == null) {
+	                            currentGroup = new HashMap<>();
+	                            currentGroup.put("id", group.getGroupCode());
+	                            currentGroup.put("title", group.getGroupName());
+	                            currentGroup.put("type", "collapse");
+	                            currentGroup.put("icon", group.getIcon());
+	                            currentGroup.put("children", new ArrayList<>());
+	                            nestedGroupItems.put(groupId, currentGroup);
+	                        }
+
+	                        ((List<Map<String, Object>>) parentGroup.get("children")).add(currentGroup);
+	                        // Add the screen item to its group
+	                        ((List<Map<String, Object>>) currentGroup.get("children")).add(screenItem);
+
+	                    } else {
+	                        // Handle single group level (2nd level)
+	                        Map<String, Object> groupData = groupWiseScreens.get(groupId);
+	                        if (groupData == null) {
+	                            groupData = new HashMap<>();
 	                            groupData.put("id", group.getGroupCode());
 	                            groupData.put("title", group.getGroupName());
 	                            groupData.put("type", "collapse");
@@ -129,15 +155,20 @@ public class UserScreenMappingServiceImpl implements UserScreenMappingService {
 	                            groupWiseScreens.put(groupId, groupData);
 	                            children.add(groupData);
 	                        }
-	                        ((List<Map<String, Object>>) groupWiseScreens.get(groupId).get("children")).add(screenItem);
-	                    } else {
-	                        children.add(screenItem); // If no group, add directly to the vertical's children
+
+	                        // Add the screen item to the group
+	                        ((List<Map<String, Object>>) groupData.get("children")).add(screenItem);
 	                    }
 	                } else {
-	                    children.add(screenItem); // If no group ID, add directly to the vertical's children
+	                    // No group, directly add to the 1st level
+	                    children.add(screenItem);
 	                }
+	            } else {
+	                // No group, directly add to the 1st level
+	                children.add(screenItem);
 	            }
 	        });
+	        
 	        if (!children.isEmpty()) {
 	            verticalData.put("children", children);
 	        }

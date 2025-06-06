@@ -38,4 +38,7 @@ public class GroupMaster {
 
     @Column(name = "Icon")
     private String icon;
+    
+    @Column(name = "Parent_Id")
+    private UUID parentId;
 }
