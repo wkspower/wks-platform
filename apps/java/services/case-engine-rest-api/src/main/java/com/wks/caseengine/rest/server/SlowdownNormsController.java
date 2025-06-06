@@ -40,8 +40,8 @@ public class SlowdownNormsController {
 	}
 
 	 @GetMapping("/slowdown-months")
-	    public ResponseEntity<List> getSlowdownMonths(@RequestParam UUID plantId,@RequestParam String maintenanceName){
-	        List data = slowdownNormsService.getSlowdownMonths(plantId, maintenanceName);
+	    public ResponseEntity<List> getSlowdownMonths(@RequestParam UUID plantId,@RequestParam String maintenanceName,@RequestParam String year){
+	        List data = slowdownNormsService.getSlowdownMonths(plantId, maintenanceName,year);
 	        return ResponseEntity.ok(data);
 	    }
 }

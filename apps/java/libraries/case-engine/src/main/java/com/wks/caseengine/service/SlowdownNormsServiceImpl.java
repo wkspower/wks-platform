@@ -327,9 +327,9 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 
 	@Override
 	@Transactional
-	public List getSlowdownMonths(UUID plantId, String maintenanceName) {
+	public List getSlowdownMonths(UUID plantId, String maintenanceName,String year) {
 		try {
-			return slowdownNormsRepository.getSlowdownMonths(plantId, maintenanceName);
+			return slowdownNormsRepository.getSlowdownMonths(plantId, maintenanceName,year);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

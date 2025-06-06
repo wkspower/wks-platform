@@ -61,7 +61,7 @@ public interface SlowdownNormsRepository extends JpaRepository<SlowdownNormsValu
                       @Param("materialId") UUID materialId,
                       @Param("financialYear") String financialYear);
 		
-		  @Query(value = "SELECT  DISTINCT MaintForMonth  FROM vwGetSlowdownMonths WHERE PlantId = :plantId AND MaintenanceName = :maintenanceName", nativeQuery = true)
-		 	List getSlowdownMonths(@Param("plantId") UUID plantId, @Param("maintenanceName") String maintenanceName);
+		  @Query(value = "SELECT  DISTINCT MaintForMonth  FROM vwGetSlowdownMonths WHERE PlantId = :plantId AND MaintenanceName = :maintenanceName AND AuditYear = :AuditYear", nativeQuery = true)
+		 	List getSlowdownMonths(@Param("plantId") UUID plantId, @Param("maintenanceName") String maintenanceName, @Param("AuditYear") String AuditYear);
 
 }

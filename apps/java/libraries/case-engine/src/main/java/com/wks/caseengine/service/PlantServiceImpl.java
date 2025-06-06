@@ -59,8 +59,8 @@ public class PlantServiceImpl implements PlantService {
 	}
 	@Override
 	@Transactional
-     public List getShutdownMonths(UUID plantId,String maintenanceName){
-	    	 return	plantsRepository.getShutdownMonths(plantId,maintenanceName);
+     public List getShutdownMonths(UUID plantId,String maintenanceName,String year){
+	    	 return	plantsRepository.getShutdownMonths(plantId,maintenanceName,year);
 	    	
 	    }
 
