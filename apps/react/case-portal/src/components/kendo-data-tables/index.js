@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Grid, GridColumn } from '@progress/kendo-react-grid'
 import { filterBy } from '@progress/kendo-data-query'
 import '@progress/kendo-theme-default/dist/all.css'
@@ -31,6 +31,7 @@ import { updateRowWithDuration } from './Utilities-Kendo/AutoDuration'
 // import ProductDropDownEditor from './Utilities-Kendo/DropdownProducts'
 import ProductCell from './Utilities-Kendo/ProductCell'
 import { ColumnMenu } from 'components/@extended/columnMenu'
+import { NoSpinnerNumericEditor } from './Utilities-Kendo/numbericColumns'
 
 export const particulars = [
   'normParameterId',
@@ -303,7 +304,6 @@ const KendoDataTables = ({
             },
           },
         ])
-      } else {
         // setGroup([{ field: groupBy }])
       }
       const initialExpandedState = {}
@@ -669,7 +669,11 @@ const KendoDataTables = ({
                   title={col.title || col.headerName}
                   width={col.width}
                   editable={true}
+                  cells={{
+                    edit: { text: NoSpinnerNumericEditor },
+                  }}
                   columnMenu={ColumnMenu}
+                  filter='numeric'
                 />
               )
             })}

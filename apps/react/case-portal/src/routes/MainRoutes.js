@@ -3,10 +3,6 @@ import Loadable from 'components/Loadable'
 import MainLayout from 'layout/MainLayout'
 import TurnaroundPlanTable from 'components/data-tables/TurnaroundPlanTable'
 // import AssessmentForm from 'components/data-tables/AssesmentForm/AssessmentContext'
-import ProductionvolumeData from 'components/data-tables/ProductionVoluemData'
-import BusinessDemand from 'components/data-tables/BusinessDemand'
-import ShutDown from 'components/data-tables/ShutDown'
-import SlowDown from 'components/data-tables/Slowdown'
 
 import { CaseStatus } from 'common/caseStatus'
 import { CaseList } from 'views/caseList/caseList'
@@ -19,28 +15,30 @@ import { RecordTypeList } from 'views/management/recordType/recordTypeList'
 import { QueueList } from 'views/management/queue/queueList'
 import FeedStockAvailability from 'components/data-tables/FeedStockavailability'
 import NormalOpNormsScreen from 'components/data-tables/NormsScreens/NormalOpNorms'
+import ConsumptionNorms from 'components/data-tables/ConsumptionNorms'
+import BusinessDemand from 'components/data-tables/BusinessDemand'
+import ProductionvolumeData from 'components/data-tables/ProductionVoluemData'
 import ShutdownNorms from 'components/data-tables/NormsScreens/ShutdownNorms'
 import MaintenanceTable from 'components/data-tables/MaintenanceTable'
-import ConsumptionNorms from 'components/data-tables/ConsumptionNorms'
 import ProductionNorms from 'components/data-tables/ProductionNorms'
-// import SelectivityData from 'components/data-tables/SelectivityData'
-// import FiveTables from 'components/data-tables/AOPWorkFlow/ProductMixTable'
+import SlowdownNorms from 'components/data-tables/NormsScreens/SlowdownNorms'
+import ShutDown from 'components/data-tables/ShutDown'
+import SlowDown from 'components/data-tables/Slowdown'
 import ConfigurationTable from 'components/data-tables/ConfigurationTable/index'
-// import UserManagement from 'components/user-management/UserManagementTable'
+// import FiveTables from 'components/data-tables/AOPWorkFlow/ProductMixTable'
 import UserForm from 'components/user-management/UserForm'
 import UserManagementTable from 'components/user-management/UserManagementTable'
 import AssessmentForm from 'components/data-tables/AssesmentForm/AssessmentContext'
-import SlowdownNorms from 'components/data-tables/NormsScreens/SlowdownNorms'
 import TextSubmitComponent from 'components/user-management/TextSubmitComponent'
 import WorkFlowMerge from 'components/data-tables/AOPWorkFlow/WorkFlowMerge'
 import AnnualAopCost from 'components/data-tables/Reports/AnnualAopCost'
 import PlantsProductionSummary from 'components/data-tables/Reports/PlantsProductionData'
-// import MonthwiseProduction from 'components/data-tables/Reports/MonthWiseProduction'
 import ProductionVolumeDataBasis from 'components/data-tables/Reports/ProductionVolumeDataBasis'
 import MonthwiseProduction from 'components/data-tables/Reports/MonthwiseProduction'
 import MonthwiseRawMaterial from 'components/data-tables/Reports/MonthwiseRawMaterial'
 import NormsHistorianBasis from 'components/data-tables/Reports/NormsHistorianBasis'
-import BusinessDemandKendo from 'components/kendo-data-tables/BusinessDemandKendo'
+// import MaintenanceTable from 'components/kendo-data-tables/MaintenanceTable'
+// import BusinessDemand from 'components/kendo-data-tables/BusinessDemand'
 import CrackerConfig from 'components/kendo-data-tables/KendoConfigCrackerInput'
 import DecokingConfig from 'components/kendo-data-tables/KendoConfigCrackerActivities'
 import CrackerConfigOutput from 'components/kendo-data-tables/KendoConfigCrackerOutput'
@@ -163,10 +161,7 @@ export const MainRoutes = (
           {
             path: 'business-demand',
             element: <BusinessDemand />,
-          },
-          {
-            path: 'business-demand-kendo',
-            element: <BusinessDemandKendo />,
+            // element: <BusinessDemand />,
           },
           {
             path: 'configuration',
