@@ -183,3 +183,10 @@ main.MuiBox-root.css-vognfw {
   background-color: #0100cb !important;
   color: #fff;
 }
+
+.k-grid th.active-column {
+  background-color: #e0f7fa; /* light cyan */
+  color: #00796b; /* teal text */
+  font-weight: bold;
+  border-bottom: 2px solid #790000;
+}

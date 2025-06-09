@@ -4,7 +4,6 @@ import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import { useSelector } from 'react-redux'
 
-
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 
@@ -264,7 +263,6 @@ const SlowDown = ({ permissions }) => {
     }
   }
 
-
   useEffect(() => {
     const getAllProducts = async () => {
       try {
@@ -376,7 +374,7 @@ const SlowDown = ({ permissions }) => {
 
   const deleteRowData = async (paramsForDelete) => {
     try {
-      const { idFromApi, id } = paramsForDelete.row
+      const { idFromApi, id } = paramsForDelete
       const deleteId = id
 
       if (!idFromApi) {

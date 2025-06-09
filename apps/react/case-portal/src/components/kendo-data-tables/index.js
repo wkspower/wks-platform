@@ -121,7 +121,6 @@ const KendoDataTables = ({
   // }
   }, [])
   const handleRowClick = (e) => {
-    console.log('22', e.dataItem?.isEditable)
     if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
       setEdit({})
       return
