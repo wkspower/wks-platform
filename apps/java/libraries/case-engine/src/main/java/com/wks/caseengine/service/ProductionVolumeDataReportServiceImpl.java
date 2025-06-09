@@ -60,13 +60,13 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 	@Autowired
 	private MonthWiseProductionPlanRepository monthWiseProductionPlanRepository;
-	
+
 	private DataSource dataSource;
-	
+
 	// Inject or set your DataSource (e.g., via constructor or setter)
-		public ProductionVolumeDataReportServiceImpl(DataSource dataSource) {
-			this.dataSource = dataSource;
-		}
+	public ProductionVolumeDataReportServiceImpl(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
 
 	@Override
 	public AOPMessageVM getReportForProductionVolumnData(String plantId, String year) {
@@ -185,12 +185,12 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	}
 
 	@Override
-	public AOPMessageVM getReportForMonthWiseConsumptionSummaryData(String plantId, String year,String reportType) {
+	public AOPMessageVM getReportForMonthWiseConsumptionSummaryData(String plantId, String year, String reportType) {
 		try {
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			List<Map<String, Object>> summaryData = new ArrayList<>();
 
-			List<Object[]> obj = getMonthWiseConsumptionData(plantId, year,reportType);
+			List<Object[]> obj = getMonthWiseConsumptionData(plantId, year, reportType);
 			for (Object[] row : obj) {
 				Map<String, Object> map = new HashMap<>();
 				if (reportType.equalsIgnoreCase("Selectivity")) {
@@ -209,7 +209,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 					map.put("march", row[12]);
 					map.put("id", row[13]);
 					summaryData.add(map);
-				}else if(reportType.equalsIgnoreCase("NormQuantity")) {
+				} else if (reportType.equalsIgnoreCase("NormQuantity")) {
 					map.put("normType", row[0]);
 					map.put("material", row[1]);
 					map.put("UOM", row[2]);
@@ -229,7 +229,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 					map.put("total", row[16]);
 					map.put("id", row[17]);
 					summaryData.add(map);
-					
+
 				}
 			}
 			// Combine both into a result map
@@ -249,7 +249,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 	}
 
-	public List<Object[]> getMonthWiseConsumptionData(String plantId, String year,String ReportType) {
+	public List<Object[]> getMonthWiseConsumptionData(String plantId, String year, String ReportType) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 			String storedProcedure = "PlantConsumptionSummaryReport";
@@ -511,6 +511,8 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			Optional<MonthWiseProductionPlan> optional = monthWiseProductionPlanRepository
 					.findById(UUID.fromString(dto.getId()));
 			optional.get().setRemark(dto.getRemark());
+			optional.get().setThroughputActual(dto.getThroughputActual());
+
 			monthWiseProductionPlanRepository.save(optional.get());
 		}
 		AOPMessageVM response = new AOPMessageVM();
@@ -654,30 +656,30 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
 			String aopYear) {
 		try {
-			
+
 			String callSql = "{call " + procedureName + "(?, ?)}";
 
-	        try (Connection connection = dataSource.getConnection();
-	             CallableStatement stmt = connection.prepareCall(callSql)) {
+			try (Connection connection = dataSource.getConnection();
+					CallableStatement stmt = connection.prepareCall(callSql)) {
 
-	            // Set parameters in the correct order
-	            stmt.setString(1, plantId); 
-	            stmt.setString(2, aopYear); 
+				// Set parameters in the correct order
+				stmt.setString(1, plantId);
+				stmt.setString(2, aopYear);
 
-	            // Execute the stored procedure
-	            int rowsAffected = stmt.executeUpdate();
+				// Execute the stored procedure
+				int rowsAffected = stmt.executeUpdate();
 
-	            // Optional: commit if auto-commit is off
-	            if (!connection.getAutoCommit()) {
-	                connection.commit();
-	            }
+				// Optional: commit if auto-commit is off
+				if (!connection.getAutoCommit()) {
+					connection.commit();
+				}
 
-	            return rowsAffected;
+				return rowsAffected;
 
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	            return 0;
-	        }
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return 0;
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();

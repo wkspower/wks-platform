@@ -11,18 +11,14 @@ export const validateFields = (data, requiredFields) => {
     normParametersFKId: 'Particular',
     aopRemarks: 'Remark',
     remarks: 'Remark',
+    ThroughputActual: 'Actual Throughput',
   }
 
   const invalidRows = data.filter((row) => {
     // Check for required fields
     const hasMissingField = requiredFields.some((field) => {
       const value = row[field]
-      if (
-        field === 'remark' ||
-        field === 'aopRemarks' ||
-        field === 'remarks' ||
-        field === 'Remarks'
-      ) {
+      if (field === 'remark' || field === 'aopRemarks' || field === 'remarks') {
         return (
           value === undefined ||
           value === null ||

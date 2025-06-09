@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class MonthWiseProductionPlanDTO {
     private String id;
     private String remark;
+    private Double ThroughputActual;
 }
-

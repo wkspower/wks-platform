@@ -56,6 +56,7 @@ import com.wks.caseengine.repository.NormAttributeTransactionReceipeRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
+
 @Service
 public class ConfigurationServiceImpl implements ConfigurationService {
 
@@ -82,10 +83,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	@Autowired
 	private NormParametersRepository normParametersRepository;
-	
+
 	@Autowired
 	private ScreenMappingRepository screenMappingRepository;
-	
+
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
 
@@ -134,13 +135,16 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						(row[9] != null && !row[9].toString().trim().isEmpty()) ? Double.parseDouble(row[9].toString())
 								: null);
 				configurationDTO.setOct(
-						(row[10] != null && !row[10].toString().trim().isEmpty()) ? Double.parseDouble(row[10].toString())
+						(row[10] != null && !row[10].toString().trim().isEmpty())
+								? Double.parseDouble(row[10].toString())
 								: null);
 				configurationDTO.setNov(
-						(row[11] != null && !row[11].toString().trim().isEmpty()) ? Double.parseDouble(row[11].toString())
+						(row[11] != null && !row[11].toString().trim().isEmpty())
+								? Double.parseDouble(row[11].toString())
 								: null);
 				configurationDTO.setDec(
-						(row[12] != null && !row[12].toString().trim().isEmpty()) ? Double.parseDouble(row[12].toString())
+						(row[12] != null && !row[12].toString().trim().isEmpty())
+								? Double.parseDouble(row[12].toString())
 								: null);
 				configurationDTO.setRemarks((row[13] != null ? row[13].toString() : ""));
 
@@ -222,16 +226,20 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						(row[8] != null && !row[9].toString().trim().isEmpty()) ? Double.parseDouble(row[9].toString())
 								: null);
 				configurationDTO.setSep(
-						(row[9] != null && !row[10].toString().trim().isEmpty()) ? Double.parseDouble(row[10].toString())
+						(row[9] != null && !row[10].toString().trim().isEmpty())
+								? Double.parseDouble(row[10].toString())
 								: null);
 				configurationDTO.setOct(
-						(row[10] != null && !row[11].toString().trim().isEmpty()) ? Double.parseDouble(row[11].toString())
+						(row[10] != null && !row[11].toString().trim().isEmpty())
+								? Double.parseDouble(row[11].toString())
 								: null);
 				configurationDTO.setNov(
-						(row[11] != null && !row[12].toString().trim().isEmpty()) ? Double.parseDouble(row[12].toString())
+						(row[11] != null && !row[12].toString().trim().isEmpty())
+								? Double.parseDouble(row[12].toString())
 								: null);
 				configurationDTO.setDec(
-						(row[12] != null && !row[13].toString().trim().isEmpty()) ? Double.parseDouble(row[13].toString())
+						(row[12] != null && !row[13].toString().trim().isEmpty())
+								? Double.parseDouble(row[13].toString())
 								: null);
 				configurationDTO.setRemarks((row[14] != null ? row[14].toString() : ""));
 				// configurationDTO.setId(row[14] != null ? row[14].toString() : i + "#");
@@ -282,6 +290,18 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<ConfigurationDTO> configurationDTOList) {
 		try {
 			UUID plantId = UUID.fromString(plantFKId);
+
+			Plants plant = plantsRepository.findById(plantId).orElseThrow();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+
+			String steamLatentName = "";
+
+			if (site.getName().equalsIgnoreCase("HMD")) {
+				steamLatentName = "HP.Latent.Heat";
+			} else {
+				steamLatentName = "MP.Latent.Heat";
+			}
+
 			for (ConfigurationDTO configurationDTO : configurationDTOList) {
 				UUID normParameterFKId = UUID.fromString(configurationDTO.getNormParameterFKId());
 
@@ -294,7 +314,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					if (attributeValue != null && optionNormParameters.get().getName().equalsIgnoreCase("TST")) {
 
 						Optional<NormParameters> optionNormParametersHP = normParametersRepository
-								.findByNameAndPlantFkId("HP.Latent.Heat", plantId);
+								.findByNameAndPlantFkId(steamLatentName, plantId);
 
 						List<Object[]> list = normAttributeTransactionsRepository.getPythonScriptName();
 
@@ -312,14 +332,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						// System.out.println("attributeHP " + attributeValueHP + " " + i);
 						// Double attributeValueHP = getAttributeValueByPythonScript(commands);
 
-						saveData(optionNormParametersHP.get().getId(), i, year, attributeValueHP, configurationDTO);
+						if (optionNormParametersHP.isPresent()) {
+							saveData(optionNormParametersHP.get().getId(), i, year, attributeValueHP, configurationDTO);
+						}
+
 					}
 
 				}
 			}
-			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("configuration");
-			for(ScreenMapping screenMapping:screenMappingList) {
-				AopCalculation aopCalculation=new AopCalculation();
+			List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("configuration");
+			for (ScreenMapping screenMapping : screenMappingList) {
+				AopCalculation aopCalculation = new AopCalculation();
 				aopCalculation.setAopYear(year);
 				aopCalculation.setIsChanged(true);
 				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
@@ -769,39 +792,39 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				map.put("UOM", row[15]);
 				map.put("NormTypeName", row[16]);
 				map.put("isEditable", row[17]);
-				configurationIntermediateValues.add(map); 
-				
+				configurationIntermediateValues.add(map);
+
 			}
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data fetched successfully");
 			aopMessageVM.setData(configurationIntermediateValues);
 			return aopMessageVM;
-		}catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-	
+
 	public List<Object[]> findConfigurationIntermediateValues(String plantId, String aopYear) {
-	    try {
-	    	Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
-	    	Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-	        String procedureName = vertical.getName()+"_GetConfigurationIntermediateValues";
-	        String sql = "EXEC " + procedureName +
-	                     " @plantId = :plantId, @aopYear = :aopYear";
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String procedureName = vertical.getName() + "_GetConfigurationIntermediateValues";
+			String sql = "EXEC " + procedureName +
+					" @plantId = :plantId, @aopYear = :aopYear";
 
-	        Query query = entityManager.createNativeQuery(sql);
+			Query query = entityManager.createNativeQuery(sql);
 
-	        query.setParameter("plantId", plantId);
-	        query.setParameter("aopYear", aopYear);
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
 
-	        return query.getResultList();
-	    } catch (IllegalArgumentException e) {
-	        throw new RestInvalidArgumentException("Invalid UUID format ", e);
-	    } catch (Exception ex) {
-	        throw new RuntimeException("Failed to fetch data", ex);
-	    }
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
 	}
 
 }

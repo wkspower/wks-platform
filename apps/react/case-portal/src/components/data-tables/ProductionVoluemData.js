@@ -12,6 +12,7 @@ import { setIsBlocked } from 'store/reducers/dataGridStore'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { Typography } from '../../../node_modules/@mui/material/index'
+import TextField from '@mui/material/TextField'
 
 const ProductionvolumeData = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -36,6 +37,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [rows, setRows] = useState()
   const [rows2, setRows2] = useState()
+  const [rows500, setRows500] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -365,13 +367,21 @@ const ProductionvolumeData = ({ permissions }) => {
         ...item,
         isEditable: false,
       }))
-      formattedData = formattedData.map((item) => ({
+
+      var formattedDataNONEDITABLE = formattedData.map((item) => ({
         ...item,
         isEditable: false,
       }))
 
+      formattedData = formattedData.map((item) => ({
+        ...item,
+        remarks: item.remarks ? item.remarks.trim() : '',
+      }))
+
       setRows2(nonEditableRows)
       setRows(formattedData)
+
+      setRows500(formattedDataNONEDITABLE)
       setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -413,6 +423,440 @@ const ProductionvolumeData = ({ permissions }) => {
       return newRow
     })
   }
+
+  const formatValueToFiveDecimals = (params) =>
+    params ? parseFloat(params).toFixed(2) : ''
+
+  const colDefs = [
+    {
+      field: 'idFromApi',
+      headerName: 'ID',
+    },
+    {
+      field: 'aopCaseId',
+      headerName: 'Case ID',
+      minWidth: 120,
+      editable: false,
+    },
+
+    {
+      field: 'normParametersFKId',
+      headerName: 'Particulars',
+      minWidth: 175,
+      editable: false,
+      valueGetter: (params) => params || '',
+      valueFormatter: (params) => {
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : ''
+      },
+
+      filterOperators: [
+        {
+          label: 'contains',
+          value: 'contains',
+          getApplyFilterFn: (filterItem) => {
+            if (!filterItem?.value) {
+              return
+            }
+            return (rowId) => {
+              const filterValue = filterItem.value.toLowerCase()
+              if (filterValue) {
+                const productName = getProductDisplayName(rowId)
+                if (productName) {
+                  return productName.toLowerCase().includes(filterValue)
+                }
+              }
+              return true
+            }
+          },
+          InputComponent: ({ item, applyValue, focusElementRef }) => (
+            <TextField
+              autoFocus
+              inputRef={focusElementRef}
+              size='small'
+              label='Contains'
+              value={item.value || ''}
+              onChange={(event) =>
+                applyValue({ ...item, value: event.target.value })
+              }
+              style={{ marginTop: '8px' }}
+            />
+          ),
+        },
+      ],
+
+      renderEditCell: (params) => {
+        const { value, id, api } = params
+        return (
+          <select
+            value={value || ''}
+            onChange={(event) => {
+              api.setEditCellValue({
+                id,
+                field: 'materialFkId',
+                value: event.target.value,
+              })
+            }}
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+            }}
+          >
+            <option value='' disabled>
+              Select
+            </option>
+            {allProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.displayName}
+              </option>
+            ))}
+          </select>
+        )
+      },
+    },
+    {
+      field: 'april',
+      headerName: headerMap[4],
+      editable: false,
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
+    {
+      field: 'may',
+      headerName: headerMap[5],
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
+    {
+      field: 'june',
+      headerName: headerMap[6],
+      valueFormatter: formatValueToFiveDecimals,
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'july',
+      valueFormatter: formatValueToFiveDecimals,
+      headerName: headerMap[7],
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'august',
+      headerName: headerMap[8],
+      valueFormatter: formatValueToFiveDecimals,
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'september',
+      headerName: headerMap[9],
+      valueFormatter: formatValueToFiveDecimals,
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'october',
+      headerName: headerMap[10],
+      valueFormatter: formatValueToFiveDecimals,
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'november',
+      headerName: headerMap[11],
+      valueFormatter: formatValueToFiveDecimals,
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'december',
+      headerName: headerMap[12],
+      valueFormatter: formatValueToFiveDecimals,
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'january',
+      headerName: headerMap[1],
+      valueFormatter: formatValueToFiveDecimals,
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'february',
+      headerName: headerMap[2],
+      valueFormatter: formatValueToFiveDecimals,
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'march',
+      headerName: headerMap[3],
+      valueFormatter: formatValueToFiveDecimals,
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+
+    {
+      field: 'avgTph',
+      headerName: 'AVG',
+      minWidth: 150,
+      editable: false,
+    },
+    {
+      field: 'isEditable',
+      headerName: 'isEditable',
+    },
+  ]
+
+  const colDefs1233 = [
+    {
+      field: 'idFromApi',
+      headerName: 'ID',
+    },
+    {
+      field: 'aopCaseId',
+      headerName: 'Case ID',
+      minWidth: 120,
+      editable: false,
+    },
+
+    {
+      field: 'normParametersFKId',
+      headerName: 'Particulars',
+      minWidth: 175,
+      editable: false,
+      valueGetter: (params) => params || '',
+      valueFormatter: (params) => {
+        const product = allProducts.find((p) => p.id === params)
+        return product ? product.displayName : ''
+      },
+
+      filterOperators: [
+        {
+          label: 'contains',
+          value: 'contains',
+          getApplyFilterFn: (filterItem) => {
+            if (!filterItem?.value) {
+              return
+            }
+            return (rowId) => {
+              const filterValue = filterItem.value.toLowerCase()
+              if (filterValue) {
+                const productName = getProductDisplayName(rowId)
+                if (productName) {
+                  return productName.toLowerCase().includes(filterValue)
+                }
+              }
+              return true
+            }
+          },
+          InputComponent: ({ item, applyValue, focusElementRef }) => (
+            <TextField
+              autoFocus
+              inputRef={focusElementRef}
+              size='small'
+              label='Contains'
+              value={item.value || ''}
+              onChange={(event) =>
+                applyValue({ ...item, value: event.target.value })
+              }
+              style={{ marginTop: '8px' }}
+            />
+          ),
+        },
+      ],
+
+      renderEditCell: (params) => {
+        const { value, id, api } = params
+        return (
+          <select
+            value={value || ''}
+            onChange={(event) => {
+              api.setEditCellValue({
+                id,
+                field: 'materialFkId',
+                value: event.target.value,
+              })
+            }}
+            style={{
+              width: '100%',
+              padding: '5px',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+            }}
+          >
+            <option value='' disabled>
+              Select
+            </option>
+            {allProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.displayName}
+              </option>
+            ))}
+          </select>
+        )
+      },
+    },
+    {
+      field: 'april',
+      headerName: headerMap[4],
+      editable: false,
+      align: 'left',
+      headerAlign: 'left',
+      valueFormatter: formatValueToFiveDecimals,
+    },
+    {
+      field: 'may',
+      headerName: headerMap[5],
+      valueFormatter: formatValueToFiveDecimals,
+
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'june',
+      headerName: headerMap[6],
+      valueFormatter: formatValueToFiveDecimals,
+
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'july',
+      headerName: headerMap[7],
+      valueFormatter: formatValueToFiveDecimals,
+
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'august',
+      headerName: headerMap[8],
+      valueFormatter: formatValueToFiveDecimals,
+
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'september',
+      headerName: headerMap[9],
+      valueFormatter: formatValueToFiveDecimals,
+
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'october',
+      headerName: headerMap[10],
+      valueFormatter: formatValueToFiveDecimals,
+
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'november',
+      headerName: headerMap[11],
+      valueFormatter: formatValueToFiveDecimals,
+
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'december',
+      headerName: headerMap[12],
+      valueFormatter: formatValueToFiveDecimals,
+
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'january',
+      headerName: headerMap[1],
+      valueFormatter: formatValueToFiveDecimals,
+
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'february',
+      headerName: headerMap[2],
+      valueFormatter: formatValueToFiveDecimals,
+
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'march',
+      headerName: headerMap[3],
+      valueFormatter: formatValueToFiveDecimals,
+
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+
+    {
+      field: 'avgTph',
+      headerName: 'AVG',
+      minWidth: 150,
+      editable: false,
+    },
+    {
+      field: 'isEditable',
+      headerName: 'isEditable',
+    },
+  ]
 
   useEffect(() => {
     const getAllProducts = async () => {
@@ -546,7 +990,7 @@ const ProductionvolumeData = ({ permissions }) => {
       showUnit: permissions?.showUnit ?? true,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
-      saveBtn: permissions?.saveBtn ?? false,
+      saveBtn: permissions?.saveBtn ?? true,
       units: ['TPH', 'TPD'],
       customHeight: permissions?.customHeight ?? defaultCustomHeight,
       showCalculate: permissions?.hideSummary ? false : lowerVertName === 'meg',
@@ -558,6 +1002,9 @@ const ProductionvolumeData = ({ permissions }) => {
     },
     isOldYear,
   )
+
+  var cols = permissions?.hideSummary ? colDefs1233 : productionColumns
+  var rows1 = permissions?.hideSummary ? rows500 : rows
 
   return (
     <div>
@@ -571,8 +1018,8 @@ const ProductionvolumeData = ({ permissions }) => {
         modifiedCells={modifiedCells}
         enableSaveAddBtn={enableSaveAddBtn}
         setRows={setRows}
-        columns={productionColumns}
-        rows={rows}
+        columns={cols}
+        rows={rows1}
         title='Production Volume Data'
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
@@ -614,42 +1061,10 @@ const ProductionvolumeData = ({ permissions }) => {
           </Typography>
           <ASDataGrid
             setRows={setRows2}
-            columns={productionColumns}
+            columns={colDefs}
             rows={rows2}
             title='Production Volume Data'
-            onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-            onDeleteRow={(id) => console.log('Row Deleted:', id)}
-            onRowUpdate={(updatedRow) =>
-              console.log('Row Updated:', updatedRow)
-            }
-            paginationOptions={[100, 200, 300]}
-            processRowUpdate={processRowUpdate}
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={onRowModesModelChange}
-            saveChanges={saveChanges}
-            snackbarData={snackbarData}
-            snackbarOpen={snackbarOpen}
-            setSnackbarOpen={setSnackbarOpen}
-            setSnackbarData={setSnackbarData}
-            apiRef={apiRef}
-            // deleteId={deleteId}
-            // setDeleteId={setDeleteId}
-            // setOpen1={setOpen1}
-            // open1={open1}
-            // handleDeleteClick={handleDeleteClick}
             fetchData={fetchData}
-            // onRowEditStop={handleRowEditStop}
-            onProcessRowUpdateError={onProcessRowUpdateError}
-            handleUnitChange={handleUnitChange}
-            experimentalFeatures={{ newEditingApi: true }}
-            remarkDialogOpen={remarkDialogOpen}
-            setRemarkDialogOpen={setRemarkDialogOpen}
-            currentRemark={currentRemark}
-            setCurrentRemark={setCurrentRemark}
-            currentRowId={currentRowId}
-            unsavedChangesRef={unsavedChangesRef}
-            handleCalculate={handleCalculate}
-            permissions={{ customHeight: defaultCustomHeight }}
           />
         </>
       )}

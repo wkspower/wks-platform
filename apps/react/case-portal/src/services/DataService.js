@@ -621,7 +621,14 @@ async function handleCalculateMaintenance(plantId, year, keycloak) {
 }
 
 async function deleteSlowdownData(maintenanceId, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/deleteSlowdownData/${maintenanceId}`
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  const url = `${Config.CaseEngineUrl}/task/deleteSlowdownData/${maintenanceId}/${plantId}`
 
   const headers = {
     Accept: 'application/json',
@@ -653,6 +660,7 @@ async function deleteShutdownData(maintenanceId, keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
+
   const url = `${Config.CaseEngineUrl}/task/deleteShutdownData/${maintenanceId}/${plantId}`
 
   const headers = {
@@ -2324,11 +2332,13 @@ async function getAllProducts(keycloak) {
 }
 
 async function getShutdownMonths(keycloak) {
+  var year = localStorage.getItem('year')
+
   const storedPlant = localStorage.getItem('selectedPlant')
   const parsedPlant = JSON.parse(storedPlant)
   // const url = `${Config.CaseEngineUrl}/task/getAllProducts?normParameterTypeName=${type}&plantId=${parsedPlant.id}`
   // http://localhost:8080/task/shutdown-months?plantId=AACDBE12-C5F6-4B79-9C88-751169815B42&MaintenanceName=Shutdown
-  const url = `${Config.CaseEngineUrl}/task/shutdown-months?plantId=${parsedPlant.id}&maintenanceName=Shutdown`
+  const url = `${Config.CaseEngineUrl}/task/shutdown-months?plantId=${parsedPlant.id}&maintenanceName=Shutdown&year=${year}`
 
   const headers = {
     Accept: 'application/json',
@@ -2347,8 +2357,10 @@ async function getShutdownMonths(keycloak) {
 
 async function getSlowdownMonths(keycloak) {
   const storedPlant = localStorage.getItem('selectedPlant')
+  var year = localStorage.getItem('year')
+
   const parsedPlant = JSON.parse(storedPlant)
-  const url = `${Config.CaseEngineUrl}/task/slowdown-months?plantId=${parsedPlant.id}&maintenanceName=Slowdown`
+  const url = `${Config.CaseEngineUrl}/task/slowdown-months?plantId=${parsedPlant.id}&maintenanceName=Slowdown&year=${year}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

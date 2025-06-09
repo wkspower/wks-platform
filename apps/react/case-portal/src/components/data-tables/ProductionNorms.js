@@ -496,7 +496,7 @@ const ProductionNorms = ({ permissions }) => {
       if (formattedData.length > 0) {
         totalRows = totalRow(formattedData)
       }
-      const finalData = [...formattedData, totalRows]
+      const finalData = [...formattedData]
 
       if (lowerVertName == 'pe') {
         setRows(finalData)
