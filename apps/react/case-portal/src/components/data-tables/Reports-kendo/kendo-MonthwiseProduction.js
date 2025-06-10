@@ -97,7 +97,7 @@ const MonthwiseProduction = () => {
               field: 'OpHrsActual',
               title: 'Actual',
               width: 120,
-              editable: false,
+              editable: true,
             },
           ],
         },
@@ -114,7 +114,7 @@ const MonthwiseProduction = () => {
               field: 'ThroughputActual',
               title: 'Actual',
               width: 120,
-              editable: true,
+              editable: false,
             },
           ],
         },
@@ -238,10 +238,11 @@ const MonthwiseProduction = () => {
 
   const saveChanges = async () => {
     try {
-      console.log('modifiedCells', modifiedCells)
+      // console.log('modifiedCells', modifiedCells);
 
-      var data = modifiedCells
-      if (data.length == 0) {
+      const data = Object.values(modifiedCells)
+
+      if (data.length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'No Records to Save!',

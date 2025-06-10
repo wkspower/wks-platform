@@ -126,6 +126,7 @@ const MonthwiseProduction = () => {
       flex: 1,
       headerAlign: 'left',
       align: 'right',
+      editable: true,
       valueFormatter: formatValueToThreeDecimalsZero,
       renderCell: (params) => (
         <Tooltip
@@ -160,7 +161,7 @@ const MonthwiseProduction = () => {
       flex: 1,
       headerAlign: 'left',
       align: 'right',
-      editable: true,
+      editable: false,
       renderEditCell: NumericInputOnly,
       valueFormatter: formatValueToThreeDecimals,
       renderCell: (params) => (

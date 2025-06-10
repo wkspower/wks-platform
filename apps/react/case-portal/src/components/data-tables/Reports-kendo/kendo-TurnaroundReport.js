@@ -256,9 +256,9 @@ const TurnaroundReport = () => {
     return newRow
   }, [])
 
-  const saveRemarkData = async () => {
+  const saveChanges = async () => {
     try {
-      var data = Object.values(unsavedChangesRef.current.unsavedRows)
+      const data = Object.values(modifiedCells)
       if (data.length == 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -306,9 +306,10 @@ const TurnaroundReport = () => {
       setSnackbarOpen(true)
     }
   }
-  const saveRemarkDataForGrid2 = async () => {
+
+  const saveChanges2 = async () => {
     try {
-      var data = Object.values(unsavedChangesRefGrid2.current.unsavedRows)
+      const data = Object.values(modifiedCells)
       if (data.length == 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -425,6 +426,7 @@ const TurnaroundReport = () => {
         loading={loading}
         handleRemarkCellClick={handleRemarkCellClick}
         title='Turnaround Details (T-19A)'
+        setModifiedCells={setModifiedCells}
         permissions={{
           customHeight: { mainBox: '32vh', otherBox: '100%' },
           textAlignment: 'center',
@@ -435,7 +437,7 @@ const TurnaroundReport = () => {
           showWorkFlowBtns: true,
           showTitle: true,
         }}
-        saveRemarkData={saveRemarkData}
+        saveChanges={saveChanges}
         handleCalculate={handleCalculate}
       />
 
@@ -458,9 +460,10 @@ const TurnaroundReport = () => {
         setCurrentRemark={setCurrentRemark2}
         currentRowId={currentRowId2}
         setCurrentRowId={setCurrentRowId2}
-        saveRemarkData={saveRemarkDataForGrid2}
+        saveChanges={saveChanges2}
         handleRemarkCellClick={handleRemarkCellClick2}
         loading={loading}
+        setModifiedCells={setModifiedCells}
         permissions={{
           customHeight: { mainBox: '32vh', otherBox: '100%' },
           textAlignment: 'center',

@@ -83,7 +83,7 @@ const ShutdownNorms = () => {
     setTimeout(() => {
       if (lowerVertName == 'meg') {
         try {
-          console.log(modifiedCells)
+          // console.log(modifiedCells)
           var data = Object.values(modifiedCells)
           // var data = Object.values(unsavedChangesRef.current.unsavedRows)
           if (data.length == 0) {

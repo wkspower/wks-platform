@@ -364,8 +364,7 @@ const KendoDataTablesReports = ({
       }
 
       const isEditable = col.editable === true
-      const isActive = isColumnActive(col.field, filter, sort) // ✅ Use col.field
-      // console.log('title', title)
+      const isActive = isColumnActive(col.field, filter, sort)
 
       if (['aopRemarks', 'remarks', 'remark', 'Remark'].includes(col.field)) {
         return (
@@ -396,9 +395,9 @@ const KendoDataTablesReports = ({
           title={col.title || col.headerName}
           editable={col.editable}
           format={col.format || '{0:#.###}'}
-          editor={{
-            data: (props) => <FullValueEditor {...props} />,
-          }}
+          // editor={{
+          //   data: (props) => <FullValueEditor {...props} />,
+          // }}
           className={!isEditable ? 'non-editable-cell' : ''}
           columnMenu={ColumnMenuCheckboxFilter}
           headerClassName={isActive ? 'active-column' : ''}

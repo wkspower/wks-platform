@@ -374,7 +374,7 @@ const SlowDown = ({ permissions }) => {
   ]
 
   const deleteRowData = async (paramsForDelete) => {
-    console.log(paramsForDelete)
+    // console.log(paramsForDelete)
     try {
       const { idFromApi, id } = paramsForDelete
       const deleteId = id
@@ -382,7 +382,7 @@ const SlowDown = ({ permissions }) => {
       if (!idFromApi) {
         setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
       }
-      console.log(idFromApi)
+      // console.log(idFromApi)
       if (idFromApi) {
         await DataService.deleteSlowdownData(idFromApi, keycloak)
         setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))

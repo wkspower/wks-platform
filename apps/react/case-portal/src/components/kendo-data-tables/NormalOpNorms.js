@@ -143,7 +143,7 @@ const NormalOpNormsScreen = () => {
           }
           return formattedItem
         })
-        console.log(formattedData)
+        // console.log(formattedData)
         setRowsIntermediateValues(formattedData)
         // setLoading(false)
       }
@@ -788,7 +788,7 @@ const NormalOpNormsScreen = () => {
     const productId = props.dataItem.NormParameterFKId
     const product = allProducts.find((p) => p.id === productId)
     const displayName = product?.displayName || ''
-    console.log(displayName)
+    // console.log(displayName)
     return <td>{displayName}</td>
   }
   return (

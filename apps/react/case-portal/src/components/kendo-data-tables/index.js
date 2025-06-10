@@ -25,6 +25,11 @@ import DateTimePickerEditor from './Utilities-Kendo/DatePickeronSelectedYr'
 import ProductCell from './Utilities-Kendo/ProductCell'
 import { ColumnMenu } from 'components/@extended/columnMenu'
 import { NoSpinnerNumericEditor } from './Utilities-Kendo/numbericColumns'
+import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports-kendo/ColumnMenu1'
+import {
+  isColumnMenuFilterActive,
+  isColumnMenuSortActive,
+} from '../../../node_modules/@progress/kendo-react-grid/index'
 
 export const particulars = [
   'normParameterId',
@@ -57,6 +62,7 @@ export const hiddenFields = [
 
 const KendoDataTables = ({
   // setUpdatedRows = () => {},
+
   rows = [],
   // updatedRows = [],
   setRows,
@@ -95,7 +101,6 @@ const KendoDataTables = ({
   setSelectMode = () => {},
   // allRedCell = [],
 }) => {
-  const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
   const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
@@ -106,6 +111,11 @@ const KendoDataTables = ({
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
   const [edit, setEdit] = useState({})
+
+  const [filter, setFilter] = useState({ logic: 'and', filters: [] })
+
+  const [sort, setSort] = useState([])
+
   // const gridApiRef = useRef()
   //  const apiRef = useGridApiRef();
 
@@ -403,53 +413,60 @@ const KendoDataTables = ({
     )
   }
 
-  useEffect(() => {
-    if (Array.isArray(rows) && rows.length > 0 && groupBy) {
-      if (typeRank) {
-        setGroup([
-          {
-            field: groupBy,
-            dir: 'asc',
-            compare: (a, b) => {
-              const rankA = typeRank[a.value] ?? 99
-              const rankB = typeRank[b.value] ?? 99
-              return rankA - rankB
-            },
-          },
-        ])
-      }
-      const initialExpandedState = {}
-      const uniqueValues = [...new Set(rows.map((row) => row[groupBy]))]
-      uniqueValues.forEach((value) => {
-        initialExpandedState[`${groupBy}_${value}`] = true
-      })
-      setExpandedState(initialExpandedState)
-    } else {
-      setGroup([])
-      setExpandedState({})
-    }
-  }, [rows, groupBy])
+  // useEffect(() => {
+  //   if (Array.isArray(rows) && rows.length > 0 && groupBy) {
+  //     if (typeRank) {
+  //       setGroup([
+  //         {
+  //           field: groupBy,
+  //           dir: 'asc',
+  //           compare: (a, b) => {
+  //             const rankA = typeRank[a.value] ?? 99
+  //             const rankB = typeRank[b.value] ?? 99
+  //             return rankA - rankB
+  //           },
+  //         },
+  //       ])
+  //     }
+  //     const initialExpandedState = {}
+  //     const uniqueValues = [...new Set(rows.map((row) => row[groupBy]))]
+  //     uniqueValues.forEach((value) => {
+  //       initialExpandedState[`${groupBy}_${value}`] = true
+  //     })
+  //     setExpandedState(initialExpandedState)
+  //   } else {
+  //     setGroup([])
+  //     setExpandedState({})
+  //   }
+  // }, [rows, groupBy])
 
-  const processedData = useMemo(() => {
-    if (!Array.isArray(rows) || rows.length === 0) return []
+  const isColumnActive = (field, filter, sort) => {
+    return (
+      isColumnMenuFilterActive(field, filter) ||
+      isColumnMenuSortActive(field, sort)
+    )
+  }
 
-    if (group.length > 0) {
-      const result = process(rows, { group })
-      const applyExpandedState = (items) => {
-        return items.map((item) => {
-          if (item.items) {
-            const key = `${item.field}_${item.value}`
-            item.expanded = expandedState[key] !== false // default to expanded
-            item.items = applyExpandedState(item.items)
-          }
-          return item
-        })
-      }
-      return applyExpandedState(result.data)
-    }
+  // const processedData = useMemo(() => {
+  //   if (!Array.isArray(rows) || rows.length === 0) return []
 
-    return rows
-  }, [rows, group, expandedState])
+  //   if (group.length > 0) {
+  //     const result = process(rows, { group })
+  //     const applyExpandedState = (items) => {
+  //       return items.map((item) => {
+  //         if (item.items) {
+  //           const key = `${item.field}_${item.value}`
+  //           item.expanded = expandedState[key] !== false // default to expanded
+  //           item.items = applyExpandedState(item.items)
+  //         }
+  //         return item
+  //       })
+  //     }
+  //     return applyExpandedState(result.data)
+  //   }
+
+  //   return rows
+  // }, [rows, group, expandedState])
 
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
     const isDisabled =
@@ -462,6 +479,11 @@ const KendoDataTables = ({
       </tr>
     )
   }, [])
+
+  const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
+
+  const initialGroup = groupBy ? [{ field: groupBy }] : []
+
   return (
     <div style={{ position: 'relative' }}>
       {loading && (
@@ -623,7 +645,10 @@ const KendoDataTables = ({
       <div className='kendo-data-grid'>
         <Grid
           // apiRef={gridApiRef}
-          data={filterBy(processedData, filter)}
+          // groupable={true}
+          autoProcessData={true}
+          defaultGroup={initialGroup}
+          data={rows}
           rows={{ data: CustomRow }}
           // rowRender={{ rowRender }}
           sortable
@@ -654,25 +679,26 @@ const KendoDataTables = ({
                 }
               : false
           }
-          group={group}
-          expandField='expanded'
-          onGroupChange={(e) => setGroup(e.group)}
-          onExpandChange={(e) => {
-            const key = e.field || e.value // Use appropriate unique identifier
-            setExpandedState({
-              ...expandedState,
-              [key]: e.expanded,
-            })
-          }}
-          groupHeaderRender={(e) => (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <span style={{ marginRight: 6 }}>{e.expanded ? '▼' : '▶'}</span>
-              <strong>{e.value}</strong>
-              <span style={{ marginLeft: 6 }}>
-                ({e.aggregates?.count || 0})
-              </span>
-            </div>
-          )}
+          // group={group}
+          // expandField='expanded'
+          // onGroupChange={(e) => setGroup(e.group)}
+          // onExpandChange={(e) => {
+          //   const key = e.field || e.value // Use appropriate unique identifier
+          //   setExpandedState({
+          //     ...expandedState,
+          //     [key]: e.expanded,
+          //   })
+          // }}
+          // groupHeaderRender={(e) => (
+          //   <div style={{ display: 'flex', alignItems: 'center' }}>
+          //     <span style={{ marginRight: 6 }}>{e.expanded ? '▼' : '▶'}</span>
+          //     <strong>{e.value}</strong>
+          //     <span style={{ marginLeft: 6 }}>
+          //       ({e.aggregates?.count || 0})
+          //     </span>
+          //   </div>
+          // )}
+
           onRowClick={handleRowClick}
           // onCellClose={onCellClose}
         >
@@ -705,7 +731,7 @@ const KendoDataTables = ({
                         date: DateTimePickerEditor,
                       },
                     }}
-                    columnMenu={ColumnMenu}
+                    columnMenu={ColumnMenuCheckboxFilter}
                     editor='date'
                   />
                 )
@@ -732,7 +758,7 @@ const KendoDataTables = ({
                         <ProductCell {...cellProps} allProducts={allProducts} />
                       ),
                     }}
-                    columnMenu={ColumnMenu}
+                    columnMenu={ColumnMenuCheckboxFilter}
                   />
                 )
               }
@@ -744,7 +770,7 @@ const KendoDataTables = ({
                     title={col.title || col.headerName || 'Description'}
                     width={210}
                     editable={true}
-                    columnMenu={ColumnMenu}
+                    columnMenu={ColumnMenuCheckboxFilter}
                   />
                 )
               }
@@ -756,10 +782,18 @@ const KendoDataTables = ({
                     title={col.title || col.headerName || 'UOM'}
                     width={col?.width}
                     editable={false}
-                    columnMenu={ColumnMenu}
+                    columnMenu={ColumnMenuCheckboxFilter}
                   />
                 )
               }
+
+              // const isColumnActive = (field, filter, sort) => {
+              //   return (
+              //     isColumnMenuFilterActive(field, filter) ||
+              //     isColumnMenuSortActive(field, sort)
+              //   )
+              // }
+              // const isActive = isColumnActive(col?.field, filter, sort)
 
               if (
                 ['aopRemarks', 'remarks', 'remark', 'Remarks'].includes(
@@ -783,7 +817,7 @@ const KendoDataTables = ({
                         />
                       ),
                     }}
-                    columnMenu={ColumnMenu}
+                    columnMenu={ColumnMenuCheckboxFilter}
                     // editor='date'
                   />
                 )
@@ -796,7 +830,7 @@ const KendoDataTables = ({
                     title={col.title || col.headerName}
                     width={col.width}
                     editable={true} // make it read‑only
-                    columnMenu={ColumnMenu} // if you want columnMenu
+                    columnMenu={ColumnMenuCheckboxFilter} // if you want columnMenu
                     // editor={(props) => (
                     //   <input
                     //     {...props}
@@ -834,7 +868,7 @@ const KendoDataTables = ({
                     cells={{
                       data: NormParameterIdCell,
                     }}
-                    columnMenu={ColumnMenu}
+                    columnMenu={ColumnMenuCheckboxFilter}
                   />
                 )
               }
@@ -847,7 +881,7 @@ const KendoDataTables = ({
                     width={col.width}
                     editable={false}
                     filterable={true}
-                    columnMenu={ColumnMenu}
+                    columnMenu={ColumnMenuCheckboxFilter}
                   />
                 )
               }
@@ -859,11 +893,11 @@ const KendoDataTables = ({
                   title={col.title || col.headerName}
                   width={col.width}
                   editable={true}
+                  // headerClassName={isActive ? 'active-column' : ''}
                   cells={{
                     edit: { text: NoSpinnerNumericEditor },
                   }}
-                  columnMenu={ColumnMenu}
-                  // editor='numeric'
+                  columnMenu={ColumnMenuCheckboxFilter}
                   filter='numeric'
                   format={col.format || '{0:n3}'}
                 />

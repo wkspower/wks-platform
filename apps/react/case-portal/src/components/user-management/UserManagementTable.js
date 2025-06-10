@@ -236,7 +236,7 @@ const UserManagementTable = ({ keycloak }) => {
 
   const defaultCustomHeight = { mainBox: '60vh', otherBox: '124%' }
   const handleDeleteSelected = () => {
-    console.log(selectionModel)
+    // console.log(selectionModel)
     setRows((prev) => prev.filter((row) => !selectionModel.includes(row.id)))
     setSelectionModel([]) // clear selection
   }

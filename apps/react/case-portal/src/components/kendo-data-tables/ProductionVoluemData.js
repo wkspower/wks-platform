@@ -207,7 +207,7 @@ const ProductionvolumeData = ({ permissions }) => {
     setTimeout(() => {
       try {
         var data = Object.values(modifiedCells)
-        console.log(data)
+        // console.log(data)
         if (data.length == 0) {
           setSnackbarOpen(true)
           setSnackbarData({

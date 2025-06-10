@@ -21,7 +21,7 @@ const DecokingConfig = () => {
   const [currentRowId2, setCurrentRowId2] = useState(null)
   const handleRemarkCellClick2 = (row) => {
     // if (!row?.isEditable) return
-    console.log(row)
+    // console.log(row)
     setCurrentRemark2(row.remarks || '')
     setCurrentRowId2(row.id)
     setRemarkDialogOpen2(true)

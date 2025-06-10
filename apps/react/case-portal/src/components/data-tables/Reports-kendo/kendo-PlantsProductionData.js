@@ -87,7 +87,8 @@ const PlantsProductionSummary = () => {
           field: 'BudgetPrevYear',
           title: 'Budget',
           width: 120,
-          editable: false,
+          editable: true,
+          format: '{0:#.###}',
         },
         {
           field: 'ActualPrevYear',
@@ -105,7 +106,7 @@ const PlantsProductionSummary = () => {
           field: 'BudgetCurrentYear',
           title: 'Budget',
           width: 120,
-          editable: true,
+          editable: false,
           format: '{0:#.###}',
         },
       ],

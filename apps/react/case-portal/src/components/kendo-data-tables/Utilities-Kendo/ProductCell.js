@@ -17,7 +17,7 @@ const ProductCellEditor = (props) => {
 
   if (typeof onChange === 'function') {
     const handleChange = (e) => {
-      console.log(e, 'test---->')
+      // console.log(e, 'test---->')
       onChange({
         dataItem,
         field,
