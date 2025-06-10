@@ -17,6 +17,7 @@ import { validateFields } from 'utils/validationUtils'
 import ProductionvolumeData from './ProductionVoluemData'
 import KendoDataTables from './index'
 import kendoGetEnhancedColDefs from 'components/data-tables/CommonHeader/kendoBusinessDemColDef'
+// import KendoDataTables from './kendo-inprogress'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -43,7 +44,7 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
   backgroundColor: '#F2F3F8',
 }))
 
-const KendoBusinessDemand = ({ permissions }) => {
+const BusinessDemand = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
 
   const keycloak = useSession()
@@ -179,7 +180,7 @@ const KendoBusinessDemand = ({ permissions }) => {
   //     headerMap,
   //     handleRemarkCellClick,
   //   })
-  //   console.log(' colDefs →', defs)
+  //   console.log(' colDefs ?', defs)
   //   return defs
   // }, [allProducts, headerMap, handleRemarkCellClick])
 
@@ -203,7 +204,6 @@ const KendoBusinessDemand = ({ permissions }) => {
 
     // setTimeout(() => {
     try {
-      console.log('modifiedCells', modifiedCells)
       if (Object.keys(modifiedCells).length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -454,4 +454,4 @@ const KendoBusinessDemand = ({ permissions }) => {
   )
 }
 
-export default KendoBusinessDemand
+export default BusinessDemand

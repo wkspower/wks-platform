@@ -4,7 +4,6 @@ import MuiAccordion from '@mui/material/Accordion'
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
 import MuiAccordionSummary from '@mui/material/AccordionSummary'
 import { styled } from '@mui/material/styles'
-import Typography from '@mui/material/Typography'
 import Notification from 'components/Utilities/Notification'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -16,30 +15,20 @@ import postmanData from '../../../assets/postmandata.json'
 
 import {
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Stack,
   Tab,
   Tabs,
-  TextField,
 } from '../../../../node_modules/@mui/material/index'
-import AuditTrail from './AuditTrail'
-import DataGridTable from '../ASDataGrid'
 // import '../data-tables/data-grid-css.css'
 // import { CaseService } from 'services/CaseService'
 // import { TaskService } from 'services/TaskService'
 // import { useSession } from 'SessionStoreContext'
 import { remarkColumn } from 'components/Utilities/remarkColumn'
-// import Notification from 'components/Utilities/Notification'
-import './jio-grid-style.css'
-// import { usePlan } from 'menu/new-plan'
-// import { useScreens } from 'menu/userscreen'
-// import { Box } from '../../../../node_modules/@mui/material/index'
-import ProductionAopView from 'components/data-tables-views/DataTable-production-aop'
 
-import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
+import './jio-grid-style.css'
+
+import ProductionAopView from 'components/data-tables-views/kendo-DataTable-production-aop'
+import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import PlantsProductionSummary from '../Reports-kendo/kendo-PlantsProductionData'
 import MonthwiseProduction from '../Reports-kendo/kendo-MonthwiseProduction'
 import MonthwiseRawMaterial from '../Reports-kendo/kendo-MonthwiseRawMaterial'
@@ -147,9 +136,11 @@ const WorkFlowMerge = () => {
   }
   // const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
+
   const handleCalculateMeg = async () => {
     try {
       setLoading(true)
+
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
       let plantId = null
@@ -268,8 +259,6 @@ const WorkFlowMerge = () => {
     //   console.error('Error fetching case', err)
     // }
   }
-  // console.log(unsavedChangesRef.current, 'unsavedChangesRef')
-  // console.log(rows)
 
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
@@ -369,7 +358,6 @@ const WorkFlowMerge = () => {
 
       formatted = formatted.map((item) => ({
         ...item,
-        isEditable: false,
       }))
 
       setRows(formatted)
@@ -527,7 +515,7 @@ const WorkFlowMerge = () => {
       setText('')
     }
   }
-  const saveWorkflowData = async () => {
+  const saveChanges = async () => {
     try {
       // console.log(rows, 'workflowDto')
       await DataService.saveAnnualWorkFlowData(keycloak, rows, plantId)
@@ -667,7 +655,7 @@ const WorkFlowMerge = () => {
               Annual AOP Cost
             </Typography> */}
             {/* <div style={{ minHeight: 'fit-content', maxHeight: 'max-content' }}> */}
-            <ReportDataGrid
+            <KendoDataTablesReports
               title='Annual AOP Cost'
               modifiedCells={modifiedCells}
               autoHeight={true}
@@ -693,7 +681,7 @@ const WorkFlowMerge = () => {
               handleExport={handleExport}
               isCreatingCase={isCreatingCase}
               createCase={createCase}
-              saveWorkflowData={saveWorkflowData}
+              saveChanges={saveChanges}
               showCreateCasebutton={showCreateCasebutton}
               permissions={{
                 // customHeight: defaultCustomHeight,
@@ -712,6 +700,7 @@ const WorkFlowMerge = () => {
               handleRejectClick={handleRejectClick}
               openRejectDialog={openRejectDialog}
               handleRejectCancel={handleRejectCancel}
+              handleRemarkCellClick={handleRemarkCellClick}
               handleSubmit={handleSubmit}
               taskId={taskId}
               text={text}
@@ -729,7 +718,6 @@ const WorkFlowMerge = () => {
         )}
 
         {tabIndex === 1 && <PlantsProductionSummary />}
-
         {tabIndex === 2 && <MonthwiseProduction />}
         {tabIndex === 3 && <MonthwiseRawMaterial />}
         {tabIndex === 4 && <TurnaroundReport />}

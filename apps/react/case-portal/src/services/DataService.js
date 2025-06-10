@@ -621,7 +621,12 @@ async function handleCalculateMaintenance(plantId, year, keycloak) {
 }
 
 async function deleteSlowdownData(maintenanceId, keycloak) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
 
   const url = `${Config.CaseEngineUrl}/task/deleteSlowdownData/${maintenanceId}/${plantId}`
 

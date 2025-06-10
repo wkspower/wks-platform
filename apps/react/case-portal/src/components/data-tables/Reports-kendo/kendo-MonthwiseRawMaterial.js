@@ -13,11 +13,14 @@ import { useSession } from 'SessionStoreContext'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
 import Notification from 'components/Utilities/Notification'
+import KendoDataTables from 'components/kendo-data-tables/index'
+import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 
 const MonthwiseRawMaterial = () => {
   const keycloak = useSession()
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [normRows, setNormRows] = useState({})
+  const [rows, setRows] = useState()
 
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -35,29 +38,14 @@ const MonthwiseRawMaterial = () => {
     return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
   }
   const columnDefs = [
-    { field: 'id', headerName: 'ID' },
-    // {
-    //   field: 'Particulars',
-    //   headerName: 'Type',
-    //   groupable: true,
-    //   flex: 2,
-    //   renderCell: (params) => (
-    //     <div
-    //       style={{
-    //         whiteSpace: 'normal',
-    //         wordBreak: 'break-word',
-    //         lineHeight: 1.4,
-    //       }}
-    //     >
-    //       <strong>{params.value}</strong>
-    //     </div>
-    //   ),
-    // },
+    { field: 'id', headerName: 'ID', editable: false },
+
     {
       field: 'material',
       headerName: 'Particulars',
       flex: 2,
       renderCell: renderTwoLineEllipsis,
+      editable: false,
     },
     {
       field: 'UOM',
@@ -87,7 +75,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'april',
       headerName: headerMap[4],
-
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -303,117 +291,6 @@ const MonthwiseRawMaterial = () => {
       ),
     },
   ]
-
-  const defaultCustomHeight = { mainBox: 'fit-content', otherBox: '100%' }
-  const defaultCustomHeightGrid2 = { mainBox: '36vh', otherBox: '100%' }
-
-  //api call
-  const [row, setRow] = useState()
-  const [row2, setRow2] = useState()
-  const [loading, setLoading] = useState(false)
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
-  const fetchData = async () => {
-    try {
-      setLoading(true)
-      // const label = `FY ${year} AOP`
-      var res = await DataService.getMonthwiseRawData(keycloak, 'NormQuantity')
-      var res2 = await DataService.getMonthwiseRawData(keycloak, 'Selectivity')
-
-      // FY%202025-26%20AOP
-      // console.log(res)
-
-      if (res2?.code == 200) {
-        res2 = res2?.data?.consumptionSummary.map((item, index) => ({
-          ...item,
-          id: index,
-          isEditable: false,
-        }))
-        setRow2(res2)
-      }
-
-      if (res?.code == 200) {
-        res = res?.data?.consumptionSummary.map((item, index) => ({
-          ...item,
-          id: index,
-          isEditable: false,
-        }))
-
-        const formattedItems = res.map((item, index) => ({
-          ...item,
-          idFromApi: item.id,
-          id: index,
-        }))
-
-        setRow(formattedItems)
-
-        // Group by normType and add Total row to each group
-        const groupedByNorms = formattedItems.reduce((acc, item) => {
-          const key = item?.normType
-          if (!acc[key]) {
-            acc[key] = []
-          }
-          acc[key].push(item)
-          return acc
-        }, {})
-
-        // Add Total row per group
-        Object.keys(groupedByNorms).forEach((key) => {
-          const group = groupedByNorms[key]
-
-          // List of columns to total
-          const monthColumns = [
-            'april',
-            'may',
-            'june',
-            'july',
-            'aug',
-            'sep',
-            'oct',
-            'nov',
-            'dec',
-            'jan',
-            'feb',
-            'march',
-            'total',
-          ]
-
-          const totalRow = {
-            id: `total-${key}`,
-            material: 'Total',
-            normType: key,
-            spec: '',
-            UOM: '',
-            isEditable: false,
-          }
-
-          // Sum values for each month column
-          monthColumns.forEach((col) => {
-            totalRow[col] = group.reduce(
-              (sum, item) => sum + (Number(item[col]) || 0),
-              0,
-            )
-          })
-
-          // Add to group
-          // group.push(totalRow)
-        })
-
-        setNormRows(groupedByNorms)
-      } else {
-        setRow([])
-      }
-    } catch (err) {
-      console.log(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-  useEffect(() => {
-    fetchData()
-  }, [year, plantId])
-
   const columns = [
     { field: 'id', headerName: 'ID' },
     {
@@ -428,6 +305,7 @@ const MonthwiseRawMaterial = () => {
       editable: false,
       align: 'right',
       headerAlign: 'left',
+
       flex: 1,
       renderCell: (params) => (
         <Tooltip
@@ -616,6 +494,109 @@ const MonthwiseRawMaterial = () => {
     },
   ]
 
+  const defaultCustomHeight = { mainBox: 'fit-content', otherBox: '100%' }
+  const defaultCustomHeightGrid2 = { mainBox: '36vh', otherBox: '100%' }
+
+  const [row, setRow] = useState()
+  const [row2, setRow2] = useState()
+  const [loading, setLoading] = useState(false)
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      var res = await DataService.getMonthwiseRawData(keycloak, 'NormQuantity')
+      var res2 = await DataService.getMonthwiseRawData(keycloak, 'Selectivity')
+
+      if (res2?.code == 200) {
+        res2 = res2?.data?.consumptionSummary.map((item, index) => ({
+          ...item,
+          id: index,
+        }))
+        setRow2(res2)
+      }
+
+      if (res?.code == 200) {
+        res = res?.data?.consumptionSummary.map((item, index) => ({
+          ...item,
+          id: index,
+        }))
+
+        const formattedItems = res.map((item, index) => ({
+          ...item,
+          idFromApi: item.id,
+          id: index,
+        }))
+
+        setRow(formattedItems)
+
+        // Group by normType and add Total row to each group
+        const groupedByNorms = formattedItems.reduce((acc, item) => {
+          const key = item?.normType
+          if (!acc[key]) {
+            acc[key] = []
+          }
+          acc[key].push(item)
+          return acc
+        }, {})
+
+        // // Add Total row per group
+        // Object.keys(groupedByNorms).forEach((key) => {
+        //   const group = groupedByNorms[key]
+
+        //   // List of columns to total
+        //   const monthColumns = [
+        //     'april',
+        //     'may',
+        //     'june',
+        //     'july',
+        //     'aug',
+        //     'sep',
+        //     'oct',
+        //     'nov',
+        //     'dec',
+        //     'jan',
+        //     'feb',
+        //     'march',
+        //     'total',
+        //   ]
+
+        //   const totalRow = {
+        //     id: `total-${key}`,
+        //     material: 'Total',
+        //     normType: key,
+        //     spec: '',
+        //     UOM: '',
+        //     isEditable: false,
+        //   }
+
+        //   // Sum values for each month column
+        //   monthColumns.forEach((col) => {
+        //     totalRow[col] = group.reduce(
+        //       (sum, item) => sum + (Number(item[col]) || 0),
+        //       0,
+        //     )
+        //   })
+
+        //   // Add to group
+        //   group.push(totalRow)
+        // })
+
+        setNormRows(groupedByNorms)
+      } else {
+        setRow([])
+      }
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => {
+    fetchData()
+  }, [year, plantId])
+
   const handleCalculate = () => {
     handleCalculateMonthwiseAndTurnaround()
   }
@@ -660,9 +641,10 @@ const MonthwiseRawMaterial = () => {
 
   return (
     <Box>
-      <ReportDataGrid
+      <KendoDataTablesReports
         rows={row2}
         columns={columns}
+        setRows={setRows}
         loading={loading}
         handleCalculate={handleCalculate}
         title='Monthwise Consumption (T-18)'
@@ -680,8 +662,9 @@ const MonthwiseRawMaterial = () => {
           <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
             {normName}
           </Typography>
-          <ReportDataGrid
+          <KendoDataTablesReports
             rows={rows}
+            setRows={setRows}
             title='Monthwise Production Summary'
             columns={columnDefs}
           />

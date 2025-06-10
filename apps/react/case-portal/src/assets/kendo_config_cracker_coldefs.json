@@ -1,102 +1,102 @@
 [
   {
-    "field": "Particulars",
+    "field": "particulars",
     "title": "Particulars",
     "editable": false,
     "width": 150
   },
   {
-    "field": "UOM",
+    "field": "uom",
     "title": "UOM",
     "editable": false,
     "width": 120
   },
   {
-    "field": "Apr",
+    "field": "april",
     "title": 4,
     "editable": true,
     "width": 120,
     "type": "number"
   },
   {
-    "field": "May",
+    "field": "may",
     "title": 5,
     "editable": true,
     "width": 120,
     "type": "number"
   },
   {
-    "field": "Jun",
+    "field": "june",
     "title": 6,
     "editable": true,
     "width": 120,
     "type": "number"
   },
   {
-    "field": "Jul",
+    "field": "july",
     "title": 7,
     "editable": true,
     "width": 120,
     "type": "number"
   },
   {
-    "field": "Aug",
+    "field": "aug",
     "title": 8,
     "editable": true,
     "width": 120,
     "type": "number"
   },
   {
-    "field": "Sep",
+    "field": "sep",
     "title": 9,
     "editable": true,
     "width": 120,
     "type": "number"
   },
   {
-    "field": "Oct",
+    "field": "oct",
     "title": 10,
     "editable": true,
     "width": 120,
     "type": "number"
   },
   {
-    "field": "Nov",
+    "field": "nov",
     "title": 11,
     "editable": true,
     "width": 120,
     "type": "number"
   },
   {
-    "field": "Dec",
+    "field": "dec",
     "title": 12,
     "editable": true,
     "width": 120,
     "type": "number"
   },
   {
-    "field": "Jan",
+    "field": "jan",
     "title": 1,
     "editable": true,
     "width": 120,
     "type": "number"
   },
   {
-    "field": "Feb",
+    "field": "feb",
     "title": 2,
     "editable": true,
     "width": 120,
     "type": "number"
   },
   {
-    "field": "Mar",
+    "field": "march",
     "title": 3,
     "editable": true,
     "width": 120,
     "type": "number"
   },
   {
-    "field": "Remarks",
+    "field": "remarks",
     "title": "Remark",
     "editable": false,
     "width": 180,

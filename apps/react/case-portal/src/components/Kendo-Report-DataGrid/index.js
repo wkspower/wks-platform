@@ -7,8 +7,8 @@ import {
 } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
 import '../../kendo-data-grid.css'
-// import { filterIcon } from '@progress/kendo-svg-icons'
-// import { ColumnMenu } from 'components/data-tables/Reports/columnMenu'
+import { filterIcon } from '@progress/kendo-svg-icons'
+import { ColumnMenu } from 'components/data-tables/Reports/columnMenu'
 import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports/ColumnMenu1'
 
 const KendoDataGrid = ({ rows, columns, onRowChange }) => {

@@ -34,41 +34,41 @@ const DecokingConfig = () => {
 
   // IBR Plan data
   const ibrPlanColumns = [
-    { field: 'furnace', title: 'Furnace', editable: false, width: 120 },
-    { field: 'ibrPlan', title: 'IBR Plan', editable: true, width: 120 },
+    { field: 'furnace', title: 'Furnace', editable: false, width: 200 },
+    { field: 'ibrPlan', title: 'IBR Plan', editable: true, width: 200 },
     {
       field: 'aprMarDays',
       title: 'Apr-Mar Days',
       editable: true,
-      width: 100,
+      width: 200,
       type: 'number',
     },
     {
       field: 'startDateIBR',
       title: 'Start Date of IBR',
       editable: true,
-      width: 150,
+      width: 200,
     },
     {
       field: 'endDateIBR',
       title: 'End Date of IBR',
       editable: true,
-      width: 150,
+      width: 200,
     },
     {
       field: 'startDateSD',
       title: 'Start Date of SD',
       editable: true,
-      width: 150,
+      width: 200,
     },
-    { field: 'endDateSD', title: 'End Date of SD', editable: true, width: 150 },
+    { field: 'endDateSD', title: 'End Date of SD', editable: true, width: 200 },
     {
       field: 'startDateTA',
       title: 'Start date TA',
       editable: true,
-      width: 150,
+      width: 200,
     },
-    { field: 'endDateTA', title: 'End date TA', editable: true, width: 150 },
+    { field: 'endDateTA', title: 'End date TA', editable: true, width: 200 },
     { field: 'remarks', title: 'Remarks', editable: true, width: 250 },
   ]
   const ibrPlanData = [
@@ -98,7 +98,7 @@ const DecokingConfig = () => {
       endDateSD: '2026-01-17 06:00 PM',
       startDateTA: '2026-01-18 07:45 AM',
       endDateTA: '2026-01-19 04:00 PM',
-      remarks: 'IBR-1 = BBD',
+      remarks: 'IBR-1?=?BBD',
     },
     {
       id: 3,
@@ -112,7 +112,7 @@ const DecokingConfig = () => {
       endDateSD: '2026-01-22 05:45 PM',
       startDateTA: '2026-01-23 08:00 AM',
       endDateTA: '2026-01-24 03:30 PM',
-      remarks: 'BBD-2 = SAD',
+      remarks: 'BBD-2?=?SAD',
     },
     {
       id: 4,
@@ -401,7 +401,6 @@ const DecokingConfig = () => {
       total: 365,
     },
   ]
-
 
   const shutdownColumns = [
     { field: 'month', title: 'Month', editable: false },

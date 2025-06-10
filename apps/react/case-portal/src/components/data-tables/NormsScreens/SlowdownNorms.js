@@ -755,6 +755,7 @@ const SlowdownNorms = () => {
           remarks: item?.remarks?.trim() || null,
           originalRemark: item?.remarks?.trim(),
           materialFkId: item?.materialFkId.toLowerCase(),
+          isEditable: true,
 
           ...(isTPD && {
             april: item.april

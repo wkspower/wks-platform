@@ -106,7 +106,8 @@ const MaintenanceTable = () => {
   }
 
   const formatValueToTwoDecimals = (params, row) => {
-    const rowsWithPercentage = row?.Name?.includes('%')
+    // const rowsWithPercentage = row?.Name?.includes('%')
+    const rowsWithPercentage = false
 
     if (rowsWithPercentage) {
       return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
