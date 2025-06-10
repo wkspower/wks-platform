@@ -26,7 +26,7 @@ const ProductionNorms = ({ permissions }) => {
   // const [csData, setCsData] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
-  const [rowModesModel, setRowModesModel] = useState({})
+  // const [rowModesModel, setRowModesModel] = useState({})
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -67,17 +67,17 @@ const ProductionNorms = ({ permissions }) => {
   }
 
   const saveChanges = React.useCallback(async () => {
-    const rowsInEditMode = Object.keys(rowModesModel).filter(
-      (id) => rowModesModel[id]?.mode === 'edit',
-    )
+    // const rowsInEditMode = Object.keys(rowModesModel).filter(
+    //   (id) => rowModesModel[id]?.mode === 'edit',
+    // )
 
-    rowsInEditMode.forEach((id) => {
-      apiRef.current.stopRowEditMode({ id })
-    })
+    // rowsInEditMode.forEach((id) => {
+    //   apiRef.current.stopRowEditMode({ id })
+    // })
 
     setTimeout(() => {
       try {
-        var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
+        var editedData = Object.values(modifiedCells)
         const allRows = Array.from(apiRef.current.getRowModels().values())
         const updatedRows = allRows.map(
           (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
@@ -128,7 +128,7 @@ const ProductionNorms = ({ permissions }) => {
         setCalculatebtnClicked(false)
       }
     }, 400)
-  }, [apiRef, rowModesModel, selectedUnit, calculatebtnClicked])
+  }, [apiRef, selectedUnit, calculatebtnClicked])
 
   const updateProductNormData = async (newRow) => {
     setLoading(true)
@@ -348,12 +348,12 @@ const ProductionNorms = ({ permissions }) => {
           }
         })
 
-        let totalRows = []
-        if (formattedData) {
-          totalRows = totalRow(formattedData)
-        }
+        // let totalRows = []
+        // if (formattedData) {
+        //   totalRows = totalRow(formattedData)
+        // }
 
-        const finalData = [...formattedData, totalRows]
+        const finalData = [...formattedData]
         // console.log(finalData)
         if (lowerVertName == 'pe') {
           setRows(finalData)
@@ -449,11 +449,11 @@ const ProductionNorms = ({ permissions }) => {
         }
       })
 
-      let totalRows = []
-      if (formattedData.length > 0) {
-        totalRows = totalRow(formattedData)
-      }
-      const finalData = [...formattedData, totalRows]
+      // let totalRows = []
+      // if (formattedData.length > 0) {
+      //   totalRows = totalRow(formattedData)
+      // }
+      const finalData = [...formattedData]
 
       if (lowerVertName == 'pe') {
         setRows(finalData)
@@ -482,40 +482,6 @@ const ProductionNorms = ({ permissions }) => {
     } finally {
       setLoading(false)
     }
-  }
-
-  const totalRow = (formattedData) => {
-    const months = [
-      'jan',
-      'feb',
-      'march',
-      'april',
-      'may',
-      'june',
-      'july',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-    ]
-
-    // Calculate totals for each month column
-    const totals = months.reduce((acc, month) => {
-      acc[month] = formattedData.reduce(
-        (sum, row) => sum + (Number(row[month]) || 0),
-        0,
-      )
-      return acc
-    }, {})
-
-    const totalRow = {
-      id: 'total',
-      Particulars: 'Total',
-      ...totals,
-      isEditable: false,
-    }
-    return totalRow
   }
 
   const findSum = (value, row) => {
@@ -669,6 +635,7 @@ const ProductionNorms = ({ permissions }) => {
     },
   ]
   const NormParameterIdCell = (props) => {
+    // console.log(props)
     const productId = props.dataItem.normParametersFKId
     const product = allProducts.find((p) => p.id === productId)
     const displayName = product?.displayName || ''
@@ -687,6 +654,7 @@ const ProductionNorms = ({ permissions }) => {
 
       <KendoDataTables
         modifiedCells={modifiedCells}
+        setModifiedCells={setModifiedCells}
         columns={productionColumns}
         rows={lowerVertName === 'cracker' ? rowData : rows}
         setRows={setRows}
@@ -701,7 +669,7 @@ const ProductionNorms = ({ permissions }) => {
         updateProductNormData={updateProductNormData}
         // processRowUpdate={processRowUpdate}
 
-        rowModesModel={rowModesModel}
+        // rowModesModel={rowModesModel}
         // onRowModesModelChange={onRowModesModelChange}
         // onRowEditStop={handleRowEditStop}
         saveChanges={saveChanges}

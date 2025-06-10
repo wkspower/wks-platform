@@ -4,8 +4,8 @@ import { useSession } from '../SessionStoreContext'
 import { useSelector } from 'react-redux'
 import plan from './plan'
 import workspace from './workspace'
-import { icons, mapScreen } from 'components/Utilities/menuRefractoring'
-import i18n from 'i18n/index'
+import { mapScreen } from 'components/Utilities/menuRefractoring'
+// import i18n from 'i18n/index'
 // import { useNavigate } from '../../node_modules/react-router-dom/dist/index'
 
 const MenuContext = createContext()
@@ -20,14 +20,7 @@ export function MenuProvider({ children }) {
   const { verticalChange } = useSelector((s) => s.dataGridStore)
   const verticalId = localStorage.getItem('verticalId')
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const userMgmtItem = {
-    id: 'user-management',
-    title: i18n.t('menu.userManage'),
-    type: 'item',
-    url: '/user-management',
-    icon: icons?.IconUserCog,
-    breadcrumbs: true,
-  }
+
   useEffect(() => {
     if (USE_STATIC_MENU) {
       setMenuItems(staticMenu)
@@ -40,34 +33,10 @@ export function MenuProvider({ children }) {
       .then((res) => {
         // Map API response
         const dynamic = Array.isArray(res.data) ? res.data.map(mapScreen) : []
-
-        // console.log(dynamic[0].children.length === 0, 'test-----')
-        // console.log(dynamic.length && dynamic[0].children.length === 0)
-        // Our hardcoded user-management entry
-        // if (dynamic[0].children.length === 0) {
-        //   navigate('/user-management')
-        //   //   // optionally you can still inject the menu entry so the UI shows it:
-        //   //   // dynamic[0].children.push(userMgmtItem)
-        //   //   // setMenuItems(dynamic)
-        //   //   // return
-        // }
-        const containsUserMgmt = (items) =>
-          items.some(
-            (item) =>
-              item.id === 'user-management' ||
-              (Array.isArray(item.children) && containsUserMgmt(item.children)),
-          )
-
-        // If API returned items…
         if (dynamic.length) {
-          // Inject user-management if missing
-          if (!containsUserMgmt(dynamic)) {
-            dynamic[0].children.push(userMgmtItem)
-          }
           setMenuItems(dynamic)
         } else {
           const base = [...staticMenu]
-
           setMenuItems(base)
         }
       })
@@ -75,9 +44,6 @@ export function MenuProvider({ children }) {
         console.error('Menu API failed, using static menu', err)
         // Fallback with hardcoded if missing
         const base = [...staticMenu]
-        if (!base.some((m) => m.id === 'user-management')) {
-          base.push(userMgmtItem)
-        }
         setMenuItems(base)
       })
   }, [keycloak, plantId, verticalId, verticalChange])

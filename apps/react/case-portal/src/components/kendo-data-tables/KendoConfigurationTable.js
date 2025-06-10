@@ -39,7 +39,7 @@ const ConfigurationTable = () => {
       if (tabs.length == 0) {
         setLoading(true)
         // data = data.sort((a, b) => b.normType.localeCompare(a.normType))
-        
+
         const formattedData = data.map((item, index) => ({
           ...item,
           idFromApi: item.id,
@@ -48,7 +48,7 @@ const ConfigurationTable = () => {
           srNo: index + 1,
           Particulars: item.normType,
         }))
-        
+        // console.log(formattedData)
         setProductionRows(formattedData)
         // setRows(formattedData)
       } else {
@@ -170,7 +170,8 @@ const ConfigurationTable = () => {
           loading={loading}
           fetchData={fetchData}
           setRows={setProductionRows}
-          configType='production'
+          configType='meg'
+          groupBy='Particulars'
         />
       </Box>
     )
@@ -225,6 +226,7 @@ const ConfigurationTable = () => {
                   fetchData={fetchData}
                   setRows={setStartUpRows}
                   configType='StartupLosses'
+                  groupBy='TypeDisplayName'
                 />
               )
             case getTheId('Otherlosses'): // Otherlosses
@@ -235,6 +237,7 @@ const ConfigurationTable = () => {
                   fetchData={fetchData}
                   setRows={setOtherLossRows}
                   configType='Otherlosses'
+                  groupBy='TypeDisplayName'
                 />
               )
             case getTheId('ShutdownNorms'): // ShutdownNorms
@@ -245,6 +248,8 @@ const ConfigurationTable = () => {
                   setRows={setShutdownRows}
                   fetchData={fetchData}
                   configType='ShutdownNorms'
+                  groupBy='TypeDisplayName'
+                  // groupBy2='ConfigTypeDisplayName'
                 />
               )
             case getTheId('Receipe'): // Receipe

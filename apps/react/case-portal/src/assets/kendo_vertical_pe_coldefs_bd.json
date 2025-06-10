@@ -4,7 +4,8 @@
     "title": "Type",
     "width": 100,
     "groupable": true,
-    "headerClass": "bold-header"
+    "headerClass": "bold-header",
+    "editable": false
   },
   {
     "field": "normParameterId",

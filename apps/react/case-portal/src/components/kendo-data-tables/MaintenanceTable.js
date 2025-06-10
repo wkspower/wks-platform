@@ -8,7 +8,6 @@ import { useSelector } from 'react-redux'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
-import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
 import KendoDataTables from './index'
 
 const MaintenanceTable = () => {
@@ -98,10 +97,6 @@ const MaintenanceTable = () => {
     }
   }
 
-  const formatValueToTwoDecimals = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
-  }
-
   useEffect(() => {
     fetchData()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
@@ -112,8 +107,7 @@ const MaintenanceTable = () => {
       title: 'Description',
       align: 'left',
       headerAlign: 'left',
-      width: 250,
-      renderCell: renderTwoLineEllipsis,
+      width: 230,
       editable: false,
     },
     {
@@ -121,70 +115,69 @@ const MaintenanceTable = () => {
       title: headerMap[4],
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToTwoDecimals,
-      width: 150,
+      type: 'number',
+      format: '{0:n2}',
+      width: 100,
       editable: false,
-
-      // valueGetter: convertUnits,
     },
 
     {
       field: 'May',
       title: headerMap[5],
-      valueFormatter: formatValueToTwoDecimals,
-      width: 150,
+      type: 'number',
+      format: '{0:n2}',
+      width: 100,
       editable: false,
-
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'June',
       title: headerMap[6],
-      valueFormatter: formatValueToTwoDecimals,
-      width: 150,
+      type: 'number',
+      format: '{0:n2}',
+      width: 100,
       editable: false,
-
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'July',
       title: headerMap[7],
-      valueFormatter: formatValueToTwoDecimals,
-      width: 150,
+      type: 'number',
+      format: '{0:n2}',
+      width: 100,
       editable: false,
-
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Aug',
       title: headerMap[8],
-      valueFormatter: formatValueToTwoDecimals,
-      width: 150,
+      type: 'number',
+      format: '{0:n2}',
+      width: 100,
       editable: false,
-
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Sep',
       title: headerMap[9],
-      valueFormatter: formatValueToTwoDecimals,
-      width: 150,
+      type: 'number',
+      format: '{0:n2}',
+      width: 100,
       editable: false,
-
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Oct',
       title: headerMap[10],
-      valueFormatter: formatValueToTwoDecimals,
-      width: 150,
+      type: 'number',
+      format: '{0:n2}',
+      width: 100,
       editable: false,
-
       align: 'right',
       headerAlign: 'left',
     },
@@ -192,50 +185,50 @@ const MaintenanceTable = () => {
     {
       field: 'Nov',
       title: headerMap[11],
-      valueFormatter: formatValueToTwoDecimals,
-      width: 150,
+      type: 'number',
+      format: '{0:n2}',
+      width: 100,
       editable: false,
-
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Dec',
       title: headerMap[12],
-      valueFormatter: formatValueToTwoDecimals,
-      width: 150,
+      type: 'number',
+      format: '{0:n2}',
+      width: 100,
       editable: false,
-
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Jan',
       title: headerMap[1],
-      valueFormatter: formatValueToTwoDecimals,
-      width: 150,
+      type: 'number',
+      format: '{0:n2}',
+      width: 100,
       editable: false,
-
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Feb',
       title: headerMap[2],
-      valueFormatter: formatValueToTwoDecimals,
-      width: 150,
+      type: 'number',
+      format: '{0:n2}',
+      width: 100,
       editable: false,
-
       align: 'right',
       headerAlign: 'left',
     },
     {
       field: 'Mar',
       title: headerMap[3],
-      valueFormatter: formatValueToTwoDecimals,
-      width: 150,
+      type: 'number',
+      format: '{0:n2}',
+      width: 100,
       editable: false,
-
       align: 'right',
       headerAlign: 'left',
     },

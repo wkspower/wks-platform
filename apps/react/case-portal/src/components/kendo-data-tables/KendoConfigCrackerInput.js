@@ -1,4 +1,3 @@
-// CrackerConfig.jsx
 import { Box, Tab, Tabs } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -14,12 +13,8 @@ const CrackerConfig = ({ keycloak }) => {
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-  //   const [snackbarData, setSnackbarData] = useState({
-  //     message: '',
-  //     severity: 'info',
-  //   })
-  // const [snackbarOpen, setSnackbarOpen] = useState(false)
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -52,38 +47,18 @@ const CrackerConfig = ({ keycloak }) => {
 
   const [feedRowsDummy, setFeedRows] = useState([])
   const [compositionRowsDummy, setCompositionRows] = useState([])
-    // —— Hexene Purge Gas ——
-
-    // —— Import Propane ——
   const [hydrogenationRowsDummy, setHydrogenationRows] = useState([])
   const [recoveryRowsDummy, setRecoveryRows] = useState([])
   const [optimizingRowsDummy, setOptimizingRows] = useState([])
   const [furnaceRowsDummy, setFurnaceRows] = useState([])
   const allModes = ['5F', '4F', '4F+D']
-
-    // —— BPCL Kochi Propylene ——
   const [selectMode, setSelectMode] = useState(allModes[0])
-
-    // —— FCC C3 ——
-
-    // —— LDPE Off Gas ——
-
-    // —— Additional Feed (Default Composition) ——
-
-
-
-
-  // ── Helper to update only one slice of rowsByTab ──
-
-  // ── Single “fetch” function that fills rowsByTab.feed … etc. ──
   const fetchCrackerRows = useCallback(
     async (tab, mode) => {
-        try {
-          // Call the backend once; assume it returns an object like:
-          // { feed: [...], composition: [...], hydrogenation: [...], …, furnace: [...] }
-          const spyroVM = await DataService.getSpyroInputData(keycloak, mode)
+      try {
+        const spyroVM = await DataService.getSpyroInputData(keycloak, mode)
 
-          // If spyroVM.data doesn't exist or is missing, default to empty arrays:
+        // setTimeout(() => {
         switch (tab) {
           case 'feed':
             setFeedRows(spyroVM.data || [])
@@ -106,23 +81,15 @@ const CrackerConfig = ({ keycloak }) => {
           default:
             break
         }
-        } catch (err) {
-          console.error('Error loading Spyro‑Input data:', err)
-          // Fallback: leave “feed” unchanged or set to empty
-
-
-    // Simulate network delay
-              /* … your compositionRows here … */
-              /* … your hydrogenationRows here … */
-              /* … your recoveryRows here … */
-              /* … your optimizingRows here … */
-              /* … your furnaceRows here … */
+        // }, 500)
+        // console.log(spyroVM)
+      } catch (err) {
+        console.error('Error loading Spyro‑Input data:', err)
+        // setFeedRows(spyroVM.data)
       }
     },
     [keycloak],
   )
-
-  // 5️⃣ Whenever the selected tab changes, reload that tab’s rows
   useEffect(() => {
     const currentTab = rawTabs[rawTabIndex]
     fetchCrackerRows(currentTab, selectMode)
@@ -160,11 +127,8 @@ const CrackerConfig = ({ keycloak }) => {
     isOldYear,
   )
   const NormParameterIdCell = (props) => {
-    // console.log(props)
     return <td>{props?.dataItem?.particulars}</td>
   }
-    // const displayName = product?.displayName || ''
-    // console.log(displayName)
 
   const productionColumns = getEnhancedAOPColDefs({
     // allGradesReciepes,
@@ -177,6 +141,14 @@ const CrackerConfig = ({ keycloak }) => {
         : 'cracker', // columnConfig,
   })
   const saveChanges = useCallback(async () => {
+    // setLoading(true)
+    // const rowsInEditMode = Object.keys(rowModesModel).filter(
+    //   (id) => rowModesModel[id]?.mode === 'edit',
+    // )
+    // rowsInEditMode.forEach((id) => {
+    //   apiRef.current.stopRowEditMode({ id })
+    // })
+    // setTimeout(() => {
     try {
       console.log('modifiedCells', modifiedCells)
       if (Object.keys(modifiedCells).length === 0) {
@@ -190,6 +162,7 @@ const CrackerConfig = ({ keycloak }) => {
       }
       var rawData = Object.values(modifiedCells)
       const data = rawData.filter((row) => row.inEdit)
+      // var data = Object.values(unsavedChangesRef.current.unsavedRows)
       if (data.length == 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -199,21 +172,25 @@ const CrackerConfig = ({ keycloak }) => {
         setLoading(false)
         return
       }
-      const requiredFields = ['NormParameterTypeFKID', 'Remarks']
-      const validationMessage = validateFields(data, requiredFields)
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationMessage,
-          severity: 'error',
-        })
-        setLoading(false)
-        return
-      }
+
+      // const requiredFields = ['NormParameterTypeFKID', 'Remarks']
+
+      // const validationMessage = validateFields(data, requiredFields)
+
+      // if (validationMessage) {
+      //   setSnackbarOpen(true)
+      //   setSnackbarData({
+      //     message: validationMessage,
+      //     severity: 'error',
+      //   })
+      //   setLoading(false)
+      //   return
+      // }
       saveBusinessDemandData(data)
     } catch (error) {
       console.log('Error saving changes:', error)
     }
+    // }, 400)
   }, [modifiedCells])
   const saveBusinessDemandData = async (newRows) => {
     try {
@@ -223,7 +200,9 @@ const CrackerConfig = ({ keycloak }) => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
+
       let verticalId = localStorage.getItem('verticalId')
+
       const SpyroInputData = newRows.map((row) => ({
         VerticalFKId: verticalId,
         PlantFKId: plantId,
@@ -250,10 +229,12 @@ const CrackerConfig = ({ keycloak }) => {
         id: row.idFromApi ?? null,
         inEdit: row.inEdit || false,
       }))
+
       const response = await DataService.saveSpyroInput(
         SpyroInputData,
         keycloak,
       )
+      // console.log()
       if (response?.status === 200) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -269,10 +250,12 @@ const CrackerConfig = ({ keycloak }) => {
           severity: 'error',
         })
       }
+
       return response
     } catch (error) {
       console.error('Error saving Spyro Input data!', error)
     } finally {
+      // fetchData()
     }
   }
   return (
@@ -321,8 +304,8 @@ const CrackerConfig = ({ keycloak }) => {
                     setCurrentRemark={setCurrentRemark}
                     currentRowId={currentRowId}
                     permissions={adjustedPermissions}
-              selectMode={selectMode}
-              setSelectMode={setSelectMode}
+                    selectMode={selectMode}
+                    setSelectMode={setSelectMode}
                     saveChanges={saveChanges}
                     snackbarData={snackbarData}
                     snackbarOpen={snackbarOpen}

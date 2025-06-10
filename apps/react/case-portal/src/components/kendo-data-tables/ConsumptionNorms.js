@@ -403,13 +403,13 @@ const ConsumptionNorms = () => {
 
       const formattedData = response?.data?.aopConsumptionNormDTOList?.map(
         (item, index) => ({
-        ...item,
-        idFromApi: item.id,
-        NormParametersId: item.materialFkId.toLowerCase(),
-        originalRemark: item.aopRemarks?.trim() || null,
-        id: index,
-        isEditable: false,
-        Particulars: item.normParameterTypeDisplayName,
+          ...item,
+          idFromApi: item.id,
+          NormParametersId: item.materialFkId.toLowerCase(),
+          originalRemark: item.aopRemarks?.trim() || null,
+          id: index,
+          isEditable: false,
+          Particulars: item.normParameterTypeDisplayName,
         }),
       )
 
@@ -671,6 +671,7 @@ const ConsumptionNorms = () => {
     return params.row.isEditable
   }
   const NormParameterIdCell = (props) => {
+    // console.log(props)
     const productId = props.dataItem.NormParametersId
     const product = allProducts.find((p) => p.id === productId)
     const displayName = product?.displayName || ''
@@ -751,23 +752,6 @@ const ConsumptionNorms = () => {
                   unsavedChangesRef={unsavedChangesRef}
                   permissions={adjustedPermissions}
                   groupBy='Particulars'
-
-                  // permissions={{
-                  //   showAction: false,
-                  //   addButton: false,
-                  //   deleteButton: false,
-                  //   editButton: false,
-                  //   showUnit: false,
-                  //   units: ['TPH', 'TPD'],
-                  //   saveWithRemark: true,
-                  //   saveBtn: false,
-                  //   showCalculate: true,
-                  //   showRefresh: false,
-                  //   noColor: true,
-                  //   ShowSummary: true,
-                  //   // customHeight2: true,
-                  //   customHeight: defaultCustomHeight, // use default height
-                  // }}
                 />
               </Box>
             </CustomAccordionDetails>

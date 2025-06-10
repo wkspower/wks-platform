@@ -22,7 +22,7 @@
     "width": 120,
 
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n2}"
   },
   {
     "field": "may",
@@ -30,7 +30,7 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n2}"
   },
   {
     "field": "june",
@@ -38,7 +38,7 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n2}"
   },
   {
     "field": "july",
@@ -46,7 +46,7 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n2}"
   },
   {
     "field": "aug",
@@ -54,7 +54,7 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n2}"
   },
   {
     "field": "sep",
@@ -62,7 +62,7 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n2}"
   },
   {
     "field": "oct",
@@ -70,7 +70,7 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n2}"
   },
   {
     "field": "nov",
@@ -78,7 +78,7 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n2}"
   },
   {
     "field": "dec",
@@ -86,7 +86,7 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n2}"
   },
   {
     "field": "jan",
@@ -94,7 +94,7 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n2}"
   },
   {
     "field": "feb",
@@ -102,7 +102,7 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n2}"
   },
   {
     "field": "march",
@@ -110,7 +110,7 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n2}"
   },
   {
     "field": "averageTPH",

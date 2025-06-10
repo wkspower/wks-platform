@@ -18,7 +18,12 @@ export const validateFields = (data, requiredFields) => {
     // Check for required fields
     const hasMissingField = requiredFields.some((field) => {
       const value = row[field]
-      if (field === 'remark' || field === 'aopRemarks' || field === 'remarks') {
+      if (
+        field === 'remark' ||
+        field === 'aopRemarks' ||
+        field === 'remarks' ||
+        field === 'Remarks'
+      ) {
         return (
           value === undefined ||
           value === null ||

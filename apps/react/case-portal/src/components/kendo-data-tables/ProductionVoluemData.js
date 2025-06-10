@@ -13,14 +13,16 @@ import { setIsBlocked } from 'store/reducers/dataGridStore'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { Typography } from '../../../node_modules/@mui/material/index'
+// import TextField from '@mui/material/TextField'
 import KendoDataTables from './index'
 
 const ProductionvolumeData = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 
   const keycloak = useSession()
   // const [productNormData, setProductNormData] = useState([])
-  const [rowModesModel, setRowModesModel] = useState({})
+  // const [rowModesModel, setRowModesModel] = useState({})
   const [calculationObject, setCalculationObject] = useState([])
 
   const [allProducts, setAllProducts] = useState([])
@@ -37,6 +39,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [rows, setRows] = useState()
   const [rows2, setRows2] = useState()
+  const [rows500, setRows500] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -50,12 +53,12 @@ const ProductionvolumeData = ({ permissions }) => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const dispatch = useDispatch()
-  const unsavedChangesRef = React.useRef({
-    unsavedRows: {},
-    rowsBeforeChange: {},
-  })
+  // const unsavedChangesRef = React.useRef({
+  //   unsavedRows: {},
+  //   rowsBeforeChange: {},
+  // })
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remarks ?? row.remark ?? '')
+    setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -163,47 +166,48 @@ const ProductionvolumeData = ({ permissions }) => {
     }
   }
 
-  const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    const rowId = newRow.id
-    const updatedFields = []
-    for (const key in newRow) {
-      if (
-        Object.prototype.hasOwnProperty.call(newRow, key) &&
-        newRow[key] !== oldRow[key]
-      ) {
-        updatedFields.push(key)
-      }
-    }
+  // const processRowUpdate = React.useCallback((newRow, oldRow) => {
+  //   const rowId = newRow.id
+  //   const updatedFields = []
+  //   for (const key in newRow) {
+  //     if (
+  //       Object.prototype.hasOwnProperty.call(newRow, key) &&
+  //       newRow[key] !== oldRow[key]
+  //     ) {
+  //       updatedFields.push(key)
+  //     }
+  //   }
 
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-    }
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === newRow.id ? { ...newRow, isNew: false } : row,
-      ),
-    )
-    if (updatedFields.length > 0) {
-      setModifiedCells((prevModifiedCells) => ({
-        ...prevModifiedCells,
-        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-      }))
-    }
-    return newRow
-  }, [])
-
+  //   unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
+  //   if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
+  //     unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
+  //   }
+  //   setRows((prevRows) =>
+  //     prevRows.map((row) =>
+  //       row.id === newRow.id ? { ...newRow, isNew: false } : row,
+  //     ),
+  //   )
+  //   if (updatedFields.length > 0) {
+  //     setModifiedCells((prevModifiedCells) => ({
+  //       ...prevModifiedCells,
+  //       [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+  //     }))
+  //   }
+  //   return newRow
+  // }, [])
+  // console.log(modifiedCells)
   const saveChanges = React.useCallback(async () => {
-    const rowsInEditMode = Object.keys(rowModesModel).filter(
-      (id) => rowModesModel[id]?.mode === 'edit',
-    )
+    // const rowsInEditMode = Object.keys(rowModesModel).filter(
+    //   (id) => rowModesModel[id]?.mode === 'edit',
+    // )
 
-    rowsInEditMode.forEach((id) => {
-      apiRef.current.stopRowEditMode({ id })
-    })
+    // rowsInEditMode.forEach((id) => {
+    //   apiRef.current.stopRowEditMode({ id })
+    // })
     setTimeout(() => {
       try {
-        var data = Object.values(unsavedChangesRef.current.unsavedRows)
+        var data = Object.values(modifiedCells)
+        console.log(data)
         if (data.length == 0) {
           setSnackbarOpen(true)
           setSnackbarData({
@@ -270,17 +274,13 @@ const ProductionvolumeData = ({ permissions }) => {
         } else {
           editAOPMCCalculatedData(data)
         }
-        setModifiedCells({})
-
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
+        setEnableSaveAddBtn(false)
+        // setModifiedCells({})
       } catch (error) {
         console.log('Facing issue at saving data', error)
       }
     }, 400)
-  }, [apiRef, rowModesModel, selectedUnit])
+  }, [modifiedCells, selectedUnit])
 
   const fetchData = async () => {
     try {
@@ -356,13 +356,18 @@ const ProductionvolumeData = ({ permissions }) => {
         ...item,
         isEditable: false,
       }))
-      formattedData = formattedData.map((item) => ({
+      var formattedDataNONEDITABLE = formattedData.map((item) => ({
         ...item,
         isEditable: false,
       }))
 
+      formattedData = formattedData.map((item) => ({
+        ...item,
+        remarks: item.remarks ? item.remarks.trim() : '',
+      }))
       setRows2(nonEditableRows)
       setRows(formattedData)
+      setRows500(formattedDataNONEDITABLE)
       setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -404,6 +409,318 @@ const ProductionvolumeData = ({ permissions }) => {
       return newRow
     })
   }
+  const formatValueToFiveDecimals = (params) =>
+    params ? parseFloat(params).toFixed(2) : ''
+  const colDefs = [
+    {
+      field: 'idFromApi',
+      title: 'ID',
+      hidden: true,
+    },
+    {
+      field: 'aopCaseId',
+      title: 'Case ID',
+      width: 120,
+      editable: false,
+    },
+    {
+      field: 'materialFKId',
+      title: 'Particulars',
+      width: 120,
+      editable: false,
+    },
+    {
+      field: 'april',
+      title: headerMap[4],
+      editable: false,
+      align: 'left',
+      headerAlign: 'left',
+      format: '{0:n3}',
+      width: 120,
+    },
+    {
+      field: 'may',
+      title: headerMap[5],
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+      format: '{0:n3}',
+    },
+    {
+      field: 'june',
+      title: headerMap[6],
+      format: '{0:n3}',
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'july',
+      format: '{0:n3}',
+      title: headerMap[7],
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'august',
+      title: headerMap[8],
+      format: '{0:n3}',
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'september',
+      title: headerMap[9],
+      format: '{0:n3}',
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'october',
+      title: headerMap[10],
+      format: '{0:n3}',
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'november',
+      title: headerMap[11],
+      format: '{0:n3}',
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'december',
+      title: headerMap[12],
+      format: '{0:n3}',
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'january',
+      title: headerMap[1],
+      format: '{0:n3}',
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'february',
+      title: headerMap[2],
+      format: '{0:n3}',
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'march',
+      title: headerMap[3],
+      format: '{0:n3}',
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+
+    {
+      field: 'avgTph',
+      title: 'AVG',
+      width: 150,
+      editable: false,
+    },
+    {
+      field: 'isEditable',
+      title: 'isEditable',
+    },
+  ]
+
+  const colDefs1233 = [
+    {
+      field: 'idFromApi',
+      title: 'ID',
+    },
+    {
+      field: 'aopCaseId',
+      title: 'Case ID',
+      width: 120,
+      editable: false,
+    },
+
+    {
+      field: 'normParametersFKId',
+      title: 'Particulars',
+      width: 175,
+      editable: false,
+    },
+    {
+      field: 'april',
+      title: headerMap[4],
+      editable: false,
+      align: 'left',
+      headerAlign: 'left',
+      format: '{0:n3}',
+      width: 120,
+    },
+    {
+      field: 'may',
+      title: headerMap[5],
+      format: '{0:n3}',
+      width: 120,
+
+      editable: false,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'june',
+      title: headerMap[6],
+      format: '{0:n3}',
+
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'july',
+      title: headerMap[7],
+      format: '{0:n3}',
+
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'august',
+      title: headerMap[8],
+      format: '{0:n3}',
+
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'september',
+      title: headerMap[9],
+      format: '{0:n3}',
+
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'october',
+      title: headerMap[10],
+      format: '{0:n3}',
+
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'november',
+      title: headerMap[11],
+      format: '{0:n3}',
+
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'december',
+      title: headerMap[12],
+      format: '{0:n3}',
+
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'january',
+      title: headerMap[1],
+      format: '{0:n3}',
+
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'february',
+      title: headerMap[2],
+      format: '{0:n3}',
+
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+    {
+      field: 'march',
+      title: headerMap[3],
+      format: '{0:n3}',
+
+      editable: false,
+      width: 120,
+
+      align: 'left',
+      headerAlign: 'left',
+    },
+
+    {
+      field: 'avgTph',
+      title: 'AVG',
+      width: 150,
+      editable: false,
+    },
+    {
+      field: 'isEditable',
+      title: 'isEditable',
+    },
+  ]
 
   useEffect(() => {
     const getAllProducts = async () => {
@@ -439,18 +756,10 @@ const ProductionvolumeData = ({ permissions }) => {
 
   const productionColumns = getEnhancedProductionColDefs({
     headerMap,
-    allProducts,
-    handleRemarkCellClick,
-    findAvg,
+    // allProducts,
+    // handleRemarkCellClick,
+    // findAvg,
   })
-
-  const onProcessRowUpdateError = React.useCallback((error) => {
-    console.log(error)
-  }, [])
-
-  const onRowModesModelChange = (newRowModesModel) => {
-    setRowModesModel(newRowModesModel)
-  }
 
   const handleUnitChange = (unit) => {
     setSelectedUnit(unit)
@@ -536,10 +845,11 @@ const ProductionvolumeData = ({ permissions }) => {
       showUnit: permissions?.showUnit ?? true,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
-      saveBtn: permissions?.saveBtn ?? false,
+      saveBtn: permissions?.saveBtn ?? true,
       units: ['TPH', 'TPD'],
       customHeight: permissions?.customHeight ?? defaultCustomHeight,
-      showCalculate:
+      showCalculate: permissions?.hideSummary ? false : lowerVertName === 'meg',
+      showCalculateVisibility:
         lowerVertName === 'meg' &&
         Object.keys(calculationObject || {}).length > 0
           ? true
@@ -551,9 +861,16 @@ const ProductionvolumeData = ({ permissions }) => {
     const productId = props.dataItem.normParametersFKId
     const product = allProducts.find((p) => p.id === productId)
     const displayName = product?.displayName || ''
-    // console.log(displayName)
     return <td>{displayName}</td>
   }
+  const NormParameterIdCell2 = (props) => {
+    const productId = props.dataItem.normParametersFKId
+    const product = allProducts.find((p) => p.id === productId)
+    const displayName = product?.displayName || ''
+    return <td>{displayName}</td>
+  }
+  var cols = permissions?.hideSummary ? colDefs1233 : productionColumns
+  var rows1 = permissions?.hideSummary ? rows500 : rows
 
   return (
     <div>
@@ -565,17 +882,13 @@ const ProductionvolumeData = ({ permissions }) => {
       </Backdrop>
       <KendoDataTables
         modifiedCells={modifiedCells}
+        setModifiedCells={setModifiedCells}
+        enableSaveAddBtn={enableSaveAddBtn}
         setRows={setRows}
-        columns={productionColumns}
-        rows={rows}
+        columns={cols}
+        rows={rows1}
         title='Production Volume Data'
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
-        processRowUpdate={processRowUpdate}
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={onRowModesModelChange}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
@@ -584,15 +897,14 @@ const ProductionvolumeData = ({ permissions }) => {
         setSnackbarData={setSnackbarData}
         apiRef={apiRef}
         fetchData={fetchData}
-        onProcessRowUpdateError={onProcessRowUpdateError}
         handleUnitChange={handleUnitChange}
+        handleRemarkCellClick={handleRemarkCellClick}
         experimentalFeatures={{ newEditingApi: true }}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}
         currentRemark={currentRemark}
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
-        unsavedChangesRef={unsavedChangesRef}
         handleCalculate={handleCalculate}
         permissions={adjustedPermissions}
         selectedUnit={selectedUnit}
@@ -606,39 +918,11 @@ const ProductionvolumeData = ({ permissions }) => {
           </Typography>
           <KendoDataTables
             setRows={setRows2}
-            columns={productionColumns}
+            columns={colDefs}
             rows={rows2}
             title='Production Volume Data'
-            onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-            onDeleteRow={(id) => console.log('Row Deleted:', id)}
-            onRowUpdate={(updatedRow) =>
-              console.log('Row Updated:', updatedRow)
-            }
-            paginationOptions={[100, 200, 300]}
-            processRowUpdate={processRowUpdate}
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={onRowModesModelChange}
-            saveChanges={saveChanges}
-            snackbarData={snackbarData}
-            snackbarOpen={snackbarOpen}
-            setSnackbarOpen={setSnackbarOpen}
-            setSnackbarData={setSnackbarData}
-            apiRef={apiRef}
             fetchData={fetchData}
-            onProcessRowUpdateError={onProcessRowUpdateError}
-            NormParameterIdCell={NormParameterIdCell}
-            handleUnitChange={handleUnitChange}
-            experimentalFeatures={{ newEditingApi: true }}
-            remarkDialogOpen={remarkDialogOpen}
-            setRemarkDialogOpen={setRemarkDialogOpen}
-            currentRemark={currentRemark}
-            setCurrentRemark={setCurrentRemark}
-            currentRowId={currentRowId}
-            unsavedChangesRef={unsavedChangesRef}
-            handleCalculate={handleCalculate}
-            permissions={{ customHeight: defaultCustomHeight }}
-            selectedUnit={selectedUnit}
-            setSelectedUnit={setSelectedUnit}
+            NormParameterIdCell={NormParameterIdCell2}
           />
         </>
       )}

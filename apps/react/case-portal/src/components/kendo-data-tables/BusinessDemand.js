@@ -17,7 +17,6 @@ import { validateFields } from 'utils/validationUtils'
 import ProductionvolumeData from './ProductionVoluemData'
 import KendoDataTables from './index'
 import kendoGetEnhancedColDefs from 'components/data-tables/CommonHeader/kendoBusinessDemColDef'
-// import KendoDataTables from './kendo-inprogress'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -365,6 +364,7 @@ const KendoBusinessDemand = ({ permissions }) => {
       showUnit: permissions?.showUnit ?? false,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       saveBtn: permissions?.saveBtn ?? true,
+      allAction: permissions?.allAction ?? true,
       units: ['TPH', 'TPD'],
       customHeight: permissions?.customHeight || defaultCustomHeight,
     },

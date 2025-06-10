@@ -1,10 +1,11 @@
 [
   {
-    "field": "Particulars",
+    "field": "TypeDisplayName",
     "title": "Type",
     "width": 100,
     "groupable": true,
-    "renderCell": "renderStrongCell"
+    "renderCell": "renderStrongCell",
+    "editable": false
   },
   {
     "field": "normParameterFKId",

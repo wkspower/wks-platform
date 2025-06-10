@@ -18,7 +18,7 @@
   {
     "field": "april",
     "title": "4",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
     "headerAlign": "left"
@@ -26,7 +26,7 @@
   {
     "field": "may",
     "title": "5",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
     "headerAlign": "left"
@@ -34,7 +34,7 @@
   {
     "field": "june",
     "title": "6",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
     "headerAlign": "left"
@@ -42,7 +42,7 @@
   {
     "field": "july",
     "title": "7",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
     "headerAlign": "left"
@@ -50,7 +50,7 @@
   {
     "field": "august",
     "title": "8",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
     "headerAlign": "left"
@@ -58,7 +58,7 @@
   {
     "field": "september",
     "title": "9",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
     "headerAlign": "left"
@@ -66,7 +66,7 @@
   {
     "field": "october",
     "title": "10",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
     "headerAlign": "left"
@@ -74,7 +74,7 @@
   {
     "field": "november",
     "title": "11",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
     "headerAlign": "left"
@@ -82,7 +82,7 @@
   {
     "field": "december",
     "title": "12",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
     "headerAlign": "left"
@@ -90,7 +90,7 @@
   {
     "field": "january",
     "title": "1",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
     "headerAlign": "left"
@@ -98,7 +98,7 @@
   {
     "field": "february",
     "title": "2",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
     "headerAlign": "left"
@@ -106,10 +106,16 @@
   {
     "field": "march",
     "title": "3",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
     "headerAlign": "left"
+  },
+  {
+    "field": "remarks",
+    "title": "Remark",
+    "editable": false,
+    "width": 180
   },
   {
     "field": "avgTph",

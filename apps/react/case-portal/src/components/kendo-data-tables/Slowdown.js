@@ -9,6 +9,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 
 import { GridRowModes } from '../../../node_modules/@mui/x-data-grid/models/gridEditRowModel'
 import KendoDataTables from './index'
+import { validateFields } from 'utils/validationUtils'
 
 const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -181,24 +182,24 @@ const SlowDown = ({ permissions }) => {
           return
         }
 
-        // const requiredFields = [
-        //   'maintStartDateTime',
-        //   'maintEndDateTime',
-        //   'discription',
-        //   'remark',
-        //   'rate',
-        //   // 'durationInHrs',
-        //   'product',
-        // ]
-        // const validationMessage = validateFields(data, requiredFields)
-        // if (validationMessage) {
-        //   setSnackbarOpen(true)
-        //   setSnackbarData({
-        //     message: validationMessage,
-        //     severity: 'error',
-        //   })
-        //   return
-        // }
+        const requiredFields = [
+          'maintStartDateTime',
+          'maintEndDateTime',
+          'discription',
+          'remark',
+          'rate',
+          // 'durationInHrs',
+          'product',
+        ]
+        const validationMessage = validateFields(data, requiredFields)
+        if (validationMessage) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: validationMessage,
+            severity: 'error',
+          })
+          return
+        }
 
         saveSlowDownData(data)
       } catch (error) {
@@ -308,7 +309,7 @@ const SlowDown = ({ permissions }) => {
       : 1
     setRowModesModel((oldModel) => ({
       ...oldModel,
-      [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
+      [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'product' },
     }))
   }
 
@@ -353,7 +354,7 @@ const SlowDown = ({ permissions }) => {
     {
       field: 'durationInHrs',
       title: 'Duration (hrs)',
-      editable: false,
+      editable: true,
       width: 100,
     },
 
@@ -373,6 +374,7 @@ const SlowDown = ({ permissions }) => {
   ]
 
   const deleteRowData = async (paramsForDelete) => {
+    console.log(paramsForDelete)
     try {
       const { idFromApi, id } = paramsForDelete
       const deleteId = id
@@ -380,7 +382,7 @@ const SlowDown = ({ permissions }) => {
       if (!idFromApi) {
         setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
       }
-
+      console.log(idFromApi)
       if (idFromApi) {
         await DataService.deleteSlowdownData(idFromApi, keycloak)
         setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
@@ -422,7 +424,7 @@ const SlowDown = ({ permissions }) => {
       saveWithRemark: permissions?.saveWithRemark ?? true,
       saveBtn: permissions?.saveBtn ?? true,
       customHeight: permissions?.customHeight,
-      allAction: false,
+      allAction: true,
     },
     isOldYear,
   )

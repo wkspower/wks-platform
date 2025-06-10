@@ -44,11 +44,6 @@ const SelectivityData = (props) => {
 
   // const [rowModesModel, setRowModesModel] = useState({})
 
-  const unsavedChangesRef = React.useRef({
-    unsavedRows: {},
-    rowsBeforeChange: {},
-  })
-
   const handleRemarkCellClick = (row) => {
     // if (!row?.isEditable) return
 
@@ -67,8 +62,8 @@ const SelectivityData = (props) => {
     // })
     setTimeout(() => {
       try {
-        let newRows = modifiedCells.filter((row) => row.isGroupHeader !== true)
-        var data = Object.values(newRows)
+        // let newRows = modifiedCells.filter((row) => row.isGroupHeader !== true)
+        var data = Object.values(modifiedCells)
         if (data.length === 0) {
           setSnackbarOpen(true)
           setSnackbarData({
@@ -142,11 +137,6 @@ const SelectivityData = (props) => {
           severity: 'success',
         })
         setModifiedCells({})
-
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
         setLoading(false)
 
         if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
@@ -325,7 +315,7 @@ const SelectivityData = (props) => {
       showUnit: false,
       saveWithRemark: true,
       saveBtn: true,
-      allAction: false,
+      allAction: true,
     },
     isOldYear,
   )
@@ -371,8 +361,9 @@ const SelectivityData = (props) => {
         currentRemark={currentRemark}
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
-        unsavedChangesRef={unsavedChangesRef}
+        // unsavedChangesRef={unsavedChangesRef}
         permissions={adjustedPermissions}
+        groupBy={props?.groupBy}
       />
     </Box>
   )

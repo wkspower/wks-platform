@@ -3,11 +3,6 @@ import { Grid, GridColumn } from '@progress/kendo-react-grid'
 import { filterBy } from '@progress/kendo-data-query'
 import '@progress/kendo-theme-default/dist/all.css'
 import '@progress/kendo-font-icons/dist/index.css'
-// import { filterIcon } from '@progress/kendo-svg-icons'
-
-// import { EditDescriptor } from '@progress/kendo-react-data-tools'
-
-// import PropTypes from 'prop-types'
 import '../../kendo-data-grid.css'
 import {
   Box,
@@ -27,8 +22,6 @@ import { trashIcon } from '../../../node_modules/@progress/kendo-svg-icons/dist/
 import { truncateRemarks } from 'utils/remarksUtils'
 import { process } from '@progress/kendo-data-query'
 import DateTimePickerEditor from './Utilities-Kendo/DatePickeronSelectedYr'
-import { updateRowWithDuration } from './Utilities-Kendo/AutoDuration'
-// import ProductDropDownEditor from './Utilities-Kendo/DropdownProducts'
 import ProductCell from './Utilities-Kendo/ProductCell'
 import { ColumnMenu } from 'components/@extended/columnMenu'
 import { NoSpinnerNumericEditor } from './Utilities-Kendo/numbericColumns'
@@ -38,7 +31,14 @@ export const particulars = [
   'normParametersFKId',
   'NormParameterFKId',
   'materialFkId',
+  'materialFKId',
   'normParameterFKId',
+  'NormParametersId',
+]
+export const typeParticulars = [
+  'Particulars',
+  'TypeDisplayName',
+  'ConfigTypeDisplayName',
 ]
 export const hiddenFields = [
   'maintenanceId',
@@ -54,6 +54,7 @@ export const hiddenFields = [
   'isEditable',
   'period',
 ]
+
 const KendoDataTables = ({
   // setUpdatedRows = () => {},
   rows = [],
@@ -104,32 +105,28 @@ const KendoDataTables = ({
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
-  // const closeDeleteDialogeBox = () => setOpenDeleteDialogeBox(false)
-  // const [resizedColumns, setResizedColumns] = useState({})
   const [edit, setEdit] = useState({})
-  // const [searchText, setSearchText] = useState('')
-  // const isFilterActive = false
-  // const localApiRef = useGridApiRef()
-  // const finalExternalApiRef = apiRef ?? localApiRef
-  // const handleSearchChange = (event) => {
-  //   setSearchText(event.target.value)
-  // }
-  // // console.log(columns)
+  // const gridApiRef = useRef()
+  //  const apiRef = useGridApiRef();
+
+  // // const localApiRef = useGridApiRef()
+  // // const finalExternalApiRef = apiRef ?? localApiRef
+  // useEffect(() => {
+  //   if (gridApiRef .current) {
+  //     gridApiRef .current.editCell({ rowIndex: 0, field: 'name' })
+  //   }
+  // }, [])
   const handleEditChange = useCallback((e) => {
-  //   console.log(e)
+    // console.log('e--->', e)
     setEdit(e.edit)
-  // }
   }, [])
   const handleRowClick = (e) => {
+    // console.log('22', e.dataItem?.isEditable)
     if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
       setEdit({})
       return
     }
 
-  // const itemChange = (e) => {
-  //   let updated = rows.map((r) =>
-  //     r.id === e.dataItem.id ? { ...r, [e.field]: e.value } : r,
-  //   )
     setRows(
       rows.map((r) => ({
         ...r,
@@ -137,25 +134,145 @@ const KendoDataTables = ({
       })),
     )
   }
+  // const itemChange = useCallback(
+  //   (e) => {
+  //     // console.log(e)
+  //     const { dataItem, field, value } = e
+
+  //     setRows((prev) =>
+  //       prev.map((r) =>
+  //         r.id === dataItem.id ? updateRowWithDuration(r, field, value) : r,
+  //       ),
+  //     )
+
+  //     setModifiedCells((prev) => {
+  //       const updatedRow = updateRowWithDuration(dataItem, field, value)
+  //       return { ...prev, [dataItem.id]: updatedRow }
+  //     })
+  //   },
+
+  //   [setRows, setModifiedCells],
+  // )
+
   const itemChange = useCallback(
     (e) => {
       const { dataItem, field, value } = e
 
+      // helper to recalc duration based on start/end
+      const recalcDuration = (startRaw, endRaw) => {
+        const start = startRaw ? new Date(startRaw) : null
+        const end = endRaw ? new Date(endRaw) : null
+        if (
+          start instanceof Date &&
+          !isNaN(start) &&
+          end instanceof Date &&
+          !isNaN(end)
+        ) {
+          const diffMs = end.getTime() - start.getTime()
+          return parseFloat((diffMs / (1000 * 60 * 60)).toFixed(2))
+        }
+        return 0
+      }
+
+      // helper to recalc end date based on start + duration
+      const recalcEndDate = (startRaw, durationHrs) => {
+        const start = startRaw ? new Date(startRaw) : null
+        if (start instanceof Date && !isNaN(start) && !isNaN(durationHrs)) {
+          return new Date(start.getTime() + durationHrs * 3600 * 1000)
+        }
+        return null
+      }
+
+      // update rows in one pass
       setRows((prev) =>
-        prev.map((r) =>
-          r.id === dataItem.id ? updateRowWithDuration(r, field, value) : r,
-        ),
+        prev.map((r) => {
+          if (r.id !== dataItem.id) return r
+
+          // apply the edit
+          const updated = { ...r, [field]: value }
+
+          if (field === 'maintStartDateTime' || field === 'maintEndDateTime') {
+            updated.durationInHrs = recalcDuration(
+              updated.maintStartDateTime,
+              updated.maintEndDateTime,
+            )
+          } else if (field === 'durationInHrs') {
+            const newEnd = recalcEndDate(
+              updated.maintStartDateTime,
+              parseFloat(value),
+            )
+            if (newEnd) {
+              updated.maintEndDateTime = newEnd.toISOString()
+            }
+          }
+
+          return updated
+        }),
       )
 
+      // mirror in modifiedCells
       setModifiedCells((prev) => {
-        const updatedRow = updateRowWithDuration(dataItem, field, value)
-        return { ...prev, [dataItem.id]: updatedRow }
+        const base = { ...dataItem, [field]: value }
+
+        if (field === 'maintStartDateTime' || field === 'maintEndDateTime') {
+          base.durationInHrs = recalcDuration(
+            base.maintStartDateTime,
+            base.maintEndDateTime,
+          )
+        } else if (field === 'durationInHrs') {
+          const newEnd = recalcEndDate(
+            base.maintStartDateTime,
+            parseFloat(value),
+          )
+          if (newEnd) base.maintEndDateTime = newEnd.toISOString()
+        }
+
+        return { ...prev, [dataItem.id]: base }
       })
     },
     [setRows, setModifiedCells],
   )
 
-
+  // const itemChange = useCallback(
+  //   (e) => {
+  //     const { dataItem, field, value } = e
+  //     setRows((prev) =>
+  //       prev.map((r) => (r.id === dataItem.id ? { ...r, [field]: value } : r)),
+  //     )
+  //     setModifiedCells((prev) => ({
+  //       ...prev,
+  //       [dataItem.id]: { ...dataItem, [field]: value },
+  //     }))
+  //   },
+  //   [setRows, setModifiedCells],
+  // )
+  // const onCellClose = useCallback(
+  //   (e) => {
+  //     const { dataItem, field } = e
+  //     if (
+  //       ['maintStartDateTime', 'maintEndDateTime', 'durationInHrs'].includes(
+  //         field,
+  //       )
+  //     ) {
+  //       setRows((prev) =>
+  //         prev.map((r) =>
+  //           r.id === dataItem.id
+  //             ? updateRowWithDuration(r, field, r[field])
+  //             : r,
+  //         ),
+  //       )
+  //       setModifiedCells((prev) => ({
+  //         ...prev,
+  //         [dataItem.id]: updateRowWithDuration(
+  //           dataItem,
+  //           field,
+  //           dataItem[field],
+  //         ),
+  //       }))
+  //     }
+  //   },
+  //   [setRows, setModifiedCells],
+  // )
   const handleRemarkSave = () => {
     setRows((prevRows) => {
       let updatedRow = null
@@ -259,9 +376,6 @@ const KendoDataTables = ({
       console.error('Error saving refresh data:', error)
     }
   }
-    // console.log('22', e.dataItem.isEditable)
-
-
   const RemarkCell = (props) => {
     const { dataItem, field, onRemarkClick, ...tdProps } = props
 
@@ -303,7 +417,6 @@ const KendoDataTables = ({
             },
           },
         ])
-        // setGroup([{ field: groupBy }])
       }
       const initialExpandedState = {}
       const uniqueValues = [...new Set(rows.map((row) => row[groupBy]))]
@@ -339,10 +452,10 @@ const KendoDataTables = ({
   }, [rows, group, expandedState])
 
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
-  // console.log(processedData)
     const isDisabled =
       !dataItem.isEditable && dataItem?.isEditable !== undefined
     const rowClassName = isDisabled ? `k-disabled` : className
+
     return (
       <tr {...rest?.trProps} className={rowClassName}>
         {rest.children}
@@ -399,7 +512,30 @@ const KendoDataTables = ({
                 </span>
               </Tooltip>
             )} */}
+            {permissions?.addButton && (
+              <Button
+                variant='contained'
+                className='btn-save'
+                onClick={handleAddRow}
+                disabled={isButtonDisabled}
+              >
+                Add Item
+              </Button>
+            )}
 
+            {permissions?.saveBtn && (
+              <Button
+                variant='contained'
+                className='btn-save'
+                onClick={saveModalOpen}
+                disabled={isButtonDisabled}
+                // loading={loading}
+                // loadingposition='start'
+                {...(loading ? {} : {})}
+              >
+                Save
+              </Button>
+            )}
             {permissions?.showCalculate && (
               <Button
                 variant='contained'
@@ -486,31 +622,29 @@ const KendoDataTables = ({
       )}
       <div className='kendo-data-grid'>
         <Grid
+          // apiRef={gridApiRef}
           data={filterBy(processedData, filter)}
           rows={{ data: CustomRow }}
+          // rowRender={{ rowRender }}
           sortable
           dataItemKey='id'
           editField='inEdit'
-          // editable={{ mode: 'incell' }}
           editable={{ mode: 'incell' }}
-          // onRowClick={(e) => {
-          //   const id = e.dataItem.id
-          //   setRows(rows.map((r) => (r.id === id ? { ...r, inEdit: true } : r)))
-          // }}
-          // onEditChange={handleEditChange}
           // autoProcessData={true}
-          // edit={edit}
           // scrollable='scrollable'
+          // filterable={true}
+          // columnMenuIcon={filterIcon}
+          // onBlur={() => {
+          //   //setEdit({})
+          // }}
           onEditChange={handleEditChange}
           edit={edit}
           filter={filter}
-          // filterable={true}
           onFilterChange={(e) => setFilter(e.filter)}
           onItemChange={itemChange}
           resizable={true}
           defaultSkip={0}
           defaultTake={100}
-          // columnMenuIcon={filterIcon}
           contextMenu={true}
           pageable={
             rows?.length > 100
@@ -520,11 +654,6 @@ const KendoDataTables = ({
                 }
               : false
           }
-          // onBlur={() => {
-          //   // whenever the Grid loses focus, clear every row’s inEdit flag
-          //   // setRows(rows.map((r) => ({ ...r, inEdit: false })))
-          //   setEdit({})
-          // }}
           group={group}
           expandField='expanded'
           onGroupChange={(e) => setGroup(e.group)}
@@ -545,6 +674,7 @@ const KendoDataTables = ({
             </div>
           )}
           onRowClick={handleRowClick}
+          // onCellClose={onCellClose}
         >
           {columns
             .filter((col) => !hiddenFields.includes(col.field))
@@ -606,8 +736,36 @@ const KendoDataTables = ({
                   />
                 )
               }
+              if (col?.field === 'discription') {
+                return (
+                  <GridColumn
+                    key='discription'
+                    field='discription'
+                    title={col.title || col.headerName || 'Description'}
+                    width={210}
+                    editable={true}
+                    columnMenu={ColumnMenu}
+                  />
+                )
+              }
+              if (col?.field === 'UOM') {
+                return (
+                  <GridColumn
+                    key='UOM'
+                    field='UOM'
+                    title={col.title || col.headerName || 'UOM'}
+                    width={col?.width}
+                    editable={false}
+                    columnMenu={ColumnMenu}
+                  />
+                )
+              }
 
-              if (['aopRemarks', 'remarks', 'remark'].includes(col.field)) {
+              if (
+                ['aopRemarks', 'remarks', 'remark', 'Remarks'].includes(
+                  col.field,
+                )
+              ) {
                 return (
                   <GridColumn
                     key={col.field}
@@ -637,13 +795,33 @@ const KendoDataTables = ({
                     field={col.field}
                     title={col.title || col.headerName}
                     width={col.width}
-                    editable={col.editable || false} // make it read‑only
+                    editable={true} // make it read‑only
                     columnMenu={ColumnMenu} // if you want columnMenu
-                    // optionally format with 2 decimals
+                    // editor={(props) => (
+                    //   <input
+                    //     {...props}
+                    //     value={props.value || ''}
+                    //     onChange={(e) =>
+                    //       props.onChange({
+                    //         dataItem: props.dataItem,
+                    //         field: props.field,
+                    //         value: e.target.value,
+                    //       })
+                    //     }
+                    //     onBlur={() =>
+                    //       props.onBlur({
+                    //         dataItem: props.dataItem,
+                    //         field: props.field,
+                    //         value: props.value,
+                    //       })
+                    //     }
+                    //   />
+                    // )}
                     format='{0:n2}'
                   />
                 )
               }
+
               if (particulars.includes(col.field)) {
                 return (
                   <GridColumn
@@ -660,6 +838,19 @@ const KendoDataTables = ({
                   />
                 )
               }
+              if (typeParticulars.includes(col.field)) {
+                return (
+                  <GridColumn
+                    key={col.field}
+                    field={col.field}
+                    title={col.title || col.headerName}
+                    width={col.width}
+                    editable={false}
+                    filterable={true}
+                    columnMenu={ColumnMenu}
+                  />
+                )
+              }
 
               return (
                 <GridColumn
@@ -672,7 +863,9 @@ const KendoDataTables = ({
                     edit: { text: NoSpinnerNumericEditor },
                   }}
                   columnMenu={ColumnMenu}
+                  // editor='numeric'
                   filter='numeric'
+                  format={col.format || '{0:n3}'}
                 />
               )
             })}
@@ -701,30 +894,6 @@ const KendoDataTables = ({
             gap: 2,
           }}
         >
-          {permissions?.addButton && (
-            <Button
-              variant='contained'
-              className='btn-save'
-              onClick={handleAddRow}
-              disabled={isButtonDisabled}
-            >
-              Add Item
-            </Button>
-          )}
-
-          {permissions?.saveBtn && (
-            <Button
-              variant='contained'
-              className='btn-save'
-              onClick={saveModalOpen}
-              disabled={isButtonDisabled}
-              // loading={loading}
-              // loadingposition='start'
-              {...(loading ? {} : {})}
-            >
-              Save
-            </Button>
-          )}
           {/* {permissions?.showCreateCasebutton && (
             <Button
               variant='contained'

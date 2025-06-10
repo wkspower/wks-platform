@@ -1,23 +1,15 @@
 import { DataService } from 'services/DataService'
-import dayjs from 'dayjs'
 import React, { useState, useEffect } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
-// import NumericInputOnly from 'utils/NumericInputOnly'
-import { StartDateTimeEditCell } from 'utils/StartDateTimeEditCell'
-import { EndDateTimeEditCell } from 'utils/EndDateTimeEditCell'
 
-import Tooltip from '@mui/material/Tooltip'
-import { truncateRemarks } from 'utils/remarksUtils'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
-import TimeInputCell from 'utils/TimeInputCell'
-import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
-import { GridRowModes } from '../../../node_modules/@mui/x-data-grid/models/gridEditRowModel'
+
+// import { GridRowModes } from '../../../node_modules/@mui/x-data-grid/models/gridEditRowModel'
 import KendoDataTables from './index'
-import { DateTimePicker } from '@progress/kendo-react-dateinputs'
 
 const ShutDown = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -226,15 +218,15 @@ const ShutDown = ({ permissions }) => {
     }
   }
 
-  const focusFirstField = async () => {
-    const newRowId = rows.length
-      ? Math.max(...rows.map((row) => row.id)) + 1
-      : 1
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
-    }))
-  }
+  // const focusFirstField = async () => {
+  //   const newRowId = rows.length
+  //     ? Math.max(...rows.map((row) => row.id)) + 1
+  //     : 1
+  //   setRowModesModel((oldModel) => ({
+  //     ...oldModel,
+  //     [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
+  //   }))
+  // }
 
   useEffect(() => {
     fetchData()
@@ -266,25 +258,25 @@ const ShutDown = ({ permissions }) => {
     return ''
   }
 
-  const handleCancelClick = () => () => {
-    const rowsInEditMode = Object.keys(rowModesModel).filter(
-      (id) => rowModesModel[id]?.mode === 'edit',
-    )
+  // const handleCancelClick = () => () => {
+  //   // const rowsInEditMode = Object.keys(rowModesModel).filter(
+  //   //   (id) => rowModesModel[id]?.mode === 'edit',
+  //   // )
 
-    rowsInEditMode.forEach((id) => {
-      apiRef.current.stopRowEditMode({ id })
-    })
+  //   // rowsInEditMode.forEach((id) => {
+  //   //   apiRef.current.stopRowEditMode({ id })
+  //   // })
 
-    // setRowModesModel({
-    //   ...rowModesModel,
-    //   [id]: { mode: GridRowModes.View, ignoreModifications: true },
-    // })
+  //   // setRowModesModel({
+  //   //   ...rowModesModel,
+  //   //   [id]: { mode: GridRowModes.View, ignoreModifications: true },
+  //   // })
 
-    // const editedRow = rows.find((row) => row.id === id)
-    // if (editedRow.isNew) {
-    //   setRows(rows.filter((row) => row.id !== id))
-    // }
-  }
+  //   // const editedRow = rows.find((row) => row.id === id)
+  //   // if (editedRow.isNew) {
+  //   //   setRows(rows.filter((row) => row.id !== id))
+  //   // }
+  // }
 
   // 5) Column definitions for KendoReact Grid
   const colDefs = [
@@ -314,7 +306,7 @@ const ShutDown = ({ permissions }) => {
     {
       field: 'durationInHrs',
       title: 'Duration (hrs)',
-      editable: false,
+      editable: true,
       // cell: DurationCell,
     },
     {
@@ -325,13 +317,13 @@ const ShutDown = ({ permissions }) => {
   ]
 
   const deleteRowData = async (paramsForDelete) => {
-    console.log(paramsForDelete)
+    // console.log(paramsForDelete)
     // console.log(idFromApi)
     try {
       const { idFromApi, id } = paramsForDelete
       const deleteId = id
-      console.log(paramsForDelete)
-      console.log(idFromApi)
+      // console.log(paramsForDelete)
+      // console.log(idFromApi)
       if (!idFromApi) {
         setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
       }
@@ -377,7 +369,7 @@ const ShutDown = ({ permissions }) => {
       saveWithRemark: permissions?.saveWithRemark ?? true,
       saveBtn: permissions?.saveBtn ?? true,
       customHeight: permissions?.customHeight,
-      allAction: false,
+      allAction: true,
     },
     isOldYear,
   )
@@ -419,8 +411,8 @@ const ShutDown = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         deleteRowData={deleteRowData}
         permissions={adjustedPermissions}
-        handleCancelClick={handleCancelClick}
-        focusFirstField={focusFirstField}
+        // handleCancelClick={handleCancelClick}
+        // focusFirstField={focusFirstField}
       />
     </div>
   )

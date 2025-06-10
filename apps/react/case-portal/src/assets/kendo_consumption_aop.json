@@ -3,7 +3,8 @@
     "field": "Particulars",
     "title": "Type",
     "width": 120,
-    "groupable": true
+    "groupable": true,
+    "editable": false
   },
   {
     "field": "NormParametersId",
@@ -24,7 +25,7 @@
     "width": 120,
 
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n5}"
   },
   {
     "field": "may",
@@ -33,7 +34,7 @@
     "width": 120,
 
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n5}"
   },
   {
     "field": "june",
@@ -42,7 +43,7 @@
     "width": 120,
 
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n5}"
   },
   {
     "field": "july",
@@ -51,7 +52,7 @@
     "width": 120,
 
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n5}"
   },
   {
     "field": "aug",
@@ -60,7 +61,7 @@
     "width": 120,
 
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n5}"
   },
   {
     "field": "sep",
@@ -69,7 +70,7 @@
     "width": 120,
 
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n5}"
   },
   {
     "field": "oct",
@@ -78,7 +79,7 @@
     "width": 120,
 
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n5}"
   },
   {
     "field": "nov",
@@ -87,7 +88,7 @@
     "width": 120,
 
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n5}"
   },
   {
     "field": "dec",
@@ -96,7 +97,7 @@
     "width": 120,
 
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n5}"
   },
   {
     "field": "jan",
@@ -105,7 +106,7 @@
     "width": 120,
 
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n5}"
   },
   {
     "field": "feb",
@@ -114,7 +115,7 @@
     "width": 120,
 
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n5}"
   },
   {
     "field": "march",
@@ -123,7 +124,7 @@
     "width": 120,
 
     "align": "left",
-    "headerAlign": "left"
+    "format": "{0:n5}"
   },
   {
     "field": "isEditable",

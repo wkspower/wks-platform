@@ -8,15 +8,15 @@ import { useSelector } from 'react-redux'
 // import { GridRowModes } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { DataService } from 'services/DataService'
-import NumericInputOnly from 'utils/NumericInputOnly'
+// import NumericInputOnly from 'utils/NumericInputOnly'
 import { truncateRemarks } from 'utils/remarksUtils'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
-import TextField from '@mui/material/TextField'
-import { useDispatch } from 'react-redux'
-import { setIsBlocked } from 'store/reducers/dataGridStore'
+// import TextField from '@mui/material/TextField'
+// import { useDispatch } from 'react-redux'
+// import { setIsBlocked } from 'store/reducers/dataGridStore'
 import KendoDataTables from './index'
 
 const SlowdownNorms = () => {
@@ -33,7 +33,7 @@ const SlowdownNorms = () => {
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
-  const dispatch = useDispatch()
+  // const dispatch = useDispatch()
   const [rows, setRows] = useState([])
   // const [productNormData, setProductNormData] = useState([])
   const [snackbarData, setSnackbarData] = useState({
@@ -62,11 +62,11 @@ const SlowdownNorms = () => {
     rowsBeforeChange: {},
   })
 
-  const getProductDisplayName = (id) => {
-    if (!id) return
-    const product = allProducts.find((p) => p.id === id)
-    return product ? product.displayName : ''
-  }
+  // const getProductDisplayName = (id) => {
+  //   if (!id) return
+  //   const product = allProducts.find((p) => p.id === id)
+  //   return product ? product.displayName : ''
+  // }
 
   const keycloak = useSession()
 
@@ -82,10 +82,7 @@ const SlowdownNorms = () => {
     setTimeout(() => {
       if (lowerVertName == 'meg') {
         try {
-          let newRows = modifiedCells.filter(
-            (row) => row.isGroupHeader !== true,
-          )
-          var data = Object.values(newRows)
+          var data = Object.values(modifiedCells)
           if (data.length == 0) {
             setSnackbarOpen(true)
             setSnackbarData({
@@ -96,17 +93,17 @@ const SlowdownNorms = () => {
             return
           }
 
-          // const requiredFields = ['remarks']
-          // const validationMessage = validateFields(data, requiredFields)
-          // if (validationMessage) {
-          //   setSnackbarOpen(true)
-          //   setSnackbarData({
-          //     message: validationMessage,
-          //     severity: 'error',
-          //   })
-          //   setLoading(false)
-          //   return
-          // }
+          const requiredFields = ['remarks']
+          const validationMessage = validateFields(data, requiredFields)
+          if (validationMessage) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: validationMessage,
+              severity: 'error',
+            })
+            setLoading(false)
+            return
+          }
 
           saveSlowdownNormsData(data)
         } catch (error) {
@@ -114,61 +111,61 @@ const SlowdownNorms = () => {
           setLoading(false)
         }
       }
-      // if (lowerVertName == 'pe') {
-      //   try {
-      //     var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
-      //     var allRows = Array.from(apiRef.current.getRowModels().values())
-      //     allRows = allRows.filter((row) => !row.isGroupHeader)
+      if (lowerVertName == 'pe') {
+        try {
+          var editedData = Object.values(modifiedCells)
+          // var allRows = Array.from(apiRef.current.getRowModels().values())
+          // allRows = allRows.filter((row) => !row.isGroupHeader)
 
-      //     const updatedRows = allRows.map(
-      //       (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
-      //     )
+          // const updatedRows = allRows.map(
+          //   (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
+          // )
 
-      //     if (updatedRows.length === 0) {
-      //       setSnackbarOpen(true)
-      //       setSnackbarData({
-      //         message: 'No Records to Save!',
-      //         severity: 'info',
-      //       })
-      //       return
-      //     }
+          if (editedData.length === 0) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: 'No Records to Save!',
+              severity: 'info',
+            })
+            return
+          }
 
-      //     const requiredFields = ['remarks']
+          const requiredFields = ['remarks']
 
-      //     const validationMessage = validateFields(editedData, requiredFields)
-      //     if (validationMessage) {
-      //       setSnackbarOpen(true)
-      //       setSnackbarData({
-      //         message: validationMessage,
-      //         severity: 'error',
-      //       })
-      //       setLoading(false)
-      //       return
-      //     }
+          const validationMessage = validateFields(editedData, requiredFields)
+          if (validationMessage) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: validationMessage,
+              severity: 'error',
+            })
+            setLoading(false)
+            return
+          }
 
-      //     if (calculatebtnClicked == false) {
-      //       if (editedData.length === 0) {
-      //         setSnackbarOpen(true)
-      //         setSnackbarData({
-      //           message: 'No Records to Save!',
-      //           severity: 'info',
-      //         })
-      //         setCalculatebtnClicked(false)
-      //         return
-      //       }
+          if (calculatebtnClicked == false) {
+            if (editedData.length === 0) {
+              setSnackbarOpen(true)
+              setSnackbarData({
+                message: 'No Records to Save!',
+                severity: 'info',
+              })
+              setCalculatebtnClicked(false)
+              return
+            }
 
-      //       saveSlowdownNormsData(editedData)
-      //     } else {
-      //       saveSlowdownNormsData(updatedRows)
-      //     }
-      //   } catch (error) {
-      //     console.log('Error saving changes:', error)
-      //     setLoading(false)
-      //     setCalculatebtnClicked(false)
-      //   }
-      // }
+            saveSlowdownNormsData(editedData)
+          } else {
+            saveSlowdownNormsData(modifiedCells)
+          }
+        } catch (error) {
+          console.log('Error saving changes:', error)
+          setLoading(false)
+          setCalculatebtnClicked(false)
+        }
+      }
     }, 400)
-  }, [apiRef, selectedUnit, calculatebtnClicked, rowModesModel, modifiedCells])
+  }, [apiRef, selectedUnit, calculatebtnClicked, modifiedCells])
 
   useEffect(() => {
     const getAllProducts = async () => {
@@ -207,8 +204,8 @@ const SlowdownNorms = () => {
     lowerVertName,
   ])
 
-  const formatValueToFiveDecimals = (params) =>
-    params ? parseFloat(params).toFixed(5) : ''
+  // const formatValueToFiveDecimals = (params) =>
+  //   params ? parseFloat(params).toFixed(5) : ''
 
   const isCellEditable = (params) => {
     return params.row.isEditable
@@ -222,17 +219,7 @@ const SlowdownNorms = () => {
       title: 'Type',
       width: 100,
       groupable: true,
-      renderCell: (params) => (
-        <div
-          style={{
-            whiteSpace: 'normal',
-            wordBreak: 'break-word',
-            lineHeight: 1.4,
-          }}
-        >
-          <strong>{params.value}</strong>
-        </div>
-      ),
+      editable: false,
     },
 
     {
@@ -240,78 +227,6 @@ const SlowdownNorms = () => {
       title: 'Particulars',
       width: 150,
       editable: false,
-      valueGetter: (params) => params || '',
-      valueFormatter: (params) => {
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : ''
-      },
-
-      filterOperators: [
-        {
-          label: 'contains',
-          value: 'contains',
-          getApplyFilterFn: (filterItem) => {
-            if (!filterItem?.value) {
-              return
-            }
-            return (rowId) => {
-              const filterValue = filterItem.value.toLowerCase()
-              if (filterValue) {
-                const productName = getProductDisplayName(rowId)
-                if (productName) {
-                  return productName.toLowerCase().includes(filterValue)
-                }
-              }
-              return true
-            }
-          },
-          InputComponent: ({ item, applyValue, focusElementRef }) => (
-            <TextField
-              autoFocus
-              inputRef={focusElementRef}
-              size='small'
-              label='Contains'
-              value={item.value || ''}
-              onChange={(event) =>
-                applyValue({ ...item, value: event.target.value })
-              }
-              style={{ marginTop: '8px' }}
-            />
-          ),
-        },
-      ],
-
-      renderEditCell: (params) => {
-        const { value, id, api } = params
-        return (
-          <select
-            value={value || ''}
-            onChange={(event) => {
-              api.setEditCellValue({
-                id,
-                field: 'materialFkId',
-                value: event.target.value,
-              })
-            }}
-            style={{
-              width: '100%',
-              padding: '5px',
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-            }}
-          >
-            <option value='' disabled>
-              Select
-            </option>
-            {allProducts.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.displayName}
-              </option>
-            ))}
-          </select>
-        )
-      },
     },
 
     { field: 'UOM', title: 'UOM', width: 100, editable: false },
@@ -320,10 +235,10 @@ const SlowdownNorms = () => {
       field: 'april',
       title: headerMap[4],
       editable: slowdownMonths?.includes(4),
-      renderEditCell: NumericInputOnly,
+      //renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
+      format: '{0:n5}',
       isDisabled: !slowdownMonths?.includes(4),
       columnClassName: 'first-column',
       width: 120,
@@ -333,10 +248,10 @@ const SlowdownNorms = () => {
       field: 'may',
       title: headerMap[5],
       editable: slowdownMonths?.includes(5),
-      renderEditCell: NumericInputOnly,
+      //renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
+      format: '{0:n5}',
       isDisabled: !slowdownMonths?.includes(5),
       columnClassName: 'first-column',
       width: 120,
@@ -346,10 +261,10 @@ const SlowdownNorms = () => {
       field: 'june',
       title: headerMap[6],
       editable: slowdownMonths?.includes(6),
-      renderEditCell: NumericInputOnly,
+      //renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
+      format: '{0:n5}',
       isDisabled: !slowdownMonths?.includes(6),
       width: 120,
     },
@@ -357,10 +272,10 @@ const SlowdownNorms = () => {
       field: 'july',
       title: headerMap[7],
       editable: slowdownMonths?.includes(7),
-      renderEditCell: NumericInputOnly,
+      //renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
+      format: '{0:n5}',
       isDisabled: !slowdownMonths?.includes(7),
       width: 120,
     },
@@ -369,10 +284,10 @@ const SlowdownNorms = () => {
       field: 'august',
       title: headerMap[8],
       editable: slowdownMonths?.includes(8),
-      renderEditCell: NumericInputOnly,
+      //renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
+      format: '{0:n5}',
       isDisabled: !slowdownMonths?.includes(8),
       width: 120,
     },
@@ -380,10 +295,10 @@ const SlowdownNorms = () => {
       field: 'september',
       title: headerMap[9],
       editable: slowdownMonths?.includes(9),
-      renderEditCell: NumericInputOnly,
+      //renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
+      format: '{0:n5}',
       isDisabled: !slowdownMonths?.includes(9),
       width: 120,
     },
@@ -391,10 +306,10 @@ const SlowdownNorms = () => {
       field: 'october',
       title: headerMap[10],
       editable: slowdownMonths?.includes(10),
-      renderEditCell: NumericInputOnly,
+      //renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
+      format: '{0:n5}',
       isDisabled: !slowdownMonths?.includes(10),
       width: 120,
     },
@@ -402,10 +317,10 @@ const SlowdownNorms = () => {
       field: 'november',
       title: headerMap[11],
       editable: slowdownMonths?.includes(11),
-      renderEditCell: NumericInputOnly,
+      //renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
+      format: '{0:n5}',
       isDisabled: !slowdownMonths?.includes(11),
       width: 120,
     },
@@ -413,10 +328,10 @@ const SlowdownNorms = () => {
       field: 'december',
       title: headerMap[12],
       editable: slowdownMonths?.includes(12),
-      renderEditCell: NumericInputOnly,
+      //renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
+      format: '{0:n5}',
       isDisabled: !slowdownMonths?.includes(12),
       width: 120,
     },
@@ -424,10 +339,10 @@ const SlowdownNorms = () => {
       field: 'january',
       title: headerMap[1],
       editable: slowdownMonths?.includes(1),
-      renderEditCell: NumericInputOnly,
+      //renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
+      format: '{0:n5}',
       isDisabled: !slowdownMonths?.includes(1),
       width: 120,
     },
@@ -435,10 +350,10 @@ const SlowdownNorms = () => {
       field: 'february',
       title: headerMap[2],
       editable: slowdownMonths?.includes(2),
-      renderEditCell: NumericInputOnly,
+      //renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
+      format: '{0:n5}',
       isDisabled: !slowdownMonths?.includes(2),
       width: 120,
     },
@@ -446,10 +361,10 @@ const SlowdownNorms = () => {
       field: 'march',
       title: headerMap[3],
       editable: slowdownMonths?.includes(3),
-      renderEditCell: NumericInputOnly,
+      //renderEditCell: NumericInputOnly,
       align: 'right',
       headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
+      format: '{0:n5}',
       isDisabled: !slowdownMonths?.includes(3),
       width: 120,
     },
@@ -642,8 +557,18 @@ const SlowdownNorms = () => {
 
         if (isTPD) {
           const months = [
-            'april', 'may', 'june', 'july', 'august', 'september',
-            'october', 'november', 'december', 'january', 'february', 'march',
+            'april',
+            'may',
+            'june',
+            'july',
+            'august',
+            'september',
+            'october',
+            'november',
+            'december',
+            'january',
+            'february',
+            'march',
           ]
 
           months.forEach((month) => {
@@ -662,7 +587,6 @@ const SlowdownNorms = () => {
       setLoading(false)
     }
   }
-
 
   const handleUnitChange = (unit) => {
     setSelectedUnit(unit)
@@ -779,8 +703,7 @@ const SlowdownNorms = () => {
       saveWithRemark: false,
       saveBtn: true,
       showCalculate: lowerVertName == 'meg' ? false : false,
-      // noColor: true,
-      allAction: false,
+      allAction: true,
     },
     isOldYear,
   )
