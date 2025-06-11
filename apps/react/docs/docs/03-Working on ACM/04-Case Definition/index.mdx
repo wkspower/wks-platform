@@ -85,3 +85,155 @@ To design effective and maintainable case definitions:
 - Involve stakeholders and domain experts during design.
 - Review and update definitions regularly to reflect process or policy changes.
 - Maintain clear, versioned documentation for each case definition.
+
+---
+
+Within this section of the documentation you'll find information about:
+
+---
+
+## 📁 Case Definition
+
+Case definitions are the backbone of how cases operate within WKS. They define the structure, transitions, logic, and routing of tasks throughout the case lifecycle.
+
+### Why It Matters
+
+Understanding case definitions is essential for implementing consistent, automated, and traceable workflows. By configuring **Stages**, **Event Listeners**, and **Queues**, organizations can design flexible cases that respond dynamically to user input, system events, or external data sources.
+
+---
+
+### 🔄 Stages
+
+**Stages** represent logical segments in a case lifecycle. Each stage can contain a set of tasks, rules, and forms, and can be configured to operate sequentially or in parallel.
+
+**Key Concepts:**
+- **Transitions:** Define the flow between stages using rules or triggers.
+- **Conditions:** Control when and how a stage becomes active or is skipped.
+- **Parallelism:** Enable stages to run simultaneously for efficiency and flexibility.
+
+Stages allow the case to evolve contextually—adapting based on inputs, external data, or user behavior.
+
+---
+
+### 📣 Event Listeners
+
+**Event listeners** are mechanisms that react to specific triggers during the case lifecycle. These can be:
+
+- **System events** (e.g., case created, task completed)
+- **Custom-defined events** (e.g., external API callbacks, integration responses)
+
+**Use Cases:**
+- Automate transitions when certain conditions are met
+- Launch external services or workflows in reaction to internal events
+- Notify users or teams when events of interest occur
+
+Event listeners help decouple logic from the case’s main flow, improving maintainability and scalability.
+
+---
+
+### 🗃️ Queues
+
+**Queues** define how tasks within a case are assigned and routed. WKS supports both static and dynamic assignment strategies.
+
+**Configuration Options:**
+- Assign tasks based on role, group, or user metadata
+- Use routing logic to assign tasks to the most appropriate user
+- Integrate with external systems to enforce service-level objectives (SLOs)
+
+Queues ensure efficient load distribution and proper accountability across case workers.
+
+---
+
+## 📁 Case Instance
+
+A **Case Instance** is a running instance of a case definition. Once initiated, it holds all operational data, user interactions, and audit trails related to that specific execution.
+
+### Why It Matters
+
+Case instances are the primary way users and systems interact with active workflows. This documentation area focuses on the features available during runtime that enhance usability, visibility, collaboration, and traceability.
+
+---
+
+### 🧾 Case Details
+
+Users can view and update case metadata, including:
+- Title, type, and category
+- Custom variables and properties
+- Case owner and participants
+
+Support for versioned updates and change logs ensures traceability.
+
+---
+
+### ✅ Tasks
+
+Case instances often include tasks that are:
+- **Automated (via processes)** or
+- **Manual (performed by users)**
+
+This section explains:
+- Task creation and linkage
+- Task assignment and reassignment
+- Task completion workflows
+- Working with tasks from the user’s perspective
+
+---
+
+### 💬 Comments
+
+Collaborative case discussions can be handled through inline comments:
+- Add, edit, and delete comments
+- Mention users
+- Tag timestamps or attach context
+
+Encourages communication and shared understanding within complex case contexts.
+
+---
+
+### 📎 Documents
+
+Cases often include document uploads such as contracts, forms, and evidential attachments.
+
+This section covers:
+- Document upload and metadata configuration
+- Version control and history
+- Access control and sharing settings
+- Tagging and classification best practices
+
+---
+
+### 📧 Emails
+
+WKS supports email interactions tied directly to cases:
+- Automatically log inbound emails
+- Send templated outbound messages
+- View full communication history from within the case
+- Enable event-triggered email notifications
+
+Useful for service desks, HR processes, or compliance cases where communications are critical.
+
+---
+
+### ✳️ Creating Case Instances
+
+Case instances can be created:
+- **Manually** via the user interface
+- **Automatically** via process events or API integrations
+
+This section outlines:
+- Required fields and configuration steps
+- Automated creation logic using external triggers
+- Best practices for case initialization
+
+---
+
+### 🕵️ Audit & History
+
+For each case instance, WKS maintains a complete audit trail, including:
+- Stage and status changes
+- Task events (assignments, completions)
+- Form submissions and updates
+- User interactions and system-triggered events
+
+Audit logs are accessible for compliance, quality control, and internal reviews.
+
