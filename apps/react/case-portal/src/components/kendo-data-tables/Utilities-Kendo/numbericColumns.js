@@ -4,6 +4,7 @@ export const NoSpinnerNumericEditor = (props) => {
   const value = props.dataItem[props.field]
 
   return (
+    <td style={{ textAlign: 'end' }}>
     <NumericTextBox
       value={value}
       spinners={false}
@@ -14,7 +15,9 @@ export const NoSpinnerNumericEditor = (props) => {
           value: e.value,
         })
       }}
-      style={{ width: '100%' }}
+        // decimals={6}
+      // style={{ width: '100%' }}
     />
+    </td>
   )
 }

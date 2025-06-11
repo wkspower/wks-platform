@@ -5,7 +5,6 @@ import productionColumnsPE3 from '../../../assets/kendo_config_pe3.json'
 import productionColumnsPE4 from '../../../assets/kendo_config_pe4.json'
 import crackerColumns from '../../../assets/kendo_config_cracker_coldefs.json'
 import cracker_composition from '../../../assets/kendo_config_cracker_composition.json'
-import { MY_NUM_COL } from 'components/kendo-data-tables/Utilities-Kendo/MyNumColdefs'
 
 const getConfigByType = (configType) => {
   switch (configType) {
@@ -51,7 +50,7 @@ const getEnhancedAOPColDefs = ({
     allGradesReciepes?.forEach((field) => {
       config.push({
         field: field?.id?.toUpperCase(),
-        title: field?.id,
+        title: field?.displayName,
         editable: true,
         align: 'left',
         headerAlign: 'left',
@@ -64,13 +63,11 @@ const getEnhancedAOPColDefs = ({
   }
 
   const enhancedColDefs = config.map((col) => {
-    const isNum = MY_NUM_COL.includes(headerMap[col.title])
     if (headerMap && headerMap[col.title]) {
       return {
         ...col,
         title: headerMap[col.title],
         align: 'right',
-        format: isNum ? '{0:n3}' : undefined,
       }
     }
 

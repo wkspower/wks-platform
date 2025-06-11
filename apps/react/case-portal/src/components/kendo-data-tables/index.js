@@ -562,7 +562,11 @@ const KendoDataTables = ({
               <Button
                 variant='contained'
                 onClick={handleCalculateBtn}
-                disabled={isButtonDisabled}
+                disabled={
+                  rows?.length === 0
+                    ? false
+                    : isButtonDisabled || !permissions?.showCalculateVisibility
+                }
                 className='btn-save'
               >
                 Calculate
@@ -762,11 +766,11 @@ const KendoDataTables = ({
                   />
                 )
               }
-              if (col?.field === 'discription') {
+              if (['discription', 'Name'].includes(col?.field)) {
                 return (
                   <GridColumn
-                    key='discription'
-                    field='discription'
+                    key={col?.field}
+                    field={col?.field}
                     title={col.title || col.headerName || 'Description'}
                     width={210}
                     editable={true}
@@ -852,6 +856,9 @@ const KendoDataTables = ({
                     //   />
                     // )}
                     format='{0:n2}'
+                    cells={{
+                      edit: { text: NoSpinnerNumericEditor },
+                    }}
                   />
                 )
               }
@@ -892,6 +899,7 @@ const KendoDataTables = ({
                   field={col.field}
                   title={col.title || col.headerName}
                   width={col.width}
+                  className='k-number-right'
                   editable={true}
                   // headerClassName={isActive ? 'active-column' : ''}
                   cells={{

@@ -169,3 +169,6 @@
 .k-custom-dtp-popup .k-footer .k-button {
   font-size: 1rem;
 }
+.k-grid .k-grid-content td.k-number-right {
+  text-align: right !important;
+}

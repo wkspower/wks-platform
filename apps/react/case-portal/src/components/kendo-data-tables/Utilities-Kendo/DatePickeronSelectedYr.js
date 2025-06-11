@@ -63,6 +63,7 @@ const DateTimePickerEditor = ({ dataItem, field, onChange }) => {
             field,
         value: jsDate,
         syntheticEvent: context?.syntheticEvent,
+        format: '{0:dd/MM/yyyy hh:mm a}',
           })
     },
     [dataItem, field, onChange],
@@ -75,7 +76,7 @@ const DateTimePickerEditor = ({ dataItem, field, onChange }) => {
           minDateTime={finalMin ? dayjs(finalMin) : null}
           maxDateTime={finalMax ? dayjs(finalMax) : null}
           onChange={handleValueChange}
-          format='DD/MM/YYYY, h:mm:ss A'
+          format='{0:dd/MM/yyyy hh:mm a}'
           minutesStep={1}
           slotProps={{
             textField: {

@@ -24,7 +24,7 @@ const ShutDown = ({ permissions }) => {
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   // const [shutdownData, setShutdownData] = useState([])
   // const [allProducts, setAllProducts] = useState([])
-  const [rowModesModel, setRowModesModel] = useState({})
+  // const [rowModesModel, setRowModesModel] = useState({})
 
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
@@ -209,6 +209,7 @@ const ShutDown = ({ permissions }) => {
         id: index,
         originalRemark: item.remark,
         inEdit: false,
+        isEditable: true,
       }))
       setRows(formattedData)
       setLoading(false)
