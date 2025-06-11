@@ -30,6 +30,11 @@ import {
   isColumnMenuFilterActive,
   isColumnMenuSortActive,
 } from '../../../node_modules/@progress/kendo-react-grid/index'
+import { DurationEditor } from './Utilities-Kendo/numericViewCells'
+import {
+  recalcDuration,
+  recalcEndDate,
+} from './Utilities-Kendo/durationHelpers'
 
 export const particulars = [
   'normParameterId',
@@ -169,39 +174,27 @@ const KendoDataTables = ({
       const { dataItem, field, value } = e
 
       // helper to recalc duration based on start/end
-      const recalcDuration = (startRaw, endRaw) => {
-        const start = startRaw ? new Date(startRaw) : null
-        const end = endRaw ? new Date(endRaw) : null
-        if (
-          start instanceof Date &&
-          !isNaN(start) &&
-          end instanceof Date &&
-          !isNaN(end)
-        ) {
-          const diffMs = end.getTime() - start.getTime()
-          return parseFloat((diffMs / (1000 * 60 * 60)).toFixed(2))
-        }
-        return 0
-      }
+      const itemId = dataItem.id
 
       // helper to recalc end date based on start + duration
-      const recalcEndDate = (startRaw, durationHrs) => {
-        const start = startRaw ? new Date(startRaw) : null
-        if (start instanceof Date && !isNaN(start) && !isNaN(durationHrs)) {
-          return new Date(start.getTime() + durationHrs * 3600 * 1000)
-        }
-        return null
-      }
 
       // update rows in one pass
       setRows((prev) =>
         prev.map((r) => {
-          if (r.id !== dataItem.id) return r
+          if (r.id !== itemId) return r
 
           // apply the edit
           const updated = { ...r, [field]: value }
 
-          if (field === 'maintStartDateTime' || field === 'maintEndDateTime') {
+          if (
+            'maintStartDateTime' in updated &&
+            'maintEndDateTime' in updated &&
+            'durationInHrs' in updated
+          ) {
+            if (
+              field === 'maintStartDateTime' ||
+              field === 'maintEndDateTime'
+            ) {
             updated.durationInHrs = recalcDuration(
               updated.maintStartDateTime,
               updated.maintEndDateTime,
@@ -209,13 +202,13 @@ const KendoDataTables = ({
           } else if (field === 'durationInHrs') {
             const newEnd = recalcEndDate(
               updated.maintStartDateTime,
-              parseFloat(value),
+                value, // string like “10.20”
             )
             if (newEnd) {
               updated.maintEndDateTime = newEnd.toISOString()
             }
           }
-
+          }
           return updated
         }),
       )
@@ -223,21 +216,22 @@ const KendoDataTables = ({
       // mirror in modifiedCells
       setModifiedCells((prev) => {
         const base = { ...dataItem, [field]: value }
-
+        if (
+          'maintStartDateTime' in base &&
+          'maintEndDateTime' in base &&
+          'durationInHrs' in base
+        ) {
         if (field === 'maintStartDateTime' || field === 'maintEndDateTime') {
           base.durationInHrs = recalcDuration(
             base.maintStartDateTime,
             base.maintEndDateTime,
           )
         } else if (field === 'durationInHrs') {
-          const newEnd = recalcEndDate(
-            base.maintStartDateTime,
-            parseFloat(value),
-          )
+            const newEnd = recalcEndDate(base.maintStartDateTime, value)
           if (newEnd) base.maintEndDateTime = newEnd.toISOString()
         }
-
-        return { ...prev, [dataItem.id]: base }
+        }
+        return { ...prev, [itemId]: base }
       })
     },
     [setRows, setModifiedCells],
@@ -855,9 +849,9 @@ const KendoDataTables = ({
                     //     }
                     //   />
                     // )}
-                    format='{0:n2}'
+                    format={'{0:n2}'}
                     cells={{
-                      edit: { text: NoSpinnerNumericEditor },
+                      edit: { text: DurationEditor },
                     }}
                   />
                 )
@@ -899,8 +893,12 @@ const KendoDataTables = ({
                   field={col.field}
                   title={col.title || col.headerName}
                   width={col.width}
-                  className='k-number-right'
-                  editable={true}
+                  className={
+                    col?.isDisabled
+                      ? 'k-number-right-disabled'
+                      : 'k-number-right'
+                  }
+                  editable={col?.isDisabled ? false : true}
                   // headerClassName={isActive ? 'active-column' : ''}
                   cells={{
                     edit: { text: NoSpinnerNumericEditor },

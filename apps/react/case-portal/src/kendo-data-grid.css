@@ -172,3 +172,7 @@
 .k-grid .k-grid-content td.k-number-right {
   text-align: right !important;
 }
+.k-grid .k-grid-content td.k-number-right-disabled {
+  text-align: right !important;
+  background-color: #ebebeb;
+}

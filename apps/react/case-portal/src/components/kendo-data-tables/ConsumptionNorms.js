@@ -66,7 +66,7 @@ const ConsumptionNorms = () => {
   const keycloak = useSession()
   const [allProducts, setAllProducts] = useState([])
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
-  const [rowModesModel, setRowModesModel] = useState({})
+  // const [rowModesModel, setRowModesModel] = useState({})
 
   const [isAccordionExpanded, setIsAccordionExpanded] = useState(true)
 
@@ -116,39 +116,39 @@ const ConsumptionNorms = () => {
   //   return product ? product.displayName : ''
   // }
 
-  const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    const rowId = newRow.id
-    const updatedFields = []
+  // const processRowUpdate = React.useCallback((newRow, oldRow) => {
+  //   const rowId = newRow.id
+  //   const updatedFields = []
 
-    for (const key in newRow) {
-      if (
-        Object.prototype.hasOwnProperty.call(newRow, key) &&
-        newRow[key] !== oldRow[key]
-      ) {
-        updatedFields.push(key)
-      }
-    }
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
+  //   for (const key in newRow) {
+  //     if (
+  //       Object.prototype.hasOwnProperty.call(newRow, key) &&
+  //       newRow[key] !== oldRow[key]
+  //     ) {
+  //       updatedFields.push(key)
+  //     }
+  //   }
+  //   unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
 
-    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-    }
+  //   if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
+  //     unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
+  //   }
 
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === newRow.id ? { ...newRow, isNew: false } : row,
-      ),
-    )
+  //   setRows((prevRows) =>
+  //     prevRows.map((row) =>
+  //       row.id === newRow.id ? { ...newRow, isNew: false } : row,
+  //     ),
+  //   )
 
-    if (updatedFields.length > 0) {
-      setModifiedCells((prevModifiedCells) => ({
-        ...prevModifiedCells,
-        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-      }))
-    }
+  //   if (updatedFields.length > 0) {
+  //     setModifiedCells((prevModifiedCells) => ({
+  //       ...prevModifiedCells,
+  //       [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
+  //     }))
+  //   }
 
-    return newRow
-  }, [])
+  //   return newRow
+  // }, [])
 
   const saveEditedData = async (newRows) => {
     setLoading(true)
@@ -263,13 +263,13 @@ const ConsumptionNorms = () => {
   }
 
   const saveChanges = React.useCallback(async () => {
-    const rowsInEditMode = Object.keys(rowModesModel).filter(
-      (id) => rowModesModel[id]?.mode === 'edit',
-    )
+    // const rowsInEditMode = Object.keys(rowModesModel).filter(
+    //   (id) => rowModesModel[id]?.mode === 'edit',
+    // )
 
-    rowsInEditMode.forEach((id) => {
-      apiRef.current.stopRowEditMode({ id })
-    })
+    // rowsInEditMode.forEach((id) => {
+    //   apiRef.current.stopRowEditMode({ id })
+    // })
     setLoading(true)
 
     setTimeout(() => {
@@ -281,7 +281,7 @@ const ConsumptionNorms = () => {
         // console.log('lowerVertName', lowerVertName)
 
         try {
-          var data = Object.values(unsavedChangesRef.current.unsavedRows)
+          var data = Object.values(modifiedCells)
           if (data.length == 0) {
             setSnackbarOpen(true)
             setSnackbarData({
@@ -318,12 +318,12 @@ const ConsumptionNorms = () => {
         try {
           setLoading(true)
 
-          var editedData = Object.values(unsavedChangesRef.current.unsavedRows)
-          var allRows = Array.from(apiRef.current.getRowModels().values())
-          allRows = allRows.filter((row) => !row.isGroupHeader)
-          const updatedRows = allRows.map(
-            (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
-          )
+          var editedData = Object.values(modifiedCells)
+          // var allRows = Array.from(apiRef.current.getRowModels().values())
+          // allRows = allRows.filter((row) => !row.isGroupHeader)
+          // const updatedRows = allRows.map(
+          //   (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
+          // )
 
           //SKIP THIS IF saveBtn IS SET TO --> FALSE
           // if (updatedRows.length === 0) {
@@ -364,13 +364,13 @@ const ConsumptionNorms = () => {
             //   return
             // }
             //UNCOMMNET THIS IF saveBtn IS SET TO --> TRUE
-            saveEditedData(updatedRows)
+            saveEditedData(editedData)
 
             // setLoading(false)
             setCalculatebtnClicked(false)
             // saveEditedData(editedData)
           } else {
-            saveEditedData(updatedRows)
+            saveEditedData(editedData)
           }
         } catch (error) {
           setLoading(false)
@@ -379,7 +379,7 @@ const ConsumptionNorms = () => {
         }
       }
     }, 400)
-  }, [apiRef, selectedUnit, rowModesModel, calculatebtnClicked])
+  }, [apiRef, selectedUnit, modifiedCells, calculatebtnClicked])
 
   const fetchData = async () => {
     setLoading(true)
@@ -478,13 +478,13 @@ const ConsumptionNorms = () => {
     handleRemarkCellClick,
   })
 
-  const onProcessRowUpdateError = React.useCallback((error) => {
-    console.log(error)
-  }, [])
+  // const onProcessRowUpdateError = React.useCallback((error) => {
+  //   console.log(error)
+  // }, [])
 
-  const onRowModesModelChange = (newRowModesModel) => {
-    setRowModesModel(newRowModesModel)
-  }
+  // const onRowModesModelChange = (newRowModesModel) => {
+  //   setRowModesModel(newRowModesModel)
+  // }
 
   const handleUnitChange = (unit) => {
     setSelectedUnit(unit)
@@ -640,7 +640,7 @@ const ConsumptionNorms = () => {
       saveWithRemark: false,
       saveBtn: false,
       isOldYear: isOldYear,
-      showCalculate: false,
+      showCalculate: true,
     }
   }
 
@@ -654,9 +654,13 @@ const ConsumptionNorms = () => {
       units: ['TPH', 'TPD'],
       saveWithRemark: true,
       saveBtn: false,
-      // showCalculate: true,
-      showCalculate: Object.keys(calculationObject).length > 0 ? true : false,
-
+      showCalculate: true,
+      allAction: true,
+      showCalculateVisibility:
+        lowerVertName === 'meg' &&
+        Object.keys(calculationObject || {}).length > 0
+          ? true
+          : false,
       showRefresh: false,
       noColor: false,
       ShowSummary: true,
@@ -717,6 +721,7 @@ const ConsumptionNorms = () => {
                 <KendoDataTables
                   autoHeight={true}
                   modifiedCells={modifiedCells}
+                  setModifiedCells={setModifiedCells}
                   columns={productionColumns}
                   isCellEditable={isCellEditable}
                   NormParameterIdCell={NormParameterIdCell}
@@ -725,9 +730,6 @@ const ConsumptionNorms = () => {
                   getRowId={(row) => row.id}
                   title='Consumption AOP'
                   paginationOptions={[100, 200, 300]}
-                  processRowUpdate={processRowUpdate}
-                  rowModesModel={rowModesModel}
-                  onRowModesModelChange={onRowModesModelChange}
                   saveChanges={saveChanges}
                   snackbarData={snackbarData}
                   snackbarOpen={snackbarOpen}
@@ -742,14 +744,13 @@ const ConsumptionNorms = () => {
                   handleCalculate={handleCalculate}
                   handleRemarkCellClick={handleRemarkCellClick}
                   fetchData={fetchData}
-                  onProcessRowUpdateError={onProcessRowUpdateError}
                   handleUnitChange={handleUnitChange}
                   remarkDialogOpen={remarkDialogOpen}
                   setRemarkDialogOpen={setRemarkDialogOpen}
                   currentRemark={currentRemark}
                   setCurrentRemark={setCurrentRemark}
                   currentRowId={currentRowId}
-                  unsavedChangesRef={unsavedChangesRef}
+                  // unsavedChangesRef={unsavedChangesRef}
                   permissions={adjustedPermissions}
                   groupBy='Particulars'
                 />
