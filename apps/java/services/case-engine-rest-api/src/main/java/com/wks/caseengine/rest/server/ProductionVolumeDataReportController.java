@@ -46,6 +46,13 @@ public class ProductionVolumeDataReportController {
 				year,reportType);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
+	
+	@PostMapping(value = "/report/month-wise/consumption-summary")
+	public ResponseEntity<AOPMessageVM> updateReportForMonthWiseConsumptionSummaryData(@RequestParam String plantId,
+			@RequestParam String year,@RequestBody List<MonthWiseProductionPlanDTO> dataList) {
+		AOPMessageVM response = productionVolumeDataReportService.updateReportForMonthWiseConsumptionSummaryData(plantId, year, dataList);
+		return ResponseEntity.status(response.getCode()).body(response);
+	}
 
 	@GetMapping(value = "/report/plant/production/plan")
 	public ResponseEntity<AOPMessageVM> getReportForPlantProductionPlanData(@RequestParam String plantId,

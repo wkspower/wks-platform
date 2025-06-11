@@ -40,5 +40,8 @@ public interface ProductionVolumeDataReportService {
 
     AOPMessageVM saveMonthWiseProductionPlanData(String plantId, String year, List<MonthWiseProductionPlanDTO> dataList);
 
+    AOPMessageVM updateReportForMonthWiseConsumptionSummaryData(String plantId, String year, List<MonthWiseProductionPlanDTO> dataList);
+
+    
     AOPMessageVM savePlanTurnAroundData(String plantId, String year, List<TurnAroundPlanReportDTO> dataList);
 }
