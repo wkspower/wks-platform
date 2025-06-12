@@ -276,7 +276,7 @@ const TurnaroundPlanTable = () => {
       field: 'maintenanceId',
       headerName: 'maintenanceId',
       editable: false,
-      hide: true,
+      hidden: true,
     },
 
     {

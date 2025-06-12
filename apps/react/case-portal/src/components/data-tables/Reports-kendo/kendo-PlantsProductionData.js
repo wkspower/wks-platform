@@ -87,14 +87,14 @@ const PlantsProductionSummary = () => {
           field: 'BudgetPrevYear',
           title: 'Budget',
           width: 120,
-          editable: true,
+          editable: false,
           format: '{0:#.###}',
         },
         {
           field: 'ActualPrevYear',
           title: 'Actual',
           width: 120,
-          editable: false,
+          editable: true,
         },
       ],
     },
@@ -163,7 +163,7 @@ const PlantsProductionSummary = () => {
         res = res?.data.map((Particulates, index) => ({
           ...Particulates,
           id: index,
-          isEditable: true,
+          isEditable: index == 4 || index == 5 ? true : false,
         }))
 
         setRows(res)
@@ -204,6 +204,7 @@ const PlantsProductionSummary = () => {
       const rowsToUpdate = data.map((row) => ({
         id: row.Id,
         remark: row.Remark,
+        ActualPrevYear: row.ActualPrevYear,
       }))
       const res = await DataService.savePlantProductionData(
         keycloak,

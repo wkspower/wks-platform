@@ -1,26 +1,23 @@
 import { DataService } from 'services/DataService'
-// import ASDataGrid from './ASDataGrid'
-import React, { useEffect, useState } from 'react'
-import { useSession } from 'SessionStoreContext'
-import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
-import { useSelector } from 'react-redux'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
-import { validateFields } from 'utils/validationUtils'
-// import getEnhancedAOPColDefs from './CommonHeader/ConfigHeader'
-import { Box } from '../../../node_modules/@mui/material/index'
-import KendoDataTables from './index'
 import getEnhancedAOPColDefs from 'components/data-tables/CommonHeader/kendo_ConfigHeader'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useSession } from 'SessionStoreContext'
+import { validateFields } from 'utils/validationUtils'
+import { Box } from '../../../node_modules/@mui/material/index'
+import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
+import KendoDataTables from './index'
 
 const SelectivityData = (props) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
-
   const isOldYear = oldYear?.oldYear
-
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const keycloak = useSession()
@@ -29,7 +26,6 @@ const SelectivityData = (props) => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const [allGradesReciepes, setAllGradesReciepes] = useState(null)
-
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -39,30 +35,15 @@ const SelectivityData = (props) => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [allProducts, setAllProducts] = useState([])
-
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
-
-  // const [rowModesModel, setRowModesModel] = useState({})
-
   const handleRemarkCellClick = (row) => {
-    // if (!row?.isEditable) return
-
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
-
   const saveChanges = React.useCallback(async () => {
-    // const rowsInEditMode = Object.keys(rowModesModel).filter(
-    //   (id) => rowModesModel[id]?.mode === 'edit',
-    // )
-
-    // rowsInEditMode.forEach((id) => {
-    //   apiRef.current.stopRowEditMode({ id })
-    // })
     setTimeout(() => {
       try {
-        // let newRows = modifiedCells.filter((row) => row.isGroupHeader !== true)
         var data = Object.values(modifiedCells)
         if (data.length === 0) {
           setSnackbarOpen(true)
@@ -258,10 +239,6 @@ const SelectivityData = (props) => {
     props?.configType,
   ])
 
-  // const [columnConfig, setColumnConfig] = useState([])
-
-  // setColumnConfig()
-
   const fetchConfigData = async () => {
     setLoading(true)
     try {
@@ -301,6 +278,8 @@ const SelectivityData = (props) => {
       showUnit: false,
       saveWithRemark: false,
       saveBtn: false,
+      downloadExcelBtn: false,
+      uploadExcelBtn: false,
       isOldYear: isOldYear,
       allAction: false,
     }
@@ -315,18 +294,24 @@ const SelectivityData = (props) => {
       showUnit: false,
       saveWithRemark: true,
       saveBtn: true,
+      downloadExcelBtn: true,
+      uploadExcelBtn: true,
       allAction: true,
     },
     isOldYear,
   )
   const NormParameterIdCell = (props) => {
-    // console.log(props)
     const productId = props.dataItem.normParameterFKId
     const product = allProducts.find((p) => p.id === productId)
     const displayName = product?.displayName || ''
-    // console.log(displayName)
     return <td>{displayName ? displayName : props?.dataItem?.particulars}</td>
   }
+
+  const handleExcelUpload = (jsonData) => {
+    console.log('Received Excel Data from Child:', jsonData)
+    // setRows(jsonData)
+  }
+
   return (
     <Box>
       <Backdrop
@@ -361,9 +346,9 @@ const SelectivityData = (props) => {
         currentRemark={currentRemark}
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
-        // unsavedChangesRef={unsavedChangesRef}
         permissions={adjustedPermissions}
         groupBy={props?.groupBy}
+        handleExcelUpload={handleExcelUpload}
       />
     </Box>
   )

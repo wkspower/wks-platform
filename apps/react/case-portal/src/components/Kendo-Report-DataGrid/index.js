@@ -63,7 +63,9 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
           data={rows}
           dataItemKey='id'
           autoProcessData={true}
-          sortable={true}
+          sortable={{
+            mode: 'multiple',
+          }}
           scrollable='scrollable'
           filter={filter}
           onFilterChange={(e) => setFilter(e.filter)}

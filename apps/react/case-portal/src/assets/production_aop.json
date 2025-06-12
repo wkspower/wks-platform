@@ -1,14 +1,20 @@
 [
-  { "field": "idFromApi", "headerName": "ID" },
+  { "field": "idFromApi", "headerName": "ID", "hidden": true },
   {
     "field": "aopCaseId",
     "headerName": "Case ID",
     "minWidth": 120,
-    "editable": false
+    "editable": false,
+    "hidden": true
   },
-  { "field": "aopType", "headerName": "Type", "minWidth": 80 },
-  { "field": "aopYear", "headerName": "Year", "minWidth": 80 },
-  { "field": "plantFkId", "headerName": "Plant ID", "minWidth": 80 },
+  { "field": "aopType", "headerName": "Type", "minWidth": 80, "hidden": true },
+  { "field": "aopYear", "headerName": "Year", "minWidth": 80, "hidden": true },
+  {
+    "field": "plantFkId",
+    "headerName": "Plant ID",
+    "minWidth": 80,
+    "hidden": true
+  },
   {
     "field": "normParametersFKId",
     "headerName": "Particulars/Grade",
@@ -122,5 +128,10 @@
     "minWidth": 175,
     "editable": false
   },
-  { "field": "aopStatus", "headerName": "aopStatus", "editable": false }
+  {
+    "field": "aopStatus",
+    "headerName": "aopStatus",
+    "editable": false,
+    "hidden": true
+  }
 ]

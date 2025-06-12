@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
@@ -235,6 +235,7 @@ const MaintenanceTable = () => {
     {
       field: 'isEditable',
       title: 'isEditable',
+      hidden: true,
     },
   ]
 

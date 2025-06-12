@@ -12,6 +12,13 @@
     "field": "normParameterId",
     "title": "Particulars",
     "editable": false,
+    "width": 150,
+    "hidden": true
+  },
+  {
+    "field": "displayName",
+    "title": "Particulars",
+    "editable": false,
     "width": 150
   },
   {

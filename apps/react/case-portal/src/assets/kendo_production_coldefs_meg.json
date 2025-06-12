@@ -1,13 +1,15 @@
 [
   {
     "field": "idFromApi",
-    "title": "ID"
+    "title": "ID",
+    "hidden": true
   },
   {
     "field": "aopCaseId",
     "title": "Case ID",
     "width": 120,
-    "editable": false
+    "editable": false,
+    "hidden": true
   },
   {
     "field": "normParametersFKId",
@@ -121,10 +123,12 @@
     "field": "avgTph",
     "title": "AVG",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "hidden": true
   },
   {
     "field": "isEditable",
-    "title": "isEditable"
+    "title": "isEditable",
+    "hidden": true
   }
 ]

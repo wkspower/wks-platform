@@ -437,6 +437,7 @@ const ProductionvolumeData = ({ permissions }) => {
       headerName: 'Case ID',
       minWidth: 120,
       editable: false,
+      hidden: true,
     },
 
     {

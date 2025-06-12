@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Grid, GridColumn } from '@progress/kendo-react-grid'
 import { filterBy } from '@progress/kendo-data-query'
 import '@progress/kendo-theme-default/dist/all.css'
@@ -16,6 +16,9 @@ import {
   MenuItem,
   TextField,
 } from '../../../node_modules/@mui/material/index'
+
+import DownloadIcon from '@mui/icons-material/Download'
+import UploadIcon from '@mui/icons-material/Upload'
 import Notification from 'components/Utilities/Notification'
 import { SvgIcon } from '../../../node_modules/@progress/kendo-react-common/index'
 import { trashIcon } from '../../../node_modules/@progress/kendo-svg-icons/dist/index'
@@ -36,9 +39,9 @@ import {
   recalcEndDate,
 } from './Utilities-Kendo/durationHelpers'
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
+import * as XLSX from 'xlsx'
 
 export const particulars = [
-  'normParameterId',
   'normParametersFKId',
   'NormParameterFKId',
   'materialFkId',
@@ -51,8 +54,8 @@ export const typeParticulars = [
   'TypeDisplayName',
   'ConfigTypeDisplayName',
 ]
-export const hiddenFields = [
-  'maintenanceId',
+
+export const hiddenFields1 = [
   'id',
   'plantFkId',
   'aopCaseId',
@@ -65,31 +68,23 @@ export const hiddenFields = [
   'isEditable',
   'period',
 ]
+export const hiddenFields = []
 
 const KendoDataTables = ({
-  // setUpdatedRows = () => {},
-
   rows = [],
-  // updatedRows = [],
   setRows,
   columns,
   loading = false,
   typeRank = {},
-  // pageSizes = [10, 20, 50],
-  // onRowChange,
-  // disableColor = false,
   permissions = {},
   setSnackbarOpen = () => {},
   snackbarData = { message: '', severity: 'info' },
   snackbarOpen = false,
   setRemarkDialogOpen = () => {},
   currentRemark = '',
-  // editedRows = [],
   setCurrentRemark = () => {},
   currentRowId = null,
-  // modifiedCells = [],
   NormParameterIdCell = () => {},
-
   setModifiedCells = () => {},
   remarkDialogOpen = false,
   handleDeleteSelected = () => {},
@@ -105,7 +100,7 @@ const KendoDataTables = ({
   allProducts = [],
   selectMode,
   setSelectMode = () => {},
-  // allRedCell = [],
+  handleExcelUpload = () => {},
 }) => {
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
@@ -117,29 +112,14 @@ const KendoDataTables = ({
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
   const [edit, setEdit] = useState({})
-
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
-
   const [sort, setSort] = useState([])
-
   const [issRowEdited, setIsRowEdited] = useState(false)
 
-  // const gridApiRef = useRef()
-  //  const apiRef = useGridApiRef();
-
-  // // const localApiRef = useGridApiRef()
-  // // const finalExternalApiRef = apiRef ?? localApiRef
-  // useEffect(() => {
-  //   if (gridApiRef .current) {
-  //     gridApiRef .current.editCell({ rowIndex: 0, field: 'name' })
-  //   }
-  // }, [])
   const handleEditChange = useCallback((e) => {
-    // console.log('e--->', e)
     setEdit(e.edit)
   }, [])
   const handleRowClick = (e) => {
-    // console.log('22', e.dataItem?.isEditable)
     if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
       setEdit({})
       return
@@ -152,32 +132,12 @@ const KendoDataTables = ({
       })),
     )
   }
-  // const itemChange = useCallback(
-  //   (e) => {
-  //     // console.log(e)
-  //     const { dataItem, field, value } = e
-
-  //     setRows((prev) =>
-  //       prev.map((r) =>
-  //         r.id === dataItem.id ? updateRowWithDuration(r, field, value) : r,
-  //       ),
-  //     )
-
-  //     setModifiedCells((prev) => {
-  //       const updatedRow = updateRowWithDuration(dataItem, field, value)
-  //       return { ...prev, [dataItem.id]: updatedRow }
-  //     })
-  //   },
-
-  //   [setRows, setModifiedCells],
-  // )
 
   const itemChange = useCallback(
     (e) => {
       const changedDataItem = e.dataItem
       const changedField = e.field
       const newValue = e.value
-
 
       const originalDataItem = rows.find(
         (item) => item.id === changedDataItem.id,
@@ -187,7 +147,7 @@ const KendoDataTables = ({
         : undefined
 
       //console.log('--- Cell Value Changed ---')
-      //console.log('Row ID:', changedDataItem.id) 
+      //console.log('Row ID:', changedDataItem.id)
       //console.log('Field (Column Name):', changedField)
       //console.log('Original Value:', originalValue)
       //console.log('New Value:', newValue)
@@ -199,18 +159,10 @@ const KendoDataTables = ({
       setIsRowEdited(true)
 
       const { dataItem, field, value } = e
-
-      // helper to recalc duration based on start/end
       const itemId = dataItem.id
-
-      // helper to recalc end date based on start + duration
-
-      // update rows in one pass
       setRows((prev) =>
         prev.map((r) => {
           if (r.id !== itemId) return r
-
-          // apply the edit
           const updated = { ...r, [field]: value }
 
           if (
@@ -240,7 +192,6 @@ const KendoDataTables = ({
         }),
       )
 
-      // mirror in modifiedCells
       setModifiedCells((prev) => {
         const base = { ...dataItem, [field]: value }
         if (
@@ -263,47 +214,6 @@ const KendoDataTables = ({
     },
     [setRows, setModifiedCells],
   )
-
-  // const itemChange = useCallback(
-  //   (e) => {
-  //     const { dataItem, field, value } = e
-  //     setRows((prev) =>
-  //       prev.map((r) => (r.id === dataItem.id ? { ...r, [field]: value } : r)),
-  //     )
-  //     setModifiedCells((prev) => ({
-  //       ...prev,
-  //       [dataItem.id]: { ...dataItem, [field]: value },
-  //     }))
-  //   },
-  //   [setRows, setModifiedCells],
-  // )
-  // const onCellClose = useCallback(
-  //   (e) => {
-  //     const { dataItem, field } = e
-  //     if (
-  //       ['maintStartDateTime', 'maintEndDateTime', 'durationInHrs'].includes(
-  //         field,
-  //       )
-  //     ) {
-  //       setRows((prev) =>
-  //         prev.map((r) =>
-  //           r.id === dataItem.id
-  //             ? updateRowWithDuration(r, field, r[field])
-  //             : r,
-  //         ),
-  //       )
-  //       setModifiedCells((prev) => ({
-  //         ...prev,
-  //         [dataItem.id]: updateRowWithDuration(
-  //           dataItem,
-  //           field,
-  //           dataItem[field],
-  //         ),
-  //       }))
-  //     }
-  //   },
-  //   [setRows, setModifiedCells],
-  // )
   const handleRemarkSave = () => {
     setRows((prevRows) => {
       let updatedRow = null
@@ -336,8 +246,6 @@ const KendoDataTables = ({
 
     setRemarkDialogOpen(false)
   }
-  // console.log(rows)
-  // console.log(columns)
   const handleAddRow = () => {
     if (isButtonDisabled) return
     setIsButtonDisabled(true)
@@ -433,61 +341,12 @@ const KendoDataTables = ({
       </td>
     )
   }
-
-  // useEffect(() => {
-  //   if (Array.isArray(rows) && rows.length > 0 && groupBy) {
-  //     if (typeRank) {
-  //       setGroup([
-  //         {
-  //           field: groupBy,
-  //           dir: 'asc',
-  //           compare: (a, b) => {
-  //             const rankA = typeRank[a.value] ?? 99
-  //             const rankB = typeRank[b.value] ?? 99
-  //             return rankA - rankB
-  //           },
-  //         },
-  //       ])
-  //     }
-  //     const initialExpandedState = {}
-  //     const uniqueValues = [...new Set(rows.map((row) => row[groupBy]))]
-  //     uniqueValues.forEach((value) => {
-  //       initialExpandedState[`${groupBy}_${value}`] = true
-  //     })
-  //     setExpandedState(initialExpandedState)
-  //   } else {
-  //     setGroup([])
-  //     setExpandedState({})
-  //   }
-  // }, [rows, groupBy])
-
   const isColumnActive = (field, filter, sort) => {
     return (
       isColumnMenuFilterActive(field, filter) ||
       isColumnMenuSortActive(field, sort)
     )
   }
-
-  // const processedData = useMemo(() => {
-  //   if (!Array.isArray(rows) || rows.length === 0) return []
-
-  //   if (group.length > 0) {
-  //     const result = process(rows, { group })
-  //     const applyExpandedState = (items) => {
-  //       return items.map((item) => {
-  //         if (item.items) {
-  //           const key = `${item.field}_${item.value}`
-  //           item.expanded = expandedState[key] !== false // default to expanded
-  //           item.items = applyExpandedState(item.items)
-  //         }
-  //         return item
-  //       })
-  //     }
-  //     return applyExpandedState(result.data)
-  //   }
-
-  //   return rows
-  // }, [rows, group, expandedState])
 
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
     const isDisabled =
@@ -523,6 +382,31 @@ const KendoDataTables = ({
         </a>
       </th>
     )
+  }
+
+  const triggerFileUpload = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    }
+  }
+
+  const fileInputRef = useRef(null)
+
+  const onFileChange = (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result)
+      const workbook = XLSX.read(data, { type: 'array' })
+      const firstSheetName = workbook.SheetNames[0]
+      const worksheet = workbook.Sheets[firstSheetName]
+      const jsonData = XLSX.utils.sheet_to_json(worksheet)
+
+      handleExcelUpload(jsonData)
+    }
+    reader.readAsArrayBuffer(file)
   }
 
   return (
@@ -586,14 +470,47 @@ const KendoDataTables = ({
               </Button>
             )}
 
+            {permissions?.downloadExcelBtn && (
+              <Tooltip title='Download'>
+                <Button
+                  variant='outlined'
+                  size='small'
+                  onClick={saveModalOpen}
+                  disabled={isButtonDisabled}
+                >
+                  <DownloadIcon fontSize='small' />
+                </Button>
+              </Tooltip>
+            )}
+
+            {permissions?.uploadExcelBtn && (
+              <>
+                <Tooltip title='Upload Excel'>
+                  <Button
+                    variant='outlined'
+                    size='small'
+                    onClick={triggerFileUpload}
+                    disabled={isButtonDisabled}
+                  >
+                    <UploadIcon fontSize='small' />
+                  </Button>
+                </Tooltip>
+                <input
+                  type='file'
+                  accept='.xlsx,.xls'
+                  onChange={onFileChange}
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                />
+              </>
+            )}
+
             {permissions?.saveBtn && (
               <Button
                 variant='contained'
                 className='btn-save'
                 onClick={saveModalOpen}
                 disabled={isButtonDisabled || !issRowEdited}
-                // loading={loading}
-                // loadingposition='start'
                 {...(loading ? {} : {})}
               >
                 Save
@@ -688,13 +605,15 @@ const KendoDataTables = ({
         </Box>
       )}
       <div className='kendo-data-grid'>
-        <Tooltip openDelay={50} position='bottom' anchorElement='target'>
+        <Tooltip openDelay={50} position='default' anchorElement='target'>
           <Grid
             autoProcessData={true}
             defaultGroup={initialGroup}
             data={rows}
             rows={{ data: CustomRow }}
-            sortable
+            sortable={{
+              mode: 'multiple',
+            }}
             dataItemKey='id'
             editField='inEdit'
             editable={{ mode: 'incell' }}
@@ -747,6 +666,7 @@ const KendoDataTables = ({
                       }}
                       columnMenu={ColumnMenuCheckboxFilter}
                       editor='date'
+                      hidden={col.hidden}
                     />
                   )
                 }
@@ -758,15 +678,7 @@ const KendoDataTables = ({
                       title={col.title || col.headerName || 'Particulars'}
                       width={210}
                       editable={col.editable || true}
-                      // cells={{
-                      //   data: (props) => (
-                      //     <ProductDropDownEditor
-                      //       {...props}
-                      //       allProducts={allProducts}
-                      //     />
-                      //   ),
-                      // }}
-
+                      hidden={col.hidden}
                       cells={{
                         data: (cellProps) => (
                           <ProductCell
@@ -788,6 +700,7 @@ const KendoDataTables = ({
                       width={210}
                       editable={true}
                       columnMenu={ColumnMenuCheckboxFilter}
+                      hidden={col.hidden}
                       cells={{
                         data: toolTipRenderer,
                       }}
@@ -803,6 +716,7 @@ const KendoDataTables = ({
                       width={col?.width}
                       editable={false}
                       columnMenu={ColumnMenuCheckboxFilter}
+                      hidden={col.hidden}
                       cells={{
                         data: toolTipRenderer,
                       }}
@@ -841,6 +755,7 @@ const KendoDataTables = ({
                         ),
                       }}
                       columnMenu={ColumnMenuCheckboxFilter}
+                      hidden={col.hidden}
                       // editor='date'
                     />
                   )
@@ -854,6 +769,7 @@ const KendoDataTables = ({
                       width={col.width}
                       editable={true}
                       columnMenu={ColumnMenuCheckboxFilter}
+                      hidden={col.hidden}
                       format={'{0:n2}'}
                       cells={{
                         edit: { text: DurationEditor },
@@ -876,6 +792,7 @@ const KendoDataTables = ({
                         data: NormParameterIdCell,
                       }}
                       columnMenu={ColumnMenuCheckboxFilter}
+                      hidden={col.hidden}
                     />
                   )
                 }
@@ -889,6 +806,7 @@ const KendoDataTables = ({
                       editable={false}
                       filterable={true}
                       columnMenu={ColumnMenuCheckboxFilter}
+                      hidden={col.hidden}
                       cells={{
                         data: toolTipRenderer,
                       }}
@@ -902,6 +820,7 @@ const KendoDataTables = ({
                     field={col.field}
                     title={col.title || col.headerName}
                     width={col.width}
+                    hidden={col.hidden}
                     className={
                       col?.isDisabled
                         ? 'k-number-right-disabled'
@@ -912,8 +831,6 @@ const KendoDataTables = ({
                     cells={{
                       edit: { text: NoSpinnerNumericEditor },
                       data: toolTipRenderer,
-
-                      filterCell: undefined, // Let Kendo use default filter cell
                     }}
                     columnMenu={ColumnMenuCheckboxFilter}
                     filter='numeric'

@@ -17,7 +17,7 @@ import { validateFields } from 'utils/validationUtils'
 import ProductionvolumeData from './ProductionVoluemData'
 import KendoDataTables from './index'
 import kendoGetEnhancedColDefs from 'components/data-tables/CommonHeader/kendoBusinessDemColDef'
-// import KendoDataTables from './kendo-inprogress'
+
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -75,18 +75,11 @@ const BusinessDemand = ({ permissions }) => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+
   const fetchData = async () => {
     setLoading(true)
     try {
       var data = await DataService.getBDData(keycloak)
-
-      if (lowerVertName !== 'pe') {
-        data = data.sort((a, b) =>
-          b.normParameterTypeDisplayName.localeCompare(
-            a.normParameterTypeDisplayName,
-          ),
-        )
-      }
 
       // console.log(sortedData)
 
@@ -174,21 +167,11 @@ const BusinessDemand = ({ permissions }) => {
     headerMap,
     // handleRemarkCellClick,
   })
-  // const colDefs = React.useMemo(() => {
-  //   const defs = getEnhancedColDefs({
-  //     allProducts,
-  //     headerMap,
-  //     handleRemarkCellClick,
-  //   })
-  //   console.log(' colDefs ?', defs)
-  //   return defs
-  // }, [allProducts, headerMap, handleRemarkCellClick])
 
   const NormParameterIdCell = (props) => {
     const productId = props.dataItem.normParameterId
     const product = allProducts.find((p) => p.id === productId)
     const displayName = product?.displayName || ''
-    // console.log(displayName)
     return <td>{displayName}</td>
   }
 

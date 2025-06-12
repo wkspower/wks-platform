@@ -1,14 +1,14 @@
 [
-  { "field": "idFromApi", "title": "ID" },
+  { "field": "idFromApi", "title": "ID", "hidden": true },
   {
     "field": "aopCaseId",
     "title": "Case ID",
-
+    "hidden": true,
     "editable": false
   },
   { "field": "aopType", "title": "Type", "width": 80 },
-  { "field": "aopYear", "title": "Year", "width": 80 },
-  { "field": "plantFkId", "title": "Plant ID", "width": 80 },
+  { "field": "aopYear", "title": "Year", "width": 80, "hidden": true },
+  { "field": "plantFkId", "title": "Plant ID", "width": 80, "hidden": true },
   {
     "field": "normParametersFKId",
     "title": "Particulars/Grade",

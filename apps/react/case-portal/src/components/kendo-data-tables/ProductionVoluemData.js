@@ -21,8 +21,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 
   const keycloak = useSession()
-  // const [productNormData, setProductNormData] = useState([])
-  // const [rowModesModel, setRowModesModel] = useState({})
+
   const [calculationObject, setCalculationObject] = useState([])
 
   const [allProducts, setAllProducts] = useState([])
@@ -422,6 +421,7 @@ const ProductionvolumeData = ({ permissions }) => {
       title: 'Case ID',
       width: 120,
       editable: false,
+      hidden: true,
     },
     {
       field: 'materialFKId',
@@ -554,10 +554,12 @@ const ProductionvolumeData = ({ permissions }) => {
       title: 'AVG',
       width: 150,
       editable: false,
+      hidden: true,
     },
     {
       field: 'isEditable',
       title: 'isEditable',
+      hidden: true,
     },
   ]
 
@@ -565,12 +567,14 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'idFromApi',
       title: 'ID',
+      hidden: true,
     },
     {
       field: 'aopCaseId',
       title: 'Case ID',
       width: 120,
       editable: false,
+      hidden: true,
     },
 
     {
@@ -715,10 +719,12 @@ const ProductionvolumeData = ({ permissions }) => {
       title: 'AVG',
       width: 150,
       editable: false,
+      hidden: true,
     },
     {
       field: 'isEditable',
       title: 'isEditable',
+      hidden: true,
     },
   ]
 

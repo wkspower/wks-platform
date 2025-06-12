@@ -522,7 +522,9 @@ const KendoDataTablesReports = ({
         <Grid
           data={filterBy(processedData, filter)}
           rows={{ data: CustomRow }}
-          sortable
+          sortable={{
+            mode: 'multiple',
+          }}
           dataItemKey='id'
           editField='inEdit'
           editable={{ mode: 'incell' }}

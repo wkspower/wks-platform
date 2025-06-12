@@ -4,11 +4,12 @@
     "field": "aopCaseId",
     "title": "Case ID",
     "width": 120,
-    "editable": false
+    "editable": false,
+    "hidden": true
   },
-  { "field": "aopType", "title": "Type", "width": 80 },
-  { "field": "aopYear", "title": "Year", "width": 80 },
-  { "field": "plantFkId", "title": "Plant ID", "width": 80 },
+  { "field": "aopType", "title": "Type", "width": 80, "hidden": true },
+  { "field": "aopYear", "title": "Year", "width": 80, "hidden": true },
+  { "field": "plantFkId", "title": "Plant ID", "width": 80, "hidden": true },
   {
     "field": "normParametersFKId",
     "title": "Particulars",

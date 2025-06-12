@@ -1,12 +1,14 @@
 [
   {
     "field": "idFromApi",
-    "headerName": "ID"
+    "headerName": "ID",
+    "hidden": true
   },
   {
     "field": "aopCaseId",
     "headerName": "Case ID",
-    "editable": false
+    "editable": false,
+    "hidden": true
   },
   {
     "field": "normParametersFKId",

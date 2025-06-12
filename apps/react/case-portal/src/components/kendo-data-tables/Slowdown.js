@@ -324,7 +324,7 @@ const SlowDown = ({ permissions }) => {
       field: 'maintenanceId',
       title: 'maintenanceId',
       editable: false,
-      hide: true,
+      hidden: true,
     },
 
     {
