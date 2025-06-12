@@ -17,6 +17,7 @@
     "editable": false,
     "align": "left",
     "headerAlign": "left",
-    "flex": 1
+    "flex": 1,
+    "type": "number"
   }
 ]

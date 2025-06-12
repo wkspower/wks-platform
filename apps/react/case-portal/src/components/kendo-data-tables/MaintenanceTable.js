@@ -107,7 +107,7 @@ const MaintenanceTable = () => {
       title: 'Description',
       align: 'left',
       headerAlign: 'left',
-      width: 230,
+      width: 250,
       editable: false,
     },
     {
@@ -117,7 +117,7 @@ const MaintenanceTable = () => {
       headerAlign: 'left',
       type: 'number',
       format: '{0:n2}',
-      width: 100,
+
       editable: false,
     },
 
@@ -126,7 +126,7 @@ const MaintenanceTable = () => {
       title: headerMap[5],
       type: 'number',
       format: '{0:n2}',
-      width: 100,
+
       editable: false,
       align: 'right',
       headerAlign: 'left',
@@ -136,7 +136,7 @@ const MaintenanceTable = () => {
       title: headerMap[6],
       type: 'number',
       format: '{0:n2}',
-      width: 100,
+
       editable: false,
       align: 'right',
       headerAlign: 'left',
@@ -146,7 +146,7 @@ const MaintenanceTable = () => {
       title: headerMap[7],
       type: 'number',
       format: '{0:n2}',
-      width: 100,
+
       editable: false,
       align: 'right',
       headerAlign: 'left',
@@ -156,7 +156,7 @@ const MaintenanceTable = () => {
       title: headerMap[8],
       type: 'number',
       format: '{0:n2}',
-      width: 100,
+
       editable: false,
       align: 'right',
       headerAlign: 'left',
@@ -166,7 +166,7 @@ const MaintenanceTable = () => {
       title: headerMap[9],
       type: 'number',
       format: '{0:n2}',
-      width: 100,
+
       editable: false,
       align: 'right',
       headerAlign: 'left',
@@ -176,7 +176,7 @@ const MaintenanceTable = () => {
       title: headerMap[10],
       type: 'number',
       format: '{0:n2}',
-      width: 100,
+
       editable: false,
       align: 'right',
       headerAlign: 'left',
@@ -187,7 +187,7 @@ const MaintenanceTable = () => {
       title: headerMap[11],
       type: 'number',
       format: '{0:n2}',
-      width: 100,
+
       editable: false,
       align: 'right',
       headerAlign: 'left',
@@ -197,7 +197,7 @@ const MaintenanceTable = () => {
       title: headerMap[12],
       type: 'number',
       format: '{0:n2}',
-      width: 100,
+
       editable: false,
       align: 'right',
       headerAlign: 'left',
@@ -207,7 +207,7 @@ const MaintenanceTable = () => {
       title: headerMap[1],
       type: 'number',
       format: '{0:n2}',
-      width: 100,
+
       editable: false,
       align: 'right',
       headerAlign: 'left',
@@ -217,7 +217,7 @@ const MaintenanceTable = () => {
       title: headerMap[2],
       type: 'number',
       format: '{0:n2}',
-      width: 100,
+
       editable: false,
       align: 'right',
       headerAlign: 'left',
@@ -227,7 +227,7 @@ const MaintenanceTable = () => {
       title: headerMap[3],
       type: 'number',
       format: '{0:n2}',
-      width: 100,
+
       editable: false,
       align: 'right',
       headerAlign: 'left',

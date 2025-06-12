@@ -21,19 +21,22 @@
     "field": "avgValue",
     "headerName": "Avg Value",
     "flex": 2,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "maxValue",
     "headerName": "Max Value",
     "flex": 2,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "minValue",
     "headerName": "Min Value",
     "flex": 2,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "startDate",

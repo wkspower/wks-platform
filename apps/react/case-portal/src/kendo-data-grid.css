@@ -124,10 +124,10 @@
   background-color: #ffffff !important;
 }
 
-/* Only apply background color to body rows, not header */
+/* Only apply background color to body rows, not header
 .kendo-data-grid .k-grid-content .k-grid-table tbody tr {
   background-color: #fff !important;
-}
+} */
 .kendo-data-grid .k-grid .k-grid-content .k-grid-table tbody tr.k-disabled {
   background-color: #ebebeb !important;
 }
@@ -174,5 +174,17 @@
 }
 .k-grid .k-grid-content td.k-number-right-disabled {
   text-align: right !important;
-  background-color: #ebebeb;
+  background-color: #f0f0f0;
+}
+
+.non-editable-cell {
+  background-color: #f0f0f0;
+}
+
+.k-grid td span {
+  pointer-events: auto; /* ensure mouse events reach the span */
+}
+
+.custom-disabled-row {
+  background-color: #f0f0f0 !important;
 }

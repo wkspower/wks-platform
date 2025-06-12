@@ -420,14 +420,10 @@ const ProductionNorms = ({ permissions }) => {
         }))
         .map(({ materialFKId, ...rest }) => rest)
 
-      // console.log(data)
-
-      // data = data.slice(0, 3)
-
-      // if (data.status === 200) {
       const formattedData = data.map((item, index) => {
         const isKiloTon = selectedUnit !== 'MT'
-        return {
+
+        const transformedItem = {
           ...item,
           idFromApi: item.id,
           normParametersFKId: item?.normParametersFKId?.toLowerCase(),
@@ -446,6 +442,26 @@ const ProductionNorms = ({ permissions }) => {
             nov: item.nov ? item.nov / 1000 : item.nov,
             dec: item.dec ? item.dec / 1000 : item.dec,
           }),
+        }
+
+        const total = [
+          transformedItem.april,
+          transformedItem.may,
+          transformedItem.june,
+          transformedItem.july,
+          transformedItem.aug,
+          transformedItem.sep,
+          transformedItem.oct,
+          transformedItem.nov,
+          transformedItem.dec,
+          transformedItem.jan,
+          transformedItem.feb,
+          transformedItem.march,
+        ].reduce((sum, val) => sum + (parseFloat(val) || 0), 0)
+
+        return {
+          ...transformedItem,
+          averageTPH: total,
         }
       })
 
@@ -574,7 +590,10 @@ const ProductionNorms = ({ permissions }) => {
       editButton: permissions?.editButton ?? false,
       showUnit: permissions?.showUnit ?? true,
       saveWithRemark: permissions?.saveWithRemark ?? true,
-      showCalculate:
+      showCalculate: permissions?.showCalculate ?? true,
+      allAction: permissions?.allAction ?? true,
+
+      showCalculateVisibility:
         Object.keys(calculationObject).length > 0
           ? permissions?.showCalculate ?? true
           : false,

@@ -21,33 +21,18 @@ export default function getKendoNormsHistorianColumns({ headerMap, type }) {
     const field = colDef.field
     // console.log('field', field)
     const title = String(headerMap[colDef.headerName] || colDef.headerName)
-    const isTextCol =
-      field === 'material' ||
-      field === 'materialName' ||
-      field === 'norms' ||
-      field === 'particulars' ||
-      field === 'srNo' ||
-      field === 'normDateTime'
+    const isTextCol = !(colDef.type == 'number')
 
     return {
       field,
       title,
-
-      width:
-        type !== 'McuAndNormGrid'
-          ? isTextCol
-            ? 200
-            : 140 // text columns get twice the flex share
-          : undefined,
       filterable: true,
       filter: isTextCol ? 'text' : 'numeric',
+      isRightAlligned: isTextCol ? 'text' : 'numeric',
       format: isTextCol ? undefined : '{0:n3}',
       ...(isTextCol ? {} : { format: '{0:n3}' }),
 
-      editable: !isTextCol,
-      editor: !isTextCol
-        ? (props) => <NumericInputOnly {...props} />
-        : undefined,
+      editable: false,
       align: isTextCol ? 'left' : 'right',
     }
   })

@@ -18,7 +18,8 @@
     "editable": false,
     "align": "left",
     "headerAlign": "left",
-    "minWidth": 125
+    "minWidth": 125,
+    "type": "number"
   },
   {
     "field": "may",
@@ -26,7 +27,8 @@
     "editable": false,
     "align": "left",
     "headerAlign": "left",
-    "minWidth": 125
+    "minWidth": 125,
+    "type": "number"
   },
   {
     "field": "june",
@@ -34,7 +36,8 @@
     "editable": false,
     "align": "left",
     "headerAlign": "left",
-    "minWidth": 125
+    "minWidth": 125,
+    "type": "number"
   },
   {
     "field": "july",
@@ -42,7 +45,8 @@
     "editable": false,
     "align": "left",
     "headerAlign": "left",
-    "minWidth": 125
+    "minWidth": 125,
+    "type": "number"
   },
   {
     "field": "august",
@@ -50,7 +54,8 @@
     "editable": false,
     "align": "left",
     "headerAlign": "left",
-    "minWidth": 125
+    "minWidth": 125,
+    "type": "number"
   },
   {
     "field": "september",
@@ -58,7 +63,8 @@
     "editable": false,
     "align": "left",
     "headerAlign": "left",
-    "minWidth": 125
+    "minWidth": 125,
+    "type": "number"
   },
   {
     "field": "october",
@@ -66,7 +72,8 @@
     "editable": false,
     "align": "left",
     "headerAlign": "left",
-    "minWidth": 125
+    "minWidth": 125,
+    "type": "number"
   },
   {
     "field": "november",
@@ -74,7 +81,8 @@
     "editable": false,
     "align": "left",
     "headerAlign": "left",
-    "minWidth": 125
+    "minWidth": 125,
+    "type": "number"
   },
   {
     "field": "december",
@@ -82,7 +90,8 @@
     "editable": false,
     "align": "left",
     "headerAlign": "left",
-    "minWidth": 125
+    "minWidth": 125,
+    "type": "number"
   },
   {
     "field": "january",
@@ -90,7 +99,8 @@
     "editable": false,
     "align": "left",
     "headerAlign": "left",
-    "minWidth": 125
+    "minWidth": 125,
+    "type": "number"
   },
   {
     "field": "february",
@@ -98,7 +108,8 @@
     "editable": false,
     "align": "left",
     "headerAlign": "left",
-    "minWidth": 125
+    "minWidth": 125,
+    "type": "number"
   },
   {
     "field": "march",
@@ -106,12 +117,14 @@
     "editable": false,
     "align": "left",
     "headerAlign": "left",
-    "minWidth": 125
+    "minWidth": 125,
+    "type": "number"
   },
   {
     "field": "total",
     "headerName": "Total",
     "editable": false,
-    "minWidth": 125
+    "minWidth": 125,
+    "type": "number"
   }
 ]

@@ -209,7 +209,6 @@ const ShutDown = ({ permissions }) => {
         id: index,
         originalRemark: item.remark,
         inEdit: false,
-        isEditable: true,
       }))
       setRows(formattedData)
       setLoading(false)
@@ -312,7 +311,7 @@ const ShutDown = ({ permissions }) => {
     },
     {
       field: 'remark',
-      title: 'Remark',
+      title: 'Shutdown Basis',
       editable: true,
     },
   ]

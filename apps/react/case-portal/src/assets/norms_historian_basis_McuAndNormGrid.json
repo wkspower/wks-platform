@@ -28,13 +28,15 @@
     "field": "normValue",
     "headerName": "Value",
     "flex": 2,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "actualQuantity",
     "headerName": "Actual Quantity",
     "flex": 2,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "normDateTime",

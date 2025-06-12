@@ -3,7 +3,7 @@
   {
     "field": "aopCaseId",
     "title": "Case ID",
-    "width": 120,
+
     "editable": false
   },
   { "field": "aopType", "title": "Type", "width": 80 },
@@ -19,7 +19,6 @@
     "field": "april",
     "title": "4",
     "editable": false,
-    "width": 120,
 
     "align": "left",
     "format": "{0:n2}"
@@ -28,7 +27,7 @@
     "field": "may",
     "title": "5",
     "editable": false,
-    "width": 120,
+
     "align": "left",
     "format": "{0:n2}"
   },
@@ -36,7 +35,7 @@
     "field": "june",
     "title": "6",
     "editable": false,
-    "width": 120,
+
     "align": "left",
     "format": "{0:n2}"
   },
@@ -44,7 +43,7 @@
     "field": "july",
     "title": "7",
     "editable": false,
-    "width": 120,
+
     "align": "left",
     "format": "{0:n2}"
   },
@@ -52,7 +51,7 @@
     "field": "aug",
     "title": "8",
     "editable": false,
-    "width": 120,
+
     "align": "left",
     "format": "{0:n2}"
   },
@@ -60,7 +59,7 @@
     "field": "sep",
     "title": "9",
     "editable": false,
-    "width": 120,
+
     "align": "left",
     "format": "{0:n2}"
   },
@@ -68,7 +67,7 @@
     "field": "oct",
     "title": "10",
     "editable": false,
-    "width": 120,
+
     "align": "left",
     "format": "{0:n2}"
   },
@@ -76,7 +75,7 @@
     "field": "nov",
     "title": "11",
     "editable": false,
-    "width": 120,
+
     "align": "left",
     "format": "{0:n2}"
   },
@@ -84,7 +83,7 @@
     "field": "dec",
     "title": "12",
     "editable": false,
-    "width": 120,
+
     "align": "left",
     "format": "{0:n2}"
   },
@@ -92,7 +91,7 @@
     "field": "jan",
     "title": "1",
     "editable": false,
-    "width": 120,
+
     "align": "left",
     "format": "{0:n2}"
   },
@@ -100,7 +99,7 @@
     "field": "feb",
     "title": "2",
     "editable": false,
-    "width": 120,
+
     "align": "left",
     "format": "{0:n2}"
   },
@@ -108,7 +107,7 @@
     "field": "march",
     "title": "3",
     "editable": false,
-    "width": 120,
+
     "align": "left",
     "format": "{0:n2}"
   },

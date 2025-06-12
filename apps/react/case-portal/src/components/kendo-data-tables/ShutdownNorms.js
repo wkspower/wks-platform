@@ -558,6 +558,7 @@ const ShutdownNorms = () => {
           originalRemark: item?.remarks?.trim(),
           materialFkId: item?.materialFkId?.toLowerCase(),
           Particulars: item.normParameterTypeDisplayName || 'By Products',
+          isEditable: true,
         }
 
         if (isTPD) {

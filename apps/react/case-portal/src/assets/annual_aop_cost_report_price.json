@@ -17,88 +17,101 @@
     "headerName": 4,
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "may",
     "headerName": 5,
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "june",
     "headerName": 6,
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "july",
     "headerName": 7,
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "august",
     "headerName": 8,
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "september",
     "headerName": 9,
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "october",
     "headerName": 10,
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "november",
     "headerName": 11,
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "december",
     "headerName": 12,
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "january",
     "headerName": 1,
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "february",
     "headerName": 2,
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "march",
     "headerName": 3,
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "total",
     "headerName": "Total",
-    "editable": false
+    "editable": false,
+    "type": "number"
   }
 ]

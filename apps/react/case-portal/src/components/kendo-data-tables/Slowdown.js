@@ -276,9 +276,7 @@ const SlowDown = ({ permissions }) => {
         var productList = []
         if (lowerVertName === 'meg') {
           productList = data
-            .filter((product) =>
-              ['EO', 'EOE', 'MEG'].includes(product.displayName),
-            )
+            .filter((product) => ['EO', 'EOE'].includes(product.displayName))
             .map((product) => ({
               id: product.id,
               displayName: product.displayName,

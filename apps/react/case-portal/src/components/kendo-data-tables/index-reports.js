@@ -98,6 +98,8 @@ const KendoDataTablesReports = ({
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
   const [edit, setEdit] = useState({})
   const [sort, setSort] = useState([]) // or
+  const [issRowEdited, setIsRowEdited] = useState(false)
+
   const handleEditChange = useCallback((e) => {
     setEdit(e.edit)
     // }
@@ -118,6 +120,8 @@ const KendoDataTablesReports = ({
   }
   const itemChange = useCallback(
     (e) => {
+      setIsRowEdited(true)
+
       const { dataItem, field, value } = e
 
       setRows((prev) =>
@@ -454,7 +458,7 @@ const KendoDataTablesReports = ({
                 variant='contained'
                 className='btn-save'
                 onClick={saveModalOpen}
-                disabled={isButtonDisabled}
+                disabled={isButtonDisabled || !issRowEdited}
                 // loading={loading}
                 // loadingposition='start'
                 {...(loading ? {} : {})}

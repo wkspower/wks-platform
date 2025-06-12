@@ -21,31 +21,20 @@ export default function getKendoProductionColumns({ headerMap, type }) {
 
   return rawCols.map((colDef) => {
     const field = colDef.field
+    // console.log('field', field)
     const title = String(headerMap[colDef.headerName] || colDef.headerName)
-    const isTextCol = field === 'norm' || field === 'particulars'
+    const isTextCol = !(colDef.type == 'number')
 
     return {
       field,
       title,
-      width:
-        type === 'MC' || type === 'MC Yearwise'
-          ? isTextCol
-            ? 200
-            : 140
-          : undefined, // no width on the auto types
-      flex:
-        type === 'Calculated Data' || type === 'RowData'
-          ? isTextCol
-            ? 2
-            : 1 // text columns get twice the flex share
-          : undefined,
       filterable: true,
       filter: isTextCol ? 'text' : 'numeric',
+      isRightAlligned: isTextCol ? 'text' : 'numeric',
+      format: isTextCol ? undefined : '{0:n3}',
       ...(isTextCol ? {} : { format: '{0:n3}' }),
-      editable: !isTextCol,
-      editor: !isTextCol
-        ? (props) => <NumericInputOnly {...props} />
-        : undefined,
+
+      editable: false,
       align: isTextCol ? 'left' : 'right',
     }
   })

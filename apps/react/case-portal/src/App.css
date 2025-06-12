@@ -194,3 +194,6 @@ main.MuiBox-root.css-vognfw {
 .non-editable-cell {
   background-color: #f0f0f0;
 }
+.custom-disabled-row {
+  background-color: #f0f0f0 !important;
+}
