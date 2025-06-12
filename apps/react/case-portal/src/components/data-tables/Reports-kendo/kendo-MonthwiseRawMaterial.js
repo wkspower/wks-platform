@@ -42,7 +42,7 @@ const MonthwiseRawMaterial = () => {
 
     {
       field: 'material',
-      headerName: 'Particulars',
+      headerName: 'Particularss',
       flex: 2,
       renderCell: renderTwoLineEllipsis,
       editable: false,
@@ -277,7 +277,7 @@ const MonthwiseRawMaterial = () => {
     },
     {
       field: 'total',
-      headerName: 'Total',
+      headerName: 'Totals',
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
       flex: 1,
@@ -295,7 +295,7 @@ const MonthwiseRawMaterial = () => {
     { field: 'id', headerName: 'ID' },
     {
       field: 'material',
-      headerName: 'Parameters',
+      headerName: 'Parameterss',
       editable: false,
       flex: 2,
     },

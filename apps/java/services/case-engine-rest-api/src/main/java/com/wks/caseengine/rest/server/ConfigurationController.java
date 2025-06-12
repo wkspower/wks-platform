@@ -56,7 +56,11 @@ public class ConfigurationController {
 	@PostMapping(value="/updatePeConfigData")
 	public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms(@RequestParam String year,@RequestParam String plantId,@RequestBody List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOList){
 		return configurationService.updateCalculatedConsumptionNorms(year,plantId,normAttributeTransactionReceipeDTOList);
-		
+	}
+	
+	@GetMapping(value="/configuration-constants")
+	public AOPMessageVM getConfigurationConstants(@RequestParam String year,@RequestParam String plantFKId) {
+		return configurationService.getConfigurationConstants(year,plantFKId);
 	}
 
 }

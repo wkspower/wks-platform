@@ -47,5 +47,6 @@ public class BusinessDemandDataDTO {
     private Boolean isEditable;
     private Boolean isVisible;
     private String UOM;
+    private String displayName;
 
 }

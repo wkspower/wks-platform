@@ -31,6 +31,5 @@ public class SpyroOutputController {
 	@PostMapping(value="/spyro-output")
 	public AOPMessageVM updateSpyroOutputData(@RequestBody List<SpyroOutputDTO> spyroOutputDTOList){
 		return spyroOutputService.updateSpyroOutputData(spyroOutputDTOList);
-		
 	}
 }

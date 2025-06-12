@@ -2,7 +2,13 @@ package com.wks.caseengine.service;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.wks.caseengine.dto.MonthWiseConsumptionSummaryDTO;
 import com.wks.caseengine.dto.MonthWiseProductionPlanDTO;
+import com.wks.caseengine.dto.PlantProductionDTO;
 import com.wks.caseengine.dto.PlantProductionDataDTO;
 import com.wks.caseengine.dto.TurnAroundPlanReportDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
@@ -16,7 +22,9 @@ public interface ProductionVolumeDataReportService {
     public AOPMessageVM getReportForMonthWiseConsumptionSummaryData(String plantId, String year,String reportType);
 
     public AOPMessageVM getReportForPlantProductionPlanData(String plantId, String year, String reportType);
-
+    
+    public AOPMessageVM updateReportForPlantProductionPlanData(String plantId,String year,List<PlantProductionDTO> dataList);
+			
     public AOPMessageVM getReportForPlantContributionYearWise(String plantId, String year, String reportType);
 
     // New method added
@@ -40,7 +48,7 @@ public interface ProductionVolumeDataReportService {
 
     AOPMessageVM saveMonthWiseProductionPlanData(String plantId, String year, List<MonthWiseProductionPlanDTO> dataList);
 
-    AOPMessageVM updateReportForMonthWiseConsumptionSummaryData(String plantId, String year, List<MonthWiseProductionPlanDTO> dataList);
+    AOPMessageVM updateReportForMonthWiseConsumptionSummaryData(String plantId, String year, List<MonthWiseConsumptionSummaryDTO> dataList);
 
     
     AOPMessageVM savePlanTurnAroundData(String plantId, String year, List<TurnAroundPlanReportDTO> dataList);

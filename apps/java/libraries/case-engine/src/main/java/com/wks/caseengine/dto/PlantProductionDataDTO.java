@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class PlantProductionDataDTO {
     private String id;
     private String remark;
-    private Double budgetPrevYear;
+    private Double ActualPrevYear;
 }

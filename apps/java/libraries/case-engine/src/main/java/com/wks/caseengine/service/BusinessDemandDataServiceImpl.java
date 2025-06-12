@@ -79,6 +79,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 				businessDemandDataDTO.setIsEditable(row[29] != null ? Boolean.valueOf(row[29].toString()) : null);
 				businessDemandDataDTO.setIsVisible(row[30] != null ? Boolean.valueOf(row[30].toString()) : null);
 				businessDemandDataDTO.setUOM(row[31] != null ? row[31].toString() : null);
+				businessDemandDataDTO.setDisplayName(row[32] != null ? row[32].toString() : null);
 
 				businessDemandDataDTOList.add(businessDemandDataDTO);
 			}
@@ -209,7 +210,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 					+ "Year, Plant_FK_Id, NormParameters_FK_Id, AvgTPH, NormTypeDisplayOrder, "
 					+ "NormParameterTypeId, NormParameterTypeName, NormParameterTypeDisplayName, "
 					+ "CreatedOn, ModifiedOn, UpdatedBy, IsDeleted, MaterialDisplayOrder, "
-					+ "Site_FK_Id, Vertical_FK_Id,isEditable,isVisible,UOM " + "FROM " + viewName + " "
+					+ "Site_FK_Id, Vertical_FK_Id,isEditable,isVisible,UOM,DisplayName " + "FROM " + viewName + " "
 					+ "WHERE (Year = :year OR Year IS NULL) " + "AND Plant_FK_Id = :plantFkId "
 					+ "ORDER BY NormTypeDisplayOrder, MaterialDisplayOrder";
 

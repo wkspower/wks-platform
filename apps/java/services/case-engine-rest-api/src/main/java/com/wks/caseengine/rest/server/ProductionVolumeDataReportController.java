@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.dto.MonthWiseConsumptionSummaryDTO;
 import com.wks.caseengine.dto.MonthWiseProductionPlanDTO;
+import com.wks.caseengine.dto.PlantProductionDTO;
 import com.wks.caseengine.dto.PlantProductionDataDTO;
 import com.wks.caseengine.dto.TurnAroundPlanReportDTO;
 import com.wks.caseengine.entity.PlantProductionRequestDTO;
@@ -49,7 +51,7 @@ public class ProductionVolumeDataReportController {
 	
 	@PostMapping(value = "/report/month-wise/consumption-summary")
 	public ResponseEntity<AOPMessageVM> updateReportForMonthWiseConsumptionSummaryData(@RequestParam String plantId,
-			@RequestParam String year,@RequestBody List<MonthWiseProductionPlanDTO> dataList) {
+			@RequestParam String year,@RequestBody List<MonthWiseConsumptionSummaryDTO> dataList) {
 		AOPMessageVM response = productionVolumeDataReportService.updateReportForMonthWiseConsumptionSummaryData(plantId, year, dataList);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
@@ -59,6 +61,14 @@ public class ProductionVolumeDataReportController {
 			@RequestParam String year, @RequestParam String reportType) {
 		AOPMessageVM response = productionVolumeDataReportService.getReportForPlantProductionPlanData(plantId, year,
 				reportType);
+		return ResponseEntity.status(response.getCode()).body(response);
+	}
+	
+	@PostMapping(value = "/report/plant/production/plan")
+	public ResponseEntity<AOPMessageVM> updateReportForPlantProductionPlanData(@RequestParam String plantId,
+			@RequestParam String year,
+			@RequestBody List<PlantProductionDTO> dataList) {
+		AOPMessageVM response = productionVolumeDataReportService.updateReportForPlantProductionPlanData(plantId, year, dataList);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 

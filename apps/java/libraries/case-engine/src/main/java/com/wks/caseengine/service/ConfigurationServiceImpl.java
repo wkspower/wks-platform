@@ -134,18 +134,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				configurationDTO.setSep(
 						(row[9] != null && !row[9].toString().trim().isEmpty()) ? Double.parseDouble(row[9].toString())
 								: null);
-				configurationDTO.setOct(
-						(row[10] != null && !row[10].toString().trim().isEmpty())
-								? Double.parseDouble(row[10].toString())
-								: null);
-				configurationDTO.setNov(
-						(row[11] != null && !row[11].toString().trim().isEmpty())
-								? Double.parseDouble(row[11].toString())
-								: null);
-				configurationDTO.setDec(
-						(row[12] != null && !row[12].toString().trim().isEmpty())
-								? Double.parseDouble(row[12].toString())
-								: null);
+				configurationDTO.setOct((row[10] != null && !row[10].toString().trim().isEmpty())
+						? Double.parseDouble(row[10].toString())
+						: null);
+				configurationDTO.setNov((row[11] != null && !row[11].toString().trim().isEmpty())
+						? Double.parseDouble(row[11].toString())
+						: null);
+				configurationDTO.setDec((row[12] != null && !row[12].toString().trim().isEmpty())
+						? Double.parseDouble(row[12].toString())
+						: null);
 				configurationDTO.setRemarks((row[13] != null ? row[13].toString() : ""));
 
 				if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
@@ -166,8 +163,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					configurationDTO.setAuditYear(row[14] != null ? row[14].toString() : "");
 					configurationDTO.setUOM(row[15] != null ? row[15].toString() : "");
 					configurationDTO.setNormType(row[16] != null ? row[16].toString() : "");
-					configurationDTO.setIsEditable(
-							row[17] != null ? ((Boolean) row[17]).booleanValue() : null);
+					configurationDTO.setIsEditable(row[17] != null ? ((Boolean) row[17]).booleanValue() : null);
 					;
 				}
 
@@ -179,6 +175,42 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			}
 
 			return configurationDTOList;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	public AOPMessageVM getConfigurationConstants(String year, String plantFKId) {
+		try {
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			List<Map<String, Object>> configurationConstantsList = new ArrayList<>();
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantFKId));
+			String procedureName = verticalName + "_GetConfiguration_Constant";
+			List<Object[]> obj = new ArrayList<>();
+			if (verticalName.equalsIgnoreCase("MEG")) {
+				obj = findConstantsByYearAndPlantFkId(year, plantFKId, procedureName);
+			}
+			for (Object[] row : obj) {
+				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
+				map.put("NormTypeName", row[0]);
+				map.put("NormParameter_FK_Id", row[1]);
+				map.put("Name", row[2]);
+				map.put("DisplayName", row[3]);
+				map.put("UOM", row[4]);
+				map.put("ConstantValue", row[5]);
+				map.put("AuditYear", row[6]);
+				map.put("Remarks", row[7]);
+				int editableFlag = (Integer) row[8];  // or use getInt(), depending on your data source
+				boolean isEditable = (editableFlag == 1);
+				map.put("isEditable", isEditable);
+				configurationConstantsList.add(map); // Add the map to the list here
+			}
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(configurationConstantsList);
+			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
@@ -225,22 +257,18 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				configurationDTO.setAug(
 						(row[8] != null && !row[9].toString().trim().isEmpty()) ? Double.parseDouble(row[9].toString())
 								: null);
-				configurationDTO.setSep(
-						(row[9] != null && !row[10].toString().trim().isEmpty())
-								? Double.parseDouble(row[10].toString())
-								: null);
-				configurationDTO.setOct(
-						(row[10] != null && !row[11].toString().trim().isEmpty())
-								? Double.parseDouble(row[11].toString())
-								: null);
-				configurationDTO.setNov(
-						(row[11] != null && !row[12].toString().trim().isEmpty())
-								? Double.parseDouble(row[12].toString())
-								: null);
-				configurationDTO.setDec(
-						(row[12] != null && !row[13].toString().trim().isEmpty())
-								? Double.parseDouble(row[13].toString())
-								: null);
+				configurationDTO.setSep((row[9] != null && !row[10].toString().trim().isEmpty())
+						? Double.parseDouble(row[10].toString())
+						: null);
+				configurationDTO.setOct((row[10] != null && !row[11].toString().trim().isEmpty())
+						? Double.parseDouble(row[11].toString())
+						: null);
+				configurationDTO.setNov((row[11] != null && !row[12].toString().trim().isEmpty())
+						? Double.parseDouble(row[12].toString())
+						: null);
+				configurationDTO.setDec((row[12] != null && !row[13].toString().trim().isEmpty())
+						? Double.parseDouble(row[13].toString())
+						: null);
 				configurationDTO.setRemarks((row[14] != null ? row[14].toString() : ""));
 				// configurationDTO.setId(row[14] != null ? row[14].toString() : i + "#");
 				configurationDTO.setAuditYear(row[15] != null ? row[15].toString() : "");
@@ -507,8 +535,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			normAttributeTransactions.setAuditYear(year);
 		}
 
-		normAttributeTransactions
-				.setAttributeValue(attributeValue != null ? attributeValue.toString() : "0.0");
+		normAttributeTransactions.setAttributeValue(attributeValue != null ? attributeValue.toString() : "0.0");
 		normAttributeTransactions.setRemarks(configurationDTO.getRemarks());
 
 		normAttributeTransactionsRepository.save(normAttributeTransactions);
@@ -516,30 +543,30 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	public Double getAttributeValue(ConfigurationDTO configurationDTO, Integer i) {
 		switch (i) {
-			case 1:
-				return configurationDTO.getJan();
-			case 2:
-				return configurationDTO.getFeb();
-			case 3:
-				return configurationDTO.getMar();
-			case 4:
-				return configurationDTO.getApr();
-			case 5:
-				return configurationDTO.getMay();
-			case 6:
-				return configurationDTO.getJun();
-			case 7:
-				return configurationDTO.getJul();
-			case 8:
-				return configurationDTO.getAug();
-			case 9:
-				return configurationDTO.getSep();
-			case 10:
-				return configurationDTO.getOct();
-			case 11:
-				return configurationDTO.getNov();
-			case 12:
-				return configurationDTO.getDec();
+		case 1:
+			return configurationDTO.getJan();
+		case 2:
+			return configurationDTO.getFeb();
+		case 3:
+			return configurationDTO.getMar();
+		case 4:
+			return configurationDTO.getApr();
+		case 5:
+			return configurationDTO.getMay();
+		case 6:
+			return configurationDTO.getJun();
+		case 7:
+			return configurationDTO.getJul();
+		case 8:
+			return configurationDTO.getAug();
+		case 9:
+			return configurationDTO.getSep();
+		case 10:
+			return configurationDTO.getOct();
+		case 11:
+			return configurationDTO.getNov();
+		case 12:
+			return configurationDTO.getDec();
 
 		}
 		return configurationDTO.getJan();
@@ -689,42 +716,30 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	public List<Object[]> findByYearAndPlantFkId(String year, UUID plantFKId, String viewName) {
 		try {
-			String sql = "SELECT " +
-					"    NP.NormParameter_FK_Id AS NormParameter_FK_Id, " +
-					"    MAX(CASE WHEN NAT.AOPMonth = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan, " +
-					"    MAX(CASE WHEN NAT.AOPMonth = '2' THEN NAT.AttributeValue ELSE NULL END) AS Feb, " +
-					"    MAX(CASE WHEN NAT.AOPMonth = '3' THEN NAT.AttributeValue ELSE NULL END) AS Mar, " +
-					"    MAX(CASE WHEN NAT.AOPMonth = '4' THEN NAT.AttributeValue ELSE NULL END) AS Apr, " +
-					"    MAX(CASE WHEN NAT.AOPMonth = '5' THEN NAT.AttributeValue ELSE NULL END) AS May, " +
-					"    MAX(CASE WHEN NAT.AOPMonth = '6' THEN NAT.AttributeValue ELSE NULL END) AS Jun, " +
-					"    MAX(CASE WHEN NAT.AOPMonth = '7' THEN NAT.AttributeValue ELSE NULL END) AS Jul, " +
-					"    MAX(CASE WHEN NAT.AOPMonth = '8' THEN NAT.AttributeValue ELSE NULL END) AS Aug, " +
-					"    MAX(CASE WHEN NAT.AOPMonth = '9' THEN NAT.AttributeValue ELSE NULL END) AS Sep, " +
-					"    MAX(CASE WHEN NAT.AOPMonth = '10' THEN NAT.AttributeValue ELSE NULL END) AS Oct, " +
-					"    MAX(CASE WHEN NAT.AOPMonth = '11' THEN NAT.AttributeValue ELSE NULL END) AS Nov, " +
-					"    MAX(CASE WHEN NAT.AOPMonth = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec, " +
-					"    MAX(NAT.Remarks) AS Remarks, " +
-					"    MAX(NAT.Id) AS NormAttributeTransaction_Id, " +
-					"    MAX(NAT.AuditYear) AS AuditYear, " +
-					"    MAX(NP.UOM) AS UOM, " +
-					"    NP.ConfigTypeDisplayName AS ConfigTypeDisplayName, " +
-					"    NP.TypeDisplayName AS TypeDisplayName, " +
-					"    NP.ConfigTypeName AS ConfigTypeName, " +
-					"    NP.TypeName AS TypeName " +
-					"FROM " + viewName + " NP " +
-					"JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id " +
-					"LEFT JOIN NormAttributeTransactions NAT ON NAT.NormParameter_FK_Id = NP.NormParameter_FK_Id " +
-					"    AND NAT.AuditYear = :year " +
-					"WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant') " +
-					"  AND NP.Plant_FK_Id = :plantFKId " +
-					"GROUP BY " +
-					"    NP.NormParameter_FK_Id, " +
-					"    NP.TypeDisplayName, " +
-					"    NP.TypeDisplayOrder, " +
-					"    NP.ConfigTypeDisplayName, " +
-					"    NP.ConfigTypeName, " +
-					"    NP.TypeName " +
-					"ORDER BY NP.TypeDisplayOrder";
+			String sql = "SELECT " + "    NP.NormParameter_FK_Id AS NormParameter_FK_Id, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '2' THEN NAT.AttributeValue ELSE NULL END) AS Feb, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '3' THEN NAT.AttributeValue ELSE NULL END) AS Mar, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '4' THEN NAT.AttributeValue ELSE NULL END) AS Apr, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '5' THEN NAT.AttributeValue ELSE NULL END) AS May, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '6' THEN NAT.AttributeValue ELSE NULL END) AS Jun, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '7' THEN NAT.AttributeValue ELSE NULL END) AS Jul, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '8' THEN NAT.AttributeValue ELSE NULL END) AS Aug, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '9' THEN NAT.AttributeValue ELSE NULL END) AS Sep, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '10' THEN NAT.AttributeValue ELSE NULL END) AS Oct, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '11' THEN NAT.AttributeValue ELSE NULL END) AS Nov, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec, "
+					+ "    MAX(NAT.Remarks) AS Remarks, " + "    MAX(NAT.Id) AS NormAttributeTransaction_Id, "
+					+ "    MAX(NAT.AuditYear) AS AuditYear, " + "    MAX(NP.UOM) AS UOM, "
+					+ "    NP.ConfigTypeDisplayName AS ConfigTypeDisplayName, "
+					+ "    NP.TypeDisplayName AS TypeDisplayName, " + "    NP.ConfigTypeName AS ConfigTypeName, "
+					+ "    NP.TypeName AS TypeName " + "FROM " + viewName + " NP "
+					+ "JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id "
+					+ "LEFT JOIN NormAttributeTransactions NAT ON NAT.NormParameter_FK_Id = NP.NormParameter_FK_Id "
+					+ "    AND NAT.AuditYear = :year " + "WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant') "
+					+ "  AND NP.Plant_FK_Id = :plantFKId " + "GROUP BY " + "    NP.NormParameter_FK_Id, "
+					+ "    NP.TypeDisplayName, " + "    NP.TypeDisplayOrder, " + "    NP.ConfigTypeDisplayName, "
+					+ "    NP.ConfigTypeName, " + "    NP.TypeName " + "ORDER BY NP.TypeDisplayOrder";
 
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("year", year);
@@ -757,6 +772,22 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("plantFKId", plantFKId);
 			query.setParameter("year", year);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	public List<Object[]> findConstantsByYearAndPlantFkId(String aopYear, String plantId, String procedureName) {
+		try {
+			String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
@@ -811,8 +842,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			String procedureName = vertical.getName() + "_GetConfigurationIntermediateValues";
-			String sql = "EXEC " + procedureName +
-					" @plantId = :plantId, @aopYear = :aopYear";
+			String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear";
 
 			Query query = entityManager.createNativeQuery(sql);
 
