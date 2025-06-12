@@ -163,7 +163,8 @@ const PlantsProductionSummary = () => {
         res = res?.data.map((Particulates, index) => ({
           ...Particulates,
           id: index,
-          isEditable: index == 4 || index == 5 ? true : false,
+          // isEditable: index == 4 || index == 5 ? true : false,
+          isEditable: true,
         }))
 
         setRows(res)

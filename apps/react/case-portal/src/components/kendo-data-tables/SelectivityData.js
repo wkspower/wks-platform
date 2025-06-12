@@ -307,9 +307,53 @@ const SelectivityData = (props) => {
     return <td>{displayName ? displayName : props?.dataItem?.particulars}</td>
   }
 
-  const handleExcelUpload = (jsonData) => {
-    console.log('Received Excel Data from Child:', jsonData)
-    // setRows(jsonData)
+  const handleExcelUpload = (rawFile) => {
+    console.log('Received Raw File', rawFile)
+    saveExcelFile(rawFile)
+  }
+
+  const saveExcelFile = async (rawFile) => {
+    setLoading(true)
+    try {
+      var plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      const response = await DataService.saveConfigurationExcel(
+        rawFile,
+        keycloak,
+      )
+      if (response) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Configuration data Upload Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        setLoading(false)
+
+        if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
+          props?.fetchData()
+        }
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Falied!',
+          severity: 'error',
+        })
+      }
+
+      return response
+    } catch (error) {
+      console.error('Error saving Configuration data:', error)
+      setLoading(false)
+    } finally {
+      // fetchData()
+      setLoading(false)
+    }
   }
 
   return (

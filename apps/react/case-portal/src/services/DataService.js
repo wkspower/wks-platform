@@ -123,6 +123,7 @@ export const DataService = {
   saveworkflow,
   submitWorkFlow,
   getExcel,
+  saveConfigurationExcel,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -2746,6 +2747,32 @@ async function getTurnaroundReportData(keycloak, type) {
 
   try {
     const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveConfigurationExcel(file, keycloak) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+  const url = `${Config.CaseEngineUrl}/task/configuration-excel?plantId=${plantId}&year=${year}`
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
     return json(keycloak, resp)
   } catch (e) {
     console.log(e)
