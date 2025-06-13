@@ -38,5 +38,6 @@ public class AOPConsumptionNormDTO {
     private String normParameterTypeDisplayName;
     private String UOM;
     private Boolean isEditable;
+    private String productName;
 
 }

@@ -46,5 +46,6 @@ public class ShutdownNormsValueDTO {
     private String aOPCaseId;
     private String aOPStatus;
     private Boolean isEditable;
+    private String productName;
 }
 

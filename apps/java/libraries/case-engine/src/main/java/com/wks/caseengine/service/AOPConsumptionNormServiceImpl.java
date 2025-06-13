@@ -100,6 +100,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 				dto.setNormParameterTypeDisplayName(row[21] != null ? row[21].toString() : null);
 				dto.setUOM(row[22] != null ? row[22].toString() : null);
 				dto.setIsEditable(row[23] != null ? Boolean.valueOf(row[23].toString()) : null);
+				dto.setProductName(row[24] != null ? row[24].toString() : null);
 				aOPConsumptionNormDTOList.add(dto);
 			}
 			Map<String, Object> map = new HashMap<>(); 

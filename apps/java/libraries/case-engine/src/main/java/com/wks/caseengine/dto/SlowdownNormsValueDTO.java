@@ -45,5 +45,6 @@ public class SlowdownNormsValueDTO {
     private String aOPCaseId;
     private String aOPStatus;
     private Boolean isEditable;
+    private String productName;
 }
 

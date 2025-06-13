@@ -39,5 +39,6 @@ public class AOPMCCalculatedDataDTO {
     private Date modifiedOn;
     private String mcuVersion;
     private String updatedBy;
+    private String productName;
 	
 }

@@ -110,6 +110,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 				slowdownNormsValueDTO.setNormParameterTypeDisplayName(row[25] != null ? row[25].toString() : null);
 				slowdownNormsValueDTO.setUOM(row[28] != null ? row[28].toString() : null);
 				slowdownNormsValueDTO.setIsEditable(row[29] != null ? Boolean.valueOf(row[29].toString()) : null);
+				slowdownNormsValueDTO.setProductName(row[30] != null ? row[30].toString() : null);
 				slowdownNormsValueDTOList.add(slowdownNormsValueDTO);
 			}
 
@@ -308,7 +309,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 					+ "[October], [November], [December], [January], [February], [March], "
 					+ "[FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [MCUVersion], "
 					+ "[UpdatedBy], [NormParameterTypeId], [NormParameterTypeName], "
-					+ "[NormParameterTypeDisplayName], [NormTypeDisplayOrder], [MaterialDisplayOrder], [UOM],[isEditable] "
+					+ "[NormParameterTypeDisplayName], [NormTypeDisplayOrder], [MaterialDisplayOrder], [UOM],[isEditable],[DisplayName] "
 					+ "FROM " + viewName + " "
 					+ "WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL) "
 					+ "ORDER BY NormTypeDisplayOrder";

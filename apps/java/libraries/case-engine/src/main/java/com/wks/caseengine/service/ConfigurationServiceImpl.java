@@ -155,6 +155,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					configurationDTO.setTypeDisplayName(row[18] != null ? row[18].toString() : "");
 					configurationDTO.setConfigTypeName(row[19] != null ? row[19].toString() : "");
 					configurationDTO.setTypeName(row[20] != null ? row[20].toString() : "");
+					configurationDTO.setProductName(row[21] != null ? row[21].toString() : "");
 
 				}
 
@@ -164,7 +165,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					configurationDTO.setUOM(row[15] != null ? row[15].toString() : "");
 					configurationDTO.setNormType(row[16] != null ? row[16].toString() : "");
 					configurationDTO.setIsEditable(row[17] != null ? ((Boolean) row[17]).booleanValue() : null);
-					;
+					configurationDTO.setProductName(row[18] != null ? row[18].toString() : "");
 				}
 
 				configurationDTOList.add(configurationDTO);
@@ -733,7 +734,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					+ "    MAX(NAT.AuditYear) AS AuditYear, " + "    MAX(NP.UOM) AS UOM, "
 					+ "    NP.ConfigTypeDisplayName AS ConfigTypeDisplayName, "
 					+ "    NP.TypeDisplayName AS TypeDisplayName, " + "    NP.ConfigTypeName AS ConfigTypeName, "
-					+ "    NP.TypeName AS TypeName " + "FROM " + viewName + " NP "
+					+ "    NP.TypeName AS TypeName, MAX(NP.DisplayName) " + "FROM " + viewName + " NP "
 					+ "JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id "
 					+ "LEFT JOIN NormAttributeTransactions NAT ON NAT.NormParameter_FK_Id = NP.NormParameter_FK_Id "
 					+ "    AND NAT.AuditYear = :year " + "WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant') "

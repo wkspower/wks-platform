@@ -90,6 +90,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 				aOPMCCalculatedDataDTO.setFinancialYear(row[16] != null ? row[16].toString() : null);
 				aOPMCCalculatedDataDTO.setRemarks(row[17] != null ? row[17].toString() : " ");
 				aOPMCCalculatedDataDTO.setVerticalFKId(row[22] != null ? row[22].toString() : null);
+				aOPMCCalculatedDataDTO.setProductName(row[24] != null ? row[24].toString() : null);
 				aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
 			}
 			Map<String, Object> map = new HashMap<>();

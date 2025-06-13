@@ -82,6 +82,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				}
 				dto.setDisplayOrder(result[8] != null ? ((Integer) result[8]) : null);
 				dto.setRate(result[9] != null ? ((Number) result[9]).doubleValue() : null); // Extract Rate
+				dto.setProductName(result[10] != null ? result[10].toString() : null);
 
 				dtoList.add(dto);
 			}

@@ -116,6 +116,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValueDTO.setNormParameterTypeDisplayName(row[25] != null ? row[25].toString() : null);
 				mCUNormsValueDTO.setUOM(row[26] != null ? row[26].toString() : null);
 				mCUNormsValueDTO.setIsEditable(row[27] != null ? Boolean.valueOf(row[27].toString()) : null);
+				mCUNormsValueDTO.setProductName(row[28] != null ? row[28].toString() : null);
 				mCUNormsValueDTOList.add(mCUNormsValueDTO);
 			}
 			Map<String, Object> map = new HashMap<>(); 

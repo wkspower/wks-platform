@@ -149,6 +149,7 @@ public class AOPServiceImpl implements AOPService {
 
 				// Directly parsing integer value
 				aOPDTO.setDisplayOrder(row[21] != null ? Integer.valueOf(row[21].toString()) : null);
+				aOPDTO.setNormParameterName(row[22] != null ? row[22].toString() : null);
 
 				aOPDTOList.add(aOPDTO);
 			}
