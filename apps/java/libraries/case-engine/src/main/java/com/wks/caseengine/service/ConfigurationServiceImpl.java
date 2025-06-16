@@ -1,31 +1,41 @@
 package com.wks.caseengine.service;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import jakarta.persistence.Query;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
-
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.regex.Matcher;
 
@@ -37,6 +47,7 @@ import jakarta.persistence.PersistenceContext;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.dto.AOPDTO;
 import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.ConfigurationDataDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
@@ -90,9 +101,146 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
 
+	public byte[] createExcel(String year, UUID plantFKId) {
+		try {
+			List<ConfigurationDTO> dtoList = getConfigurationData(year, plantFKId);
+			Workbook workbook = new XSSFWorkbook();
+			CellStyle borderStyle = createBorderedStyle(workbook);
+			CellStyle boldStyle = createBoldStyle(workbook);
+			Sheet sheet = workbook.createSheet("Sheet1");
+			int currentRow = 0;
+			// List<List<Object>> rows = new ArrayList<>();
+
+			List<List<Object>> rows = new ArrayList<>();
+			// Data rows
+			for (ConfigurationDTO dto : dtoList) {
+				Double sum = 0.0;
+				List<Object> list = new ArrayList<>();
+				list.add(dto.getNormType());
+				list.add(dto.getNormParameterDisplayName());
+				list.add(dto.getApr());
+				list.add(dto.getMay());
+				list.add(dto.getJun());
+				list.add(dto.getJul());
+				list.add(dto.getAug());
+				list.add(dto.getSep());
+				list.add(dto.getOct());
+				list.add(dto.getNov());
+				list.add(dto.getDec());
+				list.add(dto.getJan());
+				list.add(dto.getFeb());
+				list.add(dto.getMar());
+				list.add(dto.getRemarks());
+
+				rows.add(list);
+			}
+
+			List<String> innerHeaders = new ArrayList<>();
+			innerHeaders.add("Type");
+			innerHeaders.add("Particulars");
+			List<String> monthsList = getAcademicYearMonths(year);
+			innerHeaders.addAll(monthsList);
+			innerHeaders.add("Remarks");
+
+			List<List<String>> headers = new ArrayList<>();
+			headers.add(innerHeaders);
+
+			for (List<String> headerRowData : headers) {
+				Row headerRow = sheet.createRow(currentRow++);
+				for (int col = 0; col < headerRowData.size(); col++) {
+					Cell cell = headerRow.createCell(col);
+					cell.setCellValue(headerRowData.get(col));
+					cell.setCellStyle(createBoldBorderedStyle(workbook));
+				}
+			}
+			for (List<Object> rowData : rows) {
+				Row row = sheet.createRow(currentRow++);
+				for (int col = 0; col < rowData.size(); col++) {
+					Cell cell = row.createCell(col);
+					Object value = rowData.get(col);
+
+					if (value instanceof Number) {
+						cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
+					} else if (value instanceof Boolean) {
+						cell.setCellValue((Boolean) value);
+					} else if (value != null) {
+						cell.setCellValue(value.toString());
+					} else {
+						cell.setCellValue("");
+					}
+
+				}
+			}
+			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
+
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				workbook.write(outputStream);
+				workbook.close();
+				return outputStream.toByteArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+
+	private static String formatMonthYear(int month, int year) {
+		LocalDate date = LocalDate.of(year, month, 1);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM-yy", Locale.ENGLISH);
+		return date.format(formatter);
+	}
+
+	public static List<String> getAcademicYearMonths(String year) {
+		List<String> months = new ArrayList<>();
+		int startYear = Integer.parseInt(year.substring(0, 4));
+		int nextYear = startYear + 1;
+
+		// Apr to Dec of startYear
+		for (int month = 4; month <= 12; month++) {
+			String label = formatMonthYear(month, startYear);
+			months.add(label);
+		}
+
+		// Jan to Mar of nextYear
+		for (int month = 1; month <= 3; month++) {
+			String label = formatMonthYear(month, nextYear);
+			months.add(label);
+		}
+
+		return months;
+	}
+
+	private CellStyle createBorderedStyle(Workbook wb) {
+		CellStyle style = wb.createCellStyle();
+		style.setBorderBottom(BorderStyle.THIN);
+		style.setBorderTop(BorderStyle.THIN);
+		style.setBorderLeft(BorderStyle.THIN);
+		style.setBorderRight(BorderStyle.THIN);
+		return style;
+	}
+
+	private CellStyle createBoldStyle(Workbook wb) {
+		Font font = wb.createFont();
+		font.setBold(true);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		return style;
+	}
+
+	private CellStyle createBoldBorderedStyle(Workbook workbook) {
+		CellStyle style = createBorderedStyle(workbook);
+		Font font = workbook.createFont();
+		font.setBold(true);
+		style.setFont(font);
+		return style;
+	}
+
 	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId) {
 		try {
-
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 			String viewName = "vwScrn" + verticalName + "GetConfigTypes";
 			List<Object[]> obj = new ArrayList<>();
@@ -107,6 +255,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			for (Object[] row : obj) {
 				ConfigurationDTO configurationDTO = new ConfigurationDTO();
 				configurationDTO.setNormParameterFKId(row[0] != null ? row[0].toString() : "");
+				System.out.println("normparameterid" + UUID.fromString(configurationDTO.getNormParameterFKId()));
+				System.out.println(normParametersRepository
+						.findById(UUID.fromString(configurationDTO.getNormParameterFKId())).get());
+				System.out.println(normParametersRepository
+						.findById(UUID.fromString(configurationDTO.getNormParameterFKId())).get().getDisplayName());
+
+				configurationDTO.setNormParameterDisplayName(normParametersRepository
+						.findById(UUID.fromString(configurationDTO.getNormParameterFKId())).get().getDisplayName());
+
 				configurationDTO.setJan(
 						(row[1] != null && !row[1].toString().trim().isEmpty()) ? Double.parseDouble(row[1].toString())
 								: null);
@@ -203,7 +360,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				map.put("ConstantValue", row[5]);
 				map.put("AuditYear", row[6]);
 				map.put("Remarks", row[7]);
-				int editableFlag = (Integer) row[8];  // or use getInt(), depending on your data source
+				int editableFlag = (Integer) row[8]; // or use getInt(), depending on your data source
 				boolean isEditable = (editableFlag == 1);
 				map.put("isEditable", isEditable);
 				configurationConstantsList.add(map); // Add the map to the list here
@@ -544,30 +701,30 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	public Double getAttributeValue(ConfigurationDTO configurationDTO, Integer i) {
 		switch (i) {
-		case 1:
-			return configurationDTO.getJan();
-		case 2:
-			return configurationDTO.getFeb();
-		case 3:
-			return configurationDTO.getMar();
-		case 4:
-			return configurationDTO.getApr();
-		case 5:
-			return configurationDTO.getMay();
-		case 6:
-			return configurationDTO.getJun();
-		case 7:
-			return configurationDTO.getJul();
-		case 8:
-			return configurationDTO.getAug();
-		case 9:
-			return configurationDTO.getSep();
-		case 10:
-			return configurationDTO.getOct();
-		case 11:
-			return configurationDTO.getNov();
-		case 12:
-			return configurationDTO.getDec();
+			case 1:
+				return configurationDTO.getJan();
+			case 2:
+				return configurationDTO.getFeb();
+			case 3:
+				return configurationDTO.getMar();
+			case 4:
+				return configurationDTO.getApr();
+			case 5:
+				return configurationDTO.getMay();
+			case 6:
+				return configurationDTO.getJun();
+			case 7:
+				return configurationDTO.getJul();
+			case 8:
+				return configurationDTO.getAug();
+			case 9:
+				return configurationDTO.getSep();
+			case 10:
+				return configurationDTO.getOct();
+			case 11:
+				return configurationDTO.getNov();
+			case 12:
+				return configurationDTO.getDec();
 
 		}
 		return configurationDTO.getJan();
@@ -857,6 +1014,92 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
+	}
+
+	@Override
+	public AOPMessageVM importExcel(String year, UUID plantFKId, MultipartFile file) {
+		// TODO Auto-generated method stub
+		try {
+			List<ConfigurationDTO> data = readConfigurations(file.getInputStream(),plantFKId,year);
+            
+			saveConfigurationData(year,plantFKId.toString(), data);
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(data);
+			return aopMessageVM;
+			// return ResponseEntity.ok(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// return ResponseEntity.internalServerError().build();
+		}
+		return null; 
+	}
+
+	public List<ConfigurationDTO> readConfigurations(InputStream inputStream, UUID plantFKId, String year) {
+		List<ConfigurationDTO> configList = new ArrayList<>();
+
+		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+			Sheet sheet = workbook.getSheetAt(0);
+			Iterator<Row> rowIterator = sheet.iterator();
+
+			if (rowIterator.hasNext())
+				rowIterator.next(); // Skip header
+
+			while (rowIterator.hasNext()) {
+				Row row = rowIterator.next();
+				ConfigurationDTO dto = new ConfigurationDTO();
+
+				dto.setNormType(getStringCellValue(row.getCell(0)));
+				dto.setNormParameterDisplayName(getStringCellValue(row.getCell(1)));
+			    System.out.println("normparamter displayName "+dto.getNormParameterDisplayName());
+				UUID normparameterId =   normParametersRepository.findByDisplayNameAndPlantFkId(dto.getNormParameterDisplayName(),plantFKId).get().getId();
+				System.out.println("normparamter displayName "+normparameterId);
+				dto.setNormParameterFKId(normparameterId.toString());
+                dto.setAuditYear(year);
+				dto.setApr(getNumericCellValue(row.getCell(2)));
+				dto.setMay(getNumericCellValue(row.getCell(3)));
+				dto.setJun(getNumericCellValue(row.getCell(4)));
+				dto.setJul(getNumericCellValue(row.getCell(5)));
+				dto.setAug(getNumericCellValue(row.getCell(6)));
+				dto.setSep(getNumericCellValue(row.getCell(7)));
+				dto.setOct(getNumericCellValue(row.getCell(8)));
+				dto.setNov(getNumericCellValue(row.getCell(9)));
+				dto.setDec(getNumericCellValue(row.getCell(10)));
+				dto.setJan(getNumericCellValue(row.getCell(11)));
+				dto.setFeb(getNumericCellValue(row.getCell(12)));
+				dto.setMar(getNumericCellValue(row.getCell(13)));
+				dto.setRemarks(getStringCellValue(row.getCell(14)));
+				configList.add(dto);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return configList;
+	}
+
+	private static String getStringCellValue(Cell cell) {
+		if (cell == null)
+			return null;
+		cell.setCellType(CellType.STRING);
+		return cell.getStringCellValue().trim();
+	}
+
+	private static Double getNumericCellValue(Cell cell) {
+		if (cell == null)
+			return null;
+		if (cell.getCellType() == CellType.NUMERIC) {
+			return cell.getNumericCellValue();
+		} else if (cell.getCellType() == CellType.STRING) {
+			try {
+				return Double.parseDouble(cell.getStringCellValue().trim());
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+		return null;
 	}
 
 }

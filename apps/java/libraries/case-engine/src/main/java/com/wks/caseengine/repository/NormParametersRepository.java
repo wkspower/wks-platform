@@ -26,6 +26,8 @@ public interface NormParametersRepository extends JpaRepository<NormParameters, 
 
     Optional<NormParameters> findByNameAndPlantFkId(String string, UUID plantId);
 
+    Optional<NormParameters> findByDisplayNameAndPlantFkId(String normParameterDisplayName, UUID plantFKId);
+
 	
 
 }

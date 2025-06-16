@@ -17,6 +17,7 @@ import {
   TextField,
 } from '../../../node_modules/@mui/material/index'
 
+
 import DownloadIcon from '@mui/icons-material/Download'
 import UploadIcon from '@mui/icons-material/Upload'
 import Notification from 'components/Utilities/Notification'
@@ -40,6 +41,7 @@ import {
 } from './Utilities-Kendo/durationHelpers'
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import * as XLSX from 'xlsx'
+import { DataService } from 'services/DataService'
 
 export const particulars = [
   'normParametersFKId',
@@ -69,6 +71,9 @@ export const hiddenFields1 = [
   'period',
 ]
 export const hiddenFields = []
+import { useSession } from 'SessionStoreContext'
+
+
 
 const KendoDataTables = ({
   rows = [],
@@ -115,7 +120,7 @@ const KendoDataTables = ({
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
-
+  const keycloak = useSession()
   const handleEditChange = useCallback((e) => {
     setEdit(e.edit)
   }, [])
@@ -301,6 +306,23 @@ const KendoDataTables = ({
       setIsButtonDisabled(false)
     }, 500)
   }
+
+const downloadExcelForConfiguration = async () => {
+  try {
+        
+        // Await the API call here to ensure completion
+        const data = await DataService.getConfigurationExcel(keycloak)
+  
+        return data
+      } catch (error) {
+        
+        console.error('Error!', error)
+      } finally {
+        
+      }
+    }
+  
+
   const handleCalculateBtn = async () => {
     setIsButtonDisabled(true)
     handleCalculate()
@@ -465,7 +487,7 @@ const KendoDataTables = ({
                 <Button
                   variant='outlined'
                   size='small'
-                  onClick={saveModalOpen}
+                  onClick={downloadExcelForConfiguration}
                   disabled={isButtonDisabled}
                 >
                   <DownloadIcon fontSize='small' />

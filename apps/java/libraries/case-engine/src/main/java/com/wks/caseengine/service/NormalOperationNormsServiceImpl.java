@@ -15,10 +15,18 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.wks.caseengine.dto.AOPDTO;
+import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.MCUNormsValueDTO;
 import com.wks.caseengine.entity.AOPSummary;
 import com.wks.caseengine.entity.AopCalculation;
@@ -32,15 +40,21 @@ import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.NormalOperationNormsRepository;
 import com.wks.caseengine.repository.NormsTransactionRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.sql.Connection;
 import javax.sql.DataSource;
@@ -61,16 +75,17 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	VerticalsRepository verticalRepository;
 	@Autowired
 	private NormsTransactionRepository normsTransactionRepository;
-	
+
 	@Autowired
 	private ScreenMappingRepository screenMappingRepository;
-	
+
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
 
+	@Autowired
+	private NormParametersRepository normParametersRepository;
+
 	private DataSource dataSource;
-	
-	
 
 	// Inject or set your DataSource (e.g., via constructor or setter)
 	public NormalOperationNormsServiceImpl(DataSource dataSource) {
@@ -79,7 +94,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 	@Override
 	public AOPMessageVM getNormalOperationNormsData(String year, String plantId) {
-		AOPMessageVM aopMessageVM =new AOPMessageVM();
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
 			List<Object[]> obj = getNormalOperationNormsDataFromView(year, UUID.fromString(plantId));
 			List<MCUNormsValueDTO> mCUNormsValueDTOList = new ArrayList<>();
@@ -91,6 +106,14 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValueDTO.setPlantFkId(row[2].toString());
 				mCUNormsValueDTO.setVerticalFkId(row[3].toString());
 				mCUNormsValueDTO.setMaterialFkId(row[4].toString());
+				System.out.println("normparameterid" + UUID.fromString(mCUNormsValueDTO.getMaterialFkId()));
+				System.out.println(normParametersRepository
+						.findById(UUID.fromString(mCUNormsValueDTO.getMaterialFkId())).get());
+				System.out.println(normParametersRepository
+						.findById(UUID.fromString(mCUNormsValueDTO.getMaterialFkId())).get().getDisplayName());
+
+				mCUNormsValueDTO.setNormParameterDisplayName(normParametersRepository
+						.findById(UUID.fromString(mCUNormsValueDTO.getMaterialFkId())).get().getDisplayName());
 
 				mCUNormsValueDTO.setApril(row[5] != null ? Double.parseDouble(row[5].toString()) : null);
 				mCUNormsValueDTO.setMay(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
@@ -119,9 +142,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValueDTO.setProductName(row[28] != null ? row[28].toString() : null);
 				mCUNormsValueDTOList.add(mCUNormsValueDTO);
 			}
-			Map<String, Object> map = new HashMap<>(); 
-			
-			List<AopCalculation> aopCalculation=aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"normal-op-norms");
+			Map<String, Object> map = new HashMap<>();
+
+			List<AopCalculation> aopCalculation = aopCalculationRepository
+					.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year, "normal-op-norms");
 			map.put("mcuNormsValueDTOList", mCUNormsValueDTOList);
 			map.put("aopCalculation", aopCalculation);
 			aopMessageVM.setCode(200);
@@ -136,24 +160,25 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	@Override
-	public List<MCUNormsValueDTO> saveNormalOperationNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList) {
-		String year=null;
-		UUID plantId=null;
+	public List<MCUNormsValueDTO> saveNormalOperationNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList, UUID plantFKId, String year) {
+		//String year = null;
+		//UUID plantId = null;
 		try {
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			String userId = authentication.getName();
 			List<NormsTransactions> transactionsToSave = new ArrayList<>();
 
-		    for (MCUNormsValueDTO dto : mCUNormsValueDTOList) {
-		        Optional<MCUNormsValue> optionalValue = normalOperationNormsRepository.findById(UUID.fromString(dto.getId()));
-		        if (optionalValue.isEmpty()) {
-		            continue; // or handle accordingly
-		        }
-		        MCUNormsValue value = optionalValue.get();
+			for (MCUNormsValueDTO dto : mCUNormsValueDTOList) {
+				Optional<MCUNormsValue> optionalValue = normalOperationNormsRepository
+						.findById(UUID.fromString(dto.getId()));
+				if (optionalValue.isEmpty()) {
+					continue; // or handle accordingly
+				}
+				MCUNormsValue value = optionalValue.get();
 
-		        for (int month = 1; month <= 12; month++) {
-		            Double oldVal = getMonthlyValue(value, month);
-		            Double newVal = getMonthlyValue(dto, month);
+				for (int month = 1; month <= 12; month++) {
+					Double oldVal = getMonthlyValue(value, month);
+					Double newVal = getMonthlyValue(dto, month);
 
 					if (newVal != null && !Objects.equals(oldVal, newVal)) {
 						NormsTransactions normsTransactions = new NormsTransactions();
@@ -161,7 +186,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 						normsTransactions.setAopYear(value.getFinancialYear());
 						normsTransactions.setAttributeValue(newVal != null ? newVal.doubleValue() : null);
 						normsTransactions.setNormParameterFkId(value.getMaterialFkId());
-						normsTransactions.setPlantFkId(value.getPlantFkId());
+						normsTransactions.setPlantFkId(plantFKId);
 						normsTransactions.setRemark(dto.getRemarks());
 						normsTransactions.setVersion(1);
 						normsTransactions.setCreatedDateTime(new Date());
@@ -177,8 +202,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			normsTransactionRepository.saveAll(transactionsToSave);
 
 			for (MCUNormsValueDTO mCUNormsValueDTO : mCUNormsValueDTOList) {
-				year=mCUNormsValueDTO.getFinancialYear();
-				plantId=UUID.fromString(mCUNormsValueDTO.getPlantFkId());
+				year = mCUNormsValueDTO.getFinancialYear();
 				MCUNormsValue mCUNormsValue = new MCUNormsValue();
 				if (mCUNormsValueDTO.getId() != null || !mCUNormsValueDTO.getId().isEmpty()) {
 					mCUNormsValue.setId(UUID.fromString(mCUNormsValueDTO.getId()));
@@ -201,8 +225,8 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				if (mCUNormsValueDTO.getSiteFkId() != null) {
 					mCUNormsValue.setSiteFkId(UUID.fromString(mCUNormsValueDTO.getSiteFkId()));
 				}
-				if (mCUNormsValueDTO.getPlantFkId() != null) {
-					mCUNormsValue.setPlantFkId(UUID.fromString(mCUNormsValueDTO.getPlantFkId()));
+				if (plantFKId != null) {
+					mCUNormsValue.setPlantFkId(plantFKId);
 				}
 				if (mCUNormsValueDTO.getVerticalFkId() != null) {
 					mCUNormsValue.setVerticalFkId(UUID.fromString(mCUNormsValueDTO.getVerticalFkId()));
@@ -222,13 +246,13 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				System.out.println("Data Saved Succussfully");
 				normalOperationNormsRepository.save(mCUNormsValue);
 			}
-			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("normal-op-norms");
-			for(ScreenMapping screenMapping:screenMappingList) {
-				AopCalculation aopCalculation=new AopCalculation();
+			List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("normal-op-norms");
+			for (ScreenMapping screenMapping : screenMappingList) {
+				AopCalculation aopCalculation = new AopCalculation();
 				aopCalculation.setAopYear(year);
 				aopCalculation.setIsChanged(true);
 				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-				aopCalculation.setPlantId(plantId);
+				aopCalculation.setPlantId(plantFKId);
 				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
 				aopCalculationRepository.save(aopCalculation);
 			}
@@ -248,13 +272,14 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		String storedProcedure = vertical.getName() + "_" + site.getName() + "_NormsCalculation";
 		System.out.println("storedProcedure" + storedProcedure);
-		int result= executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
+		int result = executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
 				vertical.getId().toString(), year);
-		aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"normal-op-norms");
-		List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("normal-op-norms");
-		for(ScreenMapping screenMapping:screenMappingList) {
-			if(!screenMapping.getCalculationScreen().equalsIgnoreCase(screenMapping.getDependentScreen())) {
-				AopCalculation aopCalculation=new AopCalculation();
+		aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year,
+				"normal-op-norms");
+		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("normal-op-norms");
+		for (ScreenMapping screenMapping : screenMappingList) {
+			if (!screenMapping.getCalculationScreen().equalsIgnoreCase(screenMapping.getDependentScreen())) {
+				AopCalculation aopCalculation = new AopCalculation();
 				aopCalculation.setAopYear(year);
 				aopCalculation.setIsChanged(true);
 				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
@@ -264,9 +289,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			}
 		}
 		aopMessageVM.setCode(200);
-        aopMessageVM.setMessage("SP Executed successfully");
-        aopMessageVM.setData(result);
-        return aopMessageVM;
+		aopMessageVM.setMessage("SP Executed successfully");
+		aopMessageVM.setData(result);
+		return aopMessageVM;
 	}
 
 	// @Transactional
@@ -404,6 +429,242 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	@Override
+	public AOPMessageVM importExcel(String year, UUID plantFKId, MultipartFile file) {
+		// TODO Auto-generated method stub
+		try {
+			List<MCUNormsValueDTO> data = readConfigurations(file.getInputStream(), plantFKId, year);
+			saveNormalOperationNormsData(data,plantFKId,year);
+			// saveConfigurationData(year,plantFKId.toString(), data);
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(data);
+			return aopMessageVM;
+			// return ResponseEntity.ok(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// return ResponseEntity.internalServerError().build();
+		}
+		return null;
+	}
+
+	public List<MCUNormsValueDTO> readConfigurations(InputStream inputStream, UUID plantFKId, String year) {
+		List<MCUNormsValueDTO> configList = new ArrayList<>();
+
+		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+			Sheet sheet = workbook.getSheetAt(0);
+			Iterator<Row> rowIterator = sheet.iterator();
+
+			if (rowIterator.hasNext())
+				rowIterator.next(); // Skip header
+
+			while (rowIterator.hasNext()) {
+				Row row = rowIterator.next();
+				MCUNormsValueDTO dto = new MCUNormsValueDTO();
+
+				dto.setNormParameterTypeDisplayName(getStringCellValue(row.getCell(0)));
+				dto.setNormParameterDisplayName(getStringCellValue(row.getCell(1)));
+				dto.setUOM(getStringCellValue(row.getCell(2)));
+				System.out.println("normparamter displayName " + dto.getNormParameterDisplayName());
+				UUID normparameterId = normParametersRepository
+						.findByDisplayNameAndPlantFkId(dto.getNormParameterDisplayName(), plantFKId)
+						.get().getId();
+				System.out.println("normparamter displayName " + normparameterId);
+				dto.setMaterialFkId(normparameterId.toString());
+				dto.setFinancialYear(year);;
+				dto.setApril(getNumericCellValue(row.getCell(3)));
+				dto.setMay(getNumericCellValue(row.getCell(4)));
+				dto.setJune(getNumericCellValue(row.getCell(5)));
+				dto.setJuly(getNumericCellValue(row.getCell(6)));
+				dto.setAugust(getNumericCellValue(row.getCell(7)));
+				dto.setSeptember(getNumericCellValue(row.getCell(8)));
+				dto.setOctober(getNumericCellValue(row.getCell(9)));
+				dto.setNovember(getNumericCellValue(row.getCell(10)));
+				dto.setDecember(getNumericCellValue(row.getCell(11)));
+				dto.setJanuary(getNumericCellValue(row.getCell(12)));
+				dto.setFebruary(getNumericCellValue(row.getCell(13)));
+				dto.setMarch(getNumericCellValue(row.getCell(14)));
+				dto.setRemarks(getStringCellValue(row.getCell(15)));
+				dto.setId(getStringCellValue(row.getCell(16)));
+				configList.add(dto);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return configList;
+	}
+
+	private static String getStringCellValue(Cell cell) {
+		if (cell == null)
+			return null;
+		cell.setCellType(CellType.STRING);
+		return cell.getStringCellValue().trim();
+	}
+
+	private static Double getNumericCellValue(Cell cell) {
+		if (cell == null)
+			return null;
+		if (cell.getCellType() == CellType.NUMERIC) {
+			return cell.getNumericCellValue();
+		} else if (cell.getCellType() == CellType.STRING) {
+			try {
+				return Double.parseDouble(cell.getStringCellValue().trim());
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+		return null;
+	}
+
+	public byte[] createExcel(String year, UUID plantFKId) {
+		try {
+			AOPMessageVM aopMessageVM = getNormalOperationNormsData(year, plantFKId.toString());
+
+			Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+			List<MCUNormsValueDTO> dtoList = (List<MCUNormsValueDTO>) responseMap.get("mcuNormsValueDTOList");
+
+			Workbook workbook = new XSSFWorkbook();
+			CellStyle borderStyle = createBorderedStyle(workbook);
+			CellStyle boldStyle = createBoldStyle(workbook);
+			Sheet sheet = workbook.createSheet("Sheet1");
+			int currentRow = 0;
+			// List<List<Object>> rows = new ArrayList<>();
+
+			List<List<Object>> rows = new ArrayList<>();
+			// Data rows
+			for (MCUNormsValueDTO dto : dtoList) {
+				Double sum = 0.0;
+				List<Object> list = new ArrayList<>();
+				list.add(dto.getNormParameterTypeDisplayName());
+				list.add(dto.getNormParameterDisplayName());
+				list.add(dto.getUOM());
+				list.add(dto.getApril());
+				list.add(dto.getMay());
+				list.add(dto.getJune());
+				list.add(dto.getJuly());
+				list.add(dto.getAugust());
+				list.add(dto.getSeptember());
+				list.add(dto.getOctober());
+				list.add(dto.getNovember());
+				list.add(dto.getDecember());
+				list.add(dto.getJanuary());
+				list.add(dto.getFebruary());
+				list.add(dto.getMarch());
+				list.add(dto.getRemarks());
+				list.add(dto.getId());
+
+				rows.add(list);
+			}
+
+			List<String> innerHeaders = new ArrayList<>();
+			innerHeaders.add("Type");
+			innerHeaders.add("Particulars");
+			innerHeaders.add("UOM");
+			List<String> monthsList = getAcademicYearMonths(year);
+			innerHeaders.addAll(monthsList);
+			innerHeaders.add("Remarks");
+			innerHeaders.add("Id");
+			List<List<String>> headers = new ArrayList<>();
+			headers.add(innerHeaders);
+
+			for (List<String> headerRowData : headers) {
+				Row headerRow = sheet.createRow(currentRow++);
+				for (int col = 0; col < headerRowData.size(); col++) {
+					Cell cell = headerRow.createCell(col);
+					cell.setCellValue(headerRowData.get(col));
+					cell.setCellStyle(createBoldBorderedStyle(workbook));
+				}
+			}
+			for (List<Object> rowData : rows) {
+				Row row = sheet.createRow(currentRow++);
+				for (int col = 0; col < rowData.size(); col++) {
+					Cell cell = row.createCell(col);
+					Object value = rowData.get(col);
+
+					if (value instanceof Number) {
+						cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
+					} else if (value instanceof Boolean) {
+						cell.setCellValue((Boolean) value);
+					} else if (value != null) {
+						cell.setCellValue(value.toString());
+					} else {
+						cell.setCellValue("");
+					}
+
+				}
+			}
+			sheet.setColumnHidden(16, true);
+			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
+
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				workbook.write(outputStream);
+				workbook.close();
+				return outputStream.toByteArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+
+	private static String formatMonthYear(int month, int year) {
+		LocalDate date = LocalDate.of(year, month, 1);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM-yy", Locale.ENGLISH);
+		return date.format(formatter);
+	}
+
+	public static List<String> getAcademicYearMonths(String year) {
+		List<String> months = new ArrayList<>();
+		int startYear = Integer.parseInt(year.substring(0, 4));
+		int nextYear = startYear + 1;
+
+		// Apr to Dec of startYear
+		for (int month = 4; month <= 12; month++) {
+			String label = formatMonthYear(month, startYear);
+			months.add(label);
+		}
+
+		// Jan to Mar of nextYear
+		for (int month = 1; month <= 3; month++) {
+			String label = formatMonthYear(month, nextYear);
+			months.add(label);
+		}
+
+		return months;
+	}
+
+	private CellStyle createBorderedStyle(Workbook wb) {
+		CellStyle style = wb.createCellStyle();
+		style.setBorderBottom(BorderStyle.THIN);
+		style.setBorderTop(BorderStyle.THIN);
+		style.setBorderLeft(BorderStyle.THIN);
+		style.setBorderRight(BorderStyle.THIN);
+		return style;
+	}
+
+	private CellStyle createBoldStyle(Workbook wb) {
+		Font font = wb.createFont();
+		font.setBold(true);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		return style;
+	}
+
+	private CellStyle createBoldBorderedStyle(Workbook workbook) {
+		CellStyle style = createBorderedStyle(workbook);
+		Font font = workbook.createFont();
+		font.setBold(true);
+		style.setFont(font);
+		return style;
 	}
 
 }
