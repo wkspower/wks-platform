@@ -35,6 +35,7 @@ const MaintenanceTable = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
 
   const fetchData = async () => {
+    setRows([])
     setLoading(true)
     try {
       const data = await DataService.getMaintenanceData(keycloak)
@@ -107,7 +108,7 @@ const MaintenanceTable = () => {
       title: 'Description',
       align: 'left',
       headerAlign: 'left',
-      width: 250,
+      width: 350,
       editable: false,
     },
     {
@@ -117,7 +118,6 @@ const MaintenanceTable = () => {
       headerAlign: 'left',
       type: 'number',
       format: '{0:n2}',
-
       editable: false,
     },
 
@@ -126,7 +126,6 @@ const MaintenanceTable = () => {
       title: headerMap[5],
       type: 'number',
       format: '{0:n2}',
-
       editable: false,
       align: 'right',
       headerAlign: 'left',

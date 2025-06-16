@@ -4,11 +4,18 @@
     "title": "Type",
     "width": 100,
     "groupable": true,
-    "headerClass": "bold-header",
     "editable": false
   },
   {
     "field": "normParameterId",
+    "title": "Particulars",
+    "editable": false,
+    "width": 125,
+    "hidden": true
+  },
+
+  {
+    "field": "displayName",
     "title": "Particulars",
     "editable": false,
     "width": 125
@@ -18,7 +25,7 @@
     "title": 4,
     "editable": true,
     "width": 120,
-    "align": "left",
+    "rightAlign": true,
     "headerAlign": "left"
   },
   {
@@ -26,7 +33,7 @@
     "title": 5,
     "editable": true,
     "width": 120,
-    "align": "left",
+    "rightAlign": "left",
     "headerAlign": "left"
   },
   {
@@ -34,7 +41,7 @@
     "title": 6,
     "editable": true,
     "width": 120,
-    "align": "left",
+    "rightAlign": "left",
     "headerAlign": "left"
   },
   {
@@ -42,7 +49,7 @@
     "title": 7,
     "editable": true,
     "width": 120,
-    "align": "left",
+    "rightAlign": "left",
     "headerAlign": "left"
   },
   {
@@ -50,7 +57,7 @@
     "title": 8,
     "editable": true,
     "width": 120,
-    "align": "left",
+    "rightAlign": "left",
     "headerAlign": "left"
   },
   {
@@ -58,7 +65,7 @@
     "title": 9,
     "editable": true,
     "width": 120,
-    "align": "left",
+    "rightAlign": "left",
     "headerAlign": "left"
   },
   {
@@ -66,7 +73,7 @@
     "title": 10,
     "editable": true,
     "width": 120,
-    "align": "left",
+    "rightAlign": "left",
     "headerAlign": "left"
   },
   {
@@ -74,7 +81,7 @@
     "title": 11,
     "editable": true,
     "width": 120,
-    "align": "left",
+    "rightAlign": "left",
     "headerAlign": "left"
   },
   {
@@ -82,7 +89,7 @@
     "title": 12,
     "editable": true,
     "width": 120,
-    "align": "left",
+    "rightAlign": "left",
     "headerAlign": "left"
   },
   {
@@ -90,7 +97,7 @@
     "title": 1,
     "editable": true,
     "width": 120,
-    "align": "left",
+    "rightAlign": "left",
     "headerAlign": "left"
   },
   {
@@ -98,7 +105,7 @@
     "title": 2,
     "editable": true,
     "width": 120,
-    "align": "left",
+    "rightAlign": "left",
     "headerAlign": "left"
   },
   {
@@ -106,7 +113,7 @@
     "title": 3,
     "editable": true,
     "width": 120,
-    "align": "left",
+    "rightAlign": "left",
     "headerAlign": "left"
   },
   {
@@ -117,6 +124,7 @@
   },
   {
     "field": "idFromApi",
-    "title": "ID from API"
+    "title": "ID from API",
+    "hidden": true
   }
 ]

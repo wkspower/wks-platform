@@ -2,132 +2,85 @@
   {
     "field": "Particulars",
     "title": "Type",
-    "width": 120,
-    "groupable": true,
     "editable": false
   },
   {
     "field": "NormParametersId",
-    "title": "Particulars",
-    "width": 175,
-    "editable": false
+    "hidden": true
   },
   {
     "field": "UOM",
     "title": "UOM / MT",
-    "width": 90,
+    "editable": false
+  },
+  {
+    "field": "productName",
+    "title": "Particulars",
     "editable": false
   },
   {
     "field": "april",
     "title": "Apr",
-    "editable": false,
-    "width": 120,
-
-    "align": "left",
-    "format": "{0:n5}"
+    "headerName": 4
   },
   {
     "field": "may",
     "title": "May",
-    "editable": false,
-    "width": 120,
-
-    "align": "left",
-    "format": "{0:n5}"
+    "headerName": 5
   },
   {
     "field": "june",
     "title": "Jun",
-    "editable": false,
-    "width": 120,
-
-    "align": "left",
-    "format": "{0:n5}"
+    "headerName": 6
   },
   {
     "field": "july",
     "title": "Jul",
-    "editable": false,
-    "width": 120,
-
-    "align": "left",
-    "format": "{0:n5}"
+    "headerName": 7
   },
   {
     "field": "aug",
     "title": "Aug",
-    "editable": false,
-    "width": 120,
-
-    "align": "left",
-    "format": "{0:n5}"
+    "headerName": 8
   },
   {
     "field": "sep",
     "title": "Sep",
-    "editable": false,
-    "width": 120,
-
-    "align": "left",
-    "format": "{0:n5}"
+    "headerName": 9
   },
   {
     "field": "oct",
     "title": "Oct",
-    "editable": false,
-    "width": 120,
-
-    "align": "left",
-    "format": "{0:n5}"
+    "headerName": 10
   },
   {
     "field": "nov",
     "title": "Nov",
-    "editable": false,
-    "width": 120,
-
-    "align": "left",
-    "format": "{0:n5}"
+    "headerName": 11
   },
   {
     "field": "dec",
     "title": "Dec",
-    "editable": false,
-    "width": 120,
-
-    "align": "left",
-    "format": "{0:n5}"
+    "headerName": 12
   },
   {
     "field": "jan",
     "title": "Jan",
-    "editable": false,
-    "width": 120,
-
-    "align": "left",
-    "format": "{0:n5}"
+    "headerName": 1
   },
   {
     "field": "feb",
     "title": "Feb",
-    "editable": false,
-    "width": 120,
-
-    "align": "left",
-    "format": "{0:n5}"
+    "headerName": 2
   },
   {
     "field": "march",
     "title": "Mar",
-    "editable": false,
-    "width": 120,
-
-    "align": "left",
-    "format": "{0:n5}"
+    "headerName": 3
   },
   {
     "field": "isEditable",
-    "title": "isEditable"
+    "title": "isEditable",
+    "hidden": true
   }
 ]

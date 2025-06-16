@@ -54,16 +54,10 @@ const NormalOpNormsScreen = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [allProducts, setAllProducts] = useState([])
   const [allRedCell, setAllRedCell] = useState([])
-  // const [bdData, setBDData] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
-
   const [calculationObject, setCalculationObject] = useState([])
-
-  // const { sitePlantChange } = menu
   const [open1, setOpen1] = useState(false)
-  // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
-  // const [rowModesModel, setRowModesModel] = useState({})
   const [rows, setRows] = useState()
   const [rowsIntermediateValues, setRowsIntermediateValues] = useState()
   const [snackbarData, setSnackbarData] = useState({
@@ -77,7 +71,6 @@ const NormalOpNormsScreen = () => {
   const [loading, setLoading] = useState(false)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
-  //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
 
   const vertName = verticalChange?.selectedVertical
@@ -95,8 +88,6 @@ const NormalOpNormsScreen = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
-
-      // Fetch data from API
       const response = await DataService.getNormalOperationNormsData(keycloak)
 
       if (response?.code !== 200) {
@@ -131,7 +122,6 @@ const NormalOpNormsScreen = () => {
   }
 
   const fetchDataIntermediateValues = async () => {
-    // setLoading(true)
     try {
       const res = await DataService.getIntermediateValues(keycloak)
       if (res?.code == 200) {
@@ -140,12 +130,11 @@ const NormalOpNormsScreen = () => {
             ...item,
             isEditable: false,
             id: index,
+            Particulars: item.NormTypeName,
           }
           return formattedItem
         })
-        // console.log(formattedData)
         setRowsIntermediateValues(formattedData)
-        // setLoading(false)
       }
     } catch (error) {
       setLoading(false)
@@ -170,32 +159,15 @@ const NormalOpNormsScreen = () => {
     }
   }
 
-  const getAllProducts = async () => {
-    try {
-      const data = await DataService.getAllProducts(keycloak, null)
-      const productList = data.map((product) => ({
-        id: product.id,
-        displayName: product.displayName,
-      }))
-      setAllProducts(productList)
-    } catch (error) {
-      console.error('Error fetching product:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
-
   const fetchAllData = async () => {
     setRows([])
     setRowsIntermediateValues([])
     setAllRedCell([])
-    setAllProducts([])
     setLoading(true)
     try {
       await Promise.all([
         fetchData(),
         fetchDataIntermediateValues(),
-        getAllProducts(),
         getNormTransactions(),
       ])
     } catch (error) {
@@ -221,6 +193,12 @@ const NormalOpNormsScreen = () => {
       field: 'materialFkId',
       title: 'Particulars',
       width: 120,
+      hidden: true,
+    },
+    {
+      field: 'productName',
+      title: 'Particulars',
+      width: 120,
     },
 
     {
@@ -236,7 +214,8 @@ const NormalOpNormsScreen = () => {
       editable: true,
       width: 120,
       align: 'right',
-      format: '{0:n5}',
+      format: '{0:#.#####}',
+      type: 'number',
     },
     {
       field: 'may',
@@ -245,7 +224,8 @@ const NormalOpNormsScreen = () => {
 
       width: 120,
       align: 'right',
-      format: '{0:n5}',
+      format: '{0:#.#####}',
+      type: 'number',
     },
     {
       field: 'june',
@@ -254,7 +234,8 @@ const NormalOpNormsScreen = () => {
 
       width: 120,
       align: 'right',
-      format: '{0:n5}',
+      format: '{0:#.#####}',
+      type: 'number',
     },
     {
       field: 'july',
@@ -263,7 +244,8 @@ const NormalOpNormsScreen = () => {
 
       width: 120,
       align: 'right',
-      format: '{0:n5}',
+      format: '{0:#.#####}',
+      type: 'number',
     },
 
     {
@@ -273,7 +255,8 @@ const NormalOpNormsScreen = () => {
 
       width: 120,
       align: 'right',
-      format: '{0:n5}',
+      format: '{0:#.#####}',
+      type: 'number',
     },
     {
       field: 'september',
@@ -282,7 +265,8 @@ const NormalOpNormsScreen = () => {
 
       width: 120,
       align: 'right',
-      format: '{0:n5}',
+      format: '{0:#.#####}',
+      type: 'number',
     },
     {
       field: 'october',
@@ -291,7 +275,8 @@ const NormalOpNormsScreen = () => {
 
       width: 120,
       align: 'right',
-      format: '{0:n5}',
+      format: '{0:#.#####}',
+      type: 'number',
     },
     {
       field: 'november',
@@ -300,7 +285,8 @@ const NormalOpNormsScreen = () => {
 
       width: 120,
       align: 'right',
-      format: '{0:n5}',
+      format: '{0:#.#####}',
+      type: 'number',
     },
     {
       field: 'december',
@@ -308,7 +294,8 @@ const NormalOpNormsScreen = () => {
       editable: true,
       width: 120,
       align: 'right',
-      format: '{0:n5}',
+      format: '{0:#.#####}',
+      type: 'number',
     },
     {
       field: 'january',
@@ -316,7 +303,8 @@ const NormalOpNormsScreen = () => {
       editable: true,
       width: 120,
       align: 'right',
-      format: '{0:n5}',
+      format: '{0:#.#####}',
+      type: 'number',
     },
     {
       field: 'february',
@@ -324,7 +312,8 @@ const NormalOpNormsScreen = () => {
       editable: true,
       width: 120,
       align: 'right',
-      format: '{0:n5}',
+      format: '{0:#.#####}',
+      type: 'number',
     },
     {
       field: 'march',
@@ -332,7 +321,8 @@ const NormalOpNormsScreen = () => {
       editable: true,
       width: 120,
       align: 'right',
-      format: '{0:n5}',
+      format: '{0:#.#####}',
+      type: 'number',
     },
     {
       field: 'remarks',
@@ -344,16 +334,26 @@ const NormalOpNormsScreen = () => {
     {
       field: 'idFromApi',
       title: 'idFromApi',
+      hidden: true,
     },
     {
       field: 'isEditable',
       title: 'isEditable',
+      hidden: true,
     },
   ]
 
   const colDefsIntermediateValues = [
     {
-      field: 'NormTypeName',
+      field: 'Particulars',
+      title: 'Type',
+      width: 110,
+      groupable: true,
+      editable: false,
+    },
+
+    {
+      field: 'NormParameterFKId',
       title: 'Particulars',
       width: 160,
     },
@@ -369,119 +369,109 @@ const NormalOpNormsScreen = () => {
       editable: false,
       width: 120,
       align: 'right',
-      format: '{0:n5}',
+      format: '{0:#.#####}',
+      type: 'number',
     },
 
     {
       field: 'May',
       title: headerMap[5],
       editable: false,
-      //renderEditCell: NumericInputOnly,
       width: 120,
       align: 'right',
-      format: '{0:n5}',
-      //valueFormatter: formatValueToFiveDecimals,
+      format: '{0:#.#####}',
+      type: 'number',
     },
     {
       field: 'Jun',
       title: headerMap[6],
       editable: false,
-      //renderEditCell: NumericInputOnly,
+      type: 'number',
       width: 120,
       align: 'right',
-      format: '{0:n5}',
-      //valueFormatter: formatValueToFiveDecimals,
+      format: '{0:#.#####}',
     },
     {
       field: 'Jul',
       title: headerMap[7],
       editable: false,
-      //renderEditCell: NumericInputOnly,
+      type: 'number',
       width: 120,
       align: 'right',
-      format: '{0:n5}',
-      //valueFormatter: formatValueToFiveDecimals,
+      format: '{0:#.#####}',
     },
 
     {
       field: 'Aug',
       title: headerMap[8],
       editable: false,
-      //renderEditCell: NumericInputOnly,
       width: 120,
+      type: 'number',
       align: 'right',
-      format: '{0:n5}',
-      //valueFormatter: formatValueToFiveDecimals,
+      format: '{0:#.#####}',
     },
     {
       field: 'Sep',
       title: headerMap[9],
       editable: false,
-      //renderEditCell: NumericInputOnly,
       width: 120,
       align: 'right',
-      format: '{0:n5}',
-      //valueFormatter: formatValueToFiveDecimals,
+      type: 'number',
+      format: '{0:#.#####}',
     },
     {
       field: 'Oct',
       title: headerMap[10],
       editable: false,
-      //renderEditCell: NumericInputOnly,
       width: 120,
+      type: 'number',
       align: 'right',
-      format: '{0:n5}',
-      //valueFormatter: formatValueToFiveDecimals,
+      format: '{0:#.#####}',
     },
     {
       field: 'Nov',
       title: headerMap[11],
       editable: false,
-      //renderEditCell: NumericInputOnly,
       width: 120,
       align: 'right',
-      format: '{0:n5}',
-      //valueFormatter: formatValueToFiveDecimals,
+      type: 'number',
+      format: '{0:#.#####}',
     },
     {
       field: 'Dec',
       title: headerMap[12],
       editable: false,
-      //renderEditCell: NumericInputOnly,
       width: 120,
       align: 'right',
-      format: '{0:n5}',
-      //valueFormatter: formatValueToFiveDecimals,
+      type: 'number',
+      format: '{0:#.#####}',
     },
     {
       field: 'Jan',
       title: headerMap[1],
       editable: false,
-      //renderEditCell: NumericInputOnly,
       width: 120,
       align: 'right',
-      format: '{0:n5}',
-      //valueFormatter: formatValueToFiveDecimals,
+      type: 'number',
+      format: '{0:#.#####}',
     },
     {
       field: 'Feb',
       title: headerMap[2],
       editable: false,
-      //renderEditCell: NumericInputOnly,
       width: 120,
+      type: 'number',
       align: 'right',
-      format: '{0:n5}',
-      //valueFormatter: formatValueToFiveDecimals,
+      format: '{0:#.#####}',
     },
     {
       field: 'Mar',
       title: headerMap[3],
       editable: false,
-      //renderEditCell: NumericInputOnly,
       width: 120,
+      type: 'number',
       align: 'right',
-      format: '{0:n5}',
-      //valueFormatter: formatValueToFiveDecimals,
+      format: '{0:#.#####}',
     },
     {
       field: 'idFromApi',
@@ -500,54 +490,9 @@ const NormalOpNormsScreen = () => {
     setRemarkDialogOpen(true)
   }
 
-  // const processRowUpdate = React.useCallback((newRow, oldRow) => {
-  //   const rowId = newRow.id
-  //   const updatedFields = []
-  //   for (const key in newRow) {
-  //     if (
-  //       Object.prototype.hasOwnProperty.call(newRow, key) &&
-  //       newRow[key] !== oldRow[key]
-  //     ) {
-  //       updatedFields.push(key)
-  //     }
-  //   }
-
-  //   unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-
-  //   if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-  //     unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-  //   }
-
-  //   setRows((prevRows) =>
-  //     prevRows.map((row) =>
-  //       row.id === newRow.id ? { ...newRow, isNew: false } : row,
-  //     ),
-  //   )
-
-  //   if (updatedFields.length > 0) {
-  //     setModifiedCells((prevModifiedCells) => ({
-  //       ...prevModifiedCells,
-  //       [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-  //     }))
-  //   }
-
-  //   return newRow
-  // }, [])
-
   const saveChanges = React.useCallback(async () => {
-    // const rowsInEditMode = Object.keys(rowModesModel).filter(
-    //   (id) => rowModesModel[id]?.mode === 'edit',
-    // )
-
-    // rowsInEditMode.forEach((id) => {
-    //   apiRef.current.stopRowEditMode({ id })
-    // })
-
     setTimeout(() => {
       try {
-        console.log('modifiedCells', modifiedCells)
-        // let newRows = modifiedCells.filter((row) => row.isGroupHeader !== true)
-        // console.log(newRows)
         var data = Object.values(modifiedCells)
         if (data.length == 0) {
           setSnackbarOpen(true)
@@ -578,6 +523,7 @@ const NormalOpNormsScreen = () => {
   }, [modifiedCells])
 
   const saveNormalOperationNormsData = async (newRows) => {
+    setLoading(true)
     try {
       let plantId = ''
       const storedPlant = localStorage.getItem('selectedPlant')
@@ -628,18 +574,23 @@ const NormalOpNormsScreen = () => {
             message: `Normal Operations Norms Saved Successfully!`,
             severity: 'success',
           })
+
           setModifiedCells({})
           unsavedChangesRef.current = {
             unsavedRows: {},
             rowsBeforeChange: {},
           }
+          setLoading(false)
           fetchData()
+          fetchDataIntermediateValues()
+          getNormTransactions()
         } else {
           setSnackbarOpen(true)
           setSnackbarData({
             message: `Normal Operations Norms not saved!`,
             severity: 'error',
           })
+          setLoading(false)
         }
         return response
       }
@@ -650,14 +601,6 @@ const NormalOpNormsScreen = () => {
       setLoading(false)
     }
   }
-
-  // const onProcessRowUpdateError = React.useCallback((error) => {
-  //   console.log(error)
-  // }, [])
-
-  // const onRowModesModelChange = (newRowModesModel) => {
-  //   setRowModesModel(newRowModesModel)
-  // }
 
   const isCellEditable = (params) => {
     return params.row.isEditable
@@ -692,7 +635,6 @@ const NormalOpNormsScreen = () => {
         setLoading(false)
       } else {
         setSnackbarOpen(true)
-
         setSnackbarData({
           message: 'Data Refresh Falied!',
           severity: 'error',
@@ -777,20 +719,7 @@ const NormalOpNormsScreen = () => {
     },
     isOldYear,
   )
-  const NormParameterIdCell = (props) => {
-    const productId = props.dataItem.materialFkId
-    const product = allProducts.find((p) => p.id === productId)
-    const displayName = product?.displayName || ''
-    // console.log(displayName)
-    return <td>{displayName}</td>
-  }
-  const NormParameterIdCellForImmidiate = (props) => {
-    const productId = props.dataItem.NormParameterFKId
-    const product = allProducts.find((p) => p.id === productId)
-    const displayName = product?.displayName || ''
-    // console.log(displayName)
-    return <td>{displayName}</td>
-  }
+
   return (
     <div>
       <Backdrop
@@ -801,7 +730,6 @@ const NormalOpNormsScreen = () => {
       </Backdrop>
 
       <KendoDataTables
-        NormParameterIdCell={NormParameterIdCell}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         title='Normal Operations Norms'
@@ -812,9 +740,6 @@ const NormalOpNormsScreen = () => {
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
-        // processRowUpdate={processRowUpdate}
-        // rowModesModel={rowModesModel}
-        // onRowModesModelChange={onRowModesModelChange}
         saveChanges={saveChanges}
         isCellEditable={isCellEditable}
         snackbarData={snackbarData}
@@ -825,7 +750,6 @@ const NormalOpNormsScreen = () => {
         setOpen1={setOpen1}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        // onProcessRowUpdateError={onProcessRowUpdateError}
         fetchData={fetchData}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}
@@ -853,9 +777,6 @@ const NormalOpNormsScreen = () => {
             <CustomAccordionDetails>
               <Box sx={{ width: '100%', margin: 0 }}>
                 <KendoDataTables
-                  NormParameterIdCellForImmidiate={
-                    NormParameterIdCellForImmidiate
-                  }
                   title='Intermediate Values'
                   columns={colDefsIntermediateValues}
                   setRows={setRowsIntermediateValues}

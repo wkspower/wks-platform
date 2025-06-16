@@ -46,8 +46,8 @@ export default function getKendoColumns({
         filterable: true,
         filter: isTextCol ? 'text' : 'numeric',
         isRightAlligned: isTextCol ? 'text' : 'numeric',
-        format: isTextCol ? undefined : '{0:n3}',
-        ...(isTextCol ? {} : { format: '{0:n3}' }),
+        format: isTextCol ? undefined : '{0:#.###}',
+        ...(isTextCol ? {} : { format: '{0:#.###}' }),
 
         editable: false,
         align: isTextCol ? 'left' : 'right',
@@ -67,8 +67,8 @@ export default function getKendoColumns({
       filterable: true,
       filter: isTextCol ? 'text' : 'numeric',
       isRightAlligned: isTextCol ? 'text' : 'numeric',
-      format: isTextCol ? undefined : '{0:n3}',
-      ...(isTextCol ? {} : { format: '{0:n3}' }),
+      format: isTextCol ? undefined : '{0:#.###}',
+      ...(isTextCol ? {} : { format: '{0:#.###}' }),
 
       editable: false,
       align: isTextCol ? 'left' : 'right',

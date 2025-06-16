@@ -1,4 +1,5 @@
 import productionColumns from '../../../assets/kendo_config_meg.json'
+import productionColumnsConstants from '../../../assets/kendo_config_meg constants.json'
 import productionColumnsPE1 from '../../../assets/kendo_config_pe1.json'
 import productionColumnsPE2 from '../../../assets/kendo_config_pe2.json'
 import productionColumnsPE3 from '../../../assets/kendo_config_pe3.json'
@@ -10,6 +11,8 @@ const getConfigByType = (configType) => {
   switch (configType) {
     case 'meg':
       return productionColumns
+    case 'megConstants':
+      return productionColumnsConstants
     case 'StartupLosses':
       return productionColumnsPE1
     case 'Otherlosses':
@@ -68,6 +71,7 @@ const getEnhancedAOPColDefs = ({
         ...col,
         title: headerMap[col.title],
         align: 'right',
+        type: 'number',
       }
     }
 

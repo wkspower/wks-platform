@@ -14,15 +14,26 @@
     "field": "normParametersFKId",
     "title": "Particulars/Grade",
     "editable": false,
+    "width": 125,
+    "hidden": true
+  },
+
+  {
+    "field": "normParameterName",
+    "title": "Particulars/Grade",
+    "editable": false,
     "width": 125
   },
+
   {
     "field": "april",
     "title": "4",
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "may",
@@ -30,7 +41,9 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "june",
@@ -38,7 +51,9 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "july",
@@ -46,7 +61,9 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "aug",
@@ -54,7 +71,9 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "sep",
@@ -62,7 +81,9 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "oct",
@@ -70,7 +91,9 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "nov",
@@ -78,7 +101,9 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "dec",
@@ -86,7 +111,9 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "jan",
@@ -94,7 +121,9 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "feb",
@@ -102,7 +131,9 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "march",
@@ -110,7 +141,9 @@
     "editable": false,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:n2}"
   },
 
   {

@@ -1,0 +1,42 @@
+[
+  {
+    "field": "Particulars",
+    "title": "Type",
+
+    "groupable": true,
+    "headerClass": "bold-header",
+    "filterable": "false",
+    "editable": false
+  },
+  {
+    "field": "DisplayName",
+    "title": "Particulars",
+    "editable": false
+  },
+  {
+    "field": "UOM",
+    "title": "UOM",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "ConstantValue",
+    "title": "Value",
+
+    "editable": true
+  },
+
+  {
+    "field": "remarks",
+    "title": "Remark",
+
+    "editable": true
+  },
+
+  {
+    "field": "isEditable",
+    "title": "isEditable",
+    "hidden": true
+  }
+]

@@ -15,6 +15,14 @@
     "field": "normParametersFKId",
     "title": "Particulars",
     "editable": false,
+    "width": 175,
+    "hidden": true
+  },
+
+  {
+    "field": "productName",
+    "title": "Particulars",
+    "editable": false,
     "width": 175
   },
   {
@@ -23,7 +31,8 @@
     "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "may",
@@ -31,7 +40,8 @@
     "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "june",
@@ -39,7 +49,8 @@
     "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "july",
@@ -47,7 +58,8 @@
     "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "august",
@@ -55,7 +67,8 @@
     "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "september",
@@ -63,7 +76,8 @@
     "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "october",
@@ -71,7 +85,8 @@
     "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "november",
@@ -79,7 +94,8 @@
     "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "december",
@@ -87,7 +103,8 @@
     "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "january",
@@ -95,7 +112,8 @@
     "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "february",
@@ -103,7 +121,8 @@
     "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "march",
@@ -111,7 +130,8 @@
     "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "remarks",

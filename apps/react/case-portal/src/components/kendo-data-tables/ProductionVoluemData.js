@@ -3,15 +3,15 @@ import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 // import ASDataGrid from '../data-tables/ASDataGrid'
 import { useGridApiRef } from '@mui/x-data-grid'
-import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import { useSelector } from 'react-redux'
 // import getEnhancedProductionColDefs from '../data-tables/CommonHeader/ProductionVolumeHeader'
 import getEnhancedProductionColDefs from '../data-tables/CommonHeader/Kendo_ProductionVolumeHeader'
 
-import { useDispatch } from 'react-redux'
-import { setIsBlocked } from 'store/reducers/dataGridStore'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
+import { useDispatch } from 'react-redux'
+import { setIsBlocked } from 'store/reducers/dataGridStore'
 import { Typography } from '../../../node_modules/@mui/material/index'
 // import TextField from '@mui/material/TextField'
 import KendoDataTables from './index'
@@ -149,6 +149,7 @@ const ProductionvolumeData = ({ permissions }) => {
           message: 'Production Vol Data Saved Successfully!',
           severity: 'success',
         })
+        setModifiedCells({})
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -274,7 +275,6 @@ const ProductionvolumeData = ({ permissions }) => {
           editAOPMCCalculatedData(data)
         }
         setEnableSaveAddBtn(false)
-        // setModifiedCells({})
       } catch (error) {
         console.log('Facing issue at saving data', error)
       }
@@ -410,6 +410,7 @@ const ProductionvolumeData = ({ permissions }) => {
   }
   const formatValueToFiveDecimals = (params) =>
     params ? parseFloat(params).toFixed(2) : ''
+
   const colDefs = [
     {
       field: 'idFromApi',
@@ -419,14 +420,21 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'aopCaseId',
       title: 'Case ID',
-      width: 120,
+
       editable: false,
       hidden: true,
     },
     {
       field: 'materialFKId',
       title: 'Particulars',
-      width: 120,
+
+      editable: false,
+      hidden: true,
+    },
+    {
+      field: 'productName',
+      title: 'Particulars',
+
       editable: false,
     },
     {
@@ -435,35 +443,31 @@ const ProductionvolumeData = ({ permissions }) => {
       editable: false,
       align: 'left',
       headerAlign: 'left',
-      format: '{0:n3}',
-      width: 120,
+      format: '{0:#.###}',
     },
     {
       field: 'may',
       title: headerMap[5],
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
-      format: '{0:n3}',
+      format: '{0:#.###}',
     },
     {
       field: 'june',
       title: headerMap[6],
-      format: '{0:n3}',
+      format: '{0:#.###}',
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
     },
     {
       field: 'july',
-      format: '{0:n3}',
+      format: '{0:#.###}',
       title: headerMap[7],
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
@@ -471,9 +475,8 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'august',
       title: headerMap[8],
-      format: '{0:n3}',
+      format: '{0:#.###}',
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
@@ -481,9 +484,8 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'september',
       title: headerMap[9],
-      format: '{0:n3}',
+      format: '{0:#.###}',
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
@@ -491,9 +493,8 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'october',
       title: headerMap[10],
-      format: '{0:n3}',
+      format: '{0:#.###}',
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
@@ -501,9 +502,8 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'november',
       title: headerMap[11],
-      format: '{0:n3}',
+      format: '{0:#.###}',
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
@@ -511,9 +511,8 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'december',
       title: headerMap[12],
-      format: '{0:n3}',
+      format: '{0:#.###}',
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
@@ -521,9 +520,8 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'january',
       title: headerMap[1],
-      format: '{0:n3}',
+      format: '{0:#.###}',
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
@@ -531,9 +529,8 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'february',
       title: headerMap[2],
-      format: '{0:n3}',
+      format: '{0:#.###}',
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
@@ -541,9 +538,8 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'march',
       title: headerMap[3],
-      format: '{0:n3}',
+      format: '{0:#.###}',
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
@@ -552,7 +548,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'avgTph',
       title: 'AVG',
-      width: 150,
+
       editable: false,
       hidden: true,
     },
@@ -572,152 +568,159 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'aopCaseId',
       title: 'Case ID',
-      width: 120,
-      editable: false,
       hidden: true,
     },
 
     {
       field: 'normParametersFKId',
       title: 'Particulars',
-      width: 175,
+
+      editable: false,
+      hidden: true,
+    },
+    {
+      field: 'productName',
+      title: 'Particulars',
+
       editable: false,
     },
+
     {
       field: 'april',
       title: headerMap[4],
       editable: false,
       align: 'left',
       headerAlign: 'left',
-      format: '{0:n3}',
-      width: 120,
+      format: '{0:#.###}',
+
+      type: 'number',
     },
     {
       field: 'may',
       title: headerMap[5],
-      format: '{0:n3}',
-      width: 120,
+      format: '{0:#.###}',
 
       editable: false,
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'june',
       title: headerMap[6],
-      format: '{0:n3}',
+      format: '{0:#.###}',
 
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'july',
       title: headerMap[7],
-      format: '{0:n3}',
+      format: '{0:#.###}',
 
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'august',
       title: headerMap[8],
-      format: '{0:n3}',
+      format: '{0:#.###}',
 
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'september',
       title: headerMap[9],
-      format: '{0:n3}',
+      format: '{0:#.###}',
 
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'october',
       title: headerMap[10],
-      format: '{0:n3}',
+      format: '{0:#.###}',
 
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'november',
       title: headerMap[11],
-      format: '{0:n3}',
+      format: '{0:#.###}',
 
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'december',
       title: headerMap[12],
-      format: '{0:n3}',
+      format: '{0:#.###}',
 
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'january',
       title: headerMap[1],
-      format: '{0:n3}',
+      format: '{0:#.###}',
 
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'february',
       title: headerMap[2],
-      format: '{0:n3}',
+      format: '{0:#.###}',
 
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'march',
       title: headerMap[3],
-      format: '{0:n3}',
+      format: '{0:#.###}',
 
       editable: false,
-      width: 120,
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
 
     {
       field: 'avgTph',
       title: 'AVG',
-      width: 150,
+
       editable: false,
       hidden: true,
     },
@@ -729,27 +732,6 @@ const ProductionvolumeData = ({ permissions }) => {
   ]
 
   useEffect(() => {
-    const getAllProducts = async () => {
-      try {
-        const data = await DataService.getAllProductsAll(
-          keycloak,
-          // lowerVertName === 'meg' ? 'Production' : 'Grade',
-          'All',
-        )
-        const productList = data.map((product) => ({
-          id: product.id.toLowerCase(),
-          displayName: product.displayName,
-          name: product.name,
-        }))
-        setAllProducts(productList)
-      } catch (error) {
-        console.error('Error fetching product:', error)
-      } finally {
-        // handleMenuClose();
-      }
-    }
-
-    getAllProducts()
     fetchData()
   }, [
     sitePlantChange,
@@ -762,9 +744,6 @@ const ProductionvolumeData = ({ permissions }) => {
 
   const productionColumns = getEnhancedProductionColDefs({
     headerMap,
-    // allProducts,
-    // handleRemarkCellClick,
-    // findAvg,
   })
 
   const handleUnitChange = (unit) => {
@@ -926,7 +905,7 @@ const ProductionvolumeData = ({ permissions }) => {
             setRows={setRows2}
             columns={colDefs}
             rows={rows2}
-            title='Production Volume Data'
+            title='Production Volume Data Reference'
             fetchData={fetchData}
             NormParameterIdCell={NormParameterIdCell2}
           />

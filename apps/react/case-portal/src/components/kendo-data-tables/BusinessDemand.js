@@ -8,15 +8,15 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { styled } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import { useGridApiRef } from '@mui/x-data-grid'
+import kendoGetEnhancedColDefs from 'components/data-tables/CommonHeader/kendoBusinessDemColDef'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { validateFields } from 'utils/validationUtils'
-import ProductionvolumeData from './ProductionVoluemData'
 import KendoDataTables from './index'
-import kendoGetEnhancedColDefs from 'components/data-tables/CommonHeader/kendoBusinessDemColDef'
+import ProductionvolumeData from './ProductionVoluemData'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -29,6 +29,7 @@ const CustomAccordion = styled((props) => (
     display: 'none',
   },
 }))
+
 const CustomAccordionSummary = styled((props) => (
   <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
 ))(() => ({
@@ -59,8 +60,6 @@ const BusinessDemand = ({ permissions }) => {
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
-  // const [updatedRows, setUpdatedRows] = useState()
-  // const [rows2, setRows2] = useState()
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -81,8 +80,6 @@ const BusinessDemand = ({ permissions }) => {
     try {
       var data = await DataService.getBDData(keycloak)
 
-      // console.log(sortedData)
-
       const formattedData = data.map((item, index) => ({
         ...item,
         idFromApi: item.id,
@@ -102,54 +99,9 @@ const BusinessDemand = ({ permissions }) => {
     }
   }
 
-  // console.log(verticalChange)
   useEffect(() => {
-    const getAllProducts = async () => {
-      try {
-        var data = []
-        if (lowerVertName == 'meg')
-          data = await DataService.getAllProductsAll(
-            keycloak,
-            'BusinessDemandMEG',
-          )
-        else {
-          data = await DataService.getAllProductsAll(keycloak, 'Production')
-        }
-        var productList = []
-        if (lowerVertName === 'meg') {
-          productList = data
-
-          // .filter((product) =>
-          //   ['EO', 'EOE', 'MEG', 'CO2'].includes(product.displayName),
-          // )
-          // .map((product) => ({
-          //   id: product.id,
-          //   displayName: product.displayName,
-          //   inEdit: false,
-          // }))
-        } else {
-          productList = data.map((product) => ({
-            id: product.id,
-            displayName: product.displayName,
-            // inEdit: false,
-          }))
-        }
-
-        setAllProducts(productList)
-      } catch (error) {
-        console.error('Error fetching product:', error)
-      } finally {
-        // handleMenuClose();
-      }
-    }
     fetchData()
-
-    getAllProducts()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
-
-  // useEffect(()=>{
-  //   console.log('this is test for api call ')
-  // })
 
   const handleRemarkCellClick = (dataItem) => {
     // if (!dataItem?.isEditable) return
@@ -158,34 +110,15 @@ const BusinessDemand = ({ permissions }) => {
     setRemarkDialogOpen(true)
   }
 
-  const isCellEditable = (params) => {
-    return params.row.isEditable
-  }
-
   const colDefs = kendoGetEnhancedColDefs({
     // allProducts,
     headerMap,
     // handleRemarkCellClick,
   })
 
-  const NormParameterIdCell = (props) => {
-    const productId = props.dataItem.normParameterId
-    const product = allProducts.find((p) => p.id === productId)
-    const displayName = product?.displayName || ''
-    return <td>{displayName}</td>
-  }
-
   const saveChanges = React.useCallback(async () => {
     setLoading(true)
-    // const rowsInEditMode = Object.keys(rowModesModel).filter(
-    //   (id) => rowModesModel[id]?.mode === 'edit',
-    // )
 
-    // rowsInEditMode.forEach((id) => {
-    //   apiRef.current.stopRowEditMode({ id })
-    // })
-
-    // setTimeout(() => {
     try {
       if (Object.keys(modifiedCells).length === 0) {
         setSnackbarOpen(true)
@@ -296,7 +229,6 @@ const BusinessDemand = ({ permissions }) => {
       // fetchData()
     }
   }
-
   const deleteRowData = async (paramsForDelete) => {
     try {
       const { idFromApi, id } = paramsForDelete.row
@@ -320,8 +252,6 @@ const BusinessDemand = ({ permissions }) => {
       console.error('Error deleting Record!', error)
     }
   }
-
-  const defaultCustomHeight = { mainBox: '50vh', otherBox: '112%' }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
@@ -349,7 +279,6 @@ const BusinessDemand = ({ permissions }) => {
       saveBtn: permissions?.saveBtn ?? true,
       allAction: permissions?.allAction ?? true,
       units: ['TPH', 'TPD'],
-      customHeight: permissions?.customHeight || defaultCustomHeight,
     },
     isOldYear,
   )
@@ -402,14 +331,9 @@ const BusinessDemand = ({ permissions }) => {
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         setRows={setRows}
-        // updatedRows={updatedRows}
-        // setUpdatedRows={setUpdatedRows}
         columns={colDefs}
         rows={rows || []}
-        isCellEditable={isCellEditable}
         title='Business Demand'
-        // processRowUpdate={processRowUpdate}
-
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
@@ -420,7 +344,6 @@ const BusinessDemand = ({ permissions }) => {
         setDeleteId={setDeleteId}
         setOpen1={setOpen1}
         open1={open1}
-        NormParameterIdCell={NormParameterIdCell}
         fetchData={fetchData}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}

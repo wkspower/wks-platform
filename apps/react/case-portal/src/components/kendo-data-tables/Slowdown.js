@@ -32,7 +32,7 @@ const SlowDown = ({ permissions }) => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const keycloak = useSession()
-  // States for the Remark Dialog
+
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -50,27 +50,9 @@ const SlowDown = ({ permissions }) => {
     rowsInEditMode.forEach((id) => {
       apiRef.current.stopRowEditMode({ id })
     })
-
-    // setRowModesModel({
-    //   ...rowModesModel,
-    //   [id]: { mode: GridRowModes.View, ignoreModifications: true },
-    // })
-
-    // const editedRow = rows.find((row) => row.id === id)
-    // if (editedRow.isNew) {
-    //   setRows(rows.filter((row) => row.id !== id))
-    // }
   }
 
   const handleRemarkCellClick = (row) => {
-    // const rowsInEditMode = Object.keys(rowModesModel).filter(
-    //   (id) => rowModesModel[id]?.mode === 'edit',
-    // )
-
-    // rowsInEditMode.forEach((id) => {
-    //   apiRef.current.stopRowEditMode({ id })
-    // })
-
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
@@ -110,17 +92,7 @@ const SlowDown = ({ permissions }) => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-      // const slowDownDetails = newRow.map((row) => ({
-      //   productId: row.product,
-      //   discription: row.discription,
-      //   durationInHrs: parseFloat(findDuration('1', row)),
-      //   maintEndDateTime: addTimeOffset(row.maintEndDateTime),
-      //   maintStartDateTime: addTimeOffset(row.maintStartDateTime),
-      //   remark: row.remark,
-      //   rate: row.rate,
-      //   audityear: localStorage.getItem('year'),
-      //   id: row.idFromApi || null,
-      // }))
+
       const slowDownDetailsMEG = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
@@ -137,9 +109,9 @@ const SlowDown = ({ permissions }) => {
         lowerVertName === 'meg' ? slowDownDetailsMEG : slowDownDetailsMEG,
         keycloak,
       )
-      //console.log('Slowdown data Saved Successfully:', response)
+
       setSnackbarOpen(true)
-      // setSnackbarMessage("Slowdown data Saved Successfully !");
+
       setSnackbarData({
         message: 'Slowdown data Saved Successfully!',
         severity: 'success',
@@ -151,8 +123,7 @@ const SlowDown = ({ permissions }) => {
         rowsBeforeChange: {},
       }
       setLoading(false)
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Slowdown data Saved Successfully!", severity: "success" });
+
       return response
     } catch (error) {
       console.error('Error saving Slowdown data:', error)
@@ -163,13 +134,6 @@ const SlowDown = ({ permissions }) => {
     }
   }
   const saveChanges = React.useCallback(async () => {
-    // const rowsInEditMode = Object.keys(rowModesModel).filter(
-    //   (id) => rowModesModel[id]?.mode === 'edit',
-    // )
-
-    // rowsInEditMode.forEach((id) => {
-    //   apiRef.current.stopRowEditMode({ id })
-    // })
     setTimeout(() => {
       try {
         var data = Object.values(modifiedCells)
@@ -227,15 +191,14 @@ const SlowDown = ({ permissions }) => {
         slowDownDetails,
         keycloak,
       )
-      //console.log('Slowdown data Updated successfully:', response)
+
       setSnackbarOpen(true)
-      // setSnackbarMessage("Slowdown data Updated successfully !");
+
       setSnackbarData({
         message: 'Slowdown data Updated successfully!',
         severity: 'success',
       })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Slowdown data Updated successfully!", severity: "success" });
+
       return response
     } catch (error) {
       console.error('Error saving Slowdown data:', error)
@@ -254,8 +217,10 @@ const SlowDown = ({ permissions }) => {
         idFromApi: item?.maintenanceId || item?.id,
         id: index,
         originalRemark: item.remark,
+        maintStartDateTime: new Date(item?.maintStartDateTime),
+        maintEndDateTime: new Date(item?.maintEndDateTime),
       }))
-      // setSlowDownData(formattedData)
+
       setRows(formattedData)
       setLoading(false) // Hide loading
     } catch (error) {
@@ -315,9 +280,7 @@ const SlowDown = ({ permissions }) => {
     {
       field: 'discription',
       title: 'Slowdown Desc',
-      //width: 180,
       editable: true,
-      flex: 3,
     },
 
     {
@@ -337,7 +300,6 @@ const SlowDown = ({ permissions }) => {
       field: 'maintStartDateTime',
       title: 'SD- From',
       type: 'dateTime',
-      //width: 200,
       editable: true,
     },
 
@@ -345,7 +307,6 @@ const SlowDown = ({ permissions }) => {
       field: 'maintEndDateTime',
       title: 'SD- To',
       type: 'dateTime',
-      //width: 200,
       editable: true,
     },
 
@@ -353,26 +314,23 @@ const SlowDown = ({ permissions }) => {
       field: 'durationInHrs',
       title: 'Duration (hrs)',
       editable: true,
-      width: 100,
     },
 
     {
       field: 'rate',
       title: 'Rate (TPH)',
       editable: true,
-      width: 100,
+      type: 'number',
     },
 
     {
       field: 'remark',
       title: 'Remarks',
       editable: true,
-      //width: 180,
     },
   ]
 
   const deleteRowData = async (paramsForDelete) => {
-    // console.log(paramsForDelete)
     try {
       const { idFromApi, id } = paramsForDelete
       const deleteId = id
@@ -380,7 +338,7 @@ const SlowDown = ({ permissions }) => {
       if (!idFromApi) {
         setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
       }
-      // console.log(idFromApi)
+
       if (idFromApi) {
         await DataService.deleteSlowdownData(idFromApi, keycloak)
         setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))

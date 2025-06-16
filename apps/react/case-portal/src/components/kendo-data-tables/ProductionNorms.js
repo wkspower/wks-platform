@@ -1,40 +1,28 @@
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
-
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-// import ASDataGrid from './ASDataGrid'
-
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
-// import NumericCellEditor from 'utils/NumericCellEditor'
-// import NumericInputOnly from 'utils/NumericInputOnly'
-import { validateFields } from 'utils/validationUtils'
-import getEnhancedColDefs from '../data-tables/CommonHeader/Kendo_ProductionAopHeader'
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
+import { validateFields } from 'utils/validationUtils'
+import getEnhancedColDefs from '../data-tables/CommonHeader/Kendo_ProductionAopHeader'
 import KendoDataTables from './index'
 
 const ProductionNorms = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
-
   const [calculationObject, setCalculationObject] = useState([])
-
   const keycloak = useSession()
-  // const [csData, setCsData] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
-  // const [rowModesModel, setRowModesModel] = useState({})
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
-
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
-  //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
-
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [loading, setLoading] = useState(false)
@@ -45,14 +33,10 @@ const ProductionNorms = ({ permissions }) => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('MT')
-
   const [rows, setRows] = useState([])
-  // const [isSaving, setIsSaving] = useState(false)
-  // States for the Remark Dialog
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -60,21 +44,7 @@ const ProductionNorms = ({ permissions }) => {
   const dispatch = useDispatch()
   // const isBlocked = useSelector((state) => state.isBlocked) // Get block flag from Redux
 
-  const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remark || row.aopRemarks || '')
-    setCurrentRowId(row.id)
-    setRemarkDialogOpen(true)
-  }
-
   const saveChanges = React.useCallback(async () => {
-    // const rowsInEditMode = Object.keys(rowModesModel).filter(
-    //   (id) => rowModesModel[id]?.mode === 'edit',
-    // )
-
-    // rowsInEditMode.forEach((id) => {
-    //   apiRef.current.stopRowEditMode({ id })
-    // })
-
     setTimeout(() => {
       try {
         var editedData = Object.values(modifiedCells)
@@ -142,9 +112,6 @@ const ProductionNorms = ({ permissions }) => {
         plantId = parsedPlant.id
       }
 
-      // let siteID =
-      //   JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
-
       const productNormData = newRow.map((row) => ({
         aopType: row.aopType || 'production',
         aopCaseId: row.aopCaseId || null,
@@ -154,9 +121,6 @@ const ProductionNorms = ({ permissions }) => {
         materialFKId: row.normParametersFKId,
         siteFKId: JSON.parse(localStorage.getItem('selectedSiteId')).id,
         verticalFKId: localStorage.getItem('verticalId'),
-        // normItem: getProductName('1', row.normParametersFKId) || null,
-        // normItem: 'EOE',
-
         april:
           row.april === 0
             ? 0
@@ -286,7 +250,6 @@ const ProductionNorms = ({ permissions }) => {
 
   const handleCalculate = async () => {
     // dispatch(setIsBlocked(true))
-
     setCalculatebtnClicked(true)
     setLoading(true)
     try {
@@ -296,10 +259,8 @@ const ProductionNorms = ({ permissions }) => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-
       var plantId = plantId
       const data = await DataService.handleCalculate(plantId, year, keycloak)
-
       if (lowerVertName == 'meg' && data?.code == 200) {
         fetchData()
         setSnackbarOpen(true)
@@ -310,9 +271,7 @@ const ProductionNorms = ({ permissions }) => {
         setLoading(false)
         return
       }
-
       let res = data?.data
-
       if (res) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -348,13 +307,7 @@ const ProductionNorms = ({ permissions }) => {
           }
         })
 
-        // let totalRows = []
-        // if (formattedData) {
-        //   totalRows = totalRow(formattedData)
-        // }
-
         const finalData = [...formattedData]
-        // console.log(finalData)
         if (lowerVertName == 'pe') {
           setRows(finalData)
         }
@@ -363,13 +316,8 @@ const ProductionNorms = ({ permissions }) => {
         } else {
           setRows(finalData)
         }
-
-        // setRows(finalData)
         setLoading(false)
-
-        // setTimeout(() => {
         saveChanges()
-        // }, 1000)
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -465,10 +413,6 @@ const ProductionNorms = ({ permissions }) => {
         }
       })
 
-      // let totalRows = []
-      // if (formattedData.length > 0) {
-      //   totalRows = totalRow(formattedData)
-      // }
       const finalData = [...formattedData]
 
       if (lowerVertName == 'pe') {
@@ -482,17 +426,7 @@ const ProductionNorms = ({ permissions }) => {
       } else {
         setRows(finalData)
       }
-
-      // setRows(formattedData)
-      setLoading(false) // Hide loading
-      // }
-      // else {
-      //   setSnackbarOpen(true)
-      //   setSnackbarData({
-      //     message: 'Error fetching Production AOP data!',
-      //     severity: 'error',
-      //   })
-      // }
+      setLoading(false)
     } catch (error) {
       console.error('Error fetching Production AOP data:', error)
     } finally {
@@ -524,27 +458,7 @@ const ProductionNorms = ({ permissions }) => {
   }
 
   useEffect(() => {
-    const getAllProducts = async () => {
-      try {
-        const data = await DataService.getAllProductsAll(
-          keycloak,
-          lowerVertName === 'meg' ? 'All' : 'All',
-        )
-        const productList = data.map((product) => ({
-          id: product.id.toLowerCase(),
-          displayName: product.displayName,
-          name: product.name,
-        }))
-        setAllProducts(productList)
-      } catch (error) {
-        console.error('Error fetching product:', error)
-      } finally {
-        setLoading(false) // Reset loading state when API call finishes
-      }
-    }
-
     fetchData()
-    getAllProducts()
   }, [
     sitePlantChange,
     oldYear,
@@ -555,10 +469,7 @@ const ProductionNorms = ({ permissions }) => {
   ])
 
   const productionColumns = getEnhancedColDefs({
-    allProducts,
     headerMap,
-    handleRemarkCellClick,
-    findSum,
   })
 
   const handleUnitChange = (unit) => {
@@ -603,7 +514,7 @@ const ProductionNorms = ({ permissions }) => {
     },
     isOldYear,
   )
-  const rowData = [
+  const rowDataForCracker = [
     {
       idFromApi: null,
       aopCaseId: null,
@@ -653,15 +564,7 @@ const ProductionNorms = ({ permissions }) => {
       aopStatus: '',
     },
   ]
-  const NormParameterIdCell = (props) => {
-    // console.log(props)
-    const productId = props.dataItem.normParametersFKId
-    const product = allProducts.find((p) => p.id === productId)
-    const displayName = product?.displayName || ''
-    return (
-      <td>{displayName ? displayName : props.dataItem.normParametersFKId}</td>
-    )
-  }
+
   return (
     <div>
       <Backdrop
@@ -675,22 +578,15 @@ const ProductionNorms = ({ permissions }) => {
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         columns={productionColumns}
-        rows={lowerVertName === 'cracker' ? rowData : rows}
+        rows={lowerVertName === 'cracker' ? rowDataForCracker : rows}
         setRows={setRows}
-        NormParameterIdCell={NormParameterIdCell}
         title={'Production AOP'}
         isCellEditable={isCellEditable}
-        // title={lowerVertName === 'meg' ? 'Production AOP' : 'Budget Production'}
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
         paginationOptions={[100, 200, 300]}
         updateProductNormData={updateProductNormData}
-        // processRowUpdate={processRowUpdate}
-
-        // rowModesModel={rowModesModel}
-        // onRowModesModelChange={onRowModesModelChange}
-        // onRowEditStop={handleRowEditStop}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
@@ -699,7 +595,6 @@ const ProductionNorms = ({ permissions }) => {
         handleCalculate={handleCalculate}
         apiRef={apiRef}
         fetchData={fetchData}
-        // onProcessRowUpdateError={onProcessRowUpdateError}
         handleUnitChange={handleUnitChange}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}

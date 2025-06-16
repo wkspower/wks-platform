@@ -211,25 +211,10 @@ const SlowdownNorms = () => {
     return params.row.isEditable
   }
 
-  // const months = slowdownMonths
-
   const colDefs = [
     {
       field: 'Particulars',
       headerName: 'Type',
-      minWidth: 100,
-      groupable: true,
-      renderCell: (params) => (
-        <div
-          style={{
-            whiteSpace: 'normal',
-            wordBreak: 'break-word',
-            lineHeight: 1.4,
-          }}
-        >
-          <strong>{params.value}</strong>
-        </div>
-      ),
     },
 
     {
@@ -237,78 +222,6 @@ const SlowdownNorms = () => {
       headerName: 'Particulars',
       minWidth: 150,
       editable: false,
-      valueGetter: (params) => params || '',
-      valueFormatter: (params) => {
-        const product = allProducts.find((p) => p.id === params)
-        return product ? product.displayName : ''
-      },
-
-      filterOperators: [
-        {
-          label: 'contains',
-          value: 'contains',
-          getApplyFilterFn: (filterItem) => {
-            if (!filterItem?.value) {
-              return
-            }
-            return (rowId) => {
-              const filterValue = filterItem.value.toLowerCase()
-              if (filterValue) {
-                const productName = getProductDisplayName(rowId)
-                if (productName) {
-                  return productName.toLowerCase().includes(filterValue)
-                }
-              }
-              return true
-            }
-          },
-          InputComponent: ({ item, applyValue, focusElementRef }) => (
-            <TextField
-              autoFocus
-              inputRef={focusElementRef}
-              size='small'
-              label='Contains'
-              value={item.value || ''}
-              onChange={(event) =>
-                applyValue({ ...item, value: event.target.value })
-              }
-              style={{ marginTop: '8px' }}
-            />
-          ),
-        },
-      ],
-
-      renderEditCell: (params) => {
-        const { value, id, api } = params
-        return (
-          <select
-            value={value || ''}
-            onChange={(event) => {
-              api.setEditCellValue({
-                id,
-                field: 'materialFkId',
-                value: event.target.value,
-              })
-            }}
-            style={{
-              width: '100%',
-              padding: '5px',
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-            }}
-          >
-            <option value='' disabled>
-              Select
-            </option>
-            {allProducts.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.displayName}
-              </option>
-            ))}
-          </select>
-        )
-      },
     },
 
     { field: 'UOM', headerName: 'UOM', width: 100, editable: false },
@@ -317,261 +230,112 @@ const SlowdownNorms = () => {
       field: 'april',
       headerName: headerMap[4],
       editable: slowdownMonths?.includes(4),
-      renderEditCell: NumericInputOnly,
-      align: 'right',
-      headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(4),
-      columnClassName: 'first-column',
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToFiveDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      type: 'number',
+      format: '{0:#.#####}',
     },
 
     {
       field: 'may',
       headerName: headerMap[5],
       editable: slowdownMonths?.includes(5),
-      renderEditCell: NumericInputOnly,
-      align: 'right',
-      headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(5),
-      columnClassName: 'first-column',
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToFiveDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      type: 'number',
+      format: '{0:#.#####}',
     },
 
     {
       field: 'june',
       headerName: headerMap[6],
       editable: slowdownMonths?.includes(6),
-      renderEditCell: NumericInputOnly,
-      align: 'right',
-      headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(6),
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToFiveDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      type: 'number',
+      format: '{0:#.#####}',
     },
     {
       field: 'july',
       headerName: headerMap[7],
       editable: slowdownMonths?.includes(7),
-      renderEditCell: NumericInputOnly,
-      align: 'right',
-      headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(7),
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToFiveDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      type: 'number',
+      format: '{0:#.#####}',
     },
 
     {
       field: 'august',
       headerName: headerMap[8],
       editable: slowdownMonths?.includes(8),
-      renderEditCell: NumericInputOnly,
-      align: 'right',
-      headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(8),
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToFiveDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      type: 'number',
+      format: '{0:#.#####}',
     },
     {
       field: 'september',
       headerName: headerMap[9],
       editable: slowdownMonths?.includes(9),
-      renderEditCell: NumericInputOnly,
-      align: 'right',
-      headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(9),
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToFiveDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      type: 'number',
+      format: '{0:#.#####}',
     },
     {
       field: 'october',
       headerName: headerMap[10],
       editable: slowdownMonths?.includes(10),
-      renderEditCell: NumericInputOnly,
-      align: 'right',
-      headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(10),
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToFiveDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      type: 'number',
+      format: '{0:#.#####}',
     },
     {
       field: 'november',
       headerName: headerMap[11],
       editable: slowdownMonths?.includes(11),
-      renderEditCell: NumericInputOnly,
-      align: 'right',
-      headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(11),
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToFiveDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      type: 'number',
+      format: '{0:#.#####}',
     },
     {
       field: 'december',
       headerName: headerMap[12],
       editable: slowdownMonths?.includes(12),
-      renderEditCell: NumericInputOnly,
-      align: 'right',
-      headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(12),
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToFiveDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      type: 'number',
+      format: '{0:#.#####}',
     },
     {
       field: 'january',
       headerName: headerMap[1],
       editable: slowdownMonths?.includes(1),
-      renderEditCell: NumericInputOnly,
-      align: 'right',
-      headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(1),
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToFiveDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      type: 'number',
+      format: '{0:#.#####}',
     },
     {
       field: 'february',
       headerName: headerMap[2],
       editable: slowdownMonths?.includes(2),
-      renderEditCell: NumericInputOnly,
-      align: 'right',
-      headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(2),
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToFiveDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      type: 'number',
+      format: '{0:#.#####}',
     },
     {
       field: 'march',
       headerName: headerMap[3],
       editable: slowdownMonths?.includes(3),
-      renderEditCell: NumericInputOnly,
-      align: 'right',
-      headerAlign: 'left',
-      valueFormatter: formatValueToFiveDecimals,
       isDisabled: !slowdownMonths?.includes(3),
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToFiveDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      type: 'number',
     },
 
-    // remarks
     {
       field: 'remarks',
       headerName: 'Remark',
       minWidth: 125,
       editable: false,
-      renderCell: (params) => {
-        const displayText = truncateRemarks(params.value)
-        const isEditable = !params.row.Particulars
-
-        return (
-          <Tooltip title={params.value || ''} arrow>
-            <div
-              style={{
-                cursor: 'pointer',
-                color: params.value ? 'inherit' : 'gray',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                width: ' 100%',
-              }}
-              onDoubleClick={() => handleRemarkCellClick(params.row)}
-            >
-              {displayText || (isEditable ? 'Click to add remark' : '')}
-            </div>
-          </Tooltip>
-        )
-      },
     },
     {
       field: 'idFromApi',
       headerName: 'idFromApi',
+      hidden: true,
     },
-    // {
-    //   field: 'isEditable',
-    //   headerName: 'isEditable',
-    // },
   ]
 
   const handleRemarkCellClick = (row) => {

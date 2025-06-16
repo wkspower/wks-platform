@@ -23,6 +23,7 @@ const getEnhancedColDefs = ({ headerMap }) => {
         ...updatedCol,
         title: headerMap[col.title],
         align: 'right',
+        format: '{0:#.###}',
       }
     }
     return updatedCol

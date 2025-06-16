@@ -14,6 +14,7 @@ export const DataService = {
   getTAPlantData,
   getBDData,
   getCatalystSelectivityData,
+  getCatalystSelectivityDataConstants,
   getCatalystSelectivityDataIV,
   getConfigurationTabsMatrix,
   getConfigurationAvailableTabs,
@@ -124,7 +125,7 @@ export const DataService = {
   submitWorkFlow,
   getExcel,
   saveConfigurationExcel,
-  getConfigurationExcel
+  getConfigurationExcel,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -846,7 +847,6 @@ async function getExcel(keycloak, payload) {
   }
 }
 
-
 async function getConfigurationExcel(keycloak) {
   var year = localStorage.getItem('year')
   var plantId = ''
@@ -867,7 +867,7 @@ async function getConfigurationExcel(keycloak) {
   try {
     const resp = await fetch(url, {
       method: 'GET',
-      headers
+      headers,
     })
 
     if (!resp.ok) {
@@ -1447,6 +1447,34 @@ async function getCatalystSelectivityData(keycloak) {
 
   //const url = `${process.env.REACT_APP_API_URL}/task/getConfigurationData?year=${year}&plantFKId=${plantId}`
   const url = `${Config.CaseEngineUrl}/task/getConfigurationData?year=${year}&plantFKId=${plantId}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getCatalystSelectivityDataConstants(keycloak) {
+  var plantId = ''
+
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  var year = localStorage.getItem('year')
+
+  //const url = `${process.env.REACT_APP_API_URL}/task/getConfigurationData?year=${year}&plantFKId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/configuration-constants?year=${year}&plantFKId=${plantId}`
 
   const headers = {
     Accept: 'application/json',
@@ -2169,7 +2197,7 @@ async function saveNormalOperationNormsData(
   turnAroundDetails,
   keycloak,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/normalOperationNorms`
+  const url = `${Config.CaseEngineUrl}/task/normalOperationNorms?year=${year}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -2801,8 +2829,7 @@ async function getTurnaroundReportData(keycloak, type) {
 async function saveConfigurationExcel(file, keycloak) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/configuration-import-excel?plantId=${plantId}&year=${year}`
- //const url = `${Config.CaseEngineUrl}/task/norms-import-excel?plantId=${plantId}&year=${year}`
+  const url = `${Config.CaseEngineUrl}/task/configuration-excel?plantId=${plantId}&year=${year}`
 
   const formData = new FormData()
   formData.append('file', file)

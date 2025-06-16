@@ -86,7 +86,28 @@ const SelectivityData = (props) => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
+
       const payload = newRow.map((row) => ({
+        apr: row.apr || row.ConstantValue || null,
+        may: row.may || null,
+        jun: row.jun || null,
+        jul: row.jul || null,
+        aug: row.aug || null,
+        sep: row.sep || null,
+        oct: row.oct || null,
+        nov: row.nov || null,
+        dec: row.dec || null,
+        jan: row.jan || null,
+        feb: row.feb || null,
+        mar: row.mar || null,
+        UOM: '',
+        auditYear: localStorage.getItem('year'),
+        normParameterFKId: row.normParameterFKId || row.NormParameter_FK_Id,
+        remarks: row.remarks,
+        id: row.idFromApi || null,
+      }))
+
+      const payload1 = newRow.map((row) => ({
         apr: row.apr || null,
         may: row.may || null,
         jun: row.jun || null,
@@ -308,7 +329,6 @@ const SelectivityData = (props) => {
   }
 
   const handleExcelUpload = (rawFile) => {
-    console.log('Received Raw File', rawFile)
     saveExcelFile(rawFile)
   }
 

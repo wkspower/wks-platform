@@ -8,7 +8,6 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
 
-// import { GridRowModes } from '../../../node_modules/@mui/x-data-grid/models/gridEditRowModel'
 import KendoDataTables from './index'
 
 const ShutDown = ({ permissions }) => {
@@ -17,14 +16,11 @@ const ShutDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
-  //const isOldYear = oldYear?.oldYear
+
   const isOldYear = oldYear?.oldYear
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-  // const [shutdownData, setShutdownData] = useState([])
-  // const [allProducts, setAllProducts] = useState([])
-  // const [rowModesModel, setRowModesModel] = useState({})
 
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
@@ -36,7 +32,7 @@ const ShutDown = ({ permissions }) => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  // States for the Remark Dialog
+
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -48,32 +44,15 @@ const ShutDown = ({ permissions }) => {
 
   const keycloak = useSession()
   const handleRemarkCellClick = (row) => {
-    // const rowsInEditMode = Object.keys(rowModesModel).filter(
-    //   (id) => rowModesModel[id]?.mode === 'edit',
-    // )
-
-    // rowsInEditMode.forEach((id) => {
-    //   apiRef.current.stopRowEditMode({ id })
-    // })
-
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
 
   const saveChanges = React.useCallback(async () => {
-    // const rowsInEditMode = Object.keys(rowModesModel).filter(
-    //   (id) => rowModesModel[id]?.mode === 'edit',
-    // )
-
-    // rowsInEditMode.forEach((id) => {
-    //   apiRef.current.stopRowEditMode({ id })
-    // })
-    // console.log(modifiedCells)
     setTimeout(() => {
       try {
         var data = Object.values(modifiedCells)
-        // var data = Object.values(unsavedChangesRef.current.unsavedRows)
 
         if (data.length == 0) {
           setSnackbarOpen(true)
@@ -184,13 +163,12 @@ const ShutDown = ({ permissions }) => {
       )
 
       setSnackbarOpen(true)
-      // setSnackbarMessage("Shutdown data Updated successfully !");
+
       setSnackbarData({
         message: 'Shutdown data Updated successfully!',
         severity: 'success',
       })
-      // setSnackbarOpen(true);
-      // setSnackbarData({ message: "Shutdown data Updated successfully!", severity: "success" });
+
       return response
     } catch (error) {
       console.error('Error saving Shutdown data:', error)
@@ -209,7 +187,10 @@ const ShutDown = ({ permissions }) => {
         id: index,
         originalRemark: item.remark,
         inEdit: false,
+        maintStartDateTime: new Date(item?.maintStartDateTime),
+        maintEndDateTime: new Date(item?.maintEndDateTime),
       }))
+
       setRows(formattedData)
       setLoading(false)
     } catch (error) {
@@ -217,16 +198,6 @@ const ShutDown = ({ permissions }) => {
       setLoading(false)
     }
   }
-
-  // const focusFirstField = async () => {
-  //   const newRowId = rows.length
-  //     ? Math.max(...rows.map((row) => row.id)) + 1
-  //     : 1
-  //   setRowModesModel((oldModel) => ({
-  //     ...oldModel,
-  //     [newRowId]: { mode: GridRowModes.Edit, fieldToFocus: 'discription' },
-  //   }))
-  // }
 
   useEffect(() => {
     fetchData()
@@ -258,34 +229,12 @@ const ShutDown = ({ permissions }) => {
     return ''
   }
 
-  // const handleCancelClick = () => () => {
-  //   // const rowsInEditMode = Object.keys(rowModesModel).filter(
-  //   //   (id) => rowModesModel[id]?.mode === 'edit',
-  //   // )
-
-  //   // rowsInEditMode.forEach((id) => {
-  //   //   apiRef.current.stopRowEditMode({ id })
-  //   // })
-
-  //   // setRowModesModel({
-  //   //   ...rowModesModel,
-  //   //   [id]: { mode: GridRowModes.View, ignoreModifications: true },
-  //   // })
-
-  //   // const editedRow = rows.find((row) => row.id === id)
-  //   // if (editedRow.isNew) {
-  //   //   setRows(rows.filter((row) => row.id !== id))
-  //   // }
-  // }
-
-  // 5) Column definitions for KendoReact Grid
   const colDefs = [
     {
       field: 'discription',
       title: 'Shutdown Desc',
       width: 250,
       editable: true,
-      // cell: TwoLineEllipsisCell,
     },
     {
       field: 'maintenanceId',
@@ -307,7 +256,6 @@ const ShutDown = ({ permissions }) => {
       field: 'durationInHrs',
       title: 'Duration (hrs)',
       editable: true,
-      // cell: DurationCell,
     },
     {
       field: 'remark',
@@ -317,13 +265,10 @@ const ShutDown = ({ permissions }) => {
   ]
 
   const deleteRowData = async (paramsForDelete) => {
-    // console.log(paramsForDelete)
-    // console.log(idFromApi)
     try {
       const { idFromApi, id } = paramsForDelete
       const deleteId = id
-      // console.log(paramsForDelete)
-      // console.log(idFromApi)
+
       if (!idFromApi) {
         setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
       }
@@ -411,8 +356,6 @@ const ShutDown = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         deleteRowData={deleteRowData}
         permissions={adjustedPermissions}
-        // handleCancelClick={handleCancelClick}
-        // focusFirstField={focusFirstField}
       />
     </div>
   )

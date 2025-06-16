@@ -6,11 +6,18 @@
     "hidden": true,
     "editable": false
   },
-  { "field": "aopType", "title": "Type", "width": 80 },
+  { "field": "aopType", "title": "Type", "width": 80, "hidden": true },
   { "field": "aopYear", "title": "Year", "width": 80, "hidden": true },
   { "field": "plantFkId", "title": "Plant ID", "width": 80, "hidden": true },
   {
     "field": "normParametersFKId",
+    "title": "Particulars/Grade",
+    "editable": false,
+    "width": 125,
+    "hidden": true
+  },
+  {
+    "field": "normParameterName",
     "title": "Particulars/Grade",
     "editable": false,
     "width": 125
@@ -19,13 +26,14 @@
     "field": "april",
     "title": "4",
     "editable": false,
-
+    "type": "number",
     "align": "left",
     "format": "{0:n2}"
   },
   {
     "field": "may",
     "title": "5",
+    "type": "number",
     "editable": false,
 
     "align": "left",
@@ -34,6 +42,7 @@
   {
     "field": "june",
     "title": "6",
+    "type": "number",
     "editable": false,
 
     "align": "left",
@@ -42,6 +51,7 @@
   {
     "field": "july",
     "title": "7",
+    "type": "number",
     "editable": false,
 
     "align": "left",
@@ -50,6 +60,7 @@
   {
     "field": "aug",
     "title": "8",
+    "type": "number",
     "editable": false,
 
     "align": "left",
@@ -58,6 +69,7 @@
   {
     "field": "sep",
     "title": "9",
+    "type": "number",
     "editable": false,
 
     "align": "left",
@@ -66,6 +78,7 @@
   {
     "field": "oct",
     "title": "10",
+    "type": "number",
     "editable": false,
 
     "align": "left",
@@ -74,6 +87,7 @@
   {
     "field": "nov",
     "title": "11",
+    "type": "number",
     "editable": false,
 
     "align": "left",
@@ -82,6 +96,7 @@
   {
     "field": "dec",
     "title": "12",
+    "type": "number",
     "editable": false,
 
     "align": "left",
@@ -90,6 +105,7 @@
   {
     "field": "jan",
     "title": "1",
+    "type": "number",
     "editable": false,
 
     "align": "left",
@@ -98,14 +114,17 @@
   {
     "field": "feb",
     "title": "2",
+
     "editable": false,
 
     "align": "left",
+    "type": "number",
     "format": "{0:n2}"
   },
   {
     "field": "march",
     "title": "3",
+    "type": "number",
     "editable": false,
 
     "align": "left",
@@ -114,13 +133,20 @@
   {
     "field": "averageTPH",
     "title": "Total",
+    "type": "number",
     "editable": false
   },
 
   {
     "field": "isEditable",
-    "title": "isEditable"
+    "title": "isEditable",
+    "hidden": true
   },
 
-  { "field": "aopStatus", "title": "aopStatus", "editable": false }
+  {
+    "field": "aopStatus",
+    "title": "aopStatus",
+    "editable": false,
+    "hidden": true
+  }
 ]

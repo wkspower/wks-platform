@@ -3,145 +3,107 @@
     "field": "Particulars",
     "title": "Type",
     "width": 125,
-    "groupable": true,
-    "headerClass": "bold-header",
-    "filterable": "false",
     "editable": false
   },
   {
     "field": "normParameterFKId",
+    "width": 120,
+    "hidden": true
+  },
+  {
+    "field": "productName",
     "title": "Particulars",
-    "editable": false,
-    "width": 180,
-    "valueGetter": "defaultValueGetter",
-    "valueFormatter": "productDisplayNameFormatter",
-    "renderEditCell": "renderNormParameterSelectCell"
+    "width": 120,
+    "editable": false
   },
   {
     "field": "UOM",
     "title": "UOM",
-    "editable": false,
-    "align": "left",
-    "headerAlign": "left"
+    "width": 120,
+    "editable": false
   },
   {
     "field": "apr",
     "title": 4,
     "width": 120,
-    "editable": true,
-    "renderEditCell": "NumericInputOnly",
-    "align": "left",
-    "headerAlign": "left"
+    "editable": true
   },
   {
     "field": "may",
     "title": 5,
     "width": 120,
-    "editable": true,
-    "renderEditCell": "NumericInputOnly",
-    "align": "left",
-    "headerAlign": "left"
+    "editable": true
   },
   {
     "field": "jun",
     "title": 6,
     "width": 120,
-    "editable": true,
-    "renderEditCell": "NumericInputOnly",
-    "align": "left",
-    "headerAlign": "left"
+    "editable": true
   },
   {
     "field": "jul",
     "title": 7,
     "width": 120,
-    "editable": true,
-    "renderEditCell": "NumericInputOnly",
-    "align": "left",
-    "headerAlign": "left"
+    "editable": true
   },
   {
     "field": "aug",
     "title": 8,
     "width": 120,
-    "editable": true,
-    "renderEditCell": "NumericInputOnly",
-    "align": "left",
-    "headerAlign": "left"
+    "editable": true
   },
   {
     "field": "sep",
     "title": 9,
     "width": 120,
-    "editable": true,
-    "renderEditCell": "NumericInputOnly",
-    "align": "left",
-    "headerAlign": "left"
+    "editable": true
   },
   {
     "field": "oct",
     "title": 10,
     "width": 120,
-    "editable": true,
-    "renderEditCell": "NumericInputOnly",
-    "align": "left",
-    "headerAlign": "left"
+    "editable": true
   },
   {
     "field": "nov",
     "title": 11,
     "width": 120,
-    "editable": true,
-    "renderEditCell": "NumericInputOnly",
-    "align": "left",
-    "headerAlign": "left"
+    "editable": true
   },
   {
     "field": "dec",
     "title": 12,
     "width": 120,
-    "editable": true,
-    "renderEditCell": "NumericInputOnly",
-    "align": "left",
-    "headerAlign": "left"
+    "editable": true
   },
   {
     "field": "jan",
     "title": 1,
     "width": 120,
-    "editable": true,
-    "renderEditCell": "NumericInputOnly",
-    "align": "left",
-    "headerAlign": "left"
+    "editable": true
   },
   {
     "field": "feb",
     "title": 2,
     "width": 120,
-    "editable": true,
-    "renderEditCell": "NumericInputOnly",
-    "align": "left",
-    "headerAlign": "left"
+    "editable": true
   },
   {
     "field": "mar",
     "title": 3,
     "width": 120,
-    "editable": true,
-    "renderEditCell": "NumericInputOnly",
-    "align": "left",
-    "headerAlign": "left"
+    "editable": true
   },
   {
     "field": "remarks",
     "title": "Remark",
     "width": 150,
-    "editable": true,
-    "renderCell": "renderRemarkCell"
+    "editable": true
   },
 
   {
     "field": "isEditable",
-    "title": "isEditable"
+    "title": "isEditable",
+    "hidden": true
   }
 ]
