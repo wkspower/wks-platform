@@ -45,6 +45,6 @@ public class MCUNormsValueDTO {
     private String UOM;
     private Boolean isEditable;
 	private String productName;
-    private String normParameterDisplayName;
+    //private String normParameterDisplayName;
 }
 

@@ -117,7 +117,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				Double sum = 0.0;
 				List<Object> list = new ArrayList<>();
 				list.add(dto.getNormType());
-				list.add(dto.getNormParameterDisplayName());
+				list.add(dto.getProductName());
 				list.add(dto.getApr());
 				list.add(dto.getMay());
 				list.add(dto.getJun());
@@ -131,7 +131,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				list.add(dto.getFeb());
 				list.add(dto.getMar());
 				list.add(dto.getRemarks());
-
+                list.add(dto.getNormParameterFKId());
 				rows.add(list);
 			}
 
@@ -141,6 +141,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<String> monthsList = getAcademicYearMonths(year);
 			innerHeaders.addAll(monthsList);
 			innerHeaders.add("Remarks");
+			innerHeaders.add("NormParameterId");
 
 			List<List<String>> headers = new ArrayList<>();
 			headers.add(innerHeaders);
@@ -171,6 +172,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 				}
 			}
+			sheet.setColumnHidden(15, true);
 			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
 
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -255,14 +257,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			for (Object[] row : obj) {
 				ConfigurationDTO configurationDTO = new ConfigurationDTO();
 				configurationDTO.setNormParameterFKId(row[0] != null ? row[0].toString() : "");
-				System.out.println("normparameterid" + UUID.fromString(configurationDTO.getNormParameterFKId()));
-				System.out.println(normParametersRepository
-						.findById(UUID.fromString(configurationDTO.getNormParameterFKId())).get());
-				System.out.println(normParametersRepository
-						.findById(UUID.fromString(configurationDTO.getNormParameterFKId())).get().getDisplayName());
+				// System.out.println("normparameterid" + UUID.fromString(configurationDTO.getNormParameterFKId()));
+				// System.out.println(normParametersRepository
+				// 		.findById(UUID.fromString(configurationDTO.getNormParameterFKId())).get());
+				// System.out.println(normParametersRepository
+				// 		.findById(UUID.fromString(configurationDTO.getNormParameterFKId())).get().getDisplayName());
 
-				configurationDTO.setNormParameterDisplayName(normParametersRepository
-						.findById(UUID.fromString(configurationDTO.getNormParameterFKId())).get().getDisplayName());
+				// configurationDTO.setNormParameterDisplayName(normParametersRepository
+				// 		.findById(UUID.fromString(configurationDTO.getNormParameterFKId())).get().getDisplayName());
 
 				configurationDTO.setJan(
 						(row[1] != null && !row[1].toString().trim().isEmpty()) ? Double.parseDouble(row[1].toString())
@@ -324,6 +326,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					configurationDTO.setIsEditable(row[17] != null ? ((Boolean) row[17]).booleanValue() : null);
 					configurationDTO.setProductName(row[18] != null ? row[18].toString() : "");
 				}
+
+				//configurationDTO.setNormParameterDisplayName(configurationDTO.getProductName());
 
 				configurationDTOList.add(configurationDTO);
 				if (row[14] == null) {
@@ -1051,11 +1055,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				ConfigurationDTO dto = new ConfigurationDTO();
 
 				dto.setNormType(getStringCellValue(row.getCell(0)));
-				dto.setNormParameterDisplayName(getStringCellValue(row.getCell(1)));
-			    System.out.println("normparamter displayName "+dto.getNormParameterDisplayName());
-				UUID normparameterId =   normParametersRepository.findByDisplayNameAndPlantFkId(dto.getNormParameterDisplayName(),plantFKId).get().getId();
-				System.out.println("normparamter displayName "+normparameterId);
-				dto.setNormParameterFKId(normparameterId.toString());
+				dto.setProductName(getStringCellValue(row.getCell(1)));
+			    //System.out.println("normparamter displayName "+dto.getProductName());
+				//UUID normparameterId =   normParametersRepository.findByDisplayNameAndPlantFkId(dto.getProductName(),plantFKId).get().getId();
+				//System.out.println("normparamter displayName "+normparameterId);
+				//dto.setNormParameterFKId(normparameterId.toString());
                 dto.setAuditYear(year);
 				dto.setApr(getNumericCellValue(row.getCell(2)));
 				dto.setMay(getNumericCellValue(row.getCell(3)));
@@ -1070,6 +1074,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				dto.setFeb(getNumericCellValue(row.getCell(12)));
 				dto.setMar(getNumericCellValue(row.getCell(13)));
 				dto.setRemarks(getStringCellValue(row.getCell(14)));
+				dto.setNormParameterFKId(getStringCellValue(row.getCell(15)));
 				configList.add(dto);
 			}
 

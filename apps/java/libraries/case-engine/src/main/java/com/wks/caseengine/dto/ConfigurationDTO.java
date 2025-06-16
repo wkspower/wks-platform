@@ -39,6 +39,6 @@ public class ConfigurationDTO {
     private String TypeName;
     private Boolean isEditable;
 	private String productName;
-    private String normParameterDisplayName;
+   // private String normParameterDisplayName;
 
 }

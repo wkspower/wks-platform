@@ -106,14 +106,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValueDTO.setPlantFkId(row[2].toString());
 				mCUNormsValueDTO.setVerticalFkId(row[3].toString());
 				mCUNormsValueDTO.setMaterialFkId(row[4].toString());
-				System.out.println("normparameterid" + UUID.fromString(mCUNormsValueDTO.getMaterialFkId()));
-				System.out.println(normParametersRepository
-						.findById(UUID.fromString(mCUNormsValueDTO.getMaterialFkId())).get());
-				System.out.println(normParametersRepository
-						.findById(UUID.fromString(mCUNormsValueDTO.getMaterialFkId())).get().getDisplayName());
-
-				mCUNormsValueDTO.setNormParameterDisplayName(normParametersRepository
-						.findById(UUID.fromString(mCUNormsValueDTO.getMaterialFkId())).get().getDisplayName());
+				
 
 				mCUNormsValueDTO.setApril(row[5] != null ? Double.parseDouble(row[5].toString()) : null);
 				mCUNormsValueDTO.setMay(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
@@ -469,14 +462,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				MCUNormsValueDTO dto = new MCUNormsValueDTO();
 
 				dto.setNormParameterTypeDisplayName(getStringCellValue(row.getCell(0)));
-				dto.setNormParameterDisplayName(getStringCellValue(row.getCell(1)));
+				dto.setProductName(getStringCellValue(row.getCell(1)));
 				dto.setUOM(getStringCellValue(row.getCell(2)));
-				System.out.println("normparamter displayName " + dto.getNormParameterDisplayName());
-				UUID normparameterId = normParametersRepository
-						.findByDisplayNameAndPlantFkId(dto.getNormParameterDisplayName(), plantFKId)
-						.get().getId();
-				System.out.println("normparamter displayName " + normparameterId);
-				dto.setMaterialFkId(normparameterId.toString());
+				
+				
 				dto.setFinancialYear(year);;
 				dto.setApril(getNumericCellValue(row.getCell(3)));
 				dto.setMay(getNumericCellValue(row.getCell(4)));
@@ -492,6 +481,8 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				dto.setMarch(getNumericCellValue(row.getCell(14)));
 				dto.setRemarks(getStringCellValue(row.getCell(15)));
 				dto.setId(getStringCellValue(row.getCell(16)));
+
+				dto.setMaterialFkId(getStringCellValue(row.getCell(17)));
 				configList.add(dto);
 			}
 
@@ -544,7 +535,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				Double sum = 0.0;
 				List<Object> list = new ArrayList<>();
 				list.add(dto.getNormParameterTypeDisplayName());
-				list.add(dto.getNormParameterDisplayName());
+				list.add(dto.getProductName());
 				list.add(dto.getUOM());
 				list.add(dto.getApril());
 				list.add(dto.getMay());
@@ -560,7 +551,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				list.add(dto.getMarch());
 				list.add(dto.getRemarks());
 				list.add(dto.getId());
-
+                list.add(dto.getMaterialFkId());
 				rows.add(list);
 			}
 
@@ -572,6 +563,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			innerHeaders.addAll(monthsList);
 			innerHeaders.add("Remarks");
 			innerHeaders.add("Id");
+			innerHeaders.add("NormParamterId");
 			List<List<String>> headers = new ArrayList<>();
 			headers.add(innerHeaders);
 
@@ -602,6 +594,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				}
 			}
 			sheet.setColumnHidden(16, true);
+			sheet.setColumnHidden(17, true);
 			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
 
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
