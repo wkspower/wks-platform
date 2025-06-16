@@ -824,6 +824,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				map.put("UOM", row[15]);
 				map.put("NormTypeName", row[16]);
 				map.put("isEditable", row[17]);
+				map.put("ProductName", row[18]);
 				configurationIntermediateValues.add(map);
 
 			}
