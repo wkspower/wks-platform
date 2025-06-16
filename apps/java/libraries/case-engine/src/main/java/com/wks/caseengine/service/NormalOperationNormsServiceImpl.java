@@ -203,8 +203,11 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 			for (MCUNormsValueDTO mCUNormsValueDTO : mCUNormsValueDTOList) {
 				year = mCUNormsValueDTO.getFinancialYear();
+				System.out.println("MCUNormsValueDTO "+mCUNormsValueDTO);
 				MCUNormsValue mCUNormsValue = new MCUNormsValue();
+				System.out.println("mCUNormsValueDTO.getId() "+mCUNormsValueDTO.getId());
 				if (mCUNormsValueDTO.getId() != null || !mCUNormsValueDTO.getId().isEmpty()) {
+					mCUNormsValue = normalOperationNormsRepository.findById(UUID.fromString(mCUNormsValueDTO.getId())).get();
 					mCUNormsValue.setId(UUID.fromString(mCUNormsValueDTO.getId()));
 					mCUNormsValue.setModifiedOn(new Date());
 				} else {
@@ -243,7 +246,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValue.setMcuVersion("V1");
 				mCUNormsValue.setUpdatedBy(userId);
 
-				System.out.println("Data Saved Succussfully");
+				System.out.println("Data Saved Succussfully"+mCUNormsValue);
 				normalOperationNormsRepository.save(mCUNormsValue);
 			}
 			List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("normal-op-norms");
