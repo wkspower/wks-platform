@@ -106,7 +106,6 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValueDTO.setPlantFkId(row[2].toString());
 				mCUNormsValueDTO.setVerticalFkId(row[3].toString());
 				mCUNormsValueDTO.setMaterialFkId(row[4].toString());
-				
 
 				mCUNormsValueDTO.setApril(row[5] != null ? Double.parseDouble(row[5].toString()) : null);
 				mCUNormsValueDTO.setMay(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
@@ -153,9 +152,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	@Override
-	public List<MCUNormsValueDTO> saveNormalOperationNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList, UUID plantFKId, String year) {
-		//String year = null;
-		//UUID plantId = null;
+	public List<MCUNormsValueDTO> saveNormalOperationNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList,
+			UUID plantFKId, String year) {
+		// String year = null;
+		// UUID plantId = null;
 		try {
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			String userId = authentication.getName();
@@ -196,11 +196,12 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 			for (MCUNormsValueDTO mCUNormsValueDTO : mCUNormsValueDTOList) {
 				year = mCUNormsValueDTO.getFinancialYear();
-				System.out.println("MCUNormsValueDTO "+mCUNormsValueDTO);
+				System.out.println("MCUNormsValueDTO " + mCUNormsValueDTO);
 				MCUNormsValue mCUNormsValue = new MCUNormsValue();
-				System.out.println("mCUNormsValueDTO.getId() "+mCUNormsValueDTO.getId());
+				System.out.println("mCUNormsValueDTO.getId() " + mCUNormsValueDTO.getId());
 				if (mCUNormsValueDTO.getId() != null || !mCUNormsValueDTO.getId().isEmpty()) {
-					mCUNormsValue = normalOperationNormsRepository.findById(UUID.fromString(mCUNormsValueDTO.getId())).get();
+					mCUNormsValue = normalOperationNormsRepository.findById(UUID.fromString(mCUNormsValueDTO.getId()))
+							.get();
 					mCUNormsValue.setId(UUID.fromString(mCUNormsValueDTO.getId()));
 					mCUNormsValue.setModifiedOn(new Date());
 				} else {
@@ -239,7 +240,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValue.setMcuVersion("V1");
 				mCUNormsValue.setUpdatedBy(userId);
 
-				System.out.println("Data Saved Succussfully"+mCUNormsValue);
+				System.out.println("Data Saved Succussfully" + mCUNormsValue);
 				normalOperationNormsRepository.save(mCUNormsValue);
 			}
 			List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("normal-op-norms");
@@ -432,7 +433,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		// TODO Auto-generated method stub
 		try {
 			List<MCUNormsValueDTO> data = readConfigurations(file.getInputStream(), plantFKId, year);
-			saveNormalOperationNormsData(data,plantFKId,year);
+			saveNormalOperationNormsData(data, plantFKId, year);
 			// saveConfigurationData(year,plantFKId.toString(), data);
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			aopMessageVM.setCode(200);
@@ -464,9 +465,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				dto.setNormParameterTypeDisplayName(getStringCellValue(row.getCell(0)));
 				dto.setProductName(getStringCellValue(row.getCell(1)));
 				dto.setUOM(getStringCellValue(row.getCell(2)));
-				
-				
-				dto.setFinancialYear(year);;
+
+				dto.setFinancialYear(year);
+				;
 				dto.setApril(getNumericCellValue(row.getCell(3)));
 				dto.setMay(getNumericCellValue(row.getCell(4)));
 				dto.setJune(getNumericCellValue(row.getCell(5)));
@@ -532,27 +533,28 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			List<List<Object>> rows = new ArrayList<>();
 			// Data rows
 			for (MCUNormsValueDTO dto : dtoList) {
-				Double sum = 0.0;
-				List<Object> list = new ArrayList<>();
-				list.add(dto.getNormParameterTypeDisplayName());
-				list.add(dto.getProductName());
-				list.add(dto.getUOM());
-				list.add(dto.getApril());
-				list.add(dto.getMay());
-				list.add(dto.getJune());
-				list.add(dto.getJuly());
-				list.add(dto.getAugust());
-				list.add(dto.getSeptember());
-				list.add(dto.getOctober());
-				list.add(dto.getNovember());
-				list.add(dto.getDecember());
-				list.add(dto.getJanuary());
-				list.add(dto.getFebruary());
-				list.add(dto.getMarch());
-				list.add(dto.getRemarks());
-				list.add(dto.getId());
-                list.add(dto.getMaterialFkId());
-				rows.add(list);
+				if (dto.getIsEditable()) {
+					List<Object> list = new ArrayList<>();
+					list.add(dto.getNormParameterTypeDisplayName());
+					list.add(dto.getProductName());
+					list.add(dto.getUOM());
+					list.add(dto.getApril());
+					list.add(dto.getMay());
+					list.add(dto.getJune());
+					list.add(dto.getJuly());
+					list.add(dto.getAugust());
+					list.add(dto.getSeptember());
+					list.add(dto.getOctober());
+					list.add(dto.getNovember());
+					list.add(dto.getDecember());
+					list.add(dto.getJanuary());
+					list.add(dto.getFebruary());
+					list.add(dto.getMarch());
+					list.add(dto.getRemarks());
+					list.add(dto.getId());
+					list.add(dto.getMaterialFkId());
+					rows.add(list);
+				}
 			}
 
 			List<String> innerHeaders = new ArrayList<>();
