@@ -32,8 +32,8 @@ Email becomes a first-class component of case management—alongside tasks, comm
    - Identify the intent (create new or update existing case)
    - Create or log the email appropriately
    - Optionally start or continue a case process
-![Gif showing the created case](https://wkspower.com/hs-fs/hubfs/Reviewing.gif?width=3008&height=1536&name=Reviewing.gif)
-> 🛠 WKS does **not provide** out-of-the-box email consumers. You must build your own using tools like Microsoft Power Automate, Java, or Node.js, depending on your email provider.
+![Gif showing the case created based on the email received](../../../static/img/Reviewing.gif)
+> 🛠 WKS does **not provide** out-of-the-box email consumers.
 
 ### Example Address Structure
 - **Creating a new case:** `mailto-case+new-customer-support@yourdomain.com`
@@ -66,17 +66,6 @@ These internal workflows allow:
 - Clear separation of communication logic from business processes
 - Easy error handling and retry mechanisms
 - Traceable and auditable automation paths
-
----
-
-## 🧩 Integration Tips
-
-- Use **Microsoft Power Automate** for reading from Microsoft 365 mailboxes
-- Ensure your custom email consumer handles:
-  - Message parsing
-  - Case key detection
-  - API authentication and retries
-- Define **error handling paths** in your Camunda models for email delivery or processing failures
 
 ---
 
