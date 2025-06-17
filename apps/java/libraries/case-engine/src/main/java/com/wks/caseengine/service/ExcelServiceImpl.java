@@ -90,7 +90,24 @@ public class ExcelServiceImpl implements ExcelService {
                         columnCount = headers.size();
                     }
                     List<List<Object>> rows = new ArrayList<>();
-                    if (sheetName.equalsIgnoreCase("Plant Production Summary") && tableCount == 0) {
+                    if (sheetName.equalsIgnoreCase("Annual AOP Cost")) {
+                        if (tableCount == 0) {
+                            title = "Production Data";
+                            Map<String,Object> map = excelDataService.getProductionAOPWorkflowData(plantId, year);
+                                   
+                            rows = (List<List<Object>>) map.get("rows"); 
+                            List<String> headerList =  (List<String>) map.get("headers");  
+                            headers.add(headerList);
+                        }
+                        if (tableCount == 1) {
+                            title = "Annual AOP Cost";
+                            Map<String,Object> map = excelDataService.getAnnualAOPWorkflowData(plantId, year);
+                                   
+                            rows = (List<List<Object>>) map.get("rows"); 
+                            List<String> headerList =  (List<String>) map.get("headers");  
+                            headers.add(headerList);
+                        }
+                    }else if (sheetName.equalsIgnoreCase("Plant Production Summary") && tableCount == 0) {
                         title = "Plant Production Summary (T-14)";
                         rows = excelDataService.getDataForProductionVolumeReport(plantId, year);
                     } else if (sheetName.equalsIgnoreCase("Monthwise production plan")) {
@@ -589,809 +606,850 @@ public class ExcelServiceImpl implements ExcelService {
 
     private String getData(String year, String previousYear, String nextYear, String months, String previous2Year,
             String previous3Year) {
-        return "{\r\n" + //
-                "    \"Plant Production Summary\": {\r\n" + //
-                "        \"tables\": [\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"Item\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + year + ",\r\n" + //
-                "                        \"Variance wrt current year budget\",\r\n" + //
-                "                        \"Variance wrt current year budget\",\r\n" + //
-                "                        \"Variance wrt current year actuals\",\r\n" + //
-                "                        \"Variance wrt current year actuals\",\r\n" + //
-                "                        \"Remark\"\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \"serial No\",\r\n" + //
-                "                        \"Production volume\",\r\n" + //
-                "                        \"Unit\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"MT\",\r\n" + //
-                "                        \"%\",\r\n" + //
-                "                        \"MT\",\r\n" + //
-                "                        \"%\",\r\n" + //
-                "                        \"Remark\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            }\r\n" + //
-                "        ]\r\n" + //
-                "    },\r\n" + //
-                "    \"Monthwise production plan\": {\r\n" + //
-                "        \"tables\": [\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \" \",\r\n" + //
-                "                        \" \",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + year + ",\r\n" + //
-                "                        " + year + ",\r\n" + //
-                "                        " + year + ",\r\n" + //
-                "                        " + year + ",\r\n" + //
-                "                        " + year + ",\r\n" + //
-                "                        \"\"\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"EOE Production, MT\",\r\n" + //
-                "                        \"EOE Production, MT\",\r\n" + //
-                "                        \"Operating Hours\",\r\n" + //
-                "                        \"Operating Hours\",\r\n" + //
-                "                        \"Throughput TPH\",\r\n" + //
-                "                        \"Throughput TPH\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"Remark\"\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \"Sr No\",\r\n" + //
-                "                        \"Month\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Operating Hours\",\r\n" + //
-                "                        \"MEG Throughput, TPH\",\r\n" + //
-                "                        \"EO Throughput TPH\",\r\n" + //
-                "                        \"EOE Throughput TPH\",\r\n" + //
-                "                        \"TOTAL EOE, MT\",\r\n" + //
-                "                        \"Remark\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"particulars\",\r\n" + //
+        return "\r\n" + //
+                        "{\r\n" + //
+                        "\r\n" + //
+                        "                     \"Annual AOP Cost\": { \r\n" + //
+                        "                        \"tables\": [ \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                     \r\n" + //
+                        "                                     \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            },\r\n" + //
+                        "                             { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                     \r\n" + //
+                        "                                     \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            } \r\n" + //
+                        "                        ] \r\n" + //
+                        "                    }, \r\n" + //
+                        "                    \"Plant Production Summary\": { \r\n" + //
+                        "                        \"tables\": [ \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"Item\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                                                                 previousYear  + ","+//
+                        previousYear +","+
+                        year +","+
+                        "                                        \"Variance wrt current year budget\", \r\n" + //
+                        "                                        \"Variance wrt current year budget\", \r\n" + //
+                        "                                        \"Variance wrt current year actuals\", \r\n" + //
+                        "                                        \"Variance wrt current year actuals\", \r\n" + //
+                        "                                        \"Remark\" \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"serial No\", \r\n" + //
+                        "                                        \"Production volume\", \r\n" + //
+                        "                                        \"Unit\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"MT\", \r\n" + //
+                        "                                        \"%\", \r\n" + //
+                        "                                        \"MT\", \r\n" + //
+                        "                                        \"%\", \r\n" + //
+                        "                                        \"Remark\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            } \r\n" + //
+                        "                        ] \r\n" + //
+                        "                    }, \r\n" + //
+                        "                    \"Monthwise production plan\": { \r\n" + //
+                        "                        \"tables\": [ \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \" \", \r\n" + //
+                        "                                        \" \", \r\n" + //
+                        previousYear +","+
+                        previousYear +","+
+                        previousYear +","+
+                        previousYear +","+
+                        previousYear +","+
+                        previousYear +","+
+                        year +","+
+                        year +","+
+                        year +","+
+                        year +","+
+                        year +
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"EOE Production, MT\", \r\n" + //
+                        "                                        \"EOE Production, MT\", \r\n" + //
+                        "                                        \"Operating Hours\", \r\n" + //
+                        "                                        \"Operating Hours\", \r\n" + //
+                        "                                        \"Throughput TPH\", \r\n" + //
+                        "                                        \"Throughput TPH\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"Remark\" \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"Sr No\", \r\n" + //
+                        "                                        \"Month\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Operating Hours\", \r\n" + //
+                        "                                        \"MEG Throughput, TPH\", \r\n" + //
+                        "                                        \"EO Throughput TPH\", \r\n" + //
+                        "                                        \"EOE Throughput TPH\", \r\n" + //
+                        "                                        \"TOTAL EOE, MT\", \r\n" + //
+                        "                                        \"Remark\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"particulars\", \r\n" + //
                 months +
-                ",                        \"Total\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            }\r\n" + //
-                "        ]\r\n" + //
-                "    },\r\n" + //
-                "    \"Monthwise Raw Data\": {\r\n" + //
-                "        \"tables\": [\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"Parameters\",\r\n" + //
+                        "                ,                        \"Total\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            } \r\n" + //
+                        "                        ] \r\n" + //
+                        "                    }, \r\n" + //
+                        "                    \"Monthwise Raw Data\": { \r\n" + //
+                        "                        \"tables\": [ \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"Parameters\", \r\n" + //
+                        months +
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"Parameters\", \r\n" + //
+                        "                                        \"Unit\", \r\n" + //
+                        "                                        \"Spec\", \r\n" + //
                 months +
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"Parameters\",\r\n" + //
-                "                        \"Unit\",\r\n" + //
-                "                        \"Spec\",\r\n" + //
+                        "                ,                        \"Total\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"Parameters\", \r\n" + //
+                        "                                        \"Unit\", \r\n" + //
+                        "                                        \"Spec\", \r\n" + //
                 months +
-                ",                        \"Total\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"Parameters\",\r\n" + //
-                "                        \"Unit\",\r\n" + //
-                "                        \"Spec\",\r\n" + //
+                        "                ,                        \"Total\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"Parameters\", \r\n" + //
+                        "                                        \"Unit\", \r\n" + //
+                        "                                        \"Spec\", \r\n" + //
                 months +
-                ",                        \"Total\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"Parameters\",\r\n" + //
-                "                        \"Unit\",\r\n" + //
-                "                        \"Spec\",\r\n" + //
+                        "                ,                        \"Total\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"Parameters\", \r\n" + //
+                        "                                        \"Unit\", \r\n" + //
+                        "                                        \"Spec\", \r\n" + //
                 months +
-                ",                        \"Total\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"Parameters\",\r\n" + //
-                "                        \"Unit\",\r\n" + //
-                "                        \"Spec\",\r\n" + //
+                        "                ,                        \"Total\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                             \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"Parameters\", \r\n" + //
+                        "                                        \"Unit\", \r\n" + //
+                        "                                        \"Spec\", \r\n" + //
                 months +
-                ",                        \"Total\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            \r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"Parameters\",\r\n" + //
-                "                        \"Unit\",\r\n" + //
-                "                        \"Spec\",\r\n" + //
-                months +
-                ",                        \"Total\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            }\r\n" + //
-                "        ]\r\n" + //
-                "    },\r\n" + //
-                "     \"Turn Around Report\": {\r\n" + //
-                "        \"tables\": [\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"Turn Around Period\",\r\n" + //
-                "                        \"Turn Around Period\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\"\r\n" + //
-                "                        \r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \"serial No\",\r\n" + //
-                "                        \"Activities\",\r\n" + //
-                "                        \"From\",\r\n" + //
-                "                        \"To\",\r\n" + //
-                "                        \"Duration in Hrs\",\r\n" + //
-                "                        \"Remark\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"Turn Around Period\",\r\n" + //
-                "                        \"Turn Around Period\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\"\r\n" + //
-                "                        \r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \"serial No\",\r\n" + //
-                "                        \"Activities\",\r\n" + //
-                "                        \"From\",\r\n" + //
-                "                        \"To\",\r\n" + //
-                "                        \"Duration in Hrs\",\r\n" + //
-                "                        \"Remark\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            }\r\n" + //
-                "\r\n" + //
-                "        ]\r\n" + //
-                "    },\r\n" + //
-                "     \"Annual Production Plan\": {\r\n" + //
-                "        \"tables\": [\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"Sr. No.\",\r\n" + //
-                "                        \"Assumptions and remarks\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"SrNo\",\r\n" + //
-                "                        \"Max hourly rate achived\",\r\n" + //
-                "                        \"Value\",\r\n" + //
-                "                        \"UOM\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"SrNo\",\r\n" + //
-                "                        \"Calculation of operating hours\",\r\n" + //
-                "                        \"Value\",\r\n" + //
-                "                        \"Hours\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"SrNo\",\r\n" + //
-                "                        \"Throughput limiting causes\",\r\n" + //
-                "                        \"Achivable hourly rate\",\r\n" + //
-                "                        \"Op. Hrs.\",\r\n" + //
-                "                        \"Period from\",\r\n" + //
-                "                        \"Period to\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        " + previous3Year + ",\r\n" + //
-                "                        " + previous3Year + ",\r\n" + //
-                "                        " + previous2Year + ",\r\n" + //
-                "                        " + previous2Year + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + year + "\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \"SrNo\",\r\n" + //
-                "                        \"Item\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            }\r\n" + //
-                "        ]\r\n" + //
-                "    },\r\n" + //
-                "    \r\n" + //
-                "     \"Plant Contribution\": {\r\n" + //
-                "        \"tables\": [\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"Price\",\r\n" + //
-                "                        \"Production, MT\",\r\n" + //
-                "                        \"Production, MT\",\r\n" + //
-                "                        \"Production, MT\"\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                    \" \",\r\n" + //
-                "                    \" \",\r\n" + //
-                "                    \" \",\r\n" + //
-                "                    \"Price\",\r\n" + //
-                "                    " + previousYear + ",\r\n" + //
-                "                    " + previousYear + ",\r\n" + //
-                "                    " + year + "\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \"SL No\",\r\n" + //
-                "                        \"Product Name\",\r\n" + //
-                "                        \"Unit\",\r\n" + //
-                "                        \"Rs/MT\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\"\r\n" + //
-                "                    ]\r\n" + //
-                "                    \r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"Price\",\r\n" + //
-                "                        \"Norm Unit/MT\",\r\n" + //
-                "                        \"Norm Unit/MT\",\r\n" + //
-                "                        \"Norm Unit/MT\",\r\n" + //
-                "                        \"Cost Rs/MT\",\r\n" + //
-                "                        \"Cost Rs/MT\",\r\n" + //
-                "                        \"Cost Rs/MT\"\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \" \",\r\n" + //
-                "                        \" \",\r\n" + //
-                "                        \" \",\r\n" + //
-                "                        \"Price\",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + year + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + year + "\r\n" + //
-                "\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \"Sr No\",\r\n" + //
-                "                        \"By Product Name\",\r\n" + //
-                "                        \"Unit\",\r\n" + //
-                "                        \"Rs/MT\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"Price\",\r\n" + //
-                "                        \"Norm Unit/MT\",\r\n" + //
-                "                        \"Norm Unit/MT\",\r\n" + //
-                "                        \"Norm Unit/MT\",\r\n" + //
-                "                        \"Cost Rs/MT\",\r\n" + //
-                "                        \"Cost Rs/MT\",\r\n" + //
-                "                        \"Cost Rs/MT\"\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \" \",\r\n" + //
-                "                        \" \",\r\n" + //
-                "                        \" \",\r\n" + //
-                "                        \"Price\",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + year + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + year + "\r\n" + //
-                "\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \"Sr No\",\r\n" + //
-                "                        \"Raw Material Name\",\r\n" + //
-                "                        \"Unit\",\r\n" + //
-                "                        \"Rs/MT\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"Price\",\r\n" + //
-                "                        \"Norm Unit/MT\",\r\n" + //
-                "                        \"Norm Unit/MT\",\r\n" + //
-                "                        \"Norm Unit/MT\",\r\n" + //
-                "                        \"Cost Rs/MT\",\r\n" + //
-                "                        \"Cost Rs/MT\",\r\n" + //
-                "                        \"Cost Rs/MT\"\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \" \",\r\n" + //
-                "                        \" \",\r\n" + //
-                "                        \" \",\r\n" + //
-                "                        \"Price\",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + year + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + year + "\r\n" + //
-                "\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \"Sr No\",\r\n" + //
-                "                        \"Catalyst Name\",\r\n" + //
-                "                        \"Unit\",\r\n" + //
-                "                        \"Rs/MT\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"Price\",\r\n" + //
-                "                        \"Norm Unit/MT\",\r\n" + //
-                "                        \"Norm Unit/MT\",\r\n" + //
-                "                        \"Norm Unit/MT\",\r\n" + //
-                "                        \"Cost Rs/MT\",\r\n" + //
-                "                        \"Cost Rs/MT\",\r\n" + //
-                "                        \"Cost Rs/MT\"\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \" \",\r\n" + //
-                "                        \" \",\r\n" + //
-                "                        \" \",\r\n" + //
-                "                        \"Price\",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + year + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + year + "\r\n" + //
-                "\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \"Sr No\",\r\n" + //
-                "                        \"By Utility Name\",\r\n" + //
-                "                        \"Unit\",\r\n" + //
-                "                        \"Rs/MT\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + year + "\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \"Sr No\",\r\n" + //
-                "                        \"Other Cost\",\r\n" + //
-                "                        \"Unit\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            },\r\n" + //
-                "            {\r\n" + //
-                "                \"startRow\": 8,\r\n" + //
-                "                \"headers\": [\r\n" + //
-                "                    [\r\n" + //
-                "                        \"\",\r\n" + //
-                "                        \"\",\r\n" + //
-                // " \"\",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + previousYear + ",\r\n" + //
-                "                        " + year + "\r\n" + //
-                "                    ],\r\n" + //
-                "                    [\r\n" + //
-                "                        \"Sr No\",\r\n" + //
-                "                        \"Production cost Calculation\",\r\n" + //
-                // " \"Unit\",\r\n" + //
-                "                        \"Budget\",\r\n" + //
-                "                        \"Actual\",\r\n" + //
-                "                        \"Budget\"\r\n" + //
-                "                    ]\r\n" + //
-                "                ],\r\n" + //
-                "                \"rows\": [],\r\n" + //
-                "                \"styles\": {\r\n" + //
-                "                    \"boldColumns\": [\r\n" + //
-                "                        0\r\n" + //
-                "                    ],\r\n" + //
-                "                    \"borders\": true\r\n" + //
-                "                },\r\n" + //
-                "                \"autoMerge\": {\r\n" + //
-                "                    \"columns\": [],\r\n" + //
-                "                    \"rows\": []\r\n" + //
-                "                }\r\n" + //
-                "            }\r\n" + //
-                "            \r\n" + //
-                "        ]\r\n" + //
-                "    }\r\n" + //
-                "}";
+                        "                ,                        \"Total\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            } \r\n" + //
+                        "                        ] \r\n" + //
+                        "                    }, \r\n" + //
+                        "                     \"Turn Around Report\": { \r\n" + //
+                        "                        \"tables\": [ \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"Turn Around Period\", \r\n" + //
+                        "                                        \"Turn Around Period\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\" \r\n" + //
+                        "                                         \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"serial No\", \r\n" + //
+                        "                                        \"Activities\", \r\n" + //
+                        "                                        \"From\", \r\n" + //
+                        "                                        \"To\", \r\n" + //
+                        "                                        \"Duration in Hrs\", \r\n" + //
+                        "                                        \"Remark\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"Turn Around Period\", \r\n" + //
+                        "                                        \"Turn Around Period\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\" \r\n" + //
+                        "                                         \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"serial No\", \r\n" + //
+                        "                                        \"Activities\", \r\n" + //
+                        "                                        \"From\", \r\n" + //
+                        "                                        \"To\", \r\n" + //
+                        "                                        \"Duration in Hrs\", \r\n" + //
+                        "                                        \"Remark\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            } \r\n" + //
+                        "                 \r\n" + //
+                        "                        ] \r\n" + //
+                        "                    }, \r\n" + //
+                        "                     \"Annual Production Plan\": { \r\n" + //
+                        "                        \"tables\": [ \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"Sr. No.\", \r\n" + //
+                        "                                        \"Assumptions and remarks\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"SrNo\", \r\n" + //
+                        "                                        \"Max hourly rate achived\", \r\n" + //
+                        "                                        \"Value\", \r\n" + //
+                        "                                        \"UOM\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"SrNo\", \r\n" + //
+                        "                                        \"Calculation of operating hours\", \r\n" + //
+                        "                                        \"Value\", \r\n" + //
+                        "                                        \"Hours\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"SrNo\", \r\n" + //
+                        "                                        \"Throughput limiting causes\", \r\n" + //
+                        "                                        \"Achivable hourly rate\", \r\n" + //
+                        "                                        \"Op. Hrs.\", \r\n" + //
+                        "                                        \"Period from\", \r\n" + //
+                        "                                        \"Period to\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        previous3Year + ","+
+                        previous3Year +","+
+                        previous2Year +","+
+                        previous2Year +","+
+                        previousYear +","+
+                        previousYear +","+
+                        year +
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"SrNo\", \r\n" + //
+                        "                                        \"Item\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            } \r\n" + //
+                        "                        ] \r\n" + //
+                        "                    }, \r\n" + //
+                        "                     \r\n" + //
+                        "                     \"Plant Contribution\": { \r\n" + //
+                        "                        \"tables\": [ \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"Price\", \r\n" + //
+                        "                                        \"Production, MT\", \r\n" + //
+                        "                                        \"Production, MT\", \r\n" + //
+                        "                                        \"Production, MT\" \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                    \" \", \r\n" + //
+                        "                                    \" \", \r\n" + //
+                        "                                    \" \", \r\n" + //
+                        "                                    \"Price\", \r\n" + //
+                        previousYear +","+
+                        previousYear +","+
+                        "                                     "+year +  "\r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"SL No\", \r\n" + //
+                        "                                        \"Product Name\", \r\n" + //
+                        "                                        \"Unit\", \r\n" + //
+                        "                                        \"Rs/MT\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                     \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"Price\", \r\n" + //
+                        "                                        \"Norm Unit/MT\", \r\n" + //
+                        "                                        \"Norm Unit/MT\", \r\n" + //
+                        "                                        \"Norm Unit/MT\", \r\n" + //
+                        "                                        \"Cost Rs/MT\", \r\n" + //
+                        "                                        \"Cost Rs/MT\", \r\n" + //
+                        "                                        \"Cost Rs/MT\" \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \" \", \r\n" + //
+                        "                                        \" \", \r\n" + //
+                        "                                        \" \", \r\n" + //
+                        "                                        \"Price\", \r\n" + //
+                        previousYear +","+
+                        previousYear +","+
+                        year +","+
+                        previousYear +","+
+                        previousYear +","+
+                        year +
+                        "                 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"Sr No\", \r\n" + //
+                        "                                        \"By Product Name\", \r\n" + //
+                        "                                        \"Unit\", \r\n" + //
+                        "                                        \"Rs/MT\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"Price\", \r\n" + //
+                        "                                        \"Norm Unit/MT\", \r\n" + //
+                        "                                        \"Norm Unit/MT\", \r\n" + //
+                        "                                        \"Norm Unit/MT\", \r\n" + //
+                        "                                        \"Cost Rs/MT\", \r\n" + //
+                        "                                        \"Cost Rs/MT\", \r\n" + //
+                        "                                        \"Cost Rs/MT\" \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \" \", \r\n" + //
+                        "                                        \" \", \r\n" + //
+                        "                                        \" \", \r\n" + //
+                        "                                        \"Price\", \r\n" + //
+                        previousYear +","+
+                        previousYear +","+
+                        year +","+
+                        previousYear +","+
+                        previousYear +","+
+                        year +
+                        "                 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"Sr No\", \r\n" + //
+                        "                                        \"Raw Material Name\", \r\n" + //
+                        "                                        \"Unit\", \r\n" + //
+                        "                                        \"Rs/MT\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"Price\", \r\n" + //
+                        "                                        \"Norm Unit/MT\", \r\n" + //
+                        "                                        \"Norm Unit/MT\", \r\n" + //
+                        "                                        \"Norm Unit/MT\", \r\n" + //
+                        "                                        \"Cost Rs/MT\", \r\n" + //
+                        "                                        \"Cost Rs/MT\", \r\n" + //
+                        "                                        \"Cost Rs/MT\" \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \" \", \r\n" + //
+                        "                                        \" \", \r\n" + //
+                        "                                        \" \", \r\n" + //
+                        "                                        \"Price\", \r\n" + //
+                        previousYear +","+
+                        previousYear +","+
+                        year +","+
+                        previousYear +","+
+                        previousYear +","+
+                        year +
+                        "                 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"Sr No\", \r\n" + //
+                        "                                        \"Catalyst Name\", \r\n" + //
+                        "                                        \"Unit\", \r\n" + //
+                        "                                        \"Rs/MT\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"Price\", \r\n" + //
+                        "                                        \"Norm Unit/MT\", \r\n" + //
+                        "                                        \"Norm Unit/MT\", \r\n" + //
+                        "                                        \"Norm Unit/MT\", \r\n" + //
+                        "                                        \"Cost Rs/MT\", \r\n" + //
+                        "                                        \"Cost Rs/MT\", \r\n" + //
+                        "                                        \"Cost Rs/MT\" \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \" \", \r\n" + //
+                        "                                        \" \", \r\n" + //
+                        "                                        \" \", \r\n" + //
+                        "                                        \"Price\", \r\n" + //
+                        previousYear +","+
+                        previousYear +","+
+                        year +","+
+                        previousYear +","+
+                        previousYear +","+
+                        year +
+                        "                 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"Sr No\", \r\n" + //
+                        "                                        \"By Utility Name\", \r\n" + //
+                        "                                        \"Unit\", \r\n" + //
+                        "                                        \"Rs/MT\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        previousYear +","+
+                        previousYear +","+
+                        year +
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"Sr No\", \r\n" + //
+                        "                                        \"Other Cost\", \r\n" + //
+                        "                                        \"Unit\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            }, \r\n" + //
+                        "                            { \r\n" + //
+                        "                                \"startRow\": 8, \r\n" + //
+                        "                                \"headers\": [ \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        "                                        \"\", \r\n" + //
+                        //"                  \"\", \r\n" + //
+                        previousYear +","+
+                        previousYear +","+
+                        year +
+                        "                                    ], \r\n" + //
+                        "                                    [ \r\n" + //
+                        "                                        \"Sr No\", \r\n" + //
+                        "                                        \"Production cost Calculation\", \r\n" + //
+                        //"                  \"Unit\", \r\n" + //
+                        "                                        \"Budget\", \r\n" + //
+                        "                                        \"Actual\", \r\n" + //
+                        "                                        \"Budget\" \r\n" + //
+                        "                                    ] \r\n" + //
+                        "                                ], \r\n" + //
+                        "                                \"rows\": [], \r\n" + //
+                        "                                \"styles\": { \r\n" + //
+                        "                                    \"boldColumns\": [ \r\n" + //
+                        "                                        0 \r\n" + //
+                        "                                    ], \r\n" + //
+                        "                                    \"borders\": true \r\n" + //
+                        "                                }, \r\n" + //
+                        "                                \"autoMerge\": { \r\n" + //
+                        "                                    \"columns\": [], \r\n" + //
+                        "                                    \"rows\": [] \r\n" + //
+                        "                                } \r\n" + //
+                        "                            } \r\n" + //
+                        "                             \r\n" + //
+                        "                        ] \r\n" + //
+                        "                    } \r\n" + //
+                        "                }";
     }
 }
