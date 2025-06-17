@@ -28,12 +28,11 @@ Email becomes a first-class component of case management—alongside tasks, comm
 ![Screenshot of an email being written and sent to a predefined email address](https://wkspower.com/hs-fs/hubfs/1-sending-email.png?width=2458&height=1412&name=1-sending-email.png)
 2. A **custom email consumer service** (external to WKS) monitors this mailbox
 3. The email consumer sends a request to the **WKS REST API** via the **HCP (Hybrid Cloud Platform)** layer
-[PRINTSCREEN]
 4. A **Camunda internal process** is triggered to:
    - Identify the intent (create new or update existing case)
    - Create or log the email appropriately
    - Optionally start or continue a case process
-
+![Gif showing the created case](https://wkspower.com/hs-fs/hubfs/Reviewing.gif?width=3008&height=1536&name=Reviewing.gif)
 > 🛠 WKS does **not provide** out-of-the-box email consumers. You must build your own using tools like Microsoft Power Automate, Java, or Node.js, depending on your email provider.
 
 ### Example Address Structure
