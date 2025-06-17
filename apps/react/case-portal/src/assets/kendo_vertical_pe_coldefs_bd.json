@@ -26,7 +26,8 @@
     "editable": true,
     "width": 120,
     "rightAlign": true,
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "may",
@@ -34,7 +35,8 @@
     "editable": true,
     "width": 120,
     "rightAlign": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "june",
@@ -42,7 +44,8 @@
     "editable": true,
     "width": 120,
     "rightAlign": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "july",
@@ -50,7 +53,8 @@
     "editable": true,
     "width": 120,
     "rightAlign": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "aug",
@@ -58,7 +62,8 @@
     "editable": true,
     "width": 120,
     "rightAlign": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "sep",
@@ -66,7 +71,8 @@
     "editable": true,
     "width": 120,
     "rightAlign": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "oct",
@@ -74,7 +80,8 @@
     "editable": true,
     "width": 120,
     "rightAlign": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "nov",
@@ -82,7 +89,8 @@
     "editable": true,
     "width": 120,
     "rightAlign": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "dec",
@@ -90,7 +98,8 @@
     "editable": true,
     "width": 120,
     "rightAlign": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "jan",
@@ -98,7 +107,8 @@
     "editable": true,
     "width": 120,
     "rightAlign": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "feb",
@@ -106,7 +116,8 @@
     "editable": true,
     "width": 120,
     "rightAlign": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "march",
@@ -114,7 +125,8 @@
     "editable": true,
     "width": 120,
     "rightAlign": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "remark",

@@ -260,16 +260,16 @@ const UserAccessForm = ({ keycloak }) => {
 
   // Default screen options if API hasn’t returned for this vertical yet
   const screenOptions = [
-    'product-demand',
-    'product-mcu-val',
+    'business-demand',
+    'production-volume-data',
     'shutdown-plan',
     'slowdown-plan',
     'maintenance-details',
-    'production-norms',
-    'catalyst-selectivity',
+    'production-aop',
+    'configuration',
     'normal-op-norms',
     'shutdown-norms',
-    'consumption-norms',
+    'consumption-aop',
     'feed-stock',
   ]
 

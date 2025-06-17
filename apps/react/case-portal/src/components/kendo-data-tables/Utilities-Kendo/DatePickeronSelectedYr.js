@@ -59,12 +59,13 @@ const DateTimePickerEditor = ({ dataItem, field, onChange }) => {
         value={currentDate}
         min={dynamicMin}
         max={dynamicMax}
-        format='dd-MM-yyyy hh:mm:ss a'
+        format='dd-MM-yyyy hh:mm a'
         onChange={handleChange}
         width='100%'
         size='small'
         autoFill
         enableMouseWheel={false}
+        steps={{ hour: 1, minute: 1, second: 0 }}
       />
     </td>
   )

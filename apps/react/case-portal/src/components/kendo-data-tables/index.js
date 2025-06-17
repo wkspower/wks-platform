@@ -74,6 +74,7 @@ export const hiddenFields = []
 
 const KendoDataTables = ({
   rows = [],
+
   allRedCell = [],
   modifiedCells = [],
   setRows,
@@ -105,6 +106,7 @@ const KendoDataTables = ({
   selectMode,
   setSelectMode = () => {},
   handleExcelUpload = () => {},
+  downloadExcelForConfiguration = () => {},
 }) => {
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
@@ -338,14 +340,27 @@ const KendoDataTables = ({
 
     const rawValue = dataItem[field]
     const displayText = truncateRemarks(rawValue)
-    // const editable = Boolean(dataItem.isEditable)
+
+    // Tooltip and color logic
+    const value = dataItem[field]
+    const month = monthMap?.[field?.toLowerCase()]
+    const normId = dataItem.materialFkId
+
+    const isRedFromAllRedCell = allRedCell?.some(
+      (cell) =>
+        cell.month === month &&
+        cell.normParameterFKId?.toLowerCase() === normId?.toLowerCase(),
+    )
+
+    const isRed = isRedFromAllRedCell
 
     return (
       <td
         {...tdProps}
+        title={rawValue || 'Click to add remark'}
         style={{
           cursor: 'pointer',
-          color: rawValue ? 'inherit' : 'gray',
+          color: isRed ? 'orange' : rawValue ? 'inherit' : 'gray',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
@@ -359,6 +374,7 @@ const KendoDataTables = ({
       </td>
     )
   }
+
   const isColumnActive = (field, filter, sort) => {
     return (
       isColumnMenuFilterActive(field, filter) ||
@@ -445,6 +461,46 @@ const KendoDataTables = ({
     handleExcelUpload(file)
   }
 
+  const DurationDisplayWithTooltipCell = (props) => {
+    const value = props.dataItem[props.field]
+
+    // Format value to HH:MM
+    let display = value
+    if (value && !isNaN(value)) {
+      const [hoursStr, minsStr = '0'] = value.toString().split('.')
+      const hours = parseInt(hoursStr, 10)
+      const mins = parseInt(minsStr.padEnd(2, '0'), 10)
+
+      display = `${hours.toString().padStart(2, '0')}:${mins
+        .toString()
+        .padStart(2, '0')}`
+    }
+
+    // Tooltip and conditional color logic
+    const month = monthMap[props.field?.toLowerCase()]
+    const normId = props.dataItem.materialFkId
+
+    const isRedFromAllRedCell = allRedCell.some(
+      (cell) =>
+        cell.month === month &&
+        cell.normParameterFKId?.toLowerCase() === normId?.toLowerCase(),
+    )
+
+    const isRed = isRedFromAllRedCell
+
+    return (
+      <td
+        {...props.tdProps}
+        title={display}
+        style={{
+          color: isRed ? 'orange' : undefined,
+        }}
+      >
+        {display}
+      </td>
+    )
+  }
+
   return (
     <div style={{ position: 'relative' }}>
       {loading && (
@@ -511,7 +567,7 @@ const KendoDataTables = ({
                 <Button
                   variant='outlined'
                   size='large'
-                  onClick={saveModalOpen}
+                  onClick={downloadExcelForConfiguration}
                   disabled={isButtonDisabled}
                 >
                   <DownloadIcon fontSize='small' />
@@ -700,7 +756,7 @@ const KendoDataTables = ({
                       data: toolTipRenderer,
                     }}
                     columnMenu={ColumnMenuCheckboxFilter}
-                    format='{0:dd-MM-yyyy hh:mm:ss a}'
+                    format='{0:dd-MM-yyyy hh:mm a}'
                     editor='date'
                     hidden={col.hidden}
                   />
@@ -829,7 +885,7 @@ const KendoDataTables = ({
                     }
                     cells={{
                       edit: { text: DurationEditor },
-                      data: toolTipRenderer,
+                      data: DurationDisplayWithTooltipCell,
                     }}
                   />
                 )

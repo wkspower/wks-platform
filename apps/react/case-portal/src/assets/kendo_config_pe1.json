@@ -14,8 +14,19 @@
     "width": 160,
     "valueGetter": "defaultValueGetter",
     "valueFormatter": "productDisplayNameFormatter",
+    "renderEditCell": "renderNormParameterSelectCell",
+    "hidden": true
+  },
+  {
+    "field": "productName",
+    "title": "Particulars",
+    "editable": false,
+    "width": 160,
+    "valueGetter": "defaultValueGetter",
+    "valueFormatter": "productDisplayNameFormatter",
     "renderEditCell": "renderNormParameterSelectCell"
   },
+
   {
     "field": "UOM",
     "title": "UOM",

@@ -491,35 +491,33 @@ const NormalOpNormsScreen = () => {
   }
 
   const saveChanges = React.useCallback(async () => {
-    setTimeout(() => {
-      try {
-        var data = Object.values(modifiedCells)
-        if (data.length == 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          return
-        }
-
-        const requiredFields = ['materialFkId', 'remarks']
-        const validationMessage = validateFields(data, requiredFields)
-        if (validationMessage) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: validationMessage,
-            severity: 'error',
-          })
-          return
-        }
-
-        saveNormalOperationNormsData(data)
-      } catch (error) {
-        /* empty */
-        console.log(error)
+    try {
+      var data = Object.values(modifiedCells)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
       }
-    }, 400)
+
+      const requiredFields = ['materialFkId', 'remarks']
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        return
+      }
+
+      saveNormalOperationNormsData(data)
+    } catch (error) {
+      /* empty */
+      console.log(error)
+    }
   }, [modifiedCells])
 
   const saveNormalOperationNormsData = async (newRows) => {

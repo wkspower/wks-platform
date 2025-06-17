@@ -67,7 +67,7 @@ const planCracker = {
       icon: icons.IconArchive,
       children: [
         {
-          id: 'product-demand',
+          id: 'business-demand',
           title: i18n.t('menu.productDemand'),
           type: 'item',
           url: '/production-norms-plan/business-demand',
@@ -108,7 +108,7 @@ const planCracker = {
         },
 
         {
-          id: 'production-norms',
+          id: 'production-aop',
           title: i18n.t('menu.productionNorms'),
           type: 'item',
           url: '/production-norms-plan/production-aop',

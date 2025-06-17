@@ -66,12 +66,16 @@ const NavItem = ({ item, level }) => {
       .toString()
       .split('/')
       .findIndex((id) => id === item.id)
+
     if (currentIndex > -1) {
       dispatch(activeItem({ openItem: [item.id] }))
     }
   }, [])
+
   useEffect(() => {
     // runs on every URL change
+
+
     if (location.pathname.split('/').includes(item.id)) {
       dispatch(activeItem({ openItem: [item.id] }))
     }

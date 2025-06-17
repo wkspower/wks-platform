@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
+import {
+  Backdrop,
+  CircularProgress,
+} from '../../../node_modules/@mui/material/index'
 import SelectivityData from './SelectivityData'
 // import CrackerConfig from './KendoConfigCracker'
 
@@ -12,13 +16,13 @@ const ConfigurationTable = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
-  // const isOldYear = oldYear?.oldYear
+  const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
 
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [tabIndex, setTabIndex] = useState(0)
   const [loading, setLoading] = useState(false)
-  // const [rows, setRows] = useState([])
+
   const [startUpRows, setStartUpRows] = useState([])
   const [otherLossRows, setOtherLossRows] = useState([])
   const [shutdownNormsRows, setShutdownRows] = useState([])
@@ -29,6 +33,7 @@ const ConfigurationTable = () => {
   const [discontiniousGradeData, setDiscontiniousGradeData] = useState([])
   const [tabs, setTabs] = useState([])
   const [availableTabs, setAvailableTabs] = useState([])
+  const [summary, setSummary] = useState('')
 
   const fetchData = async () => {
     // setRows([])
@@ -36,10 +41,10 @@ const ConfigurationTable = () => {
     setProductionRowsConstants([])
     setLoading(true)
     try {
+      setLoading(true)
       var data = await DataService.getCatalystSelectivityData(keycloak)
 
       if (lowerVertName == 'meg') {
-        setLoading(true)
         // data = data.sort((a, b) => b.normType.localeCompare(a.normType))
 
         const formattedData = data.map((item, index) => ({
@@ -53,6 +58,10 @@ const ConfigurationTable = () => {
         // console.log(formattedData)
 
         setProductionRows(formattedData)
+
+        if (data) {
+          setLoading(false)
+        }
 
         // setRows(formattedData)
       } else {
@@ -112,23 +121,18 @@ const ConfigurationTable = () => {
   }
 
   const fetchDataConstants = async () => {
-    // setRows([])
-
     setProductionRowsConstants([])
-    setLoading(true)
     try {
       var constantsRes =
         await DataService.getCatalystSelectivityDataConstants(keycloak)
 
       if (constantsRes?.code != 200) {
         setProductionRowsConstants([])
-        setLoading(false)
+
         return
       }
 
       var data = constantsRes?.data
-
-      setLoading(true)
 
       const formattedData = data.map((item, index) => ({
         ...item,
@@ -141,11 +145,8 @@ const ConfigurationTable = () => {
       }))
 
       setProductionRowsConstants(formattedData)
-
-      setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)
-      setLoading(false)
     }
   }
 
@@ -168,11 +169,9 @@ const ConfigurationTable = () => {
         // ])
         setTabs([])
       }
-      setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)
       setTabs([])
-      setLoading(false)
     }
   }
 
@@ -186,11 +185,9 @@ const ConfigurationTable = () => {
       } else {
         setAvailableTabs([])
       }
-      setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)
       setAvailableTabs([])
-      setLoading(false)
     }
   }
 
@@ -209,173 +206,191 @@ const ConfigurationTable = () => {
     const megTabs = ['Configuration', 'Constants']
 
     return (
-      <Box>
-        <Tabs
-          value={tabIndex}
-          onChange={(e, newIndex) => setTabIndex(newIndex)}
-          sx={{
-            borderBottom: '0px solid #ccc',
-            '.MuiTabs-indicator': { display: 'none' },
-            margin: '0px 0px 10px 0px',
-          }}
-          textColor='primary'
-          indicatorColor='primary'
+      <div>
+        <Backdrop
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={!!loading}
         >
-          {megTabs.map((tab) => (
-            <Tab
-              key={tab}
-              label={tab}
-              sx={{
-                border: '1px solid #ADD8E6',
-                borderBottom: '1px solid #ADD8E6',
-              }}
-            />
-          ))}
-        </Tabs>
+          <CircularProgress color='inherit' />
+        </Backdrop>
 
-        {(() => {
-          const currentTab = megTabs[tabIndex]?.toLowerCase()
-          switch (currentTab) {
-            case 'configuration':
-              return (
-                <SelectivityData
-                  rows={productionRows}
-                  loading={loading}
-                  fetchData={fetchData}
-                  setRows={setProductionRows}
-                  configType='meg'
-                  groupBy='Particulars'
-                />
-              )
-            case 'constants':
-              return (
-                <SelectivityData
-                  rows={productionRowsConstants}
-                  loading={loading}
-                  fetchData={fetchDataConstants}
-                  setRows={setProductionRowsConstants}
-                  configType='megConstants'
-                  groupBy='Particulars'
-                />
-              )
-            default:
-              return null
-          }
-        })()}
-      </Box>
+        <Box>
+          <Tabs
+            value={tabIndex}
+            onChange={(e, newIndex) => setTabIndex(newIndex)}
+            sx={{
+              borderBottom: '0px solid #ccc',
+              '.MuiTabs-indicator': { display: 'none' },
+              margin: '0px 0px 10px 0px',
+            }}
+            textColor='primary'
+            indicatorColor='primary'
+          >
+            {megTabs.map((tab) => (
+              <Tab
+                key={tab}
+                label={tab}
+                sx={{
+                  border: '1px solid #ADD8E6',
+                  borderBottom: '1px solid #ADD8E6',
+                }}
+              />
+            ))}
+          </Tabs>
+
+          {(() => {
+            const currentTab = megTabs[tabIndex]?.toLowerCase()
+            switch (currentTab) {
+              case 'configuration':
+                return (
+                  <SelectivityData
+                    rows={productionRows}
+                    loading={loading}
+                    fetchData={fetchData}
+                    setRows={setProductionRows}
+                    configType='meg'
+                    groupBy='Particulars'
+                  />
+                )
+              case 'constants':
+                return (
+                  <SelectivityData
+                    rows={productionRowsConstants}
+                    loading={loading}
+                    fetchData={fetchDataConstants}
+                    setRows={setProductionRowsConstants}
+                    configType='megConstants'
+                    groupBy='Particulars'
+                  />
+                )
+              default:
+                return null
+            }
+          })()}
+        </Box>
+      </div>
     )
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '5px',
-        marginTop: '20px',
-      }}
-    >
-      <Tabs
-        sx={{
-          borderBottom: '0px solid #ccc',
-          '.MuiTabs-indicator': { display: 'none' },
-          margin: '-35px 0px -8px 0%',
-        }}
-        textColor='primary'
-        indicatorColor='primary'
-        value={tabIndex}
-        onChange={(e, newIndex) => setTabIndex(newIndex)}
+    <div>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={!!loading}
       >
-        {tabs.map((tabId) => {
-          const tabInfo = availableTabs.find(
-            (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
-          )
-          return (
-            <Tab
-              key={tabId}
-              sx={{
-                border: '1px solid #ADD8E6',
-                borderBottom: '1px solid #ADD8E6',
-              }}
-              label={tabInfo?.displayName || 'N/A'}
-            />
-          )
-        })}
-      </Tabs>
+        <CircularProgress color='inherit' />
+      </Backdrop>
 
-      <Box>
-        {(() => {
-          const currentTabId = tabs[tabIndex]?.toLowerCase()
-          switch (currentTabId) {
-            // case 'ac3c9ad7-82b5-4550-b04d-fed0f1fb4908': // StartupLosses
-            case getTheId('StartupLosses'):
-              return (
-                <SelectivityData
-                  rows={startUpRows}
-                  loading={loading}
-                  fetchData={fetchData}
-                  setRows={setStartUpRows}
-                  configType='StartupLosses'
-                  groupBy='TypeDisplayName'
-                />
-              )
-            case getTheId('Otherlosses'): // Otherlosses
-              return (
-                <SelectivityData
-                  rows={otherLossRows}
-                  loading={loading}
-                  fetchData={fetchData}
-                  setRows={setOtherLossRows}
-                  configType='Otherlosses'
-                  groupBy='TypeDisplayName'
-                />
-              )
-            case getTheId('ShutdownNorms'): // ShutdownNorms
-              return (
-                <SelectivityData
-                  rows={shutdownNormsRows}
-                  loading={loading}
-                  setRows={setShutdownRows}
-                  fetchData={fetchData}
-                  configType='ShutdownNorms'
-                  groupBy='TypeDisplayName'
-                  // groupBy2='ConfigTypeDisplayName'
-                />
-              )
-            case getTheId('Receipe'): // Receipe
-              return (
-                <SelectivityData
-                  rows={gradeData}
-                  loading={loading}
-                  setRows={setGradeData}
-                  configType='grades'
-                />
-              )
-            case getTheId('ContineGradeChange'): // ContineGradeChange
-              return (
-                <SelectivityData
-                  rows={continiousGradeData}
-                  loading={loading}
-                  setRows={setContiniousGradeData}
-                  fetchData={fetchData}
-                  configType='ContineGradeChange'
-                />
-              )
-            case getTheId('DisContineGradeChange'): // DisContineGradeChange
-              return (
-                <SelectivityData
-                  rows={discontiniousGradeData}
-                  loading={loading}
-                  setRows={setDiscontiniousGradeData}
-                  fetchData={fetchData}
-                  configType='DisContineGradeChange'
-                />
-              )
-            default:
-              return null
-          }
-        })()}
-      </Box>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '5px',
+          marginTop: '20px',
+        }}
+      >
+        <Tabs
+          sx={{
+            borderBottom: '0px solid #ccc',
+            '.MuiTabs-indicator': { display: 'none' },
+            margin: '-35px 0px -8px 0%',
+          }}
+          textColor='primary'
+          indicatorColor='primary'
+          value={tabIndex}
+          onChange={(e, newIndex) => setTabIndex(newIndex)}
+        >
+          {tabs.map((tabId) => {
+            const tabInfo = availableTabs.find(
+              (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
+            )
+            return (
+              <Tab
+                key={tabId}
+                sx={{
+                  border: '1px solid #ADD8E6',
+                  borderBottom: '1px solid #ADD8E6',
+                }}
+                label={tabInfo?.displayName || 'N/A'}
+              />
+            )
+          })}
+        </Tabs>
+
+        <Box>
+          {(() => {
+            const currentTabId = tabs[tabIndex]?.toLowerCase()
+            switch (currentTabId) {
+              // case 'ac3c9ad7-82b5-4550-b04d-fed0f1fb4908': // StartupLosses
+              case getTheId('StartupLosses'):
+                return (
+                  <SelectivityData
+                    rows={startUpRows}
+                    loading={loading}
+                    fetchData={fetchData}
+                    setRows={setStartUpRows}
+                    configType='StartupLosses'
+                    groupBy='TypeDisplayName'
+                  />
+                )
+              case getTheId('Otherlosses'): // Otherlosses
+                return (
+                  <SelectivityData
+                    rows={otherLossRows}
+                    loading={loading}
+                    fetchData={fetchData}
+                    setRows={setOtherLossRows}
+                    configType='Otherlosses'
+                    groupBy='TypeDisplayName'
+                  />
+                )
+              case getTheId('ShutdownNorms'): // ShutdownNorms
+                return (
+                  <SelectivityData
+                    rows={shutdownNormsRows}
+                    loading={loading}
+                    setRows={setShutdownRows}
+                    fetchData={fetchData}
+                    configType='ShutdownNorms'
+                    groupBy='TypeDisplayName'
+                    // groupBy2='ConfigTypeDisplayName'
+                  />
+                )
+              case getTheId('Receipe'): // Receipe
+                return (
+                  <SelectivityData
+                    rows={gradeData}
+                    loading={loading}
+                    setRows={setGradeData}
+                    configType='grades'
+                  />
+                )
+              case getTheId('ContineGradeChange'): // ContineGradeChange
+                return (
+                  <SelectivityData
+                    rows={continiousGradeData}
+                    loading={loading}
+                    setRows={setContiniousGradeData}
+                    fetchData={fetchData}
+                    configType='ContineGradeChange'
+                  />
+                )
+              case getTheId('DisContineGradeChange'): // DisContineGradeChange
+                return (
+                  <SelectivityData
+                    rows={discontiniousGradeData}
+                    loading={loading}
+                    setRows={setDiscontiniousGradeData}
+                    fetchData={fetchData}
+                    configType='DisContineGradeChange'
+                  />
+                )
+              default:
+                return null
+            }
+          })()}
+        </Box>
+      </div>
     </div>
   )
 }

@@ -580,6 +580,8 @@ const ShutDown = ({ permissions }) => {
           severity: 'success',
         })
         fetchData()
+        const maintenanceResponse =
+          await DataService.getMaintenanceData(keycloak)
       }
     } catch (error) {
       console.error('Error deleting Record', error)

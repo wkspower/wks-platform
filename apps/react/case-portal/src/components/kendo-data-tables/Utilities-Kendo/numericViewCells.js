@@ -6,8 +6,8 @@ export const DurationEditor = (props) => {
 
   const handleChange = (e) => {
     const v = e.target.value
-
-    if (/^(\d{0,2})?(\.\d{0,2})?$/.test(v)) {
+    if (/^(\d+)?(\.\d{0,2})?$/.test(v)) {
+      // if (/^(\d{0,2})?(\.\d{0,2})?$/.test(v)) {
       const parts = v.split('.')
       if (parts.length === 2) {
         const mins = parseInt(parts[1].padEnd(2, '0'), 10)

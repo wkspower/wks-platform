@@ -39,52 +39,6 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     severity: 'info',
   })
 
-  function getRoleName(verticalId, screenId) {
-    const roleMapping = {
-      '5CC84A47-9717-4142-8E66-B60EBE0CF703': {
-        'product-demand': 'CTS Engineer',
-        'product-mcu-val': 'Plant Manager',
-
-        'shutdown-plan': 'Maintenance Engineer',
-        'slowdown-plan': 'Maintenance Engineer',
-        'maintenance-details': 'Maintenance Engineer',
-
-        'production-norms': 'Plant Manager',
-        'catalyst-selectivity': 'CTS Engineer',
-        'normal-op-norms': 'Plant Manager',
-        'shutdown-norms': 'Maintenance Engineer',
-        'slowdown-norms': 'Maintenance Engineer',
-        'consumption-norms': 'Plant Manager',
-        'feed-stock': 'Plant Manager',
-        workflow: 'Plant Manager',
-        'aop-annual-cost-report': 'Plant Manager',
-      },
-      'BF5D7508-96EB-496E-BEB0-4828CB1A1B11': {
-        'product-demand': 'CTS Engineer',
-        'product-mcu-val': 'Plant Manager',
-
-        'shutdown-plan': 'Maintenance Engineer',
-        'slowdown-plan': 'Maintenance Engineer',
-        'maintenance-details': 'Maintenance Engineer',
-
-        'production-norms': 'Plant Manager',
-        'catalyst-selectivity': 'CTS Engineer',
-        'normal-op-norms': 'Plant Manager',
-        'shutdown-norms': 'Maintenance Engineer',
-        'slowdown-norms': 'Maintenance Engineer',
-        'consumption-norms': 'Plant Manager',
-
-        workflow: 'Plant Manager',
-        'aop-annual-cost-report': 'Plant Manager',
-      },
-    }
-
-    const verticalRoleMap = roleMapping[verticalId]
-    return verticalRoleMap?.[screenId]
-      ? `Role : ${verticalRoleMap[screenId]}`
-      : ' '
-  }
-
   async function handleOpenPdf(title) {
     const url = `${Config.StorageUrl}/storage/files/${vertName}/${siteName}/${plantName}/downloads/${title}.pdf?content-type=application/pdf`
     const headers = {
@@ -117,7 +71,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   async function handleOpenPdfTemp(title) {
     // console.log('titletitle', title)
     var url = ''
-    if (title != 'production-norms')
+    if (title != 'production-aop')
       url = `${window.location.origin}/files/DTC.xlsx`
     else {
       url = `${window.location.origin}/files/Blue Print.docx`

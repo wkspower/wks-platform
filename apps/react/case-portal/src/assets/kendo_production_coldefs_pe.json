@@ -1,13 +1,15 @@
 [
   {
     "field": "idFromApi",
-    "title": "ID"
+    "title": "ID",
+    "hidden": true
   },
   {
     "field": "aopCaseId",
     "title": "Case ID",
     "width": 120,
-    "editable": false
+    "editable": false,
+    "hidden": true
   },
   {
     "field": "normParametersFKId",
@@ -27,103 +29,128 @@
   {
     "field": "april",
     "title": "4",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "may",
     "title": "5",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "june",
     "title": "6",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "july",
     "title": "7",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "august",
     "title": "8",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "september",
     "title": "9",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "october",
     "title": "10",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "november",
     "title": "11",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "december",
     "title": "12",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "january",
     "title": "1",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "february",
     "title": "2",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "march",
     "title": "3",
-    "editable": false,
+    "editable": true,
     "width": 120,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "avgTph",
     "title": "AVG",
     "width": 150,
-    "editable": false
+    "editable": false,
+
+    "hidden": true
+  },
+  {
+    "field": "remarks",
+    "title": "Remark",
+    "editable": false,
+    "width": 180
+  },
+  {
+    "field": "isEditable",
+    "title": "isEditable",
+    "hidden": true
   }
 ]

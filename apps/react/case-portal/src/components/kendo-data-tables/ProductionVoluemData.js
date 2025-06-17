@@ -444,6 +444,7 @@ const ProductionvolumeData = ({ permissions }) => {
       align: 'left',
       headerAlign: 'left',
       format: '{0:#.###}',
+      type: 'number',
     },
     {
       field: 'may',
@@ -453,6 +454,7 @@ const ProductionvolumeData = ({ permissions }) => {
       align: 'left',
       headerAlign: 'left',
       format: '{0:#.###}',
+      type: 'number',
     },
     {
       field: 'june',
@@ -462,6 +464,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'july',
@@ -471,6 +474,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'august',
@@ -480,6 +484,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'september',
@@ -489,6 +494,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'october',
@@ -498,6 +504,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'november',
@@ -507,6 +514,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'december',
@@ -516,6 +524,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'january',
@@ -525,6 +534,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'february',
@@ -534,6 +544,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
     {
       field: 'march',
@@ -543,6 +554,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
       align: 'left',
       headerAlign: 'left',
+      type: 'number',
     },
 
     {

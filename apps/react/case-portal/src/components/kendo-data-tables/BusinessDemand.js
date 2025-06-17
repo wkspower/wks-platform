@@ -111,9 +111,7 @@ const BusinessDemand = ({ permissions }) => {
   }
 
   const colDefs = kendoGetEnhancedColDefs({
-    // allProducts,
     headerMap,
-    // handleRemarkCellClick,
   })
 
   const saveChanges = React.useCallback(async () => {
@@ -306,12 +304,12 @@ const BusinessDemand = ({ permissions }) => {
             <Box sx={{ width: '100%', margin: 0 }}>
               <ProductionvolumeData
                 permissions={{
-                  allAction: false,
+                  allAction: true,
                   showAction: false,
                   addButton: false,
                   deleteButton: false,
                   editButton: false,
-                  showUnit: false,
+                  showUnit: true,
                   saveWithRemark: false,
                   showCalculate: false,
                   saveBtn: false,

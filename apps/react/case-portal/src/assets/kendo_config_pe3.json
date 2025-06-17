@@ -14,14 +14,22 @@
   {
     "field": "normParameterFKId",
     "title": "Particulars",
-    "editable": false
+    "editable": false,
+    "hidden": true
+  },
+  {
+    "field": "productName",
+    "title": "Particulars",
+    "editable": false,
+    "hidden": true
   },
   {
     "field": "apr",
     "title": "Values",
     "editable": true,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "remarks",

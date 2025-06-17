@@ -2,7 +2,8 @@
   {
     "field": "Particulars",
     "title": "Type",
-    "editable": false
+    "editable": false,
+    "width": 200
   },
   {
     "field": "NormParametersId",
@@ -11,12 +12,14 @@
   {
     "field": "UOM",
     "title": "UOM / MT",
-    "editable": false
+    "editable": false,
+    "width": 200
   },
   {
     "field": "productName",
     "title": "Particulars",
-    "editable": false
+    "editable": false,
+    "width": 200
   },
   {
     "field": "april",

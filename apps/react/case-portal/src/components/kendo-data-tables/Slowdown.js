@@ -96,7 +96,12 @@ const SlowDown = ({ permissions }) => {
       const slowDownDetailsMEG = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
-        durationInHrs: parseFloat(findDuration('1', row)),
+        durationInHrs: (() => {
+          const v = findDuration('1', row)
+          if (!v) return null
+          const [h = '00', m = '00'] = String(v).split('.')
+          return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
+        })(),
         maintEndDateTime: addTimeOffset(row.maintEndDateTime),
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         remark: row.remark,
@@ -109,6 +114,8 @@ const SlowDown = ({ permissions }) => {
         lowerVertName === 'meg' ? slowDownDetailsMEG : slowDownDetailsMEG,
         keycloak,
       )
+
+      const maintenanceResponse = await DataService.getMaintenanceData(keycloak)
 
       setSnackbarOpen(true)
 

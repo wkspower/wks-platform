@@ -67,7 +67,7 @@ const plan = {
       icon: icons.IconArchive,
       children: [
         {
-          id: 'catalyst-selectivity',
+          id: 'configuration',
           title: i18n.t('menu.catalystSelectivity'),
           type: 'item',
           url: '/production-norms-plan/configuration',
@@ -108,24 +108,6 @@ const plan = {
         // },
 
         {
-          id: 'product-mcu-val',
-          title: i18n.t('menu.productMCUVal'),
-          type: 'item',
-          url: '/production-norms-plan/production-volume-data',
-          icon: icons.IconSettings,
-          breadcrumbs: true,
-        },
-
-        {
-          id: 'product-demand',
-          title: i18n.t('menu.productDemand'),
-          type: 'item',
-          url: '/production-norms-plan/business-demand',
-          icon: icons.IconChartBar,
-          breadcrumbs: true,
-        },
-
-        {
           id: 'shutdown-plan',
           title: i18n.t('menu.shutdownPlan'),
           type: 'item',
@@ -143,6 +125,24 @@ const plan = {
         },
 
         {
+          id: 'production-volume-data',
+          title: i18n.t('menu.productMCUVal'),
+          type: 'item',
+          url: '/production-norms-plan/production-volume-data',
+          icon: icons.IconSettings,
+          breadcrumbs: true,
+        },
+
+        {
+          id: 'business-demand',
+          title: i18n.t('menu.productDemand'),
+          type: 'item',
+          url: '/production-norms-plan/business-demand',
+          icon: icons.IconChartBar,
+          breadcrumbs: true,
+        },
+
+        {
           id: 'maintenance-details',
           title: i18n.t('menu.maintenanceDetails'),
           type: 'item',
@@ -152,7 +152,7 @@ const plan = {
         },
 
         {
-          id: 'production-norms',
+          id: 'production-aop',
           title: i18n.t('menu.productionNorms'),
           type: 'item',
           url: '/production-norms-plan/production-aop',
@@ -186,7 +186,7 @@ const plan = {
         },
 
         {
-          id: 'consumption-norms',
+          id: 'consumption-aop',
           title: i18n.t('menu.consumptionNorms'),
           type: 'item',
           url: '/production-norms-plan/consumption-aop',

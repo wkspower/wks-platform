@@ -108,7 +108,12 @@ const ShutDown = ({ permissions }) => {
       const shutdownDetails = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
-        durationInHrs: parseFloat(findDuration('1', row)),
+        durationInHrs: (() => {
+          const v = findDuration('1', row)
+          if (!v) return null
+          const [h = '00', m = '00'] = String(v).split('.')
+          return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
+        })(),
         maintEndDateTime: addTimeOffset(row.maintEndDateTime),
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         audityear: localStorage.getItem('year'),
@@ -127,6 +132,9 @@ const ShutDown = ({ permissions }) => {
         message: 'Shutdown data Saved Successfully!',
         severity: 'success',
       })
+
+      const maintenanceResponse = await DataService.getMaintenanceData(keycloak)
+
       unsavedChangesRef.current = {
         unsavedRows: {},
         rowsBeforeChange: {},
@@ -282,6 +290,8 @@ const ShutDown = ({ permissions }) => {
           severity: 'success',
         })
         fetchData()
+        const maintenanceResponse =
+          await DataService.getMaintenanceData(keycloak)
       }
     } catch (error) {
       console.error('Error deleting Record', error)
