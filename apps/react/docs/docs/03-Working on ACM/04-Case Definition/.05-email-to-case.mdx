@@ -25,6 +25,7 @@ Email becomes a first-class component of case management—alongside tasks, comm
 ### Inbound Emails (Creating or Updating Cases)
 
 1. An **email is sent** to a predefined email address (e.g., `mailto-case+new@domain.com`)
+
 ![Screenshot of an email being written and sent to a predefined email address](https://wkspower.com/hs-fs/hubfs/1-sending-email.png?width=2458&height=1412&name=1-sending-email.png)
 2. A **custom email consumer service** (external to WKS) monitors this mailbox
 3. The email consumer sends a request to the **WKS REST API** via the **HCP (Hybrid Cloud Platform)** layer
@@ -32,6 +33,7 @@ Email becomes a first-class component of case management—alongside tasks, comm
    - Identify the intent (create new or update existing case)
    - Create or log the email appropriately
    - Optionally start or continue a case process
+
 ![Gif showing the case created based on the email received](../../../static/img/Reviewing.gif)
 > 🛠 WKS does **not provide** out-of-the-box email consumers.
 
