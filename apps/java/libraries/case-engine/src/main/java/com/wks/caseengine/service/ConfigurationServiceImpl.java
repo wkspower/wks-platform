@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -25,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import javax.sql.DataSource;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -50,6 +53,7 @@ import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.dto.AOPDTO;
 import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.ConfigurationDataDTO;
+import com.wks.caseengine.dto.ExecutionDetailDto;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeRequestDTO;
 import com.wks.caseengine.entity.AopCalculation;
@@ -100,6 +104,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
+	
+	private DataSource dataSource;
+	
+	public ConfigurationServiceImpl(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
 
 	public byte[] createExcel(String year, UUID plantFKId) {
 		try {
@@ -346,7 +357,108 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	public AOPMessageVM getConfigurationExecution( String year, String plantId) {
+		try {
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			List<Object[]> rows = normAttributeTransactionsRepository
+				    .findByPlantIdAndYear(
+				        UUID.fromString(plantId),  // convert incoming String to UUID
+				        year                        // String, matching your signature
+				    );
 
+	        List<Map<String, Object>> configurationConstantsList = new ArrayList<>();
+	        for (Object[] row : rows) {
+	            Map<String, Object> map = new HashMap<>();
+
+	            map.put("Id",        row[0]);
+	            map.put("AttributeValue", row[1]);
+	            map.put("AOPMonth",          row[2]);
+	            map.put("AuditYear",         row[3]);
+	            map.put("Remarks",           row[4]);
+	            map.put("CreatedOn",       row[5]);
+	            map.put("ModifiedOn",           row[6]);
+	            map.put("AttributeValueVersion", row[7]);
+	            map.put("User",             row[8]);
+	            map.put("NormParameter_FK_Id",   row[9]);
+	            map.put("plantId",  row[10]);
+	            map.put("IsMonthwise", row[11]);
+
+	            configurationConstantsList.add(map);
+	        }
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(configurationConstantsList);
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public AOPMessageVM saveConfigurationExecution(List<ExecutionDetailDto> executionDetailDtoList) {
+		
+		for(ExecutionDetailDto executionDetailDto:executionDetailDtoList) {
+			NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+			normAttributeTransactions.setNormParameterFKId(executionDetailDto.getNormParameterFKId());
+			normAttributeTransactions.setAttributeValue(executionDetailDto.getApr());
+			normAttributeTransactions.setRemarks(executionDetailDto.getRemarks());
+			normAttributeTransactions.setAopMonth(4);
+			normAttributeTransactions.setAuditYear(executionDetailDto.getAuditYear());
+			normAttributeTransactionsRepository.save(normAttributeTransactions);
+		}
+		ExecutionDetailDto executionDetailDto1 =executionDetailDtoList.get(0);
+		String periodFrom=executionDetailDto1.getApr();
+		ExecutionDetailDto executionDetailDto2 =executionDetailDtoList.get(1);
+		String periodTo=executionDetailDto2.getApr();
+		String plantId=executionDetailDto2.getPlantId();
+		String finYear=executionDetailDto2.getAuditYear();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+		String procedureName=vertical.getName()+"_"+site.getName()+"_GetValuesforConsecutiveDays";
+		executeDynamicUpdateProcedure( procedureName,  plantId,  finYear,  periodFrom,
+				 periodTo);
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data saved successfully");
+			aopMessageVM.setData(executionDetailDtoList);
+			return aopMessageVM;
+		}catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	public void executeDynamicUpdateProcedure(String procedureName, String plantId, String finYear, String periodFrom,
+			String periodTo) {
+		String callSql = "{call " + procedureName + "(?, ?, ?, ?)}";
+
+		try (Connection connection = dataSource.getConnection();
+				CallableStatement stmt = connection.prepareCall(callSql)) {
+
+			// Set parameters
+			stmt.setString(1, plantId);
+			stmt.setString(2, finYear);
+			stmt.setString(3, periodFrom);
+			stmt.setString(4, periodTo);
+
+			// Execute the stored procedure
+			int rowsAffected = stmt.executeUpdate();
+
+			// Optional: commit if auto-commit is off
+			if (!connection.getAutoCommit()) {
+				connection.commit();
+			}
+
+			
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 	public AOPMessageVM getConfigurationConstants(String year, String plantFKId) {
 		try {
 			AOPMessageVM aopMessageVM = new AOPMessageVM();

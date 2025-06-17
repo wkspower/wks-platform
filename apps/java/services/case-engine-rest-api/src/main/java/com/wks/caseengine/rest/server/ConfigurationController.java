@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.ConfigurationDTO;
+import com.wks.caseengine.dto.ExecutionDetailDto;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeRequestDTO;
 import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
@@ -104,8 +105,14 @@ public class ConfigurationController {
 	        ) {
 	        return configurationService.importExcel(year,UUID.fromString(plantId), file); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 	}
-
-
+	@GetMapping(value="/configuration-execution")
+	public AOPMessageVM getConfigurationExecution(@RequestParam String year,@RequestParam String plantId) {
+		return configurationService.getConfigurationExecution(year,plantId);
+	}
 	
+	@PostMapping(value="/configuration-execution")
+	public AOPMessageVM saveConfigurationExecution(@RequestBody List<ExecutionDetailDto> executionDetailDtoList) {
+		return configurationService.saveConfigurationExecution(executionDetailDtoList);
+	}
 
 }

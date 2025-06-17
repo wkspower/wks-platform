@@ -229,7 +229,8 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			// TODO Auto-generated method stub
 			return slowdownNormsValueDTOList;
 		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to update data", ex);
 		}
 	}
 

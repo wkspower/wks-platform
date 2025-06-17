@@ -156,6 +156,14 @@ ORDER BY
 
     List<Object[]> getPythonScriptName();
 
-	
+    @Query(value =
+            "SELECT * FROM [RIL.AOP].dbo.vwGetExecutionDetails " +
+            "WHERE PlantId = :plantId AND AuditYear = :year",
+            nativeQuery = true
+        )
+        List<Object[]> findByPlantIdAndYear(
+            @Param("plantId") UUID plantId,
+            @Param("year") String year
+        );
 
 }
