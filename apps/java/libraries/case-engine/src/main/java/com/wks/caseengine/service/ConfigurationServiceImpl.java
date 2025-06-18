@@ -479,8 +479,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				map.put("ConstantValue", row[5]);
 				map.put("AuditYear", row[6]);
 				map.put("Remarks", row[7]);
-				int editableFlag = (Integer) row[8]; // or use getInt(), depending on your data source
-				boolean isEditable = (editableFlag == 1);
+				boolean isEditable;
+			    Object flagObj = row[8];
+			    if (flagObj instanceof Boolean) {
+			        isEditable = (Boolean) flagObj;
+			    } else if (flagObj instanceof Number) {
+			        isEditable = ((Number) flagObj).intValue() == 1;
+			    } else {
+			        isEditable = false; // or default
+			    }
 				map.put("isEditable", isEditable);
 				configurationConstantsList.add(map); // Add the map to the list here
 			}
