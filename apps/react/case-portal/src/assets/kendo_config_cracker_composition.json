@@ -4,7 +4,8 @@
     "title": "Type",
     "width": 110,
     "groupable": true,
-    "editable": false
+    "editable": false,
+    "hidden": true
   },
   {
     "field": "particulars",

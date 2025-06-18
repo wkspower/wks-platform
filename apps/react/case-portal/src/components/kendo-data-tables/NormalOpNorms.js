@@ -189,6 +189,7 @@ const NormalOpNormsScreen = () => {
       width: 110,
       groupable: true,
       editable: false,
+      hidden: true,
     },
     {
       field: 'materialFkId',
@@ -351,6 +352,7 @@ const NormalOpNormsScreen = () => {
       width: 110,
       groupable: true,
       editable: false,
+      hidden: true,
     },
 
     {
@@ -483,10 +485,12 @@ const NormalOpNormsScreen = () => {
     {
       field: 'idFromApi',
       title: 'idFromApi',
+      hidden: true,
     },
     {
       field: 'isEditable',
       title: 'isEditable',
+      hidden: true,
     },
   ]
 

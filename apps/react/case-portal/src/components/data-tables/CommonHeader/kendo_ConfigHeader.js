@@ -55,8 +55,8 @@ const getEnhancedAOPColDefs = ({
         field: field?.id?.toUpperCase(),
         title: field?.displayName,
         editable: true,
+        type: 'numberWidth',
         width: 120,
-        type: 'number',
       })
     })
   } else {
@@ -70,6 +70,7 @@ const getEnhancedAOPColDefs = ({
         title: headerMap[col.title],
         align: 'right',
         type: 'number',
+        format: '{0:#.###}',
       }
     }
 

@@ -5,7 +5,8 @@
     "width": 100,
     "groupable": true,
     "renderCell": "renderStrongCell",
-    "editable": false
+    "editable": false,
+    "hidden": true
   },
   {
     "field": "normParameterFKId",

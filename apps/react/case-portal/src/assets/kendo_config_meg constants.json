@@ -6,7 +6,8 @@
     "groupable": true,
     "headerClass": "bold-header",
     "filterable": "false",
-    "editable": false
+    "editable": false,
+    "hidden": true
   },
   {
     "field": "DisplayName",
@@ -23,7 +24,6 @@
   {
     "field": "ConstantValue",
     "title": "Value",
-
     "editable": true
   },
 

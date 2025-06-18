@@ -3,95 +3,95 @@
     "field": "Particulars",
     "title": "Type",
     "width": 125,
-    "editable": false
+    "editable": false,
+    "hidden": true
   },
   {
     "field": "normParameterFKId",
-    "width": 120,
+
     "hidden": true
   },
   {
     "field": "productName",
     "title": "Particulars",
-    "width": 120,
+
     "editable": false
   },
   {
     "field": "UOM",
     "title": "UOM",
-    "width": 120,
     "editable": false
   },
   {
     "field": "apr",
     "title": 4,
-    "width": 120,
+
     "editable": true
   },
   {
     "field": "may",
     "title": 5,
-    "width": 120,
+
     "editable": true
   },
   {
     "field": "jun",
     "title": 6,
-    "width": 120,
+
     "editable": true
   },
   {
     "field": "jul",
     "title": 7,
-    "width": 120,
+
     "editable": true
   },
   {
     "field": "aug",
     "title": 8,
-    "width": 120,
+
     "editable": true
   },
   {
     "field": "sep",
     "title": 9,
-    "width": 120,
+
     "editable": true
   },
   {
     "field": "oct",
     "title": 10,
-    "width": 120,
+
     "editable": true
   },
   {
     "field": "nov",
     "title": 11,
-    "width": 120,
+
     "editable": true
   },
   {
     "field": "dec",
     "title": 12,
-    "width": 120,
+
     "editable": true
   },
   {
     "field": "jan",
     "title": 1,
-    "width": 120,
+
     "editable": true
   },
   {
     "field": "feb",
     "title": 2,
-    "width": 120,
+
     "editable": true
   },
   {
     "field": "mar",
     "title": 3,
-    "width": 120,
+
     "editable": true
   },
   {

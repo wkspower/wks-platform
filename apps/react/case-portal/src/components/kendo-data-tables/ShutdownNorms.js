@@ -222,6 +222,7 @@ const ShutdownNorms = () => {
       field: 'Particulars',
       headerName: 'Type',
       width: 120,
+      hidden: true,
     },
 
     {

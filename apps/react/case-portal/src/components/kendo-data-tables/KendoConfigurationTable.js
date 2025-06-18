@@ -377,7 +377,7 @@ const ConfigurationTable = () => {
                   />
                 )
               case getTheId('Receipe'): // Receipe - Fixed to use gradeFetchData
-              console.log("gradedata:", gradeData)
+             
                 return (
                   <SelectivityData
                     rows={gradeData}

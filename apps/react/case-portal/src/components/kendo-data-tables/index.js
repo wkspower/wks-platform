@@ -795,6 +795,7 @@ const KendoDataTables = ({
               mode: 'multiple',
             }}
             allRedCell={allRedCell}
+            size='small'
             pageable={
               rows?.length > 100
                 ? {
@@ -822,7 +823,7 @@ const KendoDataTables = ({
                     key={col.field}
                     field={col.field}
                     title={col.title || col.headerName}
-                    width={col.width}
+                    // width={col.width}
                     cells={{
                       edit: { date: DateTimePickerEditor },
                       data: toolTipRenderer,
@@ -840,7 +841,7 @@ const KendoDataTables = ({
                     key='product'
                     field='product'
                     title={col.title || col.headerName || 'Particulars'}
-                    width={210}
+                    // width={210}
                     editable={col.editable || true}
                     hidden={col.hidden}
                     cells={{
@@ -858,7 +859,7 @@ const KendoDataTables = ({
                     key={col?.field}
                     field={col?.field}
                     title={col.title || col.headerName || 'Description'}
-                    width={col.width}
+                    // width={col.width}
                     editable={true}
                     columnMenu={ColumnMenuCheckboxFilter}
                     hidden={col.hidden}
@@ -875,7 +876,7 @@ const KendoDataTables = ({
                     key='UOM'
                     field='UOM'
                     title={col.title || col.headerName || 'UOM'}
-                    width={col?.width}
+                    // width={col?.width}
                     editable={false}
                     columnMenu={ColumnMenuCheckboxFilter}
                     hidden={col.hidden}
@@ -891,7 +892,7 @@ const KendoDataTables = ({
                     key='DisplayName'
                     field={col?.field}
                     title={col.title || col.headerName}
-                    width={col?.width}
+                    // width={col?.width}
                     editable={false}
                     columnMenu={ColumnMenuCheckboxFilter}
                     hidden={col.hidden}
@@ -920,7 +921,7 @@ const KendoDataTables = ({
                     key={col.field}
                     field={col.field}
                     title={col.title || col.headerName}
-                    width={col.width}
+                    // width={col.width}
                     editor={true}
                     // editable={col.editable || true}
                     editable={{ mode: 'popup' }}
@@ -945,7 +946,7 @@ const KendoDataTables = ({
                     key={col.field}
                     field={col.field}
                     title={col.title || col.headerName}
-                    width={col.width}
+                    // width={col.width}
                     editable={true}
                     columnMenu={ColumnMenuCheckboxFilter}
                     hidden={col.hidden}
@@ -964,6 +965,31 @@ const KendoDataTables = ({
               }
 
               if (col.type === 'number') {
+                return (
+                  <GridColumn
+                    key={col.field}
+                    field={col.field}
+                    title={col.title || col.headerName}
+                    // width={col.width}
+                    hidden={col.hidden}
+                    className={
+                      col?.isDisabled
+                        ? 'k-number-right-disabled'
+                        : 'k-number-right'
+                    }
+                    editable={col?.editable ? true : false}
+                    headerClassName={isActive ? 'active-column' : ''}
+                    cells={{
+                      edit: { text: NoSpinnerNumericEditor },
+                      data: toolTipRenderer,
+                    }}
+                    columnMenu={ColumnMenuCheckboxFilter}
+                    filter='numeric'
+                    format={col.format}
+                  />
+                )
+              }
+              if (col.type === 'numberWidth') {
                 return (
                   <GridColumn
                     key={col.field}
@@ -995,7 +1021,7 @@ const KendoDataTables = ({
                     key={col.field}
                     field={col.field}
                     title={col.title || col.headerName}
-                    width={col.width}
+                    // width={col.width}
                     hidden={col.hidden}
                     editable={!!col?.editable}
                     headerClassName={isActive ? 'active-column' : ''}
@@ -1013,7 +1039,7 @@ const KendoDataTables = ({
                   key={col.field}
                   field={col.field}
                   title={col.title || col.headerName}
-                  width={col.width}
+                  // width={col.width}
                   hidden={col.hidden}
                   editable={col?.editable ? true : false}
                   headerClassName={isActive ? 'active-column' : ''}

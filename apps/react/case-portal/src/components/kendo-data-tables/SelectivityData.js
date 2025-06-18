@@ -97,26 +97,49 @@ const SelectivityData = (props) => {
         plantId = parsedPlant.id
       }
 
-      const payload = newRow.map((row) => ({
-        apr: row.apr || row.ConstantValue || null,
-        may: row.may || null,
-        jun: row.jun || null,
-        jul: row.jul || null,
-        aug: row.aug || null,
-        sep: row.sep || null,
-        oct: row.oct || null,
-        nov: row.nov || null,
-        dec: row.dec || null,
-        jan: row.jan || null,
-        feb: row.feb || null,
-        mar: row.mar || null,
-        UOM: '',
-        auditYear: localStorage.getItem('year'),
-        normParameterFKId: row.normParameterFKId || row.NormParameter_FK_Id,
-        remarks: row.remarks,
-        id: row.idFromApi || null,
-      }))
+      var payload = []
 
+      if (props?.configType == 'megConstants') {
+        payload = newRow.map((row) => ({
+          apr: row.apr || row.ConstantValue || null,
+          may: row.apr || row.ConstantValue || null,
+          jun: row.apr || row.ConstantValue || null,
+          jul: row.apr || row.ConstantValue || null,
+          aug: row.apr || row.ConstantValue || null,
+          sep: row.apr || row.ConstantValue || null,
+          oct: row.apr || row.ConstantValue || null,
+          nov: row.apr || row.ConstantValue || null,
+          dec: row.apr || row.ConstantValue || null,
+          jan: row.apr || row.ConstantValue || null,
+          feb: row.apr || row.ConstantValue || null,
+          mar: row.apr || row.ConstantValue || null,
+          UOM: '',
+          auditYear: localStorage.getItem('year'),
+          normParameterFKId: row.normParameterFKId || row.NormParameter_FK_Id,
+          remarks: row.remarks,
+          id: row.idFromApi || null,
+        }))
+      } else {
+        payload = newRow.map((row) => ({
+          apr: row.apr || row.ConstantValue || null,
+          may: row.may || null,
+          jun: row.jun || null,
+          jul: row.jul || null,
+          aug: row.aug || null,
+          sep: row.sep || null,
+          oct: row.oct || null,
+          nov: row.nov || null,
+          dec: row.dec || null,
+          jan: row.jan || null,
+          feb: row.feb || null,
+          mar: row.mar || null,
+          UOM: '',
+          auditYear: localStorage.getItem('year'),
+          normParameterFKId: row.normParameterFKId || row.NormParameter_FK_Id,
+          remarks: row.remarks,
+          id: row.idFromApi || null,
+        }))
+      }
       const response = await DataService.saveCatalystData(
         plantId,
         payload,

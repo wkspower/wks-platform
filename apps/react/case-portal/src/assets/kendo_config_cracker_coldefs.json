@@ -3,7 +3,8 @@
     "field": "particulars",
     "title": "Particulars",
     "editable": false,
-    "width": 150
+    "width": 150,
+    "hidden": true
   },
   {
     "field": "uom",

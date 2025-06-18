@@ -9,7 +9,8 @@
     "field": "TypeDisplayName",
     "title": "Type",
     "groupable": true,
-    "editable": false
+    "editable": false,
+    "hidden": true
   },
   {
     "field": "normParameterFKId",
