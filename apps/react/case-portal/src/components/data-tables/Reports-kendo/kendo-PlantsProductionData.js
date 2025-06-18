@@ -94,7 +94,7 @@ const PlantsProductionSummary = () => {
           field: 'ActualPrevYear',
           title: 'Actual',
           width: 120,
-          editable: true,
+          editable: false,
         },
       ],
     },

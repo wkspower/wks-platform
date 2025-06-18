@@ -97,7 +97,7 @@ const MonthwiseProduction = () => {
               field: 'OpHrsActual',
               title: 'Actual',
               width: 120,
-              editable: true,
+              editable: false,
             },
           ],
         },

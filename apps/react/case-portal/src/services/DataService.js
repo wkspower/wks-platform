@@ -9,6 +9,9 @@ export const DataService = {
   getShutDownPlantData,
   getAllProducts,
   getAllProductsAll,
+  getIbrPlanData,
+  getShutdownActivitiesData,
+  getRunningDurationData,
   getYearlyData,
   getSlowDownPlantData,
   getTAPlantData,
@@ -2449,6 +2452,71 @@ async function getAllProductsAll(keycloak, type) {
     return await Promise.reject(e)
   }
 }
+
+async function getIbrPlanData(keycloak) {
+  const storedPlant = localStorage.getItem('selectedPlant')
+  const parsedPlant = JSON.parse(storedPlant)
+
+  const url = `${Config.CaseEngineUrl}/task/getIbrPlanData?plantId=${parsedPlant.id}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const response = await fetch(url, { headers })
+    if (!response.ok) throw new Error('Failed to fetch IBR plan data')
+    return await response.json()
+  } catch (error) {
+    console.error('Error in getIbrPlanData:', error)
+    throw error
+  }
+}
+
+async function getShutdownActivitiesData(keycloak) {
+  const storedPlant = localStorage.getItem('selectedPlant')
+  const parsedPlant = JSON.parse(storedPlant)
+
+  const url = `${Config.CaseEngineUrl}/task/getShutdownActivities?plantId=${parsedPlant.id}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const response = await fetch(url, { headers })
+    if (!response.ok) throw new Error('Failed to fetch shutdown activities data')
+    return await response.json()
+  } catch (error) {
+    console.error('Error in getShutdownActivitiesData:', error)
+    throw error
+  }
+}
+
+async function getRunningDurationData(keycloak) {
+  const storedPlant = localStorage.getItem('selectedPlant')
+  const parsedPlant = JSON.parse(storedPlant)
+  const url = `${Config.CaseEngineUrl}/task/getRunningDurationData?plantId=${parsedPlant.id}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error(e)
+    return await Promise.reject(e)
+  }
+}
+
 
 async function getAllCatalyst(keycloak) {
   const url = `${Config.CaseEngineUrl}/task/getAllCatalystAttributes`

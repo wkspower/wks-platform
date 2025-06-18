@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { Box, Tab, Tabs } from '@mui/material'
 import KendoDataTables from './index.js'
-
+import { DataService } from 'services/DataService'
+import { useSession } from 'SessionStoreContext'
 const DecokingConfig = () => {
   const tabs = ['IBR Plan', 'Shutdown Activities', 'Running Duration']
 
@@ -71,336 +72,6 @@ const DecokingConfig = () => {
     { field: 'endDateTA', title: 'End date TA', editable: true, width: 200 },
     { field: 'remarks', title: 'Remarks', editable: true, width: 250 },
   ]
-  const ibrPlanData = [
-    {
-      id: 1,
-      furnace: 'H10',
-      ibrPlan: "Jun'25",
-      aprMarDays: 100,
-      // remarks: 'Manual Entry with remarks',
-      startDateIBR: '2025-06-10 08:00 AM',
-      endDateIBR: '2025-06-20 05:00 PM',
-      startDateSD: '2025-06-21 09:00 AM',
-      endDateSD: '2025-06-22 06:00 PM',
-      startDateTA: '2025-06-23 07:00 AM',
-      endDateTA: '2025-06-24 03:00 PM',
-      remarks: 'Start date and end date will be manual entry for IBR',
-    },
-    {
-      id: 2,
-      furnace: 'H11',
-      ibrPlan: "Jan'26",
-      aprMarDays: 100,
-      // remarks: 'Manual Entry with remarks',
-      startDateIBR: '2026-01-05 08:30 AM',
-      endDateIBR: '2026-01-15 05:30 PM',
-      startDateSD: '2026-01-16 09:15 AM',
-      endDateSD: '2026-01-17 06:00 PM',
-      startDateTA: '2026-01-18 07:45 AM',
-      endDateTA: '2026-01-19 04:00 PM',
-      remarks: 'IBR-1?=?BBD',
-    },
-    {
-      id: 3,
-      furnace: 'H11',
-      ibrPlan: "Jan'26",
-      aprMarDays: 100,
-      // remarks: 'Manual Entry with remarks',
-      startDateIBR: '2026-01-10 09:00 AM',
-      endDateIBR: '2026-01-20 04:30 PM',
-      startDateSD: '2026-01-21 10:00 AM',
-      endDateSD: '2026-01-22 05:45 PM',
-      startDateTA: '2026-01-23 08:00 AM',
-      endDateTA: '2026-01-24 03:30 PM',
-      remarks: 'BBD-2?=?SAD',
-    },
-    {
-      id: 4,
-      furnace: 'H12',
-      ibrPlan: "Aug'25",
-      aprMarDays: 100,
-      // remarks: 'Manual Entry with remarks',
-      startDateIBR: '2025-08-01 07:30 AM',
-      endDateIBR: '2025-08-10 06:00 PM',
-      startDateSD: '2025-08-11 09:00 AM',
-      endDateSD: '2025-08-12 05:30 PM',
-      startDateTA: '2025-08-13 08:15 AM',
-      endDateTA: '2025-08-14 04:00 PM',
-      remarks: 'Logic to be checked for automating IBR, BBD, SAD entries',
-    },
-    {
-      id: 5,
-      furnace: 'H13',
-      ibrPlan: "Nov'25",
-      aprMarDays: 60,
-      // remarks: 'Manual Entry with remarks',
-      startDateIBR: '2025-11-05 08:00 AM',
-      endDateIBR: '2025-11-15 05:00 PM',
-      startDateSD: '2025-11-16 09:00 AM',
-      endDateSD: '2025-11-17 06:00 PM',
-      startDateTA: '2025-11-18 07:30 AM',
-      endDateTA: '2025-11-19 03:30 PM',
-      remarks: '',
-    },
-    {
-      id: 6,
-      furnace: 'H14',
-      ibrPlan: "Jul'25",
-      aprMarDays: 100,
-      // remarks: 'Manual Entry with remarks',
-      startDateIBR: '2025-07-01 07:00 AM',
-      endDateIBR: '2025-07-10 05:00 PM',
-      startDateSD: '2025-07-11 09:00 AM',
-      endDateSD: '2025-07-12 06:00 PM',
-      startDateTA: '2025-07-13 08:00 AM',
-      endDateTA: '2025-07-14 04:00 PM',
-      remarks: '',
-    },
-    {
-      id: 7,
-      furnace: 'DEMO',
-      ibrPlan: '-',
-      aprMarDays: 0,
-      // remarks: '',
-      startDateIBR: '2025-04-01 09:00 AM',
-      endDateIBR: '2025-04-02 05:00 PM',
-      startDateSD: '2025-04-03 10:00 AM',
-      endDateSD: '2025-04-04 04:00 PM',
-      startDateTA: '2025-04-05 08:00 AM',
-      endDateTA: '2025-04-06 03:00 PM',
-      remarks: '',
-    },
-  ]
-
-  // Shutdown Activities data
-  const shutdownActivitiesData = [
-    {
-      id: 1,
-      month: 'Mar',
-      date: '20-Mar-25',
-      h10: 38,
-      h11: 50,
-      h12: 64,
-      h13: 17,
-      h14: 88,
-      demo: 'SD',
-      remarks:
-        'Run length counter 1st entry will be manual entry, remaining will be as per logic',
-    },
-    {
-      id: 2,
-      month: 'Mar',
-      date: '21-Mar-25',
-      h10: 39,
-      h11: 51,
-      h12: 65,
-      h13: 18,
-      h14: 89,
-      demo: 'SD',
-      remarks:
-        'Run length counter 1st entry will be manual entry, remaining will be as per logic',
-    },
-    {
-      id: 3,
-      month: 'Mar',
-      date: '22-Mar-25',
-      h10: 40,
-      h11: 52,
-      h12: 66,
-      h13: 19,
-      h14: 90,
-      demo: 'SD',
-      remarks:
-        'Run length counter 1st entry will be manual entry, remaining will be as per logic',
-    },
-
-    {
-      id: 4,
-      month: 'Mar',
-      date: '28-Mar-25',
-      h10: 46,
-      h11: 58,
-      h12: 72,
-      h13: 25,
-      h14: 96,
-      demo: 'SD',
-      remarks:
-        'Run length counter 1st entry will be manual entry, remaining will be as per logic',
-    },
-  ]
-
-  // Running Duration data
-  const runningDurationData = [
-    {
-      month: 'April',
-      ibr: 0,
-      mnt: 0,
-      shutdown: 0,
-      slowdown: 0,
-      sad: 5,
-      buD: 0,
-      fourF: 5,
-      fiveF: 25,
-      fourFD: 0,
-      total: 30,
-    },
-    {
-      month: 'May',
-      ibr: 0,
-      mnt: 0,
-      shutdown: 0,
-      slowdown: 0,
-      sad: 5,
-      buD: 0,
-      fiveF: 5,
-      fourF: 26,
-      fourFD: 0,
-      total: 31,
-    },
-    {
-      month: 'June',
-      ibr: 8,
-      mnt: 0,
-      shutdown: 0,
-      slowdown: 0,
-      sad: 2.5,
-      buD: 2,
-      fiveF: 12.5,
-      fourF: 17.5,
-      fourFD: 0,
-      total: 30,
-    },
-    {
-      month: 'July',
-      ibr: 8,
-      mnt: 0,
-      shutdown: 0,
-      slowdown: 0,
-      sad: 5,
-      buD: 2,
-      fiveF: 15,
-      fourF: 16,
-      fourFD: 0,
-      total: 31,
-    },
-    {
-      month: 'August',
-      ibr: 8,
-      mnt: 0,
-      shutdown: 0,
-      slowdown: 0,
-      sad: 5,
-      buD: 2,
-      fiveF: 15,
-      fourF: 16,
-      fourFD: 0,
-      total: 31,
-    },
-    {
-      month: 'September',
-      ibr: 0,
-      mnt: 0,
-      shutdown: 0,
-      slowdown: 0,
-      sad: 5,
-      buD: 0,
-      fiveF: 5,
-      fourF: 25,
-      fourFD: 0,
-      total: 30,
-    },
-    {
-      month: 'October',
-      ibr: 0,
-      mnt: 0,
-      shutdown: 0,
-      slowdown: 0,
-      sad: 1.25,
-      buD: 0,
-      fiveF: 1.25,
-      fourF: 29.75,
-      fourFD: 0,
-      total: 31,
-    },
-    {
-      month: 'November',
-      ibr: 17,
-      mnt: 0,
-      shutdown: 0,
-      slowdown: 0,
-      sad: 6.25,
-      buD: 2,
-      fiveF: 25.25,
-      fourF: 4.75,
-      fourFD: 0,
-      total: 30,
-    },
-    {
-      month: 'December',
-      ibr: 0,
-      mnt: 0,
-      shutdown: 0,
-      slowdown: 0,
-      sad: 2.5,
-      buD: 0,
-      fiveF: 2.5,
-      fourF: 28.5,
-      fourFD: 0,
-      total: 31,
-    },
-    {
-      month: 'January',
-      ibr: 8,
-      mnt: 0,
-      shutdown: 0,
-      slowdown: 0,
-      sad: 2.5,
-      buD: 2,
-      fiveF: 12.5,
-      fourF: 18.5,
-      fourFD: 0,
-      total: 31,
-    },
-    {
-      month: 'February',
-      ibr: 0,
-      mnt: 0,
-      shutdown: 0,
-      slowdown: 0,
-      sad: 2.5,
-      buD: 0,
-      fiveF: 2.5,
-      fourF: 25.5,
-      fourFD: 0,
-      total: 28,
-    },
-    {
-      month: 'March',
-      ibr: 0,
-      mnt: 0,
-      shutdown: 0,
-      slowdown: 0,
-      sad: 5,
-      buD: 0,
-      fiveF: 5,
-      fourF: 26,
-      fourFD: 0,
-      total: 31,
-    },
-    {
-      month: 'Total',
-      ibr: 49,
-      mnt: 0,
-      shutdown: 0,
-      slowdown: 0,
-      sad: 47.5,
-      buD: 10,
-      fiveF: 106.5,
-      fourF: 258.5,
-      fourFD: 0,
-      total: 365,
-    },
-  ]
 
   const shutdownColumns = [
     { field: 'month', title: 'Month', editable: false },
@@ -440,12 +111,9 @@ const DecokingConfig = () => {
     { field: 'total', title: 'Total', editable: false, type: 'number' },
   ]
 
-  const [ibrPlanRows, setIbrPlanRows] = useState(ibrPlanData)
-  const [shutdownActivities, setshutdownActivities] = useState(
-    shutdownActivitiesData,
-  )
-  const [runningDuration, setRunningDurationRows] =
-    useState(runningDurationData)
+const [ibrPlanRows, setIbrPlanRows] = useState([])
+const [shutdownActivities, setshutdownActivities] = useState([])
+const [runningDuration, setRunningDurationRows] = useState([])
 
   const fetchData = useCallback((tabName) => {
     setTimeout(() => {
@@ -468,10 +136,32 @@ const DecokingConfig = () => {
     }, 300)
   }, [])
 
-  useEffect(() => {
-    const currentTab = tabs[activeTabIndex]
-    fetchData(currentTab)
-  }, [activeTabIndex, fetchData])
+
+
+const keycloak = useSession();
+
+useEffect(() => {
+  const currentTab = tabs[activeTabIndex]
+
+  const fetchData = async () => {
+    try {
+      if (currentTab === 'IBR Plan') {
+        const ibrData = await DataService.getIbrPlanData(keycloak);
+        setIbrPlanRows(ibrData);
+      } else if (currentTab === 'Shutdown Activities') {
+        const shutdownData = await DataService.getShutdownActivitiesData(keycloak);
+        setshutdownActivities(shutdownData);
+      } else if (currentTab === 'Running Duration') {
+        const runningData = await DataService.getRunningDurationData(keycloak);
+        setRunningDurationRows(runningData);
+      }
+    } catch (error) {
+      console.error('Error fetching decoking config data:', error);
+    }
+  };
+
+  fetchData();
+}, [activeTabIndex, keycloak]);
 
   const renderIBRPlanTable = () => (
     <Box>

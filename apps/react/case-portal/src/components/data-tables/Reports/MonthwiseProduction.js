@@ -126,7 +126,7 @@ const MonthwiseProduction = () => {
       flex: 1,
       headerAlign: 'left',
       align: 'right',
-      editable: true,
+      editable: false,
       valueFormatter: formatValueToThreeDecimalsZero,
       renderCell: (params) => (
         <Tooltip
