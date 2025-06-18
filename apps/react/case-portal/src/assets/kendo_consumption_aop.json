@@ -13,7 +13,7 @@
     "field": "UOM",
     "title": "UOM / MT",
     "editable": false,
-    "width": 200
+    "width": 150
   },
   {
     "field": "productName",

@@ -188,3 +188,7 @@
 .custom-disabled-row {
   background-color: #f0f0f0 !important;
 }
+.date-picker {
+  margin-right: 10;
+  width: 200px;
+}

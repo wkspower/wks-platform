@@ -45,9 +45,9 @@ const getEnhancedAOPColDefs = ({
       {
         field: 'ReceipeName',
         title: 'Receipe',
-        width: 120,
         editable: false,
-        flex: 1,
+        width: 120,
+        type: 'non-number',
       },
     ]
     allGradesReciepes?.forEach((field) => {
@@ -55,10 +55,8 @@ const getEnhancedAOPColDefs = ({
         field: field?.id?.toUpperCase(),
         title: field?.displayName,
         editable: true,
-        align: 'left',
-        headerAlign: 'left',
         width: 120,
-        isGradeHeader: 'true',
+        type: 'number',
       })
     })
   } else {

@@ -63,6 +63,7 @@ const getEnhancedAOPColDefs = ({
         headerAlign: 'left',
         minWidth: 120,
         isGradeHeader: 'true',
+        type: 'number',
       })
     })
   } else {

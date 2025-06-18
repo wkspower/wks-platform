@@ -221,6 +221,7 @@ const ShutdownNorms = () => {
     {
       field: 'Particulars',
       headerName: 'Type',
+      width: 120,
     },
 
     {
@@ -229,15 +230,16 @@ const ShutdownNorms = () => {
       minWidth: 150,
       editable: false,
       hidden: true,
+      width: 120,
     },
     {
       field: 'productName',
       headerName: 'Particulars',
-      minWidth: 150,
+      width: 180,
       editable: false,
     },
 
-    { field: 'UOM', headerName: 'UOM', width: 100, editable: false },
+    { field: 'UOM', headerName: 'UOM', width: 150, editable: false },
 
     {
       field: 'april',
@@ -246,6 +248,7 @@ const ShutdownNorms = () => {
       isDisabled: !shutdownMonths?.includes(4),
       type: 'number',
       format: '{0:#.#####}',
+      width: 120,
     },
 
     {
@@ -255,6 +258,7 @@ const ShutdownNorms = () => {
       isDisabled: !shutdownMonths?.includes(5),
       type: 'number',
       format: '{0:#.#####}',
+      width: 120,
     },
 
     {
@@ -264,6 +268,7 @@ const ShutdownNorms = () => {
       isDisabled: !shutdownMonths?.includes(6),
       type: 'number',
       format: '{0:#.#####}',
+      width: 120,
     },
     {
       field: 'july',
@@ -271,12 +276,14 @@ const ShutdownNorms = () => {
       editable: shutdownMonths?.includes(7),
       isDisabled: !shutdownMonths?.includes(7),
       type: 'number',
+      width: 120,
       format: '{0:#.#####}',
     },
 
     {
       field: 'august',
       headerName: headerMap[8],
+      width: 120,
       editable: shutdownMonths?.includes(8),
       isDisabled: !shutdownMonths?.includes(8),
       type: 'number',
@@ -284,6 +291,7 @@ const ShutdownNorms = () => {
     },
     {
       field: 'september',
+      width: 120,
       headerName: headerMap[9],
       editable: shutdownMonths?.includes(9),
       isDisabled: !shutdownMonths?.includes(9),
@@ -292,6 +300,7 @@ const ShutdownNorms = () => {
     },
     {
       field: 'october',
+      width: 120,
       headerName: headerMap[10],
       editable: shutdownMonths?.includes(10),
       isDisabled: !shutdownMonths?.includes(10),
@@ -300,6 +309,7 @@ const ShutdownNorms = () => {
     },
     {
       field: 'november',
+      width: 120,
       headerName: headerMap[11],
       editable: shutdownMonths?.includes(11),
       isDisabled: !shutdownMonths?.includes(11),
@@ -308,6 +318,7 @@ const ShutdownNorms = () => {
     },
     {
       field: 'december',
+      width: 120,
       headerName: headerMap[12],
       editable: shutdownMonths?.includes(12),
       isDisabled: !shutdownMonths?.includes(12),
@@ -316,6 +327,7 @@ const ShutdownNorms = () => {
     },
     {
       field: 'january',
+      width: 120,
       headerName: headerMap[1],
       editable: shutdownMonths?.includes(1),
       isDisabled: !shutdownMonths?.includes(1),
@@ -324,6 +336,7 @@ const ShutdownNorms = () => {
     },
     {
       field: 'february',
+      width: 120,
       headerName: headerMap[2],
       editable: shutdownMonths?.includes(2),
       isDisabled: !shutdownMonths?.includes(2),
@@ -332,6 +345,7 @@ const ShutdownNorms = () => {
     },
     {
       field: 'march',
+      width: 120,
       headerName: headerMap[3],
       editable: shutdownMonths?.includes(3),
       isDisabled: !shutdownMonths?.includes(3),
@@ -341,7 +355,7 @@ const ShutdownNorms = () => {
     {
       field: 'remarks',
       headerName: 'Remark',
-      minWidth: 125,
+      width: 120,
       editable: false,
     },
     {

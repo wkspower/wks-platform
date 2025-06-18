@@ -16,6 +16,7 @@ import {
   MenuItem,
   TextField,
 } from '../../../node_modules/@mui/material/index'
+import { GridEditCell } from '@progress/kendo-react-grid'
 
 import DownloadIcon from '@mui/icons-material/Download'
 import UploadIcon from '@mui/icons-material/Upload'
@@ -42,6 +43,9 @@ import {
 } from './Utilities-Kendo/durationHelpers'
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import * as XLSX from 'xlsx'
+import DateTimePickerr from './Utilities-Kendo/DatePicker'
+import DateOnlyPicker from './Utilities-Kendo/DatePicker'
+import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
 
 export const particulars = [
   'normParametersFKId',
@@ -97,6 +101,7 @@ const KendoDataTables = ({
   deleteRowData = () => {},
   handleAddPlantSite = () => {},
   handleCalculate = () => {},
+  handleLoad = () => {},
   fetchData = () => {},
   handleUnitChange = () => {},
   handleRemarkCellClick = () => {},
@@ -107,6 +112,7 @@ const KendoDataTables = ({
   setSelectMode = () => {},
   handleExcelUpload = () => {},
   downloadExcelForConfiguration = () => {},
+  onLoad = () => {},
 }) => {
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
@@ -124,6 +130,8 @@ const KendoDataTables = ({
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
   const initialGroup = groupBy ? [{ field: groupBy }] : []
   const fileInputRef = useRef(null)
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
 
   const handleEditChange = useCallback((e) => {
     setEdit(e.edit)
@@ -501,6 +509,22 @@ const KendoDataTables = ({
     )
   }
 
+  const ConditionalDateEditorForConstantValue = (props) => {
+    if (props.dataItem.UOM === 'Date') {
+      return <DateOnlyPicker {...props} />
+    }
+
+    return <NoSpinnerNumericEditor {...props} />
+  }
+
+  const [isLoadEnabled, setIsLoadEnabled] = useState(false)
+
+  const handleLoadClick = () => {
+    if (onLoad && startDate && endDate) {
+      onLoad(startDate, endDate)
+    }
+  }
+
   return (
     <div style={{ position: 'relative' }}>
       {loading && (
@@ -560,6 +584,53 @@ const KendoDataTables = ({
               >
                 Add Item
               </Button>
+            )}
+            {permissions?.showLoad && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {/* Start Date */}
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <label htmlFor='start-date'>Start Date</label>
+                  <DatePicker
+                    id='start-date'
+                    format='dd-MM-yyyy'
+                    value={startDate}
+                    onChange={(e) => {
+                      setStartDate(e.value)
+                      setIsLoadEnabled(true)
+                    }}
+                    placeholder='Select Start Date'
+                    style={{ width: '180px' }}
+                  />
+                </Box>
+
+                {/* End Date */}
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <label htmlFor='end-date'>End Date</label>
+                  <DatePicker
+                    id='end-date'
+                    format='dd-MM-yyyy'
+                    value={endDate}
+                    onChange={(e) => {
+                      setEndDate(e.value)
+                      setIsLoadEnabled(true)
+                    }}
+                    placeholder='Select End Date'
+                    style={{ width: '180px' }}
+                  />
+                </Box>
+
+                {/* Load Button */}
+                <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
+                  <Button
+                    variant='contained'
+                    onClick={handleLoadClick}
+                    className='btn-save'
+                    disabled={!isLoadEnabled}
+                  >
+                    Load
+                  </Button>
+                </Box>
+              </Box>
             )}
 
             {permissions?.downloadExcelBtn && (
@@ -624,6 +695,7 @@ const KendoDataTables = ({
                 Calculate
               </Button>
             )}
+
             {permissions?.showRefresh && (
               <Button
                 variant='contained'
@@ -817,7 +889,7 @@ const KendoDataTables = ({
                 return (
                   <GridColumn
                     key='DisplayName'
-                    field='Particulars'
+                    field={col?.field}
                     title={col.title || col.headerName}
                     width={col?.width}
                     editable={false}
@@ -913,6 +985,25 @@ const KendoDataTables = ({
                     columnMenu={ColumnMenuCheckboxFilter}
                     filter='numeric'
                     format={col.format}
+                  />
+                )
+              }
+
+              if (col.field === 'ConstantValue') {
+                return (
+                  <GridColumn
+                    key={col.field}
+                    field={col.field}
+                    title={col.title || col.headerName}
+                    width={col.width}
+                    hidden={col.hidden}
+                    editable={!!col?.editable}
+                    headerClassName={isActive ? 'active-column' : ''}
+                    cells={{
+                      edit: { text: NoSpinnerNumericEditor },
+                      data: toolTipRenderer,
+                    }}
+                    columnMenu={ColumnMenuCheckboxFilter}
                   />
                 )
               }

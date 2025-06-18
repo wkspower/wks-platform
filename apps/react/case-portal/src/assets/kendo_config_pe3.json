@@ -20,8 +20,7 @@
   {
     "field": "productName",
     "title": "Particulars",
-    "editable": false,
-    "hidden": true
+    "editable": false
   },
   {
     "field": "apr",
@@ -29,7 +28,8 @@
     "editable": true,
     "align": "left",
     "headerAlign": "left",
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.###}"
   },
   {
     "field": "remarks",
