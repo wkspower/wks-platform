@@ -150,6 +150,23 @@ const ConfigurationTable = () => {
     }
   }
 
+  // New function to fetch grade data for PE vertical
+  const fetchGradeData = async () => {
+    setLoading(true)
+    try {
+      var data = await DataService.getPeConfigData(keycloak)
+      const formattedData = data.map((item, index) => ({
+        ...item,
+        id: index,
+      }))
+      setGradeData(formattedData)
+    } catch (error) {
+      console.error('Error fetching grade data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const getConfigurationTabsMatrix = async () => {
     setLoading(true)
     try {
@@ -194,7 +211,10 @@ const ConfigurationTable = () => {
   useEffect(() => {
     getConfigurationTabsMatrix()
     getConfigurationAvailableTabs()
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+    if (vertName=== 'PE') {
+    fetchGradeData()
+    }
+  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName,vertName])
 
   const getTheId = (name) => {
     const tab = availableTabs.find((tab) => tab.name === name)
@@ -356,11 +376,13 @@ const ConfigurationTable = () => {
                     // groupBy2='ConfigTypeDisplayName'
                   />
                 )
-              case getTheId('Receipe'): // Receipe
+              case getTheId('Receipe'): // Receipe - Fixed to use gradeFetchData
+              console.log("gradedata:", gradeData)
                 return (
                   <SelectivityData
                     rows={gradeData}
                     loading={loading}
+                    fetchData={fetchGradeData}
                     setRows={setGradeData}
                     configType='grades'
                   />

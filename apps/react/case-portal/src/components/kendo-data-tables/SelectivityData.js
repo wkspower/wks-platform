@@ -241,7 +241,7 @@ const SelectivityData = (props) => {
     if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
       props?.fetchData()
     }
-    if (props?.configType === 'grades') fetchConfigData()
+    //if (props?.configType === 'grades') fetchConfigData()
   }, [
     sitePlantChange,
     oldYear,
