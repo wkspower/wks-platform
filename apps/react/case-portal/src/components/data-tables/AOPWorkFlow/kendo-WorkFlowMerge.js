@@ -18,6 +18,7 @@ import {
   Stack,
   Tab,
   Tabs,
+  Typography,
 } from '../../../../node_modules/@mui/material/index'
 // import '../data-tables/data-grid-css.css'
 // import { CaseService } from 'services/CaseService'
@@ -569,6 +570,10 @@ const WorkFlowMerge = () => {
           ))}
         </Stepper>
 
+        <Typography component='div' className='grid-header'>
+          * Prices - MIIS BPC table, Actual values - MIIS Contribution (YTD).
+        </Typography>
+
         <Stack
           direction='row'
           alignItems='center'
@@ -576,6 +581,7 @@ const WorkFlowMerge = () => {
           sx={{ mt: 0, mb: '-5px' }}
         >
           {/* LEFT: Tabs */}
+
           <Tabs
             value={tabIndex}
             onChange={(e, newIndex) => setTabIndex(newIndex)}

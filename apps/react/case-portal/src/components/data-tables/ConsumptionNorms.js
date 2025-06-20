@@ -225,49 +225,6 @@ const NormalOpNormsScreen = () => {
     }
   }
 
-  const saveSummary = async () => {
-    setLoading(true)
-    try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      let year = localStorage.getItem('year')
-      const response = await DataService.saveSummaryAOPConsumptionNorm(
-        plantId,
-        year,
-        summary,
-        keycloak,
-      )
-
-      if (response?.code == 200) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Summary Saved Successfully!',
-          severity: 'success',
-        })
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Summary Saved Failed!',
-          severity: 'error',
-        })
-      }
-
-      //
-
-      setLoading(false)
-      return response
-    } catch (error) {
-      console.error('Error saving Summary!', error)
-    } finally {
-      //
-      setLoading(false)
-    }
-  }
-
   const saveChanges = React.useCallback(async () => {
     const rowsInEditMode = Object.keys(rowModesModel).filter(
       (id) => rowModesModel[id]?.mode === 'edit',
@@ -462,25 +419,25 @@ const NormalOpNormsScreen = () => {
       setCalculatebtnClicked(false)
     }
   }
-  const getAopSummary = async () => {
-    setLoading(true)
-    try {
-      var res = await DataService.getAopSummary(keycloak)
+  // const getAopSummary = async () => {
+  //   setLoading(true)
+  //   try {
+  //     var res = await DataService.getAopSummary(keycloak)
 
-      if (res?.code == 200) {
-        setSummary(res?.data?.summary)
-      } else {
-        setSummary('')
-      }
+  //     if (res?.code == 200) {
+  //       setSummary(res?.data?.summary)
+  //     } else {
+  //       setSummary('')
+  //     }
 
-      setLoading(false)
-      setCalculatebtnClicked(false)
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      setLoading(false)
-      setCalculatebtnClicked(false)
-    }
-  }
+  //     setLoading(false)
+  //     setCalculatebtnClicked(false)
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error)
+  //     setLoading(false)
+  //     setCalculatebtnClicked(false)
+  //   }
+  // }
 
   useEffect(() => {
     const getAllProducts = async () => {
@@ -499,7 +456,7 @@ const NormalOpNormsScreen = () => {
 
     getAllProducts()
     fetchData()
-    getAopSummary()
+    // getAopSummary()
   }, [
     sitePlantChange,
     oldYear,
@@ -661,11 +618,6 @@ const NormalOpNormsScreen = () => {
   }
   const defaultCustomHeight = { mainBox: '55vh', otherBox: '112%' }
 
-  const handleSave = () => {
-    // console.log('Summary:', summary)
-    saveSummary()
-  }
-
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -805,59 +757,6 @@ const NormalOpNormsScreen = () => {
           </CustomAccordion>
         )}
       </div>
-      <Typography
-        component='div'
-        sx={{ fontWeight: 'bold', ml: '5px', mt: '25px' }}
-      >
-        Consumption AOP Summary
-      </Typography>
-
-      <TextField
-        label='Summary'
-        multiline
-        // minRows={isAccordionExpanded ? 4 : 20}
-        minRows={4}
-        fullWidth
-        margin='normal'
-        variant='outlined'
-        disabled={isOldYear == 1}
-        value={summary}
-        onChange={(e) => setSummary(e.target.value)}
-        sx={{
-          '& .MuiInputBase-root': {
-            backgroundColor: '#ffffff',
-            borderRadius: '8px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            padding: '8px',
-          },
-          '& label': {
-            fontSize: '1rem',
-            color: '#666',
-            lineHeight: '1.2',
-            transform: 'translate(14px, 12px) scale(1)',
-          },
-          '& .MuiInputLabel-shrink': {
-            transform: 'translate(14px, -6px) scale(0.75)',
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#ccc',
-          },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#999',
-          },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#1976d2',
-          },
-          '& .MuiInputBase-input': {
-            resize: 'vertical',
-          },
-        }}
-      />
-      {isOldYear !== 1 && (
-        <Button variant='contained' className='btn-save' onClick={handleSave}>
-          Save
-        </Button>
-      )}
     </div>
   )
 }

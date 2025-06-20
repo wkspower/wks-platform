@@ -290,11 +290,11 @@ const ProductionvolumeData = ({ permissions }) => {
         setRows([])
         setLoading(false)
 
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Error fetching data. Please try again.',
-          severity: 'error',
-        })
+        // setSnackbarOpen(true)
+        // setSnackbarData({
+        //   message: 'Error fetching data. Please try again.',
+        //   severity: 'error',
+        // })
 
         return
       }

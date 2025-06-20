@@ -128,7 +128,7 @@ const NormsHistorianBasis = () => {
 
     options1.sheets[0].title = 'Production Volume'
     options1.sheets[1].title = 'MCU & Norm'
-    options1.sheets[2].title = 'Historian Values'
+    options1.sheets[2].title = 'Current Values'
 
     exportRef1.current.save(options1)
   }
@@ -232,7 +232,7 @@ const NormsHistorianBasis = () => {
         {/* Accordion 3 */}
         <CustomAccordion defaultExpanded disableGutters>
           <CustomAccordionSummary>
-            <Typography className='grid-title'>Historian Values</Typography>
+            <Typography className='grid-title'>Current Values</Typography>
           </CustomAccordionSummary>
           <CustomAccordionDetails>
             <Box sx={{ width: '100%' }}>

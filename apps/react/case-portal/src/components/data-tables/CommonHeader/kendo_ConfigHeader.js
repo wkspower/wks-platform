@@ -3,13 +3,15 @@ import productionColumnsConstants from '../../../assets/kendo_config_meg constan
 import productionColumnsPE1 from '../../../assets/kendo_config_pe1.json'
 import productionColumnsPE2 from '../../../assets/kendo_config_pe2.json'
 import productionColumnsPE3 from '../../../assets/kendo_config_pe3.json'
-import productionColumnsPE4 from '../../../assets/kendo_config_pe4.json'
+// import productionColumnsPE4 from '../../../assets/kendo_config_pe4.json'
 import crackerColumns from '../../../assets/kendo_config_cracker_coldefs.json'
 import cracker_composition from '../../../assets/kendo_config_cracker_composition.json'
 
 const getConfigByType = (configType) => {
   switch (configType) {
     case 'meg':
+      return productionColumns
+    case 'megConstantsMannualEntry':
       return productionColumns
     case 'megConstants':
       return productionColumnsConstants
@@ -19,8 +21,8 @@ const getConfigByType = (configType) => {
       return productionColumnsPE2
     case 'ShutdownNorms':
       return productionColumnsPE3
-    case 'grades':
-      return productionColumnsPE4
+    // case 'grades':
+    //   return productionColumnsPE4
     case 'production':
       return productionColumns
     case 'consumption':
@@ -46,8 +48,7 @@ const getEnhancedAOPColDefs = ({
         field: 'ReceipeName',
         title: 'Receipe',
         editable: false,
-        width: 120,
-        type: 'non-number',
+        width1: 200,
       },
     ]
     allGradesReciepes?.forEach((field) => {
@@ -55,8 +56,8 @@ const getEnhancedAOPColDefs = ({
         field: field?.id?.toUpperCase(),
         title: field?.displayName,
         editable: true,
-        type: 'numberWidth',
-        width: 120,
+        width1: 200,
+        type: 'Receipe',
       })
     })
   } else {

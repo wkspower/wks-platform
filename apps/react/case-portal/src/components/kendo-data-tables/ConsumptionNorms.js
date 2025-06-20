@@ -179,49 +179,6 @@ const ConsumptionNorms = () => {
     }
   }
 
-  const saveSummary = async () => {
-    setLoading(true)
-    try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      let year = localStorage.getItem('year')
-      const response = await DataService.saveSummaryAOPConsumptionNorm(
-        plantId,
-        year,
-        summary,
-        keycloak,
-      )
-
-      if (response?.code == 200) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Summary Saved Successfully!',
-          severity: 'success',
-        })
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Summary Saved Failed!',
-          severity: 'error',
-        })
-      }
-
-      //
-
-      setLoading(false)
-      return response
-    } catch (error) {
-      console.error('Error saving Summary!', error)
-    } finally {
-      //
-      setLoading(false)
-    }
-  }
-
   const saveChanges = React.useCallback(async () => {
     setLoading(true)
 
@@ -359,29 +316,29 @@ const ConsumptionNorms = () => {
     }
   }
 
-  const getAopSummary = async () => {
-    setLoading(true)
-    try {
-      var res = await DataService.getAopSummary(keycloak)
+  // const getAopSummary = async () => {
+  //   setLoading(true)
+  //   try {
+  //     var res = await DataService.getAopSummary(keycloak)
 
-      if (res?.code == 200) {
-        setSummary(res?.data?.summary)
-      } else {
-        setSummary('')
-      }
+  //     if (res?.code == 200) {
+  //       setSummary(res?.data?.summary)
+  //     } else {
+  //       setSummary('')
+  //     }
 
-      setLoading(false)
-      setCalculatebtnClicked(false)
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      setLoading(false)
-      setCalculatebtnClicked(false)
-    }
-  }
+  //     setLoading(false)
+  //     setCalculatebtnClicked(false)
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error)
+  //     setLoading(false)
+  //     setCalculatebtnClicked(false)
+  //   }
+  // }
 
   useEffect(() => {
     fetchData()
-    getAopSummary()
+    // getAopSummary()
   }, [
     sitePlantChange,
     oldYear,
@@ -531,11 +488,6 @@ const ConsumptionNorms = () => {
     }
   }
   const defaultCustomHeight = { mainBox: '55vh', otherBox: '112%' }
-
-  const handleSave = () => {
-    // console.log('Summary:', summary)
-    saveSummary()
-  }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions

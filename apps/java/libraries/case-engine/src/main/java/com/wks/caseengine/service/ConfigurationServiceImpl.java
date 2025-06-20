@@ -104,13 +104,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
-	
+
 	private DataSource dataSource;
-	
+
 	public ConfigurationServiceImpl(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
-
 
 	public byte[] createExcel(String year, UUID plantFKId) {
 		try {
@@ -357,35 +356,36 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-	
-	public AOPMessageVM getConfigurationExecution( String year, String plantId) {
+
+	public AOPMessageVM getConfigurationExecution(String year, String plantId) {
 		try {
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			List<Object[]> rows = normAttributeTransactionsRepository
-				    .findByPlantIdAndYear(
-				        UUID.fromString(plantId),  // convert incoming String to UUID
-				        year                        // String, matching your signature
-				    );
+					.findByPlantIdAndYear(
+							UUID.fromString(plantId), // convert incoming String to UUID
+							year // String, matching your signature
+					);
 
-	        List<Map<String, Object>> configurationConstantsList = new ArrayList<>();
-	        for (Object[] row : rows) {
-	            Map<String, Object> map = new HashMap<>();
+			List<Map<String, Object>> configurationConstantsList = new ArrayList<>();
+			for (Object[] row : rows) {
+				Map<String, Object> map = new HashMap<>();
 
-	            map.put("Id",        row[0]);
-	            map.put("AttributeValue", row[1]);
-	            map.put("AOPMonth",          row[2]);
-	            map.put("AuditYear",         row[3]);
-	            map.put("Remarks",           row[4]);
-	            map.put("CreatedOn",       row[5]);
-	            map.put("ModifiedOn",           row[6]);
-	            map.put("AttributeValueVersion", row[7]);
-	            map.put("User",             row[8]);
-	            map.put("NormParameter_FK_Id",   row[9]);
-	            map.put("plantId",  row[10]);
-	            map.put("IsMonthwise", row[11]);
+				map.put("Id", row[0]);
+				map.put("AttributeValue", row[1]);
+				map.put("AOPMonth", row[2]);
+				map.put("AuditYear", row[3]);
+				map.put("Remarks", row[4]);
+				map.put("CreatedOn", row[5]);
+				map.put("ModifiedOn", row[6]);
+				map.put("AttributeValueVersion", row[7]);
+				map.put("User", row[8]);
+				map.put("Name", row[9]);
+				map.put("NormParameter_FK_Id", row[10]);
+				map.put("plantId", row[11]);
+				map.put("IsMonthwise", row[12]);
 
-	            configurationConstantsList.add(map);
-	        }
+				configurationConstantsList.add(map);
+			}
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data fetched successfully");
 			aopMessageVM.setData(configurationConstantsList);
@@ -397,37 +397,47 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-	
+
 	public AOPMessageVM saveConfigurationExecution(List<ExecutionDetailDto> executionDetailDtoList) {
-		
-		for(ExecutionDetailDto executionDetailDto:executionDetailDtoList) {
-			NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+
+		for (ExecutionDetailDto executionDetailDto : executionDetailDtoList) {
+			NormAttributeTransactions normAttributeTransactions = null;
+			if (executionDetailDto.getId() != null) {
+				normAttributeTransactions = normAttributeTransactionsRepository.findById((executionDetailDto.getId()))
+						.get();
+			} else {
+				normAttributeTransactions = new NormAttributeTransactions();
+			}
+
 			normAttributeTransactions.setNormParameterFKId(executionDetailDto.getNormParameterFKId());
 			normAttributeTransactions.setAttributeValue(executionDetailDto.getApr());
 			normAttributeTransactions.setRemarks(executionDetailDto.getRemarks());
 			normAttributeTransactions.setAopMonth(4);
 			normAttributeTransactions.setAuditYear(executionDetailDto.getAuditYear());
 			normAttributeTransactionsRepository.save(normAttributeTransactions);
+
 		}
-		ExecutionDetailDto executionDetailDto1 =executionDetailDtoList.get(0);
-		String periodFrom=executionDetailDto1.getApr();
-		ExecutionDetailDto executionDetailDto2 =executionDetailDtoList.get(1);
-		String periodTo=executionDetailDto2.getApr();
-		String plantId=executionDetailDto2.getPlantId();
-		String finYear=executionDetailDto2.getAuditYear();
+
+		ExecutionDetailDto executionDetailDto1 = executionDetailDtoList.get(0);
+		String periodFrom = executionDetailDto1.getApr();
+		ExecutionDetailDto executionDetailDto2 = executionDetailDtoList.get(1);
+		String periodTo = executionDetailDto2.getApr();
+		String plantId = executionDetailDto2.getPlantId();
+		String finYear = executionDetailDto2.getAuditYear();
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
-		String procedureName=vertical.getName()+"_"+site.getName()+"_GetValuesforConsecutiveDays";
-		executeDynamicUpdateProcedure( procedureName,  plantId,  finYear,  periodFrom,
-				 periodTo);
+
+		String procedureName = vertical.getName() + "_" + site.getName() + "_GetValuesforConsecutiveDays";
+		executeDynamicUpdateProcedure(procedureName, plantId, finYear, periodFrom,
+				periodTo);
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data saved successfully");
 			aopMessageVM.setData(executionDetailDtoList);
 			return aopMessageVM;
-		}catch (Exception ex) {
+		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
@@ -453,12 +463,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				connection.commit();
 			}
 
-			
-
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
+
 	public AOPMessageVM getConfigurationConstants(String year, String plantFKId) {
 		try {
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
@@ -480,14 +489,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				map.put("AuditYear", row[6]);
 				map.put("Remarks", row[7]);
 				boolean isEditable;
-			    Object flagObj = row[8];
-			    if (flagObj instanceof Boolean) {
-			        isEditable = (Boolean) flagObj;
-			    } else if (flagObj instanceof Number) {
-			        isEditable = ((Number) flagObj).intValue() == 1;
-			    } else {
-			        isEditable = false; // or default
-			    }
+				Object flagObj = row[8];
+				if (flagObj instanceof Boolean) {
+					isEditable = (Boolean) flagObj;
+				} else if (flagObj instanceof Number) {
+					isEditable = ((Number) flagObj).intValue() == 1;
+				} else {
+					isEditable = false; // or default
+				}
 				map.put("isEditable", isEditable);
 				configurationConstantsList.add(map); // Add the map to the list here
 			}
