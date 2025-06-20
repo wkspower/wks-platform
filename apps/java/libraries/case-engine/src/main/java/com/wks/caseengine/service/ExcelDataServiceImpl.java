@@ -196,9 +196,9 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     }
 
     @Override
-    public List<List<Object>> getAOPData(String plantId, String year) {
+    public List<List<Object>> getAOPData(String plantId, String year,String type) {
 
-        AOPMessageVM aopMessageVM = aopService.getAOPData(plantId, year);
+        AOPMessageVM aopMessageVM = aopService.getAOPData(plantId, year,type);
 
         Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
         List<AOPDTO> aOPList = (List<AOPDTO>) responseMap.get("aopDTOList");

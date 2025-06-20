@@ -43,4 +43,10 @@ public class AOPDTO {
     private String siteFKId;
     private String verticalFKId;
     private String normParameterName;
+    private String normParameterDisplayName;
+    private String normParameterTypeId;
+    private String displayName;
+    private String remark;
+    private Boolean isEditable;
+    private Boolean isVisible;
 }

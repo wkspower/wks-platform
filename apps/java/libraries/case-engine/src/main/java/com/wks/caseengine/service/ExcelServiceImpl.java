@@ -38,7 +38,7 @@ public class ExcelServiceImpl implements ExcelService {
     @Autowired
     private SiteRepository siteRepository;
 
-    public byte[] generateFlexibleExcel(Map<String, Object> data1, String plantId, String year) {
+    public byte[] generateFlexibleExcel(Map<String, Object> data1, String plantId, String year,String type) {
         try {
             Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
             Sites site = siteRepository.findById(plant.getSiteFkId()).get();
@@ -117,7 +117,7 @@ public class ExcelServiceImpl implements ExcelService {
                         }
                         if (tableCount == 1) {
                             title = "Main Products - Production for the budget year";
-                            rows = excelDataService.getAOPData(plantId, year);
+                            rows = excelDataService.getAOPData(plantId, year,type);
                         }
                     } else if (sheetName.equalsIgnoreCase("Monthwise Raw Data")) {
 

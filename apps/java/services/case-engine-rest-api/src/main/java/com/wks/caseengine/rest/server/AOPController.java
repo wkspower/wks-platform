@@ -24,8 +24,8 @@ public class AOPController {
 	private AOPService aopService;
 	
 	@GetMapping(value="/getAOP")
-	public AOPMessageVM getAOP(@RequestParam String plantId,@RequestParam String year){
-		 return  aopService.getAOPData(plantId,year);
+	public AOPMessageVM getAOP(@RequestParam String plantId,@RequestParam String year,String type){
+		 return  aopService.getAOPData(plantId,year,type);
 	}
 	
 	@PutMapping(value="/updateAOP")

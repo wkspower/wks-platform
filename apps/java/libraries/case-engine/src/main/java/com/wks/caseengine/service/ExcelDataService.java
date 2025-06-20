@@ -23,7 +23,7 @@ public interface ExcelDataService {
 
     List<List<Object>> getReportForPlantContributionYearWise(String plantId, String year, String reportType);
 
-    List<List<Object>> getAOPData(String plantId, String year);
+    List<List<Object>> getAOPData(String plantId, String year,String type);
 
     Map<String,Object> getProductionAOPWorkflowData(String plantId, String year);
 

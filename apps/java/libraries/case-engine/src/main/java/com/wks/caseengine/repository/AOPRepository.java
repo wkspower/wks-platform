@@ -28,18 +28,17 @@ public interface AOPRepository extends JpaRepository<AOP, UUID>{
     List<AOP> findAllByAopYearAndPlantFkId(String year, UUID fromString);
     
     @Query(value = """
- 	       SELECT AOP.Id, AOP.AOPCaseId, AOP.AOPStatus, AOP.AOPRemarks, 
-		       AOP.AOPType, AOP.Jan, AOP.Feb, AOP.March, AOP.April, AOP.May, AOP.June, 
-		       AOP.July, AOP.Aug, AOP.Sep, AOP.Oct, AOP.Nov, AOP.Dec, AOP.AOPYear, 
-		       AOP.Plant_FK_Id, AOP.AvgTPH, AOP.Material_FK_Id, NP.DisplayOrder, NP.DisplayName
-		FROM AOP AOP
-		JOIN NormParameters NP ON AOP.Material_FK_Id = NP.Id
-		JOIN NormParameterType NPT ON NPT.Id = NP.NormParameterType_FK_Id
-		WHERE AOP.AOPYear = :aopYear 
-		AND AOP.Plant_FK_Id = :plantFkId 
-		ORDER BY NP.DisplayOrder;
+ 	       SELECT Id, NormParameterName, NormParameterDisplayName, NormParameterType_FK_Id, 
+		       Material_FK_Id, DisplayName, April, May, June, 
+		       July, Aug, Sep, Oct, Nov, Dec,Jan,Feb,March,AvgTPH,AOPRemarks, DisplayOrder, 
+		       IsEditable, IsVisible
+		FROM vwScrnAOP
+		WHERE AOPYear = :AOPYear 
+		AND Plant_FK_Id = :Plant_FK_Id 
+		AND NormParameterName = :NormParameterName
+		ORDER BY DisplayOrder;
  	        """, nativeQuery = true)
- 	    List<Object[]> findByAOPYearAndPlantFkId(@Param("aopYear") String aopYear, @Param("plantFkId") UUID plantFkId);
+ 	    List<Object[]> findByAOPYearAndPlantFkId(@Param("AOPYear") String AOPYear, @Param("Plant_FK_Id") UUID Plant_FK_Id,@Param("NormParameterName") String NormParameterName);
 
     
  @Query(value="SELECT *" + 

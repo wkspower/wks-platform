@@ -34,11 +34,11 @@ public class ProductionVolumeDataReportExportController {
 	@PostMapping(value = "/export-excel")
 	public ResponseEntity<byte[]> exportPlantProductionPlanReport(
 	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year,
+            @RequestParam("year") String year,@RequestParam("type") String type,
 			@RequestBody Map<String, Object> data
 	        ) {
 	    try {
-	        byte[] excelBytes = excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        byte[] excelBytes = excelService.generateFlexibleExcel(data, plantId, year,type);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
