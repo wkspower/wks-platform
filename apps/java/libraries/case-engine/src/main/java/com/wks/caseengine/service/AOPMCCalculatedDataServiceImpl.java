@@ -2,6 +2,7 @@ package com.wks.caseengine.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
@@ -11,11 +12,25 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import javax.sql.DataSource;
+
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
+import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.entity.AOPMCCalculatedData;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.Plants;
@@ -27,8 +42,12 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AOPMCCalculatedDataRepository;
 import com.wks.caseengine.repository.AopCalculationRepository;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.sql.Connection;
 
 @Service
@@ -238,5 +257,246 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			return aopMessageVM;
 		}
 	}
+	
+	public byte[] createExcel(String year, UUID plantFKId) {
+		try {
+			List<Object[]> obj = aOPMCCalculatedDataRepository.getDataMCUValuesAllData(year, plantFKId.toString());
+			Workbook workbook = new XSSFWorkbook();
+			Sheet sheet = workbook.createSheet("Sheet1");
+			int currentRow = 0;
+			// List<List<Object>> rows = new ArrayList<>();
+
+			List<List<Object>> rows = new ArrayList<>();
+			// Data rows
+			for (Object[] row : obj) { 
+				
+					List<Object> list = new ArrayList<>();
+					list.add(row[24] != null ? row[24].toString() : null);
+					list.add(row[4] != null ? Double.parseDouble(row[4].toString()) : null);
+					list.add(row[5] != null ? Double.parseDouble(row[5].toString()) : null);
+					list.add(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
+					list.add(row[7] != null ? Double.parseDouble(row[7].toString()) : null);
+					list.add(row[8] != null ? Double.parseDouble(row[8].toString()) : null);
+					list.add(row[9] != null ? Double.parseDouble(row[9].toString()) : null);
+					list.add(row[10] != null ? Double.parseDouble(row[10].toString()) : null);
+					list.add(row[11] != null ? Double.parseDouble(row[11].toString()) : null);
+					list.add(row[12] != null ? Double.parseDouble(row[12].toString()) : null);
+					list.add(row[13] != null ? Double.parseDouble(row[13].toString()) : null);
+					list.add(row[14] != null ? Double.parseDouble(row[14].toString()) : null);
+					list.add(row[15] != null ? Double.parseDouble(row[15].toString()) : null);
+					list.add(row[17] != null ? row[17].toString() : " ");
+					
+					list.add(row[0] != null ? row[0].toString() : null);
+					list.add(row[1] != null ? row[1].toString() : null);
+					list.add(row[2] != null ? row[2].toString() : null);
+					list.add(row[3] != null ? row[3].toString() : null);
+					list.add(row[16] != null ? row[16].toString() : null);
+					list.add(row[22] != null ? row[22].toString() : null);
+					rows.add(list);
+				}
+			
+
+			List<String> innerHeaders = new ArrayList<>();
+			innerHeaders.add("Particulars");
+			List<String> monthsList = getAcademicYearMonths(year);
+			innerHeaders.addAll(monthsList);
+			innerHeaders.add("Remarks");
+			innerHeaders.add("Id");
+			innerHeaders.add("SiteFKId");
+			innerHeaders.add("PlantFKId");
+			innerHeaders.add("MaterialFKId");
+			innerHeaders.add("FinancialYear");
+			innerHeaders.add("VerticalFKId");
+			List<List<String>> headers = new ArrayList<>();
+			headers.add(innerHeaders);
+
+			for (List<String> headerRowData : headers) {
+				Row headerRow = sheet.createRow(currentRow++);
+				for (int col = 0; col < headerRowData.size(); col++) {
+					Cell cell = headerRow.createCell(col);
+					cell.setCellValue(headerRowData.get(col));
+					cell.setCellStyle(createBoldBorderedStyle(workbook));
+				}
+			}
+			for (List<Object> rowData : rows) {
+				Row row1 = sheet.createRow(currentRow++);
+				for (int col = 0; col < rowData.size(); col++) {
+					Cell cell = row1.createCell(col);
+					Object value = rowData.get(col);
+
+					if (value instanceof Number) {
+						cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
+					} else if (value instanceof Boolean) {
+						cell.setCellValue((Boolean) value);
+					} else if (value != null) {
+						cell.setCellValue(value.toString());
+					} else {
+						cell.setCellValue("");
+					}
+
+				}
+			}
+			sheet.setColumnHidden(14, true);
+			sheet.setColumnHidden(15, true);
+			sheet.setColumnHidden(16, true);
+			sheet.setColumnHidden(17, true);
+			sheet.setColumnHidden(18, true);
+			sheet.setColumnHidden(19, true);
+			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
+
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				workbook.write(outputStream);
+				workbook.close();
+				return outputStream.toByteArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+	
+	private CellStyle createBorderedStyle(Workbook wb) {
+		CellStyle style = wb.createCellStyle();
+		style.setBorderBottom(BorderStyle.THIN);
+		style.setBorderTop(BorderStyle.THIN);
+		style.setBorderLeft(BorderStyle.THIN);
+		style.setBorderRight(BorderStyle.THIN);
+		return style;
+	}
+
+	private CellStyle createBoldStyle(Workbook wb) {
+		Font font = wb.createFont();
+		font.setBold(true);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		return style;
+	}
+
+	private CellStyle createBoldBorderedStyle(Workbook workbook) {
+		CellStyle style = createBorderedStyle(workbook);
+		Font font = workbook.createFont();
+		font.setBold(true);
+		style.setFont(font);
+		return style;
+	}
+	
+	@Override
+	public AOPMessageVM importExcel(String year, UUID plantFKId, MultipartFile file) {
+		// TODO Auto-generated method stub
+		try {
+			List<AOPMCCalculatedDataDTO> data = readData(file.getInputStream(), plantFKId, year);
+
+			editAOPMCCalculatedData( data);
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(data);
+			return aopMessageVM;
+			// return ResponseEntity.ok(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// return ResponseEntity.internalServerError().build();
+		}
+		return null;
+	}
+
+	
+	public static List<String> getAcademicYearMonths(String year) {
+		List<String> months = new ArrayList<>();
+		int startYear = Integer.parseInt(year.substring(0, 4));
+		int nextYear = startYear + 1;
+
+		// Apr to Dec of startYear
+		for (int month = 4; month <= 12; month++) {
+			String label = formatMonthYear(month, startYear);
+			months.add(label);
+		}
+
+		// Jan to Mar of nextYear
+		for (int month = 1; month <= 3; month++) {
+			String label = formatMonthYear(month, nextYear);
+			months.add(label);
+		}
+
+		return months;
+	}
+	
+	private static String formatMonthYear(int month, int year) {
+		LocalDate date = LocalDate.of(year, month, 1);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM-yy", Locale.ENGLISH);
+		return date.format(formatter);
+	}
+	
+	public List<AOPMCCalculatedDataDTO> readData(InputStream inputStream, UUID plantFKId, String year) {
+		List<AOPMCCalculatedDataDTO> prodList = new ArrayList<>();
+		
+		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+			Sheet sheet = workbook.getSheetAt(0);
+			Iterator<Row> rowIterator = sheet.iterator();
+
+			if (rowIterator.hasNext())
+				rowIterator.next(); // Skip header
+
+			while (rowIterator.hasNext()) {
+				Row row = rowIterator.next();
+				AOPMCCalculatedDataDTO dto = new AOPMCCalculatedDataDTO();
+				dto.setProductName(getStringCellValue(row.getCell(0)));				
+				dto.setApril(getNumericCellValue(row.getCell(1)));
+				dto.setMay(getNumericCellValue(row.getCell(2)));
+				dto.setJune(getNumericCellValue(row.getCell(3)));
+				dto.setJuly(getNumericCellValue(row.getCell(4)));
+				dto.setAugust(getNumericCellValue(row.getCell(5)));
+				dto.setSeptember(getNumericCellValue(row.getCell(6)));
+				dto.setOctober(getNumericCellValue(row.getCell(7)));
+				dto.setNovember(getNumericCellValue(row.getCell(8)));
+				dto.setDecember(getNumericCellValue(row.getCell(9)));
+				dto.setJanuary(getNumericCellValue(row.getCell(10)));
+				dto.setFebruary(getNumericCellValue(row.getCell(11)));
+				dto.setMarch(getNumericCellValue(row.getCell(12)));
+				dto.setRemarks(getStringCellValue(row.getCell(13)));		
+				dto.setId(getStringCellValue(row.getCell(14)));
+				dto.setSiteFKId(getStringCellValue(row.getCell(15)));
+				dto.setPlantFKId(getStringCellValue(row.getCell(16)));
+				dto.setMaterialFKId(getStringCellValue(row.getCell(17)));
+				dto.setFinancialYear(getStringCellValue(row.getCell(18)));
+				dto.setVerticalFKId(getStringCellValue(row.getCell(19)));
+				
+				prodList.add(dto);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return prodList;
+	}
+
+	private static String getStringCellValue(Cell cell) {
+		if (cell == null)
+			return null;
+		cell.setCellType(CellType.STRING);
+		return cell.getStringCellValue().trim();
+	}
+
+	private static Double getNumericCellValue(Cell cell) {
+		if (cell == null)
+			return null;
+		if (cell.getCellType() == CellType.NUMERIC) {
+			return cell.getNumericCellValue();
+		} else if (cell.getCellType() == CellType.STRING) {
+			try {
+				return Double.parseDouble(cell.getStringCellValue().trim());
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+		return null;
+	}
+
+
 
 }
