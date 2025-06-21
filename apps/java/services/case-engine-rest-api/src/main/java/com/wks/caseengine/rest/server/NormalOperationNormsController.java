@@ -32,6 +32,11 @@ public class NormalOperationNormsController {
 	public AOPMessageVM getNormalOperationNormsData(@RequestParam String year,@RequestParam String plantId){
 		return	normalOperationNormsService.getNormalOperationNormsData(year, plantId);
 	}
+	
+	@GetMapping(value="/calculate-normal-ops-norms")
+	public AOPMessageVM calculateNormalOpsNorms(@RequestParam String aopYear,@RequestParam String plantId,@RequestParam String siteId,@RequestParam String verticalId){
+		return	normalOperationNormsService.calculateNormalOpsNorms(aopYear, plantId,siteId,verticalId);
+	}
 
 	@GetMapping(value = "/norms-transactions")
 	public AOPMessageVM getNormsTransaction(@RequestParam String plantId, @RequestParam String year) {

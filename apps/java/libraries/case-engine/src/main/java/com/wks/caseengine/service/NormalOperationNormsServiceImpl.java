@@ -665,4 +665,41 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		return style;
 	}
 
+	@Override
+	public AOPMessageVM calculateNormalOpsNorms(String aopYear, String plantId, String siteId, String verticalId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetNormsValue";
+		String callSql = "{call " + storedProcedure + "(?, ?, ?, ?)}";
+		
+		try (Connection connection = dataSource.getConnection();
+				CallableStatement stmt = connection.prepareCall(callSql)) {
+
+			// Set parameters
+			stmt.setString(1, plantId);
+			stmt.setString(2, siteId);
+			stmt.setString(3, verticalId);
+			stmt.setString(4, aopYear);
+
+			// Execute the stored procedure
+			  stmt.executeUpdate();
+
+			// Optional: commit if auto-commit is off
+			if (!connection.getAutoCommit()) {
+				connection.commit();
+			}
+
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("SP Executed successfully");
+		//aopMessageVM.setData(rowsAffected);
+		return aopMessageVM;
+
+	}
+
 }

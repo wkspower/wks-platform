@@ -13,7 +13,7 @@ public interface NormalOperationNormsService {
 	public AOPMessageVM getNormalOperationNormsData( String year, String plantId);
 	public List<MCUNormsValueDTO> saveNormalOperationNormsData( List<MCUNormsValueDTO> mCUNormsValueDTOList, UUID plantFKId, String year);
 	public AOPMessageVM calculateExpressionConsumptionNorms(String year,String plantId);
-	
+	public AOPMessageVM calculateNormalOpsNorms(String aopYear, String plantId, String siteId, String verticalId);
 	AOPMessageVM getNormsTransaction(String plantId, String aopYear);
 	 public byte[] createExcel(String year, UUID plantFKId);
     public AOPMessageVM importExcel(String year, UUID fromString, MultipartFile file);
