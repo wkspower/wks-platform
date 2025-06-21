@@ -258,8 +258,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 			String viewName = "vwScrn" + verticalName + "GetConfigTypes";
 			List<Object[]> obj = new ArrayList<>();
-			if (verticalName.equalsIgnoreCase("MEG")) {
-				obj = findByYearAndPlantFkIdMEG(year, plantFKId, viewName);
+			if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")) {
+				
+				String procedureName=verticalName+"_GetConfiguration";
+				obj = findByYearAndPlantFkIdMEG(year, plantFKId, procedureName);
 			} else {
 				obj = findByYearAndPlantFkId(year, plantFKId, viewName);
 			}
@@ -475,7 +477,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantFKId));
 			String procedureName = verticalName + "_GetConfiguration_Constant";
 			List<Object[]> obj = new ArrayList<>();
-			if (verticalName.equalsIgnoreCase("MEG")) {
+			if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER") ) {
 				obj = findConstantsByYearAndPlantFkId(year, plantFKId, procedureName);
 			}
 			for (Object[] row : obj) {
@@ -1058,13 +1060,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 	}
 
-	public List<Object[]> findByYearAndPlantFkIdMEG(String year, UUID plantFKId, String viewName) {
+	public List<Object[]> findByYearAndPlantFkIdMEG(String aopYear, UUID plantId, String procedureName) {
 		try {
-			String sql = "EXEC MEG_GetConfiguration :plantFKId, :year";
+			
+			String sql = "EXEC " + procedureName
+					+ " @plantId = :plantId, @aopYear = :aopYear";
 
 			Query query = entityManager.createNativeQuery(sql);
-			query.setParameter("plantFKId", plantFKId);
-			query.setParameter("year", year);
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
