@@ -695,6 +695,23 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),
+				aopYear, "normal-op-norms");
+
+		List<ScreenMapping> screenMappingList = screenMappingRepository
+				.findByDependentScreen("normal-op-norms");
+		for (ScreenMapping screenMapping : screenMappingList) {
+			if (!screenMapping.getCalculationScreen().equalsIgnoreCase(screenMapping.getDependentScreen())) {
+
+				AopCalculation aopCalculation = new AopCalculation();
+				aopCalculation.setAopYear(aopYear);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
+		}
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("SP Executed successfully");
 		//aopMessageVM.setData(rowsAffected);
