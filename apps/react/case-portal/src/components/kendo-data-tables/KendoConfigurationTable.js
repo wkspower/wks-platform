@@ -67,6 +67,7 @@ const ConfigurationTable = () => {
   const [otherLossRows, setOtherLossRows] = useState([])
   const [shutdownNormsRows, setShutdownRows] = useState([])
   const [productionRows, setProductionRows] = useState([])
+  const [elastomerRows, setElastomerRows] = useState([])
   const [productionRowsConstants, setProductionRowsConstants] = useState([])
   const [
     productionRowsConstantsMannualEntry,
@@ -97,7 +98,7 @@ const ConfigurationTable = () => {
       if (lowerVertName == 'meg') {
         // data = data.sort((a, b) => b.normType.localeCompare(a.normType))
 
-        data = data.filter((item) => item.normType !== 'Report Manual Entry')
+        data = data?.filter((item) => item.normType !== 'Report Manual Entry')
 
         const formattedData = data.map((item, index) => ({
           ...item,
@@ -116,6 +117,16 @@ const ConfigurationTable = () => {
         }
 
         // setRows(formattedData)
+      } else if (lowerVertName == 'elastomer') {
+        const formattedData = data.map((item, index) => ({
+          ...item,
+          idFromApi: item.id,
+          id: index,
+          originalRemark: item.remarks,
+          srNo: index + 1,
+          Particulars: item.normType,
+        }))
+        setElastomerRows(formattedData)
       } else {
         const groups = new Map()
         data.forEach((item) => {
@@ -480,7 +491,19 @@ const ConfigurationTable = () => {
   }
 
   const [isEdited, setIsEdited] = useState(false)
-
+  if (lowerVertName == 'elastomer') {
+    return (
+      <SelectivityData
+        rows={elastomerRows}
+        loading={loading}
+        fetchData={fetchData}
+        setRows={setElastomerRows}
+        configType='meg'
+        groupBy='Particulars'
+        summary={summary}
+      />
+    )
+  }
   if (lowerVertName == 'meg' && lowerVertName !== 'cracker') {
     const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']
     const auditYear = localStorage.getItem('year')

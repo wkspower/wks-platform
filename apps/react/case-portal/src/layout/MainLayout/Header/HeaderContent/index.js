@@ -50,7 +50,7 @@ export default function HeaderContent({ keycloak }) {
 
   // --- 2. screenTitleName from Redux
   const screenTitle = useSelector((s) => s.dataGridStore.screenTitle)
-  const screenTitleName = screenTitle?.title || 'Digital AOP'
+  const screenTitleName = screenTitle?.title || 'Business Demand'
 
   // allowed/full data
   const [allowedMap, setAllowedMap] = useState({})

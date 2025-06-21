@@ -5,6 +5,8 @@ import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import getEnhancedAOPColDefs from 'components/data-tables/CommonHeader/kendo_ConfigHeader'
 import KendoDataTables from './index'
+import { DataService } from 'services/DataService'
+import { useSession } from 'SessionStoreContext'
 
 const CrackerConfig = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -30,7 +32,7 @@ const CrackerConfig = () => {
   }
   // const [allProducts, setAllProducts] = useState([])
 
-  const rawTabs = [
+  const rawTabsFallback = [
     'feed',
     'composition',
     'hydrogenation',
@@ -38,8 +40,64 @@ const CrackerConfig = () => {
     'optimizing',
     'furnace',
   ]
+  const [tabs, setTabs] = useState([]) // will hold array of strings from API
+  const [loading, setLoading] = useState(false)
   const [rawTabIndex, setRawTabIndex] = useState(0)
+  const [availableTabs, setAvailableTabs] = useState([])
+  const keycloak = useSession()
 
+  const getConfigurationTabsMatrix = async () => {
+    setLoading(true)
+    try {
+      const response = await DataService.getConfigurationTabsMatrix(keycloak)
+      if (response?.code === 200) {
+        const parsedData = JSON.parse(response.data)
+        setTabs(parsedData)
+      } else {
+      }
+    } catch (error) {
+      console.error('Error fetching tabs:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+  const getConfigurationAvailableTabs = async () => {
+    setLoading(true)
+    try {
+      const response = await DataService.getConfigurationAvailableTabs(keycloak)
+      if (response?.code === 200) {
+        setAvailableTabs(response.data.configurationTypeList || [])
+      } else {
+        setAvailableTabs([])
+      }
+    } catch (error) {
+      console.error('Error fetching availableTabs:', error)
+      setAvailableTabs([])
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => {
+    getConfigurationTabsMatrix()
+    getConfigurationAvailableTabs()
+  }, [])
+  useEffect(() => {
+    if (tabs.length > 0) {
+      if (rawTabIndex < 0 || rawTabIndex >= tabs.length) {
+        setRawTabIndex(0)
+      }
+    } else {
+      setRawTabIndex(0)
+    }
+  }, [tabs])
+  const getTheId = useCallback((name) => {
+    const tabObj = availableTabs.find(
+      (t) => t.name.toLowerCase() === name.toLowerCase(),
+    )
+    console.log(tabObj)
+    return tabObj ? tabObj.id : null
+  }, [])
+  console.log('test', availableTabs)
   const feedRows = [
     {
       id: 1,
@@ -1224,24 +1282,25 @@ const CrackerConfig = () => {
 
   const fetchCrackerRows = useCallback((tab) => {
     // Simulate network delay
+    console.log(tab)
     setTimeout(() => {
       switch (tab) {
-        case 'feed':
+        case getTheId('Feed'):
           setFeedRows(feedRows)
           break
-        case 'composition':
+        case getTheId('Composition'):
           setCompositionRows(compositionRows)
           break
-        case 'hydrogenation':
+        case getTheId('Hydrogenation'):
           setHydrogenationRows(hydrogenationRows)
           break
-        case 'recovery':
+        case getTheId('Recovery'):
           setRecoveryRows(recoveryRows)
           break
-        case 'optimizing':
+        case getTheId('Optimizing'):
           setOptimizingRows(optimizingRows)
           break
-        case 'furnace':
+        case getTheId('Furnace'):
           setFurnaceRows(furnaceRows)
           break
         default:
@@ -1252,7 +1311,8 @@ const CrackerConfig = () => {
 
   // 5️⃣ Whenever the selected tab changes, reload that tab’s rows
   useEffect(() => {
-    const currentTab = rawTabs[rawTabIndex]
+    const currentTab = tabs[rawTabIndex]
+    console.log(currentTab)
     fetchCrackerRows(currentTab)
   }, [rawTabIndex, fetchCrackerRows])
   const getAdjustedPermissions = (permissions, isOldYear) => {
@@ -1302,9 +1362,7 @@ const CrackerConfig = () => {
     headerMap,
     handleRemarkCellClick,
     configType:
-      rawTabs[rawTabIndex] === 'composition'
-        ? 'cracker_composition'
-        : 'cracker', // columnConfig,
+      tabs[rawTabIndex] === 'composition' ? 'cracker_composition' : 'cracker', // columnConfig,
   })
   return (
     <Box>
@@ -1319,7 +1377,11 @@ const CrackerConfig = () => {
         value={rawTabIndex}
         onChange={(e, newIndex) => setRawTabIndex(newIndex)}
       >
-        {rawTabs.map((tabId) => (
+        {tabs.map((tabId) => {
+          const tabInfo = availableTabs.find(
+            (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
+          )
+          return (
           <Tab
             key={tabId}
             sx={{
@@ -1327,15 +1389,16 @@ const CrackerConfig = () => {
               borderBottom: '1px solid #ADD8E6',
               textTransform: 'capitalize',
             }}
-            label={tabId}
+              label={tabInfo?.displayName}
           />
-        ))}
+          )
+        })}
       </Tabs>
 
       <Box>
         {(() => {
-          switch (rawTabs[rawTabIndex]) {
-            case 'feed':
+          switch (tabs[rawTabIndex]) {
+            case getTheId('Feed'):
               return (
                 <Box>
                   <KendoDataTables
@@ -1356,7 +1419,7 @@ const CrackerConfig = () => {
                 </Box>
               )
 
-            case 'composition':
+            case getTheId('Composition'):
               return (
                 <Box>
                   <KendoDataTables
@@ -1378,7 +1441,7 @@ const CrackerConfig = () => {
                 </Box>
               )
 
-            case 'hydrogenation':
+            case getTheId('Hydrogenation'):
               return (
                 <Box>
                   <KendoDataTables
@@ -1399,7 +1462,7 @@ const CrackerConfig = () => {
                 </Box>
               )
 
-            case 'recovery':
+            case getTheId('Recovery'):
               return (
                 <Box>
                   <KendoDataTables
@@ -1420,7 +1483,7 @@ const CrackerConfig = () => {
                 </Box>
               )
 
-            case 'optimizing':
+            case getTheId('Optimizing'):
               return (
                 <Box>
                   <KendoDataTables
@@ -1441,7 +1504,7 @@ const CrackerConfig = () => {
                 </Box>
               )
 
-            case 'furnace':
+            case getTheId('Furnace'):
               return (
                 <Box>
                   <KendoDataTables
