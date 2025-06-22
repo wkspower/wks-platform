@@ -11,6 +11,7 @@ import { setIsBlocked } from 'store/reducers/dataGridStore'
 import { validateFields } from 'utils/validationUtils'
 import getEnhancedColDefs from '../data-tables/CommonHeader/Kendo_ProductionAopHeader'
 import KendoDataTables from './index'
+import getEnhancedColDefsByProducts from 'components/data-tables/CommonHeader/Kendo_ProductionAopHeaderByProducts'
 
 const ProductionNorms = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -34,6 +35,7 @@ const ProductionNorms = ({ permissions }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('MT')
   const [rows, setRows] = useState([])
+  const [rowsByProducts, setRowsByProducts] = useState([])
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -263,6 +265,7 @@ const ProductionNorms = ({ permissions }) => {
       const data = await DataService.handleCalculate(plantId, year, keycloak)
       if (lowerVertName == 'meg' && data?.code == 200) {
         fetchData()
+        fetchDataByProducts()
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data refreshed successfully!',
@@ -338,7 +341,7 @@ const ProductionNorms = ({ permissions }) => {
     try {
       setLoading(true)
 
-      const response = await DataService.getAOPData(keycloak)
+      const response = await DataService.getAOPData(keycloak, 'Production')
 
       setCalculationObject(response?.data?.aopCalculation)
 
@@ -361,6 +364,7 @@ const ProductionNorms = ({ permissions }) => {
           normParametersFKId: product.materialFKId,
           originalRemark: product.aopRemarks,
           isEditable: false,
+          Particulars: product.normParameterDisplayName,
 
           ...(product.materialFKId !== undefined
             ? { materialFKId: undefined }
@@ -433,6 +437,81 @@ const ProductionNorms = ({ permissions }) => {
       setLoading(false)
     }
   }
+  const fetchDataByProducts = async () => {
+    try {
+      setLoading(true)
+
+      const response = await DataService.getAOPData(keycloak, 'ByProducts')
+
+      if (response?.code != 200) {
+        setRows([])
+        setLoading(false)
+
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Error fetching data. Please try again.',
+          severity: 'error',
+        })
+
+        return
+      }
+
+      var data = response?.data?.aopDTOList
+        ?.map((product) => ({
+          ...product,
+          normParametersFKId: product.materialFKId,
+          originalRemark: product.aopRemarks,
+          isEditable: false,
+          Particulars: product.normParameterDisplayName,
+
+          ...(product.materialFKId !== undefined
+            ? { materialFKId: undefined }
+            : {}),
+        }))
+        .map(({ materialFKId, ...rest }) => rest)
+
+      const formattedData = data.map((item, index) => {
+        const transformedItem = {
+          ...item,
+          idFromApi: item.id,
+          normParametersFKId: item?.normParametersFKId?.toLowerCase(),
+          id: index,
+        }
+
+        const total = [
+          transformedItem.april,
+          transformedItem.may,
+          transformedItem.june,
+          transformedItem.july,
+          transformedItem.aug,
+          transformedItem.sep,
+          transformedItem.oct,
+          transformedItem.nov,
+          transformedItem.dec,
+          transformedItem.jan,
+          transformedItem.feb,
+          transformedItem.march,
+        ].reduce((sum, val) => sum + (parseFloat(val) || 0), 0)
+
+        return {
+          ...transformedItem,
+          averageTPH: total,
+        }
+      })
+
+      const finalData = [...formattedData]
+
+      if (lowerVertName == 'meg') {
+        setRowsByProducts(finalData)
+      }
+
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching Production AOP data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const findSum = (value, row) => {
     const months = [
@@ -459,6 +538,7 @@ const ProductionNorms = ({ permissions }) => {
 
   useEffect(() => {
     fetchData()
+    fetchDataByProducts()
   }, [
     sitePlantChange,
     oldYear,
@@ -469,6 +549,10 @@ const ProductionNorms = ({ permissions }) => {
   ])
 
   const productionColumns = getEnhancedColDefs({
+    headerMap,
+  })
+
+  const productionColumnsByProducts = getEnhancedColDefsByProducts({
     headerMap,
   })
 
@@ -490,6 +574,7 @@ const ProductionNorms = ({ permissions }) => {
       saveBtn: false,
       showCalculate: false,
       isOldYear: isOldYear,
+      showNote: true,
     }
   }
 
@@ -503,7 +588,7 @@ const ProductionNorms = ({ permissions }) => {
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showCalculate: permissions?.showCalculate ?? true,
       allAction: permissions?.allAction ?? true,
-
+      showNote: true,
       showCalculateVisibility:
         Object.keys(calculationObject).length > 0
           ? permissions?.showCalculate ?? true
@@ -514,6 +599,28 @@ const ProductionNorms = ({ permissions }) => {
     },
     isOldYear,
   )
+
+  const adjustedPermissionsByProducts = getAdjustedPermissions(
+    {
+      showAction: permissions?.showAction ?? false,
+      addButton: permissions?.addButton ?? false,
+      deleteButton: permissions?.deleteButton ?? false,
+      editButton: permissions?.editButton ?? false,
+      showUnit: permissions?.showUnit ?? false,
+      saveWithRemark: permissions?.saveWithRemark ?? false,
+      showCalculate: permissions?.showCalculate ?? false,
+      allAction: permissions?.allAction ?? true,
+      showCalculateVisibility:
+        Object.keys(calculationObject).length > 0
+          ? permissions?.showCalculate ?? true
+          : false,
+      saveBtn: permissions?.saveBtn ?? false,
+      units: ['MT', 'KT'],
+      customHeight: permissions?.customHeight,
+    },
+    isOldYear,
+  )
+
   const rowDataForCracker = [
     {
       idFromApi: null,
@@ -603,6 +710,18 @@ const ProductionNorms = ({ permissions }) => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         permissions={adjustedPermissions}
+        // groupBy='Particulars'
+        note='* MT per Annum'
+      />
+
+      <KendoDataTables
+        columns={productionColumnsByProducts}
+        rows={rowsByProducts}
+        setRows={setRowsByProducts}
+        title={'By Products'}
+        fetchData={fetchDataByProducts}
+        permissions={adjustedPermissionsByProducts}
+        // groupBy='Particulars'
       />
     </div>
   )

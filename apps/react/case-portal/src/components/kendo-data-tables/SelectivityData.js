@@ -50,43 +50,38 @@ const SelectivityData = (props) => {
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
+
   const saveChanges = React.useCallback(async () => {
-    setTimeout(() => {
-      try {
-        var data = Object.values(modifiedCells)
-        if (data.length === 0) {
+    try {
+      var data = Object.values(modifiedCells)
+      if (data.length === 0) {
+        //here it is emtpy
+        saveSummary(props?.summary)
+        props?.onSummaryEditChange(false)
+        return
+      }
+
+      if (props?.configType !== 'grades') {
+        const requiredFields = ['remarks']
+        const validationMessage = validateFields(data, requiredFields)
+        if (validationMessage) {
           setSnackbarOpen(true)
           setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
+            message: validationMessage,
+            severity: 'error',
           })
-          setSnackbarOpen(true)
           return
         }
-
-        // console.log(props?.configType)
-        if (props?.configType !== 'grades') {
-          const requiredFields = ['remarks']
-          const validationMessage = validateFields(data, requiredFields)
-          if (validationMessage) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: validationMessage,
-              severity: 'error',
-            })
-            return
-          }
-          saveCatalystData(data)
-        } else {
-          handleUpdate(data)
-        }
-      } catch (error) {
-        // Handle error if necessary
+        saveCatalystData(data)
+      } else {
+        handleUpdate(data)
       }
-    }, 400)
-  }, [modifiedCells])
+    } catch (error) {
+      // Handle error if necessary
+    }
+  }, [modifiedCells, props.summary, props.onSummaryEditChange])
 
-  const saveSummary = async () => {
+  const saveSummary = async (summary) => {
     try {
       let plantId = ''
       const storedPlant = localStorage.getItem('selectedPlant')
@@ -103,19 +98,19 @@ const SelectivityData = (props) => {
       )
 
       if (response?.code == 200) {
-        // setSnackbarData({
-        //   message: 'Summary Saved Successfully!',
-        //   severity: 'success',
-        // })
-        // setLoading(false)
-        // setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Summary Saved Successfully!',
+          severity: 'success',
+        })
+        setLoading(false)
+        setSnackbarOpen(true)
         // setIsEdited(false)
       } else {
-        // setSnackbarData({
-        //   message: 'Summary Saved Failed!',
-        //   severity: 'error',
-        // })
-        // setLoading(false)
+        setSnackbarData({
+          message: 'Summary Saved Failed!',
+          severity: 'error',
+        })
+        setLoading(false)
         // setSnackbarOpen(true)
       }
 
@@ -132,8 +127,6 @@ const SelectivityData = (props) => {
   }
 
   const saveCatalystData = async (newRow) => {
-    console.log(props?.summary)
-
     setLoading(true)
     try {
       var plantId = ''
@@ -186,6 +179,7 @@ const SelectivityData = (props) => {
           id: row.idFromApi || null,
         }))
       }
+
       const response = await DataService.saveCatalystData(
         plantId,
         payload,
@@ -197,9 +191,12 @@ const SelectivityData = (props) => {
           message: 'Configuration data Saved Successfully!',
           severity: 'success',
         })
-        saveSummary()
+
         setModifiedCells({})
         setLoading(false)
+
+        saveSummary(props?.summary)
+        props?.onSummaryEditChange(false)
 
         if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
           props?.fetchData()
@@ -295,8 +292,6 @@ const SelectivityData = (props) => {
         var data1 = data?.data
 
         setConfigurationExecutionDetails(data1)
-
-        console.log('data1', data1)
       } catch (error) {
         console.error('Error fetching getConfigurationExecutionDetails:', error)
       } finally {
@@ -376,8 +371,10 @@ const SelectivityData = (props) => {
       showUnit: false,
       saveWithRemark: true,
       saveBtn: true,
-      downloadExcelBtn: lowerVertName == 'meg' ? true : false,
-      uploadExcelBtn: lowerVertName == 'meg' ? true : false,
+      downloadExcelBtn:
+        lowerVertName == 'meg' && props?.tabIndex == 0 ? true : false,
+      uploadExcelBtn:
+        lowerVertName == 'meg' && props?.tabIndex == 0 ? true : false,
       showLoad: lowerVertName == 'meg' ? true : false,
       allAction: true,
     },
@@ -488,8 +485,6 @@ const SelectivityData = (props) => {
     }
   }
 
-  // console.log('loading', loading)
-
   return (
     <div>
       <Box>
@@ -508,6 +503,7 @@ const SelectivityData = (props) => {
           rows={props?.rows}
           setRows={props?.setRows}
           title='Configuration'
+          summaryEdited={props?.summaryEdited}
           // isCellEditable={isCellEditable}
           // paginationOptions={[100, 200, 300]}
           saveChanges={saveChanges}

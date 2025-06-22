@@ -15,8 +15,10 @@ import {
   DialogTitle,
   MenuItem,
   TextField,
+  Typography,
 } from '../../../node_modules/@mui/material/index'
 import { GridEditCell } from '@progress/kendo-react-grid'
+import { getDefaultColumnMenu } from '@progress/kendo-react-grid'
 
 import DownloadIcon from '@mui/icons-material/Download'
 import UploadIcon from '@mui/icons-material/Upload'
@@ -33,6 +35,7 @@ import { TextCellEditor } from './Utilities-Kendo/TextCellEditor'
 
 import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports-kendo/ColumnMenu1'
 import {
+  GridColumnMenuFilter,
   isColumnMenuFilterActive,
   isColumnMenuSortActive,
 } from '../../../node_modules/@progress/kendo-react-grid/index'
@@ -83,6 +86,7 @@ const KendoDataTables = ({
   modifiedCells = [],
   setRows,
   columns,
+  summaryEdited,
   loading = false,
   typeRank = {},
   permissions = {},
@@ -107,6 +111,7 @@ const KendoDataTables = ({
   handleRemarkCellClick = () => {},
   selectedUsers = [],
   groupBy = null,
+  note = '',
   allProducts = [],
   selectMode,
   setSelectMode = () => {},
@@ -385,6 +390,10 @@ const KendoDataTables = ({
           onRemarkClick(dataItem)
           setEdit({})
         }}
+        onDoubleClick={() => {
+          onRemarkClick(dataItem)
+          setEdit({})
+        }}
       >
         {displayText || 'Click to add remark'}
       </td>
@@ -531,6 +540,26 @@ const KendoDataTables = ({
     }
   }
 
+  const SafeColumnMenu = (props) => {
+    return (
+      <GridColumnMenuFilter
+        {...props}
+        mobileMode={false} // ✅ This prevents the crash
+      />
+    )
+  }
+
+  const dateFields = [
+    'maintStartDateTime',
+    'maintEndDateTime',
+    'endDateTA',
+    'startDateTA',
+    'endDateSD',
+    'startDateSD',
+    'endDateIBR',
+    'startDateIBR',
+  ]
+
   return (
     <div style={{ position: 'relative' }}>
       {loading && (
@@ -547,19 +576,29 @@ const KendoDataTables = ({
             sx={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'flex-end',
+              justifyContent: 'space-between',
               width: '100%',
               p: 1,
-              gap: 1,
             }}
           >
-            {permissions?.UnitToShow && (
-              <Chip
-                label={permissions.UnitToShow}
-                variant='outlined'
-                className='unit-chip'
-              />
-            )}
+            {/* Left side - Note */}
+            <Box>
+              {permissions?.showNote && (
+                <Typography component='div' className='text-note'>
+                  {note}
+                </Typography>
+              )}
+            </Box>
+
+            {/* Right side - All other actions */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {permissions?.UnitToShow && (
+                <Chip
+                  label={permissions.UnitToShow}
+                  variant='outlined'
+                  className='unit-chip'
+                />
+              )}
 
             {permissions?.addButton && (
               <Button
@@ -607,34 +646,35 @@ const KendoDataTables = ({
               </>
             )}
 
-            {permissions?.saveBtn && (
-              <Button
-                variant='contained'
-                className='btn-save'
-                onClick={saveModalOpen}
-                disabled={
-                  isButtonDisabled || Object.keys(modifiedCells).length === 0
-                }
-                {...(loading ? {} : {})}
-              >
-                Save
-              </Button>
-            )}
+              {permissions?.saveBtn && (
+                <Button
+                  variant='contained'
+                  className='btn-save'
+                  onClick={saveModalOpen}
+                  disabled={
+                    isButtonDisabled ||
+                    (!summaryEdited && Object.keys(modifiedCells).length === 0)
+                  }
+                  {...(loading ? {} : {})}
+                >
+                  Save
+                </Button>
+              )}
 
-            {permissions?.showCalculate && (
-              <Button
-                variant='contained'
-                onClick={handleCalculateBtn}
-                disabled={
-                  rows?.length === 0
-                    ? false
-                    : isButtonDisabled || !permissions?.showCalculateVisibility
-                }
-                className='btn-save'
-              >
-                Calculate
-              </Button>
-            )}
+              {permissions?.showCalculate && (
+                <Button
+                  variant='contained'
+                  onClick={handleCalculateBtn}
+                  // disabled={
+                  //   rows?.length === 0
+                  //     ? false
+                  //     : isButtonDisabled || !permissions?.showCalculateVisibility
+                  // }
+                  className='btn-save'
+                >
+                  Calculate
+                </Button>
+              )}
 
             {permissions?.showRefresh && (
               <Button
@@ -706,6 +746,7 @@ const KendoDataTables = ({
                 ))}
               </TextField>
             )}
+            </Box>
           </Box>
         </Box>
       )}
@@ -734,6 +775,7 @@ const KendoDataTables = ({
             sortable={{
               mode: 'multiple',
             }}
+            filterable={columns.some((col) => dateFields.includes(col.field))}
             allRedCell={allRedCell}
             size='small'
             pageable={
@@ -765,12 +807,17 @@ const KendoDataTables = ({
                     key={col.field}
                     field={col.field}
                     title={col.title || col.headerName}
-                    // width={col.width}
+                    filter='date'
+                    filterable={{
+                      cell: {
+                        operator: 'gte',
+                        showOperators: true,
+                      },
+                    }}
                     cells={{
                       edit: { date: DateTimePickerEditor },
                       data: toolTipRenderer,
                     }}
-                    columnMenu={ColumnMenuCheckboxFilter}
                     format='{0:dd-MM-yyyy hh:mm a}'
                     editor='date'
                     hidden={col.hidden}

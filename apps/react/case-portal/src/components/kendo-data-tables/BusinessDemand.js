@@ -127,6 +127,7 @@ const BusinessDemand = ({ permissions }) => {
         setLoading(false)
         return
       }
+
       var rawData = Object.values(modifiedCells)
       const data = rawData.filter((row) => row.inEdit)
       // var data = Object.values(unsavedChangesRef.current.unsavedRows)
@@ -280,6 +281,7 @@ const BusinessDemand = ({ permissions }) => {
     },
     isOldYear,
   )
+
   return (
     <div>
       <Backdrop
@@ -314,6 +316,8 @@ const BusinessDemand = ({ permissions }) => {
                   showCalculate: false,
                   saveBtn: false,
                   hideSummary: true,
+                  hideUploadExcel: true,
+                  hideDownloadExcel: true,
                 }}
               />
             </Box>

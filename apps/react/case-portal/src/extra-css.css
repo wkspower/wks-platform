@@ -11,6 +11,19 @@
   cursor: pointer;
   margin-bottom: 2px;
 }
+.btn-load {
+  background-color: #0100cb;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 6px 22px;
+  text-transform: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-width: 100px;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 0px;
+}
 
 .btn-save:hover {
   background-color: #143b6f;

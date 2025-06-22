@@ -625,11 +625,26 @@ const NormalOpNormsScreen = () => {
         plantId = parsedPlant.id
       }
       var plantId = plantId
-      const data = await DataService.handleCalculateNormalOpsNorms34(
-        plantId,
-        year,
-        keycloak,
-      )
+      var data = null
+      let siteID =
+        JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+      let verticalId = localStorage.getItem('verticalId')
+
+      if (lowerVertName == 'pe') {
+        data = await DataService.handleCalculateNormalOperationNormsPe(
+          plantId,
+          siteID,
+          verticalId,
+          year,
+          keycloak,
+        )
+      } else {
+        data = await DataService.handleCalculateNormalOperationNorms(
+          plantId,
+          year,
+          keycloak,
+        )
+      }
 
       if (data == 0 || data) {
         // dispatch(setIsBlocked(true))
@@ -679,7 +694,7 @@ const NormalOpNormsScreen = () => {
     }
   }
 
-  console.log('calculationObject', calculationObject)
+  // console.log('calculationObject', calculationObject)
 
   const adjustedPermissions = getAdjustedPermissions(
     {
@@ -691,7 +706,7 @@ const NormalOpNormsScreen = () => {
       showUnit: false,
       saveWithRemark: true,
       saveBtn: true,
-      showCalculate: lowerVertName === 'meg' ? true : false,
+      showCalculate: true,
       showCalculateVisibility:
         lowerVertName === 'meg' &&
         Object.keys(calculationObject || {}).length > 0

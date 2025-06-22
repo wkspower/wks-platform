@@ -63,6 +63,11 @@ const NormsHistorianBasis = () => {
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const [loading, setLoading] = useState(false)
+  function parseDDMMYYYY(dateStr) {
+    if (!dateStr) return null
+    const [day, month, year] = dateStr.split('-')
+    return new Date(`${year}-${month}-${day}`) // YYYY-MM-DD (ISO format)
+  }
 
   const fetchData = async (reportType, setState) => {
     try {
@@ -76,6 +81,7 @@ const NormsHistorianBasis = () => {
             ...item,
             id: index,
             isEditable: false,
+            dateTime: item?.dateTime ? new Date(item.dateTime) : null,
           }),
         )
         setLoading(false)

@@ -62,6 +62,7 @@ const ConfigurationTable = () => {
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [tabIndex, setTabIndex] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [summaryEdited, setSummaryEdited] = useState(false)
 
   const [startUpRows, setStartUpRows] = useState([])
   const [otherLossRows, setOtherLossRows] = useState([])
@@ -84,6 +85,13 @@ const ConfigurationTable = () => {
     message: '',
     severity: 'info',
   })
+  const [startDate, setStartDate] = useState()
+  const [endDate, setEndDate] = useState()
+  const [startDateObj, setStartDateObj] = useState([])
+  const [endDateObj, setEndDateObj] = useState([])
+  const [configurationExecutionDetails, setConfigurationExecutionDetails] =
+    useState([])
+  const [isEdited, setIsEdited] = useState(false)
 
   const fetchData = async () => {
     // setRows([])
@@ -108,10 +116,7 @@ const ConfigurationTable = () => {
           srNo: index + 1,
           Particulars: item.normType,
         }))
-        // console.log(formattedData)
-
         setProductionRows(formattedData)
-
         if (data) {
           setLoading(false)
         }
@@ -188,15 +193,11 @@ const ConfigurationTable = () => {
     try {
       var constantsRes =
         await DataService.getCatalystSelectivityDataConstants(keycloak)
-
       if (constantsRes?.code != 200) {
         setProductionRowsConstants([])
-
         return
       }
-
       var data = constantsRes?.data
-
       const formattedData = data.map((item, index) => ({
         ...item,
         idFromApi: item.id,
@@ -301,8 +302,8 @@ const ConfigurationTable = () => {
     }
   }
 
-  const [startDate, setStartDate] = useState()
-  const [endDate, setEndDate] = useState()
+  // const [startDate, setStartDate] = useState()
+  // const [endDate, setEndDate] = useState()
 
   useEffect(() => {
     getConfigurationTabsMatrix()
@@ -310,6 +311,8 @@ const ConfigurationTable = () => {
     getAopSummary()
     getConfigurationExecutionDetails()
     if (lowerVertName === 'pe') {
+      getConfigurationTabsMatrix()
+      getConfigurationAvailableTabs()
       fetchGradeData()
     }
 
@@ -325,20 +328,52 @@ const ConfigurationTable = () => {
     return tab ? tab.id : null
   }
 
-  const [startDateObj, setStartDateObj] = useState([])
-  const [endDateObj, setEndDateObj] = useState([])
-
   function formatDate(date) {
     if (!date) return ''
 
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0') // months are 0-indexed
+    const year = date?.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
 
     return `${year}-${month}-${day}`
   }
+  function formatDateForText(date, time = false) {
+    if (!date) return ''
+
+    const parsedDate = new Date(date)
+    if (isNaN(parsedDate)) return 'Invalid Date'
+
+    const day = String(parsedDate.getDate()).padStart(2, '0')
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0')
+    const year = parsedDate.getFullYear()
+
+    let formatted = `${day}-${month}-${year}`
+
+    if (time) {
+      let hours = parsedDate.getHours()
+      const minutes = String(parsedDate.getMinutes()).padStart(2, '0')
+      const ampm = hours >= 12 ? 'PM' : 'AM'
+
+      hours = hours % 12
+      hours = hours ? hours : 12 // 0 becomes 12
+
+      const formattedTime = `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`
+      formatted += ` ${formattedTime}`
+    }
+
+    return formatted
+  }
 
   const onLoad = async () => {
+    if (startDate && endDate && startDate > endDate) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Please Choose Valid Dates!',
+        severity: 'warning',
+      })
+      return
+    }
+
     setLoading(true)
     try {
       var plantId = ''
@@ -382,10 +417,6 @@ const ConfigurationTable = () => {
         },
       ]
 
-      // console.log('payload', payload)
-      // setLoading(false)
-      // return
-
       const response = await DataService.executeConfiguration(payload, keycloak)
       if (response) {
         setSnackbarOpen(true)
@@ -427,54 +458,51 @@ const ConfigurationTable = () => {
     }
   }
 
-  const saveSummary = async () => {
-    setLoading(true)
-    try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      let year = localStorage.getItem('year')
-      const response = await DataService.saveSummaryAOPConsumptionNorm(
-        plantId,
-        year,
-        summary,
-        keycloak,
-      )
+  // const saveSummary = async () => {
+  //   setLoading(true)
+  //   try {
+  //     let plantId = ''
+  //     const storedPlant = localStorage.getItem('selectedPlant')
+  //     if (storedPlant) {
+  //       const parsedPlant = JSON.parse(storedPlant)
+  //       plantId = parsedPlant.id
+  //     }
+  //     let year = localStorage.getItem('year')
+  //     const response = await DataService.saveSummaryAOPConsumptionNorm(
+  //       plantId,
+  //       year,
+  //       summary,
+  //       keycloak,
+  //     )
 
-      if (response?.code == 200) {
-        setSnackbarData({
-          message: 'Summary Saved Successfully!',
-          severity: 'success',
-        })
-        setLoading(false)
-        setSnackbarOpen(true)
-        setIsEdited(false)
-      } else {
-        setSnackbarData({
-          message: 'Summary Saved Failed!',
-          severity: 'error',
-        })
-        setLoading(false)
-        setSnackbarOpen(true)
-      }
+  //     if (response?.code == 200) {
+  //       setSnackbarData({
+  //         message: 'Summary Saved Successfully!',
+  //         severity: 'success',
+  //       })
+  //       setLoading(false)
+  //       setSnackbarOpen(true)
+  //       setIsEdited(false)
+  //     } else {
+  //       setSnackbarData({
+  //         message: 'Summary Saved Failed!',
+  //         severity: 'error',
+  //       })
+  //       setLoading(false)
+  //       setSnackbarOpen(true)
+  //     }
 
-      //
+  //     //
 
-      setLoading(false)
-      return response
-    } catch (error) {
-      console.error('Error saving Summary!', error)
-    } finally {
-      //
-      setLoading(false)
-    }
-  }
-
-  const [configurationExecutionDetails, setConfigurationExecutionDetails] =
-    useState([])
+  //     setLoading(false)
+  //     return response
+  //   } catch (error) {
+  //     console.error('Error saving Summary!', error)
+  //   } finally {
+  //     //
+  //     setLoading(false)
+  //   }
+  // }
 
   const getConfigurationExecutionDetails = async () => {
     try {
@@ -490,7 +518,7 @@ const ConfigurationTable = () => {
     }
   }
 
-  const [isEdited, setIsEdited] = useState(false)
+  // const [isEdited, setIsEdited] = useState(false)
   if (lowerVertName == 'elastomer') {
     return (
       <SelectivityData
@@ -504,6 +532,17 @@ const ConfigurationTable = () => {
       />
     )
   }
+
+  const one = configurationExecutionDetails.find(
+    (item) => item.Name === 'StartDate',
+  )
+  const two = configurationExecutionDetails.find(
+    (item) => item.Name === 'EndDate',
+  )
+
+  const startDate1 = new Date(one?.AttributeValue)
+  const endDate1 = new Date(two?.AttributeValue)
+
   if (lowerVertName == 'meg' && lowerVertName !== 'cracker') {
     const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']
     const auditYear = localStorage.getItem('year')
@@ -530,7 +569,7 @@ const ConfigurationTable = () => {
               id='meg-grid-header'
             >
               <Typography className='grid-title'>
-                Historian Period / Budget Summary
+                AOP Historical Period Basis
               </Typography>
             </CustomAccordionSummary>
             <CustomAccordionDetails>
@@ -542,29 +581,45 @@ const ConfigurationTable = () => {
                   mt: 0,
                 }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <label htmlFor='start-date'>Start Date</label>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    marginTop: '10px',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography
+                      className='grid-title'
+                      sx={{ whiteSpace: 'nowrap' }}
+                    >
+                      Start Date
+                    </Typography>
                     <DatePicker
                       id='start-date'
                       format='dd-MM-yyyy'
                       value={startDate}
                       onChange={(e) => setStartDate(e.value)}
-                      style={{ width: '180px' }}
+                      style={{ height: '80px' }}
+                      size={'large'}
                     />
-                  </Box>
 
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <label htmlFor='end-date'>End Date</label>
+                    <Typography
+                      className='grid-title'
+                      sx={{ whiteSpace: 'nowrap' }}
+                    >
+                      End Date
+                    </Typography>
                     <DatePicker
                       id='end-date'
                       format='dd-MM-yyyy'
                       value={endDate}
                       onChange={(e) => setEndDate(e.value)}
-                      style={{ width: '180px' }}
+                      style={{ height: '80px' }}
+                      size={'large'}
                     />
                   </Box>
-
                   {/* Load Button */}
                   <Button
                     variant='contained'
@@ -575,6 +630,21 @@ const ConfigurationTable = () => {
                   >
                     Load
                   </Button>
+                  {configurationExecutionDetails?.[0] ? (
+                    <Typography
+                      className='summary-title'
+                      sx={{ whiteSpace: 'nowrap' }}
+                    >
+                      {`(Last loaded data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDate1)} to ${formatDateForText(endDate1)})`}
+                    </Typography>
+                  ) : (
+                    <Typography
+                      className='summary-title'
+                      sx={{ whiteSpace: 'nowrap' }}
+                    >
+                      Loading...
+                    </Typography>
+                  )}
                 </Box>
 
                 {/* Right Side: Save Button */}
@@ -589,7 +659,7 @@ const ConfigurationTable = () => {
               </Box>
 
               <TextField
-                label='Summary'
+                label='AOP Design Basis'
                 multiline
                 // minRows={isAccordionExpanded ? 4 : 20}
                 minRows={2}
@@ -600,7 +670,7 @@ const ConfigurationTable = () => {
                 value={summary}
                 onChange={(e) => {
                   setSummary(e.target.value)
-                  setIsEdited(true)
+                  setSummaryEdited(true)
                 }}
                 sx={{
                   '& .MuiInputBase-root': {
@@ -675,6 +745,9 @@ const ConfigurationTable = () => {
                     configType='meg'
                     groupBy='Particulars'
                     summary={summary}
+                    summaryEdited={summaryEdited}
+                    onSummaryEditChange={setSummaryEdited}
+                    tabIndex='0'
                   />
                 )
               case 'constants':
@@ -686,7 +759,10 @@ const ConfigurationTable = () => {
                     setRows={setProductionRowsConstants}
                     configType='megConstants'
                     groupBy='Particulars'
+                    summaryEdited={summaryEdited}
                     summary={summary}
+                    onSummaryEditChange={setSummaryEdited}
+                    tabIndex='1'
                   />
                 )
               case 'report manual entry':
@@ -698,20 +774,25 @@ const ConfigurationTable = () => {
                     setRows={setProductionRowsConstantsMannualEntry}
                     configType='megConstantsMannualEntry'
                     groupBy='Particulars'
+                    summaryEdited={summaryEdited}
                     summary={summary}
+                    onSummaryEditChange={setSummaryEdited}
+                    tabIndex='2'
                   />
                 )
+
               default:
                 return null
             }
           })()}
-          <Notification
-            open={snackbarOpen}
-            message={snackbarData?.message || ''}
-            severity={snackbarData?.severity || 'info'}
-            onClose={() => setSnackbarOpen(false)}
-          />
         </Box>
+
+        <Notification
+          open={snackbarOpen}
+          message={snackbarData?.message || ''}
+          severity={snackbarData?.severity || 'info'}
+          onClose={() => setSnackbarOpen(false)}
+        />
       </div>
     )
   }

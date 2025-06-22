@@ -92,7 +92,7 @@ export const DataService = {
 
   handleCalculateConsumptionNorm1,
   handleCalculateNormalOpsNorms1,
-  handleCalculateNormalOpsNorms34,
+  handleCalculateNormalOperationNorms,
 
   handleCalculateShutdownNorms,
   handleCalculateSlowdownNorms,
@@ -131,8 +131,13 @@ export const DataService = {
   saveNormalOpsNormsExcel,
   getConfigurationExcel,
   getNormalOpsNormsExcel,
+
   executeConfiguration,
   getConfigurationExecutionDetails,
+  saveProductionVolDataExcel,
+  getProductionVolExcel,
+
+  handleCalculateNormalOperationNormsPe,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -208,9 +213,39 @@ async function handleCalculateNormalOpsNorms1(plantId, year, keycloak) {
     return Promise.reject(e)
   }
 }
-async function handleCalculateNormalOpsNorms34(plantId, year, keycloak) {
+async function handleCalculateNormalOperationNorms(plantId, year, keycloak) {
   const year1 = localStorage.getItem('year')
   const url = `${Config.CaseEngineUrl}/task/handleCalculateNormalOpsNorms?year=${year1}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+
+    const data = await resp.json() // Parse JSON response
+    return data
+  } catch (e) {
+    console.error('Error fetching calculation data:', e)
+    return Promise.reject(e)
+  }
+}
+async function handleCalculateNormalOperationNormsPe(
+  plantId,
+  siteId,
+  verticalId,
+  year,
+  keycloak,
+) {
+  const url = `${Config.CaseEngineUrl}/task/calculate-normal-ops-norms?plantId=${plantId}&siteId=${siteId}&verticalId=${verticalId}&aopYear=${year}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
@@ -2601,7 +2636,7 @@ async function getSlowDownPlantData(keycloak) {
   }
 }
 
-async function getAOPData(keycloak) {
+async function getAOPData(keycloak, type) {
   var year = localStorage.getItem('year')
   var plantId = ''
   const storedPlant = localStorage.getItem('selectedPlant')
@@ -2610,7 +2645,7 @@ async function getAOPData(keycloak) {
     plantId = parsedPlant.id
   }
 
-  const url = `${Config.CaseEngineUrl}/task/getAOP?plantId=${plantId}&year=${year}`
+  const url = `${Config.CaseEngineUrl}/task/getAOP?plantId=${plantId}&year=${year}&type=${type}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -2907,6 +2942,31 @@ async function saveNormalOpsNormsExcel(file, keycloak) {
     return await Promise.reject(e)
   }
 }
+async function saveProductionVolDataExcel(file, keycloak) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+  const url = `${Config.CaseEngineUrl}/task/production-volume-data/import/excel?plantId=${plantId}&year=${year}`
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
 
 async function getConfigurationExcel(keycloak) {
   var year = localStorage.getItem('year')
@@ -2981,6 +3041,47 @@ async function getNormalOpsNormsExcel(keycloak) {
     const a = document.createElement('a')
     a.href = urlBlob
     a.download = 'Normal Ops Norms.xlsx'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error Editing Config data:', e)
+    return Promise.reject(e)
+  }
+}
+async function getProductionVolExcel(keycloak) {
+  var year = localStorage.getItem('year')
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  const url = `${Config.CaseEngineUrl}/task/production-volume-data/export/excel?year=${year}&plantId=${plantId}`
+
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+
+    if (!resp.ok) {
+      throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
+    }
+
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = 'Production Vol Data.xlsx'
     document.body.appendChild(a)
     a.click()
     a.remove()

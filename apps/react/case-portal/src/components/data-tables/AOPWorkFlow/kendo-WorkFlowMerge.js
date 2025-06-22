@@ -570,7 +570,7 @@ const WorkFlowMerge = () => {
           ))}
         </Stepper>
 
-        <Typography component='div' className='grid-header'>
+        <Typography component='div' className='text-note'>
           * Prices - MIIS BPC table, Actual values - MIIS Contribution (YTD).
         </Typography>
 

@@ -66,6 +66,12 @@ const ProductionVolumeDataBasis = () => {
 
   const [loading, setLoading] = useState(false)
 
+  function parseDDMMYYYY(dateStr) {
+    if (!dateStr) return null
+    const [day, month, year] = dateStr.split('-')
+    return new Date(`${year}-${month}-${day}`) // YYYY-MM-DD (ISO format)
+  }
+
   const fetchData = async (reportType, setState) => {
     try {
       setLoading(true)
@@ -77,6 +83,9 @@ const ProductionVolumeDataBasis = () => {
           ...item,
           id: index,
           isEditable: false,
+          startDate: item?.startDate ? parseDDMMYYYY(item.startDate) : null,
+          endDate: item?.endDate ? parseDDMMYYYY(item.endDate) : null,
+          dateTime: item?.dateTime ? parseDDMMYYYY(item.dateTime) : null,
         }))
         setLoading(false)
         setState(rowsWithId)

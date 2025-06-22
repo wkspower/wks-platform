@@ -38,21 +38,10 @@
     "editable": false,
     "type": "number"
   },
-  {
-    "field": "normDateTime",
-    "headerName": "Norm Date Time",
-    "flex": 2,
-    "editable": false
-  },
+
   {
     "field": "dateTime",
     "headerName": "Date Time",
-    "flex": 2,
-    "editable": false
-  },
-  {
-    "field": "normsUom",
-    "headerName": "UOM",
     "flex": 2,
     "editable": false
   }

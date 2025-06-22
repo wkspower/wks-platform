@@ -38,7 +38,7 @@
   },
   {
     "field": "displayName",
-    "title": "Products",
+    "title": "By Products",
     "editable": false,
     "width": 125
   },

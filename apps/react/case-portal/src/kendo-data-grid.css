@@ -88,7 +88,7 @@
   color: #000000;
   cursor: pointer;
   padding: 3px 4px;
-  border-bottom: 1px solid #dae0ef;
+  border-bottom: 1px solid #d6d6d6;
   font-size: 0.8rem;
 }
 .kendo-data-grid .k-grid-content .k-grid-table td:last-child:after,
@@ -174,11 +174,11 @@
 }
 .k-grid .k-grid-content td.k-number-right-disabled {
   text-align: right !important;
-  background-color: #f0f0f0;
+  background-color: #e7e7e7;
 }
 
 .non-editable-cell {
-  background-color: #f0f0f0;
+  background-color: #e7e7e7;
 }
 
 .k-grid td span {
@@ -186,7 +186,7 @@
 }
 
 .custom-disabled-row {
-  background-color: #f0f0f0 !important;
+  background-color: #e7e7e7 !important;
 }
 .date-picker {
   margin-right: 10;
