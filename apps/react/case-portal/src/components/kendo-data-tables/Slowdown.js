@@ -95,10 +95,12 @@ const SlowDown = ({ permissions }) => {
 
       const slowDownDetailsMEG = newRow.map((row) => ({
         productId: (() => {
-          const matched = allProducts.find((p) => p.displayName === row.productName)
+          const matched = allProducts.find(
+            (p) => p.displayName === row.productName1,
+          )
           return matched?.realId || ''
         })(),
-        productName: row.productName,
+        productName: row.productName1,
         discription: row.discription,
         durationInHrs: (() => {
           const v = findDuration('1', row)
@@ -118,8 +120,6 @@ const SlowDown = ({ permissions }) => {
         lowerVertName === 'meg' ? slowDownDetailsMEG : slowDownDetailsMEG,
         keycloak,
       )
-
-
 
       const maintenanceResponse = await DataService.getMaintenanceData(keycloak)
 
@@ -166,7 +166,7 @@ const SlowDown = ({ permissions }) => {
           'remark',
           'rate',
           // 'durationInHrs',
-          'productName',
+          'productName1',
         ]
         const validationMessage = validateFields(data, requiredFields)
         if (validationMessage) {
@@ -227,8 +227,8 @@ const SlowDown = ({ permissions }) => {
 
       const formattedData = data.map((item, index) => ({
         ...item,
-        product: item.productId,              
-        productName: item.productName || '',  
+        product: item.productId,
+        productName1: item.productName || '',
         idFromApi: item?.maintenanceId || item?.id,
         id: index,
         originalRemark: item.remark,
@@ -260,13 +260,13 @@ const SlowDown = ({ permissions }) => {
             .map((product) => ({
               id: product.displayName,
               displayName: product.displayName,
-              realId: product.id, 
+              realId: product.id,
             }))
         } else {
           productList = data.map((product) => ({
             id: product.displayname,
             displayName: product.displayName,
-            realId: product.id, 
+            realId: product.id,
           }))
         }
 
@@ -308,7 +308,7 @@ const SlowDown = ({ permissions }) => {
     },
 
     {
-      field: 'productName',
+      field: 'productName1',
       title: 'Particulars',
       editable: true,
     },

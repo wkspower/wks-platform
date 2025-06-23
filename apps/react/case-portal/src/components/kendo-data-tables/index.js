@@ -825,11 +825,11 @@ const KendoDataTables = ({
                   />
                 )
               }
-              if (col?.field === 'productName') {
+              if (col?.field === 'productName1') {
                 return (
                   <GridColumn
-                    key='productName'
-                    field='productName'
+                    key='productName1'
+                    field='productName1'
                     title={col.title || col.headerName || 'Particulars'}
                     // width={210}
                     editable={col.editable || true}
