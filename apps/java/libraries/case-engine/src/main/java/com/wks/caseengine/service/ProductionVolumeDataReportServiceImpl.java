@@ -574,6 +574,9 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			if(dto.getMarch()!=null) {
 				optional.get().setMarch(dto.getMarch());
 			}
+			if(dto.getRemark()!=null) {
+				optional.get().setRemarks(dto.getRemark());
+			}
 			monthwiseConsumptionReportRepository.save(optional.get());
 		}
 		AOPMessageVM response = new AOPMessageVM();
