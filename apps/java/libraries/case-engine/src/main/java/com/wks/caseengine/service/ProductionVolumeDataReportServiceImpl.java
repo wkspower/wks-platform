@@ -593,6 +593,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			Optional<MonthWiseProductionPlan> optional = monthWiseProductionPlanRepository
 					.findById(UUID.fromString(dto.getId()));
 			optional.get().setRemark(dto.getRemark());
+			System.out.println("dto.getOpHrsActual()"+dto.getOpHrsActual());
 			if(dto.getOpHrsActual()!=null) {
 				optional.get().setOpHrsActual(dto.getOpHrsActual());
 			}
