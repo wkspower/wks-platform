@@ -4,15 +4,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.wks.caseengine.dto.MonthWiseConsumptionSummaryDTO;
+import com.wks.caseengine.dto.TurnAroundPlanReportDTO;
+import com.wks.caseengine.entity.MonthwiseConsumptionReport;
+import com.wks.caseengine.entity.TurnAroundPlan;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.TurnAroundPlanReportRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -26,6 +32,9 @@ public class TurnAroundDataReportServiceImpl implements TurnAroundDataReportServ
 
     @Autowired
     private PlantsRepository plantsRepository;
+    
+    @Autowired
+    private TurnAroundPlanReportRepository turnAroundPlanReportRepository;
 
     @Override
     public AOPMessageVM getReportForTurnAroundPlanData(String plantId, String year, String reportType) {
@@ -109,5 +118,46 @@ public class TurnAroundDataReportServiceImpl implements TurnAroundDataReportServ
             throw new RuntimeException("Failed to fetch data", ex);
         }
     }
+
+	@Override
+	public AOPMessageVM updateReportForTurnAroundData(String plantId, String year,
+			List<TurnAroundPlanReportDTO> dataList) {
+		List<TurnAroundPlan> turnAroundPlanList = new ArrayList<>();
+		for (TurnAroundPlanReportDTO dto : dataList) {
+			TurnAroundPlan turnAroundPlan=null;
+			if(dto.getId()!=null) {
+				turnAroundPlan = turnAroundPlanReportRepository
+						.findById(UUID.fromString(dto.getId())).get();
+			}else {
+				 turnAroundPlan=new TurnAroundPlan();
+			}
+			
+			//optional.get().setRemark(dto.getRemark());
+			if(dto.getActivity()!=null) {
+				turnAroundPlan.setActivity(dto.getActivity());
+			}
+			if(dto.getFromDate()!=null) {
+				turnAroundPlan.setFromDate(dto.getFromDate());
+			}
+			if(dto.getToDate()!=null) {
+				turnAroundPlan.setToDate(dto.getToDate());
+			}
+			if(dto.getDurationInHrs()!=null) {
+				turnAroundPlan.setDurationInHrs(dto.getDurationInHrs());
+			}
+			if(dto.getPeriodInMonths()!=null) {
+				turnAroundPlan.setPeriodInMonths(dto.getPeriodInMonths());
+			}
+			if(dto.getRemark()!=null) {
+				turnAroundPlan.setRemark(dto.getRemark());
+			}
+			turnAroundPlanList.add(turnAroundPlanReportRepository.save(turnAroundPlan));
+		}
+		AOPMessageVM response = new AOPMessageVM();
+		response.setCode(200);
+		response.setMessage("Remarks updated successfully.");
+		response.setData(turnAroundPlanList);
+		return response;
+	}
 
 }
