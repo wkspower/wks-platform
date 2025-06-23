@@ -16,6 +16,7 @@ import com.wks.caseengine.dto.MonthWiseProductionPlanDTO;
 import com.wks.caseengine.dto.PlantProductionDTO;
 import com.wks.caseengine.dto.PlantProductionDataDTO;
 import com.wks.caseengine.dto.TurnAroundPlanReportDTO;
+import com.wks.caseengine.dto.YearWiseContributionDataDTO;
 import com.wks.caseengine.entity.PlantProductionRequestDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.ProductionVolumeDataReportService;
@@ -77,6 +78,13 @@ public class ProductionVolumeDataReportController {
 			@RequestParam String year, @RequestParam String reportType) {
 		AOPMessageVM response = productionVolumeDataReportService.getReportForPlantContributionYearWise(plantId, year,
 				reportType);
+		return ResponseEntity.status(response.getCode()).body(response);
+	}
+	
+	@PostMapping(value = "/report/plant/contribution/year-wise/plan")
+	public ResponseEntity<AOPMessageVM> updateReportForPlantContributionYearWise(@RequestParam String plantId,
+			@RequestParam String year,@RequestBody List<YearWiseContributionDataDTO> dataList) {
+		AOPMessageVM response = productionVolumeDataReportService.updateReportForPlantContributionYearWise(plantId, year, dataList);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 

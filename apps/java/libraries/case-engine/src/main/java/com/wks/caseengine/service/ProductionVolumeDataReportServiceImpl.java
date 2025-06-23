@@ -18,9 +18,11 @@ import com.wks.caseengine.dto.MonthWiseProductionPlanDTO;
 import com.wks.caseengine.dto.PlantProductionDTO;
 import com.wks.caseengine.dto.PlantProductionDataDTO;
 import com.wks.caseengine.dto.TurnAroundPlanReportDTO;
+import com.wks.caseengine.dto.YearWiseContributionDataDTO;
 import com.wks.caseengine.entity.AnnualAOPCost;
 import com.wks.caseengine.entity.MonthWiseProductionPlan;
 import com.wks.caseengine.entity.MonthwiseConsumptionReport;
+import com.wks.caseengine.entity.PlantContribution;
 import com.wks.caseengine.entity.PlantProductionSummary;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
@@ -31,6 +33,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AnnualAOPCostRepository;
 import com.wks.caseengine.repository.MonthWiseProductionPlanRepository;
 import com.wks.caseengine.repository.MonthwiseConsumptionReportRepository;
+import com.wks.caseengine.repository.PlantContributionRepository;
 import com.wks.caseengine.repository.PlantProductionSummaryRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
@@ -74,6 +77,9 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	
 	@Autowired
 	private AnnualAOPCostRepository annualAOPCostRepository;
+	
+	@Autowired
+	private PlantContributionRepository plantContributionRepository;
 
 	// Inject or set your DataSource (e.g., via constructor or setter)
 	public ProductionVolumeDataReportServiceImpl(DataSource dataSource) {
@@ -431,6 +437,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 					map.put("PrevYearBudget", row[3]);
 					map.put("PrevYearActual", row[4]);
 					map.put("CurrentYearBudget", row[5]);
+					map.put("Remark", row[6]);
 					plantProductionData.add(map);
 				}
 			} else if (reportType.equalsIgnoreCase("ProductionCostCalculations")) {
@@ -800,5 +807,42 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		response.setMessage("Remarks updated successfully.");
 		return response;
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public AOPMessageVM updateReportForPlantContributionYearWise(String plantId, String year,
+			List<YearWiseContributionDataDTO> dataList) {
+		
+		
+		List<PlantContribution> plantContributionList = new ArrayList<>();
+		for (YearWiseContributionDataDTO dto : dataList) {
+			PlantContribution plantContribution=null;
+			if(dto.getId()!=null) {
+				plantContribution = plantContributionRepository
+						.findById(UUID.fromString(dto.getId())).get();
+			}else {
+					plantContribution=new PlantContribution();
+			}
+			
+			if(dto.getPrevYearActual()!=null) {
+				plantContribution.setActualPrevYear(dto.getPrevYearActual());
+			}
+			if(dto.getCurrentYearBudget()!=null) {
+				plantContribution.setBudgetCurrentYear(dto.getCurrentYearBudget());
+			}
+			if(dto.getPrevYearBudget()!=null) {
+				plantContribution.setBudgetPrevYear(dto.getPrevYearBudget());
+			}
+			if(dto.getRemarks()!=null) {
+				plantContribution.setRemark(dto.getRemarks());
+			}
+			plantContributionList.add(plantContributionRepository.save(plantContribution));
+			
+		}
+		AOPMessageVM response = new AOPMessageVM();
+		response.setCode(200);
+		response.setMessage("Remarks updated successfully.");
+		response.setData(plantContributionList);
+		return response;
 	}
 }

@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class MonthWiseProductionPlanDTO {
+	private Double opHrsActual;
     private String id;
     private String remark;
-    private Double opHrsActual;
+    
 }
