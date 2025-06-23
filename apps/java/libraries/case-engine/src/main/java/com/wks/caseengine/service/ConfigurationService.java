@@ -26,7 +26,9 @@ public interface ConfigurationService {
     public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms( String year, String plantId,  List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOLists);
     public AOPMessageVM getConfigurationIntermediateValuesData(String year, String plantId);
     public byte[] createExcel(String year, UUID plantFKId);
+    public byte[] createConfigurationConstantsExcel(String year, UUID plantFKId);
     public AOPMessageVM importExcel(String year, UUID fromString, MultipartFile file);
+    public AOPMessageVM importConfigurationConstantsExcel(String year, UUID plantId, MultipartFile file);
 	public AOPMessageVM getConfigurationExecution( String year, String plantId);
     public AOPMessageVM saveConfigurationExecution( List<ExecutionDetailDto> executionDetailDtoList);
 

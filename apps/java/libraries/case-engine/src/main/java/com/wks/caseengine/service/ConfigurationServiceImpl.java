@@ -1190,11 +1190,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 				dto.setNormType(getStringCellValue(row.getCell(0)));
 				dto.setProductName(getStringCellValue(row.getCell(1)));
-				// System.out.println("normparamter displayName "+dto.getProductName());
-				// UUID normparameterId =
-				// normParametersRepository.findByDisplayNameAndPlantFkId(dto.getProductName(),plantFKId).get().getId();
-				// System.out.println("normparamter displayName "+normparameterId);
-				// dto.setNormParameterFKId(normparameterId.toString());
 				dto.setAuditYear(year);
 				dto.setApr(getNumericCellValue(row.getCell(2)));
 				dto.setMay(getNumericCellValue(row.getCell(3)));
@@ -1219,6 +1214,51 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 		return configList;
 	}
+	
+	public List<ConfigurationDTO> readConfigurationConstants(InputStream inputStream, UUID plantFKId, String year) {
+		List<ConfigurationDTO> configList = new ArrayList<>();
+
+		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+			Sheet sheet = workbook.getSheetAt(0);
+			Iterator<Row> rowIterator = sheet.iterator();
+
+			if (rowIterator.hasNext())
+				rowIterator.next(); // Skip header
+
+			while (rowIterator.hasNext()) {
+				Row row = rowIterator.next();
+				ConfigurationDTO dto = new ConfigurationDTO();
+
+				dto.setUOM(getStringCellValue(row.getCell(1)));
+				dto.setProductName(getStringCellValue(row.getCell(0)));
+				dto.setAuditYear(year);
+				dto.setApr(getNumericCellValue(row.getCell(2)));
+				dto.setMay(getNumericCellValue(row.getCell(2)));
+				dto.setJun(getNumericCellValue(row.getCell(2)));
+				dto.setJul(getNumericCellValue(row.getCell(2)));
+				dto.setAug(getNumericCellValue(row.getCell(2)));
+				dto.setSep(getNumericCellValue(row.getCell(2)));
+				dto.setOct(getNumericCellValue(row.getCell(2)));
+				dto.setNov(getNumericCellValue(row.getCell(2)));
+				dto.setDec(getNumericCellValue(row.getCell(2)));
+				dto.setJan(getNumericCellValue(row.getCell(2)));
+				dto.setFeb(getNumericCellValue(row.getCell(2)));
+				dto.setMar(getNumericCellValue(row.getCell(2)));
+				dto.setRemarks(getStringCellValue(row.getCell(3)));
+				dto.setTypeName(getStringCellValue(row.getCell(4)));
+				dto.setNormParameterFKId(getStringCellValue(row.getCell(5)));
+				dto.setTypeDisplayName(getStringCellValue(row.getCell(6)));
+				dto.setIsEditable(getBooleanCellValue(row.getCell(8)));
+				configList.add(dto);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return configList;
+	}
+
 
 	private static String getStringCellValue(Cell cell) {
 		if (cell == null)
@@ -1240,6 +1280,162 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			}
 		}
 		return null;
+	}
+	
+	public static Boolean getBooleanCellValue(Cell cell) {
+	    if (cell == null) return null;
+
+	    CellType type = cell.getCellType();
+	    if (type == CellType.FORMULA) {
+	        type = cell.getCachedFormulaResultType();
+	    }
+
+	    switch (type) {
+	        case BOOLEAN:
+	            return cell.getBooleanCellValue();
+	        case STRING:
+	            String text = cell.getStringCellValue().trim().toLowerCase();
+	            if ("true".equals(text)) return true;
+	            if ("false".equals(text)) return false;
+	            return null;
+	        case NUMERIC:
+	            double num = cell.getNumericCellValue();
+	            if (num == 1.0) return true;
+	            if (num == 0.0) return false;
+	            return null;
+	        case BLANK:
+	        case _NONE:
+	        default:
+	            return null;
+	    }
+	}
+
+	@Override
+	public byte[] createConfigurationConstantsExcel(String year, UUID plantFKId) {
+		try {
+			
+			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
+			String procedureName = verticalName + "_GetConfiguration_Constant";
+			List<Object[]> obj = new ArrayList<>();
+			if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER") ) {
+				obj = findConstantsByYearAndPlantFkId(year, plantFKId.toString(), procedureName);
+			}
+			Workbook workbook = new XSSFWorkbook();
+			
+			Sheet sheet = workbook.createSheet("Sheet1");
+			int currentRow = 0;
+			// List<List<Object>> rows = new ArrayList<>();
+
+			List<List<Object>> rows = new ArrayList<>();
+			// Data rows
+			for (Object[] row  : obj) {
+				
+					List<Object> list = new ArrayList<>();
+					boolean isEditable;
+					Object flagObj = row[8];
+					if (flagObj instanceof Boolean) {
+						isEditable = (Boolean) flagObj;
+					} else if (flagObj instanceof Number) {
+						isEditable = ((Number) flagObj).intValue() == 1;
+					} else {
+						isEditable = false; // or default
+					}
+					if(isEditable) {
+						list.add(row[3]);
+						list.add(row[4]);
+						list.add(row[5]);
+						list.add(row[7]);
+						list.add(row[0]);
+						list.add(row[1]);
+						list.add(row[2]);
+						list.add(row[6]);
+						list.add(row[8]);
+						rows.add(list);
+				}
+			}
+
+			List<String> innerHeaders = new ArrayList<>();
+			
+			innerHeaders.add("Particulars");
+			innerHeaders.add("UOM");
+			innerHeaders.add("Value");
+			innerHeaders.add("Remark");
+			
+			innerHeaders.add("NormTypeName");
+			innerHeaders.add("NormParameter_FK_Id");
+			innerHeaders.add("Name");
+			innerHeaders.add("AuditYear");
+			innerHeaders.add("isEditable");
+
+			List<List<String>> headers = new ArrayList<>();
+			headers.add(innerHeaders);
+
+			for (List<String> headerRowData : headers) {
+				Row headerRow = sheet.createRow(currentRow++);
+				for (int col = 0; col < headerRowData.size(); col++) {
+					Cell cell = headerRow.createCell(col);
+					cell.setCellValue(headerRowData.get(col));
+					cell.setCellStyle(createBoldBorderedStyle(workbook));
+				}
+			}
+			for (List<Object> rowData : rows) {
+				Row row = sheet.createRow(currentRow++);
+				for (int col = 0; col < rowData.size(); col++) {
+					Cell cell = row.createCell(col);
+					Object value = rowData.get(col);
+
+					if (value instanceof Number) {
+						cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
+					} else if (value instanceof Boolean) {
+						cell.setCellValue((Boolean) value);
+					} else if (value != null) {
+						cell.setCellValue(value.toString());
+					} else {
+						cell.setCellValue("");
+					}
+
+				}
+			}
+			sheet.setColumnHidden(4, true);
+			sheet.setColumnHidden(5, true);
+			sheet.setColumnHidden(6, true);
+			sheet.setColumnHidden(7, true);
+			sheet.setColumnHidden(8, true);
+			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
+
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				workbook.write(outputStream);
+				workbook.close();
+				return outputStream.toByteArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@Override
+	public AOPMessageVM importConfigurationConstantsExcel(String year, UUID plantId, MultipartFile file) {
+		// TODO Auto-generated method stub
+				try {
+					List<ConfigurationDTO> data = readConfigurationConstants(file.getInputStream(), plantId, year);
+
+					saveConfigurationData(year, plantId.toString(), data);
+					AOPMessageVM aopMessageVM = new AOPMessageVM();
+					aopMessageVM.setCode(200);
+					aopMessageVM.setMessage("Data Updated successfully");
+					aopMessageVM.setData(data);
+					return aopMessageVM;
+					// return ResponseEntity.ok(data);
+				} catch (Exception e) {
+					e.printStackTrace();
+					// return ResponseEntity.internalServerError().build();
+				}
+				return null;
+
 	}
 
 }
