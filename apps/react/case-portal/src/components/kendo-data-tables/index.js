@@ -374,6 +374,8 @@ const KendoDataTables = ({
     )
 
     const isRed = isRedFromAllRedCell
+  
+  
 
     return (
       <td
@@ -824,11 +826,11 @@ const KendoDataTables = ({
                   />
                 )
               }
-              if (col?.field === 'product') {
+              if (col?.field === 'productName') {
                 return (
                   <GridColumn
-                    key='product'
-                    field='product'
+                    key='productName'
+                    field='productName'
                     title={col.title || col.headerName || 'Particulars'}
                     // width={210}
                     editable={col.editable || true}
@@ -838,7 +840,7 @@ const KendoDataTables = ({
                         <ProductCell {...cellProps} allProducts={allProducts} />
                       ),
                     }}
-                    columnMenu={ColumnMenuCheckboxFilter}
+                    columnMenu= {ColumnMenuCheckboxFilter}
                   />
                 )
               }
