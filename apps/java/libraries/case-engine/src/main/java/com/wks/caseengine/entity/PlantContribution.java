@@ -57,5 +57,8 @@ public class PlantContribution {
 
     @Column(name = "AOPYear")
     private String aopYear;
+    
+    @Column(name="Remark")
+    private String Remark;
 
 }
