@@ -22,6 +22,14 @@
     "field": "normParameterName",
     "title": "Particulars/Grade",
     "editable": false,
+    "width": 125,
+    "hidden": true
+  },
+
+  {
+    "field": "displayName",
+    "title": "Products",
+    "editable": false,
     "width": 125
   },
 

@@ -306,10 +306,13 @@ const ConfigurationTable = () => {
   // const [endDate, setEndDate] = useState()
 
   useEffect(() => {
-    getConfigurationTabsMatrix()
     getConfigurationAvailableTabs()
     getAopSummary()
-    getConfigurationExecutionDetails()
+
+    if (lowerVertName === 'meg') {
+      getConfigurationExecutionDetails()
+      getConfigurationTabsMatrix()
+    }
     if (lowerVertName === 'pe') {
       getConfigurationTabsMatrix()
       getConfigurationAvailableTabs()
@@ -630,19 +633,12 @@ const ConfigurationTable = () => {
                   >
                     Load
                   </Button>
-                  {configurationExecutionDetails?.[0] ? (
+                  {configurationExecutionDetails[0]?.ModifiedOn && (
                     <Typography
                       className='summary-title'
-                      sx={{ whiteSpace: 'nowrap' }}
+                      sx={{ whiteSpace: 'normal' }}
                     >
                       {`(Last loaded data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDate1)} to ${formatDateForText(endDate1)})`}
-                    </Typography>
-                  ) : (
-                    <Typography
-                      className='summary-title'
-                      sx={{ whiteSpace: 'nowrap' }}
-                    >
-                      Loading...
                     </Typography>
                   )}
                 </Box>

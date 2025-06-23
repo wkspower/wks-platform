@@ -59,201 +59,74 @@ const MonthwiseProduction = () => {
     {
       field: 'RowNo',
       headerName: 'SL.No',
-      flex: 1,
-      headerAlign: 'left',
-      align: 'left',
+      editable: false,
     },
     {
       field: 'Month',
       headerName: 'Month',
-      flex: 1,
-      headerAlign: 'left',
+      editable: false,
     },
 
     {
       field: 'EOEProdBudget', // was eoeBudgetCY
       headerName: 'Budget',
-      flex: 2,
-      headerAlign: 'left',
-      align: 'right',
-      valueFormatter: formatValueToThreeDecimalsZero,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimalsZero(params.value)}</span>
-        </Tooltip>
-      ),
+      editable: false,
     },
     {
       field: 'EOEProdActual', // was eoeActualCY
       headerName: 'Actual',
-      flex: 1,
-      headerAlign: 'left',
-      align: 'right',
-      valueFormatter: formatValueToThreeDecimalsZero,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimalsZero(params.value)}</span>
-        </Tooltip>
-      ),
+      editable: false,
     },
 
     // Current Year → Operating Hours
     {
       field: 'OpHrsBudget', // was opBudgetCY
       headerName: 'Budget',
-      flex: 1,
-      headerAlign: 'left',
-      align: 'right',
-      valueFormatter: formatValueToThreeDecimalsZero,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimalsZero(params.value)}</span>
-        </Tooltip>
-      ),
+      editable: false,
     },
     {
       field: 'OpHrsActual', // was opActualCY
       headerName: 'Actual',
-      flex: 1,
-      headerAlign: 'left',
-      align: 'right',
-      editable: false,
-      valueFormatter: formatValueToThreeDecimalsZero,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimalsZero(params.value)}</span>
-        </Tooltip>
-      ),
+      editable: true,
     },
 
     // Current Year → Throughput
     {
       field: 'ThroughputBudget', // was thrBudgetCY
       headerName: 'Budget',
-      flex: 1,
-      headerAlign: 'left',
-      align: 'right',
-      valueFormatter: formatValueToThreeDecimals,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      editable: false,
     },
     {
       field: 'ThroughputActual', // was thrActualCY
       headerName: 'Actual',
-      flex: 1,
-      headerAlign: 'left',
-      align: 'right',
       editable: false,
-      renderEditCell: NumericInputOnly,
-      valueFormatter: formatValueToThreeDecimals,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
-        </Tooltip>
-      ),
     },
 
     // Budget Year single values
     {
       field: 'OperatingHours', // was opBudgetBY
       headerName: 'Operating Hours',
-      flex: 2,
-      headerAlign: 'left',
-      align: 'right',
-      valueFormatter: formatValueToThreeDecimalsZero,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimalsZero(params.value)}</span>
-        </Tooltip>
-      ),
+      editable: false,
     },
     {
       field: 'MEGThroughput', // was megTPH
       headerName: 'MEG Throughput, TPH',
-      flex: 2,
-      headerAlign: 'left',
-      align: 'right',
-      valueFormatter: formatValueToThreeDecimals,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      editable: false,
     },
     {
       field: 'EOThroughput', // was eoTPH
       headerName: 'EO Throughput, TPH',
-      flex: 2,
-      headerAlign: 'left',
-      align: 'right',
-      valueFormatter: formatValueToThreeDecimals,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      editable: false,
     },
     {
       field: 'EOEThroughput', // was eoeTPH
       headerName: 'EOE Throughput, TPH',
-      flex: 2,
-      headerAlign: 'left',
-      align: 'right',
-      valueFormatter: formatValueToThreeDecimals,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      editable: false,
     },
     {
       field: 'TotalEOE', // was totalEoeMT
       headerName: 'Total EOE, MT',
-      flex: 2,
-      headerAlign: 'left',
-      align: 'right',
-      valueFormatter: formatValueToThreeDecimalsZero,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimalsZero(params.value)}</span>
-        </Tooltip>
-      ),
+      editable: false,
     },
 
     // (Optional) you can keep Remarks if you plan to add that later
@@ -262,28 +135,6 @@ const MonthwiseProduction = () => {
       headerName: 'Remark',
       minWidth: 150,
       editable: false,
-      renderCell: (params) => {
-        const displayText = truncateRemarks(params.value)
-        const isEditable = !params.row.Particulars
-
-        return (
-          <Tooltip title={params.value || ''} arrow>
-            <div
-              style={{
-                cursor: 'pointer',
-                color: params.value ? 'inherit' : 'gray',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                width: ' 100%',
-              }}
-              onDoubleClick={() => handleRemarkCellClick(params.row)}
-            >
-              {displayText || (isEditable ? 'Click to add remark' : '')}
-            </div>
-          </Tooltip>
-        )
-      },
     },
   ]
 

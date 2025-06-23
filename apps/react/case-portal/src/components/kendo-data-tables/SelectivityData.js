@@ -371,10 +371,8 @@ const SelectivityData = (props) => {
       showUnit: false,
       saveWithRemark: true,
       saveBtn: true,
-      downloadExcelBtn:
-        lowerVertName == 'meg' && props?.tabIndex == 0 ? true : false,
-      uploadExcelBtn:
-        lowerVertName == 'meg' && props?.tabIndex == 0 ? true : false,
+      downloadExcelBtn: lowerVertName == 'meg' ? true : false,
+      uploadExcelBtn: lowerVertName == 'meg' ? true : false,
       showLoad: lowerVertName == 'meg' ? true : false,
       allAction: true,
     },
@@ -398,7 +396,11 @@ const SelectivityData = (props) => {
     })
 
     try {
-      await DataService.getConfigurationExcel(keycloak)
+      if (props?.tabIndex != 1) {
+        await DataService.getConfigurationExcel(keycloak)
+      } else {
+        await DataService.getConfigurationExcelConstants(keycloak)
+      }
 
       // If no error is thrown, the request was successful
       setSnackbarData({
@@ -450,11 +452,15 @@ const SelectivityData = (props) => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-
-      const response = await DataService.saveConfigurationExcel(
-        rawFile,
-        keycloak,
-      )
+      var response
+      if (props?.tabIndex != 1) {
+        response = await DataService.saveConfigurationExcel(rawFile, keycloak)
+      } else {
+        response = await DataService.saveConfigurationExcelConstants(
+          rawFile,
+          keycloak,
+        )
+      }
       if (response) {
         setSnackbarOpen(true)
         setSnackbarData({

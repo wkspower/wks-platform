@@ -173,7 +173,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'april',
       headerName: headerMap[4],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
 
@@ -182,7 +182,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'may',
       headerName: headerMap[5],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -190,7 +190,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'june',
       headerName: headerMap[6],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -198,7 +198,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'july',
       headerName: headerMap[7],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -206,7 +206,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'aug',
       headerName: headerMap[8],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -214,7 +214,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'sep',
       headerName: headerMap[9],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -222,7 +222,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'oct',
       headerName: headerMap[10],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -230,7 +230,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'nov',
       headerName: headerMap[11],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -238,7 +238,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'dec',
       headerName: headerMap[12],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -246,7 +246,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'jan',
       headerName: headerMap[1],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -254,7 +254,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'feb',
       headerName: headerMap[2],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -262,7 +262,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'march',
       headerName: headerMap[3],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,

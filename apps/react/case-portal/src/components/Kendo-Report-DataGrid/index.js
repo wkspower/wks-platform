@@ -76,7 +76,7 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
           resizable={true}
           defaultSkip={0}
           defaultTake={100}
-          filterable={columns.some((col) => dateFields.includes(col.field))}
+          // filterable={columns.some((col) => dateFields.includes(col.field))}
           contextMenu={true}
           pageable={
             rows?.length > 100

@@ -605,7 +605,7 @@ const KendoDataTablesReports = ({
             defaultSkip={0}
             defaultTake={100}
             contextMenu={true}
-            filterable={columns.some((col) => dateFields.includes(col.field))}
+            // filterable={columns.some((col) => dateFields.includes(col.field))}
             size='small'
             pageable={
               rows?.length > 100

@@ -374,8 +374,6 @@ const KendoDataTables = ({
     )
 
     const isRed = isRedFromAllRedCell
-  
-  
 
     return (
       <td
@@ -602,51 +600,51 @@ const KendoDataTables = ({
                 />
               )}
 
-            {permissions?.addButton && (
-              <Button
-                variant='contained'
-                className='btn-save'
-                onClick={handleAddRow}
-                disabled={isButtonDisabled}
-              >
-                Add Item
-              </Button>
-            )}
-
-            {permissions?.downloadExcelBtn && (
-              <Tooltip title='Download'>
+              {permissions?.addButton && (
                 <Button
-                  variant='outlined'
-                  size='large'
-                  onClick={downloadExcelForConfiguration}
+                  variant='contained'
+                  className='btn-save'
+                  onClick={handleAddRow}
                   disabled={isButtonDisabled}
                 >
-                  <DownloadIcon fontSize='small' />
+                  Add Item
                 </Button>
-              </Tooltip>
-            )}
+              )}
 
-            {permissions?.uploadExcelBtn && (
-              <>
-                <Tooltip title='Upload Excel'>
+              {permissions?.downloadExcelBtn && (
+                <Tooltip title='Download'>
                   <Button
                     variant='outlined'
                     size='large'
-                    onClick={triggerFileUpload}
+                    onClick={downloadExcelForConfiguration}
                     disabled={isButtonDisabled}
                   >
-                    <UploadIcon fontSize='small' />
+                    <DownloadIcon fontSize='small' />
                   </Button>
                 </Tooltip>
-                <input
-                  type='file'
-                  accept='.xlsx,.xls'
-                  onChange={onFileChange}
-                  ref={fileInputRef}
-                  style={{ display: 'none' }}
-                />
-              </>
-            )}
+              )}
+
+              {permissions?.uploadExcelBtn && (
+                <>
+                  <Tooltip title='Upload Excel'>
+                    <Button
+                      variant='outlined'
+                      size='large'
+                      onClick={triggerFileUpload}
+                      disabled={isButtonDisabled}
+                    >
+                      <UploadIcon fontSize='small' />
+                    </Button>
+                  </Tooltip>
+                  <input
+                    type='file'
+                    accept='.xlsx,.xls'
+                    onChange={onFileChange}
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                  />
+                </>
+              )}
 
               {permissions?.saveBtn && (
                 <Button
@@ -667,87 +665,88 @@ const KendoDataTables = ({
                 <Button
                   variant='contained'
                   onClick={handleCalculateBtn}
-                  // disabled={
-                  //   rows?.length === 0
-                  //     ? false
-                  //     : isButtonDisabled || !permissions?.showCalculateVisibility
-                  // }
+                  disabled={
+                    rows?.length === 0
+                      ? false
+                      : isButtonDisabled ||
+                        !permissions?.showCalculateVisibility
+                  }
                   className='btn-save'
                 >
                   Calculate
                 </Button>
               )}
 
-            {permissions?.showRefresh && (
-              <Button
-                variant='contained'
-                onClick={handleCalculateBtn}
-                disabled={isButtonDisabled}
-                className='btn-save'
-              >
-                Refresh
-              </Button>
-            )}
+              {permissions?.showRefresh && (
+                <Button
+                  variant='contained'
+                  onClick={handleCalculateBtn}
+                  disabled={isButtonDisabled}
+                  className='btn-save'
+                >
+                  Refresh
+                </Button>
+              )}
 
-            {permissions?.showRefreshBtn && false && (
-              <Button
-                variant='contained'
-                onClick={handleRefresh}
-                className='btn-save'
-              >
-                Refresh
-              </Button>
-            )}
+              {permissions?.showRefreshBtn && false && (
+                <Button
+                  variant='contained'
+                  onClick={handleRefresh}
+                  className='btn-save'
+                >
+                  Refresh
+                </Button>
+              )}
 
-            {permissions?.showUnit && (
-              <TextField
-                select
-                value={selectedUnit || permissions?.units?.[0]}
-                onChange={(e) => {
-                  setSelectedUnit(e.target.value)
-                  handleUnitChange(e.target.value)
-                }}
-                sx={{ width: '150px', backgroundColor: '#FFFFFF' }}
-                variant='outlined'
-                label='Select UOM'
-              >
-                <MenuItem value='' disabled>
-                  Select UOM
-                </MenuItem>
-
-                {/* Render the correct unit options dynamically */}
-                {permissions?.units.map((unit) => (
-                  <MenuItem key={unit} value={unit}>
-                    {unit}
+              {permissions?.showUnit && (
+                <TextField
+                  select
+                  value={selectedUnit || permissions?.units?.[0]}
+                  onChange={(e) => {
+                    setSelectedUnit(e.target.value)
+                    handleUnitChange(e.target.value)
+                  }}
+                  sx={{ width: '150px', backgroundColor: '#FFFFFF' }}
+                  variant='outlined'
+                  label='Select UOM'
+                >
+                  <MenuItem value='' disabled>
+                    Select UOM
                   </MenuItem>
-                ))}
-              </TextField>
-            )}
 
-            {permissions?.showModes && (
-              <TextField
-                select
-                value={selectMode || permissions?.modes?.[0]}
-                onChange={(e) => {
-                  setSelectMode(e.target.value)
-                  // fetchData()
-                }}
-                sx={{ width: '150px', backgroundColor: '#FFFFFF' }}
-                variant='outlined'
-                label='Select Modes'
-              >
-                <MenuItem value='' disabled>
-                  Select Modes
-                </MenuItem>
+                  {/* Render the correct unit options dynamically */}
+                  {permissions?.units.map((unit) => (
+                    <MenuItem key={unit} value={unit}>
+                      {unit}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
 
-                {/* Render the correct unit options dynamically */}
-                {permissions?.modes.map((unit) => (
-                  <MenuItem key={unit} value={unit}>
-                    {unit}
+              {permissions?.showModes && (
+                <TextField
+                  select
+                  value={selectMode || permissions?.modes?.[0]}
+                  onChange={(e) => {
+                    setSelectMode(e.target.value)
+                    // fetchData()
+                  }}
+                  sx={{ width: '150px', backgroundColor: '#FFFFFF' }}
+                  variant='outlined'
+                  label='Select Modes'
+                >
+                  <MenuItem value='' disabled>
+                    Select Modes
                   </MenuItem>
-                ))}
-              </TextField>
-            )}
+
+                  {/* Render the correct unit options dynamically */}
+                  {permissions?.modes.map((unit) => (
+                    <MenuItem key={unit} value={unit}>
+                      {unit}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
             </Box>
           </Box>
         </Box>
@@ -777,7 +776,7 @@ const KendoDataTables = ({
             sortable={{
               mode: 'multiple',
             }}
-            filterable={columns.some((col) => dateFields.includes(col.field))}
+            // filterable={columns.some((col) => dateFields.includes(col.field))}
             allRedCell={allRedCell}
             size='small'
             pageable={
@@ -840,7 +839,7 @@ const KendoDataTables = ({
                         <ProductCell {...cellProps} allProducts={allProducts} />
                       ),
                     }}
-                    columnMenu= {ColumnMenuCheckboxFilter}
+                    columnMenu={ColumnMenuCheckboxFilter}
                   />
                 )
               }
@@ -850,10 +849,11 @@ const KendoDataTables = ({
                     key={col?.field}
                     field={col?.field}
                     title={col.title || col.headerName || 'Description'}
-                    // width={col.width}
+                    width={col.width}
                     editable={true}
                     columnMenu={ColumnMenuCheckboxFilter}
                     hidden={col.hidden}
+                    headerClassName={isActive ? 'active-column' : ''}
                     cells={{
                       edit: { text: TextCellEditor },
                       data: toolTipRenderer,
@@ -952,9 +952,7 @@ const KendoDataTables = ({
                     key={col.field}
                     field={col.field}
                     title={col.title || col.headerName}
-                    // width={col.width}
                     editor={true}
-                    // editable={col.editable || true}
                     editable={{ mode: 'popup' }}
                     cells={{
                       data: (cellProps) => (
@@ -966,8 +964,6 @@ const KendoDataTables = ({
                     }}
                     columnMenu={ColumnMenuCheckboxFilter}
                     hidden={col.hidden}
-
-                    // editor='date'
                   />
                 )
               }
