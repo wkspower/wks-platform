@@ -101,7 +101,7 @@ public class ConfigurationController {
 	        ) {
 	    try {
 			
-	        byte[] excelBytes = configurationService.createExcel(year,UUID.fromString(plantId)); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        byte[] excelBytes = configurationService.createExcel(year,UUID.fromString(plantId), false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
@@ -119,12 +119,23 @@ public class ConfigurationController {
 	
 	
 	@PostMapping(value = "/configuration-import-excel", consumes = "multipart/form-data")
-	public AOPMessageVM importExcel(
+	public ResponseEntity<byte[]> importExcel(
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,
 			@RequestParam("file") MultipartFile file
 	        ) {
-	        return configurationService.importExcel(year,UUID.fromString(plantId), file); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+
+			byte[] excelBytes =	configurationService.importExcel(year,UUID.fromString(plantId), file); 
+ HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("plant_production_plan.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
+
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+
 	}
 	
 	@PostMapping(value = "/configuration-constants-import-excel", consumes = "multipart/form-data")
