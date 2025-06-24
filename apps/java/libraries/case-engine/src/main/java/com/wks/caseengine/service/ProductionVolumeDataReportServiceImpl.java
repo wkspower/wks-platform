@@ -431,13 +431,14 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			} else if (reportType.equalsIgnoreCase("OtherVariableCost")) {
 				for (Object[] row : obj) {
 					Map<String, Object> map = new HashMap<>();
-					map.put("SrNo", row[0]);
-					map.put("OtherCost", row[1]);
-					map.put("Unit", row[2]);
-					map.put("PrevYearBudget", row[3]);
-					map.put("PrevYearActual", row[4]);
-					map.put("CurrentYearBudget", row[5]);
-					map.put("Remark", row[6]);
+					map.put("id",row[0]);
+					map.put("SrNo", row[1]);
+					map.put("OtherCost", row[2]);
+					map.put("Unit", row[3]);
+					map.put("PrevYearBudget", row[4]);
+					map.put("PrevYearActual", row[5]);
+					map.put("CurrentYearBudget", row[6]);
+					map.put("Remark", row[7]);
 					plantProductionData.add(map);
 				}
 			} else if (reportType.equalsIgnoreCase("ProductionCostCalculations")) {
