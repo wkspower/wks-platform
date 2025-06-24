@@ -121,6 +121,7 @@ export const DataService = {
   getPlantProductionSummary,
   getPlantContributionYearWisePlan,
   getMonthwiseRawData,
+  postMonthwiseRawData,
   getMonthWiseSummary,
   updateUserPlants,
   getCaseId,
@@ -1204,6 +1205,33 @@ async function getMonthwiseRawData(keycloak, reportType) {
     return await Promise.reject(e)
   }
 }
+
+async function postMonthwiseRawData(keycloak,dataList, plantId) {
+const year = localStorage.getItem('year')
+
+  const url = `${Config.CaseEngineUrl}/task/report/month-wise/consumption-summary?plantId=${plantId}&year=${year}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+     // 🔍 Log payload before sending to backend
+    console.log('Sending payload:', dataList)
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(dataList),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Error posting data:', e)
+    return await Promise.reject(e)
+  }
+}
+
 async function getMonthWiseSummary(keycloak) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')

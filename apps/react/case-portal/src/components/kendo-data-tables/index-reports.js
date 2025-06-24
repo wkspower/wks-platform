@@ -34,6 +34,7 @@ import FullValueEditor from './Utilities-Kendo/FullValueEditor'
 import { TextCellEditor } from './Utilities-Kendo/TextCellEditor'
 import { NoSpinnerNumericEditor } from './Utilities-Kendo/numbericColumns'
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
+import { recalcDuration, recalcEndDate } from './Utilities-Kendo/durationHelpers'
 
 export const particulars = [
   'normParameterId',
@@ -122,21 +123,64 @@ const KendoDataTablesReports = ({
       })),
     )
   }
-  const itemChange = useCallback(
+ const itemChange = useCallback(
     (e) => {
+      // const changedDataItem = e.dataItem
+      // const changedField = e.field
+      // const newValue = e.value
+
+      // const originalDataItem = rows.find(
+      //   (item) => item.id === changedDataItem.id,
+      // )
+      // const originalValue = originalDataItem
+      //   ? originalDataItem[changedField]
+      //   : undefined
+
       setIsRowEdited(true)
 
       const { dataItem, field, value } = e
-
+      const itemId = dataItem.id
+      console.log("dataitem", dataItem);
       setRows((prev) =>
-        prev.map((r) =>
-          r.id === dataItem.id ? updateRowWithDuration(r, field, value) : r,
-        ),
+        prev.map((r) => {
+          if (r.id !== itemId) return r
+          const updated = { ...r, [field]: value }
+
+          if (
+            'fromDate' in updated &&
+            'toDate' in updated &&
+            'durationInHrs' in updated
+          ) {
+            if (field === 'fromDate' || field === 'toDate') {
+              updated.durationInHrs = recalcDuration(
+                updated.fromDate,
+                updated.toDate,
+              )
+            } else if (field === 'durationInHrs') {
+              const newEnd = recalcEndDate(
+                updated.fromDate,
+                value, // string like “10.20”
+              )
+              if (newEnd) {
+                updated.toDate = newEnd
+              }
+            }
+          }
+          return updated
+        }),
       )
 
       setModifiedCells((prev) => {
-        const updatedRow = updateRowWithDuration(dataItem, field, value)
-        return { ...prev, [dataItem.id]: updatedRow }
+        const base = { ...dataItem, [field]: value ,id:dataItem.idFromApi}
+        if ('fromDate' in base && 'toDate' in base && 'durationInHrs' in base) {
+          if (field === 'fromDate' || field === 'toDate') {
+            base.durationInHrs = recalcDuration(base.fromDate, base.toDate)
+          } else if (field === 'durationInHrs') {
+            const newEnd = recalcEndDate(base.fromDate, value)
+            if (newEnd) base.toDate = newEnd.toISOString()
+          }
+        }
+        return { ...prev, [itemId]: base }
       })
     },
     [setRows, setModifiedCells],
@@ -605,7 +649,7 @@ const KendoDataTablesReports = ({
             defaultSkip={0}
             defaultTake={100}
             contextMenu={true}
-            // filterable={columns.some((col) => dateFields.includes(col.field))}
+            filterable={columns.some((col) => dateFields.includes(col.field))}
             size='small'
             pageable={
               rows?.length > 100

@@ -66,14 +66,14 @@ const TurnaroundReport = () => {
       field: 'activity',
       title: 'Activities',
       width: 200,
-      editable: false,
+      editable: true,
     },
 
     {
       title: 'Turnaround Period',
       children: [
-        { field: 'fromDate', title: 'From', width: 120, editable: false },
-        { field: 'toDate', title: 'To', width: 120, editable: false },
+        { field: 'fromDate', title: 'From', width: 120, editable: true },
+        { field: 'toDate', title: 'To', width: 120, editable: true },
       ],
     },
 
@@ -81,7 +81,7 @@ const TurnaroundReport = () => {
       field: 'durationInHrs',
       title: 'Duration, hrs',
       width: 120,
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'right',
     },
@@ -101,14 +101,14 @@ const TurnaroundReport = () => {
       field: 'activity',
       title: 'Activities',
       width: 250,
-      editable: false,
+      editable: true,
     },
 
     {
       title: 'Turnaround Period',
       children: [
-        { field: 'fromDate', title: 'From', width: 120, editable: false },
-        { field: 'toDate', title: 'To', width: 120, editable: false },
+        { field: 'fromDate', title: 'From', width: 120, editable: true },
+        { field: 'toDate', title: 'To', width: 120, editable: true },
       ],
     },
 
@@ -116,7 +116,7 @@ const TurnaroundReport = () => {
       field: 'durationInHrs',
       title: 'Duration, hrs',
       width: 100,
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'right',
     },
@@ -125,7 +125,7 @@ const TurnaroundReport = () => {
       field: 'periodInMonths',
       title: 'Period in Months',
       width: 120,
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'right',
     },

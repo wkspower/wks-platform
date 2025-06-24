@@ -173,7 +173,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'april',
       headerName: headerMap[4],
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'left',
 
@@ -182,7 +182,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'may',
       headerName: headerMap[5],
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -190,7 +190,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'june',
       headerName: headerMap[6],
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -198,7 +198,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'july',
       headerName: headerMap[7],
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -206,7 +206,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'aug',
       headerName: headerMap[8],
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -214,7 +214,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'sep',
       headerName: headerMap[9],
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -222,7 +222,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'oct',
       headerName: headerMap[10],
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -230,7 +230,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'nov',
       headerName: headerMap[11],
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -238,7 +238,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'dec',
       headerName: headerMap[12],
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -246,7 +246,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'jan',
       headerName: headerMap[1],
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -254,7 +254,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'feb',
       headerName: headerMap[2],
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -262,11 +262,20 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'march',
       headerName: headerMap[3],
-      editable: false,
+      editable: true,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
     },
+    {
+      field: 'remark',
+      headerName: 'Remark',
+      editable: true,
+      align: 'left',
+      headerAlign: 'left',
+      flex: 2,
+    }
+
   ]
 
   const [row, setRow] = useState()
@@ -286,8 +295,11 @@ const MonthwiseRawMaterial = () => {
         res2 = res2?.data?.consumptionSummary.map((item, index) => ({
           ...item,
           id: index,
+          idFromApi: item.id,
           isEditable: true,
+          remark:item.Remark||""
         }))
+        console.log("data is ",res2);
         setRow2(res2)
       }
 
@@ -295,6 +307,8 @@ const MonthwiseRawMaterial = () => {
         res = res?.data?.consumptionSummary.map((item, index) => ({
           ...item,
           id: index,
+          //idFromApi: item.id,
+          remark:item.Remark||""
         }))
 
         const formattedItems = res.map((item, index) => ({
@@ -418,7 +432,7 @@ const MonthwiseRawMaterial = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
 
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.Remark || '')
+    setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -436,13 +450,33 @@ const MonthwiseRawMaterial = () => {
       }
 
       var data = Object.values(modifiedCells)
+     console.log('Modified cells before save:', modifiedCells);
+     const year = localStorage.getItem('year') // e.g. "2025-26"
 
-      const rowsToUpdate = data.map((row) => ({
-        id: row.Id,
-        remark: row.Remark,
-        ActualPrevYear: row.ActualPrevYear,
-      }))
-      const res = await DataService.savePlantProductionData(
+let prevYear = ''
+if (year && year.includes('-')) {
+  const [start, end] = year.split('-').map(Number)
+  prevYear = `${start - 1}-${(start - 1 + 1).toString().slice(-2)}`
+}
+console.log("row data",data)
+const rowsToUpdate = data.map((row) => ({
+  april: row.april ?? null,
+  may: row.may ?? null,
+  june: row.june ?? null,
+  july: row.july ?? null,
+  aug: row.aug ?? null,
+  sep: row.sep ?? null,
+  oct: row.oct ?? null,
+  nov: row.nov ?? null,
+  dec: row.dec ?? null,
+  jan: row.jan ?? null,
+  feb: row.feb ?? null,
+  march: row.march ?? null,
+  remark: row.remark ?? null,
+   id: row.idFromApi,// support for both camelCase and PascalCase
+}))
+
+      const res = await DataService.postMonthwiseRawData(
         keycloak,
         rowsToUpdate,
         plantId,
@@ -454,10 +488,7 @@ const MonthwiseRawMaterial = () => {
           message: 'Data Saved Successfully!',
           severity: 'success',
         })
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
+      
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -522,6 +553,7 @@ const MonthwiseRawMaterial = () => {
             setRows={setRows}
             title='Monthwise Production Summary'
             columns={columnDefs}
+             handleRemarkCellClick={handleRemarkCellClick}
           />
         </div>
       ))}
