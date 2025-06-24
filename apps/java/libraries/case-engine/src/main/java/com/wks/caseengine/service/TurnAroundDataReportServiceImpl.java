@@ -122,6 +122,7 @@ public class TurnAroundDataReportServiceImpl implements TurnAroundDataReportServ
 	@Override
 	public AOPMessageVM updateReportForTurnAroundData(String plantId, String year,
 			List<TurnAroundPlanReportDTO> dataList) {
+		try {
 		List<TurnAroundPlan> turnAroundPlanList = new ArrayList<>();
 		for (TurnAroundPlanReportDTO dto : dataList) {
 			TurnAroundPlan turnAroundPlan=null;
@@ -130,6 +131,8 @@ public class TurnAroundDataReportServiceImpl implements TurnAroundDataReportServ
 						.findById(UUID.fromString(dto.getId())).get();
 			}else {
 				 turnAroundPlan=new TurnAroundPlan();
+				 turnAroundPlan.setPlantFkId(UUID.fromString(plantId));
+				 turnAroundPlan.setAopYear(year);
 			}
 			
 			//optional.get().setRemark(dto.getRemark());
@@ -151,6 +154,7 @@ public class TurnAroundDataReportServiceImpl implements TurnAroundDataReportServ
 			if(dto.getRemark()!=null) {
 				turnAroundPlan.setRemark(dto.getRemark());
 			}
+			
 			turnAroundPlanList.add(turnAroundPlanReportRepository.save(turnAroundPlan));
 		}
 		AOPMessageVM response = new AOPMessageVM();
@@ -158,6 +162,9 @@ public class TurnAroundDataReportServiceImpl implements TurnAroundDataReportServ
 		response.setMessage("Remarks updated successfully.");
 		response.setData(turnAroundPlanList);
 		return response;
+		}catch (Exception ex) {
+            throw new RuntimeException("Failed to save data", ex);
+        }
 	}
 
 }
