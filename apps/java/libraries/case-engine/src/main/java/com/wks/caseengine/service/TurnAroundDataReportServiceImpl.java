@@ -121,7 +121,7 @@ public class TurnAroundDataReportServiceImpl implements TurnAroundDataReportServ
 
 	@Override
 	public AOPMessageVM updateReportForTurnAroundData(String plantId, String year,
-			List<TurnAroundPlanReportDTO> dataList) {
+			String reportType,List<TurnAroundPlanReportDTO> dataList) {
 		try {
 		List<TurnAroundPlan> turnAroundPlanList = new ArrayList<>();
 		for (TurnAroundPlanReportDTO dto : dataList) {
@@ -133,6 +133,7 @@ public class TurnAroundDataReportServiceImpl implements TurnAroundDataReportServ
 				 turnAroundPlan=new TurnAroundPlan();
 				 turnAroundPlan.setPlantFkId(UUID.fromString(plantId));
 				 turnAroundPlan.setAopYear(year);
+				 turnAroundPlan.setReportType(reportType);
 			}
 			
 			//optional.get().setRemark(dto.getRemark());

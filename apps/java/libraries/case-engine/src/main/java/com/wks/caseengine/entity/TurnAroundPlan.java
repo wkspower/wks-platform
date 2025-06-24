@@ -48,7 +48,8 @@ public class TurnAroundPlan {
     @Column(name = "periodInMonths", nullable = true)
     private Double periodInMonths;
 
-
+    @Column(name="ReportType")
+    private String reportType;
 
     
     
