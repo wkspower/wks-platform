@@ -139,7 +139,7 @@ public class ConfigurationController {
 	}
 	
 	@PostMapping(value = "/configuration-constants-import-excel", consumes = "multipart/form-data")
-	public AOPMessageVM importConfigurationConstantsExcel(
+	public byte[] importConfigurationConstantsExcel(
 	         @RequestParam("plantFKId") String plantFKId,
             @RequestParam("year") String year,
 			@RequestParam("file") MultipartFile file
