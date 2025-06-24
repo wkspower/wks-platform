@@ -22,7 +22,8 @@ export const validateFields = (data, requiredFields) => {
         field === 'remark' ||
         field === 'aopRemarks' ||
         field === 'remarks' ||
-        field === 'Remarks'
+        field === 'Remarks' ||
+        field === 'Remark'
       ) {
         return (
           value === undefined ||
@@ -55,7 +56,9 @@ export const validateFields = (data, requiredFields) => {
           if (
             field === 'remark' ||
             field === 'aopRemarks' ||
-            field === 'remarks'
+            field === 'remarks' ||
+            field === 'Remarks' ||
+            field === 'Remark'
           ) {
             if (
               value === undefined ||

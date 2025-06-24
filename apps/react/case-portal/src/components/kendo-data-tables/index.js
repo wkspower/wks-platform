@@ -801,6 +801,8 @@ const KendoDataTables = ({
                   'startDateSD',
                   'endDateIBR',
                   'startDateIBR',
+                  'fromDate',
+                  'toDate',
                 ].includes(col.field)
               ) {
                 return (
@@ -816,10 +818,18 @@ const KendoDataTables = ({
                       },
                     }}
                     cells={{
-                      edit: { date: DateTimePickerEditor },
+                      edit: {
+                        date: ['fromDate', 'toDate'].includes(col.field)
+                          ? DateOnlyPicker
+                          : DateTimePickerEditor,
+                      },
                       data: toolTipRenderer,
                     }}
-                    format='{0:dd-MM-yyyy hh:mm a}'
+                    format={
+                      ['fromDate', 'toDate'].includes(col.field)
+                        ? '{0:dd-MM-yyyy}'
+                        : '{0:dd-MM-yyyy hh:mm a}'
+                    }
                     editor='date'
                     hidden={col.hidden}
                   />

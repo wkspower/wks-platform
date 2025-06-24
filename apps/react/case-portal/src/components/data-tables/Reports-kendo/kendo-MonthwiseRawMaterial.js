@@ -1,20 +1,21 @@
 import { Box } from '@mui/material'
 // import DataGridTable from '../ASDataGrid'
-import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
+// import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
 import {
   Backdrop,
   CircularProgress,
-  Tooltip,
+  // Tooltip,
   Typography,
 } from '../../../../node_modules/@mui/material/index'
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
+// import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
 import Notification from 'components/Utilities/Notification'
-import KendoDataTables from 'components/kendo-data-tables/index'
+// import KendoDataTables from 'components/kendo-data-tables/index'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
+import { validateFields } from 'utils/validationUtils'
 
 const MonthwiseRawMaterial = () => {
   const keycloak = useSession()
@@ -28,15 +29,15 @@ const MonthwiseRawMaterial = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
 
-  const formatValueToThreeDecimals = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
-  }
-  const formatValueToThreeDecimals4 = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(4) : ''
-  }
-  const formatValueToThreeDecimals2 = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
-  }
+  // const formatValueToThreeDecimals = (params) => {
+  //   return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
+  // }
+  // const formatValueToThreeDecimals4 = (params) => {
+  //   return params === 0 ? 0 : params ? parseFloat(params).toFixed(4) : ''
+  // }
+  // const formatValueToThreeDecimals2 = (params) => {
+  //   return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
+  // }
   const columnDefs = [
     { field: 'id', headerName: 'ID', editable: false },
 
@@ -268,13 +269,13 @@ const MonthwiseRawMaterial = () => {
       flex: 1,
     },
     {
-      field: 'remark',
+      field: 'Remark',
       headerName: 'Remark',
       editable: true,
       align: 'left',
       headerAlign: 'left',
       flex: 2,
-    }
+    },
 
   ]
 
@@ -290,16 +291,16 @@ const MonthwiseRawMaterial = () => {
       setLoading(true)
       var res = await DataService.getMonthwiseRawData(keycloak, 'NormQuantity')
       var res2 = await DataService.getMonthwiseRawData(keycloak, 'Selectivity')
-
+      console.log(res2)
       if (res2?.code == 200) {
         res2 = res2?.data?.consumptionSummary.map((item, index) => ({
           ...item,
           id: index,
           idFromApi: item.id,
           isEditable: true,
-          remark:item.Remark||""
+          originalRemark: item.Remark || '',
         }))
-        console.log("data is ",res2);
+        // console.log("data is ",res2);
         setRow2(res2)
       }
 
@@ -308,7 +309,7 @@ const MonthwiseRawMaterial = () => {
           ...item,
           id: index,
           //idFromApi: item.id,
-          remark:item.Remark||""
+          originalRemark: item.Remark || '',
         }))
 
         const formattedItems = res.map((item, index) => ({
@@ -432,7 +433,7 @@ const MonthwiseRawMaterial = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
 
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remark || '')
+    setCurrentRemark(row.Remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -450,7 +451,7 @@ const MonthwiseRawMaterial = () => {
       }
 
       var data = Object.values(modifiedCells)
-     console.log('Modified cells before save:', modifiedCells);
+      //  console.log('Modified cells before save:', modifiedCells);
      const year = localStorage.getItem('year') // e.g. "2025-26"
 
 let prevYear = ''
@@ -458,7 +459,7 @@ if (year && year.includes('-')) {
   const [start, end] = year.split('-').map(Number)
   prevYear = `${start - 1}-${(start - 1 + 1).toString().slice(-2)}`
 }
-console.log("row data",data)
+      // console.log('row data', data)
 const rowsToUpdate = data.map((row) => ({
   april: row.april ?? null,
   may: row.may ?? null,
@@ -472,10 +473,21 @@ const rowsToUpdate = data.map((row) => ({
   jan: row.jan ?? null,
   feb: row.feb ?? null,
   march: row.march ?? null,
-  remark: row.remark ?? null,
+        remark: row.Remark ?? null,
    id: row.idFromApi,// support for both camelCase and PascalCase
 }))
+      const requiredFields = ['Remark']
 
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
       const res = await DataService.postMonthwiseRawData(
         keycloak,
         rowsToUpdate,

@@ -5,6 +5,8 @@ import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
 import { Typography } from '../../../../node_modules/@mui/material/index'
+import KendoDataTables from 'components/kendo-data-tables/index'
+import { validateFields } from 'utils/validationUtils'
 
 const TurnaroundReport = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
@@ -97,11 +99,16 @@ const TurnaroundReport = () => {
     },
 
     {
-      title: 'Turnaround Period',
-      children: [
-        { field: 'fromDate', title: 'From', width: 120, editable: true },
-        { field: 'toDate', title: 'To', width: 120, editable: true },
-      ],
+      field: 'fromDate',
+      title: 'Turnaround Period From',
+      width: 120,
+      editable: true,
+    },
+    {
+      field: 'toDate',
+      title: 'Turnaround Period To',
+      width: 120,
+      editable: true,
     },
 
     {
@@ -117,6 +124,7 @@ const TurnaroundReport = () => {
       field: 'periodInMonths',
       title: 'Period in Months',
       width: 120,
+      type: 'number',
       editable: true,
       align: 'right',
       headerAlign: 'right',
@@ -137,7 +145,7 @@ const TurnaroundReport = () => {
       id: i,
       idRow: `${tag}-${i}`,
       inEdit: false,
-      remarks: item?.remarks ?? '',
+      originalRemark: item?.remarks ?? '',
       isEditable: true,
     }))
 
@@ -255,9 +263,9 @@ const TurnaroundReport = () => {
         setLoading(false)
         return
       }
-
+      // console.log(modifiedCells2)
       const rowsToUpdate = data.map((row) => ({
-        id: row.Id,
+        id: row.Id || null,
         fromDate: row.fromDate,
         toDate: row.toDate,
         activity: row.activity,
@@ -266,6 +274,17 @@ const TurnaroundReport = () => {
         remark: row.remarks,
         periodInMonths: row.periodInMonths,
       }))
+      const requiredFields = ['remarks']
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
       const res = await DataService.saveTurnaroundReportWhole(
         keycloak,
         rowsToUpdate,
@@ -280,6 +299,7 @@ const TurnaroundReport = () => {
           message: 'Data Saved Successfully!',
           severity: 'success',
         })
+        fetchPreviousYear()
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -352,8 +372,8 @@ const TurnaroundReport = () => {
         setRows={setRows}
         columns={columns}
         // processRowUpdate={processRowUpdate}
-        disableSelectionOnClick
-        defaultGroupingExpansionDepth={1}
+        // disableSelectionOnClick
+        // defaultGroupingExpansionDepth={1}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}
         currentRemark={currentRemark}
@@ -382,7 +402,7 @@ const TurnaroundReport = () => {
         Turnaround details for the previous years since commissioning{' '}
       </Typography>
 
-      <KendoDataTablesReports
+      <KendoDataTables
         modifiedCells={modifiedCells2}
         rows={rows2}
         setRows={setRows2}
@@ -402,7 +422,7 @@ const TurnaroundReport = () => {
           remarksEditable: true,
           saveBtn: true,
           saveBtnForRemark: true,
-          addButton: false,
+          addButton: true,
           allAction: true,
         }}
       />

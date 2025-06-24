@@ -148,10 +148,10 @@ const KendoDataTablesReports = ({
 
   const handleRowClick = (e) => {
     console.log(e.dataItem)
-    // if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
-    //   setEdit({})
-    //   return
-    // }
+    if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
+      setEdit({})
+      return
+    }
 
     setRows(
       rows.map((r) => ({
@@ -452,7 +452,7 @@ const KendoDataTablesReports = ({
     cols.map((col, idx) => {
       if (col.children) {
         return (
-          <GridColumn key={col.title || idx} title={col.title} editable={true}>
+          <GridColumn key={col.title || idx} title={col.title}>
             {renderColumns(col.children, filter, sort)}
           </GridColumn>
         )
@@ -501,7 +501,7 @@ const KendoDataTablesReports = ({
             }}
             format='{0:dd-MM-yyyy}'
             editor='date'
-            editable={true}
+            editable={col.editable || false}
             hidden={col.hidden}
             className={!isEditable ? 'non-editable-cell' : ''}
           />
@@ -513,7 +513,7 @@ const KendoDataTablesReports = ({
             key={col.field}
             field={col.field}
             title={col.title || col.headerName}
-            editable={true}
+            editable={col.editable || false}
             columnMenu={ColumnMenuCheckboxFilter}
             hidden={col.hidden}
             format={'{0:n2}'}
@@ -531,7 +531,7 @@ const KendoDataTablesReports = ({
           key={col.field}
           field={col.field}
           title={col.title || col.headerName}
-          editable={col.editable || true}
+          editable={col.editable || false}
           format={col.format || '{0:#.###}'}
           cells={{
             edit: { text: NoSpinnerNumericEditor },

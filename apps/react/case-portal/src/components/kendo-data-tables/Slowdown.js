@@ -115,9 +115,26 @@ const SlowDown = ({ permissions }) => {
         audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
       }))
+      const slowDownDetailsElastomer = newRow.map((row) => ({
+        discription: row.discription,
+        durationInHrs: (() => {
+          const v = findDuration('1', row)
+          if (!v) return null
+          const [h = '00', m = '00'] = String(v).split('.')
+          return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
+        })(),
+        maintEndDateTime: addTimeOffset(row.maintEndDateTime),
+        maintStartDateTime: addTimeOffset(row.maintStartDateTime),
+        remark: row.remark,
+        rate: row.rate,
+        audityear: localStorage.getItem('year'),
+        id: row.idFromApi || null,
+      }))
       const response = await DataService.saveSlowdownData(
         plantId,
-        lowerVertName === 'meg' ? slowDownDetailsMEG : slowDownDetailsMEG,
+        lowerVertName === 'elastomer'
+          ? slowDownDetailsElastomer
+          : slowDownDetailsMEG,
         keycloak,
       )
 
@@ -168,7 +185,19 @@ const SlowDown = ({ permissions }) => {
           // 'durationInHrs',
           'productName1',
         ]
-        const validationMessage = validateFields(data, requiredFields)
+        const requiredFieldsForElastomer = [
+          'maintStartDateTime',
+          'maintEndDateTime',
+          'discription',
+          'remark',
+          'rate',
+        ]
+        const validationMessage = validateFields(
+          data,
+          lowerVertName === 'elastomer'
+            ? requiredFieldsForElastomer
+            : requiredFields,
+        )
         if (validationMessage) {
           setSnackbarOpen(true)
           setSnackbarData({
@@ -311,6 +340,7 @@ const SlowDown = ({ permissions }) => {
       field: 'productName1',
       title: 'Particulars',
       editable: true,
+      hidden: lowerVertName === 'elastomer' ? true : false,
     },
 
     {

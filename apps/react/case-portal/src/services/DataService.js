@@ -1820,7 +1820,7 @@ async function saveTurnaroundReport(keycloak, dataList) {
 async function saveTurnaroundReportWhole(keycloak, dataList) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage?.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/report/turn-around?plantId=${plantId}&year=${year}`
+  const url = `${Config.CaseEngineUrl}/task/report/turn-around?plantId=${plantId}&year=${year}&reportType=${'previousYear'}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
