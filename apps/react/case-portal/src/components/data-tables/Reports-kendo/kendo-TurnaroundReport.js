@@ -7,14 +7,6 @@ import { DataService } from 'services/DataService'
 import { Typography } from '../../../../node_modules/@mui/material/index'
 
 const TurnaroundReport = () => {
-  const unsavedChangesRef = React.useRef({
-    unsavedRows: {},
-    rowsBeforeChange: {},
-  })
-  const unsavedChangesRefGrid2 = React.useRef({
-    unsavedRows: {},
-    rowsBeforeChange: {},
-  })
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -66,14 +58,14 @@ const TurnaroundReport = () => {
       field: 'activity',
       title: 'Activities',
       width: 200,
-      editable: true,
+      editable: false,
     },
 
     {
       title: 'Turnaround Period',
       children: [
-        { field: 'fromDate', title: 'From', width: 120, editable: true },
-        { field: 'toDate', title: 'To', width: 120, editable: true },
+        { field: 'fromDate', title: 'From', width: 120, editable: false },
+        { field: 'toDate', title: 'To', width: 120, editable: false },
       ],
     },
 
@@ -81,7 +73,7 @@ const TurnaroundReport = () => {
       field: 'durationInHrs',
       title: 'Duration, hrs',
       width: 120,
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'right',
     },
@@ -95,7 +87,7 @@ const TurnaroundReport = () => {
   ]
 
   const columnsGrid2 = [
-    { field: 'sno', title: 'SL.No', width: 80, editable: false },
+    // { field: 'sno', title: 'SL.No', width: 80, editable: false },
 
     {
       field: 'activity',
@@ -141,9 +133,12 @@ const TurnaroundReport = () => {
   const mapData = (data, tag) =>
     (data?.data?.plantTurnAroundReportData || []).map((item, i) => ({
       ...item,
-      id: `${tag}-${i}`,
-
+      idFromApi: item?.Id,
+      id: i,
+      idRow: `${tag}-${i}`,
+      inEdit: false,
       remarks: item?.remarks ?? '',
+      isEditable: true,
     }))
 
   const fetchCurrentYear = async () => {
@@ -192,69 +187,13 @@ const TurnaroundReport = () => {
     fetchPreviousYear()
   }, [keycloak, year, plantId])
 
-  const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    const rowId = newRow.id
-    const updatedFields = []
-    for (const key in newRow) {
-      if (
-        Object.prototype.hasOwnProperty.call(newRow, key) &&
-        newRow[key] !== oldRow[key]
-      ) {
-        updatedFields.push(key)
-      }
-    }
 
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-    }
 
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === newRow.id ? { ...newRow, isNew: false } : row,
-      ),
-    )
-    if (updatedFields.length > 0) {
-      setModifiedCells((prevModifiedCells) => ({
-        ...prevModifiedCells,
-        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-      }))
-    }
 
-    return newRow
-  }, [])
 
-  const processRowUpdate2 = React.useCallback((newRow, oldRow) => {
-    const rowId = newRow.id
-    const updatedFields = []
-    for (const key in newRow) {
-      if (
-        Object.prototype.hasOwnProperty.call(newRow, key) &&
-        newRow[key] !== oldRow[key]
-      ) {
-        updatedFields.push(key)
-      }
-    }
 
-    unsavedChangesRefGrid2.current.unsavedRows[rowId || 0] = newRow
-    if (!unsavedChangesRefGrid2.current.rowsBeforeChange[rowId]) {
-      unsavedChangesRefGrid2.current.rowsBeforeChange[rowId] = oldRow
-    }
 
-    setRows2((prevRows) =>
-      prevRows.map((row) =>
-        row.id === newRow.id ? { ...newRow, isNew: false } : row,
-      ),
-    )
-    if (updatedFields.length > 0) {
-      setModifiedCells2((prevModifiedCells) => ({
-        ...prevModifiedCells,
-        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-      }))
-    }
 
-    return newRow
-  }, [])
 
   const saveChanges = async () => {
     try {
@@ -287,10 +226,7 @@ const TurnaroundReport = () => {
           message: 'Data Saved Successfully!',
           severity: 'success',
         })
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
+        setModifiedCells({})
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -309,7 +245,7 @@ const TurnaroundReport = () => {
 
   const saveChanges2 = async () => {
     try {
-      const data = Object.values(modifiedCells)
+      const data = Object.values(modifiedCells2)
       if (data.length == 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -322,9 +258,15 @@ const TurnaroundReport = () => {
 
       const rowsToUpdate = data.map((row) => ({
         id: row.Id,
+        fromDate: row.fromDate,
+        toDate: row.toDate,
+        activity: row.activity,
+        sno: row.rowNumber,
+        durationInHrs: row.durationInHrs,
         remark: row.remarks,
+        periodInMonths: row.periodInMonths,
       }))
-      const res = await DataService.saveTurnaroundReport(
+      const res = await DataService.saveTurnaroundReportWhole(
         keycloak,
         rowsToUpdate,
         plantId,
@@ -338,10 +280,6 @@ const TurnaroundReport = () => {
           message: 'Data Saved Successfully!',
           severity: 'success',
         })
-        unsavedChangesRefGrid2.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -413,11 +351,10 @@ const TurnaroundReport = () => {
         rows={rows}
         setRows={setRows}
         columns={columns}
-        processRowUpdate={processRowUpdate}
+        // processRowUpdate={processRowUpdate}
         disableSelectionOnClick
         defaultGroupingExpansionDepth={1}
         remarkDialogOpen={remarkDialogOpen}
-        unsavedChangesRef={unsavedChangesRef}
         setRemarkDialogOpen={setRemarkDialogOpen}
         currentRemark={currentRemark}
         setCurrentRemark={setCurrentRemark}
@@ -428,7 +365,7 @@ const TurnaroundReport = () => {
         title='Turnaround Details (T-19A)'
         setModifiedCells={setModifiedCells}
         permissions={{
-          customHeight: { mainBox: '32vh', otherBox: '100%' },
+          // customHeight: { mainBox: '32vh', otherBox: '100%' },
           textAlignment: 'center',
           remarksEditable: true,
           showCalculate: false,
@@ -450,11 +387,7 @@ const TurnaroundReport = () => {
         rows={rows2}
         setRows={setRows2}
         columns={columnsGrid2}
-        processRowUpdate={processRowUpdate2}
-        disableSelectionOnClick
-        defaultGroupingExpansionDepth={1}
         remarkDialogOpen={remarkDialogOpen2}
-        unsavedChangesRef={unsavedChangesRefGrid2}
         setRemarkDialogOpen={setRemarkDialogOpen2}
         currentRemark={currentRemark2}
         setCurrentRemark={setCurrentRemark2}
@@ -463,13 +396,14 @@ const TurnaroundReport = () => {
         saveChanges={saveChanges2}
         handleRemarkCellClick={handleRemarkCellClick2}
         loading={loading}
-        setModifiedCells={setModifiedCells}
+        fetchData={fetchPreviousYear}
+        setModifiedCells={setModifiedCells2}
         permissions={{
-          customHeight: { mainBox: '32vh', otherBox: '100%' },
-          textAlignment: 'center',
           remarksEditable: true,
           saveBtn: true,
           saveBtnForRemark: true,
+          addButton: false,
+          allAction: true,
         }}
       />
       <Notification

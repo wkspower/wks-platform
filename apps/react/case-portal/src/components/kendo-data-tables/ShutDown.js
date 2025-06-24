@@ -37,10 +37,6 @@ const ShutDown = ({ permissions }) => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
-  const unsavedChangesRef = React.useRef({
-    unsavedRows: {},
-    rowsBeforeChange: {},
-  })
 
   const keycloak = useSession()
   const handleRemarkCellClick = (row) => {
@@ -135,10 +131,6 @@ const ShutDown = ({ permissions }) => {
 
       const maintenanceResponse = await DataService.getMaintenanceData(keycloak)
 
-      unsavedChangesRef.current = {
-        unsavedRows: {},
-        rowsBeforeChange: {},
-      }
       setModifiedCells({})
 
       setLoading(false)
@@ -363,7 +355,6 @@ const ShutDown = ({ permissions }) => {
         currentRemark={currentRemark}
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
-        unsavedChangesRef={unsavedChangesRef}
         deleteRowData={deleteRowData}
         permissions={adjustedPermissions}
       />

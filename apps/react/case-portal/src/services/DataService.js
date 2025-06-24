@@ -35,6 +35,7 @@ export const DataService = {
   savePlantProductionData,
   saveMonthwiseProduction,
   saveTurnaroundReport,
+  saveTurnaroundReportWhole,
   saveText,
   saveAOPConsumptionNorm,
   saveSummaryAOPConsumptionNorm,
@@ -1816,6 +1817,27 @@ async function saveTurnaroundReport(keycloak, dataList) {
     return await Promise.reject(e)
   }
 }
+async function saveTurnaroundReportWhole(keycloak, dataList) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage?.getItem('year')
+  const url = `${Config.CaseEngineUrl}/task/report/turn-around?plantId=${plantId}&year=${year}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(dataList),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
 async function saveText(submitedText, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/saveText`
 
@@ -2552,7 +2574,8 @@ async function getShutdownActivitiesData(keycloak) {
 
   try {
     const response = await fetch(url, { headers })
-    if (!response.ok) throw new Error('Failed to fetch shutdown activities data')
+    if (!response.ok)
+      throw new Error('Failed to fetch shutdown activities data')
     return await response.json()
   } catch (error) {
     console.error('Error in getShutdownActivitiesData:', error)
