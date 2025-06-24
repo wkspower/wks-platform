@@ -4,7 +4,7 @@
     "title": "Particulars",
     "editable": false,
     "width": 150,
-    "hidden": true
+    "hidden": false
   },
   {
     "field": "uom",
@@ -106,6 +106,7 @@
   {
     "field": "NormParameterFKID",
     "title": "NormParameterFKID",
-    "filterable": false
+    "filterable": false,
+    "hidden": true
   }
 ]

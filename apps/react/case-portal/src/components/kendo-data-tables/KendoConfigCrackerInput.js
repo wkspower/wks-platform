@@ -6,19 +6,23 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import getEnhancedAOPColDefs from 'components/data-tables/CommonHeader/kendo_ConfigHeader'
 import KendoDataTables from './index'
 import { DataService } from 'services/DataService'
-import { useSession } from 'SessionStoreContext'
+import { validateFields } from 'utils/validationUtils'
+import { Backdrop, CircularProgress } from '@mui/material'
 
-const CrackerConfig = () => {
+const CrackerConfig = ({ keycloak }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange, oldYear } = dataGridStore
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-  //   const [snackbarData, setSnackbarData] = useState({
-  //     message: '',
-  //     severity: 'info',
-  //   })
-  // const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
+  })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [modifiedCells, setModifiedCells] = useState({})
+  const [loading, setLoading] = useState(false)
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -32,7 +36,7 @@ const CrackerConfig = () => {
   }
   // const [allProducts, setAllProducts] = useState([])
 
-  const rawTabsFallback = [
+  const rawTabs = [
     'feed',
     'composition',
     'hydrogenation',
@@ -40,1238 +44,29 @@ const CrackerConfig = () => {
     'optimizing',
     'furnace',
   ]
-  const [tabs, setTabs] = useState([]) // will hold array of strings from API
-  const [loading, setLoading] = useState(false)
+
+  // Tab index
   const [rawTabIndex, setRawTabIndex] = useState(0)
-  const [availableTabs, setAvailableTabs] = useState([])
-  const keycloak = useSession()
 
-  const getConfigurationTabsMatrix = async () => {
-    setLoading(true)
-    try {
-      const response = await DataService.getConfigurationTabsMatrix(keycloak)
-      if (response?.code === 200) {
-        const parsedData = JSON.parse(response.data)
-        setTabs(parsedData)
-      } else {
-      }
-    } catch (error) {
-      console.error('Error fetching tabs:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-  const getConfigurationAvailableTabs = async () => {
-    setLoading(true)
-    try {
-      const response = await DataService.getConfigurationAvailableTabs(keycloak)
-      if (response?.code === 200) {
-        setAvailableTabs(response.data.configurationTypeList || [])
-      } else {
-        setAvailableTabs([])
-      }
-    } catch (error) {
-      console.error('Error fetching availableTabs:', error)
-      setAvailableTabs([])
-    } finally {
-      setLoading(false)
-    }
-  }
-  useEffect(() => {
-    getConfigurationTabsMatrix()
-    getConfigurationAvailableTabs()
-  }, [])
-  useEffect(() => {
-    if (tabs.length > 0) {
-      if (rawTabIndex < 0 || rawTabIndex >= tabs.length) {
-        setRawTabIndex(0)
-      }
-    } else {
-      setRawTabIndex(0)
-    }
-  }, [tabs])
-  const getTheId = useCallback((name) => {
-    const tabObj = availableTabs.find(
-      (t) => t.name.toLowerCase() === name.toLowerCase(),
-    )
-    console.log(tabObj)
-    return tabObj ? tabObj.id : null
-  }, [])
-  console.log('test', availableTabs)
-  const feedRows = [
-    {
-      id: 1,
-      particulars: 'Propane',
-      uom: 'tpd',
-      remarks: 'from planning team (1.8 TPH min is required)',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 2,
-      particulars: 'C2/C3',
-      uom: 'tpd',
-      remarks: 'from planning team',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 3,
-      particulars: 'Ethane',
-      uom: 'tpd',
-      remarks: 'from planning team',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 4,
-      particulars: 'FCC C3',
-      uom: 'tpd',
-      remarks: 'from planning team',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 5,
-      particulars: 'BPCL Kochi Propylene',
-      uom: 'tpd',
-      remarks: 'from planning team',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 6,
-      particulars: 'LDPE off Gas',
-      uom: 'tpd',
-      remarks: 'PAS data for current financial year',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 7,
-      particulars: 'PP off gas',
-      uom: 'tpd',
-      remarks: 'PAS data for current financial year',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 8,
-      particulars: 'Hexene Purge Gas',
-      uom: 'tpd',
-      remarks: 'PAS data for current financial year',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 9,
-      particulars: 'Additional feed (Future scope)',
-      uom: '',
-      remarks:
-        '1) Add button will be required for new addition of rows.\n2) Option to be provided to get the export',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-  ]
+  // Row states per tab
 
-  const compositionRows = [
     // —— C2/C3 (existing) ——
-    {
-      id: 1,
-      ParticularsType: 'C2/C3',
-      particulars: 'Methane',
-      uom: 'Wt%',
-      remarks: 'Manual Entry / Lab Tag for the current year',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 2,
-      ParticularsType: 'C2/C3',
-      particulars: 'Ethane',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 3,
-      ParticularsType: 'C2/C3',
-      particulars: 'Propane',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 4,
-      ParticularsType: 'C2/C3',
-      particulars: 'i-C4',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 5,
-      ParticularsType: 'C2/C3',
-      particulars: 'n-C4',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 6,
-      ParticularsType: 'C2/C3',
-      particulars: 'C5',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
 
     // —— Hexene Purge Gas ——
-    {
-      id: 7,
-      ParticularsType: 'Hexene Purge Gas',
-      particulars: 'Ethane',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 8,
-      ParticularsType: 'Hexene Purge Gas',
-      particulars: 'Ethylene',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
 
     // —— Import Propane ——
-    {
-      id: 9,
-      ParticularsType: 'Import Propane',
-      particulars: 'Methane',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 10,
-      ParticularsType: 'Import Propane',
-      particulars: 'Propylene',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 11,
-      ParticularsType: 'Import Propane',
-      particulars: 'Ethane',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 12,
-      ParticularsType: 'Import Propane',
-      particulars: 'Propane',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 13,
-      ParticularsType: 'Import Propane',
-      particulars: 'i-C4',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 14,
-      ParticularsType: 'Import Propane',
-      particulars: 'n-C4',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 15,
-      ParticularsType: 'Import Propane',
-      particulars: 'C5',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
 
     // —— BPCL Kochi Propylene ——
-    {
-      id: 16,
-      ParticularsType: 'BPCL Kochi Propylene',
-      particulars: 'Propylene',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
 
     // —— FCC C3 ——
-    {
-      id: 17,
-      ParticularsType: 'FCC C3',
-      particulars: 'Propane',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 18,
-      ParticularsType: 'FCC C3',
-      particulars: 'Propylene',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
 
     // —— LDPE Off Gas ——
-    {
-      id: 19,
-      ParticularsType: 'LDPE Off Gas',
-      particulars: 'C2H4 Content',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 20,
-      ParticularsType: 'LDPE Off Gas',
-      particulars: 'C2H6 Content',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 21,
-      ParticularsType: 'LDPE Off Gas',
-      particulars: 'Propane',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 22,
-      ParticularsType: 'LDPE Off Gas',
-      particulars: 'Propylene',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
 
     // —— Additional Feed (Default Composition) ——
-    {
-      id: 23,
-      ParticularsType: 'Additional Feed (Default Composition)',
-      particulars: 'H2',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 24,
-      ParticularsType: 'Additional Feed (Default Composition)',
-      particulars: 'C1',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 25,
-      ParticularsType: 'Additional Feed (Default Composition)',
-      particulars: 'C2',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 26,
-      ParticularsType: 'Additional Feed (Default Composition)',
-      particulars: 'C3',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 27,
-      ParticularsType: 'Additional Feed (Default Composition)',
-      particulars: 'C4',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-  ]
 
-  const hydrogenationRows = [
-    {
-      id: 1,
-      particulars: 'C3 Hdn selectivity',
-      uom: '%',
-      remarks: 'Manual Entry (remain same for each mode of operation)',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 2,
-      particulars: 'MAPD Conversion',
-      uom: '%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 3,
-      particulars: 'C2 Hdn selectivity',
-      uom: '%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 4,
-      particulars: 'C2 Conversion',
-      uom: '%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-  ]
 
-  const recoveryRows = [
-    {
-      id: 1,
-      particulars: 'Ethylene loss in RG',
-      uom: 'ppmv',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 2,
-      particulars: 'Ethylene in C2 spl bot',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 3,
-      particulars: 'ethane in ethylene',
-      uom: 'ppmw',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 4,
-      particulars: 'C4 loss in DP O/h',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 5,
-      particulars: 'Propylene in C3',
-      uom: 'Wt%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 6,
-      particulars: 'Propane in propylene Product',
-      uom: 'ppmw',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 7,
-      particulars: 'LDPE off gas to Fuel',
-      uom: 'Kg/day',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-  ]
 
-  const optimizingRows = [
-    {
-      id: 1,
-      particulars: 'C2C3 feed',
-      uom: 'tpd',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 2,
-      particulars: 'Import Propane',
-      uom: 'tpd',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 3,
-      particulars: 'Ethane conversion',
-      uom: '%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 4,
-      particulars: 'Propane conversion',
-      uom: '%',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 5,
-      particulars: 'Propylene loss in Propane',
-      uom: '',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 6,
-      particulars: 'Zone on Ethane',
-      uom: '',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 7,
-      particulars: 'Additional Variable',
-      uom: '',
-      remarks: 'Add button will be required for new addition of rows.',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-  ]
 
-  const furnaceRows = [
-    {
-      id: 1,
-      particulars: 'Max Flow per Zone for Ethane',
-      uom: '',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 2,
-      particulars: 'Max Flow per Zone for Propane',
-      uom: '',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 3,
-      particulars: 'Max Ethane Conversion',
-      uom: '',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 4,
-      particulars: 'Max Propane Conversion',
-      uom: '',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 5,
-      particulars: 'Max CGC molar flow',
-      uom: '',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 6,
-      particulars: 'Max Caustic Tower rho *V2',
-      uom: '',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 7,
-      particulars: 'Max Furnace Duty',
-      uom: '',
-      remarks: 'Manual Entry',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-    {
-      id: 8,
-      particulars: 'Additional Constraint',
-      uom: '',
-      remarks: 'Add button will be required for new addition of rows.',
-      jan: 100.0,
-      feb: 100.0,
-      march: 100.0,
-      april: 200.0,
-      may: 100.0,
-      june: 100.0,
-      july: 100.0,
-      aug: 100.0,
-      sep: 100.0,
-      oct: 100.0,
-      nov: 100.0,
-      dec: 100.0,
-    },
-  ]
 
   const [feedRowsDummy, setFeedRows] = useState([])
   const [compositionRowsDummy, setCompositionRows] = useState([])
@@ -1279,42 +74,144 @@ const CrackerConfig = () => {
   const [recoveryRowsDummy, setRecoveryRows] = useState([])
   const [optimizingRowsDummy, setOptimizingRows] = useState([])
   const [furnaceRowsDummy, setFurnaceRows] = useState([])
-
-  const fetchCrackerRows = useCallback((tab) => {
+  const allModes = ['5F', '4F', '4F+D']
+  const [selectMode, setSelectMode] = useState(allModes[0])
+  const fetchCrackerRows = useCallback(
     // Simulate network delay
-    console.log(tab)
-    setTimeout(() => {
+    async (tab, mode) => {
+      try {
+        setLoading(true)
+        const spyroVM = await DataService.getSpyroInputData(keycloak, mode)
+        if (spyroVM?.data && Array.isArray(spyroVM.data)) {
+          const transformedData = spyroVM.data.map((item, index) => {
+            const transformedItem = {
+              id: item.NormParameterFKID || `row_${index}`,
+              particulars: item.Particulars,
+              uom: item.UOM,
+              remarks: item.Remarks,
+              ParticularsType: item.Type,
+              jan: item.Jan,
+              feb: item.Feb,
+              march: item.Mar,
+              april: item.Apr,
+              may: item.May,
+              june: item.Jun,
+              july: item.Jul,
+              aug: item.Aug,
+              sep: item.Sep,
+              oct: item.Oct,
+              nov: item.Nov,
+              dec: item.Dec,
+              NormParameterFKID: item.NormParameterFKID,
+              ...item,
+            }
+            return transformedItem
+          })
       switch (tab) {
-        case getTheId('Feed'):
-          setFeedRows(feedRows)
+            case 'feed':
+              setFeedRows(transformedData)
+              console.log('Feed rows set:', transformedData.length)
           break
-        case getTheId('Composition'):
-          setCompositionRows(compositionRows)
+            case 'composition':
+              setCompositionRows(transformedData)
+              console.log('Composition rows set:', transformedData.length)
           break
-        case getTheId('Hydrogenation'):
-          setHydrogenationRows(hydrogenationRows)
+            case 'hydrogenation':
+              setHydrogenationRows(transformedData)
+              console.log('Hydrogenation rows set:', transformedData.length)
           break
-        case getTheId('Recovery'):
-          setRecoveryRows(recoveryRows)
+            case 'recovery':
+              setRecoveryRows(transformedData)
+              console.log('Recovery rows set:', transformedData.length)
           break
-        case getTheId('Optimizing'):
-          setOptimizingRows(optimizingRows)
+            case 'optimizing':
+              setOptimizingRows(transformedData)
+              console.log('Optimizing rows set:', transformedData.length)
           break
-        case getTheId('Furnace'):
-          setFurnaceRows(furnaceRows)
+            case 'furnace':
+              setFurnaceRows(transformedData)
+              console.log('Furnace rows set:', transformedData.length)
           break
         default:
+              console.warn('Unknown tab:', tab)
+          }
+        } else {
+          const emptyArray = []
+          switch (tab) {
+            case 'feed':
+              setFeedRows(emptyArray)
           break
+            case 'composition':
+              setCompositionRows(emptyArray)
+              break
+            case 'hydrogenation':
+              setHydrogenationRows(emptyArray)
+              break
+            case 'recovery':
+              setRecoveryRows(emptyArray)
+              break
+            case 'optimizing':
+              setOptimizingRows(emptyArray)
+              break
+            case 'furnace':
+              setFurnaceRows(emptyArray)
+              break
       }
-    }, 500) // 500ms delay to mimic async
-  }, [])
+        }
+      } catch (err) {
+        const emptyArray = []
+        switch (tab) {
+          case 'feed':
+            setFeedRows(emptyArray)
+            break
+          case 'composition':
+            setCompositionRows(emptyArray)
+            break
+          case 'hydrogenation':
+            setHydrogenationRows(emptyArray)
+            break
+          case 'recovery':
+            setRecoveryRows(emptyArray)
+            break
+          case 'optimizing':
+            setOptimizingRows(emptyArray)
+            break
+          case 'furnace':
+            setFurnaceRows(emptyArray)
+            break
+        }
+        setSnackbarData({
+          message: `Failed to load ${tab} data. Please try again.`,
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [keycloak],
+  )
 
   // 5️⃣ Whenever the selected tab changes, reload that tab’s rows
   useEffect(() => {
-    const currentTab = tabs[rawTabIndex]
-    console.log(currentTab)
-    fetchCrackerRows(currentTab)
-  }, [rawTabIndex, fetchCrackerRows])
+    const currentTab = rawTabs[rawTabIndex]
+    console.log('🔄 useEffect triggered:', {
+      currentTab,
+      rawTabIndex,
+      selectMode,
+      plantId,
+      hasKeycloak: !!keycloak,
+    })
+    if (keycloak && plantId && currentTab) {
+      fetchCrackerRows(currentTab, selectMode)
+    } else {
+      console.warn('⚠️ Missing required data for API call:', {
+        hasKeycloak: !!keycloak,
+        hasPlantId: !!plantId,
+        currentTab,
+      })
+    }
+  }, [rawTabIndex, fetchCrackerRows, selectMode, plantId])
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -1343,7 +240,7 @@ const CrackerConfig = () => {
       saveWithRemark: true,
       saveBtn: true,
       allAction: lowerVertName === 'cracker' ? true : false,
-      modes: ['5F', '4F', '4F+D'],
+      modes: allModes,
     },
     isOldYear,
   )
@@ -1362,10 +259,116 @@ const CrackerConfig = () => {
     headerMap,
     handleRemarkCellClick,
     configType:
-      tabs[rawTabIndex] === 'composition' ? 'cracker_composition' : 'cracker', // columnConfig,
+      rawTabs[rawTabIndex] === 'composition'
+        ? 'cracker_composition'
+        : 'cracker', // columnConfig,
   })
+  const saveChanges = useCallback(async () => {
+    try {
+      console.log('modifiedCells', modifiedCells)
+      if (Object.keys(modifiedCells).length === 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
+      }
+      var rawData = Object.values(modifiedCells)
+      const data = rawData.filter((row) => row.inEdit)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
+      }
+      const requiredFields = ['particulars', 'remarks']
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
+      saveSpyroData(data)
+    } catch (error) {
+      console.log('Error saving changes:', error)
+    }
+  }, [modifiedCells])
+  const saveSpyroData = async (newRows) => {
+    try {
+      let plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+      let verticalId = localStorage.getItem('verticalId')
+      const SpyroInputData = newRows.map((row) => ({
+        VerticalFKId: verticalId,
+        PlantFKId: plantId,
+        NormParameterFKID: row.NormParameterFKID ?? null,
+        Particulars: row.particulars ?? row.Particulars ?? null,
+        NormParameterTypeName: row.NormParameterTypeName ?? null,
+        NormParameterTypeFKID: row.NormParameterTypeFKID ?? null,
+        Type: row.ParticularsType ?? row.Type ?? null,
+        UOM: row.uom ?? row.UOM ?? null,
+        AuditYear: row.AuditYear ?? null,
+        Remarks: row.remarks ?? row.Remarks ?? null,
+        Jan: row.jan ?? row.Jan ?? null,
+        Feb: row.feb ?? row.Feb ?? null,
+        Mar: row.march ?? row.Mar ?? null,
+        Apr: row.april ?? row.Apr ?? null,
+        May: row.may ?? row.May ?? null,
+        Jun: row.june ?? row.Jun ?? null,
+        Jul: row.july ?? row.Jul ?? null,
+        Aug: row.aug ?? row.Aug ?? null,
+        Sep: row.sep ?? row.Sep ?? null,
+        Oct: row.oct ?? row.Oct ?? null,
+        Nov: row.nov ?? row.Nov ?? null,
+        Dec: row.dec ?? row.Dec ?? null,
+        id: row.idFromApi ?? row.id ?? null,
+        inEdit: row.inEdit || false,
+      }))
+      const response = await DataService.saveSpyroInput(
+        SpyroInputData,
+        keycloak,
+      )
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Spyro Input data Saved Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        fetchCrackerRows()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Error saving Spyro Input data!',
+          severity: 'error',
+        })
+      }
+      return response
+    } catch (error) {
+      console.error('Error saving Spyro Input data!', error)
+    }
+  }
   return (
     <Box>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={!!loading}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
       <Tabs
         sx={{
           borderBottom: '0px solid #ccc',
@@ -1377,11 +380,7 @@ const CrackerConfig = () => {
         value={rawTabIndex}
         onChange={(e, newIndex) => setRawTabIndex(newIndex)}
       >
-        {tabs.map((tabId) => {
-          const tabInfo = availableTabs.find(
-            (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
-          )
-          return (
+        {rawTabs.map((tabId) => (
           <Tab
             key={tabId}
             sx={{
@@ -1389,19 +388,19 @@ const CrackerConfig = () => {
               borderBottom: '1px solid #ADD8E6',
               textTransform: 'capitalize',
             }}
-              label={tabInfo?.displayName}
+            label={tabId}
           />
-          )
-        })}
+        ))}
       </Tabs>
 
       <Box>
         {(() => {
-          switch (tabs[rawTabIndex]) {
-            case getTheId('Feed'):
+          switch (rawTabs[rawTabIndex]) {
+            case 'feed':
               return (
                 <Box>
                   <KendoDataTables
+                    key={rawTabs[rawTabIndex]}
                     rows={feedRowsDummy}
                     setRows={setFeedRows}
                     fetchData={() => fetchCrackerRows('feed')}
@@ -1415,14 +414,24 @@ const CrackerConfig = () => {
                     setCurrentRemark={setCurrentRemark}
                     currentRowId={currentRowId}
                     permissions={adjustedPermissions}
+                    selectMode={selectMode}
+                    setSelectMode={setSelectMode}
+                    saveChanges={saveChanges}
+                    snackbarData={snackbarData}
+                    snackbarOpen={snackbarOpen}
+                    setSnackbarOpen={setSnackbarOpen}
+                    setSnackbarData={setSnackbarData}
+                    modifiedCells={modifiedCells}
+                    setModifiedCells={setModifiedCells}
                   />
                 </Box>
               )
 
-            case getTheId('Composition'):
+            case 'composition':
               return (
                 <Box>
                   <KendoDataTables
+                    key={rawTabs[rawTabIndex]}
                     rows={compositionRowsDummy}
                     setRows={setCompositionRows}
                     fetchData={() => fetchCrackerRows('composition')}
@@ -1437,14 +446,24 @@ const CrackerConfig = () => {
                     setCurrentRemark={setCurrentRemark}
                     currentRowId={currentRowId}
                     permissions={adjustedPermissions}
+                    selectMode={selectMode}
+                    setSelectMode={setSelectMode}
+                    saveChanges={saveChanges}
+                    snackbarData={snackbarData}
+                    snackbarOpen={snackbarOpen}
+                    setSnackbarOpen={setSnackbarOpen}
+                    setSnackbarData={setSnackbarData}
+                    modifiedCells={modifiedCells}
+                    setModifiedCells={setModifiedCells}
                   />
                 </Box>
               )
 
-            case getTheId('Hydrogenation'):
+            case 'hydrogenation':
               return (
                 <Box>
                   <KendoDataTables
+                    key={rawTabs[rawTabIndex]}
                     rows={hydrogenationRowsDummy}
                     setRows={setHydrogenationRows}
                     fetchData={() => fetchCrackerRows('hydrogenation')}
@@ -1458,14 +477,24 @@ const CrackerConfig = () => {
                     setCurrentRemark={setCurrentRemark}
                     currentRowId={currentRowId}
                     permissions={adjustedPermissions}
+                    selectMode={selectMode}
+                    setSelectMode={setSelectMode}
+                    saveChanges={saveChanges}
+                    snackbarData={snackbarData}
+                    snackbarOpen={snackbarOpen}
+                    setSnackbarOpen={setSnackbarOpen}
+                    setSnackbarData={setSnackbarData}
+                    modifiedCells={modifiedCells}
+                    setModifiedCells={setModifiedCells}
                   />
                 </Box>
               )
 
-            case getTheId('Recovery'):
+            case 'recovery':
               return (
                 <Box>
                   <KendoDataTables
+                    key={rawTabs[rawTabIndex]}
                     rows={recoveryRowsDummy}
                     setRows={setRecoveryRows}
                     fetchData={() => fetchCrackerRows('recovery')}
@@ -1479,14 +508,24 @@ const CrackerConfig = () => {
                     setCurrentRemark={setCurrentRemark}
                     currentRowId={currentRowId}
                     permissions={adjustedPermissions}
+                    selectMode={selectMode}
+                    setSelectMode={setSelectMode}
+                    saveChanges={saveChanges}
+                    snackbarData={snackbarData}
+                    snackbarOpen={snackbarOpen}
+                    setSnackbarOpen={setSnackbarOpen}
+                    setSnackbarData={setSnackbarData}
+                    modifiedCells={modifiedCells}
+                    setModifiedCells={setModifiedCells}
                   />
                 </Box>
               )
 
-            case getTheId('Optimizing'):
+            case 'optimizing':
               return (
                 <Box>
                   <KendoDataTables
+                    key={rawTabs[rawTabIndex]}
                     rows={optimizingRowsDummy}
                     setRows={setOptimizingRows}
                     fetchData={() => fetchCrackerRows('optimizing')}
@@ -1500,14 +539,24 @@ const CrackerConfig = () => {
                     setCurrentRemark={setCurrentRemark}
                     currentRowId={currentRowId}
                     permissions={adjustedPermissions}
+                    selectMode={selectMode}
+                    setSelectMode={setSelectMode}
+                    saveChanges={saveChanges}
+                    snackbarData={snackbarData}
+                    snackbarOpen={snackbarOpen}
+                    setSnackbarOpen={setSnackbarOpen}
+                    setSnackbarData={setSnackbarData}
+                    modifiedCells={modifiedCells}
+                    setModifiedCells={setModifiedCells}
                   />
                 </Box>
               )
 
-            case getTheId('Furnace'):
+            case 'furnace':
               return (
                 <Box>
                   <KendoDataTables
+                    key={rawTabs[rawTabIndex]}
                     rows={furnaceRowsDummy}
                     setRows={setFurnaceRows}
                     fetchData={() => fetchCrackerRows('furnace')}
@@ -1521,6 +570,15 @@ const CrackerConfig = () => {
                     setCurrentRemark={setCurrentRemark}
                     currentRowId={currentRowId}
                     permissions={adjustedPermissions}
+                    selectMode={selectMode}
+                    setSelectMode={setSelectMode}
+                    saveChanges={saveChanges}
+                    snackbarData={snackbarData}
+                    snackbarOpen={snackbarOpen}
+                    setSnackbarOpen={setSnackbarOpen}
+                    setSnackbarData={setSnackbarData}
+                    modifiedCells={modifiedCells}
+                    setModifiedCells={setModifiedCells}
                   />
                 </Box>
               )

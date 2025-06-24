@@ -135,6 +135,7 @@
   {
     "field": "idFromApi",
     "title": "idFromApi",
-    "filterable": "false"
+    "filterable": false,
+    "hidden": true
   }
 ]

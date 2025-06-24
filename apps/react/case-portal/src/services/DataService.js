@@ -46,6 +46,8 @@ export const DataService = {
 
   saveBusinessDemandData,
   saveSpyroInput,
+  saveSpyroOutput,
+  getSpyroOutputData,
   saveNormalOperationNormsData,
   saveShutDownNormsData,
   saveSlowdownNormsData,
@@ -2239,6 +2241,47 @@ async function saveSpyroInput(payload, keycloak) {
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
+  }
+}
+async function saveSpyroOutput(payload, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/spyro-output`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getSpyroOutputData(keycloak, mode) {
+  const year = localStorage.getItem('year')
+  let plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+  const url = `${Config.CaseEngineUrl}/task/spyro-output?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&Mode=${encodeURIComponent(mode)}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Failed to fetch spyro-output data', e)
+    return Promise.reject(e)
   }
 }
 
