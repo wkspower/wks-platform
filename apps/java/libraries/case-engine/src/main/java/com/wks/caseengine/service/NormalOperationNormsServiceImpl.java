@@ -477,6 +477,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					dto.setRemarks(getStringCellValue(row.getCell(15),dto));
 					dto.setId(getStringCellValue(row.getCell(16),dto));
 					dto.setMaterialFkId(getStringCellValue(row.getCell(17),dto));
+					dto.setIsEditable(getBooleanCellValue(row.getCell(18),dto));
 				} catch (Exception e) {
 					e.printStackTrace();
 					dto.setErrDescription(e.getMessage());
@@ -522,6 +523,35 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		}
 		return null;
 	}
+	
+	public static Boolean getBooleanCellValue(Cell cell, MCUNormsValueDTO dto) {
+	    if (cell == null) return null;
+
+	    CellType type = cell.getCellType();
+	    if (type == CellType.FORMULA) {
+	        type = cell.getCachedFormulaResultType();
+	    }
+
+	    switch (type) {
+	        case BOOLEAN:
+	            return cell.getBooleanCellValue();
+	        case STRING:
+	            String text = cell.getStringCellValue().trim().toLowerCase();
+	            if ("true".equals(text)) return true;
+	            if ("false".equals(text)) return false;
+	            return null;
+	        case NUMERIC:
+	            double num = cell.getNumericCellValue();
+	            if (num == 1.0) return true;
+	            if (num == 0.0) return false;
+	            return null;
+	        case BLANK:
+	        case _NONE:
+	        default:
+	            return null;
+	    }
+	}
+
 
 	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave,List<MCUNormsValueDTO> dtoList) {
 		try {
@@ -542,7 +572,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			List<List<Object>> rows = new ArrayList<>();
 			// Data rows
 			for (MCUNormsValueDTO dto : dtoList) {
-				
+				if (dto.getIsEditable()!=null && dto.getIsEditable()) {
 					List<Object> list = new ArrayList<>();
 					list.add(dto.getNormParameterTypeDisplayName());
 					list.add(dto.getProductName());
@@ -562,12 +592,13 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					list.add(dto.getRemarks());
 					list.add(dto.getId());
 					list.add(dto.getMaterialFkId());
+					list.add(dto.getIsEditable());
 					if(isAfterSave){
 						list.add(dto.getSaveStatus());
 						list.add(dto.getErrDescription());
 					}
 					rows.add(list);
-				
+				}
 			}
 
 			List<String> innerHeaders = new ArrayList<>();
@@ -579,6 +610,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			innerHeaders.add("Remarks");
 			innerHeaders.add("Id");
 			innerHeaders.add("NormParamterId");
+			innerHeaders.add("IsEditable");
 			if(isAfterSave){
 				innerHeaders.add("Status");
 				innerHeaders.add("Error Description");
@@ -614,6 +646,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			}
 			sheet.setColumnHidden(16, true);
 			sheet.setColumnHidden(17, true);
+			sheet.setColumnHidden(18, true);
 			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
 
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
