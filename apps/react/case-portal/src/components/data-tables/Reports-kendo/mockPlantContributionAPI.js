@@ -1,20 +1,6 @@
-import { Tooltip } from '../../../../node_modules/@mui/material/index'
-
 export const MockReportService = {
   async getReport({ category, year }) {
     const currFY = year || ''
-    const formatValueToThreeDecimalsTwo = (params) => {
-      return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
-    }
-    const formatValueToThreeDecimalsZero = (params) => {
-      return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
-    }
-    const formatValueToThreeDecimalsOne = (params) => {
-      return params === 0 ? 0 : params ? parseFloat(params).toFixed(1) : ''
-    }
-    const formatValueToThreeDecimalsFour = (params) => {
-      return params === 0 ? 0 : params ? parseFloat(params).toFixed(4) : ''
-    }
 
     let prevFY = ''
     if (currFY.includes('-')) {
@@ -30,7 +16,7 @@ export const MockReportService = {
               field: 'SrNo',
               title: 'SL.No',
               editable: false,
-              width: 80,
+              widthT: 100,
               align: 'right',
             },
             {
@@ -103,7 +89,8 @@ export const MockReportService = {
             {
               field: 'SrNo',
               title: 'SL.No',
-              width: 80,
+              widthT: 100,
+
               editable: false,
               align: 'right',
             },
@@ -213,7 +200,8 @@ export const MockReportService = {
             {
               field: 'SrNo',
               title: 'SL.No',
-              width: 80,
+              widthT: 100,
+
               editable: false,
               align: 'right',
             },
@@ -323,7 +311,8 @@ export const MockReportService = {
             {
               field: 'SrNo',
               title: 'SL.No',
-              width: 80,
+              widthT: 100,
+
               editable: false,
               align: 'right',
             },
@@ -433,7 +422,8 @@ export const MockReportService = {
             {
               field: 'SrNo',
               title: 'SL.No',
-              width: 80,
+              widthT: 100,
+
               editable: false,
               align: 'right',
             },
@@ -543,9 +533,13 @@ export const MockReportService = {
             {
               field: 'SrNo',
               title: 'SL.No',
-              width: 80,
+              widthT: 100,
               align: 'right',
               editable: false,
+            },
+            {
+              field: 'id',
+              hidden: true,
             },
             {
               field: 'OtherCost',
@@ -567,14 +561,14 @@ export const MockReportService = {
                   title: 'Budget',
                   width: 120,
                   align: 'right',
-                  editable: false,
+                  editable: true,
                 },
                 {
                   field: 'PrevYearActual',
                   title: 'Actual',
                   width: 120,
                   align: 'right',
-                  editable: false,
+                  editable: true,
                 },
               ],
             },
@@ -586,7 +580,7 @@ export const MockReportService = {
                   title: 'Budget',
                   width: 120,
                   align: 'right',
-                  editable: false,
+                  editable: true,
                 },
               ],
             },
@@ -600,7 +594,8 @@ export const MockReportService = {
             {
               field: 'SrNo',
               title: 'SL.No',
-              width: 80,
+              widthT: 100,
+
               align: 'right',
               editable: false,
             },

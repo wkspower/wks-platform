@@ -64,7 +64,7 @@ const PlantsProductionSummary = () => {
   }
 
   const apiCols = [
-    { field: 'RowNo', title: 'SL.No', width: 80, editable: false },
+    { field: 'RowNo', title: 'SL.No', widthT: 100, editable: false },
 
     {
       title: 'Item',
@@ -94,7 +94,8 @@ const PlantsProductionSummary = () => {
           field: 'ActualPrevYear',
           title: 'Actual',
           width: 120,
-          editable: true,
+          // editable: true,
+          editable: false,
         },
       ],
     },
@@ -163,8 +164,8 @@ const PlantsProductionSummary = () => {
         res = res?.data.map((Particulates, index) => ({
           ...Particulates,
           id: index,
-          isEditable: index == 4 || index == 5 ? true : false,
-          // isEditable: true,
+          // isEditable: index == 4 || index == 5 ? true : false,
+          isEditable: true,
         }))
 
         setRows(res)

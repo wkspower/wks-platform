@@ -782,47 +782,14 @@ export const MockReportService = {
             {
               field: 'PrevYearBudget',
               headerName: 'Budget',
-              flex: 1,
-              align: 'right',
-              valueFormatter: formatValueToThreeDecimalsZero,
-              renderCell: (params) => (
-                <Tooltip
-                  title={params.value != null ? params.value.toString() : ''}
-                  arrow
-                >
-                  <span>{formatValueToThreeDecimalsZero(params.value)}</span>
-                </Tooltip>
-              ),
             },
             {
               field: 'PrevYearActual',
               headerName: 'Actual',
-              flex: 1,
-              align: 'right',
-              valueFormatter: formatValueToThreeDecimalsZero,
-              renderCell: (params) => (
-                <Tooltip
-                  title={params.value != null ? params.value.toString() : ''}
-                  arrow
-                >
-                  <span>{formatValueToThreeDecimalsZero(params.value)}</span>
-                </Tooltip>
-              ),
             },
             {
               field: 'CurrentYearBudget',
               headerName: 'Budget',
-              flex: 1,
-              align: 'right',
-              valueFormatter: formatValueToThreeDecimalsZero,
-              renderCell: (params) => (
-                <Tooltip
-                  title={params.value != null ? params.value.toString() : ''}
-                  arrow
-                >
-                  <span>{formatValueToThreeDecimalsZero(params.value)}</span>
-                </Tooltip>
-              ),
             },
           ],
           columnGrouping: [

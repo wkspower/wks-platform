@@ -294,7 +294,9 @@ const KendoDataTables = ({
     const { dataItem, field, onRemarkClick, ...tdProps } = props
 
     const rawValue = dataItem[field]
-    const displayText = truncateRemarks(rawValue)
+    // const displayText = truncateRemarks(rawValue)
+    const displayText = String(rawValue ?? '')
+
     // const editable = Boolean(dataItem.isEditable)
 
     return (

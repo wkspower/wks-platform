@@ -374,7 +374,9 @@ const KendoDataTables = ({
     const { dataItem, field, onRemarkClick, ...tdProps } = props
 
     const rawValue = dataItem[field]
-    const displayText = truncateRemarks(rawValue)
+    // const displayText = truncateRemarks(rawValue)
+    const displayText = String(rawValue ?? '')
+    // const displayText = truncateRemarks(String(rawValue ?? ''))
 
     // Tooltip and color logic
     const value = dataItem[field]
@@ -432,7 +434,6 @@ const KendoDataTables = ({
       </tr>
     )
   }, [])
-
 
   const toolTipRenderer = (props) => {
     const value = props.dataItem[props.field]
@@ -1076,7 +1077,7 @@ const KendoDataTables = ({
                   key={col.field}
                   field={col.field}
                   title={col.title || col.headerName}
-                  // width={col.width}
+                  width={col.widthT}
                   hidden={col.hidden}
                   editable={col?.editable ? true : false}
                   headerClassName={isActive ? 'active-column' : ''}

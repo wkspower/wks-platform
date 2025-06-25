@@ -1,0 +1,44 @@
+[
+  {
+    "field": "grade",
+    "headerName": "Grades",
+    "minWidth": 150,
+    "editable": false
+  },
+  {
+    "field": "gradeMaxCap",
+    "headerName": "Grade Max Capacity",
+    "minWidth": 150,
+    "editable": false
+  },
+  {
+    "field": "dateTime",
+    "headerName": "Date",
+    "minWidth": 150,
+    "editable": false
+  },
+  {
+    "field": "gradeACTProd",
+    "headerName": "Grade Actual Production",
+    "minWidth": 150,
+    "editable": false
+  },
+  {
+    "field": "year",
+    "headerName": "Year",
+    "minWidth": 150,
+    "editable": false
+  },
+  {
+    "field": "highRange",
+    "headerName": "High Range",
+    "minWidth": 150,
+    "editable": false
+  },
+  {
+    "field": "lowRange",
+    "headerName": "Low Range",
+    "minWidth": 150,
+    "editable": false
+  }
+]

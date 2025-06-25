@@ -1,0 +1,36 @@
+[
+  {
+    "gradeCode": "gradeCode",
+    "headerName": "gradeCode",
+    "minWidth": 150,
+    "editable": false
+  },
+  {
+    "field": "gradeMaxCap",
+    "headerName": "gradeMaxCap",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "year",
+    "headerName": "year",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "highRange",
+    "headerName": "highRange",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "highRange",
+    "headerName": "highRange",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  }
+]

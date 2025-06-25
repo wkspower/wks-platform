@@ -1,0 +1,29 @@
+[
+  {
+    "field": "gradeCode",
+    "headerName": "Grades",
+    "minWidth": 150,
+    "editable": false
+  },
+  {
+    "field": "mcuDate",
+    "headerName": "MCU Date",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "gradeACTProd",
+    "headerName": "Actual Production",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "gradeMaxCap",
+    "headerName": "Max Capacity",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  }
+]

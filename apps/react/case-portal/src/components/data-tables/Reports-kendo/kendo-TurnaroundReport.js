@@ -54,7 +54,7 @@ const TurnaroundReport = () => {
   }
 
   const columns = [
-    { field: 'sno', title: 'SL.No', width: 80, editable: false },
+    { field: 'sno', title: 'SL.No', widthT: 100, editable: false },
 
     {
       field: 'activity',
@@ -89,7 +89,7 @@ const TurnaroundReport = () => {
   ]
 
   const columnsGrid2 = [
-    // { field: 'sno', title: 'SL.No', width: 80, editable: false },
+    { field: 'sno', title: 'SL.No', widthT: 100, editable: false },
 
     {
       field: 'activity',
@@ -194,14 +194,6 @@ const TurnaroundReport = () => {
   useEffect(() => {
     fetchPreviousYear()
   }, [keycloak, year, plantId])
-
-
-
-
-
-
-
-
 
   const saveChanges = async () => {
     try {

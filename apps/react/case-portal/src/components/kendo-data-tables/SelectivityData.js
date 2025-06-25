@@ -99,7 +99,7 @@ const SelectivityData = (props) => {
 
       if (response?.code == 200) {
         setSnackbarData({
-          message: 'Summary Saved Successfully!',
+          message: 'Saved Successfully!',
           severity: 'success',
         })
         setLoading(false)
@@ -107,7 +107,7 @@ const SelectivityData = (props) => {
         // setIsEdited(false)
       } else {
         setSnackbarData({
-          message: 'Summary Saved Failed!',
+          message: 'Saved Failed!',
           severity: 'error',
         })
         setLoading(false)

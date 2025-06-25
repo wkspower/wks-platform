@@ -141,8 +141,12 @@ export const DataService = {
   getConfigurationExecutionDetails,
   saveProductionVolDataExcel,
   getProductionVolExcel,
-getConfigurationExcelConstants,
+  getConfigurationExcelConstants,
   handleCalculateNormalOperationNormsPe,
+  savePlantContributionData,
+  getProductionVolDataBasisPe,
+  // saveConfigurationExcelConstants,
+  // getConfigurationExcelConstants,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -1114,6 +1118,32 @@ async function getProductionVolDataBasis(keycloak, reportType) {
   }
 }
 
+// @GetMapping(value="/report/norms-basis")
+// 	public ResponseEntity<AOPMessageVM> getNormBasisReport(@RequestParam String plantId,@RequestParam String year,@RequestParam String type){
+// 		AOPMessageVM response	=basisReportService.getNormBasisReport(plantId,year,type);
+// 		return ResponseEntity.status(response.getCode()).body(response);
+// 	}
+async function getProductionVolDataBasisPe(keycloak, reportType) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+
+  const url = `${Config.CaseEngineUrl}/task/report/norms-basis?plantId=${plantId}&year=${year}&type=${reportType}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
 async function getNormsHistorianBasis(keycloak, reportType) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
@@ -1210,8 +1240,8 @@ async function getMonthwiseRawData(keycloak, reportType) {
   }
 }
 
-async function postMonthwiseRawData(keycloak,dataList, plantId) {
-const year = localStorage.getItem('year')
+async function postMonthwiseRawData(keycloak, dataList, plantId) {
+  const year = localStorage.getItem('year')
 
   const url = `${Config.CaseEngineUrl}/task/report/month-wise/consumption-summary?plantId=${plantId}&year=${year}`
 
@@ -1222,7 +1252,7 @@ const year = localStorage.getItem('year')
   }
 
   try {
-     // 🔍 Log payload before sending to backend
+    // ?? Log payload before sending to backend
     console.log('Sending payload:', dataList)
     const resp = await fetch(url, {
       method: 'POST',
@@ -1755,6 +1785,29 @@ async function savePlantProductionData(keycloak, dataList) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage?.getItem('year')
   const url = `${Config.CaseEngineUrl}/task/plant-production-data?plantId=${plantId}&year=${year}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(dataList),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function savePlantContributionData(keycloak, dataList) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage?.getItem('year')
+  const url = `${Config.CaseEngineUrl}/task/report/plant/contribution/year-wise/plan?plantId=${plantId}&year=${year}`
 
   const headers = {
     Accept: 'application/json',
@@ -2647,7 +2700,6 @@ async function getRunningDurationData(keycloak) {
   }
 }
 
-
 async function getAllCatalyst(keycloak) {
   const url = `${Config.CaseEngineUrl}/task/getAllCatalystAttributes`
 
@@ -3007,7 +3059,6 @@ async function saveConfigurationExcel(file, keycloak) {
       body: formData,
     })
 
-
     if (!resp.ok) {
       throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
     }
@@ -3026,7 +3077,6 @@ async function saveConfigurationExcel(file, keycloak) {
     return Promise.reject(e)
   }
 }
-
 
 async function saveConfigurationExcelConstants(file, keycloak) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
@@ -3047,7 +3097,6 @@ async function saveConfigurationExcelConstants(file, keycloak) {
       headers,
       body: formData,
     })
-
 
     if (!resp.ok) {
       throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
@@ -3160,7 +3209,6 @@ async function getConfigurationExcel(keycloak) {
     return Promise.reject(e)
   }
 }
-
 async function getConfigurationExcelConstants(keycloak) {
   var year = localStorage.getItem('year')
   var plantId = ''
@@ -3202,7 +3250,6 @@ async function getConfigurationExcelConstants(keycloak) {
     return Promise.reject(e)
   }
 }
-
 async function getNormalOpsNormsExcel(keycloak) {
   var year = localStorage.getItem('year')
   var plantId = ''
@@ -3332,3 +3379,28 @@ async function getConfigurationExecutionDetails(keycloak) {
     return await Promise.reject(e)
   }
 }
+// async function saveConfigurationExcelConstants(file, keycloak) {
+//   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+//   const year = localStorage.getItem('year')
+//   const url = `${Config.CaseEngineUrl}/task/configuration-constants-import-excel?plantFKId=${plantId}&year=${year}`
+
+//   const formData = new FormData()
+//   formData.append('file', file)
+
+//   const headers = {
+//     Accept: 'application/json',
+//     Authorization: `Bearer ${keycloak.token}`,
+//   }
+
+//   try {
+//     const resp = await fetch(url, {
+//       method: 'POST',
+//       headers,
+//       body: formData,
+//     })
+//     return json(keycloak, resp)
+//   } catch (e) {
+//     console.log(e)
+//     return await Promise.reject(e)
+//   }
+// }

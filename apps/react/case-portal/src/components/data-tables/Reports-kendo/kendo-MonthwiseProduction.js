@@ -55,7 +55,7 @@ const MonthwiseProduction = () => {
   }
 
   const columns = [
-    { field: 'RowNo', title: 'SL.No', width: 80, editable: false },
+    { field: 'RowNo', title: 'SL.No', widthT: 80, editable: false },
 
     {
       field: 'Month',
@@ -97,7 +97,7 @@ const MonthwiseProduction = () => {
               field: 'OpHrsActual',
               title: 'Actual',
               width: 120,
-              editable: true,
+              editable: false,
             },
           ],
         },
@@ -184,7 +184,7 @@ const MonthwiseProduction = () => {
         res = res?.data?.data.map((item, index) => ({
           ...item,
           id: index,
-          isEditable: index != 12,
+          isEditable: true,
           originalRemark: item.Remark,
         }))
 

@@ -1,0 +1,22 @@
+[
+  {
+    "field": "noOfConsecutiveDays",
+    "headerName": "No Of Consecutive Days",
+    "minWidth": 150,
+    "editable": false
+  },
+  {
+    "field": "grade",
+    "headerName": "Grade",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "dateTime",
+    "headerName": "Date",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  }
+]

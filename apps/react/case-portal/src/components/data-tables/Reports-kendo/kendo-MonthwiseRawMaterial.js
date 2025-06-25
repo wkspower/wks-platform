@@ -174,7 +174,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'april',
       headerName: headerMap[4],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
 
@@ -183,7 +183,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'may',
       headerName: headerMap[5],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -191,7 +191,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'june',
       headerName: headerMap[6],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -199,7 +199,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'july',
       headerName: headerMap[7],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -207,7 +207,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'aug',
       headerName: headerMap[8],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -215,7 +215,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'sep',
       headerName: headerMap[9],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -223,7 +223,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'oct',
       headerName: headerMap[10],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -231,7 +231,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'nov',
       headerName: headerMap[11],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -239,7 +239,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'dec',
       headerName: headerMap[12],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -247,7 +247,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'jan',
       headerName: headerMap[1],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -255,7 +255,7 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'feb',
       headerName: headerMap[2],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
@@ -263,20 +263,19 @@ const MonthwiseRawMaterial = () => {
     {
       field: 'march',
       headerName: headerMap[3],
-      editable: true,
+      editable: false,
       align: 'right',
       headerAlign: 'left',
       flex: 1,
     },
-    {
-      field: 'Remark',
-      headerName: 'Remark',
-      editable: true,
-      align: 'left',
-      headerAlign: 'left',
-      flex: 2,
-    },
-
+    // {
+    //   field: 'Remark',
+    //   headerName: 'Remark',
+    //   editable: false,
+    //   align: 'left',
+    //   headerAlign: 'left',
+    //   flex: 2,
+    // },
   ]
 
   const [row, setRow] = useState()
@@ -291,7 +290,7 @@ const MonthwiseRawMaterial = () => {
       setLoading(true)
       var res = await DataService.getMonthwiseRawData(keycloak, 'NormQuantity')
       var res2 = await DataService.getMonthwiseRawData(keycloak, 'Selectivity')
-      console.log(res2)
+
       if (res2?.code == 200) {
         res2 = res2?.data?.consumptionSummary.map((item, index) => ({
           ...item,
@@ -452,30 +451,30 @@ const MonthwiseRawMaterial = () => {
 
       var data = Object.values(modifiedCells)
       //  console.log('Modified cells before save:', modifiedCells);
-     const year = localStorage.getItem('year') // e.g. "2025-26"
+      const year = localStorage.getItem('year') // e.g. "2025-26"
 
-let prevYear = ''
-if (year && year.includes('-')) {
-  const [start, end] = year.split('-').map(Number)
-  prevYear = `${start - 1}-${(start - 1 + 1).toString().slice(-2)}`
-}
+      let prevYear = ''
+      if (year && year.includes('-')) {
+        const [start, end] = year.split('-').map(Number)
+        prevYear = `${start - 1}-${(start - 1 + 1).toString().slice(-2)}`
+      }
       // console.log('row data', data)
-const rowsToUpdate = data.map((row) => ({
-  april: row.april ?? null,
-  may: row.may ?? null,
-  june: row.june ?? null,
-  july: row.july ?? null,
-  aug: row.aug ?? null,
-  sep: row.sep ?? null,
-  oct: row.oct ?? null,
-  nov: row.nov ?? null,
-  dec: row.dec ?? null,
-  jan: row.jan ?? null,
-  feb: row.feb ?? null,
-  march: row.march ?? null,
+      const rowsToUpdate = data.map((row) => ({
+        april: row.april ?? null,
+        may: row.may ?? null,
+        june: row.june ?? null,
+        july: row.july ?? null,
+        aug: row.aug ?? null,
+        sep: row.sep ?? null,
+        oct: row.oct ?? null,
+        nov: row.nov ?? null,
+        dec: row.dec ?? null,
+        jan: row.jan ?? null,
+        feb: row.feb ?? null,
+        march: row.march ?? null,
         remark: row.Remark ?? null,
-   id: row.idFromApi,// support for both camelCase and PascalCase
-}))
+        id: row.idFromApi, // support for both camelCase and PascalCase
+      }))
       const requiredFields = ['Remark']
 
       const validationMessage = validateFields(data, requiredFields)
@@ -500,7 +499,6 @@ const rowsToUpdate = data.map((row) => ({
           message: 'Data Saved Successfully!',
           severity: 'success',
         })
-      
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -541,7 +539,8 @@ const rowsToUpdate = data.map((row) => ({
           showCalculate: false,
           allAction: true,
           showTitle: true,
-          saveBtn: true,
+          // saveBtn: true,
+          saveBtn: false,
           textAlignment: 'center',
           remarksEditable: true,
         }}
@@ -565,7 +564,7 @@ const rowsToUpdate = data.map((row) => ({
             setRows={setRows}
             title='Monthwise Production Summary'
             columns={columnDefs}
-             handleRemarkCellClick={handleRemarkCellClick}
+            handleRemarkCellClick={handleRemarkCellClick}
           />
         </div>
       ))}

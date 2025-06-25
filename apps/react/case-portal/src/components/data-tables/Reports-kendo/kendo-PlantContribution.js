@@ -33,6 +33,8 @@ export default function PlantContribution() {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+
+  const [rows, setRows] = useState()
   // const currFY = localStorage.getItem('year') || ''
 
   const loadAll = async () => {
@@ -56,8 +58,15 @@ export default function PlantContribution() {
           rows = apiResp?.data?.plantProductionData.map((item, index) => ({
             ...item,
             id: index,
-            isEditable: false,
+            actualId: item?.id,
+            isEditable:
+              key == 'OtherVariableCost' && [1, 2, 3, 0].includes(index)
+                ? true
+                : false,
+            // isEditable: [1, 2, 3, 0].includes(index),
+            // isEditable: false,
           }))
+          if (key == 'OtherVariableCost') setRows(rows)
         } else {
           rows = []
         }
@@ -145,12 +154,16 @@ export default function PlantContribution() {
       }
 
       var data = Object.values(modifiedCells)
-
+      // console.log('row',row);
       const rowsToUpdate = data.map((row) => ({
-        id: row.Id,
-        remark: row.Remark,
+        id: row?.actualId,
+        prevYearActual: row.PrevYearActual,
+        PrevYearBudget: row.PrevYearBudget,
+        CurrentYearBudget: row.CurrentYearBudget,
+
+        remark: row.remarks || '',
       }))
-      const res = await DataService.savePlantProductionData(
+      const res = await DataService.savePlantContributionData(
         keycloak,
         rowsToUpdate,
         plantId,
@@ -162,10 +175,10 @@ export default function PlantContribution() {
           message: 'Data Saved Successfully!',
           severity: 'success',
         })
-        unsavedChangesRef.current = {
-          unsavedRows: {},
-          rowsBeforeChange: {},
-        }
+        // unsavedChangesRef.current = {
+        //   unsavedRows: {},
+        //   rowsBeforeChange: {},
+        // }
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -189,37 +202,66 @@ export default function PlantContribution() {
         open={!!loading}
       ></Backdrop>
 
-      {categories.map(({ key, title }, idx) => {
+      {/* Main Categories Except 'OtherVariableCost' */}
+      {categories
+        .filter(({ key }) => key !== 'OtherVariableCost')
+        .map(({ key, title }, idx) => {
+          const rpt = reports[key] || {}
+          return (
+            <Box key={key} sx={{ mt: 0 }}>
+              <KendoDataTablesReports
+                columns={rpt.columns || []}
+                rows={rpt.rows || []}
+                handleCalculate={handleCalculate}
+                title={title}
+                permissions={{
+                  textAlignment: 'center',
+                  showCalculate: false,
+                  showFinalSubmit: idx === 0,
+                  showTitle: true,
+                }}
+              />
+            </Box>
+          )
+        })}
+
+      {/* Separate Grid for 'OtherVariableCost' */}
+      {(() => {
+        const key = 'OtherVariableCost'
         const rpt = reports[key] || {}
-        const showFinalSubmit = idx === 0
         return (
-          <Box key={key} sx={{ mt: 0 }}>
+          <Box key={key} sx={{ mt: 4 }}>
             <KendoDataTablesReports
+              modifiedCells={modifiedCells}
+              setRows={setRows}
               columns={rpt.columns || []}
-              columnGroupingModel={rpt.columnGrouping || []}
-              rows={rpt.rows || []}
+              rows={rows || []}
               handleCalculate={handleCalculate}
-              title={title}
-              handleRemarkCellClick={handleRemarkCellClick}
-              permissions={{
-                textAlignment: 'center',
-                showCalculate: false,
-                showFinalSubmit: idx == 0 ? true : false,
-                showTitle: true,
-              }}
-              remarkDialogOpen={remarkDialogOpen}
+              title={'Other Variable Cost'}
+              // unsavedChangesRef={unsavedChangesRef}
               setRemarkDialogOpen={setRemarkDialogOpen}
               currentRemark={currentRemark}
               setCurrentRemark={setCurrentRemark}
               currentRowId={currentRowId}
               setCurrentRowId={setCurrentRowId}
-              saveChanges={saveChanges}
-              modifiedCells={modifiedCells}
+              loading={loading}
+              handleRemarkCellClick={handleRemarkCellClick}
               setModifiedCells={setModifiedCells}
+              permissions={{
+                customHeight: { mainBox: '32vh', otherBox: '100%' },
+                textAlignment: 'center',
+                remarksEditable: true,
+                showCalculate: false,
+                saveBtnForRemark: true,
+                saveBtn: true,
+                showWorkFlowBtns: true,
+                showTitle: true,
+              }}
+              saveChanges={saveChanges}
             />
           </Box>
         )
-      })}
+      })()}
 
       <Notification
         open={snackbarOpen}

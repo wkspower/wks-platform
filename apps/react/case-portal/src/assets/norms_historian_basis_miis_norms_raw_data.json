@@ -1,0 +1,50 @@
+[
+  {
+    "field": "material",
+    "headerName": "Material",
+    "minWidth": 150,
+    "editable": false
+  },
+  {
+    "field": "grade",
+    "headerName": "Grade",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "account",
+    "headerName": "Account",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "uom",
+    "headerName": "UOM",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "actualQty",
+    "headerName": "Actual Qty",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "dateTime",
+    "headerName": "Date",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
+    "field": "contributionType",
+    "headerName": "Contribution Type",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  }
+]
