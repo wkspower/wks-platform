@@ -349,7 +349,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 					map.put("Budget3", row[6]);
 					map.put("Actual3", row[7]);
 					map.put("Budget4", row[8]);
-					map.put("Remark", row[9]);
+					//map.put("Remark", row[9]);
 					plantProductionData.add(map);
 				}
 			}

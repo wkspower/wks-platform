@@ -865,7 +865,7 @@ async function getExcel(keycloak, payload) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  const url = `${Config.CaseEngineUrl}/task/export-excel?year=${year}&plantId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/export-excel?year=${year}&plantId=${plantId}&type=Production`
 
   const headers = {
     'Content-Type': 'application/json',

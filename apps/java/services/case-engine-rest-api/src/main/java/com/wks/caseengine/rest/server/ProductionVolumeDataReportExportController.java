@@ -34,7 +34,7 @@ public class ProductionVolumeDataReportExportController {
 	@PostMapping(value = "/export-excel")
 	public ResponseEntity<byte[]> exportPlantProductionPlanReport(
 	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year,@RequestParam("type") String type,
+            @RequestParam("year") String year,@RequestParam(value = "type", required = false) String type,
 			@RequestBody Map<String, Object> data
 	        ) {
 	    try {
