@@ -24,13 +24,12 @@ public class SpyroInputController {
 	private SpyroInputService spyroInputService;
 	
 	@GetMapping(value="/spyro-input")
-	public AOPMessageVM getSpyroInputData(@RequestParam String year,@RequestParam String plantId,@RequestParam String Mode){
-		return	spyroInputService.getSpyroInputData(year, plantId,Mode);
+	public AOPMessageVM getSpyroInputData(@RequestParam String year,@RequestParam String plantId,@RequestParam String Mode,@RequestParam String type){
+		return	spyroInputService.getSpyroInputData(year, plantId,Mode, type);
 	}
 
 	@PostMapping(value="/spyro-input")
 	public AOPMessageVM updateSpyroInputData(@RequestBody List<SpyroInputDTO> spyroInputDTOList){
 		return spyroInputService.updateSpyroInputData(spyroInputDTOList);
-		
 	}
 }

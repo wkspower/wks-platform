@@ -7,7 +7,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface SpyroInputService {
 	
-	public AOPMessageVM getSpyroInputData( String year, String plantId, String Mode);
+	public AOPMessageVM getSpyroInputData( String year, String plantId, String Mode,String type);
 	
 	public AOPMessageVM updateSpyroInputData(  List<SpyroInputDTO> spyroInputDTOList);
 

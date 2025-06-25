@@ -283,16 +283,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			for (Object[] row : obj) {
 				ConfigurationDTO configurationDTO = new ConfigurationDTO();
 				configurationDTO.setNormParameterFKId(row[0] != null ? row[0].toString() : "");
-				// System.out.println("normparameterid" +
-				// UUID.fromString(configurationDTO.getNormParameterFKId()));
-				// System.out.println(normParametersRepository
-				// .findById(UUID.fromString(configurationDTO.getNormParameterFKId())).get());
-				// System.out.println(normParametersRepository
-				// .findById(UUID.fromString(configurationDTO.getNormParameterFKId())).get().getDisplayName());
-
-				// configurationDTO.setNormParameterDisplayName(normParametersRepository
-				// .findById(UUID.fromString(configurationDTO.getNormParameterFKId())).get().getDisplayName());
-
+				
 				configurationDTO.setJan(
 					    (row[1] != null && !row[1].toString().trim().isEmpty())? Double.parseDouble(row[1].toString().trim()): 0.0);
 				configurationDTO.setFeb(
