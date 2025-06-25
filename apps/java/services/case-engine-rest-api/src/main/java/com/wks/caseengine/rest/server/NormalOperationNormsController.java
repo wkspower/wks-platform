@@ -93,11 +93,12 @@ public class NormalOperationNormsController {
 			@RequestParam("file") MultipartFile file
 	        ) {
 			byte[] excelBytes =	 normalOperationNormsService.importExcel(year,UUID.fromString(plantId), file); 
+			
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
 	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
 	        headers.setContentDisposition(ContentDisposition.builder("attachment")
-	                .filename("Normal Op Norms.xlsx")
+	                .filename("Normal_Op_Norms.xlsx")
 	                .build());
 	        headers.setContentLength(excelBytes.length);
 

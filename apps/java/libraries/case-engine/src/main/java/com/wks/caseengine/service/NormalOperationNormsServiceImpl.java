@@ -534,8 +534,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			
 
 			Workbook workbook = new XSSFWorkbook();
-			CellStyle borderStyle = createBorderedStyle(workbook);
-			CellStyle boldStyle = createBoldStyle(workbook);
+			
 			Sheet sheet = workbook.createSheet("Sheet1");
 			int currentRow = 0;
 			// List<List<Object>> rows = new ArrayList<>();
@@ -543,7 +542,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			List<List<Object>> rows = new ArrayList<>();
 			// Data rows
 			for (MCUNormsValueDTO dto : dtoList) {
-				if (dto.getIsEditable()) {
+				
 					List<Object> list = new ArrayList<>();
 					list.add(dto.getNormParameterTypeDisplayName());
 					list.add(dto.getProductName());
@@ -568,7 +567,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 						list.add(dto.getErrDescription());
 					}
 					rows.add(list);
-				}
+				
 			}
 
 			List<String> innerHeaders = new ArrayList<>();
