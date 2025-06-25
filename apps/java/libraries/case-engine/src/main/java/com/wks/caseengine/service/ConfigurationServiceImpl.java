@@ -29,20 +29,21 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.sql.DataSource;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
+
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.regex.Matcher;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -50,9 +51,9 @@ import jakarta.persistence.PersistenceContext;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
-import com.wks.caseengine.dto.AOPDTO;
+
 import com.wks.caseengine.dto.ConfigurationDTO;
-import com.wks.caseengine.dto.ConfigurationDataDTO;
+
 import com.wks.caseengine.dto.ExecutionDetailDto;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeRequestDTO;
@@ -418,6 +419,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			normAttributeTransactions.setRemarks(executionDetailDto.getRemarks());
 			normAttributeTransactions.setAopMonth(4);
 			normAttributeTransactions.setAuditYear(executionDetailDto.getAuditYear());
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			String userId = authentication.getName();
+			normAttributeTransactions.setUserName(userId);
 			normAttributeTransactionsRepository.save(normAttributeTransactions);
 
 		}
@@ -433,8 +437,27 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 
 		String procedureName = vertical.getName() + "_" + site.getName() + "_GetValuesforConsecutiveDays";
-		executeDynamicUpdateProcedure(procedureName, plantId, finYear, periodFrom,
-				periodTo);
+		executeDynamicUpdateProcedure(procedureName, plantId, finYear, periodFrom, periodTo);
+		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("production-aop");
+		for (ScreenMapping screenMapping : screenMappingList) {
+			AopCalculation aopCalculation = new AopCalculation();
+			aopCalculation.setAopYear(finYear);
+			aopCalculation.setIsChanged(true);
+			aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+			aopCalculation.setPlantId(UUID.fromString(plantId));
+			aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+			aopCalculationRepository.save(aopCalculation);
+		}
+		List<ScreenMapping> screenMappingList1 = screenMappingRepository.findByDependentScreen("normal-op-norms");
+		for (ScreenMapping screenMapping : screenMappingList1) {
+			AopCalculation aopCalculation = new AopCalculation();
+			aopCalculation.setAopYear(finYear);
+			aopCalculation.setIsChanged(true);
+			aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+			aopCalculation.setPlantId(UUID.fromString(plantId));
+			aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+			aopCalculationRepository.save(aopCalculation);
+		}
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
 			aopMessageVM.setCode(200);
@@ -479,7 +502,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantFKId));
 			String procedureName = verticalName + "_GetConfiguration_Constant";
 			List<Object[]> obj = new ArrayList<>();
-			if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER") ) {
+			if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")) {
 				obj = findConstantsByYearAndPlantFkId(year, plantFKId, procedureName);
 			}
 			for (Object[] row : obj) {
@@ -614,7 +637,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	public List<ConfigurationDTO> saveConfigurationData(String year, String plantFKId,
 			List<ConfigurationDTO> configurationDTOList) {
 		try {
-			
 			UUID plantId = UUID.fromString(plantFKId);
 
 			Plants plant = plantsRepository.findById(plantId).orElseThrow();

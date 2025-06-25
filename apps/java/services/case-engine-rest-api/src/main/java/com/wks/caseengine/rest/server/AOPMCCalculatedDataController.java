@@ -25,58 +25,63 @@ import com.wks.caseengine.service.AOPMCCalculatedDataService;
 @RestController
 @RequestMapping("task")
 public class AOPMCCalculatedDataController {
-	
+
 	@Autowired
 	private AOPMCCalculatedDataService aOPMCCalculatedDataService;
-	
-	@GetMapping(value="/getAOPMCCalculatedData")
-	public  AOPMessageVM getAOPMCCalculatedData(@RequestParam String plantId, @RequestParam String year){
-		return aOPMCCalculatedDataService.getAOPMCCalculatedData(plantId,year);
+
+	@GetMapping(value = "/getAOPMCCalculatedData")
+	public AOPMessageVM getAOPMCCalculatedData(@RequestParam String plantId, @RequestParam String year) {
+		return aOPMCCalculatedDataService.getAOPMCCalculatedData(plantId, year);
 	}
-	
-	@PutMapping(value="/editAOPMCCalculatedData")
-	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(@RequestBody List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTO) {
+
+	@PutMapping(value = "/editAOPMCCalculatedData")
+	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(
+			@RequestBody List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTO) {
 		return aOPMCCalculatedDataService.editAOPMCCalculatedData(aOPMCCalculatedDataDTO);
-		
+
 	}
-	
-	@GetMapping(value="/getAOPMCCalculatedDataSP")
-	public  AOPMessageVM getAOPMCCalculatedDataSP(@RequestParam String plantId, @RequestParam String year){
-		return aOPMCCalculatedDataService.getAOPMCCalculatedDataSP(plantId,year);
+
+	@GetMapping(value = "/getAOPMCCalculatedDataSP")
+	public AOPMessageVM getAOPMCCalculatedDataSP(@RequestParam String plantId, @RequestParam String year) {
+		return aOPMCCalculatedDataService.getAOPMCCalculatedDataSP(plantId, year);
 	}
-	
-	
-	
+
 	@GetMapping(value = "/production-volume-data/export/excel")
-	public ResponseEntity<byte[]> exportProductionVolumeDataReport(
-	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year
-	        ) {
-	    try {
-			
-	        byte[] excelBytes = aOPMCCalculatedDataService.createExcel(year,UUID.fromString(plantId)); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	public ResponseEntity<byte[]> exportProductionVolumeDataReport(@RequestParam("plantId") String plantId,
+			@RequestParam("year") String year) {
+		try {
 
-	        HttpHeaders headers = new HttpHeaders();
-	        headers.setContentType(MediaType.parseMediaType(
-	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
-	        headers.setContentDisposition(ContentDisposition.builder("attachment")
-	                .filename("Production Volume Data.xlsx")
-	                .build());
-	        headers.setContentLength(excelBytes.length);
+			byte[] excelBytes = aOPMCCalculatedDataService.createExcel(year, UUID.fromString(plantId), false, null); // excelService.generateFlexibleExcel(data,
+																														// plantId,
+																														// year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId,
+																														// year,
+																														// reportType);
 
-	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
-	    } catch (Exception e) {
-	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(
+					MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+			headers.setContentDisposition(
+					ContentDisposition.builder("attachment").filename("Production Volume Data.xlsx").build());
+			headers.setContentLength(excelBytes.length);
+
+			return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
-	
+
 	@PostMapping(value = "/production-volume-data/import/excel", consumes = "multipart/form-data")
-	public AOPMessageVM importExcel(
-	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year,
-			@RequestParam("file") MultipartFile file
-	        ) {
-	        return aOPMCCalculatedDataService.importExcel(year,UUID.fromString(plantId), file); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	public ResponseEntity<byte[]> importExcel(@RequestParam("plantId") String plantId,
+			@RequestParam("year") String year, @RequestParam("file") MultipartFile file) {
+		byte[] excelBytes = aOPMCCalculatedDataService.importExcel(year, UUID.fromString(plantId), file);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(
+				MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+		headers.setContentDisposition(
+				ContentDisposition.builder("attachment").filename("Production Vol Data.xlsx").build());
+		headers.setContentLength(excelBytes.length);
+
+		return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
 	}
-	
+
 }

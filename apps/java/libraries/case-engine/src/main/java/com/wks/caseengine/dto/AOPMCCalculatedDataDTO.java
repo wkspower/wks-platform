@@ -40,5 +40,6 @@ public class AOPMCCalculatedDataDTO {
     private String mcuVersion;
     private String updatedBy;
     private String productName;
-	
+    private String saveStatus;
+    private String errDescription;
 }

@@ -15,8 +15,8 @@ public interface NormalOperationNormsService {
 	public AOPMessageVM calculateExpressionConsumptionNorms(String year,String plantId);
 	public AOPMessageVM calculateNormalOpsNorms(String aopYear, String plantId, String siteId, String verticalId);
 	AOPMessageVM getNormsTransaction(String plantId, String aopYear);
-	 public byte[] createExcel(String year, UUID plantFKId);
-    public AOPMessageVM importExcel(String year, UUID fromString, MultipartFile file);
+	 public byte[] createExcel(String year, UUID plantFKId,boolean isAfterSave,List<MCUNormsValueDTO> dtoList);
+    public byte[] importExcel(String year, UUID fromString, MultipartFile file);
 	// public int getCalculatedNormalOpsNorms( String year, String plantId);
 
 }

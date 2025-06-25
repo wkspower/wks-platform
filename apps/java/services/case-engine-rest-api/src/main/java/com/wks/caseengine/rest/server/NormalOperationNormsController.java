@@ -68,7 +68,7 @@ public class NormalOperationNormsController {
 	        ) {
 	    try {
 			
-	        byte[] excelBytes = normalOperationNormsService.createExcel(year,UUID.fromString(plantId)); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        byte[] excelBytes = normalOperationNormsService.createExcel(year,UUID.fromString(plantId),false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
@@ -87,16 +87,21 @@ public class NormalOperationNormsController {
 
 
 	@PostMapping(value = "/norms-import-excel", consumes = "multipart/form-data")
-	public AOPMessageVM importExcel(
+	public ResponseEntity<byte[]> importExcel(
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,
 			@RequestParam("file") MultipartFile file
 	        ) {
-	        return normalOperationNormsService.importExcel(year,UUID.fromString(plantId), file); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
-	}
-	// @GetMapping(value="/getCalculatedNormalOpsNorms")
-	// public List<Object[]> getCalculatedNormalOpsNorms(@RequestParam String year,@RequestParam String plantId){
-	// 	return normalOperationNormsService.getCalculatedNormalOpsNorms(year,plantId);
-	// }
+			byte[] excelBytes =	 normalOperationNormsService.importExcel(year,UUID.fromString(plantId), file); 
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("Normal Op Norms.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
 
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+	}
+	
 }

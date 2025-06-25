@@ -17,21 +17,18 @@ import java.util.stream.Collectors;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.wks.caseengine.dto.AOPDTO;
-import com.wks.caseengine.dto.ConfigurationDTO;
+
 import com.wks.caseengine.dto.MCUNormsValueDTO;
-import com.wks.caseengine.entity.AOPSummary;
+
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.MCUNormsValue;
-import com.wks.caseengine.entity.NormParameters;
+
 import com.wks.caseengine.entity.NormsTransactions;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
@@ -154,8 +151,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	@Override
 	public List<MCUNormsValueDTO> saveNormalOperationNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList,
 			UUID plantFKId, String year) {
-		// String year = null;
-		// UUID plantId = null;
+
 		try {
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			String userId = authentication.getName();
@@ -164,9 +160,13 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			for (MCUNormsValueDTO dto : mCUNormsValueDTOList) {
 				Optional<MCUNormsValue> optionalValue = normalOperationNormsRepository
 						.findById(UUID.fromString(dto.getId()));
+
 				if (optionalValue.isEmpty()) {
+					dto.setErrDescription("No record found with this id" +dto.getId());
+					dto.setSaveStatus("Failed");
 					continue; // or handle accordingly
 				}
+
 				MCUNormsValue value = optionalValue.get();
 
 				for (int month = 1; month <= 12; month++) {
@@ -429,17 +429,12 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	@Override
-	public AOPMessageVM importExcel(String year, UUID plantFKId, MultipartFile file) {
+	public byte[] importExcel(String year, UUID plantFKId, MultipartFile file) {
 		// TODO Auto-generated method stub
 		try {
 			List<MCUNormsValueDTO> data = readConfigurations(file.getInputStream(), plantFKId, year);
-			saveNormalOperationNormsData(data, plantFKId, year);
-			// saveConfigurationData(year,plantFKId.toString(), data);
-			AOPMessageVM aopMessageVM = new AOPMessageVM();
-			aopMessageVM.setCode(200);
-			aopMessageVM.setMessage("Data fetched successfully");
-			aopMessageVM.setData(data);
-			return aopMessageVM;
+			List<MCUNormsValueDTO> savedData=saveNormalOperationNormsData(data, plantFKId, year);
+			return createExcel(year, plantFKId, true, savedData);
 			// return ResponseEntity.ok(data);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -461,29 +456,32 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			while (rowIterator.hasNext()) {
 				Row row = rowIterator.next();
 				MCUNormsValueDTO dto = new MCUNormsValueDTO();
+				try {
+					dto.setNormParameterTypeDisplayName(getStringCellValue(row.getCell(0),dto));
+					dto.setProductName(getStringCellValue(row.getCell(1),dto));
+					dto.setUOM(getStringCellValue(row.getCell(2),dto));
 
-				dto.setNormParameterTypeDisplayName(getStringCellValue(row.getCell(0)));
-				dto.setProductName(getStringCellValue(row.getCell(1)));
-				dto.setUOM(getStringCellValue(row.getCell(2)));
-
-				dto.setFinancialYear(year);
-				;
-				dto.setApril(getNumericCellValue(row.getCell(3)));
-				dto.setMay(getNumericCellValue(row.getCell(4)));
-				dto.setJune(getNumericCellValue(row.getCell(5)));
-				dto.setJuly(getNumericCellValue(row.getCell(6)));
-				dto.setAugust(getNumericCellValue(row.getCell(7)));
-				dto.setSeptember(getNumericCellValue(row.getCell(8)));
-				dto.setOctober(getNumericCellValue(row.getCell(9)));
-				dto.setNovember(getNumericCellValue(row.getCell(10)));
-				dto.setDecember(getNumericCellValue(row.getCell(11)));
-				dto.setJanuary(getNumericCellValue(row.getCell(12)));
-				dto.setFebruary(getNumericCellValue(row.getCell(13)));
-				dto.setMarch(getNumericCellValue(row.getCell(14)));
-				dto.setRemarks(getStringCellValue(row.getCell(15)));
-				dto.setId(getStringCellValue(row.getCell(16)));
-
-				dto.setMaterialFkId(getStringCellValue(row.getCell(17)));
+					dto.setFinancialYear(year);
+					dto.setApril(getNumericCellValue(row.getCell(3),dto));
+					dto.setMay(getNumericCellValue(row.getCell(4),dto));
+					dto.setJune(getNumericCellValue(row.getCell(5),dto));
+					dto.setJuly(getNumericCellValue(row.getCell(6),dto));
+					dto.setAugust(getNumericCellValue(row.getCell(7),dto));
+					dto.setSeptember(getNumericCellValue(row.getCell(8),dto));
+					dto.setOctober(getNumericCellValue(row.getCell(9),dto));
+					dto.setNovember(getNumericCellValue(row.getCell(10),dto));
+					dto.setDecember(getNumericCellValue(row.getCell(11),dto));
+					dto.setJanuary(getNumericCellValue(row.getCell(12),dto));
+					dto.setFebruary(getNumericCellValue(row.getCell(13),dto));
+					dto.setMarch(getNumericCellValue(row.getCell(14),dto));
+					dto.setRemarks(getStringCellValue(row.getCell(15),dto));
+					dto.setId(getStringCellValue(row.getCell(16),dto));
+					dto.setMaterialFkId(getStringCellValue(row.getCell(17),dto));
+				} catch (Exception e) {
+					e.printStackTrace();
+					dto.setErrDescription(e.getMessage());
+					dto.setSaveStatus("Failed");
+				}
 				configList.add(dto);
 			}
 
@@ -494,14 +492,22 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		return configList;
 	}
 
-	private static String getStringCellValue(Cell cell) {
-		if (cell == null)
-			return null;
-		cell.setCellType(CellType.STRING);
-		return cell.getStringCellValue().trim();
-	}
+	private static String getStringCellValue(Cell cell, MCUNormsValueDTO dto) {
+		try{
+			if (cell == null)
+				return null;
+			cell.setCellType(CellType.STRING);
+			return cell.getStringCellValue().trim();
+		}catch(Exception e){
+			dto.setSaveStatus("Failed");
+			dto.setErrDescription("Please enter correct values");
+			e.printStackTrace();
+		}
+		return null;
+			
+		}
 
-	private static Double getNumericCellValue(Cell cell) {
+	private static Double getNumericCellValue(Cell cell, MCUNormsValueDTO dto) {
 		if (cell == null)
 			return null;
 		if (cell.getCellType() == CellType.NUMERIC) {
@@ -510,18 +516,22 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			try {
 				return Double.parseDouble(cell.getStringCellValue().trim());
 			} catch (NumberFormatException e) {
-				return null;
+				dto.setSaveStatus("Failed");
+				dto.setErrDescription("Please enter numeric values");
 			}
 		}
 		return null;
 	}
 
-	public byte[] createExcel(String year, UUID plantFKId) {
+	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave,List<MCUNormsValueDTO> dtoList) {
 		try {
 			AOPMessageVM aopMessageVM = getNormalOperationNormsData(year, plantFKId.toString());
-
-			Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
-			List<MCUNormsValueDTO> dtoList = (List<MCUNormsValueDTO>) responseMap.get("mcuNormsValueDTOList");
+			
+			if(!isAfterSave){
+				Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+				dtoList = (List<MCUNormsValueDTO>) responseMap.get("mcuNormsValueDTOList");
+			}
+			
 
 			Workbook workbook = new XSSFWorkbook();
 			CellStyle borderStyle = createBorderedStyle(workbook);
@@ -553,6 +563,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					list.add(dto.getRemarks());
 					list.add(dto.getId());
 					list.add(dto.getMaterialFkId());
+					if(isAfterSave){
+						list.add(dto.getSaveStatus());
+						list.add(dto.getErrDescription());
+					}
 					rows.add(list);
 				}
 			}
@@ -566,6 +580,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			innerHeaders.add("Remarks");
 			innerHeaders.add("Id");
 			innerHeaders.add("NormParamterId");
+			if(isAfterSave){
+				innerHeaders.add("Status");
+				innerHeaders.add("Error Description");
+			}
 			List<List<String>> headers = new ArrayList<>();
 			headers.add(innerHeaders);
 
@@ -673,7 +691,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetNormsValue";
 		String callSql = "{call " + storedProcedure + "(?, ?, ?, ?)}";
-		
+
 		try (Connection connection = dataSource.getConnection();
 				CallableStatement stmt = connection.prepareCall(callSql)) {
 
@@ -684,22 +702,20 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			stmt.setString(4, aopYear);
 
 			// Execute the stored procedure
-			  stmt.executeUpdate();
+			stmt.executeUpdate();
 
 			// Optional: commit if auto-commit is off
 			if (!connection.getAutoCommit()) {
 				connection.commit();
 			}
 
-
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),
-				aopYear, "normal-op-norms");
+		aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), aopYear,
+				"normal-op-norms");
 
-		List<ScreenMapping> screenMappingList = screenMappingRepository
-				.findByDependentScreen("normal-op-norms");
+		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("normal-op-norms");
 		for (ScreenMapping screenMapping : screenMappingList) {
 			if (!screenMapping.getCalculationScreen().equalsIgnoreCase(screenMapping.getDependentScreen())) {
 
@@ -714,7 +730,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		}
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("SP Executed successfully");
-		//aopMessageVM.setData(rowsAffected);
+		// aopMessageVM.setData(rowsAffected);
 		return aopMessageVM;
 
 	}
