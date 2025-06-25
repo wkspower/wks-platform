@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import KendoDataTables from './index'
+import crackercolumns from '../../assets/CrackerMaintenanceColumn.json'
 
 const MaintenanceTable = () => {
   const keycloak = useSession()
@@ -34,28 +35,68 @@ const MaintenanceTable = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
 
+  // const fetchData = async () => {
+  //   setRows([])
+  //   setLoading(true)
+  //   try {
+  //     const data = await DataService.getMaintenanceData(keycloak)
+  //     var formattedData = []
+  //     if (data) {
+  //       formattedData = data?.map((item, index) => ({
+  //         ...item,
+  //         idFromApi: item.id,
+  //         id: index,
+  //         isEditable: false,
+  //       }))
+  //     }
+  //     setRows(formattedData)
+  //     setLoading(false)
+  //   } catch (error) {
+  //     console.error('Error fetching  data:', error)
+  //     setRows([])
+  //     setLoading(false)
+  //   }
+  // }
   const fetchData = async () => {
-    setRows([])
-    setLoading(true)
+    setRows([]);
+    setLoading(true);
+
     try {
-      const data = await DataService.getMaintenanceData(keycloak)
-      var formattedData = []
-      if (data) {
-        formattedData = data?.map((item, index) => ({
-          ...item,
-          idFromApi: item.id,
-          id: index,
-          isEditable: false,
-        }))
-      }
-      setRows(formattedData)
-      setLoading(false)
+      if (lowerVertName === 'cracker') {
+        const response = await DataService.getCrackerMaintenanceData(keycloak);
+        console.log('Cracker Data :', response)
+        if (response?.code == 200){
+          const formattedData = response?.data.map((item, index) => ({
+            ...item,
+            idFromApi: item.id,
+            id: index,
+            isEditable: false,
+          }));
+          setRows(formattedData);
+        }
+        else{
+          console.error('Error fetching data:', error);
+          setRows([]);
+        }
+        }
+        else {
+        const data = await DataService.getMaintenanceData(keycloak);
+          const formattedData = data.map((item, index) => ({
+            ...item,
+            idFromApi: item.id,
+            id: index,
+            isEditable: false,
+          }));
+          setRows(formattedData);
+        } 
     } catch (error) {
-      console.error('Error fetching  data:', error)
-      setRows([])
-      setLoading(false)
+      console.error('Error fetching data:', error);
+      setRows([]);
+    } finally {
+      setLoading(false);
     }
   }
+
 
   const handleCalculate = async () => {
     try {
@@ -237,6 +278,7 @@ const MaintenanceTable = () => {
       hidden: true,
     },
   ]
+  const basecols = lowerVertName == 'cracker' ? crackercolumns : productionColumns
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
@@ -278,7 +320,7 @@ const MaintenanceTable = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <KendoDataTables
-        columns={productionColumns}
+        columns={basecols}
         rows={rows}
         setRows={setRows}
         snackbarData={snackbarData}

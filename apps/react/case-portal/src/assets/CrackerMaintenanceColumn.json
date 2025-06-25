@@ -1,0 +1,120 @@
+[
+  {
+    "field": "id",
+    "title": "Id",
+    "editable": false,
+    "hidden": true
+  },
+  {
+    "field": "monthName",
+    "title": "MonthName",
+    "editable": false,
+    "width": 125,
+    "hidden":false
+  },
+  {
+    "field": "ibr",
+    "title": "IBR",
+    "editable": false,
+    "type": "number",
+    "width": 120,
+    "hidden":false
+  },
+  {
+    "field": "mnt",
+    "title": "MNT",
+    "editable": false,
+    "type": "number",
+    "width": 120,
+    "hidden":false
+  },
+  {
+    "field": "shutdown",
+    "title": "ShutDown",
+    "editable": false,
+    "type": "number",
+    "width": 120,
+    "hidden":false
+  },
+  {
+    "field": "sad",
+    "title": "SAD",
+    "editable": false,
+    "type": "number",
+    "width": 120,
+    "hidden":false
+  },
+  {
+    "field": "bud",
+    "title": "BUD",
+    "editable": false,
+    "type": "number",
+    "width": 120,
+    "hidden":false
+  },
+  {
+    "field": "demoHHS",
+    "title": "DemoHHS",
+    "editable": false,
+    "type": "number",
+    "width": 150,
+    "hidden":false
+  },
+  {
+    "field": "demoBBU",
+    "title": "DemoBBU",
+    "editable": false,
+    "type": "number",
+    "width": 150,
+    "hidden":false
+  },
+  {
+    "field": "demoSAD",
+    "title": "DemoSAD",
+    "editable": false,
+    "type": "number",
+    "width": 150,
+    "hidden":false
+  },
+  {
+    "field": "4FD",
+    "title": "4FD",
+    "editable": false,
+    "type": "number",
+    "width": 120,
+    "hidden":false
+  },
+  {
+    "field": "4F",
+    "title": "4F",
+    "editable": false,
+    "type": "number",
+    "width": 120,
+    "hidden":false
+  },
+  {
+    "field": "5F",
+    "title": "5F",
+    "editable": false,
+    "type": "number",
+    "width": 120,
+    "hidden":false
+  }, 
+  {
+    "field": "4FHours",
+    "title": "4FHours",
+    "editable": false,
+    "type": "number",
+    "width": 120,
+    "hidden":false
+  },
+  {
+    "field": "total",
+    "title": "Total",
+    "editable": false,
+    "type": "number",
+    "width": 120,
+    "hidden":false
+  }
+  
+]

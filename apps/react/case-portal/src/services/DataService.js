@@ -48,6 +48,7 @@ export const DataService = {
   saveSpyroInput,
   saveSpyroOutput,
   getSpyroOutputData,
+  getCrackerMaintenanceData,
   saveNormalOperationNormsData,
   saveShutDownNormsData,
   saveSlowdownNormsData,
@@ -3404,3 +3405,27 @@ async function getConfigurationExecutionDetails(keycloak) {
 //     return await Promise.reject(e)
 //   }
 // }
+async function getCrackerMaintenanceData(keycloak) {
+  var year = localStorage.getItem('year')
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  const url = `${Config.CaseEngineUrl}/task/maintenance?plantId=${plantId}&year=${year}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
