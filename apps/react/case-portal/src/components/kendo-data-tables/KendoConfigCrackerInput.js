@@ -130,7 +130,7 @@ const CrackerConfig = () => {
     try {
       const resp = await DataService.getConfigurationTabsMatrix(
         keycloak,
-        'null',
+        // 'null',
       )
       let tabsFromApi = []
       if (typeof resp.data === 'string') {

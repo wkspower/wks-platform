@@ -1566,7 +1566,13 @@ async function getConfigurationTabsMatrix(keycloak, type) {
     plantId = parsedPlant.id
   }
 
-  const url = `${Config.CaseEngineUrl}/task/access/matrix?plantId=${plantId}&siteId=${siteID}&verticalId=${verticalId}&type=${type}`
+  const params = new URLSearchParams({
+    plantId,
+    siteId: siteID,
+    verticalId,
+  })
+  if (type) params.append('type', type)
+  const url = `${Config.CaseEngineUrl}/task/access/matrix?${params.toString()}`
 
   const headers = {
     Accept: 'application/json',

@@ -291,15 +291,16 @@ const BusinessDemand = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <div>
+      {lowerVertName !== 'cracker' && (
+        <>
         <CustomAccordion defaultExpanded disableGutters>
           <CustomAccordionSummary
             aria-controls='meg-grid-content'
             id='meg-grid-header'
           >
             <Typography component='span' className='grid-title'>
-              Production Volume Data (MT) (This is a reference for entering the
-              Business Demand value)
+                Production Volume Data (MT) (This is a reference for entering
+                the Business Demand value)
             </Typography>
           </CustomAccordionSummary>
           <CustomAccordionDetails>
@@ -323,7 +324,8 @@ const BusinessDemand = ({ permissions }) => {
             </Box>
           </CustomAccordionDetails>
         </CustomAccordion>
-      </div>
+        </>
+      )}
 
       <Typography component='div' className='grid-title'>
         Business Demand Data

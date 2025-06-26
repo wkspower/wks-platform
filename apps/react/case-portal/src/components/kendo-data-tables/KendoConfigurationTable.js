@@ -256,7 +256,7 @@ const ConfigurationTable = () => {
     try {
       var response = await DataService.getConfigurationTabsMatrix(
         keycloak,
-        'null',
+        // 'null',
       )
       if (response?.code == 200) {
         const parsedData = JSON.parse(response?.data)

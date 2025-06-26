@@ -93,7 +93,7 @@ export default function HeaderContent({ keycloak }) {
     const avail = fullDetails
       .filter((v) => allowedMap[v.id])
       .map((v) => ({ id: v.id, name: v.displayName }))
-      .sort((a, b) => a.name.localeCompare(b.name))
+    // .sort((a, b) => a.name.localeCompare(b.name))
     setVerticals(avail)
 
     if (!selectedVertical && avail.length) {
