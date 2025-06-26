@@ -4,6 +4,6 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface ConfigurationAccessMatrixService {
 	
-	public AOPMessageVM getConfigurationAccessMatrix(String plantId, String siteId, String verticalId);
+	public AOPMessageVM getConfigurationAccessMatrix(String plantId, String siteId, String verticalId,String type);
 
 }

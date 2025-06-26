@@ -19,8 +19,8 @@ public class ConfigurationAccessMatrixController {
 	private ConfigurationAccessMatrixService configurationAccessMatrixService;
 	
 	@GetMapping(value="/access/matrix")
-	public ResponseEntity<AOPMessageVM> getConfigurationAccessMatrix(@RequestParam String plantId,@RequestParam String siteId,@RequestParam String verticalId){
-		AOPMessageVM response	=configurationAccessMatrixService.getConfigurationAccessMatrix(plantId,siteId,verticalId);
+	public ResponseEntity<AOPMessageVM> getConfigurationAccessMatrix(@RequestParam String plantId,@RequestParam String siteId,@RequestParam String verticalId,@RequestParam(value = "type", required = false) String type){
+		AOPMessageVM response	=configurationAccessMatrixService.getConfigurationAccessMatrix(plantId,siteId,verticalId,type);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 	

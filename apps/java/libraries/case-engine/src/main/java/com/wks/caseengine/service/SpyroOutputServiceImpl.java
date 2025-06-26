@@ -45,7 +45,7 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
 
 	@Override
-	public AOPMessageVM getSpyroOutputData(String year, String plantId,String Mode) {
+	public AOPMessageVM getSpyroOutputData(String year, String plantId,String Mode,String type) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<Map<String, Object>> spyroOutputDataList = new ArrayList<>();
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
@@ -60,12 +60,12 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 
 			for (Object[] row : results) {
 				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
-
+				if(row[6].toString().contains(type)) {	
 					map.put("VerticalFKId", row[0]);
 					map.put("PlantFKId", row[1]);
 					map.put("NormParameterFKID", row[2]);
 					map.put("Particulars", row[3]);
-					map.put("NormParameterTypeName", row[4]);
+					map.put("NormParameterDisplayName", row[4]);
 					map.put("NormParameterTypeFKID", row[5]);
 					map.put("Type", row[6]);
 					map.put("UOM", row[7]);
@@ -84,7 +84,7 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 					map.put("Nov", row[20]);
 					map.put("Dec", row[21]);
 					spyroOutputDataList.add(map); // Add the map to the list here
-
+				}
 			}
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data fetched successfully");

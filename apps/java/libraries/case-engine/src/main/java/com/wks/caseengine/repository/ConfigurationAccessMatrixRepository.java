@@ -11,17 +11,23 @@ import org.springframework.data.repository.query.Param;
 public interface ConfigurationAccessMatrixRepository extends JpaRepository<ConfigurationAccessMatrix, UUID>{
 	
 	@Query(value = """
-		    SELECT ConfigurationTabs 
-		    FROM dbo.ConfigurationAccessMatrix 
-		    WHERE VerticalId = :verticalId 
-		      AND SiteId = :siteId 
-		      AND PlantId = :plantId
-		    """, nativeQuery = true)
+		    SELECT ConfigurationTabs
+		      FROM dbo.ConfigurationAccessMatrix
+		     WHERE VerticalId = :verticalId
+		       AND SiteId     = :siteId
+		       AND PlantId    = :plantId
+		       AND (
+		            (:Type IS NULL AND Type IS NULL)
+		            OR Type = :Type
+		           )
+		""", nativeQuery = true)
 		Optional<String> findConfigurationTabsByVerticalSitePlant(
-		        @Param("verticalId") UUID verticalId,
-		        @Param("siteId") UUID siteId,
-		        @Param("plantId") UUID plantId
+		    @Param("verticalId") UUID verticalId,
+		    @Param("siteId")       UUID siteId,
+		    @Param("plantId")      UUID plantId,
+		    @Param("Type")         String Type // can be null
 		);
+
 
 	
 }
