@@ -315,7 +315,7 @@ const CrackerConfig = () => {
         setLoading(false)
         return
       }
-      console.log(data)
+      // console.log(data)
       const validationMessage = validateFields(data, ['particulars', 'remarks'])
       if (validationMessage) {
         setSnackbarOpen(true)

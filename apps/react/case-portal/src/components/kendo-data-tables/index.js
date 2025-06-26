@@ -773,7 +773,7 @@ const KendoDataTables = ({
             sortable={{
               mode: 'multiple',
             }}
-            // filterable={columns.some((col) => dateFields.includes(col.field))}
+            filterable={columns.some((col) => dateFields.includes(col.field))}
             allRedCell={allRedCell}
             size='small'
             pageable={
