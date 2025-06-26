@@ -438,18 +438,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 		String procedureName = vertical.getName() + "_" + site.getName() + "_GetValuesforConsecutiveDays";
 		executeDynamicUpdateProcedure(procedureName, plantId, finYear, periodFrom, periodTo);
-		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("production-aop");
+		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("configuration");
 		for (ScreenMapping screenMapping : screenMappingList) {
-			AopCalculation aopCalculation = new AopCalculation();
-			aopCalculation.setAopYear(finYear);
-			aopCalculation.setIsChanged(true);
-			aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-			aopCalculation.setPlantId(UUID.fromString(plantId));
-			aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
-			aopCalculationRepository.save(aopCalculation);
-		}
-		List<ScreenMapping> screenMappingList1 = screenMappingRepository.findByDependentScreen("normal-op-norms");
-		for (ScreenMapping screenMapping : screenMappingList1) {
 			AopCalculation aopCalculation = new AopCalculation();
 			aopCalculation.setAopYear(finYear);
 			aopCalculation.setIsChanged(true);
