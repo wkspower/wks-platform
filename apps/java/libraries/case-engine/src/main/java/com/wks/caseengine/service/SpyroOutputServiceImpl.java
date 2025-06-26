@@ -60,7 +60,8 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 
 			for (Object[] row : results) {
 				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
-				if(row[6].toString().contains(type)) {	
+				
+				if(row[4].toString().contains(type)) {	
 					map.put("VerticalFKId", row[0]);
 					map.put("PlantFKId", row[1]);
 					map.put("NormParameterFKID", row[2]);
