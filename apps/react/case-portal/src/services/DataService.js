@@ -146,6 +146,7 @@ export const DataService = {
   handleCalculateNormalOperationNormsPe,
   savePlantContributionData,
   getProductionVolDataBasisPe,
+  saveCrackerMaintenance,
   // saveConfigurationExcelConstants,
   // getConfigurationExcelConstants,
 }
@@ -3429,6 +3430,28 @@ async function getCrackerMaintenanceData(keycloak) {
 
   try {
     const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function saveCrackerMaintenance(payload, keycloak) {
+  const { plantId, year, decokePlanningDTOList } = payload
+  const url = `${Config.CaseEngineUrl}/task/maintenance?plantId=${plantId}&year=${year}`
+  
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(decokePlanningDTOList), 
+    })
     return json(keycloak, resp)
   } catch (e) {
     console.log(e)

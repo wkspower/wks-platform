@@ -2,124 +2,125 @@
   {
     "field": "id",
     "title": "Id",
-    "editable": false,
+    "editable":true,
     "hidden": true
   },
   {
     "field": "monthName",
     "title": "MonthName",
-    "editable": false,
-    "width": 125,
+    "editable":true,
     "hidden":false
   },
   {
     "field": "ibr",
     "title": "IBR",
-    "editable": false,
+    "editable":true,
     "type": "number",
-    "width": 120,
+    "format": "{0:#.###}",
     "hidden":false
   },
   {
     "field": "mnt",
     "title": "MNT",
-    "editable": false,
+    "editable":true,
     "type": "number",
-    "width": 120,
+    "format": "{0:#.###}",
     "hidden":false
   },
   {
     "field": "shutdown",
     "title": "ShutDown",
-    "editable": false,
+    "editable":true,
     "type": "number",
-    "width": 120,
+    "format": "{0:#.###}",
     "hidden":false
   },
   {
     "field": "sad",
     "title": "SAD",
-    "editable": false,
+    "editable":true,
     "type": "number",
-    "width": 120,
+    "format": "{0:#.###}",
     "hidden":false
   },
   {
     "field": "bud",
     "title": "BUD",
-    "editable": false,
+    "editable":true,
     "type": "number",
-    "width": 120,
+    "format": "{0:#.###}",
     "hidden":false
   },
   {
     "field": "demoHHS",
     "title": "DemoHHS",
-    "editable": false,
+    "editable":true,
     "type": "number",
-    "width": 150,
+    "format": "{0:#.###}",
     "hidden":false
   },
   {
     "field": "demoBBU",
     "title": "DemoBBU",
-    "editable": false,
+    "editable":true,
     "type": "number",
-    "width": 150,
+    "format": "{0:#.###}",
     "hidden":false
   },
   {
     "field": "demoSAD",
     "title": "DemoSAD",
-    "editable": false,
+    "editable":true,
     "type": "number",
-    "width": 150,
+    "format": "{0:#.###}",
     "hidden":false
   },
   {
-    "field": "4FD",
+    "field": "fourFD",
     "title": "4FD",
-    "editable": false,
+    "editable":true,
     "type": "number",
-    "width": 120,
+    "format": "{0:#.###}",
     "hidden":false
   },
   {
-    "field": "4F",
+    "field": "fourF",
     "title": "4F",
-    "editable": false,
+    "editable":true,
     "type": "number",
-    "width": 120,
+    "format": "{0:#.###}",
     "hidden":false
   },
   {
-    "field": "5F",
-    "title": "5F",
-    "editable": false,
-    "type": "number",
-    "width": 120,
-    "hidden":false
-  }, 
-  {
-    "field": "4FHours",
+    "field": "fourFHours",
     "title": "4FHours",
-    "editable": false,
+    "editable":true,
     "type": "number",
-    "width": 120,
+    "format": "{0:#.###}",
+    "hidden":false
+  },
+  {
+    "field": "fiveF",
+    "title": "5FHours",
+    "editable":true,
+    "type": "number",
+    "format": "{0:#.###}",
     "hidden":false
   },
   {
     "field": "total",
     "title": "Total",
-    "editable": false,
+    "editable":true,
     "type": "number",
-    "width": 120,
+    "format": "{0:#.###}",
     "hidden":false
   },
   {
-    "field": "remark",
-    "title": "Remark",
-    "widthT": 150
+    "field": "remarks",
+    "title": "Remarks",
+    "editable": true,
+    "type": "string",
+    "hidden":false
   }
   
 ]
