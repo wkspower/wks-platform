@@ -41,7 +41,7 @@ const getEnhancedColDefs = ({
 
   let cols
 
-  if (lowerVertName == 'pe') {
+  if (lowerVertName == 'pe' || lowerVertName == 'pp') {
     cols = productionColDefsPE
   } else {
     cols = productionColDefs

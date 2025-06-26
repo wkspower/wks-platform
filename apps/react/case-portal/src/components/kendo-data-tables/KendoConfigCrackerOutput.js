@@ -330,6 +330,8 @@ const CrackerConfig = () => {
   }, [modifiedCells])
 
   const saveSpyroData = async (newRows) => {
+    setLoading(true)
+
     try {
       let plant = ''
       const storedPlant = localStorage.getItem('selectedPlant')
@@ -385,6 +387,8 @@ const CrackerConfig = () => {
       return response
     } catch (error) {
       console.error('Error saving Spyro Input data!', error)
+    } finally {
+      setLoading(false)
     }
   }
 

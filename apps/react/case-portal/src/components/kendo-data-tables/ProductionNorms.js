@@ -363,7 +363,7 @@ const ProductionNorms = ({ permissions }) => {
 
       const finalData = [...formattedData]
 
-      if (lowerVertName == 'pe') {
+      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
         setRows(finalData)
       }
       if (lowerVertName == 'meg') {

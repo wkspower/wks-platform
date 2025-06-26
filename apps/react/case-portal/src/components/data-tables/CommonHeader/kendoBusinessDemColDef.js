@@ -10,7 +10,7 @@ const getEnhancedColDefs = ({ headerMap }) => {
 
   let cols
 
-  if (lowerVertName === 'pe') {
+  if (lowerVertName === 'pe' || lowerVertName == 'pp') {
     cols = vertical_pe_coldefs_bd
   } else {
     cols = vertical_meg_coldefs_bd

@@ -114,7 +114,7 @@ const ShutdownNorms = () => {
           setLoading(false)
         }
       }
-      if (lowerVertName == 'pe') {
+      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
         try {
           var editedData = Object.values(modifiedCells)
           // var allRows = Array.from(apiRef.current.getRowModels().values())

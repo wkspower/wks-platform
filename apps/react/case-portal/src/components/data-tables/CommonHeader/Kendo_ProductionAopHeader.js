@@ -26,7 +26,7 @@ const getEnhancedColDefs = ({ headerMap }) => {
 
   let cols
 
-  if (lowerVertName == 'pe') {
+  if (lowerVertName == 'pe' || lowerVertName == 'pp') {
     cols = productionColDefsPE
   } else if (lowerVertName === 'cracker') {
     cols = productionColDefsCracker

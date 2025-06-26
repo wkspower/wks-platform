@@ -53,23 +53,19 @@ const CrackerConfig = () => {
 
   // Row states per tab
 
-    // —— C2/C3 (existing) ——
+  // —— C2/C3 (existing) ——
 
-    // —— Hexene Purge Gas ——
+  // —— Hexene Purge Gas ——
 
-    // —— Import Propane ——
+  // —— Import Propane ——
 
-    // —— BPCL Kochi Propylene ——
+  // —— BPCL Kochi Propylene ——
 
-    // —— FCC C3 ——
+  // —— FCC C3 ——
 
-    // —— LDPE Off Gas ——
+  // —— LDPE Off Gas ——
 
-    // —— Additional Feed (Default Composition) ——
-
-
-
-
+  // —— Additional Feed (Default Composition) ——
 
   const [feedRows, setFeedRows] = useState([])
   const [compositionRows, setCompositionRows] = useState([])
@@ -249,28 +245,28 @@ const CrackerConfig = () => {
         let transformedData = []
         if (spyroVM?.data && Array.isArray(spyroVM.data)) {
           transformedData = spyroVM.data.map((item, index) => ({
-              id: item.NormParameterFKID || `row_${index}`,
-              particulars: item.Particulars,
-              uom: item.UOM,
-              remarks: item.Remarks,
+            id: item.NormParameterFKID || `row_${index}`,
+            particulars: item.Particulars,
+            uom: item.UOM,
+            remarks: item.Remarks,
             originalRemark: item.Remarks,
-              ParticularsType: item.Type,
-              jan: item.Jan,
-              feb: item.Feb,
-              march: item.Mar,
-              april: item.Apr,
-              may: item.May,
-              june: item.Jun,
-              july: item.Jul,
-              aug: item.Aug,
-              sep: item.Sep,
-              oct: item.Oct,
-              nov: item.Nov,
-              dec: item.Dec,
-              NormParameterFKID: item.NormParameterFKID,
-              ...item,
+            ParticularsType: item.Type,
+            jan: item.Jan,
+            feb: item.Feb,
+            march: item.Mar,
+            april: item.Apr,
+            may: item.May,
+            june: item.Jun,
+            july: item.Jul,
+            aug: item.Aug,
+            sep: item.Sep,
+            oct: item.Oct,
+            nov: item.Nov,
+            dec: item.Dec,
+            NormParameterFKID: item.NormParameterFKID,
+            ...item,
           }))
-          }
+        }
         setRowsForTab(currentTabDisplay, transformedData)
       } catch (err) {
         // console.warn(`Failed to load ${tabId} data:`, err)
@@ -300,7 +296,6 @@ const CrackerConfig = () => {
       })
     }
   }, [
-
     tabIndex,
     selectMode,
     plantId,
@@ -309,15 +304,15 @@ const CrackerConfig = () => {
     keycloak,
     currentTabDisplay,
   ])
-    // console.log(props)
-    // const productId = props.dataItem.normParameterFKId
-    // const product = allProducts.find((p) => p.id === productId)
-    // const displayName = product?.displayName || ''
-    // console.log(displayName)
+  // console.log(props)
+  // const productId = props.dataItem.normParameterFKId
+  // const product = allProducts.find((p) => p.id === productId)
+  // const displayName = product?.displayName || ''
+  // console.log(displayName)
 
   // ===== Save logic unchanged except reload uses setRowsForTab =====
   const [modifiedCells, setModifiedCells] = useState({})
-    // allProducts,
+  // allProducts,
   const saveChanges = useCallback(async () => {
     try {
       if (Object.keys(modifiedCells).length === 0) {
@@ -346,7 +341,9 @@ const CrackerConfig = () => {
       console.error('Error saving changes:', error)
     }
   }, [modifiedCells])
+
   const saveSpyroData = async (newRows) => {
+    setLoading(true)
     try {
       let plant = ''
       const storedPlant = localStorage.getItem('selectedPlant')
@@ -402,6 +399,8 @@ const CrackerConfig = () => {
       return response
     } catch (error) {
       console.error('Error saving Spyro Input data!', error)
+    } finally {
+      setLoading(false)
     }
   }
   return (
@@ -433,15 +432,15 @@ const CrackerConfig = () => {
           )
           const label = info?.displayName || tabId
           return (
-          <Tab
-            key={tabId}
-            sx={{
-              border: '1px solid #ADD8E6',
-              borderBottom: '1px solid #ADD8E6',
-              textTransform: 'capitalize',
-            }}
+            <Tab
+              key={tabId}
+              sx={{
+                border: '1px solid #ADD8E6',
+                borderBottom: '1px solid #ADD8E6',
+                textTransform: 'capitalize',
+              }}
               label={label}
-          />
+            />
           )
         })}
       </Tabs>
@@ -522,10 +521,6 @@ const CrackerConfig = () => {
                   />
                 </Box>
               )
-
-
-
-
 
             default:
               return null

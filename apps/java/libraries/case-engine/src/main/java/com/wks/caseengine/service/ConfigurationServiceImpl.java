@@ -634,7 +634,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 			String steamLatentName = "";
 
-			if (site.getName().equalsIgnoreCase("HMD")) {
+
+			if (site.getName().equalsIgnoreCase("HMD") || site.getName().equalsIgnoreCase("DMD")) {
 				steamLatentName = "HP.Latent.Heat";
 			} else if ((site.getName().equalsIgnoreCase("NMD"))) {
 				steamLatentName = "MP.Latent.Heat";

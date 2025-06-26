@@ -222,7 +222,7 @@ const ConsumptionNorms = () => {
         }
       }
 
-      if (lowerVertName == 'pe') {
+      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
         try {
           setLoading(true)
 

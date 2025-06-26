@@ -9,7 +9,9 @@ const getEnhancedProductionColDefs = ({ headerMap }) => {
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const baseCols =
-    lowerVertName === 'pe' ? production_coldefs_pe : production_coldefs_meg
+    lowerVertName === 'pe' || lowerVertName == 'pp'
+      ? production_coldefs_pe
+      : production_coldefs_meg
 
   const enhancedColDefs = baseCols.map((col) => {
     let updatedCol = { ...col }

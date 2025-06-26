@@ -630,7 +630,7 @@ const NormalOpNormsScreen = () => {
         JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
       let verticalId = localStorage.getItem('verticalId')
 
-      if (lowerVertName == 'pe') {
+      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
         data = await DataService.handleCalculateNormalOperationNormsPe(
           plantId,
           siteID,
