@@ -160,7 +160,7 @@ const KendoDataTablesReports = ({
       })),
     )
   }
- const itemChange = useCallback(
+  const itemChange = useCallback(
     (e) => {
       // const changedDataItem = e.dataItem
       // const changedField = e.field
@@ -339,11 +339,15 @@ const KendoDataTablesReports = ({
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
         }}
-        onClick={() => {
-          onRemarkClick(dataItem)
-          setEdit({})
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          // onRemarkClick(dataItem)
+          // setEdit({})
         }}
-        onDoubleClick={() => {
+        onDoubleClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
           onRemarkClick(dataItem)
           setEdit({})
         }}
@@ -367,7 +371,7 @@ const KendoDataTablesReports = ({
   //           },
   //         },
   //       ])
-        // setGroup([{ field: groupBy }])
+  // setGroup([{ field: groupBy }])
   //     }
   //     const initialExpandedState = {}
   //     const uniqueValues = [...new Set(rows.map((row) => row[groupBy]))]
@@ -446,7 +450,6 @@ const KendoDataTablesReports = ({
       isColumnMenuSortActive(field, sort)
     )
   }
-
 
   const renderColumns = (cols, filter, sort) =>
     cols.map((col, idx) => {
@@ -574,7 +577,6 @@ const KendoDataTablesReports = ({
       </td>
     )
   }
-
 
   return (
     <div style={{ position: 'relative' }}>

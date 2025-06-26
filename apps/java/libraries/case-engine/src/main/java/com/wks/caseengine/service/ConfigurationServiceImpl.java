@@ -644,22 +644,27 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 			String steamLatentName = "";
 
-			if (site.getName().equalsIgnoreCase("HMD")) {
+			// --D3BFDDCC-0AAF-4A57-A304-38034D7A5900 - DMD - HP.Latent.Heat
+			// --C5102765-E0A1-4CC6-B7A0-4F937B91EB6D - NMD - MP.Latent.Heat
+			// --AACDBE12-C5F6-4B79-9C88-751169815B42 - HMD - HP.Latent.Heat
+			// --338E602D-BBF9-4278-A45A-EF6BCAEE63D8 - VMD - N/A
+
+			if (site.getName().equalsIgnoreCase("HMD") || site.getName().equalsIgnoreCase("DMD")) {
 				steamLatentName = "HP.Latent.Heat";
-			} else {
+			} else if ((site.getName().equalsIgnoreCase("NMD"))) {
 				steamLatentName = "MP.Latent.Heat";
 			}
 
 			for (ConfigurationDTO configurationDTO : configurationDTOList) {
-				if(configurationDTO.getSaveStatus()!=null && configurationDTO.getSaveStatus().equalsIgnoreCase("Failed")){
+				if (configurationDTO.getSaveStatus() != null
+						&& configurationDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
 					continue;
 				}
 
 				UUID normParameterFKId = UUID.fromString(configurationDTO.getNormParameterFKId());
 
-
 				Optional<NormParameters> optionNormParameters = normParametersRepository.findById(normParameterFKId);
-				if(!optionNormParameters.isPresent()){
+				if (!optionNormParameters.isPresent()) {
 					configurationDTO.setSaveStatus("Failed");
 					configurationDTO.setErrDescription("Norm Paramter not found");
 					continue;
@@ -669,7 +674,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					Double attributeValue = getAttributeValue(configurationDTO, i);
 
 					saveData(normParameterFKId, i, year, attributeValue, configurationDTO);
-					if (attributeValue != null && optionNormParameters.get().getName().equalsIgnoreCase("TST")) {
+
+					if (!steamLatentName.isEmpty() && attributeValue != null
+							&& optionNormParameters.get().getName().equalsIgnoreCase("TST")) {
+
+						System.out.println("saveConfigurationData  - ConfigurationServiceImpl - steamLatentName   "
+								+ steamLatentName);
 
 						Optional<NormParameters> optionNormParametersHP = normParametersRepository
 								.findByNameAndPlantFkId(steamLatentName, plantId);

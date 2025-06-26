@@ -707,11 +707,10 @@ const NormalOpNormsScreen = () => {
       saveWithRemark: true,
       saveBtn: true,
       showCalculate: true,
+      showGrade: lowerVertName === 'pe' ? true : false,
+      grades: ['1005FY20', '1020FA20', '1070LA17'],
       showCalculateVisibility:
-        lowerVertName === 'meg' &&
-        Object.keys(calculationObject || {}).length > 0
-          ? true
-          : false,
+        Object.keys(calculationObject || {}).length > 0 ? true : false,
       downloadExcelBtn: lowerVertName == 'meg' ? true : false,
       uploadExcelBtn: lowerVertName == 'meg' ? true : false,
     },
@@ -819,6 +818,9 @@ const NormalOpNormsScreen = () => {
       setLoading(false)
     }
   }
+  const handleGradeChange = async () => {
+    console.log('grade changed')
+  }
 
   return (
     <div>
@@ -863,6 +865,7 @@ const NormalOpNormsScreen = () => {
         groupBy='Particulars'
         handleExcelUpload={handleExcelUpload}
         downloadExcelForConfiguration={downloadExcelForConfiguration}
+        handleGradeChange={handleGradeChange}
       />
 
       {lowerVertName === 'meg' && (

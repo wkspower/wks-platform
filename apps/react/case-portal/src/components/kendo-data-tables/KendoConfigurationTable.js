@@ -48,8 +48,6 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
   backgroundColor: '#F2F3F8',
 }))
 
-// import CrackerConfig from './KendoConfigCracker'
-
 const ConfigurationTable = () => {
   const keycloak = useSession()
 
@@ -59,7 +57,7 @@ const ConfigurationTable = () => {
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
 
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   const [tabIndex, setTabIndex] = useState(0)
   const [loading, setLoading] = useState(false)
   const [summaryEdited, setSummaryEdited] = useState(false)
@@ -104,8 +102,6 @@ const ConfigurationTable = () => {
       var data = await DataService.getCatalystSelectivityData(keycloak)
 
       if (lowerVertName == 'meg') {
-        // data = data.sort((a, b) => b.normType.localeCompare(a.normType))
-
         data = data?.filter((item) => item.normType !== 'Report Manual Entry')
 
         const formattedData = data.map((item, index) => ({
@@ -265,14 +261,6 @@ const ConfigurationTable = () => {
         setTabs(parsedData)
         setLoading(false)
       } else {
-        // setTabs([
-        //   'StartupLosses',
-        //   'OtherLosses',
-        //   'ShutdownNorms',
-        //   'Receipes',
-        //   'ContineGradeChange',
-        //   'DisContineGradeChange',
-        // ])
         setTabs([])
         setLoading(false)
       }
@@ -302,28 +290,29 @@ const ConfigurationTable = () => {
     }
   }
 
-  // const [startDate, setStartDate] = useState()
-  // const [endDate, setEndDate] = useState()
-
   useEffect(() => {
+    getConfigurationExecutionDetails()
     getConfigurationAvailableTabs()
     getAopSummary()
 
-    if (lowerVertName === 'meg') {
-      getConfigurationExecutionDetails()
-      getConfigurationTabsMatrix()
-    }
     if (lowerVertName === 'pe') {
       getConfigurationTabsMatrix()
       getConfigurationAvailableTabs()
       fetchGradeData()
     }
 
-    let year = localStorage.getItem('year')
-    const baseYear = parseInt(year.split('-')[0], 10)
+    const today = new Date()
 
-    setStartDate(new Date(`${baseYear - 5}-04-01`))
-    setEndDate(new Date(`${baseYear}-03-31`))
+    const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
+
+    const startDate = new Date(
+      today.getFullYear() - 5,
+      today.getMonth() - 1 + 1,
+      1,
+    )
+
+    setStartDate(startDate)
+    setEndDate(endDate)
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   const getTheId = (name) => {
@@ -367,12 +356,128 @@ const ConfigurationTable = () => {
     return formatted
   }
 
+  const getAopSummary = async () => {
+    try {
+      setSummary('')
+      var res = await DataService.getAopSummary(keycloak)
+
+      if (res?.code == 200) {
+        setSummary(res?.data?.summary)
+      } else {
+        setSummary('')
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    }
+  }
+  const onLoadTest = async (startDateObj, endDateObj) => {
+    setLoading(true)
+    try {
+      const plantId =
+        JSON.parse(localStorage.getItem('selectedPlant') || '{}')?.id || ''
+      const auditYear = localStorage.getItem('year')
+
+      const createPayloadItem = (obj, date) => ({
+        apr: date,
+        UOM: '',
+        auditYear,
+        normParameterFKId: obj?.NormParameter_FK_Id,
+        remarks: 'Initiated',
+        id: obj?.Id || null,
+        plantId,
+      })
+
+      const today = new Date() // ? Declare 'today' before using it
+
+      const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
+
+      const startDate = new Date(
+        today.getFullYear() - 5,
+        today.getMonth() - 1 + 1,
+        1,
+      )
+
+      const payload = [
+        createPayloadItem(startDateObj, formatDate(startDate)),
+        createPayloadItem(endDateObj, formatDate(endDate)),
+      ]
+
+      const response = await DataService.executeConfiguration(payload, keycloak)
+
+      if (response) {
+        await getConfigurationExecutionDetails()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Execution Failed!',
+          severity: 'error',
+        })
+      }
+
+      return response
+    } catch (error) {
+      console.error('Execution Failed!', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+  const hasExecutedRef = useRef(false) // ? useRef instead of useState
+
+  const getConfigurationExecutionDetails = async () => {
+    try {
+      const response =
+        await DataService.getConfigurationExecutionDetails(keycloak)
+      const details = response?.data || []
+
+      if (details.length === 0) {
+        console.warn(
+          'getConfigurationExecutionDetails returned an empty array:',
+          response,
+        )
+      }
+
+      const hasNoModifiedOn = details.length && !details[0]?.ModifiedOn
+
+      if (hasNoModifiedOn && !hasExecutedRef.current) {
+        const startDateObj = details.find((item) => item.Name === 'StartDate')
+        const endDateObj = details.find((item) => item.Name === 'EndDate')
+
+        hasExecutedRef.current = true
+        await onLoadTest(startDateObj, endDateObj)
+      } else {
+        setConfigurationExecutionDetails(details)
+      }
+    } catch (error) {
+      console.error('Error fetching getConfigurationExecutionDetails:', error)
+    }
+  }
+
   const onLoad = async () => {
     if (startDate && endDate && startDate > endDate) {
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Please Choose Valid Dates!',
         severity: 'warning',
+      })
+      return
+    }
+
+    const startDateObj = configurationExecutionDetails.find(
+      (item) => item.Name === 'StartDate',
+    )
+
+    const endDateObj = configurationExecutionDetails.find(
+      (item) => item.Name === 'EndDate',
+    )
+
+    if (!startDateObj?.Id || !endDateObj?.Id) {
+      console.warn(
+        'StartDate or EndDate object is missing Id. Aborting execution.',
+      )
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Start/End date configuration is incomplete.',
+        severity: 'error',
       })
       return
     }
@@ -386,18 +491,11 @@ const ConfigurationTable = () => {
         plantId = parsedPlant.id
       }
 
-      const startDateObj = configurationExecutionDetails.find(
-        (item) => item.Name === 'StartDate',
-      )
-      const endDateObj = configurationExecutionDetails.find(
-        (item) => item.Name === 'EndDate',
-      )
+      console.log('startDateObj', startDateObj)
+      console.log('endDateObj', endDateObj)
 
       setStartDateObj(startDateObj)
       setEndDateObj(endDateObj)
-
-      var startDate1 = startDateObj?.AttributeValue
-      var startDate2 = endDateObj?.AttributeValue
 
       const payload = [
         {
@@ -447,79 +545,11 @@ const ConfigurationTable = () => {
     }
   }
 
-  const getAopSummary = async () => {
-    try {
-      var res = await DataService.getAopSummary(keycloak)
-
-      if (res?.code == 200) {
-        setSummary(res?.data?.summary)
-      } else {
-        setSummary('')
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error)
+  useEffect(() => {
+    if (tabIndex >= tabs.length) {
+      setTabIndex(0)
     }
-  }
-
-  // const saveSummary = async () => {
-  //   setLoading(true)
-  //   try {
-  //     let plantId = ''
-  //     const storedPlant = localStorage.getItem('selectedPlant')
-  //     if (storedPlant) {
-  //       const parsedPlant = JSON.parse(storedPlant)
-  //       plantId = parsedPlant.id
-  //     }
-  //     let year = localStorage.getItem('year')
-  //     const response = await DataService.saveSummaryAOPConsumptionNorm(
-  //       plantId,
-  //       year,
-  //       summary,
-  //       keycloak,
-  //     )
-
-  //     if (response?.code == 200) {
-  //       setSnackbarData({
-  //         message: 'Summary Saved Successfully!',
-  //         severity: 'success',
-  //       })
-  //       setLoading(false)
-  //       setSnackbarOpen(true)
-  //       setIsEdited(false)
-  //     } else {
-  //       setSnackbarData({
-  //         message: 'Summary Saved Failed!',
-  //         severity: 'error',
-  //       })
-  //       setLoading(false)
-  //       setSnackbarOpen(true)
-  //     }
-
-  //     //
-
-  //     setLoading(false)
-  //     return response
-  //   } catch (error) {
-  //     console.error('Error saving Summary!', error)
-  //   } finally {
-  //     //
-  //     setLoading(false)
-  //   }
-  // }
-
-  const getConfigurationExecutionDetails = async () => {
-    try {
-      const data = await DataService.getConfigurationExecutionDetails(keycloak)
-
-      var data1 = data?.data
-
-      setConfigurationExecutionDetails(data1)
-    } catch (error) {
-      console.error('Error fetching getConfigurationExecutionDetails:', error)
-    } finally {
-      // handleMenuClose();
-    }
-  }
+  }, [tabs])
 
   // const [isEdited, setIsEdited] = useState(false)
   if (lowerVertName == 'elastomer') {
@@ -638,20 +668,10 @@ const ConfigurationTable = () => {
                       className='summary-title'
                       sx={{ whiteSpace: 'normal' }}
                     >
-                      {`(Last loaded data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDate1)} to ${formatDateForText(endDate1)})`}
+                      {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDate1)} to ${formatDateForText(endDate1)})`}
                     </Typography>
                   )}
                 </Box>
-
-                {/* Right Side: Save Button */}
-                {/* <Button
-                  variant='contained'
-                  onClick={saveSummary}
-                  className='btn-save'
-                  disabled={!isEdited}
-                >
-                  Save Summary
-                </Button> */}
               </Box>
 
               <TextField
@@ -802,12 +822,156 @@ const ConfigurationTable = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
+      <Box sx={{ mb: '6px' }}>
+        <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordionSummary
+            aria-controls='meg-grid-content'
+            id='meg-grid-header'
+          >
+            <Typography className='grid-title'>
+              AOP Historical Period Basis
+            </Typography>
+          </CustomAccordionSummary>
+          <CustomAccordionDetails>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end',
+                mt: 0,
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  marginTop: '10px',
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    className='grid-title'
+                    sx={{ whiteSpace: 'nowrap' }}
+                  >
+                    Start Date
+                  </Typography>
+                  <DatePicker
+                    id='start-date'
+                    format='dd-MM-yyyy'
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.value)}
+                    style={{ height: '80px' }}
+                    size={'large'}
+                  />
+
+                  <Typography
+                    className='grid-title'
+                    sx={{ whiteSpace: 'nowrap' }}
+                  >
+                    End Date
+                  </Typography>
+                  <DatePicker
+                    id='end-date'
+                    format='dd-MM-yyyy'
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.value)}
+                    style={{ height: '80px' }}
+                    size={'large'}
+                  />
+                </Box>
+                {/* Load Button */}
+                <Button
+                  variant='contained'
+                  onClick={onLoad}
+                  className='btn-load'
+                  // disabled={startDate > endDate}
+                  sx={{ alignSelf: 'flex-end' }}
+                >
+                  Load
+                </Button>
+                {configurationExecutionDetails[0]?.ModifiedOn && (
+                  <Typography
+                    className='summary-title'
+                    sx={{ whiteSpace: 'normal' }}
+                  >
+                    {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDate1)} to ${formatDateForText(endDate1)})`}
+                  </Typography>
+                )}
+              </Box>
+
+              {/* Right Side: Save Button */}
+              {/* <Button
+                  variant='contained'
+                  onClick={saveSummary}
+                  className='btn-save'
+                  disabled={!isEdited}
+                >
+                  Save Summary
+                </Button> */}
+            </Box>
+
+            <TextField
+              label='AOP Design Basis'
+              multiline
+              // minRows={isAccordionExpanded ? 4 : 20}
+              minRows={2}
+              fullWidth
+              margin='normal'
+              variant='outlined'
+              disabled={isOldYear == 1}
+              value={summary}
+              onChange={(e) => {
+                setSummary(e.target.value)
+                setSummaryEdited(true)
+              }}
+              sx={{
+                '& .MuiInputBase-root': {
+                  backgroundColor: '#ffffff',
+                  borderRadius: '8px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                  padding: '8px',
+                },
+                '& label': {
+                  fontSize: '1rem',
+                  color: '#666',
+                  lineHeight: '1.2',
+                  transform: 'translate(14px, 12px) scale(1)',
+                },
+                '& .MuiInputLabel-shrink': {
+                  transform: 'translate(14px, -6px) scale(0.75)',
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#ccc',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#999',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#1976d2',
+                },
+                '& .MuiInputBase-input': {
+                  resize: 'vertical',
+                },
+              }}
+            />
+          </CustomAccordionDetails>
+        </CustomAccordion>
+      </Box>
+
+      <Notification
+        open={snackbarOpen}
+        message={snackbarData?.message || ''}
+        severity={snackbarData?.severity || 'info'}
+        onClose={() => setSnackbarOpen(false)}
+      />
+
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
           gap: '5px',
-          marginTop: '20px',
+          marginTop: '40px',
         }}
       >
         <Tabs
@@ -852,6 +1016,9 @@ const ConfigurationTable = () => {
                     setRows={setStartUpRows}
                     configType='StartupLosses'
                     groupBy='TypeDisplayName'
+                    summary={summary}
+                    summaryEdited={summaryEdited}
+                    onSummaryEditChange={setSummaryEdited}
                   />
                 )
               case getTheId('Otherlosses'): // Otherlosses
@@ -863,6 +1030,9 @@ const ConfigurationTable = () => {
                     setRows={setOtherLossRows}
                     configType='Otherlosses'
                     groupBy='TypeDisplayName'
+                    summary={summary}
+                    summaryEdited={summaryEdited}
+                    onSummaryEditChange={setSummaryEdited}
                   />
                 )
               case getTheId('ShutdownNorms'): // ShutdownNorms
@@ -874,6 +1044,9 @@ const ConfigurationTable = () => {
                     fetchData={fetchData}
                     configType='ShutdownNorms'
                     groupBy='TypeDisplayName'
+                    summary={summary}
+                    summaryEdited={summaryEdited}
+                    onSummaryEditChange={setSummaryEdited}
                     // groupBy2='ConfigTypeDisplayName'
                   />
                 )
@@ -885,6 +1058,9 @@ const ConfigurationTable = () => {
                     fetchData={fetchGradeData}
                     setRows={setGradeData}
                     configType='grades'
+                    summary={summary}
+                    summaryEdited={summaryEdited}
+                    onSummaryEditChange={setSummaryEdited}
                   />
                 )
               case getTheId('ContineGradeChange'): // ContineGradeChange
@@ -895,6 +1071,9 @@ const ConfigurationTable = () => {
                     setRows={setContiniousGradeData}
                     fetchData={fetchData}
                     configType='ContineGradeChange'
+                    summary={summary}
+                    summaryEdited={summaryEdited}
+                    onSummaryEditChange={setSummaryEdited}
                   />
                 )
               case getTheId('DisContineGradeChange'): // DisContineGradeChange
@@ -905,6 +1084,9 @@ const ConfigurationTable = () => {
                     setRows={setDiscontiniousGradeData}
                     fetchData={fetchData}
                     configType='DisContineGradeChange'
+                    summary={summary}
+                    summaryEdited={summaryEdited}
+                    onSummaryEditChange={setSummaryEdited}
                   />
                 )
               default:

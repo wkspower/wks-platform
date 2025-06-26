@@ -122,6 +122,7 @@ const KendoDataTables = ({
   handleLoad = () => {},
   fetchData = () => {},
   handleUnitChange = () => {},
+  handleGradeChange = () => {},
   handleRemarkCellClick = () => {},
   selectedUsers = [],
   groupBy = null,
@@ -139,6 +140,7 @@ const KendoDataTables = ({
   const [group, setGroup] = useState([])
   const [expandedState, setExpandedState] = useState({})
   const [selectedUnit, setSelectedUnit] = useState()
+  const [selectedGrade, setSelectedGrade] = useState()
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
@@ -405,7 +407,6 @@ const KendoDataTables = ({
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
-          //Uncomment the line below if single click functionality needed
           // onRemarkClick(dataItem)
           // setEdit({})
         }}
@@ -594,6 +595,30 @@ const KendoDataTables = ({
                   {note}
                 </Typography>
               )}
+
+              {permissions?.showGrade && (
+                <TextField
+                  select
+                  value={selectedGrade || permissions?.grades?.[0]}
+                  onChange={(e) => {
+                    setSelectedGrade(e.target.value)
+                    handleGradeChange(e.target.value)
+                  }}
+                  sx={{ width: '150px', backgroundColor: '#FFFFFF' }}
+                  variant='outlined'
+                  label='Select Grade'
+                >
+                  <MenuItem value='' disabled>
+                    Select Grade
+                  </MenuItem>
+
+                  {permissions?.grades.map((unit) => (
+                    <MenuItem key={unit} value={unit}>
+                      {unit}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
             </Box>
 
             {/* Right side - All other actions */}
@@ -618,21 +643,23 @@ const KendoDataTables = ({
               )}
 
               {permissions?.downloadExcelBtn && (
-                <Tooltip title='Download'>
-                  <Button
-                    variant='outlined'
-                    size='large'
-                    onClick={downloadExcelForConfiguration}
-                    disabled={isButtonDisabled}
-                  >
-                    <DownloadIcon fontSize='small' />
-                  </Button>
+                <Tooltip>
+                  <span title='Export Data'>
+                    <Button
+                      variant='outlined'
+                      size='large'
+                      onClick={downloadExcelForConfiguration}
+                      disabled={isButtonDisabled}
+                    >
+                      <DownloadIcon fontSize='small' />
+                    </Button>
+                  </span>
                 </Tooltip>
               )}
 
               {permissions?.uploadExcelBtn && (
-                <>
-                  <Tooltip title='Upload Excel'>
+                <Tooltip>
+                  <span title='Import Data'>
                     <Button
                       variant='outlined'
                       size='large'
@@ -641,7 +668,7 @@ const KendoDataTables = ({
                     >
                       <UploadIcon fontSize='small' />
                     </Button>
-                  </Tooltip>
+                  </span>
                   <input
                     type='file'
                     accept='.xlsx,.xls'
@@ -649,7 +676,7 @@ const KendoDataTables = ({
                     ref={fileInputRef}
                     style={{ display: 'none' }}
                   />
-                </>
+                </Tooltip>
               )}
 
               {permissions?.saveBtn && (
@@ -782,7 +809,7 @@ const KendoDataTables = ({
             sortable={{
               mode: 'multiple',
             }}
-            // filterable={columns.some((col) => dateFields.includes(col.field))}
+            filterable={columns.some((col) => dateFields.includes(col.field))}
             allRedCell={allRedCell}
             size='small'
             pageable={
