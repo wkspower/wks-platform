@@ -46,9 +46,10 @@ import {
 } from './Utilities-Kendo/durationHelpers'
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import * as XLSX from 'xlsx'
-import DateTimePickerr from './Utilities-Kendo/DatePicker'
+// import DateTimePickerr from './Utilities-Kendo/DatePicker'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
-import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
+// import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
+import { RemarkCell } from './Utilities-Kendo/RemarkCell'
 
 export const particulars = [
   'normParametersFKId',
@@ -76,6 +77,18 @@ export const hiddenFields1 = [
   'idFromApi',
   'isEditable',
   'period',
+]
+export const dateFields = [
+  'maintStartDateTime',
+  'maintEndDateTime',
+  'endDateTA',
+  'startDateTA',
+  'endDateSD',
+  'startDateSD',
+  'endDateIBR',
+  'startDateIBR',
+  'fromDate',
+  'toDate',
 ]
 export const hiddenFields = []
 export const monthMap = {
@@ -137,8 +150,8 @@ const KendoDataTables = ({
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
   const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
-  const [group, setGroup] = useState([])
-  const [expandedState, setExpandedState] = useState({})
+  // const [group, setGroup] = useState([])
+  // const [expandedState, setExpandedState] = useState({})
   const [selectedUnit, setSelectedUnit] = useState()
   const [selectedGrade, setSelectedGrade] = useState()
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
@@ -186,16 +199,16 @@ const KendoDataTables = ({
 
   const itemChange = useCallback(
     (e) => {
-      const changedDataItem = e.dataItem
-      const changedField = e.field
-      const newValue = e.value
+      // const changedDataItem = e.dataItem
+      // const changedField = e.field
+      // // const newValue = e.value
 
-      const originalDataItem = rows.find(
-        (item) => item.id === changedDataItem.id,
-      )
-      const originalValue = originalDataItem
-        ? originalDataItem[changedField]
-        : undefined
+      // const originalDataItem = rows.find(
+      //   (item) => item.id === changedDataItem.id,
+      // )
+      // const originalValue = originalDataItem
+      //   ? originalDataItem[changedField]
+      //   : undefined
 
       // setEditedCellMap((prev) => ({
       //   ...prev,
@@ -372,55 +385,6 @@ const KendoDataTables = ({
       console.error('Error saving refresh data:', error)
     }
   }
-  const RemarkCell = (props) => {
-    const { dataItem, field, onRemarkClick, ...tdProps } = props
-
-    const rawValue = dataItem[field]
-    // const displayText = truncateRemarks(rawValue)
-    const displayText = String(rawValue ?? '')
-    // const displayText = truncateRemarks(String(rawValue ?? ''))
-
-    // Tooltip and color logic
-    const value = dataItem[field]
-    const month = monthMap?.[field?.toLowerCase()]
-    const normId = dataItem.materialFkId
-
-    const isRedFromAllRedCell = allRedCell?.some(
-      (cell) =>
-        cell.month === month &&
-        cell.normParameterFKId?.toLowerCase() === normId?.toLowerCase(),
-    )
-
-    const isRed = isRedFromAllRedCell
-
-    return (
-      <td
-        {...tdProps}
-        title={rawValue || 'Click to add remark'}
-        style={{
-          cursor: 'pointer',
-          color: isRed ? 'orange' : rawValue ? 'inherit' : 'gray',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          // onRemarkClick(dataItem)
-          // setEdit({})
-        }}
-        onDoubleClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          onRemarkClick(dataItem)
-          setEdit({})
-        }}
-      >
-        {displayText || 'Click to add remark'}
-      </td>
-    )
-  }
 
   const isColumnActive = (field, filter, sort) => {
     return (
@@ -472,15 +436,15 @@ const KendoDataTables = ({
     )
   }
 
-  const HeaderWithTooltip = (props) => {
-    return (
-      <th {...props.thProps}>
-        <a className='k-link' onClick={props.onClick}>
-          <span title={props.title}>{props.title}</span>
-        </a>
-      </th>
-    )
-  }
+  // const HeaderWithTooltip = (props) => {
+  //   return (
+  //     <th {...props.thProps}>
+  //       <a className='k-link' onClick={props.onClick}>
+  //         <span title={props.title}>{props.title}</span>
+  //       </a>
+  //     </th>
+  //   )
+  // }
   const triggerFileUpload = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click()
@@ -533,39 +497,39 @@ const KendoDataTables = ({
     )
   }
 
-  const ConditionalDateEditorForConstantValue = (props) => {
-    if (props.dataItem.UOM === 'Date') {
-      return <DateOnlyPicker {...props} />
-    }
+  // const ConditionalDateEditorForConstantValue = (props) => {
+  //   if (props.dataItem.UOM === 'Date') {
+  //     return <DateOnlyPicker {...props} />
+  //   }
 
-    return <NoSpinnerNumericEditor {...props} />
-  }
+  //   return <NoSpinnerNumericEditor {...props} />
+  // }
 
-  const handleLoadClick = () => {
-    if (onLoad && startDate && endDate) {
-      onLoad(startDate, endDate)
-    }
-  }
+  // const handleLoadClick = () => {
+  //   if (onLoad && startDate && endDate) {
+  //     onLoad(startDate, endDate)
+  //   }
+  // }
 
-  const SafeColumnMenu = (props) => {
-    return (
-      <GridColumnMenuFilter
-        {...props}
-        mobileMode={false} // ✅ This prevents the crash
-      />
-    )
-  }
+  // const SafeColumnMenu = (props) => {
+  //   return (
+  //     <GridColumnMenuFilter
+  //       {...props}
+  //       mobileMode={false} // ✅ This prevents the crash
+  //     />
+  //   )
+  // }
 
-  const dateFields = [
-    'maintStartDateTime',
-    'maintEndDateTime',
-    'endDateTA',
-    'startDateTA',
-    'endDateSD',
-    'startDateSD',
-    'endDateIBR',
-    'startDateIBR',
-  ]
+  // const dateFields = [
+  //   'maintStartDateTime',
+  //   'maintEndDateTime',
+  //   'endDateTA',
+  //   'startDateTA',
+  //   'endDateSD',
+  //   'startDateSD',
+  //   'endDateIBR',
+  //   'startDateIBR',
+  // ]
 
   return (
     <div style={{ position: 'relative' }}>
@@ -824,20 +788,7 @@ const KendoDataTables = ({
             {columns.map((col) => {
               const isActive = isColumnActive(col?.field, filter, sort)
 
-              if (
-                [
-                  'maintStartDateTime',
-                  'maintEndDateTime',
-                  'endDateTA',
-                  'startDateTA',
-                  'endDateSD',
-                  'startDateSD',
-                  'endDateIBR',
-                  'startDateIBR',
-                  'fromDate',
-                  'toDate',
-                ].includes(col.field)
-              ) {
+              if (dateFields.includes(col.field)) {
                 return (
                   <GridColumn
                     key={col.field}
@@ -998,9 +949,10 @@ const KendoDataTables = ({
                     editor={true}
                     editable={{ mode: 'popup' }}
                     cells={{
-                      data: (cellProps) => (
+                      data: (cellProps, allRedCell) => (
                         <RemarkCell
                           {...cellProps}
+                          allRedCell={allRedCell} // pass your extra flag
                           onRemarkClick={handleRemarkCellClick}
                         />
                       ),

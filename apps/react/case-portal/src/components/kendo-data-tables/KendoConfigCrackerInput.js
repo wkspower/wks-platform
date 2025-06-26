@@ -41,6 +41,7 @@ const CrackerConfig = () => {
 
   const rawTabsStatic = [
     'Feed',
+    'Optimizing',
     'Composition',
     'Hydrogenation',
     'Recovery',
@@ -113,7 +114,7 @@ const CrackerConfig = () => {
   const currentTabDisplay = useMemo(() => {
     const idLower = tabs[tabIndex]?.toLowerCase() || ''
     const info = availableTabs.find((t) => t.id.toLowerCase() === idLower)
-    console.log(info)
+    // console.log(info)
     return info ? info.displayName : tabs[tabIndex] || 'Feed'
   }, [tabs, tabIndex, availableTabs])
   const productionColumns = useMemo(() => {
@@ -127,7 +128,10 @@ const CrackerConfig = () => {
   }, [headerMap, currentTabDisplay])
   const fetchTabsMatrix = useCallback(async () => {
     try {
-      const resp = await DataService.getConfigurationTabsMatrix(keycloak)
+      const resp = await DataService.getConfigurationTabsMatrix(
+        keycloak,
+        'null',
+      )
       let tabsFromApi = []
       if (typeof resp.data === 'string') {
         try {
@@ -249,6 +253,7 @@ const CrackerConfig = () => {
               particulars: item.Particulars,
               uom: item.UOM,
               remarks: item.Remarks,
+            originalRemark: item.Remarks,
               ParticularsType: item.Type,
               jan: item.Jan,
               feb: item.Feb,
@@ -329,6 +334,7 @@ const CrackerConfig = () => {
         setLoading(false)
         return
       }
+      console.log(data)
       const validationMessage = validateFields(data, ['particulars', 'remarks'])
       if (validationMessage) {
         setSnackbarOpen(true)

@@ -3,7 +3,7 @@
     "field": "particulars",
     "title": "Particulars",
     "editable": false,
-    "width": 150,
+    "widthT": 150,
     "hidden": false
   },
   {

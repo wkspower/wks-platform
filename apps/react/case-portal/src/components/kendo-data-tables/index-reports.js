@@ -44,6 +44,7 @@ import {
   recalcEndDate,
 } from './Utilities-Kendo/durationHelpers'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
+import { RemarkCell } from './Utilities-Kendo/RemarkCell'
 
 export const particulars = [
   'normParameterId',
@@ -320,42 +321,38 @@ const KendoDataTablesReports = ({
   // console.log('22', e.dataItem.isEditable)
   // console.log('Rendering with title:', title, 'type:', typeof title)
 
-  const RemarkCell = (props) => {
-    const { dataItem, field, onRemarkClick, ...tdProps } = props
+  // const RemarkCell = (props) => {
+  //   const { dataItem, field, onRemarkClick, ...tdProps } = props
 
-    const rawValue = dataItem[field]
+  //   const rawValue = dataItem[field]
     // const displayText = truncateRemarks(rawValue)
-    const displayText = String(rawValue ?? '')
+  //   const displayText = String(rawValue ?? '')
 
     // const editable = Boolean(dataItem.isEditable)
 
-    return (
-      <td
-        {...tdProps}
-        style={{
-          cursor: 'pointer',
-          color: rawValue ? 'inherit' : 'gray',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
+  //   return (
+  //     <td
+  //       {...tdProps}
+  //       style={{
+  //         cursor: 'pointer',
+  //         color: rawValue ? 'inherit' : 'gray',
+  //         overflow: 'hidden',
+  //         textOverflow: 'ellipsis',
+  //         whiteSpace: 'nowrap',
+  //       }}
+  //       onClick={() => {
           // onRemarkClick(dataItem)
           // setEdit({})
-        }}
-        onDoubleClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          onRemarkClick(dataItem)
-          setEdit({})
-        }}
-      >
-        {displayText || 'Click to add remark'}
-      </td>
-    )
-  }
+  //       }}
+  //       onDoubleClick={() => {
+  //         onRemarkClick(dataItem)
+  //         setEdit({})
+  //       }}
+  //     >
+  //       {displayText || 'Click to add remark'}
+  //     </td>
+  //   )
+  // }
 
   // useEffect(() => {
   //   if (Array.isArray(rows) && rows.length > 0 && groupBy) {
@@ -473,9 +470,10 @@ const KendoDataTablesReports = ({
             editor={true}
             editable={{ mode: 'popup' }}
             cells={{
-              data: (cellProps) => (
+              data: (cellProps, allRedCell) => (
                 <RemarkCell
                   {...cellProps}
+                  allRedCell={allRedCell} // pass your extra flag
                   onRemarkClick={handleRemarkCellClick}
                 />
               ),

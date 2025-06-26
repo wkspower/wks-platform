@@ -31,7 +31,7 @@ import { updateRowWithDuration } from './Utilities-Kendo/AutoDuration'
 import ProductDropDownEditor from './Utilities-Kendo/DropdownProducts'
 import ProductCell from './Utilities-Kendo/ProductCell'
 
-const KendoDataTables = ({
+const KendoDataTablesTest = ({
   // setUpdatedRows = () => {},
   rows = [],
   // updatedRows = [],
@@ -847,4 +847,4 @@ const KendoDataTables = ({
   )
 }
 
-export default KendoDataTables
+export default KendoDataTablesTest

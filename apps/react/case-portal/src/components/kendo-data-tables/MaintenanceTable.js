@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
@@ -13,27 +13,40 @@ import crackercolumns from '../../assets/CrackerMaintenanceColumn.json'
 
 const MaintenanceTable = () => {
   const keycloak = useSession()
+  const { sitePlantChange, verticalChange, yearChanged, oldYear } = useSelector(
+    (s) => s.dataGridStore,
+  )
+  const lowerVertName = verticalChange?.selectedVertical?.toLowerCase() || 'meg'
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const dataConfig = useMemo(
+    () => ({
+      isCracker: lowerVertName === 'cracker',
+      serviceFn:
+        lowerVertName === 'cracker'
+          ? DataService.getCrackerMaintenanceData
+          : DataService.getMaintenanceData,
+      editable: lowerVertName === 'cracker',
+    }),
+    [lowerVertName],
+  )
+  const headerMap = useMemo(
+    () => generateHeaderNames(localStorage.getItem('year')),
+    [],
+  )
+  const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
-  const [open1, setOpen1] = useState(false)
-  const [deleteId, setDeleteId] = useState(null)
-  const [rows, setRows] = useState()
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
 
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
-    dataGridStore
   //const isOldYear = oldYear?.oldYear
-  const isOldYear = oldYear?.oldYear
 
-  const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
-  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [deleteId, setDeleteId] = useState(null)
+  const [open1, setOpen1] = useState(false)
 
   // const fetchData = async () => {
   //   setRows([])
@@ -57,228 +70,111 @@ const MaintenanceTable = () => {
   //     setLoading(false)
   //   }
   // }
-  const fetchData = async () => {
-    setRows([]);
-    setLoading(true);
+  const fetchData = useCallback(async () => {
+    setRows([])
+    setLoading(true)
 
     try {
-      if (lowerVertName === 'cracker') {
-        const response = await DataService.getCrackerMaintenanceData(keycloak);
-        console.log('Cracker Data :', response)
-        if (response?.code == 200){
-          const formattedData = response?.data.map((item, index) => ({
+      const resp = await dataConfig.serviceFn(keycloak)
+      const raw = dataConfig.isCracker ? resp.data : resp
+      const formatted = (raw || []).map((item, idx) => ({
             ...item,
             idFromApi: item.id,
-            id: index,
-            isEditable: false,
-          }));
-          setRows(formattedData);
-        }
-        else{
-          console.error('Error fetching data:', error);
-          setRows([]);
-        }
-        }
-        else {
-        const data = await DataService.getMaintenanceData(keycloak);
-          const formattedData = data.map((item, index) => ({
-            ...item,
-            idFromApi: item.id,
-            id: index,
-            isEditable: false,
-          }));
-          setRows(formattedData);
-        } 
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setRows([]);
+        id: idx,
+        isEditable: dataConfig.editable,
+      }))
+      setRows(formatted)
+    } catch (err) {
+      console.error('Error fetching data:', err)
+      setRows([])
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }
+  }, [plantId, keycloak])
 
 
-  const handleCalculate = async () => {
-    try {
-      const storedPlant = localStorage.getItem('selectedPlant')
+  const handleCalculate = useCallback(async () => {
+    const plantId = JSON.parse(localStorage.getItem('selectedPlant') || '{}').id
       const year = localStorage.getItem('year')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      var plantId = plantId
-      const data = await DataService.handleCalculateMaintenance(
+    try {
+      const result = await DataService.handleCalculateMaintenance(
         plantId,
         year,
         keycloak,
       )
 
-      if (data == 0) {
-        setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Data refreshed successfully!',
-          severity: 'success',
+        message:
+          result === 0
+            ? 'Data refreshed successfully!'
+            : 'Data Refresh Failed!',
+        severity: result === 0 ? 'success' : 'error',
         })
-        fetchData()
-      } else {
         setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Data Refresh Falied!',
-          severity: 'error',
-        })
-      }
+      if (result === 0) fetchData()
 
-      return data
-    } catch (error) {
+    } catch (err) {
+      console.error(err)
+      setSnackbarData({ message: err.message || 'Error!', severity: 'error' })
       setSnackbarOpen(true)
-      setSnackbarData({
-        message: error.message || 'An error occurred',
-        severity: 'error',
-      })
-      console.error('Error!', error)
     }
-  }
+  }, [keycloak, fetchData])
 
   useEffect(() => {
     fetchData()
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  }, [fetchData, sitePlantChange, oldYear, yearChanged])
 
-  const productionColumns = [
+  const productionColumns = useMemo(
+    () => [
     {
       field: 'Name',
       title: 'Description',
       align: 'left',
       headerAlign: 'left',
       width: 220,
-      editable: false,
     },
-    {
-      field: 'April',
-      title: headerMap[4],
-      align: 'right',
-      headerAlign: 'left',
-      type: 'number',
-      format: '{0:n2}',
-      editable: false,
-    },
+      ...[4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3].map((i) => ({
+        field: [
+          'April',
 
-    {
-      field: 'May',
-      title: headerMap[5],
-      type: 'number',
-      format: '{0:n2}',
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'June',
-      title: headerMap[6],
-      type: 'number',
-      format: '{0:n2}',
+          'May',
+          'June',
 
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'July',
-      title: headerMap[7],
+          'July',
+
+          'Aug',
+
+          'Sep',
+
+          'Oct',
+
+
+          'Nov',
+
+          'Dec',
+
+          'Jan',
+          'Feb',
+
+          'Mar',
+        ][i - 1],
+        title: headerMap[i],
       type: 'number',
       format: '{0:n2}',
 
-      editable: false,
       align: 'right',
       headerAlign: 'left',
-    },
-    {
-      field: 'Aug',
-      title: headerMap[8],
-      type: 'number',
-      format: '{0:n2}',
+      })),
+      { field: 'isEditable', title: 'isEditable', hidden: true },
+    ],
+    [headerMap],
 
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'Sep',
-      title: headerMap[9],
-      type: 'number',
-      format: '{0:n2}',
+  )
 
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'Oct',
-      title: headerMap[10],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-
-    {
-      field: 'Nov',
-      title: headerMap[11],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'Dec',
-      title: headerMap[12],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'Jan',
-      title: headerMap[1],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'Feb',
-      title: headerMap[2],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'Mar',
-      title: headerMap[3],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'isEditable',
-      title: 'isEditable',
-      hidden: true,
-    },
-  ]
-  const basecols = lowerVertName == 'cracker' ? crackercolumns : productionColumns
+  const basecols = useMemo(
+    () => (dataConfig.isCracker ? crackercolumns : productionColumns),
+    [dataConfig.isCracker, productionColumns],
+  )
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
@@ -290,13 +186,15 @@ const MaintenanceTable = () => {
       editButton: false,
       showUnit: false,
       saveWithRemark: false,
-      saveBtn: false,
+      saveBtn: dataConfig.isCracker,
       isOldYear: isOldYear,
-      allAction: false,
+      allAction: dataConfig.isCracker,
     }
   }
 
-  const adjustedPermissions = getAdjustedPermissions(
+  const adjustedPermissions = useMemo(
+    () =>
+      getAdjustedPermissions(
     {
       showAction: false,
       addButton: false,
@@ -304,18 +202,20 @@ const MaintenanceTable = () => {
       editButton: false,
       showUnit: false,
       saveWithRemark: false,
-      saveBtn: false,
+          saveBtn: dataConfig.isCracker,
       showRefresh: false,
-      allAction: false,
+          allAction: dataConfig.isCracker,
     },
-    isOldYear,
+        oldYear?.oldYear,
+      ),
+    [dataConfig.isCracker, oldYear],
   )
 
   return (
     <div>
       <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading}
+        open={loading}
+        sx={{ color: '#fff', zIndex: (t) => t.zIndex.drawer + 1 }}
       >
         <CircularProgress color='inherit' />
       </Backdrop>
@@ -323,16 +223,16 @@ const MaintenanceTable = () => {
         columns={basecols}
         rows={rows}
         setRows={setRows}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        handleCalculate={handleCalculate}
-        setDeleteId={setDeleteId}
         fetchData={fetchData}
-        setOpen1={setOpen1}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
+        handleCalculate={handleCalculate}
         deleteId={deleteId}
+        setDeleteId={setDeleteId}
         open1={open1}
+        setOpen1={setOpen1}
+        snackbarOpen={snackbarOpen}
+        setSnackbarOpen={setSnackbarOpen}
+        snackbarData={snackbarData}
+        setSnackbarData={setSnackbarData}
         permissions={adjustedPermissions}
       />
     </div>
@@ -340,3 +240,7 @@ const MaintenanceTable = () => {
 }
 
 export default MaintenanceTable
+// import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+// import Backdrop from '@mui/material/Backdrop'
+// import CircularProgress from '@mui/material/CircularProgress'
+// import KendoDataTables from './index'

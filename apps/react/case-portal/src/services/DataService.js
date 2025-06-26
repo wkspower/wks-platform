@@ -1554,7 +1554,7 @@ async function getCatalystSelectivityDataConstants(keycloak) {
   }
 }
 
-async function getConfigurationTabsMatrix(keycloak) {
+async function getConfigurationTabsMatrix(keycloak, type) {
   let plantId = ''
   let siteID =
     JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
@@ -1566,7 +1566,7 @@ async function getConfigurationTabsMatrix(keycloak) {
     plantId = parsedPlant.id
   }
 
-  const url = `${Config.CaseEngineUrl}/task/access/matrix?plantId=${plantId}&siteId=${siteID}&verticalId=${verticalId}`
+  const url = `${Config.CaseEngineUrl}/task/access/matrix?plantId=${plantId}&siteId=${siteID}&verticalId=${verticalId}&type=${type}`
 
   const headers = {
     Accept: 'application/json',
@@ -2317,7 +2317,7 @@ async function saveSpyroOutput(payload, keycloak) {
     return await Promise.reject(e)
   }
 }
-async function getSpyroOutputData(keycloak, mode) {
+async function getSpyroOutputData(keycloak, mode, type) {
   const year = localStorage.getItem('year')
   let plantId = ''
   const storedPlant = localStorage.getItem('selectedPlant')
@@ -2325,7 +2325,7 @@ async function getSpyroOutputData(keycloak, mode) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  const url = `${Config.CaseEngineUrl}/task/spyro-output?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&Mode=${encodeURIComponent(mode)}`
+  const url = `${Config.CaseEngineUrl}/task/spyro-output?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&Mode=${encodeURIComponent(mode)}&type=${type}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

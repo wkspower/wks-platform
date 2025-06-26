@@ -104,6 +104,14 @@ const planCracker = {
               icon: icons.IconFilter,
               breadcrumbs: true,
             },
+            {
+              id: 'maintenance-details',
+              title: i18n.t('menu.maintenanceDetails'),
+              type: 'item',
+              url: '/production-norms-plan/maintenance-details',
+              icon: icons.IconCalendarCog,
+              breadcrumbs: true,
+            },
           ],
         },
 

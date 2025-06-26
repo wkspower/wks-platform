@@ -115,6 +115,11 @@
     "type": "number",
     "width": 120,
     "hidden":false
+  },
+  {
+    "field": "remark",
+    "title": "Remark",
+    "widthT": 150
   }
   
 ]
