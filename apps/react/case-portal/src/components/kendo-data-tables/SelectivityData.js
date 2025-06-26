@@ -16,6 +16,8 @@ import {
 } from '../../../node_modules/@mui/material/index'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import KendoDataTables from './index'
+import KendoDataTablesReports from './index-reports'
+import KendoDataTablesReciepe from './index-reports-receipe'
 
 const SelectivityData = (props) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -489,6 +491,53 @@ const SelectivityData = (props) => {
       // fetchData()
       setLoading(false)
     }
+  }
+
+  if (props?.configType == 'grades') {
+    return (
+      <div>
+        <Box>
+          <Backdrop
+            sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={!!loading}
+          >
+            <CircularProgress color='inherit' />
+          </Backdrop>
+          <KendoDataTablesReciepe
+            handleRemarkCellClick={handleRemarkCellClick}
+            NormParameterIdCell={NormParameterIdCell}
+            modifiedCells={modifiedCells}
+            setModifiedCells={setModifiedCells}
+            columns={productionColumns}
+            rows={props?.rows}
+            setRows={props?.setRows}
+            title='Configuration'
+            summaryEdited={props?.summaryEdited}
+            // isCellEditable={isCellEditable}
+            // paginationOptions={[100, 200, 300]}
+            saveChanges={saveChanges}
+            snackbarData={snackbarData}
+            snackbarOpen={snackbarOpen}
+            apiRef={apiRef}
+            setDeleteId={setDeleteId}
+            setOpen1={setOpen1}
+            setSnackbarOpen={setSnackbarOpen}
+            setSnackbarData={setSnackbarData}
+            deleteId={deleteId}
+            open1={open1}
+            remarkDialogOpen={remarkDialogOpen}
+            setRemarkDialogOpen={setRemarkDialogOpen}
+            currentRemark={currentRemark}
+            setCurrentRemark={setCurrentRemark}
+            currentRowId={currentRowId}
+            permissions={adjustedPermissions}
+            groupBy={props?.groupBy}
+            handleExcelUpload={handleExcelUpload}
+            downloadExcelForConfiguration={downloadExcelForConfiguration}
+          />
+        </Box>
+      </div>
+    )
   }
 
   return (

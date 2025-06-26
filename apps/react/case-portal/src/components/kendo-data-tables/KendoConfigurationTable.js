@@ -14,6 +14,11 @@ import {
   Backdrop,
   Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   TextField,
   Typography,
 } from '../../../node_modules/@mui/material/index'
@@ -90,6 +95,21 @@ const ConfigurationTable = () => {
   const [configurationExecutionDetails, setConfigurationExecutionDetails] =
     useState([])
   const [isEdited, setIsEdited] = useState(false)
+
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false)
+
+  const handleOpenDialog = () => {
+    setOpenConfirmDialog(true)
+  }
+
+  const handleCloseDialog = () => {
+    setOpenConfirmDialog(false)
+  }
+
+  const handleConfirmLoad = () => {
+    setOpenConfirmDialog(false)
+    onLoad() // call your actual load function here
+  }
 
   const fetchData = async () => {
     // setRows([])
@@ -254,10 +274,7 @@ const ConfigurationTable = () => {
   const getConfigurationTabsMatrix = async () => {
     setLoading(true)
     try {
-      var response = await DataService.getConfigurationTabsMatrix(
-        keycloak,
-        // 'null',
-      )
+      var response = await DataService.getConfigurationTabsMatrix(keycloak)
       if (response?.code == 200) {
         const parsedData = JSON.parse(response?.data)
 
@@ -295,15 +312,15 @@ const ConfigurationTable = () => {
 
   useEffect(() => {
     getConfigurationExecutionDetails()
-    getConfigurationAvailableTabs()
     getAopSummary()
-
-    if (lowerVertName === 'pe') {
-      getConfigurationTabsMatrix()
-      getConfigurationAvailableTabs()
-      fetchGradeData()
-    }
-
+    setTimeout(() => {
+      if (lowerVertName != 'cracker' || lowerVertName != 'meg') {
+        getConfigurationTabsMatrix()
+        // getConfigurationAvailableTabs()
+        getConfigurationAvailableTabs()
+        fetchGradeData()
+      }
+    }, 500)
     const today = new Date()
 
     const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
@@ -659,7 +676,8 @@ const ConfigurationTable = () => {
                   {/* Load Button */}
                   <Button
                     variant='contained'
-                    onClick={onLoad}
+                    // onClick={onLoad}
+                    onClick={handleOpenDialog}
                     className='btn-load'
                     // disabled={!isLoadEnabled}
                     sx={{ alignSelf: 'flex-end' }}
@@ -812,6 +830,26 @@ const ConfigurationTable = () => {
           severity={snackbarData?.severity || 'info'}
           onClose={() => setSnackbarOpen(false)}
         />
+
+        <Dialog
+          open={openConfirmDialog}
+          onClose={handleCloseDialog}
+          aria-labelledby='alert-dialog-title'
+          aria-describedby='alert-dialog-description'
+        >
+          <DialogTitle id='alert-dialog-title'>{'Load?'}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id='alert-dialog-description'>
+              Are you sure you want to load the data?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog}>Cancel</Button>
+            <Button onClick={handleConfirmLoad} autoFocus>
+              Load
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     )
   }
@@ -886,7 +924,8 @@ const ConfigurationTable = () => {
                 {/* Load Button */}
                 <Button
                   variant='contained'
-                  onClick={onLoad}
+                  // onClick={onLoad}
+                  onClick={handleOpenDialog}
                   className='btn-load'
                   // disabled={startDate > endDate}
                   sx={{ alignSelf: 'flex-end' }}
@@ -968,6 +1007,26 @@ const ConfigurationTable = () => {
         severity={snackbarData?.severity || 'info'}
         onClose={() => setSnackbarOpen(false)}
       />
+
+      <Dialog
+        open={openConfirmDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      >
+        <DialogTitle id='alert-dialog-title'>{'Load?'}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>
+            Are you sure you want to load the data?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleConfirmLoad} autoFocus>
+            Load
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <div
         style={{
