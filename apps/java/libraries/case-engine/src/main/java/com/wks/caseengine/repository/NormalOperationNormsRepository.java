@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.entity.MCUNormsValue;
-import com.wks.caseengine.entity.NormsTransactions;
+
 
 @Repository
 public interface NormalOperationNormsRepository extends JpaRepository<MCUNormsValue, UUID> {

@@ -9,14 +9,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.MaintenanceDetailsDTO;
+import com.wks.caseengine.entity.DecokePlanning;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.DecokePlanningRepository;
 import com.wks.caseengine.repository.MaintenanceCalculatedDataRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
@@ -25,18 +30,20 @@ import com.wks.caseengine.repository.VerticalsRepository;
 @Service
 public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculatedDataService {
 
-
 	@Autowired
 	private PlantsRepository plantsRepository;
-	
+
 	@Autowired
 	private SiteRepository siteRepository;
-	
+
 	@Autowired
-	private  VerticalsRepository verticalRepository;
-	
+	private VerticalsRepository verticalRepository;
+
 	@PersistenceContext
 	private EntityManager entityManager;
+
+	@Autowired
+	private DecokePlanningRepository decokePlanningRepository;
 
 	@Override
 	public List<MaintenanceDetailsDTO> getMaintenanceCalculatedData(String plantId, String year) {
@@ -44,7 +51,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			String storedProcedure = vertical.getName() + "_"+site.getName()+"_GETMaintenance";
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GETMaintenance";
 			List<Object[]> list = executeDynamicStoredProcedure(storedProcedure, plantId, site.getId().toString(),
 					vertical.getId().toString(), year);
 			List<MaintenanceDetailsDTO> maintenanceDetailsDTOList = new ArrayList<>();
@@ -97,36 +104,35 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	@Override
 	public AOPMessageVM getMaintenanceDataForCracker(String plantId, String year) {
-		
+
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		
 		List<Map<String, Object>> data = new ArrayList<>();
 		try {
 			List<Object[]> results = getData(plantId, year);
-			
+
 			for (Object[] row : results) {
 				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
 
-					map.put("id", row[0]);
-					map.put("monthName", row[1]);
-					map.put("ibr", row[2]);
-					map.put("mnt", row[3]);
-					map.put("shutdown", row[4]);
-					map.put("sad", row[5]);
-					map.put("bud", row[6]);
-					map.put("demoHHS", row[7]);
-					map.put("demoBBU", row[8]);
-					map.put("demoSAD", row[9]);
-					map.put("4FD", row[10]);
-					map.put("4F", row[11]);
-					map.put("5F", row[12]);
-					map.put("total", row[13]);
-					map.put("4FHours", row[14]);
-					map.put("aopYear", row[15]);
-					map.put("plantId", row[16]);
-					data.add(map); // Add the map to the list here
-
-							
+				map.put("id", row[0]);
+				map.put("monthName", row[1]);
+				map.put("ibr", row[2]);
+				map.put("mnt", row[3]);
+				map.put("shutdown", row[4]);
+				map.put("sad", row[5]);
+				map.put("bud", row[6]);
+				map.put("demoHHS", row[7]);
+				map.put("demoBBU", row[8]);
+				map.put("demoSAD", row[9]);
+				map.put("fourFD", row[10]);
+				map.put("fourF", row[11]);
+				map.put("fourF", row[12]);
+				map.put("total", row[13]);
+				map.put("fourFHours", row[14]);
+				map.put("aopYear", row[15]);
+				map.put("plantId", row[16]);
+				map.put("remarks", row[17]);
+				   
+				data.add(map); // Add the map to the list here
 			}
 
 			aopMessageVM.setCode(200);
@@ -141,28 +147,67 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		}
 
 	}
-	
+
 	public List<Object[]> getData(String plantId, String aopYear) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			String storedProcedure = vertical.getName() + "_"+site.getName()+"_DecokingPlanning";
-			
-			String sql = "EXEC " + storedProcedure +
-					" @plantId = :plantId, @aopYear = :aopYear";
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_DecokingPlanning";
+
+			String sql = "EXEC " + storedProcedure + " @plantId = :plantId, @aopYear = :aopYear";
 
 			Query query = entityManager.createNativeQuery(sql);
 
 			query.setParameter("plantId", plantId);
 			query.setParameter("aopYear", aopYear);
-			
+
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format ", e);
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
+	}
+
+	@Override
+	public AOPMessageVM updateMaintenanceDataForCracker(String plantId, String year,
+			List<DecokePlanningDTO> decokePlanningDTOList) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<DecokePlanning> decokePlanningList = new ArrayList<>();
+		try {
+			for (DecokePlanningDTO decokePlanningDTO : decokePlanningDTOList) {
+				Optional<DecokePlanning> decokePlanningop = decokePlanningRepository
+						.findById(decokePlanningDTO.getId());
+				if (decokePlanningop.isPresent()) {
+					DecokePlanning decokePlanning = decokePlanningop.get();
+					decokePlanning.setBud(decokePlanningDTO.getBud());
+					decokePlanning.setDemoBBU(decokePlanningDTO.getDemoBBU());
+					decokePlanning.setDemoHSS(decokePlanningDTO.getDemoHSS());
+					decokePlanning.setDemoSAD(decokePlanningDTO.getDemoSAD());
+					decokePlanning.setFiveF(decokePlanningDTO.getFiveF());
+					decokePlanning.setFourF(decokePlanningDTO.getFourF());
+					decokePlanning.setFourFD(decokePlanningDTO.getFourFD());
+					decokePlanning.setFourFHours(decokePlanningDTO.getFourFHours());
+					decokePlanning.setIbr(decokePlanningDTO.getIbr());
+					decokePlanning.setMnt(decokePlanningDTO.getMnt());
+					decokePlanning.setMonthName(decokePlanningDTO.getMonthName());
+					decokePlanning.setShutdown(decokePlanningDTO.getShutdown());
+					decokePlanning.setSad(decokePlanningDTO.getSad());
+					decokePlanning.setRemarks(decokePlanningDTO.getRemarks());
+					decokePlanningList.add(decokePlanningRepository.save(decokePlanning));
+				}
+			}
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to update data", ex);
+		}
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Data updated successfully");
+		aopMessageVM.setData(decokePlanningList);
+		return aopMessageVM;
+
 	}
 
 }

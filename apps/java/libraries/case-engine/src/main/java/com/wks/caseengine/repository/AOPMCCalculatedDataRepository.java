@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.wks.caseengine.entity.AOPMCCalculatedData;
-import com.wks.caseengine.entity.BusinessDemand;
+
 
 @Repository
 public interface AOPMCCalculatedDataRepository extends JpaRepository<AOPMCCalculatedData, UUID>{

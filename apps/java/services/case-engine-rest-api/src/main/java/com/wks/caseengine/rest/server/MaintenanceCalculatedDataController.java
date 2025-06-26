@@ -4,11 +4,13 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.MaintenanceCalculatedDataDTO;
 import com.wks.caseengine.dto.MaintenanceDetailsDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
@@ -29,5 +31,10 @@ public class MaintenanceCalculatedDataController {
 	@GetMapping(value="/maintenance")
 	public AOPMessageVM getMaintenanceDataForCracker(@RequestParam String plantId, @RequestParam String year){
 		return maintenanceCalculatedDataService.getMaintenanceDataForCracker(plantId,year);		
+	}
+	
+	@PostMapping(value="/maintenance")
+	public AOPMessageVM updateMaintenanceDataForCracker(@RequestParam String plantId, @RequestParam String year,@RequestBody List<DecokePlanningDTO> decokePlanningDTOList){
+		return maintenanceCalculatedDataService.updateMaintenanceDataForCracker(plantId,year,decokePlanningDTOList);		
 	}
 }
