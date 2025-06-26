@@ -644,12 +644,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 			String steamLatentName = "";
 
-			// --D3BFDDCC-0AAF-4A57-A304-38034D7A5900 - DMD - HP.Latent.Heat
-			// --C5102765-E0A1-4CC6-B7A0-4F937B91EB6D - NMD - MP.Latent.Heat
-			// --AACDBE12-C5F6-4B79-9C88-751169815B42 - HMD - HP.Latent.Heat
-			// --338E602D-BBF9-4278-A45A-EF6BCAEE63D8 - VMD - N/A
-
-			if (site.getName().equalsIgnoreCase("HMD") || site.getName().equalsIgnoreCase("DMD")) {
+			if (site.getName().equalsIgnoreCase("HMD")) {
 				steamLatentName = "HP.Latent.Heat";
 			} else if ((site.getName().equalsIgnoreCase("NMD"))) {
 				steamLatentName = "MP.Latent.Heat";

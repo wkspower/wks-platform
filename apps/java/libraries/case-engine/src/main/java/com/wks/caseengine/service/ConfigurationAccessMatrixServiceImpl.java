@@ -22,7 +22,7 @@ public class ConfigurationAccessMatrixServiceImpl implements ConfigurationAccess
 			UUID plant = UUID.fromString(plantId);
 			UUID site = UUID.fromString(siteId);
 			UUID vertical = UUID.fromString(verticalId);
-			System.out.println("type"+type);
+
 			String configurationTabsStr = configurationAccessMatrixRepository
 			        .findConfigurationTabsByVerticalSitePlant(vertical, site, plant,type)
 			        .orElse("[]"); // Default to empty JSON array string if not found

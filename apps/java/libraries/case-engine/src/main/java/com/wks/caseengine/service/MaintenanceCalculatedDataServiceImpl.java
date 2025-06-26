@@ -130,7 +130,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 				map.put("fourFHours", row[14]);
 				map.put("aopYear", row[15]);
 				map.put("plantId", row[16]);
-				map.put("remarks", row[17]);
+				String remarks = row[17] == null ? " " : row[17].toString();
+				map.put("remarks", remarks);
 				   
 				data.add(map); // Add the map to the list here
 			}
