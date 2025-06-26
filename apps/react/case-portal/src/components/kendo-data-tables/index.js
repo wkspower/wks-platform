@@ -402,11 +402,16 @@ const KendoDataTables = ({
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
         }}
-        onClick={() => {
-          onRemarkClick(dataItem)
-          setEdit({})
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          //Uncomment the line below if single click functionality needed
+          // onRemarkClick(dataItem)
+          // setEdit({})
         }}
-        onDoubleClick={() => {
+        onDoubleClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
           onRemarkClick(dataItem)
           setEdit({})
         }}

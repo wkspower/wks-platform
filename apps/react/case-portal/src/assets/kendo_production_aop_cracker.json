@@ -1,5 +1,5 @@
 [
-  { "field": "idFromApi", "title": "ID" },
+  { "field": "idFromApi", "title": "ID", "hidden": true },
   {
     "field": "aopCaseId",
     "title": "Case ID",
@@ -121,13 +121,20 @@
   {
     "field": "averageTPH",
     "title": "Total",
-    "editable": false
+    "editable": false,
+    "hidden": true
   },
 
   {
     "field": "isEditable",
-    "title": "isEditable"
+    "title": "isEditable",
+    "hidden": true
   },
 
-  { "field": "aopStatus", "title": "aopStatus", "editable": false }
+  {
+    "field": "aopStatus",
+    "title": "aopStatus",
+    "editable": false,
+    "hidden": true
+  }
 ]

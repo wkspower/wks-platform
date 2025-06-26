@@ -2808,7 +2808,7 @@ async function getAOPData(keycloak, type) {
     return await Promise.reject(e)
   }
 }
-async function getSpyroInputData(keycloak, mode) {
+async function getSpyroInputData(keycloak, mode, type) {
   const year = localStorage.getItem('year')
   let plantId = ''
   const storedPlant = localStorage.getItem('selectedPlant')
@@ -2817,7 +2817,7 @@ async function getSpyroInputData(keycloak, mode) {
     plantId = parsedPlant.id
   }
 
-  const url = `${Config.CaseEngineUrl}/task/spyro-input?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&Mode=${encodeURIComponent(mode)}`
+  const url = `${Config.CaseEngineUrl}/task/spyro-input?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&Mode=${encodeURIComponent(mode)}&type=${type}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
