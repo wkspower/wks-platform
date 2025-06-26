@@ -31,7 +31,7 @@ public class DecokePlanning {
     @Column(name = "MNT")
     private Integer mnt;
 
-    @Column(name = "Shutdown")
+    @Column(name = "ShutdownName")
     private Integer shutdown;
 
     @Column(name = "SAD")
