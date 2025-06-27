@@ -18,5 +18,6 @@ public interface NormalOperationNormsService {
 	 public byte[] createExcel(String year, UUID plantFKId,boolean isAfterSave,List<MCUNormsValueDTO> dtoList);
     public byte[] importExcel(String year, UUID fromString, MultipartFile file);
 	// public int getCalculatedNormalOpsNorms( String year, String plantId);
+    public AOPMessageVM getNormalOperationNormsGradesData(String year, String plantId);
 
 }

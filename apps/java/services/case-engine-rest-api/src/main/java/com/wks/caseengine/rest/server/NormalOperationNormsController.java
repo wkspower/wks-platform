@@ -32,6 +32,9 @@ public class NormalOperationNormsController {
 	public AOPMessageVM getNormalOperationNormsData(@RequestParam String year,@RequestParam String plantId){
 		return	normalOperationNormsService.getNormalOperationNormsData(year, plantId);
 	}
+
+
+
 	
 	@GetMapping(value="/calculate-normal-ops-norms")
 	public AOPMessageVM calculateNormalOpsNorms(@RequestParam String aopYear,@RequestParam String plantId,@RequestParam String siteId,@RequestParam String verticalId){
@@ -104,5 +107,11 @@ public class NormalOperationNormsController {
 
 	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
 	}
+
 	
+
+	@GetMapping(value="/normal-operation-norms-grades")
+	public AOPMessageVM getNormalOperationNormsGradesData(@RequestParam String year,@RequestParam String plantId){
+		return	normalOperationNormsService.getNormalOperationNormsGradesData(year, plantId);
+	}
 }
