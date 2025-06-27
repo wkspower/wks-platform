@@ -210,38 +210,33 @@ const MaintenanceTable = () => {
     fetchData()
   }, [fetchData, sitePlantChange, oldYear, yearChanged])
 
+  const monthNames = [
+    'April',
+    'May',
+    'June',
+    'July',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+  ]
+
   const productionColumns = useMemo(
     () => [
-      {
-        field: 'Name',
-        title: 'Description',
-        align: 'left',
-        headerAlign: 'left',
-        width: 220,
-      },
-      // ...build month cols via headerMap in a loop to avoid copy/paste
-      ...[4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3].map((i) => ({
-        field: [
-          'April',
-          'May',
-          'June',
-          'July',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-          'Jan',
-          'Feb',
-          'Mar',
-        ][i - 1],
-        title: headerMap[i],
+      { field: 'Name', title: 'Description', width: 220, align: 'left' },
+      ...monthNames.map((name, idx) => ({
+        field: name,
+        title: headerMap[4 + idx], // 4 + 0 = April, 4 + 1 = May, …
         type: 'number',
         format: '{0:n2}',
         align: 'right',
         headerAlign: 'left',
       })),
-      { field: 'isEditable', title: 'isEditable', hidden: true },
+      { field: 'isEditable', hidden: true },
     ],
     [headerMap],
   )

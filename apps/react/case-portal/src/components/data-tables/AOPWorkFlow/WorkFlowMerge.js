@@ -330,7 +330,10 @@ const WorkFlowMerge = () => {
         ...(i === 0 && {
           renderHeader: (p) => <div>{p.colDef.headerName}</div>,
         }),
-        ...(numericKeys.includes(key) && { align: 'right' }),
+        ...(numericKeys.includes(key) && {
+          align: 'right',
+          format: '{0:#.#####}',
+        }),
       }
     })
 
