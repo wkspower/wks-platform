@@ -1,4 +1,3 @@
-import { filterBy, process } from '@progress/kendo-data-query'
 import '@progress/kendo-font-icons/dist/index.css'
 import {
   Grid,
@@ -7,11 +6,9 @@ import {
   isColumnMenuSortActive,
 } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
-import { ColumnMenu } from 'components/@extended/columnMenu'
 import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports/ColumnMenu1'
 import Notification from 'components/Utilities/Notification'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { truncateRemarks } from 'utils/remarksUtils'
+import { useCallback, useState } from 'react'
 import {
   Backdrop,
   Box,
@@ -34,7 +31,6 @@ import '../../kendo-data-grid.css'
 // import { TextCellEditor } from './Utilities-Kendo/TextCellEditor'
 import { NoSpinnerNumericEditor } from './Utilities-Kendo/numbericColumns'
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
-import DateTimePickerEditor from './Utilities-Kendo/DatePickeronSelectedYr'
 import {
   DurationDisplayWithTooltipCell,
   DurationEditor,
@@ -101,7 +97,7 @@ const KendoDataTablesReports = ({
   setRows,
   columns,
   loading = false,
-  typeRank = {},
+  // typeRank = {},
   permissions = {},
   setSnackbarOpen = () => {},
   snackbarData = { message: '', severity: 'info' },
@@ -110,31 +106,31 @@ const KendoDataTablesReports = ({
   currentRemark = '',
   setCurrentRemark = () => {},
   currentRowId = null,
-  NormParameterIdCell = () => {},
+  // NormParameterIdCell = () => {},
   setModifiedCells = () => {},
   remarkDialogOpen = false,
-  handleDeleteSelected = () => {},
+  // handleDeleteSelected = () => {},
   saveChanges = () => {},
   fetchData = () => {},
   deleteRowData = () => {},
-  handleAddPlantSite = () => {},
+  // handleAddPlantSite = () => {},
   handleCalculate = () => {},
   handleUnitChange = () => {},
   handleRemarkCellClick = () => {},
-  selectedUsers = [],
-  groupBy = null,
-  allProducts = [],
-  selectMode,
-  setSelectMode = () => {},
+  // selectedUsers = [],
+  // groupBy = null,
+  // allProducts = [],
+  // selectMode,
+  // setSelectMode = () => {},
   handleExport = () => {},
 }) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
-  const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
-  const [group, setGroup] = useState([])
-  const [expandedState, setExpandedState] = useState({})
-  const [selectedUnit, setSelectedUnit] = useState()
+  // const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
+  // const [group, setGroup] = useState([])
+  // const [expandedState, setExpandedState] = useState({})
+  // const [selectedUnit, setSelectedUnit] = useState()
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
@@ -321,38 +317,40 @@ const KendoDataTablesReports = ({
   // console.log('22', e.dataItem.isEditable)
   // console.log('Rendering with title:', title, 'type:', typeof title)
 
-  // const RemarkCell = (props) => {
-  //   const { dataItem, field, onRemarkClick, ...tdProps } = props
+  const RemarkCell = (props) => {
+    const { dataItem, field, onRemarkClick, ...tdProps } = props
 
-  //   const rawValue = dataItem[field]
+    const rawValue = dataItem[field]
     // const displayText = truncateRemarks(rawValue)
-  //   const displayText = String(rawValue ?? '')
+    const displayText = String(rawValue ?? '')
 
     // const editable = Boolean(dataItem.isEditable)
 
-  //   return (
-  //     <td
-  //       {...tdProps}
-  //       style={{
-  //         cursor: 'pointer',
-  //         color: rawValue ? 'inherit' : 'gray',
-  //         overflow: 'hidden',
-  //         textOverflow: 'ellipsis',
-  //         whiteSpace: 'nowrap',
-  //       }}
-  //       onClick={() => {
-          // onRemarkClick(dataItem)
-          // setEdit({})
-  //       }}
-  //       onDoubleClick={() => {
-  //         onRemarkClick(dataItem)
-  //         setEdit({})
-  //       }}
-  //     >
-  //       {displayText || 'Click to add remark'}
-  //     </td>
-  //   )
-  // }
+    return (
+      <td
+        {...tdProps}
+        style={{
+          cursor: 'pointer',
+          color: rawValue ? 'inherit' : 'gray',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+        onDoubleClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          onRemarkClick(dataItem)
+          setEdit?.({})
+        }}
+      >
+        {displayText || 'Click to add remark'}
+      </td>
+    )
+  }
 
   // useEffect(() => {
   //   if (Array.isArray(rows) && rows.length > 0 && groupBy) {
@@ -470,10 +468,9 @@ const KendoDataTablesReports = ({
             editor={true}
             editable={{ mode: 'popup' }}
             cells={{
-              data: (cellProps, allRedCell) => (
+              data: (cellProps) => (
                 <RemarkCell
                   {...cellProps}
-                  allRedCell={allRedCell} // pass your extra flag
                   onRemarkClick={handleRemarkCellClick}
                 />
               ),
@@ -526,7 +523,26 @@ const KendoDataTablesReports = ({
           />
         )
       }
-
+      if (col.type === 'number') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            className={'k-number-right-disabled'}
+            editable={col?.editable ? true : false}
+            headerClassName={isActive ? 'active-column' : ''}
+            cells={{
+              edit: { text: NoSpinnerNumericEditor },
+              data: toolTipRenderer,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            filter='numeric'
+            format={col.format}
+          />
+        )
+      }
       return (
         <GridColumn
           key={col.field}
@@ -824,7 +840,9 @@ const KendoDataTablesReports = ({
         <DialogActions>
           <Button onClick={() => setRemarkDialogOpen(false)}>Cancel</Button>
           {/* <Button onClick={handleCloseRemark}>Cancel</Button> */}
-          <Button onClick={handleRemarkSave} disabled={!currentRemark?.trim()}>
+          <Button
+            onClick={handleRemarkSave}
+          >
             Add
           </Button>
         </DialogActions>

@@ -308,64 +308,71 @@ const WorkFlowMerge = () => {
   }
   // const screens = useScreens()
   // console.log(screens)
-  // generate columns including remark column
-  const generateColumns = (data, numericKeys) => {
+  function getNumericKeysInAllRows(rows) {
+    if (!Array.isArray(rows) || rows.length === 0) return []
+    return Object.keys(rows[0]).filter((key) =>
+      rows.every((row) => row[key] === '' || !isNaN(Number(row[key]))),
+    )
+  }
+  const generateColumns = (data, numericKeys, handleRemarkCellClick) => {
     const cols = data.headers.map((header, i) => {
-      const key = data.keys[i]
+      const field = data.keys[i]
+      const isNumeric = numericKeys.includes(field)
       return {
-        field: key,
+        field,
         headerName: header,
         // minWidth: i === 0 ? 300 : 150,
         flex: 1,
         ...(i === 0 && {
           renderHeader: (p) => <div>{p.colDef.headerName}</div>,
         }),
-        ...(numericKeys.includes(key) && { align: 'right' }),
+        ...(isNumeric && {
+          type: 'number',
+          valueFormatter: ({ value }) =>
+            value === '' || value == null ? '' : Number(value).toFixed(2),
+        }),
       }
     })
 
-    const remarkIdx = cols.findIndex((col) => col.field === 'remark')
-    if (remarkIdx !== -1) cols[remarkIdx] = remarkColumn(handleRemarkCellClick)
+    const remarkIdx = cols.findIndex((c) => c.field === 'remark')
+    if (remarkIdx > -1) {
+      cols[remarkIdx] = remarkColumn(handleRemarkCellClick)
+
+    }
 
     return cols
-  }
-
-  function getNumericKeysInAllRows(data) {
-    if (!Array.isArray(data) || data.length === 0) return []
-
-    const keys = Object.keys(data[0])
-
-    return keys.filter((key) =>
-      data.every((row) => {
-        const value = row[key]
         // The column is considered numeric if:
         // - It's a valid number (including empty values)
-        return value === '' || !isNaN(Number(value))
-      }),
-    )
   }
 
   const fetchData = async () => {
+    setLoading(true)
     try {
-      const data = await DataService.getWorkflowData(keycloak, plantId)
-      const numericKeys = getNumericKeysInAllRows(data?.results)
-      let formatted = data.results.map((row, idx) => {
-        const out = { id: idx }
-        Object.entries(row).forEach(([k, v]) => {
-          out[k] = !isNaN(v) && v !== '' ? Number(v).toFixed(2) : v
-        })
-        return out
-      })
+      const { headers, keys, results } = await DataService.getWorkflowData(
+        keycloak,
+        plantId,
+      )
+      const numericKeys = getNumericKeysInAllRows(results)
+      const formatted = results.map((row, idx) => ({
+        id: idx,
+        ...row,
+        ...Object.fromEntries(
+          Object.entries(row).map(([k, v]) => [
+            k,
+            numericKeys.includes(k) && v !== '' ? Number(v) : v,
+          ]),
+        ),
 
-      formatted = formatted.map((item) => ({
-        ...item,
       }))
 
       setRows(formatted)
-      setColumns(generateColumns(data, numericKeys)) // pass numericKeys
+      setColumns(
+        generateColumns({ headers, keys }, numericKeys, handleRemarkCellClick),
+      )
     } catch (err) {
       console.error('Error fetching grid', err)
       setRows([])
+      setColumns([])
     } finally {
       setLoading(false)
     }

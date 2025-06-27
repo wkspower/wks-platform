@@ -8,13 +8,13 @@ import { useSession } from 'SessionStoreContext'
 import {
   // Backdrop,
   Box,
-  Typography,
+  // Typography,
   // CircularProgress,
 } from '../../../node_modules/@mui/material/index'
 import { remarkColumn } from 'components/Utilities/remarkColumn'
-import ReportDataGrid from './ReportDataGrid'
+// import ReportDataGrid from './ReportDataGrid'
 import Notification from 'components/Utilities/Notification'
-import KendoDataTables from 'components/kendo-data-tables/index'
+// import KendoDataTables from 'components/kendo-data-tables/index'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 
 const ProductionAopView = ({
@@ -36,10 +36,7 @@ const ProductionAopView = ({
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const unsavedChangesRef = React.useRef({
-    unsavedRows: {},
-    rowsBeforeChange: {},
-  })
+
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -65,38 +62,10 @@ const ProductionAopView = ({
       }),
     )
   }
-  const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    const rowId = newRow.id
-    const updatedFields = []
-    for (const key in newRow) {
-      if (
-        Object.prototype.hasOwnProperty.call(newRow, key) &&
-        newRow[key] !== oldRow[key]
-      ) {
-        updatedFields.push(key)
-      }
-    }
 
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-    }
 
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === newRow.id ? { ...newRow, isNew: false } : row,
-      ),
-    )
-    if (updatedFields.length > 0) {
-      setModifiedCells((prevModifiedCells) => ({
-        ...prevModifiedCells,
-        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-      }))
-    }
 
-    return newRow
-  }, [])
-  const handleRemarkCellClick = async (row) => {
+  const handleRemarkCellClick = (row) => {
     // do not delete commented code
     // try {
     //   const cases = await DataService.getCaseId(keycloak)
@@ -145,7 +114,10 @@ const ProductionAopView = ({
             ...(idx === 0 && {
               renderHeader: (params) => <div>{params.colDef.headerName}</div>,
             }),
-            ...(numericKeys.includes(key) && { align: 'right' }),
+            ...(numericKeys.includes(key) && {
+              align: 'right',
+              type: 'number',
+            }),
           }
         })
 
@@ -222,11 +194,8 @@ const ProductionAopView = ({
         saveChanges={saveChanges}
         treeData
         getTreeDataPath={(rows) => rows.path}
-        defaultGroupingExpansionDepth={1}
-        disableSelectionOnClick
-        processRowUpdate={processRowUpdate}
         remarkDialogOpen={remarkDialogOpen}
-        unsavedChangesRef={unsavedChangesRef}
+        setModifiedCells={setModifiedCells}
         setRemarkDialogOpen={setRemarkDialogOpen}
         currentRemark={currentRemark}
         setCurrentRemark={setCurrentRemark}
@@ -234,6 +203,7 @@ const ProductionAopView = ({
         setCurrentRowId={setCurrentRowId}
         modifiedCells={modifiedCells}
         enableSaveAddBtn={enableSaveAddBtn}
+        setEnableSaveAddBtn={setEnableSaveAddBtn}
         handleCalculate={handlecalcualteWithRefreshAll}
         handleRemarkCellClick={handleRemarkCellClick}
         handleExport={handleExport}
