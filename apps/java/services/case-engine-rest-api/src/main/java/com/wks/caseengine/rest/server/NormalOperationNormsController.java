@@ -29,8 +29,8 @@ public class NormalOperationNormsController {
 	private NormalOperationNormsService normalOperationNormsService;
 	
 	@GetMapping(value="/normalOperationNorms")
-	public AOPMessageVM getNormalOperationNormsData(@RequestParam String year,@RequestParam String plantId){
-		return	normalOperationNormsService.getNormalOperationNormsData(year, plantId);
+	public AOPMessageVM getNormalOperationNormsData(@RequestParam String year,@RequestParam String plantId,@RequestParam(required = false) String gradeFkId){
+		return	normalOperationNormsService.getNormalOperationNormsData(year, plantId,gradeFkId);
 	}
 
 
@@ -67,11 +67,12 @@ public class NormalOperationNormsController {
 	@GetMapping(value = "/norms-export-excel")
 	public ResponseEntity<byte[]> exportPlantProductionPlanReport(
 	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year
+            @RequestParam("year") String year,
+			@RequestParam(required = false) String gradeFkId
 	        ) {
 	    try {
 			
-	        byte[] excelBytes = normalOperationNormsService.createExcel(year,UUID.fromString(plantId),false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        byte[] excelBytes = normalOperationNormsService.createExcel(year,UUID.fromString(plantId),false,null, gradeFkId); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
@@ -93,9 +94,10 @@ public class NormalOperationNormsController {
 	public ResponseEntity<byte[]> importExcel(
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,
+			@RequestParam(required = false) String gradeFkId,
 			@RequestParam("file") MultipartFile file
 	        ) {
-			byte[] excelBytes =	 normalOperationNormsService.importExcel(year,UUID.fromString(plantId), file); 
+			byte[] excelBytes =	 normalOperationNormsService.importExcel(year,UUID.fromString(plantId), file, gradeFkId); 
 			
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(

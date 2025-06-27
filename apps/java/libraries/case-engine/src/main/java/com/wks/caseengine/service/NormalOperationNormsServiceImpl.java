@@ -1,18 +1,10 @@
 package com.wks.caseengine.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+
 import java.util.stream.Collectors;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -90,10 +82,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	@Override
-	public AOPMessageVM getNormalOperationNormsData(String year, String plantId) {
+	public AOPMessageVM getNormalOperationNormsData(String year, String plantId, String gradeFkId) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			List<Object[]> obj = getNormalOperationNormsDataFromView(year, UUID.fromString(plantId),false);
+			List<Object[]> obj = getNormalOperationNormsDataFromView(year, UUID.fromString(plantId),false, gradeFkId);
 			List<MCUNormsValueDTO> mCUNormsValueDTOList = new ArrayList<>();
 
 			for (Object[] row : obj) {
@@ -129,6 +121,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValueDTO.setUOM(row[26] != null ? row[26].toString() : null);
 				mCUNormsValueDTO.setIsEditable(row[27] != null ? Boolean.valueOf(row[27].toString()) : null);
 				mCUNormsValueDTO.setProductName(row[28] != null ? row[28].toString() : null);
+				mCUNormsValueDTO.setGradeFkId(row[29] != null ? row[29].toString() : null);
 				mCUNormsValueDTOList.add(mCUNormsValueDTO);
 			}
 			Map<String, Object> map = new HashMap<>();
@@ -350,7 +343,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	@Transactional
-	public List<Object[]> getNormalOperationNormsDataFromView(String financialYear, UUID plantId, boolean isGrades) {
+	public List<Object[]> getNormalOperationNormsDataFromView(String financialYear, UUID plantId, boolean isGrades, String gradeFkId) {
 		try {
 			Plants plant = plantsRepository.findById(plantId).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
@@ -358,11 +351,42 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			String sql = "";
 			if(isGrades){
 				 viewName = "vwScrn" + vertical.getName() + "NormalOperationNorms";
-				sql = "SELECT * FROM " + viewName
-					+ " WHERE FinancialYear = :financialYear AND Plant_FK_Id = :plantId";
+				sql = "SELECT [Id]\r\n" + //
+										"      ,[Site_FK_Id]\r\n" + //
+										"      ,[Plant_FK_Id]\r\n" + //
+										"      ,[Vertical_FK_Id]\r\n" + //
+										
+										"      ,[Material_FK_Id]\r\n" + //
+										"      ,[April]\r\n" + //
+										"      ,[May]\r\n" + //
+										"      ,[June]\r\n" + //
+										"      ,[July]\r\n" + //
+										"      ,[August]\r\n" + //
+										"      ,[September]\r\n" + //
+										"      ,[October]\r\n" + //
+										"      ,[November]\r\n" + //
+										"      ,[December]\r\n" + //
+										"      ,[January]\r\n" + //
+										"      ,[February]\r\n" + //
+										"      ,[March]\r\n" + //
+										"      ,[FinancialYear]\r\n" + //
+										"      ,[Remarks]\r\n" + //
+										"      ,[CreatedOn]\r\n" + //
+										"      ,[ModifiedOn]\r\n" + //
+										"      ,[MCUVersion]\r\n" + //
+										"      ,[UpdatedBy]\r\n" + //
+										"      ,[NormParameterTypeId]\r\n" + //
+										"      ,[NormParameterTypeName]\r\n" + //
+										"      ,[NormParameterTypeDisplayName]\r\n" + //
+										"      ,[UOM]\r\n" + //
+										"      ,[IsEditable]\r\n" + //
+										"      ,[DisplayName] " +
+										"      ,[Grade_FK_Id]\r\n" + 
+										" FROM " + viewName
+					+ " WHERE FinancialYear = :financialYear AND Plant_FK_Id = :plantId and (:gradeFkId IS NULL OR Grade_FK_Id = :gradeFkId)";
 			}else{
 			
-				viewName = "vwScrn" + vertical.getName() + "NormalOperationNormsGrade";
+				viewName = "vwScrn" + vertical.getName() + "NormalOperationNorms";
 		 		sql = "SELECT DISTINCT v.Grade_FK_Id,n.Name,n.DisplayName from " + viewName
 					+ " JOIN NormParameters n ON v.Grade_FK_Id = n.Id " + 
 												" WHERE v.Grade_FK_Id IS NOT NULL and FinancialYear = :financialYear AND Plant_FK_Id = :plantId";
@@ -377,6 +401,8 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("financialYear", financialYear);
 			query.setParameter("plantId", plantId);
+			query.setParameter("gradeFkId", gradeFkId);
+			
 
 			return query.getResultList(); // You can cast this to a DTO later
 		} catch (IllegalArgumentException e) {
@@ -442,12 +468,12 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	@Override
-	public byte[] importExcel(String year, UUID plantFKId, MultipartFile file) {
+	public byte[] importExcel(String year, UUID plantFKId, MultipartFile file, String gradeFkId) {
 		// TODO Auto-generated method stub
 		try {
 			List<MCUNormsValueDTO> data = readConfigurations(file.getInputStream(), plantFKId, year);
 			List<MCUNormsValueDTO> savedData = saveNormalOperationNormsData(data, plantFKId, year);
-			return createExcel(year, plantFKId, true, savedData);
+			return createExcel(year, plantFKId, true, savedData,gradeFkId);
 			// return ResponseEntity.ok(data);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -570,9 +596,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		}
 	}
 
-	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<MCUNormsValueDTO> dtoList) {
+	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<MCUNormsValueDTO> dtoList, String gradeFkId) {
 		try {
-			AOPMessageVM aopMessageVM = getNormalOperationNormsData(year, plantFKId.toString());
+			AOPMessageVM aopMessageVM = getNormalOperationNormsData(year, plantFKId.toString(), gradeFkId);
 
 			if (!isAfterSave) {
 				Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
@@ -787,7 +813,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	public AOPMessageVM getNormalOperationNormsGradesData(String year, String plantId) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			List<Object[]> obj = getNormalOperationNormsDataFromView(year, UUID.fromString(plantId),true);
+			List<Object[]> obj = getNormalOperationNormsDataFromView(year, UUID.fromString(plantId),true, null);
 			List<MCUNormsValueDTO> mCUNormsValueDTOList = new ArrayList<>();
 
 			for (Object[] row : obj) {
