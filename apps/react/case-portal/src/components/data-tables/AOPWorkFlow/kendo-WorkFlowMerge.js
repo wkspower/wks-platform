@@ -328,8 +328,9 @@ const WorkFlowMerge = () => {
         }),
         ...(isNumeric && {
           type: 'number',
-          valueFormatter: ({ value }) =>
-            value === '' || value == null ? '' : Number(value).toFixed(2),
+          format: '{0:#.#####}',
+          // valueFormatter: ({ value }) =>
+          //   value === '' || value == null ? '' : Number(value).toFixed(2),
         }),
       }
     })

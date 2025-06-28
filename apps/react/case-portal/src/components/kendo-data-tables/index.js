@@ -90,6 +90,20 @@ export const dateFields = [
   'fromDate',
   'toDate',
 ]
+export const monthNames = [
+  'April',
+  'May',
+  'June',
+  'July',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+  'Jan',
+  'Feb',
+  'Mar',
+]
 export const hiddenFields = []
 export const monthMap = {
   january: 1,
@@ -831,6 +845,28 @@ const KendoDataTables = ({
                     cells={{
                       data: (cellProps) => (
                         <ProductCell {...cellProps} allProducts={allProducts} />
+                      ),
+                    }}
+                    columnMenu={ColumnMenuCheckboxFilter}
+                  />
+                )
+              }
+              if (col?.field === 'MonthNameDropdown') {
+                return (
+                  <GridColumn
+                    key='MonthNameDropdown'
+                    field='MonthNameDropdown'
+                    title={col.title || col.headerName || 'MonthNameDropdown'}
+                    editable={col.editable || true}
+                    hidden={col.hidden}
+                    cells={{
+                      data: (cellProps) => (
+                        <ProductCell
+                          {...cellProps}
+                          allProducts={
+                            allProducts
+                          }
+                        />
                       ),
                     }}
                     columnMenu={ColumnMenuCheckboxFilter}

@@ -1,309 +1,207 @@
-import React, { useState, useCallback, useEffect } from 'react'
-import { Box, Tab, Tabs } from '@mui/material'
+// DecokingConfig.jsx (refactored to mirror CrackerConfig patterns)
+import React, { useState, useCallback, useEffect, useMemo } from 'react'
+import {
+  Box,
+  Tab,
+  Tabs,
+  Backdrop,
+  CircularProgress,
+  Typography,
+} from '@mui/material'
 import KendoDataTables from './index.js'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
+
+// ─── Column Definitions ─────────────────────────────────────────────────────
+import {
+  ibrGridOne,
+  ibrPlanColumns,
+  ibrGridThree,
+  runningDurationColumns,
+} from './columnDefs'
+
+// ─── Sample Data ─────────────────────────────────────────────────────────────
+import {
+  ibrGridOneRowsSample,
+  ibrPlanRowsSample,
+  ibrGridThreeRowsSample,
+  runningDurationRowsSample,
+} from './rowSamples'
+
 const DecokingConfig = () => {
-  const tabs = ['IBR Plan', 'Shutdown Activities', 'Running Duration']
+  const keycloak = useSession()
+  const tabs = ['IBR Plan', 'Running Duration']
 
-  const [activeTabIndex, setActiveTabIndex] = useState(0)
-  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
-  const [currentRemark, setCurrentRemark] = useState('')
-  const [currentRowId, setCurrentRowId] = useState(null)
-  const handleRemarkCellClick = (row) => {
-    // if (!row?.isEditable) return
-
-    setCurrentRemark(row.remark || '')
-    setCurrentRowId(row.id)
-    setRemarkDialogOpen(true)
-  }
-  const [remarkDialogOpen2, setRemarkDialogOpen2] = useState(false)
-  const [currentRemark2, setCurrentRemark2] = useState('')
-  const [currentRowId2, setCurrentRowId2] = useState(null)
-  const handleRemarkCellClick2 = (row) => {
-    // if (!row?.isEditable) return
-    // console.log(row)
-    setCurrentRemark2(row.remarks || '')
-    setCurrentRowId2(row.id)
-    setRemarkDialogOpen2(true)
-  }
-  const [data, setData] = useState({
-    ibrPlan: [],
-    shutdownActivities: [],
-    runningDuration: [],
+  // ─── Global UI State ──────────────────────────────────────────────────────
+  const [loading, setLoading] = useState(false)
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
   })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
 
-  // IBR Plan data
-  const ibrPlanColumns = [
-    { field: 'furnace', title: 'Furnace', editable: false, width: 200 },
-    { field: 'ibrPlan', title: 'IBR Plan', editable: true, width: 200 },
-    {
-      field: 'aprMarDays',
-      title: 'Apr-Mar Days',
-      editable: true,
-      width: 200,
-      type: 'number',
-    },
-    {
-      field: 'startDateIBR',
-      title: 'Start Date of IBR',
-      editable: true,
-      width: 200,
-    },
-    {
-      field: 'endDateIBR',
-      title: 'End Date of IBR',
-      editable: true,
-      width: 200,
-    },
-    {
-      field: 'startDateSD',
-      title: 'Start Date of SD',
-      editable: true,
-      width: 200,
-    },
-    { field: 'endDateSD', title: 'End Date of SD', editable: true, width: 200 },
-    {
-      field: 'startDateTA',
-      title: 'Start date TA',
-      editable: true,
-      width: 200,
-    },
-    { field: 'endDateTA', title: 'End date TA', editable: true, width: 200 },
-    { field: 'remarks', title: 'Remarks', editable: true, width: 250 },
-  ]
+  // ─── Dynamic Tab Index ────────────────────────────────────────────────────
+  const [activeTabIndex, setActiveTabIndex] = useState(0)
 
-  const shutdownColumns = [
-    { field: 'month', title: 'Month', editable: false },
-    { field: 'date', title: 'Date', editable: false },
-    { field: 'h10', title: 'H10', editable: true, type: 'number' },
-    { field: 'h11', title: 'H11', editable: true },
-    { field: 'h12', title: 'H12', editable: true, type: 'number' },
-    { field: 'h13', title: 'H13', editable: true, type: 'number' },
-    { field: 'h14', title: 'H14', editable: true, type: 'number' },
-    { field: 'demo', title: 'Demo', editable: true },
-    { field: 'remarks', title: 'Remarks', editable: true },
-  ]
-
-  const runningDurationColumns = [
-    { field: 'month', title: 'Month', editable: false },
-    { field: 'ibr', title: 'IBR', editable: true, type: 'number' },
-    { field: 'mnt', title: 'MNT', editable: true, type: 'number' },
-    {
-      field: 'shutdown',
-      title: 'Shutdown',
-      editable: true,
-      width: 120,
-      type: 'number',
-    },
-    {
-      field: 'slowdown',
-      title: 'Slowdown',
-      editable: true,
-      width: 120,
-      type: 'number',
-    },
-    { field: 'sad', title: 'SAD', editable: true, type: 'number' },
-    { field: 'buD', title: 'BUD', editable: true, type: 'number' },
-    { field: 'fourF', title: '4F', editable: true, type: 'number' },
-    { field: 'fiveF', title: '5F', editable: true, type: 'number' },
-    { field: 'fourFD', title: '4FD', editable: true, type: 'number' },
-    { field: 'total', title: 'Total', editable: false, type: 'number' },
-  ]
-
-const [ibrPlanRows, setIbrPlanRows] = useState([])
-const [shutdownActivities, setshutdownActivities] = useState([])
-const [runningDuration, setRunningDurationRows] = useState([])
-
-  const fetchData = useCallback((tabName) => {
-    setTimeout(() => {
-      switch (tabName) {
-        case 'IBR Plan':
-          setData((prev) => ({ ...prev, ibrPlan: ibrPlanData }))
-          break
-        case 'Shutdown Activities':
-          setData((prev) => ({
-            ...prev,
-            shutdownActivities: shutdownActivitiesData,
-          }))
-          break
-        case 'Running Duration':
-          setData((prev) => ({ ...prev, runningDuration: runningDurationData }))
-          break
-        default:
-          break
-      }
-    }, 300)
+  // ─── Remark Dialog (generic) ───────────────────────────────────────────────
+  const [remarkDialog, setRemarkDialog] = useState({
+    open: false,
+    rowId: null,
+    remark: '',
+  })
+  const handleRemarkCellClick = useCallback((row) => {
+    setRemarkDialog({
+      open: true,
+      rowId: row.id,
+      remark: row.remarks || row.Remarks || '',
+    })
   }, [])
 
+  // ─── Rows State Per Tab ────────────────────────────────────────────────────
+  const [ibrScreen1Rows, setIbrScreen1Rows] = useState([])
+  const [ibrScreen2Rows, setIbrScreen2Rows] = useState([])
+  const [ibrScreen3Rows, setIbrScreen3Rows] = useState([])
+  const [runningDurationRows, setRunningDurationRows] = useState([])
+  const modifiedCells = useState({})[0] // you can replace with useState if needed
 
-
-const keycloak = useSession();
-
-useEffect(() => {
-  const currentTab = tabs[activeTabIndex]
-
-  const fetchData = async () => {
-    try {
-      if (currentTab === 'IBR Plan') {
-        const ibrData = await DataService.getIbrPlanData(keycloak);
-        setIbrPlanRows(ibrData);
-      } else if (currentTab === 'Shutdown Activities') {
-        const shutdownData = await DataService.getShutdownActivitiesData(keycloak);
-        setshutdownActivities(shutdownData);
-      } else if (currentTab === 'Running Duration') {
-        const runningData = await DataService.getRunningDurationData(keycloak);
-        setRunningDurationRows(runningData);
+  // ─── Get/Set Rows by Tab ───────────────────────────────────────────────────
+  const getRows = useCallback(
+    (tab) => {
+      if (tab === 'IBR Plan') {
+        return { 1: ibrScreen1Rows, 2: ibrScreen2Rows, 3: ibrScreen3Rows }
       }
-    } catch (error) {
-      console.error('Error fetching decoking config data:', error);
-    }
-  };
-
-  fetchData();
-}, [activeTabIndex, keycloak]);
-
-  const renderIBRPlanTable = () => (
-    <Box>
-      <KendoDataTables
-        title='IBR Plan (Screen-3)'
-        columns={ibrPlanColumns}
-        rows={ibrPlanRows}
-        setRows={setIbrPlanRows}
-        handleRemarkCellClick={handleRemarkCellClick}
-        //NormParameterIdCell={NormParameterIdCell}
-        //modifiedCells={modifiedCells}
-        //setModifiedCells={setModifiedCells}
-        //isCellEditable={isCellEditable}
-        paginationOptions={[100, 200, 300]}
-        //saveChanges={saveChanges}
-        //snackbarData={snackbarData}
-        //snackbarOpen={snackbarOpen}
-        //apiRef={apiRef}
-        //setDeleteId={setDeleteId}
-        //setOpen1={setOpen1}
-        //setSnackbarOpen={setSnackbarOpen}
-        //setSnackbarData={setSnackbarData}
-        //deleteId={deleteId}
-        //open1={open1}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        //unsavedChangesRef={unsavedChangesRef}
-        //permissions={adjustedPermissions}
-      />
-    </Box>
+      if (tab === 'Running Duration') {
+        return runningDurationRows
+      }
+      return []
+    },
+    [ibrScreen1Rows, ibrScreen2Rows, ibrScreen3Rows, runningDurationRows],
   )
 
-  const renderShutdownActivitiesTable = () => (
-    <Box>
-      <KendoDataTables
-        title='Shutdown Activities (Screen-4)'
-        columns={shutdownColumns}
-        rows={shutdownActivities}
-        setRows={setshutdownActivities}
-        handleRemarkCellClick={handleRemarkCellClick2}
-        //NormParameterIdCell={NormParameterIdCell}
-        //modifiedCells={modifiedCells}
-        //setModifiedCells={setModifiedCells}
-        //isCellEditable={isCellEditable}
-        paginationOptions={[100, 200, 300]}
-        //saveChanges={saveChanges}
-        //snackbarData={snackbarData}
-        //snackbarOpen={snackbarOpen}
-        //apiRef={apiRef}
-        //setDeleteId={setDeleteId}
-        //setOpen1={setOpen1}
-        //setSnackbarOpen={setSnackbarOpen}
-        //setSnackbarData={setSnackbarData}
-        //deleteId={deleteId}
-        //open1={open1}
-        remarkDialogOpen={remarkDialogOpen2}
-        setRemarkDialogOpen={setRemarkDialogOpen2}
-        currentRemark={currentRemark2}
-        setCurrentRemark={setCurrentRemark2}
-        currentRowId={currentRowId2}
-        //unsavedChangesRef={unsavedChangesRef}
-        //permissions={adjustedPermissions}
-      />
-    </Box>
+  const setRowsForTab = useCallback((tab, data, screen = 1) => {
+    if (tab === 'IBR Plan') {
+      if (screen === 1) setIbrScreen1Rows(data)
+      if (screen === 2) setIbrScreen2Rows(data)
+      if (screen === 3) setIbrScreen3Rows(data)
+    } else if (tab === 'Running Duration') {
+      setRunningDurationRows(data)
+    }
+  }, [])
+
+  // ─── Fetch Data ────────────────────────────────────────────────────────────
+  const fetchData = useCallback(async () => {
+    const currentTab = tabs[activeTabIndex]
+    setLoading(true)
+    try {
+      if (currentTab === 'IBR Plan') {
+        // screen 1
+        // const data1 = await DataService.getIbrScreen1(keycloak)
+        setRowsForTab(currentTab, ibrGridOneRowsSample, 1)
+        // screen 2
+        // const data2 = await DataService.getIbrScreen2(keycloak)
+        setRowsForTab(currentTab, ibrPlanRowsSample, 2)
+        // screen 3
+        // const data3 = await DataService.getIbrScreen3(keycloak)
+        setRowsForTab(currentTab, ibrGridThreeRowsSample, 3)
+      } else if (currentTab === 'Running Duration') {
+        // const rd = await DataService.getRunningDuration(keycloak)
+        setRowsForTab(currentTab, runningDurationRowsSample)
+      }
+    } catch (err) {
+      console.error('Error loading data:', err)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: 'Failed to load data', severity: 'error' })
+    } finally {
+      setLoading(false)
+    }
+  }, [activeTabIndex, keycloak, setRowsForTab])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  // ─── Renderers ─────────────────────────────────────────────────────────────
+  const renderIbrPlanTables = () => (
+    <>
+      {[1, 2, 3].map((screen) => (
+        <Box key={screen} sx={{ mt: 2 }}>
+          <Typography variant='h6'>IBR Plan (Screen-{screen})</Typography>
+          <KendoDataTables
+            columns={
+              screen === 1
+                ? ibrGridOne
+                : screen === 2
+                  ? ibrPlanColumns
+                  : ibrGridThree
+            }
+            rows={getRows('IBR Plan')[screen]}
+            setRows={(data) => setRowsForTab('IBR Plan', data, screen)}
+            fetchData={fetchData}
+            handleRemarkCellClick={handleRemarkCellClick}
+            remarkDialogOpen={remarkDialog.open}
+            setRemarkDialogOpen={(open) =>
+              setRemarkDialog((v) => ({ ...v, open }))
+            }
+            currentRemark={remarkDialog.remark}
+            setCurrentRemark={(r) =>
+              setRemarkDialog((v) => ({ ...v, remark: r }))
+            }
+            currentRowId={remarkDialog.rowId}
+            snackbarData={snackbarData}
+            snackbarOpen={snackbarOpen}
+            setSnackbarOpen={setSnackbarOpen}
+            setSnackbarData={setSnackbarData}
+            modifiedCells={modifiedCells}
+            setModifiedCells={(m) => {
+              /* implement setter */
+            }}
+          />
+        </Box>
+      ))}
+    </>
   )
 
   const renderRunningDurationTable = () => (
-    <Box>
+    <Box sx={{ mt: 2 }}>
+      <Typography variant='h6'>Running Duration</Typography>
       <KendoDataTables
-        title='Running Duration (Maintenance Details) - (Screen-5)'
         columns={runningDurationColumns}
-        rows={runningDuration}
+        rows={runningDurationRows}
         setRows={setRunningDurationRows}
-        // handleRemarkCellClick={handleRemarkCellClick}
-        //NormParameterIdCell={NormParameterIdCell}
-        //modifiedCells={modifiedCells}
-        //setModifiedCells={setModifiedCells}
-        //isCellEditable={isCellEditable}
-        paginationOptions={[100, 200, 300]}
-        //saveChanges={saveChanges}
-        //snackbarData={snackbarData}
-        //snackbarOpen={snackbarOpen}
-        //apiRef={apiRef}
-        //setDeleteId={setDeleteId}
-        //setOpen1={setOpen1}
-        //setSnackbarOpen={setSnackbarOpen}
-        //setSnackbarData={setSnackbarData}
-        //deleteId={deleteId}
-        //open1={open1}
-        //remarkDialogOpen={remarkDialogOpen}
-        //setRemarkDialogOpen={setRemarkDialogOpen}
-        //currentRemark={currentRemark}
-        //setCurrentRemark={setCurrentRemark}
-        //currentRowId={currentRowId}
-        //unsavedChangesRef={unsavedChangesRef}
-        //permissions={adjustedPermissions}
+        fetchData={fetchData}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialog.open}
+        setRemarkDialogOpen={(open) => setRemarkDialog((v) => ({ ...v, open }))}
+        currentRemark={remarkDialog.remark}
+        setCurrentRemark={(r) => setRemarkDialog((v) => ({ ...v, remark: r }))}
+        currentRowId={remarkDialog.rowId}
+        snackbarData={snackbarData}
+        snackbarOpen={snackbarOpen}
+        setSnackbarOpen={setSnackbarOpen}
+        setSnackbarData={setSnackbarData}
+        modifiedCells={modifiedCells}
+        setModifiedCells={(m) => {
+          /* implement setter */
+        }}
       />
     </Box>
   )
 
-  const renderContent = () => {
-    switch (tabs[activeTabIndex]) {
-      case 'IBR Plan':
-        return renderIBRPlanTable()
-      case 'Shutdown Activities':
-        return renderShutdownActivitiesTable()
-      case 'Running Duration':
-        return renderRunningDurationTable()
-      default:
-        return null
-    }
-  }
-
   return (
     <Box>
-      <Tabs
-        value={activeTabIndex}
-        onChange={(e, newIndex) => setActiveTabIndex(newIndex)}
-        sx={{
-          borderBottom: '0px solid #ccc',
-          '.MuiTabs-indicator': { display: 'none' },
-        }}
-        textColor='primary'
-        indicatorColor='primary'
-      >
-        {tabs.map((tabId) => (
-          <Tab
-            key={tabId}
-            label={tabId}
-            sx={{
-              border: '1px solid #ADD8E6',
-              borderBottom: '1px solid #ADD8E6',
-              textTransform: 'capitalize',
-            }}
-          />
+      <Backdrop open={loading} sx={{ color: '#fff', zIndex: 999 }}>
+        <CircularProgress color='inherit' />
+      </Backdrop>
+
+      <Tabs value={activeTabIndex} onChange={(e, i) => setActiveTabIndex(i)}>
+        {tabs.map((tab) => (
+          <Tab key={tab} label={tab} />
         ))}
       </Tabs>
 
-      {renderContent()}
+      {activeTabIndex === 0
+        ? renderIbrPlanTables()
+        : renderRunningDurationTable()}
     </Box>
   )
 }
