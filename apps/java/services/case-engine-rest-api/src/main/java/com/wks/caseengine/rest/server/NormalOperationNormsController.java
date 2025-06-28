@@ -28,9 +28,12 @@ public class NormalOperationNormsController {
 	@Autowired
 	private NormalOperationNormsService normalOperationNormsService;
 	
-	@GetMapping(value="/normalOperationNorms")
-	public AOPMessageVM getNormalOperationNormsData(@RequestParam String year,@RequestParam String plantId){
-		return	normalOperationNormsService.getNormalOperationNormsData(year, plantId);
+	@GetMapping(value = "/normalOperationNorms")
+	public AOPMessageVM getNormalOperationNormsData(
+	        @RequestParam String year,
+	        @RequestParam String plantId,
+	        @RequestParam(required = false) String gradeId) {
+	    return normalOperationNormsService.getNormalOperationNormsData(year, plantId, gradeId);
 	}
 	
 	@GetMapping(value="/normal-operation/norms/grades")

@@ -47,6 +47,7 @@ public class MCUNormsValueDTO {
 	private String productName;
 	private String saveStatus;
 	private String errDescription;
+	private String gradeId;
     //private String normParameterDisplayName;
 }
 
