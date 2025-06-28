@@ -20,7 +20,6 @@ public class MCUNormsValueDTO {
     private String plantFkId;
     private String verticalFkId;
     private String materialFkId;
-    private String gradeFkId;
     private String normParameterTypeFkId;
     private Double april;
     private Double may;
@@ -48,7 +47,6 @@ public class MCUNormsValueDTO {
 	private String productName;
 	private String saveStatus;
 	private String errDescription;
-    private String displayName;
     //private String normParameterDisplayName;
 }
 

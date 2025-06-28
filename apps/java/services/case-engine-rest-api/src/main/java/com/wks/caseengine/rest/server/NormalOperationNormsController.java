@@ -29,12 +29,9 @@ public class NormalOperationNormsController {
 	private NormalOperationNormsService normalOperationNormsService;
 	
 	@GetMapping(value="/normalOperationNorms")
-	public AOPMessageVM getNormalOperationNormsData(@RequestParam String year,@RequestParam String plantId,@RequestParam(required = false) String gradeFkId){
-		return	normalOperationNormsService.getNormalOperationNormsData(year, plantId,gradeFkId);
+	public AOPMessageVM getNormalOperationNormsData(@RequestParam String year,@RequestParam String plantId){
+		return	normalOperationNormsService.getNormalOperationNormsData(year, plantId);
 	}
-
-
-
 	
 	@GetMapping(value="/calculate-normal-ops-norms")
 	public AOPMessageVM calculateNormalOpsNorms(@RequestParam String aopYear,@RequestParam String plantId,@RequestParam String siteId,@RequestParam String verticalId){
@@ -67,12 +64,11 @@ public class NormalOperationNormsController {
 	@GetMapping(value = "/norms-export-excel")
 	public ResponseEntity<byte[]> exportPlantProductionPlanReport(
 	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year,
-			@RequestParam(required = false) String gradeFkId
+            @RequestParam("year") String year
 	        ) {
 	    try {
 			
-	        byte[] excelBytes = normalOperationNormsService.createExcel(year,UUID.fromString(plantId),false,null, gradeFkId); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        byte[] excelBytes = normalOperationNormsService.createExcel(year,UUID.fromString(plantId),false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
@@ -94,10 +90,9 @@ public class NormalOperationNormsController {
 	public ResponseEntity<byte[]> importExcel(
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,
-			@RequestParam(required = false) String gradeFkId,
 			@RequestParam("file") MultipartFile file
 	        ) {
-			byte[] excelBytes =	 normalOperationNormsService.importExcel(year,UUID.fromString(plantId), file, gradeFkId); 
+			byte[] excelBytes =	 normalOperationNormsService.importExcel(year,UUID.fromString(plantId), file); 
 			
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
@@ -109,11 +104,5 @@ public class NormalOperationNormsController {
 
 	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
 	}
-
 	
-
-	@GetMapping(value="/normal-operation-norms-grades")
-	public AOPMessageVM getNormalOperationNormsGradesData(@RequestParam String year,@RequestParam String plantId){
-		return	normalOperationNormsService.getNormalOperationNormsGradesData(year, plantId);
-	}
 }
