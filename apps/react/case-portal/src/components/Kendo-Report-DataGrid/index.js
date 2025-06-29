@@ -12,6 +12,8 @@ import { ColumnMenu } from 'components/data-tables/Reports/columnMenu'
 import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports/ColumnMenu1'
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import DateTimePickerEditor from 'components/kendo-data-tables/Utilities-Kendo/DatePickeronSelectedYr'
+import { DateColumnMenu } from 'components/Utilities/DateColumnMenu'
+import DateOnlyPicker from 'components/kendo-data-tables/Utilities-Kendo/DatePicker'
 
 const KendoDataGrid = ({ rows, columns, onRowChange }) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
@@ -76,7 +78,6 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
           resizable={true}
           defaultSkip={0}
           defaultTake={100}
-          // filterable={columns.some((col) => dateFields.includes(col.field))}
           contextMenu={true}
           pageable={
             rows?.length > 100
@@ -97,6 +98,7 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
               filterType = 'text',
               isRightAlligned,
               hidden,
+              widthT,
             } = col
 
             if (['endDate', 'startDate', 'dateTime'].includes(field)) {
@@ -114,11 +116,15 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
                   }}
                   cell={cell}
                   cells={{
-                    // edit: { date: DateTimePickerEditor },
+                    edit: {
+                      date: ['dateTime', 'dateTime'].includes(col.field)
+                        ? DateOnlyPicker
+                        : DateTimePickerEditor,
+                    },
                     data: toolTipRenderer,
                   }}
+                  editor='date'
                   format='{0:dd-MM-yyyy}'
-                  filterType='date'
                   hidden={hidden}
                   className={
                     isRightAlligned === 'numeric'
@@ -128,7 +134,7 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
                   headerClassName={
                     isColumnActive(field, filter, sort) ? 'active-column' : ''
                   }
-                  columnMenu={ColumnMenuCheckboxFilter}
+                  columnMenu={DateColumnMenu}
                 />
               )
             }
@@ -150,6 +156,7 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
                 headerClassName={
                   isColumnActive(field, filter, sort) ? 'active-column' : ''
                 }
+                width={widthT}
               />
             )
           })}

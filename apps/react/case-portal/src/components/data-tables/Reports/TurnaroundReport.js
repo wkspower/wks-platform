@@ -64,7 +64,7 @@ const TurnaroundReport = () => {
   }
 
   const columns = [
-    { field: 'sno', headerName: 'SL.No', flex: 1 },
+    { field: 'sno', headerName: 'SL.No', flex: 1, widthT: 50 },
     { field: 'activity', headerName: 'Activities', flex: 2 },
     { field: 'fromDate', headerName: 'From', flex: 2 },
     { field: 'toDate', headerName: 'To', flex: 2 },
@@ -107,7 +107,7 @@ const TurnaroundReport = () => {
   ]
 
   const columnsGrid2 = [
-    { field: 'sno', headerName: 'SL.No', flex: 1 },
+    { field: 'sno', headerName: 'SL.No', flex: 1, widthT: 50 },
     { field: 'activity', headerName: 'Activities', flex: 3 },
     { field: 'fromDate', headerName: 'From', flex: 2 },
     { field: 'toDate', headerName: 'To', flex: 2 },

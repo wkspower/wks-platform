@@ -149,6 +149,7 @@ export const DataService = {
   saveCrackerMaintenance,
   // saveConfigurationExcelConstants,
   // getConfigurationExcelConstants,
+  getNormalOperationNormsGrades,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -1384,19 +1385,24 @@ async function getMaintenanceData(keycloak) {
     return await Promise.reject(e)
   }
 }
-async function getNormalOperationNormsData(keycloak) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
+async function getNormalOperationNormsData(keycloak, gradeId) {
+  const year = localStorage.getItem('year') || ''
   const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
+  const plantId = storedPlant ? JSON.parse(storedPlant)?.id || '' : ''
+
+  // Construct URL based on presence of gradeId
+  const baseUrl = `${Config.CaseEngineUrl}/task/normalOperationNorms`
+  const queryParams = new URLSearchParams({
+    year,
+    plantId,
+  })
+
+  if (gradeId) {
+    queryParams.append('gradeId', gradeId)
   }
 
-  // let siteID =
-  //   JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+  const url = `${baseUrl}?${queryParams.toString()}`
 
-  const url = `${Config.CaseEngineUrl}/task/normalOperationNorms?year=${year}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -2351,9 +2357,18 @@ async function saveNormalOperationNormsData(
   plantId,
   turnAroundDetails,
   keycloak,
+  gradeId,
+  lowerVertName,
 ) {
-  var year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/normalOperationNorms?year=${year}&plantId=${plantId}`
+  const year = localStorage.getItem('year')
+  const queryParams = new URLSearchParams({ year, plantId })
+
+  if (lowerVertName === 'pe') {
+    queryParams.append('gradeId', gradeId)
+  }
+
+  const url = `${Config.CaseEngineUrl}/task/normalOperationNorms?${queryParams.toString()}`
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -3439,7 +3454,7 @@ async function getCrackerMaintenanceData(keycloak) {
 async function saveCrackerMaintenance(payload, keycloak) {
   const { plantId, year, decokePlanningDTOList } = payload
   const url = `${Config.CaseEngineUrl}/task/maintenance?plantId=${plantId}&year=${year}`
-  
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -3450,8 +3465,33 @@ async function saveCrackerMaintenance(payload, keycloak) {
     const resp = await fetch(url, {
       method: 'POST',
       headers,
-      body: JSON.stringify(decokePlanningDTOList), 
+      body: JSON.stringify(decokePlanningDTOList),
     })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getNormalOperationNormsGrades(keycloak) {
+  var year = localStorage.getItem('year')
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  const url = `${Config.CaseEngineUrl}/task/normal-operation/norms/grades?year=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
     return json(keycloak, resp)
   } catch (e) {
     console.log(e)

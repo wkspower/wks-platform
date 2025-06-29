@@ -56,6 +56,7 @@ const NormalOpNormsScreen = () => {
   const [allRedCell, setAllRedCell] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const [calculationObject, setCalculationObject] = useState([])
+  const [grades, setGrades] = useState([])
   const [open1, setOpen1] = useState(false)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
@@ -69,12 +70,13 @@ const NormalOpNormsScreen = () => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [gradeId, setGradeId] = useState(null)
   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
     dataGridStore
   const isOldYear = oldYear?.oldYear
 
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   const dispatch = useDispatch()
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
@@ -85,10 +87,15 @@ const NormalOpNormsScreen = () => {
 
   const keycloak = useSession()
 
-  const fetchData = async () => {
+  const fetchData = async (gradeId) => {
+    if (lowerVertName == 'pe' && !gradeId) return
     try {
       setLoading(true)
-      const response = await DataService.getNormalOperationNormsData(keycloak)
+
+      const response = await DataService.getNormalOperationNormsData(
+        keycloak,
+        gradeId,
+      )
 
       if (response?.code !== 200) {
         setRows([])
@@ -121,6 +128,35 @@ const NormalOpNormsScreen = () => {
     }
   }
 
+  const fetchGradeDropdowns = async () => {
+    try {
+      setGrades([])
+      const response = await DataService.getNormalOperationNormsGrades(keycloak)
+
+      if (response?.code == 200) {
+        setGrades(response?.data)
+      }
+
+      // setGrades([
+      //   {
+      //     Grade_FK_Id: '0E39FD68-D4DC-4FA9-A686-6A265BC35580',
+      //     DisplayName: '1020FA20',
+      //   },
+      //   {
+      //     Grade_FK_Id: '6851C7E9-EF06-44E0-AE44-8790FD7B5AF4',
+      //     DisplayName: '1070LA17',
+      //   },
+      //   {
+      //     Grade_FK_Id: 'EA27B6FC-F31F-4381-ABA4-E697F57C46DD',
+      //     DisplayName: '1005FY20',
+      //   },
+      // ])
+    } catch (error) {
+      setGrades([])
+      console.error('Error fetching Business Demand data:', error)
+    }
+  }
+
   const fetchDataIntermediateValues = async () => {
     try {
       const res = await DataService.getIntermediateValues(keycloak)
@@ -137,7 +173,6 @@ const NormalOpNormsScreen = () => {
         setRowsIntermediateValues(formattedData)
       }
     } catch (error) {
-      setLoading(false)
       console.error('Error fetching data:', error)
     }
   }
@@ -161,16 +196,22 @@ const NormalOpNormsScreen = () => {
   }
 
   const fetchAllData = async () => {
+    setLoading(true)
     setRows([])
     setRowsIntermediateValues([])
     setAllRedCell([])
-    setLoading(true)
+
     try {
-      await Promise.all([
-        fetchData(),
-        fetchDataIntermediateValues(),
-        getNormTransactions(),
-      ])
+      const promises = [fetchData(gradeId), getNormTransactions()]
+
+      if (lowerVertName === 'meg') {
+        promises.push(fetchDataIntermediateValues())
+      }
+      if (lowerVertName === 'pe') {
+        promises.push(fetchGradeDropdowns())
+      }
+
+      await Promise.all(promises)
     } catch (error) {
       console.error('Error during data fetching:', error)
     } finally {
@@ -180,7 +221,7 @@ const NormalOpNormsScreen = () => {
 
   useEffect(() => {
     fetchAllData()
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName, gradeId])
 
   const colDefs = [
     {
@@ -568,11 +609,14 @@ const NormalOpNormsScreen = () => {
         unit: row.unit || null,
         normParameterTypeId: row.normParameterTypeId || null,
       }))
+
       if (businessData.length > 0) {
         const response = await DataService.saveNormalOperationNormsData(
           plantId,
           businessData,
           keycloak,
+          gradeId,
+          lowerVertName,
         )
 
         // if (response.status === 200) {
@@ -589,9 +633,9 @@ const NormalOpNormsScreen = () => {
             unsavedRows: {},
             rowsBeforeChange: {},
           }
-          setLoading(false)
-          fetchData()
-          fetchDataIntermediateValues()
+
+          fetchData(gradeId)
+          if (lowerVertName == 'meg') fetchDataIntermediateValues()
           getNormTransactions()
         } else {
           setSnackbarOpen(true)
@@ -599,7 +643,6 @@ const NormalOpNormsScreen = () => {
             message: `Normal Operations Norms not saved!`,
             severity: 'error',
           })
-          setLoading(false)
         }
         return response
       }
@@ -607,7 +650,7 @@ const NormalOpNormsScreen = () => {
       console.error(`Error saving Normal Operations Norms`, error)
     } finally {
       // fetchData()
-      setLoading(false)
+      // setLoading(false)
     }
   }
 
@@ -653,17 +696,17 @@ const NormalOpNormsScreen = () => {
           message: 'Data refreshed successfully!',
           severity: 'success',
         })
-        fetchData()
-        fetchDataIntermediateValues()
+
+        if (lowerVertName == 'pe') fetchGradeDropdowns()
+        fetchData(gradeId)
+        if (lowerVertName == 'meg') fetchDataIntermediateValues()
         getNormTransactions()
-        setLoading(false)
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data Refresh Falied!',
           severity: 'error',
         })
-        setLoading(false)
       }
 
       return data
@@ -673,7 +716,7 @@ const NormalOpNormsScreen = () => {
         message: error.message || 'An error occurred',
         severity: 'error',
       })
-      setLoading(false)
+
       console.error('Error!', error)
     }
   }
@@ -707,8 +750,8 @@ const NormalOpNormsScreen = () => {
       saveWithRemark: true,
       saveBtn: true,
       showCalculate: true,
-      showGrade: lowerVertName === 'pe' ? true : false,
-      grades: ['1005FY20', '1020FA20', '1070LA17'],
+      showG: lowerVertName === 'pe' ? true : false,
+
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,
       downloadExcelBtn: lowerVertName == 'meg' ? true : false,
@@ -818,8 +861,8 @@ const NormalOpNormsScreen = () => {
       setLoading(false)
     }
   }
-  const handleGradeChange = async () => {
-    console.log('grade changed')
+  const handleGradeChange = (gradeId) => {
+    setGradeId(gradeId)
   }
 
   return (
@@ -838,6 +881,7 @@ const NormalOpNormsScreen = () => {
         columns={colDefs}
         setRows={setRows}
         rows={rows}
+        grades={grades}
         onAddRow={(newRow) => console.log('New Row Added:', newRow)}
         onDeleteRow={(id) => console.log('Row Deleted:', id)}
         onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}

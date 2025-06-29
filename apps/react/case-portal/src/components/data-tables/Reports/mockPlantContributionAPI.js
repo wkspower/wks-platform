@@ -33,7 +33,7 @@ export const MockReportService = {
       case 'ProductMixAndProduction':
         return {
           columns: [
-            { field: 'SrNo', headerName: 'SL.No', align: 'right' },
+            { field: 'SrNo', headerName: 'SL.No', align: 'right', widthT: 50 },
             { field: 'ByProductName', headerName: 'Product name', flex: 2 },
             { field: 'Unit', headerName: 'Unit' },
             {
@@ -131,7 +131,13 @@ export const MockReportService = {
       case 'ByProducts':
         return {
           columns: [
-            { field: 'SrNo', headerName: 'SL.No', align: 'right', flex: 0.5 },
+            {
+              field: 'SrNo',
+              headerName: 'SL.No',
+              align: 'right',
+              flex: 0.5,
+              widthT: 50,
+            },
             { field: 'ByProductName', headerName: 'By product name', flex: 2 },
             { field: 'Unit', headerName: 'Unit', flex: 1 },
             {
@@ -292,7 +298,13 @@ export const MockReportService = {
       case 'RawMaterial':
         return {
           columns: [
-            { field: 'SrNo', headerName: 'SL.No', align: 'right', flex: 0.5 },
+            {
+              field: 'SrNo',
+              headerName: '',
+              align: 'right',
+              flex: 0.5,
+              widthT: 50,
+            },
             {
               field: 'ByProductName',
               headerName: 'Raw material name',
@@ -456,7 +468,13 @@ export const MockReportService = {
       case 'CatChem':
         return {
           columns: [
-            { field: 'SrNo', headerName: 'SL.No', align: 'right', flex: 0.5 },
+            {
+              field: 'SrNo',
+              headerName: 'SL.No',
+              align: 'right',
+              flex: 0.5,
+              widthT: 50,
+            },
             { field: 'ByProductName', headerName: 'Catalyst name', flex: 2 },
             { field: 'Unit', headerName: 'Unit', flex: 1 },
             {
@@ -616,7 +634,13 @@ export const MockReportService = {
       case 'Utilities':
         return {
           columns: [
-            { field: 'SrNo', headerName: 'SL.No', align: 'right', flex: 0.5 },
+            {
+              field: 'SrNo',
+              headerName: 'SL.No',
+              align: 'right',
+              flex: 0.5,
+              widthT: 50,
+            },
             { field: 'ByProductName', headerName: 'Utility name', flex: 2 },
             { field: 'Unit', headerName: 'Unit', flex: 1 },
             {
@@ -776,7 +800,7 @@ export const MockReportService = {
       case 'OtherVariableCost':
         return {
           columns: [
-            { field: 'SrNo', headerName: 'SL.No', align: 'right' },
+            { field: 'SrNo', headerName: 'SL.No', align: 'right', widthT: 50 },
             { field: 'OtherCost', headerName: 'Other cost', flex: 2 },
             { field: 'Unit', headerName: 'Unit' },
             {
@@ -815,7 +839,7 @@ export const MockReportService = {
       case 'ProductionCostCalculations':
         return {
           columns: [
-            { field: 'SrNo', headerName: 'SL.No', align: 'right' },
+            { field: 'SrNo', headerName: 'SL.No', align: 'right', widthT: 50 },
             {
               field: 'ProductionCostCalculations',
               headerName: 'Production cost calculations',

@@ -106,7 +106,7 @@ const AnnualProductionPlan = () => {
       field: 'sno',
       headerName: 'SL.No',
       editable: true,
-      minWidth: 20,
+      widthT: 20,
       align: 'right',
     },
     {
@@ -122,7 +122,7 @@ const AnnualProductionPlan = () => {
       field: 'sno',
       headerName: 'SL.No',
       editable: true,
-      minWidth: 50,
+      widthT: 50,
       align: 'right',
     },
     {
@@ -155,7 +155,7 @@ const AnnualProductionPlan = () => {
       field: 'sno',
       headerName: 'SL.No',
       editable: true,
-      minWidth: 50,
+      widthT: 50,
       align: 'right',
     },
     {
@@ -194,7 +194,7 @@ const AnnualProductionPlan = () => {
       field: 'sno',
       headerName: 'SL.No',
       editable: true,
-      minWidth: 50,
+      widthT: 50,
       align: 'right',
     },
     {
@@ -249,7 +249,7 @@ const AnnualProductionPlan = () => {
       field: 'sno',
       headerName: 'SL.No',
       editable: false,
-      minWidth: 50,
+      widthT: 50,
       align: 'right',
     },
     { field: 'Item', headerName: 'Item', editable: false, flex: 1 },

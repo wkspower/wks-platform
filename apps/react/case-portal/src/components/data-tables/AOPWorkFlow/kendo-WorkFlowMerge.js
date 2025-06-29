@@ -75,6 +75,7 @@ const WorkFlowMerge = () => {
   const [rows, setRows] = useState([])
   const [columns, setColumns] = useState([])
   const [loading, setLoading] = useState(false)
+  const [loadingCalculate, setLoadingCalculate] = useState(false)
   const [isCreatingCase, setIsCreatingCase] = useState(false)
   const [showCreateCasebutton, setShowCreateCasebutton] = useState(false)
   // const [isEdit, setIsEdit] = useState(false)
@@ -140,7 +141,8 @@ const WorkFlowMerge = () => {
 
   const handleCalculateMeg = async () => {
     try {
-      setLoading(true)
+      setLoadingCalculate(true)
+      // console.log('true 1')
 
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
@@ -184,6 +186,7 @@ const WorkFlowMerge = () => {
           message: 'Data refreshed successfully!',
           severity: 'success',
         })
+        setLoadingCalculate(false)
         fetchData()
       } else {
         setSnackbarOpen(true)
@@ -200,9 +203,11 @@ const WorkFlowMerge = () => {
         message: error.message || 'An error occurred',
         severity: 'error',
       })
+      setLoadingCalculate(false)
       console.error('Error!', error)
     } finally {
-      setLoading(false)
+      // setLoadingCalculate(false)
+      // console.log('false 1')
     }
   }
 
@@ -328,7 +333,7 @@ const WorkFlowMerge = () => {
         }),
         ...(isNumeric && {
           type: 'number',
-          format: '{0:#.#####}',
+          format: '{0:#.###}',
           // valueFormatter: ({ value }) =>
           //   value === '' || value == null ? '' : Number(value).toFixed(2),
         }),
@@ -347,7 +352,8 @@ const WorkFlowMerge = () => {
   }
 
   const fetchData = async () => {
-    setLoading(true)
+    // setLoading(true)
+    // console.log('true 3')
     try {
       const { headers, keys, results } = await DataService.getWorkflowData(
         keycloak,
@@ -375,7 +381,8 @@ const WorkFlowMerge = () => {
       setRows([])
       setColumns([])
     } finally {
-      setLoading(false)
+      // setLoading(false)
+      // console.log('false 3')
     }
   }
 
@@ -408,7 +415,7 @@ const WorkFlowMerge = () => {
     } catch (err) {
       console.error('Error fetching case', err)
     } finally {
-      setLoading(false)
+      // setLoading(false)
     }
   }
 
@@ -680,7 +687,7 @@ const WorkFlowMerge = () => {
               }
               columns={columns}
               // className='jio-data-grid'
-              loading={loading}
+              loading={loadingCalculate}
               processRowUpdate={processRowUpdate}
               remarkDialogOpen={remarkDialogOpen}
               unsavedChangesRef={unsavedChangesRef}

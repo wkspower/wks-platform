@@ -60,6 +60,7 @@ const MonthwiseProduction = () => {
       field: 'RowNo',
       headerName: 'SL.No',
       editable: false,
+      widthT: 50,
     },
     {
       field: 'Month',

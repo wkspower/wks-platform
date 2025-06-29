@@ -20,6 +20,7 @@ import {
 import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import getKendoNormsHistorianColumns from '../CommonHeader/KendoNormHistoryHeader'
 import { Button } from '../../../../node_modules/@mui/material/index'
+import moment from '../../../../node_modules/moment/moment'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -64,31 +65,67 @@ const NormsHistorianBasis = () => {
 
   const [loading, setLoading] = useState(false)
 
-  const fetchData = async (reportType, setState) => {
-    try {
+  useEffect(() => {
+    const fetchAllData = async () => {
       setLoading(true)
-      var data = []
-      data = await DataService.getNormsHistorianBasis(keycloak, reportType)
 
-      if (data?.code === 200) {
-        const rowsWithId = data?.data?.normHistoricBasisData?.map(
-          (item, index) => ({
+      try {
+        const results = await Promise.all([
+          DataService.getNormsHistorianBasis(keycloak, 'HistorianValues'),
+          DataService.getNormsHistorianBasis(keycloak, 'McuAndNormGrid'),
+          DataService.getNormsHistorianBasis(keycloak, 'ProductionVolumeData'),
+        ])
+
+        const [historianRes, mcuRes, prodRes] = results
+
+        if (historianRes?.code === 200) {
+          const rows = historianRes.data.normHistoricBasisData.map(
+            (item, index) => ({
+              ...item,
+              id: index,
+              isEditable: false,
+              dateTime: item?.dateTime
+                ? moment(item.dateTime, 'DD-MM-YYYY').toDate()
+                : null,
+            }),
+          )
+          setHistorianValues(rows)
+        }
+
+        if (mcuRes?.code === 200) {
+          const rows = mcuRes.data.normHistoricBasisData.map((item, index) => ({
             ...item,
             id: index,
             isEditable: false,
-          }),
-        )
-        setLoading(false)
-        setState(rowsWithId)
-      } else {
-        console.error(`Error fetching ${reportType} data`)
+            dateTime: item?.dateTime
+              ? moment(item.dateTime, 'DD-MM-YYYY').toDate()
+              : null,
+          }))
+          setMcuAndNormGrid(rows)
+        }
+
+        if (prodRes?.code === 200) {
+          const rows = prodRes.data.normHistoricBasisData.map(
+            (item, index) => ({
+              ...item,
+              id: index,
+              isEditable: false,
+              dateTime: item?.dateTime
+                ? moment(item.dateTime, 'DD-MM-YYYY').toDate()
+                : null,
+            }),
+          )
+          setProductionVolumeData(rows)
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      } finally {
         setLoading(false)
       }
-    } catch (error) {
-      console.error(`Error fetching ${reportType} data:`, error)
-      setLoading(false)
     }
-  }
+
+    fetchAllData()
+  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   const year = localStorage.getItem('year')
   const headerMap = generateHeaderNames(year)
@@ -107,12 +144,6 @@ const NormsHistorianBasis = () => {
     headerMap,
     type: 'ProductionVolumeData',
   })
-
-  useEffect(() => {
-    fetchData('HistorianValues', setHistorianValues)
-    fetchData('McuAndNormGrid', setMcuAndNormGrid)
-    fetchData('ProductionVolumeData', setProductionVolumeData)
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   const exportRef1 = useRef(null)
   const exportRef2 = useRef(null)

@@ -3,7 +3,8 @@
     "field": "srNo",
     "headerName": "SL No.",
     "flex": 1,
-    "editable": false
+    "editable": false,
+    "widthT": 50
   },
   {
     "field": "norms",

@@ -21,6 +21,7 @@ import {
   ExcelExportColumn,
 } from '../../../../node_modules/@progress/kendo-react-excel-export/index'
 import { Button } from '../../../../node_modules/@mui/material/index'
+import moment from '../../../../node_modules/moment/moment'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -83,9 +84,16 @@ const ProductionVolumeDataBasis = () => {
           ...item,
           id: index,
           isEditable: false,
-          startDate: item?.startDate ? parseDDMMYYYY(item.startDate) : null,
-          endDate: item?.endDate ? parseDDMMYYYY(item.endDate) : null,
-          dateTime: item?.dateTime ? parseDDMMYYYY(item.dateTime) : null,
+
+          startDate: item?.startDate
+            ? moment(item.startDate, 'DD-MM-YYYY').toDate()
+            : null,
+          dateTime: item?.dateTime
+            ? moment(item.dateTime, 'DD-MM-YYYY').toDate()
+            : null,
+          endDate: item?.endDate
+            ? moment(item.endDate, 'DD-MM-YYYY').toDate()
+            : null,
         }))
         setLoading(false)
         setState(rowsWithId)
@@ -128,6 +136,7 @@ const ProductionVolumeDataBasis = () => {
     fetchData('Calculated Data', setRowsCalculatedData)
     fetchData('RowData', setRowsRowData)
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+
   const exportRef1 = useRef(null)
   const exportRef2 = useRef(null)
   const exportRef3 = useRef(null)
@@ -251,7 +260,7 @@ const ProductionVolumeDataBasis = () => {
               id='meg-grid-header'
             >
               <Typography component='span' className='grid-title'>
-                MC Yearwise
+                MC Yearwise_
               </Typography>
             </CustomAccordionSummary>
             <CustomAccordionDetails>

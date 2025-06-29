@@ -6,6 +6,7 @@ import {
   isColumnMenuSortActive,
 } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
+import { ColumnMenu } from 'components/@extended/columnMenu'
 import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports/ColumnMenu1'
 import Notification from 'components/Utilities/Notification'
 import { useCallback, useState } from 'react'
@@ -31,6 +32,7 @@ import '../../kendo-data-grid.css'
 // import { TextCellEditor } from './Utilities-Kendo/TextCellEditor'
 import { NoSpinnerNumericEditor } from './Utilities-Kendo/numbericColumns'
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
+import DateTimePickerEditor from './Utilities-Kendo/DatePickeronSelectedYr'
 import {
   DurationDisplayWithTooltipCell,
   DurationEditor,
@@ -557,6 +559,7 @@ const KendoDataTablesReports = ({
           className={!isEditable ? 'non-editable-cell' : ''}
           columnMenu={ColumnMenuCheckboxFilter}
           headerClassName={isActive ? 'active-column' : ''}
+          width={col?.widthT}
         />
       )
     })
@@ -840,11 +843,7 @@ const KendoDataTablesReports = ({
         <DialogActions>
           <Button onClick={() => setRemarkDialogOpen(false)}>Cancel</Button>
           {/* <Button onClick={handleCloseRemark}>Cancel</Button> */}
-          <Button
-            onClick={handleRemarkSave}
-          >
-            Add
-          </Button>
+          <Button onClick={handleRemarkSave}>Add</Button>
         </DialogActions>
       </Dialog>
     </div>

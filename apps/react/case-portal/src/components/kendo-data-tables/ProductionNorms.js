@@ -265,7 +265,10 @@ const ProductionNorms = ({ permissions }) => {
       const data = await DataService.handleCalculate(plantId, year, keycloak)
       if (data?.code == 200) {
         fetchData()
-        fetchDataByProducts()
+
+        if (lowerVertName === 'meg') {
+          fetchDataByProducts()
+        }
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data refreshed successfully!',
@@ -482,7 +485,9 @@ const ProductionNorms = ({ permissions }) => {
 
   useEffect(() => {
     fetchData()
-    fetchDataByProducts()
+    if (lowerVertName === 'meg') {
+      fetchDataByProducts()
+    }
   }, [
     sitePlantChange,
     oldYear,

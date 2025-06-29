@@ -66,27 +66,57 @@ const ProductionVolumeDataBasis = () => {
 
   const [loading, setLoading] = useState(false)
 
-  const fetchData = async (reportType, setState) => {
-    try {
+  useEffect(() => {
+    const fetchAll = async () => {
       setLoading(true)
-      var data = []
-      data = await DataService.getProductionVolDataBasis(keycloak, reportType)
+      try {
+        const [mc, mcYearwise, calc, rowData] = await Promise.all([
+          fetchData('MC'),
+          fetchData('MC Yearwise'),
+          fetchData('Calculated Data'),
+          fetchData('RowData'),
+        ])
+
+        setRowsMC(mc)
+        setRowsMCYearWise(mcYearwise)
+        setRowsCalculatedData(calc)
+        setRowsRowData(rowData)
+      } catch (error) {
+        console.error('Error in one or more API calls:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchAll()
+  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+
+  const fetchData = async (reportType) => {
+    try {
+      const data = await DataService.getProductionVolDataBasis(
+        keycloak,
+        reportType,
+      )
 
       if (data?.code === 200) {
-        const rowsWithId = data?.data?.map((item, index) => ({
+        return data.data.map((item, index) => ({
           ...item,
           id: index,
           isEditable: false,
+          endDate: item?.endDate
+            ? moment(item.endDate, 'DD-MM-YYYY').toDate()
+            : null,
+          startDate: item?.startDate
+            ? moment(item.startDate, 'DD-MM-YYYY').toDate()
+            : null,
         }))
-        setLoading(false)
-        setState(rowsWithId)
       } else {
         console.error(`Error fetching ${reportType} data`)
-        setLoading(false)
+        return []
       }
     } catch (error) {
       console.error(`Error fetching ${reportType} data:`, error)
-      setLoading(false)
+      return []
     }
   }
 
@@ -113,12 +143,6 @@ const ProductionVolumeDataBasis = () => {
     type: 'RowData',
   })
 
-  useEffect(() => {
-    fetchData('MC', setRowsMC)
-    fetchData('MC Yearwise', setRowsMCYearWise)
-    fetchData('Calculated Data', setRowsCalculatedData)
-    fetchData('RowData', setRowsRowData)
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
   const exportRef1 = useRef(null)
   const exportRef2 = useRef(null)
   const exportRef3 = useRef(null)

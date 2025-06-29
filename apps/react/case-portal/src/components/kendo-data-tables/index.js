@@ -50,34 +50,8 @@ import * as XLSX from 'xlsx'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 // import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
 import { RemarkCell } from './Utilities-Kendo/RemarkCell'
+import { DateColumnMenu } from 'components/Utilities/DateColumnMenu'
 
-export const particulars = [
-  'normParametersFKId',
-  'NormParameterFKId',
-  'materialFkId',
-  'materialFKId',
-  'normParameterFKId',
-  'NormParametersId',
-]
-export const typeParticulars = [
-  'Particulars',
-  'TypeDisplayName',
-  'ConfigTypeDisplayName',
-]
-
-export const hiddenFields1 = [
-  'id',
-  'plantFkId',
-  'aopCaseId',
-  'aopType',
-  'aopYear',
-  'avgTph',
-  'NormParameterMonthlyTransactionId',
-  'aopStatus',
-  'idFromApi',
-  'isEditable',
-  'period',
-]
 export const dateFields = [
   'maintStartDateTime',
   'maintEndDateTime',
@@ -89,20 +63,6 @@ export const dateFields = [
   'startDateIBR',
   'fromDate',
   'toDate',
-]
-export const monthNames = [
-  'April',
-  'May',
-  'June',
-  'July',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-  'Jan',
-  'Feb',
-  'Mar',
 ]
 export const hiddenFields = []
 export const monthMap = {
@@ -122,7 +82,7 @@ export const monthMap = {
 
 const KendoDataTables = ({
   rows = [],
-
+  grades = [],
   allRedCell = [],
   modifiedCells = [],
   setRows,
@@ -545,6 +505,14 @@ const KendoDataTables = ({
   //   'startDateIBR',
   // ]
 
+  useEffect(() => {
+    if (permissions?.showG && grades?.length > 0 && !selectedGrade) {
+      const firstGrade = grades[0]
+      setSelectedGrade(firstGrade.gradeId)
+      handleGradeChange(firstGrade.gradeId)
+    }
+  }, [grades, permissions?.showG, selectedGrade])
+
   return (
     <div style={{ position: 'relative' }}>
       {loading && (
@@ -574,13 +542,17 @@ const KendoDataTables = ({
                 </Typography>
               )}
 
-              {permissions?.showGrade && (
+              {permissions?.showG && (
                 <TextField
                   select
-                  value={selectedGrade || permissions?.grades?.[0]}
+                  value={selectedGrade || ''}
                   onChange={(e) => {
-                    setSelectedGrade(e.target.value)
-                    handleGradeChange(e.target.value)
+                    const selectedGradeId = e.target.value
+                    const selectedGradeObj = grades.find(
+                      (g) => g.gradeId === selectedGradeId,
+                    )
+                    setSelectedGrade(selectedGradeId)
+                    handleGradeChange(selectedGradeObj?.gradeId)
                   }}
                   sx={{ width: '150px', backgroundColor: '#FFFFFF' }}
                   variant='outlined'
@@ -590,9 +562,9 @@ const KendoDataTables = ({
                     Select Grade
                   </MenuItem>
 
-                  {permissions?.grades.map((unit) => (
-                    <MenuItem key={unit} value={unit}>
-                      {unit}
+                  {grades?.map((unit) => (
+                    <MenuItem key={unit.gradeId} value={unit.gradeId}>
+                      {unit.displayName}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -783,11 +755,12 @@ const KendoDataTables = ({
             defaultSkip={0}
             defaultTake={100}
             contextMenu={true}
+            grade={grades}
             onRowClick={handleRowClick}
             sortable={{
               mode: 'multiple',
             }}
-            filterable={columns.some((col) => dateFields.includes(col.field))}
+            // filterable={columns.some((col) => dateFields.includes(col.field))}
             allRedCell={allRedCell}
             size='small'
             pageable={
@@ -830,6 +803,7 @@ const KendoDataTables = ({
                     }
                     editor='date'
                     hidden={col.hidden}
+                    columnMenu={DateColumnMenu}
                   />
                 )
               }

@@ -65,6 +65,7 @@ const ConfigurationTable = () => {
   const lowerVertName = vertName?.toLowerCase()
   const [tabIndex, setTabIndex] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [loading1, setLoading1] = useState(false)
   const [summaryEdited, setSummaryEdited] = useState(false)
 
   const [startUpRows, setStartUpRows] = useState([])
@@ -82,7 +83,18 @@ const ConfigurationTable = () => {
   const [discontiniousGradeData, setDiscontiniousGradeData] = useState([])
   const [tabs, setTabs] = useState([])
   const [availableTabs, setAvailableTabs] = useState([])
+  // const [summary, setSummary] = useState('')
+
   const [summary, setSummary] = useState('')
+  const [debouncedSummary, setDebouncedSummary] = useState('')
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSummary(summary)
+    }, 300) // adjust debounce delay as needed
+
+    return () => clearTimeout(handler)
+  }, [summary])
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -108,7 +120,7 @@ const ConfigurationTable = () => {
 
   const handleConfirmLoad = () => {
     setOpenConfirmDialog(false)
-    onLoad() // call your actual load function here
+    onLoad()
   }
 
   const fetchData = async () => {
@@ -313,8 +325,10 @@ const ConfigurationTable = () => {
   useEffect(() => {
     getConfigurationExecutionDetails()
     getAopSummary()
+    let vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
+    let verticalName = vertical.toLowerCase()
     setTimeout(() => {
-      if (lowerVertName != 'cracker' || lowerVertName != 'meg') {
+      if (verticalName != 'cracker' && verticalName != 'meg') {
         getConfigurationTabsMatrix()
         // getConfigurationAvailableTabs()
         getConfigurationAvailableTabs()
@@ -391,40 +405,35 @@ const ConfigurationTable = () => {
     }
   }
   const onLoadTest = async (startDateObj, endDateObj) => {
-    setLoading(true)
+    setLoading1(true)
+
+    const plantId =
+      JSON.parse(localStorage.getItem('selectedPlant') || '{}')?.id || ''
+    const auditYear = localStorage.getItem('year')
+
+    const today = new Date()
+    const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
+    const startDate = new Date(today.getFullYear() - 5, today.getMonth(), 1)
+
+    const createPayloadItem = (obj, date) => ({
+      apr: date,
+      UOM: '',
+      auditYear,
+      normParameterFKId: obj?.NormParameter_FK_Id,
+      remarks: 'Initiated',
+      id: obj?.Id || null,
+      plantId,
+    })
+
+    const payload = [
+      createPayloadItem(startDateObj, formatDate(startDate)),
+      createPayloadItem(endDateObj, formatDate(endDate)),
+    ]
+
     try {
-      const plantId =
-        JSON.parse(localStorage.getItem('selectedPlant') || '{}')?.id || ''
-      const auditYear = localStorage.getItem('year')
-
-      const createPayloadItem = (obj, date) => ({
-        apr: date,
-        UOM: '',
-        auditYear,
-        normParameterFKId: obj?.NormParameter_FK_Id,
-        remarks: 'Initiated',
-        id: obj?.Id || null,
-        plantId,
-      })
-
-      const today = new Date() // ? Declare 'today' before using it
-
-      const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
-
-      const startDate = new Date(
-        today.getFullYear() - 5,
-        today.getMonth() - 1 + 1,
-        1,
-      )
-
-      const payload = [
-        createPayloadItem(startDateObj, formatDate(startDate)),
-        createPayloadItem(endDateObj, formatDate(endDate)),
-      ]
-
       const response = await DataService.executeConfiguration(payload, keycloak)
 
-      if (response) {
+      if (response?.code === 200) {
         await getConfigurationExecutionDetails()
       } else {
         setSnackbarOpen(true)
@@ -439,9 +448,16 @@ const ConfigurationTable = () => {
       console.error('Execution Failed!', error)
     } finally {
       setLoading(false)
+      setLoading1(false)
     }
   }
-  const hasExecutedRef = useRef(false) // ? useRef instead of useState
+
+  useEffect(() => {
+    hasExecutedRef.current = false
+    getConfigurationExecutionDetails()
+  }, [sitePlantChange])
+
+  const hasExecutedRef = useRef(false)
 
   const getConfigurationExecutionDetails = async () => {
     try {
@@ -463,16 +479,21 @@ const ConfigurationTable = () => {
         const endDateObj = details.find((item) => item.Name === 'EndDate')
 
         hasExecutedRef.current = true
+
         await onLoadTest(startDateObj, endDateObj)
       } else {
         setConfigurationExecutionDetails(details)
+        // setLoading1(false)
       }
     } catch (error) {
       console.error('Error fetching getConfigurationExecutionDetails:', error)
+    } finally {
+      // setLoading1(false)
     }
   }
 
   const onLoad = async () => {
+    setLoading1(true)
     if (startDate && endDate && startDate > endDate) {
       setSnackbarOpen(true)
       setSnackbarData({
@@ -562,6 +583,7 @@ const ConfigurationTable = () => {
       setLoading(false)
     } finally {
       setLoading(false)
+      setLoading1(false)
     }
   }
 
@@ -581,7 +603,7 @@ const ConfigurationTable = () => {
         setRows={setElastomerRows}
         configType='meg'
         groupBy='Particulars'
-        summary={summary}
+        summary={debouncedSummary}
       />
     )
   }
@@ -606,11 +628,13 @@ const ConfigurationTable = () => {
       displayYear = `(${start - 1}-${(end - 1).toString().slice(-2)})`
     }
 
+    // console.log(loading1)
+
     return (
       <div>
         <Backdrop
           sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={!!loading}
+          open={!!loading1}
         >
           <CircularProgress color='inherit' />
         </Backdrop>
@@ -781,7 +805,7 @@ const ConfigurationTable = () => {
                     setRows={setProductionRows}
                     configType='meg'
                     groupBy='Particulars'
-                    summary={summary}
+                    summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='0'
@@ -797,7 +821,7 @@ const ConfigurationTable = () => {
                     configType='megConstants'
                     groupBy='Particulars'
                     summaryEdited={summaryEdited}
-                    summary={summary}
+                    summary={debouncedSummary}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='1'
                   />
@@ -812,7 +836,7 @@ const ConfigurationTable = () => {
                     configType='megConstantsMannualEntry'
                     groupBy='Particulars'
                     summaryEdited={summaryEdited}
-                    summary={summary}
+                    summary={debouncedSummary}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='2'
                   />
@@ -840,7 +864,7 @@ const ConfigurationTable = () => {
           <DialogTitle id='alert-dialog-title'>{'Load?'}</DialogTitle>
           <DialogContent>
             <DialogContentText id='alert-dialog-description'>
-              Are you sure you want to load the data?
+              {`Are you sure you want to load data for the period from ${formatDateForText(startDate)} to ${formatDateForText(endDate)}?`}
             </DialogContentText>
           </DialogContent>
           <DialogActions>
@@ -858,7 +882,7 @@ const ConfigurationTable = () => {
     <div>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading}
+        open={!!loading1}
       >
         <CircularProgress color='inherit' />
       </Backdrop>
@@ -1017,7 +1041,7 @@ const ConfigurationTable = () => {
         <DialogTitle id='alert-dialog-title'>{'Load?'}</DialogTitle>
         <DialogContent>
           <DialogContentText id='alert-dialog-description'>
-            Are you sure you want to load the data?
+            {`Are you sure you want to load data for the period from ${formatDateForText(startDate)} to ${formatDateForText(endDate)}?`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -1058,7 +1082,7 @@ const ConfigurationTable = () => {
                   border: '1px solid #ADD8E6',
                   borderBottom: '1px solid #ADD8E6',
                 }}
-                label={tabInfo?.displayName || 'N/A'}
+                label={tabInfo?.displayName || 'loading..'}
               />
             )
           })}
@@ -1078,7 +1102,7 @@ const ConfigurationTable = () => {
                     setRows={setStartUpRows}
                     configType='StartupLosses'
                     groupBy='TypeDisplayName'
-                    summary={summary}
+                    summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
                   />
@@ -1092,7 +1116,7 @@ const ConfigurationTable = () => {
                     setRows={setOtherLossRows}
                     configType='Otherlosses'
                     groupBy='TypeDisplayName'
-                    summary={summary}
+                    summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
                   />
@@ -1106,7 +1130,7 @@ const ConfigurationTable = () => {
                     fetchData={fetchData}
                     configType='ShutdownNorms'
                     groupBy='TypeDisplayName'
-                    summary={summary}
+                    summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
                     // groupBy2='ConfigTypeDisplayName'
@@ -1120,7 +1144,7 @@ const ConfigurationTable = () => {
                     fetchData={fetchGradeData}
                     setRows={setGradeData}
                     configType='grades'
-                    summary={summary}
+                    summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
                   />
@@ -1133,7 +1157,7 @@ const ConfigurationTable = () => {
                     setRows={setContiniousGradeData}
                     fetchData={fetchData}
                     configType='ContineGradeChange'
-                    summary={summary}
+                    summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
                   />
@@ -1146,7 +1170,7 @@ const ConfigurationTable = () => {
                     setRows={setDiscontiniousGradeData}
                     fetchData={fetchData}
                     configType='DisContineGradeChange'
-                    summary={summary}
+                    summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
                   />
