@@ -78,7 +78,7 @@ const ConsumptionNorms = () => {
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
 
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
     dataGridStore
   //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
@@ -98,7 +98,15 @@ const ConsumptionNorms = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+
+  const [_plantID, set_PlantID] = useState('')
   const dispatch = useDispatch()
+
+  useEffect(() => {
+    if (plantID?.plantId) {
+      set_PlantID(plantID?.plantId)
+    }
+  }, [plantID])
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -339,14 +347,7 @@ const ConsumptionNorms = () => {
   useEffect(() => {
     fetchData()
     // getAopSummary()
-  }, [
-    sitePlantChange,
-    oldYear,
-    yearChanged,
-    keycloak,
-    selectedUnit,
-    lowerVertName,
-  ])
+  }, [plantID, oldYear, yearChanged, keycloak, selectedUnit])
 
   const productionColumns = getEnhancedColDefs({
     headerMap,

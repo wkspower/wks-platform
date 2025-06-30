@@ -8,6 +8,8 @@ const initialState = {
   yearChanged: false,
   currentYear: null,
   oldYear: null,
+  siteID: null,
+  plantID: null,
 }
 
 const dataGridStore = createSlice({
@@ -38,6 +40,12 @@ const dataGridStore = createSlice({
     setOldYear(state, action) {
       state.oldYear = action.payload
     },
+    setSiteID(state, action) {
+      state.siteID = action.payload
+    },
+    setPlantID(state, action) {
+      state.plantID = action.payload
+    },
   },
 })
 
@@ -52,4 +60,6 @@ export const {
   setYearChange,
   setCurrentYear,
   setOldYear,
+  setSiteID,
+  setPlantID,
 } = dataGridStore.actions

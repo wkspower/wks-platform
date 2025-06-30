@@ -21,7 +21,9 @@ const ProductionNorms = ({ permissions }) => {
   const apiRef = useGridApiRef()
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+  const [_plantID, set_PlantID] = useState('')
+
+  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
     dataGridStore
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
@@ -44,6 +46,12 @@ const ProductionNorms = ({ permissions }) => {
     rowsBeforeChange: {},
   })
   const dispatch = useDispatch()
+
+  useEffect(() => {
+    if (plantID?.plantId) {
+      set_PlantID(plantID?.plantId)
+    }
+  }, [plantID])
   // const isBlocked = useSelector((state) => state.isBlocked) // Get block flag from Redux
 
   const saveChanges = React.useCallback(async () => {
@@ -488,14 +496,7 @@ const ProductionNorms = ({ permissions }) => {
     if (lowerVertName === 'meg') {
       fetchDataByProducts()
     }
-  }, [
-    sitePlantChange,
-    oldYear,
-    yearChanged,
-    keycloak,
-    selectedUnit,
-    lowerVertName,
-  ])
+  }, [plantID, oldYear, yearChanged, keycloak, selectedUnit])
 
   const productionColumns = getEnhancedColDefs({
     headerMap,

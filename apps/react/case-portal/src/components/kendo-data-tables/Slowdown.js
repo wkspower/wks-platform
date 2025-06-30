@@ -13,10 +13,11 @@ import { validateFields } from 'utils/validationUtils'
 
 const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
     dataGridStore
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
+
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [rowModesModel, setRowModesModel] = useState({})
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -41,6 +42,14 @@ const SlowDown = ({ permissions }) => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+
+  const [_plantID, set_PlantID] = useState('')
+
+  useEffect(() => {
+    if (plantID?.plantId) {
+      set_PlantID(plantID?.plantId)
+    }
+  }, [plantID])
 
   const handleCancelClick = () => () => {
     const rowsInEditMode = Object.keys(rowModesModel).filter(
@@ -310,7 +319,7 @@ const SlowDown = ({ permissions }) => {
     fetchData()
     // saveShutdownData()
     getAllProducts()
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  }, [oldYear, yearChanged, keycloak, plantID])
 
   const focusFirstField = async () => {
     const newRowId = rows.length

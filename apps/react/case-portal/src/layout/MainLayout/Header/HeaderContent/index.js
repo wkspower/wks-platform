@@ -16,6 +16,8 @@ import {
   setSitePlantChange,
   setCurrentYear,
   setOldYear,
+  setSiteID,
+  setPlantID,
 } from 'store/reducers/dataGridStore'
 import { DataService } from 'services/DataService'
 import Search from './Search'
@@ -42,21 +44,16 @@ function parseAllowed(raw) {
 export default function HeaderContent({ keycloak }) {
   const dispatch = useDispatch()
   const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
-  // const { drawerOpen } = useSelector((state) => state.menu) // Get drawer state
 
-  // --- 1. Year logic state
   const [aopYears, setAopYears] = useState([])
   const [selectedYear, setSelectedYear] = useState('')
 
-  // --- 2. screenTitleName from Redux
   const screenTitle = useSelector((s) => s.dataGridStore.screenTitle)
   const screenTitleName = screenTitle?.title || 'Business Demand'
 
-  // allowed/full data
   const [allowedMap, setAllowedMap] = useState({})
   const [fullDetails, setFullDetails] = useState([])
 
-  // dropdowns
   const [verticals, setVerticals] = useState([])
   const [sites, setSites] = useState([])
   const [plants, setPlants] = useState([])
@@ -65,7 +62,6 @@ export default function HeaderContent({ keycloak }) {
   const [selectedSite, setSelectedSite] = useState('')
   const [selectedPlant, setSelectedPlant] = useState('')
 
-  // 1?? parse Keycloak allowed once
   useEffect(() => {
     let parsed = []
     try {
@@ -86,28 +82,25 @@ export default function HeaderContent({ keycloak }) {
       })
   }, [keycloak])
 
-  // 3?? build verticals list & default ? localStorage + Redux
   useEffect(() => {
     if (!fullDetails.length || !Object.keys(allowedMap).length) return
 
     const avail = fullDetails
       .filter((v) => allowedMap[v.id])
       .map((v) => ({ id: v.id, name: v.displayName }))
-    // .sort((a, b) => a.name.localeCompare(b.name))
+
     setVerticals(avail)
 
     if (!selectedVertical && avail.length) {
       const defV = avail[0]
       setSelectedVertical(defV.id)
 
-      // persist vertical default
       localStorage.setItem('verticalId', defV.id)
       localStorage.setItem(
         'selectedVertical',
         JSON.stringify({ id: defV.id, name: defV.name }),
       )
-      // console.log(defV.name)
-      // dispatch Redux
+
       dispatch(
         setVerticalChange({
           selectedVertical: defV.name,
@@ -118,7 +111,6 @@ export default function HeaderContent({ keycloak }) {
     }
   }, [fullDetails, allowedMap, selectedVertical, dispatch])
 
-  // 4?? update sites when vertical changes ? localStorage + Redux
   useEffect(() => {
     if (!selectedVertical) {
       setSites([])
@@ -141,11 +133,13 @@ export default function HeaderContent({ keycloak }) {
         JSON.stringify({ id: defS.id, name: defS.name }),
       )
       localStorage.setItem('selectedSiteId', JSON.stringify({ id: defS.id }))
+
+      dispatch(setSiteID({ siteId: defS.id }))
+
       dispatch(setSitePlantChange({ sitePlantChange: true }))
     }
   }, [selectedVertical, fullDetails, allowedMap, dispatch])
 
-  // 5?? update plants when site changes ? localStorage + Redux
   useEffect(() => {
     if (!selectedSite) {
       setPlants([])
@@ -153,26 +147,40 @@ export default function HeaderContent({ keycloak }) {
       return
     }
     const vertObj = fullDetails.find((v) => v.id === selectedVertical)
+
+    // console.log('vertObj', vertObj)
+
     const siteObj = vertObj?.sites.find((s) => s.id === selectedSite)
+
+    // console.log('siteObj', siteObj)
+
     const allowedPlants = allowedMap[selectedVertical]?.[selectedSite] || []
+
+    // console.log('allowedPlants', allowedPlants)
+
     const list = (siteObj?.plants || [])
       .filter((p) => allowedPlants.includes(p.id))
       .map((p) => ({ id: p.id, name: p.displayName }))
+
     setPlants(list)
+
+    // console.log('list', list)
 
     if (list.length) {
       const defP = list[0]
       setSelectedPlant(defP.id)
+      // console.log('defP.id', defP.id)
+      // console.log('defP.name', defP.name)
 
       localStorage.setItem(
         'selectedPlant',
         JSON.stringify({ id: defP.id, name: defP.name }),
       )
       dispatch(setSitePlantChange({ sitePlantChange: true }))
+      dispatch(setPlantID({ plantId: defP.id }))
     }
   }, [selectedSite, selectedVertical, fullDetails, allowedMap, dispatch])
 
-  // 6?? fetch AOP years on mount ? localStorage + Redux
   useEffect(() => {
     async function fetchYears() {
       try {
@@ -197,7 +205,6 @@ export default function HeaderContent({ keycloak }) {
     fetchYears()
   }, [keycloak, dispatch])
 
-  // Handler for year change ? localStorage + Redux
   const handleYearChange = (e) => {
     const newYear = e.target.value
     setSelectedYear(newYear)
@@ -206,7 +213,6 @@ export default function HeaderContent({ keycloak }) {
     dispatch(setYearChange({ yearChanged: true }))
     dispatch(setAopYear({ selectedYear: newYear }))
 
-    // Find the selected year object to determine if it's the current year
     const selectedYearObj = aopYears.find((y) => y.AOPYear === newYear)
     const isCurrentYear = selectedYearObj?.currentYear == 1
 
@@ -221,25 +227,29 @@ export default function HeaderContent({ keycloak }) {
     }
     dispatch(setOldYear({ oldYear: isOldYear }))
   }
-  // inside HeaderContent, above the return
+
   const handlePlantChange = (e) => {
     const newPlantId = e.target.value
     setSelectedPlant(newPlantId)
 
-    // find the selected plant object from your plants array
     const plantObj = plants.find((p) => p.id === newPlantId)
     if (plantObj) {
-      // persist exactly the same key & shape you've used elsewhere:
       localStorage.setItem(
         'selectedPlant',
         JSON.stringify({ id: plantObj.id, name: plantObj.name }),
       )
-      // notify Redux that plant (or site/plant combination) changed:
+
       dispatch(setSitePlantChange({ sitePlantChange: true }))
+      dispatch(setPlantID({ plantId: plantObj.id }))
     }
   }
   const handleVertChange = (e) => {
     const newVId = e.target.value
+
+    // Immediately clear dependent selections
+    setSelectedSite('')
+    setSelectedPlant('')
+
     setSelectedVertical(newVId)
 
     const vert = verticals.find((v) => v.id === newVId)
@@ -279,7 +289,7 @@ export default function HeaderContent({ keycloak }) {
         'selectedSite',
         JSON.stringify({ id: site.id, name: site.name }),
       )
-      // localStorage.setItem('selectedSiteId', site.id)
+
       localStorage.setItem('selectedSiteId', JSON.stringify({ id: site?.id }))
 
       setSelectedPlant('')

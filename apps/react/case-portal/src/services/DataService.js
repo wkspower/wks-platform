@@ -2495,8 +2495,6 @@ async function getYearWiseProduct(keycloak) {
 
 async function getAllSites(keycloak) {
   const url = `${Config.CaseEngineUrl}/task/getPlantsAndSidesAndVerticals`
-  // const url = `${Config.CaseEngineUrl}/task/getPlantAndSite`
-
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -2741,7 +2739,7 @@ async function getAllCatalyst(keycloak) {
   }
 }
 
-async function getShutDownPlantData(keycloak) {
+async function getShutDownPlantData(keycloak, _plantID) {
   var maintenanceTypeName = 'Shutdown'
   var year = localStorage.getItem('year')
   var plantId = ''
@@ -2755,7 +2753,7 @@ async function getShutDownPlantData(keycloak) {
   // plantId = 'A4212E62-2BAC-4A38-9DAB-2C9066A9DA7D'
   // plantId = plantId
 
-  const url = `${Config.CaseEngineUrl}/task/getShutDownPlanData?plantId=${plantId}&maintenanceTypeName=${maintenanceTypeName}&year=${year}`
+  const url = `${Config.CaseEngineUrl}/task/getShutDownPlanData?plantId=${_plantID}&maintenanceTypeName=${maintenanceTypeName}&year=${year}`
 
   const headers = {
     Accept: 'application/json',

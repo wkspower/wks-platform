@@ -71,9 +71,11 @@ const NormalOpNormsScreen = () => {
   const [currentRowId, setCurrentRowId] = useState(null)
   const [loading, setLoading] = useState(false)
   const [gradeId, setGradeId] = useState(null)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
     dataGridStore
   const isOldYear = oldYear?.oldYear
+
+  const [_plantID, set_PlantID] = useState('')
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
@@ -87,11 +89,21 @@ const NormalOpNormsScreen = () => {
 
   const keycloak = useSession()
 
-  const fetchData = async (gradeId) => {
-    if (lowerVertName == 'pe' && !gradeId) return
-    try {
-      setLoading(true)
+  useEffect(() => {
+    if (plantID?.plantId) {
+      set_PlantID(plantID?.plantId)
+    }
+  }, [plantID])
 
+  const fetchData = async (gradeId) => {
+    if (lowerVertName === 'pe' && !gradeId) return
+
+    setLoading(true)
+
+    // // Wait 500ms before continuing
+    // await new Promise((resolve) => setTimeout(resolve, 500))
+
+    try {
       const response = await DataService.getNormalOperationNormsData(
         keycloak,
         gradeId,
@@ -104,7 +116,6 @@ const NormalOpNormsScreen = () => {
           message: 'Error fetching data. Please try again.',
           severity: 'error',
         })
-        setLoading(false)
         return
       }
 
@@ -121,9 +132,9 @@ const NormalOpNormsScreen = () => {
       )
 
       setRows(formattedData)
-      setLoading(false)
     } catch (error) {
       console.error('Error fetching Business Demand data:', error)
+    } finally {
       setLoading(false)
     }
   }
@@ -221,7 +232,7 @@ const NormalOpNormsScreen = () => {
 
   useEffect(() => {
     fetchAllData()
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName, gradeId])
+  }, [oldYear, yearChanged, keycloak, gradeId, plantID])
 
   const colDefs = [
     {

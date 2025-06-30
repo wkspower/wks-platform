@@ -26,7 +26,7 @@ const SlowdownNorms = () => {
   const [allProducts, setAllProducts] = useState([])
 
   const [slowdownMonths, setSlowdownMonths] = useState([])
-  const { sitePlantChange, yearChanged, oldYear } = menu
+  const { sitePlantChange, yearChanged, oldYear, plantID } = menu
   //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
 
@@ -61,6 +61,13 @@ const SlowdownNorms = () => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+
+  const [_plantID, set_PlantID] = useState('')
+  useEffect(() => {
+    if (plantID?.plantId) {
+      set_PlantID(plantID?.plantId)
+    }
+  }, [plantID])
 
   // const getProductDisplayName = (id) => {
   //   if (!id) return
@@ -195,14 +202,7 @@ const SlowdownNorms = () => {
     fetchData()
     getAllProducts()
     getSlowdownMonths()
-  }, [
-    sitePlantChange,
-    oldYear,
-    yearChanged,
-    keycloak,
-    selectedUnit,
-    lowerVertName,
-  ])
+  }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
 
   // const formatValueToFiveDecimals = (params) =>
   //   params ? parseFloat(params).toFixed(5) : ''

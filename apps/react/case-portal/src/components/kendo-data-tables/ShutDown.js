@@ -11,11 +11,25 @@ import { validateFields } from 'utils/validationUtils'
 import KendoDataTables from './index'
 
 const ShutDown = ({ permissions }) => {
+  const [_plantID, set_PlantID] = useState('')
+
   const [modifiedCells, setModifiedCells] = React.useState({})
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
-    dataGridStore
+  const {
+    sitePlantChange,
+    verticalChange,
+    yearChanged,
+    oldYear,
+    siteID,
+    plantID,
+  } = dataGridStore
+
+  useEffect(() => {
+    if (plantID?.plantId) {
+      set_PlantID(plantID?.plantId)
+    }
+  }, [plantID])
 
   const isOldYear = oldYear?.oldYear
 
@@ -36,7 +50,6 @@ const ShutDown = ({ permissions }) => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-
 
   const keycloak = useSession()
   const handleRemarkCellClick = (row) => {
@@ -178,9 +191,10 @@ const ShutDown = ({ permissions }) => {
   }
 
   const fetchData = async () => {
+    if (!_plantID) return
     try {
       setLoading(true)
-      const data = await DataService.getShutDownPlantData(keycloak)
+      const data = await DataService.getShutDownPlantData(keycloak, _plantID)
       const formattedData = data.map((item, index) => ({
         ...item,
         idFromApi: item?.id,
@@ -202,12 +216,13 @@ const ShutDown = ({ permissions }) => {
   useEffect(() => {
     fetchData()
   }, [
-    sitePlantChange,
+    // sitePlantChange,
     oldYear,
     yearChanged,
     keycloak,
-    verticalChange,
-    lowerVertName,
+    // verticalChange,
+    // lowerVertName,
+    _plantID,
   ])
 
   const findDuration = (v, row) => {

@@ -20,6 +20,8 @@ const ProductionvolumeData = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 
+  const [_plantID, set_PlantID] = useState('')
+
   const keycloak = useSession()
 
   const [calculationObject, setCalculationObject] = useState([])
@@ -27,7 +29,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
     dataGridStore
   //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
@@ -61,6 +63,12 @@ const ProductionvolumeData = ({ permissions }) => {
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
+
+  useEffect(() => {
+    if (plantID?.plantId) {
+      set_PlantID(plantID?.plantId)
+    }
+  }, [plantID])
 
   const findAvg = (value, row) => {
     const months = [
@@ -745,14 +753,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
   useEffect(() => {
     fetchData()
-  }, [
-    sitePlantChange,
-    oldYear,
-    yearChanged,
-    keycloak,
-    selectedUnit,
-    lowerVertName,
-  ])
+  }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
 
   const productionColumns = getEnhancedProductionColDefs({
     headerMap,

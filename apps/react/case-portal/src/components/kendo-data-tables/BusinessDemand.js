@@ -53,7 +53,7 @@ const BusinessDemand = ({ permissions }) => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
     dataGridStore
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
@@ -74,6 +74,13 @@ const BusinessDemand = ({ permissions }) => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+
+  const [_plantID, set_PlantID] = useState('')
+  useEffect(() => {
+    if (plantID?.plantId) {
+      set_PlantID(plantID?.plantId)
+    }
+  }, [plantID])
 
   const fetchData = async () => {
     setLoading(true)
@@ -101,7 +108,7 @@ const BusinessDemand = ({ permissions }) => {
 
   useEffect(() => {
     fetchData()
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  }, [plantID, oldYear, yearChanged, keycloak])
 
   const handleRemarkCellClick = (dataItem) => {
     // if (!dataItem?.isEditable) return
@@ -267,6 +274,7 @@ const BusinessDemand = ({ permissions }) => {
       // showStepper:false,
     }
   }
+
   const adjustedPermissions = getAdjustedPermissions(
     {
       showAction: permissions?.showAction ?? false,
@@ -293,37 +301,37 @@ const BusinessDemand = ({ permissions }) => {
 
       {lowerVertName !== 'cracker' && (
         <>
-        <CustomAccordion defaultExpanded disableGutters>
-          <CustomAccordionSummary
-            aria-controls='meg-grid-content'
-            id='meg-grid-header'
-          >
-            <Typography component='span' className='grid-title'>
+          <CustomAccordion defaultExpanded disableGutters>
+            <CustomAccordionSummary
+              aria-controls='meg-grid-content'
+              id='meg-grid-header'
+            >
+              <Typography component='span' className='grid-title'>
                 Production Volume Data (MT) (This is a reference for entering
                 the Business Demand value)
-            </Typography>
-          </CustomAccordionSummary>
-          <CustomAccordionDetails>
-            <Box sx={{ width: '100%', margin: 0 }}>
-              <ProductionvolumeData
-                permissions={{
-                  allAction: true,
-                  showAction: false,
-                  addButton: false,
-                  deleteButton: false,
-                  editButton: false,
-                  showUnit: true,
-                  saveWithRemark: false,
-                  showCalculate: false,
-                  saveBtn: false,
-                  hideSummary: true,
-                  hideUploadExcel: true,
-                  hideDownloadExcel: true,
-                }}
-              />
-            </Box>
-          </CustomAccordionDetails>
-        </CustomAccordion>
+              </Typography>
+            </CustomAccordionSummary>
+            <CustomAccordionDetails>
+              <Box sx={{ width: '100%', margin: 0 }}>
+                <ProductionvolumeData
+                  permissions={{
+                    allAction: true,
+                    showAction: false,
+                    addButton: false,
+                    deleteButton: false,
+                    editButton: false,
+                    showUnit: true,
+                    saveWithRemark: false,
+                    showCalculate: false,
+                    saveBtn: false,
+                    hideSummary: true,
+                    hideUploadExcel: true,
+                    hideDownloadExcel: true,
+                  }}
+                />
+              </Box>
+            </CustomAccordionDetails>
+          </CustomAccordion>
         </>
       )}
 

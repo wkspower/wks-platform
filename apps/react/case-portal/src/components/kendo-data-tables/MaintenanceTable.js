@@ -11,9 +11,8 @@ import { validateFields } from 'utils/validationUtils'
 
 const MaintenanceTable = () => {
   const keycloak = useSession()
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } = useSelector(
-    (s) => s.dataGridStore,
-  )
+  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
+    useSelector((s) => s.dataGridStore)
   const lowerVertName = verticalChange?.selectedVertical?.toLowerCase() || 'meg'
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
 
@@ -34,6 +33,13 @@ const MaintenanceTable = () => {
     () => generateHeaderNames(localStorage.getItem('year')),
     [],
   )
+
+  const [_plantID, set_PlantID] = useState('')
+  useEffect(() => {
+    if (plantID?.plantId) {
+      set_PlantID(plantID?.plantId)
+    }
+  }, [plantID])
 
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
@@ -208,7 +214,7 @@ const MaintenanceTable = () => {
 
   useEffect(() => {
     fetchData()
-  }, [fetchData, sitePlantChange, oldYear, yearChanged])
+  }, [fetchData, oldYear, yearChanged, plantID])
 
   const monthNames = [
     'April',
@@ -230,7 +236,7 @@ const MaintenanceTable = () => {
       { field: 'Name', title: 'Description', width: 220, align: 'left' },
       ...monthNames.map((name, idx) => ({
         field: name,
-        title: headerMap[4 + idx], // 4 + 0 = April, 4 + 1 = May, …
+        title: headerMap[4 + idx], // 4 + 0 = April, 4 + 1 = May, �
         type: 'number',
         format: '{0:n2}',
         align: 'right',

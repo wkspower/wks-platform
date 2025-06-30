@@ -1,5 +1,3 @@
-import Tooltip from '@mui/material/Tooltip'
-
 import { useGridApiRef } from '@mui/x-data-grid'
 import { useSession } from 'SessionStoreContext'
 import React, { useEffect, useState } from 'react'
@@ -26,21 +24,22 @@ const ShutdownNorms = () => {
   const menu = useSelector((state) => state.dataGridStore)
   const [allProducts, setAllProducts] = useState([])
   const [shutdownMonths, setShutdownMonths] = useState([])
-  const { sitePlantChange, yearChanged, oldYear } = menu
-  //const isOldYear = oldYear?.oldYear
+  const { sitePlantChange, yearChanged, oldYear, plantID } = menu
+
   const isOldYear = oldYear?.oldYear
 
   const [open1, setOpen1] = useState(false)
-  // const [deleteId, setDeleteId] = useState(null)
+
   const apiRef = useGridApiRef()
   // const dispatch = useDispatch()
   const [rows, setRows] = useState([])
 
-  // const [productNormData, setProductNormData] = useState([])
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
+
+  const [_plantID, set_PlantID] = useState('')
 
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
@@ -63,6 +62,12 @@ const ShutdownNorms = () => {
     rowsBeforeChange: {},
   })
 
+  useEffect(() => {
+    if (plantID?.plantId) {
+      set_PlantID(plantID?.plantId)
+    }
+  }, [plantID])
+
   // const getProductDisplayName = (id) => {
   //   if (!id) return
   //   const product = allProducts.find((p) => p.id === id)
@@ -72,104 +77,85 @@ const ShutdownNorms = () => {
   const keycloak = useSession()
 
   const saveChanges = React.useCallback(async () => {
-    // const rowsInEditMode = Object.keys(rowModesModel).filter(
-    //   (id) => rowModesModel[id]?.mode === 'edit',
-    // )
+    if (lowerVertName == 'meg') {
+      try {
+        var data = Object.values(modifiedCells)
 
-    // rowsInEditMode.forEach((id) => {
-    //   apiRef.current.stopRowEditMode({ id })
-    // })
-
-    setTimeout(() => {
-      if (lowerVertName == 'meg') {
-        try {
-          // console.log(modifiedCells)
-          var data = Object.values(modifiedCells)
-          // var data = Object.values(unsavedChangesRef.current.unsavedRows)
-          if (data.length == 0) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: 'No Records to Save!',
-              severity: 'info',
-            })
-            setLoading(false)
-            return
-          }
-
-          const requiredFields = ['remarks']
-          const validationMessage = validateFields(data, requiredFields)
-          if (validationMessage) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: validationMessage,
-              severity: 'error',
-            })
-            setLoading(false)
-            return
-          }
-
-          saveShutDownNormsData(data)
-        } catch (error) {
-          /* empty */
+        if (data.length == 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
           setLoading(false)
+          return
         }
+
+        const requiredFields = ['remarks']
+        const validationMessage = validateFields(data, requiredFields)
+        if (validationMessage) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: validationMessage,
+            severity: 'error',
+          })
+          setLoading(false)
+          return
+        }
+
+        saveShutDownNormsData(data)
+      } catch (error) {
+        setLoading(false)
       }
-      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
-        try {
-          var editedData = Object.values(modifiedCells)
-          // var allRows = Array.from(apiRef.current.getRowModels().values())
-          // allRows = allRows.filter((row) => !row.isGroupHeader)
+    }
+    if (lowerVertName == 'pe' || lowerVertName == 'pp') {
+      try {
+        var editedData = Object.values(modifiedCells)
+        if (editedData.length === 0) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'No Records to Save!',
+            severity: 'info',
+          })
+          return
+        }
 
-          // const updatedRows = modifiedCells.map(
-          //   (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
-          // )
+        const requiredFields = ['remarks']
 
+        const validationMessage = validateFields(editedData, requiredFields)
+        if (validationMessage) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: validationMessage,
+            severity: 'error',
+          })
+          setLoading(false)
+          return
+        }
+
+        if (calculatebtnClicked == false) {
           if (editedData.length === 0) {
             setSnackbarOpen(true)
             setSnackbarData({
               message: 'No Records to Save!',
               severity: 'info',
             })
+            setCalculatebtnClicked(false)
             return
           }
 
-          const requiredFields = ['remarks']
-
-          const validationMessage = validateFields(editedData, requiredFields)
-          if (validationMessage) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: validationMessage,
-              severity: 'error',
-            })
-            setLoading(false)
-            return
-          }
-
-          if (calculatebtnClicked == false) {
-            if (editedData.length === 0) {
-              setSnackbarOpen(true)
-              setSnackbarData({
-                message: 'No Records to Save!',
-                severity: 'info',
-              })
-              setCalculatebtnClicked(false)
-              return
-            }
-
-            saveShutDownNormsData(editedData)
-          } else {
-            saveShutDownNormsData(editedData)
-          }
-        } catch (error) {
-          console.log('Error saving changes:', error)
-          setLoading(false)
-          setCalculatebtnClicked(false)
+          saveShutDownNormsData(editedData)
+        } else {
+          saveShutDownNormsData(editedData)
         }
+      } catch (error) {
+        console.log('Error saving changes:', error)
+        setLoading(false)
+        setCalculatebtnClicked(false)
       }
-    }, 400)
+    }
   }, [apiRef, selectedUnit, calculatebtnClicked, modifiedCells])
-  // console.log(rows)
+
   useEffect(() => {
     const getAllProducts = async () => {
       try {
@@ -199,23 +185,11 @@ const ShutdownNorms = () => {
     fetchData()
     getAllProducts()
     getShutdownMonths()
-  }, [
-    sitePlantChange,
-    oldYear,
-    yearChanged,
-    keycloak,
-    selectedUnit,
-    lowerVertName,
-  ])
-
-  // const formatValueToFiveDecimals = (params) =>
-  //   params ? parseFloat(params).toFixed(5) : ''
+  }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
 
   const isCellEditable = (params) => {
     return params.row.isEditable
   }
-
-  // const months = shutdownMonths
 
   const colDefs = [
     {
