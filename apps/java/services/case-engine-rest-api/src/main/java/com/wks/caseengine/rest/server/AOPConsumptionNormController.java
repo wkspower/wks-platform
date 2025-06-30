@@ -24,8 +24,8 @@ public class AOPConsumptionNormController {
 	private AOPConsumptionNormService aOPConsumptionNormService;
 	
 	@GetMapping(value="/getAOPConsumptionNorm")
-	public AOPMessageVM getAOPConsumptionNorm(@RequestParam String plantId,@RequestParam String year){
-		return aOPConsumptionNormService.getAOPConsumptionNorm(plantId,year);
+	public AOPMessageVM getAOPConsumptionNorm(@RequestParam String plantId,@RequestParam String year,@RequestParam(required = false) String gradeId){
+		return aOPConsumptionNormService.getAOPConsumptionNorm(plantId,year,gradeId);
 	}
 	
 	@PostMapping(value="/saveAOPConsumptionNorm")

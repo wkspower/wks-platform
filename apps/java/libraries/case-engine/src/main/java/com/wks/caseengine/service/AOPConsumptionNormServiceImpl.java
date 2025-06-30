@@ -67,10 +67,10 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 		}
 
 	@Override
-	public AOPMessageVM getAOPConsumptionNorm(String plantId, String year) {
+	public AOPMessageVM getAOPConsumptionNorm(String plantId, String year,String gradeId) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			List<Object[]> resultList = getAOPConsumptionNormDataFromView(year, UUID.fromString(plantId));
+			List<Object[]> resultList = getAOPConsumptionNormDataFromView(year, UUID.fromString(plantId),gradeId);
 			List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList = new ArrayList<>();
 
 			for (Object[] row : resultList) {
@@ -348,18 +348,24 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 	}
 
 	@Transactional
-	public List<Object[]> getAOPConsumptionNormDataFromView(String aopYear, UUID plantFkId) {
+	public List<Object[]> getAOPConsumptionNormDataFromView(String aopYear, UUID plantFkId,String gradeId) {
 		try {
 			Plants plant = plantsRepository.findById(plantFkId).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-
+			String sql=null;
 			String viewName = "vwScrn" + vertical.getName() + "AOPConsumptionNorms";
-			String sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = :plantFkId AND AOPYear = :aopYear";
+			if(vertical.getName().equalsIgnoreCase("PE")) {
+				 sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = :plantFkId AND AOPYear = :aopYear AND Grade_FK_Id = :gradeId";
+			}else {
+				 sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = :plantFkId AND AOPYear = :aopYear";
+			}
 
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("plantFkId", plantFkId);
 			query.setParameter("aopYear", aopYear);
-
+			if(vertical.getName().equalsIgnoreCase("PE")) {
+				query.setParameter("gradeId", gradeId);
+			}
 			return query.getResultList(); // Later you can map this to a
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);

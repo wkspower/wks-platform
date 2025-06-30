@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +34,12 @@ public class TurnAroundDataReportController {
 	public ResponseEntity<AOPMessageVM> updateReportForTurnAroundData(@RequestParam String plantId,
 			@RequestParam String year,@RequestParam String reportType,@RequestBody List<TurnAroundPlanReportDTO> dataList) {
 		AOPMessageVM response = turnAroundDataReportService.updateReportForTurnAroundData(plantId, year,reportType, dataList);
+		return ResponseEntity.status(response.getCode()).body(response);
+	}
+	
+	@DeleteMapping(value="/report/turn-around")
+	public ResponseEntity<AOPMessageVM> deleteReportForTurnAroundData(@RequestParam String id){
+		AOPMessageVM response	= turnAroundDataReportService.deleteReportForTurnAroundData(id);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.wks.caseengine.dto.AnnualProductionPlanReportDto;
 import com.wks.caseengine.dto.MonthWiseConsumptionSummaryDTO;
 import com.wks.caseengine.dto.MonthWiseProductionPlanDTO;
 import com.wks.caseengine.dto.PlantProductionDTO;
@@ -20,6 +21,7 @@ import com.wks.caseengine.dto.PlantProductionDataDTO;
 import com.wks.caseengine.dto.TurnAroundPlanReportDTO;
 import com.wks.caseengine.dto.YearWiseContributionDataDTO;
 import com.wks.caseengine.entity.AnnualAOPCost;
+import com.wks.caseengine.entity.AnnualProductionPlanReport;
 import com.wks.caseengine.entity.MonthWiseProductionPlan;
 import com.wks.caseengine.entity.MonthwiseConsumptionReport;
 import com.wks.caseengine.entity.PlantContribution;
@@ -31,6 +33,7 @@ import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AnnualAOPCostRepository;
+import com.wks.caseengine.repository.AnnualProductionPlanReportRepository;
 import com.wks.caseengine.repository.MonthWiseProductionPlanRepository;
 import com.wks.caseengine.repository.MonthwiseConsumptionReportRepository;
 import com.wks.caseengine.repository.PlantContributionRepository;
@@ -80,6 +83,9 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	
 	@Autowired
 	private PlantContributionRepository plantContributionRepository;
+	
+	@Autowired
+	private AnnualProductionPlanReportRepository annualProductionPlanReportRepository;
 
 	// Inject or set your DataSource (e.g., via constructor or setter)
 	public ProductionVolumeDataReportServiceImpl(DataSource dataSource) {
@@ -301,7 +307,8 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 				for (Object[] row : obj) {
 					Map<String, Object> map = new HashMap<>();
 					map.put("sno", row[0]);
-					map.put("part1", row[1]);
+					map.put("activity", row[1]);
+					map.put("id", row[2]);
 					plantProductionData.add(map);
 				}
 			}
@@ -309,9 +316,10 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 				for (Object[] row : obj) {
 					Map<String, Object> map = new HashMap<>();
 					map.put("sno", row[0]);
-					map.put("part1", row[1]);
-					map.put("part2", row[2]);
-					map.put("part3", row[3]);
+					map.put("activity", row[1]);
+					map.put("maxHourlyRateValue", row[2]);
+					map.put("uom", row[3]);
+					map.put("id", row[4]);
 					plantProductionData.add(map);
 				}
 			}
@@ -319,9 +327,10 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 				for (Object[] row : obj) {
 					Map<String, Object> map = new HashMap<>();
 					map.put("sno", row[0]);
-					map.put("part1", row[1]);
-					map.put("part2", row[2]);
-					map.put("part3", row[3]);
+					map.put("activity", row[1]);
+					map.put("rateValue", row[2]);
+					map.put("uom", row[3]);
+					map.put("id", row[4]);
 					plantProductionData.add(map);
 				}
 			}
@@ -329,11 +338,12 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 				for (Object[] row : obj) {
 					Map<String, Object> map = new HashMap<>();
 					map.put("sno", row[0]);
-					map.put("Throughput", row[1]);
-					map.put("HourlyRate", row[2]);
-					map.put("OperatingHrs", row[3]);
-					map.put("PeriodFrom", row[4]);
-					map.put("PeriodTo", row[5]);
+					map.put("activity", row[1]);
+					map.put("durationHours", row[2]);
+					map.put("rateValue", row[3]);
+					map.put("periodFrom", row[4]);
+					map.put("periodTo", row[5]);
+					map.put("id", row[6]);
 					plantProductionData.add(map);
 				}
 			}
@@ -372,7 +382,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	public List<Object[]> getPlantProductionData(String plantId, String aopYear, String reportType) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
-			String storedProcedure = "annualProductionPlan";
+			String storedProcedure = "AnnualProductionPlan";
 			String sql = "EXEC " + storedProcedure
 					+ " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
 
@@ -781,27 +791,41 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 
 	@Override
 	public AOPMessageVM updateReportForPlantProductionPlanData(String plantId, String year,
-			List<PlantProductionDTO> dataList) {
-		for (PlantProductionDTO dto : dataList) {
-			Optional<AnnualAOPCost> optional = annualAOPCostRepository
-					.findById(UUID.fromString(dto.getId()));
-			//optional.get().setRemark(dto.getRemark());
-			/*
-			 * if(dto.getActual1()!=null) { optional.get().set(dto.getActual1()); }
-			 * if(dto.getMay()!=null) { optional.get().setMay(dto.getMay()); }
-			 * if(dto.getJune()!=null) { optional.get().setJune(dto.getJune()); }
-			 * if(dto.getJuly()!=null) { optional.get().setJuly(dto.getJuly()); }
-			 * if(dto.getAug()!=null) { optional.get().setAugust(dto.getAug()); }
-			 * if(dto.getSep()!=null) { optional.get().setSeptember(dto.getSep()); }
-			 * if(dto.getOct()!=null) { optional.get().setOctober(dto.getOct()); }
-			 * if(dto.getNov()!=null) { optional.get().setNovember(dto.getNov()); }
-			 * if(dto.getDec()!=null) { optional.get().setDecember(dto.getDec()); }
-			 * if(dto.getDec()!=null) { optional.get().setDecember(dto.getDec()); }
-			 * if(dto.getJan()!=null) { optional.get().setJanuary(dto.getJan()); }
-			 * if(dto.getFeb()!=null) { optional.get().setFebruary(dto.getFeb()); }
-			 * if(dto.getMarch()!=null) { optional.get().setMarch(dto.getMarch()); }
-			 * monthwiseConsumptionReportRepository.save(optional.get());
-			 */
+			List<AnnualProductionPlanReportDto> dataList,String reportType) {
+		for (AnnualProductionPlanReportDto dto : dataList) {
+			Optional<AnnualProductionPlanReport> optional = annualProductionPlanReportRepository
+					.findById(dto.getId());
+			if(optional.isPresent()) {
+				AnnualProductionPlanReport annualProductionPlanReport = optional.get();
+				if(reportType.equalsIgnoreCase("assumptions")) {
+					annualProductionPlanReport.setActivity(dto.getActivity());
+					annualProductionPlanReport.setRemark(dto.getRemark());
+					annualProductionPlanReportRepository.save(annualProductionPlanReport);
+				}
+				if(reportType.equalsIgnoreCase("maxRate")) {
+					annualProductionPlanReport.setActivity(dto.getActivity());
+					annualProductionPlanReport.setMaxHourlyRateValue(dto.getMaxHourlyRateValue());
+					annualProductionPlanReport.setUom(dto.getUom());
+					annualProductionPlanReport.setRemark(dto.getRemark());
+					annualProductionPlanReportRepository.save(annualProductionPlanReport);
+				}
+				if(reportType.equalsIgnoreCase("OperatingHrs")) {
+					annualProductionPlanReport.setActivity(dto.getActivity());
+					annualProductionPlanReport.setRateValue(dto.getRateValue());
+					annualProductionPlanReport.setUom(dto.getUom());
+					annualProductionPlanReport.setRemark(dto.getRemark());
+					annualProductionPlanReportRepository.save(annualProductionPlanReport);
+				}
+				if(reportType.equalsIgnoreCase("AverageHourlyRate")) {
+					annualProductionPlanReport.setActivity(dto.getActivity());
+					annualProductionPlanReport.setDurationHours(dto.getDurationHours());
+					annualProductionPlanReport.setRateValue(dto.getRateValue());
+					annualProductionPlanReport.setPeriodTo(dto.getPeriodTo());
+					annualProductionPlanReport.setPeriodFrom(dto.getPeriodFrom());
+					annualProductionPlanReport.setRemark(dto.getRemark());
+					annualProductionPlanReportRepository.save(annualProductionPlanReport);
+				}
+			}
 		}
 		AOPMessageVM response = new AOPMessageVM();
 		response.setCode(200);

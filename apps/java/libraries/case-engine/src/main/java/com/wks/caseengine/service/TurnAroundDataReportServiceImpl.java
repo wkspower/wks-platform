@@ -168,4 +168,19 @@ public class TurnAroundDataReportServiceImpl implements TurnAroundDataReportServ
         }
 	}
 
+	@Override
+	public AOPMessageVM deleteReportForTurnAroundData(String id) {
+		TurnAroundPlan turnAroundPlan=null;
+		Optional<TurnAroundPlan> turnAroundPlanOpt=turnAroundPlanReportRepository.findById(UUID.fromString(id));
+		if(turnAroundPlanOpt.isPresent()) {
+			turnAroundPlan = turnAroundPlanOpt.get();
+			turnAroundPlanReportRepository.delete(turnAroundPlan);
+		}
+		AOPMessageVM response = new AOPMessageVM();
+		response.setCode(200);
+		response.setMessage("Record deleted successfully.");
+		response.setData(turnAroundPlan);
+		return response;
+	}
+
 }

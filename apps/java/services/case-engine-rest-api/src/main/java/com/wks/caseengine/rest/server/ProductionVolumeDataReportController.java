@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.dto.AnnualProductionPlanReportDto;
 import com.wks.caseengine.dto.MonthWiseConsumptionSummaryDTO;
 import com.wks.caseengine.dto.MonthWiseProductionPlanDTO;
 import com.wks.caseengine.dto.PlantProductionDTO;
@@ -67,9 +68,9 @@ public class ProductionVolumeDataReportController {
 	
 	@PostMapping(value = "/report/plant/production/plan")
 	public ResponseEntity<AOPMessageVM> updateReportForPlantProductionPlanData(@RequestParam String plantId,
-			@RequestParam String year,
-			@RequestBody List<PlantProductionDTO> dataList) {
-		AOPMessageVM response = productionVolumeDataReportService.updateReportForPlantProductionPlanData(plantId, year, dataList);
+			@RequestParam String year,@RequestParam(required = false) String reportType,
+			@RequestBody List<AnnualProductionPlanReportDto> dataList) {
+		AOPMessageVM response = productionVolumeDataReportService.updateReportForPlantProductionPlanData(plantId, year, dataList,reportType);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 
