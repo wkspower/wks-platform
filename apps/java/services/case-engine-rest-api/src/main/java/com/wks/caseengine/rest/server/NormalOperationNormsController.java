@@ -54,9 +54,10 @@ public class NormalOperationNormsController {
 	@PostMapping(value = "/normalOperationNorms")
 	public List<MCUNormsValueDTO> saveNormalOperationNormsData(
 		@RequestParam String plantId, @RequestParam String year,
+        @RequestParam(required = false) String gradeId,
 			@RequestBody List<MCUNormsValueDTO> mCUNormsValueDTOList) {
 		try {
-			return normalOperationNormsService.saveNormalOperationNormsData(mCUNormsValueDTOList,UUID.fromString(plantId),year);
+			return normalOperationNormsService.saveNormalOperationNormsData(mCUNormsValueDTOList,UUID.fromString(plantId),year, gradeId);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -98,9 +99,10 @@ public class NormalOperationNormsController {
 	public ResponseEntity<byte[]> importExcel(
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,
+            @RequestParam(required = false) String gradeId,
 			@RequestParam("file") MultipartFile file
 	        ) {
-			byte[] excelBytes =	 normalOperationNormsService.importExcel(year,UUID.fromString(plantId), file); 
+			byte[] excelBytes =	 normalOperationNormsService.importExcel(year,UUID.fromString(plantId),gradeId, file); 
 			
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
