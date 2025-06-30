@@ -38,7 +38,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	private EntityManager entityManager;
 
 	@Override
-	public AOPMessageVM getDecokingActivitiesData(String year, String plantId,String reportType) {
+	public AOPMessageVM getDecokingActivitiesData(String year, String plantId, String reportType) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<Map<String, Object>> decokingActivitiesList = new ArrayList<>();
 		try {
@@ -47,21 +47,54 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 
 			String procedureName = vertical.getName() + "_" + site.getName() + "_GetDecokingActivities";
-			List<Object[]> results = getData(plantId, year,reportType, procedureName);
+			List<Object[]> results = getData(plantId, year, reportType, procedureName);
 
 			for (Object[] row : results) {
 				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
-				map.put("month", row[0]);
-				map.put("ibr", row[1]);
-				map.put("mnt", row[2]);
-				map.put("shutdown", row[3]);
-				map.put("slowdown", row[4]);
-				map.put("sad", row[5]);
-				map.put("bud", row[6]);
-				map.put("fourF", row[7]);
-				map.put("fiveF", row[8]);
-				map.put("fourFD", row[9]);
-				map.put("total", row[10]);
+				if (reportType.equalsIgnoreCase("RunningDuration")) {
+					map.put("month", row[0]);
+					map.put("ibr", row[1]);
+					map.put("mnt", row[2]);
+					map.put("shutdown", row[3]);
+					map.put("slowdown", row[4]);
+					map.put("sad", row[5]);
+					map.put("bud", row[6]);
+					map.put("fourF", row[7]);
+					map.put("fiveF", row[8]);
+					map.put("fourFD", row[9]);
+					map.put("total", row[10]);
+				}
+				else if(reportType.equalsIgnoreCase("ibr")) {
+					map.put("furnace", row[0]);
+					map.put("monthName", row[1]);
+					map.put("days", row[2]);
+					map.put("remarks", row[3]);
+				}
+				else if(reportType.equalsIgnoreCase("activity")) {
+					map.put("furnace", row[0]);
+					map.put("startDateIBR", row[1]);
+					map.put("endDateIBR", row[2]);
+					map.put("startDateSD", row[3]);
+					map.put("endDateSD", row[4]);
+					map.put("startDateTA", row[5]);
+					map.put("endDateTA", row[6]);
+					map.put("remarks", row[7]);
+				}
+				else if(reportType.equalsIgnoreCase("RunLength")) {
+					map.put("month", row[0]);
+					map.put("date", row[1]);
+					map.put("hTenActualRunLength", row[2]);
+					map.put("hTenProposedAOP", row[3]);
+					map.put("hElevenActualRunLength", row[4]);
+					map.put("hElevenProposedAOP", row[5]);
+					map.put("hTwelveActualRunLength", row[6]);
+					map.put("hTwelveProposedAOP", row[7]);
+					map.put("hThirteenActualRunLength", row[8]);
+					map.put("hThirteenProposedAOP", row[9]);
+					map.put("hFourteenActualRunLength", row[10]);
+					map.put("hFourteenProposedAOP", row[11]);
+					map.put("demo", row[12]);
+				}
 				decokingActivitiesList.add(map); // Add the map to the list here
 			}
 			aopMessageVM.setCode(200);
@@ -76,9 +109,9 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		}
 	}
 
-	public List<Object[]> getData(String plantId, String aopYear, String reportType,String procedureName) {
+	public List<Object[]> getData(String plantId, String aopYear, String reportType, String procedureName) {
 		try {
-			
+
 			String sql = "EXEC " + procedureName
 					+ " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
 
