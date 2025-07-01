@@ -400,7 +400,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 				map.put("displayName", result[1].toString());
 				map.put("name", result[2].toString());
 				map.put("plantId", result[3].toString());
-				map.put("financialYear", result[4].toString());
+				map.put("aopYear", result[4].toString());
 				gradeList.add(map);
 			}
 			aopMessageVM.setCode(200);
