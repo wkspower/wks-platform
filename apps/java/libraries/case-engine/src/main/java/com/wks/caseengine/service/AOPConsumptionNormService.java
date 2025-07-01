@@ -12,5 +12,6 @@ public interface AOPConsumptionNormService {
 	public List<AOPConsumptionNormDTO> saveAOPConsumptionNorm(List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList);
 	public AOPMessageVM calculateExpressionConsumptionNorms(String year,String plantId);
 	public List<CalculatedConsumptionNormsDTO> getCalculatedConsumptionNorms(String year, String plantId);
+	public AOPMessageVM getConsumptionAOPGrades(String year,String plantId);
 
 }

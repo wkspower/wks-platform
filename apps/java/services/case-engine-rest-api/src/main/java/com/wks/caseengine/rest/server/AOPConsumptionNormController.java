@@ -21,29 +21,34 @@ import com.wks.caseengine.service.AOPConsumptionNormService;
 public class AOPConsumptionNormController {
 	
 	@Autowired
-	private AOPConsumptionNormService aOPConsumptionNormService;
+	private AOPConsumptionNormService aopConsumptionNormService;
 	
 	@GetMapping(value="/getAOPConsumptionNorm")
 	public AOPMessageVM getAOPConsumptionNorm(@RequestParam String plantId,@RequestParam String year,@RequestParam(required = false) String gradeId){
-		return aOPConsumptionNormService.getAOPConsumptionNorm(plantId,year,gradeId);
+		return aopConsumptionNormService.getAOPConsumptionNorm(plantId,year,gradeId);
 	}
 	
 	@PostMapping(value="/saveAOPConsumptionNorm")
 	public List<AOPConsumptionNormDTO> saveAOPConsumptionNorm(@RequestBody List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList){
-		return aOPConsumptionNormService.saveAOPConsumptionNorm(aOPConsumptionNormDTOList);
+		return aopConsumptionNormService.saveAOPConsumptionNorm(aOPConsumptionNormDTOList);
 		
 	}
 
 	@GetMapping(value="/handleCalculateonsumptionNorms")
 	public AOPMessageVM getNormalOperationNormsDataFromSP(@RequestParam String year,@RequestParam String plantId){
-		return	 aOPConsumptionNormService.calculateExpressionConsumptionNorms(year,plantId);
+		return	 aopConsumptionNormService.calculateExpressionConsumptionNorms(year,plantId);
 		
 	}
 	
 	@GetMapping(value="/getCalculatedConsumptionNorms")
 	public  List<CalculatedConsumptionNormsDTO>  getCalculatedConsumptionNorms(@RequestParam String year,@RequestParam String plantId){
-		return	 aOPConsumptionNormService.getCalculatedConsumptionNorms(year,plantId);
+		return	 aopConsumptionNormService.getCalculatedConsumptionNorms(year,plantId);
 		
+	}
+	
+	@GetMapping(value="/consumption-aop/grades")
+	public AOPMessageVM getConsumptionAOPGrades(@RequestParam String year,@RequestParam String plantId){
+		return	aopConsumptionNormService.getConsumptionAOPGrades(year, plantId);
 	}
 	
 
