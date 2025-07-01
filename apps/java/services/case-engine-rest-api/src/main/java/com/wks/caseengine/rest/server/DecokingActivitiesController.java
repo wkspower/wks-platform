@@ -1,15 +1,16 @@
 package com.wks.caseengine.rest.server;
 
 import java.util.List;
-import java.util.UUID;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.wks.caseengine.dto.ConfigurationDTO;
+import com.wks.caseengine.dto.DecokingActivitiesDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.DecokingActivitiesService;
 
@@ -23,5 +24,10 @@ public class DecokingActivitiesController {
 	@GetMapping(value="/decoking-activities")
 	public AOPMessageVM getDecokingActivitiesData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType) {
 		return decokingActivitiesService.getDecokingActivitiesData(year,plantId,reportType);
+	}
+	
+	@PostMapping(value="/decoking-activities")
+	public AOPMessageVM updateDecokingActivitiesData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType, @RequestBody List<DecokingActivitiesDTO> decokingActivitiesDTOList) {
+		return decokingActivitiesService.updateDecokingActivitiesData(year,plantId,reportType,decokingActivitiesDTOList);
 	}
 }

@@ -1,6 +1,7 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,8 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.wks.caseengine.dto.DecokePlanningDTO;
+import com.wks.caseengine.dto.DecokingActivitiesDTO;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
@@ -190,6 +193,45 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	        case 12: return "December";
 	        default: return "Invalid month";
 	    }
+	}
+
+	@Override
+	public AOPMessageVM updateDecokingActivitiesData(String year, String plantId, String reportType,
+			List<DecokingActivitiesDTO> decokingActivitiesDTOList) {
+		List<NormAttributeTransactions> normAttributeTransactionsList=new ArrayList<>();
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			for(DecokingActivitiesDTO decokingActivitiesDTO:decokingActivitiesDTOList) {
+				if(decokingActivitiesDTO.getId()!=null) {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findById(UUID.fromString(decokingActivitiesDTO.getId()));
+					if(normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+						normAttributeTransactions.setAttributeValue(decokingActivitiesDTO.getDays());
+						normAttributeTransactions.setAopMonth(decokingActivitiesDTO.getAopMonth());
+						normAttributeTransactions.setRemarks(decokingActivitiesDTO.getRemarks());
+						normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+					}
+				}else {
+					NormAttributeTransactions normAttributeTransactions = new NormAttributeTransactions();
+					normAttributeTransactions.setAttributeValue(decokingActivitiesDTO.getDays());
+					normAttributeTransactions.setAopMonth(decokingActivitiesDTO.getAopMonth());
+					normAttributeTransactions.setRemarks(decokingActivitiesDTO.getRemarks());
+					normAttributeTransactions.setAuditYear(year);
+					normAttributeTransactions.setCreatedOn(new Date());
+					normAttributeTransactions.setAttributeValueVersion("V1");
+					normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokingActivitiesDTO.getNormParameterId()));
+					normAttributeTransactions.setUserName("System");
+					normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+				}
+			}
+		} catch (Exception ex) {
+	        throw new RuntimeException("Failed to update data");
+	    }
+		
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Data Updated successfully");
+		aopMessageVM.setData(normAttributeTransactionsList);
+		return aopMessageVM;
 	}
 
 
