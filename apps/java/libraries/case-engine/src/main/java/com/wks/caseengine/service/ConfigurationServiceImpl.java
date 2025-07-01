@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import jakarta.persistence.Query;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -627,6 +628,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	public List<ConfigurationDTO> saveConfigurationData(String year, String plantFKId,
 			List<ConfigurationDTO> configurationDTOList) {
 		try {
+			List<ConfigurationDTO> failedList = new ArrayList<>();
 			UUID plantId = UUID.fromString(plantFKId);
 
 			Plants plant = plantsRepository.findById(plantId).orElseThrow();
@@ -644,6 +646,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			for (ConfigurationDTO configurationDTO : configurationDTOList) {
 				if (configurationDTO.getSaveStatus() != null
 						&& configurationDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+							failedList.add(configurationDTO);
 					continue;
 				}
 
@@ -653,6 +656,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				if (!optionNormParameters.isPresent()) {
 					configurationDTO.setSaveStatus("Failed");
 					configurationDTO.setErrDescription("Norm Paramter not found");
+					failedList.add(configurationDTO);
 					continue;
 				}
 
@@ -702,7 +706,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
 				aopCalculationRepository.save(aopCalculation);
 			}
-			return configurationDTOList;
+			return failedList;
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to save data", ex);
 		}
@@ -1185,7 +1189,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	@Override
-	public byte[] importExcel(String year, UUID plantFKId, MultipartFile file) {
+	public AOPMessageVM importExcel(String year, UUID plantFKId, MultipartFile file) {
 		// TODO Auto-generated method stub
 		if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
     		throw new IllegalArgumentException("Invalid or empty Excel file.");
@@ -1199,12 +1203,23 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<ConfigurationDTO> data = readConfigurations(file.getInputStream(), plantFKId, year);
 			System.out.println("Ended Read configuration in importExcel");
 			System.out.println("Started Save configuration in importExcel");
-			List<ConfigurationDTO> savedData = saveConfigurationData(year, plantFKId.toString(), data);
+			List<ConfigurationDTO> failedRecords = saveConfigurationData(year, plantFKId.toString(), data);
 			System.out.println("Ended Save configuration in importExcel");
-
-			return createExcel(year, plantFKId, true, savedData);
-
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			if(failedRecords!=null &&failedRecords.size()>0 ){
+				byte[] fileByteArray =  createExcel(year, plantFKId, true, failedRecords);	
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			}else{
+				//aopMessageVM.setData();
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
 			
+
+			return aopMessageVM;
 			// return ResponseEntity.ok(data);
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format ", e);

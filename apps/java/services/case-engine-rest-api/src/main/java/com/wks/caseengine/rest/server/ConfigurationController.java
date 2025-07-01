@@ -119,23 +119,12 @@ public class ConfigurationController {
 	
 	
 	@PostMapping(value = "/configuration-import-excel", consumes = "multipart/form-data")
-	public ResponseEntity<byte[]> importExcel(
+	public AOPMessageVM importExcel(
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,
 			@RequestParam("file") MultipartFile file
 	        ) {
-
-			byte[] excelBytes =	configurationService.importExcel(year,UUID.fromString(plantId), file); 
- HttpHeaders headers = new HttpHeaders();
-	        headers.setContentType(MediaType.parseMediaType(
-	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
-	        headers.setContentDisposition(ContentDisposition.builder("attachment")
-	                .filename("plant_production_plan.xlsx")
-	                .build());
-	        headers.setContentLength(excelBytes.length);
-
-	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
-
+			return	configurationService.importExcel(year,UUID.fromString(plantId), file); 
 	}
 	
 	@PostMapping(value = "/configuration-constants-import-excel", consumes = "multipart/form-data")
