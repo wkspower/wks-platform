@@ -21,7 +21,7 @@ public class DecokingActivitiesController {
 	private DecokingActivitiesService decokingActivitiesService;
 	
 	@GetMapping(value="/decoking-activities")
-	public AOPMessageVM getDecokingActivitiesData(@RequestParam String year,@RequestParam String plantId,@RequestParam String reportType) {
+	public AOPMessageVM getDecokingActivitiesData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType) {
 		return decokingActivitiesService.getDecokingActivitiesData(year,plantId,reportType);
 	}
 }

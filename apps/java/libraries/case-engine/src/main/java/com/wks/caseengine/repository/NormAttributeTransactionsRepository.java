@@ -169,5 +169,8 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	List<Object[]> findByPlantIdAndYear(
 			@Param("plantId") UUID plantId,
 			@Param("year") String year);
+	
+	Optional<NormAttributeTransactions> findByNormParameterFKId(UUID normParameterFKId);
+
 
 }
