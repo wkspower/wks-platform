@@ -386,7 +386,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			// Validate or sanitize viewName before using it directly in the query to
 			// prevent SQL injection
 			String sql = "SELECT * FROM " + viewName
-					+ " WHERE FinancialYear = :financialYear AND Plant_FK_Id = :plantId";
+					+ " WHERE AOPYear = :financialYear AND Plant_FK_Id = :plantId";
 
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("financialYear", financialYear);
