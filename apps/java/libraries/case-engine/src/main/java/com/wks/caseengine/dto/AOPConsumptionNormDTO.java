@@ -39,5 +39,6 @@ public class AOPConsumptionNormDTO {
     private String UOM;
     private Boolean isEditable;
     private String productName;
+    private String gradeId;
 
 }

@@ -69,6 +69,9 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 	@Override
 	public AOPMessageVM getAOPConsumptionNorm(String plantId, String year,String gradeId) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+
 		try {
 			List<Object[]> resultList = getAOPConsumptionNormDataFromView(year, UUID.fromString(plantId),gradeId);
 			List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList = new ArrayList<>();
@@ -82,25 +85,49 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 				dto.setAopCaseId(row[3] != null ? row[3].toString() : null);
 				dto.setAopStatus(row[4] != null ? row[4].toString() : null);
 				dto.setAopRemarks(row[5] != null ? row[5].toString() : null);
-				dto.setMaterialFkId(row[6] != null ? row[6].toString() : null);
-				dto.setJan(row[7] != null ? Double.valueOf(row[7].toString()) : null);
-				dto.setFeb(row[8] != null ? Double.valueOf(row[8].toString()) : null);
-				dto.setMarch(row[9] != null ? Double.valueOf(row[9].toString()) : null);
-				dto.setApril(row[10] != null ? Double.valueOf(row[10].toString()) : null);
-				dto.setMay(row[11] != null ? Double.valueOf(row[11].toString()) : null);
-				dto.setJune(row[12] != null ? Double.valueOf(row[12].toString()) : null);
-				dto.setJuly(row[13] != null ? Double.valueOf(row[13].toString()) : null);
-				dto.setAug(row[14] != null ? Double.valueOf(row[14].toString()) : null);
-				dto.setSep(row[15] != null ? Double.valueOf(row[15].toString()) : null);
-				dto.setOct(row[16] != null ? Double.valueOf(row[16].toString()) : null);
-				dto.setNov(row[17] != null ? Double.valueOf(row[17].toString()) : null);
-				dto.setDec(row[18] != null ? Double.valueOf(row[18].toString()) : null);
-				dto.setAopYear(row[19] != null ? row[19].toString() : null);
-				dto.setPlantFkId(row[20] != null ? row[20].toString() : null);
-				dto.setNormParameterTypeDisplayName(row[21] != null ? row[21].toString() : null);
-				dto.setUOM(row[22] != null ? row[22].toString() : null);
-				dto.setIsEditable(row[23] != null ? Boolean.valueOf(row[23].toString()) : null);
-				dto.setProductName(row[24] != null ? row[24].toString() : null);
+				if(vertical.getName().equalsIgnoreCase("PE")) {
+					dto.setGradeId(gradeId);
+					dto.setMaterialFkId(row[7] != null ? row[7].toString() : null);
+					dto.setJan(row[8] != null ? Double.valueOf(row[8].toString()) : null);
+					dto.setFeb(row[9] != null ? Double.valueOf(row[9].toString()) : null);
+					dto.setMarch(row[10] != null ? Double.valueOf(row[10].toString()) : null);
+					dto.setApril(row[11] != null ? Double.valueOf(row[11].toString()) : null);
+					dto.setMay(row[12] != null ? Double.valueOf(row[12].toString()) : null);
+					dto.setJune(row[13] != null ? Double.valueOf(row[13].toString()) : null);
+					dto.setJuly(row[14] != null ? Double.valueOf(row[14].toString()) : null);
+					dto.setAug(row[15] != null ? Double.valueOf(row[15].toString()) : null);
+					dto.setSep(row[16] != null ? Double.valueOf(row[16].toString()) : null);
+					dto.setOct(row[17] != null ? Double.valueOf(row[17].toString()) : null);
+					dto.setNov(row[18] != null ? Double.valueOf(row[18].toString()) : null);
+					dto.setDec(row[19] != null ? Double.valueOf(row[19].toString()) : null);
+					dto.setAopYear(row[20] != null ? row[20].toString() : null);
+					dto.setPlantFkId(row[21] != null ? row[21].toString() : null);
+					dto.setNormParameterTypeDisplayName(row[22] != null ? row[22].toString() : null);
+					dto.setUOM(row[23] != null ? row[23].toString() : null);
+					dto.setIsEditable(row[24] != null ? Boolean.valueOf(row[24].toString()) : null);
+					dto.setProductName(row[25] != null ? row[25].toString() : null);
+				}else {
+					dto.setMaterialFkId(row[6] != null ? row[6].toString() : null);
+					dto.setJan(row[7] != null ? Double.valueOf(row[7].toString()) : null);
+					dto.setFeb(row[8] != null ? Double.valueOf(row[8].toString()) : null);
+					dto.setMarch(row[9] != null ? Double.valueOf(row[9].toString()) : null);
+					dto.setApril(row[10] != null ? Double.valueOf(row[10].toString()) : null);
+					dto.setMay(row[11] != null ? Double.valueOf(row[11].toString()) : null);
+					dto.setJune(row[12] != null ? Double.valueOf(row[12].toString()) : null);
+					dto.setJuly(row[13] != null ? Double.valueOf(row[13].toString()) : null);
+					dto.setAug(row[14] != null ? Double.valueOf(row[14].toString()) : null);
+					dto.setSep(row[15] != null ? Double.valueOf(row[15].toString()) : null);
+					dto.setOct(row[16] != null ? Double.valueOf(row[16].toString()) : null);
+					dto.setNov(row[17] != null ? Double.valueOf(row[17].toString()) : null);
+					dto.setDec(row[18] != null ? Double.valueOf(row[18].toString()) : null);
+					dto.setAopYear(row[19] != null ? row[19].toString() : null);
+					dto.setPlantFkId(row[20] != null ? row[20].toString() : null);
+					dto.setNormParameterTypeDisplayName(row[21] != null ? row[21].toString() : null);
+					dto.setUOM(row[22] != null ? row[22].toString() : null);
+					dto.setIsEditable(row[23] != null ? Boolean.valueOf(row[23].toString()) : null);
+					dto.setProductName(row[24] != null ? row[24].toString() : null);
+				}
+				
 				aOPConsumptionNormDTOList.add(dto);
 			}
 			Map<String, Object> map = new HashMap<>(); 
@@ -113,6 +140,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			aopMessageVM.setMessage("Data fetched successfully");
 			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
