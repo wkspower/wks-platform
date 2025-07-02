@@ -63,6 +63,8 @@ export const dateFields = [
   'startDateIBR',
   'fromDate',
   'toDate',
+  'periodFrom',
+  'periodTo'
 ]
 export const hiddenFields = []
 export const monthMap = {
@@ -790,14 +792,14 @@ const KendoDataTables = ({
                     }}
                     cells={{
                       edit: {
-                        date: ['fromDate', 'toDate'].includes(col.field)
+                        date: ['fromDate', 'toDate','periodFrom','periodTo'].includes(col.field)
                           ? DateOnlyPicker
                           : DateTimePickerEditor,
                       },
                       data: toolTipRenderer,
                     }}
                     format={
-                      ['fromDate', 'toDate'].includes(col.field)
+                      ['fromDate', 'toDate','periodFrom','periodTo'].includes(col.field)
                         ? '{0:dd-MM-yyyy}'
                         : '{0:dd-MM-yyyy hh:mm a}'
                     }

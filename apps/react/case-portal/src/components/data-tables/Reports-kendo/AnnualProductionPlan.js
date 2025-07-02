@@ -13,6 +13,7 @@ import {
 import Notification from 'components/Utilities/Notification'
 import KendoDataTables from 'components/kendo-data-tables/index'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
+import moment from '../../../../node_modules/moment/moment'
 
 const AnnualProductionPlan = () => {
   const keycloak = useSession()
@@ -437,6 +438,12 @@ const AnnualProductionPlan = () => {
           id: index,
           isEditable: true,
           inEdit: false,
+          periodFrom: item?.periodFrom
+                        ? moment(item.periodFrom, 'DD-MMM-YY').toDate()
+                        : null,
+          periodTo:  item?.periodTo
+                        ? moment(item.periodTo, 'DD-MMM-YY').toDate()
+                        : null,
         }))
 
         switch (type) {
@@ -720,26 +727,6 @@ const AnnualProductionPlan = () => {
         setLoading(false)
         return
       }
-      const parseDate = (dateStr) => {
-        if (!dateStr) return null;
-        const parts = dateStr.split('-');
-        if (parts.length === 3) {
-          const day = parseInt(parts[0]);
-          const monthStr = parts[1];
-          const year = parseInt(parts[2]) + 2000; // Convert 25 to 2025
-          
-          const monthMap = {
-            'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
-            'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
-          };
-          
-          const month = monthMap[monthStr];
-          if (month !== undefined) {
-            return new Date(year, month, day);
-          }
-        }
-        return new Date(dateStr);
-      };
 
       const dataList = data.map((row) => ({
         id: row.idFromApi,
@@ -747,8 +734,12 @@ const AnnualProductionPlan = () => {
         activity: row.activity,
         rateValue: row.rateValue,
         durationHours: row.durationHours,
-        periodFrom: parseDate(row.periodFrom),
-        periodTo: parseDate(row.periodTo),
+        periodFrom: row?.periodFrom
+                        ? moment(row.periodFrom).add(1, 'day').utc().startOf('day').toISOString()
+                        : null,
+        periodTo:  row?.periodTo
+                        ? moment(row.periodTo).add(1, 'day').utc().startOf('day').toISOString()
+                        : null,
       }))
       const res = await DataService.saveAnnualProduction(
         {
@@ -828,7 +819,7 @@ const AnnualProductionPlan = () => {
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Max hourly rate achieved{' '}
       </Typography>
-      <KendoDataTablesReports rows={rowsMaxRate} columns={columnsMaxRate} permissions={{saveBtn: true,}}
+      <KendoDataTables rows={rowsMaxRate} columns={columnsMaxRate} permissions={{saveBtn: true,allAction: true, }}
         modifiedCells={modifiedCells2}
         setModifiedCells={setModifiedCells2}
         currentRowId={currentRowId2}
@@ -839,10 +830,10 @@ const AnnualProductionPlan = () => {
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Calculation of Operating hours{' '}
       </Typography>
-      <KendoDataTablesReports
+      <KendoDataTables
         rows={rowsOperatingHrs}
         columns={columnsOperatingHrs}
-        permissions={{saveBtn: true}}
+        permissions={{saveBtn: true,allAction: true,}}
         modifiedCells={modifiedCells3}
         setModifiedCells={setModifiedCells3}
         currentRowId={currentRowId3}
@@ -854,10 +845,10 @@ const AnnualProductionPlan = () => {
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Calculation of Average hourly rate{' '}
       </Typography>
-      <KendoDataTablesReports
+      <KendoDataTables
         rows={rowsAverageHourlyRate}
         columns={columnsAverageHourlyRate}
-        permissions={{saveBtn: true,}}
+        permissions={{saveBtn: true,allAction: true,}}
         modifiedCells={modifiedCells4}
         setModifiedCells={setModifiedCells4}
         currentRowId={currentRowId4}
@@ -875,7 +866,6 @@ const AnnualProductionPlan = () => {
         columnGroupingModel={columnGroupingModel}
         permissions={{
           textAlignment: 'center',
-          saveBtn: true,
         }}
         // modifiedCells={modifiedCells5}
         // setModifiedCells={setModifiedCells5}
