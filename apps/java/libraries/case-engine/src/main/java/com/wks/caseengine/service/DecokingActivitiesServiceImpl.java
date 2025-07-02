@@ -241,14 +241,23 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					if(normAttributeTransactionsopt.isPresent()) {
 						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
 						normAttributeTransactions.setAttributeValue(decokingActivitiesDTO.getDays());
-						normAttributeTransactions.setAopMonth(decokingActivitiesDTO.getAopMonth());
+						if(decokingActivitiesDTO.getAopMonth()!=null) {
+							normAttributeTransactions.setAopMonth(decokingActivitiesDTO.getAopMonth());
+						}else {
+							normAttributeTransactions.setAopMonth(0);
+						}
+						
 						normAttributeTransactions.setRemarks(decokingActivitiesDTO.getRemarks());
 						normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
 					}
 				}else {
 					NormAttributeTransactions normAttributeTransactions = new NormAttributeTransactions();
 					normAttributeTransactions.setAttributeValue(decokingActivitiesDTO.getDays());
-					normAttributeTransactions.setAopMonth(decokingActivitiesDTO.getAopMonth());
+					if(decokingActivitiesDTO.getAopMonth()!=null) {
+						normAttributeTransactions.setAopMonth(decokingActivitiesDTO.getAopMonth());
+					}else {
+						normAttributeTransactions.setAopMonth(0);
+					}
 					normAttributeTransactions.setRemarks(decokingActivitiesDTO.getRemarks());
 					normAttributeTransactions.setAuditYear(year);
 					normAttributeTransactions.setCreatedOn(new Date());
@@ -291,6 +300,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIbrEDId()));
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactions.setUserName("System");
+						normAttributeTransactions.setAopMonth(0);
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
 					}
 				}
@@ -311,6 +321,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIbrSDId()));
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactions.setUserName("System");
+						normAttributeTransactions.setAopMonth(0);
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
 					}
 				}
@@ -331,6 +342,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getTaSDId()));
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactions.setUserName("System");
+						normAttributeTransactions.setAopMonth(0);
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
 					}
 				}
@@ -351,6 +363,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getTaEDId()));
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactions.setUserName("System");
+						normAttributeTransactions.setAopMonth(0);
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
 					}
 				}
@@ -371,6 +384,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getSdSDId()));
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactions.setUserName("System");
+						normAttributeTransactions.setAopMonth(0);
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
 					}
 				}
@@ -391,6 +405,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getSdEDId()));
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactions.setUserName("System");
+						normAttributeTransactions.setAopMonth(0);
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
 					}
 				}
