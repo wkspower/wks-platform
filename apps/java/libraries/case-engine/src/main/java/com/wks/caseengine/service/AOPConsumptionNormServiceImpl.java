@@ -85,7 +85,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 				dto.setAopCaseId(row[3] != null ? row[3].toString() : null);
 				dto.setAopStatus(row[4] != null ? row[4].toString() : null);
 				dto.setAopRemarks(row[5] != null ? row[5].toString() : null);
-				if(vertical.getName().equalsIgnoreCase("PE")) {
+				if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
 					dto.setGradeId(gradeId);
 					dto.setMaterialFkId(row[7] != null ? row[7].toString() : null);
 					dto.setJan(row[8] != null ? Double.valueOf(row[8].toString()) : null);
@@ -382,7 +382,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			String sql=null;
 			String viewName = "vwScrn" + vertical.getName() + "AOPConsumptionNorms";
-			if(vertical.getName().equalsIgnoreCase("PE")) {
+			if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
 				 sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = :plantFkId AND AOPYear = :aopYear AND Grade_FK_Id = :gradeId";
 			}else {
 				 sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = :plantFkId AND AOPYear = :aopYear";
@@ -391,7 +391,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("plantFkId", plantFkId);
 			query.setParameter("aopYear", aopYear);
-			if(vertical.getName().equalsIgnoreCase("PE")) {
+			if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
 				query.setParameter("gradeId", gradeId);
 			}
 			return query.getResultList(); // Later you can map this to a
