@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.DecokePlanningDTO;
+import com.wks.caseengine.dto.DecokePlanningIBRDTO;
 import com.wks.caseengine.dto.DecokingActivitiesDTO;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.Plants;
@@ -264,6 +265,145 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("Data Updated successfully");
 		aopMessageVM.setData(normAttributeTransactionsList);
+		return aopMessageVM;
+	}
+
+	@Override
+	public AOPMessageVM updateDecokingActivitiesIBRData(String year, String plantId, String reportType,
+			List<DecokePlanningIBRDTO> decokePlanningIBRDTOList) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			for(DecokePlanningIBRDTO decokePlanningIBRDTO:decokePlanningIBRDTOList) {
+				if(decokePlanningIBRDTO.getIbrEDId()!=null && decokePlanningIBRDTO.getIbrEDId()!="") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIbrEDId()));
+					if(normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getIbrED());
+						normAttributeTransactions.setModifiedOn(new Date());
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}else {
+						NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getIbrED());
+						normAttributeTransactions.setAttributeValueVersion("V1");
+						normAttributeTransactions.setAuditYear(year);
+						normAttributeTransactions.setCreatedOn(new Date());
+						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIbrEDId()));
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactions.setUserName("System");
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}
+				}
+				if(decokePlanningIBRDTO.getIbrSDId()!=null && decokePlanningIBRDTO.getIbrSDId()!="") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIbrSDId()));
+					if(normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getIbrSD());
+						normAttributeTransactions.setModifiedOn(new Date());
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}else {
+						NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getIbrSD());
+						normAttributeTransactions.setAttributeValueVersion("V1");
+						normAttributeTransactions.setAuditYear(year);
+						normAttributeTransactions.setCreatedOn(new Date());
+						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIbrSDId()));
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactions.setUserName("System");
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}
+				}
+				if(decokePlanningIBRDTO.getTaSDId()!=null && decokePlanningIBRDTO.getTaSDId()!="") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getTaSDId()));
+					if(normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getTaSD());
+						normAttributeTransactions.setModifiedOn(new Date());
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}else {
+						NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getTaSD());
+						normAttributeTransactions.setAttributeValueVersion("V1");
+						normAttributeTransactions.setAuditYear(year);
+						normAttributeTransactions.setCreatedOn(new Date());
+						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getTaSDId()));
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactions.setUserName("System");
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}
+				}
+				if(decokePlanningIBRDTO.getTaEDId()!=null && decokePlanningIBRDTO.getTaEDId()!="") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getTaEDId()));
+					if(normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getTaED());
+						normAttributeTransactions.setModifiedOn(new Date());
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}else {
+						NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getTaED());
+						normAttributeTransactions.setAttributeValueVersion("V1");
+						normAttributeTransactions.setAuditYear(year);
+						normAttributeTransactions.setCreatedOn(new Date());
+						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getTaEDId()));
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactions.setUserName("System");
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}
+				}
+				if(decokePlanningIBRDTO.getSdSDId()!=null && decokePlanningIBRDTO.getSdSDId()!="") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getSdSDId()));
+					if(normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getSdSD());
+						normAttributeTransactions.setModifiedOn(new Date());
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}else {
+						NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getSdSD());
+						normAttributeTransactions.setAttributeValueVersion("V1");
+						normAttributeTransactions.setAuditYear(year);
+						normAttributeTransactions.setCreatedOn(new Date());
+						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getSdSDId()));
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactions.setUserName("System");
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}
+				}
+				if(decokePlanningIBRDTO.getSdEDId()!=null && decokePlanningIBRDTO.getSdEDId()!="") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getSdEDId()));
+					if(normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getSdED());
+						normAttributeTransactions.setModifiedOn(new Date());
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}else {
+						NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getSdED());
+						normAttributeTransactions.setAttributeValueVersion("V1");
+						normAttributeTransactions.setAuditYear(year);
+						normAttributeTransactions.setCreatedOn(new Date());
+						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getSdEDId()));
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactions.setUserName("System");
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}
+				}
+
+			}
+		}
+		catch (Exception ex) {
+	        throw new RuntimeException("Failed to update data");
+	    }
+		
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Data Updated successfully");
+		aopMessageVM.setData(decokePlanningIBRDTOList);
 		return aopMessageVM;
 	}
 
