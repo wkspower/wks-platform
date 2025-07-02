@@ -87,20 +87,21 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					}
 				}
 				else if(reportType.equalsIgnoreCase("ibr")) {
-					map.put("furnace", row[0]);
-					map.put("plantId", row[1]);
-					map.put("ibrSDId", row[2]);
-					map.put("ibrEDId", row[3]);
-					map.put("taSDId", row[4]);
-					map.put("taEDId", row[5]);
-					map.put("sdSDId", row[6]);
-					map.put("sdEDId", row[7]);
-					map.put("ibrSD", row[8]);
-					map.put("ibrED", row[9]);
-					map.put("taSD", row[10]);
-					map.put("taED", row[11]);
-					map.put("sdSD", row[12]);
-					map.put("sdED", row[13]);
+					map.put("furnace", row[0] != null ? row[0] : "");
+					map.put("plantId", row[1] != null ? row[1] : "");
+					map.put("ibrSDId", row[2] != null ? row[2] : "");
+					map.put("ibrEDId", row[3] != null ? row[3] : "");
+					map.put("taSDId",  row[4] != null ? row[4] : "");
+					map.put("taEDId",  row[5] != null ? row[5] : "");
+					map.put("sdSDId",  row[6] != null ? row[6] : "");
+					map.put("sdEDId",  row[7] != null ? row[7] : "");
+					map.put("ibrSD",   row[8] != null ? row[8] : "");
+					map.put("ibrED",   row[9] != null ? row[9] : "");
+					map.put("taSD",    row[10] != null ? row[10] : "");
+					map.put("taED",    row[11] != null ? row[11] : "");
+					map.put("sdSD",    row[12] != null ? row[12] : "");
+					map.put("sdED",    row[13] != null ? row[13] : "");
+
 				}
 				else if(reportType.equalsIgnoreCase("activity")) {
 					map.put("furnace", row[0]);
