@@ -1,7 +1,7 @@
 import { Box } from '@mui/material'
 // import DataGridTable from '../ASDataGrid'
 import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
-import { useEffect, useState } from 'react'
+import React,  { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import {
@@ -50,6 +50,15 @@ const AnnualProductionPlan = () => {
   const [rowsOperatingHrs, setRowsOperatingHrs] = useState([])
   const [rowsAverageHourlyRate, setRowsAverageHourlyRate] = useState([])
   const [rowsProductionPerformance, setRowsProductionPerformance] = useState([])
+  const [modifiedCells, setModifiedCells] = React.useState({})
+  const [modifiedCells2, setModifiedCells2] = React.useState({})
+  const [modifiedCells3, setModifiedCells3] = React.useState({})
+  const [modifiedCells4, setModifiedCells4] = React.useState({})
+  const [currentRowId, setCurrentRowId] = useState(null)
+  const [currentRowId2, setCurrentRowId2] = useState(null)
+  const [currentRowId3, setCurrentRowId3] = useState(null)
+  const [currentRowId4, setCurrentRowId4] = useState(null)
+  const [rows, setRows] = useState()
 
   const formatValueToThreeDecimals = (params) => {
     const dateRegex =
@@ -102,41 +111,59 @@ const AnnualProductionPlan = () => {
     const num = parseFloat(params)
     return isNaN(num) ? '' : num.toFixed(0)
   }
-
+  // {
+  //               "activity": "1 MT EOE \u003d 1 MT EO",
+  //               "sno": 1,
+  //               "id": "E0383316-53DE-4A28-B1D5-AC57294ECE8E"
+  //           },
   const columnsAssumptions = [
     {
       field: 'sno',
       headerName: 'SL.No',
-      editable: true,
+      editable: false,
       widthT: 100,
       align: 'right',
     },
     {
-      field: 'part1',
+      field: 'activity',
       headerName: 'Assumptions & remarks',
-      editable: false,
+      editable: true,
       flex: 1,
     },
+    {
+      field: 'id',
+      hidden: true,
+    },
   ]
-
+  //  {
+  //               "maxHourlyRateValue": "480.8190",
+  //               "uom": "TPD",
+  //               "activity": "Recorded max daily production",
+  //               "sno": 1,
+  //               "id": "2813A86A-5AA0-408B-A8FB-F2E49BC844C3"
+  //           },
   const columnsMaxRate = [
     {
       field: 'sno',
       headerName: 'SL.No',
-      editable: true,
+      editable: false,
       widthT: 100,
       align: 'right',
     },
     {
-      field: 'part1',
+      field: 'activity',
       headerName: 'Max hourly rate achieved',
-      editable: false,
+      editable: true,
       flex: 1,
     },
     {
-      field: 'part2',
+      field: 'id',
+      hidden: true,
+    },
+    {
+      field: 'maxHourlyRateValue',
       headerName: 'Value',
-      editable: false,
+      editable: true,
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimals,
@@ -149,27 +176,37 @@ const AnnualProductionPlan = () => {
         </Tooltip>
       ),
     },
-    { field: 'part3', headerName: 'UOM', editable: false, flex: 1 },
+    { field: 'uom', headerName: 'UOM', editable: true, flex: 1 },
   ]
-
+  // {
+  //               "rateValue": 8760.00000000,
+  //               "uom": "Hrs",
+  //               "activity": "Total available hours",
+  //               "sno": 1,
+  //               "id": "56C9D602-C34B-42ED-983D-218C56CD7568"
+  //           },
   const columnsOperatingHrs = [
     {
       field: 'sno',
       headerName: 'SL.No',
-      editable: true,
+      editable: false,
       widthT: 100,
       align: 'right',
     },
     {
-      field: 'part1',
+      field: 'activity',
       headerName: 'Calculation of Operating hours',
-      editable: false,
+      editable: true,
       flex: 1,
     },
     {
-      field: 'part2',
+      field: 'id',
+      hidden: true,
+    },
+    {
+      field: 'rateValue',
       headerName: 'Value',
-      editable: false,
+      editable: true,
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimalsZero,
@@ -183,32 +220,45 @@ const AnnualProductionPlan = () => {
       ),
     },
     {
-      field: 'part3',
+      field: 'uom',
       headerName: 'Hours',
-      editable: false,
+      editable: true,
       flex: 1,
       align: 'right',
     },
   ]
 
+//  {
+//                 "durationHours": 720.00000000,
+//                 "rateValue": 18.96000000,
+//                 "periodTo": "30-Jun-25",
+//                 "activity": "Plant running normal",
+//                 "sno": 3,
+//                 "periodFrom": "01-Jun-25",
+//                 "id": "021CD9C0-2074-4A17-BDAE-88A98A5A0CA9"
+//             },
   const columnsAverageHourlyRate = [
     {
       field: 'sno',
       headerName: 'SL.No',
-      editable: true,
+      editable: false,
       widthT: 100,
       align: 'right',
     },
     {
-      field: 'Throughput',
+      field: 'activity',
       headerName: 'Throughput  limiting causes',
-      editable: false,
+      editable: true,
       flex: 1,
     },
     {
-      field: 'OperatingHrs',
+      field: 'id',
+      hidden: true,
+    },
+    {
+      field: 'durationHours',
       headerName: 'Achievable Hourly rate',
-      editable: false,
+      editable: true,
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimalsTwo,
@@ -222,9 +272,9 @@ const AnnualProductionPlan = () => {
       ),
     },
     {
-      field: 'HourlyRate',
+      field: 'rateValue',
       headerName: 'Op. Hrs',
-      editable: false,
+      editable: true,
       flex: 1,
       align: 'right',
       valueFormatter: formatValueToThreeDecimalsZero,
@@ -238,19 +288,29 @@ const AnnualProductionPlan = () => {
       ),
     },
     {
-      field: 'PeriodFrom',
+      field: 'periodFrom',
       headerName: 'Period from',
-      editable: false,
+      editable: true,
       flex: 1,
     },
-    { field: 'PeriodTo', headerName: 'Period to', editable: false, flex: 1 },
+    { field: 'periodTo', headerName: 'Period to', editable: true, flex: 1 },
   ]
 
   const year4 = localStorage.getItem('year')
   const year3 = `${+year4.split('-')[0] - 1}-${+year4.split('-')[1] - 1}`
   const year2 = `${+year3.split('-')[0] - 1}-${+year3.split('-')[1] - 1}`
   const year1 = `${+year2.split('-')[0] - 1}-${+year2.split('-')[1] - 1}`
-
+  // {
+  //               "Item": "Operating hours, Hrs",
+  //               "sno": 2,
+  //               "Actual2": 8760.00000000,
+  //               "Actual3": 8760.00000000,
+  //               "Budget4": 8496.00000000,
+  //               "Actual1": 8760.00000000,
+  //               "Budget3": 8760.00000000,
+  //               "Budget2": 8496.00000000,
+  //               "Budget1": 8736.00000000
+  //           },
   const columnsProductionPerformance = [
     {
       field: 'sno',
@@ -332,7 +392,7 @@ const AnnualProductionPlan = () => {
         {
           field: 'Budget4',
           title: 'Budget',
-          editable: true,
+          editable: false,
           flex: 1,
           align: 'right',
         },
@@ -373,8 +433,10 @@ const AnnualProductionPlan = () => {
       if (res?.code == 200) {
         res = res?.data?.plantProductionData.map((item, index) => ({
           ...item,
+          idFromApi: item?.id,
           id: index,
-          isEditable: false,
+          isEditable: true,
+          inEdit: false,
         }))
 
         switch (type) {
@@ -471,6 +533,262 @@ const AnnualProductionPlan = () => {
       setLoading(false)
     }
   }
+  const saveChanges = async () => {
+    try {
+      const data = Object.values(modifiedCells)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
+      }
+
+      const dataList = data.map((row) => ({
+        id: row.idFromApi,
+        uom: row.uom,
+        sno : row.sno,
+        activity: row.activity,
+        rateValue: row.rateValue,
+      }))
+      const res = await DataService.saveAnnualProduction(
+        {
+          plantId,
+          year,
+          reportType: 'assumptions', 
+          dataList,
+        },
+        keycloak
+      )
+
+
+      if (res?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        fetchData('assumptions')
+        // fetchData('maxRate')
+        // fetchData('OperatingHrs')
+        // fetchData('AverageHourlyRate')
+        // fetchData('ProductionPerformance')
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Failed!',
+          severity: 'error',
+        })
+      }
+    } catch (err) {
+      console.error('Error while save', err)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: err.message, severity: 'error' })
+    } finally {
+      setSnackbarOpen(true)
+    }
+  }
+
+  const saveChanges2 = async () => {
+    try {
+      const data = Object.values(modifiedCells2)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
+      }
+
+      const dataList = data.map((row) => ({
+        id: row.idFromApi,
+        uom: row.uom,
+        sno : row.sno,
+        activity: row.activity,
+        maxHourlyRateValue: row.maxHourlyRateValue,
+      }))
+      const res = await DataService.saveAnnualProduction(
+        {
+          plantId,
+          year,
+          reportType: 'maxRate', 
+          dataList,
+        },
+        keycloak
+      )
+
+
+      if (res?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells2({})
+        // fetchData('assumptions')
+        fetchData('maxRate')
+        // fetchData('OperatingHrs')
+        // fetchData('AverageHourlyRate')
+        // fetchData('ProductionPerformance')
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Failed!',
+          severity: 'error',
+        })
+      }
+    } catch (err) {
+      console.error('Error while save', err)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: err.message, severity: 'error' })
+    } finally {
+      setSnackbarOpen(true)
+    }
+  }
+  const saveChanges3 = async () => {
+    try {
+      const data = Object.values(modifiedCells3)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
+      }
+
+      const dataList = data.map((row) => ({
+       id: row.idFromApi,
+        uom: row.uom,
+        sno : row.sno,
+        activity: row.activity,
+        rateValue: row.rateValue,
+      }))
+      const res = await DataService.saveAnnualProduction(
+        {
+          plantId,
+          year,
+          reportType: 'OperatingHrs', 
+          dataList,
+        },
+        keycloak
+      )
+
+
+      if (res?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells3({})
+        // fetchData('assumptions')
+        // fetchData('maxRate')
+        fetchData('OperatingHrs')
+        // fetchData('AverageHourlyRate')
+        // fetchData('ProductionPerformance')
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Failed!',
+          severity: 'error',
+        })
+      }
+    } catch (err) {
+      console.error('Error while save', err)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: err.message, severity: 'error' })
+    } finally {
+      setSnackbarOpen(true)
+    }
+  }
+  const saveChanges4 = async () => {
+    try {
+      const data = Object.values(modifiedCells4)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
+      }
+      const parseDate = (dateStr) => {
+        if (!dateStr) return null;
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+          const day = parseInt(parts[0]);
+          const monthStr = parts[1];
+          const year = parseInt(parts[2]) + 2000; // Convert 25 to 2025
+          
+          const monthMap = {
+            'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+            'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+          };
+          
+          const month = monthMap[monthStr];
+          if (month !== undefined) {
+            return new Date(year, month, day);
+          }
+        }
+        return new Date(dateStr);
+      };
+
+      const dataList = data.map((row) => ({
+        id: row.idFromApi,
+        sno : row.sno,
+        activity: row.activity,
+        rateValue: row.rateValue,
+        durationHours: row.durationHours,
+        periodFrom: parseDate(row.periodFrom),
+        periodTo: parseDate(row.periodTo),
+      }))
+      const res = await DataService.saveAnnualProduction(
+        {
+          plantId,
+          year,
+          reportType: 'AverageHourlyrate', 
+          dataList,
+        },
+        keycloak
+      )
+
+
+      if (res?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells4({})
+        // fetchData('assumptions')
+        // fetchData('maxRate')
+        // fetchData('OperatingHrs')
+        fetchData('AverageHourlyRate')
+        //fetchData('ProductionPerformance')
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Failed!',
+          severity: 'error',
+        })
+      }
+    } catch (err) {
+      console.error('Error while save', err)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: err.message, severity: 'error' })
+    } finally {
+      setSnackbarOpen(true)
+    }
+  }
+
 
   return (
     <Box sx={{ height: 'auto', width: '100%' }}>
@@ -485,29 +803,53 @@ const AnnualProductionPlan = () => {
         Assumptions & remarks{' '}
       </Typography> */}
 
-      <KendoDataTablesReports
+      <KendoDataTables
         rows={rowsAssumptions}
+        setRows={setRowsassumptions}
         columns={columnsAssumptions}
         handleCalculate={handleCalculate}
         title='Plant Production Plan (T-15) - Assumptions & remarks'
-        // title='Plant Contribution (T-21)- MEG\nProduct mix and Production'
+        modifiedCells={modifiedCells}
+        setModifiedCells={setModifiedCells}
+        currentRowId={currentRowId}
+        setCurrentRowId={setCurrentRowId}
+        saveChanges={saveChanges}
+        loading={loading}
+        fetchData={() => fetchData('assumptions')}
         permissions={{
           showWorkFlowBtns: true,
           showCalculate: false,
           showTitle: true,
+          saveBtn: true,
+          allAction: true, 
         }}
       />
 
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Max hourly rate achieved{' '}
       </Typography>
-      <KendoDataTablesReports rows={rowsMaxRate} columns={columnsMaxRate} />
+      <KendoDataTablesReports rows={rowsMaxRate} columns={columnsMaxRate} permissions={{saveBtn: true,}}
+        modifiedCells={modifiedCells2}
+        setModifiedCells={setModifiedCells2}
+        currentRowId={currentRowId2}
+        setCurrentRowId={setCurrentRowId2}
+        setRows={setRowsMaxRate}
+        saveChanges={saveChanges2}
+       />
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Calculation of Operating hours{' '}
       </Typography>
       <KendoDataTablesReports
         rows={rowsOperatingHrs}
         columns={columnsOperatingHrs}
+        permissions={{saveBtn: true}}
+        modifiedCells={modifiedCells3}
+        setModifiedCells={setModifiedCells3}
+        currentRowId={currentRowId3}
+        setCurrentRowId={setCurrentRowId3}
+        setRows={setRowsOperatingHrs}
+        saveChanges={saveChanges3}
+        
       />
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Calculation of Average hourly rate{' '}
@@ -515,6 +857,14 @@ const AnnualProductionPlan = () => {
       <KendoDataTablesReports
         rows={rowsAverageHourlyRate}
         columns={columnsAverageHourlyRate}
+        permissions={{saveBtn: true,}}
+        modifiedCells={modifiedCells4}
+        setModifiedCells={setModifiedCells4}
+        currentRowId={currentRowId4}
+        setCurrentRowId={setCurrentRowId4}
+        setRows={setRowsAverageHourlyRate}
+        saveChanges={saveChanges4}
+        
       />
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Production performance comparision with last 3 years{' '}
@@ -525,7 +875,13 @@ const AnnualProductionPlan = () => {
         columnGroupingModel={columnGroupingModel}
         permissions={{
           textAlignment: 'center',
+          saveBtn: true,
         }}
+        // modifiedCells={modifiedCells5}
+        // setModifiedCells={setModifiedCells5}
+        // currentRowId={currentRowId5}
+        // setCurrentRowId={setCurrentRowId5}
+        // setRows={setRows5} 
       />
 
       <Notification

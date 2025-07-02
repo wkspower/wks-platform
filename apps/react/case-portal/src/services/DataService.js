@@ -150,6 +150,7 @@ export const DataService = {
   // saveConfigurationExcelConstants,
   // getConfigurationExcelConstants,
   getNormalOperationNormsGrades,
+  saveAnnualProduction,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -3493,6 +3494,34 @@ async function getNormalOperationNormsGrades(keycloak) {
     return json(keycloak, resp)
   } catch (e) {
     console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function saveAnnualProduction(payload, keycloak) {
+  const { plantId, year, reportType, dataList } = payload
+
+  let queryParams = `?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`
+  if (reportType) {
+    queryParams += `&reportType=${encodeURIComponent(reportType)}`
+  }
+
+  const url = `${Config.CaseEngineUrl}/task/report/plant/production/plan${queryParams}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(dataList),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Error in saveAnnualProduction:', e)
     return await Promise.reject(e)
   }
 }
