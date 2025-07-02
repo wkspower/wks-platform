@@ -38,7 +38,6 @@ import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.MCUNormsValueGradeRepository;
-import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.NormalOperationNormsRepository;
 import com.wks.caseengine.repository.NormsTransactionRepository;
 import com.wks.caseengine.repository.PlantsRepository;
@@ -79,9 +78,6 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
-
-	@Autowired
-	private NormParametersRepository normParametersRepository;
 	
 	@Autowired
 	private MCUNormsValueGradeRepository mcuNormsValueGradeRepository;
@@ -107,7 +103,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValueDTO.setPlantFkId(row[2].toString());
 				mCUNormsValueDTO.setVerticalFkId(row[3].toString());
 				Verticals vertical = verticalRepository.findById(UUID.fromString(row[3].toString())).get();
-				if (vertical.getName().equalsIgnoreCase("PE")) {
+				if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
 					mCUNormsValueDTO.setGradeId(row[4].toString());
 					mCUNormsValueDTO.setMaterialFkId(row[5].toString());
 					mCUNormsValueDTO.setApril(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
@@ -197,7 +193,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 						.findById(UUID.fromString(dto.getId()));
 
 				if (optionalValue.isEmpty()) {
-					dto.setErrDescription("No record found with this id" +dto.getId());
+					dto.setErrDescription("No record found with this id" + dto.getId());
 					dto.setSaveStatus("Failed");
 					continue; // or handle accordingly
 				}
@@ -235,7 +231,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				MCUNormsValueGrade mCUNormsValueGrade = new MCUNormsValueGrade();
 				Verticals vertical = verticalRepository.findById(UUID.fromString(mCUNormsValueDTO.getVerticalFkId())).get();
 				if (mCUNormsValueDTO.getId() != null || !mCUNormsValueDTO.getId().isEmpty()) {
-					if(vertical.getName().equalsIgnoreCase("PE")) {
+					if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
 						
 						Optional<MCUNormsValueGrade> optionalNormsValue = 
 								mcuNormsValueGradeRepository.findById(UUID.fromString(mCUNormsValueDTO.getId()));
@@ -325,7 +321,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 						}	
 					}
 				}else {
-					if(vertical.getName().equalsIgnoreCase("PE")) {
+					if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
 						mCUNormsValueGrade.setCreatedOn(new Date());
 						mCUNormsValueGrade.setGradeFkId(UUID.fromString(mCUNormsValueDTO.getGradeId()));
 						mCUNormsValueGrade.setApril(Optional.ofNullable(mCUNormsValueDTO.getApril()).orElse(0.0));
@@ -520,7 +516,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			// Validate or sanitize viewName before using it directly in the query to
 			// prevent SQL injection
 			String sql = null;
-			if (vertical.getName().equalsIgnoreCase("PE")) {
+			if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
 				sql = "SELECT * FROM " + viewName
 						+ " WHERE FinancialYear = :financialYear AND Plant_FK_Id = :plantId AND Grade_FK_Id = :gradeId";
 			} else {
@@ -530,7 +526,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("financialYear", financialYear);
 			query.setParameter("plantId", plantId);
-			if (vertical.getName().equalsIgnoreCase("PE")) {
+			if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
 				query.setParameter("gradeId", gradeId);
 			}
 
