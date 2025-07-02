@@ -14,14 +14,18 @@ import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.DecokePlanningIBRDTO;
 import com.wks.caseengine.dto.DecokingActivitiesDTO;
+import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 
@@ -46,6 +50,12 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	
 	@Autowired
 	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
+	
+	@Autowired
+	private ScreenMappingRepository screenMappingRepository;
+
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
 
 	@Override
 	public AOPMessageVM getDecokingActivitiesData(String year, String plantId, String reportType) {
@@ -102,7 +112,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					map.put("taED",    row[11] != null ? row[11] : "");
 					map.put("sdSD",    row[12] != null ? row[12] : "");
 					map.put("sdED",    row[13] != null ? row[13] : "");
-
+					map.put("remarks", "");
 				}
 				else if(reportType.equalsIgnoreCase("activity")) {
 					map.put("furnace", row[0]);
@@ -271,6 +281,17 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	        throw new RuntimeException("Failed to update data");
 	    }
 		
+		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("ibr");
+		for (ScreenMapping screenMapping : screenMappingList) {
+			AopCalculation aopCalculation = new AopCalculation();
+			aopCalculation.setAopYear(year);
+			aopCalculation.setIsChanged(true);
+			aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+			aopCalculation.setPlantId(UUID.fromString(plantId));
+			aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+			aopCalculationRepository.save(aopCalculation);
+		}
+		
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("Data Updated successfully");
 		aopMessageVM.setData(normAttributeTransactionsList);
@@ -415,7 +436,16 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		catch (Exception ex) {
 	        throw new RuntimeException("Failed to update data");
 	    }
-		
+		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("sd-ta-activity");
+		for (ScreenMapping screenMapping : screenMappingList) {
+			AopCalculation aopCalculation = new AopCalculation();
+			aopCalculation.setAopYear(year);
+			aopCalculation.setIsChanged(true);
+			aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+			aopCalculation.setPlantId(UUID.fromString(plantId));
+			aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+			aopCalculationRepository.save(aopCalculation);
+		}
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("Data Updated successfully");
 		aopMessageVM.setData(decokePlanningIBRDTOList);

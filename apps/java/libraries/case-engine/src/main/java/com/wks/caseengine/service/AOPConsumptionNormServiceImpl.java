@@ -344,8 +344,6 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 				listDTO.add(dto);
 			}
 
-			// return
-			// results.stream().map(this::mapToAopDataDTO).collect(Collectors.toList());
 			return listDTO;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);

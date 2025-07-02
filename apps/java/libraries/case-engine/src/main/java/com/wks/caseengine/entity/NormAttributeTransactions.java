@@ -30,17 +30,10 @@ public class NormAttributeTransactions {
     @Column(name = "Id", nullable = false, updatable = false)
     private UUID id;
 
-//    @Column(name = "AttributeName", length = 250)
-//    private String attributeName;
 
     @Column(name = "AttributeValue", length = 250)
     private String attributeValue;
 
-//    @Column(name = "AttributeLable", length = 250)
-//    private String attributeLable;
-//
-//    @Column(name = "AttributeValueLable", length = 250)
-//    private String attributeValueLable;
 
     @Column(name = "AOPMonth")
     private Integer aopMonth;
@@ -60,8 +53,7 @@ public class NormAttributeTransactions {
     @Column(name = "AttributeValueVersion", length = 10)
     private String attributeValueVersion;
 
-    // If you want to avoid using the reserved keyword 'User' directly in Java,
-    // you can rename the field and map it to the column "User".
+   
 
     @Column(name = "[User]")
     private String userName;
@@ -70,13 +62,5 @@ public class NormAttributeTransactions {
     @Column(name = "NormParameter_FK_Id")
     private UUID normParameterFKId;
 
-//    @Column(name = "CatalystAttribute_FK_Id")
-//    private UUID catalystAttributeFKId;
-    
-//    @Column(name="Month")
-//    private Integer month;
-    
-   // @Column(name = "Plant_FK_Id")
-   // private UUID plantFKId;
 
 }
