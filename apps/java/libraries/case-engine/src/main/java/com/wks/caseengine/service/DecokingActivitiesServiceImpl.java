@@ -73,6 +73,9 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			}else if(reportType.equalsIgnoreCase("ibr")){
 				procedureName = "vwScrn"+vertical.getName() + "_" + site.getName() + "_DecokePlanningDates";
 				 results = getIBRData(plantId, procedureName);
+			}else if(reportType.equalsIgnoreCase("RunLength")){
+				procedureName = vertical.getName() + "_" + site.getName() + "_getRunLength";
+				 results = getDataRunLength(plantId,vertical.getId().toString(),site.getId().toString(),year, procedureName);
 			}
 
 			for (Object[] row : results) {
@@ -138,8 +141,21 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					map.put("hFourteenActualRunLength", row[10]);
 					map.put("hFourteenProposedAOP", row[11]);
 					map.put("demo", row[12]);
+					map.put("remark", row[13]);
 				}
 				decokingActivitiesList.add(map); // Add the map to the list here
+			}
+			Map<String, Object> aopCalculationMap = new HashMap<>();
+			if(reportType.equalsIgnoreCase("RunLength")) {
+				List<AopCalculation> aopCalculation = aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(
+						UUID.fromString(plantId), year, "Furnace-run-length");
+				
+				aopCalculationMap.put("aopCalculation", aopCalculation);
+				aopCalculationMap.put("decokingActivitiesList", decokingActivitiesList);
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("Data fetched successfully");
+				aopMessageVM.setData(aopCalculationMap);
+				return aopMessageVM;
 			}
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data fetched successfully");
@@ -165,6 +181,26 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			query.setParameter("plantId", plantId);
 			query.setParameter("aopYear", aopYear);
 			query.setParameter("reportType", reportType);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	public List<Object[]> getDataRunLength(String plantId,String verticalId,String siteId, String aopYear, String procedureName) {
+		try {
+			
+			String sql = "EXEC " + procedureName
+					+ " @plantId = :plantId, @verticalId = :verticalId, @siteId = :siteId,@aopYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("verticalId", verticalId);
+			query.setParameter("siteId", siteId);
+			query.setParameter("aopYear", aopYear);
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
