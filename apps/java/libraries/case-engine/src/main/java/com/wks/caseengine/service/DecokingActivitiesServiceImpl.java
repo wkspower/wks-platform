@@ -59,9 +59,9 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			if(reportType.equalsIgnoreCase("RunningDuration")) {
 				 procedureName = "vwScrn"+vertical.getName() + "_" + site.getName() + "_DecokingPlanning";
 				 results = getData(plantId, procedureName);
-			}else {
-				procedureName = vertical.getName() + "_" + site.getName() + "_GetDecokingActivities";
-				results = getData(plantId, year, reportType, procedureName);
+			}else if(reportType.equalsIgnoreCase("ibr")){
+				procedureName = "vwScrn"+vertical.getName() + "_" + site.getName() + "_DecokePlanningDates";
+				 results = getIBRData(plantId, procedureName);
 			}
 
 			for (Object[] row : results) {
@@ -88,9 +88,19 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 				}
 				else if(reportType.equalsIgnoreCase("ibr")) {
 					map.put("furnace", row[0]);
-					map.put("monthName", row[1]);
-					map.put("days", row[2]);
-					map.put("remarks", row[3]);
+					map.put("plantId", row[1]);
+					map.put("ibrSDId", row[2]);
+					map.put("ibrEDId", row[3]);
+					map.put("taSDId", row[4]);
+					map.put("taEDId", row[5]);
+					map.put("sdSDId", row[6]);
+					map.put("sdEDId", row[7]);
+					map.put("ibrSD", row[8]);
+					map.put("ibrED", row[9]);
+					map.put("taSD", row[10]);
+					map.put("taED", row[11]);
+					map.put("sdSD", row[12]);
+					map.put("sdED", row[13]);
 				}
 				else if(reportType.equalsIgnoreCase("activity")) {
 					map.put("furnace", row[0]);
@@ -173,7 +183,29 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	        throw new RuntimeException("Failed to fetch data from view " + viewName, ex);
 	    }
 	}
-	
+
+	public List<Object[]> getIBRData(String plantId, String viewName) {
+	    try {
+	        
+	        // 2. Construct SQL with dynamic view name
+	        String sql = 
+	            "SELECT * FROM " + viewName + 
+	            " WHERE PlantId = :plantId";
+
+	        // 3. Create and parameterize the native query
+	        Query query = entityManager.createNativeQuery(sql);
+	        query.setParameter("plantId", plantId);
+
+	        // 4. Execute
+	        return query.getResultList();
+
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid argument: " + e.getMessage(), e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data from view " + viewName, ex);
+	    }
+	}
+
 	public static String getMonth(Integer month) {
 	    if (month == null) {
 	        return "Invalid month";
