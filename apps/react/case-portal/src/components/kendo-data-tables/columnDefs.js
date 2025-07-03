@@ -127,7 +127,7 @@ export const ibrGridThree = [
   },
 
   {
-    field: 'hTenProposed',
+    field: 'tenProposed',
     title: 'H10 – Proposed AOP',
     type: 'number',
     format: '{0:n0}',
@@ -150,7 +150,7 @@ export const ibrGridThree = [
   },
 
   {
-    field: 'hElevenProposed',
+    field: 'elevenProposed',
     title: 'H11 – Proposed AOP',
     type: 'number',
     format: '{0:n0}',
@@ -173,7 +173,7 @@ export const ibrGridThree = [
   },
 
   {
-    field: 'hTwelveProposed',
+    field: 'twelveProposed',
     title: 'H12 – Proposed AOP',
     type: 'number',
     format: '{0:n0}',
@@ -196,7 +196,7 @@ export const ibrGridThree = [
   },
 
   {
-    field: 'hThirteenProposed',
+    field: 'thirteenProposed',
     title: 'H13 – Proposed AOP',
     type: 'number',
     format: '{0:n0}',
@@ -219,7 +219,7 @@ export const ibrGridThree = [
   },
 
   {
-    field: 'hFourteenProposed',
+    field: 'fourteenProposed',
     title: 'H14 – Proposed AOP',
     type: 'number',
     format: '{0:n0}',

@@ -511,11 +511,11 @@ const DecokingConfig = () => {
       var payload = []
 
       payload = newRow.map((row) => ({
-        hTenProposed: row?.hTenProposed || '',
-        hElevenProposed: row?.hElevenProposed || '',
-        hTwelveProposed: row?.hTwelveProposed || '',
-        hThirteenProposed: row?.hThirteenProposed || '',
-        hFourteenProposed: row?.hFourteenProposed || '',
+        tenProposed: row?.tenProposed || '',
+        elevenProposed: row?.elevenProposed || '',
+        twelveProposed: row?.twelveProposed || '',
+        thirteenProposed: row?.thirteenProposed || '',
+        fourteenProposed: row?.fourteenProposed || '',
         plantId: row?.plantId || '',
         id: row?.idFromApi || '',
         demo: row?.demo || '',
