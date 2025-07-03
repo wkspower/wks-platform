@@ -17,8 +17,9 @@ import lombok.NoArgsConstructor;
 @Configuration
 public class DecokeRunLengthDTO {
 	
-	UUID id;
-    Date date;
+	String id;
+    String date;
+    String month;
     Double hTenActual;
     Double tenProposed;
     Double hElevenActual;
@@ -31,7 +32,9 @@ public class DecokeRunLengthDTO {
     Double fourteenProposed;
     String demo;
     String aopYear;
-    UUID plantFkId;
+    String plantFkId;
     String remarks;
+    String saveStatus;
+    String errDescription;
 
 }

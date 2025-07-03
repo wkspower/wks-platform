@@ -3769,7 +3769,7 @@ async function getRunLengthExcel(keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  const url = `${Config.CaseEngineUrl}/task/run-length-export-excel?year=${year}&plantId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/run-length-export-excel?year=${year}&plantId=${plantId}&reportType=RunLength`
   //const url = `${Config.CaseEngineUrl}/task/norms-export-excel?year=${year}&plantId=${plantId}`
 
   const headers = {
@@ -3806,7 +3806,7 @@ async function getRunLengthExcel(keycloak) {
 async function saveRunLengthExcel(file, keycloak) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/run-length-import-excel?plantId=${plantId}&year=${year}`
+  const url = `${Config.CaseEngineUrl}/task/run-length-import-excel?year=${year}&plantId=${plantId}&reportType=RunLength`
 
   const formData = new FormData()
   formData.append('file', file)
