@@ -136,7 +136,6 @@ const ProductionVolumeDataBasis = () => {
     fetchData('Calculated Data', setRowsCalculatedData)
     fetchData('RowData', setRowsRowData)
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
-
   const exportRef1 = useRef(null)
   const exportRef2 = useRef(null)
   const exportRef3 = useRef(null)
@@ -260,7 +259,7 @@ const ProductionVolumeDataBasis = () => {
               id='meg-grid-header'
             >
               <Typography component='span' className='grid-title'>
-                MC Yearwise_
+                MC Yearwise
               </Typography>
             </CustomAccordionSummary>
             <CustomAccordionDetails>

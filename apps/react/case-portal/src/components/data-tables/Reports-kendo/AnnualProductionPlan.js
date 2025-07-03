@@ -257,7 +257,7 @@ const AnnualProductionPlan = () => {
       hidden: true,
     },
     {
-      field: 'durationHours',
+      field: 'rateValue',
       headerName: 'Achievable Hourly rate',
       editable: true,
       flex: 1,
@@ -273,7 +273,7 @@ const AnnualProductionPlan = () => {
       ),
     },
     {
-      field: 'rateValue',
+      field: 'durationHours',
       headerName: 'Op. Hrs',
       editable: true,
       flex: 1,

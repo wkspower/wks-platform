@@ -111,7 +111,7 @@ const CrackerConfig = () => {
     const idLower = tabs[tabIndex]?.toLowerCase() || ''
     const info = availableTabs.find((t) => t.id.toLowerCase() === idLower)
     // console.log(info)
-    return info ? info.displayName : tabs[tabIndex] || 'Feed'
+    return info ? info.name : tabs[tabIndex] || 'Feed'
   }, [tabs, tabIndex, availableTabs])
   const productionColumns = useMemo(() => {
     const configType =

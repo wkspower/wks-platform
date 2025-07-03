@@ -1316,6 +1316,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				}
 				
 				dto.setTypeDisplayName(getStringCellValue(row.getCell(6),dto));
+				dto.setIsEditable(getBooleanCellValue(row.getCell(8)));
 				}catch(Exception e){
 					e.printStackTrace();
 				   dto.setErrDescription(e.getMessage());
@@ -1413,7 +1414,16 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			for (Object[] row  : obj) {
 				
 					List<Object> list = new ArrayList<>();
-								
+					boolean isEditable;
+					Object flagObj = row[8];
+					if (flagObj instanceof Boolean) {
+						isEditable = (Boolean) flagObj;
+					} else if (flagObj instanceof Number) {
+						isEditable = ((Number) flagObj).intValue() == 1;
+					} else {
+						isEditable = false; // or default
+					}
+					if(isEditable) {
 						list.add(row[3]);
 						list.add(row[4]);
 						list.add(row[5]);
@@ -1421,9 +1431,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						list.add(row[0]);
 						list.add(row[1]);
 						list.add(row[2]);
-						list.add(row[6]);					
+						list.add(row[6]);
+						list.add(row[8]);
 						rows.add(list);
-				}			
+				}
+			}
 
 			List<String> innerHeaders = new ArrayList<>();
 			
@@ -1431,10 +1443,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			innerHeaders.add("UOM");
 			innerHeaders.add("Value");
 			innerHeaders.add("Remark");
+			
 			innerHeaders.add("NormTypeName");
 			innerHeaders.add("NormParameter_FK_Id");
 			innerHeaders.add("Name");
 			innerHeaders.add("AuditYear");
+			innerHeaders.add("isEditable");
 
 			List<List<String>> headers = new ArrayList<>();
 			headers.add(innerHeaders);
@@ -1469,6 +1483,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			sheet.setColumnHidden(5, true);
 			sheet.setColumnHidden(6, true);
 			sheet.setColumnHidden(7, true);
+			sheet.setColumnHidden(8, true);
 			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
 
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -1512,6 +1527,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						list.add(dto.getRemarks());
 						list.add(dto.getTypeName());
 						list.add(dto.getNormParameterFKId());
+						list.add(dto.getIsEditable());
 						list.add(year);
 						list.add(dto.getTypeDisplayName());
 						list.add(dto.getSaveStatus());
@@ -1521,14 +1537,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			}
 
 			List<String> innerHeaders = new ArrayList<>();
+			
 			innerHeaders.add("Particulars");
 			innerHeaders.add("UOM");
 			innerHeaders.add("Value");
 			innerHeaders.add("Remark");
+			
 			innerHeaders.add("NormTypeName");
 			innerHeaders.add("NormParameter_FK_Id");
-			innerHeaders.add("AuditYear");
 			innerHeaders.add("Name");
+			innerHeaders.add("AuditYear");
+			innerHeaders.add("isEditable");
 			innerHeaders.add("Status");
 			innerHeaders.add("Error Description");
 
@@ -1565,6 +1584,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			sheet.setColumnHidden(5, true);
 			sheet.setColumnHidden(6, true);
 			sheet.setColumnHidden(7, true);
+			sheet.setColumnHidden(8, true);
 			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
 
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

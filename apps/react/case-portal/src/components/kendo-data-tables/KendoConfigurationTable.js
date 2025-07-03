@@ -1,5 +1,5 @@
 import { Box, Tab, Tabs } from '@mui/material'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
@@ -57,8 +57,7 @@ const ConfigurationTable = () => {
   const keycloak = useSession()
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
-    dataGridStore
+  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
 
@@ -122,6 +121,13 @@ const ConfigurationTable = () => {
     setOpenConfirmDialog(false)
     onLoad()
   }
+
+  // const [_plantID, set_PlantID] = useState('')
+  // useEffect(() => {
+  //   if (plantID?.plantId) {
+  //     set_PlantID(plantID?.plantId)
+  //   }
+  // }, [plantID])
 
   const fetchData = async () => {
     // setRows([])
@@ -335,19 +341,57 @@ const ConfigurationTable = () => {
         fetchGradeData()
       }
     }, 500)
-    const today = new Date()
 
-    const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
+    // const today = new Date()
+    // const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
+    // const startDate = new Date(
+    //   today.getFullYear() - 5,
+    //   today.getMonth() - 1 + 1,
+    //   1,
+    // )
+    // setStartDate(startDate)
+    // setEndDate(endDate)
+  }, [oldYear, yearChanged, keycloak, plantID])
 
-    const startDate = new Date(
-      today.getFullYear() - 5,
-      today.getMonth() - 1 + 1,
-      1,
-    )
+  const computeAndSetDates = useCallback(() => {
+    setStartDate('')
+    setEndDate('')
+    // if (!configurationExecutionDetails.length) return
 
-    setStartDate(startDate)
-    setEndDate(endDate)
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+    const hasModifiedOn = configurationExecutionDetails[0]?.ModifiedOn
+
+    if (hasModifiedOn) {
+      // console.log(
+      //   'configurationExecutionDetails',
+      //   configurationExecutionDetails,
+      // )
+
+      const getDateValue = (name) =>
+        new Date(
+          configurationExecutionDetails.find(
+            (item) => item.Name === name,
+          )?.AttributeValue,
+        )
+
+      setStartDate(getDateValue('StartDate'))
+      setEndDate(getDateValue('EndDate'))
+    } else {
+      const today = new Date()
+      const fallbackEndDate = new Date(today.getFullYear(), today.getMonth(), 0)
+      const fallbackStartDate = new Date(
+        today.getFullYear() - 5,
+        today.getMonth(),
+        1,
+      )
+
+      setStartDate(fallbackStartDate)
+      setEndDate(fallbackEndDate)
+    }
+  }, [configurationExecutionDetails, plantID])
+
+  useEffect(() => {
+    computeAndSetDates()
+  }, [computeAndSetDates])
 
   const getTheId = (name) => {
     const tab = availableTabs.find((tab) => tab.name === name)
@@ -442,7 +486,7 @@ const ConfigurationTable = () => {
           severity: 'error',
         })
       }
-
+      getAopSummary()
       return response
     } catch (error) {
       console.error('Execution Failed!', error)
@@ -455,7 +499,7 @@ const ConfigurationTable = () => {
   useEffect(() => {
     hasExecutedRef.current = false
     getConfigurationExecutionDetails()
-  }, [sitePlantChange])
+  }, [plantID])
 
   const hasExecutedRef = useRef(false)
 
@@ -532,8 +576,8 @@ const ConfigurationTable = () => {
         plantId = parsedPlant.id
       }
 
-      console.log('startDateObj', startDateObj)
-      console.log('endDateObj', endDateObj)
+      // console.log('startDateObj', startDateObj)
+      // console.log('endDateObj', endDateObj)
 
       setStartDateObj(startDateObj)
       setEndDateObj(endDateObj)
@@ -576,7 +620,7 @@ const ConfigurationTable = () => {
           severity: 'error',
         })
       }
-
+      getAopSummary()
       return response
     } catch (error) {
       console.error('Execution Falied!', error)

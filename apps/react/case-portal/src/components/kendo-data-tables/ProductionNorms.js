@@ -620,6 +620,30 @@ const ProductionNorms = ({ permissions }) => {
       isEditable: false,
       aopStatus: '',
     },
+    {
+      idFromApi: null,
+      aopCaseId: null,
+      aopType: null,
+      aopYear: null,
+      plantFkId: null,
+      normParametersFKId: 'E + P',
+      uom: 'MT/Month',
+      april: 950,
+      may: 1035,
+      june: 1090,
+      july: 1720,
+      aug: 1560,
+      sep: 985,
+      oct: 140,
+      nov: 575,
+      dec: 1120,
+      jan: 280,
+      feb: 850,
+      march: 1430,
+      averageTPH: '',
+      isEditable: false,
+      aopStatus: '',
+    },
   ]
 
   return (
@@ -635,7 +659,7 @@ const ProductionNorms = ({ permissions }) => {
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         columns={productionColumns}
-        rows={lowerVertName === 'cracker' ? rowDataForCracker : rows}
+        rows={rows}
         setRows={setRows}
         title={'Production AOP'}
         isCellEditable={isCellEditable}

@@ -101,6 +101,8 @@ const ConsumptionNorms = () => {
 
   const [_plantID, set_PlantID] = useState('')
   const dispatch = useDispatch()
+  const [gradeId, setGradeId] = useState(null)
+  const [grades, setGrades] = useState([])
 
   useEffect(() => {
     if (plantID?.plantId) {
@@ -175,7 +177,7 @@ const ConsumptionNorms = () => {
         unsavedRows: {},
         rowsBeforeChange: {},
       }
-      fetchData()
+      fetchData(gradeId)
       dispatch(setIsBlocked(false))
 
       return response
@@ -280,10 +282,29 @@ const ConsumptionNorms = () => {
     }, 400)
   }, [apiRef, selectedUnit, modifiedCells, calculatebtnClicked])
 
-  const fetchData = async () => {
+  const fetchGradeDropdowns = async () => {
+    try {
+      setGrades([])
+      // const response = await DataService.getNormalOperationNormsGrades(keycloak)
+      const response = await DataService.getConsumptionAOPNormsGrades(keycloak)
+
+      if (response?.code == 200) {
+        setGrades(response?.data)
+      }
+    } catch (error) {
+      setGrades([])
+      console.error('Error fetching Business Demand data:', error)
+    }
+  }
+
+  const fetchData = async (gradeId) => {
+    if ((lowerVertName === 'pe' || lowerVertName === 'pp') && !gradeId) return
     setLoading(true)
     try {
-      var response = await DataService.getConsumptionNormsData(keycloak)
+      var response = await DataService.getConsumptionNormsData(
+        keycloak,
+        gradeId,
+      )
 
       if (response?.code != 200) {
         setRows([])
@@ -345,9 +366,12 @@ const ConsumptionNorms = () => {
   // }
 
   useEffect(() => {
-    fetchData()
+    fetchData(gradeId)
+    if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+      fetchGradeDropdowns()
+    }
     // getAopSummary()
-  }, [plantID, oldYear, yearChanged, keycloak, selectedUnit])
+  }, [plantID, oldYear, yearChanged, keycloak, selectedUnit, gradeId])
 
   const productionColumns = getEnhancedColDefs({
     headerMap,
@@ -358,11 +382,7 @@ const ConsumptionNorms = () => {
   }
 
   const handleCalculate = () => {
-    if (lowerVertName == 'meg') {
-      handleCalculateMeg()
-    } else {
-      handleCalculatePe()
-    }
+    handleCalculateMeg()
   }
 
   const handleCalculateMeg = async () => {
@@ -388,7 +408,7 @@ const ConsumptionNorms = () => {
           message: 'Data refreshed successfully!',
           severity: 'success',
         })
-        fetchData()
+        fetchData(gradeId)
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -519,17 +539,19 @@ const ConsumptionNorms = () => {
       showCalculate: true,
       allAction: true,
       showCalculateVisibility:
-        lowerVertName === 'meg' &&
-        Object.keys(calculationObject || {}).length > 0
-          ? true
-          : false,
+        Object.keys(calculationObject || {}).length > 0 ? true : false,
       showRefresh: false,
       noColor: false,
 
       customHeight: defaultCustomHeight,
+      showG: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
     },
     isOldYear,
   )
+
+  const handleGradeChange = (gradeId) => {
+    setGradeId(gradeId)
+  }
 
   return (
     <div>
@@ -541,7 +563,7 @@ const ConsumptionNorms = () => {
       </Backdrop>
 
       <div>
-        {(lowerVertName === 'meg' || lowerVertName === 'pe') && (
+        {true && (
           // <CustomAccordion
           //   defaultExpanded
           //   disableGutters
@@ -595,6 +617,8 @@ const ConsumptionNorms = () => {
               currentRowId={currentRowId}
               permissions={adjustedPermissions}
               groupBy='Particulars'
+              grades={grades}
+              handleGradeChange={handleGradeChange}
             />
           </Box>
           // </CustomAccordionDetails>

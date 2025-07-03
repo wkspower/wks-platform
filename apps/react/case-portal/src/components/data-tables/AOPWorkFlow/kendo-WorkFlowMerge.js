@@ -126,6 +126,7 @@ const WorkFlowMerge = () => {
   useEffect(() => {
     fetchData()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+
   const handleCalculate = () => {
     if (lowerVertName == 'meg') {
       handleCalculateMeg()
@@ -214,6 +215,7 @@ const WorkFlowMerge = () => {
   const handleExportAll = async () => {
     try {
       setLoading(true)
+      // console.log('true 2')
 
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
@@ -343,12 +345,11 @@ const WorkFlowMerge = () => {
     const remarkIdx = cols.findIndex((c) => c.field === 'remark')
     if (remarkIdx > -1) {
       cols[remarkIdx] = remarkColumn(handleRemarkCellClick)
-
     }
 
     return cols
-        // The column is considered numeric if:
-        // - It's a valid number (including empty values)
+    // The column is considered numeric if:
+    // - It's a valid number (including empty values)
   }
 
   const fetchData = async () => {
@@ -369,7 +370,6 @@ const WorkFlowMerge = () => {
             numericKeys.includes(k) && v !== '' ? Number(v) : v,
           ]),
         ),
-
       }))
 
       setRows(formatted)
@@ -586,7 +586,8 @@ const WorkFlowMerge = () => {
         </Stepper>
 
         <Typography component='div' className='text-note'>
-          * Prices - MIIS BPC table, Actual values - MIIS Contribution (YTD).
+          * Prices - MIIS BPC (Last Budget Year), Actual Values - MIIS
+          Contribution (YTD).
         </Typography>
 
         <Stack

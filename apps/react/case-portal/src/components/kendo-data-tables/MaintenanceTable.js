@@ -24,15 +24,13 @@ const MaintenanceTable = () => {
         lowerVertName === 'cracker'
           ? DataService.getCrackerMaintenanceData
           : DataService.getMaintenanceData,
-      editable: lowerVertName === 'cracker',
+      // editable: lowerVertName === 'cracker',
+      editable: false,
     }),
     [lowerVertName],
   )
 
-  const headerMap = useMemo(
-    () => generateHeaderNames(localStorage.getItem('year')),
-    [],
-  )
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   const [_plantID, set_PlantID] = useState('')
   useEffect(() => {
@@ -231,26 +229,150 @@ const MaintenanceTable = () => {
     'Mar',
   ]
 
-  const productionColumns = useMemo(
-    () => [
-      { field: 'Name', title: 'Description', width: 220, align: 'left' },
-      ...monthNames.map((name, idx) => ({
-        field: name,
-        title: headerMap[4 + idx], // 4 + 0 = April, 4 + 1 = May, �
-        type: 'number',
-        format: '{0:n2}',
-        align: 'right',
-        headerAlign: 'left',
-      })),
-      { field: 'isEditable', hidden: true },
-    ],
-    [headerMap],
-  )
+  const productionColumns = [
+    {
+      field: 'Name',
+      title: 'Description',
+      align: 'left',
+      headerAlign: 'left',
+      width: 220,
+      editable: false,
+    },
+    {
+      field: 'April',
+      title: headerMap[4],
+      align: 'right',
+      headerAlign: 'left',
+      type: 'number',
+      format: '{0:n2}',
+      editable: false,
+    },
 
-  const basecols = useMemo(
-    () => (dataConfig.isCracker ? crackercolumns : productionColumns),
-    [dataConfig.isCracker, productionColumns],
-  )
+    {
+      field: 'May',
+      title: headerMap[5],
+      type: 'number',
+      format: '{0:n2}',
+      editable: false,
+      align: 'right',
+      headerAlign: 'left',
+    },
+    {
+      field: 'June',
+      title: headerMap[6],
+      type: 'number',
+      format: '{0:n2}',
+
+      editable: false,
+      align: 'right',
+      headerAlign: 'left',
+    },
+    {
+      field: 'July',
+      title: headerMap[7],
+      type: 'number',
+      format: '{0:n2}',
+
+      editable: false,
+      align: 'right',
+      headerAlign: 'left',
+    },
+    {
+      field: 'Aug',
+      title: headerMap[8],
+      type: 'number',
+      format: '{0:n2}',
+
+      editable: false,
+      align: 'right',
+      headerAlign: 'left',
+    },
+    {
+      field: 'Sep',
+      title: headerMap[9],
+      type: 'number',
+      format: '{0:n2}',
+
+      editable: false,
+      align: 'right',
+      headerAlign: 'left',
+    },
+    {
+      field: 'Oct',
+      title: headerMap[10],
+      type: 'number',
+      format: '{0:n2}',
+
+      editable: false,
+      align: 'right',
+      headerAlign: 'left',
+    },
+
+    {
+      field: 'Nov',
+      title: headerMap[11],
+      type: 'number',
+      format: '{0:n2}',
+
+      editable: false,
+      align: 'right',
+      headerAlign: 'left',
+    },
+    {
+      field: 'Dec',
+      title: headerMap[12],
+      type: 'number',
+      format: '{0:n2}',
+
+      editable: false,
+      align: 'right',
+      headerAlign: 'left',
+    },
+    {
+      field: 'Jan',
+      title: headerMap[1],
+      type: 'number',
+      format: '{0:n2}',
+
+      editable: false,
+      align: 'right',
+      headerAlign: 'left',
+    },
+    {
+      field: 'Feb',
+      title: headerMap[2],
+      type: 'number',
+      format: '{0:n2}',
+
+      editable: false,
+      align: 'right',
+      headerAlign: 'left',
+    },
+    {
+      field: 'Mar',
+      title: headerMap[3],
+      type: 'number',
+      format: '{0:n2}',
+
+      editable: false,
+      align: 'right',
+      headerAlign: 'left',
+    },
+
+    {
+      field: 'isEditable',
+      title: 'isEditable',
+      hidden: true,
+    },
+  ]
+
+  // const basecols = useMemo(
+  //   () => (dataConfig.isCracker ? crackercolumns : productionColumns),
+  //   [dataConfig.isCracker, productionColumns],
+  // )
+
+  const basecols =
+    lowerVertName == 'cracker' ? crackercolumns : productionColumns
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions

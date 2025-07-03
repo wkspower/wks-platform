@@ -114,12 +114,5 @@
     "type": "number",
     "format": "{0:#.###}",
     "hidden": false
-  },
-  {
-    "field": "remarks",
-    "title": "Remarks",
-    "editable": true,
-    "type": "string",
-    "hidden": false
   }
 ]

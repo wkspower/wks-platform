@@ -96,7 +96,7 @@ const NormalOpNormsScreen = () => {
   }, [plantID])
 
   const fetchData = async (gradeId) => {
-    if (lowerVertName === 'pe' && !gradeId) return
+    if ((lowerVertName === 'pe' || lowerVertName === 'pp') && !gradeId) return
 
     setLoading(true)
 
@@ -218,7 +218,7 @@ const NormalOpNormsScreen = () => {
       if (lowerVertName === 'meg') {
         promises.push(fetchDataIntermediateValues())
       }
-      if (lowerVertName === 'pe') {
+      if (lowerVertName === 'pe' || lowerVertName === 'pp') {
         promises.push(fetchGradeDropdowns())
       }
 
@@ -708,7 +708,8 @@ const NormalOpNormsScreen = () => {
           severity: 'success',
         })
 
-        if (lowerVertName == 'pe') fetchGradeDropdowns()
+        if (lowerVertName == 'pe' || lowerVertName == 'pp')
+          fetchGradeDropdowns()
         fetchData(gradeId)
         if (lowerVertName == 'meg') fetchDataIntermediateValues()
         getNormTransactions()
@@ -761,7 +762,7 @@ const NormalOpNormsScreen = () => {
       saveWithRemark: true,
       saveBtn: true,
       showCalculate: true,
-      showG: lowerVertName === 'pe' ? true : false,
+      showG: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
 
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,
@@ -848,7 +849,7 @@ const NormalOpNormsScreen = () => {
       if (response) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Configuration data Upload Successfully!',
+          message: 'Uploaded Successfully!',
           severity: 'success',
         })
         setModifiedCells({})
@@ -865,7 +866,7 @@ const NormalOpNormsScreen = () => {
 
       return response
     } catch (error) {
-      console.error('Error saving Configuration data:', error)
+      console.error('Error saving data:', error)
       setLoading(false)
     } finally {
       // fetchData()

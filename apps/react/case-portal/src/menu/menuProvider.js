@@ -18,12 +18,9 @@ import { mapScreen } from 'components/Utilities/menuRefractoring'
 const MenuContext = createContext()
 const STATIC_MENU_DEFAULT = [plan, workspace]
 const STATIC_MENU_CRACKER = [planCracker]
-const USE_STATIC_MENU = false
+const USE_STATIC_MENU = true
 
 export function MenuProvider({ children }) {
-
-
-
   // const navigate = useNavigate()
 
   const keycloak = useSession()
@@ -42,9 +39,9 @@ export function MenuProvider({ children }) {
   const [menuItems, setMenuItems] = useState(staticMenuForVertical)
   const fetchMenuScreens = useCallback(
     async (currentToken, vId, pId, staticMenu) => {
-    if (USE_STATIC_MENU) {
+      if (USE_STATIC_MENU) {
         return staticMenu
-    }
+      }
 
       if (!currentToken || (!vId && !pId)) {
         return staticMenu

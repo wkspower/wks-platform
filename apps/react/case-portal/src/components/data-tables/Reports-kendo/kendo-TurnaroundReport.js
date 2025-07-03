@@ -78,6 +78,7 @@ const TurnaroundReport = () => {
       editable: false,
       align: 'right',
       headerAlign: 'right',
+      type: 'number',
     },
 
     {
@@ -112,9 +113,10 @@ const TurnaroundReport = () => {
     },
 
     {
-      field: 'durationInHrs',
+      field: 'durationInHrs1',
       title: 'Duration, hrs',
       width: 100,
+      type: 'number',
       editable: true,
       align: 'right',
       headerAlign: 'right',
@@ -147,6 +149,7 @@ const TurnaroundReport = () => {
       inEdit: false,
       originalRemark: item?.remarks ?? '',
       isEditable: true,
+      durationInHrs1: item?.durationInHrs,
     }))
 
   const fetchCurrentYear = async () => {
@@ -262,7 +265,7 @@ const TurnaroundReport = () => {
         toDate: row.toDate,
         activity: row.activity,
         sno: row.rowNumber,
-        durationInHrs: row.durationInHrs,
+        durationInHrs: row.durationInHrs1,
         remark: row.remarks,
         periodInMonths: row.periodInMonths,
       }))
@@ -355,6 +358,31 @@ const TurnaroundReport = () => {
       setLoading(false)
     }
   }
+
+  const deleteRowData = async (paramsForDelete) => {
+    try {
+      const { idFromApi, id } = paramsForDelete
+      const deleteId = id
+
+      if (!idFromApi) {
+        setRows2((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+      }
+
+      if (idFromApi) {
+        await DataService.deleteTurnArondReportItem(idFromApi, keycloak)
+        setRows2((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Record Deleted successfully!',
+          severity: 'success',
+        })
+        fetchPreviousYear()
+      }
+    } catch (error) {
+      console.error('Error deleting Record!', error)
+    }
+  }
+
   return (
     <Box>
       <KendoDataTablesReports
@@ -363,9 +391,6 @@ const TurnaroundReport = () => {
         rows={rows}
         setRows={setRows}
         columns={columns}
-        // processRowUpdate={processRowUpdate}
-        // disableSelectionOnClick
-        // defaultGroupingExpansionDepth={1}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}
         currentRemark={currentRemark}
@@ -377,7 +402,6 @@ const TurnaroundReport = () => {
         title='Turnaround Details (T-19A)'
         setModifiedCells={setModifiedCells}
         permissions={{
-          // customHeight: { mainBox: '32vh', otherBox: '100%' },
           textAlignment: 'center',
           remarksEditable: true,
           showCalculate: false,
@@ -391,7 +415,7 @@ const TurnaroundReport = () => {
       />
 
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
-        Turnaround details for the previous years since commissioning{' '}
+        Turnaround details for the previous years data since commissioning{' '}
       </Typography>
 
       <KendoDataTables
@@ -410,12 +434,14 @@ const TurnaroundReport = () => {
         loading={loading}
         fetchData={fetchPreviousYear}
         setModifiedCells={setModifiedCells2}
+        deleteRowData={deleteRowData}
         permissions={{
           remarksEditable: true,
           saveBtn: true,
           saveBtnForRemark: true,
           addButton: true,
           allAction: true,
+          deleteButton: true,
         }}
       />
       <Notification

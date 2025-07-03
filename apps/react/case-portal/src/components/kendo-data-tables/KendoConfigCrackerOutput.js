@@ -42,9 +42,9 @@ const CrackerConfig = () => {
 
   // ===== Dynamic-tabs state (static fallback) =====
   const rawTabsStatic = [
-    'Miscellaneous Parameters',
     'Total Feed',
     'Total Products',
+    'Miscellaneous Parameters',
   ]
   const [tabs, setTabs] = useState(rawTabsStatic)
   const [availableTabs, setAvailableTabs] = useState([])
@@ -183,12 +183,12 @@ const CrackerConfig = () => {
   const getRows = useCallback(
     (tabId) => {
       switch (tabId) {
-        case 'Miscellaneous Parameters':
-          return feedRows
         case 'Total Feed':
           return compositionRows
         case 'Total Products':
           return hydrogenationRows
+        case 'Miscellaneous Parameters':
+          return feedRows
 
         default:
           return []
@@ -445,9 +445,9 @@ const CrackerConfig = () => {
             [currentTabDisplay],
           )
           switch (currentTabDisplay) {
-            case 'Miscellaneous Parameters':
             case 'Total Feed':
             case 'Total Products':
+            case 'Miscellaneous Parameters':
               return (
                 <Box key={currentTabDisplay}>
                   <KendoDataTables

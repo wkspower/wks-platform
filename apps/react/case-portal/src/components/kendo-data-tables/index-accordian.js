@@ -52,11 +52,42 @@ import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 // import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
 import { RemarkCell } from './Utilities-Kendo/RemarkCell'
 import { DateColumnMenu } from 'components/Utilities/DateColumnMenu'
+import MuiAccordion from '@mui/material/Accordion'
+import MuiAccordionDetails from '@mui/material/AccordionDetails'
+import MuiAccordionSummary from '@mui/material/AccordionSummary'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { styled } from '@mui/material/styles'
+
+const CustomAccordion = styled((props) => (
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(() => ({
+  position: 'unset',
+  border: 'none',
+  boxShadow: 'none',
+  margin: '0px',
+  '&:before': {
+    display: 'none',
+  },
+}))
+
+const CustomAccordionSummary = styled((props) => (
+  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
+))(() => ({
+  backgroundColor: '#fff',
+  padding: '0px 12px',
+  minHeight: '40px',
+  '& .MuiAccordionSummary-content': {
+    margin: '8px 0',
+  },
+}))
+const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
+  padding: '0px 0px 12px',
+  backgroundColor: '#F2F3F8',
+}))
 
 export const dateFields = [
   'maintStartDateTime',
   'maintEndDateTime',
-
   'fromDate',
   'toDate',
 ]
@@ -78,7 +109,7 @@ export const monthMap = {
   december: 12,
 }
 
-const KendoDataTables = ({
+const KendoDataTablesAccordian = ({
   rows = [],
   grades = [],
   allRedCell = [],
@@ -515,6 +546,399 @@ const KendoDataTables = ({
     }
   }, [grades, permissions?.showG, selectedGrade])
 
+  const renderGrid = () => (
+    <Grid
+      modifiedCells={modifiedCells}
+      autoProcessData={true}
+      defaultGroup={initialGroup}
+      data={rows}
+      rows={{ data: CustomRow }}
+      dataItemKey='id'
+      editField='inEdit'
+      editable={{ mode: 'incell' }}
+      onEditChange={handleEditChange}
+      edit={edit}
+      filter={filter}
+      onFilterChange={(e) => setFilter(e.filter)}
+      onItemChange={itemChange}
+      resizable={true}
+      defaultSkip={0}
+      defaultTake={100}
+      contextMenu={true}
+      grade={grades}
+      onRowClick={handleRowClick}
+      sortable={{
+        mode: 'multiple',
+      }}
+      // filterable={columns.some((col) => dateFields.includes(col.field))}
+      allRedCell={allRedCell}
+      size='small'
+      pageable={
+        rows?.length > 100
+          ? {
+              buttonCount: 4,
+              pageSizes: [10, 50, 100],
+            }
+          : false
+      }
+    >
+      {columns.map((col) => {
+        const isActive = isColumnActive(col?.field, filter, sort)
+
+        if (dateFields.includes(col.field)) {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              filter='date'
+              filterable={{
+                cell: {
+                  operator: 'gte',
+                  showOperators: true,
+                },
+              }}
+              cells={{
+                edit: {
+                  date: ['fromDate', 'toDate'].includes(col.field)
+                    ? DateOnlyPicker
+                    : DateTimePickerEditor,
+                },
+                data: toolTipRenderer,
+              }}
+              format={
+                ['fromDate', 'toDate'].includes(col.field)
+                  ? '{0:dd-MM-yyyy}'
+                  : '{0:dd-MM-yyyy hh:mm a}'
+              }
+              editor='date'
+              hidden={col.hidden}
+              columnMenu={DateColumnMenu}
+            />
+          )
+        }
+
+        if (dateFields1.includes(col.field)) {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              filter='date'
+              filterable={{
+                cell: {
+                  operator: 'gte',
+                  showOperators: true,
+                },
+              }}
+              cells={{
+                edit: {
+                  date: [
+                    'ibrSD',
+                    'ibrED',
+                    'taSD',
+                    'taED',
+                    'sdED',
+                    'sdSD',
+                  ].includes(col.field)
+                    ? DateOnlyPicker
+                    : DateOnlyPicker,
+                },
+                data: toolTipRenderer,
+              }}
+              format={
+                ['ibrSD', 'ibrED', 'taSD', 'taED', 'sdED', 'sdSD'].includes(
+                  col.field,
+                )
+                  ? '{0:dd-MM-yyyy}'
+                  : '{0:dd-MM-yyyy}'
+              }
+              editor='date'
+              hidden={col.hidden}
+              columnMenu={DateColumnMenu}
+            />
+          )
+        }
+        if (col?.field === 'productName1') {
+          return (
+            <GridColumn
+              key='productName1'
+              field='productName1'
+              title={col.title || col.headerName || 'Particulars'}
+              // width={210}
+              editable={col.editable || true}
+              hidden={col.hidden}
+              cells={{
+                data: (cellProps) => (
+                  <ProductCell {...cellProps} allProducts={allProducts} />
+                ),
+              }}
+              columnMenu={ColumnMenuCheckboxFilter}
+            />
+          )
+        }
+        if (col?.field === 'month') {
+          return (
+            <GridColumn
+              key='month'
+              field='month'
+              title={col.title || col.headerName || 'month'}
+              editable={col.editable || true}
+              hidden={col.hidden}
+              width={col.widthT}
+              cells={{
+                data: (cellProps) => (
+                  <MonthCell {...cellProps} allMonths={allMonths} />
+                ),
+              }}
+              columnMenu={ColumnMenuCheckboxFilter}
+            />
+          )
+        }
+        if (['discription', 'Name'].includes(col?.field)) {
+          return (
+            <GridColumn
+              key={col?.field}
+              field={col?.field}
+              title={col.title || col.headerName || 'Description'}
+              width={col.width}
+              editable={true}
+              columnMenu={ColumnMenuCheckboxFilter}
+              hidden={col.hidden}
+              headerClassName={isActive ? 'active-column' : ''}
+              cells={{
+                edit: { text: TextCellEditor },
+                data: toolTipRenderer,
+              }}
+            />
+          )
+        }
+        if (col?.field === 'UOM') {
+          return (
+            <GridColumn
+              key='UOM'
+              field='UOM'
+              title={col.title || col.headerName || 'UOM'}
+              // width={col?.width}
+              editable={false}
+              columnMenu={ColumnMenuCheckboxFilter}
+              hidden={col.hidden}
+              cells={{
+                data: toolTipRenderer,
+              }}
+            />
+          )
+        }
+        if (col?.field === 'ReceipeName') {
+          return (
+            <GridColumn
+              key='ReceipeName'
+              field='ReceipeName'
+              title={col.title || col.headerName}
+              width={col.width1}
+              editable={false}
+              columnMenu={ColumnMenuCheckboxFilter}
+              hidden={col.hidden}
+              cells={{
+                data: toolTipRenderer,
+              }}
+            />
+          )
+        }
+        if (col.type === 'Receipe') {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              width={col.width1}
+              hidden={col.hidden}
+              className={
+                col?.isDisabled ? 'k-number-right-disabled' : 'k-number-right'
+              }
+              editable={col?.editable ? true : false}
+              headerClassName={isActive ? 'active-column' : ''}
+              cells={{
+                edit: { text: NoSpinnerNumericEditor },
+                data: toolTipRenderer,
+              }}
+              columnMenu={ColumnMenuCheckboxFilter}
+              filter='numeric'
+              format={col.format}
+            />
+          )
+        }
+        if (col?.field === 'DisplayName') {
+          return (
+            <GridColumn
+              key='DisplayName'
+              field={col?.field}
+              title={col.title || col.headerName}
+              // width={col?.width}
+              editable={false}
+              columnMenu={ColumnMenuCheckboxFilter}
+              hidden={col.hidden}
+              cells={{
+                data: toolTipRenderer,
+              }}
+            />
+          )
+        }
+
+        // const isColumnActive = (field, filter, sort) => {
+        //   return (
+        //     isColumnMenuFilterActive(field, filter) ||
+        //     isColumnMenuSortActive(field, sort)
+        //   )
+        // }
+
+        if (
+          ['aopRemarks', 'remarks', 'remark', 'Remarks'].includes(col.field)
+        ) {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              editor={true}
+              editable={{ mode: 'popup' }}
+              cells={{
+                data: (cellProps, allRedCell) => (
+                  <RemarkCell
+                    {...cellProps}
+                    allRedCell={allRedCell} // pass your extra flag
+                    onRemarkClick={handleRemarkCellClick}
+                  />
+                ),
+              }}
+              columnMenu={ColumnMenuCheckboxFilter}
+              hidden={col.hidden}
+            />
+          )
+        }
+        if (col.field === 'durationInHrs') {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              // width={col.width}
+              editable={true}
+              columnMenu={ColumnMenuCheckboxFilter}
+              hidden={col.hidden}
+              format={'{0:n2}'}
+              className={
+                col?.isDisabled ? 'k-number-right-disabled' : 'k-number-right'
+              }
+              cells={{
+                edit: { text: DurationEditor },
+                data: DurationDisplayWithTooltipCell,
+              }}
+            />
+          )
+        }
+
+        if (col.type === 'number') {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              // width={col.width}
+              hidden={col.hidden}
+              className={
+                col?.isDisabled ? 'k-number-right-disabled' : 'k-number-right'
+              }
+              editable={col?.editable ? true : false}
+              headerClassName={isActive ? 'active-column' : ''}
+              cells={{
+                edit: { text: NoSpinnerNumericEditor },
+                data: toolTipRenderer,
+              }}
+              columnMenu={ColumnMenuCheckboxFilter}
+              filter='numeric'
+              format={col.format}
+            />
+          )
+        }
+        if (col.type === 'numberWidth') {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              width={col.width}
+              hidden={col.hidden}
+              className={
+                col?.isDisabled ? 'k-number-right-disabled' : 'k-number-right'
+              }
+              editable={col?.editable ? true : false}
+              headerClassName={isActive ? 'active-column' : ''}
+              cells={{
+                edit: { text: NoSpinnerNumericEditor },
+                data: toolTipRenderer,
+              }}
+              columnMenu={ColumnMenuCheckboxFilter}
+              filter='numeric'
+              format={col.format}
+            />
+          )
+        }
+
+        if (col.field === 'ConstantValue') {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              // width={col.width}
+              hidden={col.hidden}
+              editable={!!col?.editable}
+              headerClassName={isActive ? 'active-column' : ''}
+              cells={{
+                edit: { text: NoSpinnerNumericEditor },
+                data: toolTipRenderer,
+              }}
+              columnMenu={ColumnMenuCheckboxFilter}
+            />
+          )
+        }
+
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            width={col.widthT}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            headerClassName={isActive ? 'active-column' : ''}
+            cells={{
+              edit: { text: TextCellEditor },
+              data: toolTipRenderer,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+          />
+        )
+      })}
+
+      {permissions?.deleteButton && (
+        <GridColumn
+          key='actions'
+          field='actions'
+          title='Action'
+          width={80}
+          className='k-text-center'
+          filterable={false}
+          editable={false}
+          cells={{
+            data: ActionsCell,
+          }}
+        />
+      )}
+    </Grid>
+  )
+
   return (
     <div style={{ position: 'relative' }}>
       {loading && (
@@ -544,11 +968,11 @@ const KendoDataTables = ({
                 </Typography>
               )}
 
-              {permissions?.showTitleName && (
+              {/* {permissions?.showTitleName && (
                 <Typography component='div' className='grid-title'>
                   {titleName}
                 </Typography>
-              )}
+              )} */}
 
               {permissions?.showG && (
                 <TextField
@@ -744,412 +1168,33 @@ const KendoDataTables = ({
       )}
 
       <div className='kendo-data-grid'>
-        <Tooltip openDelay={50} position='default' anchorElement='target'>
-          <Grid
-            modifiedCells={modifiedCells}
-            autoProcessData={true}
-            defaultGroup={initialGroup}
-            data={rows}
-            rows={{ data: CustomRow }}
-            dataItemKey='id'
-            editField='inEdit'
-            editable={{ mode: 'incell' }}
-            onEditChange={handleEditChange}
-            edit={edit}
-            filter={filter}
-            onFilterChange={(e) => setFilter(e.filter)}
-            onItemChange={itemChange}
-            resizable={true}
-            defaultSkip={0}
-            defaultTake={100}
-            contextMenu={true}
-            grade={grades}
-            onRowClick={handleRowClick}
-            sortable={{
-              mode: 'multiple',
-            }}
-            // filterable={columns.some((col) => dateFields.includes(col.field))}
-            allRedCell={allRedCell}
-            size='small'
-            pageable={
-              rows?.length > 100
-                ? {
-                    buttonCount: 4,
-                    pageSizes: [10, 50, 100],
-                  }
-                : false
-            }
-          >
-            {columns.map((col) => {
-              const isActive = isColumnActive(col?.field, filter, sort)
-
-              if (dateFields.includes(col.field)) {
-                return (
-                  <GridColumn
-                    key={col.field}
-                    field={col.field}
-                    title={col.title || col.headerName}
-                    filter='date'
-                    filterable={{
-                      cell: {
-                        operator: 'gte',
-                        showOperators: true,
-                      },
-                    }}
-                    cells={{
-                      edit: {
-                        date: ['fromDate', 'toDate'].includes(col.field)
-                          ? DateOnlyPicker
-                          : DateTimePickerEditor,
-                      },
-                      data: toolTipRenderer,
-                    }}
-                    format={
-                      ['fromDate', 'toDate'].includes(col.field)
-                        ? '{0:dd-MM-yyyy}'
-                        : '{0:dd-MM-yyyy hh:mm a}'
-                    }
-                    editor='date'
-                    hidden={col.hidden}
-                    columnMenu={DateColumnMenu}
-                  />
-                )
-              }
-              if (dateFields1.includes(col.field)) {
-                return (
-                  <GridColumn
-                    key={col.field}
-                    field={col.field}
-                    title={col.title || col.headerName}
-                    filter='date'
-                    filterable={{
-                      cell: {
-                        operator: 'gte',
-                        showOperators: true,
-                      },
-                    }}
-                    cells={{
-                      edit: {
-                        date: [
-                          'ibrSD',
-                          'ibrED',
-                          'taSD',
-                          'taED',
-                          'sdED',
-                          'sdSD',
-                        ].includes(col.field)
-                          ? DateOnlyPicker
-                          : DateOnlyPicker,
-                      },
-                      data: toolTipRenderer,
-                    }}
-                    format={
-                      [
-                        'ibrSD',
-                        'ibrED',
-                        'taSD',
-                        'taED',
-                        'sdED',
-                        'sdSD',
-                      ].includes(col.field)
-                        ? '{0:dd-MM-yyyy}'
-                        : '{0:dd-MM-yyyy}'
-                    }
-                    editor='date'
-                    hidden={col.hidden}
-                    columnMenu={DateColumnMenu}
-                  />
-                )
-              }
-              if (col?.field === 'productName1') {
-                return (
-                  <GridColumn
-                    key='productName1'
-                    field='productName1'
-                    title={col.title || col.headerName || 'Particulars'}
-                    // width={210}
-                    editable={col.editable || true}
-                    hidden={col.hidden}
-                    cells={{
-                      data: (cellProps) => (
-                        <ProductCell {...cellProps} allProducts={allProducts} />
-                      ),
-                    }}
-                    columnMenu={ColumnMenuCheckboxFilter}
-                  />
-                )
-              }
-              if (col?.field === 'month') {
-                return (
-                  <GridColumn
-                    key='month'
-                    field='month'
-                    title={col.title || col.headerName || 'month'}
-                    editable={col.editable || true}
-                    hidden={col.hidden}
-                    width={col.widthT}
-                    cells={{
-                      data: (cellProps) => (
-                        <MonthCell {...cellProps} allMonths={allMonths} />
-                      ),
-                    }}
-                    columnMenu={ColumnMenuCheckboxFilter}
-                  />
-                )
-              }
-              if (['discription', 'Name'].includes(col?.field)) {
-                return (
-                  <GridColumn
-                    key={col?.field}
-                    field={col?.field}
-                    title={col.title || col.headerName || 'Description'}
-                    width={col.width}
-                    editable={true}
-                    columnMenu={ColumnMenuCheckboxFilter}
-                    hidden={col.hidden}
-                    headerClassName={isActive ? 'active-column' : ''}
-                    cells={{
-                      edit: { text: TextCellEditor },
-                      data: toolTipRenderer,
-                    }}
-                  />
-                )
-              }
-              if (col?.field === 'UOM') {
-                return (
-                  <GridColumn
-                    key='UOM'
-                    field='UOM'
-                    title={col.title || col.headerName || 'UOM'}
-                    // width={col?.width}
-                    editable={false}
-                    columnMenu={ColumnMenuCheckboxFilter}
-                    hidden={col.hidden}
-                    cells={{
-                      data: toolTipRenderer,
-                    }}
-                  />
-                )
-              }
-              if (col?.field === 'ReceipeName') {
-                return (
-                  <GridColumn
-                    key='ReceipeName'
-                    field='ReceipeName'
-                    title={col.title || col.headerName}
-                    width={col.width1}
-                    editable={false}
-                    columnMenu={ColumnMenuCheckboxFilter}
-                    hidden={col.hidden}
-                    cells={{
-                      data: toolTipRenderer,
-                    }}
-                  />
-                )
-              }
-              if (col.type === 'Receipe') {
-                return (
-                  <GridColumn
-                    key={col.field}
-                    field={col.field}
-                    title={col.title || col.headerName}
-                    width={col.width1}
-                    hidden={col.hidden}
-                    className={
-                      col?.isDisabled
-                        ? 'k-number-right-disabled'
-                        : 'k-number-right'
-                    }
-                    editable={col?.editable ? true : false}
-                    headerClassName={isActive ? 'active-column' : ''}
-                    cells={{
-                      edit: { text: NoSpinnerNumericEditor },
-                      data: toolTipRenderer,
-                    }}
-                    columnMenu={ColumnMenuCheckboxFilter}
-                    filter='numeric'
-                    format={col.format}
-                  />
-                )
-              }
-              if (col?.field === 'DisplayName') {
-                return (
-                  <GridColumn
-                    key='DisplayName'
-                    field={col?.field}
-                    title={col.title || col.headerName}
-                    // width={col?.width}
-                    editable={false}
-                    columnMenu={ColumnMenuCheckboxFilter}
-                    hidden={col.hidden}
-                    cells={{
-                      data: toolTipRenderer,
-                    }}
-                  />
-                )
-              }
-
-              // const isColumnActive = (field, filter, sort) => {
-              //   return (
-              //     isColumnMenuFilterActive(field, filter) ||
-              //     isColumnMenuSortActive(field, sort)
-              //   )
-              // }
-
-              if (
-                ['aopRemarks', 'remarks', 'remark', 'Remarks'].includes(
-                  col.field,
-                )
-              ) {
-                return (
-                  <GridColumn
-                    key={col.field}
-                    field={col.field}
-                    title={col.title || col.headerName}
-                    editor={true}
-                    editable={{ mode: 'popup' }}
-                    cells={{
-                      data: (cellProps, allRedCell) => (
-                        <RemarkCell
-                          {...cellProps}
-                          allRedCell={allRedCell} // pass your extra flag
-                          onRemarkClick={handleRemarkCellClick}
-                        />
-                      ),
-                    }}
-                    columnMenu={ColumnMenuCheckboxFilter}
-                    hidden={col.hidden}
-                  />
-                )
-              }
-              if (col.field === 'durationInHrs') {
-                return (
-                  <GridColumn
-                    key={col.field}
-                    field={col.field}
-                    title={col.title || col.headerName}
-                    // width={col.width}
-                    editable={true}
-                    columnMenu={ColumnMenuCheckboxFilter}
-                    hidden={col.hidden}
-                    format={'{0:n2}'}
-                    className={
-                      col?.isDisabled
-                        ? 'k-number-right-disabled'
-                        : 'k-number-right'
-                    }
-                    cells={{
-                      edit: { text: DurationEditor },
-                      data: DurationDisplayWithTooltipCell,
-                    }}
-                  />
-                )
-              }
-
-              if (col.type === 'number') {
-                return (
-                  <GridColumn
-                    key={col.field}
-                    field={col.field}
-                    title={col.title || col.headerName}
-                    // width={col.width}
-                    hidden={col.hidden}
-                    className={
-                      col?.isDisabled
-                        ? 'k-number-right-disabled'
-                        : 'k-number-right'
-                    }
-                    editable={col?.editable ? true : false}
-                    headerClassName={isActive ? 'active-column' : ''}
-                    cells={{
-                      edit: { text: NoSpinnerNumericEditor },
-                      data: toolTipRenderer,
-                    }}
-                    columnMenu={ColumnMenuCheckboxFilter}
-                    filter='numeric'
-                    format={col.format}
-                  />
-                )
-              }
-              if (col.type === 'numberWidth') {
-                return (
-                  <GridColumn
-                    key={col.field}
-                    field={col.field}
-                    title={col.title || col.headerName}
-                    width={col.width}
-                    hidden={col.hidden}
-                    className={
-                      col?.isDisabled
-                        ? 'k-number-right-disabled'
-                        : 'k-number-right'
-                    }
-                    editable={col?.editable ? true : false}
-                    headerClassName={isActive ? 'active-column' : ''}
-                    cells={{
-                      edit: { text: NoSpinnerNumericEditor },
-                      data: toolTipRenderer,
-                    }}
-                    columnMenu={ColumnMenuCheckboxFilter}
-                    filter='numeric'
-                    format={col.format}
-                  />
-                )
-              }
-
-              if (col.field === 'ConstantValue') {
-                return (
-                  <GridColumn
-                    key={col.field}
-                    field={col.field}
-                    title={col.title || col.headerName}
-                    // width={col.width}
-                    hidden={col.hidden}
-                    editable={!!col?.editable}
-                    headerClassName={isActive ? 'active-column' : ''}
-                    cells={{
-                      edit: { text: NoSpinnerNumericEditor },
-                      data: toolTipRenderer,
-                    }}
-                    columnMenu={ColumnMenuCheckboxFilter}
-                  />
-                )
-              }
-
-              return (
-                <GridColumn
-                  key={col.field}
-                  field={col.field}
-                  title={col.title || col.headerName}
-                  width={col.widthT}
-                  hidden={col.hidden}
-                  editable={col?.editable ? true : false}
-                  headerClassName={isActive ? 'active-column' : ''}
-                  cells={{
-                    edit: { text: TextCellEditor },
-                    data: toolTipRenderer,
-                  }}
-                  columnMenu={ColumnMenuCheckboxFilter}
-                />
-              )
-            })}
-
-            {permissions?.deleteButton && (
-              <GridColumn
-                key='actions'
-                field='actions'
-                title='Action'
-                width={80}
-                className='k-text-center'
-                filterable={false}
-                editable={false}
-                cells={{
-                  data: ActionsCell,
-                }}
-              />
-            )}
-          </Grid>
-        </Tooltip>
+        <>
+          {permissions?.showAccordian ? (
+            <CustomAccordion defaultExpanded disableGutters>
+              <CustomAccordionSummary
+                aria-controls='meg-grid-content'
+                id='meg-grid-header'
+              >
+                <Typography component='span' className='grid-title'>
+                  {titleName}
+                </Typography>
+              </CustomAccordionSummary>
+              <CustomAccordionDetails>
+                <Tooltip
+                  openDelay={50}
+                  position='default'
+                  anchorElement='target'
+                >
+                  {renderGrid()}
+                </Tooltip>
+              </CustomAccordionDetails>
+            </CustomAccordion>
+          ) : (
+            <Tooltip openDelay={50} position='default' anchorElement='target'>
+              {renderGrid()}
+            </Tooltip>
+          )}
+        </>
       </div>
 
       {/* {(permissions?.allActionOfBottomBtns ?? true) && ( */}
@@ -1293,4 +1338,4 @@ const KendoDataTables = ({
   )
 }
 
-export default KendoDataTables
+export default KendoDataTablesAccordian

@@ -66,14 +66,14 @@ const planCracker = {
       type: 'collapse',
       icon: icons.IconArchive,
       children: [
-        {
-          id: 'business-demand',
-          title: i18n.t('menu.productDemand'),
-          type: 'item',
-          url: '/production-norms-plan/business-demand',
-          icon: icons.IconChartBar,
-          breadcrumbs: true,
-        },
+        // {
+        //   id: 'business-demand',
+        //   title: i18n.t('menu.productDemand'),
+        //   type: 'item',
+        //   url: '/production-norms-plan/business-demand',
+        //   icon: icons.IconChartBar,
+        //   breadcrumbs: true,
+        // },
         {
           id: 'spyro-menu',
           title: i18n.t('menu.spyroMenu'),
@@ -85,7 +85,7 @@ const planCracker = {
               title: i18n.t('menu.spyroInput'),
               type: 'item',
               url: '/production-norms-plan/spyro-menu/spyro-input',
-              icon: icons.IconFilter,
+              icon: icons.IconDatabase,
               breadcrumbs: true,
             },
             {
@@ -93,7 +93,7 @@ const planCracker = {
               title: i18n.t('menu.spyroOutput'),
               type: 'item',
               url: '/production-norms-plan/spyro-menu/spyro-output',
-              icon: icons.IconFilter,
+              icon: icons.IconChartBar,
               breadcrumbs: true,
             },
             {
@@ -101,7 +101,7 @@ const planCracker = {
               title: i18n.t('menu.decokingActivities'),
               type: 'item',
               url: '/production-norms-plan/spyro-menu/decoking-activities',
-              icon: icons.IconFilter,
+              icon: icons.IconPower,
               breadcrumbs: true,
             },
           ],
