@@ -108,7 +108,11 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<Map<String, Object>> data = new ArrayList<>();
 		try {
-			List<Object[]> results = getData(plantId, year);
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+			String procedureName = "vwScrn"+vertical.getName() + "_" + site.getName() + "_Decoke_Maintenance";
+			List<Object[]> results = getData(plantId, year,procedureName);
 
 			for (Object[] row : results) {
 				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
@@ -149,28 +153,29 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	}
 
-	public List<Object[]> getData(String plantId, String aopYear) {
-		try {
-			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
-			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_DecokingPlanning";
+	public List<Object[]> getData(String plantId,String aopYear, String viewName) {
+	    try {
+	        
+	        // 2. Construct SQL with dynamic view name
+	        String sql = 
+	            "SELECT * FROM " + viewName + 
+	            " WHERE PlantId = :plantId and AOPYear = :aopYear";
 
-			String sql = "EXEC " + storedProcedure + " @plantId = :plantId, @aopYear = :aopYear";
+	        // 3. Create and parameterize the native query
+	        Query query = entityManager.createNativeQuery(sql);
+	        query.setParameter("plantId", plantId);
+	        query.setParameter("aopYear", aopYear);
 
-			Query query = entityManager.createNativeQuery(sql);
+	        // 4. Execute
+	        return query.getResultList();
 
-			query.setParameter("plantId", plantId);
-			query.setParameter("aopYear", aopYear);
-
-			return query.getResultList();
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format ", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid argument: " + e.getMessage(), e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data from view " + viewName, ex);
+	    }
 	}
-
+	
 	@Override
 	public AOPMessageVM updateMaintenanceDataForCracker(String plantId, String year,
 			List<DecokePlanningDTO> decokePlanningDTOList) {
