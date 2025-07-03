@@ -1170,7 +1170,10 @@ const KendoDataTablesAccordian = ({
       <div className='kendo-data-grid'>
         <>
           {permissions?.showAccordian ? (
-            <CustomAccordion defaultExpanded disableGutters>
+            <CustomAccordion
+              defaultExpanded={!permissions?.byDefCollaps}
+              disableGutters
+            >
               <CustomAccordionSummary
                 aria-controls='meg-grid-content'
                 id='meg-grid-header'

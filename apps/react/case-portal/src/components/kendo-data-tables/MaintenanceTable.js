@@ -78,13 +78,13 @@ const MaintenanceTable = () => {
         return
       }
 
-      const validationMessage = validateFields(data, ['remarks'])
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: validationMessage, severity: 'error' })
-        setLoading(false)
-        return
-      }
+      // const validationMessage = validateFields(data, ['remarks'])
+      // if (validationMessage) {
+      //   setSnackbarOpen(true)
+      //   setSnackbarData({ message: validationMessage, severity: 'error' })
+      //   setLoading(false)
+      //   return
+      // }
 
       await saveCrackerMaintenanceData(data)
     } catch (err) {

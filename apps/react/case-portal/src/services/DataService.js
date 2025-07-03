@@ -163,6 +163,8 @@ export const DataService = {
 
   getRunLengthExcel,
   saveRunLengthExcel,
+
+  handleCalculateDecokingActivities,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -1113,11 +1115,11 @@ async function getAnnualCostAopReport(
     return await Promise.reject(e)
   }
 }
-async function getProductionVolDataBasis(keycloak, reportType) {
+async function getProductionVolDataBasis(keycloak, reportType, uom) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
 
-  const url = `${Config.CaseEngineUrl}/task/report/production-volume-aop?plantId=${plantId}&year=${year}&reportType=${reportType}`
+  const url = `${Config.CaseEngineUrl}/task/report/production-volume-aop?plantId=${plantId}&year=${year}&reportType=${reportType}&uom=${uom}`
 
   const headers = {
     Accept: 'application/json',
@@ -1160,11 +1162,11 @@ async function getProductionVolDataBasisPe(keycloak, reportType) {
   }
 }
 
-async function getNormsHistorianBasis(keycloak, reportType) {
+async function getNormsHistorianBasis(keycloak, reportType, uom) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
 
-  const url = `${Config.CaseEngineUrl}/task/report/norms-Historian-basis?plantId=${plantId}&year=${year}&reportType=${reportType}`
+  const url = `${Config.CaseEngineUrl}/task/report/norms-Historian-basis?plantId=${plantId}&year=${year}&reportType=${reportType}&uom=${uom}`
 
   const headers = {
     Accept: 'application/json',
@@ -3828,6 +3830,32 @@ async function saveRunLengthExcel(file, keycloak) {
     return json(keycloak, resp)
   } catch (e) {
     console.error('Error Editing RunlLength data:', e)
+    return Promise.reject(e)
+  }
+}
+
+async function handleCalculateDecokingActivities(plantId, year, keycloak) {
+  const year1 = localStorage.getItem('year')
+  const url = `${Config.CaseEngineUrl}/task/calculate/decoking-activities?year=${year1}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+
+    const data = await resp.json() // Parse JSON response
+    return data
+  } catch (e) {
+    console.error('Error fetching calculation data:', e)
     return Promise.reject(e)
   }
 }

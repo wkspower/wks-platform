@@ -20,7 +20,11 @@ import {
   ExcelExport,
   ExcelExportColumn,
 } from '../../../../node_modules/@progress/kendo-react-excel-export/index'
-import { Button } from '../../../../node_modules/@mui/material/index'
+import {
+  Button,
+  MenuItem,
+  TextField,
+} from '../../../../node_modules/@mui/material/index'
 import moment from '../../../../node_modules/moment/moment'
 
 const CustomAccordion = styled((props) => (
@@ -53,6 +57,8 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 
 const ProductionVolumeDataBasis = () => {
   const keycloak = useSession()
+  const units = ['TPH', 'TPD']
+  const [selectedUnit, setSelectedUnit] = useState('TPH')
 
   const [rowsMC, setRowsMC] = useState([])
   const [rowsMCYearWise, setRowsMCYearWise] = useState([])
@@ -73,11 +79,16 @@ const ProductionVolumeDataBasis = () => {
     return new Date(`${year}-${month}-${day}`) // YYYY-MM-DD (ISO format)
   }
 
-  const fetchData = async (reportType, setState) => {
+  const fetchData = async (reportType, setState, selectedUnit) => {
+    if (!selectedUnit) return
     try {
       setLoading(true)
       var data = []
-      data = await DataService.getProductionVolDataBasis(keycloak, reportType)
+      data = await DataService.getProductionVolDataBasis(
+        keycloak,
+        reportType,
+        selectedUnit,
+      )
 
       if (data?.code === 200) {
         const rowsWithId = data?.data?.map((item, index) => ({
@@ -107,6 +118,10 @@ const ProductionVolumeDataBasis = () => {
     }
   }
 
+  const handleUnitChange = (unit) => {
+    setSelectedUnit(unit)
+  }
+
   const year = localStorage.getItem('year')
   const headerMap = generateHeaderNames(year)
 
@@ -131,11 +146,18 @@ const ProductionVolumeDataBasis = () => {
   })
 
   useEffect(() => {
-    fetchData('MC', setRowsMC)
-    fetchData('MC Yearwise', setRowsMCYearWise)
-    fetchData('Calculated Data', setRowsCalculatedData)
+    fetchData('MC', setRowsMC, selectedUnit)
+    fetchData('MC Yearwise', setRowsMCYearWise, selectedUnit)
+    fetchData('Calculated Data', setRowsCalculatedData, selectedUnit)
     fetchData('RowData', setRowsRowData)
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  }, [
+    sitePlantChange,
+    oldYear,
+    yearChanged,
+    keycloak,
+    lowerVertName,
+    selectedUnit,
+  ])
   const exportRef1 = useRef(null)
   const exportRef2 = useRef(null)
   const exportRef3 = useRef(null)
@@ -227,6 +249,32 @@ const ProductionVolumeDataBasis = () => {
         >
           Export
         </Button>
+
+        <TextField
+          select
+          value={selectedUnit || 'TPH'}
+          onChange={(e) => {
+            setSelectedUnit(e.target.value)
+            handleUnitChange(e.target.value)
+          }}
+          sx={{
+            width: '150px',
+            backgroundColor: '#FFFFFF',
+            marginLeft: '12px',
+          }}
+          variant='outlined'
+          label='Select UOM'
+        >
+          <MenuItem value='' disabled>
+            Select UOM
+          </MenuItem>
+
+          {units.map((unit) => (
+            <MenuItem key={unit} value={unit}>
+              {unit}
+            </MenuItem>
+          ))}
+        </TextField>
       </Box>
 
       <Box display='flex' flexDirection='column' gap={2}>

@@ -422,6 +422,7 @@ const DecokingConfig = () => {
       setLoading(false)
     } finally {
       fetchData(1)
+      fetchData(3)
       setLoading(false)
     }
   }
@@ -495,6 +496,7 @@ const DecokingConfig = () => {
       setLoading(false)
     } finally {
       fetchData(2)
+      fetchData(3)
       setLoading(false)
     }
   }
@@ -616,6 +618,7 @@ const DecokingConfig = () => {
         Object.keys(calculationObject || {}).length > 0 ? true : false,
       downloadExcelBtn: true,
       uploadExcelBtn: true,
+      byDefCollaps: true,
     },
     isOldYear,
   )
@@ -732,6 +735,40 @@ const DecokingConfig = () => {
     }
   }
 
+  const handleCalculate = async () => {
+    // dispatch(setIsBlocked(true))
+    // setCalculatebtnClicked(true)
+    setLoading(true)
+    try {
+      const year = localStorage.getItem('year')
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+      var plantId = plantId
+      const data = await DataService.handleCalculateDecokingActivities(
+        plantId,
+        year,
+        keycloak,
+      )
+      if (data?.code == 200) {
+        fetchData(3)
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data refreshed successfully!',
+          severity: 'success',
+        })
+        setLoading(false)
+        return
+      }
+      return res
+    } catch (error) {
+      console.error('Error saving refresh data:', error)
+      setLoading(false)
+    }
+  }
+
   const renderIbrPlanTables = () => (
     <>
       <>
@@ -809,6 +846,7 @@ const DecokingConfig = () => {
             titleName={'Furnace Run length'}
             handleExcelUpload={handleExcelUpload}
             downloadExcelForConfiguration={downloadExcelForConfiguration}
+            handleCalculate={handleCalculate}
           />
         </Box>
       </>
