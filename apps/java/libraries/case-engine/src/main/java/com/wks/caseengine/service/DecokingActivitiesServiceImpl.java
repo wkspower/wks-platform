@@ -136,15 +136,15 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					map.put("date", row[1]!= null ? row[1] : "");
 					map.put("month", row[2]!= null ? row[2] : "");
 					map.put("hTenActual", row[3]!= null ? row[3] : "");
-					map.put("hTenProposed", row[4]!= null ? row[4] : "");
+					map.put("tenProposed", row[4]!= null ? row[4] : "");
 					map.put("hElevenActual", row[5]!= null ? row[5] : "");
-					map.put("hElevenProposed", row[6]!= null ? row[6] : "");
+					map.put("elevenProposed", row[6]!= null ? row[6] : "");
 					map.put("hTwelveActual", row[7]!= null ? row[7] : "");
-					map.put("hTwelveProposed", row[8]!= null ? row[8] : "");
+					map.put("twelveProposed", row[8]!= null ? row[8] : "");
 					map.put("hThirteenActual", row[9]!= null ? row[9] : "");
-					map.put("hThirteenProposed", row[10]!= null ? row[10] : "");
+					map.put("thirteenProposed", row[10]!= null ? row[10] : "");
 					map.put("hFourteenActual", row[11]!= null ? row[11] : "");
-					map.put("hFourteenProposed", row[12]!= null ? row[12] : "");
+					map.put("fourteenProposed", row[12]!= null ? row[12] : "");
 					map.put("demo", row[13]!= null ? row[13] : "");
 					map.put("aopYear", row[14]!= null ? row[14] : "");
 					map.put("plantId", row[15]!= null ? row[15] : "");
@@ -509,11 +509,11 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 				Optional<DecokeRunLength> decokeRunLengthopt = decokeRunLengthRepository.findById(decokeRunLengthDTO.getId());
 				if(decokeRunLengthopt.isPresent()) {
 					DecokeRunLength decokeRunLength = decokeRunLengthopt.get();
-					decokeRunLength.setH10Proposed(decokeRunLengthDTO.getHTenProposed());
-					decokeRunLength.setH11Proposed(decokeRunLengthDTO.getHElevenProposed());
-					decokeRunLength.setH12Proposed(decokeRunLengthDTO.getHTwelveProposed());
-					decokeRunLength.setH13Proposed(decokeRunLengthDTO.getHThirteenProposed());
-					decokeRunLength.setH14Proposed(decokeRunLengthDTO.getHFourteenProposed());
+					decokeRunLength.setH10Proposed(decokeRunLengthDTO.getTenProposed());
+					decokeRunLength.setH11Proposed(decokeRunLengthDTO.getElevenProposed());
+					decokeRunLength.setH12Proposed(decokeRunLengthDTO.getTwelveProposed());
+					decokeRunLength.setH13Proposed(decokeRunLengthDTO.getThirteenProposed());
+					decokeRunLength.setH14Proposed(decokeRunLengthDTO.getFourteenProposed());
 					decokeRunLength.setDemo(decokeRunLengthDTO.getDemo());
 					decokeRunLengthList.add(decokeRunLengthRepository.save(decokeRunLength));
 				}
