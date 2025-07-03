@@ -518,6 +518,7 @@ const DecokingConfig = () => {
         hFourteenProposed: row?.hFourteenProposed || '',
         plantId: row?.plantId || '',
         id: row?.idFromApi || '',
+        demo: row?.demo || '',
       }))
 
       const response = await DataService.saveCracker3(
