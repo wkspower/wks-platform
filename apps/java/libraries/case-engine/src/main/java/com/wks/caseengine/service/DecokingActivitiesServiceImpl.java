@@ -74,8 +74,8 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 				procedureName = "vwScrn"+vertical.getName() + "_" + site.getName() + "_DecokePlanningDates";
 				 results = getIBRData(plantId, procedureName);
 			}else if(reportType.equalsIgnoreCase("RunLength")){
-				procedureName = vertical.getName() + "_" + site.getName() + "_getRunLength";
-				 results = getDataRunLength(plantId,vertical.getId().toString(),site.getId().toString(),year, procedureName);
+				procedureName = "vwScrn"+vertical.getName() + "_" + site.getName() + "_Decoke_RunLength";
+				 results = getRunLengthData(plantId,year, procedureName);
 			}
 
 			for (Object[] row : results) {
@@ -128,20 +128,23 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					map.put("remarks", row[7]);
 				}
 				else if(reportType.equalsIgnoreCase("RunLength")) {
-					map.put("month", row[0]);
-					map.put("date", row[1]);
-					map.put("hTenActualRunLength", row[2]);
-					map.put("hTenProposedAOP", row[3]);
-					map.put("hElevenActualRunLength", row[4]);
-					map.put("hElevenProposedAOP", row[5]);
-					map.put("hTwelveActualRunLength", row[6]);
-					map.put("hTwelveProposedAOP", row[7]);
-					map.put("hThirteenActualRunLength", row[8]);
-					map.put("hThirteenProposedAOP", row[9]);
-					map.put("hFourteenActualRunLength", row[10]);
-					map.put("hFourteenProposedAOP", row[11]);
-					map.put("demo", row[12]);
-					map.put("remark", row[13]);
+					map.put("id", row[0]!= null ? row[0] : "");
+					map.put("date", row[1]!= null ? row[1] : "");
+					map.put("month", row[2]!= null ? row[2] : "");
+					map.put("hTenActual", row[3]!= null ? row[3] : "");
+					map.put("hTenProposed", row[4]!= null ? row[4] : "");
+					map.put("hElevenActual", row[5]!= null ? row[5] : "");
+					map.put("hElevenProposed", row[6]!= null ? row[6] : "");
+					map.put("hTwelveActual", row[7]!= null ? row[7] : "");
+					map.put("hTwelveProposed", row[8]!= null ? row[8] : "");
+					map.put("hThirteenActual", row[9]!= null ? row[9] : "");
+					map.put("hThirteenProposed", row[10]!= null ? row[10] : "");
+					map.put("hFourteenActual", row[11]!= null ? row[11] : "");
+					map.put("hFourteenProposed", row[12]!= null ? row[12] : "");
+					map.put("demo", row[13]!= null ? row[13] : "");
+					map.put("aopYear", row[14]!= null ? row[14] : "");
+					map.put("plantId", row[15]!= null ? row[15] : "");
+					map.put("remark", row[16]!= null ? row[16] : "");
 				}
 				decokingActivitiesList.add(map); // Add the map to the list here
 			}
@@ -189,26 +192,6 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-	public List<Object[]> getDataRunLength(String plantId,String verticalId,String siteId, String aopYear, String procedureName) {
-		try {
-			
-			String sql = "EXEC " + procedureName
-					+ " @plantId = :plantId, @verticalId = :verticalId, @siteId = :siteId,@aopYear = :aopYear";
-
-			Query query = entityManager.createNativeQuery(sql);
-
-			query.setParameter("plantId", plantId);
-			query.setParameter("verticalId", verticalId);
-			query.setParameter("siteId", siteId);
-			query.setParameter("aopYear", aopYear);
-
-			return query.getResultList();
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format ", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
-	}
 	
 	public List<Object[]> getData(String plantId, String viewName) {
 	    try {
@@ -231,6 +214,30 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	        throw new RuntimeException("Failed to fetch data from view " + viewName, ex);
 	    }
 	}
+	
+	public List<Object[]> getRunLengthData(String plantId,String aopYear, String viewName) {
+	    try {
+	        
+	        // 2. Construct SQL with dynamic view name
+	        String sql = 
+	            "SELECT * FROM " + viewName + 
+	            " WHERE Plant_FK_Id = :plantId AND AOPYear = :aopYear";
+
+	        // 3. Create and parameterize the native query
+	        Query query = entityManager.createNativeQuery(sql);
+	        query.setParameter("plantId", plantId);
+	        query.setParameter("aopYear", aopYear);
+
+	        // 4. Execute
+	        return query.getResultList();
+
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid argument: " + e.getMessage(), e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data from view " + viewName, ex);
+	    }
+	}
+
 
 	public List<Object[]> getIBRData(String plantId, String viewName) {
 	    try {
