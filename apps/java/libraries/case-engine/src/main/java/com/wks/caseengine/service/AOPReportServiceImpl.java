@@ -208,19 +208,20 @@ public class AOPReportServiceImpl implements AOPReportService {
 	}
 
 	public List<Object[]> getProductionVolumnDataReport(String plantId, String aopYear, String reportType,
-			String verticalName) {
+			String verticalName,String uom) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 			String procedureName = "ProductionVolumnDataReport";
 			String sql = "EXEC " + procedureName +
-					" @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
+					" @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType,@UOM = :uom";
 
 			Query query = entityManager.createNativeQuery(sql);
 
 			query.setParameter("plantId", plantId);
 			query.setParameter("aopYear", aopYear);
 			query.setParameter("reportType", reportType);
+			query.setParameter("uom", uom);
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
@@ -231,13 +232,13 @@ public class AOPReportServiceImpl implements AOPReportService {
 	}
 
 	@Override
-	public AOPMessageVM getReportForProductionVolumnData(String plantId, String year, String reportType) {
+	public AOPMessageVM getReportForProductionVolumnData(String plantId, String year, String reportType,String uom) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<Map<String, Object>> productionVolumnDataReportList = new ArrayList<>();
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 
-			List<Object[]> results = getProductionVolumnDataReport(plantId, year, reportType, verticalName);
+			List<Object[]> results = getProductionVolumnDataReport(plantId, year, reportType, verticalName,uom);
 			List<String> headers = null;
 			List<String> keys = null;
 

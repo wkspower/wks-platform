@@ -21,8 +21,8 @@ public class NormsHistorianBasisController {
 	
 	
     @GetMapping(value="/report/norms-Historian-basis")
-	public ResponseEntity<AOPMessageVM> getNormHistorianBasisData(@RequestParam String plantId,@RequestParam String year,@RequestParam String reportType){
-		AOPMessageVM response	=normHistorianBasisService.getNormHistorianBasisData(plantId,year,reportType);
+	public ResponseEntity<AOPMessageVM> getNormHistorianBasisData(@RequestParam String plantId,@RequestParam String year,@RequestParam String reportType,@RequestParam(value = "uom", required = false) String uom){
+		AOPMessageVM response	=normHistorianBasisService.getNormHistorianBasisData(plantId,year,reportType,uom);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
     

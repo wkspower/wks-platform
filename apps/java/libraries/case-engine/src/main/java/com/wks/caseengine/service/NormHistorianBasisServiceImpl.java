@@ -30,14 +30,14 @@ public class NormHistorianBasisServiceImpl  implements NormHistorianBasisService
 	private PlantsRepository plantsRepository;
 
     @Override
-    public AOPMessageVM getNormHistorianBasisData(String plantId, String year, String reportType) {
+    public AOPMessageVM getNormHistorianBasisData(String plantId, String year, String reportType,String uom) {
         // TODO Auto-generated method stub
     
             try {
                 AOPMessageVM aopMessageVM = new AOPMessageVM();
                 List<Map<String, Object>> normHistoricBasisData = new ArrayList<>();
     
-                List<Object[]> obj = getHistorianBasisDatafromDB(plantId, year,reportType);
+                List<Object[]> obj = getHistorianBasisDatafromDB(plantId, year,reportType,uom);
                 if(reportType.equalsIgnoreCase("ProductionVolumeData")) {
                     for (Object[] row : obj) {
                     Map<String, Object> map = new HashMap<>();
@@ -120,18 +120,19 @@ public class NormHistorianBasisServiceImpl  implements NormHistorianBasisService
         
     
 
-    public List<Object[]> getHistorianBasisDatafromDB(String plantId, String aopYear,String reportType) {
+    public List<Object[]> getHistorianBasisDatafromDB(String plantId, String aopYear,String reportType,String uom) {
         try {
             String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
             String storedProcedure = "NormsHistorianBasis";
             String sql = "EXEC " + storedProcedure
-                    + " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
+                    + " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType,@UOM = :uom";
 
             Query query = entityManager.createNativeQuery(sql);
 
             query.setParameter("plantId", plantId);
             query.setParameter("aopYear", aopYear);
             query.setParameter("reportType", reportType);
+            query.setParameter("uom", uom);
 
             return query.getResultList();
         } catch (IllegalArgumentException e) {
