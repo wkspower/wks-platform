@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.DecokePlanningIBRDTO;
+import com.wks.caseengine.dto.DecokeRunLengthDTO;
 import com.wks.caseengine.dto.DecokingActivitiesDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.DecokingActivitiesService;
@@ -37,5 +38,9 @@ public class DecokingActivitiesController {
 	@PostMapping(value="/decoking-activities/ibr")
 	public AOPMessageVM updateDecokingActivitiesIBRData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType, @RequestBody List<DecokePlanningIBRDTO> decokePlanningIBRDTOList) {
 		return decokingActivitiesService.updateDecokingActivitiesIBRData(year,plantId,reportType,decokePlanningIBRDTOList);
+	}
+	@PostMapping(value="/decoking-activities/run-length")
+	public AOPMessageVM updateDecokingActivitiesRunLengthData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType, @RequestBody List<DecokeRunLengthDTO> decokeRunLengthDTOList) {
+		return decokingActivitiesService.updateDecokingActivitiesRunLengthData(year,plantId,reportType,decokeRunLengthDTOList);
 	}
 }

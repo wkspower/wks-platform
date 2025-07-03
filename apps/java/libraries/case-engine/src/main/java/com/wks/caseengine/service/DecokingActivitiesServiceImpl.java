@@ -10,11 +10,11 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.DecokePlanningIBRDTO;
+import com.wks.caseengine.dto.DecokeRunLengthDTO;
 import com.wks.caseengine.dto.DecokingActivitiesDTO;
 import com.wks.caseengine.entity.AopCalculation;
+import com.wks.caseengine.entity.DecokeRunLength;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
@@ -23,6 +23,7 @@ import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.DecokeRunLengthRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
@@ -56,6 +57,9 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
+	
+	@Autowired
+	private DecokeRunLengthRepository decokeRunLengthRepository;
 
 	@Override
 	public AOPMessageVM getDecokingActivitiesData(String year, String plantId, String reportType) {
@@ -495,6 +499,31 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		return aopMessageVM;
 	}
 
-
-
+	@Override
+	public AOPMessageVM updateDecokingActivitiesRunLengthData(String year, String plantId, String reportType,
+			List<DecokeRunLengthDTO> decokeRunLengthDTOList) {
+		List<DecokeRunLength> decokeRunLengthList=new ArrayList<>();
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			for(DecokeRunLengthDTO decokeRunLengthDTO:decokeRunLengthDTOList) {
+				Optional<DecokeRunLength> decokeRunLengthopt = decokeRunLengthRepository.findById(decokeRunLengthDTO.getId());
+				if(decokeRunLengthopt.isPresent()) {
+					DecokeRunLength decokeRunLength = decokeRunLengthopt.get();
+					decokeRunLength.setH10Proposed(decokeRunLengthDTO.getHTenProposed());
+					decokeRunLength.setH11Proposed(decokeRunLengthDTO.getHElevenProposed());
+					decokeRunLength.setH12Proposed(decokeRunLengthDTO.getHTwelveProposed());
+					decokeRunLength.setH13Proposed(decokeRunLengthDTO.getHThirteenProposed());
+					decokeRunLength.setH14Proposed(decokeRunLengthDTO.getHFourteenProposed());
+					decokeRunLength.setDemo(decokeRunLengthDTO.getDemo());
+					decokeRunLengthList.add(decokeRunLengthRepository.save(decokeRunLength));
+				}
+			}
+		}catch (Exception ex) {
+	        throw new RuntimeException("Failed to update data");
+	    }
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Data Updated successfully");
+		aopMessageVM.setData(decokeRunLengthList);
+		return aopMessageVM;
+	}
 }
