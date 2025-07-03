@@ -43,4 +43,8 @@ public class DecokingActivitiesController {
 	public AOPMessageVM updateDecokingActivitiesRunLengthData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType, @RequestBody List<DecokeRunLengthDTO> decokeRunLengthDTOList) {
 		return decokingActivitiesService.updateDecokingActivitiesRunLengthData(year,plantId,reportType,decokeRunLengthDTOList);
 	}
+	@GetMapping(value="/calculate/decoking-activities")
+	public AOPMessageVM calculateDecokingActivities(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType) {
+		return decokingActivitiesService.calculateDecokingActivities(plantId,year);
+	}
 }

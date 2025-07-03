@@ -1,5 +1,8 @@
 package com.wks.caseengine.service;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -7,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,6 +65,13 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	
 	@Autowired
 	private DecokeRunLengthRepository decokeRunLengthRepository;
+	
+	private DataSource dataSource;
+	
+	// Inject or set your DataSource (e.g., via constructor or setter)
+		public DecokingActivitiesServiceImpl(DataSource dataSource) {
+			this.dataSource = dataSource;
+		}
 
 	@Override
 	public AOPMessageVM getDecokingActivitiesData(String year, String plantId, String reportType) {
@@ -526,4 +538,56 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		aopMessageVM.setData(decokeRunLengthList);
 		return aopMessageVM;
 	}
+
+	@Override
+	public AOPMessageVM calculateDecokingActivities(String plantId, String aopYear) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			String storedProcedure = vertical.getName()+"_"+site.getName() + "_DecokingPlanning";
+
+			String callSql = "{call " + storedProcedure + "(?, ?)}";
+
+			try (Connection connection = dataSource.getConnection();
+					CallableStatement stmt = connection.prepareCall(callSql)) {
+
+				// Set parameters in the correct order
+				stmt.setString(1, plantId); // @finYear
+				stmt.setString(2, aopYear); // @plantId
+				
+
+				// Execute the stored procedure
+				int rowsAffected = stmt.executeUpdate();
+
+				// Optional: commit if auto-commit is off
+				if (!connection.getAutoCommit()) {
+					connection.commit();
+				}
+
+				aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),
+						aopYear, "Furnace-run-length");
+
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("SP Executed successfully");
+				aopMessageVM.setData(rowsAffected);
+				return aopMessageVM;
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return aopMessageVM;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return aopMessageVM;
+		}
+	}
+
+	
 }

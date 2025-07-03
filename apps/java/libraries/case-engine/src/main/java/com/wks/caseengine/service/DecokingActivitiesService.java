@@ -12,5 +12,5 @@ public interface DecokingActivitiesService {
 	public AOPMessageVM updateDecokingActivitiesData( String year, String plantId, String reportType, List<DecokingActivitiesDTO> decokingActivitiesDTOList);
 	public AOPMessageVM updateDecokingActivitiesIBRData( String year, String plantId, String reportType, List<DecokePlanningIBRDTO> decokePlanningIBRDTOList);
 	public AOPMessageVM updateDecokingActivitiesRunLengthData( String year, String plantId, String reportType, List<DecokeRunLengthDTO> decokeRunLengthDTOList);
-	
+	public AOPMessageVM calculateDecokingActivities(String plantId,String year);
 }
