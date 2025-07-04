@@ -16,25 +16,25 @@ import lombok.NoArgsConstructor;
 @Builder
 @Configuration
 public class DecokeRunLengthDTO {
-	
-	String id;
-    String date;
-    String month;
-    Double hTenActual;
-    Double tenProposed;
-    Double hElevenActual;
-    Double elevenProposed;
-    Double hTwelveActual;
-    Double twelveProposed;
-    Double hThirteenActual;
-    Double thirteenProposed;
-    Double hFourteenActual;
-    Double fourteenProposed;
-    String demo;
-    String aopYear;
-    String plantFkId;
-    String remarks;
-    String saveStatus;
-    String errDescription;
+
+	private String id;
+	private String date;
+	private String month;
+	private String hTenActual;
+	private String tenProposed;
+	private String hElevenActual;
+	private String elevenProposed;
+	private String hTwelveActual;
+	private String twelveProposed;
+	private String hThirteenActual;
+	private String thirteenProposed;
+	private String hFourteenActual;
+	private String fourteenProposed;
+	private String demo;
+	private String aopYear;
+	private String plantFkId;
+	private String remarks;
+	private String saveStatus;
+	private String errDescription;
 
 }

@@ -27,34 +27,34 @@ public class DecokeRunLength {
     private LocalDate date;
 
     @Column(name = "H10 Actual")
-    private Double h10Actual;
+    private String h10Actual;
 
     @Column(name = "H10 Proposed")
-    private Double h10Proposed;
+    private String h10Proposed;
 
     @Column(name = "H11 Actual")
-    private Double h11Actual;
+    private String h11Actual;
 
     @Column(name = "H11 Proposed")
-    private Double h11Proposed;
+    private String h11Proposed;
 
     @Column(name = "H12 Actual")
-    private Double h12Actual;
+    private String h12Actual;
 
     @Column(name = "H12 Proposed")
-    private Double h12Proposed;
+    private String h12Proposed;
 
     @Column(name = "H13 Actual")
-    private Double h13Actual;
+    private String h13Actual;
 
     @Column(name = "H13 Proposed")
-    private Double h13Proposed;
+    private String h13Proposed;
 
     @Column(name = "H14 Actual")
-    private Double h14Actual;
+    private String h14Actual;
 
     @Column(name = "H14 Proposed")
-    private Double h14Proposed;
+    private String h14Proposed;
 
     @Column(name = "Demo", length = 100)
     private String demo;

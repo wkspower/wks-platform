@@ -28,15 +28,10 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.google.type.Color;
-import com.wks.caseengine.dto.ConfigurationDTO;
-import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.DecokePlanningIBRDTO;
 import com.wks.caseengine.dto.DecokeRunLengthDTO;
 import com.wks.caseengine.dto.DecokingActivitiesDTO;
@@ -169,16 +164,16 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					dto.setId(row[0] != null ? row[0].toString() : "");
 					dto.setDate(row[1] != null ? row[1].toString() : "");
 					dto.setMonth(row[2] != null ? row[2].toString() : "");
-					dto.setHTenActual(row[3] != null ? Double.parseDouble(row[3].toString()) : 0.0f);
-					dto.setTenProposed(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0f);
-					dto.setElevenProposed(row[6] != null ? Double.parseDouble(row[6].toString()) : 0.0f);
-					dto.setHElevenActual(row[5] != null ? Double.parseDouble(row[5].toString()) : 0.0f);
-					dto.setTwelveProposed(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0f);
-					dto.setHTwelveActual(row[7] != null ? Double.parseDouble(row[7].toString()) : 0.0f);
-					dto.setThirteenProposed(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0f);
-					dto.setHThirteenActual(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0f);
-					dto.setFourteenProposed(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0f);
-					dto.setHFourteenActual(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0f);
+					dto.setHTenActual(row[3] != null ? row[3].toString() : "");
+					dto.setTenProposed(row[4] != null ? row[4].toString() : "");
+					dto.setElevenProposed(row[6] != null ? row[6].toString() : "");
+					dto.setHElevenActual(row[5] != null ? row[5].toString() : "");
+					dto.setTwelveProposed(row[8] != null ? row[8].toString() : "");
+					dto.setHTwelveActual(row[7] != null ? row[7].toString() : "");
+					dto.setThirteenProposed(row[10] != null ? row[10].toString() : "");
+					dto.setHThirteenActual(row[9] != null ? row[9].toString() : "");
+					dto.setFourteenProposed(row[12] != null ? row[12].toString() : "");
+					dto.setHFourteenActual(row[11] != null ? row[11].toString() : "");
 					dto.setDemo(row[13] != null ? row[13].toString() : "");
 					dto.setAopYear(year);
 					dto.setPlantFkId(row[15] != null ? row[15].toString() : "");
@@ -801,17 +796,17 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					dto.setDate(getStringCellValue(row.getCell(2), dto));
 					// dto.setDate( null);
 
-					dto.setHTenActual(getNumericCellValue(row.getCell(3), dto));
-					dto.setTenProposed(getNumericCellValue(row.getCell(4), dto));
-					dto.setHElevenActual(getNumericCellValue(row.getCell(5), dto));
-					dto.setElevenProposed(getNumericCellValue(row.getCell(6), dto));
-					dto.setHTwelveActual(getNumericCellValue(row.getCell(7), dto));
-					dto.setTwelveProposed(getNumericCellValue(row.getCell(8), dto));
+					dto.setHTenActual(getStringCellValue(row.getCell(3), dto));
+					dto.setTenProposed(getStringCellValue(row.getCell(4), dto));
+					dto.setHElevenActual(getStringCellValue(row.getCell(5), dto));
+					dto.setElevenProposed(getStringCellValue(row.getCell(6), dto));
+					dto.setHTwelveActual(getStringCellValue(row.getCell(7), dto));
+					dto.setTwelveProposed(getStringCellValue(row.getCell(8), dto));
 
-					dto.setHThirteenActual(getNumericCellValue(row.getCell(9), dto));
-					dto.setThirteenProposed(getNumericCellValue(row.getCell(10), dto));
-					dto.setHFourteenActual(getNumericCellValue(row.getCell(11), dto));
-					dto.setFourteenProposed(getNumericCellValue(row.getCell(12), dto));
+					dto.setHThirteenActual(getStringCellValue(row.getCell(9), dto));
+					dto.setThirteenProposed(getStringCellValue(row.getCell(10), dto));
+					dto.setHFourteenActual(getStringCellValue(row.getCell(11), dto));
+					dto.setFourteenProposed(getStringCellValue(row.getCell(12), dto));
 
 					dto.setDemo(getStringCellValue(row.getCell(13), dto));
 
