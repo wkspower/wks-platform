@@ -157,9 +157,24 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	    try {
 	        
 	        // 2. Construct SQL with dynamic view name
-	        String sql = 
-	            "SELECT * FROM " + viewName + 
-	            " WHERE PlantId = :plantId and AOPYear = :aopYear";
+	    	String sql = 
+	    		    "SELECT * FROM " + viewName + 
+	    		    " WHERE PlantId = :plantId AND AOPYear = :aopYear " +
+	    		    "ORDER BY CASE MonthName " +
+	    		    "    WHEN 'January' THEN 1 " +
+	    		    "    WHEN 'February' THEN 2 " +
+	    		    "    WHEN 'March' THEN 3 " +
+	    		    "    WHEN 'April' THEN 4 " +
+	    		    "    WHEN 'May' THEN 5 " +
+	    		    "    WHEN 'June' THEN 6 " +
+	    		    "    WHEN 'July' THEN 7 " +
+	    		    "    WHEN 'August' THEN 8 " +
+	    		    "    WHEN 'September' THEN 9 " +
+	    		    "    WHEN 'October' THEN 10 " +
+	    		    "    WHEN 'November' THEN 11 " +
+	    		    "    WHEN 'December' THEN 12 " +
+	    		    "    ELSE 13 " +
+	    		    "END";
 
 	        // 3. Create and parameterize the native query
 	        Query query = entityManager.createNativeQuery(sql);

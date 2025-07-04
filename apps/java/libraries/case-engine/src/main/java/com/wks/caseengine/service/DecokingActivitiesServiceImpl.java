@@ -254,7 +254,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 			// 2. Construct SQL with dynamic view name
 			String sql = "SELECT * FROM " + viewName +
-					" WHERE Plant_FK_Id = :plantId AND AOPYear = :aopYear";
+					" WHERE Plant_FK_Id = :plantId AND AOPYear = :aopYear order by date";
 
 			// 3. Create and parameterize the native query
 			Query query = entityManager.createNativeQuery(sql);
@@ -322,7 +322,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			case 12:
 				return "December";
 			default:
-				return "Invalid month";
+				return "0";
 		}
 	}
 
